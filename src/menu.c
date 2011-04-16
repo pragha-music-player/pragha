@@ -311,6 +311,68 @@ void pref_action(GtkAction *action, struct con_win *cwin)
 	preferences_dialog(cwin);
 }
 
+/* Handler for the 'Full screen' item in the Edit menu */
+
+void
+fullscreen_action (GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *menu_bar;
+
+	menu_bar = gtk_ui_manager_get_widget(cwin->bar_context_menu, "/Menubar");
+
+	cwin->cpref->fullscreen = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	if(!cwin->cpref->fullscreen){
+		gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
+		gtk_widget_show(GTK_WIDGET(menu_bar));
+	}
+	else{
+		gtk_window_fullscreen(GTK_WINDOW(cwin->mainwindow));
+		gtk_widget_hide(GTK_WIDGET(menu_bar));
+	}
+}
+
+/* Handler for the 'Library panel' item in the Edit menu */
+
+void
+library_pane_action (GtkAction *action, struct con_win *cwin)
+{
+	gboolean ret;
+	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), ret);
+}
+
+/* Handler for the 'File panel' item in the Edit menu */
+
+void
+files_pane_action (GtkAction *action, struct con_win *cwin)
+{
+	gboolean ret;
+	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_file), ret);
+}
+
+/* Handler for the 'Status bar' item in the Edit menu */
+
+void
+status_bar_action (GtkAction *action, struct con_win *cwin)
+{
+	cwin->cpref->status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	if(cwin->cpref->status_bar)
+		gtk_widget_show(GTK_WIDGET(cwin->status_bar));
+	else
+		gtk_widget_hide(GTK_WIDGET(cwin->status_bar));
+}
+
+void
+jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
+{
+	jump_to_playing_song(cwin);
+}
+
 /* Handler for the 'Rescan Library' item in the Tools menu */
 
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
@@ -594,6 +656,17 @@ void about_widget(struct con_win *cwin)
 				"name", PACKAGE_NAME,
 				"version", PACKAGE_VERSION,
 				NULL);
+}
+
+void lyric_action(GtkAction *action, struct con_win *cwin)
+{
+	if (cwin->cstate->state != ST_STOPPED){
+		gchar *uri = g_markup_printf_escaped("http://www.lyricsplugin.com/winamp03/plugin/?artist=%s&title=%s",
+							cwin->cstate->curr_mobj->tags->artist,
+							cwin->cstate->curr_mobj->tags->title);
+	open_url(cwin, uri);
+	g_free(uri);
+	}
 }
 
 void home_action(GtkAction *action, struct con_win *cwin)

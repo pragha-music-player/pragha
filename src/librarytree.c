@@ -950,7 +950,7 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 /* Menu handlers */
 /*****************/
 
-void library_tree_play(GtkAction *action, struct con_win *cwin)
+void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model, *filter_model;
 	GtkTreeSelection *selection;
@@ -983,11 +983,9 @@ void library_tree_play(GtkAction *action, struct con_win *cwin)
 		
 		g_list_free(list);
 	}
-
-	play_first_current_playlist(cwin);
 }
 
-void library_tree_enqueue(GtkAction *action, struct con_win *cwin)
+void library_tree_add_to_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model, *filter_model;
 	GtkTreeSelection *selection;

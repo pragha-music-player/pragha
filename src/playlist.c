@@ -305,7 +305,7 @@ gboolean playlist_tree_right_click_cb(GtkWidget *widget,
 	return ret;
 }
 
-void playlist_tree_play(GtkAction *action, struct con_win *cwin)
+void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -344,13 +344,9 @@ void playlist_tree_play(GtkAction *action, struct con_win *cwin)
 		
 		g_list_free(list);
 	}
-
-	/* Play the first track */
-
-	play_first_current_playlist(cwin);
 }
 
-void playlist_tree_enqueue(GtkAction *action, struct con_win *cwin)
+void playlist_tree_add_to_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;

@@ -148,6 +148,8 @@
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
 #define KEY_SHOW_OSD               "show_osd"
 #define KEY_TIMER_MODE		   "timer_mode"
+#define KEY_FULLSCREEN		   "fullscreen"
+#define KEY_STATUS_BAR		   "status_bar"
 
 #define KEY_SAVE_PLAYLIST          "save_playlist"
 #define KEY_CURRENT_REF		   "current_ref"
@@ -404,6 +406,8 @@ struct con_pref {
 	gboolean save_playlist;
 	gboolean software_mixer;
 	gboolean use_cddb;
+	gboolean fullscreen;
+	gboolean status_bar;
 	GSList *library_dir;
 	GSList *playlist_columns;
 	GSList *playlist_column_widths;
@@ -586,6 +590,7 @@ struct con_win {
 	GOptionContext *cmd_context;
 	GtkStatusIcon *status_icon;
 	GtkEntryCompletion *completion[3];
+	GtkUIManager *bar_context_menu;
 	GtkUIManager *cp_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
@@ -661,17 +666,22 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin);
 void shuffle_action(GtkToggleAction *action, struct con_win *cwin);
 void repeat_action(GtkToggleAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
+void fullscreen_action (GtkAction *action, struct con_win *cwin);
+void library_pane_action (GtkAction *action, struct con_win *cwin);
+void files_pane_action (GtkAction *action, struct con_win *cwin);
+void status_bar_action (GtkAction *action, struct con_win *cwin);
+void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
 void add_all_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
+void lyric_action(GtkAction *action, struct con_win *cwin);
 void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
 /* Panel actions */
-void selection_current_track(GtkButton *button, struct con_win *cwin);
 gboolean update_current_song_info(gpointer data);
 void __update_current_song_info(struct con_win *cwin, gint length);
 void unset_current_song_info(struct con_win *cwin);
@@ -688,6 +698,7 @@ void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
+void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin);
 void vol_button_handler(GtkScaleButton *button, gdouble value,
 			struct con_win *cwin);
 void play_button_toggle_state(struct con_win *cwin);
@@ -708,10 +719,10 @@ void file_tree_row_activated_cb(GtkTreeView *file_tree,
 gboolean file_tree_right_click_cb(GtkWidget *widget,
 				  GdkEventButton *event,
 				  struct con_win *cwin);
-void file_tree_play(GtkAction *action, struct con_win *cwin);
-void file_tree_enqueue(GtkAction *action, struct con_win *cwin);
-void file_tree_enqueue_recur(GtkAction *action, struct con_win *cwin);
-void file_tree_enqueue_non_recur(GtkAction *action, struct con_win *cwin);
+void file_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
+void file_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
+void file_tree_add_to_playlist_recur(GtkAction *action, struct con_win *cwin);
+void file_tree_add_to_playlist_non_recur(GtkAction *action, struct con_win *cwin);
 void dnd_file_tree_get(GtkWidget *widget,
 		       GdkDragContext *context,
 		       GtkSelectionData *data,
@@ -778,8 +789,8 @@ void artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
-void library_tree_play(GtkAction *action, struct con_win *cwin);
-void library_tree_enqueue(GtkAction *action, struct con_win *cwin);
+void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
+void library_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
@@ -832,8 +843,8 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 gboolean playlist_tree_right_click_cb(GtkWidget *widget,
 				      GdkEventButton *event,
 				      struct con_win *cwin);
-void playlist_tree_play(GtkAction *action, struct con_win *cwin);
-void playlist_tree_enqueue(GtkAction *action, struct con_win *cwin);
+void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
+void playlist_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 void open_m3u_playlist(gchar *file, struct con_win *cwin);
@@ -873,7 +884,10 @@ gchar* get_ref_current_track(struct con_win *cwin);
 void init_current_playlist_columns(struct con_win *cwin);
 void remove_current_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
-void track_properties_current_playlist(GtkAction *action, struct con_win *cwin);
+void track_properties_current_playlist_action(GtkAction *action, struct con_win *cwin);
+void track_properties_current_playlist(struct con_win *cwin);
+void track_properties_current_playing_action(GtkAction *action, struct con_win *cwin);
+void track_properties_current_playing(struct con_win *cwin);
 void clear_current_playlist(GtkAction *action, struct con_win *cwin);
 void append_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
@@ -886,6 +900,7 @@ void play_track(struct con_win *cwin);
 void pause_resume_track(struct con_win *cwin);
 void play_pause_resume(struct con_win *cwin);
 void shuffle_button(struct con_win *cwin);
+void jump_to_playing_song(struct con_win *cwin);
 void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreePath *path,
 				       GtkTreeViewColumn *column,
@@ -934,6 +949,8 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item,
 void playlist_length_column_change_cb(GtkCheckMenuItem *item,
 				      struct con_win *cwin);
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
+					struct con_win *cwin);
+void clear_sort_current_playlist_cb(GtkMenuItem *item,
 					struct con_win *cwin);
 gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a,
 		      GtkTreeIter *b, gpointer data);

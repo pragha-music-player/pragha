@@ -1,10 +1,43 @@
-Overview of changes in Pragha 0.7.0 "Great Like House"
-======================================================
+===================================
+Overview of changes in Pragha 0.7.1
+===================================
 
-Now depends on gtk >= 2.16. Thank to this:
-* Eliminate eggtrayicon and sexyentry.
-* Add new tooltip in statusicon with the album art of the reproduced song.
-* The executable, and the memory consumption one was reduced.
+Rework all menus.
+	Use more advisable names: "Add to playlist" instead "Equeque", "Replace playlist" instead "Play", etc.
+	Use betters icon: GTK_STOCK_ADD instead GTK_STOCK_COPY when add music, NULL instead GTK_STOCK_PLAY when replace playlist, etc.
+	Add betters accelerators: <Control>R to repeat, <Control>Y to search lyrics, etc.
+	Now activate the panels from the menu bar. 
+	New properties of current song in menu bar and status icon.
+	Clear Sort in Current playlist header_context_menu.
+
+Others Changes:
+	Add option to search lyrics using http://www.lyricsplugin.com.
+	Add more tooltips.
+	Add Fullscreen option.
+	Add Options to hide status bar.
+	A new icon of pragha.
+
+Updates Translations:
+	Rusian translation thanks to Evgen.
+	Czech translation thanks to alois.nespor.
+	Japanese translation thanks to Masato Hashimoto.
+	Spanish translation thanks to msdelos.
+	German translation thanks to PhotonX.
+
+Bugs fixed:
+	When create search entry, no sensitive claer icon.
+	Show "track" (Before show "tracks") in statusbar when unique song in playlist.
+	No show track no in playlist, when is zero.
+	Show filename in playlist when unknown title tag.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.0
+	Now depends on gtk >= 2.16. Thank to this:
+	* Eliminate eggtrayicon and sexyentry.
+	* Add new tooltip in statusicon with the album art of the reproduced song.
+	* The executable, and the memory consumption one was reduced.
 
 Others Changes:
 	Command "pragha -t", play pause and resume.
@@ -23,10 +56,6 @@ Bugs fixed:
 	Fix crash when click "go to current track".
 	Fix criticals warnings when run and compile pragha.
 	Fix pragha.desktop file.
-
-======================================================
-OTHERS REALESES:
-======================================================
 V0.6.3
 	Add remaining time mode to panel.
 	Pragha remeber and showed last played song.

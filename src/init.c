@@ -213,6 +213,8 @@ gint init_config(struct con_win *cwin)
 		album_f,
 		album_art_pattern_f,
 		osd_f,
+		fullscreen_f,
+		status_bar_f,
 		save_playlist_f,
 		lastfm_f,
 		software_mixer_f,
@@ -229,7 +231,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	libs_f = lib_add_f = lib_delete_f = columns_f = nodes_f = cur_lib_view_f = FALSE;
-	file_tree_pwd_f = hidden_f = album_f = osd_f = lastfm_f = FALSE;
+	file_tree_pwd_f = hidden_f = album_f = osd_f = fullscreen_f = status_bar_f = lastfm_f = FALSE;
 	software_mixer_f = save_playlist_f = album_art_pattern_f = use_cddb_f = FALSE;
 	shuffle_f = repeat_f = window_size_f = all_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = FALSE;
@@ -302,6 +304,32 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			window_size_f = TRUE;
+		}
+
+		/* Retrieve Fullscreen option */
+
+		cwin->cpref->fullscreen =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_FULLSCREEN,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			fullscreen_f = FALSE;
+		}
+
+		/* Retrieve view status bar option */
+
+		cwin->cpref->status_bar =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_STATUS_BAR,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			status_bar_f = FALSE;
 		}
 
 		/* Retrieve list of libraries */
@@ -801,6 +829,10 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->show_album_art = TRUE;
 	if (all_f || osd_f)
 		cwin->cpref->show_osd = FALSE;
+	if (all_f || fullscreen_f)
+		cwin->cpref->fullscreen = FALSE;
+	if (all_f || status_bar_f)
+		cwin->cpref->status_bar = TRUE;
 	if (all_f || save_playlist_f)
 		cwin->cpref->save_playlist = TRUE;
 	if (all_f || lastfm_f)
@@ -1084,10 +1116,27 @@ void init_pixbuf(struct con_win *cwin)
 	g_object_ref(cwin->pixbuf->pixbuf_pause);
 }
 
+void init_menu_actions(struct con_win *cwin)
+{
+	GtkAction *action = NULL;
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/EditMenu/Shuffle");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/EditMenu/Repeat");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->repeat);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->fullscreen);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
+}
+
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *hbox_panel, *hbox_main, *status_bar, *search_bar;
+	GtkWidget *vbox, *hbox_panel, *hbox_main, *status_bar, *search_bar, *menu_bar;
 	GError *error = NULL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
@@ -1096,7 +1145,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
         g_set_application_name("Pragha Music Manager");
         g_setenv("PULSE_PROP_media.role", "music", TRUE);
-
 
 	/* Main window */
 
@@ -1152,10 +1200,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	status_bar = create_status_bar(cwin);
 	search_bar = create_search_bar(cwin);
 
+	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
+
 	/* Pack all hboxen into vbox */
 
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   gtk_ui_manager_get_widget(menu, "/Menubar"),
+			   GTK_WIDGET(menu_bar),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_panel),
@@ -1170,6 +1220,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Show main window */
 
 	gtk_widget_show_all(cwin->mainwindow);
+
+	init_menu_actions(cwin);
 
 	/* Set initial size of album art frame */
 

@@ -418,21 +418,34 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
 {
-static gboolean test = FALSE;
+	static gboolean test = FALSE;
+	GtkAction *action_lib, *action_files;
 
-	if (GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib) && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(toggle) ))
+	action_files = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Files");
+	action_lib = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Library");
+
+	g_signal_handlers_block_by_func (action_lib, library_pane_action, cwin);
+	g_signal_handlers_block_by_func (action_files, files_pane_action, cwin);
+	g_signal_handlers_block_by_func (cwin->toggle_lib, toggled_cb, cwin);
+	g_signal_handlers_block_by_func (cwin->toggle_file, toggled_cb, cwin);
+
+	if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
 		{
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), TRUE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_files) ,FALSE);
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_file), FALSE);
 		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
-		gtk_widget_grab_focus(cwin->library_tree);
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 0);
+		gtk_widget_grab_focus(cwin->library_tree);
 		}
-	else if (GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_file) && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(toggle)) )
+	else if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_file)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
 		{
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_files), TRUE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
 		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
-		gtk_widget_grab_focus(cwin->file_tree);
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 1);
+		gtk_widget_grab_focus(cwin->file_tree);
 		if (!test)
 			{
 			if (cwin->cstate->file_tree_pwd)
@@ -443,11 +456,17 @@ static gboolean test = FALSE;
 			}
 		}
 	else{
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_files), FALSE);
 		gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
 		gtk_widget_grab_focus(cwin->current_playlist);
 	}
-}
 
+	g_signal_handlers_unblock_by_func (action_lib, library_pane_action, cwin);
+	g_signal_handlers_unblock_by_func (action_files, files_pane_action, cwin);
+	g_signal_handlers_unblock_by_func (cwin->toggle_lib, toggled_cb, cwin);
+	g_signal_handlers_unblock_by_func (cwin->toggle_file, toggled_cb, cwin);
+}
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
 	if (!cwin->cstate->audio_init)

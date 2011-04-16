@@ -841,21 +841,38 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_AUDIO,
 			       KEY_USE_CDDB,
 			       cwin->cpref->use_cddb);
-	/* Window size */
 
-	window_size = g_new0(gint, 2);
-	gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
-			    &win_width,
-			    &win_height);
-	window_size[0] = win_width;
-	window_size[1] = win_height;
+	/* Fullscreen option */
 
-	g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-				    GROUP_GENERAL,
-				    KEY_WINDOW_SIZE,
-				    window_size,
-				    2);
-	g_free(window_size);
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_FULLSCREEN,
+			       cwin->cpref->fullscreen);
+
+	/* Add Window size if not fullscreen*/
+
+	if (!cwin->cpref->fullscreen){
+		window_size = g_new0(gint, 2);
+		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
+				    &win_width,
+				    &win_height);
+		window_size[0] = win_width;
+		window_size[1] = win_height;
+
+		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
+					    GROUP_GENERAL,
+					    KEY_WINDOW_SIZE,
+					    window_size,
+					    2);
+		g_free(window_size);
+		}
+
+	/* Set status bar option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_STATUS_BAR,
+			       cwin->cpref->status_bar);
 
 	/* List of libraries */
 

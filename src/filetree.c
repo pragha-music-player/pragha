@@ -412,9 +412,9 @@ gboolean file_tree_right_click_cb(GtkWidget *widget,
 	return ret;
 }
 
-/* Handler for 'Play' on a file */
+/* Handler for 'Replace playlist' on a file */
 
-void file_tree_play(GtkAction *action, struct con_win *cwin)
+void file_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection = NULL;
 	GtkTreePath *path = NULL;
@@ -426,15 +426,14 @@ void file_tree_play(GtkAction *action, struct con_win *cwin)
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->file_tree));
 	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		path = gtk_tree_model_get_path(model, &iter);
-		if (file_tree_add_file(path, TRUE, cwin))
-			play_first_current_playlist(cwin);
+		file_tree_add_file(path, TRUE, cwin);
 		gtk_tree_path_free(path);
 	}
 }
 
-/* Handler for 'Enqueue' on  a file */
+/* Handler for 'Add to playlist' on  a file */
 
-void file_tree_enqueue(GtkAction *action, struct con_win *cwin)
+void file_tree_add_to_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection = NULL;
 	GtkTreePath *path = NULL;
@@ -451,9 +450,9 @@ void file_tree_enqueue(GtkAction *action, struct con_win *cwin)
 	}
 }
 
-/* Handler for 'Enqueue(Recursive)' on a directory */
+/* Handler for 'Add to playlist (Recursive)' on a directory */
 
-void file_tree_enqueue_recur(GtkAction *action, struct con_win *cwin)
+void file_tree_add_to_playlist_recur(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection = NULL;
 	GtkTreePath *path = NULL;
@@ -470,9 +469,9 @@ void file_tree_enqueue_recur(GtkAction *action, struct con_win *cwin)
 	}
 }
 
-/* Handler for 'Enqueue(Non-Recursive)' on a directory */
+/* Handler for 'Add to playlist (Non-Recursive)' on a directory */
 
-void file_tree_enqueue_non_recur(GtkAction *action, struct con_win *cwin)
+void file_tree_add_to_playlist_non_recur(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection = NULL;
 	GtkTreePath *path = NULL;
