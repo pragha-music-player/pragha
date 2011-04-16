@@ -1,4 +1,4 @@
-AC_INIT([consonance], [0.5.92], [m.sujith@gmail.com])
+AC_INIT([consonance], [0.5.93], [m.sujith@gmail.com])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREREQ(2.61)
@@ -12,12 +12,6 @@ AC_PROG_LIBTOOL
 
 # Checks for header files.
 AC_HEADER_STDC
-
-# Check user options.
-AC_ARG_ENABLE(modplug,
-	[AS_HELP_STRING([--enable_modplug], [support modplug (default: no)])],
-	[enable_modplug=$enableval],
-	[enable_modplug=no])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([alsa],

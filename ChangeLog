@@ -1,3 +1,7 @@
+v0.5.93
+	Sync systray and panel volume.
+	Fix icon of consonance in gnome_main_menu and xfce menu.
+	Small adjustments in the language.
 v0.5.92
 	Problem of the panel background image fixed.
 	Elimine Spanish.

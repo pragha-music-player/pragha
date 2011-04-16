@@ -1227,6 +1227,9 @@ void init_library_view(struct con_win *cwin)
 		"GENRE.name ASC, ARTIST.name ASC, ALBUM.name ASC, TRACK.track_no ASC"};
 
 	cwin->cstate->view_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->combo_order), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
+
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
@@ -1269,6 +1272,9 @@ void init_library_view(struct con_win *cwin)
 	/* Refresh tag completion entries too */
 
 	refresh_tag_completion_entries(cwin);
+
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->combo_order), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), TRUE);
 
 	cwin->cstate->view_change = FALSE;
 }

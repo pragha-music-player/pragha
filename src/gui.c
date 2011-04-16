@@ -1808,14 +1808,8 @@ GtkWidget* create_status_bar(struct con_win *cwin)
 
 GtkWidget* create_search_bar(struct con_win *cwin)
 {
-	GtkWidget *hbox_bar;
 	GtkWidget *search_entry;
-	GtkWidget *cancel_button;
-	GtkWidget *label_find;
 	GtkWidget *image;
-
-	hbox_bar = gtk_hbox_new(FALSE, 2);
-/*	label_find = gtk_label_new("Filtrar:");*/
 
 	search_entry = sexy_icon_entry_new( );
 	sexy_icon_entry_add_clear_button( SEXY_ICON_ENTRY( search_entry ) );
@@ -1827,17 +1821,6 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 				search_entry ), SEXY_ICON_ENTRY_PRIMARY,
 				TRUE );
 
-/*	gtk_box_pack_start(GTK_BOX(hbox_bar),*/
-/*			   label_find,*/
-/*			   FALSE,*/
-/*			   FALSE,*/
-/*			   5);*/
-/*	gtk_box_pack_start(GTK_BOX(hbox_bar),*/
-/*			   search_entry,*/
-/*			   TRUE,*/
-/*			   TRUE,*/
-/*			   2);*/
-
 	cwin->search_entry = search_entry;
 
 	/* Signal handlers */
@@ -1848,7 +1831,7 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 			 cwin);
 
 	return search_entry;
-/*	return hbox_bar;*/
+
 }
 
 /* Search (simple) */

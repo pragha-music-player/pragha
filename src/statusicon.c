@@ -97,7 +97,7 @@ void show_osd(struct con_win *cwin)
 		body = g_markup_printf_escaped ("by %s", 
 						cwin->cstate->curr_mobj->tags->artist);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped ("the %s", 
+		body = g_markup_printf_escaped ("in %s", 
 						cwin->cstate->curr_mobj->tags->album);
 	else	body = g_markup_printf_escaped ("Unknown Tags");
 
@@ -166,9 +166,13 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 	{
 		case GDK_SCROLL_UP:
 			cwin->cmixer->inc_volume(cwin);
+			gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button),
+						SCALE_UP_VOL(cwin->cmixer->curr_vol));
 			break;
 		case GDK_SCROLL_DOWN:
 			cwin->cmixer->dec_volume(cwin);
+			gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button),
+						SCALE_UP_VOL(cwin->cmixer->curr_vol));
 			break;
 		default:
 			return;

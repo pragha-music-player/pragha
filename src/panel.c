@@ -167,7 +167,7 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 						str ,
 						cwin->cstate->curr_mobj->tags->artist);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">the</span></small> %s", 
+		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">in</span></small> %s", 
 						str ,
 						cwin->cstate->curr_mobj->tags->album);
 	else	str = g_markup_printf_escaped ("%s", 

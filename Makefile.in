@@ -57,7 +57,8 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	ps-recursive uninstall-recursive
 man1dir = $(mandir)/man1
 am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(desktopdir)" \
-	"$(DESTDIR)$(docdir)" "$(DESTDIR)$(imagedir)"
+	"$(DESTDIR)$(docdir)" "$(DESTDIR)$(iconsdir)" \
+	"$(DESTDIR)$(imagedir)"
 NROFF = nroff
 MANS = $(man_MANS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -68,8 +69,9 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 desktopDATA_INSTALL = $(INSTALL_DATA)
 docDATA_INSTALL = $(INSTALL_DATA)
+iconsDATA_INSTALL = $(INSTALL_DATA)
 imageDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(desktop_DATA) $(doc_DATA) $(image_DATA)
+DATA = $(desktop_DATA) $(doc_DATA) $(icons_DATA) $(image_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
@@ -243,10 +245,12 @@ image_DATA = \
 	data/track.png  \
 	data/cover.png  \
 	data/genre.png	\
+	data/consonance.png	\
 	data/bookmark_starred.png \
-	data/bookmark_unstarred.png \
-	data/consonance.png
+	data/bookmark_unstarred.png
 
+iconsdir = $(datadir)/icons/hicolor/scalable/apps
+icons_DATA = data/consonance.png
 desktopdir = $(datadir)/applications
 desktop_DATA = data/consonance.desktop
 EXTRA_DIST = \
@@ -254,8 +258,10 @@ EXTRA_DIST = \
 	$(doc_DATA)	\
 	$(image_DATA)	\
 	$(desktop_DATA)	\
+	$(icons_DATA)	\
 	$(man_MANS)
 
+gtk_update_icon_cache = gtk-update-icon-cache -f -t $(datadir)/icons/hicolor
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -397,6 +403,23 @@ uninstall-docDATA:
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(docdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(docdir)/$$f"; \
+	done
+install-iconsDATA: $(icons_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(iconsdir)" || $(MKDIR_P) "$(DESTDIR)$(iconsdir)"
+	@list='$(icons_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(iconsDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(iconsdir)/$$f'"; \
+	  $(iconsDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(iconsdir)/$$f"; \
+	done
+
+uninstall-iconsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(icons_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(iconsdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(iconsdir)/$$f"; \
 	done
 install-imageDATA: $(image_DATA)
 	@$(NORMAL_INSTALL)
@@ -699,7 +722,7 @@ check: check-recursive
 all-am: Makefile $(MANS) $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(imagedir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(iconsdir)" "$(DESTDIR)$(imagedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -746,8 +769,10 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-desktopDATA install-docDATA install-imageDATA \
-	install-man
+install-data-am: install-desktopDATA install-docDATA install-iconsDATA \
+	install-imageDATA install-man
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 
 install-dvi: install-dvi-recursive
 
@@ -784,12 +809,12 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-desktopDATA uninstall-docDATA \
-	uninstall-imageDATA uninstall-man
+	uninstall-iconsDATA uninstall-imageDATA uninstall-man
 
 uninstall-man: uninstall-man1
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) install-am \
-	install-strip
+	install-data-am install-strip
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
@@ -798,18 +823,30 @@ uninstall-man: uninstall-man1
 	distclean distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-desktopDATA \
-	install-docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-imageDATA \
-	install-info install-info-am install-man install-man1 \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-desktopDATA uninstall-docDATA uninstall-imageDATA \
-	uninstall-man uninstall-man1
+	install-data install-data-am install-data-hook \
+	install-desktopDATA install-docDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-iconsDATA install-imageDATA install-info \
+	install-info-am install-man install-man1 install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-desktopDATA uninstall-docDATA uninstall-iconsDATA \
+	uninstall-imageDATA uninstall-man uninstall-man1
 
+
+install-data-hook:
+	@-if test -z "$(DESTDIR)"; then					\
+		echo "Updating Gtk icon cache.";			\
+		$(gtk_update_icon_cache);				\
+	else								\
+		echo "*** Icon cache not updated. Remember to run:";	\
+		echo "***";						\
+		echo "***   $(gtk_update_icon_cache)";			\
+		echo "***";						\
+	fi
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
