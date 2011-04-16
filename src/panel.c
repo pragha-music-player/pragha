@@ -42,10 +42,10 @@ static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
 		    is_image_file(ab_file)) {
 			CDEBUG(DBG_INFO, "Image file: %s", ab_file);
 			image = gdk_pixbuf_new_from_file_at_scale(ab_file,
-								  ALBUM_ART_SIZE,
-								  ALBUM_ART_SIZE,
-								  FALSE,
-								  &error);
+								cwin->cpref->album_art_size,
+								cwin->cpref->album_art_size,
+								FALSE,
+							  	&error);
 			if (!image) {
 				g_critical("Unable to open image file: %s",
 					   ab_file);
@@ -106,8 +106,8 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 			if (is_image_file(ab_file)) {
 				CDEBUG(DBG_INFO, "Image file: %s", ab_file);
 				image = gdk_pixbuf_new_from_file_at_scale(ab_file,
-							  ALBUM_ART_SIZE,
-							  ALBUM_ART_SIZE,
+							  cwin->cpref->album_art_size,
+							  cwin->cpref->album_art_size,
 							  FALSE,
 							  &error);
 				if (!image) {
@@ -235,9 +235,9 @@ void track_progress_change_cb(GtkWidget *widget,
 
 void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
+	GError *error = NULL;
 	GdkPixbuf *album_art;
 	gchar *dir;
-	GError *error = NULL;
 
 	if (cwin->cpref->show_album_art) {
 
@@ -263,9 +263,9 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				g_object_unref(G_OBJECT(album_art));
 			}
 			else
-				cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
-								       ALBUM_ART_SIZE,
-								       ALBUM_ART_SIZE,
+				cwin->album_art = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
+								       cwin->cpref->album_art_size,
+								       cwin->cpref->album_art_size,
 								       &error));
 
 			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
@@ -286,19 +286,15 @@ void unset_album_art(struct con_win *cwin)
 		gtk_widget_destroy(cwin->album_art);
 		cwin->album_art = NULL;
 	}
+	if (cwin->cpref->show_album_art){
 	cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
-				       ALBUM_ART_SIZE,
-				       ALBUM_ART_SIZE,
-				       &error));
+						       cwin->cpref->album_art_size,
+						       cwin->cpref->album_art_size,
+						       &error));
 	gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
 			  GTK_WIDGET(cwin->album_art));
 	gtk_widget_show_all(cwin->album_art_frame);
-}
-
-void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin)
-{
-	cwin->cpref->shuffle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	shuffle_button(cwin);
+	}
 }
 
 void shuffle_button (struct con_win *cwin)
@@ -324,12 +320,6 @@ void shuffle_button (struct con_win *cwin)
 			reset_rand_track_refs(ref, cwin);
 		}
 	}
-}
-
-void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Repeat handler");
-	cwin->cpref->repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)
@@ -471,10 +461,10 @@ void album_art_toggle_state(struct con_win *cwin)
 			gtk_frame_set_shadow_type (GTK_FRAME(cwin->album_art_frame), GTK_SHADOW_NONE);
 			gtk_box_pack_end(GTK_BOX(cwin->hbox_panel),
 					   GTK_WIDGET(cwin->album_art_frame),
-					   FALSE, FALSE, 2);
+					   FALSE, FALSE, 0);
 			gtk_box_reorder_child(GTK_BOX(cwin->hbox_panel),
 					      cwin->album_art_frame,
-					      0);
+					      2);
 		}
 		gtk_widget_show_now(cwin->album_art_frame);
 		resize_album_art_frame(cwin);
@@ -491,8 +481,11 @@ void album_art_toggle_state(struct con_win *cwin)
 
 void resize_album_art_frame(struct con_win *cwin)
 {
-	if (cwin->album_art_frame)
+	if (cwin->album_art_frame && cwin->cpref->show_album_art){
+
 		gtk_widget_set_size_request(GTK_WIDGET(cwin->album_art_frame),
-					    ALBUM_ART_SIZE,
-					    ALBUM_ART_SIZE);
+					    cwin->cpref->album_art_size+2,
+					    cwin->cpref->album_art_size+2);
+
+	}
 }

@@ -159,6 +159,7 @@
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
 #define KEY_WINDOW_SIZE            "window_size"
+#define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_AUDIO_SINK             "audio_sink"
 #define KEY_AUDIO_ALSA_DEVICE      "audio_alsa_device"
 #define KEY_AUDIO_OSS_DEVICE       "audio_oss_device"
@@ -362,7 +363,6 @@ struct pixbuf {
 
 	GdkPixbuf *pixbuf_pause;	/* Play button image */
 	GdkPixbuf *pixbuf_play;		/* Pause button image */
-
 };
 
 struct lastfm_pref {
@@ -384,6 +384,7 @@ struct con_pref {
 	gchar *audio_alsa_device;
 	gchar *audio_oss_device;
 	gchar *audio_cd_device;
+	int album_art_size;
 	gint window_width;
 	gint window_height;
 	GTimeVal last_rescan_time;
@@ -409,6 +410,8 @@ struct con_pref {
 	GtkWidget *save_playlist_w;
 	GtkWidget *album_art_pattern_w;
 	GtkWidget *album_art_pattern_label_w;
+	GtkWidget *album_art_size_w;
+	GtkWidget *album_art_size_label_w;
 	GtkWidget *soft_mixer;
 	GtkWidget *use_cddb_w;
 	GtkWidget *audio_sink_combo;
@@ -674,8 +677,6 @@ void track_progress_change_cb(GtkWidget *widget,
 			      struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
-void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin);
-void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);

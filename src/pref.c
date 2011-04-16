@@ -56,22 +56,18 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	case GTK_RESPONSE_OK:
 		/* Validate album art pattern, if invalid bail out immediately */
 
-		if (GTK_WIDGET_VISIBLE(cwin->cpref->album_art_pattern_w)) {
-			album_art_pattern =
-				gtk_entry_get_text(GTK_ENTRY(
-					   cwin->cpref->album_art_pattern_w));
+		if (GTK_WIDGET_VISIBLE(cwin->cpref->album_art_pattern_w)){
 
-			if (album_art_pattern) {
+			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w));
+
+			if (album_art_pattern){
 				if (!validate_album_art_pattern(album_art_pattern)) {
 					album_art_pattern_helper(dialog, cwin);
 					return;
 				}
-
 				/* Proper pattern, store in preferences */
-
 				g_free(cwin->cpref->album_art_pattern);
-				cwin->cpref->album_art_pattern =
-					g_strdup(album_art_pattern);
+				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
 			}
 		}
 
@@ -92,6 +88,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			cwin->cpref->show_album_art = TRUE;
 		else
 			cwin->cpref->show_album_art = FALSE;
+
+		cwin->cpref->album_art_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w));
 
 		album_art_toggle_state(cwin);
 
@@ -371,9 +369,13 @@ static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
 	if (is_active) {
 		gtk_widget_show(cwin->cpref->album_art_pattern_w);
 		gtk_widget_show(cwin->cpref->album_art_pattern_label_w);
+		gtk_widget_show(cwin->cpref->album_art_size_w);
+		gtk_widget_show(cwin->cpref->album_art_size_label_w);
 	} else {
 		gtk_widget_hide(cwin->cpref->album_art_pattern_w);
 		gtk_widget_hide(cwin->cpref->album_art_pattern_label_w);
+		gtk_widget_hide(cwin->cpref->album_art_size_w);
+		gtk_widget_hide(cwin->cpref->album_art_size_label_w);
 	}
 }
 
@@ -599,6 +601,11 @@ static void update_preferences(struct con_win *cwin)
 				   cwin->cpref->album_art_pattern);
 	}
 
+	if (cwin->cpref->album_art_size) {
+		gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),  (int)cwin->cpref->album_art_size);
+	}
+
+
 	/* Update Audio CD device */
 
 	if (cwin->cpref->audio_cd_device)
@@ -725,6 +732,13 @@ void save_preferences(struct con_win *cwin)
 				      KEY_ALBUM_ART_PATTERN,
 				      cwin->cpref->album_art_pattern);
 	}
+
+	/* Album art size */
+
+	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_ALBUM_ART_SIZE,
+			       (int)cwin->cpref->album_art_size);
 
 	/* OSD option */
 
@@ -1092,6 +1106,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *audio_sink_combo, *sink_label, *hbox_sink;
 	GtkWidget *hbox_album_art_pattern, *hbox_audio_cd_device;
 	GtkWidget *audio_device_combo, *audio_device_label, *hbox_audio_device;
+	GtkWidget *album_art_size, *album_art_size_label, *hbox_album_art_size, *vbox_album_art;
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -1127,7 +1142,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	pref_notebook = gtk_notebook_new();
 
-	gtk_container_set_border_width (pref_notebook, 8);
+	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 8);
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox,
 				 label_general);
@@ -1147,6 +1162,21 @@ void preferences_dialog(struct con_win *cwin)
 
 	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
 
+	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
+	album_art_size_label = gtk_label_new(_("Size of Album art"));
+
+	hbox_album_art_size = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox_album_art_size),
+			   album_art_size_label,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_end(GTK_BOX(hbox_album_art_size),
+			 album_art_size,
+			 TRUE,
+			 TRUE,
+			 0);
+
 	album_art_pattern = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
 				 ALBUM_ART_PATTERN_LEN);
@@ -1164,6 +1194,19 @@ void preferences_dialog(struct con_win *cwin)
 			 TRUE,
 			 TRUE,
 			 0);
+
+	vbox_album_art = gtk_vbox_new(FALSE, 2);
+
+	gtk_box_pack_start(GTK_BOX(vbox_album_art),
+			   hbox_album_art_pattern,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(vbox_album_art),
+			   hbox_album_art_size,
+			   FALSE,
+			   FALSE,
+			   0);
 
 	/* Notification */
 
@@ -1197,7 +1240,7 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   hbox_album_art_pattern,
+			   vbox_album_art,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1439,6 +1482,8 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->album_art = album_art;
 	cwin->cpref->album_art_pattern_w = album_art_pattern;
 	cwin->cpref->album_art_pattern_label_w = album_art_pattern_label;
+	cwin->cpref->album_art_size_w = album_art_size;
+	cwin->cpref->album_art_size_label_w = album_art_size_label;
 
 	/* Setup signal handlers */
 
@@ -1456,6 +1501,7 @@ void preferences_dialog(struct con_win *cwin)
 			 G_CALLBACK(change_audio_sink), cwin);
 
 	update_preferences(cwin);
+
 	gtk_widget_show_all(dialog);
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
 	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art), cwin);

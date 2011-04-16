@@ -516,9 +516,9 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
 	combo_add = gtk_combo_box_new_text();
-	radio_new = gtk_radio_button_new_with_label(NULL, "Save as a new playlist");
+	radio_new = gtk_radio_button_new_with_label(NULL, _("Save as a new playlist"));
 	radio_add = gtk_radio_button_new_with_label_from_widget(
-		GTK_RADIO_BUTTON(radio_new), "Append to an existing playlist");
+		GTK_RADIO_BUTTON(radio_new), _("Append to an existing playlist"));
 	if (playlists) {
 		while (playlists[i]) {
 			gtk_combo_box_append_text(GTK_COMBO_BOX(combo_add),
@@ -530,7 +530,7 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 		gtk_widget_set_sensitive(combo_add, FALSE);
 		gtk_widget_set_sensitive(radio_add, FALSE);
 	}
-	dialog = gtk_dialog_new_with_buttons("Save playlist",
+	dialog = gtk_dialog_new_with_buttons(_("Save playlist"),
 			     GTK_WINDOW(cwin->mainwindow),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_OK,
@@ -595,7 +595,7 @@ static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt *choice
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_INFO,
 				GTK_BUTTONS_OK,
-				"<b>con_playlist</b> is a reserved playlist name");
+				_("<b>con_playlist</b> is a reserved playlist name"));
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			g_free(playlist);

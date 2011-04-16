@@ -1,6 +1,6 @@
 INCLUDES =								\
 	-DDBUS_API_SUBJECT_TO_CHANGE					\
-	-DG_LOG_DOMAIN=\"snyder\"					\
+	-DG_LOG_DOMAIN=\"pragha\"					\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DSHAREDIR=\""$(pkgdatadir)"\"					\
 	-I$(top_srcdir)

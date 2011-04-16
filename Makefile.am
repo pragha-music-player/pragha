@@ -34,6 +34,13 @@ EXTRA_DIST = 		\
 	$(icons_DATA)	\
 	$(man_MANS)
 
+distclean-local:
+	rm -rf *.cache *~
+
+rpm: dist
+	rpmbuild -ta $(PACKAGE)-$(VERSION).tar.gz
+	@rm -f $(PACKAGE)-$(VERSION).tar.gz
+
 gtk_update_icon_cache = gtk-update-icon-cache -f -t $(datadir)/icons/hicolor
 
 install-data-hook:

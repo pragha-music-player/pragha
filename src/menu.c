@@ -91,7 +91,7 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 
 	library_dialog =
 		gtk_dialog_new_with_buttons((update) ?
-					    "Update Library" : "Rescan Library",
+					    _("Update Library") : _("Rescan Library"),
 					    GTK_WINDOW(cwin->mainwindow),
 					    GTK_DIALOG_MODAL,
 					    GTK_STOCK_CANCEL,
@@ -143,7 +143,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	/* Create a file chooser dialog */
 
-	dialog = gtk_file_chooser_dialog_new("Select a file to play",
+	dialog = gtk_file_chooser_dialog_new(_("Select a file to play"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_FILE_CHOOSER_ACTION_OPEN,
 					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -157,7 +157,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	/* Create file filters  */
 
 	media_filter = gtk_file_filter_new();
-	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), "Supported media");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
 	
 	/* wav filter */
 	while (mime_wav[i])
@@ -185,7 +185,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 
 	all_filter = gtk_file_filter_new();
-	gtk_file_filter_set_name(GTK_FILE_FILTER(all_filter), "All files");
+	gtk_file_filter_set_name(GTK_FILE_FILTER(all_filter), _("All files"));
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(all_filter), "*.*");
 
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog),
@@ -291,6 +291,7 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 
 void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	CDEBUG(DBG_INFO, "shuffle_action");
 	cwin->cpref->shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 	shuffle_button(cwin);
 }
@@ -299,8 +300,8 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 
 void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	CDEBUG(DBG_INFO, "Repeat_action");
 	cwin->cpref->repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-	CDEBUG("(%s): Repeat action menu", __func__);
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */
@@ -371,7 +372,7 @@ void rescan_library_action(GtkAction *action, struct con_win *cwin)
 						    GTK_MESSAGE_INFO,
 						    GTK_BUTTONS_OK,
 						    "%s",
-						    "Library scan complete");
+						    _("Library scan complete"));
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
@@ -480,7 +481,7 @@ exit:
 						    GTK_MESSAGE_INFO,
 						    GTK_BUTTONS_OK,
 						    "%s",
-						    "Library scan complete");
+						    _("Library scan complete"));
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
@@ -597,7 +598,7 @@ void about_widget(struct con_win *cwin)
 
 void home_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *uri = "http://sites.google.com/site/consonancemanager/";
+	const gchar *uri = "http://pragha.wikispaces.com/";
 	open_url(uri);
 }
 

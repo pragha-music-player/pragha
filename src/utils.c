@@ -253,50 +253,6 @@ gboolean is_image_file(gchar *file)
 
 gchar* convert_length_str(gint length)
 {
-/*        gchar *res;*/
-/*        gchar *temp1, *temp2;*/
-/*        gint temp_time=0;*/
-/*        gint sec=0, min=0, hours=0, days=0;*/
-
-/*        if (length < 0)*/
-/*                return g_strdup_printf ("n/a");*/
-
-/*        days = (length / 86400);*/
-/*        temp_time = (time % 86400);*/
-
-/*        hours = (temp_time / 3600);*/
-/*        temp_time = (temp_time % 3600);*/
-
-/*        min = (temp_time / 60);*/
-/*        sec = (temp_time % 60);*/
-
-/*        res = g_strdup_printf ("%d %s", sec, "seconds");*/
-
-/*        if (min != 0) {*/
-/*                temp1 = g_strdup_printf ("%d %s, ", min, "minutes");*/
-/*                temp2 = g_strconcat (temp1, res, NULL);*/
-/*                g_free (temp1);*/
-/*                g_free (res);*/
-/*                res = temp2;*/
-/*        }*/
-
-/*        if (hours != 0) {*/
-/*                temp1 = g_strdup_printf ("%d %s, ", hours, "hours");*/
-/*                temp2 = g_strconcat (temp1, res, NULL);*/
-/*                g_free (temp1);*/
-/*                g_free (res);*/
-/*                res = temp2;*/
-/*        }*/
-
-/*        if (days != 0) {*/
-/*                temp1 = g_strdup_printf ("%d %s, ", days, "days");*/
-/*                temp2 = g_strconcat (temp1, res, NULL);*/
-/*                g_free (temp1);*/
-/*                g_free (res);*/
-/*                res = temp2;*/
-/*        }*/
-
-/*        return res;*/
 	static gchar *str, tmp[24];
 	gint days = 0, hours = 0, minutes = 0, seconds = 0;
 
@@ -306,7 +262,7 @@ gchar* convert_length_str(gint length)
 	if (length > 86400) {
 		days = length/86400;
 		length = length%86400;
-		g_sprintf(tmp, "%d %s, ", days, (days>1)?"days":"day");
+		g_sprintf(tmp, "%d %s, ", days, (days>1)?_("days"):_("day"));
 		g_strlcat(str, tmp, 24);
 	}
 

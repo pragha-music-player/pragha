@@ -454,7 +454,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 			return;
 	}
 
-	dialog = gtk_file_chooser_dialog_new("Export playlist to file",
+	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_FILE_CHOOSER_ACTION_SAVE,
 					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,

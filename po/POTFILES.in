@@ -7,3 +7,5 @@ src/statusicon.c
 src/tags.c
 src/pref.c
 src/menu.c
+src/utils.c
+src/playlist.c

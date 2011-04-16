@@ -298,21 +298,6 @@ GtkActionEntry library_page_context_aentries[] = {
 	 NULL, "Genre / Artist / Album / Track", G_CALLBACK(genre_artist_album_track_library_tree)}
 };
 
-/*GtkActionEntry systray_menu_aentries[] = {
-	{"Play", GTK_STOCK_MEDIA_PLAY, N_("Play/Pause"),
-	 NULL, "Play", G_CALLBACK(systray_play)},
-	{"Stop", GTK_STOCK_MEDIA_STOP, N_("Stop"),
-	 NULL, "Stop", G_CALLBACK(systray_stop)},
-	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, "Prev",
-	 NULL, "Prev", G_CALLBACK(systray_prev)},
-	{"Next", GTK_STOCK_MEDIA_NEXT, "Next",
-	 NULL, "Next", G_CALLBACK(systray_next)},
-	{"Pause", GTK_STOCK_MEDIA_PAUSE, "Pause [T]",
-	 NULL, "Pause", G_CALLBACK(systray_pause)},
-	{"Quit", GTK_STOCK_QUIT, "Quit",
-	 NULL, "Quit", G_CALLBACK(systray_quit)}
-};*/
-
 GtkActionEntry systray_menu_aentries[] = {
 	{"About", GTK_STOCK_ABOUT, N_("About"),
 	 NULL, NULL, G_CALLBACK(about_action)},
@@ -1624,7 +1609,7 @@ GtkWidget* create_paned_region(struct con_win *cwin)
 
 GtkWidget* create_panel(struct con_win *cwin)
 {
-	GtkWidget *controls_align;
+	GtkWidget *controls_align, *vol_button_align;
 	GtkWidget *playing;
 	GtkWidget *vbox_order;
 	GtkWidget *hbox_panel, *hbox_controls;
@@ -1725,15 +1710,18 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	/* Tooltips */
 
-	gtk_widget_set_tooltip_text(GTK_WIDGET(play_button), "Play / Pause Track");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), "Previous Track");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), "Next Track");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), "Stop playback");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(play_button), _("Play / Pause Track"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), _("Previous Track"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), _("Stop playback"));
 
 	/* Pack panel widgets into hbox_panel */
 
+	vol_button_align = gtk_alignment_new(0, 0.5, 0, 0);
+	gtk_container_add(GTK_CONTAINER(vol_button_align), vol_button);
+
  	gtk_box_pack_end(GTK_BOX(hbox_panel),
-			   GTK_WIDGET(vol_button),
+			   GTK_WIDGET(vol_button_align),
 			   FALSE, FALSE, 0);
  	gtk_box_pack_end(GTK_BOX(hbox_panel),
 		   GTK_WIDGET(playing),
@@ -1760,16 +1748,17 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 GtkWidget* create_playing_box(struct con_win *cwin)
 {
-GtkWidget *now_playing_label,*track_length_label,*track_time_label;
-GtkWidget *track_progress_bar, *track_progress_align;
-GtkWidget *new_vbox,*new_hbox; 
+	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
+	GtkWidget *track_progress_bar;
+	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
+	GtkWidget *new_vbox,*new_hbox; 
 
 	now_playing_label = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
 	gtk_label_set_markup(GTK_LABEL(now_playing_label),_("<b>Not playing</b>"));
-	gtk_misc_set_alignment (GTK_MISC(now_playing_label),0,1);
+	gtk_misc_set_alignment (GTK_MISC(now_playing_label) , 0, 1);
 
-	new_vbox = gtk_vbox_new(FALSE, 1);
+	new_vbox = gtk_vbox_new(FALSE, 2);
 	new_hbox = gtk_hbox_new(FALSE, 1);
 
 	/* Setup track progress */
@@ -1790,6 +1779,13 @@ GtkWidget *new_vbox,*new_hbox;
 
 	track_time_label = gtk_label_new(NULL);
 	track_length_label = gtk_label_new(NULL);
+
+	track_time_align = gtk_alignment_new(1, 0.5, 0, 0);
+	track_length_align = gtk_alignment_new(0, 0.5, 0, 0);
+
+	gtk_container_add(GTK_CONTAINER(track_time_align), track_time_label);
+	gtk_container_add(GTK_CONTAINER(track_length_align), track_length_label);
+
 	gtk_label_set_markup(GTK_LABEL(track_length_label),"<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
 
@@ -1799,22 +1795,26 @@ GtkWidget *new_vbox,*new_hbox;
 	cwin->track_length_label = 	track_length_label;
 
 	gtk_box_pack_start(GTK_BOX(new_hbox),
-			   GTK_WIDGET(track_time_label),
+			   GTK_WIDGET(track_time_align),
 			   FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(new_hbox),
  			   GTK_WIDGET(track_progress_align),
  			   TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(new_hbox),
-			   GTK_WIDGET(track_length_label),
+			   GTK_WIDGET(track_length_align),
 			   FALSE, FALSE, 3);
 
 	gtk_box_pack_start(GTK_BOX(new_vbox),
 			   GTK_WIDGET(now_playing_label),
-			   TRUE, TRUE, 0);
+			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(new_vbox),
 			   GTK_WIDGET(new_hbox),
-			   TRUE, TRUE, 0);
-return new_vbox;
+			   FALSE, FALSE, 0);
+
+	vbox_align = gtk_alignment_new(0.5, 0.5, 1, 0);
+	gtk_container_add(GTK_CONTAINER(vbox_align), new_vbox);
+
+return vbox_align;
 }
 
 GtkWidget* create_status_bar(struct con_win *cwin)
