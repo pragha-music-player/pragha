@@ -187,6 +187,8 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 	}
 	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), (const gchar*)str);
 
+	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (cwin->track_length_label));
+
 	g_free(str);
 	g_free(tot_length);
 	g_free(cur_pos);
@@ -278,7 +280,7 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				g_object_unref(G_OBJECT(album_art));
 			}
 			else
-				cwin->album_art = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
+				cwin->album_art = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
 								       cwin->cpref->album_art_size,
 								       cwin->cpref->album_art_size,
 								       &error));
@@ -302,7 +304,7 @@ void unset_album_art(struct con_win *cwin)
 		cwin->album_art = NULL;
 	}
 	if (cwin->cpref->show_album_art){
-	cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
+	cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
 						       cwin->cpref->album_art_size,
 						       cwin->cpref->album_art_size,
 						       &error));
@@ -310,6 +312,40 @@ void unset_album_art(struct con_win *cwin)
 			  GTK_WIDGET(cwin->album_art));
 	gtk_widget_show_all(cwin->album_art_frame);
 	}
+}
+
+/* Handler for the 'Shuffle' button item in Panel */
+
+void
+shuffle_button_handler (GtkToggleButton *button, struct con_win *cwin)
+{
+	GtkAction *action_shuffle;
+
+	cwin->cpref->shuffle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+
+	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/EditMenu/Shuffle");
+
+	g_signal_handlers_block_by_func (action_shuffle, shuffle_action, cwin);
+
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), cwin->cpref->shuffle);
+		shuffle_button(cwin);
+
+	g_signal_handlers_unblock_by_func (action_shuffle, shuffle_action, cwin);
+}
+
+void
+repeat_button_handler (GtkToggleButton *button, struct con_win *cwin)
+{
+	GtkAction *action_repeat;
+	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/EditMenu/Repeat");
+
+	cwin->cpref->repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+
+	g_signal_handlers_block_by_func (action_repeat, repeat_action, cwin);
+
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), cwin->cpref->repeat);
+
+	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
 }
 
 void shuffle_button (struct con_win *cwin)
@@ -349,7 +385,7 @@ void play_pause_resume(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GThread *thread;
-	GtkTreePath *path;
+	GtkTreePath *path=NULL;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
 
@@ -371,12 +407,14 @@ void play_pause_resume(struct con_win *cwin)
 		resume_playback(cwin);
 		break;
 	case ST_STOPPED:
-		path = current_playlist_get_selection(cwin);
+		if(cwin->cstate->queue_track_refs)
+			path = get_next_queue_track(cwin);
+		if (!path)
+			path = current_playlist_get_selection(cwin);
 		if (!path) {
 			play_first_current_playlist(cwin);
 			break;
 		}
-
 		if (cwin->cpref->shuffle) {
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 			ref = gtk_tree_row_reference_new(model, path);

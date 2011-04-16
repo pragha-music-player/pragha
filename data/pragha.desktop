@@ -1,10 +1,31 @@
 [Desktop Entry]
-Name=Pragha
-GenericName=Music Manager
+Version=1.0
+
 Type=Application
-Comment=A lightweight music manager
-Icon=pragha.png
+
+Name=Pragha
+GenericName=Music Player
+GenericName[da]=Lydafspiller
+GenericName[de]=Musikspieler
+GenericName[es]=Reproductor de Música
+GenericName[fr]=Lecteur de Musique
+GenericName[it]=Lettore di Musica
+GenericName[nl]=Muziekspeler
+GenericName[no]=Lydavspiller
+GenericName[pt]=Leitor de Música
+GenericName[ro]=Lector de Muzică
+GenericName[se]=Ljudspelare
+Comment=Manage and listen to music
+Comment[de]=Musik verwalten und hören
+Comment[fr]=Gérer et écouter de la musique
+Comment[it]=Gestire e ascoltare musica
+Icon=pragha
+
+Categories=GTK;AudioVideo;Player
+
 Exec=pragha %F
+TryExec=pragha
 Terminal=false
-MimeType=audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav
-Categories=GTK;Application;AudioVideo;Player
+StartupNotify=true
+
+MimeType=audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav;

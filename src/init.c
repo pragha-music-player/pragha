@@ -1069,6 +1069,7 @@ void init_state(struct con_win *cwin)
 
 	cwin->cstate->rand = g_rand_new();
 	cwin->cstate->rand_track_refs = NULL;
+	cwin->cstate->queue_track_refs = NULL;
 	cwin->cstate->state = ST_STOPPED;
 }
 
@@ -1116,6 +1117,12 @@ void init_pixbuf(struct con_win *cwin)
 	g_object_ref(cwin->pixbuf->pixbuf_pause);
 }
 
+void init_toggle_buttons(struct con_win *cwin)
+{
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+}
+
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
@@ -1131,6 +1138,9 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
+
+	action = gtk_ui_manager_get_action(cwin->file_tree_file_context_menu,"/popup/Show hidden files");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->show_hidden_files);
 }
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
@@ -1156,9 +1166,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_widget_set_default_colormap(colormap);
 	}
 
-	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(SHAREDIR 
-							    "/data/pragha.png",
-							    &error);
+	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png",
+ 							    &error);
 	if (!cwin->pixbuf->pixbuf_app) {
 		g_warning("Unable to load app png : %s", error->message);
 		g_error_free(error);
@@ -1185,11 +1194,13 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Systray */
 
 	create_status_icon(cwin);
+
 	init_pixbuf(cwin);
 
 	/* Main Vbox */
 
 	vbox = gtk_vbox_new(FALSE, 2);
+
 	gtk_container_add(GTK_CONTAINER(cwin->mainwindow), vbox);
 
 	/* Create hboxen */
@@ -1199,7 +1210,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	hbox_panel = create_panel(cwin);
 	status_bar = create_status_bar(cwin);
 	search_bar = create_search_bar(cwin);
-
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
 	/* Pack all hboxen into vbox */
@@ -1222,11 +1232,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_widget_show_all(cwin->mainwindow);
 
 	init_menu_actions(cwin);
+	init_toggle_buttons(cwin);
 
 	/* Set initial size of album art frame */
 
 	if (cwin->album_art_frame)
 		resize_album_art_frame(cwin);
-
 	gtk_init_add(_init_gui_state, cwin);
 }

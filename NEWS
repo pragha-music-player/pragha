@@ -1,7 +1,42 @@
-===================================
-Overview of changes in Pragha 0.7.1
-===================================
+=====================================================
+Overview of changes in Pragha 0.7.2 "Queue Support!."
+=====================================================
 
+Basic queue playlist support!-)
+	Now you can add and remove multiple songs to be played.	
+	(Special thanks to Christian Hergert by gtkcellrendererbubble.)
+
+Others Changes:
+	Use Desktop file XDG compliant. Thanks to Christoph.
+	Use shared files XDG compliant. Thanks to Christoph.
+
+	Restore 'Shuffle' and 'Repeat' options in the panel.
+
+	Add 'Current play time' in the systray tooltip.
+	Notifications, more consistent at the systray tooltips.
+
+	Move 'Add the library' menu item to 'Tools' menu.
+	Move 'Connect to CDDB server' option to 'General' tab.
+
+	Use Control+space to play and pause.
+	Remove 'Show Hidden Files in File View' preferences option, and add 'show hidden files' menu item, to popup menu of file pane.
+
+Updates Translations:
+	Portuguese translation thanks to Lyceuhns.
+	Spanish translation thanks to msdelos.
+
+Bugs fixed:
+	Fixs GDK_Delete no work in search entry.
+
+Note: When playing songs from the play queue, deletes references to previous songs.
+
+======================================================
+OTHERS REALESES:
+======================================================
+
+V0.7.1.1: Update of french translation thank to Aloïs Halel.
+
+V0.7.1
 Rework all menus.
 	Use more advisable names: "Add to playlist" instead "Equeque", "Replace playlist" instead "Play", etc.
 	Use betters icon: GTK_STOCK_ADD instead GTK_STOCK_COPY when add music, NULL instead GTK_STOCK_PLAY when replace playlist, etc.
@@ -30,9 +65,6 @@ Bugs fixed:
 	No show track no in playlist, when is zero.
 	Show filename in playlist when unknown title tag.
 
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.0
 	Now depends on gtk >= 2.16. Thank to this:
 	* Eliminate eggtrayicon and sexyentry.

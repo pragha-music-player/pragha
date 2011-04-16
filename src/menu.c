@@ -292,8 +292,15 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "shuffle_action");
+
 	cwin->cpref->shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-	shuffle_button(cwin);
+
+	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
+
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+		shuffle_button(cwin);
+
+	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 }
 
 /* Handler for 'Repeat' option in the Edit menu */
@@ -301,7 +308,14 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Repeat_action");
+
 	cwin->cpref->repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
+
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+		
+	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */

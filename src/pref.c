@@ -43,7 +43,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			   struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean hf, aa, osd, ret;
+	gboolean aa, osd, ret;
 	gchar *u_folder = NULL, *audio_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
@@ -70,15 +70,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
 			}
 		}
-
-		/* Hidden files */
-
-		hf = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->hidden_files));
-		if (hf)
-			cwin->cpref->show_hidden_files = TRUE;
-		else
-			cwin->cpref->show_hidden_files = FALSE;
 
 		/* Album art */
 
@@ -228,7 +219,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	}
 
 	gtk_widget_destroy(GTK_WIDGET(dialog));
-	cwin->cpref->hidden_files = NULL;
 	cwin->cpref->library_view = NULL;
 }
 
@@ -514,13 +504,6 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
-
-	/* Update Hidden Files */
-
-	if (cwin->cpref->show_hidden_files)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->hidden_files),
-					     TRUE);
 
 	/* Update album art */
 
@@ -1187,7 +1170,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *dialog, *vbox_all, *pref_notebook, *hbox_library;
 	GtkWidget *general_vbox, *audio_vbox, *library_vbox, *lastfm_vbox;
 	GtkWidget *label_general, *label_library, *label_audio, *label_lastfm;
-	GtkWidget *hidden_files, *album_art, *osd, *save_playlist, *use_cddb;
+	GtkWidget *album_art, *osd, *save_playlist, *use_cddb;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern;
 	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
 	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
@@ -1260,10 +1243,9 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
 	gtk_container_add(GTK_CONTAINER(alignment), lastfm_vbox);
 
-	/* Hidden files */
+	/* CDDB */
 
-	hidden_files = gtk_check_button_new_with_label(_("Show Hidden Files in "
-						       "File View"));
+	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 
 	/* Album art */
 
@@ -1327,17 +1309,17 @@ void preferences_dialog(struct con_win *cwin)
 	/* Pack general items */
 
 	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   hidden_files,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   osd,
 			   FALSE,
 			   FALSE,
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   save_playlist,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   use_cddb,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1356,10 +1338,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
-
-	/* CDDB */
-
-	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 
 	/* Audio Sink */
 
@@ -1430,11 +1408,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(audio_vbox),
 			   soft_mixer,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(audio_vbox),
-			   use_cddb,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1583,7 +1556,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->cpref->hidden_files = hidden_files;
 	cwin->cpref->album_art = album_art;
 	cwin->cpref->osd = osd;
 	cwin->cpref->save_playlist_w = save_playlist;

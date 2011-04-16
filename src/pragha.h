@@ -54,6 +54,7 @@
 #include "oggvorbis.h"
 #include "cdda.h"
 #include "mod.h"
+#include "gtkcellrendererbubble.h"
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
@@ -273,6 +274,8 @@ enum file_columns {
 enum curplaylist_columns {
 	P_MOBJ_PTR,
 	P_PLAY_PIXBUF,
+	P_QUEUE,
+	P_BUBBLE,
 	P_TRACK_NO,
 	P_TITLE,
 	P_ARTIST,
@@ -414,7 +417,6 @@ struct con_pref {
 	GSList *library_tree_nodes;
 	GSList *lib_delete;
 	GSList *lib_add;
-	GtkWidget *hidden_files;
 	GtkWidget *album_art;
 	GtkWidget *osd;
 	GtkWidget *save_playlist_w;
@@ -506,6 +508,7 @@ struct con_state {
 	GMutex *l_mutex;
 	GCond *c_cond;
 	GList *rand_track_refs;
+	GList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
 	cdrom_drive_t *cdda_drive;
@@ -559,16 +562,15 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
-	GtkWidget *hbox_controls;
 	GtkWidget *album_art_frame;
 	GtkWidget *album_art;
 	GtkWidget *track_progress_bar;
-	GtkWidget *shuffle_button;
-	GtkWidget *repeat_button;
 	GtkWidget *prev_button;
 	GtkWidget *play_button;
 	GtkWidget *stop_button;
 	GtkWidget *next_button;
+	GtkWidget *shuffle_button;
+	GtkWidget *repeat_button;
 	GtkWidget *vol_button;
 	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
@@ -694,6 +696,8 @@ void track_progress_change_cb(GtkWidget *widget,
 			      struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
+void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin);
+void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
@@ -723,6 +727,7 @@ void file_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void file_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
 void file_tree_add_to_playlist_recur(GtkAction *action, struct con_win *cwin);
 void file_tree_add_to_playlist_non_recur(GtkAction *action, struct con_win *cwin);
+void file_tree_show_hidden_files(GtkToggleAction *action, struct con_win *cwin);
 void dnd_file_tree_get(GtkWidget *widget,
 		       GdkDragContext *context,
 		       GtkSelectionData *data,
@@ -880,8 +885,13 @@ GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
 GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
+GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
 void init_current_playlist_columns(struct con_win *cwin);
+void requeue_track_refs (struct con_win *cwin);
+void enqueue_current_playlist(GtkAction *action, struct con_win *cwin);
+void queue_current_playlist(GtkAction *action, struct con_win *cwin);
+int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void remove_current_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void track_properties_current_playlist_action(GtkAction *action, struct con_win *cwin);

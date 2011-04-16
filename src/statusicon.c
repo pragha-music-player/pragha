@@ -66,8 +66,7 @@ void show_osd(struct con_win *cwin)
 {
 	GError *error = NULL;
 	NotifyNotification *osd;
-	gchar *body, *length, *str;
-	gchar *etitle = NULL;
+	gchar *summary, *length, *str;
 
 	/* Check if OSD is enabled in preferences */
 
@@ -81,27 +80,16 @@ void show_osd(struct con_win *cwin)
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
 
-	etitle = g_markup_printf_escaped ("%s (%s)",
-			str,
-			length);
-
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
-	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped (_("by %s in %s"), 
-						cwin->cstate->curr_mobj->tags->artist, 
-						cwin->cstate->curr_mobj->tags->album);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-		body = g_markup_printf_escaped (_("by %s"), 
-						cwin->cstate->curr_mobj->tags->artist);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped (_("in %s"), 
-						cwin->cstate->curr_mobj->tags->album);
-	else	body = g_markup_printf_escaped (_("Unknown Tags"));
+	summary = g_markup_printf_escaped("%s: %s\n%s: %s\n%s: %s\n%s: %s",
+ 			_("Title"), str,
+ 			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
+ 			_("Album"), cwin->cstate->curr_mobj->tags->album,
+			_("Length"), convert_length_str(cwin->cstate->curr_mobj->tags->length));
 
 	/* Create notification instance */
 
-	osd = notify_notification_new_with_status_icon(etitle,
-					(const gchar *)body,
+	osd = notify_notification_new_with_status_icon((const gchar *) summary,
+					NULL,
 					NULL,
 					GTK_STATUS_ICON(cwin->status_icon));
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
@@ -123,10 +111,9 @@ void show_osd(struct con_win *cwin)
 
 	/* Cleanup */
 
+	g_free(summary);
 	g_free(length);
 	g_free(str);
-	g_free(body);
-	g_free(etitle);
 	g_object_unref(G_OBJECT(osd));
 }
 
@@ -142,11 +129,12 @@ gboolean status_get_tooltip_cb (GtkWidget        *widget,
 	if (cwin->cstate->state == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
-		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s",
-			_("Title"), cwin->cstate->curr_mobj->tags->title,
-			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
-			_("Album"), cwin->cstate->curr_mobj->tags->album,
-			_("Length"), convert_length_str(cwin->cstate->curr_mobj->tags->length));
+		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
+ 			_("Title"), cwin->cstate->curr_mobj->tags->title,
+ 			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
+ 			_("Album"), cwin->cstate->curr_mobj->tags->album,
+			_("Length"), gtk_label_get_text (GTK_LABEL(cwin->track_time_label)),
+			convert_length_str(cwin->cstate->curr_mobj->tags->length));
 	}
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);

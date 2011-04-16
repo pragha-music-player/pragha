@@ -11,7 +11,7 @@ man_MANS = data/pragha.1
 docdir= $(pkgdatadir)/doc
 doc_DATA = README ChangeLog FAQ
 
-imagedir = $(pkgdatadir)/data
+imagedir = $(datadir)/pixmaps/pragha
 image_DATA = 		\
 	data/artist.png	\
 	data/album.png	\
@@ -20,7 +20,7 @@ image_DATA = 		\
 	data/genre.png	\
 	data/pragha.png
 
-iconsdir = $(datadir)/icons/hicolor/scalable/apps
+iconsdir = $(datadir)/icons/hicolor/128x128/apps
 icons_DATA = data/pragha.png
 
 desktopdir = $(datadir)/applications

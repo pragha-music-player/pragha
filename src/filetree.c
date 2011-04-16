@@ -487,6 +487,21 @@ void file_tree_add_to_playlist_non_recur(GtkAction *action, struct con_win *cwin
 		gtk_tree_path_free(path);
 	}
 }
+/* Handler to Show hiden files */
+
+void file_tree_show_hidden_files(GtkToggleAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+
+	cwin->cpref->show_hidden_files = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->file_tree));
+	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(
+					GTK_TREE_VIEW(cwin->file_tree)));
+	gtk_list_store_clear(GTK_LIST_STORE(model));
+	
+	populate_file_tree(NULL, cwin);
+}
 
 /* Callback for DnD signal 'drag-data-get' */
 
