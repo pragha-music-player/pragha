@@ -12,6 +12,8 @@ image_DATA = 		\
 	data/track.png  \
 	data/cover.png  \
 	data/genre.png	\
+	data/bookmark_starred.png \
+	data/bookmark_unstarred.png \
 	data/consonance.png
 
 desktopdir = $(datadir)/applications

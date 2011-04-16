@@ -593,6 +593,24 @@ void about_widget(struct con_win *cwin)
 
 }
 
+void home_action(GtkAction *action, struct con_win *cwin)
+{
+	const gchar *uri = "http://sites.google.com/site/consonancemanager/";
+	open_url(uri);
+}
+
+void community_action(GtkAction *action, struct con_win *cwin)
+{
+	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
+	open_url(uri);
+}
+
+void wiki_action(GtkAction *action, struct con_win *cwin)
+{
+	const gchar *uri = "http://tux-goodies.wikispaces.com/bugs";
+	open_url(uri);
+}
+
 void about_action(GtkAction *action, struct con_win *cwin)
 {
 	about_widget(cwin);

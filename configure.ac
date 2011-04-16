@@ -1,4 +1,4 @@
-AC_INIT([consonance], [0.5.9], [m.sujith@gmail.com])
+AC_INIT([consonance], [0.5.91], [m.sujith@gmail.com])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREREQ(2.61)
@@ -86,27 +86,27 @@ PKG_CHECK_MODULES([vorbisfile],
                   [AC_MSG_ERROR(vorbisfile-1.1.3 is required)])
 
 PKG_CHECK_MODULES([libcurl],
-                  [libcurl >= 7.18.2],
+                  [libcurl >= 7.18],
 		  [],
-                  [AC_MSG_ERROR(curl-2.19.2 is required)])
+                  [AC_MSG_ERROR(curl-7.18 is required)])
 
 PKG_CHECK_MODULES([libcdio],
-                  [libcdio >= 0.80],
+                  [libcdio >= 0.78],
 		  [],
-                  [AC_MSG_ERROR(libcdio-0.80 is required)])
+                  [AC_MSG_ERROR(libcdio-0.78 is required)])
 
 PKG_CHECK_MODULES([libcdio_paranoia],
-                  [libcdio_paranoia >= 0.80],
+                  [libcdio_paranoia >= 0.78],
 		  [],
-                  [AC_MSG_ERROR(libcdio_paranoia-0.80 is required)])
+                  [AC_MSG_ERROR(libcdio_paranoia-0.78 is required)])
 
 PKG_CHECK_MODULES([libcddb],
-                  [libcddb >= 1.3.0],
+                  [libcddb >= 1.2.1],
 		  [],
                   [AC_MSG_ERROR(libcddb-1.3.0 is required)])
 
 PKG_CHECK_MODULES([libmodplug],
-                  [libmodplug >= 0.8.0],
+                  [libmodplug >= 0.7.0],
 		  [],
                   [AC_MSG_ERROR(libmodplug-0.8.0 is required)])
 

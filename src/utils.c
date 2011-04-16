@@ -501,6 +501,28 @@ exit:
 	return ret;
 }
 
+/* callback used to open default browser when URLs got clicked */
+void open_url(const gchar *url)
+{
+    /* FIXME: is there any better way to do this? */
+    const char* programs[] = { "exo-open", "gnome-open" /* Sorry, KDE users. :-P */, "xdg-open" };
+    int i;
+    for(  i = 0; i < G_N_ELEMENTS(programs); ++i)
+    {
+        gchar* open_cmd = NULL;
+        if( (open_cmd = g_find_program_in_path( programs[i] )) )
+        {
+             char* argv [3];
+             argv [0] = programs[i];
+             argv [1] = (gchar *) url;
+             argv [2] = NULL;
+             g_spawn_async (NULL, argv, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL);
+             g_free( open_cmd );
+             break;
+        }
+    }
+}
+
 /* It gives the position of the menu on the 
    basis of the position of combo_order */
 

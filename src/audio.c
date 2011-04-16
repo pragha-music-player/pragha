@@ -224,7 +224,7 @@ static void alsa_set_volume(struct con_win *cwin)
 static void alsa_inc_volume(struct con_win *cwin)
 {
 	if (SCALE_DOWN_VOL(cwin->cmixer->curr_vol) < cwin->cmixer->max_vol)
-		cwin->cmixer->curr_vol++;
+		cwin->cmixer->curr_vol+=5;
 
 	CDEBUG(DBG_VERBOSE, "Setting ALSA volume to %ld",
 	       SCALE_DOWN_VOL(cwin->cmixer->curr_vol));
@@ -238,7 +238,7 @@ static void alsa_inc_volume(struct con_win *cwin)
 static void alsa_dec_volume(struct con_win *cwin)
 {
 	if (SCALE_DOWN_VOL(cwin->cmixer->curr_vol) > cwin->cmixer->min_vol)
-		cwin->cmixer->curr_vol--;
+		cwin->cmixer->curr_vol-=5;
 
 	CDEBUG(DBG_VERBOSE, "Setting ALSA volume to %ld",
 	       SCALE_DOWN_VOL(cwin->cmixer->curr_vol));
@@ -362,7 +362,7 @@ static void oss_inc_volume(struct con_win *cwin)
 	gint curr_vol;
 
 	if (cwin->cmixer->curr_vol < cwin->cmixer->max_vol)
-		cwin->cmixer->curr_vol++;
+		cwin->cmixer->curr_vol+=5;
 
 	curr_vol = cwin->cmixer->curr_vol;
 	CDEBUG(DBG_VERBOSE, "Setting OSS volume to %d", curr_vol);
@@ -377,7 +377,7 @@ static void oss_dec_volume(struct con_win *cwin)
 	gint curr_vol;
 
 	if (cwin->cmixer->curr_vol > cwin->cmixer->min_vol)
-		cwin->cmixer->curr_vol--;
+		cwin->cmixer->curr_vol-=5;
 
 	curr_vol = cwin->cmixer->curr_vol;
 	CDEBUG(DBG_VERBOSE, "Setting OSS volume to %d", curr_vol);
@@ -431,7 +431,7 @@ static void soft_set_volume(struct con_win *cwin)
 static void soft_inc_volume(struct con_win *cwin)
 {
 	if (cwin->cmixer->curr_vol < cwin->cmixer->max_vol)
-		cwin->cmixer->curr_vol++;
+		cwin->cmixer->curr_vol+=5;
 
 	CDEBUG(DBG_VERBOSE, "Setting SOFT volume to %ld",
 	       cwin->cmixer->curr_vol);
@@ -440,7 +440,7 @@ static void soft_inc_volume(struct con_win *cwin)
 static void soft_dec_volume(struct con_win *cwin)
 {
 	if (cwin->cmixer->curr_vol > cwin->cmixer->min_vol)
-		cwin->cmixer->curr_vol--;
+		cwin->cmixer->curr_vol-=5;
 
 	CDEBUG(DBG_VERBOSE, "Setting SOFT volume to %ld",
 	       cwin->cmixer->curr_vol);

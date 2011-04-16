@@ -1067,7 +1067,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_init(&argc, &argv);
 
-        g_set_application_name("Totem Movie Player");
+        /*g_set_application_name("Totem Movie Player");*/
         g_setenv("PULSE_PROP_media.role", "video", TRUE);
 
 

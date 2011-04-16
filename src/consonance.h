@@ -653,6 +653,9 @@ void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
 void add_all_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
+void home_action(GtkAction *action, struct con_win *cwin);
+void community_action(GtkAction *action, struct con_win *cwin);
+void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
 /* Panel actions */
@@ -1033,6 +1036,7 @@ void free_str_list(GSList *list);
 gint compare_utf8_str(gchar *str1, gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 gboolean is_m3u_playlist(gchar *file);
+void open_url(const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 

@@ -69,31 +69,37 @@ void show_osd(struct con_win *cwin)
 {
 	GError *error = NULL;
 	NotifyNotification *osd;
-	gchar *body, *length;
-	gchar *etitle = NULL, *eartist = NULL, *ealbum = NULL;
+	gchar *body, *length, *str;
+	gchar *etitle = NULL;
 
 	/* Check if OSD is enabled in preferences */
 
-	if (!cwin->cpref->show_osd)
+	if (!cwin->cpref->show_osd || gtk_window_is_active(cwin->mainwindow))
 		return;
 
-	if (cwin->cstate->curr_mobj->tags->title)
-		etitle = g_markup_escape_text(cwin->cstate->curr_mobj->tags->title,
-				      strlen(cwin->cstate->curr_mobj->tags->title));
-
-	if (cwin->cstate->curr_mobj->tags->artist)
-		eartist = g_markup_escape_text(cwin->cstate->curr_mobj->tags->artist,
-				       strlen(cwin->cstate->curr_mobj->tags->artist));
-
-	if (cwin->cstate->curr_mobj->tags->album)
-		ealbum = g_markup_escape_text(cwin->cstate->curr_mobj->tags->album,
-				      strlen(cwin->cstate->curr_mobj->tags->album));
+	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
+		str = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	else
+		str = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
-	body = g_strdup_printf("Artist: %s\nAlbum: %s\nLength: %s",
-			       eartist,
-			       ealbum,
-			       length);
+
+	etitle = g_markup_printf_escaped ("%s (%s)",
+			str,
+			length);
+
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
+	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		body = g_markup_printf_escaped ("por %s en %s", 
+						cwin->cstate->curr_mobj->tags->artist, 
+						cwin->cstate->curr_mobj->tags->album);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
+		body = g_markup_printf_escaped ("por %s", 
+						cwin->cstate->curr_mobj->tags->artist);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		body = g_markup_printf_escaped ("en %s", 
+						cwin->cstate->curr_mobj->tags->album);
+	else	body = g_markup_printf_escaped ("Unknown Tags");
 
 	/* Create notification instance */
 
@@ -121,10 +127,9 @@ void show_osd(struct con_win *cwin)
 	/* Cleanup */
 
 	g_free(length);
+	g_free(str);
 	g_free(body);
 	g_free(etitle);
-	g_free(eartist);
-	g_free(ealbum);
 	g_object_unref(G_OBJECT(osd));
 }
 
