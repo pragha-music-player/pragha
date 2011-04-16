@@ -1,4 +1,4 @@
-AC_INIT([consonance], [0.5.91], [m.sujith@gmail.com])
+AC_INIT([consonance], [0.5.91.1], [m.sujith@gmail.com])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREREQ(2.61)

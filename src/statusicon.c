@@ -90,14 +90,14 @@ void show_osd(struct con_win *cwin)
 
 	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
 	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped ("por %s en %s", 
+		body = g_markup_printf_escaped ("by %s the %s", 
 						cwin->cstate->curr_mobj->tags->artist, 
 						cwin->cstate->curr_mobj->tags->album);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-		body = g_markup_printf_escaped ("por %s", 
+		body = g_markup_printf_escaped ("by %s", 
 						cwin->cstate->curr_mobj->tags->artist);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped ("en %s", 
+		body = g_markup_printf_escaped ("the %s", 
 						cwin->cstate->curr_mobj->tags->album);
 	else	body = g_markup_printf_escaped ("Unknown Tags");
 
