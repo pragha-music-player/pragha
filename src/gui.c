@@ -1730,7 +1730,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 
 	now_playing_label = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
-	gtk_label_set_markup(GTK_LABEL(now_playing_label),"<b>No se reproduce nada</b>");
+	gtk_label_set_markup(GTK_LABEL(now_playing_label),"<b>Not playing</b>");
 	gtk_misc_set_alignment (GTK_MISC(now_playing_label), 0 , 1);
 
 	bookmark_image = gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/bookmark_unstarred.png",

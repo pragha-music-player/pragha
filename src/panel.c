@@ -189,7 +189,7 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 void unset_current_song_info(struct con_win *cwin)
 {
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label),
-				  "<b>Consonance Music Manager</b>");
+				  "<b>Not playing</b>");
 	gtk_label_set_markup(GTK_LABEL(cwin->track_length_label),"<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label),"<small>00:00</small>");
 }
