@@ -664,11 +664,11 @@ void save_preferences(struct con_win *cwin)
 	/* Shuffle and repeat options */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_PLAYLIST,
 			       KEY_SHUFFLE,
 			       cwin->cpref->shuffle);
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_PLAYLIST,
 			       KEY_REPEAT,
 			       cwin->cpref->repeat);
 
@@ -740,19 +740,19 @@ void save_preferences(struct con_win *cwin)
 			       KEY_ALBUM_ART_SIZE,
 			       (int)cwin->cpref->album_art_size);
 
+	/* Mode remaining time option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_TIMER_REMAINING_MODE,
+			       cwin->cpref->timer_remaining_mode);
+
 	/* OSD option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
 			       KEY_SHOW_OSD,
 			       cwin->cpref->show_osd);
-
-	/* Save playlist option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SAVE_PLAYLIST,
-			       cwin->cpref->save_playlist);
 
 	/* Audio CD Device */
 
@@ -895,6 +895,22 @@ void save_preferences(struct con_win *cwin)
 		}
 	}
 
+	/* Save playlist option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_PLAYLIST,
+			       KEY_SAVE_PLAYLIST,
+			       cwin->cpref->save_playlist);
+
+	/* Reference to current play */
+
+	if(cwin->cstate->tracks_curr_playlist){
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_PLAYLIST,
+				      KEY_CURRENT_REF,
+				      get_ref_current_track(cwin));
+		}
+
 	/* List of columns visible in current playlist */
 
 	if (cwin->cpref->playlist_columns) {
@@ -908,7 +924,7 @@ void save_preferences(struct con_win *cwin)
 		}
 
 		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_GENERAL,
+					   GROUP_PLAYLIST,
 					   KEY_PLAYLIST_COLUMNS,
 					   (const gchar **)columns,
 					   cnt);
@@ -930,7 +946,7 @@ void save_preferences(struct con_win *cwin)
 					gtk_tree_view_column_get_width(col);
 		}
 		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_GENERAL,
+					    GROUP_PLAYLIST,
 					    KEY_PLAYLIST_COLUMN_WIDTHS,
 					    col_widths,
 					    i);
@@ -957,6 +973,7 @@ void save_preferences(struct con_win *cwin)
 					   cnt);
 		g_free(nodes);
 	}
+
 
 	/* Audio sink */
 

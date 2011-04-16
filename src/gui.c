@@ -1484,8 +1484,6 @@ GtkUIManager* create_menu(struct con_win *cwin)
 				   gtk_ui_manager_get_accel_group(main_menu));
 	gtk_ui_manager_insert_action_group(main_menu, main_actions, 0);
 
-	action = gtk_action_group_get_action (main_actions, "Stop");
-
 	action = gtk_action_group_get_action (main_actions, "Shuffle");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
 
@@ -1752,6 +1750,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	GtkWidget *track_progress_bar;
 	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
 	GtkWidget *new_vbox,*new_hbox; 
+	GtkWidget *track_length_event_box;
 
 	now_playing_label = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
@@ -1789,6 +1788,11 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	gtk_label_set_markup(GTK_LABEL(track_length_label),"<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
 
+	track_length_event_box = gtk_event_box_new();
+	gtk_signal_connect( GTK_OBJECT( track_length_event_box ), "button-press-event",
+			G_CALLBACK(timer_remaining_mode_change), cwin );
+	gtk_container_add(GTK_CONTAINER(track_length_event_box), track_length_align);
+
 	cwin->track_progress_bar = 	track_progress_bar;
 	cwin->now_playing_label = 	now_playing_label;
 	cwin->track_time_label =	track_time_label;
@@ -1801,7 +1805,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
  			   GTK_WIDGET(track_progress_align),
  			   TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(new_hbox),
-			   GTK_WIDGET(track_length_align),
+			   GTK_WIDGET(track_length_event_box),
 			   FALSE, FALSE, 3);
 
 	gtk_box_pack_start(GTK_BOX(new_vbox),

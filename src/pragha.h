@@ -136,6 +136,7 @@
 
 #define GROUP_GENERAL "General"
 #define GROUP_LIBRARY "Library"
+#define GROUP_PLAYLIST "Playlist"
 #define GROUP_AUDIO   "Audio"
 
 #define KEY_INSTALLED_VERSION      "installed_version"
@@ -146,15 +147,20 @@
 #define KEY_SHOW_HIDDEN_FILE       "show_hidden_files"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
+#define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
 #define KEY_SHOW_OSD               "show_osd"
+#define KEY_TIMER_MODE		   "timer_mode"
+
 #define KEY_SAVE_PLAYLIST          "save_playlist"
-#define KEY_LASTFM                 "lastfm"
-#define KEY_LASTFM_USER            "lastfm_user"
-#define KEY_LASTFM_PASS            "lastfm_pass"
+#define KEY_CURRENT_REF		   "current_ref"
 #define KEY_SHUFFLE                "shuffle"
 #define KEY_REPEAT                 "repeat"
 #define KEY_PLAYLIST_COLUMNS       "playlist_columns"
 #define KEY_PLAYLIST_COLUMN_WIDTHS "playlist_column_widths"
+
+#define KEY_LASTFM                 "lastfm"
+#define KEY_LASTFM_USER            "lastfm_user"
+#define KEY_LASTFM_PASS            "lastfm_pass"
 #define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
@@ -384,7 +390,7 @@ struct con_pref {
 	gchar *audio_alsa_device;
 	gchar *audio_oss_device;
 	gchar *audio_cd_device;
-	int album_art_size;
+	gint album_art_size;
 	gint window_width;
 	gint window_height;
 	GTimeVal last_rescan_time;
@@ -393,6 +399,7 @@ struct con_pref {
 	gboolean show_hidden_files;
 	gboolean show_album_art;
 	gboolean show_osd;
+	gboolean timer_remaining_mode;
 	gboolean shuffle;
 	gboolean repeat;
 	gboolean save_playlist;
@@ -664,14 +671,15 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
 /* Panel actions */
-
-void selection_current_track(GtkButton *button, struct con_win *cwin);
+void selection_current_track_handler(GtkButton *button, struct con_win *cwin);
+void selection_current_track(struct con_win *cwin);
 gboolean update_current_song_info(gpointer data);
 void __update_current_song_info(struct con_win *cwin, gint length);
 void unset_current_song_info(struct con_win *cwin);
 gboolean update_track_progress_bar(gpointer data);
 void __update_track_progress_bar(struct con_win *cwin, gint length);
 void unset_track_progress_bar(struct con_win *cwin);
+void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
 void track_progress_change_cb(GtkWidget *widget,
 			      GdkEventButton *event,
 			      struct con_win *cwin);
@@ -759,6 +767,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 			  enum dnd_target info,
 			  guint time,
 			  struct con_win *cwin);
+void simple_library_search_keyrelease(struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler(GtkWidget *entry,
 						  struct con_win *cwin);
 void cancel_simple_library_search_handler(GtkButton *button, struct con_win *cwin);
@@ -861,6 +870,7 @@ GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
 GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
+gchar* get_ref_current_track(struct con_win *cwin);
 void init_current_playlist_columns(struct con_win *cwin);
 void remove_current_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);

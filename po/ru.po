@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Russian\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-08 18:55-0300\n"
+"POT-Creation-Date: 2009-08-08 18:43-0300\n"
 "PO-Revision-Date: 2009-07-08 19:05-0300\n"
 "Last-Translator: Matias <mati86_dl@yahoo.com.ar>\n"
 "Language-Team: Russian\n"
@@ -58,7 +58,7 @@ msgstr "Воспроизведение/Пауза"
 msgid "Stop"
 msgstr "Остановить"
 
-#: src/gui.c:167 src/gui.c:314 src/gui.c:1715
+#: src/gui.c:167 src/gui.c:314 src/gui.c:1713
 msgid "Next Track"
 msgstr "Следующий трек"
 
@@ -106,41 +106,41 @@ msgstr "Стат_истика"
 msgid "_Library View"
 msgstr "_Просмотр коллекции"
 
-#: src/gui.c:190 src/gui.c:283 src/librarytree.c:800 src/librarytree.c:1239
+#: src/gui.c:190 src/gui.c:283 src/librarytree.c:800 src/librarytree.c:1240
 msgid "Folder / File"
 msgstr "Директория / Файл"
 
 #: src/gui.c:192 src/gui.c:285 src/gui.c:946 src/gui.c:1062
-#: src/current_playlist.c:1043 src/librarytree.c:817 src/librarytree.c:1242
+#: src/current_playlist.c:1061 src/librarytree.c:817 src/librarytree.c:1243
 #: src/tags.c:408
 msgid "Artist"
 msgstr "Исполнитель"
 
 #: src/gui.c:194 src/gui.c:287 src/gui.c:947 src/gui.c:1063
-#: src/current_playlist.c:1044 src/librarytree.c:834 src/librarytree.c:1245
+#: src/current_playlist.c:1062 src/librarytree.c:834 src/librarytree.c:1246
 #: src/tags.c:409
 msgid "Album"
 msgstr "Альбом"
 
 #: src/gui.c:196 src/gui.c:289 src/gui.c:948 src/gui.c:1064
-#: src/current_playlist.c:1045 src/librarytree.c:851 src/librarytree.c:1248
+#: src/current_playlist.c:1063 src/librarytree.c:851 src/librarytree.c:1249
 #: src/tags.c:410
 msgid "Genre"
 msgstr "Жанр"
 
-#: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1251
+#: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1252
 msgid "Artist / Album"
 msgstr "Исполнитель / Альбом"
 
-#: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1257
+#: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1258
 msgid "Genre / Album"
 msgstr "Жанр / Альбом"
 
-#: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1254
+#: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1255
 msgid "Genre / Artist"
 msgstr "Жанр / Исполнитель"
 
-#: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1260
+#: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1261
 msgid "Genre / Artist / Album"
 msgstr "Жанр / Исполнитель / Альбом"
 
@@ -232,7 +232,7 @@ msgstr "Поставить в очередь  (Recursive)"
 msgid "Enqueue (Non-Recursive)"
 msgstr "Поставить в очередь (Non-Recursive)"
 
-#: src/gui.c:777 src/pref.c:1131
+#: src/gui.c:777 src/pref.c:1148
 msgid "Library"
 msgstr "Коллекция"
 
@@ -249,44 +249,44 @@ msgstr ""
 msgid "Track"
 msgstr "Трек"
 
-#: src/gui.c:945 src/gui.c:1061 src/current_playlist.c:1042 src/tags.c:407
+#: src/gui.c:945 src/gui.c:1061 src/current_playlist.c:1060 src/tags.c:407
 msgid "Title"
 msgstr "Название"
 
-#: src/gui.c:949 src/gui.c:1065 src/current_playlist.c:1048
+#: src/gui.c:949 src/gui.c:1065 src/current_playlist.c:1066
 msgid "Bitrate"
 msgstr "Битрейт"
 
-#: src/gui.c:950 src/gui.c:1066 src/current_playlist.c:1046 src/tags.c:411
+#: src/gui.c:950 src/gui.c:1066 src/current_playlist.c:1064 src/tags.c:411
 msgid "Year"
 msgstr "Год"
 
-#: src/gui.c:951 src/gui.c:1067 src/current_playlist.c:1047
+#: src/gui.c:951 src/gui.c:1067 src/current_playlist.c:1065
 msgid "Length"
 msgstr "Продолжительность"
 
-#: src/gui.c:952 src/gui.c:1068 src/current_playlist.c:1051
+#: src/gui.c:952 src/gui.c:1068 src/current_playlist.c:1069
 msgid "Filename"
 msgstr "Имя файла"
 
 #. Tooltips
-#: src/gui.c:1713
+#: src/gui.c:1711
 msgid "Play / Pause Track"
 msgstr "Воспроизвести / Остановить трек"
 
-#: src/gui.c:1714
+#: src/gui.c:1712
 msgid "Previous Track"
 msgstr "Предыдущий трек"
 
-#: src/gui.c:1716
+#: src/gui.c:1714
 msgid "Stop playback"
 msgstr "Остановить воспроизведение"
 
-#: src/gui.c:1758 src/panel.c:193
+#: src/gui.c:1757 src/panel.c:198
 msgid "<b>Not playing</b>"
 msgstr "<b>Не воспроизводится</b>"
 
-#: src/panel.c:162
+#: src/panel.c:159
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
@@ -295,12 +295,12 @@ msgstr ""
 "%s <small><span weight=\"light\">исполняет</span></small> %s <small><span "
 "weight=\"light\">из</span></small> %s"
 
-#: src/panel.c:167
+#: src/panel.c:164
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr "%s <small><span weight=\"light\">исполняет</span></small> %s"
 
-#: src/panel.c:171
+#: src/panel.c:168
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
 msgstr "%s <small><span weight=\"light\">из</span></small> %s"
@@ -327,19 +327,19 @@ msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> это зарезервированное название плейлиста"
 
 #. Create labels
-#: src/current_playlist.c:1041 src/tags.c:406
+#: src/current_playlist.c:1059 src/tags.c:406
 msgid "Track No"
 msgstr "Трек №"
 
-#: src/current_playlist.c:1049
+#: src/current_playlist.c:1067
 msgid "Channels"
 msgstr "Каналы"
 
-#: src/current_playlist.c:1050
+#: src/current_playlist.c:1068
 msgid "Samplerate"
 msgstr "Рейтинг"
 
-#: src/current_playlist.c:1100
+#: src/current_playlist.c:1118
 msgid "Track Information"
 msgstr "Информация о треке"
 
@@ -403,92 +403,92 @@ msgid "Select a folder to add to library"
 msgstr "Добавить в коллекцию выделенную директорию"
 
 #. The main preferences dialog
-#: src/pref.c:1116
+#: src/pref.c:1133
 msgid "Preferences"
 msgstr "Настройки"
 
 #. Labels
-#: src/pref.c:1129
+#: src/pref.c:1146
 msgid "General"
 msgstr "Основное"
 
-#: src/pref.c:1130
+#: src/pref.c:1147
 msgid "Audio"
 msgstr "Аудио"
 
-#: src/pref.c:1132
+#: src/pref.c:1149
 msgid "Last.fm"
 msgstr ""
 
 #. Hidden files
-#: src/pref.c:1158
+#: src/pref.c:1175
 msgid "Show Hidden Files in File View"
 msgstr "Показывать скрытые файлы в \"Обозревателе Файлов\""
 
 #. Album art
-#: src/pref.c:1163
+#: src/pref.c:1180
 msgid "Show Album art in Panel"
 msgstr "Показывать обложку альбома на панели"
 
-#: src/pref.c:1166
+#: src/pref.c:1183
 msgid "Size of Album art"
 msgstr "Размер изображения обложки альбома"
 
-#: src/pref.c:1184
+#: src/pref.c:1201
 msgid "Album art file pattern"
 msgstr "Шаблон имени файла обложки альбома"
 
 #. Notification
-#: src/pref.c:1213
+#: src/pref.c:1230
 msgid "Show OSD for track change"
 msgstr "Показывать OSD при смене трека"
 
 #. Save current playlist
-#: src/pref.c:1217
+#: src/pref.c:1234
 msgid "Save/Restore current playlist"
 msgstr "Сохранить/Восстановить текущий плейлист"
 
 #. Software mixer
-#: src/pref.c:1250
+#: src/pref.c:1267
 msgid "Use software mixer"
 msgstr "Использовать программный микшер"
 
-#: src/pref.c:1251 src/pref.c:1261 src/pref.c:1290
+#: src/pref.c:1268 src/pref.c:1278 src/pref.c:1307
 msgid "Restart Required"
 msgstr "Требуется перезапуск"
 
 #. CDDB
-#: src/pref.c:1255
+#: src/pref.c:1272
 msgid "Connect to CDDB server"
 msgstr "Соединится с CDDB сервером"
 
-#: src/pref.c:1270
+#: src/pref.c:1287
 msgid "Audio sink"
 msgstr "Звуковая подсистема"
 
-#: src/pref.c:1287
+#: src/pref.c:1304
 msgid "Audio Device"
 msgstr "Audio устройство"
 
 #. Audio CD device
-#: src/pref.c:1305
+#: src/pref.c:1322
 msgid "Audio CD Device"
 msgstr "Устройство Audio CD"
 
-#: src/pref.c:1358
+#: src/pref.c:1375
 msgid "Folder"
 msgstr "Директория"
 
 #. Last.fm
-#: src/pref.c:1405
+#: src/pref.c:1422
 msgid "Last.fm Support"
 msgstr "Поддержка Last.fm"
 
-#: src/pref.c:1408
+#: src/pref.c:1425
 msgid "Username"
 msgstr "Имя учетной записи"
 
-#: src/pref.c:1409
+#: src/pref.c:1426
 msgid "Password"
 msgstr "Пароль"
 

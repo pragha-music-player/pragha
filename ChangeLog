@@ -1,13 +1,22 @@
+V0.6.3
+	Add remaining time mode to panel.
+	Pragha remeber and showed last played song.
+	Small optimization in library_tree.
+	Fixs critical warnings.
+	Updated czech translation by Alois Nespor.
+0.6.2.2
+	Add German translation, thanks to PhotonX
+	Drops some strings "Tracks" confused.
+0.6.2.1
+	Add russian and ukrainian language, thanks to Evgen.
 V0.6.2
 	Pargha is 100% translatable one.
 	Add Japanese translation. - Tanks Masato hashimoto, Xfce-i18n team_ja.
 	Add czech translation. - Tanks alois.nespor.
 	Add Portuguese-Brazil. - Tanks Lyceuhns.
 	Add option to resize album art in preferences.
-
 V0.6.1
 	International Support (ES)
-	
 V0.6.0
 	Now is Pragha Music Manager!-)
 

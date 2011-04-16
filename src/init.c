@@ -339,7 +339,7 @@ gint init_config(struct con_win *cwin)
 		/* Retrieve list of columns to show in playlist view */
 
 		columns = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						     GROUP_GENERAL,
+						     GROUP_PLAYLIST,
 						     KEY_PLAYLIST_COLUMNS,
 						     &cnt,
 						     &error);
@@ -361,7 +361,7 @@ gint init_config(struct con_win *cwin)
 		/* Retrieve list of column widths */
 
 		col_widths = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
-							 GROUP_GENERAL,
+							 GROUP_PLAYLIST,
 							 KEY_PLAYLIST_COLUMN_WIDTHS,
 							 &cnt,
 							 &error);
@@ -571,6 +571,19 @@ gint init_config(struct con_win *cwin)
 			cwin->cpref->album_art_size = ALBUM_ART_SIZE;
 		}
 
+	/* Mode remaining time option */
+
+		cwin->cpref->timer_remaining_mode =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_TIMER_REMAINING_MODE,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			cwin->cpref->timer_remaining_mode = FALSE;
+		}
+
 		/* Retrieve OSD option */
 
 		cwin->cpref->show_osd =
@@ -588,7 +601,7 @@ gint init_config(struct con_win *cwin)
 
 		cwin->cpref->save_playlist =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
+					       GROUP_PLAYLIST,
 					       KEY_SAVE_PLAYLIST,
 					       &error);
 		if (error) {
@@ -660,7 +673,7 @@ gint init_config(struct con_win *cwin)
 
 		cwin->cpref->shuffle =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
+					       GROUP_PLAYLIST,
 					       KEY_SHUFFLE,
 					       &error);
 		if (error) {
@@ -671,7 +684,7 @@ gint init_config(struct con_win *cwin)
 
 		cwin->cpref->repeat =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
+					       GROUP_PLAYLIST,
 					       KEY_REPEAT,
 					       &error);
 		if (error) {
