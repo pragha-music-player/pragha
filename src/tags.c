@@ -918,7 +918,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		update_musicobject(mobj, changed, &ntag, cwin);
 		update_track_current_playlist(&iter, changed, mobj, cwin);
 
-		if (gtk_tree_path_compare(path, path_current) == 0) {
+		if ((path_current != NULL) && (gtk_tree_path_compare(path, path_current) == 0)) {
 			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
 			if(cwin->cstate->state != ST_STOPPED)
 				__update_current_song_info(cwin);

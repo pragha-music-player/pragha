@@ -27,6 +27,10 @@ Bugs fixed:
 	No save fuse option if not folders view is activate.
 	Fix tiny memory leak.
 
+v0.8.3.1
+	D'Oh!. Fix crash when edit track without reproducing any song.
+	No show zero length, zero bitrate, or zero year in current playlist.
+
 ======================================================
 OTHERS REALESES:
 ======================================================

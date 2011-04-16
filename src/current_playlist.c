@@ -1531,14 +1531,17 @@ void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkT
 		return;
 	}
 
-	ch_length = convert_length_str(mobj->tags->length);
-	ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
-	ch_filename = get_display_name(mobj);
-
 	if(mobj->tags->track_no)
 		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
 	if(mobj->tags->year)
 		ch_year = g_strdup_printf("%d", mobj->tags->year);
+	if(mobj->tags->length)
+		ch_length = convert_length_str(mobj->tags->length);
+	if(mobj->tags->bitrate)
+		ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
+
+	ch_filename = get_display_name(mobj);
+
 
 	if (drop_after)
 		gtk_list_store_insert_after(GTK_LIST_STORE(model), &iter, pos);
@@ -1582,7 +1585,7 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *ch_length, *ch_track_no, *ch_year, *ch_bitrate, *ch_filename;
+	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -1595,15 +1598,17 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 		return;
 	}
 
-	ch_length = convert_length_str(mobj->tags->length);
-	ch_year = g_strdup_printf("%d", mobj->tags->year);
-	ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
-	ch_filename = get_display_name(mobj);
-
 	if(mobj->tags->track_no)
 		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
-	else
-		ch_track_no = NULL;
+	if(mobj->tags->year)
+		ch_year = g_strdup_printf("%d", mobj->tags->year);
+	if(mobj->tags->length)
+		ch_length = convert_length_str(mobj->tags->length);
+	if(mobj->tags->bitrate)
+		ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
+
+	ch_filename = get_display_name(mobj);
+
 
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
