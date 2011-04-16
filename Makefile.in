@@ -38,8 +38,8 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	THANKS config.guess config.sub depcomp install-sh ltmain.sh \
-	missing mkinstalldirs
+	THANKS TODO config.guess config.sub depcomp install-sh \
+	ltmain.sh missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -213,6 +213,10 @@ LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
 LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
 LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
 LIBCDIO_VERSION = @LIBCDIO_VERSION@
+LIBCLASTFM_CFLAGS = @LIBCLASTFM_CFLAGS@
+LIBCLASTFM_LIBS = @LIBCLASTFM_LIBS@
+LIBCLASTFM_REQUIRED_VERSION = @LIBCLASTFM_REQUIRED_VERSION@
+LIBCLASTFM_VERSION = @LIBCLASTFM_VERSION@
 LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
 LIBCURL_REQUIRED_VERSION = @LIBCURL_REQUIRED_VERSION@

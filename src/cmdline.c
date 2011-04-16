@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -24,128 +24,107 @@ gboolean cmd_version(const gchar *opt_name, const gchar *val,
 		     struct con_win *cwin, GError **error)
 {
 	g_print("pragha %s\n", PACKAGE_VERSION);
+
 	exit(0);
 }
 
 gboolean cmd_play(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_PLAY, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_stop(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_STOP, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_pause(const gchar *opt_name, const gchar *val,
 		   struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_PAUSE, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_prev(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_PREV, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_next(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_NEXT, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_shuffle(const gchar *opt_name, const gchar *val,
 		     struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_SHUFFLE, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_repeat(const gchar *opt_name, const gchar *val,
 		    struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_REPEAT, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_inc_volume(const gchar *opt_name, const gchar *val,
 			struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_INC_VOL, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
 			struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_DEC_VOL, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
 		      struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_SHOW_OSD, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
 		      struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->cstate->unique_instance)
 		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
-		exit(0);
-	}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
@@ -160,8 +139,10 @@ gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 
 	year = track_no = length = bitrate = channels = samplerate = 0;
 
-	if (cwin->cstate->unique_instance)
-		return TRUE;
+	if (cwin->cstate->unique_instance) {
+		ret = FALSE;
+		goto exit;
+	}
 
 	dbus_error_init(&d_error);
 
@@ -240,6 +221,11 @@ gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
+
+	if (cwin->cstate->unique_instance) {
+		ret = FALSE;
+		goto exit;
+	}
 
 	msg = dbus_message_new_signal(DBUS_PATH, DBUS_INTERFACE, DBUS_SIG_ADD_FILE);
 	if (!msg) {

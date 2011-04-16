@@ -95,6 +95,8 @@ gint init_dbus(struct con_win *cwin)
 	DBusError error;
 	gint ret = 0;
 
+	CDEBUG(DBG_INFO, "Initializing DBUS");
+
 	dbus_error_init(&error);
 	conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
 	if (!conn) {
@@ -156,7 +158,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 
 	CDEBUG(DBG_INFO, "Initializing Command line options");
 
-	context = g_option_context_new("- A lightweight music manager");
+	context = g_option_context_new("- A lightweight music player");
 	group = g_option_group_new("General", "General", "General Options", cwin, NULL);
 	g_option_group_add_entries(group, cmd_entries);
 	g_option_context_set_main_group(context, group);
@@ -164,7 +166,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 	if (!g_option_context_parse(context, &argc, &argv, &error)) {
 		gchar *txt;
 
-		g_critical("Unable to parse options: %s", error->message);
+		g_message("Unable to parse options. Some options need another instance of pragha running.");
 		txt = g_option_context_get_help(context, TRUE, NULL);
 		g_print("%s", txt);
 		g_free(txt);
@@ -189,22 +191,28 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
-	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f, lastfm_f;
+	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f;
 	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
+	gboolean use_mpris2_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = lastfm_f = FALSE;
+	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
+	use_mpris2_f = FALSE;
+
+	#ifdef HAVE_LIBCLASTFM
+	gboolean lastfm_f = FALSE;
+	#endif
 
 	all_f = FALSE;
 
@@ -743,7 +751,7 @@ gint init_config(struct con_win *cwin)
 		}
 
 		/* Retrieve Services Internet preferences */
-
+		#ifdef HAVE_LIBCLASTFM
 		cwin->cpref->lw.lastfm_support =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
@@ -774,7 +782,7 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 		}
-
+		#endif
 		cwin->cpref->use_cddb =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
@@ -784,6 +792,17 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			use_cddb_f = TRUE;
+		}
+
+		cwin->cpref->use_mpris2 =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_SERVICES,
+					       KEY_ALLOW_MPRIS2,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			use_mpris2_f = TRUE;
 		}
 	}
 
@@ -882,10 +901,14 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->audio_alsa_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	if (all_f || audio_oss_device_f)
 		cwin->cpref->audio_oss_device = g_strdup(OSS_DEFAULT_DEVICE);
+	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lw.lastfm_support = FALSE;
+	#endif
 	if (all_f || use_cddb_f)
 		cwin->cpref->use_cddb = TRUE;
+	if (all_f || use_mpris2_f)
+		cwin->cpref->use_mpris2 = TRUE;
 
 	/* Cleanup */
 
@@ -954,6 +977,7 @@ gint init_musicdbase(struct con_win *cwin)
 	return init_dbase_schema(cwin);
 }
 
+#ifdef HAVE_LIBCLASTFM
 gint init_lastfm(struct con_win *cwin)
 {
 	gint rv;
@@ -969,11 +993,14 @@ gint init_lastfm(struct con_win *cwin)
 
 	if(rv != 0) {
 		g_critical("Unable to login on Lastfm");
-		cwin->cpref->lw.lastfm_support = FALSE;
+		cwin->clastfm->connected = FALSE;
+		return -1;
 	}
+	cwin->clastfm->connected = TRUE;
 
 	return 0;
 }
+#endif
 
 gint init_notify(struct con_win *cwin)
 {
@@ -1074,9 +1101,6 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
 }
 
 void init_pixbufs(struct con_win *cwin)
@@ -1191,7 +1215,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Systray */
 
 	create_status_icon(cwin);
-	
+
 	/* Main Vbox */
 
 	vbox = gtk_vbox_new(FALSE, 2);

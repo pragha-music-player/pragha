@@ -63,9 +63,10 @@ void common_cleanup(struct con_win *cwin)
 		cddb_destroy(cwin->cstate->cddb_conn);
 		libcddb_shutdown();
 	}
-
+#ifdef HAVE_LIBCLASTFM
 	g_free(cwin->cpref->lw.lastfm_user);
 	g_free(cwin->cpref->lw.lastfm_pass);
+#endif
 	g_free(cwin->cpref->configrc_file);
 	g_free(cwin->cpref->installed_version);
 	g_free(cwin->cpref->album_art_pattern);
@@ -89,11 +90,12 @@ void common_cleanup(struct con_win *cwin)
 	g_free(cwin->cdbase->db_file);
 	sqlite3_close(cwin->cdbase->db);
 	g_slice_free(struct con_dbase, cwin->cdbase);
-
+#ifdef HAVE_LIBCLASTFM
 	if (!cwin->cpref->lw.lastfm_support)
 		LASTFM_dinit(cwin->clastfm->session_id);
 
 	g_slice_free(struct con_lastfm, cwin->clastfm);
+#endif
 
 	dbus_connection_remove_filter(cwin->con_dbus,
 				      dbus_filter_handler,
@@ -103,7 +105,7 @@ void common_cleanup(struct con_win *cwin)
 			      NULL);
 	dbus_connection_unref(cwin->con_dbus);
 
-	mpris_cleanup();
+	mpris_cleanup(cwin);
 
 	if (notify_is_initted())
 		notify_uninit();
@@ -141,7 +143,11 @@ gint main(gint argc, gchar *argv[])
 	cwin->cstate = g_slice_new0(struct con_state);
 	cwin->cdbase = g_slice_new0(struct con_dbase);
 	cwin->cgst = g_slice_new0(struct con_gst);
+#ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
+#endif
+	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
+
 	debug_level = 0;
 
 	setlocale (LC_ALL, "");
@@ -159,7 +165,7 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (mpris_init(cwin) == -1) {
+	if (cwin->cpref->use_mpris2 && mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
@@ -182,9 +188,11 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
+	#ifdef HAVE_LIBCLASTFM
 	if (init_lastfm(cwin) == -1) {
 		g_critical("Unable to initialize Lastfm");
 	}
+	#endif
 
 	if (init_notify(cwin) == -1) {
 		g_critical("Unable to initialize libnotify");

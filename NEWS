@@ -51,10 +51,42 @@ Updates Translations:
 
 Note: Temporarily disables search lyrics, by license change of http://www.lyricsplugin.com.
 
-0.93.1:
+V0.93.1:
 Any change on pragha. But use liblastfm 0.4, that does not depend on libopenssl, incompatible with the GPL
 So fix Issee 22. :)
 
+V0.94.0
+Special thanks to Vikram Ambrose and Hakan Erduman for answering all my questions.
+News:
+	Add various demonstration features over Lastfm sevices.
+		* Love track.
+		* Unlove track.
+		* Add favorites.
+		* Artist info.
+		* Get album art.
+		* Add similar.
+	Complete MPRIS2 track list interface.
+	Add option to init MPRIS2 in preferences.
+	Restore Search Lyrics with a dialog using Chartlyrics.com.
+	Add new popup menu when current playlist is emply.
+
+Others Changes:
+	Now depend on external libclastfm >=0.4 (Optional).
+
+Updates Translations:
+	Add Turkisk translation thanks to Hakan.
+	Update Czech translation thanks to Anespor.
+
+Bugs fixed:
+	Much more faster when you start with many songs, or add the complete library.
+	Fix bad editing of current playlist items when it is sorted (Issue 21).
+	Fix Segfault after clear playlist and play (Issue 23 and 24).
+	No erase user info when no connect to lastfm.
+	Never init pragha witch -p,-s,-t, -r, -n, -t... command options.
+	Better update album art.
+	Drop unused vars.
+
+Note: http://liblastfm.sourceforge.net now is libclastfm due to incompatibility with the official library.
 
 ======================================================
 OTHERS REALESES:

@@ -253,8 +253,8 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 		g_critical("Unable to send DBUS message");
 		goto exit;
 	}
-	/*if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE))
-		mpris_update_any(cwin);*/
+	if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE))
+		mpris_update_any(cwin);
 
 	dbus_connection_flush(cwin->con_dbus);
 exit:

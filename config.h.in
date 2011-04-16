@@ -27,6 +27,9 @@
 /* Define if your <locale.h> file defines LC_MESSAGES. */
 #undef HAVE_LC_MESSAGES
 
+/* Define if libclastfm >= 0.4 present */
+#undef HAVE_LIBCLASTFM
+
 /* Define if keybinder >= 0.2.0 present */
 #undef HAVE_LIBKEYBINDER
 

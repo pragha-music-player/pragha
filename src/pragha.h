@@ -27,6 +27,10 @@
 #include <keybinder.h>
 #endif
 
+#ifdef HAVE_LIBCLASTFM
+#include <clastfm.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -55,7 +59,6 @@
 
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
-#include "lastfm.h"
 
 #ifndef NOTIFY_CHECK_VERSION
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
@@ -197,6 +200,7 @@
 #define KEY_LASTFM_USER            "lastfm_user"
 #define KEY_LASTFM_PASS            "lastfm_pass"
 #define KEY_USE_CDDB               "use_cddb"
+#define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
 #define TAG_TNO_CHANGED		1<<0
 #define TAG_TITLE_CHANGED	1<<1
@@ -205,6 +209,8 @@
 #define TAG_GENRE_CHANGED	1<<4
 #define TAG_YEAR_CHANGED	1<<5
 #define TAG_COMMENT_CHANGED	1<<6
+
+#define ISO_639_1 _("en")
 
 #define PRAGHA_BUTTON_SKIP       _("_Skip")
 #define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
@@ -386,6 +392,7 @@ struct pixbuf {
 	GtkWidget *image_play;
 };
 
+#ifdef HAVE_LIBCLASTFM
 struct lastfm_pref {
 	gboolean lastfm_support;
 	gchar *lastfm_user;
@@ -394,7 +401,7 @@ struct lastfm_pref {
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
 };
-
+#endif
 struct con_pref {
 	enum library_view cur_library_view;
 	gchar *installed_version;
@@ -424,6 +431,7 @@ struct con_pref {
 	gboolean save_playlist;
 	gboolean software_mixer;
 	gboolean use_cddb;
+	gboolean use_mpris2;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean status_bar;
@@ -455,9 +463,11 @@ struct con_pref {
 	GtkWidget *osd_in_systray_w;
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
-
+	#ifdef HAVE_LIBCLASTFM
 	struct lastfm_pref lw;
+	#endif
 	GtkWidget *use_cddb_w;
+	GtkWidget *use_mpris2_w;
 };
 
 struct musicobject {
@@ -535,15 +545,25 @@ struct con_gst {
 	int timer;
 	gdouble curr_vol;
 };
-
-#define LASTFM_NOT_CONNECTED 1<<1
-#define LASTFM_CONNECTED     1<<2
-
+#ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	gint lastfm_handler_id;
-	gint state;
+	gboolean connected;
 	time_t playback_started;
+};
+#endif
+struct con_mpris2 {
+	guint owner_id;
+	GDBusNodeInfo *introspection_data;
+	GDBusConnection *dbus_connection;
+	GQuark interface_quarks[4];
+	gboolean saved_playbackstatus;
+	gboolean saved_shuffle;
+	gchar *saved_title;
+	enum player_state state;
+	GError **property_error;			/* for returning errors in propget/propput */
+	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
 struct con_win {
@@ -552,7 +572,10 @@ struct con_win {
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
 	struct con_gst *cgst;
+	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
+	#endif
+	struct con_mpris2 *cmpris2;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
@@ -587,6 +610,7 @@ struct con_win {
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *cp_context_menu;
+	GtkUIManager *cp_null_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
@@ -866,11 +890,14 @@ void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
 
+void update_status_bar(struct con_win *cwin);
 void update_current_state(GtkTreePath *path,
 			  enum playlist_action action,
 			  struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  struct con_win *cwin);
+GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
+						struct con_win *cwin);
 void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
 void current_playlist_clear_dirty_all(struct con_win *cwin);
 GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
@@ -892,6 +919,8 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin);
 void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin);
 void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin);
 void append_current_playlist(struct musicobject *mobj, struct con_win *cwin);
+void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
+void append_current_playlist_on_model(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
@@ -1072,10 +1101,20 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 
 /* MPRIS functions */
+
 gint mpris_init(struct con_win *cwin);
 void mpris_update_any(struct con_win *cwin);
-void mpris_cleanup();
+void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
+void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter);
+void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, gint bitmask);
+void mpris_update_tracklist_changed(struct con_win *cwin);
+void mpris_close(struct con_win *cwin);
+void mpris_cleanup(struct con_win *cwin);
 /* Utilities */
+
+void set_status_message (gchar *message, struct con_win *cwin);
+GdkPixbuf *vgdk_pixbuf_new_from_memory (unsigned char *data, size_t size);
+gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
@@ -1123,6 +1162,25 @@ gint init_keybinder(struct con_win *cwin);
 void init_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
+
+/* Lastfm Helper */
+
+void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin);
+void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
+void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
+void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
+void lastfm_artist_info_action(GtkAction *action, struct con_win *cwin);
+void lastfm_get_album_art_action(GtkAction *action, struct con_win *cwin);
+void *do_lastfm_love (gpointer data);
+gboolean lastfm_love_handler (gpointer data);
+void *do_lastfm_scrob (gpointer data);
+gboolean lastfm_scrob_handler (gpointer data);
+void *do_lastfm_now_playing (gpointer data);
+gboolean lastfm_now_playing_handler (gpointer data);
+void update_lastfm (struct con_win *cwin);
+
+/* Chartlyric */
+void chartlyric_dialog (struct con_win *cwin);
 
 /* Others */
 

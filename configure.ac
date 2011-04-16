@@ -5,8 +5,8 @@ dnl
 
 dnl Version information
 m4_define([pragha_version_major], [0])
-m4_define([pragha_version_minor], [93])
-m4_define([pragha_version_micro], [1])
+m4_define([pragha_version_minor], [94])
+m4_define([pragha_version_micro], [0])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -45,7 +45,7 @@ AC_PROG_INSTALL()
 AC_PROG_LIBTOOL()
 
 dnl Check for i18n support
-XDT_I18N([cs de es fr hu ja nl no pl pt pt_BR ru sv uk])
+XDT_I18N([cs de es fr hu ja nl no pl pt pt_BR ru sv tr uk])
 
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
@@ -90,6 +90,13 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
                        [keybinder],
                        [keybinder library], [yes])
 
+dnl Check libclastfm
+LIBCLASTFM_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
+                       [libclastfm], [0.4],
+                       [libclastfm],
+                       [libclastfm library], [yes])
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
@@ -106,8 +113,9 @@ AC_MSG_RESULT([CFLAGS = $CFLAGS])
 echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
-echo "  Prefix...................................................: ${prefix}"
-echo "  Cubic volume support (Need gstreamer-plugins-base-devel).: $GSTREAMER_PLUGINS_BASE_FOUND"
-echo "  Global keyboard shortcuts support........................: $LIBKEYBINDER_FOUND"
+echo "  Prefix.....................................................: ${prefix}"
+echo "  Cubic volume support (Need gstreamer-plugins-base-devel)...: $GSTREAMER_PLUGINS_BASE_FOUND"
+echo "  Global keyboard shortcuts support..........................: $LIBKEYBINDER_FOUND"
+echo "  Lastfm support (Need http://liblastfm.sourceforge.net 0.4).: $LIBCLASTFM_FOUND"
 echo ""
 

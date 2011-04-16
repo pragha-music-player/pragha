@@ -271,16 +271,13 @@ void track_progress_change_cb(GtkWidget *widget,
 
 void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
+	CDEBUG(DBG_INFO, "Update album art");
+
 	GError *error = NULL;
 	GdkPixbuf *scaled_album_art, *album_art, *scaled_frame, *frame;
 	gchar *dir;
 
 	if (cwin->cpref->show_album_art) {
-		if (cwin->album_art) {
-			gtk_widget_destroy(cwin->album_art);
-			cwin->album_art = NULL;
-		}
-
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
 		if (mobj && mobj->file_type != FILE_CDDA){
@@ -305,14 +302,20 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 							cwin->cpref->album_art_size,
 							cwin->cpref->album_art_size,
 							GDK_INTERP_BILINEAR);
-		cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
+
+		if (cwin->album_art) {
+			gtk_image_clear(GTK_IMAGE(cwin->album_art));
+			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
+		}
+		else {
+			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
+			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+					  GTK_WIDGET(cwin->album_art));
+			gtk_widget_show_all(cwin->album_art_frame);
+		}
 
 		g_object_unref(G_OBJECT(scaled_frame));
 		g_object_unref(G_OBJECT(frame));
-
-		gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-				  GTK_WIDGET(cwin->album_art));
-		gtk_widget_show_all(cwin->album_art_frame);
 	}
 }
 
@@ -323,23 +326,23 @@ void unset_album_art(struct con_win *cwin)
 	GError *error = NULL;
 	GdkPixbuf *cover;
 
-	if (cwin->album_art) {
-		gtk_widget_destroy(cwin->album_art);
-		cwin->album_art = NULL;
-	}
-
 	if (cwin->cpref->show_album_art){
 		cover = gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
 							cwin->cpref->album_art_size,
 							cwin->cpref->album_art_size,
 							&error);
-		cwin->album_art = gtk_image_new_from_pixbuf(cover);
+		if (cwin->album_art) {
+			gtk_image_clear(GTK_IMAGE(cwin->album_art));
+			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), cover);
+		}
+		else {
+			cwin->album_art = gtk_image_new_from_pixbuf(cover);
+			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+					  GTK_WIDGET(cwin->album_art));
+			gtk_widget_show_all(cwin->album_art_frame);
+		}
 
 		g_object_unref(G_OBJECT(cover));
-
-		gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-				  GTK_WIDGET(cwin->album_art));
-		gtk_widget_show_all(cwin->album_art_frame);
 	}
 }
 
@@ -526,44 +529,57 @@ void keybind_media_handler (const char *keystring, gpointer data)
 
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
 {
-	GtkAction *action_lib, *action_playlists;
+	GtkAction *action_lib, *null_action_lib, *action_playlists, *null_action_playlists;
+
+	action_lib = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Library");
+	null_action_lib = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Library");
 
 	action_playlists = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Playlists");
-	action_lib = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Library");
+	null_action_playlists = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Playlists");
 
 	g_signal_handlers_block_by_func (action_lib, library_pane_action, cwin);
-	g_signal_handlers_block_by_func (action_playlists, playlists_pane_action, cwin);
+	g_signal_handlers_block_by_func (null_action_lib, library_pane_action, cwin);
 	g_signal_handlers_block_by_func (cwin->toggle_lib, toggled_cb, cwin);
+
+	g_signal_handlers_block_by_func (action_playlists, playlists_pane_action, cwin);
+	g_signal_handlers_block_by_func (null_action_playlists, playlists_pane_action, cwin);
 	g_signal_handlers_block_by_func (cwin->toggle_playlists, toggled_cb, cwin);
 
-	if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
-		{
+	if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle))) {
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), TRUE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), TRUE);
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists) ,FALSE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists) ,FALSE);
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_playlists), FALSE);
 		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 0);
 		gtk_widget_grab_focus(cwin->library_tree);
-		}
-	else if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_playlists)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
-		{
+	}
+	else if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_playlists)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle))) {
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists), TRUE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists), TRUE);
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), FALSE);
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
 		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 1);
 		gtk_widget_grab_focus(cwin->playlist_tree);
-		}
-	else{
+	}
+	else {
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), FALSE);
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists), FALSE);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists), FALSE);
 		gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
 		gtk_widget_grab_focus(cwin->current_playlist);
 	}
 
 	g_signal_handlers_unblock_by_func (action_lib, library_pane_action, cwin);
-	g_signal_handlers_unblock_by_func (action_playlists, playlists_pane_action, cwin);
+	g_signal_handlers_unblock_by_func (null_action_lib, library_pane_action, cwin);
 	g_signal_handlers_unblock_by_func (cwin->toggle_lib, toggled_cb, cwin);
+
+	g_signal_handlers_unblock_by_func (action_playlists, playlists_pane_action, cwin);
+	g_signal_handlers_unblock_by_func (null_action_playlists, playlists_pane_action, cwin);
 	g_signal_handlers_unblock_by_func (cwin->toggle_playlists, toggled_cb, cwin);
 }
 
@@ -588,6 +604,8 @@ void play_button_toggle_state(struct con_win *cwin)
 
 void album_art_toggle_state(struct con_win *cwin)
 {
+	CDEBUG(DBG_INFO, "Tocggle album art");
+
 	if (cwin->cpref->show_album_art) {
 		if (!cwin->album_art_frame) {
 			cwin->album_art_frame = gtk_frame_new(NULL);

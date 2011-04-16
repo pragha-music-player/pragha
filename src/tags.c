@@ -851,6 +851,8 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
 
+	clear_sort_current_playlist_cb(NULL, cwin);
+
 	/* Store the new tags */
 
 	for (i = list; i != NULL; i = i->next) {

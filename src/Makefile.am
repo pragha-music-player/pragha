@@ -32,17 +32,10 @@ pragha_SOURCES =cdda.c \
 		utils.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
-		lastfm.c \
-		lastfm.h \
-		lfm_helper.c \
-		lfm_helper.h \
-		album.c \
-		artist.c \
-		user.c \
-		track.c \
-		scrobbler.c \
 		pragha-lastfm.c \
-		md5.c
+		pragha-chartlyrics.c \
+		chartlyrics_helper.c \
+		chartlyrics_helper.h
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -86,3 +79,11 @@ if HAVE_LIBKEYBINDER
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
 pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
 endif
+
+if HAVE_LIBCLASTFM
+pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
+pragha_LDFLAGS += $(LIBCLASTFM_LIBS)
+endif
+
+
+

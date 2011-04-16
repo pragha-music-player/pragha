@@ -420,7 +420,9 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 			cwin->cstate->state = ST_PLAYING;
 			if(cwin->cgst->timer == 0)
 				cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
+			#ifdef HAVE_LIBCLASTFM
 			time(&cwin->clastfm->playback_started);
+			#endif
 			break;
 		}
 		case GST_STATE_PAUSED: {
@@ -444,9 +446,10 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 			break;
 	}
 	play_button_toggle_state(cwin);
-
-	update_lastfm(cwin);
-
+	#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support)
+		update_lastfm(cwin);
+	#endif
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 

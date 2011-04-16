@@ -1,13 +1,388 @@
-/*
-   lastfm_helper.c - Helper functions for handling liblastfm stuff
-   See README for Copyright and License
-*/
+/*************************************************************************/
+/* Copyright (C) 2011 matias <mati86dl@gmail.com>			 */
+/* 									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/* 									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
+/* GNU General Public License for more details.				 */
+/* 									 */
+/* You should have received a copy of the GNU General Public License	 */
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+/*************************************************************************/
 
 #include <stdio.h>
 #include <pthread.h>
 #include <pragha.h>
 
-static void *do_lastfm_scrob(gpointer data)
+#ifdef HAVE_LIBCLASTFM
+gint find_nocase_artist_db(const gchar *artist, struct con_win *cwin)
+{
+	gint artist_id = 0;
+	gchar *query;
+	struct db_result result;
+
+	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s' COLLATE NOCASE;", artist);
+	if (exec_sqlite_query(query, cwin, &result)) {
+		if(result.no_rows)
+			artist_id = atoi(result.resultp[result.no_columns]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	return artist_id;
+}
+
+gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
+{
+	gchar *query, *s_artist, *s_title;
+	gint location_id = 0, artist_id = 0;
+	struct db_result result;
+	struct musicobject *mobj = NULL;
+
+	s_artist = sanitize_string_sqlite3(artist);
+	s_title = sanitize_string_sqlite3(title);
+
+	artist_id = find_nocase_artist_db(s_artist, cwin);
+	if(artist_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT location FROM TRACK WHERE TRACK.title = \"%s\" COLLATE NOCASE AND TRACK.artist = %d;", title, artist_id);
+	exec_sqlite_query(query, cwin, &result);
+	if (!result.no_rows)
+		goto bad;
+
+	location_id = atoi(result.resultp[result.no_columns]);
+
+	mobj = new_musicobject_from_db(location_id, cwin);
+
+	append_current_playlist(mobj, cwin);
+bad:
+	g_free(s_artist);
+	g_free(s_title);
+
+	return location_id;
+}
+
+void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
+{
+	LFMList *results = NULL, *li;
+	LASTFM_TRACK_INFO *track;
+	gint rv;
+
+	if (!cwin->clastfm->connected) {
+		CDEBUG(DBG_LASTFM, "No connection Last.fm has been established");
+		return;
+	}
+
+	rv = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
+			cwin->cpref->lw.lastfm_user,
+			-1, &results);
+
+	if(rv != LASTFM_STATUS_OK) {
+		g_warning("Last.fm get loved failed");
+		return;
+	}
+
+	for(li=results; li; li=li->next) {
+		track = li->data;
+		CDEBUG(DBG_LASTFM, "Try to add: %s - %s", track->artist, track->name);
+		try_add_track_from_db (track->artist, track->name, cwin);
+	}
+
+	LASTFM_free_track_info_list (results);
+}
+
+void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
+{
+	LFMList *results = NULL, *li;
+	LASTFM_TRACK_INFO *track;
+	gint rv, added, tray;
+	gchar *summary = NULL;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->clastfm->connected) {
+		CDEBUG(DBG_LASTFM, "No connection Last.fm has been established");
+		return;
+	}
+
+	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
+			cwin->cstate->curr_mobj->tags->title,
+			cwin->cstate->curr_mobj->tags->artist,
+			50, &results);
+
+	if(rv != LASTFM_STATUS_OK) {
+		g_warning("Last.fm getsimilar failed");
+		return;
+	}
+
+	for(li=results, added=0, tray=0 ; li; li=li->next) {
+		track = li->data;
+		tray++;
+		if (try_add_track_from_db (track->artist, track->name, cwin))
+			added++;
+	}
+
+	summary = g_strdup_printf("Added %d song of %d sugested from Last.fm", added, tray);
+	set_status_message(summary, cwin);
+
+	LASTFM_free_track_info_list (results);
+	g_free(summary);
+}
+
+void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
+{
+	GError *error = NULL;
+	GdkPixbuf *album_art = NULL, *scaled_album_art = NULL, *pix_frame = NULL, *scaled_frame;
+	
+	LASTFM_ALBUM_INFO *album = NULL;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->cpref->show_album_art)
+		return;
+
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return;
+	}
+
+	album = LASTFM_album_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, cwin->cstate->curr_mobj->tags->album);
+
+	if(!album) {
+		set_status_message("Last.fm: No album info found", cwin);
+		return;
+	}
+
+	if(album->image)
+		album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
+
+	if (album_art) {
+		scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
+
+		pix_frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
+		gdk_pixbuf_copy_area(scaled_album_art, 0 ,0 ,112 ,112, pix_frame, 12, 8);
+
+		scaled_frame = gdk_pixbuf_scale_simple (pix_frame,
+							cwin->cpref->album_art_size,
+							cwin->cpref->album_art_size,
+							GDK_INTERP_BILINEAR);
+
+		if (cwin->album_art) {
+			gtk_image_clear(GTK_IMAGE(cwin->album_art));
+			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
+		}
+		else {
+			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
+			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+					  GTK_WIDGET(cwin->album_art));
+			gtk_widget_show_all(cwin->album_art_frame);
+		}
+		g_object_unref(G_OBJECT(album_art));
+		g_object_unref(G_OBJECT(scaled_album_art));
+		g_object_unref(G_OBJECT(scaled_frame));
+		g_object_unref(G_OBJECT(pix_frame));
+	}
+	else {
+		set_status_message("Last.fm: No album art found", cwin);
+	}
+
+	LASTFM_free_album_info(album);
+}
+
+/* Handler for 'Artist info' action in the Tools menu */
+
+void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
+	GtkTextTag *btag;
+	gchar *value = NULL, *playcount = NULL, *wiki = NULL;
+	gchar *summary_helper = NULL, *summary = NULL;
+	GtkWidget *header, *view, *frame, *scrolled;
+	gint i, result;
+
+	LASTFM_ARTIST_INFO *artist;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return;
+	}
+
+	artist = LASTFM_artist_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, ISO_639_1);
+
+	if(!artist) {
+		set_status_message("Last.fm: No artist info found", cwin);
+		return;
+	}
+
+	view = gtk_text_view_new ();
+	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
+	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
+
+	frame = gtk_frame_new (NULL);
+	scrolled = gtk_scrolled_window_new (NULL, NULL);
+
+	gtk_container_add (GTK_CONTAINER (scrolled), view);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+	gtk_container_set_border_width (GTK_CONTAINER (frame), 8);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
+	gtk_container_add (GTK_CONTAINER (frame), scrolled);
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+	gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (buffer), &iter, 0);
+
+	btag = gtk_text_buffer_create_tag (buffer, NULL, "weight", PANGO_WEIGHT_BOLD, NULL);
+
+	playcount = g_strdup_printf("%d", artist->playcount);
+	gtk_text_buffer_insert_with_tags(GTK_TEXT_BUFFER(buffer), &iter, _("Playcount:"), -1, btag, NULL);
+	value = g_strdup_printf (" %s\n\n", playcount);
+	gtk_text_buffer_insert(GTK_TEXT_BUFFER(buffer), &iter, value, -1);
+	g_free (playcount);
+	g_free (value);
+
+	gtk_text_buffer_insert_with_tags(GTK_TEXT_BUFFER(buffer), &iter, _("Summary:"), -1, btag, NULL);
+
+	if(artist->summary && strncmp (artist->summary, "<![CDATA[", 9) == 0) {
+		summary_helper = artist->summary + 9;
+		summary = g_strndup (summary_helper, strlen (summary_helper) - 3);
+	}
+	else {
+		summary = g_strdup(artist->summary);
+	}
+
+	value = g_strdup_printf (" %s\n\n", summary);
+	gtk_text_buffer_insert(GTK_TEXT_BUFFER(buffer), &iter, value, -1);
+	g_free (summary);
+	g_free (value);
+
+	if(artist->similar != NULL) {
+		gtk_text_buffer_insert_with_tags(GTK_TEXT_BUFFER(buffer), &iter, _("Similar artists:"), -1, btag, NULL);
+
+		for(i=0; artist->similar[i]; i++){
+			value = g_strdup_printf ("\n\t%i: %s", i, artist->similar[i]);
+			gtk_text_buffer_insert(GTK_TEXT_BUFFER(buffer), &iter, value, -1);
+			g_free (value);
+		}
+	}
+
+	dialog = gtk_dialog_new_with_buttons(_("Lastfm artist info"),
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_DIALOG_MODAL,
+					     GTK_STOCK_OK,
+					     GTK_RESPONSE_OK,
+					     NULL);
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), _("View more..."), GTK_RESPONSE_HELP);
+
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
+
+	header = sokoke_xfce_header_new (artist->name, "lastfm", cwin);
+
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), frame, TRUE, TRUE, 0);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch (result) {
+		case GTK_RESPONSE_HELP:
+			wiki = g_strdup_printf("http://www.lastfm.es/music/%s/+wiki", artist->name);
+			open_url (cwin, wiki);
+			g_free (wiki);
+			break;
+		case GTK_RESPONSE_OK:
+			break;
+		default:
+			break;
+	}
+	gtk_widget_destroy(dialog);
+
+	LASTFM_free_artist_info(artist);
+}
+
+void *do_lastfm_love (gpointer data)
+{
+	gint rv;
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_LASTFM, "Love");
+
+	rv = LASTFM_track_love (cwin->clastfm->session_id,
+		cwin->cstate->curr_mobj->tags->title,
+		cwin->cstate->curr_mobj->tags->artist);
+
+	if (rv != 0)
+		CDEBUG(DBG_LASTFM, "Last.fm love failed");
+
+	return NULL;
+}
+
+void lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_LASTFM, "Love Handler");
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return;
+	}
+
+	pthread_create(&tid, NULL, do_lastfm_love, cwin);
+}
+
+void *do_lastfm_unlove (gpointer data)
+{
+	gint rv;
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_LASTFM, "Unlove");
+
+	rv = LASTFM_track_love (cwin->clastfm->session_id,
+		cwin->cstate->curr_mobj->tags->title,
+		cwin->cstate->curr_mobj->tags->artist);
+
+	if (rv != 0)
+		CDEBUG(DBG_LASTFM, "Last.fm unlove failed");
+
+	return NULL;
+}
+
+void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_LASTFM, "Unlove Handler");
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return;
+	}
+
+	pthread_create(&tid, NULL, do_lastfm_unlove, cwin);
+}
+
+void *do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
@@ -21,15 +396,20 @@ static void *do_lastfm_scrob(gpointer data)
 		cwin->clastfm->playback_started,
 		cwin->cstate->curr_mobj->tags->length,
 		cwin->cstate->curr_mobj->tags->track_no,
-		0);
+		0, NULL);
 
-	if (rv != 0)
+	if (rv != 0) {
 		CDEBUG(DBG_LASTFM, "Last.fm submission failed");
-
+	}
+	else {
+		gdk_threads_leave ();
+		set_status_message("Track scrobbled on Last.fm", cwin);
+		gdk_threads_enter ();
+	}
 	return NULL;
 }
 
-static gboolean lastfm_scrob_handler(gpointer data)
+gboolean lastfm_scrob_handler(gpointer data)
 {
 	pthread_t tid;
 	struct con_win *cwin = data;
@@ -39,12 +419,17 @@ static gboolean lastfm_scrob_handler(gpointer data)
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
 
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return FALSE;
+	}
+
 	pthread_create(&tid, NULL, do_lastfm_scrob, cwin);
 
 	return FALSE;
 }
 
-static void *do_lastfm_now_playing(gpointer data)
+void *do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
@@ -65,7 +450,7 @@ static void *do_lastfm_now_playing(gpointer data)
 	return NULL;
 }
 
-static gboolean lastfm_now_playing_handler(gpointer data)
+gboolean lastfm_now_playing_handler (gpointer data)
 {
 	pthread_t tid;
 	struct con_win *cwin = data;
@@ -75,12 +460,17 @@ static gboolean lastfm_now_playing_handler(gpointer data)
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
 
+	if (!cwin->clastfm->connected) {
+		g_warning("No connection Last.fm has been established");
+		return FALSE;
+	}
+
 	pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
 
 	return FALSE;
 }
 
-void update_lastfm(struct con_win *cwin)
+void update_lastfm (struct con_win *cwin)
 {
 	int length;
 
@@ -112,3 +502,4 @@ void update_lastfm(struct con_win *cwin)
 			G_PRIORITY_DEFAULT_IDLE, length,
 			lastfm_scrob_handler, cwin, NULL);
 }
+#endif

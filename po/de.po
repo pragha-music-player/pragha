@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-13 11:44-0300\n"
+"POT-Creation-Date: 2011-02-23 23:12-0300\n"
 "PO-Revision-Date: 2010-10-08 22:14-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Deutsch\n"
@@ -15,347 +15,384 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: src/gui.c:163
+#: src/gui.c:175
 msgid "_File"
 msgstr "_Datei"
 
-#: src/gui.c:164
+#: src/gui.c:176
 msgid "_Edit"
 msgstr "_Bearbeiten"
 
-#: src/gui.c:165
+#: src/gui.c:177
 msgid "_View"
 msgstr "_Ansicht"
 
-#: src/gui.c:166
+#: src/gui.c:178
 msgid "_Tools"
 msgstr "_Extras"
 
-#: src/gui.c:167
+#: src/gui.c:179
 msgid "_Help"
 msgstr "_Hilfe"
 
-#: src/gui.c:168 src/gui.c:317
+#: src/gui.c:180 src/gui.c:342
 msgid "_Add files"
 msgstr "Dateien _hinzufügen"
 
-#: src/gui.c:169
+#: src/gui.c:181
 msgid "Open a media file"
 msgstr "Eine Mediendatei öffnen"
 
-#: src/gui.c:170 src/gui.c:319
+#: src/gui.c:182 src/gui.c:344
 msgid "_Play audio CD"
 msgstr "Audio-_CD abspielen"
 
-#: src/gui.c:172
+#: src/gui.c:184
 msgid "Prev track"
 msgstr "Vorheriger Titel"
 
-#: src/gui.c:174 src/gui.c:323
+#: src/gui.c:186 src/gui.c:348
 msgid "Play / Pause"
 msgstr "Wiedergabe/Pause"
 
-#: src/gui.c:176 src/gui.c:325
+#: src/gui.c:188 src/gui.c:350
 msgid "Stop"
 msgstr "Stopp"
 
-#: src/gui.c:178
+#: src/gui.c:190
 msgid "Next track"
 msgstr "Nächster Titel"
 
 #. The main edit dialog
-#: src/gui.c:180 src/gui.c:253 src/gui.c:283 src/gui.c:329 src/tags.c:630
+#: src/gui.c:192 src/gui.c:278 src/gui.c:308 src/gui.c:354 src/tags.c:630
 msgid "Edit tags"
 msgstr "Tags bearbeiten"
 
-#: src/gui.c:182 src/gui.c:331
+#: src/gui.c:194 src/gui.c:356
 msgid "_Quit"
 msgstr "_Beenden"
 
-#: src/gui.c:184
+#: src/gui.c:196
 msgid "_Add the library"
 msgstr "Zur Musikbibliothek _hinzufügen"
 
-#: src/gui.c:186 src/gui.c:249
+#: src/gui.c:198 src/gui.c:274
 msgid "Remove"
 msgstr "Entfernen"
 
-#: src/gui.c:188 src/gui.c:251
+#: src/gui.c:200 src/gui.c:276
 msgid "Crop"
 msgstr "Zuschneiden"
 
-#: src/gui.c:190 src/gui.c:259
+#: src/gui.c:202 src/gui.c:284
 msgid "Clear playlist"
 msgstr "Wiedergabeliste löschen"
 
-#: src/gui.c:192 src/gui.c:255
+#: src/gui.c:204 src/gui.c:280
 msgid "Save selection"
 msgstr "Auswahl speichern"
 
-#: src/gui.c:194 src/gui.c:257 src/current-playlist.c:602
+#: src/gui.c:206 src/gui.c:282 src/current-playlist.c:603
 msgid "Save playlist"
 msgstr "Wiedergabeliste speichern"
 
-#: src/gui.c:196
+#: src/gui.c:208
 msgid "_Preferences"
 msgstr "_Einstellungen"
 
-#: src/gui.c:198
+#: src/gui.c:210
 msgid "Lateral _panel"
 msgstr "Seitenleiste"
 
-#: src/gui.c:199
+#: src/gui.c:211
 msgid "Jump to playing song"
 msgstr "Zum momentan wiedergegebenen Titel springen"
 
-#: src/gui.c:201
+#: src/gui.c:213
 msgid "Search _lyric"
 msgstr "Nach dem _Liedtext suchen"
 
-#: src/gui.c:203
+#: src/gui.c:215
 msgid "_Search in playlist"
 msgstr "Wiedergabeliste durch_suchen"
 
-#: src/gui.c:205
+#: src/gui.c:217
 msgid "_Rescan library"
 msgstr "Musikbibliothek neu _einlesen"
 
-#: src/gui.c:207
+#: src/gui.c:219
 msgid "_Update library"
 msgstr "Musikbibliothek _aktualisieren"
 
-#: src/gui.c:209
+#: src/gui.c:221
+msgid "_Lastfm (Demonstration features)"
+msgstr ""
+
+#: src/gui.c:222
+#, fuzzy
+msgid "Love track"
+msgstr "Vorheriger Titel"
+
+#: src/gui.c:224
+#, fuzzy
+msgid "Unlove track"
+msgstr "Vorheriger Titel"
+
+#: src/gui.c:226
+#, fuzzy
+msgid "Add favorites"
+msgstr "Dateien _hinzufügen"
+
+#: src/gui.c:228
+#, fuzzy
+msgid "Artist _info"
+msgstr "Interpret"
+
+#: src/gui.c:230
+#, fuzzy
+msgid "Get album art"
+msgstr "Größe des Album-Covers"
+
+#: src/gui.c:232
+msgid "Add similar"
+msgstr ""
+
+#: src/gui.c:234
 msgid "_Statistics"
 msgstr "Statistiken"
 
-#: src/gui.c:211
+#: src/gui.c:236
 msgid "Homepage"
 msgstr "Webseite"
 
-#: src/gui.c:213
+#: src/gui.c:238
 msgid "Community"
 msgstr "Gemeinschaft"
 
-#: src/gui.c:215
+#: src/gui.c:240
 msgid "Wiki"
 msgstr "Wiki"
 
-#: src/gui.c:217
+#: src/gui.c:242
 msgid "Translate Pragha"
 msgstr "Pragha übersetzen"
 
-#: src/gui.c:219 src/gui.c:315
+#: src/gui.c:244 src/gui.c:340
 msgid "About"
 msgstr "_Über"
 
-#: src/gui.c:224
+#: src/gui.c:249
 msgid "_Shuffle"
 msgstr "_Zufallswiedergabe"
 
-#: src/gui.c:227
+#: src/gui.c:252
 msgid "_Repeat"
 msgstr "_Wiederholen"
 
-#: src/gui.c:230
+#: src/gui.c:255
 msgid "_Fullscreen"
 msgstr "_Vollbild"
 
-#: src/gui.c:233 src/gui.c:614 src/pref.c:1322
+#: src/gui.c:258 src/gui.c:639 src/pref.c:1299
 msgid "Library"
 msgstr "Musikbibliothek"
 
-#: src/gui.c:236 src/gui.c:632 src/playlist.c:923
+#: src/gui.c:261 src/gui.c:657 src/playlist.c:923
 msgid "Playlists"
 msgstr "Wiedergabelisten"
 
-#: src/gui.c:239
+#: src/gui.c:264
 msgid "Status bar"
 msgstr "Statuszeile"
 
-#: src/gui.c:245
+#: src/gui.c:270
 msgid "Add to playback queue"
 msgstr "Zur Warteliste hinzufügen"
 
-#: src/gui.c:247
+#: src/gui.c:272
 msgid "Remove to playback queue"
 msgstr "Aus der Warteliste entfernen"
 
-#: src/gui.c:264 src/gui.c:277
+#: src/gui.c:289 src/gui.c:302
 msgid "_Add to playlist"
 msgstr "Zur Wiedergabeliste _hinzufügen"
 
-#: src/gui.c:266 src/gui.c:279
+#: src/gui.c:291 src/gui.c:304
 msgid "_Replace playlist"
 msgstr "Wiedergabeliste ersetzen"
 
-#: src/gui.c:268 src/gui.c:281
+#: src/gui.c:293 src/gui.c:306
 #, fuzzy
 msgid "Replace and _play"
 msgstr "Wiedergabeliste ersetzen"
 
-#: src/gui.c:270
+#: src/gui.c:295
 msgid "Delete"
 msgstr "Löschen"
 
-#: src/gui.c:272
+#: src/gui.c:297
 msgid "Export"
 msgstr "Exportieren"
 
-#: src/gui.c:285
+#: src/gui.c:310
 #, fuzzy
 msgid "Move to _trash"
 msgstr "In den _Müll verschieben"
 
-#: src/gui.c:287
+#: src/gui.c:312
 msgid "Delete from library"
 msgstr "Aus der Bibliothek entfernen"
 
-#: src/gui.c:292
+#: src/gui.c:317
 msgid "_Expand library"
 msgstr "Alles in der Musikbibliothek _aufklappen"
 
-#: src/gui.c:294
+#: src/gui.c:319
 msgid "_Collapse library"
 msgstr "Alles in der Musikbibliothek _zuklappen"
 
-#: src/gui.c:296 src/librarytree.c:1356
+#: src/gui.c:321 src/librarytree.c:1354
 msgid "Folders structure"
 msgstr "Verzeichnisbaum"
 
-#: src/gui.c:298 src/gui.c:752 src/gui.c:883 src/pragha.h:77
-#: src/librarytree.c:1359 src/statusicon.c:213 src/tags.c:391
+#: src/gui.c:323 src/gui.c:777 src/gui.c:908 src/pragha.h:82
+#: src/librarytree.c:1357 src/statusicon.c:215 src/tags.c:391
 msgid "Artist"
 msgstr "Interpret"
 
-#: src/gui.c:300 src/gui.c:753 src/gui.c:884 src/pragha.h:78
-#: src/librarytree.c:1363 src/statusicon.c:214 src/tags.c:392
+#: src/gui.c:325 src/gui.c:778 src/gui.c:909 src/pragha.h:83
+#: src/librarytree.c:1361 src/statusicon.c:216 src/tags.c:392
 msgid "Album"
 msgstr "Album"
 
-#: src/gui.c:302 src/gui.c:754 src/gui.c:885 src/pragha.h:79
-#: src/librarytree.c:1367 src/tags.c:393
+#: src/gui.c:327 src/gui.c:779 src/gui.c:910 src/pragha.h:84
+#: src/librarytree.c:1365 src/tags.c:393
 msgid "Genre"
 msgstr "Genre"
 
-#: src/gui.c:304 src/librarytree.c:1371
+#: src/gui.c:329 src/librarytree.c:1369
 msgid "Artist / Album"
 msgstr "Interpret / Album"
 
-#: src/gui.c:306 src/librarytree.c:1379
+#: src/gui.c:331 src/librarytree.c:1377
 msgid "Genre / Album"
 msgstr "Genre / Album"
 
-#: src/gui.c:308 src/librarytree.c:1375
+#: src/gui.c:333 src/librarytree.c:1373
 msgid "Genre / Artist"
 msgstr "Genre / Interpret"
 
-#: src/gui.c:310 src/librarytree.c:1383
+#: src/gui.c:335 src/librarytree.c:1381
 msgid "Genre / Artist / Album"
 msgstr "Genre / Interpret / Album"
 
-#: src/gui.c:321 src/statusicon.c:174
+#: src/gui.c:346 src/statusicon.c:176
 msgid "Prev Track"
 msgstr "Vorheriger Titel"
 
-#: src/gui.c:327 src/gui.c:1590 src/statusicon.c:178
+#: src/gui.c:352 src/gui.c:1637 src/statusicon.c:180
 msgid "Next Track"
 msgstr "Nächster Titel"
 
-#: src/gui.c:643
+#: src/gui.c:668
 msgid "Pragha Music Player"
 msgstr "Pragha Music Player"
 
 #. Create the checkmenu items
-#: src/gui.c:750 src/gui.c:881 src/current-playlist.c:70
+#: src/gui.c:775 src/gui.c:906 src/current-playlist.c:70
 msgid "Track"
 msgstr "Spur"
 
 #. Create labels
-#: src/gui.c:751 src/gui.c:882 src/pragha.h:76 src/statusicon.c:212
+#: src/gui.c:776 src/gui.c:907 src/pragha.h:81 src/statusicon.c:214
 #: src/tags.c:390
 msgid "Title"
 msgstr "Titel"
 
-#: src/gui.c:755 src/gui.c:886 src/pragha.h:80 src/current-playlist.c:1275
+#: src/gui.c:780 src/gui.c:911 src/pragha.h:85 src/current-playlist.c:1277
 msgid "Bitrate"
 msgstr "Bitrate"
 
-#: src/gui.c:756 src/gui.c:887 src/pragha.h:81 src/tags.c:395
+#: src/gui.c:781 src/gui.c:912 src/pragha.h:86 src/tags.c:395
 msgid "Year"
 msgstr "Jahr"
 
-#: src/gui.c:757 src/gui.c:888 src/pragha.h:82 src/tags.c:396
+#: src/gui.c:782 src/gui.c:913 src/pragha.h:87 src/tags.c:396
 msgid "Comment"
 msgstr "Kommentar"
 
 #. Create labels
-#: src/gui.c:758 src/gui.c:889 src/pragha.h:83 src/current-playlist.c:1274
-#: src/statusicon.c:215
+#: src/gui.c:783 src/gui.c:914 src/pragha.h:88 src/current-playlist.c:1276
+#: src/statusicon.c:217
 msgid "Length"
 msgstr "Länge"
 
-#: src/gui.c:759 src/gui.c:890 src/pragha.h:84 src/current-playlist.c:1279
+#: src/gui.c:784 src/gui.c:915 src/pragha.h:89 src/current-playlist.c:1281
 msgid "Filename"
 msgstr "Dateiname"
 
-#: src/gui.c:762
+#: src/gui.c:787
 msgid "Clear sort"
 msgstr "Sortierung zurücksetzen"
 
 #. Tooltips
-#: src/gui.c:1588
+#: src/gui.c:1635
 msgid "Play / Pause Track"
 msgstr "Titel wiedergeben / anhalten"
 
-#: src/gui.c:1589
+#: src/gui.c:1636
 msgid "Previous Track"
 msgstr "Vorheriger Titel"
 
-#: src/gui.c:1591
+#: src/gui.c:1638
 msgid "Stop playback"
 msgstr "Wiedergabe stoppen"
 
-#: src/gui.c:1593
+#: src/gui.c:1640
 msgid "Leave Fullscreen"
 msgstr "Vollbild verlassen"
 
-#: src/gui.c:1594
+#: src/gui.c:1641
 msgid "Play songs in a random order"
 msgstr "In einer zufälligen Reihenfolge wiedergeben"
 
-#: src/gui.c:1595
+#: src/gui.c:1642
 msgid "Repeat playback list at the end"
 msgstr "Wiedergabe wiederholen"
 
-#: src/gui.c:1635 src/panel.c:213 src/statusicon.c:209
+#: src/gui.c:1682 src/panel.c:213 src/statusicon.c:211
 msgid "<b>Not playing</b>"
 msgstr "<b>Keine Wiedergabe</b>"
 
-#: src/gui.c:1858
+#: src/gui.c:1903
 msgid "Options of the library"
 msgstr "Einstellungen der Musikbibliothek"
 
-#: src/pragha.h:75 src/tags.c:394
+#: src/pragha.h:80 src/tags.c:394
 msgid "Track No"
 msgstr "Titelnummer"
 
-#: src/pragha.h:115
+#: src/pragha.h:120
 msgid "Scanning"
 msgstr "Durchsuchen"
 
-#: src/pragha.h:116
+#: src/pragha.h:121
 msgid "Stopped"
 msgstr "Angehalten"
 
-#: src/pragha.h:208
+#: src/pragha.h:209
+msgid "en"
+msgstr ""
+
+#: src/pragha.h:211
 msgid "_Skip"
 msgstr "Über_springen"
 
-#: src/pragha.h:209
+#: src/pragha.h:212
 msgid "S_kip All"
 msgstr "Alle ü_berspringen"
 
-#: src/pragha.h:210
+#: src/pragha.h:213
 msgid "Delete _All"
 msgstr "_Alle löschen"
 
@@ -382,40 +419,40 @@ msgstr "%s <small><span weight=\"light\">in</span></small> %s"
 msgid "Tracks"
 msgstr "Spuren"
 
-#: src/current-playlist.c:588
+#: src/current-playlist.c:589
 msgid "Save as a new playlist"
 msgstr "Als neue Wiedergabyliste speichern"
 
-#: src/current-playlist.c:590
+#: src/current-playlist.c:591
 msgid "Append to an existing playlist"
 msgstr "An existierende Wiedergabeliste anhängen"
 
-#: src/current-playlist.c:667
+#: src/current-playlist.c:668
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> ist ein reservierter Wiedergabelistenname"
 
-#: src/current-playlist.c:1276
+#: src/current-playlist.c:1278
 msgid "Channels"
 msgstr "Kanäle"
 
-#: src/current-playlist.c:1277
+#: src/current-playlist.c:1279
 msgid "Samplerate"
 msgstr "Samplerate"
 
-#: src/current-playlist.c:1278
+#: src/current-playlist.c:1280
 msgid "Folder"
 msgstr "Ordner"
 
 #. The main edit dialog
-#: src/current-playlist.c:1369 src/tags.c:665
+#: src/current-playlist.c:1371 src/tags.c:665
 msgid "Details"
 msgstr "Details"
 
-#: src/librarytree.c:189 src/statusicon.c:150
+#: src/librarytree.c:189 src/statusicon.c:148
 msgid "Unknown Artist"
 msgstr "Unbekannter Interpret"
 
-#: src/librarytree.c:195 src/statusicon.c:152
+#: src/librarytree.c:195 src/statusicon.c:150
 msgid "Unknown Album"
 msgstr "Unbekanntes Album"
 
@@ -434,7 +471,7 @@ msgstr ""
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr "Die Datei »%s« kann nicht in den Müll verschoben werden. Details: %s"
 
-#: src/librarytree.c:1113
+#: src/librarytree.c:1111
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
@@ -445,15 +482,15 @@ msgstr ""
 "Warnung: Um die Datei wiederherzustellen, muss die gesamte Musikbibliothek "
 "neu eingelesen werden."
 
-#: src/librarytree.c:1171
+#: src/librarytree.c:1169
 msgid "Really want to move the files to trash?"
 msgstr "Soll die Datei wirklich in den Müll verschoben werden"
 
-#: src/librarytree.c:1173
+#: src/librarytree.c:1171
 msgid "Delete immediately instead of move to trash"
 msgstr "Dateien löschen anstatt sie in den Müll zu verschieben"
 
-#: src/statusicon.c:148
+#: src/statusicon.c:146
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 msgstr "von <b>%s</b> in <b>%s</b> <b>(%s)</b>"
@@ -476,207 +513,234 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Muster für Album-Cover"
 
-#: src/pref.c:136 src/pref.c:1540
+#: src/pref.c:136 src/pref.c:1517
 msgid "Start normal"
 msgstr "Normal starten"
 
-#: src/pref.c:141 src/pref.c:1541
+#: src/pref.c:141 src/pref.c:1518
 msgid "Start fullscreen"
 msgstr "Vollbild starten"
 
-#: src/pref.c:146 src/pref.c:1542
+#: src/pref.c:146 src/pref.c:1519
 msgid "Start in system tray"
 msgstr "Im Tray starten"
 
 #. Create a folder chooser dialog
-#: src/pref.c:268
+#: src/pref.c:269
 msgid "Select a folder to add to library"
 msgstr "Den zu hinzufügenden Ordner wählen"
 
 #. The main preferences dialog
-#: src/pref.c:1278 src/pref.c:1310
+#. Add to dialog
+#: src/pref.c:1287 src/pref.c:1692
 msgid "Preferences of Pragha"
 msgstr "Einstellungen von Pragha"
 
 #. Labels
-#: src/pref.c:1321
+#: src/pref.c:1298
 msgid "Audio"
 msgstr "Audio"
 
-#: src/pref.c:1323
+#: src/pref.c:1300
 msgid "General"
 msgstr "Allgemein"
 
-#: src/pref.c:1324
+#: src/pref.c:1301
 msgid "Notifications"
 msgstr "Benachrichtigungen"
 
-#: src/pref.c:1325
+#: src/pref.c:1302
 msgid "Internet Services"
 msgstr "Internetdienste"
 
-#: src/pref.c:1375 src/pref.c:1406 src/pref.c:1441
+#: src/pref.c:1352 src/pref.c:1383 src/pref.c:1418
 msgid "Restart Required"
 msgstr "Neustart erforderlich"
 
-#: src/pref.c:1378
+#: src/pref.c:1355
 msgid "Select automatically"
 msgstr ""
 
-#: src/pref.c:1386
+#: src/pref.c:1363
 msgid "Audio sink"
 msgstr "Audiosystem"
 
-#: src/pref.c:1403
+#: src/pref.c:1380
 msgid "Audio Device"
 msgstr "Audiogerät"
 
 #. Audio CD device
-#: src/pref.c:1421
+#: src/pref.c:1398
 msgid "Audio CD Device"
 msgstr "Audio-CD-Laufwerk"
 
 #. Software mixer
-#: src/pref.c:1440
+#: src/pref.c:1417
 msgid "Use software mixer"
 msgstr "Software-Mixer verwenden"
 
-#: src/pref.c:1474
+#: src/pref.c:1451
 msgid "Folders"
 msgstr "Ordner"
 
-#: src/pref.c:1519
+#: src/pref.c:1496
 msgid "Merge folders in the folders estructure view"
 msgstr "Ordner im Verzeichnisbaum zusammenführen"
 
-#: src/pref.c:1539
+#: src/pref.c:1516
 msgid "Remember last window state"
 msgstr "Fensterposition und -größe merken"
 
-#: src/pref.c:1544
+#: src/pref.c:1521
 msgid "Restore last playlist"
 msgstr "Letzte Wiedergabeliste wiederherstellen"
 
-#: src/pref.c:1546
+#: src/pref.c:1523
 msgid "Minimize Pragha when close the window"
 msgstr "Pragha beim Schließen des Fensters minimieren"
 
-#: src/pref.c:1547
+#: src/pref.c:1524
 msgid "Add files recursively"
 msgstr "Dateien rekursiv hinzufügen"
 
-#: src/pref.c:1549
+#: src/pref.c:1526
 msgid "Show Album art in Panel"
 msgstr "Album-Cover in der Steuerleiste anzeigen"
 
-#: src/pref.c:1552
+#: src/pref.c:1529
 msgid "Size of Album art"
 msgstr "Größe des Album-Covers"
 
-#: src/pref.c:1570
+#: src/pref.c:1547
 msgid "Album art file pattern"
 msgstr "Muster für Album-Cover Dateien"
 
 #. Notification OSD
-#: src/pref.c:1624
+#: src/pref.c:1601
 msgid "Show OSD for track change"
 msgstr "Benachrichtigungspopup beim Titelwechsel zeigen"
 
-#: src/pref.c:1625
+#: src/pref.c:1602
 msgid "Associate notifications to system tray"
 msgstr "Benachrichtigungen mit System-Tray verbinden"
 
-#: src/pref.c:1626
+#: src/pref.c:1603
 msgid "Show Album art in notifications"
 msgstr "Album-Cover in Benachrichtigungen anzeigen"
 
-#: src/pref.c:1627
+#: src/pref.c:1604
 msgid "Add actions to change track to notifications"
 msgstr "Aktionen zum Wechseln der Titel in den Benachrichtigungen anzeigen"
 
 #. Services Last.fm
-#: src/pref.c:1652
+#: src/pref.c:1629
 msgid "Last.fm Support"
 msgstr "Last.fm Unterstützung"
 
-#: src/pref.c:1658
+#: src/pref.c:1633
 msgid "Username"
 msgstr "Benutzername"
 
-#: src/pref.c:1659
+#: src/pref.c:1634
 msgid "Password"
 msgstr "Passwort"
 
 #. Services CDDB
-#: src/pref.c:1670
+#: src/pref.c:1645
 msgid "Connect to CDDB server"
 msgstr "Mit dem CDDB-Server verbinden"
 
-#: src/menu.c:130
+#: src/menu.c:134
 msgid "Update Library"
 msgstr "Musikbibliothek aktualisieren"
 
-#: src/menu.c:130
+#: src/menu.c:134
 msgid "Rescan Library"
 msgstr "Musikbibliothek neu einlesen"
 
-#: src/menu.c:234
+#: src/menu.c:239
 msgid "Select a file to play"
 msgstr "Eine Datei zum Abspielen auswählen"
 
-#: src/menu.c:255
+#: src/menu.c:260
 msgid "Add recursively files"
 msgstr "Dateien rekursiv hinzufügen"
 
-#: src/menu.c:276
+#: src/menu.c:281
 msgid "Supported media"
 msgstr "Unterstützte Mediendateien"
 
-#: src/menu.c:310
+#: src/menu.c:315
 msgid "All files"
 msgstr "Alle Dateien"
 
-#: src/menu.c:673 src/menu.c:807
+#: src/menu.c:676 src/menu.c:810
 msgid "Library scan complete"
 msgstr "Einlesen der Musikbibliothek abgeschlossen"
 
-#: src/menu.c:888
+#: src/menu.c:891
 msgid "Total Tracks:"
 msgstr "Gesamtzahl der Titel:"
 
-#: src/menu.c:890
+#: src/menu.c:893
 msgid "Total Artists:"
 msgstr "Anzahl der Künstler:"
 
-#: src/menu.c:892
+#: src/menu.c:895
 msgid "Total Albums:"
 msgstr "Anzahl der Alben:"
 
-#: src/menu.c:894
+#: src/menu.c:897
 msgid "Statistics"
 msgstr "Statistiken"
 
-#: src/menu.c:911
+#: src/menu.c:914
 msgid "translator-credits"
 msgstr ""
 "PhotonX\n"
 "Christoph Wickert <cwickert@fedoraproject.org>"
 
-#: src/utils.c:243
+#: src/utils.c:330
 msgid "days"
 msgstr "Tage"
 
-#: src/utils.c:243
+#: src/utils.c:330
 msgid "day"
 msgstr "Tag"
 
-#: src/utils.c:474
+#: src/utils.c:561
 msgid "Unable to open the browser"
 msgstr "Der Browser konnte nicht geöffnet werden"
 
 #: src/playlist.c:539
 msgid "Export playlist to file"
 msgstr "Wiedergabeliste in Datei speichern"
+
+#: src/pragha-lastfm.c:218
+msgid "Playcount:"
+msgstr ""
+
+#: src/pragha-lastfm.c:224
+msgid "Summary:"
+msgstr ""
+
+#: src/pragha-lastfm.c:240
+#, fuzzy
+msgid "Similar artists:"
+msgstr "Anzahl der Künstler:"
+
+#: src/pragha-lastfm.c:249
+#, fuzzy
+msgid "Lastfm artist info"
+msgstr "Interpret"
+
+#: src/pragha-lastfm.c:256
+msgid "View more..."
+msgstr ""
+
+#, fuzzy
+#~ msgid "Use lastfm artist art"
+#~ msgstr "Interpret"
 
 #~ msgid ""
 #~ "<small><span weight=\"light\">by</span></small> %s <small><span weight="

@@ -214,7 +214,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						  cwin->cpref->actions_in_osd_w));
 
 		/* Services internet preferences */
-
+#ifdef HAVE_LIBCLASTFM
 		cwin->cpref->lw.lastfm_support =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->lw.lastfm_w));
@@ -237,10 +237,21 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 					    cwin->cpref->lw.lastfm_pass_w)));
 		}
 		init_lastfm(cwin);
-
+#endif
 		cwin->cpref->use_cddb =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->use_cddb_w));
+
+		cwin->cpref->use_mpris2 =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->use_mpris2_w));
+		if(!cwin->cpref->use_mpris2) {
+			if(NULL != cwin->cmpris2->dbus_connection)
+				mpris_close(cwin);
+		} else {
+			if(NULL == cwin->cmpris2->dbus_connection)
+				mpris_init(cwin);
+		}
 
 		save_preferences(cwin);
 
@@ -357,7 +368,7 @@ static void library_remove_cb(GtkButton *button, struct con_win *cwin)
 }
 
 /* Toggle displaying last.fm username/password widgets */
-
+#ifdef HAVE_LIBCLASTFM
 static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 {
 	gboolean is_active;
@@ -368,7 +379,7 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
 }
-
+#endif
 /* Toggle album art pattern */
 
 static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
@@ -617,7 +628,7 @@ static void update_preferences(struct con_win *cwin)
 					     TRUE);
 
 	/* Service Internet Option */
-
+#ifdef HAVE_LIBCLASTFM
 	if (cwin->cpref->lw.lastfm_support) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->lw.lastfm_w),
@@ -627,10 +638,14 @@ static void update_preferences(struct con_win *cwin)
 		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_pass_w),
 				   cwin->cpref->lw.lastfm_pass);
 	}
-
+#endif
 	if (cwin->cpref->use_cddb)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->use_cddb_w),
+					     TRUE);
+	if (cwin->cpref->use_mpris2)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->use_mpris2_w),
 					     TRUE);
 }
 
@@ -1185,7 +1200,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Services internet */
 	/* Save last.fm option */
-
+#ifdef HAVE_LIBCLASTFM
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_SERVICES,
 			       KEY_LASTFM,
@@ -1227,12 +1242,20 @@ void save_preferences(struct con_win *cwin)
 					      KEY_LASTFM_PASS,
 					      cwin->cpref->lw.lastfm_pass);
 	}
+#endif
 	/* Save use CDDB server option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_SERVICES,
 			       KEY_USE_CDDB,
 			       cwin->cpref->use_cddb);
+
+	/* Save allow MPRIS2 server option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_SERVICES,
+			       KEY_ALLOW_MPRIS2,
+			       cwin->cpref->use_mpris2);
 
 
 	/* Save to conrc */
@@ -1261,53 +1284,6 @@ int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 	return FALSE;
 }
 
-/* Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan */
-gpointer sokoke_xfce_header_new(struct con_win *cwin)
-{
-	GtkWidget* entry;
-	GtkWidget* xfce_heading;
-	GtkWidget* hbox;
-	GtkWidget* vbox;
-	GtkWidget* image;
-	GtkWidget* label;
-	GtkWidget* separator;
-	gchar* markup;
-
-	entry = gtk_entry_new();
-	xfce_heading = gtk_event_box_new();
-
-	gtk_widget_modify_bg(xfce_heading,
-				GTK_STATE_NORMAL,
-				&entry->style->base[GTK_STATE_NORMAL]);
-
-	hbox = gtk_hbox_new(FALSE, 12);
-	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
-
-	image = gtk_image_new_from_icon_name("pragha", GTK_ICON_SIZE_DIALOG);
-
-	label = gtk_label_new(NULL);
-	gtk_widget_modify_fg(label,
-				GTK_STATE_NORMAL,
-				&entry->style->text[GTK_STATE_NORMAL]);
-        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", _("Preferences of Pragha"));
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	gtk_widget_destroy (entry);
-
-	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-
-	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
-
-	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
-
-	separator = gtk_hseparator_new ();
-	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
-
-	return vbox;
-}
-
 void preferences_dialog(struct con_win *cwin)
 {
 	GtkWidget *dialog, *header, *pref_notebook, *alignment;
@@ -1320,10 +1296,13 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *fuse_folders, *hbox_library;
 	GtkWidget *window_state_combo, *restore_playlist, *close_to_tray, *album_art, *album_art_pattern_label, *add_recursively, \
-		  *hbox_album_art_pattern, *album_art_size, *album_art_size_label, *hbox_album_art_size;
+		  *hbox_album_art_pattern, *album_art_size, *album_art_size_label, *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
-	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern, *lastfm_uhbox, *lastfm_ulabel, \
-		  *lastfm_phbox, *lastfm_plabel, *use_cddb;
+#ifdef HAVE_LIBCLASTFM
+	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_uhbox, *lastfm_ulabel, \
+		  *lastfm_phbox, *lastfm_plabel;
+#endif
+	GtkWidget *use_mpris2, *use_cddb;
 
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
@@ -1672,7 +1651,7 @@ void preferences_dialog(struct con_win *cwin)
 			   0);
 
 	/* Services Last.fm */
-
+#ifdef HAVE_LIBCLASTFM
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
 
 	lastfm_uname = gtk_entry_new();
@@ -1686,11 +1665,16 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
 	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
+#endif
 
 	/* Services CDDB */
 
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-
+	
+	/* Services MPRIS2 */
+	
+	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
+#ifdef HAVE_LIBCLASTFM
 	gtk_box_pack_start(GTK_BOX(lastfm_uhbox),
 			   lastfm_ulabel,
 			   FALSE,
@@ -1728,15 +1712,21 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
+#endif
 	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   use_cddb,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(services_vbox),
+			   use_mpris2,
 			   FALSE,
 			   FALSE,
 			   0);
 
 	/* Add to dialog */
 
-	header = sokoke_xfce_header_new (cwin);
+	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
 
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), pref_notebook, TRUE, TRUE, 0);
@@ -1764,18 +1754,21 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->osd_in_systray_w = osd_in_systray;
 	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
 	cwin->cpref->actions_in_osd_w = actions_in_osd;
+	cwin->cpref->use_cddb_w = use_cddb;
+	cwin->cpref->use_mpris2_w = use_mpris2;
 
+#ifdef HAVE_LIBCLASTFM
 	cwin->cpref->lw.lastfm_w = lastfm_check;
 	cwin->cpref->lw.lastfm_uname_w = lastfm_uname;
 	cwin->cpref->lw.lastfm_pass_w = lastfm_pass;
-	cwin->cpref->use_cddb_w = use_cddb;
+	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
+			 G_CALLBACK(toggle_lastfm), cwin);
+#endif
 
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
-	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
-			 G_CALLBACK(toggle_lastfm), cwin);
 	g_signal_connect(G_OBJECT(show_osd), "toggled",
 			 G_CALLBACK(toggle_show_osd), cwin);
 	g_signal_connect(G_OBJECT(dialog), "response",
@@ -1792,6 +1785,8 @@ void preferences_dialog(struct con_win *cwin)
 	update_preferences(cwin);
 
 	gtk_widget_show_all(dialog);
+#ifdef HAVE_LIBCLASTFM
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
+#endif
 	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art_w), cwin);
 }
