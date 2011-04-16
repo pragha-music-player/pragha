@@ -1075,6 +1075,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+	GdkScreen *screen = gtk_widget_get_screen(cwin->mainwindow);
+	GdkColormap *colormap = gdk_screen_get_rgba_colormap (screen);
+	if (colormap && gdk_screen_is_composited (screen)){
+		gtk_widget_set_default_colormap(colormap);
+	}
+
 	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(SHAREDIR 
 							    "/data/consonance.png",
 							    &error);

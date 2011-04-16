@@ -1915,6 +1915,8 @@ create_systray_icon (struct con_win *cwin)
 	g_signal_connect (icon, "button-press-event", G_CALLBACK (systray_icon_clicked), cwin);
 	g_signal_connect (icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
 
+	gtk_widget_set_colormap(GTK_WIDGET(icon), gdk_screen_get_rgb_colormap(gdk_screen_get_default()));
+
 	gtk_widget_show (GTK_WIDGET(systray_icon));
 	gtk_widget_show (GTK_WIDGET(icon));
 

@@ -1097,19 +1097,14 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* The main preferences dialog */
 
-	dialog = xfce_titled_dialog_new_with_buttons ("Preferencias",
-							GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (cwin->mainwindow))),
-							GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_NO_SEPARATOR,
-							GTK_STOCK_CANCEL,
-							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_OK,
-							GTK_RESPONSE_OK,
-							NULL);
-
-	xfce_titled_dialog_set_subtitle (XFCE_TITLED_DIALOG (dialog), "Confifurar Consonance Music Manager");
-
-	gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "gtk-preferences");
+	dialog = gtk_dialog_new_with_buttons("Preferences",
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_DIALOG_MODAL,
+					     GTK_STOCK_CANCEL,
+					     GTK_RESPONSE_CANCEL,
+					     GTK_STOCK_OK,
+					     GTK_RESPONSE_OK,
+					     NULL);
 
 	vbox_all = gtk_vbox_new(FALSE, 2);
 

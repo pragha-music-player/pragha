@@ -37,9 +37,6 @@
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
-#include <libxfcegui4/libxfcegui4.h>
-#include <libxfce4util/libxfce4util.h>
-#include <exo/exo.h>
 #include <sqlite3.h>
 #include <ao/ao.h>
 #include <curl/curl.h>

@@ -110,10 +110,6 @@ PKG_CHECK_MODULES([libmodplug],
 		  [],
                   [AC_MSG_ERROR(libmodplug-0.8.0 is required)])
 
-PKG_CHECK_MODULES(libxfcegui4, libxfcegui4-1.0 >= 4.4.0)
-PKG_CHECK_MODULES(libxfceutil4, libxfce4util-1.0 >= 4.4.0)
-PKG_CHECK_MODULES(libexo, exo-0.3 >= 0.3.99)
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 
