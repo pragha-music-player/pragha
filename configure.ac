@@ -1,4 +1,5 @@
-AC_INIT([consonance], [0.5.1], [m.sujith@gmail.com])
+AC_INIT([consonance], [0.5.9], [m.sujith@gmail.com])
+
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR([src/consonance.c])
@@ -11,6 +12,12 @@ AC_PROG_LIBTOOL
 
 # Checks for header files.
 AC_HEADER_STDC
+
+# Check user options.
+AC_ARG_ENABLE(modplug,
+	[AS_HELP_STRING([--enable_modplug], [support modplug (default: no)])],
+	[enable_modplug=$enableval],
+	[enable_modplug=no])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([alsa],
@@ -79,9 +86,9 @@ PKG_CHECK_MODULES([vorbisfile],
                   [AC_MSG_ERROR(vorbisfile-1.1.3 is required)])
 
 PKG_CHECK_MODULES([libcurl],
-                  [libcurl >= 7.19.2],
+                  [libcurl >= 7.18.2],
 		  [],
-                  [AC_MSG_ERROR(curl-7.19.2 is required)])
+                  [AC_MSG_ERROR(curl-2.19.2 is required)])
 
 PKG_CHECK_MODULES([libcdio],
                   [libcdio >= 0.80],
@@ -102,6 +109,10 @@ PKG_CHECK_MODULES([libmodplug],
                   [libmodplug >= 0.8.0],
 		  [],
                   [AC_MSG_ERROR(libmodplug-0.8.0 is required)])
+
+PKG_CHECK_MODULES(libxfcegui4, libxfcegui4-1.0 >= 4.4.0)
+PKG_CHECK_MODULES(libxfceutil4, libxfce4util-1.0 >= 4.4.0)
+PKG_CHECK_MODULES(libexo, exo-0.3 >= 0.3.99)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

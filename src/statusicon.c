@@ -17,6 +17,52 @@
 
 #include "consonance.h"
 
+GtkWidget *stooltip;
+
+gboolean
+systray_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin)
+{
+	GtkWidget *popup_menu;
+	switch (event->button)
+	{
+		case 1: if (GTK_WIDGET_VISIBLE(cwin->mainwindow))
+				toogle_main_window (cwin, TRUE);
+			else
+				toogle_main_window (cwin, FALSE);
+			break;
+		case 2:	play_pause_resume(cwin);
+			break;
+		case 3:
+			popup_menu = gtk_ui_manager_get_widget(cwin->systray_menu, "/popup");
+			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
+				       event->button, gtk_get_current_event_time ());
+		default: break;
+	}
+	
+	return TRUE;
+}
+
+void toogle_main_window(struct con_win *cwin, gboolean        present)
+{
+GtkWindow * window = GTK_WINDOW( cwin->mainwindow );
+static int  x = 0, y = 0;
+
+	g_warning("(%s): Unable to show OSD notification", __func__);
+
+	if (present) {
+	        gtk_window_get_position( window, &x, &y );
+		gtk_widget_hide(GTK_WIDGET(window));
+	}
+	else{
+	        gtk_window_set_skip_taskbar_hint( window , FALSE );
+	        if( x != 0 && y != 0 )
+	            gtk_window_move( window , x, y );
+	        gtk_widget_show( GTK_WIDGET( window ) );
+        	gtk_window_deiconify( window );
+		gtk_window_present( window );
+		}
+}
+
 /* For want of a better place, this is here ... */
 
 void show_osd(struct con_win *cwin)
@@ -24,12 +70,16 @@ void show_osd(struct con_win *cwin)
 	GError *error = NULL;
 	NotifyNotification *osd;
 	gchar *body, *length;
-	gchar *eartist = NULL, *ealbum = NULL;
+	gchar *etitle = NULL, *eartist = NULL, *ealbum = NULL;
 
 	/* Check if OSD is enabled in preferences */
 
 	if (!cwin->cpref->show_osd)
 		return;
+
+	if (cwin->cstate->curr_mobj->tags->title)
+		etitle = g_markup_escape_text(cwin->cstate->curr_mobj->tags->title,
+				      strlen(cwin->cstate->curr_mobj->tags->title));
 
 	if (cwin->cstate->curr_mobj->tags->artist)
 		eartist = g_markup_escape_text(cwin->cstate->curr_mobj->tags->artist,
@@ -47,11 +97,10 @@ void show_osd(struct con_win *cwin)
 
 	/* Create notification instance */
 
-	osd = notify_notification_new_with_status_icon(
-		cwin->cstate->curr_mobj->tags->title,
-		(const gchar *)body,
-		NULL,
-		GTK_STATUS_ICON(cwin->status_icon));
+	osd = notify_notification_new(etitle,
+					(const gchar *)body,
+					NULL,
+					GTK_WIDGET(cwin->status_icon));
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
 
 	/* Add album art if set */
@@ -73,6 +122,7 @@ void show_osd(struct con_win *cwin)
 
 	g_free(length);
 	g_free(body);
+	g_free(etitle);
 	g_free(eartist);
 	g_free(ealbum);
 	g_object_unref(G_OBJECT(osd));
@@ -80,51 +130,50 @@ void show_osd(struct con_win *cwin)
 
 void status_icon_tooltip_update(struct con_win *cwin)
 {
-	gchar *tooltip;
-
-	tooltip = g_strdup_printf("%s by %s", cwin->cstate->curr_mobj->tags->title,
-				  cwin->cstate->curr_mobj->tags->artist);
-	gtk_status_icon_set_tooltip(GTK_STATUS_ICON(cwin->status_icon), tooltip);
-	g_free(tooltip);
+gchar *tooltip;
+tooltip = g_strdup_printf("%s by %s", cwin->cstate->curr_mobj->tags->title,
+			  cwin->cstate->curr_mobj->tags->artist);
+#if GTK_CHECK_VERSION(2, 10, 0)
+	GtkTooltips *tooltips = gtk_tooltips_new ();
+	gtk_tooltips_set_tip (tooltips,GTK_WIDGET(cwin->status_icon) , tooltip , NULL);
+#else
+	gtk_widget_set_tooltip_text (GTK_WIDGET(cwin->status_icon), tooltip);
+#endif
 }
 
 void unset_status_icon_tooltip(struct con_win *cwin)
 {
-	gtk_status_icon_set_tooltip(GTK_STATUS_ICON(cwin->status_icon),
-				    PACKAGE_STRING);
+#if GTK_CHECK_VERSION(2, 10, 0)
+	GtkTooltips *tooltips = gtk_tooltips_new ();
+	gtk_tooltips_set_tip (tooltips,GTK_WIDGET(cwin->status_icon) , PACKAGE_STRING , NULL);
+#else
+	gtk_widget_set_tooltip_text (GTK_WIDGET(cwin->status_icon), PACKAGE_STRING);
+#endif
 }
 
-void status_icon_activate(GtkStatusIcon *status_icon, struct con_win *cwin)
+void
+systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin)
 {
-	if (GTK_WIDGET_VISIBLE(cwin->mainwindow)) {
-		gtk_widget_hide(cwin->mainwindow);
+	if (event->type != GDK_SCROLL)
+		return;
+
+	switch (event->direction)
+	{
+		case GDK_SCROLL_UP:
+			cwin->cmixer->inc_volume(cwin);
+			break;
+		case GDK_SCROLL_DOWN:
+			cwin->cmixer->dec_volume(cwin);
+			break;
+		default:
+			return;
 	}
-	else
-		gtk_widget_show(cwin->mainwindow);
+	return;
 }
-
-void status_icon_popup_menu(GtkStatusIcon *status_icon,
-			    guint button,
-			    guint activate_time,
-			    struct con_win *cwin)
-{
-	GtkWidget *popup_menu;
-
-	switch(button) {
-	case 3:
-		popup_menu = gtk_ui_manager_get_widget(cwin->systray_menu, "/popup");
-		gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
-			       button, activate_time);
-
-		break;
-	default:
-		break;
-	}
-}	
 
 void systray_play(GtkAction *action, struct con_win *cwin)
 {
-	play_track(cwin);
+	play_pause_resume( cwin);
 }
 
 void systray_stop(GtkAction *action, struct con_win *cwin)

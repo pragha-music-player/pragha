@@ -10,6 +10,7 @@ image_DATA = 		\
 	data/artist.png	\
 	data/album.png	\
 	data/track.png  \
+	data/cover.png  \
 	data/genre.png	\
 	data/consonance.png
 

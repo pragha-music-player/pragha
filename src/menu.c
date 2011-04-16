@@ -212,14 +212,42 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_widget_destroy(dialog);
 }
 
-/* Handler for the 'Play Audio CD' item in the File menu */
+/* Handler for the 'Play Audio CD' item in the Consonance menu */
 
 void play_audio_cd_action(GtkAction *action, struct con_win *cwin)
 {
 	play_audio_cd(cwin);
 }
 
-/* Handler for the 'Quit' item in the File menu */
+/* Handler for the 'Prev' item in the Consonance menu */
+
+void prev_action(GtkAction *action, struct con_win *cwin)
+{
+	play_prev_track(cwin);
+}
+
+/* Handler for the 'Play / Pause' item in the Consonance menu */
+
+void play_pause_action(GtkAction *action, struct con_win *cwin)
+{
+	play_pause_resume(cwin);
+}
+
+/* Handler for the 'Stop' item in the Consonance menu */
+
+void stop_action(GtkAction *action, struct con_win *cwin)
+{
+	stop_playback(cwin);
+}
+
+/* Handler for the 'Next' item in the Consonance menu */
+
+void next_action (GtkAction *action, struct con_win *cwin)
+{
+	play_next_track(cwin);
+}
+
+/* Handler for the 'Quit' item in the Consonance menu */
 
 void quit_action(GtkAction *action, struct con_win *cwin)
 {
@@ -244,15 +272,6 @@ void collapse_all_action(GtkAction *action, struct con_win *cwin)
 
 void search_library_action(GtkAction *action, struct con_win *cwin)
 {
-	if (!cwin->search_bar)
-		return;
-
-	if (GTK_WIDGET_VISIBLE(cwin->search_bar)) {
-		clear_library_search(cwin);
-		return;
-	}
-
-	gtk_widget_show_now(cwin->search_bar);
 	gtk_widget_grab_focus(cwin->search_entry);
 }
 
@@ -265,6 +284,22 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 	gtk_widget_grab_focus(cwin->current_playlist);
 	g_signal_emit_by_name(G_OBJECT(cwin->current_playlist),
 			      "start-interactive-search", &ret);
+}
+
+/* Handler for 'Shuffle' option in the Edit menu */
+
+void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
+{
+	cwin->cpref->shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	shuffle_button(cwin);
+}
+
+/* Handler for 'Repeat' option in the Edit menu */
+
+void repeat_action(GtkToggleAction *action, struct con_win *cwin)
+{
+	cwin->cpref->repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	CDEBUG("(%s): Repeat action menu", __func__);
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */
@@ -540,7 +575,7 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 
 /* Handler for the 'About' action in the Help menu */
 
-void about_action(GtkAction *action, struct con_win *cwin)
+void about_widget(struct con_win *cwin)
 {
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
@@ -555,4 +590,10 @@ void about_action(GtkAction *action, struct con_win *cwin)
 			      "name", PACKAGE_NAME,
 			      "version", PACKAGE_VERSION,
 			      NULL);
+
+}
+
+void about_action(GtkAction *action, struct con_win *cwin)
+{
+	about_widget(cwin);
 }

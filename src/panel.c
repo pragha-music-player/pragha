@@ -150,13 +150,36 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 
 	cur_pos = convert_length_str(length);
 	tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
-	str = g_strdup_printf("%s [ %s / %s ]",
-			      cwin->cstate->curr_mobj->tags->title,
-			      cur_pos,
-			      tot_length);
 
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(cwin->track_progress_bar),
-				  (const gchar*)str);
+	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
+		str = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	else
+		str = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
+
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
+	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">por</span></small> %s <small><span weight=\"light\">en</span></small> %s", 
+						str ,
+						cwin->cstate->curr_mobj->tags->artist, 
+						cwin->cstate->curr_mobj->tags->album);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
+		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">por</span></small> %s", 
+						str ,
+						cwin->cstate->curr_mobj->tags->artist);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">en</span></small> %s", 
+						str ,
+						cwin->cstate->curr_mobj->tags->album);
+	else	str = g_markup_printf_escaped ("%s", 
+						str);
+
+	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), (const gchar*)str);
+
+	str = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
+	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), (const gchar*)str);
+	
+	str = g_markup_printf_escaped ("<small>%s</small>", tot_length);
+	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), (const gchar*)str);
 
 	g_free(str);
 	g_free(tot_length);
@@ -165,8 +188,10 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 
 void unset_current_song_info(struct con_win *cwin)
 {
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(cwin->track_progress_bar),
-				  TRACK_PROGRESS_BAR_STOPPED);
+	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label),
+				  "<b>No se reproduce nada</b>");
+	gtk_label_set_markup(GTK_LABEL(cwin->track_length_label),"<small>--:--</small>");
+	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label),"<small>00:00</small>");
 }
 
 void __update_track_progress_bar(struct con_win *cwin, gint length)
@@ -211,6 +236,7 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
 	GdkPixbuf *album_art;
 	gchar *dir;
+	GError *error = NULL;
 
 	if (cwin->cpref->show_album_art) {
 
@@ -236,9 +262,10 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				g_object_unref(G_OBJECT(album_art));
 			}
 			else
-				cwin->album_art = gtk_image_new_from_stock(
-					GTK_STOCK_INFO,
-					GTK_ICON_SIZE_LARGE_TOOLBAR);
+				cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
+								       ALBUM_ART_SIZE,
+								       ALBUM_ART_SIZE,
+								       &error));
 
 			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
 					  GTK_WIDGET(cwin->album_art));
@@ -253,17 +280,29 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 
 void unset_album_art(struct con_win *cwin)
 {
+	GError *error = NULL;
 	if (cwin->album_art) {
 		gtk_widget_destroy(cwin->album_art);
 		cwin->album_art = NULL;
 	}
+	cwin->album_art = gtk_image_new_from_pixbuf( gdk_pixbuf_new_from_file_at_size (SHAREDIR"/data/cover.png",
+				       ALBUM_ART_SIZE,
+				       ALBUM_ART_SIZE,
+				       &error));
+	gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+			  GTK_WIDGET(cwin->album_art));
+	gtk_widget_show_all(cwin->album_art_frame);
 }
 
 void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin)
 {
-	GtkTreeRowReference *ref;
-
 	cwin->cpref->shuffle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	shuffle_button(cwin);
+}
+
+void shuffle_button (struct con_win *cwin)
+{
+	GtkTreeRowReference *ref;
 
 	current_playlist_clear_dirty_all(cwin);
 
@@ -293,6 +332,12 @@ void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin)
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)
+{
+	play_pause_resume(cwin);
+	gtk_widget_grab_focus(cwin->current_playlist);
+}
+
+void play_pause_resume(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GThread *thread;
@@ -348,16 +393,51 @@ void play_button_handler(GtkButton *button, struct con_win *cwin)
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	stop_playback(cwin);
+	gtk_widget_grab_focus(cwin->current_playlist);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_prev_track(cwin);
+	gtk_widget_grab_focus(cwin->current_playlist);
 }
 
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_next_track(cwin);
+	gtk_widget_grab_focus(cwin->current_playlist);
+}
+
+void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
+{
+static gboolean test = FALSE;
+
+	if (GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib) && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(toggle) ))
+		{
+		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_file), FALSE);
+		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
+		gtk_widget_grab_focus(cwin->library_tree);
+		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 0);
+		}
+	else if (GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_file) && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(toggle)) )
+		{
+		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
+		gtk_widget_show_all(GTK_WIDGET(cwin->browse_mode));
+		gtk_widget_grab_focus(cwin->file_tree);
+		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 1);
+		if (!test)
+			{
+			if (cwin->cstate->file_tree_pwd)
+				test = g_file_test(cwin->cstate->file_tree_pwd, G_FILE_TEST_EXISTS);
+			if (!cwin->cstate->file_tree_pwd || !test)
+				cwin->cstate->file_tree_pwd = (gchar*)g_get_home_dir();
+			populate_file_tree(NULL, cwin);
+			}
+		}
+	else{
+		gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
+		gtk_widget_grab_focus(cwin->current_playlist);
+	}
 }
 
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
@@ -387,7 +467,8 @@ void album_art_toggle_state(struct con_win *cwin)
 	if (cwin->cpref->show_album_art) {
 		if (!cwin->album_art_frame) {
 			cwin->album_art_frame = gtk_frame_new(NULL);
-			gtk_box_pack_start(GTK_BOX(cwin->hbox_panel),
+			gtk_frame_set_shadow_type (GTK_FRAME(cwin->album_art_frame), GTK_SHADOW_NONE);
+			gtk_box_pack_end(GTK_BOX(cwin->hbox_panel),
 					   GTK_WIDGET(cwin->album_art_frame),
 					   FALSE, FALSE, 2);
 			gtk_box_reorder_child(GTK_BOX(cwin->hbox_panel),
@@ -398,6 +479,7 @@ void album_art_toggle_state(struct con_win *cwin)
 		resize_album_art_frame(cwin);
 		if (cwin->cstate->state != ST_STOPPED)
 			update_album_art(cwin->cstate->curr_mobj, cwin);
+		else unset_album_art(cwin);
 	}
 	else
 		if (cwin->album_art_frame)

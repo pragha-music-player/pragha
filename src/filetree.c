@@ -721,25 +721,3 @@ exit:
 
 	return ret;
 }
-
-/* Populate the file tree for the first time only when the file page is selected */
-/* Faster load time ...... */
-
-void browse_mode_switch_page_cb(GtkNotebook *notebook,
-				GtkNotebookTab arg1,
-				enum page_view pgnum,
-				struct con_win *cwin)
-{
-	gboolean test = FALSE;
-
-	if (pgnum == PAGE_FILE) {
-		if (cwin->cstate->file_tree_pwd)
-			test = g_file_test(cwin->cstate->file_tree_pwd,
-					   G_FILE_TEST_EXISTS);
-		if (!cwin->cstate->file_tree_pwd || !test)
-			cwin->cstate->file_tree_pwd = (gchar*)g_get_home_dir();
-		populate_file_tree(NULL, cwin);
-		g_signal_handler_disconnect(G_OBJECT(cwin->browse_mode),
-					    switch_cb_id);
-	}
-}

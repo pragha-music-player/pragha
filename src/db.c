@@ -45,10 +45,11 @@ static void add_new_track_db(gint location_id,
 				"length, "
 				"channels, "
 				"file_type, "
+				"compilation, "
 				"title) "
 				"VALUES "
 				"('%d', '%d', '%d', '%d', '%d', '%d', '%d', "
-				"'%d', '%d', %d, '%d', '%s')",
+				"'%d', '%d', %d, '%d', '%s', '%s')",
 				location_id,
 				track_no,
 				artist_id,
@@ -60,6 +61,7 @@ static void add_new_track_db(gint location_id,
 				length,
 				channels,
 				file_type,
+				"FALSE",
 				title);
 	exec_sqlite_query(query, cwin, NULL);
 }
@@ -367,7 +369,6 @@ gint find_playlist_db(const gchar *playlist, struct con_win *cwin)
 
 	return playlist_id;
 }
-
 void delete_location_db(gint location_id, struct con_win *cwin)
 {
 	gchar *query;
@@ -746,7 +747,7 @@ gint init_dbase_schema(struct con_win *cwin)
 	/* Create 'TRACKS' table */
 
 	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS TRACK "
-				"(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+				"(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
 				"location INT PRIMARY KEY",
 				"track_no INT",
 				"artist INT",
@@ -758,6 +759,7 @@ gint init_dbase_schema(struct con_win *cwin)
 				"channels INT",
 				"samplerate INT",
 				"file_type INT",
+				"compilation BLOB",
 				"title VARCHAR(255)");
 	if (!exec_sqlite_query(query, cwin, NULL))
 		return -1;

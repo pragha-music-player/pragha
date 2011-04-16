@@ -252,6 +252,50 @@ gboolean is_image_file(gchar *file)
 
 gchar* convert_length_str(gint length)
 {
+/*        gchar *res;*/
+/*        gchar *temp1, *temp2;*/
+/*        gint temp_time=0;*/
+/*        gint sec=0, min=0, hours=0, days=0;*/
+
+/*        if (length < 0)*/
+/*                return g_strdup_printf ("n/a");*/
+
+/*        days = (length / 86400);*/
+/*        temp_time = (time % 86400);*/
+
+/*        hours = (temp_time / 3600);*/
+/*        temp_time = (temp_time % 3600);*/
+
+/*        min = (temp_time / 60);*/
+/*        sec = (temp_time % 60);*/
+
+/*        res = g_strdup_printf ("%d %s", sec, "seconds");*/
+
+/*        if (min != 0) {*/
+/*                temp1 = g_strdup_printf ("%d %s, ", min, "minutes");*/
+/*                temp2 = g_strconcat (temp1, res, NULL);*/
+/*                g_free (temp1);*/
+/*                g_free (res);*/
+/*                res = temp2;*/
+/*        }*/
+
+/*        if (hours != 0) {*/
+/*                temp1 = g_strdup_printf ("%d %s, ", hours, "hours");*/
+/*                temp2 = g_strconcat (temp1, res, NULL);*/
+/*                g_free (temp1);*/
+/*                g_free (res);*/
+/*                res = temp2;*/
+/*        }*/
+
+/*        if (days != 0) {*/
+/*                temp1 = g_strdup_printf ("%d %s, ", days, "days");*/
+/*                temp2 = g_strconcat (temp1, res, NULL);*/
+/*                g_free (temp1);*/
+/*                g_free (res);*/
+/*                res = temp2;*/
+/*        }*/
+
+/*        return res;*/
 	static gchar *str, tmp[24];
 	gint days = 0, hours = 0, minutes = 0, seconds = 0;
 
@@ -455,6 +499,40 @@ exit:
 		g_strfreev(tokens);
 
 	return ret;
+}
+
+/* It gives the position of the menu on the 
+   basis of the position of combo_order */
+
+void
+menu_position(GtkMenu *menu,
+		gint *x, gint *y,
+		gboolean *push_in,
+		gpointer user_data)
+{
+        GtkWidget *widget;
+        GtkRequisition requisition;
+        gint menu_xpos;
+        gint menu_ypos;
+
+        widget = GTK_WIDGET (user_data);
+
+        gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+
+        gdk_window_get_origin (widget->window, &menu_xpos, &menu_ypos);
+
+        menu_xpos += widget->allocation.x;
+        menu_ypos += widget->allocation.y;
+
+	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
+		menu_ypos -= requisition.height + widget->style->ythickness;
+	else
+		menu_ypos += widget->allocation.height + widget->style->ythickness;
+
+        *x = menu_xpos;
+        *y = menu_ypos - 5;
+
+        *push_in = TRUE;
 }
 
 /* Return TRUE if the previous installed version is

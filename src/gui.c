@@ -17,13 +17,16 @@
 
 #include "consonance.h"
 
-gulong switch_cb_id;
-
 gchar *main_menu_xml = "<ui>							\
 	<menubar name=\"Menubar\">						\
 		<menu action=\"FileMenu\">					\
 			<menuitem action=\"Open File\"/>			\
 			<menuitem action=\"Play Audio CD\"/>			\
+			<separator/>				\
+			<menuitem action=\"Prev\"/>		\
+			<menuitem action=\"Play_Pause\"/>	\
+			<menuitem action=\"Stop\"/>		\
+			<menuitem action=\"Next\"/>		\
 			<separator/>						\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
@@ -33,6 +36,9 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Search Library\"/>			\
 			<menuitem action=\"Search Playlist\"/>			\
 			<separator/>						\
+			<menuitem action=\"Shuffle\"/>		\
+			<menuitem action=\"Repeat\"/>		\
+			<separator/>				\
 			<menuitem action=\"Preferences\"/>			\
 		</menu>								\
 		<menu action=\"ToolsMenu\">					\
@@ -53,6 +59,10 @@ gchar *main_menu_xml = "<ui>							\
 			</menu>							\
 		</menu>								\
 		<menu action=\"HelpMenu\">					\
+			<menuitem action=\"Home\"/>				\
+			<menuitem action=\"Community\"/>		\
+			<menuitem action=\"Wiki\"/>				\
+			<separator/>							\
 			<menuitem action=\"About\"/>				\
 		</menu>								\
 	</menubar>								\
@@ -143,6 +153,14 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>O", "Open a media file", G_CALLBACK(open_file_action)},
 	{"Play Audio CD", GTK_STOCK_CDROM, "_Play Audio CD",
 	 NULL, "Play a Audio CD", G_CALLBACK(play_audio_cd_action)},
+	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, "Pista Anterior",
+	 NULL, "Reproducir Pista Anterior", G_CALLBACK(prev_action)},
+	{"Play_Pause", GTK_STOCK_MEDIA_PLAY, "Reproducir/Pausa",
+	 NULL, "About Consonance", G_CALLBACK(play_pause_action)},
+	{"Stop", GTK_STOCK_MEDIA_STOP, "Parar",
+	 NULL, "About Consonance", G_CALLBACK(stop_action)},
+	{"Next", GTK_STOCK_MEDIA_NEXT, "Pista Siguiente",
+	 NULL, "About Consonance", G_CALLBACK(next_action)},
 	{"Quit", GTK_STOCK_QUIT, "_Quit",
 	 "<Control>Q", "Quit consonance", G_CALLBACK(quit_action)},
 	{"Expand All", GTK_STOCK_GOTO_LAST, "_Expand All in Library",
@@ -181,7 +199,22 @@ GtkActionEntry main_aentries[] = {
 	{"genre_artist_album_track", GTK_STOCK_REFRESH, "Genre / Artist / Album / Track",
 	 NULL, "Genre / Artist / Album / Track", G_CALLBACK(genre_artist_album_track_library_tree)},
 	{"About", GTK_STOCK_ABOUT, "About",
-	 NULL, "About Consonance", G_CALLBACK(about_action)}
+	 NULL, "About Consonance", G_CALLBACK(about_action)},
+	{"Home", GTK_STOCK_HOME, "Homepage",
+	 NULL, "Pagina del Consonance", G_CALLBACK(about_action)},
+	{"Community", GTK_STOCK_INFO, "Community",
+	 NULL, "Foro de Consonance", G_CALLBACK(about_action)},
+	{"Wiki", GTK_STOCK_YES, "Wiki",
+	 NULL, "Wiki de Consonance", G_CALLBACK(about_action)},
+};
+
+GtkToggleActionEntry toggles_entries[] = {
+	{"Shuffle", NULL, "_Aleatorio",
+	 NULL, "Orden aleatorio", G_CALLBACK(shuffle_action),
+	 FALSE},
+	{"Repeat", NULL, "_Repetir",
+	 NULL, "Repetir canciones", G_CALLBACK(repeat_action), 
+	 FALSE}
 };
 
 GtkActionEntry cp_context_aentries[] = {
@@ -298,8 +331,8 @@ static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
 	if (!gtk_ui_manager_add_ui_from_string(context_menu,
 					       library_tree_context_menu_xml,
 					       -1, &error)) {
-		g_critical("Unable to create library tree context menu, err : %s",
-			   error->message);
+		g_critical("(%s): Unable to create library tree context menu, err : %s",
+			   __func__, error->message);
 	}
 
 	gtk_action_group_add_actions(context_actions,
@@ -633,7 +666,7 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 	/* Create the tree view */
 
 	playlist_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(playlist_tree), FALSE);
+/*	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(playlist_tree), FALSE);*/
 	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(playlist_tree), TRUE);
 
 	/* Selection mode is multiple */
@@ -656,6 +689,8 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 					    "text", P_PLAYLIST,
 					    NULL);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+
+	gtk_tree_view_column_set_title(column, "Artist / Album / Track");
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(playlist_tree), column);
 
@@ -711,17 +746,69 @@ static GtkUIManager* create_library_page_context_menu(GtkWidget *library_page,
 	return context_menu;
 }
 
+static GtkWidget * create_toggles_buttons(struct con_win *cwin)
+{
+	GtkWidget *vbox_btns;
+	GtkWidget *w, *l;
+
+	vbox_btns = gtk_vbox_new(FALSE, 0);
+	
+	w = gtk_toggle_button_new_with_mnemonic( NULL );
+	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),TRUE);
+		
+	l = gtk_label_new_with_mnemonic( "Coleccion" );
+	gtk_label_set_angle(GTK_LABEL(l), 90);
+	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
+
+	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
+	cwin->toggle_lib=w;
+
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "toggled", G_CALLBACK( toggled_cb ), cwin );
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "button-press-event",
+			G_CALLBACK(library_page_right_click_cb), cwin);
+
+	/* Create library page context menu */
+	cwin->library_page_context_menu = create_library_page_context_menu(cwin->toggle_lib, cwin);
+
+	w = gtk_toggle_button_new_with_mnemonic( NULL );
+	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),FALSE);
+
+	l = gtk_label_new_with_mnemonic( "Archivos" );
+	gtk_label_set_angle(GTK_LABEL(l), 90);
+	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
+	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
+	cwin->toggle_file=w;
+
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_file)), "toggled",
+			G_CALLBACK( toggled_cb ), cwin );
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_file)), "button-press-event",
+			G_CALLBACK(library_page_right_click_cb), cwin);
+
+	l = gtk_label_new_with_mnemonic( "Consonance Music Manager" );
+	gtk_label_set_angle(GTK_LABEL(l), 90);
+	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
+
+	gtk_box_pack_start( GTK_BOX( vbox_btns ), l, TRUE, TRUE, 0 );
+
+	return vbox_btns;
+}
+
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *browse_mode;
-	GtkWidget *vbox_lib;
-	GtkWidget *label_lib, *label_file;
+	GtkWidget *vbox_lib, *vbox_page;
 	GtkWidget *file_tree, *library_tree, *playlist_tree;
 	GtkWidget *file_tree_scroll, *library_tree_scroll;
 	GtkWidget *sep;
+	GtkWidget *order_selector, *search_bar;
 
 	browse_mode = gtk_notebook_new();
+
+	vbox_page = gtk_vbox_new(FALSE, 0);
 	vbox_lib = gtk_vbox_new(FALSE, 0);
+
 	sep = gtk_hseparator_new();
 
 	/* The scrollbar window widgets */
@@ -738,23 +825,31 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 				       GTK_POLICY_AUTOMATIC,
 				       GTK_POLICY_AUTOMATIC);
 
-	/* Labels for the the notebook pages : Library / File / Playlist */
-
-	label_lib = gtk_label_new("Library");
-	label_file = gtk_label_new("File");
-
-	/* Set angle to 90 degrees to display the labels vertically */
-
-	gtk_label_set_angle(GTK_LABEL(label_lib), 90);
-	gtk_label_set_angle(GTK_LABEL(label_file), 90);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(file_tree_scroll),
+					GTK_SHADOW_IN);
 
 	/* The actual notebook page widgets */
 
 	file_tree = create_file_tree(cwin);
+
+	search_bar = create_search_bar(cwin);
+	order_selector = create_combo_order (cwin);
 	library_tree = create_library_tree(cwin);
 	playlist_tree = create_playlist_tree(cwin);
 
 	/* Store playlist/library tree in hbox */
+
+	gtk_box_pack_start(GTK_BOX(vbox_page),
+			   order_selector,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	gtk_box_pack_start(GTK_BOX(vbox_page),
+			   search_bar,
+			   FALSE,
+			   FALSE,
+			   2);
 
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   playlist_tree,
@@ -765,7 +860,7 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   sep,
 			   FALSE,
 			   FALSE,
-			   2);
+			   0);
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   library_tree,
 			   TRUE,
@@ -778,28 +873,25 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(library_tree_scroll),
 					      vbox_lib);
 
-	/* Create library page context menu */
-
-	cwin->library_page_context_menu = create_library_page_context_menu(label_lib,
-									   cwin);
+	gtk_box_pack_start(GTK_BOX(vbox_page),
+				library_tree_scroll,
+				TRUE,
+				TRUE,
+				0);
 
 	/* Append the notebook page widgets */
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 GTK_WIDGET(library_tree_scroll),
-				 GTK_WIDGET(label_lib));
+				 vbox_page,
+				 NULL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 GTK_WIDGET(file_tree_scroll),
-				 GTK_WIDGET(label_file));
-
-	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(browse_mode), GTK_POS_LEFT);
+				 file_tree_scroll,
+				 NULL);
 
 	cwin->browse_mode = browse_mode;
 
-	/* Setup focus-tab handling */
-
-	switch_cb_id = g_signal_connect(G_OBJECT(browse_mode), "switch-page",
-					G_CALLBACK(browse_mode_switch_page_cb), cwin);
+	gtk_notebook_set_show_tabs (GTK_NOTEBOOK(browse_mode),FALSE);
+	gtk_notebook_set_show_border (GTK_NOTEBOOK(browse_mode),FALSE);
 
 	/* Signal handler for right-clicking on a page */
 
@@ -935,6 +1027,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkWidget *label_track,
+		*play_pixbuf,
 		*label_title,
 		*label_artist,
 		*label_album,
@@ -954,6 +1047,27 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	label_year = gtk_label_new(P_YEAR_STR);
 	label_length = gtk_label_new(P_LENGTH_STR);
 	label_filename = gtk_label_new(P_FILENAME_STR);
+
+	play_pixbuf = gtk_image_new_from_icon_name ("stock_volume-max", GTK_ICON_SIZE_MENU);
+
+	/* Column : Pixbuf */
+
+	renderer = gtk_cell_renderer_pixbuf_new ();
+	column = gtk_tree_view_column_new ();
+
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer,
+						 (GtkTreeCellDataFunc)
+						 view_playing_cell_data_func,
+						 cwin,
+						 NULL);
+	gtk_tree_view_column_set_attributes (column, renderer,
+				             "pixbuf", P_PLAY_PIXBUF,
+					     NULL);
+	gtk_tree_view_column_set_widget(column, play_pixbuf);
+	gtk_widget_show (play_pixbuf);
+	gtk_tree_view_column_set_resizable(column, FALSE);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
 
 	/* Column : Track No */
 
@@ -1138,6 +1252,7 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	store = gtk_list_store_new(N_P_COLUMNS,
 				   G_TYPE_POINTER,	/* Pointer to musicobject */
+				   GDK_TYPE_PIXBUF,	/* Pixbuf */
 				   G_TYPE_STRING,	/* Tag : Track No */
 				   G_TYPE_STRING,	/* Tag : Title */
 				   G_TYPE_STRING,	/* Tag : Artist */
@@ -1214,6 +1329,7 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	/* Store the treeview in the scrollbar widget */
 
 	gtk_container_add(GTK_CONTAINER(current_playlist_scroll), current_playlist);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(current_playlist_scroll),GTK_SHADOW_IN);
 	cwin->current_playlist = current_playlist;
 
 	/* Set initial column visibility */
@@ -1322,6 +1438,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 {
 	GtkUIManager *main_menu = NULL;
 	GtkActionGroup *main_actions;
+	GtkAction *action = NULL;
 	GError *error = NULL;
 
 	main_actions = gtk_action_group_new("Main Actions");
@@ -1336,14 +1453,105 @@ GtkUIManager* create_menu(struct con_win *cwin)
 				     main_aentries,
 				     G_N_ELEMENTS(main_aentries),
 				     (gpointer)cwin);
+	gtk_action_group_add_toggle_actions (main_actions, 
+					toggles_entries, G_N_ELEMENTS(toggles_entries), 
+					cwin);
+
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
 				   gtk_ui_manager_get_accel_group(main_menu));
 	gtk_ui_manager_insert_action_group(main_menu, main_actions, 0);
 
+	action = gtk_action_group_get_action (main_actions, "Stop");
+	gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
+	action = gtk_action_group_get_action (main_actions, "Shuffle");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
+
+	action = gtk_action_group_get_action (main_actions, "Repeat");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->repeat);
+
 	return main_menu;
 }
 
+GtkWidget *create_playlist_pane(struct con_win *cwin)
+{
+	GtkWidget *vbox, *htools;
+	GtkWidget *save_btn, *purge_btn, *to_now_btn, *filter_current;
+	GtkWidget *vsep;
+	GtkWidget *current_playlist;
+	
+	vbox = gtk_vbox_new(FALSE, 0);
+	htools = gtk_hbox_new(FALSE, 0);
+
+	vsep = gtk_vseparator_new();
+
+	save_btn = gtk_button_new();
+ 	gtk_button_set_image(GTK_BUTTON(save_btn), gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU));
+	gtk_button_set_relief(GTK_BUTTON(save_btn),GTK_RELIEF_NONE);
+	gtk_box_pack_start(GTK_BOX(htools), save_btn, FALSE, FALSE, 0);
+
+	g_signal_connect(G_OBJECT(save_btn), "clicked",
+			 G_CALLBACK(save_current_playlist), cwin);
+
+	purge_btn = gtk_button_new();
+ 	gtk_button_set_image(GTK_BUTTON(purge_btn), gtk_image_new_from_stock(GTK_STOCK_DELETE, GTK_ICON_SIZE_MENU));
+	gtk_button_set_relief(GTK_BUTTON(purge_btn),GTK_RELIEF_NONE);
+	gtk_box_pack_start(GTK_BOX(htools), purge_btn, FALSE, FALSE,0);
+
+	g_signal_connect(G_OBJECT(purge_btn), "clicked",
+			 G_CALLBACK(clear_current_playlist), cwin);
+
+	to_now_btn = gtk_button_new();
+ 	gtk_button_set_image(GTK_BUTTON(to_now_btn), gtk_image_new_from_stock(GTK_STOCK_JUMP_TO, GTK_ICON_SIZE_MENU));
+	gtk_button_set_relief(GTK_BUTTON(to_now_btn),GTK_RELIEF_NONE);
+	gtk_box_pack_start(GTK_BOX(htools), to_now_btn, FALSE, FALSE,0);
+
+	g_signal_connect(G_OBJECT(to_now_btn), "clicked",
+			 G_CALLBACK(selection_current_track), cwin);
+
+	gtk_box_pack_start(GTK_BOX(htools), vsep, FALSE, FALSE,0);
+
+	filter_current = create_search_current_bar(cwin);
+
+	gtk_box_pack_start(GTK_BOX(htools), filter_current, TRUE, TRUE,0);
+
+	gtk_box_pack_start(GTK_BOX(vbox), htools, FALSE, FALSE, 2);
+
+	current_playlist = create_current_playlist_view(cwin);
+	gtk_box_pack_start(GTK_BOX(vbox), current_playlist, TRUE, TRUE, 0);
+
+	return vbox;
+
+}
+
 GtkWidget* create_main_region(struct con_win *cwin)
+{
+	GtkWidget *hbox;
+	GtkWidget *toggles_note;
+	GtkWidget *paned_region;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	toggles_note = create_toggles_buttons(cwin);
+	paned_region = create_paned_region(cwin);
+
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   toggles_note,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   paned_region,
+			   TRUE,
+			   TRUE,
+			   0);
+
+	return hbox;
+
+}
+
+
+GtkWidget* create_paned_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
@@ -1359,7 +1567,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Right pane contains the current playlist */
 
-	current_playlist = create_current_playlist_view(cwin);
+	current_playlist = create_playlist_pane(cwin);
 
 	/* DnD */
 
@@ -1379,66 +1587,19 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 GtkWidget* create_panel(struct con_win *cwin)
 {
-	GtkWidget *controls_align, *shuffle_align, *repeat_align;
+	GtkWidget *controls_align;
+	GtkWidget *playing;
+	GtkWidget *vbox_order;
 	GtkWidget *hbox_panel, *hbox_controls;
 	GtkWidget *play_button, *stop_button, *prev_button, *next_button, *vol_button;
 	GtkWidget *album_art_frame = NULL;
-	GtkWidget *track_progress_bar, *track_progress_align;
-	GtkWidget *vbox_order;
-	GtkWidget *shuffle_button, *repeat_button;
 	GtkObject *vol_adjust;
 
 	hbox_panel = gtk_hbox_new(FALSE, 5);
 	vbox_order = gtk_vbox_new(FALSE, 1);
 	hbox_controls = gtk_hbox_new(FALSE, 1);
 
-	/* Setup album art */
-
-	if (cwin->cpref->show_album_art) {
-		album_art_frame = gtk_frame_new(NULL);
-		gtk_box_pack_start(GTK_BOX(hbox_panel),
-				   GTK_WIDGET(album_art_frame),
-				   FALSE, FALSE, 2);
-	}
-
-	/* Setup track progress */
-
-	track_progress_align = gtk_alignment_new(0, 0.5, 1, 0.3);
-	track_progress_bar = gtk_progress_bar_new();
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(track_progress_bar),
-				  TRACK_PROGRESS_BAR_STOPPED);
-	gtk_progress_bar_set_ellipsize(GTK_PROGRESS_BAR(track_progress_bar),
-				       PANGO_ELLIPSIZE_MIDDLE);
-	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_bar);
-
-	gtk_widget_set_events(track_progress_bar, GDK_BUTTON_PRESS_MASK);
-
-	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
-			 G_CALLBACK(track_progress_change_cb), cwin);
-
-	/* Setup play order buttons */
-
-	shuffle_align = gtk_alignment_new(0, 1, 0, 0);
-	repeat_align = gtk_alignment_new(0, 0, 0, 0);
-	shuffle_button = gtk_check_button_new_with_label("Shuffle");
-	repeat_button = gtk_check_button_new_with_label("Repeat");
-
-	gtk_container_add(GTK_CONTAINER(shuffle_align), shuffle_button);
-	gtk_container_add(GTK_CONTAINER(repeat_align), repeat_button);
-
-	gtk_box_pack_start(GTK_BOX(vbox_order),
-			   GTK_WIDGET(shuffle_align),
-			   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox_order),
-			   GTK_WIDGET(repeat_align),
-			   TRUE, TRUE, 0);
-
-	/* Signal handlers for play order controls */
-
-	g_signal_connect(G_OBJECT(shuffle_button), "toggled",
-			 G_CALLBACK(shuffle_button_handler), cwin);
-	g_signal_connect(G_OBJECT(repeat_button), "toggled",
-			 G_CALLBACK(repeat_button_handler), cwin);
+	playing = create_playing_box(cwin);
 
 	/* Images for pause and play */
 
@@ -1458,12 +1619,16 @@ GtkWidget* create_panel(struct con_win *cwin)
 	play_button = gtk_button_new();
 	stop_button = gtk_button_new();
 	next_button = gtk_button_new();
-	vol_button = gtk_volume_button_new();
 
+	gtk_button_set_relief(GTK_BUTTON(prev_button), GTK_RELIEF_NONE);
+	gtk_button_set_relief(GTK_BUTTON(stop_button), GTK_RELIEF_NONE);
+	gtk_button_set_relief(GTK_BUTTON(next_button), GTK_RELIEF_NONE);
+	gtk_button_set_relief(GTK_BUTTON(play_button), GTK_RELIEF_NONE);
+
+	vol_button = gtk_volume_button_new();
 	vol_adjust = gtk_adjustment_new(0, 0, 100, 1, 5, 0);
 	gtk_scale_button_set_adjustment(GTK_SCALE_BUTTON(vol_button),
 					GTK_ADJUSTMENT(vol_adjust));
-	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NORMAL);
 
 	gtk_button_set_image(GTK_BUTTON(prev_button),
 			     gtk_image_new_from_stock(GTK_STOCK_MEDIA_PREVIOUS,
@@ -1489,9 +1654,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(hbox_controls),
 			   GTK_WIDGET(next_button),
 			   FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_controls),
-			   GTK_WIDGET(vol_button),
-			   TRUE, FALSE, 0);
 
 	controls_align = gtk_alignment_new(0, 0.5, 0, 0);
 	gtk_container_add(GTK_CONTAINER(controls_align), hbox_controls);
@@ -1511,20 +1673,13 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	/* Initial state of various widgets from stored preferences */
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(shuffle_button),
-				     cwin->cpref->shuffle);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(repeat_button),
-				     cwin->cpref->repeat);
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(vol_button),
 				   SCALE_UP_VOL(cwin->cmixer->curr_vol));
 
 	/* References to widgets */
 
+	cwin->hbox_controls = controls_align;
 	cwin->hbox_panel = hbox_panel;
-	cwin->album_art_frame = album_art_frame;
-	cwin->track_progress_bar = track_progress_bar;
-	cwin->shuffle_button = shuffle_button;
-	cwin->repeat_button = repeat_button;
 	cwin->prev_button = prev_button;
 	cwin->play_button = play_button;
 	cwin->stop_button = stop_button;
@@ -1540,17 +1695,90 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	/* Pack panel widgets into hbox_panel */
 
-	gtk_box_pack_start(GTK_BOX(hbox_panel),
-			   GTK_WIDGET(track_progress_align),
-			   TRUE, TRUE, 0);
-	gtk_box_pack_end(GTK_BOX(hbox_panel),
-			 GTK_WIDGET(vbox_order),
-			 FALSE, FALSE, 2);
+ 	gtk_box_pack_end(GTK_BOX(hbox_panel),
+			   GTK_WIDGET(vol_button),
+			   FALSE, FALSE, 0);
+ 	gtk_box_pack_end(GTK_BOX(hbox_panel),
+		   GTK_WIDGET(playing),
+		   TRUE, TRUE, 0);
+
+	/* Setup album art */
+
+	if (cwin->cpref->show_album_art) {
+		album_art_frame = gtk_frame_new(NULL);
+		gtk_frame_set_shadow_type (GTK_FRAME(album_art_frame),GTK_SHADOW_NONE);
+		gtk_box_pack_end(GTK_BOX(hbox_panel),
+				   GTK_WIDGET(album_art_frame),
+				   FALSE, FALSE, 0);
+		cwin->album_art_frame = album_art_frame;
+		unset_album_art(cwin);
+	}
+
 	gtk_box_pack_end(GTK_BOX(hbox_panel),
 			 GTK_WIDGET(controls_align),
 			 FALSE, FALSE, 0);
 
 	return hbox_panel;
+}
+
+GtkWidget* create_playing_box(struct con_win *cwin)
+{
+	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
+	GtkWidget *track_progress_bar, *track_progress_align;
+	GtkWidget *new_vbox,*new_hbox; 
+
+	now_playing_label = gtk_label_new(NULL);
+	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
+	gtk_label_set_markup(GTK_LABEL(now_playing_label),"<b>No se reproduce nada</b>");
+	gtk_misc_set_alignment (GTK_MISC(now_playing_label),0,1);
+
+	new_vbox = gtk_vbox_new(FALSE, 1);
+	new_hbox = gtk_hbox_new(FALSE, 1);
+
+	/* Setup track progress */
+
+	track_progress_align = gtk_alignment_new(0, 0.5, 1, 0);
+	track_progress_bar = gtk_progress_bar_new();
+
+        gtk_widget_set_size_request(GTK_WIDGET(track_progress_bar),
+                                      -1,
+                                      12);
+
+	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_bar);
+
+	gtk_widget_set_events(track_progress_bar, GDK_BUTTON_PRESS_MASK);
+
+	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
+			 G_CALLBACK(track_progress_change_cb), cwin);
+
+	track_time_label = gtk_label_new(NULL);
+	track_length_label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(track_length_label),"<small>--:--</small>");
+	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
+
+	cwin->track_progress_bar = 	track_progress_bar;
+	cwin->now_playing_label = 	now_playing_label;
+	cwin->track_time_label =	track_time_label;
+	cwin->track_length_label = 	track_length_label;
+
+	gtk_box_pack_start(GTK_BOX(new_hbox),
+			   GTK_WIDGET(track_time_label),
+			   FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(new_hbox),
+ 			   GTK_WIDGET(track_progress_align),
+ 			   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(new_hbox),
+			   GTK_WIDGET(track_length_label),
+			   FALSE, FALSE, 3);
+
+	gtk_box_pack_start(GTK_BOX(new_vbox),
+			   GTK_WIDGET(now_playing_label),
+			   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(new_vbox),
+			   GTK_WIDGET(new_hbox),
+			   TRUE, TRUE, 0);
+return new_vbox;
+
 }
 
 GtkWidget* create_status_bar(struct con_win *cwin)
@@ -1570,17 +1798,65 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 {
 	GtkWidget *hbox_bar;
 	GtkWidget *search_entry;
-	GtkWidget *label_find;
 	GtkWidget *cancel_button;
+	GtkWidget *label_find;
+	GtkWidget *image;
+
+	hbox_bar = gtk_hbox_new(FALSE, 2);
+/*	label_find = gtk_label_new("Filtrar:");*/
+
+	search_entry = sexy_icon_entry_new( );
+	sexy_icon_entry_add_clear_button( SEXY_ICON_ENTRY( search_entry ) );
+	image = gtk_image_new_from_stock( GTK_STOCK_FIND, GTK_ICON_SIZE_MENU );
+	sexy_icon_entry_set_icon( SEXY_ICON_ENTRY(
+				search_entry ), SEXY_ICON_ENTRY_PRIMARY,
+				GTK_IMAGE( image ) );
+	sexy_icon_entry_set_icon_highlight( SEXY_ICON_ENTRY(
+				search_entry ), SEXY_ICON_ENTRY_PRIMARY,
+				TRUE );
+
+/*	gtk_box_pack_start(GTK_BOX(hbox_bar),*/
+/*			   label_find,*/
+/*			   FALSE,*/
+/*			   FALSE,*/
+/*			   5);*/
+/*	gtk_box_pack_start(GTK_BOX(hbox_bar),*/
+/*			   search_entry,*/
+/*			   TRUE,*/
+/*			   TRUE,*/
+/*			   2);*/
+
+	cwin->search_entry = search_entry;
+
+	/* Signal handlers */
+
+	g_signal_connect(G_OBJECT(cwin->search_entry),
+			 "changed",
+			 G_CALLBACK(simple_library_search_keyrelease_handler),
+			 cwin);
+
+	return search_entry;
+/*	return hbox_bar;*/
+}
+
+/* Search (simple) */
+
+GtkWidget* create_search_current_bar(struct con_win *cwin)
+{
+	GtkWidget *hbox_bar;
+	GtkWidget *search_current_entry, *cancel_button;
+	GtkWidget *icon_find, *label_find;
 
 	hbox_bar = gtk_hbox_new(FALSE, 0);
-	label_find = gtk_label_new("Search Library");
-	search_entry = gtk_entry_new();
+	icon_find =  gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+	label_find = gtk_label_new("Buscar:");
+	search_current_entry = gtk_entry_new();
 	cancel_button = gtk_button_new();
 
 	gtk_button_set_image(GTK_BUTTON(cancel_button),
-			     gtk_image_new_from_stock(GTK_STOCK_CANCEL,
+			     gtk_image_new_from_stock(GTK_STOCK_CLEAR,
 						      GTK_ICON_SIZE_MENU));
+	gtk_button_set_relief(GTK_BUTTON(cancel_button),GTK_RELIEF_NONE);
 
 	gtk_box_pack_start(GTK_BOX(hbox_bar),
 			   cancel_button,
@@ -1593,46 +1869,54 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 			   FALSE,
 			   2);
 	gtk_box_pack_start(GTK_BOX(hbox_bar),
-			   search_entry,
+			   search_current_entry,
 			   TRUE,
 			   TRUE,
 			   2);
 
-	cwin->search_bar = hbox_bar;
-	cwin->search_entry = search_entry;
+	gtk_box_pack_start(GTK_BOX(hbox_bar),
+			   icon_find,
+			   FALSE,
+			   FALSE,
+			   2);
 
-	/* Signal handlers */
+	cwin->search_current_entry = search_current_entry;
 
-	g_signal_connect(G_OBJECT(cancel_button),
-			 "clicked",
-			 G_CALLBACK(cancel_simple_library_search_handler),
-			 cwin);
-	g_signal_connect(G_OBJECT(search_entry),
-			 "key-release-event",
-			 G_CALLBACK(simple_library_search_keyrelease_handler),
-			 cwin);
-
+	gtk_widget_set_sensitive (hbox_bar, FALSE);
 	return hbox_bar;
 }
 
-/* Systray */
-
-void create_status_icon(struct con_win *cwin)
+void
+create_systray_icon (struct con_win *cwin)
 {
-	GtkStatusIcon *status_icon;
+	GdkPixbuf	*status_icon;
+	GtkWidget	*systray_icon;
 	GtkUIManager *systray_menu;
+	EggTrayIcon	*icon = NULL;
 
-	if (cwin->pixbuf->pixbuf_app)
-		status_icon = gtk_status_icon_new_from_pixbuf(cwin->pixbuf->pixbuf_app);
-	else
-		status_icon = gtk_status_icon_new_from_stock(GTK_STOCK_NEW);
+	#if GTK_CHECK_VERSION(2, 10, 0)
+		GtkTooltips *tooltips = gtk_tooltips_new ();
+	#endif
 
-	gtk_status_icon_set_tooltip(GTK_STATUS_ICON(status_icon), PACKAGE_STRING);
+	/* create the tray icon */
+	icon = egg_tray_icon_new ("Consonance");
+	status_icon = gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/consonance.png", 20, 20, NULL);
 
-	g_signal_connect(G_OBJECT(status_icon), "activate",
-			 G_CALLBACK(status_icon_activate), cwin);
-	g_signal_connect(G_OBJECT(status_icon), "popup-menu",
-			 G_CALLBACK(status_icon_popup_menu), cwin);
+	#if GTK_CHECK_VERSION(2, 10, 0)
+		gtk_tooltips_set_tip (tooltips,GTK_WIDGET(icon) , PACKAGE_STRING, NULL);
+	#else
+		gtk_widget_set_tooltip_text (GTK_WIDGET(icon), PACKAGE_STRING);
+	#endif
+
+	systray_icon = gtk_image_new_from_pixbuf (status_icon);
+	gtk_container_add (GTK_CONTAINER (icon), systray_icon);
+	g_object_unref (status_icon);
+
+	g_signal_connect (icon, "button-press-event", G_CALLBACK (systray_icon_clicked), cwin);
+	g_signal_connect (icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
+
+	gtk_widget_show (GTK_WIDGET(systray_icon));
+	gtk_widget_show (GTK_WIDGET(icon));
 
 	/* Systray right click menu */
 
@@ -1640,7 +1924,7 @@ void create_status_icon(struct con_win *cwin)
 
 	/* Store reference */
 
-	cwin->status_icon = status_icon;
+	cwin->status_icon = icon;
 	cwin->systray_menu = systray_menu;
 }
 
@@ -1668,10 +1952,48 @@ gboolean dialog_audio_init(gpointer data)
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
-		gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+	if (!egg_tray_icon_have_manager (EGG_TRAY_ICON (cwin->status_icon))) {
+		g_warning("(%s): No embedded status_icon.", __func__);
+		gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 		return TRUE;
 	}
+	gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+	return TRUE;
+}
 
-	return FALSE;
+GtkWidget * create_combo_order(struct con_win *cwin)
+{
+	GtkWidget *button;
+	GtkWidget *hbox;
+	GtkWidget *label_order, *arrow;
+
+	button = gtk_button_new();
+	gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	label_order = gtk_label_new(library_page_context_aentries[ARTIST_ALBUM_TRACK].label);
+	gtk_misc_set_alignment (GTK_MISC(label_order),0,0.5);
+	arrow = gtk_arrow_new (GTK_ARROW_DOWN, GTK_SHADOW_NONE);
+
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   label_order,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   arrow,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_container_add (GTK_CONTAINER(button),
+			   hbox);
+
+	g_signal_connect(G_OBJECT(button),
+			 "button-press-event",
+			 G_CALLBACK(library_page_right_click_cb),
+			 cwin);
+	cwin->combo_order = button;
+	cwin->combo_order_label = label_order;
+
+	return button;
 }

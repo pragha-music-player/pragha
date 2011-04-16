@@ -52,7 +52,7 @@ static void update_status_bar(struct con_win *cwin)
 
 	total_playtime = get_total_playtime(cwin);
 	tot_str = convert_length_str(total_playtime);
-	str = g_strdup_printf("Playtime : %s", tot_str);
+	str = g_strdup_printf("%i Pistas - %s", cwin->cstate->tracks_curr_playlist, tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
@@ -874,6 +874,37 @@ GtkTreePath* current_playlist_get_prev(struct con_win *cwin)
 	return path;
 }
 
+/* Return the path of the Actual track playing */
+
+GtkTreePath* current_playlist_get_actual(struct con_win *cwin)
+{
+	GtkTreePath *path=NULL;
+
+	if (cwin->cpref->shuffle && cwin->cstate->curr_rand_ref)
+		path = gtk_tree_row_reference_get_path(cwin->cstate->curr_rand_ref);
+	else if (!cwin->cpref->shuffle && cwin->cstate->curr_seq_ref)
+		path = gtk_tree_row_reference_get_path(cwin->cstate->curr_seq_ref);
+	return path;
+}
+
+void selection_current_track(GtkButton *button, struct con_win *cwin)
+{
+	GtkTreePath *path=NULL;
+	GtkTreeSelection *selection;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+
+	path = current_playlist_get_actual(cwin);
+
+	if (!path) return;
+
+	gtk_tree_selection_unselect_all(selection);
+	gtk_tree_selection_select_path(selection, path);
+	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+				     path, NULL, TRUE, 0.5, 0);
+	gtk_tree_path_free(path);
+}
+
 /* Remove selected rows from current playlist */
 
 void remove_current_playlist(GtkAction *action, struct con_win *cwin)
@@ -1165,6 +1196,7 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GdkPixbuf *pixbuf = NULL;
 	gchar *ch_length, *ch_track_no, *ch_year, *ch_bitrate, *ch_filename;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1190,6 +1222,7 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
+			   P_PLAY_PIXBUF, pixbuf,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, mobj->tags->title,
 			   P_ARTIST, mobj->tags->artist,
@@ -1208,11 +1241,58 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	cwin->cstate->unplayed_tracks++;
 	update_status_bar(cwin);
 
+	if (pixbuf != NULL) {
+		g_object_unref (pixbuf);
+	}
+
 	g_free(ch_length);
 	g_free(ch_track_no);
 	g_free(ch_year);
 	g_free(ch_bitrate);
 	g_free(ch_filename);
+}
+
+/* Function to show icon in Current Playlist if PLAYING or PAUSED */
+
+void view_playing_cell_data_func (GtkTreeViewColumn *column,
+			      GtkCellRenderer *renderer,
+			      GtkTreeModel *tree_model,
+			      GtkTreeIter *iter,
+			      struct con_win *cwin)
+{
+	GdkPixbuf *pixbuf = NULL;
+	GtkTreeModel *model;
+	GtkTreePath *path = NULL, *path_renderer;
+
+	path = current_playlist_get_actual(cwin);
+
+	if (path == NULL) {
+		return;
+		}
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	path_renderer = gtk_tree_model_get_path (model, iter);
+
+	if (gtk_tree_path_compare (path, path_renderer) == 0)
+	{
+		switch (cwin->cstate->state)
+		{
+		case ST_PLAYING:
+			pixbuf = cwin->pixbuf->pixbuf_play;
+			break;
+		case ST_PAUSED:
+			pixbuf = cwin->pixbuf->pixbuf_pause;
+			break;
+		default:
+			pixbuf = NULL;
+			break;
+		}
+	}
+
+	g_object_set (renderer, "pixbuf", pixbuf, NULL);
+
+	gtk_tree_path_free(path);
+	gtk_tree_path_free(path_renderer);
 }
 
 /* Clear sort in the current playlist */
@@ -1910,7 +1990,14 @@ void init_current_playlist_columns(struct con_win *cwin)
 		g_list_free(list);
 	}
 	else
-		g_warning("No columns in playlist view");
+		g_warning("(%s): No columns in playlist view", __func__);
+
+	/* Show Pixbuf colum ever*/
+
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
+				       P_PLAY_PIXBUF - 1);
+	col_name = gtk_tree_view_column_get_title(col);
+	gtk_tree_view_column_set_visible(col, TRUE);
 }
 
 /* Callback for adding/deleting track_no column */

@@ -510,25 +510,35 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin)
 {
-	GtkWidget *popup_menu;
+	static GtkWidget *popup_menu = NULL;
 	gboolean ret = FALSE;
 
-	switch(event->button) {
-	case 3: {
-		if ((gtk_notebook_get_current_page(GTK_NOTEBOOK(
-						   cwin->browse_mode)) == 0) &&
-		    (!cwin->cstate->view_change)) {
-			popup_menu = gtk_ui_manager_get_widget(
-				cwin->library_page_context_menu,
-			       "/popup");
+	if(!popup_menu){
+		popup_menu = gtk_ui_manager_get_widget(cwin->library_page_context_menu,
+						       "/popup");
+		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), widget, NULL);
+	}
+
+	if ((gtk_notebook_get_current_page(GTK_NOTEBOOK(cwin->browse_mode)) == 0) &&
+		(!cwin->cstate->view_change)){
+		switch(event->button) {
+		case 3: {
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 				       event->button, event->time);
+			ret = TRUE;
 		}
-		ret = TRUE;
-	}
-	default:
-		ret = FALSE;
-		break;
+		case 1: {
+			if (widget == cwin->combo_order){
+				gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
+						(GtkMenuPositionFunc) menu_position, widget, 
+						0, gtk_get_current_event_time());
+				ret = TRUE;
+			}
+		}
+		default:
+			ret = FALSE;
+			break;
+		}
 	}
 	return ret;
 }
@@ -716,40 +726,35 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 }
 
 gboolean simple_library_search_keyrelease_handler(GtkWidget *entry,
-						  GdkEventKey *event,
 						  struct con_win *cwin)
 {
-	const gchar *text = NULL;
+
+	gchar *text = NULL;
 	gchar *u_str = NULL;
 	GtkTreeModel *filter_model;
 
-	switch(event->type) {
-	case GDK_KEY_RELEASE:
-		text = gtk_entry_get_text(GTK_ENTRY(entry));
+	text = gtk_editable_get_chars( GTK_EDITABLE(entry), 0, -1 );
+
+	if (g_utf8_strlen (text, -1)){
 		u_str = g_utf8_strdown(text, -1);
 		cwin->cstate->filter_entry = u_str;
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 		gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
-				       filter_tree_func,
-				       cwin);
-		filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(
-							 cwin->library_store),
-							 NULL);
-		gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(
-							 filter_model),
-							 L_VISIBILE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree),
-					filter_model);
+				filter_tree_func,
+				cwin);
+		filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
+				NULL);
+		gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model),
+				L_VISIBILE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
 		g_object_unref(filter_model);
 		gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
 		gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
-						filter_tree_expand_func,
-						cwin);
+			filter_tree_expand_func,
+			cwin);
 		g_free(u_str);
-		break;
-	default:
-		break;
 	}
+	else clear_library_search(cwin);
 	return FALSE;
 }
 
@@ -765,7 +770,6 @@ void clear_library_search(struct con_win *cwin)
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
-	gtk_widget_hide(cwin->search_bar);
 	cwin->cstate->filter_entry = NULL;
 	gtk_tree_model_foreach(model, set_all_visible, cwin);
 	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
@@ -785,6 +789,10 @@ void folder_file_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_BASENAME_STR));
 	cwin->cpref->cur_library_view = FOLDER_FILE;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Folder / File");
+
 	init_library_view(cwin);
 }
 
@@ -798,6 +806,10 @@ void artist_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = ARTIST_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Artist / Track");
+
 	init_library_view(cwin);
 }
 
@@ -811,6 +823,10 @@ void album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = ALBUM_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Album / Track");
+
 	init_library_view(cwin);
 }
 
@@ -824,6 +840,10 @@ void genre_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = GENRE_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Genre / Track");
+
 	init_library_view(cwin);
 }
 
@@ -839,6 +859,10 @@ void artist_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = ARTIST_ALBUM_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Artist / Album / Track");
+
 	init_library_view(cwin);
 }
 
@@ -854,6 +878,10 @@ void genre_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = GENRE_ALBUM_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Genre / Album / Track");
+
 	init_library_view(cwin);
 }
 
@@ -869,6 +897,10 @@ void genre_artist_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = GENRE_ARTIST_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Genre / Artist / Track");
+
 	init_library_view(cwin);
 }
 
@@ -886,6 +918,10 @@ void genre_artist_album_track_library_tree(GtkAction *action, struct con_win *cw
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
 	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM_TRACK;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			"Genre / Artist / Album / Track");
+
 	init_library_view(cwin);
 }
 

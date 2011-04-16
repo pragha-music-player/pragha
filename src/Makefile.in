@@ -61,7 +61,10 @@ am_consonance_OBJECTS = consonance-consonance.$(OBJEXT) \
 	consonance-threads.$(OBJEXT) consonance-audio.$(OBJEXT) \
 	consonance-statusicon.$(OBJEXT) consonance-cmdline.$(OBJEXT) \
 	consonance-dbus.$(OBJEXT) consonance-playlist.$(OBJEXT) \
-	consonance-md5.$(OBJEXT) consonance-lastfm.$(OBJEXT)
+	consonance-md5.$(OBJEXT) consonance-lastfm.$(OBJEXT) \
+	consonance-eggtrayicon.$(OBJEXT) \
+	consonance-sexy-icon-entry.$(OBJEXT) \
+	consonance-sexy-marshal.$(OBJEXT)
 consonance_OBJECTS = $(am_consonance_OBJECTS)
 am__DEPENDENCIES_1 =
 consonance_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -72,7 +75,8 @@ consonance_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 consonance_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(consonance_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -208,10 +212,16 @@ libcurl_CFLAGS = @libcurl_CFLAGS@
 libcurl_LIBS = @libcurl_LIBS@
 libdir = @libdir@
 libexecdir = @libexecdir@
+libexo_CFLAGS = @libexo_CFLAGS@
+libexo_LIBS = @libexo_LIBS@
 libmodplug_CFLAGS = @libmodplug_CFLAGS@
 libmodplug_LIBS = @libmodplug_LIBS@
 libnotify_CFLAGS = @libnotify_CFLAGS@
 libnotify_LIBS = @libnotify_LIBS@
+libxfcegui4_CFLAGS = @libxfcegui4_CFLAGS@
+libxfcegui4_LIBS = @libxfcegui4_LIBS@
+libxfceutil4_CFLAGS = @libxfceutil4_CFLAGS@
+libxfceutil4_LIBS = @libxfceutil4_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
@@ -246,6 +256,9 @@ consonance_LDADD = $(glib_LIBS) \
 	$(gthread_LIBS) \
 	$(gio_LIBS) \
 	$(gtk_LIBS) \
+	$(libxfcegui4_LIBS) \
+	$(libxfceutil4_LIBS) \
+	$(libexo_LIBS) \
 	$(mad_LIBS) \
 	$(flac_LIBS) \
 	$(sqlite3_LIBS) \
@@ -265,6 +278,9 @@ consonance_LDADD = $(glib_LIBS) \
 AM_CPPFLAGS = $(glib_CFLAGS) \
 	$(gio_CFLAGS) \
 	$(gtk_CFLAGS) \
+	$(libxfcegui4_CFLAGS) \
+	$(libxfceutil4_CFLAGS) \
+	$(libexo_CFLAGS) \
 	$(mad_CFLAGS) \
 	$(flac_CFLAGS) \
 	$(sqlite3_CFLAGS) \
@@ -308,6 +324,12 @@ consonance_SOURCES = consonance.c \
 		playlist.c \
 		md5.c \
 		lastfm.c \
+		eggtrayicon.c \
+		eggtrayicon.h \
+		sexy-icon-entry.c \
+		sexy-icon-entry.h \
+		sexy-marshal.c \
+		sexy-marshal.h \
 		consonance.h \
 		md5.h \
 		wav.h \
@@ -394,6 +416,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-current_playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-dbus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-eggtrayicon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-filetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-gui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-init.Po@am__quote@
@@ -411,6 +434,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-playback_wav.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-pref.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-sexy-icon-entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-sexy-marshal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-statusicon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-tags.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/consonance-threads.Po@am__quote@
@@ -814,6 +839,48 @@ consonance-lastfm.obj: lastfm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lastfm.c' object='consonance-lastfm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-lastfm.obj `if test -f 'lastfm.c'; then $(CYGPATH_W) 'lastfm.c'; else $(CYGPATH_W) '$(srcdir)/lastfm.c'; fi`
+
+consonance-eggtrayicon.o: eggtrayicon.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-eggtrayicon.o -MD -MP -MF $(DEPDIR)/consonance-eggtrayicon.Tpo -c -o consonance-eggtrayicon.o `test -f 'eggtrayicon.c' || echo '$(srcdir)/'`eggtrayicon.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-eggtrayicon.Tpo $(DEPDIR)/consonance-eggtrayicon.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eggtrayicon.c' object='consonance-eggtrayicon.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-eggtrayicon.o `test -f 'eggtrayicon.c' || echo '$(srcdir)/'`eggtrayicon.c
+
+consonance-eggtrayicon.obj: eggtrayicon.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-eggtrayicon.obj -MD -MP -MF $(DEPDIR)/consonance-eggtrayicon.Tpo -c -o consonance-eggtrayicon.obj `if test -f 'eggtrayicon.c'; then $(CYGPATH_W) 'eggtrayicon.c'; else $(CYGPATH_W) '$(srcdir)/eggtrayicon.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-eggtrayicon.Tpo $(DEPDIR)/consonance-eggtrayicon.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eggtrayicon.c' object='consonance-eggtrayicon.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-eggtrayicon.obj `if test -f 'eggtrayicon.c'; then $(CYGPATH_W) 'eggtrayicon.c'; else $(CYGPATH_W) '$(srcdir)/eggtrayicon.c'; fi`
+
+consonance-sexy-icon-entry.o: sexy-icon-entry.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-sexy-icon-entry.o -MD -MP -MF $(DEPDIR)/consonance-sexy-icon-entry.Tpo -c -o consonance-sexy-icon-entry.o `test -f 'sexy-icon-entry.c' || echo '$(srcdir)/'`sexy-icon-entry.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-sexy-icon-entry.Tpo $(DEPDIR)/consonance-sexy-icon-entry.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-icon-entry.c' object='consonance-sexy-icon-entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-sexy-icon-entry.o `test -f 'sexy-icon-entry.c' || echo '$(srcdir)/'`sexy-icon-entry.c
+
+consonance-sexy-icon-entry.obj: sexy-icon-entry.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-sexy-icon-entry.obj -MD -MP -MF $(DEPDIR)/consonance-sexy-icon-entry.Tpo -c -o consonance-sexy-icon-entry.obj `if test -f 'sexy-icon-entry.c'; then $(CYGPATH_W) 'sexy-icon-entry.c'; else $(CYGPATH_W) '$(srcdir)/sexy-icon-entry.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-sexy-icon-entry.Tpo $(DEPDIR)/consonance-sexy-icon-entry.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-icon-entry.c' object='consonance-sexy-icon-entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-sexy-icon-entry.obj `if test -f 'sexy-icon-entry.c'; then $(CYGPATH_W) 'sexy-icon-entry.c'; else $(CYGPATH_W) '$(srcdir)/sexy-icon-entry.c'; fi`
+
+consonance-sexy-marshal.o: sexy-marshal.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-sexy-marshal.o -MD -MP -MF $(DEPDIR)/consonance-sexy-marshal.Tpo -c -o consonance-sexy-marshal.o `test -f 'sexy-marshal.c' || echo '$(srcdir)/'`sexy-marshal.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-sexy-marshal.Tpo $(DEPDIR)/consonance-sexy-marshal.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-marshal.c' object='consonance-sexy-marshal.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-sexy-marshal.o `test -f 'sexy-marshal.c' || echo '$(srcdir)/'`sexy-marshal.c
+
+consonance-sexy-marshal.obj: sexy-marshal.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -MT consonance-sexy-marshal.obj -MD -MP -MF $(DEPDIR)/consonance-sexy-marshal.Tpo -c -o consonance-sexy-marshal.obj `if test -f 'sexy-marshal.c'; then $(CYGPATH_W) 'sexy-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sexy-marshal.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/consonance-sexy-marshal.Tpo $(DEPDIR)/consonance-sexy-marshal.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-marshal.c' object='consonance-sexy-marshal.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(consonance_CFLAGS) $(CFLAGS) -c -o consonance-sexy-marshal.obj `if test -f 'sexy-marshal.c'; then $(CYGPATH_W) 'sexy-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sexy-marshal.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

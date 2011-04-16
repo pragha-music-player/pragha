@@ -1045,6 +1045,18 @@ void init_tag_completion(struct con_win *cwin)
 	g_object_unref(genre_tag_model);
 }
 
+void init_pixbuf(struct con_win *cwin)
+{
+	GtkIconTheme *icon_theme;
+	icon_theme = gtk_icon_theme_get_default ();
+
+	cwin->pixbuf->pixbuf_play = gtk_icon_theme_load_icon (icon_theme, "stock_media-play",16, 0,NULL);
+	cwin->pixbuf->pixbuf_pause = gtk_icon_theme_load_icon (icon_theme, "stock_media-pause", 16, 0, NULL);
+
+	g_object_ref(cwin->pixbuf->pixbuf_play);
+	g_object_ref(cwin->pixbuf->pixbuf_pause);
+}
+
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
@@ -1054,6 +1066,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing gui");
 
 	gtk_init(&argc, &argv);
+
+        g_set_application_name("Totem Movie Player");
+        g_setenv("PULSE_PROP_media.role", "video", TRUE);
+
 
 	/* Main window */
 
@@ -1067,10 +1083,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		g_error_free(error);
 		error = NULL;
 	}
-	else
+	else{
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
 				    cwin->pixbuf->pixbuf_app);
-
+	}
 	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), "Consonance");
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",
@@ -1087,7 +1103,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Systray */
 
-	create_status_icon(cwin);
+	create_systray_icon(cwin);
+	init_pixbuf(cwin);
 
 	/* Main Vbox */
 
@@ -1114,16 +1131,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(hbox_main),
 			   TRUE,TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(search_bar),
-			   FALSE,FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
 
-	/* Show main window, hide search bar */
+	/* Show main window */
 
 	gtk_widget_show_all(cwin->mainwindow);
-	gtk_widget_hide(cwin->search_bar);
 
 	/* Set initial size of album art frame */
 
