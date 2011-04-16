@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-05-18 23:53-0300\n"
-"PO-Revision-Date: 2010-03-21 12:43+0100\n"
+"PO-Revision-Date: 2010-05-08 14:21+0100\n"
 "Last-Translator: Michael Kogan <michael.kogan@gmx.net>\n"
 "Language-Team: Deutsch\n"
 "MIME-Version: 1.0\n"
@@ -318,9 +318,8 @@ msgid "Stop playback"
 msgstr "Wiedergabe stoppen"
 
 #: src/gui.c:1593
-#, fuzzy
 msgid "Leave Fullscreen"
-msgstr "_Vollbild"
+msgstr "Vollbild verlassen"
 
 #: src/gui.c:1594
 msgid "Play songs in a random order"
@@ -417,6 +416,10 @@ msgid ""
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
+"Die Datei sicher aus der Musikbibliothek entfernen?\n"
+"\n"
+"Warnung: Um die Datei wiederherzustellen, muss die gesamte Musikbibliothek "
+"neu eingelesen werden."
 
 #: src/librarytree.c:1117
 msgid ""
@@ -424,6 +427,9 @@ msgid ""
 "\n"
 "Warning: Once deleted, the file cannot be recovered."
 msgstr ""
+"Die Datei sicher von der Festplatte löschen? \n"
+"\n"
+"Warnung: Die Datei kann nach dem Löschen nicht wiederhergestellt werden."
 
 #: src/pref.c:21
 msgid ""
@@ -441,16 +447,15 @@ msgstr "Muster für Album-Cover"
 
 #: src/pref.c:61 src/pref.c:1391
 msgid "Start normal"
-msgstr ""
+msgstr "Normal starten"
 
 #: src/pref.c:66 src/pref.c:1392
-#, fuzzy
 msgid "Start fullscreen"
-msgstr "_Vollbild"
+msgstr "Vollbild starten"
 
 #: src/pref.c:71 src/pref.c:1393
 msgid "Start in system tray"
-msgstr ""
+msgstr "Im Tray starten"
 
 #. Create a folder chooser dialog
 #: src/pref.c:270
@@ -495,21 +500,20 @@ msgstr "Muster für Album-Cover Dateien"
 
 #: src/pref.c:1390
 msgid "Remember last window state"
-msgstr ""
+msgstr "Fensterposition und -größe merken"
 
 #: src/pref.c:1395
 msgid "When Pragha start"
-msgstr ""
+msgstr "Wenn Pragha startet"
 
 #. General Check_buttons
 #: src/pref.c:1412
 msgid "Minimize pragha when close the window"
-msgstr ""
+msgstr "Pragha minimieren, wenn das Fenster geschlossen wird"
 
 #: src/pref.c:1414
-#, fuzzy
 msgid "Restore last playlist"
-msgstr "Wiedergabeliste Speichern/Wiederherstellen"
+msgstr "Letzte Wiedergabeliste wiederherstellen"
 
 #: src/pref.c:1415
 msgid "Show OSD for track change"

@@ -29,6 +29,10 @@ Bugs fixed:
 	Unref Cover in unset_album_art
 	Fix memleak in panel.
 
+V0.7.5.1
+	Update German translation. Thanks to PhotonX.
+	New album unknown icon. Provisory.(Does not look good with dark themes)
+
 ======================================================
 OTHERS REALESES:
 ======================================================
