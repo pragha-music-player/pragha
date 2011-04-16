@@ -33,7 +33,7 @@ Updates Translations:
 	Add Hungiran translatiton.
 	Update others translation.
 
-0.93
+V0.93
 News:
 	Add MPRIS2 control support and emit a dbus signal named 'update_state' thanks to Hakan Erduman.
 	Added a DBus message to toggle the visibility of the player thanks to Hakan Erduman.
@@ -50,6 +50,10 @@ Updates Translations:
 	Updated Czech translation thank to Alois.
 
 Note: Temporarily disables search lyrics, by license change of http://www.lyricsplugin.com.
+
+0.93.1:
+Any change on pragha. But use liblastfm 0.4, that does not depend on libopenssl, incompatible with the GPL
+So fix Issee 22. :)
 
 
 ======================================================

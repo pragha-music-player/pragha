@@ -6,7 +6,8 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [0])
 m4_define([pragha_version_minor], [93])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
+m4_define([pragha_version_micro], [1])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2009-2011
@@ -59,7 +60,6 @@ XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
 XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
-XDT_CHECK_PACKAGE([OPENSSL], [openssl], [1.0.0])
 XDT_CHECK_PACKAGE([LIBX11], [x11], 1.0.0)
 
 dnl Check for taglib_c

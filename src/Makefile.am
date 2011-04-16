@@ -41,7 +41,8 @@ pragha_SOURCES =cdda.c \
 		user.c \
 		track.c \
 		scrobbler.c \
-		pragha-lastfm.c
+		pragha-lastfm.c \
+		md5.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -57,7 +58,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	$(LIBCURL_CFLAGS)						\
-	$(OPENSSL_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -74,7 +74,6 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS) 						\
 	$(LIBCURL_LIBS)							\
-	$(OPENSSL_LIBS) 						\
 	$(LIBX11_LIBS)
 
 if HAVE_GSTREAMER_PLUGINS_BASE

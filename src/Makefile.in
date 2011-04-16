@@ -67,7 +67,7 @@ am_pragha_OBJECTS = pragha-cdda.$(OBJEXT) pragha-cmdline.$(OBJEXT) \
 	pragha-lfm_helper.$(OBJEXT) pragha-album.$(OBJEXT) \
 	pragha-artist.$(OBJEXT) pragha-user.$(OBJEXT) \
 	pragha-track.$(OBJEXT) pragha-scrobbler.$(OBJEXT) \
-	pragha-pragha-lastfm.$(OBJEXT)
+	pragha-pragha-lastfm.$(OBJEXT) pragha-md5.$(OBJEXT)
 pragha_OBJECTS = $(am_pragha_OBJECTS)
 pragha_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -215,10 +215,6 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
-OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
-OPENSSL_LIBS = @OPENSSL_LIBS@
-OPENSSL_REQUIRED_VERSION = @OPENSSL_REQUIRED_VERSION@
-OPENSSL_VERSION = @OPENSSL_VERSION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -345,20 +341,21 @@ pragha_SOURCES = cdda.c \
 		user.c \
 		track.c \
 		scrobbler.c \
-		pragha-lastfm.c
+		pragha-lastfm.c \
+		md5.c
 
 pragha_CFLAGS = $(GSTREAMER_CFLAGS) $(GSTREAMER_BASE_CFLAGS) \
 	$(GLIB_CFLAGS) $(GIO_CFLAGS) $(GTK_CFLAGS) $(SQLITE3_CFLAGS) \
 	$(TAGLIB_CFLAGS) $(TAGLIBC_CFLAGS) $(DBUS_CFLAGS) \
 	$(LIBNOTIFY_CFLAGS) $(LIBX11_CFLAGS) $(LIBCDIO_CFLAGS) \
-	$(LIBCDDB_CFLAGS) $(LIBCURL_CFLAGS) $(OPENSSL_CFLAGS) \
+	$(LIBCDDB_CFLAGS) $(LIBCURL_CFLAGS) \
 	-I$(top_srcdir)/src/include -Wall $(am__append_1) \
 	$(am__append_3)
 pragha_LDFLAGS = $(GSTREAMER_LIBS) $(GLIB_LIBS) $(GIO_LIBS) \
 	$(GTK_LIBS) $(SQLITE3_LIBS) $(TAGLIB_LIBS) $(TAGLIBC_LIBS) \
 	$(DBUS_LIBS) $(LIBNOTIFY_LIBS) $(LIBCDIO_LIBS) \
 	$(LIBCDIO_PARANOIA_LIBS) $(LIBCDDB_LIBS) $(LIBCURL_LIBS) \
-	$(OPENSSL_LIBS) $(LIBX11_LIBS) $(am__append_2) $(am__append_4)
+	$(LIBX11_LIBS) $(am__append_2) $(am__append_4)
 all: all-am
 
 .SUFFIXES:
@@ -460,6 +457,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-lastfm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-lfm_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-librarytree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-mpris.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-musicobject.Po@am__quote@
@@ -963,6 +961,22 @@ pragha-pragha-lastfm.obj: pragha-lastfm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha-lastfm.c' object='pragha-pragha-lastfm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha-lastfm.obj `if test -f 'pragha-lastfm.c'; then $(CYGPATH_W) 'pragha-lastfm.c'; else $(CYGPATH_W) '$(srcdir)/pragha-lastfm.c'; fi`
+
+pragha-md5.o: md5.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-md5.o -MD -MP -MF $(DEPDIR)/pragha-md5.Tpo -c -o pragha-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-md5.Tpo $(DEPDIR)/pragha-md5.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='md5.c' object='pragha-md5.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+
+pragha-md5.obj: md5.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-md5.obj -MD -MP -MF $(DEPDIR)/pragha-md5.Tpo -c -o pragha-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-md5.Tpo $(DEPDIR)/pragha-md5.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='md5.c' object='pragha-md5.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

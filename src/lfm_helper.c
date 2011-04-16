@@ -13,8 +13,6 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
-#include <openssl/md5.h>
-
 #include "lfm_helper.h"
 
 char *HTML_ESCAPE[] = {
@@ -23,6 +21,8 @@ char *HTML_ESCAPE[] = {
 	"&ndash;","-",
 	NULL
 };
+
+extern void md5_buffer (const char *buffer, size_t len, void *resblock);
 
 char *unescape_HTML(char *original){
 	int i;
@@ -43,16 +43,16 @@ char *unescape_HTML(char *original){
 }
 
 int string2MD5(const char *string, char *buffer){
-	char hash[MD5_DIGEST_LENGTH];
+	char hash[16]; // 128bit md5
 	int i;
 	char *cptr;
-	MD5((const unsigned char *)string,strlen(string),(unsigned char *)hash);
+	md5_buffer(string,strlen(string),(unsigned char *)hash);
 	cptr = buffer;
-	for(i=0;i<MD5_DIGEST_LENGTH;i++){
-		sprintf(cptr,"%02x",(unsigned char)hash[i]);
+	for(i=0;i<16;i++){
+		sprintf(cptr,"%02hhx",(unsigned char)hash[i]);
 		cptr+=2;
 	}
-	buffer[(MD5_DIGEST_LENGTH*2)]=0;
+	buffer[32]=0; // 128bit x 2
 	return 0;
 }
 void *myrealloc(void *ptr, unsigned int size)
