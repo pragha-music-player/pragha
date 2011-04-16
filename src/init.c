@@ -779,7 +779,7 @@ gint init_config(struct con_win *cwin)
 		}
 	}
 	if (all_f || cur_lib_view_f)
-		cwin->cpref->cur_library_view = ARTIST_ALBUM_TRACK;
+		cwin->cpref->cur_library_view = ARTIST_ALBUM;
 	if (all_f || hidden_f)
 		cwin->cpref->show_hidden_files = FALSE;
 	if (all_f || file_tree_pwd_f)

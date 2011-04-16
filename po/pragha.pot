@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-03 12:39-0300\n"
+"POT-Creation-Date: 2009-07-08 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,32 +108,38 @@ msgstr ""
 msgid "Folder / File"
 msgstr ""
 
-#: src/gui.c:192 src/gui.c:285 src/librarytree.c:817 src/librarytree.c:1242
-msgid "Artist / Track"
+#: src/gui.c:192 src/gui.c:285 src/gui.c:946 src/gui.c:1062
+#: src/current_playlist.c:1043 src/librarytree.c:817 src/librarytree.c:1242
+#: src/tags.c:408
+msgid "Artist"
 msgstr ""
 
-#: src/gui.c:194 src/gui.c:287 src/librarytree.c:834 src/librarytree.c:1245
-msgid "Album / Track"
+#: src/gui.c:194 src/gui.c:287 src/gui.c:947 src/gui.c:1063
+#: src/current_playlist.c:1044 src/librarytree.c:834 src/librarytree.c:1245
+#: src/tags.c:409
+msgid "Album"
 msgstr ""
 
-#: src/gui.c:196 src/gui.c:289 src/librarytree.c:851 src/librarytree.c:1248
-msgid "Genre / Track"
+#: src/gui.c:196 src/gui.c:289 src/gui.c:948 src/gui.c:1064
+#: src/current_playlist.c:1045 src/librarytree.c:851 src/librarytree.c:1248
+#: src/tags.c:410
+msgid "Genre"
 msgstr ""
 
 #: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1251
-msgid "Artist / Album / Track"
+msgid "Artist / Album"
 msgstr ""
 
 #: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1257
-msgid "Genre / Album / Track"
+msgid "Genre / Album"
 msgstr ""
 
 #: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1254
-msgid "Genre / Artist / Track"
+msgid "Genre / Artist"
 msgstr ""
 
 #: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1260
-msgid "Genre / Artist / Album / Track"
+msgid "Genre / Artist / Album"
 msgstr ""
 
 #: src/gui.c:206 src/gui.c:302
@@ -243,18 +249,6 @@ msgstr ""
 
 #: src/gui.c:945 src/gui.c:1061 src/current_playlist.c:1042 src/tags.c:407
 msgid "Title"
-msgstr ""
-
-#: src/gui.c:946 src/gui.c:1062 src/current_playlist.c:1043 src/tags.c:408
-msgid "Artist"
-msgstr ""
-
-#: src/gui.c:947 src/gui.c:1063 src/current_playlist.c:1044 src/tags.c:409
-msgid "Album"
-msgstr ""
-
-#: src/gui.c:948 src/gui.c:1064 src/current_playlist.c:1045 src/tags.c:410
-msgid "Genre"
 msgstr ""
 
 #: src/gui.c:949 src/gui.c:1065 src/current_playlist.c:1048
@@ -542,4 +536,8 @@ msgstr ""
 
 #: src/playlist.c:457
 msgid "Export playlist to file"
+msgstr ""
+
+#: src/playlist.c:837
+msgid "Playlists"
 msgstr ""

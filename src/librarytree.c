@@ -802,7 +802,7 @@ void folder_file_library_tree(GtkAction *action, struct con_win *cwin)
 	init_library_view(cwin);
 }
 
-void artist_track_library_tree(GtkAction *action, struct con_win *cwin)
+void artist_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -811,15 +811,15 @@ void artist_track_library_tree(GtkAction *action, struct con_win *cwin)
 							 g_strdup(P_ARTIST_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = ARTIST_TRACK;
+	cwin->cpref->cur_library_view = ARTIST;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Artist / Track"));
+			_("Artist"));
 
 	init_library_view(cwin);
 }
 
-void album_track_library_tree(GtkAction *action, struct con_win *cwin)
+void album_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -828,15 +828,15 @@ void album_track_library_tree(GtkAction *action, struct con_win *cwin)
 							 g_strdup(P_ALBUM_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = ALBUM_TRACK;
+	cwin->cpref->cur_library_view = ALBUM;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Album / Track"));
+			_("Album"));
 
 	init_library_view(cwin);
 }
 
-void genre_track_library_tree(GtkAction *action, struct con_win *cwin)
+void genre_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -845,15 +845,15 @@ void genre_track_library_tree(GtkAction *action, struct con_win *cwin)
 							 g_strdup(P_GENRE_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = GENRE_TRACK;
+	cwin->cpref->cur_library_view = GENRE;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Genre / Track"));
+			_("Genre"));
 
 	init_library_view(cwin);
 }
 
-void artist_album_track_library_tree(GtkAction *action, struct con_win *cwin)
+void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -864,15 +864,15 @@ void artist_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 							 g_strdup(P_ALBUM_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = ARTIST_ALBUM_TRACK;
+	cwin->cpref->cur_library_view = ARTIST_ALBUM;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Artist / Album / Track"));
+			_("Artist / Album"));
 
 	init_library_view(cwin);
 }
 
-void genre_album_track_library_tree(GtkAction *action, struct con_win *cwin)
+void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -883,34 +883,15 @@ void genre_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 							 g_strdup(P_ALBUM_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = GENRE_ALBUM_TRACK;
+	cwin->cpref->cur_library_view = GENRE_ALBUM;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Genre / Album / Track"));
+			_("Genre / Album"));
 
 	init_library_view(cwin);
 }
 
-void genre_artist_track_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	free_str_list(cwin->cpref->library_tree_nodes);
-	cwin->cpref->library_tree_nodes = NULL;
-
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_GENRE_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ARTIST_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = GENRE_ARTIST_TRACK;
-
-	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Genre / Artist / Track"));
-
-	init_library_view(cwin);
-}
-
-void genre_artist_album_track_library_tree(GtkAction *action, struct con_win *cwin)
+void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
 {
 	free_str_list(cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
@@ -920,13 +901,32 @@ void genre_artist_album_track_library_tree(GtkAction *action, struct con_win *cw
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_ARTIST_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
+							 g_strdup(P_TITLE_STR));
+	cwin->cpref->cur_library_view = GENRE_ARTIST;
+
+	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
+			_("Genre / Artist"));
+
+	init_library_view(cwin);
+}
+
+void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	free_str_list(cwin->cpref->library_tree_nodes);
+	cwin->cpref->library_tree_nodes = NULL;
+
+	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
+							 g_strdup(P_GENRE_STR));
+	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
+							 g_strdup(P_ARTIST_STR));
+	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_ALBUM_STR));
 	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
 							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM_TRACK;
+	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			_("Genre / Artist / Album / Track"));
+			_("Genre / Artist / Album"));
 
 	init_library_view(cwin);
 }
@@ -1238,26 +1238,26 @@ void init_library_view(struct con_win *cwin)
 	case FOLDER_FILE:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Folder / File"));
 		break;
-	case ARTIST_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist / Track"));		
+	case ARTIST:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist"));		
 		break;
-	case ALBUM_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Album / Track"));	
+	case ALBUM:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Album"));	
 		break;
-	case GENRE_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Track"));
+	case GENRE:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre"));
 		break;
-	case ARTIST_ALBUM_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist / Album / Track"));
+	case ARTIST_ALBUM:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist / Album"));
 		break;
-	case GENRE_ARTIST_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist / Track"));
+	case GENRE_ARTIST:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist"));
 		break;
-	case GENRE_ALBUM_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Album / Track"));
+	case GENRE_ALBUM:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Album"));
 		break;
-	case GENRE_ARTIST_ALBUM_TRACK:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist / Album / Track"));
+	case GENRE_ARTIST_ALBUM:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist / Album"));
 		break;
 	default:
 		break;

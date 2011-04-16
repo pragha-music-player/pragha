@@ -1,155 +1,157 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Pragha\n"
+"Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-07-08 18:55-0300\n"
-"PO-Revision-Date: \n"
+"PO-Revision-Date: 2009-07-08 19:12-0300\n"
 "Last-Translator: Matias <mati86_dl@yahoo.com.ar>\n"
-"Language-Team: Lyceuhns <mail@lyceuhns.net>\n"
+"Language-Team: Deutsch\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Portuguese\n"
-"X-Poedit-Country: BRAZIL\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
 #: src/gui.c:153
 msgid "_File"
-msgstr "_Arquivo"
+msgstr "_Datei"
 
 #: src/gui.c:154
 msgid "_Edit"
-msgstr "_Editar"
+msgstr "_Bearbeiten"
 
 #: src/gui.c:155
 msgid "_Tools"
-msgstr "_Ferramentas"
+msgstr "_Extras"
 
 #: src/gui.c:156
 msgid "_Help"
-msgstr "Aj_uda"
+msgstr "_Hilfe"
 
 #: src/gui.c:157 src/gui.c:304
 msgid "_Open File"
-msgstr "_Abrir Arquivo"
+msgstr "Datei öffnen"
 
 #: src/gui.c:158
 msgid "Open a media file"
-msgstr "Abrir um arquivo de mídia"
+msgstr "Eine Mediendatei öffnen"
 
 #: src/gui.c:159 src/gui.c:306
 msgid "_Play Audio CD"
-msgstr "_Reproduzir CD de Áudio"
+msgstr "_Audio-CD abspielen"
 
 #: src/gui.c:161 src/gui.c:308
+#, fuzzy
 msgid "Prev Track"
-msgstr "Faixa Anterior"
+msgstr "Vorheriger Titel"
 
 #: src/gui.c:163 src/gui.c:310
 msgid "Play/Pause"
-msgstr "Reproduzir/Pausar"
+msgstr "Wiedergabe/Pause"
 
 #: src/gui.c:165 src/gui.c:312
 msgid "Stop"
-msgstr "Parar"
+msgstr "Stopp"
 
 #: src/gui.c:167 src/gui.c:314 src/gui.c:1715
+#, fuzzy
 msgid "Next Track"
-msgstr "Próxima Faixa"
+msgstr "Nächster Titel"
 
 #: src/gui.c:169 src/gui.c:316
 msgid "_Quit"
-msgstr "_Sair"
+msgstr "_Beenden"
 
 #: src/gui.c:171
 msgid "_Expand All in Library"
-msgstr "E_xpandir tudo da biblioteca"
+msgstr "Alles in der Musikbibliothek _aufklappen"
 
 #: src/gui.c:173
 msgid "_Collapse All in Library"
-msgstr "E_sconder tudo da biblioteca"
+msgstr "Alles in der Musikbibliothek _zuklappen"
 
 #: src/gui.c:175
 msgid "Search Library"
-msgstr "Procurar na Biblioteca"
+msgstr "Musikbibliothek durchsuchen"
 
 #: src/gui.c:177
 msgid "Search Playlist"
-msgstr "Procurar na Lista de Reprodução"
+msgstr "Wiedergabeliste durchsuchen"
 
 #: src/gui.c:179
 msgid "_Preferences"
-msgstr "_Preferências"
+msgstr "_Einstellungen"
 
 #: src/gui.c:181
 msgid "_Rescan Library"
-msgstr "_Varrer Biblioteca"
+msgstr "Musikbibliothek neu _einlesen"
 
 #: src/gui.c:183
 msgid "_Update Library"
-msgstr "_Atualizar Biblioteca"
+msgstr "Musikbibliothek _aktualisieren"
 
 #: src/gui.c:185
 msgid "_Add All to Current Playlist"
-msgstr "A_dicionar tudo para a lista de reprodução"
+msgstr "Alles zur aktuellen Wiedergabeliste _hinzufügen"
 
 #: src/gui.c:187
 msgid "_Statistics"
-msgstr "_Estatísticas"
+msgstr "Statistiken"
 
 #: src/gui.c:189
 msgid "_Library View"
-msgstr "E_xibição da Biblioteca"
+msgstr "Struktur der Musikbibliothek"
 
 #: src/gui.c:190 src/gui.c:283 src/librarytree.c:800 src/librarytree.c:1239
 msgid "Folder / File"
-msgstr "Pasta / Arquivo"
+msgstr "Ordner / Datei"
 
 #: src/gui.c:192 src/gui.c:285 src/gui.c:946 src/gui.c:1062
 #: src/current_playlist.c:1043 src/librarytree.c:817 src/librarytree.c:1242
 #: src/tags.c:408
 msgid "Artist"
-msgstr "Artista"
+msgstr "Interpret"
 
 #: src/gui.c:194 src/gui.c:287 src/gui.c:947 src/gui.c:1063
 #: src/current_playlist.c:1044 src/librarytree.c:834 src/librarytree.c:1245
 #: src/tags.c:409
 msgid "Album"
-msgstr "Álbum"
+msgstr "Album"
 
 #: src/gui.c:196 src/gui.c:289 src/gui.c:948 src/gui.c:1064
 #: src/current_playlist.c:1045 src/librarytree.c:851 src/librarytree.c:1248
 #: src/tags.c:410
 msgid "Genre"
-msgstr "Gênero"
+msgstr "Genre"
 
 #: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1251
 msgid "Artist / Album"
-msgstr "Artista / Álbum"
+msgstr "Interpret / Album"
 
 #: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1257
 msgid "Genre / Album"
-msgstr "Gênero / Álbum"
+msgstr "Genre / Album"
 
 #: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1254
 msgid "Genre / Artist"
-msgstr "Gênero / Artista"
+msgstr "Genre / Interpret"
 
 #: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1260
 msgid "Genre / Artist / Album"
-msgstr "Gênero / Artista / Álbum"
+msgstr "Genre / Interpret / Album"
 
 #: src/gui.c:206 src/gui.c:302
 msgid "About"
-msgstr "Sobre"
+msgstr "_Über"
 
 #: src/gui.c:208
 msgid "Homepage"
-msgstr "Página Inicial"
+msgstr "Webseite"
 
 #: src/gui.c:210
 msgid "Community"
-msgstr "Comunidade"
+msgstr "Gemeinschaft"
 
 #: src/gui.c:212
 msgid "Wiki"
@@ -157,96 +159,101 @@ msgstr "Wiki"
 
 #: src/gui.c:217
 msgid "_Shuffle"
-msgstr "_Aleatório"
+msgstr "_Zufallswiedergabe"
 
 #: src/gui.c:220
 msgid "_Repeat"
-msgstr "_Repetir"
+msgstr "_Wiederholen"
 
 #: src/gui.c:226
 msgid "Remove"
-msgstr "Remover"
+msgstr "Entfernen"
 
 #: src/gui.c:228
+#, fuzzy
 msgid "Crop"
-msgstr "Recortar"
+msgstr "Zuschneiden"
 
 #: src/gui.c:230 src/gui.c:260
 msgid "Edit tags"
-msgstr "Editar Tags"
+msgstr "Tags bearbeiten"
 
 #: src/gui.c:232
 msgid "Properties"
-msgstr "Propriedades"
+msgstr "Eigenschaften"
 
 #: src/gui.c:234
 msgid "Save Selected as Playlist"
-msgstr "Salvar selecionado como lista de reprodução"
+msgstr "Auswahl als Wiedergabeliste speichern..."
 
 #: src/gui.c:236
 msgid "Save Complete Playlist"
-msgstr "Salvar como lista de reprodução"
+msgstr "Komplette Wiedergabeliste speichern"
 
 #: src/gui.c:238
 msgid "Clear Playlist"
-msgstr "Limpar lista de reprodução"
+msgstr "Wiedergabeliste löschen"
 
 #: src/gui.c:240
+#, fuzzy
 msgid "Clear Sort"
-msgstr "Limpar ordem"
+msgstr "Elemente sortieren nach"
 
 #: src/gui.c:245 src/gui.c:256 src/gui.c:276
 msgid "Play"
-msgstr "Reproduzir"
+msgstr "Abspielen"
 
 #: src/gui.c:247 src/gui.c:258 src/gui.c:278
 msgid "Enqueue"
-msgstr "Enfileirar"
+msgstr "In die Warteschlange einreihen"
 
 #: src/gui.c:249
 msgid "Delete"
-msgstr "Apagar"
+msgstr "Löschen"
 
 #: src/gui.c:251
 msgid "Export"
-msgstr "Exportar"
+msgstr "Exportieren"
 
 #: src/gui.c:262
 msgid "Delete from Library"
-msgstr "Apagar da Biblioteca"
+msgstr "Aus der Bibliothek entfernen"
 
 #: src/gui.c:264
 msgid "Delete from HDD"
-msgstr "Apagar do Disco Rígido"
+msgstr "Vom Laufwerk löschen"
 
 #: src/gui.c:269
 msgid "Enqueue (Recursive)"
-msgstr "Enfileirar (Recursivamente)"
+msgstr "In die Warteschlange einreihen (rekursiv)"
 
 #: src/gui.c:271
 msgid "Enqueue (Non-Recursive)"
-msgstr "Enfileirar (Não Recursivamente)"
+msgstr "In die Warteschlange einreihen (nicht rekursiv)"
 
 #: src/gui.c:777 src/pref.c:1131
 msgid "Library"
-msgstr "Biblioteca"
+msgstr "Musikbibliothek"
 
 #: src/gui.c:795
 msgid "Files"
-msgstr "Arquivos"
+msgstr "Dateien"
 
 #: src/gui.c:806
+#, fuzzy
 msgid "Pragha Music Manager"
-msgstr "Gerenciador de Músicas Pragha"
+msgstr "Pragha Music Manager"
 
 #. Create the checkmenu items
 #: src/gui.c:944 src/gui.c:1060
+#, fuzzy
 msgid "Track"
-msgstr "Faixa"
+msgstr "Spur"
 
 #: src/gui.c:945 src/gui.c:1061 src/current_playlist.c:1042 src/tags.c:407
+#, fuzzy
 msgid "Title"
-msgstr "Título"
+msgstr "Titel"
 
 #: src/gui.c:949 src/gui.c:1065 src/current_playlist.c:1048
 msgid "Bitrate"
@@ -254,34 +261,34 @@ msgstr "Bitrate"
 
 #: src/gui.c:950 src/gui.c:1066 src/current_playlist.c:1046 src/tags.c:411
 msgid "Year"
-msgstr "Ano"
+msgstr "Jahr"
 
 #: src/gui.c:951 src/gui.c:1067 src/current_playlist.c:1047
 msgid "Length"
-msgstr "Tempo"
+msgstr "Länge"
 
 #: src/gui.c:952 src/gui.c:1068 src/current_playlist.c:1051
 msgid "Filename"
-msgstr "Nome do Arquivo"
+msgstr "Dateiname"
 
 #. Tooltips
 #: src/gui.c:1713
 #, fuzzy
 msgid "Play / Pause Track"
-msgstr "Reproduzir/Pausar"
+msgstr "Titel wiedergeben / anhalten"
 
 #: src/gui.c:1714
 #, fuzzy
 msgid "Previous Track"
-msgstr "Faixa Anterior"
+msgstr "Vorheriger Titel"
 
 #: src/gui.c:1716
 msgid "Stop playback"
-msgstr ""
+msgstr "Wiedergabe stoppen"
 
 #: src/gui.c:1758 src/panel.c:193
 msgid "<b>Not playing</b>"
-msgstr "<b>Parado</b>"
+msgstr "<b>Keine Wiedergabe</b>"
 
 #: src/panel.c:162
 #, c-format
@@ -289,98 +296,98 @@ msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
-"%s <small><span weight=\"light\">por</span></small> %s <small><span weight="
-"\"light\">em</span></small> %s"
+"%s <small><span weight=\"light\">von</span></small> %s <small><span weight="
+"\"light\">in</span></small> %s"
 
 #: src/panel.c:167
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">por</span></small> %s"
+msgstr "%s <small><span weight=\"light\">von</span></small> %s"
 
 #: src/panel.c:171
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">em</span></small> %s"
+msgstr "%s <small><span weight=\"light\">in</span></small> %s"
 
 #: src/current_playlist.c:56
-#, c-format
+#, fuzzy, c-format
 msgid "%i Tracks - %s"
-msgstr "%i Faixas - %s"
+msgstr "%i Titel - %s"
 
 #: src/current_playlist.c:519
-#, fuzzy
 msgid "Save as a new playlist"
-msgstr "Salvar selecionado como lista de reprodução"
+msgstr "Als neue Wiedergabyliste speichern"
 
 #: src/current_playlist.c:521
 msgid "Append to an existing playlist"
-msgstr ""
+msgstr "An existierende Wiedergabeliste anhängen"
 
 #: src/current_playlist.c:533
-#, fuzzy
 msgid "Save playlist"
-msgstr "Salvar como lista de reprodução"
+msgstr "Wiedergabeliste speichern"
 
 #: src/current_playlist.c:598
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr ""
+msgstr "<b>con_playlist</b> ist ein reservierter Wiedergabelistenname"
 
 #. Create labels
 #: src/current_playlist.c:1041 src/tags.c:406
+#, fuzzy
 msgid "Track No"
-msgstr "Faixa Nº"
+msgstr "Titelnummer"
 
 #: src/current_playlist.c:1049
 msgid "Channels"
-msgstr "Canais"
+msgstr "Kanäle"
 
 #: src/current_playlist.c:1050
 msgid "Samplerate"
 msgstr "Samplerate"
 
 #: src/current_playlist.c:1100
+#, fuzzy
 msgid "Track Information"
-msgstr "Informação da Faixa"
+msgstr "Titelinformationen"
 
 #: src/librarytree.c:178 src/librarytree.c:233
 #, c-format
 msgid "Unknown Artist"
-msgstr "Artista Desconhecido"
+msgstr "Unbekannter Interpret"
 
 #: src/librarytree.c:180 src/librarytree.c:235
 #, c-format
 msgid "Unknown Album"
-msgstr "Álbum Desconhecido"
+msgstr "Unbekanntes Album"
 
 #: src/librarytree.c:182 src/librarytree.c:237
 #, c-format
 msgid "Unknown Genre"
-msgstr "Gênero Desconhecido"
+msgstr "Unbekanntes Genre"
 
 #: src/statusicon.c:92
 #, c-format
 msgid "by %s in %s"
-msgstr "por %s em %s"
+msgstr "von %s in %s"
 
 #: src/statusicon.c:96
 #, c-format
 msgid "by %s"
-msgstr "por %s"
+msgstr "von %s"
 
 #: src/statusicon.c:99
 #, c-format
 msgid "in %s"
-msgstr "em %s"
+msgstr "in %s"
 
 #: src/statusicon.c:101
 #, c-format
 msgid "Unknown Tags"
-msgstr "Tags Desconhecidas"
+msgstr "Unbekannte Tags"
 
 #: src/statusicon.c:138
 #, c-format
 msgid "%s by %s"
-msgstr "%s por %s"
+msgstr "%s von %s"
 
 #: src/pref.c:21
 msgid ""
@@ -388,32 +395,32 @@ msgid ""
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
-"Os padrões de nomes devem ser descritos na forma:<nome>;<nome>;....\n"
-"É permitido um máximo de 6 nomes.\n"
-"Por enquanto Wildcards não são aceitos (mas patches são bem vindos :-) )."
+"Muster sollten in der Form <Dateiname>;<Dateiname>;... vorliegen\n"
+"Es sind maximal sechs Muster erlaubt.\n"
+"Platzhalter werden noch nicht verarbeitet (Patches sind willkommen :-) )."
 
 #: src/pref.c:35
 msgid "Album art pattern"
-msgstr "Nome da arte do álbum"
+msgstr "Muster für Album-Cover"
 
 #. Create a folder chooser dialog
 #: src/pref.c:248
 msgid "Select a folder to add to library"
-msgstr "Selecione uma pasta para adicionar a biblioteca"
+msgstr "Den zu hinzufügenden Ordner wählen"
 
 #. The main preferences dialog
 #: src/pref.c:1116
 msgid "Preferences"
-msgstr "Preferências"
+msgstr "Einstellungen"
 
 #. Labels
 #: src/pref.c:1129
 msgid "General"
-msgstr "Geral"
+msgstr "Allgemein"
 
 #: src/pref.c:1130
 msgid "Audio"
-msgstr "Áudio"
+msgstr "Audio"
 
 #: src/pref.c:1132
 msgid "Last.fm"
@@ -422,152 +429,143 @@ msgstr "Last.fm"
 #. Hidden files
 #: src/pref.c:1158
 msgid "Show Hidden Files in File View"
-msgstr "Mostrar arquivos ocultos na visualização de arquivos"
+msgstr "Versteckte Dateien in Datei-Ansicht zeigen"
 
 #. Album art
 #: src/pref.c:1163
 msgid "Show Album art in Panel"
-msgstr "Mostrar arte do álbum no painel"
+msgstr "Album-Cover in der Steuerleiste anzeigen"
 
 #: src/pref.c:1166
 msgid "Size of Album art"
-msgstr "Tamanho da arte do álbum"
+msgstr "Größe des Album-Covern"
 
 #: src/pref.c:1184
 msgid "Album art file pattern"
-msgstr "Nome da arte do álbum"
+msgstr "Muster für Album-Cover Dateien"
 
 #. Notification
 #: src/pref.c:1213
+#, fuzzy
 msgid "Show OSD for track change"
-msgstr "Mostrar OSD para mudanças de faixa"
+msgstr "Benachrichtigungspopup beim Titelwechsel zeigen"
 
 #. Save current playlist
 #: src/pref.c:1217
 msgid "Save/Restore current playlist"
-msgstr "Salvar/Restaurar lista de reprodução atual"
+msgstr "Wiedergabeliste Speichern/Wiederherstellen"
 
 #. Software mixer
 #: src/pref.c:1250
 msgid "Use software mixer"
-msgstr "Usar controle do programa"
+msgstr "Software-Mixer verwenden"
 
 #: src/pref.c:1251 src/pref.c:1261 src/pref.c:1290
 msgid "Restart Required"
-msgstr "Necessário Reiniciar"
+msgstr "Neustart erforderlich"
 
 #. CDDB
 #: src/pref.c:1255
 msgid "Connect to CDDB server"
-msgstr "Conectar ao servidor CDDB"
+msgstr "Mit dem CDDB-Server verbinden"
 
 #: src/pref.c:1270
 msgid "Audio sink"
-msgstr "Sistema de Som"
+msgstr "Audiosystem"
 
 #: src/pref.c:1287
 msgid "Audio Device"
-msgstr "Dispositivo de Som"
+msgstr "Audiogerät"
 
 #. Audio CD device
 #: src/pref.c:1305
 msgid "Audio CD Device"
-msgstr "Dispositivo do CD de Áudio"
+msgstr "Audio-CD-Laufwerk"
 
 #: src/pref.c:1358
 msgid "Folder"
-msgstr "Pasta"
+msgstr "Ordner"
 
 #. Last.fm
 #: src/pref.c:1405
 msgid "Last.fm Support"
-msgstr "Suporte ao Last.fm"
+msgstr "Last.fm Unterstützung"
 
 #: src/pref.c:1408
 msgid "Username"
-msgstr "Usuário"
+msgstr "Benutzername"
 
 #: src/pref.c:1409
 msgid "Password"
-msgstr "Senha"
+msgstr "Passwort"
 
 #: src/menu.c:94
-#, fuzzy
 msgid "Update Library"
-msgstr "_Atualizar Biblioteca"
+msgstr "Musikbibliothek aktualisieren"
 
 #: src/menu.c:94
-#, fuzzy
 msgid "Rescan Library"
-msgstr "_Varrer Biblioteca"
+msgstr "Musikbibliothek neu einlesen"
 
 #. Create a file chooser dialog
 #: src/menu.c:146
-#, fuzzy
 msgid "Select a file to play"
-msgstr "Selecione uma pasta para adicionar a biblioteca"
+msgstr "Eine Datei zum Abspielen auswählen"
 
 #: src/menu.c:160
 msgid "Supported media"
-msgstr ""
+msgstr "Unterstützte Mediendateien"
 
 #: src/menu.c:188
 msgid "All files"
-msgstr ""
+msgstr "Alle Dateien"
 
 #: src/menu.c:375 src/menu.c:484
 msgid "Library scan complete"
-msgstr ""
+msgstr "Einlesen der Musikbibliothek abgeschlossen"
 
 #: src/menu.c:567
+#, fuzzy
 msgid "Total Tracks:"
-msgstr "Total de Faixas:"
+msgstr "Anzahl der Titel:"
 
 #: src/menu.c:569
 msgid "Total Artists:"
-msgstr "Total de Artistas:"
+msgstr "Anzahl der Künstler:"
 
 #: src/menu.c:571
 msgid "Total Albums:"
-msgstr "Total de Álbuns:"
+msgstr "Anzahl der Alben:"
 
 #: src/menu.c:573
 msgid "Statistics"
-msgstr "Estatísticas"
+msgstr "Statistiken"
 
 #: src/utils.c:265
 msgid "days"
-msgstr ""
+msgstr "Tage"
 
 #: src/utils.c:265
 msgid "day"
-msgstr ""
+msgstr "Tag"
 
 #: src/playlist.c:457
 msgid "Export playlist to file"
-msgstr ""
+msgstr "Wiedergabeliste in Datei speichern"
 
 #: src/playlist.c:837
+#, fuzzy
 msgid "Playlists"
-msgstr "Lista de reprodução"
+msgstr "Wiedergabeliste löschen"
 
+#, fuzzy
 #~ msgid "Artist / Track"
-#~ msgstr "Artista / Faixa"
+#~ msgstr "Interpret / Titel"
 
+#, fuzzy
 #~ msgid "Album / Track"
-#~ msgstr "Álbum / Faixa"
+#~ msgstr "Album / Titel"
 
+#, fuzzy
 #~ msgid "Genre / Track"
-#~ msgstr "Gênero / Faixa"
-
-#~ msgid "Artist / Album / Track"
-#~ msgstr "Artista / Álbum / Faixa"
-
-#~ msgid "Genre / Album / Track"
-#~ msgstr "Gênero / Álbum / Faixa"
-
-#~ msgid "Genre / Artist / Track"
-#~ msgstr "Gênero / Artista / Faixa"
-
-#~ msgid "Genre / Artist / Album / Track"
-#~ msgstr "Gênero / Artista / Álbum / Faixa"
+#~ msgstr "Genre / Titel"

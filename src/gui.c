@@ -49,13 +49,13 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Statistics\"/>			\
 			<menu action=\"Library View Menu\">			\
 				<menuitem action=\"folder_file\"/>		\
-				<menuitem action=\"artist_track\"/>		\
-				<menuitem action=\"album_track\"/>		\
-				<menuitem action=\"genre_track\"/>		\
-				<menuitem action=\"artist_album_track\"/>	\
-				<menuitem action=\"genre_artist_track\"/>	\
-				<menuitem action=\"genre_album_track\"/>	\
-				<menuitem action=\"genre_artist_album_track\"/>	\
+				<menuitem action=\"artist\"/>		\
+				<menuitem action=\"album\"/>		\
+				<menuitem action=\"genre\"/>		\
+				<menuitem action=\"artist_album\"/>	\
+				<menuitem action=\"genre_artist\"/>	\
+				<menuitem action=\"genre_album\"/>	\
+				<menuitem action=\"genre_artist_album\"/>	\
 				<menuitem action=\"folder_file\"/>		\
 			</menu>							\
 		</menu>								\
@@ -121,15 +121,15 @@ gchar *library_page_context_menu_xml = "<ui>		\
 	<popup>						\
 	<menuitem action=\"folder_file\"/>		\
 	<separator/>					\
-	<menuitem action=\"artist_track\"/>		\
-	<menuitem action=\"album_track\"/>		\
-	<menuitem action=\"genre_track\"/>		\
+	<menuitem action=\"artist\"/>		\
+	<menuitem action=\"album\"/>		\
+	<menuitem action=\"genre\"/>		\
 	<separator/>					\
-	<menuitem action=\"artist_album_track\"/>	\
-	<menuitem action=\"genre_artist_track\"/>	\
-	<menuitem action=\"genre_album_track\"/>	\
+	<menuitem action=\"artist_album\"/>	\
+	<menuitem action=\"genre_artist\"/>	\
+	<menuitem action=\"genre_album\"/>	\
 	<separator/>					\
-	<menuitem action=\"genre_artist_album_track\"/>	\
+	<menuitem action=\"genre_artist_album\"/>	\
 	</popup>					\
 	</ui>";
 
@@ -189,20 +189,20 @@ GtkActionEntry main_aentries[] = {
 	{"Library View Menu", GTK_STOCK_GO_FORWARD, N_("_Library View")},
 	{"folder_file", GTK_STOCK_REFRESH, N_("Folder / File"),
 	 NULL, "Folder/File", G_CALLBACK(folder_file_library_tree)},
-	{"artist_track", GTK_STOCK_REFRESH, N_("Artist / Track"),
-	 NULL, "Artist / Track", G_CALLBACK(artist_track_library_tree)},
-	{"album_track", GTK_STOCK_REFRESH, N_("Album / Track"),
-	 NULL, "Album / Track", G_CALLBACK(album_track_library_tree)},
-	{"genre_track", GTK_STOCK_REFRESH, N_("Genre / Track"),
-	 NULL, "Genre / Track", G_CALLBACK(genre_track_library_tree)},
-	{"artist_album_track", GTK_STOCK_REFRESH, N_("Artist / Album / Track"),
-	 NULL, "Artist / Album / Track", G_CALLBACK(artist_album_track_library_tree)},
-	{"genre_album_track", GTK_STOCK_REFRESH, N_("Genre / Album / Track"),
-	 NULL, "Genre / Album / Track", G_CALLBACK(genre_album_track_library_tree)},
-	{"genre_artist_track", GTK_STOCK_REFRESH, N_("Genre / Artist / Track"),
-	 NULL, "Genre / Artist / Track", G_CALLBACK(genre_artist_track_library_tree)},
-	{"genre_artist_album_track", GTK_STOCK_REFRESH, N_("Genre / Artist / Album / Track"),
-	 NULL, "Genre / Artist / Album / Track", G_CALLBACK(genre_artist_album_track_library_tree)},
+	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
+	 NULL, "Artist", G_CALLBACK(artist_library_tree)},
+	{"album", GTK_STOCK_REFRESH, N_("Album"),
+	 NULL, "Album", G_CALLBACK(album_library_tree)},
+	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
+	 NULL, "Genre", G_CALLBACK(genre_library_tree)},
+	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
+	 NULL, "Artist / Album", G_CALLBACK(artist_album_library_tree)},
+	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
+	 NULL, "Genre / Album", G_CALLBACK(genre_album_library_tree)},
+	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
+	 NULL, "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
+	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
+	 NULL, "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)},
 	{"About", GTK_STOCK_ABOUT, N_("About"),
 	 NULL, "About pragha", G_CALLBACK(about_action)},
 	{"Home", GTK_STOCK_HOME, N_("Homepage"),
@@ -282,20 +282,20 @@ GtkActionEntry file_tree_file_context_aentries[] = {
 GtkActionEntry library_page_context_aentries[] = {
 	{"folder_file", GTK_STOCK_REFRESH, N_("Folder / File"),
 	 NULL, "Folder / File", G_CALLBACK(folder_file_library_tree)},
-	{"artist_track", GTK_STOCK_REFRESH, N_("Artist / Track"),
-	 NULL, "Artist / Track", G_CALLBACK(artist_track_library_tree)},
-	{"album_track", GTK_STOCK_REFRESH, N_("Album / Track"),
-	 NULL, "Album / Track", G_CALLBACK(album_track_library_tree)},
-	{"genre_track", GTK_STOCK_REFRESH, N_("Genre / Track"),
-	 NULL, "Genre / Track", G_CALLBACK(genre_track_library_tree)},
-	{"artist_album_track", GTK_STOCK_REFRESH, N_("Artist / Album / Track"),
-	 NULL, "Artist / Album / Track", G_CALLBACK(artist_album_track_library_tree)},
-	{"genre_album_track", GTK_STOCK_REFRESH, N_("Genre / Album / Track"),
-	 NULL, "Genre / Album / Track", G_CALLBACK(genre_album_track_library_tree)},
-	{"genre_artist_track", GTK_STOCK_REFRESH, N_("Genre / Artist / Track"),
-	 NULL, "Genre / Artist / Track", G_CALLBACK(genre_artist_track_library_tree)},
-	{"genre_artist_album_track", GTK_STOCK_REFRESH, N_("Genre / Artist / Album / Track"),
-	 NULL, "Genre / Artist / Album / Track", G_CALLBACK(genre_artist_album_track_library_tree)}
+	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
+	 NULL, "Artist", G_CALLBACK(artist_library_tree)},
+	{"album", GTK_STOCK_REFRESH, N_("Album"),
+	 NULL, "Album", G_CALLBACK(album_library_tree)},
+	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
+	 NULL, "Genre", G_CALLBACK(genre_library_tree)},
+	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
+	 NULL, "Artist / Album", G_CALLBACK(artist_album_library_tree)},
+	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
+	 NULL, "Genre / Album", G_CALLBACK(genre_album_library_tree)},
+	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
+	 NULL, "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
+	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
+	 NULL, "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
 };
 
 GtkActionEntry systray_menu_aentries[] = {

@@ -834,7 +834,7 @@ void init_playlist_view(struct con_win *cwin)
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, "Playlists",
+			   P_PLAYLIST, _("Playlists"),
 			   -1);
 
 	/* Query and insert entries */

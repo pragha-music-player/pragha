@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Español\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-03 12:39-0300\n"
+"POT-Creation-Date: 2009-07-08 18:55-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Matias <mati86_dl@yahoo.com.ar>\n"
 "Language-Team: Español\n"
@@ -105,33 +105,39 @@ msgstr "_Ordenar colección como"
 msgid "Folder / File"
 msgstr "Carpeta / Archivo"
 
-#: src/gui.c:192 src/gui.c:285 src/librarytree.c:817 src/librarytree.c:1242
-msgid "Artist / Track"
-msgstr "Artista / Pista"
+#: src/gui.c:192 src/gui.c:285 src/gui.c:946 src/gui.c:1062
+#: src/current_playlist.c:1043 src/librarytree.c:817 src/librarytree.c:1242
+#: src/tags.c:408
+msgid "Artist"
+msgstr "Artista"
 
-#: src/gui.c:194 src/gui.c:287 src/librarytree.c:834 src/librarytree.c:1245
-msgid "Album / Track"
-msgstr "Álbum / Pista"
+#: src/gui.c:194 src/gui.c:287 src/gui.c:947 src/gui.c:1063
+#: src/current_playlist.c:1044 src/librarytree.c:834 src/librarytree.c:1245
+#: src/tags.c:409
+msgid "Album"
+msgstr "Álbum"
 
-#: src/gui.c:196 src/gui.c:289 src/librarytree.c:851 src/librarytree.c:1248
-msgid "Genre / Track"
-msgstr "Genero / Pista"
+#: src/gui.c:196 src/gui.c:289 src/gui.c:948 src/gui.c:1064
+#: src/current_playlist.c:1045 src/librarytree.c:851 src/librarytree.c:1248
+#: src/tags.c:410
+msgid "Genre"
+msgstr "Genero"
 
 #: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1251
-msgid "Artist / Album / Track"
-msgstr "Artista / Álbum / Pista"
+msgid "Artist / Album"
+msgstr "Artista / Álbum"
 
 #: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1257
-msgid "Genre / Album / Track"
-msgstr "Genero / Álbum / Pista"
+msgid "Genre / Album"
+msgstr "Genero / Álbum"
 
 #: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1254
-msgid "Genre / Artist / Track"
-msgstr "Genero / Artista / Pista"
+msgid "Genre / Artist"
+msgstr "Genero / Artista"
 
 #: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1260
-msgid "Genre / Artist / Album / Track"
-msgstr "Genero / Artista / Álbum / Pista"
+msgid "Genre / Artist / Album"
+msgstr "Genero / Artista / Álbum"
 
 #: src/gui.c:206 src/gui.c:302
 msgid "About"
@@ -183,7 +189,7 @@ msgstr "Guardar lista de reproducción"
 
 #: src/gui.c:238
 msgid "Clear Playlist"
-msgstr "Limpiar lista de reproduccion"
+msgstr "Limpiar lista de reproducción"
 
 #: src/gui.c:240
 msgid "Clear Sort"
@@ -223,7 +229,7 @@ msgstr "Encolar (No Recursivo)"
 
 #: src/gui.c:777 src/pref.c:1131
 msgid "Library"
-msgstr "Coleccion"
+msgstr "Colección"
 
 #: src/gui.c:795
 msgid "Files"
@@ -241,18 +247,6 @@ msgstr "Pista"
 #: src/gui.c:945 src/gui.c:1061 src/current_playlist.c:1042 src/tags.c:407
 msgid "Title"
 msgstr "Titulo"
-
-#: src/gui.c:946 src/gui.c:1062 src/current_playlist.c:1043 src/tags.c:408
-msgid "Artist"
-msgstr "Artista"
-
-#: src/gui.c:947 src/gui.c:1063 src/current_playlist.c:1044 src/tags.c:409
-msgid "Album"
-msgstr "Álbum"
-
-#: src/gui.c:948 src/gui.c:1064 src/current_playlist.c:1045 src/tags.c:410
-msgid "Genre"
-msgstr "Genero"
 
 #: src/gui.c:949 src/gui.c:1065 src/current_playlist.c:1048
 msgid "Bitrate"
@@ -448,7 +442,7 @@ msgstr "Mostrar notificaciones para el cambio de temas"
 #. Save current playlist
 #: src/pref.c:1217
 msgid "Save/Restore current playlist"
-msgstr "Guardar y restaurar lista de reproduccion"
+msgstr "Guardar y restaurar lista de reproducción"
 
 #. Software mixer
 #: src/pref.c:1250
@@ -533,19 +527,44 @@ msgstr "Álbumes"
 
 #: src/menu.c:573
 msgid "Statistics"
-msgstr "Estadisticas"
+msgstr "Estadísticas"
 
 #: src/utils.c:265
 msgid "days"
-msgstr "dias"
+msgstr "días"
 
 #: src/utils.c:265
 msgid "day"
-msgstr "dia"
+msgstr "día"
 
 #: src/playlist.c:457
 msgid "Export playlist to file"
 msgstr "Exportar lista de reproducción como archivo"
+
+#: src/playlist.c:837
+msgid "Playlists"
+msgstr "Listas de reproducción"
+
+#~ msgid "Artist / Track"
+#~ msgstr "Artista / Pista"
+
+#~ msgid "Album / Track"
+#~ msgstr "Álbum / Pista"
+
+#~ msgid "Genre / Track"
+#~ msgstr "Genero / Pista"
+
+#~ msgid "Artist / Album / Track"
+#~ msgstr "Artista / Álbum / Pista"
+
+#~ msgid "Genre / Album / Track"
+#~ msgstr "Genero / Álbum / Pista"
+
+#~ msgid "Genre / Artist / Track"
+#~ msgstr "Genero / Artista / Pista"
+
+#~ msgid "Genre / Artist / Album / Track"
+#~ msgstr "Genero / Artista / Álbum / Pista"
 
 #~ msgid "Lenguaje"
 #~ msgstr "Español"

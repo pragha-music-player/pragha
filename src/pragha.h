@@ -291,13 +291,13 @@ enum dnd_target {
 
 enum library_view {
 	FOLDER_FILE,
-	ARTIST_TRACK,
-	ALBUM_TRACK,
-	GENRE_TRACK,
-	ARTIST_ALBUM_TRACK,
-	GENRE_ARTIST_TRACK,
-	GENRE_ALBUM_TRACK,
-	GENRE_ARTIST_ALBUM_TRACK
+	ARTIST,
+	ALBUM,
+	GENRE,
+	ARTIST_ALBUM,
+	GENRE_ARTIST,
+	GENRE_ALBUM,
+	GENRE_ARTIST_ALBUM
 };
 
 /* Playlist management */
@@ -764,13 +764,13 @@ gboolean simple_library_search_keyrelease_handler(GtkWidget *entry,
 void cancel_simple_library_search_handler(GtkButton *button, struct con_win *cwin);
 void clear_library_search(struct con_win *cwin);
 void folder_file_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_track_library_tree(GtkAction *action, struct con_win *cwin);
-void album_track_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_track_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_album_track_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_album_track_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_track_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_album_track_library_tree(GtkAction *action, struct con_win *cwin);
+void artist_library_tree(GtkAction *action, struct con_win *cwin);
+void album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_library_tree(GtkAction *action, struct con_win *cwin);
+void artist_album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void library_tree_play(GtkAction *action, struct con_win *cwin);
 void library_tree_enqueue(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
