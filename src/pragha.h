@@ -487,8 +487,6 @@ struct con_state {
 	gboolean view_change;
 	gboolean curr_mobj_clear;
 	gboolean advance_track;
-	gboolean fullscreen;
-	gboolean iconified;
 	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
@@ -1126,7 +1124,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
-void toogle_main_window(struct con_win *cwin, gboolean        present);
+void toogle_main_window(struct con_win *cwin);
 void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
 GtkUIManager* create_systray_menu(struct con_win *cwin);
 

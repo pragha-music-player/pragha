@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-24 14:51-0300\n"
+"POT-Creation-Date: 2010-06-24 21:57-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Kim Ljosdal <kim357@web.de>\n"
 "Language-Team: \n"
@@ -166,7 +166,7 @@ msgstr "_Gjenta"
 msgid "_Fullscreen"
 msgstr ""
 
-#: src/gui.c:227 src/gui.c:656 src/pref.c:1317
+#: src/gui.c:227 src/gui.c:656 src/pref.c:1334
 msgid "Library"
 msgstr "Samling"
 
@@ -239,13 +239,13 @@ msgstr "Mappe / Fil"
 
 #: src/gui.c:290 src/gui.c:793 src/gui.c:917 src/current_playlist.c:1280
 #: src/current_playlist.c:1403 src/librarytree.c:902 src/librarytree.c:1356
-#: src/statusicon.c:133 src/statusicon.c:187 src/tags.c:426
+#: src/statusicon.c:135 src/statusicon.c:189 src/tags.c:426
 msgid "Artist"
 msgstr "Artist"
 
 #: src/gui.c:292 src/gui.c:794 src/gui.c:918 src/current_playlist.c:1281
 #: src/current_playlist.c:1404 src/librarytree.c:919 src/librarytree.c:1359
-#: src/statusicon.c:134 src/statusicon.c:188 src/tags.c:427
+#: src/statusicon.c:136 src/statusicon.c:190 src/tags.c:427
 msgid "Album"
 msgstr "Album"
 
@@ -275,7 +275,7 @@ msgstr "Genre / Artist / Album"
 msgid "Prev Track"
 msgstr "Forrige Spor"
 
-#: src/gui.c:319 src/gui.c:1589 src/statusicon.c:154
+#: src/gui.c:319 src/gui.c:1589 src/statusicon.c:156
 msgid "Next Track"
 msgstr "Neste Spor"
 
@@ -290,7 +290,7 @@ msgstr "Spor"
 
 #. Create labels
 #: src/gui.c:792 src/gui.c:916 src/current_playlist.c:1279
-#: src/current_playlist.c:1402 src/statusicon.c:132 src/statusicon.c:186
+#: src/current_playlist.c:1402 src/statusicon.c:134 src/statusicon.c:188
 #: src/tags.c:425
 msgid "Title"
 msgstr "Tittel"
@@ -306,7 +306,7 @@ msgid "Year"
 msgstr "År"
 
 #: src/gui.c:798 src/gui.c:922 src/current_playlist.c:1284
-#: src/current_playlist.c:1407 src/statusicon.c:135 src/statusicon.c:189
+#: src/current_playlist.c:1407 src/statusicon.c:137 src/statusicon.c:191
 msgid "Length"
 msgstr "Lengde"
 
@@ -345,11 +345,11 @@ msgstr ""
 msgid "Repeat playback list at the end"
 msgstr ""
 
-#: src/gui.c:1634 src/panel.c:218 src/statusicon.c:183
+#: src/gui.c:1634 src/panel.c:218 src/statusicon.c:185
 msgid "<b>Not playing</b>"
 msgstr "<b>Spiller ikke</b>"
 
-#: src/gui.c:1854
+#: src/gui.c:1853
 #, fuzzy
 msgid "Options of the library"
 msgstr "_Oppdater Samling"
@@ -456,15 +456,15 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Albumcover mønster"
 
-#: src/pref.c:61 src/pref.c:1416
+#: src/pref.c:61 src/pref.c:1433
 msgid "Start normal"
 msgstr ""
 
-#: src/pref.c:66 src/pref.c:1417
+#: src/pref.c:66 src/pref.c:1434
 msgid "Start fullscreen"
 msgstr ""
 
-#: src/pref.c:71 src/pref.c:1418
+#: src/pref.c:71 src/pref.c:1435
 msgid "Start in system tray"
 msgstr ""
 
@@ -474,103 +474,103 @@ msgid "Select a folder to add to library"
 msgstr "Velg en mappe for å legge til samling"
 
 #. The main preferences dialog
-#: src/pref.c:1269 src/pref.c:1302
+#: src/pref.c:1286 src/pref.c:1319
 msgid "Preferences"
 msgstr "Preferanser"
 
 #. Labels
-#: src/pref.c:1315
+#: src/pref.c:1332
 msgid "General"
 msgstr "Generell"
 
-#: src/pref.c:1316
+#: src/pref.c:1333
 msgid "Audio"
 msgstr "Audio"
 
-#: src/pref.c:1318
+#: src/pref.c:1335
 msgid "Last.fm"
 msgstr "Last.fm"
 
 #. CDDB
-#: src/pref.c:1359
+#: src/pref.c:1376
 msgid "Connect to CDDB server"
 msgstr "Koble til CDDB server"
 
 #. Album art
-#: src/pref.c:1363
+#: src/pref.c:1380
 msgid "Show Album art in Panel"
 msgstr "Vis Albumcover i Panel"
 
-#: src/pref.c:1366
+#: src/pref.c:1383
 msgid "Size of Album art"
 msgstr "Størrelse på Albumcover"
 
-#: src/pref.c:1384
+#: src/pref.c:1401
 msgid "Album art file pattern"
 msgstr "Albumcover filmønster"
 
-#: src/pref.c:1415
+#: src/pref.c:1432
 msgid "Remember last window state"
 msgstr ""
 
-#: src/pref.c:1420
+#: src/pref.c:1437
 msgid "When Pragha start"
 msgstr ""
 
 #. General Check_buttons
-#: src/pref.c:1437
+#: src/pref.c:1454
 msgid "Minimize Pragha when close the window"
 msgstr ""
 
-#: src/pref.c:1438
+#: src/pref.c:1455
 #, fuzzy
 msgid "Restore last playlist"
 msgstr "Lagre/Gjenopprett spillelisten"
 
-#: src/pref.c:1439
+#: src/pref.c:1456
 msgid "Add files recurcively"
 msgstr ""
 
-#: src/pref.c:1440
+#: src/pref.c:1457
 msgid "Show OSD for track change"
 msgstr "Vis OSD for spor endring"
 
 #. Software mixer
-#: src/pref.c:1488
+#: src/pref.c:1505
 msgid "Use software mixer"
 msgstr "Bruk mykvare mikser"
 
-#: src/pref.c:1489 src/pref.c:1495 src/pref.c:1524
+#: src/pref.c:1506 src/pref.c:1512 src/pref.c:1541
 msgid "Restart Required"
 msgstr "Krever Omstart"
 
-#: src/pref.c:1504
+#: src/pref.c:1521
 msgid "Audio sink"
 msgstr "Audio synk"
 
-#: src/pref.c:1521
+#: src/pref.c:1538
 msgid "Audio Device"
 msgstr "Lydenhet"
 
 #. Audio CD device
-#: src/pref.c:1539
+#: src/pref.c:1556
 msgid "Audio CD Device"
 msgstr "Audio CD Enhet"
 
-#: src/pref.c:1587
+#: src/pref.c:1604
 msgid "Folder"
 msgstr "Mappe"
 
 #. Last.fm
-#: src/pref.c:1642
+#: src/pref.c:1659
 msgid "Last.fm Support"
 msgstr "Last.fm Støtte"
 
-#: src/pref.c:1645
+#: src/pref.c:1662
 msgid "Username"
 msgstr "Brukernavn"
 
-#: src/pref.c:1646
+#: src/pref.c:1663
 msgid "Password"
 msgstr "Passord"
 
@@ -598,27 +598,27 @@ msgstr "Støttet media"
 msgid "All files"
 msgstr "Alle filer"
 
-#: src/menu.c:577 src/menu.c:693
+#: src/menu.c:582 src/menu.c:698
 msgid "Library scan complete"
 msgstr "Skanning av samling ferdig"
 
-#: src/menu.c:774
+#: src/menu.c:779
 msgid "Total Tracks:"
 msgstr "Antall Låter:"
 
-#: src/menu.c:776
+#: src/menu.c:781
 msgid "Total Artists:"
 msgstr "Antall Artister:"
 
-#: src/menu.c:778
+#: src/menu.c:783
 msgid "Total Albums:"
 msgstr "Antall Album:"
 
-#: src/menu.c:780
+#: src/menu.c:785
 msgid "Statistics"
 msgstr "Statistikker"
 
-#: src/menu.c:797
+#: src/menu.c:802
 msgid "translator-credits"
 msgstr ""
 

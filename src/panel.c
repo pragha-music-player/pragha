@@ -519,11 +519,7 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 void keybind_media_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-
-	if (GTK_WIDGET_VISIBLE(cwin->mainwindow))
-		toogle_main_window (cwin, TRUE);
-	else
-		toogle_main_window (cwin, FALSE);
+	toogle_main_window (cwin);
 }
 
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)

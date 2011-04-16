@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Swedish\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-24 14:51-0300\n"
+"POT-Creation-Date: 2010-06-24 21:57-0300\n"
 "PO-Revision-Date: 2010-04-23 16:55-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Swedish team <LL@li.org>\n"
@@ -157,7 +157,7 @@ msgstr "_Upprepa"
 msgid "_Fullscreen"
 msgstr "_Helskärm"
 
-#: src/gui.c:227 src/gui.c:656 src/pref.c:1317
+#: src/gui.c:227 src/gui.c:656 src/pref.c:1334
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -224,13 +224,13 @@ msgstr "Mapp / Fil"
 
 #: src/gui.c:290 src/gui.c:793 src/gui.c:917 src/current_playlist.c:1280
 #: src/current_playlist.c:1403 src/librarytree.c:902 src/librarytree.c:1356
-#: src/statusicon.c:133 src/statusicon.c:187 src/tags.c:426
+#: src/statusicon.c:135 src/statusicon.c:189 src/tags.c:426
 msgid "Artist"
 msgstr "Artist"
 
 #: src/gui.c:292 src/gui.c:794 src/gui.c:918 src/current_playlist.c:1281
 #: src/current_playlist.c:1404 src/librarytree.c:919 src/librarytree.c:1359
-#: src/statusicon.c:134 src/statusicon.c:188 src/tags.c:427
+#: src/statusicon.c:136 src/statusicon.c:190 src/tags.c:427
 msgid "Album"
 msgstr "Album"
 
@@ -260,7 +260,7 @@ msgstr "Genre / Artist / Album"
 msgid "Prev Track"
 msgstr "Föregående spår"
 
-#: src/gui.c:319 src/gui.c:1589 src/statusicon.c:154
+#: src/gui.c:319 src/gui.c:1589 src/statusicon.c:156
 msgid "Next Track"
 msgstr "Nästa spår"
 
@@ -275,7 +275,7 @@ msgstr "Spår"
 
 #. Create labels
 #: src/gui.c:792 src/gui.c:916 src/current_playlist.c:1279
-#: src/current_playlist.c:1402 src/statusicon.c:132 src/statusicon.c:186
+#: src/current_playlist.c:1402 src/statusicon.c:134 src/statusicon.c:188
 #: src/tags.c:425
 msgid "Title"
 msgstr "Titel"
@@ -291,7 +291,7 @@ msgid "Year"
 msgstr "År"
 
 #: src/gui.c:798 src/gui.c:922 src/current_playlist.c:1284
-#: src/current_playlist.c:1407 src/statusicon.c:135 src/statusicon.c:189
+#: src/current_playlist.c:1407 src/statusicon.c:137 src/statusicon.c:191
 msgid "Length"
 msgstr "Längd"
 
@@ -330,11 +330,11 @@ msgstr "Spela upp i slumpmässig ordning"
 msgid "Repeat playback list at the end"
 msgstr "Upprepa spellistan då den nått slutet"
 
-#: src/gui.c:1634 src/panel.c:218 src/statusicon.c:183
+#: src/gui.c:1634 src/panel.c:218 src/statusicon.c:185
 msgid "<b>Not playing</b>"
 msgstr "<b>Spelar inte</b>"
 
-#: src/gui.c:1854
+#: src/gui.c:1853
 msgid "Options of the library"
 msgstr "Bibliotekets variabler"
 
@@ -439,16 +439,16 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Albumomslagsmönster"
 
-#: src/pref.c:61 src/pref.c:1416
+#: src/pref.c:61 src/pref.c:1433
 msgid "Start normal"
 msgstr ""
 
-#: src/pref.c:66 src/pref.c:1417
+#: src/pref.c:66 src/pref.c:1434
 #, fuzzy
 msgid "Start fullscreen"
 msgstr "_Helskärm"
 
-#: src/pref.c:71 src/pref.c:1418
+#: src/pref.c:71 src/pref.c:1435
 msgid "Start in system tray"
 msgstr ""
 
@@ -458,104 +458,104 @@ msgid "Select a folder to add to library"
 msgstr "Välj en mapp att lägga till i biblioteket"
 
 #. The main preferences dialog
-#: src/pref.c:1269 src/pref.c:1302
+#: src/pref.c:1286 src/pref.c:1319
 msgid "Preferences"
 msgstr "Inställningar"
 
 #. Labels
-#: src/pref.c:1315
+#: src/pref.c:1332
 msgid "General"
 msgstr "Allmänt"
 
-#: src/pref.c:1316
+#: src/pref.c:1333
 msgid "Audio"
 msgstr "Ljud"
 
-#: src/pref.c:1318
+#: src/pref.c:1335
 msgid "Last.fm"
 msgstr "Last.fm"
 
 #. CDDB
-#: src/pref.c:1359
+#: src/pref.c:1376
 msgid "Connect to CDDB server"
 msgstr "Anslut till CDDB server"
 
 #. Album art
-#: src/pref.c:1363
+#: src/pref.c:1380
 msgid "Show Album art in Panel"
 msgstr "Visa Albumomslag i Panelen"
 
-#: src/pref.c:1366
+#: src/pref.c:1383
 msgid "Size of Album art"
 msgstr "Storlek på Albumomslag"
 
-#: src/pref.c:1384
+#: src/pref.c:1401
 msgid "Album art file pattern"
 msgstr "Albumomslags filmönster"
 
-#: src/pref.c:1415
+#: src/pref.c:1432
 msgid "Remember last window state"
 msgstr ""
 
-#: src/pref.c:1420
+#: src/pref.c:1437
 msgid "When Pragha start"
 msgstr ""
 
 #. General Check_buttons
-#: src/pref.c:1437
+#: src/pref.c:1454
 msgid "Minimize Pragha when close the window"
 msgstr ""
 
-#: src/pref.c:1438
+#: src/pref.c:1455
 #, fuzzy
 msgid "Restore last playlist"
 msgstr "Spara/Återställ nuvarande spellista"
 
-#: src/pref.c:1439
+#: src/pref.c:1456
 #, fuzzy
 msgid "Add files recurcively"
 msgstr "Lägg till filer rekursivt"
 
-#: src/pref.c:1440
+#: src/pref.c:1457
 msgid "Show OSD for track change"
 msgstr "Visa OSD-notifiering vid spårbyte"
 
 #. Software mixer
-#: src/pref.c:1488
+#: src/pref.c:1505
 msgid "Use software mixer"
 msgstr "Anvävnd mjukvarumixer"
 
-#: src/pref.c:1489 src/pref.c:1495 src/pref.c:1524
+#: src/pref.c:1506 src/pref.c:1512 src/pref.c:1541
 msgid "Restart Required"
 msgstr "Omstart krävs"
 
-#: src/pref.c:1504
+#: src/pref.c:1521
 msgid "Audio sink"
 msgstr "Ljudmotor"
 
-#: src/pref.c:1521
+#: src/pref.c:1538
 msgid "Audio Device"
 msgstr "Portabel Musiksplare"
 
 #. Audio CD device
-#: src/pref.c:1539
+#: src/pref.c:1556
 msgid "Audio CD Device"
 msgstr "Ljud-CD Enhet"
 
-#: src/pref.c:1587
+#: src/pref.c:1604
 msgid "Folder"
 msgstr "Mapp"
 
 #. Last.fm
-#: src/pref.c:1642
+#: src/pref.c:1659
 msgid "Last.fm Support"
 msgstr "Last.fm-stöd"
 
-#: src/pref.c:1645
+#: src/pref.c:1662
 msgid "Username"
 msgstr "Användarnamn"
 
-#: src/pref.c:1646
+#: src/pref.c:1663
 msgid "Password"
 msgstr "Lösenord"
 
@@ -584,27 +584,27 @@ msgstr "Supportad media"
 msgid "All files"
 msgstr "Alla filer"
 
-#: src/menu.c:577 src/menu.c:693
+#: src/menu.c:582 src/menu.c:698
 msgid "Library scan complete"
 msgstr "Biblioteksavsökning färdig"
 
-#: src/menu.c:774
+#: src/menu.c:779
 msgid "Total Tracks:"
 msgstr "Antal Spår:"
 
-#: src/menu.c:776
+#: src/menu.c:781
 msgid "Total Artists:"
 msgstr "Antal Artister:"
 
-#: src/menu.c:778
+#: src/menu.c:783
 msgid "Total Albums:"
 msgstr "Antal Album:"
 
-#: src/menu.c:780
+#: src/menu.c:785
 msgid "Statistics"
 msgstr "Statistik"
 
-#: src/menu.c:797
+#: src/menu.c:802
 msgid "translator-credits"
 msgstr "Översättare"
 

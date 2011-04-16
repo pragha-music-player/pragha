@@ -24,10 +24,7 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	GtkWidget *popup_menu;
 	switch (event->button)
 	{
-		case 1: if (GTK_WIDGET_VISIBLE(cwin->mainwindow))
-				toogle_main_window (cwin, TRUE);
-			else
-				toogle_main_window (cwin, FALSE);
+		case 1: toogle_main_window (cwin);
 			break;
 		case 2:	play_pause_resume(cwin);
 			break;
@@ -41,33 +38,38 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	return TRUE;
 }
 
-void toogle_main_window(struct con_win *cwin, gboolean present)
+void toogle_main_window(struct con_win *cwin)
 {
-static gint  x = 0, y = 0;
+	static gint x = 0, y = 0;
+	GdkWindowState state;
 
-	if (present) {
+	state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
+
+	if (GTK_WIDGET_VISIBLE(cwin->mainwindow)) {
 		if(gtk_window_is_active(GTK_WINDOW(cwin->mainwindow))){
 			gtk_window_get_position(GTK_WINDOW(cwin->mainwindow), &x, &y );
 			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
-			cwin->cstate->iconified = TRUE;
+			gtk_window_move (GTK_WINDOW(cwin->mainwindow),x ,y);
 		}
 		else gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 	}
 	else{
-		if( x != 0 && y != 0 )
-			gtk_window_move(GTK_WINDOW(cwin->mainwindow), x, y);
-		gtk_widget_show_all(cwin->mainwindow);
+		if(x <= 0)
+			x = 0;
+		if (y <= 0 )
+			y = 0;
+
+		gtk_window_move(GTK_WINDOW(cwin->mainwindow), x, y);
+
+		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 
 		if(!cwin->cpref->show_album_art && cwin->album_art_frame)
 			gtk_widget_hide(cwin->album_art_frame);
-		if(!cwin->cstate->fullscreen)
+		if(!(state & GDK_WINDOW_STATE_FULLSCREEN))
 			gtk_widget_hide(cwin->unfull_button);
 		if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))
 			&& !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)))
 				gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
-
-		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
-		cwin->cstate->iconified = FALSE;
 	}
 }
 

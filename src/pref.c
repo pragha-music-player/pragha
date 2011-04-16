@@ -707,40 +707,18 @@ void save_preferences(struct con_win *cwin)
 	GtkTreeViewColumn *col;
 	gchar *ref_char = NULL;
 	GtkTreePath *path = NULL;
+	GdkWindowState state;
 
-	/* Version */
+	/* General options*/
+
+	/* Save version */
 
 	g_key_file_set_string(cwin->cpref->configrc_keyfile,
 			      GROUP_GENERAL,
 			      KEY_INSTALLED_VERSION,
 			      PACKAGE_VERSION);
 
-	/* Shuffle and repeat options */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_SHUFFLE,
-			       cwin->cpref->shuffle);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_REPEAT,
-			       cwin->cpref->repeat);
-
-	/* Library view order */
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_LIBRARY_VIEW_ORDER,
-			       cwin->cpref->cur_library_view);
-
-	/* Add recursively in file chooser option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_ADD_RECURSIVELY_FILES,
-			       cwin->cpref->add_recursively_files);
-
-	/* Last Folder used in file chooser */
+	/* Save last folder used in file chooser */
 
 	u_file = g_filename_to_utf8(cwin->cstate->last_folder, -1,
 				    NULL, NULL, &error);
@@ -757,14 +735,14 @@ void save_preferences(struct con_win *cwin)
 		g_free(u_file);
 	}
 
-	/* Album art option */
+	/* Save add recursively in file chooser option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SHOW_ALBUM_ART,
-			       cwin->cpref->show_album_art);
+			       GROUP_GENERAL,
+			       KEY_ADD_RECURSIVELY_FILES,
+			       cwin->cpref->add_recursively_files);
 
-	/* Album art pattern */
+	/* Save album art pattern */
 
 	if (!cwin->cpref->album_art_pattern ||
 	    (cwin->cpref->album_art_pattern &&
@@ -780,57 +758,36 @@ void save_preferences(struct con_win *cwin)
 					      KEY_ALBUM_ART_PATTERN,
 					      &error);
 		}
-	} else if (cwin->cpref->album_art_pattern) {
+	}
+	else if (cwin->cpref->album_art_pattern) {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_GENERAL,
 				      KEY_ALBUM_ART_PATTERN,
 				      cwin->cpref->album_art_pattern);
 	}
 
-	/* Album art size */
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_ALBUM_ART_SIZE,
-			       (int)cwin->cpref->album_art_size);
-
-	/* Mode remaining time option */
+	/* Save time remaining mode option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
 			       KEY_TIMER_REMAINING_MODE,
 			       cwin->cpref->timer_remaining_mode);
 
-	/* OSD option */
+	/* Save close to tray option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_CLOSE_TO_TRAY,
+			       cwin->cpref->close_to_tray);
+
+	/* Save show OSD option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
 			       KEY_SHOW_OSD,
 			       cwin->cpref->show_osd);
 
-	/* Audio CD Device */
-
-	if (!cwin->cpref->audio_cd_device ||
-	    (cwin->cpref->audio_cd_device &&
-	     !strlen(cwin->cpref->audio_cd_device))) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_AUDIO) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_AUDIO_CD_DEVICE,
-				       &error))
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-	} else if (cwin->cpref->audio_cd_device) {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_AUDIO,
-				      KEY_AUDIO_CD_DEVICE,
-				      cwin->cpref->audio_cd_device);
-	}
-
-	/* last.fm option */
+	/* Save last.fm option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
@@ -860,7 +817,8 @@ void save_preferences(struct con_win *cwin)
 					      KEY_LASTFM_PASS,
 					      &error);
 		}
-	} else {
+	}
+	else {
 		if (cwin->cpref->lw.lastfm_user)
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_GENERAL,
@@ -873,62 +831,98 @@ void save_preferences(struct con_win *cwin)
 					      cwin->cpref->lw.lastfm_pass);
 	}
 
-	/* Software mixer option */
+	/* Playlist options */
+
+	/* Save playlist option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_AUDIO,
-			       KEY_SOFTWARE_MIXER,
-			       cwin->cpref->software_mixer);
+			       GROUP_PLAYLIST,
+			       KEY_SAVE_PLAYLIST,
+			       cwin->cpref->save_playlist);
 
-	if(cwin->cpref->software_mixer){
-		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_SOFTWARE_VOLUME,
-				       cwin->cmixer->curr_vol);
+	/* Save reference to current play */
+
+	path = current_playlist_get_actual(cwin);
+
+	if(path){
+		ref_char = gtk_tree_path_to_string (path);
+		gtk_tree_path_free(path);
+
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					GROUP_PLAYLIST,
+					KEY_CURRENT_REF,
+					ref_char);
+		g_free (ref_char);
+	}
+	else {
+		if (g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_PLAYLIST,
+				       KEY_CURRENT_REF,
+				       &error)){
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_PLAYLIST,
+					      KEY_CURRENT_REF,
+					      &error);
+		}
 	}
 
-	/* CDDB server option */
+	/* Shuffle and repeat options */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_AUDIO,
-			       KEY_USE_CDDB,
-			       cwin->cpref->use_cddb);
+			       GROUP_PLAYLIST,
+			       KEY_SHUFFLE,
+			       cwin->cpref->shuffle);
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_PLAYLIST,
+			       KEY_REPEAT,
+			       cwin->cpref->repeat);
 
-	/* Add Window size if not fullscreen*/
+	/* Save list of columns visible in current playlist */
 
-	if (!cwin->cstate->fullscreen){
-		window_size = g_new0(gint, 2);
-		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
-				    &win_width,
-				    &win_height);
-		window_size[0] = win_width;
-		window_size[1] = win_height;
+	if (cwin->cpref->playlist_columns) {
+		list = cwin->cpref->playlist_columns;
+		cnt = g_slist_length(cwin->cpref->playlist_columns);
+		columns = g_new0(gchar *, cnt);
 
+		for (i=0; i<cnt; i++) {
+			columns[i] = (gchar*)list->data;
+			list = list->next;
+		}
+
+		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
+					   GROUP_PLAYLIST,
+					   KEY_PLAYLIST_COLUMNS,
+					   (const gchar **)columns,
+					   cnt);
+		g_free(columns);
+	}
+
+	/* Save column widths */
+
+	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->current_playlist));
+	cnt = g_list_length(cols);
+	if (cols) {
+		col_widths = g_new0(gint, cnt);
+		for (j=cols, i=0; j != NULL; j = j->next) {
+			col = j->data;
+			col_name = gtk_tree_view_column_get_title(col);
+			if (is_present_str_list(col_name,
+						cwin->cpref->playlist_columns))
+				col_widths[i++] =
+					gtk_tree_view_column_get_width(col);
+		}
 		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_WINDOW,
-					    KEY_WINDOW_SIZE,
-					    window_size,
-					    2);
-		g_free(window_size);
+					    GROUP_PLAYLIST,
+					    KEY_PLAYLIST_COLUMN_WIDTHS,
+					    col_widths,
+					    i);
+		g_list_free(cols);
+		g_free(col_widths);
 	}
 
-	/* Set sidebar size*/
+	/* Library Options */
 
-	sidebar_size = gtk_paned_get_position(GTK_PANED(cwin->paned));
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SIDEBAR_SIZE,
-			       sidebar_size);
-
-	/* Set status bar option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_STATUS_BAR,
-			       cwin->cpref->status_bar);
-
-	/* List of libraries */
+	/* Save the list of libraries folders */
 
 	if (cwin->cpref->library_dir) {
 		list = cwin->cpref->library_dir;
@@ -974,172 +968,6 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
-
-	/* Save last window state */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_REMEMBER_STATE,
-			       cwin->cpref->remember_window_state);
-
-	if(cwin->cpref->remember_window_state){
-		if(cwin->cstate->fullscreen){
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      FULLSCREEN_STATE);
-		}
-		else if(cwin->cstate->iconified){
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      ICONIFIED_STATE);
-		}
-		else g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      NORMAL_STATE);
-	}
-	else{
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_WINDOW,
-				      KEY_START_MODE,
-				      cwin->cpref->start_mode);
-	}
-
-	/* Save playlist option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_SAVE_PLAYLIST,
-			       cwin->cpref->save_playlist);
-
-	/* Reference to current play */
-
-	path = current_playlist_get_actual(cwin);
-
-	if(path){
-		ref_char = gtk_tree_path_to_string (path);
-		gtk_tree_path_free(path);
-
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					GROUP_PLAYLIST,
-					KEY_CURRENT_REF,
-					ref_char);
-		g_free (ref_char);
-	}
-	else{
-		if (g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_PLAYLIST,
-				       KEY_CURRENT_REF,
-				       &error)){
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_PLAYLIST,
-					      KEY_CURRENT_REF,
-					      &error);
-		}
-	}
-
-	/* Close to tray option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_CLOSE_TO_TRAY,
-			       cwin->cpref->close_to_tray);
-
-	/* List of columns visible in current playlist */
-
-	if (cwin->cpref->playlist_columns) {
-		list = cwin->cpref->playlist_columns;
-		cnt = g_slist_length(cwin->cpref->playlist_columns);
-		columns = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			columns[i] = (gchar*)list->data;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_PLAYLIST,
-					   KEY_PLAYLIST_COLUMNS,
-					   (const gchar **)columns,
-					   cnt);
-		g_free(columns);
-	}
-
-	/* Column widths */
-
-	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->current_playlist));
-	cnt = g_list_length(cols);
-	if (cols) {
-		col_widths = g_new0(gint, cnt);
-		for (j=cols, i=0; j != NULL; j = j->next) {
-			col = j->data;
-			col_name = gtk_tree_view_column_get_title(col);
-			if (is_present_str_list(col_name,
-						cwin->cpref->playlist_columns))
-				col_widths[i++] =
-					gtk_tree_view_column_get_width(col);
-		}
-		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_PLAYLIST,
-					    KEY_PLAYLIST_COLUMN_WIDTHS,
-					    col_widths,
-					    i);
-		g_list_free(cols);
-		g_free(col_widths);
-	}
-
-	/* Library tree nodes */
-
-	if (cwin->cpref->library_tree_nodes) {
-		list = cwin->cpref->library_tree_nodes;
-		cnt = g_slist_length(cwin->cpref->library_tree_nodes);
-		nodes = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			nodes[i] = (gchar*)list->data;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_TREE_NODES,
-					   (const gchar **)nodes,
-					   cnt);
-		g_free(nodes);
-	}
-
-
-	/* Audio sink */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_SINK,
-			      cwin->cpref->audio_sink);
-
-	/* ALSA device */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_ALSA_DEVICE,
-			      cwin->cpref->audio_alsa_device);
-
-	/* OSS device */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_OSS_DEVICE,
-			      cwin->cpref->audio_oss_device);
-
-	/* last rescan time */
-
-	last_rescan_time = g_time_val_to_iso8601(&cwin->cpref->last_rescan_time);
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_LIBRARY,
-			      KEY_LIBRARY_LAST_SCANNED,
-			      last_rescan_time);
-	g_free(last_rescan_time);
 
 	/* List of libraries to be added/deleted from db */
 
@@ -1234,6 +1062,195 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
+
+	/* Save the library tree nodes */
+
+	if (cwin->cpref->library_tree_nodes) {
+		list = cwin->cpref->library_tree_nodes;
+		cnt = g_slist_length(cwin->cpref->library_tree_nodes);
+		nodes = g_new0(gchar *, cnt);
+
+		for (i=0; i<cnt; i++) {
+			nodes[i] = (gchar*)list->data;
+			list = list->next;
+		}
+
+		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
+					   GROUP_LIBRARY,
+					   KEY_LIBRARY_TREE_NODES,
+					   (const gchar **)nodes,
+					   cnt);
+		g_free(nodes);
+	}
+
+	/* Save the library view order */
+
+	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+			       GROUP_LIBRARY,
+			       KEY_LIBRARY_VIEW_ORDER,
+			       cwin->cpref->cur_library_view);
+
+	/* Save last rescan time */
+
+	last_rescan_time = g_time_val_to_iso8601(&cwin->cpref->last_rescan_time);
+	g_key_file_set_string(cwin->cpref->configrc_keyfile,
+			      GROUP_LIBRARY,
+			      KEY_LIBRARY_LAST_SCANNED,
+			      last_rescan_time);
+	g_free(last_rescan_time);
+
+	/* Audio Options */
+
+	/* Save Audio sink */
+
+	g_key_file_set_string(cwin->cpref->configrc_keyfile,
+			      GROUP_AUDIO,
+			      KEY_AUDIO_SINK,
+			      cwin->cpref->audio_sink);
+
+	/* Save ALSA device */
+
+	g_key_file_set_string(cwin->cpref->configrc_keyfile,
+			      GROUP_AUDIO,
+			      KEY_AUDIO_ALSA_DEVICE,
+			      cwin->cpref->audio_alsa_device);
+
+	/* Save OSS device */
+
+	g_key_file_set_string(cwin->cpref->configrc_keyfile,
+			      GROUP_AUDIO,
+			      KEY_AUDIO_OSS_DEVICE,
+			      cwin->cpref->audio_oss_device);
+
+	/* Save Software mixer option and volume */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_AUDIO,
+			       KEY_SOFTWARE_MIXER,
+			       cwin->cpref->software_mixer);
+
+	if(cwin->cpref->software_mixer){
+		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+				       GROUP_AUDIO,
+				       KEY_SOFTWARE_VOLUME,
+				       cwin->cmixer->curr_vol);
+	}
+
+	/* Save audio CD Device */
+
+	if (!cwin->cpref->audio_cd_device ||
+	    (cwin->cpref->audio_cd_device &&
+	     !strlen(cwin->cpref->audio_cd_device))) {
+		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
+					 GROUP_AUDIO) &&
+		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_AUDIO,
+				       KEY_AUDIO_CD_DEVICE,
+				       &error))
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_AUDIO,
+					      KEY_AUDIO_CD_DEVICE,
+					      &error);
+	}
+	else if (cwin->cpref->audio_cd_device) {
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_AUDIO,
+				      KEY_AUDIO_CD_DEVICE,
+				      cwin->cpref->audio_cd_device);
+	}
+
+	/* Save use CDDB server option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_AUDIO,
+			       KEY_USE_CDDB,
+			       cwin->cpref->use_cddb);
+
+	/* Window Option */
+
+	/* Save last window state */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_REMEMBER_STATE,
+			       cwin->cpref->remember_window_state);
+
+	state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
+
+	if(cwin->cpref->remember_window_state) {
+		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_START_MODE,
+					      FULLSCREEN_STATE);
+		}
+		else if(state & GDK_WINDOW_STATE_WITHDRAWN) {
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_START_MODE,
+					      ICONIFIED_STATE);
+		}
+		else {
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_START_MODE,
+					      NORMAL_STATE);
+		}
+	}
+	else {
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_WINDOW,
+				      KEY_START_MODE,
+				      cwin->cpref->start_mode);
+	}
+
+	/* Save geometry only if window is not maximized or fullscreened */
+
+	if (!(state & GDK_WINDOW_STATE_MAXIMIZED) || !(state & GDK_WINDOW_STATE_FULLSCREEN)) {
+		window_size = g_new0(gint, 2);
+		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
+				    &win_width,
+				    &win_height);
+		window_size[0] = win_width;
+		window_size[1] = win_height;
+
+		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
+					    GROUP_WINDOW,
+					    KEY_WINDOW_SIZE,
+					    window_size,
+					    2);
+		g_free(window_size);
+	}
+
+	/* Save sidebar size */
+
+	sidebar_size = gtk_paned_get_position(GTK_PANED(cwin->paned));
+
+	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_SIDEBAR_SIZE,
+			       sidebar_size);
+
+	/* Save show album art option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_SHOW_ALBUM_ART,
+			       cwin->cpref->show_album_art);
+
+	/* Save album art size */
+
+	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_ALBUM_ART_SIZE,
+			       (int)cwin->cpref->album_art_size);
+
+	/* Save status bar option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_STATUS_BAR,
+			       cwin->cpref->status_bar);
 
 	/* Save to conrc */
 

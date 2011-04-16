@@ -2,7 +2,7 @@
 Overview of changes in Pragha 0.7.7
 =====================================================
 News:
-	Global keybindings with keybinder. Inspired on osdlyrics
+	Global keybindings thanks to keybinder. Inspired on osdlyrics
 
 Updates Translations:
 	Add Brazilian Portuguese translation. Thanks to Sergio Cipolla.
@@ -13,6 +13,11 @@ Bugs fixed:
 	Add files recursively with dbus and command line according to preferences.
 	Shows album art when playing audio cd
 	D'Oh!. No remember Close to tray option.
+
+V0.7.7.1
+	Fix Issue 14: Pragha can not remember the starting position.
+	Remember correctly window position when click status icon or close window.
+	Never add files recursively with dbus and command line. Freeze Pragha.
 
 ======================================================
 OTHERS REALESES:
