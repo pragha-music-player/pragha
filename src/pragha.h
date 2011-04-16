@@ -96,6 +96,10 @@
 #define FULLSCREEN_STATE	"fullscreen"
 #define ICONIFIED_STATE		"iconified"
 
+#define PANE_LIBRARY		"library"
+#define PANE_PLAYLISTS		"playlists"
+#define PANE_NONE		"none"
+
 #define MIN_DATABASE_VERSION	"0.8.0"
 
 #define DEFAULT_SINK "default"
@@ -184,6 +188,7 @@
 #define KEY_START_MODE		   "start_mode"
 #define KEY_WINDOW_SIZE            "window_size"
 #define KEY_SIDEBAR_SIZE           "sidebar_size"
+#define KEY_SIDEBAR                "sidebar"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR		   "status_bar"
@@ -201,6 +206,16 @@
 #define TAG_GENRE_CHANGED	1<<4
 #define TAG_YEAR_CHANGED	1<<5
 #define TAG_COMMENT_CHANGED	1<<6
+
+#define PRAGHA_BUTTON_SKIP       _("_Skip")
+#define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
+#define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
+
+typedef enum {
+	PRAGHA_RESPONSE_SKIP,
+	PRAGHA_RESPONSE_SKIP_ALL,
+	PRAGHA_RESPONSE_DELETE_ALL
+} PraghaDeleteResponseType;
 
 enum debug_level {
 	DBG_INFO = 1,
@@ -388,6 +403,7 @@ struct con_pref {
 	gchar *audio_sink;
 	gchar *album_art_pattern;
 	gchar *start_mode;
+	gchar *sidebar_pane;
 	gchar *audio_alsa_device;
 	gchar *audio_oss_device;
 	gchar *audio_cd_device;

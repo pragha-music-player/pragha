@@ -1,7 +1,37 @@
 =====================================================
-Overview of changes in Pragha 0.8.2 "Quasi One.Zero"
+Overview of changes in Pragha 0.8.3
 =====================================================
 
+News:
+	Move to trash instead remove tracks in library view.
+	Add dialog to Skip, Skip all, or delete all tracks if fails move to trash.
+	Remember last sidebar pane used.
+
+Others Changes:
+	Delete folders in library preferences pressing Delete Key.
+	Delete track from library items in library view pressing Delete Key.
+	Changed design of notifications, now more in line to pragha panel.
+	Add GTK_STOCK_JUMP_TO icon to open folders in tag editor dialog.
+	Use GTK_STOCK_EDIT icon to Edit tags menu.
+
+Updates Translations:
+	Update Swedish thanks to monotux.
+	Update German thanks to Cwickert.
+	Update po files.
+
+Bugs fixed:
+	Remove unnecessary gtk_widget_add_events.
+	Romove unnesessary validate entry to year and track gtk_spins.
+	Use GTK_DIALOG_DESTROY_WITH_PARENT in dialogs.
+	Place the cursor at the end of the filename entry.
+	No save fuse option if not folders view is activate.
+	Fix tiny memory leak.
+
+======================================================
+OTHERS REALESES:
+======================================================
+
+V0.8.2
 News:
 	Add filename entry to tag editor dialog with a open folder icon.
 	Add Details button to tag editor dialog that open the properties dialog.
@@ -25,9 +55,6 @@ Bugs fixed:
 	Initialized pointers!.
 	Remove unused vars.
 
-======================================================
-OTHERS REALESES:
-======================================================
 V0.8.1
 News:
 	Add Translate Pragha (Link to Transifex) in Help menu.
@@ -50,6 +77,7 @@ Updates Translations:
 Bugs fixed:
 	Fix typo thanks to Timm Bäder.
 	Expand only comment field when change window size in edit tag dialog.
+
 V0.8.0.2
 	Update German translation. Thanks to Christoph Wickert.
 	Disable Global keybindings if gtk < 2.20.

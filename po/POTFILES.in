@@ -1,5 +1,6 @@
 src/gui.c
 src/pragha.c
+src/pragha.h
 src/panel.c
 src/current_playlist.c
 src/librarytree.c

@@ -270,22 +270,6 @@ static gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin
 	return ret;
 }
 
-static gboolean entry_validate_cb(GtkWidget *entry, GdkEventKey *event,
-				  gpointer data)
-{
-	gunichar unich;
-
-	unich = gdk_keyval_to_unicode(event->keyval);
-
-	if (g_unichar_isdigit(unich))
-		return FALSE;
-
-	if (g_unichar_isalpha(unich) || g_unichar_isspace(unich))
-		return TRUE;
-
-	return FALSE;
-}
-
 void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin)
 {
@@ -501,14 +485,11 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_DIRECTORY);
+
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_DIRECTORY);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_JUMP_TO);
 
 	gtk_entry_set_editable (GTK_ENTRY(entry_file), FALSE);
-
-	g_signal_connect(G_OBJECT(entry_tno), "key-press-event",
-			 G_CALLBACK(entry_validate_cb), cwin);
-	g_signal_connect(G_OBJECT(entry_year), "key-press-event",
-			 G_CALLBACK(entry_validate_cb), cwin);
 
 	/* Create checkboxes */
 
@@ -731,6 +712,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 
 	if (file) {
 		gtk_entry_set_text(GTK_ENTRY(entry_file), file);
+		gtk_editable_set_position(GTK_EDITABLE(entry_file), strlen(file));
 		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
 	}
 	else

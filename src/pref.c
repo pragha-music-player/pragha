@@ -122,12 +122,11 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			ret = gtk_tree_model_iter_next(model, &iter);
 		}
 
-		test_fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
+		test_fuse_folders = cwin->cpref->fuse_folders;
+		cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
 
-		if ((cwin->cpref->fuse_folders != test_fuse_folders) && (cwin->cpref->cur_library_view == FOLDERS)) {
-			cwin->cpref->fuse_folders = test_fuse_folders;
+		if ((cwin->cpref->fuse_folders != test_fuse_folders) && (cwin->cpref->cur_library_view == FOLDERS))
 			init_library_view(cwin);
-		}
 
 		/* General preferences */
 
@@ -1186,6 +1185,27 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SIDEBAR_SIZE,
 			       sidebar_size);
 
+	/* Save last sidebar pane used */
+
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))) {
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_WINDOW,
+				      KEY_SIDEBAR,
+				      PANE_LIBRARY);
+	}
+	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists))) {
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_WINDOW,
+				      KEY_SIDEBAR,
+				      PANE_PLAYLISTS);
+	}
+	else {
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_WINDOW,
+				      KEY_SIDEBAR,
+				      PANE_NONE);
+	}
+
 	/* Save show album art option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
@@ -1268,6 +1288,22 @@ void save_preferences(struct con_win *cwin)
 			   error->message);
 
 	g_free(data);
+}
+
+int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+{
+	if (event->state != 0
+			&& ((event->state & GDK_CONTROL_MASK)
+			|| (event->state & GDK_MOD1_MASK)
+			|| (event->state & GDK_MOD3_MASK)
+			|| (event->state & GDK_MOD4_MASK)
+			|| (event->state & GDK_MOD5_MASK)))
+		return FALSE;
+	if (event->keyval == GDK_Delete){
+		library_remove_cb(NULL, cwin);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 /* Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan */
@@ -1773,6 +1809,8 @@ void preferences_dialog(struct con_win *cwin)
 			 G_CALLBACK(library_add_cb), cwin);
 	g_signal_connect(G_OBJECT(library_remove), "clicked",
 			 G_CALLBACK(library_remove_cb), cwin);
+	g_signal_connect (G_OBJECT (library_view), "key_press_event",
+			  G_CALLBACK(library_view_key_press), cwin);
 	g_signal_connect(G_OBJECT(audio_sink_combo), "changed",
 			 G_CALLBACK(change_audio_sink), cwin);
 

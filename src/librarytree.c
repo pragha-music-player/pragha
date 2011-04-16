@@ -345,38 +345,86 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 	}
 }
 
-static void delete_row_from_hdd(GtkTreePath *path, GtkTreeModel *model,
+static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				struct con_win *cwin)
 {
-	GtkTreeIter t_iter, r_iter;
-	enum node_type node_type = 0;
-	gint location_id;
-	gint j = 0;
+	GtkWidget *question_dialog;
+	gchar *query = NULL, *filename = NULL;
+	gchar *primary, *secondary;
+	gint response, i, location_id = 0;
+	gboolean deleted = FALSE;
+	struct db_result result;
 
-	/* If this path is a track, delete it immediately */
+	if (!loc_arr)
+		return;
 
-	gtk_tree_model_get_iter(model, &r_iter, path);
-	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
-	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-		if (delete_location_hdd(location_id, cwin) == 0)
-			delete_location_db(location_id, cwin);
-	}
+	for(i = 0; i < loc_arr->len; i++) {
+		location_id = g_array_index(loc_arr, gint, i);
+		if (location_id) {
+			query = g_strdup_printf("SELECT name FROM LOCATION "
+						"WHERE id = '%d';",
+						location_id);
+			if (exec_sqlite_query(query, cwin, &result)) {
+				filename = result.resultp[result.no_columns];
+				if(filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
+					GError *error = NULL;
+					GFile *file = g_file_new_for_path(filename);
 
-	/* For all other node types do a recursive deletion */
+					if(!unlink && !(deleted = g_file_trash(file, NULL, &error))) {
+						primary = g_strdup (_("Cannot move file to trash, do you want to delete immediately?"));
+						secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
+										g_file_get_basename (file), error->message);
 
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
-		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
-		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-			gtk_tree_model_get(model, &t_iter,
-					   L_LOCATION_ID, &location_id, -1);
-			if (delete_location_hdd(location_id, cwin) == 0)
+						question_dialog = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
+					                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					                                                GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", primary);
+						gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (question_dialog), "%s", secondary);
+
+						gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+						if (loc_arr->len > 1) {
+						        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP, PRAGHA_RESPONSE_SKIP);
+						        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP_ALL, PRAGHA_RESPONSE_SKIP_ALL);
+				        		gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_DELETE_ALL, PRAGHA_RESPONSE_DELETE_ALL);
+						}
+						gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_DELETE, GTK_RESPONSE_ACCEPT);
+
+						response = gtk_dialog_run (GTK_DIALOG (question_dialog));
+						gtk_widget_destroy (question_dialog);
+						g_free (primary);
+						g_free (secondary);
+						g_error_free (error);
+						error = NULL;
+
+						switch (response)
+						{
+							case PRAGHA_RESPONSE_DELETE_ALL:
+								unlink = TRUE;
+								break;
+							case GTK_RESPONSE_ACCEPT:
+								g_unlink(filename);
+								deleted = TRUE;
+								break;
+							case PRAGHA_RESPONSE_SKIP:
+								break;
+							case PRAGHA_RESPONSE_SKIP_ALL:
+							case GTK_RESPONSE_CANCEL:
+							case GTK_RESPONSE_DELETE_EVENT:
+							default:
+								sqlite3_free_table(result.resultp);
+								return;
+						}
+					}
+					if(unlink) {
+						g_unlink(filename);
+						deleted = TRUE;
+					}
+					g_object_unref(G_OBJECT(file));
+				}
+			}
+			if (deleted) {
 				delete_location_db(location_id, cwin);
-		}
-		else {
-			path = gtk_tree_model_get_path(model, &t_iter);
-			delete_row_from_hdd(path, model, cwin);
-			gtk_tree_path_free(path);
+			}
+			sqlite3_free_table(result.resultp);
 		}
 	}
 }
@@ -1022,7 +1070,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 
 	if (list) {
 		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL,
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_QUESTION,
 					GTK_BUTTONS_YES_NO,
 					_("Are you sure you want to delete current file from library?\n\n"
@@ -1064,12 +1112,15 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
+	GtkWidget *toggle_unlink;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 	gchar *query;
 	gint result;
+	GArray *loc_arr;
+	gboolean unlink = FALSE;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -1077,23 +1128,30 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 
 	if (list) {
 		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-						GTK_DIALOG_MODAL,
+						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
 						GTK_BUTTONS_YES_NO,
-						_("Are you sure you want to delete current file from HDD?\n\n"
-						"Warning: Once deleted, the file cannot be recovered."));
+						_("Really want to move the files to trash?"));
 
+		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
+		gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), toggle_unlink, TRUE, TRUE, 0);
+
+		gtk_widget_show_all(dialog);
 		result = gtk_dialog_run(GTK_DIALOG(dialog));
+		unlink = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_unlink));
 		gtk_widget_destroy(dialog);
-		if( result == GTK_RESPONSE_YES ){
-			/* Delete all the rows */
 
+		if(result == GTK_RESPONSE_YES){
 			query = g_strdup_printf("BEGIN;");
 			exec_sqlite_query(query, cwin, NULL);
 
+			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				delete_row_from_hdd(path, model, cwin);
+				get_location_ids(path, loc_arr, model, cwin);
+				trash_or_unlink_row(loc_arr, unlink, cwin);
+
 				gtk_tree_path_free(path);
 
 				/* Have to give control to GTK periodically ... */
@@ -1105,6 +1163,8 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 						return;
 			}
 			g_list_free(list);
+			if (loc_arr)
+				g_array_free(loc_arr, TRUE);
 
 			query = g_strdup_printf("END;");
 			exec_sqlite_query(query, cwin, NULL);

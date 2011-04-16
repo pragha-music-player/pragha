@@ -144,8 +144,8 @@ void show_osd(struct con_win *cwin)
 		summary = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
-	
-	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
+
+	body = g_markup_printf_escaped(_("<small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s (%s)"),
 			(cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
 			cwin->cstate->curr_mobj->tags->artist : _("Unknown Artist"),
 			(cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?

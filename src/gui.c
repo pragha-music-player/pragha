@@ -113,9 +113,10 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Add to playlist\"/>		\
 	<menuitem action=\"Replace playlist\"/>		\
 	<separator/>					\
-	<menuitem action=\"Edit\"/>			\
-	<menuitem action=\"Delete (From library)\"/>	\
-	<menuitem action=\"Delete (From HDD)\"/>	\
+	<menuitem action=\"Edit tags\"/>		\
+	<separator/>					\
+	<menuitem action=\"Move to trash\"/>		\
+	<menuitem action=\"Delete from library\"/>	\
 	</popup>					\
 	</ui>";
 
@@ -174,7 +175,7 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next track"),
 	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
-	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
@@ -247,7 +248,7 @@ GtkActionEntry cp_context_aentries[] = {
 	 NULL, "Delete this entry", G_CALLBACK(remove_current_playlist)},
 	{"Crop", GTK_STOCK_REMOVE, N_("Crop"),
 	 NULL, "Crop the playlist", G_CALLBACK(crop_current_playlist)},
-	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_current_playlist)},
 	{"Save selection", GTK_STOCK_SAVE, N_("Save selection"),
 	 NULL, "Save selected tracks as playlist", G_CALLBACK(save_selected_playlist)},
@@ -273,12 +274,12 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 NULL, "Add to playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace playlist", NULL, N_("_Replace playlist"),
 	 NULL, "Replace playlist", G_CALLBACK(library_tree_replace_playlist)},
-	{"Edit", GTK_STOCK_EDIT, N_("Edit tags"),
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 NULL, "Edit tags", G_CALLBACK(library_tree_edit_tags)},
-	{"Delete (From library)", GTK_STOCK_REMOVE, N_("Delete from library"),
-	 NULL, "Delete from library", G_CALLBACK(library_tree_delete_db)},
-	{"Delete (From HDD)", GTK_STOCK_REMOVE, N_("Delete from HDD"),
-	 NULL, "Delete from HDD", G_CALLBACK(library_tree_delete_hdd)}
+	{"Move to trash", "user-trash", N_("Move to _trash"),
+	 NULL, "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
+	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
+	 NULL, "Delete from library", G_CALLBACK(library_tree_delete_db)}
 };
 
 GtkActionEntry library_page_context_aentries[] = {
@@ -319,7 +320,7 @@ GtkActionEntry systray_menu_aentries[] = {
 	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next Track"),
 	 NULL, "Next Track", G_CALLBACK(next_action)},
-	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 NULL, "Quit", G_CALLBACK(systray_quit)}
@@ -364,6 +365,22 @@ static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
 	return context_menu;
+}
+
+int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+{
+	if (event->state != 0
+			&& ((event->state & GDK_CONTROL_MASK)
+			|| (event->state & GDK_MOD1_MASK)
+			|| (event->state & GDK_MOD3_MASK)
+			|| (event->state & GDK_MOD4_MASK)
+			|| (event->state & GDK_MOD5_MASK)))
+		return FALSE;
+	if (event->keyval == GDK_Delete){
+		library_tree_delete_db(NULL, cwin);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 static GtkWidget* create_library_tree(struct con_win *cwin)
@@ -423,6 +440,8 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 	cwin->library_tree = library_tree;
 	g_signal_connect(G_OBJECT(library_tree), "row-activated",
 			 G_CALLBACK(library_tree_row_activated_cb), cwin);
+	g_signal_connect (G_OBJECT (library_tree), "key_press_event",
+			  G_CALLBACK(library_tree_key_press), cwin);
 
 	/* Create right click popup menu */
 
@@ -1160,7 +1179,6 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(current_playlist), "row-activated",
 			 G_CALLBACK(current_playlist_row_activated_cb), cwin);
 
-	gtk_widget_add_events (GTK_WIDGET (current_playlist), GDK_KEY_PRESS_MASK);
 	g_signal_connect (G_OBJECT (current_playlist), "key_press_event",
 			  G_CALLBACK (current_playlist_key_press), cwin);
 

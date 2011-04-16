@@ -207,7 +207,7 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f;
 	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, album_f, album_art_size_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
 
@@ -217,7 +217,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = album_f = album_art_size_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 
 	all_f = FALSE;
@@ -313,6 +313,16 @@ gint init_config(struct con_win *cwin)
 			sidebar_size_f = TRUE;
 		}
 
+		cwin->cpref->sidebar_pane =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_SIDEBAR,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			sidebar_pane_f = TRUE;
+		}
 
 		/* Retrieve Audio preferences */
 
@@ -799,6 +809,8 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
+	if (all_f || sidebar_pane_f)
+		cwin->cpref->sidebar_pane = g_strdup(PANE_LIBRARY);
 	if (all_f || libs_f)
 		cwin->cpref->library_dir = NULL;
 	if (all_f || lib_add_f)
@@ -1194,6 +1206,13 @@ void init_toggle_buttons(struct con_win *cwin)
 {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+
+	if (!g_ascii_strcasecmp(cwin->cpref->sidebar_pane, PANE_LIBRARY))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib), TRUE);
+	else if (!g_ascii_strcasecmp(cwin->cpref->sidebar_pane, PANE_PLAYLISTS))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
 }
 
 void init_menu_actions(struct con_win *cwin)

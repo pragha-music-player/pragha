@@ -73,6 +73,8 @@ void common_cleanup(struct con_win *cwin)
 	g_free(cwin->cpref->audio_oss_device);
 	g_free(cwin->cpref->album_art_pattern);
 	g_free(cwin->cpref->audio_cd_device);
+	g_free(cwin->cpref->start_mode);
+	g_free(cwin->cpref->sidebar_pane);
 	g_key_file_free(cwin->cpref->configrc_keyfile);
 	free_str_list(cwin->cpref->library_dir);
 	free_str_list(cwin->cpref->lib_add);
