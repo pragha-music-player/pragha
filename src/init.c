@@ -203,20 +203,23 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
-	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f, osd_f, lastfm_f;
+	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f, lastfm_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f;
 	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, album_f, album_art_size_f, status_bar_f;	
+	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, album_f, album_art_size_f, status_bar_f;
+	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = osd_f = lastfm_f = FALSE;
+	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = lastfm_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = album_f = album_art_size_f = status_bar_f = FALSE;
+	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
+
 	all_f = FALSE;
 
 	config_dir = g_get_user_config_dir();
@@ -271,7 +274,7 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 		}
 
-		/* Retrieve window size */
+		/* Retrieve Window preferences */
 
 		win_size = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
 						       GROUP_WINDOW,
@@ -289,60 +292,6 @@ gint init_config(struct con_win *cwin)
 			window_size_f = TRUE;
 		}
 
-		/* Retrieve sidebar size */
-
-		cwin->cpref->sidebar_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-								   GROUP_WINDOW,
-								   KEY_SIDEBAR_SIZE,
-								   &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			sidebar_size_f = TRUE;
-		}
-
-		/* Retrieve Remember last window state option */
-
-		cwin->cpref->remember_window_state =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_REMEMBER_STATE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			remember_window_state_f = TRUE;
-		}
-
-		/* Retrieve last window stat */
-
-		cwin->cpref->start_mode =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			start_mode_f = TRUE;
-		}
-
-		/* Retrieve close to system tray option */
-
-		cwin->cpref->close_to_tray =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_CLOSE_TO_TRAY,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			close_to_tray_f = TRUE;
-		}
-
-
-		/* Retrieve view status bar option */
-
 		cwin->cpref->status_bar =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_WINDOW,
@@ -354,7 +303,74 @@ gint init_config(struct con_win *cwin)
 			status_bar_f = TRUE;
 		}
 
-		/* Retrieve list of libraries */
+		cwin->cpref->sidebar_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
+								   GROUP_WINDOW,
+								   KEY_SIDEBAR_SIZE,
+								   &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			sidebar_size_f = TRUE;
+		}
+
+
+		/* Retrieve Audio preferences */
+
+		cwin->cpref->audio_sink =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_AUDIO,
+					      KEY_AUDIO_SINK,
+					      &error);
+		if (!cwin->cpref->audio_sink) {
+			g_error_free(error);
+			error = NULL;
+			audio_sink_f = TRUE;
+		}
+
+		cwin->cpref->audio_alsa_device =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_AUDIO,
+					      KEY_AUDIO_ALSA_DEVICE,
+					      &error);
+		if (!cwin->cpref->audio_alsa_device) {
+			g_error_free(error);
+			error = NULL;
+			audio_alsa_device_f = TRUE;
+		}
+
+		cwin->cpref->audio_oss_device =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_AUDIO,
+					      KEY_AUDIO_OSS_DEVICE,
+					      &error);
+		if (!cwin->cpref->audio_oss_device) {
+			g_error_free(error);
+			error = NULL;
+			audio_oss_device_f = TRUE;
+		}
+
+		cwin->cpref->audio_cd_device =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_AUDIO,
+					      KEY_AUDIO_CD_DEVICE,
+					      &error);
+		if (!cwin->cpref->audio_cd_device) {
+			g_error_free(error);
+			error = NULL;
+		}
+
+		cwin->cpref->software_mixer =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_AUDIO,
+					       KEY_SOFTWARE_MIXER,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			software_mixer_f = TRUE;
+		}
+
+		/* Retrieve Collection preferences */
 
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						  GROUP_LIBRARY,
@@ -386,14 +402,11 @@ gint init_config(struct con_win *cwin)
 			libs_f = TRUE;
 		}
 
-		/* Retrieve list of columns to show in playlist view */
-
 		columns = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						     GROUP_PLAYLIST,
 						     KEY_PLAYLIST_COLUMNS,
 						     &cnt,
 						     &error);
-
 		if (columns) {
 			for (i=0; i<cnt; i++) {
 				cwin->cpref->playlist_columns =
@@ -408,14 +421,11 @@ gint init_config(struct con_win *cwin)
 			columns_f = TRUE;
 		}
 
-		/* Retrieve list of column widths */
-
 		col_widths = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
 							 GROUP_PLAYLIST,
 							 KEY_PLAYLIST_COLUMN_WIDTHS,
 							 &cnt,
 							 &error);
-
 		if (col_widths) {
 			for (i = 0; i < cnt; i++) {
 				cwin->cpref->playlist_column_widths =
@@ -429,8 +439,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			col_widths_f = TRUE;
 		}
-
-		/* Retrieve list of library tree nodes */
 
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						   GROUP_LIBRARY,
@@ -451,8 +459,6 @@ gint init_config(struct con_win *cwin)
 			nodes_f = TRUE;
 		}
 
-		/* Retrieve library view order */
-
 		cwin->cpref->cur_library_view =
 			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
 					       GROUP_LIBRARY,
@@ -463,8 +469,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			cur_lib_view_f = TRUE;
 		}
-
-		/* Retrieve last rescan time */
 
 		last_rescan_time =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
@@ -480,8 +484,6 @@ gint init_config(struct con_win *cwin)
 				g_warning("Unable to convert last rescan time");
 			g_free(last_rescan_time);
 		}
-
-		/* Retrieve list of libraries to be added */
 
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						  GROUP_LIBRARY,
@@ -513,8 +515,6 @@ gint init_config(struct con_win *cwin)
 			lib_add_f = TRUE;
 		}
 
-		/* Retrieve list of libraries to be deleted */
-
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						  GROUP_LIBRARY,
 						  KEY_LIBRARY_DELETE,
@@ -545,8 +545,6 @@ gint init_config(struct con_win *cwin)
 			lib_delete_f = TRUE;
 		}
 
-		/* Retrieve fuse folders option */
-
 		cwin->cpref->fuse_folders = 
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_LIBRARY,
@@ -558,7 +556,60 @@ gint init_config(struct con_win *cwin)
 			fuse_folders_f = TRUE;
 		}
 
-		/* Retrieve add recursively files option */
+
+
+
+
+
+
+
+
+
+		/* Retrieve General preferences */
+
+		cwin->cpref->remember_window_state =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_WINDOW,
+					       KEY_REMEMBER_STATE,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			remember_window_state_f = TRUE;
+		}
+
+		cwin->cpref->start_mode =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_START_MODE,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			start_mode_f = TRUE;
+		}
+
+		cwin->cpref->save_playlist =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_SAVE_PLAYLIST,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			save_playlist_f = TRUE;
+		}
+
+		cwin->cpref->close_to_tray =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_CLOSE_TO_TRAY,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			close_to_tray_f = TRUE;
+		}
 
 		cwin->cpref->add_recursively_files =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
@@ -571,7 +622,49 @@ gint init_config(struct con_win *cwin)
 			recursively_f = TRUE;
 		}
 
-		/* Retrieve filetree pwd */
+		cwin->cpref->show_album_art =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_WINDOW,
+					       KEY_SHOW_ALBUM_ART,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			album_f = TRUE;
+		}
+
+		cwin->cpref->album_art_size =
+			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_ALBUM_ART_SIZE,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			album_art_size_f = TRUE;
+		}
+
+		cwin->cpref->album_art_pattern =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_ALBUM_ART_PATTERN,
+					      &error);
+		if (!cwin->cpref->album_art_pattern) {
+			g_error_free(error);
+			error = NULL;
+			album_art_pattern_f = TRUE;
+		}
+
+		cwin->cpref->timer_remaining_mode =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_TIMER_REMAINING_MODE,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			timer_remaining_mode_f = TRUE;
+		}
 
 		u_file = g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -595,144 +688,6 @@ gint init_config(struct con_win *cwin)
 			g_free(u_file);
 		}
 
-		/* Retrieve album art option */
-
-		cwin->cpref->show_album_art =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_SHOW_ALBUM_ART,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_f = TRUE;
-		}
-
-		/* Retrieve Album art Size */
-
-		cwin->cpref->album_art_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_ALBUM_ART_SIZE,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_art_size_f = TRUE;
-		}
-
-		/* Retrieve album art pattern */
-
-		cwin->cpref->album_art_pattern =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_ALBUM_ART_PATTERN,
-					      &error);
-		if (!cwin->cpref->album_art_pattern) {
-			g_error_free(error);
-			error = NULL;
-			album_art_pattern_f = TRUE;
-		}
-
-		/* Mode remaining time option */
-
-		cwin->cpref->timer_remaining_mode =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_TIMER_REMAINING_MODE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			timer_remaining_mode_f = TRUE;
-		}
-
-		/* Retrieve OSD option */
-
-		cwin->cpref->show_osd =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SHOW_OSD,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			osd_f = TRUE;
-		}
-
-		/* Retrieve Save playlist option */
-
-		cwin->cpref->save_playlist =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_PLAYLIST,
-					       KEY_SAVE_PLAYLIST,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			save_playlist_f = TRUE;
-		}
-
-		/* Retrieve last.fm option */
-
-		cwin->cpref->lw.lastfm_support =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_LASTFM,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			lastfm_f = TRUE;
-		}
-
-		cwin->cpref->lw.lastfm_user =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_USER,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-		}
-
-		cwin->cpref->lw.lastfm_pass =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_PASS,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-		}
-
-		/* Retrieve software mixer option */
-
-		cwin->cpref->software_mixer =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_AUDIO,
-					       KEY_SOFTWARE_MIXER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			software_mixer_f = TRUE;
-		}
-
-		/* Retrieve use CDDB server option */
-
-		cwin->cpref->use_cddb =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_AUDIO,
-					       KEY_USE_CDDB,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			use_cddb_f = TRUE;
-		}
-
-		/* Retrieve shuffle & repeat options */
-
 		cwin->cpref->shuffle =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_PLAYLIST,
@@ -755,55 +710,93 @@ gint init_config(struct con_win *cwin)
 			repeat_f= TRUE;
 		}
 
-		/* Retrieve audio sink */
+		/* Retrieve Notification preferences */
 
-		cwin->cpref->audio_sink =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_SINK,
-					      &error);
-		if (!cwin->cpref->audio_sink) {
+		cwin->cpref->show_osd =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_SHOW_OSD,
+					       &error);
+		if (error) {
 			g_error_free(error);
 			error = NULL;
-			audio_sink_f = TRUE;
+			show_osd_f = TRUE;
 		}
 
-		/* Retrieve ALSA audio device */
-
-		cwin->cpref->audio_alsa_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_ALSA_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_alsa_device) {
+		cwin->cpref->osd_in_systray =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_OSD_IN_TRAY,
+					       &error);
+		if (error) {
 			g_error_free(error);
 			error = NULL;
-			audio_alsa_device_f = TRUE;
+			osd_in_systray_f = TRUE;
 		}
 
-		/* Retrieve OSS audio device */
-
-		cwin->cpref->audio_oss_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_OSS_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_oss_device) {
+		cwin->cpref->albumart_in_osd =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_SHOW_ALBUM_ART_OSD,
+					       &error);
+		if (error) {
 			g_error_free(error);
 			error = NULL;
-			audio_oss_device_f = TRUE;
+			albumart_in_osd_f = TRUE;
+		}
+		cwin->cpref->actions_in_osd =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_SHOW_ACTIONS_OSD,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			actions_in_osd_f = TRUE;
 		}
 
-		/* Retrieve Audio CD Device */
+		/* Retrieve Services Internet preferences */
 
-		cwin->cpref->audio_cd_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_cd_device) {
+		cwin->cpref->lw.lastfm_support =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_SERVICES,
+					       KEY_LASTFM,
+					       &error);
+		if (error) {
 			g_error_free(error);
 			error = NULL;
+			lastfm_f = TRUE;
+		}
+
+		cwin->cpref->lw.lastfm_user =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_USER,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+		}
+
+		cwin->cpref->lw.lastfm_pass =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_PASS,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+		}
+
+		cwin->cpref->use_cddb =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_SERVICES,
+					       KEY_USE_CDDB,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			use_cddb_f = TRUE;
 		}
 	}
 
@@ -869,8 +862,14 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->album_art_size = ALBUM_ART_SIZE;
 	if (all_f || timer_remaining_mode_f)
 		cwin->cpref->timer_remaining_mode = FALSE;
-	if (all_f || osd_f)
-		cwin->cpref->show_osd = FALSE;
+	if (all_f || show_osd_f)
+		cwin->cpref->show_osd = TRUE;
+	if (all_f || osd_in_systray_f)
+		cwin->cpref->osd_in_systray = TRUE;
+	if (all_f || albumart_in_osd_f)
+		cwin->cpref->albumart_in_osd = TRUE;
+	if (all_f || actions_in_osd_f)
+		cwin->cpref->actions_in_osd = FALSE;
 	if (all_f || remember_window_state_f)
 		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
@@ -881,12 +880,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || save_playlist_f)
 		cwin->cpref->save_playlist = TRUE;
-	if (all_f || lastfm_f)
-		cwin->cpref->lw.lastfm_support = FALSE;
 	if (all_f || software_mixer_f)
 		cwin->cpref->software_mixer = TRUE;
-	if (all_f || use_cddb_f)
-		cwin->cpref->use_cddb = TRUE;
 	if (all_f || shuffle_f)
 		cwin->cpref->shuffle = FALSE;
 	if (all_f || repeat_f)
@@ -898,6 +893,10 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->audio_alsa_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	if (all_f || audio_oss_device_f)
 		cwin->cpref->audio_oss_device = g_strdup(OSS_DEFAULT_DEVICE);
+	if (all_f || lastfm_f)
+		cwin->cpref->lw.lastfm_support = FALSE;
+	if (all_f || use_cddb_f)
+		cwin->cpref->use_cddb = TRUE;
 
 	/* Cleanup */
 
@@ -1366,6 +1365,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
+
 	/* Init window state*/
 
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {

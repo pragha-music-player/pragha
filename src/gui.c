@@ -74,6 +74,8 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Community\"/>			\
 			<menuitem action=\"Wiki\"/>				\
 			<separator/>						\
+			<menuitem action=\"Translate Pragha\"/>			\
+			<separator/>						\
 			<menuitem action=\"About\"/>				\
 		</menu>								\
 	</menubar>								\
@@ -204,14 +206,16 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Update library", G_CALLBACK(update_library_action)},
 	{"Statistics", GTK_STOCK_INFO, N_("_Statistics"),
 	 NULL, "Statistics", G_CALLBACK(statistics_action)},
-	{"About", GTK_STOCK_ABOUT, N_("About"),
-	 NULL, "About pragha", G_CALLBACK(about_action)},
 	{"Home", GTK_STOCK_HOME, N_("Homepage"),
 	 NULL, "Homepage", G_CALLBACK(home_action)},
 	{"Community", GTK_STOCK_INFO, N_("Community"),
 	 NULL, "Forum of pragha", G_CALLBACK(community_action)},
 	{"Wiki", GTK_STOCK_YES, N_("Wiki"),
 	 NULL, "Wiki of pragha", G_CALLBACK(wiki_action)},
+	{"Translate Pragha", NULL, N_("Translate Pragha"),
+	 NULL, "Translate Pragha", G_CALLBACK(translate_action)},
+	{"About", GTK_STOCK_ABOUT, N_("About"),
+	 NULL, "About pragha", G_CALLBACK(about_action)},
 };
 
 GtkToggleActionEntry toggles_entries[] = {

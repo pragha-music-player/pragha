@@ -43,7 +43,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			   struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean aa, ctt, ar, osd, ret, test_fuse_folders;
+	gboolean ret, osd, test_fuse_folders;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
@@ -54,146 +54,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	case GTK_RESPONSE_CANCEL:
 		break;
 	case GTK_RESPONSE_OK:
-		/* Windows init start option */
 
-		window_state_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cwin->cpref->window_state_combo));
-
-		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
-			cwin->cpref->remember_window_state = FALSE;
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
-		}
-		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
-			cwin->cpref->remember_window_state = FALSE;
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
-		}
-		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
-			cwin->cpref->remember_window_state = FALSE;
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
-		}
-		else 	cwin->cpref->remember_window_state = TRUE;
-
-		g_free(window_state_sink);
-
-		/* Validate album art pattern, if invalid bail out immediately */
-
-		if (GTK_WIDGET_VISIBLE(cwin->cpref->album_art_pattern_w)){
-
-			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w));
-
-			if (album_art_pattern){
-				if (!validate_album_art_pattern(album_art_pattern)) {
-					album_art_pattern_helper(dialog, cwin);
-					return;
-				}
-				/* Proper pattern, store in preferences */
-				g_free(cwin->cpref->album_art_pattern);
-				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
-			}
-		}
-
-		/* Album art */
-
-		aa = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->album_art_w));
-		if (aa)
-			cwin->cpref->show_album_art = TRUE;
-		else
-			cwin->cpref->show_album_art = FALSE;
-
-		cwin->cpref->album_art_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w));
-
-		album_art_toggle_state(cwin);
-
-		/* Close_to_tray */
-
-		ctt = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->close_to_tray_w));
-		if (ctt)
-			cwin->cpref->close_to_tray = TRUE;
-		else
-			cwin->cpref->close_to_tray = FALSE;
-
-		/* Add recurcively */
-
-		ar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->add_recurcively_w));
-		if (ar)
-			cwin->cpref->add_recursively_files = TRUE;
-		else
-			cwin->cpref->add_recursively_files = FALSE;
-
-		/* OSD */
-
-		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						   cwin->cpref->osd_w));
-		if (osd) {
-			cwin->cpref->show_osd = TRUE;
-			if (!notify_is_initted()) {
-				if (!notify_init(PACKAGE_NAME))
-					cwin->cpref->show_osd = FALSE;
-			}
-		}
-		else
-			cwin->cpref->show_osd = FALSE;
-
-		/* Save playlist */
-
-		cwin->cpref->save_playlist =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->save_playlist_w));
-
-		/* Last.fm */
-
-		cwin->cpref->lw.lastfm_support =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->lw.lastfm_w));
-
-		if (cwin->cpref->lw.lastfm_user) {
-			g_free(cwin->cpref->lw.lastfm_user);
-			cwin->cpref->lw.lastfm_user = NULL;
-		}
-		if (cwin->cpref->lw.lastfm_pass) {
-			g_free(cwin->cpref->lw.lastfm_pass);
-			cwin->cpref->lw.lastfm_pass = NULL;
-		}
-
-		if (cwin->cpref->lw.lastfm_support) {
-			cwin->cpref->lw.lastfm_user =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->cpref->lw.lastfm_uname_w)));
-			cwin->cpref->lw.lastfm_pass =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->cpref->lw.lastfm_pass_w)));
-		}
-
-		lastfm_init_thread(cwin);
-
-		/* Software mixer */
-
-		cwin->cpref->software_mixer =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->soft_mixer));
-
-		/* CDDB Server */
-
-		cwin->cpref->use_cddb =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->use_cddb_w));
-
-		/* Audio sink */
-
+		/* Audio preferences */
 		audio_sink =
 			gtk_combo_box_get_active_text(GTK_COMBO_BOX(
-						      cwin->cpref->audio_sink_combo));
+						      cwin->cpref->audio_sink_combo_w));
 
 		g_free(cwin->cpref->audio_sink);
 		cwin->cpref->audio_sink = g_strdup(audio_sink);
 		g_free(audio_sink);
-
-		/* Audio device, store based on the audio sink */
 
 		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
 			audio_alsa_device = gtk_combo_box_get_active_text(GTK_COMBO_BOX(
@@ -209,8 +78,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			g_free(audio_oss_device);
 		}
 
-		/* Audio CD Device */
-
 		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(
 						     cwin->cpref->audio_cd_device_w));
 		if (audio_cd_device) {
@@ -218,14 +85,17 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			cwin->cpref->audio_cd_device = g_strdup(audio_cd_device);
 		}
 
-		/* Library */
+		cwin->cpref->software_mixer =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->soft_mixer_w));
+
+		/* Library Preferences */
 
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view));
+						cwin->cpref->library_view_w));
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
 		/* Free the list of libraries and rebuild it again */
-
 		free_str_list(cwin->cpref->library_dir);
 		cwin->cpref->library_dir = NULL;
 
@@ -259,6 +129,119 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			init_library_view(cwin);
 		}
 
+		/* General preferences */
+
+		window_state_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w));
+
+		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
+		}
+		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
+		}
+		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
+		}
+		else 	cwin->cpref->remember_window_state = TRUE;
+
+		g_free(window_state_sink);
+
+		cwin->cpref->save_playlist =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->restore_playlist_w));
+
+		cwin->cpref->close_to_tray =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->close_to_tray_w));
+
+		cwin->cpref->add_recursively_files =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->add_recursively_w));
+
+		cwin->cpref->show_album_art =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->album_art_w));
+
+		cwin->cpref->album_art_size =
+			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
+						cwin->cpref->album_art_size_w));
+
+		if (cwin->cpref->show_album_art) {
+			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w));
+
+			if (album_art_pattern) {
+				if (!validate_album_art_pattern(album_art_pattern)) {
+					album_art_pattern_helper(dialog, cwin);
+					return;
+				}
+				/* Proper pattern, store in preferences */
+				g_free(cwin->cpref->album_art_pattern);
+				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
+			}
+		}
+
+		album_art_toggle_state(cwin);
+
+		/* Notification preferences */
+
+		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						   cwin->cpref->show_osd_w));
+		if (osd) {
+			cwin->cpref->show_osd = TRUE;
+			if (!notify_is_initted()) {
+				if (!notify_init(PACKAGE_NAME))
+					cwin->cpref->show_osd = FALSE;
+			}
+		}
+		else
+			cwin->cpref->show_osd = FALSE;
+
+		cwin->cpref->osd_in_systray =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->osd_in_systray_w));
+
+		cwin->cpref->albumart_in_osd =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->albumart_in_osd_w));
+		cwin->cpref->actions_in_osd =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->actions_in_osd_w));
+
+		/* Services internet preferences */
+
+		cwin->cpref->lw.lastfm_support =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->lw.lastfm_w));
+
+		if (cwin->cpref->lw.lastfm_user) {
+			g_free(cwin->cpref->lw.lastfm_user);
+			cwin->cpref->lw.lastfm_user = NULL;
+		}
+		if (cwin->cpref->lw.lastfm_pass) {
+			g_free(cwin->cpref->lw.lastfm_pass);
+			cwin->cpref->lw.lastfm_pass = NULL;
+		}
+
+		if (cwin->cpref->lw.lastfm_support) {
+			cwin->cpref->lw.lastfm_user =
+				g_strdup(gtk_entry_get_text(GTK_ENTRY(
+					    cwin->cpref->lw.lastfm_uname_w)));
+			cwin->cpref->lw.lastfm_pass =
+				g_strdup(gtk_entry_get_text(GTK_ENTRY(
+					    cwin->cpref->lw.lastfm_pass_w)));
+		}
+		lastfm_init_thread(cwin);
+
+		cwin->cpref->use_cddb =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->use_cddb_w));
+
 		save_preferences(cwin);
 
 		break;
@@ -267,7 +250,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	}
 
 	gtk_widget_destroy(GTK_WIDGET(dialog));
-	cwin->cpref->library_view = NULL;
+	cwin->cpref->library_view_w = NULL;
 }
 
 /* Handler for adding a new library */
@@ -297,7 +280,7 @@ static void library_add_cb(GtkButton *button, struct con_win *cwin)
 	switch (resp) {
 	case GTK_RESPONSE_ACCEPT:
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view));
+						cwin->cpref->library_view_w));
 		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		if (!folder)
 			break;
@@ -345,7 +328,7 @@ static void library_remove_cb(GtkButton *button, struct con_win *cwin)
 	gchar *folder, *u_folder;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-						cwin->cpref->library_view));
+						cwin->cpref->library_view_w));
 	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
 		if (!u_folder)
@@ -382,17 +365,8 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->cpref->lw.lastfm_w));
 
-	if (is_active) {
-		gtk_widget_show(cwin->cpref->lw.lastfm_uname_w);
-		gtk_widget_show(cwin->cpref->lw.lastfm_pass_w);
-		gtk_widget_show(cwin->cpref->lw.lastfm_ulabel_w);
-		gtk_widget_show(cwin->cpref->lw.lastfm_plabel_w);
-	} else {
-		gtk_widget_hide(cwin->cpref->lw.lastfm_uname_w);
-		gtk_widget_hide(cwin->cpref->lw.lastfm_pass_w);
-		gtk_widget_hide(cwin->cpref->lw.lastfm_ulabel_w);
-		gtk_widget_hide(cwin->cpref->lw.lastfm_plabel_w);
-	}
+	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
+	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
 }
 
 /* Toggle album art pattern */
@@ -404,18 +378,26 @@ static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->cpref->album_art_w));
 
-	if (is_active) {
-		gtk_widget_show(cwin->cpref->album_art_pattern_w);
-		gtk_widget_show(cwin->cpref->album_art_pattern_label_w);
-		gtk_widget_show(cwin->cpref->album_art_size_w);
-		gtk_widget_show(cwin->cpref->album_art_size_label_w);
-	} else {
-		gtk_widget_hide(cwin->cpref->album_art_pattern_w);
-		gtk_widget_hide(cwin->cpref->album_art_pattern_label_w);
-		gtk_widget_hide(cwin->cpref->album_art_size_w);
-		gtk_widget_hide(cwin->cpref->album_art_size_label_w);
-	}
+	gtk_widget_set_sensitive(cwin->cpref->album_art_pattern_w, is_active);
+	gtk_widget_set_sensitive(cwin->cpref->album_art_size_w, is_active);
+
+	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
 }
+
+/* Toggle album art pattern */
+
+static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
+{
+	gboolean is_active;
+
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						 cwin->cpref->show_osd_w));
+
+	gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, is_active);
+	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
+	gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
+}
+
 
 static void update_audio_device_alsa(struct con_win *cwin)
 {
@@ -533,7 +515,7 @@ static void change_audio_sink(GtkComboBox *combo, gpointer udata)
 	gchar *audio_sink;
 
 	audio_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(
-					      cwin->cpref->audio_sink_combo));
+					      cwin->cpref->audio_sink_combo_w));
 
 	if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 		update_audio_device_alsa(cwin);
@@ -553,96 +535,22 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeModel *model;
 	GError *error = NULL;
 
-	if(cwin->cpref->remember_window_state)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 0);
-	else{
-		if(cwin->cpref->start_mode){
-			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))		
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 1);		
-			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 2);
-			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 3);
-		}
-	}
-
-	/* Update album art */
-
-	if (cwin->cpref->show_album_art)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->album_art_w),
-					     TRUE);
-
-	/* Update close to tray */
-
-	if (cwin->cpref->close_to_tray)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->close_to_tray_w),
-					     TRUE);
-	/* Update add recurcively */
-
-	if (cwin->cpref->add_recursively_files)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->add_recurcively_w),
-					     TRUE);
-
-
-	/* Update OSD */
-
-	if (cwin->cpref->show_osd)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->osd_w),
-					     TRUE);
-
-	/* Update save playlist */
-
-	if (cwin->cpref->save_playlist)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->save_playlist_w),
-					     TRUE);
-
-	/* Update last.fm */
-
-	if (cwin->cpref->lw.lastfm_support) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->lw.lastfm_w),
-					     TRUE);
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_uname_w),
-				   cwin->cpref->lw.lastfm_user);
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_pass_w),
-				   cwin->cpref->lw.lastfm_pass);
-	}
-
-	/* Update software mixer */
-
-	if (cwin->cpref->software_mixer)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->soft_mixer),
-					     TRUE);
-	/* Update CDDB server */
-
-	if (cwin->cpref->use_cddb)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->use_cddb_w),
-					     TRUE);
-	/* Update audio sink */
+	/* Audio Options */
 
 	if (cwin->cpref->audio_sink) {
 		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, DEFAULT_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo),
+						 cwin->cpref->audio_sink_combo_w),
 						 0);
 		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo),
+						 cwin->cpref->audio_sink_combo_w),
 						 1);
 		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo),
+						 cwin->cpref->audio_sink_combo_w),
 						 2);
 	}
-
-	/* Update audio device, based on audio sink */
 
 	if (cwin->cpref->audio_sink) {
 		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, DEFAULT_SINK))
@@ -653,29 +561,62 @@ static void update_preferences(struct con_win *cwin)
 			update_audio_device_oss(cwin);
 	}
 
-	/* Update album art pattern */
-
-	if (cwin->cpref->album_art_pattern) {
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w),
-				   cwin->cpref->album_art_pattern);
-	}
-
-	if (cwin->cpref->album_art_size) {
-		gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),  (int)cwin->cpref->album_art_size);
-	}
-
-
-	/* Update Audio CD device */
-
 	if (cwin->cpref->audio_cd_device)
 		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->audio_cd_device_w),
 				   cwin->cpref->audio_cd_device);
 
-	/* Append libraries, if any */
+	if (cwin->cpref->software_mixer)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->soft_mixer_w),
+					     TRUE);
+
+	/*General Options*/
+
+	if(cwin->cpref->remember_window_state)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 0);
+	else{
+		if(cwin->cpref->start_mode){
+			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))		
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 1);		
+			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 2);
+			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 3);
+		}
+	}
+
+	if (cwin->cpref->save_playlist)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->restore_playlist_w),
+					     TRUE);
+
+	if (cwin->cpref->close_to_tray)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->close_to_tray_w),
+					     TRUE);
+
+	if (cwin->cpref->add_recursively_files)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->add_recursively_w),
+					     TRUE);
+
+	if (cwin->cpref->show_album_art)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->album_art_w),
+					     TRUE);
+
+	if (cwin->cpref->album_art_size)
+		gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),  (int)cwin->cpref->album_art_size);
+
+	if (cwin->cpref->album_art_pattern)
+		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w),
+				   cwin->cpref->album_art_pattern);
+
+	/* Lbrary Options */
 
 	if (cwin->cpref->library_dir) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view));
+						cwin->cpref->library_view_w));
 
 		cnt = g_slist_length(cwin->cpref->library_dir);
 		list = cwin->cpref->library_dir;
@@ -701,6 +642,41 @@ static void update_preferences(struct con_win *cwin)
 	if (cwin->cpref->fuse_folders)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->fuse_folders_w),
+					     TRUE);
+	/* Notifications options */
+
+	if (cwin->cpref->show_osd)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->show_osd_w),
+					     TRUE);
+	if (cwin->cpref->osd_in_systray)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->osd_in_systray_w),
+					     TRUE);
+	if (cwin->cpref->albumart_in_osd)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->albumart_in_osd_w),
+					     TRUE);
+	if (cwin->cpref->actions_in_osd)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->actions_in_osd_w),
+					     TRUE);
+
+	/* Service Internet Option */
+
+	if (cwin->cpref->lw.lastfm_support) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->lw.lastfm_w),
+					     TRUE);
+		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_uname_w),
+				   cwin->cpref->lw.lastfm_user);
+		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_pass_w),
+				   cwin->cpref->lw.lastfm_pass);
+	}
+
+	if (cwin->cpref->use_cddb)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->use_cddb_w),
 					     TRUE);
 }
 
@@ -797,57 +773,25 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_SHOW_OSD,
 			       cwin->cpref->show_osd);
-
-	/* Save last.fm option */
-
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
-			       KEY_LASTFM,
-			       cwin->cpref->lw.lastfm_support);
-
-	if (!cwin->cpref->lw.lastfm_support) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_GENERAL) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_GENERAL,
-				       KEY_LASTFM_USER,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_USER,
-					      &error);
-		}
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_GENERAL) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_GENERAL,
-				       KEY_LASTFM_PASS,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_PASS,
-					      &error);
-		}
-	}
-	else {
-		if (cwin->cpref->lw.lastfm_user)
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_USER,
-					      cwin->cpref->lw.lastfm_user);
-		if (cwin->cpref->lw.lastfm_pass)
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_LASTFM_PASS,
-					      cwin->cpref->lw.lastfm_pass);
-	}
+			       KEY_OSD_IN_TRAY,
+			       cwin->cpref->osd_in_systray);
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_SHOW_ALBUM_ART_OSD,
+			       cwin->cpref->albumart_in_osd);
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_SHOW_ACTIONS_OSD,
+			       cwin->cpref->actions_in_osd);
 
 	/* Playlist options */
 
 	/* Save playlist option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
+			       GROUP_GENERAL,
 			       KEY_SAVE_PLAYLIST,
 			       cwin->cpref->save_playlist);
 
@@ -1177,13 +1121,6 @@ void save_preferences(struct con_win *cwin)
 				      cwin->cpref->audio_cd_device);
 	}
 
-	/* Save use CDDB server option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_AUDIO,
-			       KEY_USE_CDDB,
-			       cwin->cpref->use_cddb);
-
 	/* Window Option */
 
 	/* Save last window state */
@@ -1263,12 +1200,65 @@ void save_preferences(struct con_win *cwin)
 			       KEY_ALBUM_ART_SIZE,
 			       (int)cwin->cpref->album_art_size);
 
+
 	/* Save status bar option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_STATUS_BAR,
 			       cwin->cpref->status_bar);
+
+	/* Services internet */
+	/* Save last.fm option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_SERVICES,
+			       KEY_LASTFM,
+			       cwin->cpref->lw.lastfm_support);
+
+	if (!cwin->cpref->lw.lastfm_support) {
+		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
+					 GROUP_SERVICES) &&
+		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_SERVICES,
+				       KEY_LASTFM_USER,
+				       &error)) {
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_USER,
+					      &error);
+		}
+		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
+					 GROUP_SERVICES) &&
+		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_SERVICES,
+				       KEY_LASTFM_PASS,
+				       &error)) {
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_PASS,
+					      &error);
+		}
+	}
+	else {
+		if (cwin->cpref->lw.lastfm_user)
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_USER,
+					      cwin->cpref->lw.lastfm_user);
+		if (cwin->cpref->lw.lastfm_pass)
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_SERVICES,
+					      KEY_LASTFM_PASS,
+					      cwin->cpref->lw.lastfm_pass);
+	}
+	/* Save use CDDB server option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_SERVICES,
+			       KEY_USE_CDDB,
+			       cwin->cpref->use_cddb);
+
 
 	/* Save to conrc */
 
@@ -1294,14 +1284,14 @@ gpointer sokoke_xfce_header_new(struct con_win *cwin)
 	GtkWidget* hbox = gtk_hbox_new(FALSE, 12);
 
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
-	GtkWidget* image = gtk_image_new_from_icon_name("gtk-preferences",
+	GtkWidget* image = gtk_image_new_from_icon_name("pragha",
 							GTK_ICON_SIZE_DIALOG);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	GtkWidget* label = gtk_label_new(NULL);
 	gtk_widget_modify_fg(label,
 				GTK_STATE_NORMAL,
 				&entry->style->text[GTK_STATE_NORMAL]);
-        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", _("Preferences"));
+        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", _("Preferences of Pragha"));
 	gtk_label_set_markup(GTK_LABEL(label), markup);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
@@ -1312,29 +1302,28 @@ gpointer sokoke_xfce_header_new(struct con_win *cwin)
 
 void preferences_dialog(struct con_win *cwin)
 {
-	GtkWidget *dialog, *vbox_all, *pref_notebook, *hbox_library;
-	GtkWidget *general_vbox, *audio_vbox, *library_vbox, *lastfm_vbox;
-	GtkWidget *label_general, *label_library, *label_audio, *label_lastfm;
-	GtkWidget *start_label, *hbox_start;
-	GtkWidget *window_state_combo, *close_to_tray, *album_art,*add_recurcively, *osd, *save_playlist, *use_cddb;
-	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern;
-	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
-	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
-	GtkWidget *audio_cd_device_label, *audio_cd_device_entry;
-	GtkWidget *library_bbox_align, *library_bbox, *library_add, *library_remove, *fuse_folders;
-	GtkWidget *audio_sink_combo, *sink_label, *hbox_sink;
-	GtkWidget *hbox_album_art_pattern, *hbox_audio_cd_device;
-	GtkWidget *audio_device_combo, *audio_device_label, *hbox_audio_device;
-	GtkWidget *album_art_size, *album_art_size_label, *hbox_album_art_size, *vbox_album_art;
-	GtkWidget *header, *alignment;
+	GtkWidget *dialog, *header, *pref_notebook, *alignment;
+
+	GtkWidget *audio_vbox, *library_vbox, *general_vbox, *notification_vbox, *services_vbox;
+	GtkWidget *label_audio, *label_library, *label_general, *label_notification, *label_services;
+
+	GtkWidget *audio_device_combo, *audio_device_label, *hbox_audio_device, *audio_sink_combo, *sink_label, \
+		  *hbox_sink, *soft_mixer, *audio_cd_device_label, *audio_cd_device_entry, *hbox_audio_cd_device;
+	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
+		  *fuse_folders, *hbox_library;
+	GtkWidget *window_state_combo, *restore_playlist, *close_to_tray, *album_art, *album_art_pattern_label, *add_recursively, \
+		  *hbox_album_art_pattern, *album_art_size, *album_art_size_label, *hbox_album_art_size;
+	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
+	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern, *lastfm_uhbox, *lastfm_ulabel, \
+		  *lastfm_phbox, *lastfm_plabel, *use_cddb;
+
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
-
 	/* The main preferences dialog */
 
-	dialog = gtk_dialog_new_with_buttons(_("Preferences"),
+	dialog = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_MODAL,
 					     GTK_STOCK_CANCEL,
@@ -1343,33 +1332,27 @@ void preferences_dialog(struct con_win *cwin)
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	vbox_all = gtk_vbox_new(FALSE, 2);
-
 	/* Labels */
 
-	label_general = gtk_label_new(_("General"));
 	label_audio = gtk_label_new(_("Audio"));
 	label_library = gtk_label_new(_("Library"));
-	label_lastfm = gtk_label_new(_("Last.fm"));
+	label_general = gtk_label_new(_("General"));
+	label_notification = gtk_label_new(_("Notifications"));
+	label_services = gtk_label_new(_("Internet Services"));
 
 	/* Boxes */
 
-	general_vbox = gtk_vbox_new(FALSE, 2);
 	audio_vbox = gtk_vbox_new(FALSE, 2);
 	library_vbox = gtk_vbox_new(FALSE, 2);
-	lastfm_vbox = gtk_vbox_new(FALSE, 2);
+	general_vbox = gtk_vbox_new(FALSE, 2);
+	notification_vbox = gtk_vbox_new(FALSE, 2);
+	services_vbox = gtk_vbox_new(FALSE, 2);
 
 	/* Notebook, pages et al. */
 
 	pref_notebook = gtk_notebook_new();
 
 	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
-
-	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
-				 label_general);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), general_vbox);
 
 	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
@@ -1385,142 +1368,21 @@ void preferences_dialog(struct con_win *cwin)
 
 	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
-				 label_lastfm);
+				 label_general);
 	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), lastfm_vbox);
+	gtk_container_add(GTK_CONTAINER(alignment), general_vbox);
 
-	/* CDDB */
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
+				 label_notification);
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), notification_vbox);
 
-	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-
-	/* Album art */
-
-	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
-
-	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
-	album_art_size_label = gtk_label_new(_("Size of Album art"));
-
-	hbox_album_art_size = gtk_hbox_new(FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox_album_art_size),
-			   album_art_size_label,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_end(GTK_BOX(hbox_album_art_size),
-			 album_art_size,
-			 TRUE,
-			 TRUE,
-			 0);
-
-	album_art_pattern = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
-				 ALBUM_ART_PATTERN_LEN);
-	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
-	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
-
-	hbox_album_art_pattern = gtk_hbox_new(FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox_album_art_pattern),
-			   album_art_pattern_label,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_end(GTK_BOX(hbox_album_art_pattern),
-			 album_art_pattern,
-			 TRUE,
-			 TRUE,
-			 0);
-
-	vbox_album_art = gtk_vbox_new(FALSE, 2);
-
-	gtk_box_pack_start(GTK_BOX(vbox_album_art),
-			   hbox_album_art_pattern,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(vbox_album_art),
-			   hbox_album_art_size,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	/* Save Window State */
-
-	window_state_combo = gtk_combo_box_new_text ();
-
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Remember last window state"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start normal"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start fullscreen"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start in system tray"));
-
-	start_label = gtk_label_new(_("When Pragha start"));
-
-	hbox_start = gtk_hbox_new(FALSE, 10);
-
-	gtk_box_pack_start(GTK_BOX(hbox_start),
-			   start_label,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_end(GTK_BOX(hbox_start),
-			 window_state_combo,
-			 FALSE,
-			 FALSE,
-			 0);
-
-	/*General Check_buttons*/
-
-	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
-	save_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
-	add_recurcively = gtk_check_button_new_with_label(_("Add files recurcively"));
-	osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-
-	/* Pack general items */
-
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   hbox_start,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   close_to_tray,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   save_playlist,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   add_recurcively,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   osd,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   use_cddb,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   album_art,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   vbox_album_art,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	/* Software mixer */
-
-	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
+				 label_services);
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), services_vbox);
 
 	/* Audio Sink */
 
@@ -1587,13 +1449,13 @@ void preferences_dialog(struct con_win *cwin)
 			 TRUE,
 			 0);
 
+	/* Software mixer */
+
+	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
+
 	/* Pack audio items */
 
-	gtk_box_pack_start(GTK_BOX(audio_vbox),
-			   soft_mixer,
-			   FALSE,
-			   FALSE,
-			   0);
 	gtk_box_pack_start(GTK_BOX(audio_vbox),
 			   hbox_sink,
 			   FALSE,
@@ -1606,6 +1468,11 @@ void preferences_dialog(struct con_win *cwin)
 			   0);
 	gtk_box_pack_start(GTK_BOX(audio_vbox),
 			   hbox_audio_cd_device,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(audio_vbox),
+			   soft_mixer,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1679,7 +1546,122 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   2);
 
-	/* Last.fm */
+	/* General Widgets */
+
+	window_state_combo = gtk_combo_box_new_text ();
+
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Remember last window state"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start normal"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start fullscreen"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start in system tray"));
+
+	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
+
+	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
+	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
+
+	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
+
+	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
+	album_art_size_label = gtk_label_new(_("Size of Album art"));
+
+	hbox_album_art_size = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox_album_art_size),
+			   album_art_size_label,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_end(GTK_BOX(hbox_album_art_size),
+			 album_art_size,
+			 TRUE,
+			 TRUE,
+			 0);
+
+	album_art_pattern = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
+				 ALBUM_ART_PATTERN_LEN);
+	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
+	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
+
+	hbox_album_art_pattern = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox_album_art_pattern),
+			   album_art_pattern_label,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_end(GTK_BOX(hbox_album_art_pattern),
+			 album_art_pattern,
+			 TRUE,
+			 TRUE,
+			 0);
+
+	/* Pack general items */
+
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   window_state_combo,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   restore_playlist,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   close_to_tray,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   add_recursively,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   album_art,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   hbox_album_art_size,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   hbox_album_art_pattern,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	/* Notification OSD */
+
+	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
+	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
+	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
+	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
+
+	gtk_box_pack_start(GTK_BOX(notification_vbox),
+			   show_osd,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(notification_vbox),
+			   osd_in_systray,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(notification_vbox),
+			   albumart_in_osd,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(notification_vbox),
+			   actions_in_osd,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	/* Services Last.fm */
 
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
 	lastfm_uname = gtk_entry_new();
@@ -1693,6 +1675,10 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
 	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
+
+	/* Services CDDB */
+
+	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 
 	gtk_box_pack_start(GTK_BOX(lastfm_uhbox),
 			   lastfm_ulabel,
@@ -1716,58 +1702,62 @@ void preferences_dialog(struct con_win *cwin)
 			 FALSE,
 			 0);
 
-	gtk_box_pack_start(GTK_BOX(lastfm_vbox),
+	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   lastfm_check,
 			   FALSE,
 			   FALSE,
 			   0);
-	gtk_box_pack_start(GTK_BOX(lastfm_vbox),
+	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   lastfm_uhbox,
 			   FALSE,
 			   FALSE,
 			   0);
-	gtk_box_pack_start(GTK_BOX(lastfm_vbox),
+	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   lastfm_phbox,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(services_vbox),
+			   use_cddb,
 			   FALSE,
 			   FALSE,
 			   0);
 
 	/* Add to dialog */
 
-	gtk_box_pack_start(GTK_BOX(vbox_all),
-			   pref_notebook,
-			   FALSE,
-			   FALSE,
-			   0);
-
 	header = sokoke_xfce_header_new (cwin);
 
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), vbox_all, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), pref_notebook, TRUE, TRUE, 0);
 
 	/* Store references */
-	cwin->cpref->window_state_combo = window_state_combo;
+
+	cwin->cpref->audio_sink_combo_w = audio_sink_combo;
+	cwin->cpref->audio_device_w = audio_device_combo;
+	cwin->cpref->audio_cd_device_w = audio_cd_device_entry;
+	cwin->cpref->soft_mixer_w = soft_mixer;
+
+	cwin->cpref->library_view_w = library_view;
+	cwin->cpref->fuse_folders_w = fuse_folders;
+
+	cwin->cpref->window_state_combo_w = window_state_combo;
+	cwin->cpref->restore_playlist_w = restore_playlist;
 	cwin->cpref->close_to_tray_w = close_to_tray;
+	cwin->cpref->add_recursively_w = add_recursively;
 	cwin->cpref->album_art_w = album_art;
-	cwin->cpref->add_recurcively_w = add_recurcively;
-	cwin->cpref->osd_w = osd;
-	cwin->cpref->save_playlist_w = save_playlist;
+	cwin->cpref->album_art_size_w = album_art_size;
+
+	cwin->cpref->album_art_pattern_w = album_art_pattern;
+
+	cwin->cpref->show_osd_w = show_osd;
+	cwin->cpref->osd_in_systray_w = osd_in_systray;
+	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
+	cwin->cpref->actions_in_osd_w = actions_in_osd;
+
 	cwin->cpref->lw.lastfm_w = lastfm_check;
 	cwin->cpref->lw.lastfm_uname_w = lastfm_uname;
 	cwin->cpref->lw.lastfm_pass_w = lastfm_pass;
-	cwin->cpref->lw.lastfm_ulabel_w = lastfm_ulabel;
-	cwin->cpref->lw.lastfm_plabel_w = lastfm_plabel;
-	cwin->cpref->soft_mixer = soft_mixer;
 	cwin->cpref->use_cddb_w = use_cddb;
-	cwin->cpref->audio_sink_combo = audio_sink_combo;
-	cwin->cpref->audio_device_w = audio_device_combo;
-	cwin->cpref->audio_cd_device_w = audio_cd_device_entry;
-	cwin->cpref->library_view = library_view;
-	cwin->cpref->fuse_folders_w = fuse_folders;
-	cwin->cpref->album_art_pattern_w = album_art_pattern;
-	cwin->cpref->album_art_pattern_label_w = album_art_pattern_label;
-	cwin->cpref->album_art_size_w = album_art_size;
-	cwin->cpref->album_art_size_label_w = album_art_size_label;
 
 	/* Setup signal handlers */
 
@@ -1775,6 +1765,8 @@ void preferences_dialog(struct con_win *cwin)
 			 G_CALLBACK(toggle_album_art), cwin);
 	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
 			 G_CALLBACK(toggle_lastfm), cwin);
+	g_signal_connect(G_OBJECT(show_osd), "toggled",
+			 G_CALLBACK(toggle_show_osd), cwin);
 	g_signal_connect(G_OBJECT(dialog), "response",
 			 G_CALLBACK(pref_dialog_cb), cwin);
 	g_signal_connect(G_OBJECT(library_add), "clicked",

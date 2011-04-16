@@ -1,7 +1,45 @@
 =====================================================
-Overview of changes in Pragha 0.8.0 "A tiny more fast"
+Overview of changes in Pragha 0.8.1
 =====================================================
 
+News:
+	Add Translate Pragha (Link to Transifex) in Help menu.
+	New "Associate notifications to system tray" option.
+	New "Show Album art in notifications" option.
+	New "Add actions to change track to notifications" option.
+
+Others Changes:
+	Rework preferences dialog.
+	Reformat Notifications like rythombox, amarok, clementine, etc, etc.
+
+Updates Translations:
+	Add Dutch translatition. Thanks to Zenlord.
+	Update Brazilian Portuguese translation. Thanks to Secipolla.
+	Update Rusian translation. Thanks to Pendalf.
+	Update Czech translation. Thanks to Alois Nešpor.
+	Update German translation. Thanks to Cwickert.
+	Update po files.
+
+Bugs fixed:
+	Fix typo thanks to Timm Bäder.
+	Expand only comment field when change window size in edit tag dialog.
+
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.8.0.2
+	Update German translation. Thanks to Christoph Wickert.
+	Disable Global keybindings if gtk < 2.20.
+	Add "Pragha Music Player" to the sumary of notifications and so displayed correctly. In notify-osd for example.
+	Eliminate previous incompatible db only if minor to 0.8.0.
+	Drop "Folder structure" bad string.
+
+V0.8.0.1
+	Eliminate previous incompatible db.
+	Show message dialog to rescand libray.
+
+V0.8.0
 News:
 	Folder / Files library view replaced by Foders Estructure. (like in foobar2000) (1)
 	Add option to merge folders in folders estructure view.
@@ -29,22 +67,6 @@ Bugs fixed:
 
 Update po files.
 
-V0.8.0.1
-	Eliminate previous incompatible db.
-	Show message dialog to rescand libray.
-
-V0.8.0.2
-	Update German translation. Thanks to Christoph Wickert.
-	Disable Global keybindings if gtk < 2.20.
-	Add "Pragha Music Player" to the sumary of notifications and so displayed correctly. In notify-osd for example.
-	Eliminate previous incompatible db only if minor to 0.8.0.
-	Drop "Folder structure" bad string.
-
-(1) Again thank you very much to Roberto DMD.
-
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.7.1
 	Fix Issue 14: Pragha can not remember the starting position.
 	Remember correctly window position when click status icon or close window.

@@ -74,13 +74,29 @@ void toogle_main_window(struct con_win *cwin)
 }
 
 static void
-notify_next_Callback (NotifyNotification *osd,
+notify_Prev_Callback (NotifyNotification *osd,
                 const char *action,
                 struct con_win *cwin)
 {
+        g_assert (action != NULL);
+        g_assert (strcmp (action, "media-prev") == 0);
+
+	notify_notification_close (osd, NULL);
+	play_prev_track(cwin);
+}
+
+static void
+notify_Next_Callback (NotifyNotification *osd,
+                const char *action,
+                struct con_win *cwin)
+{
+        g_assert (action != NULL);
+        g_assert (strcmp (action, "media-next") == 0);
+
 	notify_notification_close (osd, NULL);
 	play_next_track(cwin);
 }
+
 
 static gboolean
 can_support_actions( void )
@@ -116,60 +132,61 @@ void show_osd(struct con_win *cwin)
 {
 	GError *error = NULL;
 	NotifyNotification *osd;
-	gchar *summary, *body, *length, *str;
+	gchar *summary, *body, *length;
 
 	/* Check if OSD is enabled in preferences */
-
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
 	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
-		str = g_strdup(cwin->cstate->curr_mobj->tags->title);
+		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
-		str = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
+		summary = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
-
-
-	summary = g_strdup(_("Pragha Music Player"));
-
-	body = g_markup_printf_escaped("%s: %s\n%s: %s\n%s: %s\n%s: %s",
- 			_("Title"), str,
- 			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
- 			_("Album"), cwin->cstate->curr_mobj->tags->album,
-			_("Length"), length);
+	
+	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
+			(cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
+			cwin->cstate->curr_mobj->tags->artist : _("Unknown Artist"),
+			(cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?
+			cwin->cstate->curr_mobj->tags->album : _("Unknown Album"),
+			length);
 
 	/* Create notification instance */
-
-	if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
+	if(cwin->cpref->osd_in_systray && gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
 		osd = notify_notification_new_with_status_icon((const gchar *) summary,
 								body, NULL,
 								GTK_STATUS_ICON(cwin->status_icon));
 	}
 	else {
-		osd = notify_notification_new((const gchar *) summary, NULL, NULL, NULL);
+		osd = notify_notification_new((const gchar *) summary, body, NULL, NULL);
 	}
 
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
 
 	/* Add album art if set */
-
-	if (cwin->cpref->show_album_art && cwin->album_art &&
+	if (cwin->cpref->show_album_art && cwin->album_art && cwin->cpref->albumart_in_osd &&
 	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
 			notify_notification_set_icon_from_pixbuf(osd, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
 
-	if(can_support_actions( )){
-                notify_notification_add_action(
-                    osd, "media-next", _("Next Track" ),
-                    NOTIFY_ACTION_CALLBACK(notify_next_Callback), cwin,
-                    NULL );
+	if(can_support_actions( ) && cwin->cpref->actions_in_osd){
+		notify_notification_add_action(
+			osd, "media-prev", _("Prev Track"),
+			NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
+			NULL);
+		notify_notification_add_action(
+			osd, "media-next", _("Next Track" ),
+			NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
+			NULL);
 	}
-	g_signal_connect (osd, "closed",
-			G_CALLBACK (notify_closed_cb), NULL);
-	/* Show OSD */
 
+	g_signal_connect(osd, "closed",
+			G_CALLBACK (notify_closed_cb), NULL);
+
+	/* Show OSD */
 	if (!notify_notification_show(osd, &error)) {
-		g_warning("Unable to show OSD notification");
+		g_warning("Unable to show OSD notification: %s", error->message);
+		g_error_free (error);
 	}
 
 	/* Cleanup */
@@ -177,7 +194,6 @@ void show_osd(struct con_win *cwin)
 	g_free(summary);
 	g_free(body);
 	g_free(length);
-	g_free(str);
 }
 
 gboolean status_get_tooltip_cb (GtkWidget        *widget,

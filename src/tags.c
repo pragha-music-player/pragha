@@ -521,10 +521,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 
 	gtk_table_attach(GTK_TABLE (tag_table), label_title,
 			0, 1, 0, 1,
-			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			GTK_FILL, GTK_SHRINK,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_title,
-			1, 2, 0, 1);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_title,
+			1, 2, 0, 1,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox_artist),
 			   entry_artist,
@@ -538,10 +540,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			   0);
 	gtk_table_attach(GTK_TABLE (tag_table), label_artist,
 			0, 1, 1, 2,
-			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			GTK_FILL, GTK_SHRINK,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_artist,
-			1, 2, 1, 2);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_artist,
+			1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox_album),
 			   entry_album,
@@ -555,10 +559,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			   0);
 	gtk_table_attach(GTK_TABLE (tag_table), label_album,
 			0, 1, 2, 3,
-			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			GTK_FILL, GTK_SHRINK,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_album,
-			1, 2, 2, 3);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_album,
+			1, 2, 2, 3,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox_genre),
 			   entry_genre,
@@ -572,10 +578,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			   0);
 	gtk_table_attach(GTK_TABLE (tag_table), label_genre,
 			0, 1, 3, 4,
-			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			GTK_FILL, GTK_SHRINK,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_genre,
-			1, 2, 3, 4);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_genre,
+			1, 2, 3, 4,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox_tno),
 			   entry_tno,
@@ -617,10 +625,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 
 	gtk_table_attach(GTK_TABLE (tag_table), label_tno,
 			0, 1, 4, 5,
-			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			GTK_FILL, GTK_SHRINK,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_spins,
-			1, 2, 4, 5);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_spins,
+			1, 2, 4, 5,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
 
 	comment_view_scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(comment_view_scroll),
@@ -643,13 +653,14 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			   FALSE,
 			   FALSE,
 			   0);
-
 	gtk_table_attach(GTK_TABLE (tag_table), label_comment,
 			0, 1, 5, 7,
 			GTK_FILL, GTK_FILL|GTK_EXPAND,
 			0, 0);
-	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_comment,
-			1, 2, 5, 7);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_comment,
+			1, 2, 5, 7,
+			GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND,
+			0, 0);
 
 	/* The main edit dialog */
 

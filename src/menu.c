@@ -861,6 +861,12 @@ void wiki_action(GtkAction *action, struct con_win *cwin)
 	open_url(cwin, uri);
 }
 
+void translate_action(GtkAction *action, struct con_win *cwin)
+{
+	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/c/Pragha/";
+	open_url(cwin, uri);
+}
+
 void about_action(GtkAction *action, struct con_win *cwin)
 {
 	about_widget(cwin);
