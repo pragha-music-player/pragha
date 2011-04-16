@@ -1,0 +1,14 @@
+config.*
+configure
+INSTALL
+*.cache
+*.m4
+/depcomp
+/install-sh
+/libtool
+/Makefile
+/Makefile.in
+/missing
+/mkinstalldirs
+/ltmain.sh
+/stamp-h1

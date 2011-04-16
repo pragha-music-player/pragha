@@ -1,0 +1,4 @@
+*.gmo
+Makefile*
+POTFILES
+*~
