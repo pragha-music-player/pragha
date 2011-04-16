@@ -352,7 +352,7 @@ AUTOMAKE_OPTIONS = \
 	dist-bzip2
 
 man_MANS = data/pragha.1
-doc_DATA = README ChangeLog FAQ
+doc_DATA = README ChangeLog NEWS FAQ
 imagedir = $(datadir)/pixmaps/pragha
 image_DATA = \
 	data/artist.png	\

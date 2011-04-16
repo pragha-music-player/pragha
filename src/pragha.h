@@ -59,7 +59,7 @@
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
-#define BROWSE_MODE_SIZE           90
+#define DEFAULT_SIDEBAR_SIZE       200
 #define ALBUM_ART_SIZE             36
 #define PROGRESS_BAR_WIDTH         300
 #define COL_WIDTH_THRESH           30
@@ -137,41 +137,35 @@
 
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 
-#define GROUP_GENERAL "General"
-#define GROUP_LIBRARY "Library"
-#define GROUP_PLAYLIST "Playlist"
-#define GROUP_AUDIO   "Audio"
-
+#define GROUP_GENERAL  "General"
 #define KEY_INSTALLED_VERSION      "installed_version"
-#define KEY_LIBRARY_DIR            "library_dir"
-#define KEY_LIBRARY_DELETE         "library_delete"
-#define KEY_LIBRARY_ADD            "library_add"
 #define KEY_LAST_FOLDER            "last_folder"
 #define KEY_ADD_RECURSIVELY_FILES  "add_recursively_files"
-#define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
+#define KEY_CLOSE_TO_TRAY	   "close_to_tray"
 #define KEY_SHOW_OSD               "show_osd"
-#define KEY_STATUS_BAR		   "status_bar"
+#define KEY_LASTFM                 "lastfm"
+#define KEY_LASTFM_USER            "lastfm_user"
+#define KEY_LASTFM_PASS            "lastfm_pass"
 
-#define KEY_REMEMBER_STATE	   "remember_window_state"
-#define KEY_START_MODE		   "start_mode"
+#define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
 #define KEY_CURRENT_REF		   "current_ref"
-#define KEY_CLOSE_TO_TRAY	   "close_to_tray"
 #define KEY_SHUFFLE                "shuffle"
 #define KEY_REPEAT                 "repeat"
 #define KEY_PLAYLIST_COLUMNS       "playlist_columns"
 #define KEY_PLAYLIST_COLUMN_WIDTHS "playlist_column_widths"
 
-#define KEY_LASTFM                 "lastfm"
-#define KEY_LASTFM_USER            "lastfm_user"
-#define KEY_LASTFM_PASS            "lastfm_pass"
+#define GROUP_LIBRARY  "Library"
+#define KEY_LIBRARY_DIR            "library_dir"
+#define KEY_LIBRARY_DELETE         "library_delete"
+#define KEY_LIBRARY_ADD            "library_add"
 #define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
-#define KEY_WINDOW_SIZE            "window_size"
-#define KEY_ALBUM_ART_SIZE         "album_art_size"
+
+#define GROUP_AUDIO    "Audio"
 #define KEY_AUDIO_SINK             "audio_sink"
 #define KEY_AUDIO_ALSA_DEVICE      "audio_alsa_device"
 #define KEY_AUDIO_OSS_DEVICE       "audio_oss_device"
@@ -179,6 +173,15 @@
 #define KEY_SOFTWARE_VOLUME	   "software_volume"
 #define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
 #define KEY_USE_CDDB               "use_cddb"
+
+#define GROUP_WINDOW   "Window"
+#define KEY_REMEMBER_STATE	   "remember_window_state"
+#define KEY_START_MODE		   "start_mode"
+#define KEY_WINDOW_SIZE            "window_size"
+#define KEY_SIDEBAR_SIZE           "sidebar_size"
+#define KEY_SHOW_ALBUM_ART         "show_album_art"
+#define KEY_ALBUM_ART_SIZE         "album_art_size"
+#define KEY_STATUS_BAR		   "status_bar"
 
 #define TAG_TNO_CHANGED    1<<0
 #define TAG_TITLE_CHANGED  1<<1
@@ -270,9 +273,23 @@ enum curplaylist_columns {
 
 /* DnD */
 
+gboolean tree_selection_func_true(GtkTreeSelection *selection,
+					       GtkTreeModel *model,
+					       GtkTreePath *path,
+					       gboolean path_currently_selected,
+					       gpointer data);
+
+gboolean tree_selection_func_false(GtkTreeSelection *selection,
+					       GtkTreeModel *model,
+					       GtkTreePath *path,
+					       gboolean path_currently_selected,
+					       gpointer data);
+
 enum dnd_target {
 	TARGET_LOCATION_ID,
-	TARGET_PLAYLIST
+	TARGET_PLAYLIST,
+	TARGET_URI_LIST,
+	TARGET_PLAIN_TEXT
 };
 
 /* Library Views */
@@ -366,6 +383,7 @@ struct con_pref {
 	gint album_art_size;
 	gint window_width;
 	gint window_height;
+	gint sidebar_size;
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
 	gchar *configrc_file;
@@ -389,8 +407,9 @@ struct con_pref {
 	GSList *lib_add;
 	GtkWidget *window_state_combo;
 	GtkWidget *close_to_tray_w;
-	GtkWidget *album_art;
-	GtkWidget *osd;
+	GtkWidget *album_art_w;
+	GtkWidget *add_recurcively_w;
+	GtkWidget *osd_w;
 	GtkWidget *save_playlist_w;
 	GtkWidget *album_art_pattern_w;
 	GtkWidget *album_art_pattern_label_w;
@@ -459,6 +478,7 @@ struct lastfm_track {
 struct con_state {
 	enum thread_cmd cmd;
 	enum player_state state;
+	gboolean dragging;
 	gboolean unique_instance;
 	gboolean audio_init;
 	gboolean stop_scan;
@@ -466,7 +486,7 @@ struct con_state {
 	gboolean curr_mobj_clear;
 	gboolean advance_track;
 	gboolean fullscreen;
-	gboolean iconified; /*in_sytray*/
+	gboolean iconified;
 	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
@@ -550,8 +570,8 @@ struct con_win {
 	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
 	GtkWidget *search_entry;
-	GtkWidget *search_current_entry;
 	GtkWidget *browse_mode;
+	GtkWidget *paned;
 	GtkWidget *toggle_lib;
 	GtkWidget *toggle_playlists;
 	GtkWidget *combo_order;
@@ -581,6 +601,10 @@ extern const gchar *mime_wav[];
 extern const gchar *mime_flac[];
 extern const gchar *mime_ogg[];
 extern const gchar *mime_image[];
+
+/*Open file function*/
+
+void handle_selected_file(gpointer data, gpointer udata);
 
 /* Conversion routine from alsaplayer */
 
@@ -722,12 +746,21 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 				   GtkTreePath *path,
 				   GtkTreeViewColumn *column,
 				   struct con_win *cwin);
-gboolean library_tree_right_click_cb(GtkWidget *widget,
+gboolean library_tree_button_press_cb(GtkWidget *widget,
+				     GdkEventButton *event,
+				     struct con_win *cwin);
+gboolean library_tree_button_release_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin);
 gboolean library_page_right_click_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin);
+gboolean dnd_library_tree_begin(GtkWidget *widget,
+				    GdkDragContext *context,
+				    struct con_win *cwin);
+gboolean dnd_library_tree_begin(GtkWidget *widget,
+				    GdkDragContext *context,
+				    struct con_win *cwin);
 void dnd_library_tree_get(GtkWidget *widget,
 			  GdkDragContext *context,
 			  GtkSelectionData *data,
@@ -798,7 +831,10 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 				    GtkTreePath *path,
 				    GtkTreeViewColumn *column,
 				    struct con_win *cwin);
-gboolean playlist_tree_right_click_cb(GtkWidget *widget,
+gboolean playlist_tree_button_press_cb(GtkWidget *widget,
+				      GdkEventButton *event,
+				      struct con_win *cwin);
+gboolean playlist_tree_button_release_cb(GtkWidget *widget,
 				      GdkEventButton *event,
 				      struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
@@ -807,6 +843,9 @@ void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwi
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 void open_m3u_playlist(gchar *file, struct con_win *cwin);
+gboolean dnd_playlist_tree_begin(GtkWidget *widget,
+				    GdkDragContext *context,
+				    struct con_win *cwin);
 void dnd_playlist_tree_get(GtkWidget *widget,
 			   GdkDragContext *context,
 			   GtkSelectionData *data,
@@ -864,12 +903,24 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreePath *path,
 				       GtkTreeViewColumn *column,
 				       struct con_win *cwin);
-gboolean current_playlist_right_click_cb(GtkWidget *widget,
+gboolean current_playlist_button_press_cb(GtkWidget *widget,
 					 GdkEventButton *event,
 					 struct con_win *cwin);
+gboolean current_playlist_button_release_cb(GtkWidget *widget,
+					    GdkEventButton *event,
+					    struct con_win *cwin);
 gboolean header_right_click_cb(GtkWidget *widget,
 			       GdkEventButton *event,
 			       struct con_win *cwin);
+gboolean dnd_current_playlist_begin(GtkWidget *widget,
+				    GdkDragContext *context,
+				    struct con_win *cwin);
+void drag_current_playlist_get_data (GtkWidget *widget,
+				    GdkDragContext *context,
+				    GtkSelectionData *selection_data,
+				    guint target_type,
+				    guint time,
+				    struct con_win *cwin);
 gboolean dnd_current_playlist_drop(GtkWidget *widget,
 				   GdkDragContext *context,
 				   gint x,
@@ -1033,7 +1084,6 @@ GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
 GtkWidget* create_status_bar(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
-GtkWidget* create_search_current_bar (struct con_win *cwin);
 GtkWidget* create_combo_order(struct con_win *cwin);
 void create_status_icon(struct con_win *cwin);
 gboolean dialog_audio_init(gpointer data);

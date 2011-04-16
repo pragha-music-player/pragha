@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS =							\
 man_MANS = data/pragha.1
 
 docdir= $(pkgdatadir)/doc
-doc_DATA = README ChangeLog FAQ
+doc_DATA = README ChangeLog NEWS FAQ
 
 imagedir = $(datadir)/pixmaps/pragha
 image_DATA = 		\

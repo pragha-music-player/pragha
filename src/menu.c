@@ -62,7 +62,7 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 
 /* Add selected files from the file chooser to the current playlist */
 
-static void handle_selected_file(gpointer data, gpointer udata)
+void handle_selected_file(gpointer data, gpointer udata)
 {
 	enum file_type type;
 	GtkRecentData recent_data;

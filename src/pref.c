@@ -43,7 +43,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			   struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean aa, osd, ret;
+	gboolean aa, ctt, ar, osd, ret;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
@@ -97,7 +97,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		/* Album art */
 
 		aa = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->album_art));
+						  cwin->cpref->album_art_w));
 		if (aa)
 			cwin->cpref->show_album_art = TRUE;
 		else
@@ -107,19 +107,28 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		album_art_toggle_state(cwin);
 
-		/* close_to_tray */
+		/* Close_to_tray */
 
-		aa = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+		ctt = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->close_to_tray_w));
 		if (aa)
 			cwin->cpref->close_to_tray = TRUE;
 		else
 			cwin->cpref->close_to_tray = FALSE;
 
+		/* Add recurcively */
+
+		ar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->add_recurcively_w));
+		if (ar)
+			cwin->cpref->add_recursively_files = TRUE;
+		else
+			cwin->cpref->add_recursively_files = FALSE;
+
 		/* OSD */
 
 		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						   cwin->cpref->osd));
+						   cwin->cpref->osd_w));
 		if (osd) {
 			cwin->cpref->show_osd = TRUE;
 			if (!notify_is_initted()) {
@@ -386,7 +395,7 @@ static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->cpref->album_art));
+						 cwin->cpref->album_art_w));
 
 	if (is_active) {
 		gtk_widget_show(cwin->cpref->album_art_pattern_w);
@@ -554,7 +563,7 @@ static void update_preferences(struct con_win *cwin)
 
 	if (cwin->cpref->show_album_art)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->album_art),
+					     cwin->cpref->album_art_w),
 					     TRUE);
 
 	/* Update close to tray */
@@ -563,12 +572,19 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->close_to_tray_w),
 					     TRUE);
+	/* Update add recurcively */
+
+	if (cwin->cpref->add_recursively_files)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->add_recurcively_w),
+					     TRUE);
+
 
 	/* Update OSD */
 
 	if (cwin->cpref->show_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->osd),
+					     cwin->cpref->osd_w),
 					     TRUE);
 
 	/* Update save playlist */
@@ -684,7 +700,7 @@ void save_preferences(struct con_win *cwin)
 	gchar *u_file = NULL;
 	gsize length;
 	gint cnt = 0, i = 0, *col_widths, *window_size;
-	gint win_width, win_height;
+	gint win_width, win_height, sidebar_size;
 	GError *error = NULL;
 	GSList *list;
 	GList *cols, *j;
@@ -744,7 +760,7 @@ void save_preferences(struct con_win *cwin)
 	/* Album art option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_WINDOW,
 			       KEY_SHOW_ALBUM_ART,
 			       cwin->cpref->show_album_art);
 
@@ -774,7 +790,7 @@ void save_preferences(struct con_win *cwin)
 	/* Album art size */
 
 	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_WINDOW,
 			       KEY_ALBUM_ART_SIZE,
 			       (int)cwin->cpref->album_art_size);
 
@@ -889,17 +905,26 @@ void save_preferences(struct con_win *cwin)
 		window_size[1] = win_height;
 
 		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_GENERAL,
+					    GROUP_WINDOW,
 					    KEY_WINDOW_SIZE,
 					    window_size,
 					    2);
 		g_free(window_size);
-		}
+	}
+
+	/* Set sidebar size*/
+
+	sidebar_size = gtk_paned_get_position(GTK_PANED(cwin->paned));
+
+	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_SIDEBAR_SIZE,
+			       sidebar_size);
 
 	/* Set status bar option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_WINDOW,
 			       KEY_STATUS_BAR,
 			       cwin->cpref->status_bar);
 
@@ -953,33 +978,33 @@ void save_preferences(struct con_win *cwin)
 	/* Save last window state */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
+			       GROUP_WINDOW,
 			       KEY_REMEMBER_STATE,
 			       cwin->cpref->remember_window_state);
 
 	if(cwin->cpref->remember_window_state){
 		if(cwin->cstate->fullscreen){
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
+					      GROUP_WINDOW,
 					      KEY_START_MODE,
 					      FULLSCREEN_STATE);
 		}
 		else if(cwin->cstate->iconified){
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
+					      GROUP_WINDOW,
 					      KEY_START_MODE,
 					      ICONIFIED_STATE);
 		}
 		else g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
+					      GROUP_WINDOW,
 					      KEY_START_MODE,
 					      NORMAL_STATE);
 	}
 	else{
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_START_MODE,
-					      cwin->cpref->start_mode);
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				      GROUP_WINDOW,
+				      KEY_START_MODE,
+				      cwin->cpref->start_mode);
 	}
 
 	/* Save playlist option */
@@ -1256,7 +1281,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *general_vbox, *audio_vbox, *library_vbox, *lastfm_vbox;
 	GtkWidget *label_general, *label_library, *label_audio, *label_lastfm;
 	GtkWidget *start_label, *hbox_start;
-	GtkWidget *window_state_combo, *close_to_tray, *album_art, *osd, *save_playlist, *use_cddb;
+	GtkWidget *window_state_combo, *close_to_tray, *album_art,*add_recurcively, *osd, *save_playlist, *use_cddb;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern;
 	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
 	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
@@ -1409,10 +1434,11 @@ void preferences_dialog(struct con_win *cwin)
 
 	/*General Check_buttons*/
 
-	close_to_tray = gtk_check_button_new_with_label(_("Minimize pragha when close the window"));
-
+	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
 	save_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
+	add_recurcively = gtk_check_button_new_with_label(_("Add files recurcively"));
 	osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
+
 
 	/* Pack general items */
 
@@ -1428,6 +1454,11 @@ void preferences_dialog(struct con_win *cwin)
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   save_playlist,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   add_recurcively,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1675,8 +1706,9 @@ void preferences_dialog(struct con_win *cwin)
 	/* Store references */
 	cwin->cpref->window_state_combo = window_state_combo;
 	cwin->cpref->close_to_tray_w = close_to_tray;
-	cwin->cpref->album_art = album_art;
-	cwin->cpref->osd = osd;
+	cwin->cpref->album_art_w = album_art;
+	cwin->cpref->add_recurcively_w = add_recurcively;
+	cwin->cpref->osd_w = osd;
 	cwin->cpref->save_playlist_w = save_playlist;
 	cwin->cpref->lw.lastfm_w = lastfm_check;
 	cwin->cpref->lw.lastfm_uname_w = lastfm_uname;
@@ -1689,7 +1721,6 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->audio_device_w = audio_device_combo;
 	cwin->cpref->audio_cd_device_w = audio_cd_device_entry;
 	cwin->cpref->library_view = library_view;
-	cwin->cpref->album_art = album_art;
 	cwin->cpref->album_art_pattern_w = album_art_pattern;
 	cwin->cpref->album_art_pattern_label_w = album_art_pattern_label;
 	cwin->cpref->album_art_size_w = album_art_size;
@@ -1714,5 +1745,5 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_widget_show_all(dialog);
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
-	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art), cwin);
+	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art_w), cwin);
 }

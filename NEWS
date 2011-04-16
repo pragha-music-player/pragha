@@ -1,7 +1,36 @@
 =====================================================
-Overview of changes in Pragha 0.7.5
+Overview of changes in Pragha 0.7.6
 =====================================================
+News:
+	Drag'n drop several items in Library/Playlist/Current_playlist. Very thanks to Guillaume Royer.
+	Add files to the current playlist by dragging them from file browser. Very thanks to Guillaume Royer.
+	Drag files over current playlist to any file browser to copy this.
 
+Others Changes:
+	Add option to add files recurvively in preferences dialogs.
+	Use <Alt>Right" and "<Alt>Left", as default keyboard shortcuts for Previous/Next.
+	Remember sidebar size when restart.
+
+Bugs fixed:
+	Refilter library view according to search entry, when switching library order.
+	Only insensitive search entry when switching library order.
+	Remove the redundant Save Playlist/Clear/Jump To/Searchbar toolbar.
+	Insensitive Properties menu entry, instead hide it when several items are selected.
+	Unselect all when click over when click over no song.
+	No resize panel, when change windows size.
+	Remove unused variables.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.5.2
+	Update Polish translation. Thanks to Sid.
+
+V0.7.5.1
+	Update German translation. Thanks to PhotonX.
+	New album unknown icon. Provisory.(Does not look good with dark themes)
+
+V0.7.5
 News:
 	Add confirmation dialog. to "Delete from..", menu entries.
 	Leave the checkbox automatically when change a tag in edit track dialog.
@@ -29,16 +58,6 @@ Bugs fixed:
 	Unref Cover in unset_album_art
 	Fix memleak in panel.
 
-V0.7.5.1
-	Update German translation. Thanks to PhotonX.
-	New album unknown icon. Provisory.(Does not look good with dark themes)
-
-V0.7.5.2
-	Update Polish translation. Thanks to Sid.
-
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.4
 Add next action to notifications.
 Improved time library indexing.

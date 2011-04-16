@@ -166,13 +166,13 @@ GtkActionEntry main_aentries[] = {
 	{"Play audio CD", GTK_STOCK_CDROM, N_("_Play audio CD"),
 	 NULL, "Play a audio CD", G_CALLBACK(play_audio_cd_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev track"),
-	 NULL, "Prev track", G_CALLBACK(prev_action)},
+	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
 	{"Play_pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
 	 "<Control>space", "Play / Pause", G_CALLBACK(play_pause_action)},
 	{"Stop", GTK_STOCK_MEDIA_STOP, N_("Stop"),
 	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next track"),
-	 NULL, "Next track", G_CALLBACK(next_action)},
+	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
 	{"Properties", GTK_STOCK_PROPERTIES, N_("_Properties"),
 	 NULL, "Properties", G_CALLBACK(track_properties_current_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
@@ -326,7 +326,9 @@ GtkActionEntry systray_menu_aentries[] = {
 
 GtkTargetEntry tentries[] = {
 	{"LOCATION_ID", GTK_TARGET_SAME_APP, TARGET_LOCATION_ID},
-	{"PLAYLIST", GTK_TARGET_SAME_APP, TARGET_PLAYLIST}
+	{"PLAYLIST", GTK_TARGET_SAME_APP, TARGET_PLAYLIST},
+	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
+	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
 };
 
 /****************/
@@ -479,10 +481,13 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
 									   cwin);
 
-	/* Signal handler for right-clicking */
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
-			 G_CALLBACK(library_tree_right_click_cb), cwin);
+	/* Signal handler for right-clicking and selection */
+ 
+ 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
+			 G_CALLBACK(library_tree_button_press_cb), cwin);
+ 
+	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
+			 G_CALLBACK(library_tree_button_release_cb), cwin);
 
 	g_object_unref(library_filter_tree);
 	
@@ -592,7 +597,9 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 			 G_CALLBACK(playlist_tree_row_activated_cb), cwin);
 
 	g_signal_connect(G_OBJECT(GTK_WIDGET(playlist_tree)), "button-press-event",
-			 G_CALLBACK(playlist_tree_right_click_cb), cwin);
+			 G_CALLBACK(playlist_tree_button_press_cb), cwin);
+	g_signal_connect(G_OBJECT(GTK_WIDGET(playlist_tree)), "button-release-event",
+			 G_CALLBACK(playlist_tree_button_release_cb), cwin);
 
 	g_object_unref(store);
 
@@ -1182,10 +1189,13 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	cwin->cp_context_menu = cp_context_menu;
 	cwin->header_context_menu = create_header_context_menu(cwin);
 
-	/* Signal handler for right-clicking */
+	/* Signal handler for right-clicking and selection */
 
 	g_signal_connect(G_OBJECT(GTK_WIDGET(current_playlist)), "button-press-event",
-			 G_CALLBACK(current_playlist_right_click_cb), cwin);
+			 G_CALLBACK(current_playlist_button_press_cb), cwin);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(current_playlist)), "button-release-event",
+			 G_CALLBACK(current_playlist_button_release_cb), cwin);
 
 	/* Store the treeview in the scrollbar widget */
 
@@ -1202,6 +1212,31 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	return current_playlist_scroll;
 }
 
+/*****************/
+/* DnD functions */
+/*****************/
+/* These two functions are only callbacks that must be passed to
+gtk_tree_selection_set_select_function() to chose if GTK is allowed
+to change selection itself or if we handle it ourselves */
+
+gboolean tree_selection_func_true(GtkTreeSelection *selection,
+					       GtkTreeModel *model,
+					       GtkTreePath *path,
+					       gboolean path_currently_selected,
+					       gpointer data)
+{
+	return TRUE;
+}
+
+gboolean tree_selection_func_false(GtkTreeSelection *selection,
+					       GtkTreeModel *model,
+					       GtkTreePath *path,
+					       gboolean path_currently_selected,
+					       gpointer data)
+{
+	return FALSE;
+}
+
 static void init_dnd(struct con_win *cwin)
 {
 	/* Source: Library View */
@@ -1212,6 +1247,10 @@ static void init_dnd(struct con_win *cwin)
 					       G_N_ELEMENTS(tentries),
 					       GDK_ACTION_COPY);
 
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_library_tree_begin),
+			 cwin);
 	g_signal_connect(G_OBJECT(cwin->library_tree),
 			 "drag-data-get",
 			 G_CALLBACK(dnd_library_tree_get),
@@ -1225,6 +1264,10 @@ static void init_dnd(struct con_win *cwin)
 					       G_N_ELEMENTS(tentries),
 					       GDK_ACTION_COPY);
 
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->playlist_tree)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_playlist_tree_begin),
+			 cwin);
 	g_signal_connect(G_OBJECT(cwin->playlist_tree),
 			 "drag-data-get",
 			 G_CALLBACK(dnd_playlist_tree_get),
@@ -1236,13 +1279,21 @@ static void init_dnd(struct con_win *cwin)
 					       GDK_BUTTON1_MASK,
 					       tentries,
 					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_MOVE);
+					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
 	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(cwin->current_playlist),
 					     tentries,
 					     G_N_ELEMENTS(tentries),
 					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->current_playlist)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_current_playlist_begin),
+			 cwin);
+	g_signal_connect (G_OBJECT(cwin->current_playlist),
+			 "drag-data-get",
+			 G_CALLBACK (drag_current_playlist_get_data),
+			 cwin);
 	g_signal_connect(G_OBJECT(cwin->current_playlist),
 			 "drag-drop",
 			 G_CALLBACK(dnd_current_playlist_drop),
@@ -1317,60 +1368,6 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	return main_menu;
 }
 
-GtkWidget *create_playlist_pane(struct con_win *cwin)
-{
-	GtkWidget *vbox, *htools;
-	GtkWidget *save_btn, *purge_btn, *to_now_btn, *filter_current;
-	GtkWidget *vsep;
-	GtkWidget *current_playlist;
-	
-	vbox = gtk_vbox_new(FALSE, 0);
-	htools = gtk_hbox_new(FALSE, 0);
-
-	vsep = gtk_vseparator_new();
-
-	save_btn = gtk_button_new();
- 	gtk_button_set_image(GTK_BUTTON(save_btn), gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU));
-	gtk_button_set_relief(GTK_BUTTON(save_btn),GTK_RELIEF_NONE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(save_btn), _("Save complete playlist"));
-	gtk_box_pack_start(GTK_BOX(htools), save_btn, FALSE, FALSE, 0);
-
-	g_signal_connect(G_OBJECT(save_btn), "clicked",
-			 G_CALLBACK(save_current_playlist), cwin);
-
-	purge_btn = gtk_button_new();
- 	gtk_button_set_image(GTK_BUTTON(purge_btn), gtk_image_new_from_stock(GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU));
-	gtk_button_set_relief(GTK_BUTTON(purge_btn),GTK_RELIEF_NONE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(purge_btn), _("Clear playlist"));
-	gtk_box_pack_start(GTK_BOX(htools), purge_btn, FALSE, FALSE,0);
-
-	g_signal_connect(G_OBJECT(purge_btn), "clicked",
-			 G_CALLBACK(clear_current_playlist), cwin);
-
-	to_now_btn = gtk_button_new();
- 	gtk_button_set_image(GTK_BUTTON(to_now_btn), gtk_image_new_from_stock(GTK_STOCK_JUMP_TO, GTK_ICON_SIZE_MENU));
-	gtk_button_set_relief(GTK_BUTTON(to_now_btn),GTK_RELIEF_NONE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(to_now_btn), _("Jump to playing song"));
-	gtk_box_pack_start(GTK_BOX(htools), to_now_btn, FALSE, FALSE,0);
-
-	g_signal_connect(G_OBJECT(to_now_btn), "clicked",
-			 G_CALLBACK(jump_to_playing_song_handler), cwin);
-
-	gtk_box_pack_start(GTK_BOX(htools), vsep, FALSE, FALSE,0);
-
-	filter_current = create_search_current_bar(cwin);
-
-	gtk_box_pack_start(GTK_BOX(htools), filter_current, TRUE, TRUE,0);
-
-	gtk_box_pack_start(GTK_BOX(vbox), htools, FALSE, FALSE, 2);
-
-	current_playlist = create_current_playlist_view(cwin);
-	gtk_box_pack_start(GTK_BOX(vbox), current_playlist, TRUE, TRUE, 0);
-
-	return vbox;
-
-}
-
 GtkWidget* create_main_region(struct con_win *cwin)
 {
 	GtkWidget *hbox;
@@ -1413,7 +1410,7 @@ GtkWidget* create_paned_region(struct con_win *cwin)
 
 	/* Right pane contains the current playlist */
 
-	current_playlist = create_playlist_pane(cwin);
+	current_playlist = create_current_playlist_view(cwin);
 
 	/* DnD */
 
@@ -1421,12 +1418,14 @@ GtkWidget* create_paned_region(struct con_win *cwin)
 
 	/* Set initial sizes */
 
-	gtk_widget_set_size_request(browse_mode, BROWSE_MODE_SIZE, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(browse_mode), cwin->cpref->sidebar_size, -1);
 
 	/* Pack everything into the hpane */
 
-	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, FALSE);
-	gtk_paned_pack2 (GTK_PANED (hpane), current_playlist, FALSE, FALSE);
+	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (hpane), current_playlist, TRUE, FALSE);
+
+	cwin->paned = hpane;
 
 	return hpane;
 }
@@ -1747,54 +1746,6 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 	cwin->search_entry = search_entry;
 
 	return search_entry;
-
-}
-
-/* Search (simple) */
-
-GtkWidget* create_search_current_bar(struct con_win *cwin)
-{
-	GtkWidget *hbox_bar;
-	GtkWidget *search_current_entry, *cancel_button;
-	GtkWidget *icon_find, *label_find;
-
-	hbox_bar = gtk_hbox_new(FALSE, 0);
-	icon_find =  gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-	label_find = gtk_label_new("Find:");
-	search_current_entry = gtk_entry_new();
-	cancel_button = gtk_button_new();
-
-	gtk_button_set_image(GTK_BUTTON(cancel_button),
-			     gtk_image_new_from_stock(GTK_STOCK_CLEAR,
-						      GTK_ICON_SIZE_MENU));
-	gtk_button_set_relief(GTK_BUTTON(cancel_button),GTK_RELIEF_NONE);
-
-	gtk_box_pack_start(GTK_BOX(hbox_bar),
-			   cancel_button,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(hbox_bar),
-			   label_find,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(hbox_bar),
-			   search_current_entry,
-			   TRUE,
-			   TRUE,
-			   2);
-
-	gtk_box_pack_start(GTK_BOX(hbox_bar),
-			   icon_find,
-			   FALSE,
-			   FALSE,
-			   2);
-
-	cwin->search_current_entry = search_current_entry;
-
-	gtk_widget_set_sensitive (hbox_bar, FALSE);
-	return hbox_bar;
 }
 
 void create_status_icon(struct con_win *cwin)

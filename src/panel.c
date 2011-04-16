@@ -185,22 +185,26 @@ void __update_current_song_info(struct con_win *cwin)
 	else
 		str_title = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
 
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
-	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
-						str_title ,
-						cwin->cstate->curr_mobj->tags->artist, 
-						cwin->cstate->curr_mobj->tags->album);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
-						str_title ,
-						cwin->cstate->curr_mobj->tags->artist);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
-						str_title ,
-						cwin->cstate->curr_mobj->tags->album);
-	else	str = g_markup_printf_escaped ("%s", 
-						str_title);
+	if (cwin->cstate->curr_mobj->file_type == FILE_CDDA){
+		str = g_markup_printf_escaped ("%s", str_title);
+	}
+	else{
+		if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
+		 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
+							str_title ,
+							cwin->cstate->curr_mobj->tags->artist, 
+							cwin->cstate->curr_mobj->tags->album);
+		else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
+			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
+							str_title ,
+							cwin->cstate->curr_mobj->tags->artist);
+		else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
+							str_title ,
+							cwin->cstate->curr_mobj->tags->album);
+		else	str = g_markup_printf_escaped ("%s", str_title);
+	}
 
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), (const gchar*)str);
 

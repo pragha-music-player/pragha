@@ -1,72 +1,895 @@
-r92 | mati86dl@gmail.com | 2009-10-02
-	Pragha 0.7.0 "Great Like House".
+2010-05-12 16:12  mati86dl@gmail.com
 
-r92 | mati86dl@gmail.com | 2009-10-02
-	Prepare to Pragha 0.7.0 "Great Like House".
-	Use gtk_show_uri to lauch Browser.
-	Remove useless "Edit tag <Title> in the selected tracks" menu item in playlist.
-	Update po files.
+	* src/menu.c: Add files when double-clicking or pressing enter in
+	  filechooser.
 
-r91 | mati86dl@gmail.com | 2009-10-02
-	D'Oh!. (GSourceFunc) always returns gbolean.
+2010-05-12 15:52  mati86dl@gmail.com
 
-r90 | mati86dl@gmail.com | 2009-10-02
-	Fix headers Warnigs.
-	Update pragha.pot and Polish Translation.
+	* src/librarytree.c: Unsensitive library tree when updating.
 
-r89 | mati86dl@gmail.com | 2009-10-02 11:22:12
-	Optimization when search library_tree. Add g_timeout_add.
+2010-05-07 20:36  mati86dl@gmail.com
 
-r88 | mati86dl@gmail.com | 2009-10-01 20:10:07
-	Better layout of Preferences Dialog.
-	(Simil xfce preferences dialogs, thank to midori web browser)
-	Fix status tooltips warning when song info use & character.
-	(D'Oh!. Use g_markup_printf_escaped instead of g_strdup_printf)
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/sv.po, po/uk.po:
+	  Update po files.
+	  It is the Prerealese1 of Pragha 0.7.5
 
-r87 | mati86dl@gmail.com | 2009-09-29 20:36:32
-	Fix Warnings when playlist is empty and restore pragha. More efficient.
+2010-05-07 16:30  mati86dl@gmail.com
 
-r86 | mati86dl@gmail.com | 2009-09-29 20:25:04 -0300 (mar 29 de sep de 2009)
-	Fix Warnings when playlist is empty and restore pragha.
+	* src/librarytree.c: Add confirmation dialog. to "Delete from..",
+	  menu entries.
 
-r85 | mati86dl@gmail.com | 2009-09-29 19:54:37 -0300 (mar 29 de sep de 2009)
-	Better layout of Preferences Dialog
+2010-05-07 15:24  mati86dl@gmail.com
 
-r84 | mati86dl@gmail.com | 2009-09-28 21:05:36 -0300 (lun 28 de sep de 2009)
-	Fixs CRITICALS when not reproduce music and close pragha.
+	* src/gui.c, src/pref.c: Use GTK_STOCK_LEAVE_FULLSCREEN button
+	  adding text and translations.
+	  Capitalise "When Pragha start" label.
 
-r83 | mati86dl@gmail.com | 2009-09-28 20:56:28 -0300 (lun 28 de sep de 2009)
-	Add norwegian language, thanks to Kim.
+2010-05-05 22:11  mati86dl@gmail.com
 
-r82 | mati86dl@gmail.com | 2009-09-28 20:51:10 -0300 (lun 28 de sep de 2009)
-	Save and retrieve software mixer volume.
+	* src/gui.c, src/init.c: Fix Issue 10. Several critical warning
+	  when first init.
+	  Use software_mixer and minimize to systray by default.
 
-r81 | mati86dl@gmail.com | 2009-09-18 17:13:41 -0300 (vie 18 de sep de 2009)
-	FIX Segment Violation when click button "go to current track"
+2010-05-05 17:01  mati86dl@gmail.com
 
-r80 | mati86dl@gmail.com | 2009-09-12 11:21:10 -0300 (sáb 12 de sep de 2009)
-	Add Polish translation thanks to Krzysztof Komorowski
+	* po/cs.po, po/pragha.pot, src/init.c: Update Czeec translation
+	  thanks to Alois.
+	  Capitalise and translate window title.
 
-r79 | mati86dl@gmail.com | 2009-09-12 10:54:41 -0300 (sáb 12 de sep de 2009)
-	"pragha -t", now Play, Pause and resume the song.
+2010-04-28 16:25  mati86dl@gmail.com
 
-r78 | mati86dl@gmail.com | 2009-09-11 21:58:50 -0300 (vie 11 de sep de 2009)
-	Add translator-credits to about dialog.
+	* src/tags.c: Leave the checkbox automatically when change a tag.
+	  Adds an icon to clear the tags entry.
 
-r77 | mati86dl@gmail.com | 2009-09-11 19:39:45 -0300 (vie 11 de sep de 2009)
-	Better tooltip in systray.
+2010-04-23 19:59  mati86dl@gmail.com
 
-r76 | mati86dl@gmail.com | 2009-09-11 18:03:06 -0300 (vie 11 de sep de 2009)
-	Show OSD on mouse over on StatusIcon
-	Fix warnings when compiling.
+	* configure.ac, po/sv.po, src/librarytree.c: 0.7.5svn
+	  Add initial Swedish language. Thanks to Zwopper.
+	  Expand all row in library tree when double click.
 
-r75 | mati86dl@gmail.com | 2009-09-11 17:00:52 -0300 (vie 11 de sep de 2009)
-	Remove "Library View Menu"
+2010-04-23 00:40  mati86dl@gmail.com
 
-r74 | mati86dl@gmail.com | 2009-09-11 14:58:37 -0300 (vie 11 de sep de 2009)
-	Drop SexyIconEntry
+	* NEWS, configure.ac, data/pragha.1: Pragha 0.7.4 released.
 
-r73 | mati86dl@gmail.com | 2009-09-11 14:05:19 -0300 (vie 11 de sep de 2009)
-	Now depends of GTK>=2.16,=> Drop eggtrayicon.
-	Fix pragha.desktop file, reported in http://pragha.wikispaces.com/Bugs.
-	Add (Useless) "Edit tag <Title> in the selected tracks" menu item in playlist.
+2010-04-23 00:39  mati86dl@gmail.com
+
+	* FAQ, po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/pragha.h, src/statusicon.c: Now works notification actions.
+	  Fixes a memory leak.
+	  Update po files.
+
+2010-04-22 23:00  mati86dl@gmail.com
+
+	* configure.ac, src/statusicon.c: Use AM_SILENT_RULES if available.
+	  Hide sidebar when restore mainwindow and originally it no showed.
+
+2010-04-22 22:36  mati86dl@gmail.com
+
+	* src/pragha.h, src/statusicon.c, src/tags.c: New Layout of edit
+	  track dialog.
+	  Fix memory leak.
+	  Remobe unused glib header.
+
+2010-04-09 13:12  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/audio.c, src/cdda.h, src/cmdline.c, src/current_playlist.c,
+	  src/db.c, src/dbus.c, src/filetree.c, src/flac.h, src/gui.c,
+	  src/init.c, src/lastfm.c, src/librarytree.c, src/menu.c,
+	  src/mod.h, src/mp3.h, src/musicobject.c, src/oggvorbis.h,
+	  src/panel.c, src/playback_cdda.c, src/playback_flac.c,
+	  src/playback_modplug.c, src/playback_mp3.c,
+	  src/playback_oggvorbis.c, src/playback_wav.c, src/playlist.c,
+	  src/pragha.c, src/pragha.h, src/pref.c, src/statusicon.c,
+	  src/tags.c, src/threads.c, src/utils.c, src/wav.h: Old years in
+	  Copyrighs and the About dialog.
+	  Update po files.
+
+2010-04-08 15:45  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/statusicon.c: Hide album art when
+	  restore mainwindow if set to no show.
+	  No show leave fullscreen button when restore mainwindow in normal
+	  state.
+	  Now work queue list when sequential playlist.
+	  Try add next action to notifications. (In the previous commits)
+
+2010-04-08 00:01  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/init.c, src/menu.c,
+	  src/panel.c, src/pragha.c, src/pragha.h, src/pref.c,
+	  src/statusicon.c: Add option to start pragha minimized,
+	  fullscreen, or remember the last window state.
+	  Add button in panel to leave fullscreen.
+	  Add next track action to notification.
+
+2010-03-31 15:27  mati86dl@gmail.com
+
+	* configure.ac, src/menu.c: Improved time library indexing, and
+	  0.7.4svn
+
+2010-03-12 14:16  mati86dl@gmail.com
+
+	* NEWS, configure.ac, po/cs.po, po/de.po, po/es.po, po/fr.po,
+	  po/ja.po, po/no.po, po/pl.po, po/pragha.pot, po/pt.po, po/ru.po,
+	  po/uk.po: Pragha 0.7.3 released.
+
+2010-03-11 22:23  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/tags.c: OK/Cancel buttons in Edit
+	  Tags and Save Playlist dialog are inverted.
+
+2010-03-11 21:43  mati86dl@gmail.com
+
+	* src/gui.c: D'Oh!.
+
+2010-03-11 15:58  mati86dl@gmail.com
+
+	* src/gui.c, src/librarytree.c, src/playlist.c, src/pragha.h:
+	  Middle click on the library/playlists view append songs to
+	  current playlist.
+	  Inspired in http://bugs.kde.org/show_bug.cgi?id=197423
+
+2010-03-11 13:49  mati86dl@gmail.com
+
+	* src/gui.c: D'Oh!. Restore track.png pixbuf in libraytree.
+
+2010-03-11 00:39  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/menu.c: Add option to add folders recursively or not in file
+	  chooser.
+	  Update po files.
+
+2010-03-11 00:09  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/filetree.c, src/gui.c, src/init.c,
+	  src/menu.c, src/panel.c, src/playlist.c, src/pragha.c,
+	  src/pragha.h, src/pref.c, src/utils.c: Drop File Pane.
+
+2010-02-26 15:20  mati86dl@gmail.com
+
+	* src/current_playlist.c: Queue and dequeue pressing 'Q'.
+
+2010-02-25 21:45  mati86dl@gmail.com
+
+	* Makefile.am, configure.ac, data/album.png, src/gui.c: Drop
+	  album.png in favor of the icon theme instaled. And 0.7.3svn
+
+2010-02-25 16:54  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/statusicon.c: If pragha minimized or
+	  without focus, when clicked statusicon restore mainwindow
+
+2010-02-25 00:01  mati86dl@gmail.com
+
+	* src/menu.c: Adds support for adding folders recursively in file
+	  chooser.
+	  Now remember last folder used.
+	  Based on Audacius code. /src/ui_fileopen.c
+
+2010-02-24 00:40  mati86dl@gmail.com
+
+	* src/init.c: Use g_get_user_config_dir() instead of
+	  g_get_home_dir() and then concatenating "/.config".
+
+2010-02-24 00:32  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/menu.c: Adds support for recent files in file chooser.
+	  Update po files.
+
+2010-02-20 14:44  mati86dl@gmail.com
+
+	* NEWS, configure.ac, data/pragha.1, src/statusicon.c: Pragha 0.7.2
+	  released.
+	  Notifications, more consistent at the systray tooltips.
+
+2010-02-19 23:49  mati86dl@gmail.com
+
+	* Makefile.am, data/pragha.desktop, src/Makefile.am,
+	  src/current_playlist.c, src/gui.c, src/init.c, src/panel.c:
+	  Restore AudioVideo categorie to desktop file.
+	  Use shared files XDG compliant. Thanks to Christoph.
+	  Now reset the previous songs when adds a song to queue list.
+
+2009-12-21 13:08  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/filetree.c, src/gui.c, src/init.c, src/menu.c, src/pragha.h,
+	  src/pref.c: Remove 'Show Hidden Files in File View' preferences
+	  option, and add 'show hidden files' menu item, to popup menu of
+	  file pane.
+	  Update po files.
+
+2009-12-21 00:39  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/statusicon.c: D'Oh!. Fix my BAD English.
+	  And update Portuguese translation thanks to Lyceuhns.
+
+2009-12-20 13:01  mati86dl@gmail.com
+
+	* configure.ac, po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po,
+	  po/no.po, po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/gui.c, src/statusicon.c: Add tooltips to shuffle and repeat
+	  button.
+	  Notifications were made more consistent at the systray tooltips.
+	  Update po lifes.
+
+2009-12-20 12:00  mati86dl@gmail.com
+
+	* data/pragha.desktop: Desktop file updates.
+	  Thanks to Christoph.
+
+2009-12-19 20:57  mati86dl@gmail.com
+
+	* src/gui.c: Use Control+space to play and pause.
+
+2009-12-19 20:44  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/fr.po, po/ja.po, po/no.po,
+	  po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po: Update po
+	  files
+
+2009-12-19 20:43  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/init.c, src/menu.c,
+	  src/panel.c, src/pragha.h, src/pref.c, src/statusicon.c: Add
+	  'Current play time' in the systray tooltip.
+	  Restore 'Shuffle' and 'Repeat' options in the panel.
+	  Move 'Add the library' menu item to 'Tools' menu.
+	  Move 'Connect to CDDB server' option to 'General' tab.
+
+2009-10-30 15:14  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/pragha.h: Add romove track
+	  to queue List.
+	  Queue and enqueue mutiple tracks.
+	  Fixs GDK_Delete no work in search entry.
+
+2009-10-30 00:07  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/panel.c: Fix reactivate colums.
+	  Fix Crash when play and no selected song.
+
+2009-10-29 22:57  mati86dl@gmail.com
+
+	* configure.ac, src/Makefile.am, src/current_playlist.c,
+	  src/gtkcellrendererbubble.c, src/gtkcellrendererbubble.h,
+	  src/gui.c, src/init.c, src/panel.c, src/pragha.h: Basic Queue
+	  List!-)
+
+2009-10-28 12:35  mati86dl@gmail.com
+
+	* NEWS, configure.ac, po/fr.po: Pragha 0.7.1.1 released.
+	  Update french translation thanks to Aloïs Halel.
+
+2009-10-27 22:12  mati86dl@gmail.com
+
+	* NEWS, configure.ac, po/cs.po, po/de.po, po/es.po, po/fr.po,
+	  po/ja.po, po/no.po, po/pl.po, po/pragha.pot, po/pt.po, po/ru.po,
+	  po/uk.po, src/gui.c: Pragha 0.7.1 released.
+
+2009-10-25 01:24  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/pragha.h: Clear Sort in
+	  Current playlist header_context_menu.
+	  Use betters icon.
+	  * ADD instead COPY, when add music.
+	  * NULL instead PLAY when replace playlist.
+	  Add betters accelerators.
+	  * <Control R, to repeat,
+	  * <Control>Y, to search lyrics.
+	  * etc.
+
+2009-10-24 12:39  mati86dl@gmail.com
+
+	* src/gui.c, src/statusicon.c: When create search entry, no
+	  sensitive claer icon.
+
+2009-10-22 15:07  mati86dl@gmail.com
+
+	* po/pragha.pot, po/ru.po: Updated rusian translation thanks to
+	  Evgen
+
+2009-10-21 15:48  mati86dl@gmail.com
+
+	* src/gui.c, src/init.c, src/menu.c, src/pragha.h, src/pref.c:
+	  Remove Show/Hide Menu option and now coordinate with fullscreen
+	  option.
+
+2009-10-20 23:50  mati86dl@gmail.com
+
+	* po/cs.po, po/fr.po, po/ja.po, src/gui.c, src/statusicon.c:
+	  Restore "Search in playlist" menu item.
+	  Add "Properties" in syatray menu.
+	  Updated cs.po thanks to alois.nespor.
+	  Updated ja.po thanks to Masato Hashimoto.
+
+2009-10-16 23:59  mati86dl@gmail.com
+
+	* NEWS, configure.ac, data/pragha.png, po/cs.po, po/de.po,
+	  po/es.po, po/ja.po, po/no.po, po/pl.po, po/pragha.pot, po/pt.po,
+	  po/ru.po, po/uk.po, src/pragha.h, src/tags.c: 0.7.1Pre1
+	  Add new Icon.
+	  Remove unseles comment tag.
+
+2009-10-16 22:19  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/ja.po, po/no.po, po/pl.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po, src/gui.c: Rework
+	  playlist popup menu.
+	  Update pragha.pot file.
+
+2009-10-16 19:29  mati86dl@gmail.com
+
+	* src/gui.c: Add more tooltips.
+
+2009-10-16 14:59  mati86dl@gmail.com
+
+	* src/gui.c, src/init.c, src/menu.c, src/pragha.h, src/pref.c: Add
+	  hide status bar option.
+
+2009-10-16 14:00  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/ja.po, po/no.po, po/pl.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po, src/filetree.c,
+	  src/gui.c, src/librarytree.c, src/playlist.c, src/pragha.h: More
+	  reworks on popups menus.
+	  * "Add to playlist" instead "Equeque" and "Replace playlist"
+	  instead "Play"
+	  Update pragha.pot file.
+
+2009-10-16 02:10  mati86dl@gmail.com
+
+	* src/gui.c, src/menu.c, src/panel.c, src/pragha.h, src/tags.c: Now
+	  activate panels from the menu.
+	  Add comment tag (Useless even).
+
+2009-10-16 00:15  mati86dl@gmail.com
+
+	* src/current_playlist.c: No show track no, when is zero.
+	  Show file name when unknown title.
+
+2009-10-15 23:36  mati86dl@gmail.com
+
+	* src/gui.c: Restore Expand library and Collapse library in popup
+	  library menu.
+
+2009-10-15 22:13  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/init.c, src/menu.c,
+	  src/pragha.h, src/pref.c: Option to hide menu bar.
+	  Properties playing song in menu bar.
+
+2009-10-05 15:12  mati86dl@gmail.com
+
+	* src/menu.c, src/pref.c: Save Fullscreen option and window size
+	  correctly.
+
+2009-10-05 13:58  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/ja.po, po/no.po, po/pl.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/current_playlist.c, src/gui.c, src/init.c, src/menu.c,
+	  src/pragha.h, src/pref.c: Rework main menu. (Everything does not
+	  work)
+	  Add Fullscreen Option.
+	  Sorry. Many translations have changed.
+
+2009-10-04 19:02  mati86dl@gmail.com
+
+	* src/current_playlist.c: Show "track" (Before show "tracks") in
+	  statusbar when inique song in playlist.
+
+2009-10-04 14:51  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/ja.po, po/no.po, po/pl.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po, src/gui.c,
+	  src/menu.c, src/pragha.h: Add option to search lyric, using
+	  http://www.lyricsplugin.com.
+	  Update po files.
+
+2009-10-03 00:45  mati86dl@gmail.com
+
+	* ChangeLog, FAQ, configure.ac: Pragha 0.7.0 "Great Like House"
+	  released.
+
+2009-10-03 00:26  mati86dl@gmail.com
+
+	* ChangeLog, NEWS, po/cs.po, po/de.po, po/es.po, po/ja.po,
+	  po/no.po, po/pl.po, po/pragha.pot, po/pt.po, po/ru.po, po/uk.po,
+	  src/current_playlist.c, src/gui.c, src/menu.c, src/pragha.h,
+	  src/utils.c: Prepare to Pragha 0.7.0 "Great Like House".
+	  Use gtk_show_uri to lauch Browser.
+	  Remove useless "Edit tag <Title> in the selected tracks" menu
+	  item.
+	  Update po files.
+
+2009-10-02 15:52  mati86dl@gmail.com
+
+	* src/gui.c, src/librarytree.c, src/menu.c: D'Oh!. (GSourceFunc)
+	  always returns gbolean.
+
+2009-10-02 14:59  mati86dl@gmail.com
+
+	* po/cs.po, po/de.po, po/es.po, po/ja.po, po/no.po, po/pl.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po, src/librarytree.c,
+	  src/pragha.h: Fix headers Warnigs.
+	  Update pragha.pot and Polish Translation.
+
+2009-10-02 14:22  mati86dl@gmail.com
+
+	* src/librarytree.c, src/pragha.h: Optimization when search
+	  library_tree. Add g_timeout_add.
+
+2009-10-01 23:10  mati86dl@gmail.com
+
+	* src/pref.c, src/statusicon.c: Better layout of Preferences
+	  Dialog.
+	  (Simil xfce preferences dialogs, thank to midori web browser)
+	  Fix status tooltips warning when song info use & character.
+	  (D'Oh!. Use g_markup_printf_escaped instead of g_strdup_printf)
+
+2009-09-29 23:36  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/pref.c: Fix Warnings when playlist is
+	  empty and restore pragha. More efficient.
+
+2009-09-29 23:25  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/pref.c: Fix Warnings when playlist is
+	  empty and restore pragha.
+
+2009-09-29 22:54  mati86dl@gmail.com
+
+	* src/pref.c: Better layout of Preferences Dialog
+
+2009-09-29 00:05  mati86dl@gmail.com
+
+	* src/pref.c: Fixs CRITICALS when not reproduce music and close
+	  pragha.
+
+2009-09-28 23:56  mati86dl@gmail.com
+
+	* configure.ac, po/no.po: Add norwegian language, thanks to Kim.
+
+2009-09-28 23:51  mati86dl@gmail.com
+
+	* src/audio.c, src/init.c, src/pragha.h, src/pref.c: Save and
+	  retrieve software mixer volume.
+
+2009-09-18 20:13  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/init.c, src/pragha.h, src/pref.c: FIX
+	  Segment Violation when click button "go to current track"
+
+2009-09-12 14:21  mati86dl@gmail.com
+
+	* configure.ac, po/pl.po: Add Polish translation thanks to
+	  Krzysztof Komorowski
+
+2009-09-12 13:54  mati86dl@gmail.com
+
+	* data/pragha.1, po/es.po, po/pragha.pot, src/current_playlist.c,
+	  src/dbus.c, src/gui.c, src/init.c: "pragha -t", now Play, Pause
+	  and resume the song.
+
+2009-09-12 00:58  mati86dl@gmail.com
+
+	* po/es.po, po/pragha.pot, src/menu.c: Add translator-credits to
+	  about dialog.
+
+2009-09-11 22:39  mati86dl@gmail.com
+
+	* src/statusicon.c: Better tooltip in systray.
+
+2009-09-11 21:03  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/pragha.h,
+	  src/statusicon.c, src/threads.c: Show OSD on mouse over on
+	  StatusIcon
+	  Fix warnings when compiling.
+
+2009-09-11 20:00  mati86dl@gmail.com
+
+	* src/gui.c: Remove "Library View Menu"
+
+2009-09-11 17:58  mati86dl@gmail.com
+
+	* src/Makefile.am, src/gui.c, src/librarytree.c, src/pragha.h,
+	  src/sexy-icon-entry.c, src/sexy-icon-entry.h, src/sexy-marshal.c,
+	  src/sexy-marshal.h: Drop SexyIconEntry
+
+2009-09-11 17:05  mati86dl@gmail.com
+
+	* configure.ac, data/pragha.desktop, src/Makefile.am,
+	  src/current_playlist.c, src/eggtrayicon.c, src/eggtrayicon.h,
+	  src/gui.c, src/init.c, src/pragha.h, src/statusicon.c: Now
+	  depends of GTK>=2.16,=> Drop eggtrayicon.
+	  Fix pragha.desktop file, reported in
+	  http://pragha.wikispaces.com/Bugs.
+	  Add (Useless) "Edit tag <Title> in the selected tracks" menu item
+	  in playlist.
+
+2009-09-09 21:19  mati86dl@gmail.com
+
+	* configure.ac, po/cs.po, po/fr.po, src/librarytree.c: V0.6.3.1
+	  Fix bug (Great like a house) in Libraryview.
+	  Add French translation, thanks to Alois Halel.
+
+2009-08-08 21:42  mati86dl@gmail.com
+
+	* ChangeLog, configure.ac: V0.6.3
+	  Add remaining time mode to panel.
+	  Pragha remeber and showed last played song.
+	  Small optimization in library_tree.
+	  Fixs critical warnings.
+	  Updated czech translation by Alois Nespor.
+
+2009-08-08 21:30  mati86dl@gmail.com
+
+	* src/gui.c, src/panel.c, src/pragha.h: Add remaining time mode to
+	  panel.
+
+2009-08-08 20:18  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c, src/init.c, src/librarytree.c,
+	  src/panel.c, src/pragha.h, src/pref.c: Pragha remeber and showed
+	  last played song.
+
+2009-08-05 21:54  mati86dl@gmail.com
+
+	* src/gui.c: Fixs critical warnings when initiating pragha.
+
+2009-07-20 20:34  mati86dl@gmail.com
+
+	* src/librarytree.c: Purge residual code
+
+2009-07-20 20:24  mati86dl@gmail.com
+
+	* src/librarytree.c: Small optimization.
+
+2009-07-20 19:33  mati86dl@gmail.com
+
+	* po/cs.po: Updated czech translation by Alois Nespor
+
+2009-07-09 16:34  mati86dl@gmail.com
+
+	* po/de.po: Update pot
+
+2009-07-08 22:20  mati86dl@gmail.com
+
+	* configure.ac, po/cs.po, po/de.po, po/es.po, po/ja.po,
+	  po/pragha.pot, po/pt.po, po/ru.po, po/uk.po, src/gui.c,
+	  src/init.c, src/librarytree.c, src/playlist.c, src/pragha.h:
+	  0.6.2.2: Add German translation, thanks to PhotonX!-) and drops
+	  some strings "Tracks" confused.
+
+2009-07-08 17:02  mati86dl@gmail.com
+
+	* configure.ac, po/cs.po, po/es.po, po/ja.po, po/pragha.pot,
+	  po/pt.po, po/ru.po, po/uk.po: 0.6.2.1: Add russian and ukrainian
+	  language, thanks to Evgen.
+
+2009-07-03 15:38  mati86dl@gmail.com
+
+	* ChangeLog, configure.ac: V0.6.2
+	  Pargha is 100% translatable one.
+	  Add Japanese translation. - Tanks Masato hashimoto, Xfce-i18n
+	  team_ja.
+	  Add czech translation. - Tanks alois.nespor.
+	  Add Portuguese-Brazil. - Tanks Lyceuhns.
+	  Add option to resize album art in preferences.
+
+2009-07-02 18:26  mati86dl@gmail.com
+
+	* po/cs.po, po/es.po, po/ja.po, po/pragha.pot, po/pt.po, src/gui.c,
+	  src/menu.c: Pargha is 100% translatable one.! ¿?
+
+2009-07-02 16:55  mati86dl@gmail.com
+
+	* po/cs.po, po/es.po, po/ja.po, po/pragha.pot, po/pt.po,
+	  src/current_playlist.c: Pargha is 100% translatable one.!-)
+
+2009-07-02 16:31  mati86dl@gmail.com
+
+	* po/POTFILES.in, po/cs.po, po/es.po, po/ja.po, po/pragha.pot,
+	  po/pt.po, src/gui.c, src/menu.c, src/panel.c, src/playlist.c,
+	  src/pragha.c, src/pragha.h, src/pref.c, src/statusicon.c,
+	  src/utils.c: Pargha is 100% translatable one.
+	  I eliminate preview of the album while the size changes.
+	  Many fixes and clean the code.
+
+2009-07-01 22:53  mati86dl@gmail.com
+
+	* configure.ac, src/Makefile.am: Add Japanese translation.. Tanks
+	  Masato hashimoto, (Xfce-i18n team_ja)
+	  Purge "Snyder" remains
+
+2009-07-01 22:52  mati86dl@gmail.com
+
+	* po/ja.po: Add Japanese translation.. Tanks Masato hashimoto,
+	  (Xfce-i18n team_ja)
+
+2009-07-01 16:31  mati86dl@gmail.com
+
+	* src/panel.c: change GTK_SHADOW_IN
+
+2009-07-01 16:19  mati86dl@gmail.com
+
+	* po/cs.po, po/es.po, po/pragha.pot, po/pt.po: Update pot files
+
+2009-07-01 16:17  mati86dl@gmail.com
+
+	* src/init.c, src/panel.c, src/pragha.c, src/pragha.h, src/pref.c,
+	  src/statusicon.c: More Resize album art in preferences
+	  Fix warnings
+
+2009-06-30 22:21  mati86dl@gmail.com
+
+	* src/init.c, src/panel.c, src/pragha.h, src/pref.c: Resize album
+	  art in preferences
+
+2009-06-29 20:25  mati86dl@gmail.com
+
+	* configure.ac: Add czech translation.. Tanks alois.nespor!-)
+
+2009-06-29 20:23  mati86dl@gmail.com
+
+	* po/cs.po: Add czech translation.. Tanks alois.nespor!-)
+
+2009-06-29 19:56  mati86dl@gmail.com
+
+	* configure.ac: Add Portuguese (Brazil)
+
+2009-06-29 19:55  mati86dl@gmail.com
+
+	* po/pt.po: Add Portuguese (Brazil)
+
+2009-06-23 16:21  mati86dl@gmail.com
+
+	* Makefile.am: Add objetive distclean-local and try rpm:
+
+2009-06-23 15:44  mati86dl@gmail.com
+
+	* src/Makefile.am: Fix make distcheck (consonance.h remain)
+
+2009-06-23 15:21  mati86dl@gmail.com
+
+	* po/es.po: Fix es.po
+
+2009-06-23 15:15  mati86dl@gmail.com
+
+	* AUTHORS, COPYING, NEWS, autogen.sh: Add News, Copying and Autors
+
+2009-06-23 15:11  mati86dl@gmail.com
+
+	* autogen.sh: New autogen.sh with Xfce Developer Tools
+
+2009-06-23 15:05  mati86dl@gmail.com
+
+	* autogen.sh: New autogen.sh with Xfce Developer Tools
+
+2009-06-23 15:00  mati86dl@gmail.com
+
+	* po, po/ChangeLog, po/LINGUAS, po/POTFILES.in, po/es.po,
+	  po/pragha.pot: International Support
+
+2009-06-23 14:57  mati86dl@gmail.com
+
+	* src/Makefile.am, src/current_playlist.c, src/gui.c,
+	  src/librarytree.c, src/menu.c, src/panel.c, src/pragha.c,
+	  src/pragha.h, src/pref.c, src/statusicon.c, src/tags.c:
+	  International Support
+
+2009-06-23 14:56  mati86dl@gmail.com
+
+	* ChangeLog, Makefile.am, README, configure.ac: International
+	  Support
+
+2009-06-18 21:34  mati86dl@gmail.com
+
+	* src/statusicon.c: fix notify text
+
+2009-06-18 00:25  mati86dl@gmail.com
+
+	* ChangeLog, Makefile.am, configure.ac: First Pragha realese
+
+2009-06-18 00:21  mati86dl@gmail.com
+
+	* src/Makefile.am, src/audio.c, src/cdda.h, src/cmdline.c,
+	  src/consonance.c, src/consonance.h, src/current_playlist.c,
+	  src/db.c, src/dbus.c, src/filetree.c, src/flac.h, src/gui.c,
+	  src/init.c, src/lastfm.c, src/librarytree.c, src/menu.c,
+	  src/mod.h, src/mp3.h, src/musicobject.c, src/oggvorbis.h,
+	  src/panel.c, src/playback_cdda.c, src/playback_flac.c,
+	  src/playback_modplug.c, src/playback_mp3.c,
+	  src/playback_oggvorbis.c, src/playback_wav.c, src/playlist.c,
+	  src/pragha.c, src/pragha.h, src/pref.c, src/statusicon.c,
+	  src/tags.c, src/threads.c, src/utils.c, src/wav.h: Prepare /src
+	  to first Pragha realese
+
+2009-06-18 00:18  mati86dl@gmail.com
+
+	* data/bookmark_starred.png, data/bookmark_unstarred.png,
+	  data/consonance.1, data/consonance.desktop, data/consonance.png,
+	  data/pragha.1, data/pragha.desktop, data/pragha.png: Prepare data
+	  to first Pragha realese
+
+2009-05-28 16:31  mati86dl@gmail.com
+
+	* ChangeLog: Changelog
+
+2009-05-28 15:35  mati86dl@gmail.com
+
+	* Makefile.am, configure.ac: Fixed consonance.png in
+	  gnome_main_menu and xfce_menu (gtk_update_icon_cache)
+
+2009-05-28 13:46  mati86dl@gmail.com
+
+	* src/statusicon.c: Sync systray and panel volume
+
+2009-05-28 13:38  mati86dl@gmail.com
+
+	* ChangeLog, configure.ac: Little fixes
+
+2009-05-28 13:37  mati86dl@gmail.com
+
+	* src/statusicon.c: Little fixes
+
+2009-05-28 13:19  mati86dl@gmail.com
+
+	* src/gui.c, src/librarytree.c, src/panel.c: Little fixes
+
+2009-05-27 16:56  mati86dl@gmail.com
+
+	* src/eggtrayicon.c, src/init.c: Problem of the panel background
+	  image fixed
+
+2009-05-27 15:58  mati86dl@gmail.com
+
+	* src/current_playlist.c, src/gui.c: More Spanish!
+
+2009-05-27 15:19  mati86dl@gmail.com
+
+	* configure.ac: consonance 0.5.90.2
+
+2009-05-27 15:19  mati86dl@gmail.com
+
+	* src/gui.c, src/panel.c: Drop spanish!
+
+2009-05-27 14:59  mati86dl@gmail.com
+
+	* configure.ac: ups.. Drop spanish remains
+
+2009-05-27 14:59  mati86dl@gmail.com
+
+	* src/panel.c, src/statusicon.c: ups.. Drop spanish remains
+
+2009-05-27 14:28  mati86dl@gmail.com
+
+	* ChangeLog, configure.ac: Commits Changelog and configure.ac
+
+2009-05-27 14:28  mati86dl@gmail.com
+
+	* src/audio.c, src/consonance.h, src/gui.c, src/init.c, src/menu.c,
+	  src/statusicon.c, src/utils.c: Incress and decress 5% vol with
+	  whell.
+	  New text layout of notifications.
+	  Notifications only are if consonance not this in first plane and
+	  new text layout.
+	  In help menu show links to Consonance homepage, a Nonofficial
+	  wiki and forum..(Work!-)
+	  Completely in English.
+	  etc.
+
+2009-05-26 15:24  mati86dl@gmail.com
+
+	* data/bookmark_starred.png, data/bookmark_unstarred.png: add
+	  Bookmark_starred/_unstarred icon
+
+2009-05-26 15:22  mati86dl@gmail.com
+
+	* src/gui.c: Put bookmark icon.. (Crazy idea)
+
+2009-05-26 15:21  mati86dl@gmail.com
+
+	* Makefile.am, configure.ac: Dependences of intrepid fixed. ¿?
+
+2009-05-25 20:46  mati86dl@gmail.com
+
+	* configure.ac: Now need libcurl >= 7.18
+
+2009-05-25 18:51  mati86dl@gmail.com
+
+	* configure.ac: Now need libcurl >= 7.18.2 and libcdio >= 0.78..
+
+2009-05-25 15:22  mati86dl@gmail.com
+
+	* configure.ac: Purge xfce libs
+
+2009-05-25 15:22  mati86dl@gmail.com
+
+	* src/consonance.h, src/pref.c: Purge xfce libs
+
+2009-05-25 01:18  mati86dl@gmail.com
+
+	* src/gui.c, src/init.c: Add murrine RGBA support
+
+2009-05-23 23:31  mati86dl@gmail.com
+
+	* configure.ac: Fix configure.ac
+
+2009-05-23 23:27  mati86dl@gmail.com
+
+	* configure.ac: Fix configure.ac
+
+2009-05-23 23:19  mati86dl@gmail.com
+
+	* src/consonance: CleanIV
+
+2009-05-23 23:18  mati86dl@gmail.com
+
+	* Makefile.am: Add /data/cover.png to Makefile.am
+
+2009-05-23 23:17  mati86dl@gmail.com
+
+	* Makefile, Makefile.in, aclocal.m4, depcomp, install-sh, libtool,
+	  ltmain.sh, missing, stamp-h1: Clean!!!
+
+2009-05-23 23:17  mati86dl@gmail.com
+
+	* config.guess, config.h, config.h.in, config.log, config.status,
+	  config.sub, configure: Clean!!
+
+2009-05-23 23:16  mati86dl@gmail.com
+
+	* configure.ac: Clean!
+
+2009-05-23 23:14  mati86dl@gmail.com
+
+	* data/album.png, data/artist.png, data/consonance.1,
+	  data/consonance.desktop, data/consonance.png, data/cover.png,
+	  data/genre.png, data/track.png: Add data
+
+2009-05-23 23:12  mati86dl@gmail.com
+
+	* src/Makefile, src/Makefile.in: Clean
+
+2009-05-23 23:05  mati86dl@gmail.com
+
+	* src, src/Makefile, src/Makefile.am, src/Makefile.in, src/audio.c,
+	  src/cdda.h, src/cmdline.c, src/consonance, src/consonance.c,
+	  src/consonance.h, src/current_playlist.c, src/db.c, src/dbus.c,
+	  src/eggtrayicon.c, src/eggtrayicon.h, src/filetree.c, src/flac.h,
+	  src/gui.c, src/init.c, src/lastfm.c, src/librarytree.c,
+	  src/md5.c, src/md5.h, src/menu.c, src/mod.h, src/mp3.h,
+	  src/musicobject.c, src/oggvorbis.h, src/panel.c,
+	  src/playback_cdda.c, src/playback_flac.c, src/playback_modplug.c,
+	  src/playback_mp3.c, src/playback_oggvorbis.c, src/playback_wav.c,
+	  src/playlist.c, src/pref.c, src/sexy-icon-entry.c,
+	  src/sexy-icon-entry.h, src/sexy-marshal.c, src/sexy-marshal.h,
+	  src/statusicon.c, src/tags.c, src/threads.c, src/utils.c,
+	  src/wav.h: Changes in gui.
+
+2009-05-23 22:53  mati86dl@gmail.com
+
+	* ChangeLog, FAQ, Makefile, Makefile.am, Makefile.in, README,
+	  aclocal.m4, autogen.sh, autom4te.cache, config.guess, config.h,
+	  config.h.in, config.log, config.status, config.sub, configure,
+	  configure.ac, data, depcomp, install-sh, libtool, ltmain.sh,
+	  missing, src, stamp-h1: Initial import of consonance git
+
+2009-05-23 22:39  
+
+	* .: Initial directory structure.
+
