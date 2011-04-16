@@ -1,8 +1,7 @@
 dnl Version information
 m4_define([pragha_version_major], [0])
-m4_define([pragha_version_minor], [8])
-m4_define([pragha_version_micro], [3.1])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
+m4_define([pragha_version_minor], [91])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
 
 dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2010
@@ -23,27 +22,19 @@ AC_PROG_INSTALL()
 AC_PROG_LIBTOOL()
 
 dnl Check for i18n support
-XDT_I18N([cs de es fr ja nl no pl pt pt_BR ru sv uk])
+XDT_I18N([cs de es fr hu ja nl no pl pt pt_BR ru sv uk])
 
 dnl Check for required packages
-XDT_CHECK_PACKAGE([ALSA], [alsa], [1.0.15])
-XDT_CHECK_PACKAGE([AO], [ao], [0.8.8])
-XDT_CHECK_PACKAGE([FLAC], [flac], [1.2.1])
-XDT_CHECK_PACKAGE([GTHREAD], [gthread-2.0], [2.14.0])
+XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.16.3])
 XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.16.0])
 XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
-XDT_CHECK_PACKAGE([MAD], [mad], [0.15])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([DBUS], [dbus-1], [0.74])
 XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
-XDT_CHECK_PACKAGE([SNDFILE], [sndfile >= 1.0.17], [1.0.17])
-XDT_CHECK_PACKAGE([VORBISFILE], [vorbisfile], [1.2.0])
-XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
-XDT_CHECK_PACKAGE([LIBMODPLUG], [libmodplug], [0.7.0])
 XDT_CHECK_PACKAGE([LIBX11], [x11], 1.0.0)
 
 dnl ***********************************

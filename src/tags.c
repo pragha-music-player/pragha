@@ -17,35 +17,6 @@
 /*************************************************************************/
 
 #include "pragha.h"
-#include <tag_c.h>
-
-gboolean get_wav_info(gchar *file, struct tags *tags)
-{
-	SNDFILE *sfile = NULL;
-	SF_INFO sinfo;
-
-	memset(&sinfo, 0, sizeof(sinfo));
-
-	sfile = sf_open(file, SFM_READ, &sinfo);
-	if (!sfile) {
-		g_warning("Unable to open file using sndfile : %s", file);
-		return FALSE;
-	}
-
-	tags->artist = g_strdup("");
-	tags->album = g_strdup("");
-	tags->genre = g_strdup("");
-	tags->comment = g_strdup("");
-	tags->title = g_path_get_basename(file);
-	tags->channels = sinfo.channels;
-	tags->samplerate = sinfo.samplerate;
-	tags->length = sinfo.frames / sinfo.samplerate;
-
-	if (sf_close(sfile))
-		g_warning("Unable to close file using sndfile : %s", file);
-
-	return TRUE;
-}
 
 static gboolean get_info_taglib(gchar *file, struct tags *tags)
 {
@@ -94,6 +65,11 @@ exit:
 	return ret;
 }
 
+gboolean get_wav_info(gchar *file, struct tags *tags)
+{
+	return get_info_taglib(file, tags);
+}
+
 gboolean get_mp3_info(gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
@@ -109,41 +85,14 @@ gboolean get_ogg_info(gchar *file, struct tags *tags)
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_mod_info(gchar *file, struct tags *tags)
+gboolean get_asf_info(gchar *file, struct tags *tags)
 {
-	gchar *data;
-	gsize length;
-	ModPlugFile *mf;
-	
-	if(!g_file_get_contents(file, &data, &length, NULL))
-	{
-		g_critical("Unable to open file : %s", file);
-		return FALSE;
-	}
+	return get_info_taglib(file, tags);
+}
 
-	mf = ModPlug_Load((const void*)data, (int)length);
-
-	if(!mf) {
-		g_critical("ModPlug_Load failed for %s", file);
-		g_free(data);
-		return FALSE;
-	}
-
-	;
-	tags->artist = g_strdup("");
-	tags->album = g_strdup("");
-	tags->genre = g_strdup("");
-	tags->comment = g_strdup("");
-	tags->title = g_strdup(ModPlug_GetName(mf));
-	tags->channels = 2;
-	tags->samplerate = 44100;
-	tags->length = ModPlug_GetLength(mf)/1000;
-
-	ModPlug_Unload(mf);
-
-	g_free(data);
-
-	return TRUE;
+gboolean get_mp4_info(gchar *file, struct tags *tags)
+{
+	return get_info_taglib(file, tags);
 }
 
 gboolean save_tags_to_file(gchar *file, struct tags *ntag,
@@ -923,17 +872,18 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 			if(cwin->cstate->state != ST_STOPPED)
 				__update_current_song_info(cwin);
 		}
-
-		sfile = sanitize_string_sqlite3(mobj->file);
-		location_id = find_location_db(sfile, cwin);
-		if (location_id) {
-			g_array_append_val(loc_arr, location_id);
+		if(mobj->file_type != FILE_CDDA) {
+			sfile = sanitize_string_sqlite3(mobj->file);
+			location_id = find_location_db(sfile, cwin);
+			if (location_id) {
+				g_array_append_val(loc_arr, location_id);
+				g_free(sfile);
+				continue;
+			}
+			tfile = g_strdup(mobj->file);
+			file_arr = g_array_append_val(file_arr, tfile);
 			g_free(sfile);
-			continue;
 		}
-		tfile = g_strdup(mobj->file);
-		file_arr = g_array_append_val(file_arr, tfile);
-		g_free(sfile);
 	}
 
 	tag_update(loc_arr, file_arr, changed, &ntag, cwin);

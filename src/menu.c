@@ -60,13 +60,35 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 	}
 }
 
+/* generate the recently-used data */
+
+void add_recent_file (gchar *filename)
+{
+	GtkRecentData recent_data;
+
+	recent_data.mime_type = get_mime_type(filename);
+	if (recent_data.mime_type == NULL)
+		return;
+
+	recent_data.display_name = g_filename_display_basename (filename);
+	recent_data.app_name = g_strdup (g_get_application_name ());
+	recent_data.app_exec =  g_strjoin (" ", g_get_prgname (), "%u", NULL);
+	recent_data.description = NULL;
+	recent_data.groups = NULL;
+	recent_data.is_private = FALSE;
+
+	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), filename, &recent_data);
+
+	g_free (recent_data.display_name);
+	g_free (recent_data.mime_type);
+	g_free (recent_data.app_name);
+	g_free (recent_data.app_exec);
+}
+
 /* Add selected files from the file chooser to the current playlist */
 
 void handle_selected_file(gpointer data, gpointer udata)
 {
-	enum file_type type;
-	GtkRecentData recent_data;
-
 	struct musicobject *mobj;
 	struct con_win *cwin = (struct con_win*)udata;
 
@@ -81,48 +103,16 @@ void handle_selected_file(gpointer data, gpointer udata)
 		g_free(data);
 		return;
 	}
-
-	if (is_m3u_playlist(data)){
+	else if (is_m3u_playlist(data)){
 		open_m3u_playlist(data, cwin);
-		recent_data.mime_type = "audio/x-mpegurl";
 	}
 	else{
 		mobj = new_musicobject_from_file(data);
-		if (mobj)
+		if (mobj) {
 			append_current_playlist(mobj, cwin);
-
-		/* generate the recently-used data */
-
-		type = get_file_type(data);
-		switch(type) {
-		case FILE_WAV:
-			recent_data.mime_type = "audio/x-wav";
-			break;
-		case FILE_MP3:
-			recent_data.mime_type = "audio/mpeg";
-			break;
-		case FILE_FLAC:
-			recent_data.mime_type = "audio/x-flac";
-			break;
-		case FILE_OGGVORBIS:
-			recent_data.mime_type = "audio/x-vorbis+ogg";
-			break;
-		case FILE_MODPLUG:
-			recent_data.mime_type = "audio/x-mod";
-			break;
-		default:
-			break;
+			add_recent_file(data);
 		}
 	}
-
-	recent_data.display_name = NULL;
-	recent_data.description = NULL;
-	recent_data.app_name = "Pragha Music Player";
-	recent_data.app_exec = "pragha %f";
-	recent_data.groups = NULL;
-	recent_data.is_private = FALSE;
-	
-	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), g_filename_to_uri(data, NULL, NULL), &recent_data);
 
 	g_free(data);
 }
@@ -301,6 +291,20 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	while (mime_ogg[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_ogg[i++]);
+
+	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+	i = 0;
+	while (mime_asf[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_asf[i++]);
+	#endif
+	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+	i = 0;
+	while (mime_mp4[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_mp4[i++]);
+	#endif
+
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 
 	all_filter = gtk_file_filter_new();
@@ -362,7 +366,7 @@ void play_pause_action(GtkAction *action, struct con_win *cwin)
 
 void stop_action(GtkAction *action, struct con_win *cwin)
 {
-	stop_playback(cwin);
+	backend_stop(cwin);
 }
 
 /* Handler for the 'Next' item in the pragha menu */
@@ -403,55 +407,47 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	/* Store the new tags */
+	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
+		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
 
-	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
+		location_id = find_location_db(sfile, cwin);
 
-	sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
-	location_id = find_location_db(sfile, cwin);
+		if (location_id)
+			g_array_append_val(loc_arr, location_id);
 
-	if (location_id)
-		g_array_append_val(loc_arr, location_id);
+		tfile = g_strdup(cwin->cstate->curr_mobj->file);
+		file_arr = g_array_append_val(file_arr, tfile);
 
-	tfile = g_strdup(cwin->cstate->curr_mobj->file);
-	file_arr = g_array_append_val(file_arr, tfile);
+		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
+		init_library_view(cwin);
 
-	tag_update(loc_arr, file_arr, changed, &ntag, cwin);
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
+		g_array_free(loc_arr, TRUE);
+		g_array_free(file_arr, TRUE);
 
-	path = current_playlist_get_actual(cwin);
+		g_free(sfile);
+		g_free(tfile);
+	}
 
-	if (path != NULL) {
+	if ((path = current_playlist_get_actual(cwin)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		if (gtk_tree_model_get_iter(model, &iter, path)) {
+		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
-		}
 		gtk_tree_path_free(path);
 	}
 
+	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
 	__update_current_song_info(cwin);
-
-	init_library_view(cwin);
 
 exit:
 	/* Cleanup */
-
-	if (loc_arr)
-		g_array_free(loc_arr, TRUE);
-	if (file_arr)
-		g_array_free(file_arr, TRUE);
-
-	g_free(sfile);
-	g_free(tfile);
-
 	g_free(ntag.title);
 	g_free(ntag.artist);
 	g_free(ntag.album);
 	g_free(ntag.genre);
 	g_free(ntag.comment);	
 }
-
 
 /* Handler for the 'Quit' item in the pragha menu */
 

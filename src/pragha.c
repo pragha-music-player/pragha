@@ -28,8 +28,7 @@ void common_cleanup(struct con_win *cwin)
 	if ((cwin->cstate->state == ST_STOPPED) && (cwin->cstate->curr_mobj_clear))
 		delete_musicobject(cwin->cstate->curr_mobj);
 
-	if ((cwin->cstate->state == ST_PLAYING) || (cwin->cstate->state == ST_PAUSED))
-		stop_playback(cwin);
+	backend_quit(cwin);
 
 	save_preferences(cwin);
 
@@ -68,9 +67,6 @@ void common_cleanup(struct con_win *cwin)
 	g_free(cwin->cpref->lw.lastfm_pass);
 	g_free(cwin->cpref->configrc_file);
 	g_free(cwin->cpref->installed_version);
-	g_free(cwin->cpref->audio_sink);
-	g_free(cwin->cpref->audio_alsa_device);
-	g_free(cwin->cpref->audio_oss_device);
 	g_free(cwin->cpref->album_art_pattern);
 	g_free(cwin->cpref->audio_cd_device);
 	g_free(cwin->cpref->start_mode);
@@ -86,36 +82,12 @@ void common_cleanup(struct con_win *cwin)
 
 	g_rand_free(cwin->cstate->rand);
 	g_free(cwin->cstate->last_folder);
-	g_mutex_free(cwin->cstate->c_mutex);
 
-	/* Hack, hack */
-	if (g_mutex_trylock(cwin->cstate->l_mutex) == TRUE) {
-		g_mutex_unlock(cwin->cstate->l_mutex);
-		g_mutex_free(cwin->cstate->l_mutex);
-	}
-	g_cond_free(cwin->cstate->c_cond);
 	g_slice_free(struct con_state, cwin->cstate);
 
 	g_free(cwin->cdbase->db_file);
 	sqlite3_close(cwin->cdbase->db);
 	g_slice_free(struct con_dbase, cwin->cdbase);
-
-	if (cwin->cstate->audio_init && cwin->cmixer)
-		cwin->cmixer->deinit_mixer(cwin);
-	if (cwin->clibao->ao_dev) {
-		CDEBUG(DBG_INFO, "Freeing ao dev");
-		ao_close(cwin->clibao->ao_dev);
-	}
-	ao_shutdown();
-	g_slice_free(struct con_mixer, cwin->cmixer);
-	g_slice_free(struct con_libao, cwin->clibao);
-
-	g_free(cwin->clastfm->session_id);
-	g_free(cwin->clastfm->submission_url);
-	if (cwin->clastfm->curl_handle)
-		curl_easy_cleanup(cwin->clastfm->curl_handle);
-	curl_global_cleanup();
-	g_slice_free(struct con_lastfm, cwin->clastfm);
 
 	dbus_connection_remove_filter(cwin->con_dbus,
 				      dbus_filter_handler,
@@ -154,7 +126,6 @@ void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 
 gint main(gint argc, gchar *argv[])
 {
-	gint ret = 0;
 	struct con_win *cwin;
 
 	cwin = g_slice_new0(struct con_win);
@@ -162,9 +133,7 @@ gint main(gint argc, gchar *argv[])
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
 	cwin->cdbase = g_slice_new0(struct con_dbase);
-	cwin->cmixer = g_slice_new0(struct con_mixer);
-	cwin->clibao = g_slice_new0(struct con_libao);
-	cwin->clastfm = g_slice_new0(struct con_lastfm);
+	cwin->cgst = g_slice_new0(struct con_gst);
 	debug_level = 0;
 
 	setlocale (LC_ALL, "");
@@ -200,26 +169,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	ret = init_audio(cwin);
-	if (ret == -EINVAL) {
-		g_critical("Unable to init audio");
-		return -1;
-	} else if (ret == -ENODEV) {
-		g_critical("Audio init failed, choose appropriate settings "
-			   "from the preferences.");
-	}
-
-	/* Init libcurl before spawning threads */
-
-	if (init_lastfm(cwin) == -1) {
-		g_critical("Unable to initialize curl");
-	}
-
-	if (init_threads(cwin) == -1) {
-		g_critical("Unable to init threads");
-		return -1;
-	}
-
 	if (init_notify(cwin) == -1) {
 		g_critical("Unable to initialize libnotify");
 		return -1;
@@ -232,6 +181,11 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 	#endif
+
+	if(backend_init(cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
+		return -1;	
+	}
 
 	init_state(cwin);
 

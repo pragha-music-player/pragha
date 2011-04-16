@@ -83,24 +83,8 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (gtk_main_iteration_do(FALSE))
 		return TRUE;
-	if (cwin->cpref->lw.lastfm_support)
-		lastfm_init_thread(cwin);
 
 	return TRUE;
-}
-
-static gint init_audio_mixer(struct con_win *cwin)
-{
-	if (!g_ascii_strcasecmp(ao_driver_info(cwin->clibao->ao_driver_id)->short_name,
-				ALSA_SINK))
-		set_alsa_mixer(cwin, audio_mixer);
-	else if (!g_ascii_strcasecmp(ao_driver_info(cwin->clibao->ao_driver_id)->short_name,
-				     OSS_SINK))
-		set_oss_mixer(cwin, audio_mixer);
-	else
-		return -1;
-
-	return 0;
 }
 
 gint init_dbus(struct con_win *cwin)
@@ -968,150 +952,6 @@ gint init_musicdbase(struct con_win *cwin)
 	return init_dbase_schema(cwin);
 }
 
-/*
- * EINVAL: We bail out.
- * ENODEV: We continue to launch the GUI.
- */
-gint init_audio(struct con_win *cwin)
-{
-	gint id = 0, ret = 0;
-	ao_sample_format format;
-	ao_device *ao_dev;
-	gchar *audio_sink = NULL, *audio_dev = NULL;
-
-	CDEBUG(DBG_INFO, "Initializing audio");
-
-	ao_initialize();
-
-	if (audio_backend) {
-		if (!g_ascii_strcasecmp(audio_backend, ALSA_SINK)) {
-			audio_sink = ALSA_SINK;
-		} else if (!g_ascii_strcasecmp(audio_backend, OSS_SINK)) {
-			audio_sink = OSS_SINK;
-		} else {
-			g_warning("Invalid cmdline audio device: %s",
-				  audio_backend);
-			ao_shutdown();
-			ret = -EINVAL;
-			goto bad1;
-		}
-	}
-
-	if (!audio_sink)
-		audio_sink = cwin->cpref->audio_sink;
-
-	if (!g_ascii_strcasecmp(audio_sink, DEFAULT_SINK))
-		id = ao_default_driver_id();
-	else
-		id = ao_driver_id(audio_sink);
-
-	if (id == -1) {
-		g_critical("%s driver not found",
-			   cwin->cpref->audio_sink);
-		ao_shutdown();
-		ret = -ENODEV;
-		goto bad1;
-	}
-
-	/*
-	 * Decide the user's preferred audio device.
-	 * Handle both the command line option and the preference
-	 * from conrc. Command line option takes precedence over conrc.
-	 */
-
-	if (audio_device) {
-		audio_dev = audio_device;
-	} else {
-		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK)) {
-			if (cwin->cpref->audio_alsa_device)
-				audio_dev = cwin->cpref->audio_alsa_device;
-		} else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK)) {
-			if (cwin->cpref->audio_oss_device)
-				audio_dev = cwin->cpref->audio_oss_device;
-		}
-	}
-
-	cwin->clibao->ao_driver_id = id;
-
-	/* Now append the audio device as a libao option */
-
-	if (audio_dev) {
-		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK)) {
-			ao_append_option(&cwin->clibao->ao_opts, "dev", audio_dev);
-		} else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK)) {
-			ao_append_option(&cwin->clibao->ao_opts, "dsp", audio_dev);
-		} else if (!g_ascii_strcasecmp(audio_sink, DEFAULT_SINK)) {
-			g_critical("Choose a valid audio backend explicitly");
-			ret = -EINVAL;
-			goto bad1;
-		}
-	}
-
-	CDEBUG(DBG_INFO, "Using audio driver: %s (%s) with id: %d",
-	       audio_sink, ao_driver_info(id)->name, id);
-
-	if (audio_dev ) {
-		CDEBUG(DBG_INFO, "Using audio device: %s", audio_dev);
-	}
-
-	/* Check if audio device is accessible */
-
-	format.bits = 16;
-	format.channels = 2;
-	format.rate = 44100;
-	format.byte_format = AO_FMT_LITTLE;
-
-	ao_dev = ao_open_live(id, &format, cwin->clibao->ao_opts);
-
-	if (ao_dev == NULL) {
-		g_critical("Unable to open audio device");
-		ret = -ENODEV;
-		goto bad1;
-	}
-
-	/* Check if user wants software mixer */
-
-	if (cwin->cpref->software_mixer && (audio_mixer == NULL)) {
-		set_soft_mixer(cwin);
-		cwin->cmixer->init_mixer(cwin);
-		goto audio_init;
-	}
-
-	/* If not, try initializing HW mixers */
-
-	if (init_audio_mixer(cwin) == -1) {
-		g_critical("Unable to choose a HW audio mixer");
-		set_soft_mixer(cwin);
-	}
-
-	if (cwin->cmixer->init_mixer(cwin) == -1) {
-		ret = -ENODEV;
-		goto bad2;
-	}
-
-audio_init:
-	cwin->cstate->audio_init = true;
-bad2:
-	ao_close(ao_dev);
-bad1:
-	return ret;
-}
-
-gint init_threads(struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Initializing threads");
-
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-	gdk_threads_init();
-	cwin->cstate->c_thread = NULL;
-	cwin->cstate->c_mutex = g_mutex_new();
-	cwin->cstate->l_mutex = g_mutex_new();
-	cwin->cstate->c_cond = g_cond_new();
-
-	return 0;
-}
-
 gint init_notify(struct con_win *cwin)
 {
 	if (cwin->cpref->show_osd) {
@@ -1137,27 +977,6 @@ gint init_keybinder(struct con_win *cwin)
 	return 0;
 }
 #endif
-
-gint init_lastfm(struct con_win *cwin)
-{
-	gint ret = 0;
-
-	CDEBUG(DBG_INFO, "Initializing libcurl");
-
-	ret = curl_global_init(CURL_GLOBAL_ALL);
-	if (ret) {
-		g_critical("Unable to init curl: %d\n", ret);
-		return -1;
-	}
-
-	cwin->clastfm->curl_handle = curl_easy_init();
-	if (!cwin->clastfm->curl_handle) {
-		g_critical("Unable to setup curl handle");
-		return -1;
-	}
-
-	return 0;
-}
 
 void init_state(struct con_win *cwin)
 {

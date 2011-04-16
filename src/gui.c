@@ -890,6 +890,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_tree_view_column_add_attribute (column, renderer, "markup", P_QUEUE);
 	gtk_tree_view_column_add_attribute (column, renderer, "show-bubble", P_BUBBLE);
+	gtk_tree_view_column_add_attribute (column, renderer, "background", PL_COLOR_COL);
 	gtk_tree_view_column_set_resizable(column, FALSE);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
 
@@ -902,7 +903,17 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_TRACK_NO,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
+	/*column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							   renderer,
+							   "text",
+							   P_TRACK_NO,
+							  "background",
+							  PL_COLOR_COL,
+							  NULL);*/
+
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -922,6 +933,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_TITLE,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
@@ -942,6 +955,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_ARTIST,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
@@ -962,6 +977,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_ALBUM,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
@@ -982,6 +999,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_GENRE,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
@@ -1002,6 +1021,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_BITRATE,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
@@ -1022,6 +1043,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_YEAR,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
@@ -1042,6 +1065,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_COMMENT,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
@@ -1062,6 +1087,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_LENGTH,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
@@ -1081,6 +1108,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  renderer,
 							  "text",
 							  P_FILENAME,
+							  "background",
+							  PL_COLOR_COL,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
@@ -1116,6 +1145,7 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 				   G_TYPE_POINTER,	/* Pointer to musicobject */
 				   G_TYPE_STRING,	/* Queue No String */
 				   G_TYPE_BOOLEAN,	/* Show Bublle Queue */
+				   G_TYPE_STRING,	/* Color */
 				   G_TYPE_STRING,	/* Tag : Track No */
 				   G_TYPE_STRING,	/* Tag : Title */
 				   G_TYPE_STRING,	/* Tag : Artist */
@@ -1565,8 +1595,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	/* Initial state of various widgets from stored preferences */
 
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(vol_button),
-				   SCALE_UP_VOL(cwin->cmixer->curr_vol));
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(vol_button), 50);
 
 	/* References to widgets */
 
@@ -1604,7 +1633,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	if (cwin->cpref->show_album_art) {
 		album_art_frame = gtk_frame_new(NULL);
-		gtk_frame_set_shadow_type (GTK_FRAME(album_art_frame),GTK_SHADOW_NONE);
+		gtk_frame_set_shadow_type (GTK_FRAME(album_art_frame), GTK_SHADOW_NONE);
 		gtk_box_pack_end(GTK_BOX(hbox_panel),
 				   GTK_WIDGET(album_art_frame),
 				   FALSE, FALSE, 0);

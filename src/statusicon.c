@@ -231,18 +231,20 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 	if (event->type != GDK_SCROLL)
 		return;
 
+	cwin->cgst->curr_vol = backend_get_volume (cwin);
+
 	switch (event->direction){
 		case GDK_SCROLL_UP:
-			cwin->cmixer->inc_volume(cwin);
+			cwin->cgst->curr_vol += 2;
 			break;
 		case GDK_SCROLL_DOWN:
-			cwin->cmixer->dec_volume(cwin);
+			cwin->cgst->curr_vol -= 2;
 			break;
 		default:
 			return;
 	}
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button),
-						cwin->cmixer->curr_vol);
+						cwin->cgst->curr_vol);
 	return;
 }
 
@@ -253,7 +255,7 @@ void systray_play(GtkAction *action, struct con_win *cwin)
 
 void systray_stop(GtkAction *action, struct con_win *cwin)
 {
-	stop_playback(cwin);
+	backend_stop(cwin);
 }
 
 void systray_pause(GtkAction *action, struct con_win *cwin)

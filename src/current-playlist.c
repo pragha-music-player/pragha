@@ -19,6 +19,8 @@
 #include <string.h>
 #include "pragha.h"
 
+#define GLOW_COLOR	"#A9D0F5"
+
 /*********************/
 /* General functions */
 /*********************/
@@ -116,42 +118,6 @@ static gboolean is_current_rand_ref(GtkTreeRowReference *ref, struct con_win *cw
 		return FALSE;
 }
 
-/* Print title of track ref */
-
-/*static void print_track_ref(GtkTreeRowReference *ref, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	struct musicobject *mobj = NULL;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	path = gtk_tree_row_reference_get_path(ref);
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-	if (mobj)
-		g_print("Track title from ref : %s at %p\n", mobj->tags->title, ref);
-
-	gtk_tree_path_free(path);
-}*/
-
-/* Print title of all nodes in cstate->rand_track_refs */
-
-/*static void print_all_rand_track_refs(struct con_win *cwin)
-{
-	GList *list;
-
-	if (cwin->cstate->rand_track_refs) {
-		list = cwin->cstate->rand_track_refs;
-		while (list) {
-			print_track_ref(list->data, cwin);
-			list = list->next;
-		}
-	}
-}*/
-
 void requeue_track_refs (struct con_win *cwin)
 {
 	GSList *list = NULL;
@@ -172,6 +138,9 @@ void requeue_track_refs (struct con_win *cwin)
 			ch_queue_no = g_strdup_printf("%d", ++i);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, ch_queue_no, -1);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, TRUE, -1);
+
+			gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, GLOW_COLOR, -1);
+
 			g_free(ch_queue_no);
 		}
 		gtk_tree_path_free(lpath);
@@ -202,6 +171,8 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, FALSE, -1);
+
+				gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, NULL, -1);
 			}
 			gtk_tree_path_free(lpath);
 			list = list->next;
@@ -721,7 +692,7 @@ static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt *choice
 /* Update the state on 'Next', 'Prev' or selecting a new track
    from current playlist */
 	
-void update_current_state(GThread *thread, GtkTreePath *path,
+void update_current_state(GtkTreePath *path,
 			  enum playlist_action action, struct con_win *cwin)
 {
 	GtkTreeRowReference *rand_ref;
@@ -735,9 +706,7 @@ void update_current_state(GThread *thread, GtkTreePath *path,
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 
-	CDEBUG(DBG_VERBOSE, "Updating c_thread with new thread: %p", thread);
-
-	cwin->cstate->c_thread = thread;
+	CDEBUG(DBG_VERBOSE, "Update the state from current playlist");
 
 	/* Update view */
 
@@ -791,48 +760,43 @@ void update_current_state(GThread *thread, GtkTreePath *path,
 
 	if (cwin->cpref->shuffle) {
 		switch (action) {
-
 			/* If 'Prev', get the previous node from the track references */
-
-		case PLAYLIST_PREV:
-			if (cwin->cstate->curr_rand_ref) {
-				cwin->cstate->curr_rand_ref =
-					get_rand_ref_prev(cwin->cstate->curr_rand_ref,
-							  cwin);
-			}
+			case PLAYLIST_PREV:
+				if (cwin->cstate->curr_rand_ref) {
+					cwin->cstate->curr_rand_ref =
+						get_rand_ref_prev(cwin->cstate->curr_rand_ref,
+								  cwin);
+				}
 			break;
 
 			/* If 'Next', get the next node from the track references */
 			/* Do this only if the current track and the
 			   last node don't match */
-
-		case PLAYLIST_NEXT:
-			if (cwin->cstate->curr_rand_ref) {
-				if (cwin->cstate->curr_rand_ref !=
-				    (g_list_last(cwin->cstate->rand_track_refs)->data)) {
-					cwin->cstate->curr_rand_ref =
-						get_rand_ref_next(cwin->cstate->curr_rand_ref,
-								  cwin);
-					break;
+			case PLAYLIST_NEXT:
+				if (cwin->cstate->curr_rand_ref) {
+					if (cwin->cstate->curr_rand_ref !=
+					    (g_list_last(cwin->cstate->rand_track_refs)->data)) {
+						cwin->cstate->curr_rand_ref =
+							get_rand_ref_next(cwin->cstate->curr_rand_ref,
+									  cwin);
+						break;
+					}
 				}
-			}
 
 			/* Append a new ref of the track to the track references */
-
-		case PLAYLIST_CURR:
-			rand_ref = gtk_tree_row_reference_new(model, path);
-			cwin->cstate->rand_track_refs =
-				g_list_append(cwin->cstate->rand_track_refs,
-					      rand_ref);
-			cwin->cstate->curr_rand_ref = rand_ref;
-			break;
-		default:
-			break;
+			case PLAYLIST_CURR:
+				rand_ref = gtk_tree_row_reference_new(model, path);
+				cwin->cstate->rand_track_refs =
+					g_list_append(cwin->cstate->rand_track_refs,
+						      rand_ref);
+				cwin->cstate->curr_rand_ref = rand_ref;
+				break;
+			default:
+				break;
 		}
 	}
 
 	/* Mark the track as dirty */
-
 	current_playlist_set_dirty_track(path, cwin);
 	if (cwin->cstate->unplayed_tracks)
 		cwin->cstate->unplayed_tracks--;
@@ -1542,7 +1506,6 @@ void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkT
 
 	ch_filename = get_display_name(mobj);
 
-
 	if (drop_after)
 		gtk_list_store_insert_after(GTK_LIST_STORE(model), &iter, pos);
 	else
@@ -1552,6 +1515,7 @@ void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkT
 			   P_MOBJ_PTR, mobj,
 			   P_QUEUE, NULL,
 			   P_BUBBLE, FALSE, 
+			   PL_COLOR_COL, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1609,12 +1573,12 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 
 	ch_filename = get_display_name(mobj);
 
-
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
 			   P_QUEUE, NULL,
 			   P_BUBBLE, FALSE, 
+			   PL_COLOR_COL, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1746,7 +1710,6 @@ void play_first_current_playlist(struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	struct musicobject *mobj;
-	GThread *thread;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -1754,15 +1717,13 @@ void play_first_current_playlist(struct con_win *cwin)
 
 	if (gtk_tree_model_get_iter_first(model, &iter)) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		thread = start_playback(mobj, cwin);
-		if (!thread)
-			g_critical("Unable to create thread for playback");
-		else {
-			clear_rand_track_refs(cwin);
-			path = gtk_tree_model_get_path(model, &iter);
-			update_current_state(thread, path, PLAYLIST_CURR, cwin);
-			gtk_tree_path_free(path);
-		}
+
+		backend_start(mobj, cwin);
+
+		clear_rand_track_refs(cwin);
+		path = gtk_tree_model_get_path(model, &iter);
+		update_current_state( path, PLAYLIST_CURR, cwin);
+		gtk_tree_path_free(path);
 	}
 }
 
@@ -1772,31 +1733,22 @@ void play_prev_track(struct con_win *cwin)
 {
 	GtkTreePath *path;
 	struct musicobject *mobj = NULL;
-	GThread *thread;
 
 	/* Get the next (prev) track to be played */
-
 	path = current_playlist_get_prev(cwin);
 
 	/* No more tracks */
-
 	if (!path)
 		return;
 
 	/* Stop currently playing track */
-
-	stop_playback(cwin);
+	backend_stop(cwin);
 
 	/* Start playing new track */
-
 	mobj = current_playlist_mobj_at_path(path, cwin);
-
-	thread = start_playback(mobj, cwin);
-	if (!thread)
-		g_critical("Unable to create playback thread");
-	else
-		update_current_state(thread, path, PLAYLIST_PREV, cwin);
-
+	backend_start(mobj, cwin);
+ 
+	update_current_state(path, PLAYLIST_PREV, cwin);
 	gtk_tree_path_free(path);
 }
 
@@ -1806,31 +1758,22 @@ void play_next_track(struct con_win *cwin)
 {
 	GtkTreePath *path;
 	struct musicobject *mobj = NULL;
-	GThread *thread;
 
 	/* Get the next track to be played */
-
 	path = current_playlist_get_next(cwin);
 
 	/* No more tracks */
-
 	if (!path)
 		return;
 
 	/* Stop currently playing track */
-
-	stop_playback(cwin);
+	backend_stop(cwin);
 
 	/* Start playing new track */
-
 	mobj = current_playlist_mobj_at_path(path, cwin);
+	backend_start(mobj, cwin);
 
-	thread = start_playback(mobj, cwin);
-	if (!thread)
-		g_critical("Unable to create playback thread");
-	else
-		update_current_state(thread, path, PLAYLIST_NEXT, cwin);
-
+	update_current_state(path, PLAYLIST_NEXT, cwin);
 	gtk_tree_path_free(path);
 }
 
@@ -1839,7 +1782,6 @@ void play_next_track(struct con_win *cwin)
 void play_track(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
-	GThread *thread;
 	GtkTreePath *path = NULL;
 
 	/* New action is based on the current state */
@@ -1861,43 +1803,34 @@ void play_track(struct con_win *cwin)
 
 		if (path) {
 			mobj = new_musicobject_from_file(cwin->cstate->curr_mobj->file);
-			thread = start_playback(mobj, cwin);
-			if (!thread)
-				g_critical("Unable to create playback thread");
-			else {
-				update_current_state(thread, path, PLAYLIST_CURR, cwin);
-			}
+			backend_start(mobj, cwin);
+
+			update_current_state(path, PLAYLIST_CURR, cwin);
 			gtk_tree_path_free(path);
 		}
 		break;
 	case ST_PAUSED:
-		resume_playback(cwin);
+		backend_resume(cwin);
 		break;
 	case ST_STOPPED:
 		if(cwin->cstate->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if(!path)
 			path = current_playlist_get_selection(cwin);
-		if(!path){
+		if(!path) {
 			play_first_current_playlist(cwin);
 			break;
 		}
 
 		mobj = current_playlist_mobj_at_path(path, cwin);
+		backend_start(mobj, cwin);
 
-		thread = start_playback(mobj, cwin);
-		if (!thread)
-			g_critical("Unable to create playback thread");
-		else {
-			clear_rand_track_refs(cwin);
-			current_playlist_clear_dirty_all(cwin);
-			cwin->cstate->unplayed_tracks =
-				cwin->cstate->tracks_curr_playlist;
-			update_current_state(thread, path, PLAYLIST_CURR, cwin);
-		}
+		clear_rand_track_refs(cwin);
+		current_playlist_clear_dirty_all(cwin);
+		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+		update_current_state(path, PLAYLIST_CURR, cwin);
 		gtk_tree_path_free(path);
 		break;
-
 	default:
 		break;
 	}
@@ -1909,10 +1842,10 @@ void pause_resume_track(struct con_win *cwin)
 {
 	switch(cwin->cstate->state) {
 	case ST_PAUSED:
-		resume_playback(cwin);
+		backend_resume(cwin);
 		break;
 	case ST_PLAYING:
-		pause_playback(cwin);
+		backend_pause(cwin);
 		break;
 	default:
 		break;
@@ -1933,22 +1866,19 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	struct musicobject *mobj;
-	GThread *thread;
+
+	backend_stop(cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-	thread = start_playback(mobj, cwin);
+	backend_start(mobj, cwin);
 
-	if (!thread)
-		g_critical("Unable to create thread for playback");
-	else {
-		clear_rand_track_refs(cwin);
-		current_playlist_clear_dirty_all(cwin);
-		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-		update_current_state(thread, path, PLAYLIST_CURR, cwin);
-	}
+	clear_rand_track_refs(cwin);
+	current_playlist_clear_dirty_all(cwin);
+	cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+	update_current_state(path, PLAYLIST_CURR, cwin);
 }
 
 /* Handler for current playlist click */
@@ -2575,7 +2505,7 @@ void playlist_track_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_TRACK_NO - 2);
+				       P_TRACK_NO - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2597,7 +2527,7 @@ void playlist_title_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_TITLE - 2);
+				       P_TITLE - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2619,7 +2549,7 @@ void playlist_artist_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_ARTIST - 2);
+				       P_ARTIST - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2641,7 +2571,7 @@ void playlist_album_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_ALBUM - 2);
+				       P_ALBUM - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2663,7 +2593,7 @@ void playlist_genre_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_GENRE - 2);
+				       P_GENRE - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2685,7 +2615,7 @@ void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, struct con_win *c
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_BITRATE - 2);
+				       P_BITRATE - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2707,7 +2637,7 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_YEAR - 2);
+				       P_YEAR - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2729,7 +2659,7 @@ void playlist_comment_column_change_cb(GtkCheckMenuItem *item, struct con_win *c
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_COMMENT - 2);
+				       P_COMMENT - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2751,7 +2681,7 @@ void playlist_length_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_LENGTH - 2);
+				       P_LENGTH - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2773,7 +2703,7 @@ void playlist_filename_column_change_cb(GtkCheckMenuItem *item, struct con_win *
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_FILENAME - 2);
+				       P_FILENAME - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");

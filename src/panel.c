@@ -152,7 +152,7 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), (const gchar*)str_cur_pos);
 
-	if(!cwin->cpref->timer_remaining_mode){
+	if(cwin->cstate->curr_mobj->tags->length == 0 || !cwin->cpref->timer_remaining_mode){
 		tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
 		str_length = g_markup_printf_escaped ("<small>%s</small>", tot_length);
 	}
@@ -180,31 +180,26 @@ void __update_current_song_info(struct con_win *cwin)
 		return;
 	}
 
-	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
 		str_title = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
 		str_title = get_display_filename(cwin->cstate->curr_mobj->file, FALSE);
 
-	if (cwin->cstate->curr_mobj->file_type == FILE_CDDA){
-		str = g_markup_printf_escaped ("%s", str_title);
-	}
-	else{
-		if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
-		 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
-							str_title ,
-							cwin->cstate->curr_mobj->tags->artist, 
-							cwin->cstate->curr_mobj->tags->album);
-		else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
-							str_title ,
-							cwin->cstate->curr_mobj->tags->artist);
-		else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-			str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
-							str_title ,
-							cwin->cstate->curr_mobj->tags->album);
-		else	str = g_markup_printf_escaped ("%s", str_title);
-	}
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
+	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
+						str_title ,
+						cwin->cstate->curr_mobj->tags->artist, 
+						cwin->cstate->curr_mobj->tags->album);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
+						str_title ,
+						cwin->cstate->curr_mobj->tags->artist);
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
+						str_title ,
+						cwin->cstate->curr_mobj->tags->album);
+	else	str = g_markup_printf_escaped ("%s", str_title);
 
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), (const gchar*)str);
 
@@ -218,15 +213,23 @@ void unset_current_song_info(struct con_win *cwin)
 				  _("<b>Not playing</b>"));
 	gtk_label_set_markup(GTK_LABEL(cwin->track_length_label),"<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label),"<small>00:00</small>");
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), 0);
 }
 
 void __update_track_progress_bar(struct con_win *cwin, gint length)
 {
 	gdouble fraction = 0;
 
-	fraction = (gdouble)length / (gdouble)cwin->cstate->curr_mobj->tags->length;
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar),
-				      fraction);
+	if(cwin->cstate->curr_mobj->tags->length == 0) {
+		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(backend_get_current_length(cwin));
+	}
+	else {
+		fraction = (gdouble)length / (gdouble)cwin->cstate->curr_mobj->tags->length;
+
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar),
+					      fraction);
+	}
 }
 
 void unset_track_progress_bar(struct con_win *cwin)
@@ -241,7 +244,7 @@ void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con
 	else
 		cwin->cpref->timer_remaining_mode = TRUE;
 	if(cwin->cstate->state != ST_STOPPED)
-		__update_progress_song_info(cwin, cwin->cstate->newsec);
+		update_current_song_info(cwin);
 }
 
 void track_progress_change_cb(GtkWidget *widget,
@@ -249,7 +252,6 @@ void track_progress_change_cb(GtkWidget *widget,
 			      struct con_win *cwin)
 {
 	gint seek = 0;
-	gdouble fraction = 0;
 
 	if (event->button != 1)
 		return;
@@ -257,15 +259,14 @@ void track_progress_change_cb(GtkWidget *widget,
 	if (cwin->cstate->state != ST_PLAYING)
 		return;
 
-	if (!cwin->cstate->curr_mobj)
+	if (!cwin->cstate->curr_mobj || cwin->cstate->curr_mobj->tags->length == 0)
 		return;
 
-	fraction = event->x / widget->allocation.width;
 	seek = (cwin->cstate->curr_mobj->tags->length * event->x) / widget->allocation.width;
 	if (seek >= cwin->cstate->curr_mobj->tags->length)
 		seek = cwin->cstate->curr_mobj->tags->length;
 
-	seek_playback(cwin, seek, fraction);
+	backend_seek(seek, cwin);
 }
 
 void update_album_art(struct musicobject *mobj, struct con_win *cwin)
@@ -430,7 +431,6 @@ void play_button_handler(GtkButton *button, struct con_win *cwin)
 void play_pause_resume(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
-	GThread *thread;
 	GtkTreePath *path=NULL;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
@@ -447,10 +447,10 @@ void play_pause_resume(struct con_win *cwin)
 
 	switch (cwin->cstate->state) {
 	case ST_PLAYING:
-		pause_playback(cwin);
+		backend_pause(cwin);
 		break;
 	case ST_PAUSED:
-		resume_playback(cwin);
+		backend_resume(cwin);
 		break;
 	case ST_STOPPED:
 		if(cwin->cstate->queue_track_refs)
@@ -469,11 +469,9 @@ void play_pause_resume(struct con_win *cwin)
 		}
 
 		mobj = current_playlist_mobj_at_path(path, cwin);
-		thread = start_playback(mobj, cwin);
-		if (!thread)
-			g_critical("Unable to create playback thread");
-		else
-			update_current_state(thread, path, PLAYLIST_CURR, cwin);
+
+		backend_start(mobj, cwin);
+		update_current_state(path, PLAYLIST_CURR, cwin);
 
 		gtk_tree_path_free(path);
 		break;
@@ -485,12 +483,12 @@ void play_pause_resume(struct con_win *cwin)
 void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	stop_playback(cwin);
+	backend_stop(cwin);
 }
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	stop_playback(cwin);
+	backend_stop(cwin);
 }
 
 void keybind_prev_handler (const char *keystring, gpointer data)
@@ -564,13 +562,11 @@ void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
 	g_signal_handlers_unblock_by_func (cwin->toggle_lib, toggled_cb, cwin);
 	g_signal_handlers_unblock_by_func (cwin->toggle_playlists, toggled_cb, cwin);
 }
+
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
-	if (!cwin->cstate->audio_init)
-		return;
-
-	cwin->cmixer->curr_vol = value;
-	cwin->cmixer->set_volume(cwin);
+	cwin->cgst->curr_vol = value;
+	backend_update_volume(cwin);
 }
 
 void play_button_toggle_state(struct con_win *cwin)

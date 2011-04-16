@@ -54,7 +54,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	case GTK_RESPONSE_CANCEL:
 		break;
 	case GTK_RESPONSE_OK:
-
 		/* Audio preferences */
 		audio_sink =
 			gtk_combo_box_get_active_text(GTK_COMBO_BOX(
@@ -70,7 +69,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			g_free(cwin->cpref->audio_alsa_device);
 			cwin->cpref->audio_alsa_device = g_strdup(audio_alsa_device);
 			g_free(audio_alsa_device);
-		} else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
+		}
+		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
 			audio_oss_device = gtk_combo_box_get_active_text(GTK_COMBO_BOX(
 							 cwin->cpref->audio_device_w));
 			g_free(cwin->cpref->audio_oss_device);
@@ -88,6 +88,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		cwin->cpref->software_mixer =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->soft_mixer_w));
+		backend_set_soft_volume(cwin);
 
 		/* Library Preferences */
 
@@ -235,7 +236,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
 		}
-		lastfm_init_thread(cwin);
 
 		cwin->cpref->use_cddb =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -400,91 +400,23 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 
 static void update_audio_device_alsa(struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GSList *devices, *l;
-	gint cnt, i;
-	gint active = 0;
-
-	devices = alsa_pcm_devices(cwin);
-	if (devices == NULL)
-		return;
-
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(
-					cwin->cpref->audio_device_w));
-	gtk_list_store_clear(GTK_LIST_STORE(model));
-
-	cnt = g_slist_length(devices);
-	l = devices;
-
-	/* Append 'default' device first */
-	gtk_combo_box_append_text(GTK_COMBO_BOX(
-				  cwin->cpref->audio_device_w),
-				  ALSA_DEFAULT_DEVICE);
-
-	/* Now append the obtained devices */
-	for (i = 0; i < cnt; i++) {
-		gtk_combo_box_append_text(GTK_COMBO_BOX(
-					  cwin->cpref->audio_device_w),
-					  l->data);
-		l = l->next;
-	}
-
-	/* Set the active entry */
-
-	l = devices;
-	if (cwin->cpref->audio_alsa_device) {
-		for (i = 1; i <= cnt; i++) {
-			if (!g_ascii_strcasecmp(cwin->cpref->audio_alsa_device,
-						ALSA_DEFAULT_DEVICE))
-				goto set_active;
-
-			if (!g_ascii_strcasecmp(cwin->cpref->audio_alsa_device,
-						l->data)) {
-				active = i;
-				goto set_active;
-			}
-			l = l->next;
-		}
-		gtk_combo_box_insert_text(GTK_COMBO_BOX(
-					  cwin->cpref->audio_device_w),
-					  0, cwin->cpref->audio_alsa_device);
-	}
-
-set_active:
-	gtk_combo_box_set_active(GTK_COMBO_BOX(
-				 cwin->cpref->audio_device_w),
-				 active);
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);
-
-	free_str_list(devices);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->audio_device_w), FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, TRUE);
 }
 
 static void update_audio_device_oss(struct con_win *cwin)
 {
-	GtkTreeModel *model;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->audio_device_w), FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, TRUE);
+}
 
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(
-					cwin->cpref->audio_device_w));
-	gtk_list_store_clear(GTK_LIST_STORE(model));
-
-	/* Append 'default' device */
-	gtk_combo_box_append_text(GTK_COMBO_BOX(
-				  cwin->cpref->audio_device_w),
-				  OSS_DEFAULT_DEVICE);
-
-	if (cwin->cpref->audio_oss_device) {
-		if (g_ascii_strcasecmp(cwin->cpref->audio_oss_device,
-				       OSS_DEFAULT_DEVICE)) {
-			gtk_combo_box_insert_text(GTK_COMBO_BOX(
-						  cwin->cpref->audio_device_w),
-						  0, cwin->cpref->audio_oss_device);
-		}
-	}
-
-	gtk_combo_box_set_active(GTK_COMBO_BOX(
-				 cwin->cpref->audio_device_w),
-				 0);
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);
+static void update_audio_device_pulse(struct con_win *cwin)
+{
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->audio_device_w), FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
 }
 
 static void update_audio_device_default(struct con_win *cwin)
@@ -504,6 +436,7 @@ static void update_audio_device_default(struct con_win *cwin)
 				 0);
 
 	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
 }
 
 /* The enumerated audio devices have to be changed here */
@@ -520,6 +453,8 @@ static void change_audio_sink(GtkComboBox *combo, gpointer udata)
 		update_audio_device_alsa(cwin);
 	else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
 		update_audio_device_oss(cwin);
+	else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
+		update_audio_device_pulse(cwin);
 	else
 		update_audio_device_default(cwin);
 
@@ -537,11 +472,7 @@ static void update_preferences(struct con_win *cwin)
 	/* Audio Options */
 
 	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, DEFAULT_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
-						 0);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->cpref->audio_sink_combo_w),
 						 1);
@@ -549,15 +480,25 @@ static void update_preferences(struct con_win *cwin)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->cpref->audio_sink_combo_w),
 						 2);
+		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+			gtk_combo_box_set_active(GTK_COMBO_BOX(
+						 cwin->cpref->audio_sink_combo_w),
+						 3);
+		else
+			gtk_combo_box_set_active(GTK_COMBO_BOX(
+						 cwin->cpref->audio_sink_combo_w),
+						 0);
 	}
 
 	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, DEFAULT_SINK))
-			update_audio_device_default(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
 			update_audio_device_alsa(cwin);
 		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
 			update_audio_device_oss(cwin);
+		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+			update_audio_device_pulse(cwin);
+		else
+			update_audio_device_default(cwin);
 	}
 
 	if (cwin->cpref->audio_cd_device)
@@ -662,6 +603,8 @@ static void update_preferences(struct con_win *cwin)
 					     TRUE);
 
 	/* Service Internet Option */
+
+	cwin->cpref->lw.lastfm_support = FALSE;
 
 	if (cwin->cpref->lw.lastfm_support) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
@@ -1094,7 +1037,7 @@ void save_preferences(struct con_win *cwin)
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
-				       cwin->cmixer->curr_vol);
+				       50);
 	}
 
 	/* Save audio CD Device */
@@ -1427,11 +1370,13 @@ void preferences_dialog(struct con_win *cwin)
 				    _("Restart Required"));
 
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
-				  DEFAULT_SINK);
+				  _("Select automatically"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  ALSA_SINK);
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  OSS_SINK);
+	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+				  PULSE_SINK);
 
 	sink_label = gtk_label_new(_("Audio sink"));
 	hbox_sink = gtk_hbox_new(FALSE, 2);
@@ -1700,6 +1645,9 @@ void preferences_dialog(struct con_win *cwin)
 	/* Services Last.fm */
 
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
+
+	gtk_widget_set_sensitive(lastfm_check, FALSE);
+
 	lastfm_uname = gtk_entry_new();
 	lastfm_pass = gtk_entry_new();
 	lastfm_ulabel = gtk_label_new(_("Username"));

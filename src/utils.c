@@ -20,13 +20,26 @@
 #include <fcntl.h>
 #include "pragha.h"
 
-const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
-const gchar *mime_wav[] = {"audio/x-wav", NULL};
 const gchar *mime_flac[] = {"audio/x-flac", NULL};
-const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg",
-			   "application/ogg", NULL};
-const gchar *mime_modplug[] = {"audio/x-mod", "audio/x-xm", NULL};
+const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
+const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", NULL};
+const gchar *mime_wav[] = {"audio/x-wav", NULL};
+
+#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", NULL};
+#endif
+#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
+#endif
+
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
+
+/*static gchar *asf_exts[] = { "asf", "wm", "wma", "wmv", NULL };
+static gchar *flac_exts[] = { "flac", NULL };
+static gchar *m4a_exts[] = { "m4a", NULL };
+static gchar *mp3_exts[] = { "mp3", "mp2", "mp1", "mpga", NULL };
+static gchar *ogg_exts[] = { "anx", "ogg", "ogm", NULL };
+static gchar *wav_exts[] = { "wav", NULL };*/
 
 /* Accepts only absolute filename */
 
@@ -157,30 +170,46 @@ static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
 enum file_type get_file_type(gchar *file)
 {
 	gint ret = -1;
-	gboolean uncertain;
 	gchar *result = NULL;
 
 	if (!file)
 		return -1;
 
-	result = g_content_type_guess((const gchar *)file, NULL, 0, &uncertain);
+	result = get_mime_type(file);
 
 	if (result) {
-		if (is_valid_mime(result, mime_wav))
-			ret = FILE_WAV;
+		if(is_valid_mime(result, mime_flac))
+			ret = FILE_FLAC;
 		else if(is_valid_mime(result, mime_mpeg))
 			ret = FILE_MP3;
-		else if(is_valid_mime(result, mime_flac))
-			ret = FILE_FLAC;
 		else if(is_valid_mime(result, mime_ogg))
 			ret = FILE_OGGVORBIS;
-		else if(is_valid_mime(result, mime_modplug))
-			ret = FILE_MODPLUG;
+		else if (is_valid_mime(result, mime_wav))
+			ret = FILE_WAV;
+		#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+		else if (is_valid_mime(result, mime_asf))
+			ret = FILE_ASF;
+		#endif
+		#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+		else if (is_valid_mime(result, mime_mp4))
+			ret = FILE_MP4;
+		#endif
+
 		else ret = -1;
 	}
 
 	g_free(result);
 	return ret;
+}
+
+gchar* get_mime_type(gchar *file)
+{
+	gboolean uncertain;
+	gchar *result = NULL;
+
+	result = g_content_type_guess((const gchar *)file, NULL, 0, &uncertain);
+
+	return result;
 }
 
 /* Return true if given file is an image */

@@ -65,15 +65,25 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 			g_critical("OGG Info failed");
 			goto bad;
 		}
-		break;
-	case FILE_MODPLUG:
-		if (get_mod_info(file, mobj->tags))
-			mobj->file_type = FILE_MODPLUG;
+	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+	case FILE_ASF:
+		if (get_asf_info(file, mobj->tags))
+			mobj->file_type = FILE_ASF;
 		else {
-			g_critical("MOD Info failed");
+			g_critical("ASF Info failed");
+			goto bad;
+		}
+	#endif
+	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+	case FILE_MP4:
+		if (get_mp4_info(file, mobj->tags))
+			mobj->file_type = FILE_MP4;
+		else {
+			g_critical("MP4 Info failed");
 			goto bad;
 		}
 		break;
+	#endif
 	default:
 		break;
 	}

@@ -31,6 +31,4 @@ struct con_cdda_decoder {
 	gint end;
 };
 
-void play_cdda(struct con_win *cwin);
-
 #endif /* CDDA_H */

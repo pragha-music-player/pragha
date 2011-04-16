@@ -47,22 +47,17 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_pragha_OBJECTS = pragha-pragha.$(OBJEXT) pragha-init.$(OBJEXT) \
-	pragha-gui.$(OBJEXT) pragha-menu.$(OBJEXT) \
-	pragha-utils.$(OBJEXT) pragha-musicobject.$(OBJEXT) \
-	pragha-db.$(OBJEXT) pragha-librarytree.$(OBJEXT) \
-	pragha-panel.$(OBJEXT) pragha-filetree.$(OBJEXT) \
-	pragha-current_playlist.$(OBJEXT) pragha-tags.$(OBJEXT) \
-	pragha-playback_mp3.$(OBJEXT) pragha-playback_wav.$(OBJEXT) \
-	pragha-playback_flac.$(OBJEXT) \
-	pragha-playback_oggvorbis.$(OBJEXT) \
-	pragha-playback_modplug.$(OBJEXT) \
-	pragha-playback_cdda.$(OBJEXT) pragha-pref.$(OBJEXT) \
-	pragha-threads.$(OBJEXT) pragha-audio.$(OBJEXT) \
-	pragha-statusicon.$(OBJEXT) pragha-cmdline.$(OBJEXT) \
-	pragha-dbus.$(OBJEXT) pragha-playlist.$(OBJEXT) \
-	pragha-md5.$(OBJEXT) pragha-lastfm.$(OBJEXT) \
-	pragha-gtkcellrendererbubble.$(OBJEXT) pragha-bind.$(OBJEXT)
+am_pragha_OBJECTS = pragha-bind.$(OBJEXT) pragha-cdda.$(OBJEXT) \
+	pragha-cmdline.$(OBJEXT) pragha-current-playlist.$(OBJEXT) \
+	pragha-db.$(OBJEXT) pragha-dbus.$(OBJEXT) \
+	pragha-filetree.$(OBJEXT) \
+	pragha-gtkcellrendererbubble.$(OBJEXT) pragha-gui.$(OBJEXT) \
+	pragha-init.$(OBJEXT) pragha-librarytree.$(OBJEXT) \
+	pragha-menu.$(OBJEXT) pragha-musicobject.$(OBJEXT) \
+	pragha-panel.$(OBJEXT) pragha-playlist.$(OBJEXT) \
+	pragha-pragha.$(OBJEXT) pragha-pragha-backend.$(OBJEXT) \
+	pragha-pref.$(OBJEXT) pragha-statusicon.$(OBJEXT) \
+	pragha-tags.$(OBJEXT) pragha-utils.$(OBJEXT)
 pragha_OBJECTS = $(am_pragha_OBJECTS)
 pragha_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -103,16 +98,8 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-ALSA_CFLAGS = @ALSA_CFLAGS@
-ALSA_LIBS = @ALSA_LIBS@
-ALSA_REQUIRED_VERSION = @ALSA_REQUIRED_VERSION@
-ALSA_VERSION = @ALSA_VERSION@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AO_CFLAGS = @AO_CFLAGS@
-AO_LIBS = @AO_LIBS@
-AO_REQUIRED_VERSION = @AO_REQUIRED_VERSION@
-AO_VERSION = @AO_VERSION@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -141,10 +128,6 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
-FLAC_CFLAGS = @FLAC_CFLAGS@
-FLAC_LIBS = @FLAC_LIBS@
-FLAC_REQUIRED_VERSION = @FLAC_REQUIRED_VERSION@
-FLAC_VERSION = @FLAC_VERSION@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GIO_CFLAGS = @GIO_CFLAGS@
 GIO_LIBS = @GIO_LIBS@
@@ -153,10 +136,10 @@ GIO_VERSION = @GIO_VERSION@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
-GTHREAD_CFLAGS = @GTHREAD_CFLAGS@
-GTHREAD_LIBS = @GTHREAD_LIBS@
-GTHREAD_REQUIRED_VERSION = @GTHREAD_REQUIRED_VERSION@
-GTHREAD_VERSION = @GTHREAD_VERSION@
+GSTREAMER_CFLAGS = @GSTREAMER_CFLAGS@
+GSTREAMER_LIBS = @GSTREAMER_LIBS@
+GSTREAMER_REQUIRED_VERSION = @GSTREAMER_REQUIRED_VERSION@
+GSTREAMER_VERSION = @GSTREAMER_VERSION@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_LIBS = @GTK_LIBS@
 GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
@@ -182,14 +165,6 @@ LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
 LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
 LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
 LIBCDIO_VERSION = @LIBCDIO_VERSION@
-LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
-LIBCURL_LIBS = @LIBCURL_LIBS@
-LIBCURL_REQUIRED_VERSION = @LIBCURL_REQUIRED_VERSION@
-LIBCURL_VERSION = @LIBCURL_VERSION@
-LIBMODPLUG_CFLAGS = @LIBMODPLUG_CFLAGS@
-LIBMODPLUG_LIBS = @LIBMODPLUG_LIBS@
-LIBMODPLUG_REQUIRED_VERSION = @LIBMODPLUG_REQUIRED_VERSION@
-LIBMODPLUG_VERSION = @LIBMODPLUG_VERSION@
 LIBNOTIFY_CFLAGS = @LIBNOTIFY_CFLAGS@
 LIBNOTIFY_LIBS = @LIBNOTIFY_LIBS@
 LIBNOTIFY_REQUIRED_VERSION = @LIBNOTIFY_REQUIRED_VERSION@
@@ -204,10 +179,6 @@ LIBX11_VERSION = @LIBX11_VERSION@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-MAD_CFLAGS = @MAD_CFLAGS@
-MAD_LIBS = @MAD_LIBS@
-MAD_REQUIRED_VERSION = @MAD_REQUIRED_VERSION@
-MAD_VERSION = @MAD_VERSION@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
@@ -237,10 +208,6 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
-SNDFILE_CFLAGS = @SNDFILE_CFLAGS@
-SNDFILE_LIBS = @SNDFILE_LIBS@
-SNDFILE_REQUIRED_VERSION = @SNDFILE_REQUIRED_VERSION@
-SNDFILE_VERSION = @SNDFILE_VERSION@
 SQLITE3_CFLAGS = @SQLITE3_CFLAGS@
 SQLITE3_LIBS = @SQLITE3_LIBS@
 SQLITE3_REQUIRED_VERSION = @SQLITE3_REQUIRED_VERSION@
@@ -254,10 +221,6 @@ TAGLIB_REQUIRED_VERSION = @TAGLIB_REQUIRED_VERSION@
 TAGLIB_VERSION = @TAGLIB_VERSION@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
-VORBISFILE_CFLAGS = @VORBISFILE_CFLAGS@
-VORBISFILE_LIBS = @VORBISFILE_LIBS@
-VORBISFILE_REQUIRED_VERSION = @VORBISFILE_REQUIRED_VERSION@
-VORBISFILE_VERSION = @VORBISFILE_VERSION@
 XGETTEXT = @XGETTEXT@
 XGETTEXT_ARGS = @XGETTEXT_ARGS@
 abs_builddir = @abs_builddir@
@@ -318,88 +281,59 @@ INCLUDES = \
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
 	-I$(top_srcdir)
 
-pragha_CFLAGS = $(GLIB_CFLAGS) 						\
-	$(GTHREAD_CFLAGS)						\
+pragha_CFLAGS = $(GSTREAMER_CFLAGS) 					\
+	$(GLIB_CFLAGS) 							\
 	$(GIO_CFLAGS) 							\
 	$(GTK_CFLAGS) 							\
-	$(MAD_CFLAGS) 							\
-	$(FLAC_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_CFLAGS) 						\
 	$(TAGLIBC_CFLAGS) 						\
-	$(AO_CFLAGS) 							\
-	$(ALSA_CFLAGS) 							\
 	$(DBUS_CFLAGS) 							\
 	$(LIBNOTIFY_CFLAGS) 						\
-	$(SNDFILE_CFLAGS) 						\
-	$(VORBISFILE_CFLAGS) 						\
-	$(LIBCURL_CFLAGS) 						\
+	$(LIBX11_CFLAGS)						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
-	$(LIBX11_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-pragha_SOURCES = pragha.c \
-		init.c \
-		gui.c \
-		menu.c \
-		utils.c \
-		musicobject.c \
-		db.c \
-		librarytree.c \
-		panel.c \
-		filetree.c \
-		current_playlist.c \
-		tags.c \
-		playback_mp3.c \
-		playback_wav.c \
-		playback_flac.c \
-		playback_oggvorbis.c \
-		playback_modplug.c \
-		playback_cdda.c \
-		pref.c \
-		threads.c \
-		audio.c \
-		statusicon.c \
-		cmdline.c \
-		dbus.c \
-		playlist.c \
-		md5.c \
-		lastfm.c \
-		pragha.h \
-		md5.h \
-		wav.h \
-		oggvorbis.h \
-		mp3.h \
-		mod.h \
-		flac.h \
+pragha_SOURCES = bind.c \
+		cdda.c \
 		cdda.h \
+		cmdline.c \
+		current-playlist.c \
+		db.c \
+		dbus.c \
+		filetree.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
-		bind.c \
-		keybinder.h
+		gui.c \
+		init.c \
+		keybinder.h \
+		librarytree.c \
+		menu.c \
+		musicobject.c \
+		panel.c \
+		playlist.c \
+		pragha.c \
+		pragha.h \
+		pragha-backend.c \
+		pref.c \
+		statusicon.c \
+		tags.c \
+		utils.c
 
-pragha_LDFLAGS = $(GLIB_LIBS) 						\
-	$(GTHREAD_LIBS)							\
+pragha_LDFLAGS = $(GSTREAMER_LIBS) 					\
+	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
-	$(MAD_LIBS) 							\
-	$(FLAC_LIBS) 							\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_LIBS)							\
 	$(TAGLIBC_LIBS)							\
-	$(AO_LIBS) 							\
-	$(ALSA_LIBS) 							\
 	$(DBUS_LIBS) 							\
 	$(LIBNOTIFY_LIBS) 						\
-	$(SNDFILE_LIBS) 						\
-	$(VORBISFILE_LIBS) 						\
-	$(LIBMODPLUG_LIBS) 						\
-	$(LIBCURL_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)							\
+	$(LIBCDDB_LIBS) 						\
 	$(LIBX11_LIBS)
 
 all: all-am
@@ -489,34 +423,26 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-audio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-bind.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-cdda.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-cmdline.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-current_playlist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-current-playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-filetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-gtkcellrendererbubble.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-gui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-init.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-lastfm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-librarytree.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-musicobject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-panel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_cdda.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_flac.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_modplug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_mp3.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_oggvorbis.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playback_wav.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playlist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-pragha-backend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-pragha.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-pref.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-statusicon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-tags.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-utils.Po@am__quote@
 
 .c.o:
@@ -543,357 +469,37 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-pragha-pragha.o: pragha.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha.o -MD -MP -MF $(DEPDIR)/pragha-pragha.Tpo -c -o pragha-pragha.o `test -f 'pragha.c' || echo '$(srcdir)/'`pragha.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha.Tpo $(DEPDIR)/pragha-pragha.Po
+pragha-bind.o: bind.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.o -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha.c' object='pragha-pragha.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha.o `test -f 'pragha.c' || echo '$(srcdir)/'`pragha.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
 
-pragha-pragha.obj: pragha.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha.obj -MD -MP -MF $(DEPDIR)/pragha-pragha.Tpo -c -o pragha-pragha.obj `if test -f 'pragha.c'; then $(CYGPATH_W) 'pragha.c'; else $(CYGPATH_W) '$(srcdir)/pragha.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha.Tpo $(DEPDIR)/pragha-pragha.Po
+pragha-bind.obj: bind.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.obj -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha.c' object='pragha-pragha.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha.obj `if test -f 'pragha.c'; then $(CYGPATH_W) 'pragha.c'; else $(CYGPATH_W) '$(srcdir)/pragha.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
 
-pragha-init.o: init.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-init.o -MD -MP -MF $(DEPDIR)/pragha-init.Tpo -c -o pragha-init.o `test -f 'init.c' || echo '$(srcdir)/'`init.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-init.Tpo $(DEPDIR)/pragha-init.Po
+pragha-cdda.o: cdda.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-cdda.o -MD -MP -MF $(DEPDIR)/pragha-cdda.Tpo -c -o pragha-cdda.o `test -f 'cdda.c' || echo '$(srcdir)/'`cdda.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-cdda.Tpo $(DEPDIR)/pragha-cdda.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='init.c' object='pragha-init.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdda.c' object='pragha-cdda.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-init.o `test -f 'init.c' || echo '$(srcdir)/'`init.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-cdda.o `test -f 'cdda.c' || echo '$(srcdir)/'`cdda.c
 
-pragha-init.obj: init.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-init.obj -MD -MP -MF $(DEPDIR)/pragha-init.Tpo -c -o pragha-init.obj `if test -f 'init.c'; then $(CYGPATH_W) 'init.c'; else $(CYGPATH_W) '$(srcdir)/init.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-init.Tpo $(DEPDIR)/pragha-init.Po
+pragha-cdda.obj: cdda.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-cdda.obj -MD -MP -MF $(DEPDIR)/pragha-cdda.Tpo -c -o pragha-cdda.obj `if test -f 'cdda.c'; then $(CYGPATH_W) 'cdda.c'; else $(CYGPATH_W) '$(srcdir)/cdda.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-cdda.Tpo $(DEPDIR)/pragha-cdda.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='init.c' object='pragha-init.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cdda.c' object='pragha-cdda.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-init.obj `if test -f 'init.c'; then $(CYGPATH_W) 'init.c'; else $(CYGPATH_W) '$(srcdir)/init.c'; fi`
-
-pragha-gui.o: gui.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-gui.o -MD -MP -MF $(DEPDIR)/pragha-gui.Tpo -c -o pragha-gui.o `test -f 'gui.c' || echo '$(srcdir)/'`gui.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-gui.Tpo $(DEPDIR)/pragha-gui.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gui.c' object='pragha-gui.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gui.o `test -f 'gui.c' || echo '$(srcdir)/'`gui.c
-
-pragha-gui.obj: gui.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-gui.obj -MD -MP -MF $(DEPDIR)/pragha-gui.Tpo -c -o pragha-gui.obj `if test -f 'gui.c'; then $(CYGPATH_W) 'gui.c'; else $(CYGPATH_W) '$(srcdir)/gui.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-gui.Tpo $(DEPDIR)/pragha-gui.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gui.c' object='pragha-gui.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gui.obj `if test -f 'gui.c'; then $(CYGPATH_W) 'gui.c'; else $(CYGPATH_W) '$(srcdir)/gui.c'; fi`
-
-pragha-menu.o: menu.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-menu.o -MD -MP -MF $(DEPDIR)/pragha-menu.Tpo -c -o pragha-menu.o `test -f 'menu.c' || echo '$(srcdir)/'`menu.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-menu.Tpo $(DEPDIR)/pragha-menu.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menu.c' object='pragha-menu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-menu.o `test -f 'menu.c' || echo '$(srcdir)/'`menu.c
-
-pragha-menu.obj: menu.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-menu.obj -MD -MP -MF $(DEPDIR)/pragha-menu.Tpo -c -o pragha-menu.obj `if test -f 'menu.c'; then $(CYGPATH_W) 'menu.c'; else $(CYGPATH_W) '$(srcdir)/menu.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-menu.Tpo $(DEPDIR)/pragha-menu.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menu.c' object='pragha-menu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-menu.obj `if test -f 'menu.c'; then $(CYGPATH_W) 'menu.c'; else $(CYGPATH_W) '$(srcdir)/menu.c'; fi`
-
-pragha-utils.o: utils.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-utils.o -MD -MP -MF $(DEPDIR)/pragha-utils.Tpo -c -o pragha-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-utils.Tpo $(DEPDIR)/pragha-utils.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='pragha-utils.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
-
-pragha-utils.obj: utils.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-utils.obj -MD -MP -MF $(DEPDIR)/pragha-utils.Tpo -c -o pragha-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-utils.Tpo $(DEPDIR)/pragha-utils.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='pragha-utils.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
-
-pragha-musicobject.o: musicobject.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-musicobject.o -MD -MP -MF $(DEPDIR)/pragha-musicobject.Tpo -c -o pragha-musicobject.o `test -f 'musicobject.c' || echo '$(srcdir)/'`musicobject.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-musicobject.Tpo $(DEPDIR)/pragha-musicobject.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='musicobject.c' object='pragha-musicobject.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-musicobject.o `test -f 'musicobject.c' || echo '$(srcdir)/'`musicobject.c
-
-pragha-musicobject.obj: musicobject.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-musicobject.obj -MD -MP -MF $(DEPDIR)/pragha-musicobject.Tpo -c -o pragha-musicobject.obj `if test -f 'musicobject.c'; then $(CYGPATH_W) 'musicobject.c'; else $(CYGPATH_W) '$(srcdir)/musicobject.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-musicobject.Tpo $(DEPDIR)/pragha-musicobject.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='musicobject.c' object='pragha-musicobject.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-musicobject.obj `if test -f 'musicobject.c'; then $(CYGPATH_W) 'musicobject.c'; else $(CYGPATH_W) '$(srcdir)/musicobject.c'; fi`
-
-pragha-db.o: db.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-db.o -MD -MP -MF $(DEPDIR)/pragha-db.Tpo -c -o pragha-db.o `test -f 'db.c' || echo '$(srcdir)/'`db.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-db.Tpo $(DEPDIR)/pragha-db.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='db.c' object='pragha-db.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-db.o `test -f 'db.c' || echo '$(srcdir)/'`db.c
-
-pragha-db.obj: db.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-db.obj -MD -MP -MF $(DEPDIR)/pragha-db.Tpo -c -o pragha-db.obj `if test -f 'db.c'; then $(CYGPATH_W) 'db.c'; else $(CYGPATH_W) '$(srcdir)/db.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-db.Tpo $(DEPDIR)/pragha-db.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='db.c' object='pragha-db.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-db.obj `if test -f 'db.c'; then $(CYGPATH_W) 'db.c'; else $(CYGPATH_W) '$(srcdir)/db.c'; fi`
-
-pragha-librarytree.o: librarytree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-librarytree.o -MD -MP -MF $(DEPDIR)/pragha-librarytree.Tpo -c -o pragha-librarytree.o `test -f 'librarytree.c' || echo '$(srcdir)/'`librarytree.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-librarytree.Tpo $(DEPDIR)/pragha-librarytree.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='librarytree.c' object='pragha-librarytree.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-librarytree.o `test -f 'librarytree.c' || echo '$(srcdir)/'`librarytree.c
-
-pragha-librarytree.obj: librarytree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-librarytree.obj -MD -MP -MF $(DEPDIR)/pragha-librarytree.Tpo -c -o pragha-librarytree.obj `if test -f 'librarytree.c'; then $(CYGPATH_W) 'librarytree.c'; else $(CYGPATH_W) '$(srcdir)/librarytree.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-librarytree.Tpo $(DEPDIR)/pragha-librarytree.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='librarytree.c' object='pragha-librarytree.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-librarytree.obj `if test -f 'librarytree.c'; then $(CYGPATH_W) 'librarytree.c'; else $(CYGPATH_W) '$(srcdir)/librarytree.c'; fi`
-
-pragha-panel.o: panel.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-panel.o -MD -MP -MF $(DEPDIR)/pragha-panel.Tpo -c -o pragha-panel.o `test -f 'panel.c' || echo '$(srcdir)/'`panel.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-panel.Tpo $(DEPDIR)/pragha-panel.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='panel.c' object='pragha-panel.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-panel.o `test -f 'panel.c' || echo '$(srcdir)/'`panel.c
-
-pragha-panel.obj: panel.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-panel.obj -MD -MP -MF $(DEPDIR)/pragha-panel.Tpo -c -o pragha-panel.obj `if test -f 'panel.c'; then $(CYGPATH_W) 'panel.c'; else $(CYGPATH_W) '$(srcdir)/panel.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-panel.Tpo $(DEPDIR)/pragha-panel.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='panel.c' object='pragha-panel.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-panel.obj `if test -f 'panel.c'; then $(CYGPATH_W) 'panel.c'; else $(CYGPATH_W) '$(srcdir)/panel.c'; fi`
-
-pragha-filetree.o: filetree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-filetree.o -MD -MP -MF $(DEPDIR)/pragha-filetree.Tpo -c -o pragha-filetree.o `test -f 'filetree.c' || echo '$(srcdir)/'`filetree.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-filetree.Tpo $(DEPDIR)/pragha-filetree.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='filetree.c' object='pragha-filetree.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-filetree.o `test -f 'filetree.c' || echo '$(srcdir)/'`filetree.c
-
-pragha-filetree.obj: filetree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-filetree.obj -MD -MP -MF $(DEPDIR)/pragha-filetree.Tpo -c -o pragha-filetree.obj `if test -f 'filetree.c'; then $(CYGPATH_W) 'filetree.c'; else $(CYGPATH_W) '$(srcdir)/filetree.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-filetree.Tpo $(DEPDIR)/pragha-filetree.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='filetree.c' object='pragha-filetree.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-filetree.obj `if test -f 'filetree.c'; then $(CYGPATH_W) 'filetree.c'; else $(CYGPATH_W) '$(srcdir)/filetree.c'; fi`
-
-pragha-current_playlist.o: current_playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-current_playlist.o -MD -MP -MF $(DEPDIR)/pragha-current_playlist.Tpo -c -o pragha-current_playlist.o `test -f 'current_playlist.c' || echo '$(srcdir)/'`current_playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-current_playlist.Tpo $(DEPDIR)/pragha-current_playlist.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='current_playlist.c' object='pragha-current_playlist.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-current_playlist.o `test -f 'current_playlist.c' || echo '$(srcdir)/'`current_playlist.c
-
-pragha-current_playlist.obj: current_playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-current_playlist.obj -MD -MP -MF $(DEPDIR)/pragha-current_playlist.Tpo -c -o pragha-current_playlist.obj `if test -f 'current_playlist.c'; then $(CYGPATH_W) 'current_playlist.c'; else $(CYGPATH_W) '$(srcdir)/current_playlist.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-current_playlist.Tpo $(DEPDIR)/pragha-current_playlist.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='current_playlist.c' object='pragha-current_playlist.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-current_playlist.obj `if test -f 'current_playlist.c'; then $(CYGPATH_W) 'current_playlist.c'; else $(CYGPATH_W) '$(srcdir)/current_playlist.c'; fi`
-
-pragha-tags.o: tags.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-tags.o -MD -MP -MF $(DEPDIR)/pragha-tags.Tpo -c -o pragha-tags.o `test -f 'tags.c' || echo '$(srcdir)/'`tags.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-tags.Tpo $(DEPDIR)/pragha-tags.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tags.c' object='pragha-tags.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-tags.o `test -f 'tags.c' || echo '$(srcdir)/'`tags.c
-
-pragha-tags.obj: tags.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-tags.obj -MD -MP -MF $(DEPDIR)/pragha-tags.Tpo -c -o pragha-tags.obj `if test -f 'tags.c'; then $(CYGPATH_W) 'tags.c'; else $(CYGPATH_W) '$(srcdir)/tags.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-tags.Tpo $(DEPDIR)/pragha-tags.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tags.c' object='pragha-tags.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-tags.obj `if test -f 'tags.c'; then $(CYGPATH_W) 'tags.c'; else $(CYGPATH_W) '$(srcdir)/tags.c'; fi`
-
-pragha-playback_mp3.o: playback_mp3.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_mp3.o -MD -MP -MF $(DEPDIR)/pragha-playback_mp3.Tpo -c -o pragha-playback_mp3.o `test -f 'playback_mp3.c' || echo '$(srcdir)/'`playback_mp3.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_mp3.Tpo $(DEPDIR)/pragha-playback_mp3.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_mp3.c' object='pragha-playback_mp3.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_mp3.o `test -f 'playback_mp3.c' || echo '$(srcdir)/'`playback_mp3.c
-
-pragha-playback_mp3.obj: playback_mp3.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_mp3.obj -MD -MP -MF $(DEPDIR)/pragha-playback_mp3.Tpo -c -o pragha-playback_mp3.obj `if test -f 'playback_mp3.c'; then $(CYGPATH_W) 'playback_mp3.c'; else $(CYGPATH_W) '$(srcdir)/playback_mp3.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_mp3.Tpo $(DEPDIR)/pragha-playback_mp3.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_mp3.c' object='pragha-playback_mp3.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_mp3.obj `if test -f 'playback_mp3.c'; then $(CYGPATH_W) 'playback_mp3.c'; else $(CYGPATH_W) '$(srcdir)/playback_mp3.c'; fi`
-
-pragha-playback_wav.o: playback_wav.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_wav.o -MD -MP -MF $(DEPDIR)/pragha-playback_wav.Tpo -c -o pragha-playback_wav.o `test -f 'playback_wav.c' || echo '$(srcdir)/'`playback_wav.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_wav.Tpo $(DEPDIR)/pragha-playback_wav.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_wav.c' object='pragha-playback_wav.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_wav.o `test -f 'playback_wav.c' || echo '$(srcdir)/'`playback_wav.c
-
-pragha-playback_wav.obj: playback_wav.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_wav.obj -MD -MP -MF $(DEPDIR)/pragha-playback_wav.Tpo -c -o pragha-playback_wav.obj `if test -f 'playback_wav.c'; then $(CYGPATH_W) 'playback_wav.c'; else $(CYGPATH_W) '$(srcdir)/playback_wav.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_wav.Tpo $(DEPDIR)/pragha-playback_wav.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_wav.c' object='pragha-playback_wav.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_wav.obj `if test -f 'playback_wav.c'; then $(CYGPATH_W) 'playback_wav.c'; else $(CYGPATH_W) '$(srcdir)/playback_wav.c'; fi`
-
-pragha-playback_flac.o: playback_flac.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_flac.o -MD -MP -MF $(DEPDIR)/pragha-playback_flac.Tpo -c -o pragha-playback_flac.o `test -f 'playback_flac.c' || echo '$(srcdir)/'`playback_flac.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_flac.Tpo $(DEPDIR)/pragha-playback_flac.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_flac.c' object='pragha-playback_flac.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_flac.o `test -f 'playback_flac.c' || echo '$(srcdir)/'`playback_flac.c
-
-pragha-playback_flac.obj: playback_flac.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_flac.obj -MD -MP -MF $(DEPDIR)/pragha-playback_flac.Tpo -c -o pragha-playback_flac.obj `if test -f 'playback_flac.c'; then $(CYGPATH_W) 'playback_flac.c'; else $(CYGPATH_W) '$(srcdir)/playback_flac.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_flac.Tpo $(DEPDIR)/pragha-playback_flac.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_flac.c' object='pragha-playback_flac.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_flac.obj `if test -f 'playback_flac.c'; then $(CYGPATH_W) 'playback_flac.c'; else $(CYGPATH_W) '$(srcdir)/playback_flac.c'; fi`
-
-pragha-playback_oggvorbis.o: playback_oggvorbis.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_oggvorbis.o -MD -MP -MF $(DEPDIR)/pragha-playback_oggvorbis.Tpo -c -o pragha-playback_oggvorbis.o `test -f 'playback_oggvorbis.c' || echo '$(srcdir)/'`playback_oggvorbis.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_oggvorbis.Tpo $(DEPDIR)/pragha-playback_oggvorbis.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_oggvorbis.c' object='pragha-playback_oggvorbis.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_oggvorbis.o `test -f 'playback_oggvorbis.c' || echo '$(srcdir)/'`playback_oggvorbis.c
-
-pragha-playback_oggvorbis.obj: playback_oggvorbis.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_oggvorbis.obj -MD -MP -MF $(DEPDIR)/pragha-playback_oggvorbis.Tpo -c -o pragha-playback_oggvorbis.obj `if test -f 'playback_oggvorbis.c'; then $(CYGPATH_W) 'playback_oggvorbis.c'; else $(CYGPATH_W) '$(srcdir)/playback_oggvorbis.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_oggvorbis.Tpo $(DEPDIR)/pragha-playback_oggvorbis.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_oggvorbis.c' object='pragha-playback_oggvorbis.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_oggvorbis.obj `if test -f 'playback_oggvorbis.c'; then $(CYGPATH_W) 'playback_oggvorbis.c'; else $(CYGPATH_W) '$(srcdir)/playback_oggvorbis.c'; fi`
-
-pragha-playback_modplug.o: playback_modplug.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_modplug.o -MD -MP -MF $(DEPDIR)/pragha-playback_modplug.Tpo -c -o pragha-playback_modplug.o `test -f 'playback_modplug.c' || echo '$(srcdir)/'`playback_modplug.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_modplug.Tpo $(DEPDIR)/pragha-playback_modplug.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_modplug.c' object='pragha-playback_modplug.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_modplug.o `test -f 'playback_modplug.c' || echo '$(srcdir)/'`playback_modplug.c
-
-pragha-playback_modplug.obj: playback_modplug.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_modplug.obj -MD -MP -MF $(DEPDIR)/pragha-playback_modplug.Tpo -c -o pragha-playback_modplug.obj `if test -f 'playback_modplug.c'; then $(CYGPATH_W) 'playback_modplug.c'; else $(CYGPATH_W) '$(srcdir)/playback_modplug.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_modplug.Tpo $(DEPDIR)/pragha-playback_modplug.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_modplug.c' object='pragha-playback_modplug.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_modplug.obj `if test -f 'playback_modplug.c'; then $(CYGPATH_W) 'playback_modplug.c'; else $(CYGPATH_W) '$(srcdir)/playback_modplug.c'; fi`
-
-pragha-playback_cdda.o: playback_cdda.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_cdda.o -MD -MP -MF $(DEPDIR)/pragha-playback_cdda.Tpo -c -o pragha-playback_cdda.o `test -f 'playback_cdda.c' || echo '$(srcdir)/'`playback_cdda.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_cdda.Tpo $(DEPDIR)/pragha-playback_cdda.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_cdda.c' object='pragha-playback_cdda.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_cdda.o `test -f 'playback_cdda.c' || echo '$(srcdir)/'`playback_cdda.c
-
-pragha-playback_cdda.obj: playback_cdda.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playback_cdda.obj -MD -MP -MF $(DEPDIR)/pragha-playback_cdda.Tpo -c -o pragha-playback_cdda.obj `if test -f 'playback_cdda.c'; then $(CYGPATH_W) 'playback_cdda.c'; else $(CYGPATH_W) '$(srcdir)/playback_cdda.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playback_cdda.Tpo $(DEPDIR)/pragha-playback_cdda.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playback_cdda.c' object='pragha-playback_cdda.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playback_cdda.obj `if test -f 'playback_cdda.c'; then $(CYGPATH_W) 'playback_cdda.c'; else $(CYGPATH_W) '$(srcdir)/playback_cdda.c'; fi`
-
-pragha-pref.o: pref.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pref.o -MD -MP -MF $(DEPDIR)/pragha-pref.Tpo -c -o pragha-pref.o `test -f 'pref.c' || echo '$(srcdir)/'`pref.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pref.Tpo $(DEPDIR)/pragha-pref.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pref.c' object='pragha-pref.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pref.o `test -f 'pref.c' || echo '$(srcdir)/'`pref.c
-
-pragha-pref.obj: pref.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pref.obj -MD -MP -MF $(DEPDIR)/pragha-pref.Tpo -c -o pragha-pref.obj `if test -f 'pref.c'; then $(CYGPATH_W) 'pref.c'; else $(CYGPATH_W) '$(srcdir)/pref.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pref.Tpo $(DEPDIR)/pragha-pref.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pref.c' object='pragha-pref.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pref.obj `if test -f 'pref.c'; then $(CYGPATH_W) 'pref.c'; else $(CYGPATH_W) '$(srcdir)/pref.c'; fi`
-
-pragha-threads.o: threads.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-threads.o -MD -MP -MF $(DEPDIR)/pragha-threads.Tpo -c -o pragha-threads.o `test -f 'threads.c' || echo '$(srcdir)/'`threads.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-threads.Tpo $(DEPDIR)/pragha-threads.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='threads.c' object='pragha-threads.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-threads.o `test -f 'threads.c' || echo '$(srcdir)/'`threads.c
-
-pragha-threads.obj: threads.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-threads.obj -MD -MP -MF $(DEPDIR)/pragha-threads.Tpo -c -o pragha-threads.obj `if test -f 'threads.c'; then $(CYGPATH_W) 'threads.c'; else $(CYGPATH_W) '$(srcdir)/threads.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-threads.Tpo $(DEPDIR)/pragha-threads.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='threads.c' object='pragha-threads.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-threads.obj `if test -f 'threads.c'; then $(CYGPATH_W) 'threads.c'; else $(CYGPATH_W) '$(srcdir)/threads.c'; fi`
-
-pragha-audio.o: audio.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-audio.o -MD -MP -MF $(DEPDIR)/pragha-audio.Tpo -c -o pragha-audio.o `test -f 'audio.c' || echo '$(srcdir)/'`audio.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-audio.Tpo $(DEPDIR)/pragha-audio.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='audio.c' object='pragha-audio.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-audio.o `test -f 'audio.c' || echo '$(srcdir)/'`audio.c
-
-pragha-audio.obj: audio.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-audio.obj -MD -MP -MF $(DEPDIR)/pragha-audio.Tpo -c -o pragha-audio.obj `if test -f 'audio.c'; then $(CYGPATH_W) 'audio.c'; else $(CYGPATH_W) '$(srcdir)/audio.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-audio.Tpo $(DEPDIR)/pragha-audio.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='audio.c' object='pragha-audio.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-audio.obj `if test -f 'audio.c'; then $(CYGPATH_W) 'audio.c'; else $(CYGPATH_W) '$(srcdir)/audio.c'; fi`
-
-pragha-statusicon.o: statusicon.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-statusicon.o -MD -MP -MF $(DEPDIR)/pragha-statusicon.Tpo -c -o pragha-statusicon.o `test -f 'statusicon.c' || echo '$(srcdir)/'`statusicon.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-statusicon.Tpo $(DEPDIR)/pragha-statusicon.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='statusicon.c' object='pragha-statusicon.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-statusicon.o `test -f 'statusicon.c' || echo '$(srcdir)/'`statusicon.c
-
-pragha-statusicon.obj: statusicon.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-statusicon.obj -MD -MP -MF $(DEPDIR)/pragha-statusicon.Tpo -c -o pragha-statusicon.obj `if test -f 'statusicon.c'; then $(CYGPATH_W) 'statusicon.c'; else $(CYGPATH_W) '$(srcdir)/statusicon.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-statusicon.Tpo $(DEPDIR)/pragha-statusicon.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='statusicon.c' object='pragha-statusicon.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-statusicon.obj `if test -f 'statusicon.c'; then $(CYGPATH_W) 'statusicon.c'; else $(CYGPATH_W) '$(srcdir)/statusicon.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-cdda.obj `if test -f 'cdda.c'; then $(CYGPATH_W) 'cdda.c'; else $(CYGPATH_W) '$(srcdir)/cdda.c'; fi`
 
 pragha-cmdline.o: cmdline.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-cmdline.o -MD -MP -MF $(DEPDIR)/pragha-cmdline.Tpo -c -o pragha-cmdline.o `test -f 'cmdline.c' || echo '$(srcdir)/'`cmdline.c
@@ -911,6 +517,38 @@ pragha-cmdline.obj: cmdline.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-cmdline.obj `if test -f 'cmdline.c'; then $(CYGPATH_W) 'cmdline.c'; else $(CYGPATH_W) '$(srcdir)/cmdline.c'; fi`
 
+pragha-current-playlist.o: current-playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-current-playlist.o -MD -MP -MF $(DEPDIR)/pragha-current-playlist.Tpo -c -o pragha-current-playlist.o `test -f 'current-playlist.c' || echo '$(srcdir)/'`current-playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-current-playlist.Tpo $(DEPDIR)/pragha-current-playlist.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='current-playlist.c' object='pragha-current-playlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-current-playlist.o `test -f 'current-playlist.c' || echo '$(srcdir)/'`current-playlist.c
+
+pragha-current-playlist.obj: current-playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-current-playlist.obj -MD -MP -MF $(DEPDIR)/pragha-current-playlist.Tpo -c -o pragha-current-playlist.obj `if test -f 'current-playlist.c'; then $(CYGPATH_W) 'current-playlist.c'; else $(CYGPATH_W) '$(srcdir)/current-playlist.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-current-playlist.Tpo $(DEPDIR)/pragha-current-playlist.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='current-playlist.c' object='pragha-current-playlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-current-playlist.obj `if test -f 'current-playlist.c'; then $(CYGPATH_W) 'current-playlist.c'; else $(CYGPATH_W) '$(srcdir)/current-playlist.c'; fi`
+
+pragha-db.o: db.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-db.o -MD -MP -MF $(DEPDIR)/pragha-db.Tpo -c -o pragha-db.o `test -f 'db.c' || echo '$(srcdir)/'`db.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-db.Tpo $(DEPDIR)/pragha-db.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='db.c' object='pragha-db.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-db.o `test -f 'db.c' || echo '$(srcdir)/'`db.c
+
+pragha-db.obj: db.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-db.obj -MD -MP -MF $(DEPDIR)/pragha-db.Tpo -c -o pragha-db.obj `if test -f 'db.c'; then $(CYGPATH_W) 'db.c'; else $(CYGPATH_W) '$(srcdir)/db.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-db.Tpo $(DEPDIR)/pragha-db.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='db.c' object='pragha-db.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-db.obj `if test -f 'db.c'; then $(CYGPATH_W) 'db.c'; else $(CYGPATH_W) '$(srcdir)/db.c'; fi`
+
 pragha-dbus.o: dbus.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-dbus.o -MD -MP -MF $(DEPDIR)/pragha-dbus.Tpo -c -o pragha-dbus.o `test -f 'dbus.c' || echo '$(srcdir)/'`dbus.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-dbus.Tpo $(DEPDIR)/pragha-dbus.Po
@@ -927,53 +565,21 @@ pragha-dbus.obj: dbus.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-dbus.obj `if test -f 'dbus.c'; then $(CYGPATH_W) 'dbus.c'; else $(CYGPATH_W) '$(srcdir)/dbus.c'; fi`
 
-pragha-playlist.o: playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playlist.o -MD -MP -MF $(DEPDIR)/pragha-playlist.Tpo -c -o pragha-playlist.o `test -f 'playlist.c' || echo '$(srcdir)/'`playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playlist.Tpo $(DEPDIR)/pragha-playlist.Po
+pragha-filetree.o: filetree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-filetree.o -MD -MP -MF $(DEPDIR)/pragha-filetree.Tpo -c -o pragha-filetree.o `test -f 'filetree.c' || echo '$(srcdir)/'`filetree.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-filetree.Tpo $(DEPDIR)/pragha-filetree.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playlist.c' object='pragha-playlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='filetree.c' object='pragha-filetree.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playlist.o `test -f 'playlist.c' || echo '$(srcdir)/'`playlist.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-filetree.o `test -f 'filetree.c' || echo '$(srcdir)/'`filetree.c
 
-pragha-playlist.obj: playlist.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playlist.obj -MD -MP -MF $(DEPDIR)/pragha-playlist.Tpo -c -o pragha-playlist.obj `if test -f 'playlist.c'; then $(CYGPATH_W) 'playlist.c'; else $(CYGPATH_W) '$(srcdir)/playlist.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playlist.Tpo $(DEPDIR)/pragha-playlist.Po
+pragha-filetree.obj: filetree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-filetree.obj -MD -MP -MF $(DEPDIR)/pragha-filetree.Tpo -c -o pragha-filetree.obj `if test -f 'filetree.c'; then $(CYGPATH_W) 'filetree.c'; else $(CYGPATH_W) '$(srcdir)/filetree.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-filetree.Tpo $(DEPDIR)/pragha-filetree.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playlist.c' object='pragha-playlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='filetree.c' object='pragha-filetree.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playlist.obj `if test -f 'playlist.c'; then $(CYGPATH_W) 'playlist.c'; else $(CYGPATH_W) '$(srcdir)/playlist.c'; fi`
-
-pragha-md5.o: md5.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-md5.o -MD -MP -MF $(DEPDIR)/pragha-md5.Tpo -c -o pragha-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-md5.Tpo $(DEPDIR)/pragha-md5.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='md5.c' object='pragha-md5.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
-
-pragha-md5.obj: md5.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-md5.obj -MD -MP -MF $(DEPDIR)/pragha-md5.Tpo -c -o pragha-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-md5.Tpo $(DEPDIR)/pragha-md5.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='md5.c' object='pragha-md5.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
-
-pragha-lastfm.o: lastfm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-lastfm.o -MD -MP -MF $(DEPDIR)/pragha-lastfm.Tpo -c -o pragha-lastfm.o `test -f 'lastfm.c' || echo '$(srcdir)/'`lastfm.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-lastfm.Tpo $(DEPDIR)/pragha-lastfm.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lastfm.c' object='pragha-lastfm.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-lastfm.o `test -f 'lastfm.c' || echo '$(srcdir)/'`lastfm.c
-
-pragha-lastfm.obj: lastfm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-lastfm.obj -MD -MP -MF $(DEPDIR)/pragha-lastfm.Tpo -c -o pragha-lastfm.obj `if test -f 'lastfm.c'; then $(CYGPATH_W) 'lastfm.c'; else $(CYGPATH_W) '$(srcdir)/lastfm.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-lastfm.Tpo $(DEPDIR)/pragha-lastfm.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lastfm.c' object='pragha-lastfm.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-lastfm.obj `if test -f 'lastfm.c'; then $(CYGPATH_W) 'lastfm.c'; else $(CYGPATH_W) '$(srcdir)/lastfm.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-filetree.obj `if test -f 'filetree.c'; then $(CYGPATH_W) 'filetree.c'; else $(CYGPATH_W) '$(srcdir)/filetree.c'; fi`
 
 pragha-gtkcellrendererbubble.o: gtkcellrendererbubble.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-gtkcellrendererbubble.o -MD -MP -MF $(DEPDIR)/pragha-gtkcellrendererbubble.Tpo -c -o pragha-gtkcellrendererbubble.o `test -f 'gtkcellrendererbubble.c' || echo '$(srcdir)/'`gtkcellrendererbubble.c
@@ -991,21 +597,213 @@ pragha-gtkcellrendererbubble.obj: gtkcellrendererbubble.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gtkcellrendererbubble.obj `if test -f 'gtkcellrendererbubble.c'; then $(CYGPATH_W) 'gtkcellrendererbubble.c'; else $(CYGPATH_W) '$(srcdir)/gtkcellrendererbubble.c'; fi`
 
-pragha-bind.o: bind.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.o -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
+pragha-gui.o: gui.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-gui.o -MD -MP -MF $(DEPDIR)/pragha-gui.Tpo -c -o pragha-gui.o `test -f 'gui.c' || echo '$(srcdir)/'`gui.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-gui.Tpo $(DEPDIR)/pragha-gui.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gui.c' object='pragha-gui.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gui.o `test -f 'gui.c' || echo '$(srcdir)/'`gui.c
 
-pragha-bind.obj: bind.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.obj -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
+pragha-gui.obj: gui.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-gui.obj -MD -MP -MF $(DEPDIR)/pragha-gui.Tpo -c -o pragha-gui.obj `if test -f 'gui.c'; then $(CYGPATH_W) 'gui.c'; else $(CYGPATH_W) '$(srcdir)/gui.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-gui.Tpo $(DEPDIR)/pragha-gui.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gui.c' object='pragha-gui.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gui.obj `if test -f 'gui.c'; then $(CYGPATH_W) 'gui.c'; else $(CYGPATH_W) '$(srcdir)/gui.c'; fi`
+
+pragha-init.o: init.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-init.o -MD -MP -MF $(DEPDIR)/pragha-init.Tpo -c -o pragha-init.o `test -f 'init.c' || echo '$(srcdir)/'`init.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-init.Tpo $(DEPDIR)/pragha-init.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='init.c' object='pragha-init.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-init.o `test -f 'init.c' || echo '$(srcdir)/'`init.c
+
+pragha-init.obj: init.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-init.obj -MD -MP -MF $(DEPDIR)/pragha-init.Tpo -c -o pragha-init.obj `if test -f 'init.c'; then $(CYGPATH_W) 'init.c'; else $(CYGPATH_W) '$(srcdir)/init.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-init.Tpo $(DEPDIR)/pragha-init.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='init.c' object='pragha-init.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-init.obj `if test -f 'init.c'; then $(CYGPATH_W) 'init.c'; else $(CYGPATH_W) '$(srcdir)/init.c'; fi`
+
+pragha-librarytree.o: librarytree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-librarytree.o -MD -MP -MF $(DEPDIR)/pragha-librarytree.Tpo -c -o pragha-librarytree.o `test -f 'librarytree.c' || echo '$(srcdir)/'`librarytree.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-librarytree.Tpo $(DEPDIR)/pragha-librarytree.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='librarytree.c' object='pragha-librarytree.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-librarytree.o `test -f 'librarytree.c' || echo '$(srcdir)/'`librarytree.c
+
+pragha-librarytree.obj: librarytree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-librarytree.obj -MD -MP -MF $(DEPDIR)/pragha-librarytree.Tpo -c -o pragha-librarytree.obj `if test -f 'librarytree.c'; then $(CYGPATH_W) 'librarytree.c'; else $(CYGPATH_W) '$(srcdir)/librarytree.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-librarytree.Tpo $(DEPDIR)/pragha-librarytree.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='librarytree.c' object='pragha-librarytree.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-librarytree.obj `if test -f 'librarytree.c'; then $(CYGPATH_W) 'librarytree.c'; else $(CYGPATH_W) '$(srcdir)/librarytree.c'; fi`
+
+pragha-menu.o: menu.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-menu.o -MD -MP -MF $(DEPDIR)/pragha-menu.Tpo -c -o pragha-menu.o `test -f 'menu.c' || echo '$(srcdir)/'`menu.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-menu.Tpo $(DEPDIR)/pragha-menu.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menu.c' object='pragha-menu.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-menu.o `test -f 'menu.c' || echo '$(srcdir)/'`menu.c
+
+pragha-menu.obj: menu.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-menu.obj -MD -MP -MF $(DEPDIR)/pragha-menu.Tpo -c -o pragha-menu.obj `if test -f 'menu.c'; then $(CYGPATH_W) 'menu.c'; else $(CYGPATH_W) '$(srcdir)/menu.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-menu.Tpo $(DEPDIR)/pragha-menu.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menu.c' object='pragha-menu.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-menu.obj `if test -f 'menu.c'; then $(CYGPATH_W) 'menu.c'; else $(CYGPATH_W) '$(srcdir)/menu.c'; fi`
+
+pragha-musicobject.o: musicobject.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-musicobject.o -MD -MP -MF $(DEPDIR)/pragha-musicobject.Tpo -c -o pragha-musicobject.o `test -f 'musicobject.c' || echo '$(srcdir)/'`musicobject.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-musicobject.Tpo $(DEPDIR)/pragha-musicobject.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='musicobject.c' object='pragha-musicobject.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-musicobject.o `test -f 'musicobject.c' || echo '$(srcdir)/'`musicobject.c
+
+pragha-musicobject.obj: musicobject.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-musicobject.obj -MD -MP -MF $(DEPDIR)/pragha-musicobject.Tpo -c -o pragha-musicobject.obj `if test -f 'musicobject.c'; then $(CYGPATH_W) 'musicobject.c'; else $(CYGPATH_W) '$(srcdir)/musicobject.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-musicobject.Tpo $(DEPDIR)/pragha-musicobject.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='musicobject.c' object='pragha-musicobject.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-musicobject.obj `if test -f 'musicobject.c'; then $(CYGPATH_W) 'musicobject.c'; else $(CYGPATH_W) '$(srcdir)/musicobject.c'; fi`
+
+pragha-panel.o: panel.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-panel.o -MD -MP -MF $(DEPDIR)/pragha-panel.Tpo -c -o pragha-panel.o `test -f 'panel.c' || echo '$(srcdir)/'`panel.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-panel.Tpo $(DEPDIR)/pragha-panel.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='panel.c' object='pragha-panel.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-panel.o `test -f 'panel.c' || echo '$(srcdir)/'`panel.c
+
+pragha-panel.obj: panel.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-panel.obj -MD -MP -MF $(DEPDIR)/pragha-panel.Tpo -c -o pragha-panel.obj `if test -f 'panel.c'; then $(CYGPATH_W) 'panel.c'; else $(CYGPATH_W) '$(srcdir)/panel.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-panel.Tpo $(DEPDIR)/pragha-panel.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='panel.c' object='pragha-panel.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-panel.obj `if test -f 'panel.c'; then $(CYGPATH_W) 'panel.c'; else $(CYGPATH_W) '$(srcdir)/panel.c'; fi`
+
+pragha-playlist.o: playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playlist.o -MD -MP -MF $(DEPDIR)/pragha-playlist.Tpo -c -o pragha-playlist.o `test -f 'playlist.c' || echo '$(srcdir)/'`playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playlist.Tpo $(DEPDIR)/pragha-playlist.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playlist.c' object='pragha-playlist.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playlist.o `test -f 'playlist.c' || echo '$(srcdir)/'`playlist.c
+
+pragha-playlist.obj: playlist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-playlist.obj -MD -MP -MF $(DEPDIR)/pragha-playlist.Tpo -c -o pragha-playlist.obj `if test -f 'playlist.c'; then $(CYGPATH_W) 'playlist.c'; else $(CYGPATH_W) '$(srcdir)/playlist.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-playlist.Tpo $(DEPDIR)/pragha-playlist.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playlist.c' object='pragha-playlist.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-playlist.obj `if test -f 'playlist.c'; then $(CYGPATH_W) 'playlist.c'; else $(CYGPATH_W) '$(srcdir)/playlist.c'; fi`
+
+pragha-pragha.o: pragha.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha.o -MD -MP -MF $(DEPDIR)/pragha-pragha.Tpo -c -o pragha-pragha.o `test -f 'pragha.c' || echo '$(srcdir)/'`pragha.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha.Tpo $(DEPDIR)/pragha-pragha.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha.c' object='pragha-pragha.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha.o `test -f 'pragha.c' || echo '$(srcdir)/'`pragha.c
+
+pragha-pragha.obj: pragha.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha.obj -MD -MP -MF $(DEPDIR)/pragha-pragha.Tpo -c -o pragha-pragha.obj `if test -f 'pragha.c'; then $(CYGPATH_W) 'pragha.c'; else $(CYGPATH_W) '$(srcdir)/pragha.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha.Tpo $(DEPDIR)/pragha-pragha.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha.c' object='pragha-pragha.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha.obj `if test -f 'pragha.c'; then $(CYGPATH_W) 'pragha.c'; else $(CYGPATH_W) '$(srcdir)/pragha.c'; fi`
+
+pragha-pragha-backend.o: pragha-backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha-backend.o -MD -MP -MF $(DEPDIR)/pragha-pragha-backend.Tpo -c -o pragha-pragha-backend.o `test -f 'pragha-backend.c' || echo '$(srcdir)/'`pragha-backend.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha-backend.Tpo $(DEPDIR)/pragha-pragha-backend.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha-backend.c' object='pragha-pragha-backend.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha-backend.o `test -f 'pragha-backend.c' || echo '$(srcdir)/'`pragha-backend.c
+
+pragha-pragha-backend.obj: pragha-backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pragha-backend.obj -MD -MP -MF $(DEPDIR)/pragha-pragha-backend.Tpo -c -o pragha-pragha-backend.obj `if test -f 'pragha-backend.c'; then $(CYGPATH_W) 'pragha-backend.c'; else $(CYGPATH_W) '$(srcdir)/pragha-backend.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pragha-backend.Tpo $(DEPDIR)/pragha-pragha-backend.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pragha-backend.c' object='pragha-pragha-backend.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pragha-backend.obj `if test -f 'pragha-backend.c'; then $(CYGPATH_W) 'pragha-backend.c'; else $(CYGPATH_W) '$(srcdir)/pragha-backend.c'; fi`
+
+pragha-pref.o: pref.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pref.o -MD -MP -MF $(DEPDIR)/pragha-pref.Tpo -c -o pragha-pref.o `test -f 'pref.c' || echo '$(srcdir)/'`pref.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pref.Tpo $(DEPDIR)/pragha-pref.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pref.c' object='pragha-pref.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pref.o `test -f 'pref.c' || echo '$(srcdir)/'`pref.c
+
+pragha-pref.obj: pref.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-pref.obj -MD -MP -MF $(DEPDIR)/pragha-pref.Tpo -c -o pragha-pref.obj `if test -f 'pref.c'; then $(CYGPATH_W) 'pref.c'; else $(CYGPATH_W) '$(srcdir)/pref.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-pref.Tpo $(DEPDIR)/pragha-pref.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pref.c' object='pragha-pref.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-pref.obj `if test -f 'pref.c'; then $(CYGPATH_W) 'pref.c'; else $(CYGPATH_W) '$(srcdir)/pref.c'; fi`
+
+pragha-statusicon.o: statusicon.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-statusicon.o -MD -MP -MF $(DEPDIR)/pragha-statusicon.Tpo -c -o pragha-statusicon.o `test -f 'statusicon.c' || echo '$(srcdir)/'`statusicon.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-statusicon.Tpo $(DEPDIR)/pragha-statusicon.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='statusicon.c' object='pragha-statusicon.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-statusicon.o `test -f 'statusicon.c' || echo '$(srcdir)/'`statusicon.c
+
+pragha-statusicon.obj: statusicon.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-statusicon.obj -MD -MP -MF $(DEPDIR)/pragha-statusicon.Tpo -c -o pragha-statusicon.obj `if test -f 'statusicon.c'; then $(CYGPATH_W) 'statusicon.c'; else $(CYGPATH_W) '$(srcdir)/statusicon.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-statusicon.Tpo $(DEPDIR)/pragha-statusicon.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='statusicon.c' object='pragha-statusicon.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-statusicon.obj `if test -f 'statusicon.c'; then $(CYGPATH_W) 'statusicon.c'; else $(CYGPATH_W) '$(srcdir)/statusicon.c'; fi`
+
+pragha-tags.o: tags.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-tags.o -MD -MP -MF $(DEPDIR)/pragha-tags.Tpo -c -o pragha-tags.o `test -f 'tags.c' || echo '$(srcdir)/'`tags.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-tags.Tpo $(DEPDIR)/pragha-tags.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tags.c' object='pragha-tags.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-tags.o `test -f 'tags.c' || echo '$(srcdir)/'`tags.c
+
+pragha-tags.obj: tags.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-tags.obj -MD -MP -MF $(DEPDIR)/pragha-tags.Tpo -c -o pragha-tags.obj `if test -f 'tags.c'; then $(CYGPATH_W) 'tags.c'; else $(CYGPATH_W) '$(srcdir)/tags.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-tags.Tpo $(DEPDIR)/pragha-tags.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tags.c' object='pragha-tags.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-tags.obj `if test -f 'tags.c'; then $(CYGPATH_W) 'tags.c'; else $(CYGPATH_W) '$(srcdir)/tags.c'; fi`
+
+pragha-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-utils.o -MD -MP -MF $(DEPDIR)/pragha-utils.Tpo -c -o pragha-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-utils.Tpo $(DEPDIR)/pragha-utils.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='pragha-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+
+pragha-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-utils.obj -MD -MP -MF $(DEPDIR)/pragha-utils.Tpo -c -o pragha-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-utils.Tpo $(DEPDIR)/pragha-utils.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='utils.c' object='pragha-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

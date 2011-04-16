@@ -40,22 +40,16 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 #include <sqlite3.h>
-#include <ao/ao.h>
-#include <curl/curl.h>
 #include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <tag_c.h>
+#include <taglib_config.h>
 #include <cddb/cddb.h>
-/*#include <libintl.h>*/
+#include <gst/gst.h>
 
-#include "mp3.h"
-#include "wav.h"
-#include "flac.h"
-#include "oggvorbis.h"
 #include "cdda.h"
-#include "mod.h"
-
 #include "gtkcellrendererbubble.h"
 #include "keybinder.h"
 
@@ -105,6 +99,7 @@
 #define DEFAULT_SINK "default"
 #define ALSA_SINK    "alsa"
 #define OSS_SINK     "oss"
+#define PULSE_SINK   "pulse"
 
 #define DEFAULT_MIXER "default"
 #define ALSA_MIXER    "alsa"
@@ -232,15 +227,6 @@ enum playlist_action {
 	PLAYLIST_PREV
 };
 
-/* Thread commands */
-
-enum thread_cmd {
-	CMD_PLAYBACK_STOP = 1,
-	CMD_PLAYBACK_PAUSE,
-	CMD_PLAYBACK_RESUME,
-	CMD_PLAYBACK_SEEK
-};
-
 /* Player state */
 
 enum player_state {
@@ -285,6 +271,7 @@ enum curplaylist_columns {
 	P_MOBJ_PTR,
 	P_QUEUE,
 	P_BUBBLE,
+	PL_COLOR_COL,
 	P_TRACK_NO,
 	P_TITLE,
 	P_ARTIST,
@@ -349,7 +336,12 @@ enum file_type {
 	FILE_MP3,
 	FILE_FLAC,
 	FILE_OGGVORBIS,
-	FILE_MODPLUG,
+#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+	FILE_ASF,
+#endif
+#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+	FILE_MP4,
+#endif
 	FILE_CDDA
 };
 
@@ -474,14 +466,6 @@ struct db_result {
 	gint no_columns;
 };
 
-struct lastfm_track {
-	struct con_win *cwin;
-	gint play_duration;
-	GTimeVal start_time;
-	enum track_source tsource;
-	struct tags tags;
-};
-
 /**
  * struct con_state - Pertains to the current state of the player
  *
@@ -489,21 +473,16 @@ struct lastfm_track {
  * @stop_scan: Flag to stop rescan process
  * @view_change: If library view change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
- * @advance_track: Advance to next track - set by playback thread
  * @state: State of the player { ST_STOPPED, ... }
  * @cmd: Thread Command {CMD_PLAYBACK_STOP, ... }
  * @seek_len: New seek length to pass to playback thread
  * @tracks_curr_playlist: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @newsec: Arg for idle func invoked from playback thread
- * @lastfm_hard_failure: If more than 3, should do a handshake again
  * @seek_fraction: New seek fraction to pass to playback thread
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
  * @rand: To generate random numbers
- * @c_thread: Playback thread
- * @c_mutex: Mutex between playback thread and main process
- * @l_mutex: Mutex for last.fm submission thread
  * @c_cond: Cond Between playback thread and main process
  * @rand_track_refs: List of references maintained in Shuffle mode
  * @curr_rand_ref: Currently playing track in Shuffle mode
@@ -514,29 +493,21 @@ struct lastfm_track {
  */
 
 struct con_state {
-	enum thread_cmd cmd;
 	enum player_state state;
 	gboolean dragging;
 	gboolean unique_instance;
-	gboolean audio_init;
 	gboolean stop_scan;
 	gboolean view_change;
 	gboolean curr_mobj_clear;
-	gboolean advance_track;
 	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
 	gint newsec;
-	gint lastfm_hard_failure;
 	gint timeout_id;
 	gdouble seek_fraction;
 	gchar *last_folder;
 	gchar *filter_entry;
 	GRand *rand;
-	GThread *c_thread;
-	GMutex *c_mutex;
-	GMutex *l_mutex;
-	GCond *c_cond;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
@@ -547,39 +518,16 @@ struct con_state {
 	struct musicobject *curr_mobj;
 };
 
-struct con_mixer {
-	gchar *mixer_elem;
-	glong min_vol;
-	glong max_vol;
-	glong curr_vol;
-	void (*set_volume)(struct con_win *);
-	void (*inc_volume)(struct con_win *);
-	void (*dec_volume)(struct con_win *);
-	gint (*init_mixer)(struct con_win *);
-	void (*deinit_mixer)(struct con_win *);
-	gint (*mute_mixer)(struct con_win *);
-};
-
 struct con_dbase {
 	gchar *db_file;	/* Filename of the DB file (~/.pragha.db) */
 	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
 };
 
-struct con_libao {
-	gint ao_driver_id;
-	ao_device *ao_dev;
-	ao_option *ao_opts;
-	ao_sample_format format;
-};
-
-#define LASTFM_NOT_CONNECTED 1<<1
-#define LASTFM_CONNECTED     1<<2
-
-struct con_lastfm {
-	CURL *curl_handle;
-	gint state; /* LASTFM_* */
-	gchar *session_id;
-	gchar *submission_url;
+struct con_gst {
+	GstElement *pipeline;
+	GstElement *audio_sink;
+	int timer;
+	gdouble curr_vol;
 };
 
 struct con_win {
@@ -587,9 +535,7 @@ struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
-	struct con_mixer *cmixer;
-	struct con_libao *clibao;
-	struct con_lastfm *clastfm;
+	struct con_gst *cgst;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
@@ -630,41 +576,25 @@ struct con_win {
 	GtkUIManager *systray_menu;
 	DBusConnection *con_dbus;
 };
+
 extern gulong switch_cb_id;
 extern gint debug_level;
 extern const gchar *mime_mpeg[];
 extern const gchar *mime_wav[];
 extern const gchar *mime_flac[];
 extern const gchar *mime_ogg[];
+#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+extern const gchar *mime_asf[];
+#endif
+#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+extern const gchar *mime_mp4[];
+#endif
+
 extern const gchar *mime_image[];
 
 /*Open file function*/
 
 void handle_selected_file(gpointer data, gpointer udata);
-
-/* Conversion routine from alsaplayer */
-
-static inline long volume_convert(glong val, long omin, long omax,
-				  long nmin, long nmax) {
-        float orange = omax - omin, nrange = nmax - nmin;
-
-        if (orange == 0)
-                return 0;
-        return ((nrange * (val - omin)) + (orange / 2)) / orange + nmin;
-}
-
-/* Init last.fm track status */
-
-static inline void lastfm_track_reset(struct con_win *cwin,
-				      struct lastfm_track **ltrack)
-{
-	*ltrack = g_slice_new0(struct lastfm_track);
-	(*ltrack)->cwin = cwin;
-	g_get_current_time(&(*ltrack)->start_time);
-	(*ltrack)->tsource = USER_SOURCE;
-	memcpy(&(*ltrack)->tags, cwin->cstate->curr_mobj->tags,
-	       sizeof(struct tags));
-}
 
 /* Convenience macros */
 
@@ -775,7 +705,12 @@ gboolean get_wav_info(gchar *file, struct tags *tags);
 gboolean get_mp3_info(gchar *file, struct tags *tags);
 gboolean get_flac_info(gchar *file, struct tags *tags);
 gboolean get_ogg_info(gchar *file, struct tags *tags);
-gboolean get_mod_info(gchar *file, struct tags *tags);
+#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+gboolean get_asf_info(gchar *file, struct tags *tags);
+#endif
+#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+gboolean get_mp4_info(gchar *file, struct tags *tags);
+#endif
 gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
 void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
@@ -910,8 +845,7 @@ void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
 
-void update_current_state(GThread *thread,
-			  GtkTreePath *path,
+void update_current_state(GtkTreePath *path,
 			  enum playlist_action action,
 			  struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
@@ -1032,18 +966,24 @@ void free_library_delete_dir(struct con_win *cwin);
 void free_playlist_columns(struct con_win *cwin);
 void free_library_tree_nodes(struct con_win *cwin);
 
-/* Threads */
+/* Gstreamer */
 
-GThread* start_playback(struct musicobject *mobj, struct con_win *cwin);
-void pause_playback(struct con_win *cwin);
-void resume_playback(struct con_win *cwin);
-void stop_playback(struct con_win *cwin);
-void seek_playback(struct con_win *cwin, gint seek_len, gdouble seek_fraction);
-gint process_thread_command(struct con_win *cwin);
-gint reset_thread_command(struct con_win *cwin, gint cmd);
-void playback_end_cleanup(struct con_win *cwin, struct lastfm_track *ltrack,
-			  gint ret, gboolean lastfm_f);
-void lastfm_init_thread(struct con_win *cwin);
+void backend_seek (guint64 seek, struct con_win *cwin);
+gint64 backend_get_current_length(struct con_win *cwin);
+gint64 backend_get_current_position(struct con_win *cwin);
+void backend_set_soft_volume(struct con_win *cwin);
+gint64 backend_get_volume (struct con_win *cwin);
+void backend_set_volume (gdouble vol, struct con_win *cwin);
+void backend_update_volume (struct con_win *cwin);
+gboolean backend_is_playing(struct con_win *cwin);
+gboolean backend_is_paused(struct con_win *cwin);
+void backend_pause (struct con_win *cwin);
+void backend_resume (struct con_win *cwin);
+void backend_play (struct con_win *cwin);
+void backend_stop (struct con_win *cwin);
+void backend_start(struct musicobject *mobj, struct con_win *cwin);
+void backend_quit (struct con_win *cwin);
+gint backend_init (struct con_win *cwin);
 
 /* Audio functions */
 
@@ -1113,6 +1053,7 @@ gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(gchar *str);
 enum file_type get_file_type(gchar *file);
+gchar* get_mime_type(gchar *file);
 gboolean is_image_file(gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);
@@ -1140,13 +1081,6 @@ void create_status_icon(struct con_win *cwin);
 gboolean dialog_audio_init(gpointer data);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 
-/* Last.fm */
-
-gint lastfm_handshake(struct con_win *cwin);
-gint lastfm_submit(struct con_win *cwin, gchar *title, gchar *artist,
-		   gchar *album, gint track_no, gint track_len,
-		   GTimeVal start_time, enum track_source source);
-
 /* Init */
 
 gint init_dbus(struct con_win *cwin);
@@ -1155,10 +1089,8 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
-gint init_threads(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_keybinder(struct con_win *cwin);
-gint init_lastfm(struct con_win *cwin);
 void init_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);

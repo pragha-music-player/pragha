@@ -1,6 +1,25 @@
-=====================================================
-Overview of changes in Pragha 0.8.3
-=====================================================
+==============================================================
+Overview of changes in Pragha 0.91 "Good news, or aberration?."
+==============================================================
+
+News:
+	Ported to use gstreamer.
+
+Benefit? :)
+ * Add support for new formats: So far wma and m4a. Please checks support to m4a. I no have any m4a file to test. ;)
+ * Add a new pulseaudio backend.
+ * Now it's free!. Can be packaged for fedora for example, since not depend directly of libmad.
+
+Regressions: :(
+ * Lastfm not working. Soon fix it using https://github.com/felipec/libscrobbler. Adding librefm and love support.
+ * Lost Mod file support. Sorry.. but someone used it? In fact very easy to add support for this. Maybe fix it later.
+
+Then, everything should work. :)
+
+
+======================================================
+OTHERS REALESES:
+======================================================
 
 News:
 	Move to trash instead remove tracks in library view.
@@ -26,14 +45,6 @@ Bugs fixed:
 	Place the cursor at the end of the filename entry.
 	No save fuse option if not folders view is activate.
 	Fix tiny memory leak.
-
-v0.8.3.1
-	D'Oh!. Fix crash when edit track without reproducing any song.
-	No show zero length, zero bitrate, or zero year in current playlist.
-
-======================================================
-OTHERS REALESES:
-======================================================
 
 V0.8.2
 News:
