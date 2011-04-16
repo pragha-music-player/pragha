@@ -138,10 +138,14 @@ void show_osd(struct con_win *cwin)
 
 	/* Create notification instance */
 
-	osd = notify_notification_new_with_status_icon((const gchar *) summary,
-					NULL,
-					NULL,
-					GTK_STATUS_ICON(cwin->status_icon));
+	if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
+		osd = notify_notification_new_with_status_icon((const gchar *) summary,
+								NULL, NULL,
+								GTK_STATUS_ICON(cwin->status_icon));
+	}
+	else {
+		osd = notify_notification_new((const gchar *) summary, NULL, NULL, NULL);
+	}
 
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
 

@@ -43,7 +43,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			   struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean aa, ctt, ar, osd, ret;
+	gboolean aa, ctt, ar, osd, ret, test_fuse_folders;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
@@ -250,6 +250,13 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			}
 			g_free(u_folder);
 			ret = gtk_tree_model_iter_next(model, &iter);
+		}
+
+		test_fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
+
+		if ((cwin->cpref->fuse_folders != test_fuse_folders) && (cwin->cpref->cur_library_view == FOLDERS)) {
+			cwin->cpref->fuse_folders = test_fuse_folders;
+			init_library_view(cwin);
 		}
 
 		save_preferences(cwin);
@@ -691,6 +698,10 @@ static void update_preferences(struct con_win *cwin)
 			g_free(u_file);
 		}
 	}
+	if (cwin->cpref->fuse_folders)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->fuse_folders_w),
+					     TRUE);
 }
 
 void save_preferences(struct con_win *cwin)
@@ -1099,6 +1110,13 @@ void save_preferences(struct con_win *cwin)
 			      last_rescan_time);
 	g_free(last_rescan_time);
 
+	/* Save fuse folders option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_LIBRARY,
+			       KEY_FUSE_FOLDERS,
+			       cwin->cpref->fuse_folders);
+
 	/* Audio Options */
 
 	/* Save Audio sink */
@@ -1303,7 +1321,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
 	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
 	GtkWidget *audio_cd_device_label, *audio_cd_device_entry;
-	GtkWidget *library_bbox_align, *library_bbox, *library_add, *library_remove;
+	GtkWidget *library_bbox_align, *library_bbox, *library_add, *library_remove, *fuse_folders;
 	GtkWidget *audio_sink_combo, *sink_label, *hbox_sink;
 	GtkWidget *hbox_album_art_pattern, *hbox_audio_cd_device;
 	GtkWidget *audio_device_combo, *audio_device_label, *hbox_audio_device;
@@ -1456,7 +1474,6 @@ void preferences_dialog(struct con_win *cwin)
 	add_recurcively = gtk_check_button_new_with_label(_("Add files recurcively"));
 	osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
 
-
 	/* Pack general items */
 
 	gtk_box_pack_start(GTK_BOX(general_vbox),
@@ -1601,7 +1618,7 @@ void preferences_dialog(struct con_win *cwin)
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("Folder"),
+	column = gtk_tree_view_column_new_with_attributes(_("Folders"),
 							  renderer,
 							  "text",
 							  0,
@@ -1645,6 +1662,8 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
+
+	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
 	
 	/* Pack all library items */
 
@@ -1652,6 +1671,12 @@ void preferences_dialog(struct con_win *cwin)
 			   hbox_library,
 			   TRUE,
 			   TRUE,
+			   2);
+
+	gtk_box_pack_start(GTK_BOX(library_vbox),
+			   fuse_folders,
+			   FALSE,
+			   FALSE,
 			   2);
 
 	/* Last.fm */
@@ -1738,6 +1763,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->audio_device_w = audio_device_combo;
 	cwin->cpref->audio_cd_device_w = audio_cd_device_entry;
 	cwin->cpref->library_view = library_view;
+	cwin->cpref->fuse_folders_w = fuse_folders;
 	cwin->cpref->album_art_pattern_w = album_art_pattern;
 	cwin->cpref->album_art_pattern_label_w = album_art_pattern_label;
 	cwin->cpref->album_art_size_w = album_art_size;

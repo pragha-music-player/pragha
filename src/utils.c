@@ -304,11 +304,11 @@ gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 {
 	gchar *utf8_filename = NULL;
 	gchar *dir = NULL;
-	
+
 	/* Get the containing folder of the file or the file itself ? */
 	if (get_folder) {
 		dir = g_path_get_dirname(filename);
-		utf8_filename = g_filename_display_basename(dir);
+		utf8_filename = g_filename_display_name(dir);
 		g_free(dir);
 	}
 	else {

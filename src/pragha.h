@@ -82,6 +82,7 @@
 #define P_GENRE_STR         N_("Genre")
 #define P_BITRATE_STR       N_("Bitrate")
 #define P_YEAR_STR          N_("Year")
+#define P_COMMENT_STR       N_("Comment")
 #define P_LENGTH_STR        N_("Length")
 #define P_FILENAME_STR      N_("Filename")
 
@@ -166,6 +167,8 @@
 #define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
+#define KEY_FUSE_FOLDERS	   "library_fuse_folders"
+
 
 #define GROUP_AUDIO    "Audio"
 #define KEY_AUDIO_SINK             "audio_sink"
@@ -185,12 +188,13 @@
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR		   "status_bar"
 
-#define TAG_TNO_CHANGED    1<<0
-#define TAG_TITLE_CHANGED  1<<1
-#define TAG_ARTIST_CHANGED 1<<2
-#define TAG_ALBUM_CHANGED  1<<3
-#define TAG_GENRE_CHANGED  1<<4
-#define TAG_YEAR_CHANGED   1<<5
+#define TAG_TNO_CHANGED		1<<0
+#define TAG_TITLE_CHANGED	1<<1
+#define TAG_ARTIST_CHANGED	1<<2
+#define TAG_ALBUM_CHANGED	1<<3
+#define TAG_GENRE_CHANGED	1<<4
+#define TAG_YEAR_CHANGED	1<<5
+#define TAG_COMMENT_CHANGED	1<<6
 
 enum debug_level {
 	DBG_INFO = 1,
@@ -267,6 +271,7 @@ enum curplaylist_columns {
 	P_GENRE,
 	P_BITRATE,
 	P_YEAR,
+	P_COMMENT,
 	P_LENGTH,
 	P_FILENAME,
 	P_PLAYED,
@@ -297,7 +302,7 @@ enum dnd_target {
 /* Library Views */
 
 enum library_view {
-	FOLDER_FILE,
+	FOLDERS,
 	ARTIST,
 	ALBUM,
 	GENRE,
@@ -342,6 +347,7 @@ struct tags {
 	gchar *artist;
 	gchar *album;
 	gchar *genre;
+	gchar *comment;
 	guint year;
 	guint track_no;
 	gint length;
@@ -351,13 +357,12 @@ struct tags {
 };
 
 struct pixbuf {
-	GdkPixbuf *pixbuf_dir;
-	GdkPixbuf *pixbuf_file;
+	GdkPixbuf *pixbuf_app;
 	GdkPixbuf *pixbuf_artist;
 	GdkPixbuf *pixbuf_album;
 	GdkPixbuf *pixbuf_track;
 	GdkPixbuf *pixbuf_genre;
-	GdkPixbuf *pixbuf_app;
+	GdkPixbuf *pixbuf_dir;
 	GtkWidget *image_pause;
 	GtkWidget *image_play;
 };
@@ -401,6 +406,7 @@ struct con_pref {
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean status_bar;
+	gboolean fuse_folders;
 	GSList *library_dir;
 	GSList *playlist_columns;
 	GSList *playlist_column_widths;
@@ -421,6 +427,7 @@ struct con_pref {
 	GtkWidget *use_cddb_w;
 	GtkWidget *audio_sink_combo;
 	GtkWidget *library_view;
+	GtkWidget *fuse_folders_w;
 	GtkWidget *audio_cd_device_w;
 	GtkWidget *audio_device_w;
 	struct lastfm_pref lw;
@@ -502,7 +509,7 @@ struct con_state {
 	GMutex *l_mutex;
 	GCond *c_cond;
 	GList *rand_track_refs;
-	GList *queue_track_refs;
+	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
 	cdrom_drive_t *cdda_drive;
@@ -778,7 +785,7 @@ void simple_library_search_keyrelease(struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 						  struct con_win *cwin);
 void clear_library_search(struct con_win *cwin);
-void folder_file_library_tree(GtkAction *action, struct con_win *cwin);
+void folders_library_tree(GtkAction *action, struct con_win *cwin);
 void artist_library_tree(GtkAction *action, struct con_win *cwin);
 void album_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_library_tree(GtkAction *action, struct con_win *cwin);
@@ -800,19 +807,21 @@ gint add_new_artist_db(gchar *artist, struct con_win *cwin);
 gint add_new_album_db(gchar *album, struct con_win *cwin);
 gint add_new_genre_db(gchar *genre, struct con_win *cwin);
 gint add_new_year_db(guint year, struct con_win *cwin);
+gint add_new_comment_db(gchar *comment, struct con_win *cwin);
 gint add_new_location_db(gchar *location, struct con_win *cwin);
 void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin);
 gint find_artist_db(const gchar *artist, struct con_win *cwin);
 gint find_album_db(const gchar *album, struct con_win *cwin);
 gint find_genre_db(const gchar *genre, struct con_win *cwin);
 gint find_year_db(gint year, struct con_win *cwin);
+gint find_comment_db(const gchar *comment, struct con_win *cwin);
 gint find_location_db(const gchar *location, struct con_win *cwin);
 gint find_playlist_db(const gchar *playlist, struct con_win *cwin);
 void delete_location_db(gint location_id, struct con_win *cwin);
 gint delete_location_hdd(gint location_id, struct con_win *cwin);
 void update_track_db(gint location_id, gint changed,
 		     gint track_no, gchar *title,
-		     gint artist_id, gint album_id, gint genre_id, gint year_id,
+		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_win *cwin);
 gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
 gchar** get_playlist_names_db(struct con_win *cwin);
@@ -820,6 +829,7 @@ void delete_playlist_db(gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
 void flush_stale_entries_db(struct con_win *cwin);
 void flush_db(struct con_win *cwin);
+gboolean fraction_update(GtkWidget *pbar);
 void rescan_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 void update_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
@@ -894,6 +904,7 @@ void track_properties_current_playlist(struct con_win *cwin);
 void track_properties_current_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties_current_playing(struct con_win *cwin);
 void clear_current_playlist(GtkAction *action, struct con_win *cwin);
+void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin);
 void append_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
@@ -965,6 +976,8 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item,
 				    struct con_win *cwin);
 void playlist_length_column_change_cb(GtkCheckMenuItem *item,
 				      struct con_win *cwin);
+void playlist_comment_column_change_cb(GtkCheckMenuItem *item,
+				     struct con_win *cwin);
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
 					struct con_win *cwin);
 void clear_sort_current_playlist_cb(GtkMenuItem *item,

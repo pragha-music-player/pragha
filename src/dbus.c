@@ -136,6 +136,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->genre,
 			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->year,
 			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->track_no,
+			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->comment,
 			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->length,
 			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->bitrate,
 			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->channels,

@@ -9,3 +9,4 @@ src/pref.c
 src/menu.c
 src/utils.c
 src/playlist.c
+src/db.c

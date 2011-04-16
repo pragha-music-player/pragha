@@ -144,7 +144,7 @@ gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 	DBusMessage *msg = NULL;
 	DBusMessage *reply_msg = NULL;
 	DBusError d_error;
-	const char *state, *file, *title, *artist, *album, *genre;
+	const char *state, *file, *title, *artist, *album, *genre, *comment;
 	gint year, track_no, length, bitrate, channels, samplerate;
 
 	year = track_no = length = bitrate = channels = samplerate = 0;
@@ -192,6 +192,7 @@ gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 				      DBUS_TYPE_STRING, &genre,
 				      DBUS_TYPE_INT32, &year,
 				      DBUS_TYPE_INT32, &track_no,
+				      DBUS_TYPE_STRING, &comment,
 				      DBUS_TYPE_INT32, &length,
 				      DBUS_TYPE_INT32, &bitrate,
 				      DBUS_TYPE_INT32, &channels,
@@ -207,10 +208,10 @@ gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 		}
 
 		g_print("state: %s\nfile: %s\ntitle: %s\nartist: %s\n"
-			"album: %s\ngenre: %s\nyear: %d\ntrack_no: %d\nlength: %d\n"
-			"bitrate: %d\nchannels: %d\nsamplerate: %d\n",
+			"album: %s\ngenre: %s\nyear: %d\ntrack_no: %d\ncomment: %s\n"
+			"length: %d\nbitrate: %d\nchannels: %d\nsamplerate: %d\n",
 			state, file, title, artist, album, genre, year,
-			track_no, length, bitrate, channels, samplerate);
+			track_no, comment, length, bitrate, channels, samplerate);
 	} else {
 		g_print("state: %s\n", state);
 	}

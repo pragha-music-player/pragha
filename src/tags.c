@@ -35,6 +35,7 @@ gboolean get_wav_info(gchar *file, struct tags *tags)
 	tags->artist = g_strdup("");
 	tags->album = g_strdup("");
 	tags->genre = g_strdup("");
+	tags->comment = g_strdup("");
 	tags->title = g_path_get_basename(file);
 	tags->channels = sinfo.channels;
 	tags->samplerate = sinfo.samplerate;
@@ -78,6 +79,7 @@ static gboolean get_info_taglib(gchar *file, struct tags *tags)
 	tags->artist = g_strdup(taglib_tag_artist(tag));
 	tags->album = g_strdup(taglib_tag_album(tag));
 	tags->genre = g_strdup(taglib_tag_genre(tag));
+	tags->comment = g_strdup(taglib_tag_comment(tag));
 	tags->track_no = taglib_tag_track(tag);
 	tags->year = taglib_tag_year(tag);
 	tags->bitrate = taglib_audioproperties_bitrate(audio_prop);
@@ -131,6 +133,7 @@ gboolean get_mod_info(gchar *file, struct tags *tags)
 	tags->artist = g_strdup("");
 	tags->album = g_strdup("");
 	tags->genre = g_strdup("");
+	tags->comment = g_strdup("");
 	tags->title = g_strdup(ModPlug_GetName(mf));
 	tags->channels = 2;
 	tags->samplerate = 44100;
@@ -178,6 +181,8 @@ gboolean save_tags_to_file(gchar *file, struct tags *ntag,
 		taglib_tag_set_genre(tag, ntag->genre);
 	if (changed & TAG_YEAR_CHANGED)
 		taglib_tag_set_year(tag, ntag->year);
+	if (changed & TAG_COMMENT_CHANGED)
+		taglib_tag_set_comment(tag, ntag->comment);
 
 	CDEBUG(DBG_VERBOSE, "Saving tags for file: %s", file);
 
@@ -285,9 +290,9 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 		struct con_win *cwin)
 {
 	gboolean ret = FALSE;
-	gchar *query = NULL, *stitle = NULL, *sartist = NULL;
+	gchar *query = NULL, *stitle = NULL, *sartist = NULL, *scomment= NULL;
 	gchar *salbum = NULL, *sgenre = NULL, *file = NULL;
-	gint i = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0;
+	gint i = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	struct db_result result;
 
 	if (!changed)
@@ -339,6 +344,12 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 		if (!year_id)
 			year_id = add_new_year_db(ntag->year, cwin);
 	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		scomment = sanitize_string_sqlite3(ntag->comment);
+		comment_id = find_comment_db(scomment, cwin);
+		if (!comment_id)
+			comment_id = add_new_comment_db(scomment, cwin);
+	}
 
 	/* This is so fscking horrible. */
 
@@ -363,6 +374,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 							album_id,
 							genre_id,
 							year_id,
+							comment_id,
 							cwin);
 					ret = FALSE;
 				}
@@ -383,6 +395,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	g_free(sartist);
 	g_free(salbum);
 	g_free(sgenre);
+	g_free(scomment);
 }
 
 void check_entry(GtkEntry *entry, GtkCheckButton *check)
@@ -404,19 +417,21 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 {
 	GtkWidget *dialog;
 	GtkWidget *tag_table;
-	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year;
-	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year;
-	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year;
-	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year;
-	GtkWidget *hbox_spins;
+	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year, *label_comment;
+	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year, *chk_comment;
+	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment;
+	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
+	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
+	GtkTextBuffer *buffer;
+	GtkTextIter start, end;
 
 	gint result, changed = 0;
 
 	/*Create table*/
 
-	tag_table = gtk_table_new(5, 2, FALSE);
+	tag_table = gtk_table_new(7, 2, FALSE);
 
-	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 15);
+	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 5);
 	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
 	gtk_container_set_border_width(GTK_CONTAINER(tag_table), 5);
 
@@ -428,6 +443,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	label_genre = gtk_label_new(_("Genre"));
 	label_tno = gtk_label_new(_("Track No"));
 	label_year = gtk_label_new(_("Year"));
+	label_comment = gtk_label_new(_("Comment"));
 
 	gtk_misc_set_alignment(GTK_MISC (label_title), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_artist), 1, 0.5);
@@ -435,6 +451,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_misc_set_alignment(GTK_MISC (label_genre), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_tno), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_year), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_comment), 1, 0);
 
 	/* Create entry fields */
 
@@ -446,6 +463,9 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	entry_tno = gtk_spin_button_new_with_range (0, 2030, 1);
 	entry_year = gtk_spin_button_new_with_range (0, 2030, 1);
 
+	entry_comment = gtk_text_view_new();
+	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (entry_comment), FALSE);
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry_comment));
 
 	gtk_entry_set_max_length(GTK_ENTRY(entry_title), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_artist), TAG_MAX_LEN);
@@ -474,6 +494,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	chk_genre = gtk_check_button_new();
 	chk_year = gtk_check_button_new();
 	chk_tno = gtk_check_button_new();
+	chk_comment = gtk_check_button_new();
 
 	hbox_title = gtk_hbox_new(FALSE, 0);
 	hbox_artist = gtk_hbox_new(FALSE, 0);
@@ -481,6 +502,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	hbox_genre = gtk_hbox_new(FALSE, 0);
 	hbox_year = gtk_hbox_new(FALSE, 0);
 	hbox_tno = gtk_hbox_new(FALSE, 0);
+	hbox_comment = gtk_hbox_new(FALSE, 0);
 
 	hbox_spins = gtk_hbox_new(FALSE, 5);
 
@@ -600,6 +622,35 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_spins,
 			1, 2, 4, 5);
 
+	comment_view_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(comment_view_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(comment_view_scroll),
+					GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(comment_view_scroll), entry_comment);
+
+	chk_alignment = gtk_alignment_new(0.5, 0, 0, 0);
+	gtk_container_add(GTK_CONTAINER(chk_alignment), chk_comment);
+
+	gtk_box_pack_start(GTK_BOX(hbox_comment),
+			   comment_view_scroll,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_comment),
+			   chk_alignment,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_comment,
+			0, 1, 5, 7,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_comment,
+			1, 2, 5, 7);
+
 	/* The main edit dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Edit tags"),
@@ -610,7 +661,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
 					     NULL);
-	gtk_window_set_default_size(GTK_WINDOW (dialog), 400, -1);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
 	/* Add to the dialog's main vbox */
 
@@ -630,6 +681,8 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)otag->track_no);
 	if (otag->year)
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
+	if (otag->comment)
+		gtk_text_buffer_set_text (buffer, otag->comment, -1);
 
 	g_signal_connect(G_OBJECT(entry_title),
 			 "changed",
@@ -655,6 +708,10 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			 "changed",
 			 G_CALLBACK(check_entry),
 			 chk_year);
+	g_signal_connect(G_OBJECT(buffer),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_comment);
 
 	g_signal_connect (G_OBJECT(entry_title),
 			"icon-press",
@@ -708,6 +765,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			ntag->year =
 				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year));
 			changed |= TAG_YEAR_CHANGED;
+		}
+		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_comment))) {
+			gtk_text_buffer_get_start_iter (buffer, &start);
+			gtk_text_buffer_get_end_iter (buffer, &end);
+			ntag->comment = g_strdup(gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
+			changed |= TAG_COMMENT_CHANGED;
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:
@@ -857,6 +920,7 @@ exit:
 	g_free(ntag.artist);
 	g_free(ntag.album);
 	g_free(ntag.genre);
+	g_free(ntag.comment);
 	g_list_free(list);
 }
 

@@ -37,10 +37,10 @@ void common_cleanup(struct con_win *cwin)
 	g_object_unref(cwin->pixbuf->image_play);
 	g_object_unref(cwin->pixbuf->image_pause);
 
+	if (cwin->pixbuf->pixbuf_app)
+		g_object_unref(cwin->pixbuf->pixbuf_app);
 	if (cwin->pixbuf->pixbuf_dir)
 		g_object_unref(cwin->pixbuf->pixbuf_dir);
-	if (cwin->pixbuf->pixbuf_file)
-		g_object_unref(cwin->pixbuf->pixbuf_file);
 	if (cwin->pixbuf->pixbuf_artist)
 		g_object_unref(cwin->pixbuf->pixbuf_artist);
 	if (cwin->pixbuf->pixbuf_album)

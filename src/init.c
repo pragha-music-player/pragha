@@ -205,7 +205,7 @@ gint init_config(struct con_win *cwin)
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f, osd_f, lastfm_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
-	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f;
+	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f;
 	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, album_f, album_art_size_f, status_bar_f;	
 	gboolean all_f;
@@ -214,7 +214,7 @@ gint init_config(struct con_win *cwin)
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = osd_f = lastfm_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
-	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = FALSE;
+	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	all_f = FALSE;
@@ -545,6 +545,19 @@ gint init_config(struct con_win *cwin)
 			lib_delete_f = TRUE;
 		}
 
+		/* Retrieve fuse folders option */
+
+		cwin->cpref->fuse_folders = 
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_LIBRARY,
+					       KEY_FUSE_FOLDERS,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			fuse_folders_f = TRUE;
+		}
+
 		/* Retrieve add recursively files option */
 
 		cwin->cpref->add_recursively_files =
@@ -835,6 +848,8 @@ gint init_config(struct con_win *cwin)
 			g_slist_append(cwin->cpref->library_tree_nodes,
 				       g_strdup(P_TITLE_STR));
 	}
+	if (all_f || fuse_folders_f)
+		cwin->cpref->fuse_folders = FALSE;
 	if (all_f || col_widths_f) {
 		for (i=0; i<4; i++) {
 			cwin->cpref->playlist_column_widths =
@@ -914,6 +929,14 @@ gint init_musicdbase(struct con_win *cwin)
 			   cwin->cdbase->db_file);
 		g_free(cwin->cdbase->db_file);
 		return -1;
+	}
+
+	if (g_ascii_strcasecmp(cwin->cpref->installed_version, PACKAGE_VERSION)) {
+		g_critical("Music database is incompatible with previous to 0.8.0. Please rescand library.");
+		if (drop_dbase_schema(cwin) == -1) {
+			g_critical("Unable to drop database schema");
+			return -1;
+		}
 	}
 
 	return init_dbase_schema(cwin);
@@ -1176,18 +1199,84 @@ void init_menu_actions(struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
 }
 
+void init_pixbufs(struct con_win *cwin)
+{
+	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
+
+	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
+	if (!cwin->pixbuf->pixbuf_app)
+		g_warning("Unable to load pragha png");
+
+	cwin->pixbuf->pixbuf_artist = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
+									"/artist.png",
+									16,
+									16,
+									TRUE,
+									NULL);
+	if (!cwin->pixbuf->pixbuf_artist)
+		g_warning("Unable to load artist png");
+
+	cwin->pixbuf->pixbuf_album = gtk_icon_theme_load_icon(icontheme,
+							      "media-optical",
+							      16,
+							      0,
+							      NULL);
+	if (!cwin->pixbuf->pixbuf_album)
+		cwin->pixbuf->pixbuf_album = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
+										"/album.png",
+										16,
+										16,
+										TRUE,
+										NULL);
+	if (!cwin->pixbuf->pixbuf_album)
+		g_warning("Unable to load album png");
+
+	cwin->pixbuf->pixbuf_track = gtk_icon_theme_load_icon(icontheme,
+							     "gnome-mime-audio",
+							     16,
+							     0,
+							     NULL);
+	if (!cwin->pixbuf->pixbuf_track)
+		cwin->pixbuf->pixbuf_track = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
+										"/track.png",
+										16,
+										16,
+										TRUE,
+										NULL);
+	if (!cwin->pixbuf->pixbuf_track)
+		g_warning("Unable to load track png");
+
+	cwin->pixbuf->pixbuf_genre = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
+								       "/genre.png",
+								       16,
+								       16,
+								       TRUE,
+								       NULL);
+	if (!cwin->pixbuf->pixbuf_genre)
+		g_warning("Unable to load genre png");
+
+	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
+							    "gtk-directory",
+							    16,
+							    0,
+							    NULL);
+	if (!cwin->pixbuf->pixbuf_dir)
+		g_warning("Unable to load subdir png");
+}
+
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *hbox_panel, *hbox_main, *status_bar, *menu_bar;
-	GError *error = NULL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
 	gtk_init(&argc, &argv);
 
-        g_set_application_name(_("Pragha Music Manager"));
-        g_setenv("PULSE_PROP_media.role", "music", TRUE);
+	g_set_application_name(_("Pragha Music Player"));
+	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
+
+	init_pixbufs(cwin);
 
 	/* Main window */
 
@@ -1199,18 +1288,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_widget_set_default_colormap(colormap);
 	}
 
-	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png",
- 							    &error);
-	if (!cwin->pixbuf->pixbuf_app) {
-		g_warning("Unable to load app png : %s", error->message);
-		g_error_free(error);
-		error = NULL;
-	}
-	else{
+	if (cwin->pixbuf->pixbuf_app)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
 				    cwin->pixbuf->pixbuf_app);
-	}
-	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Manager"));
+
+	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
 
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",

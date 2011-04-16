@@ -29,7 +29,7 @@ static void add_entry_playlist(gchar *playlist,
 			      &iter,
 			      root);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_file,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_track,
 			   P_PLAYLIST, playlist,
 			   -1);
 }

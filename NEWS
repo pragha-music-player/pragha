@@ -1,6 +1,45 @@
 =====================================================
-Overview of changes in Pragha 0.7.7
+Overview of changes in Pragha 0.8.0 "A tiny more fast"
 =====================================================
+
+News:
+	Folder / Files library view replaced by Foders Estructure. (like in foobar2000) (1)
+	Add option to merge folders in folders estructure view.
+	Add support for comments.
+
+Optimizations.
+	Use gtk_tree_store_prepend rather than gtk_tree_store_append.
+	Use fixed size in cell renderers of current playlist.
+	Use g_timeout_add_seconds to update progress when scan the library.
+	Prepend refs to crop playlist.
+
+Others Changes:
+	Now is Pragha Music Player instead Pragha Music Manager.
+	When change songs not scroll to the new path if already visible.
+	When you drag songs where they are dropped.
+	Use gnome-mime-audio icon to library_tree, and playlist_tree if exitst.
+
+Bugs fixed:
+	Order with case insensitive in library view.
+	Preventing incomplete icon themes, restore Album png.
+	Check system tray before sending notifications.
+	Use correct PULSE_PROP_media.role audio, instead music.
+	Use Singly-Linked List in queue list.
+	Remove useless compilation flag in db.
+
+Update po files.
+
+(1) Again thank you very much to Roberto DMD.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.7.1
+	Fix Issue 14: Pragha can not remember the starting position.
+	Remember correctly window position when click status icon or close window.
+	Never add files recursively with dbus and command line. Freeze Pragha.
+
+V0.7.7
 News:
 	Global keybindings thanks to keybinder. Inspired on osdlyrics
 
@@ -14,14 +53,6 @@ Bugs fixed:
 	Shows album art when playing audio cd
 	D'Oh!. No remember Close to tray option.
 
-V0.7.7.1
-	Fix Issue 14: Pragha can not remember the starting position.
-	Remember correctly window position when click status icon or close window.
-	Never add files recursively with dbus and command line. Freeze Pragha.
-
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.6
 News:
 	Drag'n drop several items in Library/Playlist/Current_playlist. Very thanks to Guillaume Royer.
@@ -40,6 +71,7 @@ Bugs fixed:
 	Insensitive Properties menu entry, instead hide it when several items are selected.
 	Unselect all when click over when click over no song.
 	No resize panel, when change windows size.
+	Make NEWS Distributable.
 	Remove unused variables.
 
 V0.7.5.2

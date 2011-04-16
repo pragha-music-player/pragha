@@ -104,6 +104,7 @@ TRACK.samplerate, \
 TRACK.channels, \
 TRACK.length, \
 TRACK.bitrate, \
+COMMENT.name, \
 YEAR.year, \
 TRACK.track_no, \
 GENRE.name, \
@@ -111,8 +112,9 @@ ALBUM.name, \
 ARTIST.name, \
 TRACK.title, \
 LOCATION.name \
-FROM TRACK, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
+FROM TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
 WHERE TRACK.location = \"%d\" \
+AND COMMENT.id = TRACK.comment \
 AND YEAR.id = TRACK.year \
 AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
@@ -128,13 +130,14 @@ AND LOCATION.id = \"%d\";", location_id, location_id);
 		mobj = g_slice_new0(struct musicobject);
 		mobj->tags = g_slice_new0(struct tags);
 
-		mobj->file = g_strdup(result.resultp[i+11]);
-		mobj->tags->title = g_strdup(result.resultp[i+10]);
-		mobj->tags->artist = g_strdup(result.resultp[i+9]);
-		mobj->tags->album = g_strdup(result.resultp[i+8]);
-		mobj->tags->genre = g_strdup(result.resultp[i+7]);
-		mobj->tags->track_no = atoi(result.resultp[i+6]);
-		mobj->tags->year = atoi(result.resultp[i+5]);
+		mobj->file = g_strdup(result.resultp[i+12]);
+		mobj->tags->title = g_strdup(result.resultp[i+11]);
+		mobj->tags->artist = g_strdup(result.resultp[i+10]);
+		mobj->tags->album = g_strdup(result.resultp[i+9]);
+		mobj->tags->genre = g_strdup(result.resultp[i+8]);
+		mobj->tags->track_no = atoi(result.resultp[i+7]);
+		mobj->tags->year = atoi(result.resultp[i+6]);
+		mobj->tags->comment = g_strdup(result.resultp[i+5]);
 		mobj->tags->bitrate = atoi(result.resultp[i+4]);
 		mobj->tags->length = atoi(result.resultp[i+3]);
 		mobj->tags->channels = atoi(result.resultp[i+2]);
@@ -209,6 +212,7 @@ void delete_musicobject(struct musicobject *mobj)
 	g_free(mobj->tags->artist);
 	g_free(mobj->tags->album);
 	g_free(mobj->tags->genre);
+	g_free(mobj->tags->comment);
 	g_free(mobj->file);
 	g_slice_free(struct tags, mobj->tags);
 	g_slice_free(struct musicobject, mobj);

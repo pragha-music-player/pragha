@@ -123,7 +123,7 @@ gchar *library_page_context_menu_xml = "<ui>			\
 	<menuitem action=\"Expand library\"/>			\
 	<menuitem action=\"Collapse library\"/>			\
 	<separator/>						\
-	<menuitem action=\"folder_file\"/>			\
+	<menuitem action=\"folders\"/>				\
 	<separator/>						\
 	<menuitem action=\"artist\"/>				\
 	<menuitem action=\"album\"/>				\
@@ -209,7 +209,7 @@ GtkActionEntry main_aentries[] = {
 	{"Home", GTK_STOCK_HOME, N_("Homepage"),
 	 NULL, "Homepage", G_CALLBACK(home_action)},
 	{"Community", GTK_STOCK_INFO, N_("Community"),
-	 NULL, "Forum or pragha", G_CALLBACK(community_action)},
+	 NULL, "Forum of pragha", G_CALLBACK(community_action)},
 	{"Wiki", GTK_STOCK_YES, N_("Wiki"),
 	 NULL, "Wiki of pragha", G_CALLBACK(wiki_action)},
 };
@@ -285,8 +285,8 @@ GtkActionEntry library_page_context_aentries[] = {
 	 NULL, "Expand the library", G_CALLBACK(expand_all_action)},
 	{"Collapse library", GTK_STOCK_REMOVE, N_("_Collapse library"),
 	 NULL, "Collapse the library", G_CALLBACK(collapse_all_action)},
-	{"folder_file", GTK_STOCK_REFRESH, N_("Folder / File"),
-	 NULL, "Folder / File", G_CALLBACK(folder_file_library_tree)},
+	{"folders", GTK_STOCK_REFRESH, N_("Folder structure"),
+	 NULL, "Folder structure", G_CALLBACK(folders_library_tree)},
 	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
 	 NULL, "Artist", G_CALLBACK(artist_library_tree)},
 	{"album", GTK_STOCK_REFRESH, N_("Album"),
@@ -367,14 +367,12 @@ static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
 
 static GtkWidget* create_library_tree(struct con_win *cwin)
 {
-	GError *error = NULL;
 	GtkWidget *library_tree;
 	GtkTreeModel *library_filter_tree;
 	GtkTreeStore *store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
-	gint width, height;
 
 	/* Create the tree store */
 
@@ -401,57 +399,6 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library_tree));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
-
-	/* Load pixbufs */
-
-	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
-
-	cwin->pixbuf->pixbuf_artist = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-									"/artist.png",
-									width,
-									height,
-									TRUE,
-									&error);
-	if (!cwin->pixbuf->pixbuf_artist) {
-		g_warning("Unable to load artist png : %s", error->message);
-		g_error_free(error);
-		error = NULL;
-	}
-
-	cwin->pixbuf->pixbuf_album = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-							      "media-optical",
-							      width,
-							      0,
-							      &error);
-	if (!cwin->pixbuf->pixbuf_album) {
-		g_warning("Unable to load album png : %s", error->message);
-		g_error_free(error);
-		error = NULL;
-	}
-
-	cwin->pixbuf->pixbuf_track = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-								       "/track.png",
-								       width,
-								       height,
-								       TRUE,
-								       &error);
-	if (!cwin->pixbuf->pixbuf_track) {
-		g_warning("Unable to load track png : %s", error->message);
-		g_error_free(error);
-		error = NULL;
-	}
-
-	cwin->pixbuf->pixbuf_genre = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-								       "/genre.png",
-								       width,
-								       height,
-								       TRUE,
-								       &error);
-	if (!cwin->pixbuf->pixbuf_genre) {
-		g_warning("Unable to load genre png : %s", error->message);
-		g_error_free(error);
-		error = NULL;
-	}
 
 	/* Create column and cell renderers */
 
@@ -535,7 +482,6 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
-	GError *error = NULL;
 
 	/* Create the tree store */
 
@@ -571,20 +517,6 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(playlist_tree), column);
-
-	/* Create pixbufs */
-
-	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-							    "gtk-directory",
-							    16, 0, &error);
-	if( error != NULL )
-		g_warning("Unable to load gtk-directory icon, err : %s", error->message);
-
-	cwin->pixbuf->pixbuf_file = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-							     "gtk-file",
-							     16, 0, &error);
-	if( error != NULL )
-		g_warning("Unable to load gtk-file icon, err : %s", error->message);
 
 	/* Create right click popup menu */
 
@@ -682,7 +614,7 @@ static GtkWidget * create_toggles_buttons(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "button-press-event",
 			G_CALLBACK(library_page_right_click_cb), cwin);
 
-	l = gtk_label_new_with_mnemonic(_("Pragha Music Manager"));
+	l = gtk_label_new_with_mnemonic(_("Pragha Music Player"));
 	gtk_label_set_angle(GTK_LABEL(l), 90);
 	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
 
@@ -779,6 +711,7 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 		*toggle_genre,
 		*toggle_bitrate,
 		*toggle_year,
+		*toggle_comment,
 		*toggle_length,
 		*toggle_filename,
 		*separator,
@@ -795,6 +728,7 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 	toggle_genre = gtk_check_menu_item_new_with_label(_("Genre"));
 	toggle_bitrate = gtk_check_menu_item_new_with_label(_("Bitrate"));
 	toggle_year = gtk_check_menu_item_new_with_label(_("Year"));
+	toggle_comment = gtk_check_menu_item_new_with_label(_("Comment"));
 	toggle_length = gtk_check_menu_item_new_with_label(_("Length"));
 	toggle_filename = gtk_check_menu_item_new_with_label(_("Filename"));
 	separator = gtk_separator_menu_item_new ();
@@ -812,6 +746,7 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_genre);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_bitrate);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_year);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_comment);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_length);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_filename);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), separator);
@@ -833,6 +768,8 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_bitrate), TRUE);
 	if (is_present_str_list(P_YEAR_STR, cwin->cpref->playlist_columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_year), TRUE);
+	if (is_present_str_list(P_COMMENT_STR, cwin->cpref->playlist_columns))
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_comment), TRUE);
 	if (is_present_str_list(P_LENGTH_STR, cwin->cpref->playlist_columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_length), TRUE);
 	if (is_present_str_list(P_FILENAME_STR, cwin->cpref->playlist_columns))
@@ -854,6 +791,8 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 			 G_CALLBACK(playlist_bitrate_column_change_cb), cwin);
 	g_signal_connect(G_OBJECT(toggle_year), "toggled",
 			 G_CALLBACK(playlist_year_column_change_cb), cwin);
+	g_signal_connect(G_OBJECT(toggle_comment), "toggled",
+			 G_CALLBACK(playlist_comment_column_change_cb), cwin);
 	g_signal_connect(G_OBJECT(toggle_length), "toggled",
 			 G_CALLBACK(playlist_length_column_change_cb), cwin);
 	g_signal_connect(G_OBJECT(toggle_filename), "toggled",
@@ -908,6 +847,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 		*label_genre,
 		*label_bitrate,
 		*label_year,
+		*label_comment,
 		*label_length,
 		*label_filename;
 	GtkWidget *col_button;
@@ -919,6 +859,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	label_genre = gtk_label_new(_("Genre"));
 	label_bitrate = gtk_label_new(_("Bitrate"));
 	label_year = gtk_label_new(_("Year"));
+	label_comment = gtk_label_new(_("Comment"));
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
 
@@ -935,6 +876,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Track No */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
 	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
 							  renderer,
 							  "text",
@@ -953,6 +896,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Title */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
 	column = gtk_tree_view_column_new_with_attributes(P_TITLE_STR,
 							  renderer,
 							  "text",
@@ -971,6 +916,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Artist */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
 	column = gtk_tree_view_column_new_with_attributes(P_ARTIST_STR,
 							  renderer,
 							  "text",
@@ -989,6 +936,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Album */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_ALBUM_STR,
 							  renderer,
 							  "text",
@@ -1007,6 +956,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Genre */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_GENRE_STR,
 							  renderer,
 							  "text",
@@ -1025,6 +976,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Bitrate */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_BITRATE_STR,
 							  renderer,
 							  "text",
@@ -1043,6 +996,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Year */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_YEAR_STR,
 							  renderer,
 							  "text",
@@ -1058,9 +1013,31 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
 			 G_CALLBACK(header_right_click_cb), cwin);
 
+	/* Column : Comment */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_COMMENT_STR,
+							  renderer,
+							  "text",
+							  P_COMMENT,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_column_set_widget(column, label_comment);
+	gtk_widget_show(label_comment);
+	col_button = gtk_widget_get_ancestor(label_comment, GTK_TYPE_BUTTON);
+	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
+			 G_CALLBACK(header_right_click_cb), cwin);
+
 	/* Column : Length */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_LENGTH_STR,
 							  renderer,
 							  "text",
@@ -1078,6 +1055,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	/* Column : Filename */
 
 	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
 	column = gtk_tree_view_column_new_with_attributes(P_FILENAME_STR,
 							  renderer,
 							  "text",
@@ -1124,6 +1103,7 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 				   G_TYPE_STRING,	/* Tag : Genre */
 				   G_TYPE_STRING,	/* Tag : Bitrate */
 				   G_TYPE_STRING,	/* Tag : Year */
+				   G_TYPE_STRING,	/* Tag : Comment */
 				   G_TYPE_STRING,	/* Tag : Length */
 				   G_TYPE_STRING,	/* Filename */
 				   G_TYPE_BOOLEAN);	/* Played flag */

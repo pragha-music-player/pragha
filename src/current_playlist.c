@@ -154,7 +154,7 @@ static gboolean is_current_rand_ref(GtkTreeRowReference *ref, struct con_win *cw
 
 void requeue_track_refs (struct con_win *cwin)
 {
-	GList *list;
+	GSList *list = NULL;
 	GtkTreeRowReference *ref;
 	GtkTreeModel *model;
 	GtkTreePath *lpath;
@@ -183,7 +183,7 @@ void requeue_track_refs (struct con_win *cwin)
 
 void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 {
-	GList *list;
+	GSList *list = NULL;
 	GtkTreeRowReference *ref;
 	GtkTreeModel *model;
 	GtkTreePath *lpath;
@@ -197,7 +197,7 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			lpath = gtk_tree_row_reference_get_path(ref);
 			if (!gtk_tree_path_compare(path, lpath)) {
 				gtk_tree_row_reference_free(ref);
-				cwin->cstate->queue_track_refs = g_list_remove(cwin->cstate->queue_track_refs, ref);
+				cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, ref);
 			}
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
@@ -512,7 +512,7 @@ static void clear_rand_track_refs(struct con_win *cwin)
 
 static void clear_queue_track_refs(struct con_win *cwin)
 {
-	GList *list;
+	GSList *list = NULL;
 
 	if (cwin->cstate->queue_track_refs) {
 		list = cwin->cstate->queue_track_refs;
@@ -520,7 +520,7 @@ static void clear_queue_track_refs(struct con_win *cwin)
 			gtk_tree_row_reference_free(list->data);
 			list = list->next;
 		}
-		g_list_free(cwin->cstate->queue_track_refs);
+		g_slist_free(cwin->cstate->queue_track_refs);
 		cwin->cstate->queue_track_refs = NULL;
 	}
 
@@ -727,6 +727,10 @@ void update_current_state(GThread *thread, GtkTreePath *path,
 	GtkTreeRowReference *rand_ref;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
+	gint cx, cy;
+
+	GdkRectangle vrect;
+	GdkRectangle crect;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -738,13 +742,29 @@ void update_current_state(GThread *thread, GtkTreePath *path,
 	/* Update view */
 
 	gtk_tree_selection_unselect_all(selection);
-	gtk_tree_selection_select_path(selection, path);
-	if ((action != PLAYLIST_CURR) && cwin->cpref->shuffle)
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-					     path, NULL, TRUE, 0.5, 0);
-	else
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-					     path, NULL, FALSE, 0, 0);
+	gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
+
+	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
+	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
+
+	gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
+
+	if (cwin->cpref->shuffle) {
+		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
+			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+						     path, NULL, TRUE, 0.5, 0.0);
+		}
+	}
+	else {
+		if (cy < vrect.y) {
+			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+						     path, NULL, TRUE, 0.0, 0.0);
+		}
+		else if (cy + crect.height > vrect.y + vrect.height) {
+			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+						     path, NULL, TRUE, 1.0, 0.0);
+		}
+	}
 
 	/* Update current song info */
 
@@ -1007,6 +1027,10 @@ void jump_to_playing_song(struct con_win *cwin)
 {
 	GtkTreePath *path=NULL;
 	GtkTreeSelection *selection;
+	gint cx, cy;
+
+	GdkRectangle vrect;
+	GdkRectangle crect;
 
 	path = current_playlist_get_actual(cwin);
 
@@ -1016,12 +1040,15 @@ void jump_to_playing_song(struct con_win *cwin)
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
 
-		if (cwin->cpref->shuffle)
+		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
+		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
+
+		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
+
+		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
 			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						path, NULL, TRUE, 0.5, 0);
-		else
-			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						path, NULL, FALSE, 0, 0);
+						     path, NULL, TRUE, 0.5, 0.0);
+		}
 
 		gtk_tree_path_free(path);
 	}
@@ -1066,7 +1093,7 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (list) {
 		path = list->data;
 		ref = gtk_tree_row_reference_new(model, path);
-		cwin->cstate->queue_track_refs = g_list_append(cwin->cstate->queue_track_refs, ref);
+		cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
 		gtk_tree_path_free(path);
 		list = list->next;
 	}
@@ -1121,7 +1148,7 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 					delete_queue_track_refs(list->data, cwin);
 				else{
 					ref = gtk_tree_row_reference_new(model, list->data);
-					cwin->cstate->queue_track_refs = g_list_append(cwin->cstate->queue_track_refs, ref);
+					cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
 				}
 				requeue_track_refs(cwin);
 			}
@@ -1143,7 +1170,7 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	GList *list, *i;
+	GList *list = NULL, *i = NULL;
 	struct musicobject *mobj = NULL;
 	gboolean played = FALSE;
 
@@ -1204,7 +1231,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
-	GList *to_delete = NULL, *i = NULL;
+	GSList *to_delete = NULL, *i = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1222,7 +1249,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (!gtk_tree_selection_iter_is_selected(selection, &iter)) {
 			path = gtk_tree_model_get_path(model, &iter);
 			ref = gtk_tree_row_reference_new(model, path);
-			to_delete = g_list_append(to_delete, ref);
+			to_delete = g_slist_prepend(to_delete, ref);
 			gtk_tree_path_free(path);
 		}
 		ret = gtk_tree_model_iter_next(model, &iter);
@@ -1252,7 +1279,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_tree_row_reference_free(ref);
 	}
 	gtk_tree_selection_unselect_all(selection);
-	g_list_free(to_delete);
+	g_slist_free(to_delete);
 	update_status_bar(cwin);
 }
 
@@ -1275,12 +1302,13 @@ void track_properties_current_playlist(struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
 	gint i=0;
-	gchar tags[11][20] = {N_("Track No"),
+	gchar tags[12][20] = {N_("Track No"),
 			      N_("Title"),
 			      N_("Artist"),
 			      N_("Album"),
 			      N_("Genre"),
 			      N_("Year"),
+			      N_("Comment"),
 			      N_("Length"),
 			      N_("Bitrate"),
 			      N_("Channels"),
@@ -1302,9 +1330,9 @@ void track_properties_current_playlist(struct con_win *cwin)
 			gchar *bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
 			gchar *channels = g_strdup_printf("%d", mobj->tags->channels);
 			gchar *samplerate = g_strdup_printf("%d", mobj->tags->samplerate);
-			gchar *u_file = get_display_name(mobj);;
+			gchar *u_file = get_display_name(mobj);
 
-			gchar *tr_info[11] = {tno,
+			gchar *tr_info[12] = {tno,
 			      (mobj->tags->title && strlen(mobj->tags->title)) ?
 			      mobj->tags->title : _("Unknown Tags"),
 			      (mobj->tags->artist && strlen(mobj->tags->artist)) ?
@@ -1314,6 +1342,8 @@ void track_properties_current_playlist(struct con_win *cwin)
 			      (mobj->tags->genre && strlen(mobj->tags->genre)) ?
 			      mobj->tags->genre : _("Unknown Tags"),
 			      year,
+			      (mobj->tags->comment && strlen(mobj->tags->comment)) ?
+			      mobj->tags->comment : _("Unknown Tags"),
 			      length,
 			      bitrate,
 			      channels,
@@ -1331,7 +1361,7 @@ void track_properties_current_playlist(struct con_win *cwin)
 			info_box = gtk_vbox_new(FALSE, 0);
 			t_hbox = gtk_hbox_new(FALSE, 0);
 
-			for (i=0; i<11; i++) {
+			for (i=0; i<12; i++) {
 				align = gtk_alignment_new(0, 0, 0, 0);
 				tag_label = gtk_label_new(tags[i]);
 				gtk_label_set_selectable(GTK_LABEL(tag_label), TRUE);
@@ -1398,12 +1428,13 @@ void track_properties_current_playing(struct con_win *cwin)
 	GtkWidget *dialog;
 	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
 	gint i=0;
-	gchar tags[11][20] = {N_("Track No"),
+	gchar tags[12][20] = {N_("Track No"),
 			      N_("Title"),
 			      N_("Artist"),
 			      N_("Album"),
 			      N_("Genre"),
 			      N_("Year"),
+			      N_("Comment"),
 			      N_("Length"),
 			      N_("Bitrate"),
 			      N_("Channels"),
@@ -1419,7 +1450,7 @@ void track_properties_current_playing(struct con_win *cwin)
 		gchar *samplerate = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->samplerate);
 		gchar *u_file = get_display_name(cwin->cstate->curr_mobj);
 
-		gchar *tr_info[11] = {tno,
+		gchar *tr_info[12] = {tno,
 				     (cwin->cstate->curr_mobj->tags->title && strlen(cwin->cstate->curr_mobj->tags->title)) ?
 				     cwin->cstate->curr_mobj->tags->title : _("Unknown Tags"),
 				     (cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
@@ -1429,6 +1460,8 @@ void track_properties_current_playing(struct con_win *cwin)
 				     (cwin->cstate->curr_mobj->tags->genre && strlen(cwin->cstate->curr_mobj->tags->genre)) ?
 				     cwin->cstate->curr_mobj->tags->genre : _("Unknown Tags"),
 				     year,
+				     (cwin->cstate->curr_mobj->tags->comment && strlen(cwin->cstate->curr_mobj->tags->comment)) ?
+				     cwin->cstate->curr_mobj->tags->comment : _("Unknown Tags"),
 				     length,
 				     bitrate,
 				     channels,
@@ -1446,7 +1479,7 @@ void track_properties_current_playing(struct con_win *cwin)
 		info_box = gtk_vbox_new(FALSE, 0);
 		t_hbox = gtk_hbox_new(FALSE, 0);
 
-		for (i=0; i<11; i++) {
+		for (i=0; i<12; i++) {
 			align = gtk_alignment_new(0, 0, 0, 0);
 			tag_label = gtk_label_new(tags[i]);
 			gtk_label_set_selectable(GTK_LABEL(tag_label), TRUE);
@@ -1532,6 +1565,71 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	update_status_bar(cwin);
 }
 
+/* Insert a track to the current playlist */
+
+void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gchar *ch_length, *ch_track_no, *ch_year, *ch_bitrate, *ch_filename;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	if (!mobj) {
+		g_warning("Dangling entry in current playlist");
+		return;
+	}
+	if (!mobj->tags) {
+		g_warning("Corrupt music object, no tags found");
+		return;
+	}
+
+	ch_length = convert_length_str(mobj->tags->length);
+	ch_year = g_strdup_printf("%d", mobj->tags->year);
+	ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
+	ch_filename = get_display_name(mobj);
+
+	if(mobj->tags->track_no)
+		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
+	else
+		ch_track_no = NULL;
+
+	if (drop_after)
+		gtk_list_store_insert_after(GTK_LIST_STORE(model), &iter, pos);
+	else
+		gtk_list_store_insert_before(GTK_LIST_STORE(model), &iter, pos);
+
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+			   P_MOBJ_PTR, mobj,
+			   P_QUEUE, NULL,
+			   P_BUBBLE, FALSE, 
+			   P_TRACK_NO, ch_track_no,
+			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
+					mobj->tags->title : ch_filename,
+			   P_ARTIST, mobj->tags->artist,
+			   P_ALBUM, mobj->tags->album,
+			   P_GENRE, mobj->tags->genre,
+			   P_BITRATE, ch_bitrate,
+			   P_YEAR, ch_year,
+			   P_COMMENT, mobj->tags->comment,
+			   P_LENGTH, ch_length,
+			   P_FILENAME, ch_filename,
+			   P_PLAYED, FALSE,
+			   -1);
+
+	/* Increment global count of tracks */
+
+	cwin->cstate->tracks_curr_playlist++;
+	cwin->cstate->unplayed_tracks++;
+	update_status_bar(cwin);
+
+	g_free(ch_length);
+	g_free(ch_track_no);
+	g_free(ch_year);
+	g_free(ch_bitrate);
+	g_free(ch_filename);
+}
+
 /* Append a track to the current playlist */
 
 void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
@@ -1574,6 +1672,7 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 			   P_GENRE, mobj->tags->genre,
 			   P_BITRATE, ch_bitrate,
 			   P_YEAR, ch_year,
+			   P_COMMENT, mobj->tags->comment,
 			   P_LENGTH, ch_length,
 			   P_FILENAME, ch_filename,
 			   P_PLAYED, FALSE,
@@ -2194,27 +2293,32 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	gchar *name = NULL;
 	gchar **uris = NULL;
 	gchar *filename = NULL;
-	gboolean ret;
+	gboolean is_row;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	is_row = gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(cwin->current_playlist),
+						x, y,
+						&dest_path,
+						&pos);
+	if (is_row)
+		gtk_tree_model_get_iter(model, &dest_iter, dest_path);
 
 	/* Reorder within current playlist */
 
 	if (gtk_drag_get_source_widget(context) == cwin->current_playlist) {
 		CDEBUG(DBG_VERBOSE, "Dnd: Reorder");
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 		/* Clear sort */
-
 		clear_sort_current_playlist(NULL, cwin);
 
 		/* No selections */
-
 		if (!list)
 			goto exit;
 
 		/* Store references to the selected paths */
-
 		l = list;
 		while(l) {
 			path = l->data;
@@ -2224,15 +2328,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			l = l->next;
 		}
 
-		/* Move them to the new place */
-
-		ret = gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(cwin->current_playlist),
-							x, y,
-							&dest_path,
-							&pos);
-		if (ret)
-			gtk_tree_model_get_iter(model, &dest_iter, dest_path);
-
 		for (l=list; l != NULL; l = l->next) {
 			ref = l->data;
 			path = gtk_tree_row_reference_get_path(ref);
@@ -2240,7 +2335,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 			if (pos == GTK_TREE_VIEW_DROP_BEFORE)
 				gtk_list_store_move_before(GTK_LIST_STORE(model), &iter,
-							   (ret) ? &dest_iter : NULL);
+							   (is_row) ? &dest_iter : NULL);
 			else if (pos == GTK_TREE_VIEW_DROP_AFTER)
 				gtk_list_store_move_after(GTK_LIST_STORE(model),
 							  &iter, &dest_iter);
@@ -2248,12 +2343,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			gtk_tree_path_free(path);
 			gtk_tree_row_reference_free(ref);
 		}
-
-		/* Cleanup and finish. */
-
-		gtk_tree_path_free(dest_path);
 		g_list_free(list);
-
 		goto exit;
 	}
 
@@ -2275,8 +2365,17 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				mobj = new_musicobject_from_db(elem, cwin);
 				if (!mobj)
 					g_critical("Invalid location ID");
-				else
-					append_current_playlist(mobj, cwin);
+				else {
+					if (is_row && pos == GTK_TREE_VIEW_DROP_AFTER) {
+						insert_current_playlist(mobj, TRUE, &dest_iter, cwin);
+					}
+					else if (is_row && pos == GTK_TREE_VIEW_DROP_BEFORE) {
+						insert_current_playlist(mobj, FALSE, (is_row) ? &dest_iter : NULL, cwin);
+					}
+					else {
+						append_current_playlist(mobj, cwin);
+					}
+				}
 			}
 			i++;
 		} while (elem != 0);
@@ -2308,24 +2407,73 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 		break;
 	case TARGET_URI_LIST:
+		CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
+
 		uris = gtk_selection_data_get_uris(data);
 		if(uris){
 			for(i = 0; uris[i] != NULL; i++) {
 				filename = g_filename_from_uri(uris[i], NULL, NULL);
-				handle_selected_file(filename, cwin);
+				if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
+					if(cwin->cpref->add_recursively_files)
+						__recur_add(filename, cwin);
+					else
+						__non_recur_add(filename, TRUE, cwin);
+				}
+				else {
+					mobj = new_musicobject_from_file(filename);
+					if (!mobj)
+						g_critical("Invalid location filename");
+					else {
+						if (is_row && pos == GTK_TREE_VIEW_DROP_AFTER) {
+							insert_current_playlist(mobj, TRUE, &dest_iter, cwin);
+						}
+						else if (is_row && pos == GTK_TREE_VIEW_DROP_BEFORE) {
+							insert_current_playlist(mobj, FALSE, (is_row) ? &dest_iter : NULL, cwin);
+						}
+						else {
+							append_current_playlist(mobj, cwin);
+						}
+					}
+				}
+				g_free(filename);
 			}
 			g_strfreev(uris);
 		}
 		break;
 	case TARGET_PLAIN_TEXT:
+		CDEBUG(DBG_VERBOSE, "Target: PLAIN_TEXT");
+
 		filename = (gchar*)gtk_selection_data_get_text(data);
-		handle_selected_file(filename, cwin);
+		if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
+			if(cwin->cpref->add_recursively_files)
+				__recur_add(filename, cwin);
+			else
+				__non_recur_add(filename, TRUE, cwin);
+		}
+		else {
+			mobj = new_musicobject_from_file(filename);
+			if (!mobj)
+				g_critical("Invalid location filename");
+			else {
+				if (is_row && pos == GTK_TREE_VIEW_DROP_AFTER) {
+					insert_current_playlist(mobj, TRUE, &dest_iter, cwin);
+				}
+				else if (is_row && pos == GTK_TREE_VIEW_DROP_BEFORE) {
+					insert_current_playlist(mobj, FALSE, (is_row) ? &dest_iter : NULL, cwin);
+				}
+				else {
+					append_current_playlist(mobj, cwin);
+				}
+			}
+		}
+		g_free(filename);
 		break;
 	default:
 		g_warning("Unknown DND type");
 		break;
 	}
 exit:
+	gtk_tree_path_free(dest_path);
 	gtk_drag_finish(context, TRUE, FALSE, time);
 }
 
@@ -2392,6 +2540,10 @@ void init_current_playlist_view(struct con_win *cwin)
 	GError *error = NULL;
 	GtkTreePath *path=NULL;
  	GtkTreeSelection *selection;
+	gint cx, cy;
+
+	GdkRectangle vrect;
+	GdkRectangle crect;
 
 	add_playlist_current_playlist(SAVE_PLAYLIST_STATE, cwin);
 
@@ -2412,12 +2564,15 @@ void init_current_playlist_view(struct con_win *cwin)
 	gtk_tree_selection_unselect_all(selection);
 	gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
 
-	if (cwin->cpref->shuffle)
+	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
+	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
+
+	gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
+
+	if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
 		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-					path, NULL, TRUE, 0.5, 0);
-	else
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-					path, NULL, FALSE, 0, 0);
+					     path, NULL, TRUE, 0.5, 0.0);
+	}
 
 	gtk_tree_path_free(path);
 
@@ -2617,6 +2772,28 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
 				       P_YEAR - 2);
+
+	if (!col) {
+		g_warning("Invalid column number");
+		return;
+	}
+
+	col_name = gtk_tree_view_column_get_title(col);
+	gtk_tree_view_column_set_visible(col, state);
+	modify_current_playlist_columns(cwin, col_name, state);
+}
+
+/* Callback for adding/deleting comment column */
+
+void playlist_comment_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+{
+	const gchar *col_name;
+	gboolean state;
+	GtkTreeViewColumn *col;
+
+	state = gtk_check_menu_item_get_active(item);
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
+				       P_COMMENT - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
