@@ -1,16 +1,46 @@
 =====================================================
-Overview of changes in Pragha 0.7.4
+Overview of changes in Pragha 0.7.5
 =====================================================
 
 News:
-	Add next action to notifications.
-	Improved time library indexing.
-	Add option to start pragha minimized, fullscreen, or remember the last window state. Inspired in Nathan Wayde patch. Thanks!.
-	Add option to minimize pragha when close window.
-	Add button in panel to leave fullscreen.
+	Add confirmation dialog. to "Delete from..", menu entries.
+	Leave the checkbox automatically when change a tag in edit track dialog.
+	Adds an icon to clear the tags entry in edit track dialog.
+	Hack in the representation of album art.
 
 Others Changes:
-	Set the labels to wrap on display properties dialog. Thanks to Nathan Wayde.  
+	Expand all row in library tree when double click
+	Use GTK_STOCK_LEAVE_FULLSCREEN button adding text and translations. 
+	Unsensitive librarytree and search_entry when updating.
+
+Updates Translations:
+	Add initial Swedish language. Thanks to Zwopper.
+	Update Czech translation. Thanks to Alois.
+
+Bugs fixed:
+	Fix Issue 10. Several critical warnings when first init.
+	Add files when double-clicking or pressing enter in filechooser.
+	Keep the open file dialog on top of the main window,
+	Do not use gtk_tree_view_column_set_cell_data_func(). Performance problem. No more play/pause pixbuf in currente playlist.
+	No update song information all the time.
+	Capitalise and translate window title.
+	Rework toogle_main_window.
+	Unref notification when close it.
+	Unref Cover in unset_album_art
+	Fix memleak in panel.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.4
+Add next action to notifications.
+Improved time library indexing.
+Add option to start pragha minimized, fullscreen, or remember the last window state. Inspired in Nathan Wayde patch. Thanks!.
+Add option to minimize pragha when close window.
+Add button in panel to leave fullscreen.
+
+Others Changes:
+	Set the labels to wrap on display properties dialog. Thanks to Nathan Wayde.
 	New Layout of edit track dialog.
 	Use AM_SILENT_RULES if available.
 
@@ -25,9 +55,6 @@ Bugs fixed:
 	Hide album art when restore mainwindow if set to no show.
 	Fixes some memory leaks.
 
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.3
 Drop File Pane in favor of gtk-file-chooser.
 	Support for adding folders recursively in file chooser. (Based on Audacius code. /src/ui_fileopen.c)

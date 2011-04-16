@@ -253,7 +253,6 @@ enum playlist_columns {
 
 enum curplaylist_columns {
 	P_MOBJ_PTR,
-	P_PLAY_PIXBUF,
 	P_QUEUE,
 	P_BUBBLE,
 	P_TRACK_NO,
@@ -342,9 +341,6 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_app;
 	GtkWidget *image_pause;
 	GtkWidget *image_play;
-
-	GdkPixbuf *pixbuf_pause;	/* Play button image */
-	GdkPixbuf *pixbuf_play;		/* Pause button image */
 };
 
 struct lastfm_pref {
@@ -661,7 +657,8 @@ void about_action(GtkAction *action, struct con_win *cwin);
 
 /* Panel actions */
 gboolean update_current_song_info(gpointer data);
-void __update_current_song_info(struct con_win *cwin, gint length);
+void __update_progress_song_info(struct con_win *cwin, gint length);
+void __update_current_song_info(struct con_win *cwin);
 void unset_current_song_info(struct con_win *cwin);
 gboolean update_track_progress_bar(gpointer data);
 void __update_track_progress_bar(struct con_win *cwin, gint length);
@@ -825,11 +822,6 @@ void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
 
-void view_playing_cell_data_func (GtkTreeViewColumn *column,
-			      GtkCellRenderer *renderer,
-			      GtkTreeModel *tree_model,
-			      GtkTreeIter *iter,
-			      struct con_win *cwin);
 void update_current_state(GThread *thread,
 			  GtkTreePath *path,
 			  enum playlist_action action,
@@ -1014,7 +1006,6 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 
 /* Utilities */
-
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);

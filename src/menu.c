@@ -315,12 +315,17 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	g_signal_connect(add_button, "clicked",
 		G_CALLBACK(add_button_cb), storage);
+	g_signal_connect(chooser, "file-activated",
+		G_CALLBACK(add_button_cb), storage);
 	g_signal_connect(close_button, "clicked",
 			G_CALLBACK(close_button_cb), window);
 	g_signal_connect(window, "destroy",
 			G_CALLBACK(gtk_widget_destroy), window);
 	g_signal_connect(window, "key_press_event",
 			G_CALLBACK(open_file_on_keypress), NULL);
+
+	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(cwin->mainwindow));
+	gtk_window_set_destroy_with_parent (GTK_WINDOW (window), TRUE);
 
 	gtk_widget_show_all(window);
 }

@@ -43,32 +43,30 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 
 void toogle_main_window(struct con_win *cwin, gboolean present)
 {
-GtkWindow * window = GTK_WINDOW( cwin->mainwindow );
-static int  x = 0, y = 0;
+static gint  x = 0, y = 0;
 
 	if (present) {
-		if(gtk_window_is_active(GTK_WINDOW (cwin->mainwindow))){
-			gtk_window_get_position( window, &x, &y );
-			gtk_widget_hide(GTK_WIDGET(window));
+		if(gtk_window_is_active(GTK_WINDOW(cwin->mainwindow))){
+			gtk_window_get_position(GTK_WINDOW(cwin->mainwindow), &x, &y );
+			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
 			cwin->cstate->iconified = TRUE;
 		}
-		else gtk_window_present( window );
+		else gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 	}
 	else{
-		gtk_window_set_skip_taskbar_hint( window , FALSE );
 		if( x != 0 && y != 0 )
-			gtk_window_move( window , x, y );
-		gtk_widget_show_all( GTK_WIDGET( window ) );
+			gtk_window_move(GTK_WINDOW(cwin->mainwindow), x, y);
+		gtk_widget_show_all(cwin->mainwindow);
 
-		if(!cwin->cpref->show_album_art)
-			if (cwin->album_art_frame)
-				gtk_widget_hide(cwin->album_art_frame);
+		if(!cwin->cpref->show_album_art && cwin->album_art_frame)
+			gtk_widget_hide(cwin->album_art_frame);
 		if(!cwin->cstate->fullscreen)
 			gtk_widget_hide(cwin->unfull_button);
-		if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)))
-			gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
+		if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))
+			&& !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)))
+				gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
 
-		gtk_window_present( window );
+		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 		cwin->cstate->iconified = FALSE;
 	}
 }
@@ -102,6 +100,12 @@ can_support_actions( void )
 	}
 
 	return supported;
+}
+
+static void
+notify_closed_cb (NotifyNotification *osd)
+{
+	g_object_unref (G_OBJECT(osd));
 }
 
 /* For want of a better place, this is here ... */
@@ -141,12 +145,9 @@ void show_osd(struct con_win *cwin)
 
 	/* Add album art if set */
 
-	if (cwin->cpref->show_album_art &&
-	    cwin->album_art &&
-	    (gtk_image_get_storage_type(GTK_IMAGE(
-				cwin->album_art)) == GTK_IMAGE_PIXBUF))
-		notify_notification_set_icon_from_pixbuf(osd,
-				 gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+	if (cwin->cpref->show_album_art && cwin->album_art &&
+	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
+			notify_notification_set_icon_from_pixbuf(osd, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
 
 	if(can_support_actions( )){
                 notify_notification_add_action(
@@ -154,7 +155,8 @@ void show_osd(struct con_win *cwin)
                     NOTIFY_ACTION_CALLBACK(notify_next_Callback), cwin,
                     NULL );
 	}
-
+	g_signal_connect (osd, "closed",
+			G_CALLBACK (notify_closed_cb), NULL);
 	/* Show OSD */
 
 	if (!notify_notification_show(osd, &error)) {
@@ -190,7 +192,8 @@ gboolean status_get_tooltip_cb (GtkWidget        *widget,
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);
 
-	if (cwin->cpref->show_album_art && cwin->album_art)
+	if (cwin->cpref->show_album_art && cwin->album_art &&
+	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
 		gtk_tooltip_set_icon (tooltip, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
 
 	return TRUE;

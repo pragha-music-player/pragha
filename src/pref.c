@@ -1392,7 +1392,7 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start fullscreen"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start in system tray"));
 
-	start_label = gtk_label_new(_("When pragha start"));
+	start_label = gtk_label_new(_("When Pragha start"));
 
 	hbox_start = gtk_hbox_new(FALSE, 10);
 

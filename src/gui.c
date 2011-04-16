@@ -895,7 +895,6 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkWidget *label_track,
-		*play_pixbuf,
 		*label_title,
 		*label_artist,
 		*label_album,
@@ -916,30 +915,14 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
 
-	play_pixbuf = gtk_image_new_from_icon_name ("stock_volume-max", GTK_ICON_SIZE_MENU);
-
-	/* Column : Pixbuf and Queue Bubble*/
+	/* Column : Queue Bubble*/
 
 	column = gtk_tree_view_column_new ();
-
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func (column, renderer,
-						 (GtkTreeCellDataFunc)
-						 view_playing_cell_data_func,
-						 cwin,
-						 NULL);
-	gtk_tree_view_column_add_attribute (column, renderer, "pixbuf", P_PLAY_PIXBUF);
-
 	renderer = gtk_cell_renderer_bubble_new ();
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_tree_view_column_add_attribute (column, renderer, "markup", P_QUEUE);
 	gtk_tree_view_column_add_attribute (column, renderer, "show-bubble", P_BUBBLE);
-
-	gtk_tree_view_column_set_widget(column, play_pixbuf);
-	gtk_widget_show (play_pixbuf);
 	gtk_tree_view_column_set_resizable(column, FALSE);
-
 	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
 
 	/* Column : Track No */
@@ -1125,7 +1108,6 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	store = gtk_list_store_new(N_P_COLUMNS,
 				   G_TYPE_POINTER,	/* Pointer to musicobject */
-				   GDK_TYPE_PIXBUF,	/* Pixbuf */
 				   G_TYPE_STRING,	/* Queue No String */
 				   G_TYPE_BOOLEAN,	/* Show Bublle Queue */
 				   G_TYPE_STRING,	/* Tag : Track No */
@@ -1412,7 +1394,6 @@ GtkWidget* create_main_region(struct con_win *cwin)
 			   0);
 
 	return hbox;
-
 }
 
 
@@ -1492,7 +1473,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_button_set_relief(GTK_BUTTON(next_button), GTK_RELIEF_NONE);
 	gtk_button_set_relief(GTK_BUTTON(play_button), GTK_RELIEF_NONE);
 
-
 	gtk_button_set_image(GTK_BUTTON(prev_button),
 			     gtk_image_new_from_stock(GTK_STOCK_MEDIA_PREVIOUS,
 						      GTK_ICON_SIZE_LARGE_TOOLBAR));
@@ -1524,11 +1504,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	/* Setup Right control buttons */
 
-	unfull_button = gtk_button_new();
+	unfull_button = gtk_button_new_from_stock (GTK_STOCK_LEAVE_FULLSCREEN);
 	gtk_button_set_relief(GTK_BUTTON(unfull_button), GTK_RELIEF_NONE);
-	gtk_button_set_image(GTK_BUTTON(unfull_button),
-			     gtk_image_new_from_stock(GTK_STOCK_LEAVE_FULLSCREEN,
-						      GTK_ICON_SIZE_LARGE_TOOLBAR));
 
 	sep = gtk_vseparator_new();
 
@@ -1634,6 +1611,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 				   GTK_WIDGET(album_art_frame),
 				   FALSE, FALSE, 0);
 		cwin->album_art_frame = album_art_frame;
+
 		unset_album_art(cwin);
 	}
 

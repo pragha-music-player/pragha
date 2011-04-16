@@ -1,7 +1,7 @@
 dnl Version information
 m4_define([pragha_version_major], [0])
 m4_define([pragha_version_minor], [7])
-m4_define([pragha_version_micro], [4])
+m4_define([pragha_version_micro], [5])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -23,7 +23,7 @@ AC_PROG_INSTALL()
 AC_PROG_LIBTOOL()
 
 dnl Check for i18n support
-XDT_I18N([cs de es fr ja no pl pt ru uk])
+XDT_I18N([cs de es fr ja no pl pt ru sv uk])
 
 dnl Check for required packages
 XDT_CHECK_PACKAGE([ALSA], [alsa], [1.0.15])

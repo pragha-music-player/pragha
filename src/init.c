@@ -212,8 +212,11 @@ gint init_config(struct con_win *cwin)
 		last_folder_f,
 		album_f,
 		album_art_pattern_f,
+		album_art_size_f,
+		timer_remaining_mode_f,
 		osd_f,
 		remember_window_state_f,
+		start_mode_f,
 		close_to_tray_f,
 		status_bar_f,
 		save_playlist_f,
@@ -232,8 +235,8 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	libs_f = lib_add_f = lib_delete_f = columns_f = nodes_f = cur_lib_view_f = FALSE;
-	last_folder_f = recursively_f = album_f = osd_f = remember_window_state_f = close_to_tray_f = status_bar_f = lastfm_f = FALSE;
-	software_mixer_f = save_playlist_f = album_art_pattern_f = use_cddb_f = FALSE;
+	last_folder_f = recursively_f = album_f = osd_f = remember_window_state_f = audio_sink_f = close_to_tray_f = status_bar_f = lastfm_f = FALSE;
+	software_mixer_f = save_playlist_f = album_art_pattern_f = album_art_size_f = timer_remaining_mode_f = use_cddb_f = FALSE;
 	shuffle_f = repeat_f = window_size_f = all_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = FALSE;
 
@@ -272,7 +275,7 @@ gint init_config(struct con_win *cwin)
 				       conrc,
 				       G_KEY_FILE_NONE,
 				       &error)) {
-		g_critical("Unable to load config file, err: %s", error->message);
+		g_critical("Unable to load config file (Possible first start), err: %s", error->message);
 		g_error_free(error);
 		all_f = TRUE;
 	}
@@ -328,9 +331,9 @@ gint init_config(struct con_win *cwin)
 					      KEY_START_MODE,
 					      &error);
 		if (!cwin->cpref->start_mode) {
-			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 			g_error_free(error);
 			error = NULL;
+			start_mode_f = TRUE;
 		}
 
 		/* Retrieve close to system tray option */
@@ -624,7 +627,7 @@ gint init_config(struct con_win *cwin)
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			cwin->cpref->album_art_size = ALBUM_ART_SIZE;
+			album_art_size_f = TRUE;
 		}
 
 		/* Mode remaining time option */
@@ -637,7 +640,7 @@ gint init_config(struct con_win *cwin)
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			cwin->cpref->timer_remaining_mode = FALSE;
+			timer_remaining_mode_f = TRUE;
 		}
 
 		/* Retrieve OSD option */
@@ -855,12 +858,18 @@ gint init_config(struct con_win *cwin)
 		cwin->cstate->last_folder = (gchar*)g_get_home_dir();
 	if (all_f || album_f)
 		cwin->cpref->show_album_art = TRUE;
+	if (all_f || album_art_size_f)
+		cwin->cpref->album_art_size = ALBUM_ART_SIZE;
+	if (all_f || timer_remaining_mode_f)
+		cwin->cpref->timer_remaining_mode = FALSE;
 	if (all_f || osd_f)
 		cwin->cpref->show_osd = FALSE;
 	if (all_f || remember_window_state_f)
 		cwin->cpref->remember_window_state = TRUE;
+	if (all_f || start_mode_f)
+		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 	if (all_f || close_to_tray_f)
-		cwin->cpref->close_to_tray = FALSE;
+		cwin->cpref->close_to_tray = TRUE;
 	if (all_f || status_bar_f)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || save_playlist_f)
@@ -868,7 +877,7 @@ gint init_config(struct con_win *cwin)
 	if (all_f || lastfm_f)
 		cwin->cpref->lw.lastfm_support = FALSE;
 	if (all_f || software_mixer_f)
-		cwin->cpref->software_mixer = FALSE;
+		cwin->cpref->software_mixer = TRUE;
 	if (all_f || use_cddb_f)
 		cwin->cpref->use_cddb = TRUE;
 	if (all_f || shuffle_f)
@@ -1135,18 +1144,6 @@ void init_tag_completion(struct con_win *cwin)
 	g_object_unref(genre_tag_model);
 }
 
-void init_pixbuf(struct con_win *cwin)
-{
-	GtkIconTheme *icon_theme;
-	icon_theme = gtk_icon_theme_get_default ();
-
-	cwin->pixbuf->pixbuf_play = gtk_icon_theme_load_icon (icon_theme, "stock_media-play",16, 0,NULL);
-	cwin->pixbuf->pixbuf_pause = gtk_icon_theme_load_icon (icon_theme, "stock_media-pause", 16, 0, NULL);
-
-	g_object_ref(cwin->pixbuf->pixbuf_play);
-	g_object_ref(cwin->pixbuf->pixbuf_pause);
-}
-
 void init_toggle_buttons(struct con_win *cwin)
 {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
@@ -1180,7 +1177,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_init(&argc, &argv);
 
-        g_set_application_name("Pragha Music Manager");
+        g_set_application_name(_("Pragha Music Manager"));
         g_setenv("PULSE_PROP_media.role", "music", TRUE);
 
 	/* Main window */
@@ -1204,7 +1201,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
 				    cwin->pixbuf->pixbuf_app);
 	}
-	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), "pragha");
+	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Manager"));
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",
 			 G_CALLBACK(exit_gui), cwin);
@@ -1221,8 +1218,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Systray */
 
 	create_status_icon(cwin);
-
-	init_pixbuf(cwin);
 
 	/* Main Vbox */
 

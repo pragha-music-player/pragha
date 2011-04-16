@@ -734,9 +734,10 @@ void update_current_state(GThread *thread, GtkTreePath *path,
 		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
 					     path, NULL, FALSE, 0, 0);
 
-	/* Update track progress bar */
+	/* Update current song info */
 
-	__update_current_song_info(cwin, 0);
+	__update_current_song_info(cwin);
+	__update_progress_song_info(cwin, 0);
 
 	/* Update album art */
 
@@ -1555,7 +1556,6 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	GdkPixbuf *pixbuf = NULL;
 	gchar *ch_length, *ch_track_no, *ch_year, *ch_bitrate, *ch_filename;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1586,7 +1586,6 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
-			   P_PLAY_PIXBUF, pixbuf,
 			   P_QUEUE, NULL,
 			   P_BUBBLE, FALSE, 
 			   P_TRACK_NO, ch_track_no,
@@ -1608,58 +1607,11 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	cwin->cstate->unplayed_tracks++;
 	update_status_bar(cwin);
 
-	if (pixbuf != NULL) {
-		g_object_unref (pixbuf);
-	}
-
 	g_free(ch_length);
 	g_free(ch_track_no);
 	g_free(ch_year);
 	g_free(ch_bitrate);
 	g_free(ch_filename);
-}
-
-/* Function to show icon in Current Playlist if PLAYING or PAUSED */
-
-void view_playing_cell_data_func (GtkTreeViewColumn *column,
-			      GtkCellRenderer *renderer,
-			      GtkTreeModel *tree_model,
-			      GtkTreeIter *iter,
-			      struct con_win *cwin)
-{
-	GdkPixbuf *pixbuf = NULL;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL, *path_renderer;
-
-	path = current_playlist_get_actual(cwin);
-
-	if (path == NULL) {
-		return;
-		}
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	path_renderer = gtk_tree_model_get_path (model, iter);
-
-	if (gtk_tree_path_compare (path, path_renderer) == 0)
-	{
-		switch (cwin->cstate->state)
-		{
-		case ST_PLAYING:
-			pixbuf = cwin->pixbuf->pixbuf_play;
-			break;
-		case ST_PAUSED:
-			pixbuf = cwin->pixbuf->pixbuf_pause;
-			break;
-		default:
-			pixbuf = NULL;
-			break;
-		}
-	}
-
-	g_object_set (renderer, "pixbuf", pixbuf, NULL);
-
-	gtk_tree_path_free(path);
-	gtk_tree_path_free(path_renderer);
 }
 
 /* Clear sort in the current playlist */
@@ -2396,7 +2348,7 @@ void init_current_playlist_columns(struct con_win *cwin)
 	/* Show Pixbuf colum ever*/
 
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_PLAY_PIXBUF - 1);
+				       P_QUEUE - 1);
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, TRUE);
 }
@@ -2411,7 +2363,7 @@ void playlist_track_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_TRACK_NO - 3);
+				       P_TRACK_NO - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2433,7 +2385,7 @@ void playlist_title_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_TITLE - 3);
+				       P_TITLE - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2455,7 +2407,7 @@ void playlist_artist_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_ARTIST - 3);
+				       P_ARTIST - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2477,7 +2429,7 @@ void playlist_album_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_ALBUM - 3);
+				       P_ALBUM - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2499,7 +2451,7 @@ void playlist_genre_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_GENRE - 3);
+				       P_GENRE - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2521,7 +2473,7 @@ void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, struct con_win *c
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_BITRATE - 3);
+				       P_BITRATE - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2543,7 +2495,7 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_YEAR - 3);
+				       P_YEAR - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2565,7 +2517,7 @@ void playlist_length_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_LENGTH - 3);
+				       P_LENGTH - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -2587,7 +2539,7 @@ void playlist_filename_column_change_cb(GtkCheckMenuItem *item, struct con_win *
 
 	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_FILENAME - 3);
+				       P_FILENAME - 2);
 
 	if (!col) {
 		g_warning("Invalid column number");

@@ -198,7 +198,7 @@ gboolean update_current_song_info(gpointer data)
 	struct con_win *cwin = data;
 
 	gdk_threads_enter();
-	__update_current_song_info(cwin, cwin->cstate->newsec);
+	__update_progress_song_info(cwin, cwin->cstate->newsec);
 	gdk_threads_leave();
 
 	return FALSE;

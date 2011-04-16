@@ -385,7 +385,19 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	g_free(sgenre);
 }
 
-/* Layout idea: Easytag */
+void check_entry(GtkEntry *entry, GtkCheckButton *check)
+{
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
+}
+
+static void
+clear_pressed (GtkEntry       *entry,
+		gint            position,
+		GdkEventButton *event)
+{
+	if (position == GTK_ENTRY_ICON_SECONDARY)
+		gtk_entry_set_text (entry, "");
+}
 
 gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		     struct con_win *cwin)
@@ -444,6 +456,11 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_entry_set_completion(GTK_ENTRY(entry_album), cwin->completion[1]);
 	gtk_entry_set_completion(GTK_ENTRY(entry_genre), cwin->completion[2]);
 
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+
 	g_signal_connect(G_OBJECT(entry_tno), "key-press-event",
 			 G_CALLBACK(entry_validate_cb), cwin);
 	g_signal_connect(G_OBJECT(entry_year), "key-press-event",
@@ -457,7 +474,6 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	chk_genre = gtk_check_button_new();
 	chk_year = gtk_check_button_new();
 	chk_tno = gtk_check_button_new();
-
 
 	hbox_title = gtk_hbox_new(FALSE, 0);
 	hbox_artist = gtk_hbox_new(FALSE, 0);
@@ -614,6 +630,48 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)otag->track_no);
 	if (otag->year)
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
+
+	g_signal_connect(G_OBJECT(entry_title),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_title);
+	g_signal_connect(G_OBJECT(entry_artist),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_artist);
+	g_signal_connect(G_OBJECT(entry_album),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_album);
+	g_signal_connect(G_OBJECT(entry_genre),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_genre);
+	g_signal_connect(G_OBJECT(entry_tno),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_tno);
+	g_signal_connect(G_OBJECT(entry_year),
+			 "changed",
+			 G_CALLBACK(check_entry),
+			 chk_year);
+
+	g_signal_connect (G_OBJECT(entry_title),
+			"icon-press",
+			G_CALLBACK (clear_pressed),
+			NULL);
+	g_signal_connect (G_OBJECT(entry_artist),
+			"icon-press",
+			G_CALLBACK (clear_pressed),
+			NULL);
+	g_signal_connect (G_OBJECT(entry_album),
+			"icon-press",
+			G_CALLBACK (clear_pressed),
+			NULL);
+	g_signal_connect (G_OBJECT(entry_genre),
+			"icon-press",
+			G_CALLBACK (clear_pressed),
+			NULL);
 
 	gtk_widget_show_all(dialog);
 
