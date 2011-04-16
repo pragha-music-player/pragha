@@ -73,15 +73,15 @@
 #define AUDIO_CD_DEVICE_ENTRY_LEN  32
 
 #define P_TRACK_NO_STR      "#"
-#define P_TNO_FULL_STR      "Track No"
-#define P_TITLE_STR         "Title"
-#define P_ARTIST_STR        "Artist"
-#define P_ALBUM_STR         "Album"
-#define P_GENRE_STR         "Genre"
-#define P_BITRATE_STR       "Bitrate"
-#define P_YEAR_STR          "Year"
-#define P_LENGTH_STR        "Length"
-#define P_FILENAME_STR      "Filename"
+#define P_TNO_FULL_STR      N_("Track No")
+#define P_TITLE_STR         N_("Title")
+#define P_ARTIST_STR        N_("Artist")
+#define P_ALBUM_STR         N_("Album")
+#define P_GENRE_STR         N_("Genre")
+#define P_BITRATE_STR       N_("Bitrate")
+#define P_YEAR_STR          N_("Year")
+#define P_LENGTH_STR        N_("Length")
+#define P_FILENAME_STR      N_("Filename")
 
 /* These are not seen in the playlist columns */
 /* Used for library view and preferences */

@@ -563,13 +563,13 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 					GTK_MESSAGE_INFO,
 					GTK_BUTTONS_OK,
 					"%s %d\n%s %d\n%s %d",
-					"Total Tracks:",
+					_("Total Tracks:"),
 					n_tracks,
-					"Total Artists:",
+					_("Total Artists:"),
 					n_artists,
-					"Total Albums:",
+					_("Total Albums:"),
 					n_albums);
-	gtk_window_set_title(GTK_WINDOW(dialog), "Statistics");
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Statistics"));
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(dialog);
 }

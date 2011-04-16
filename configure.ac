@@ -1,112 +1,66 @@
-AC_INIT([pragha], [0.6.0], [mati86dl@gmail.com])
+dnl Version information
+m4_define([pragha_version_major], [0])
+m4_define([pragha_version_minor], [6])
+m4_define([pragha_version_micro], [1])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_PREREQ(2.61)
-AC_CONFIG_SRCDIR([src/pragha.c])
-AC_CONFIG_HEADER([config.h])
+dnl Initialize autoconf
+AC_COPYRIGHT([Copyright (c) 2009
+        Matias De lellis <mati86dl@gmail.com>])
+AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 
-# Checks for programs.
-AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+dnl Initialize automake
+AM_INIT_AUTOMAKE([AC_PACKAGE_TARNAME()], [AC_PACKAGE_VERSION()])
+AM_CONFIG_HEADER([config.h])
+AM_MAINTAINER_MODE()
 
-# Checks for header files.
-AC_HEADER_STDC
+dnl check for basic programs
+AC_PROG_CC()
+AC_PROG_INSTALL()
+AC_PROG_LIBTOOL()
 
-# Checks for libraries.
-PKG_CHECK_MODULES([alsa],
-		  [alsa >= 1.0.15],
-		  [],
-		  [AC_MSG_ERROR(alsa-1.0.15 is required)])
+dnl Check for i18n support
+XDT_I18N([es])
 
-PKG_CHECK_MODULES([ao],
-                  [ao >= 0.8.8],
-		  [],
-                  [AC_MSG_ERROR(ao-0.8.8 is required)])
+dnl Check for required packages
+XDT_CHECK_PACKAGE([ALSA], [alsa], [1.0.15])
+XDT_CHECK_PACKAGE([AO], [ao], [0.8.8])
+XDT_CHECK_PACKAGE([FLAC], [flac], [1.2.1])
+XDT_CHECK_PACKAGE([GTHREAD], [gthread-2.0], [2.14.0])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.16.3])
+XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.10.14])
+XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
+XDT_CHECK_PACKAGE([MAD], [mad], [0.15])
+XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
+XDT_CHECK_PACKAGE([DBUS], [dbus-1], [0.74])
+XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
+XDT_CHECK_PACKAGE([SNDFILE], [sndfile >= 1.0.17], [1.0.17])
+XDT_CHECK_PACKAGE([VORBISFILE], [vorbisfile], [1.2.0])
+XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
+XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
+XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
+XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
+XDT_CHECK_PACKAGE([LIBMODPLUG], [libmodplug], [0.7.0])
 
-PKG_CHECK_MODULES([flac],
-                  [flac >= 1.2.1],
-		  [],
-                  [AC_MSG_ERROR(libflac-1.2.1 is required)])
+dnl ***********************************
+dnl *** Check for taglib_c ***
+dnl ***********************************
+TAGLIBC_LIBS=""
+TAGLIBC_CFLAGS=""
+AC_CHECK_LIB([tag_c], [taglib_file_new],
+[
+ AC_CHECK_HEADER([taglib/tag_c.h],
+ [
+  TAGLIBC_LIBS="-ltag_c"
+  AC_DEFINE([HAVE_TAGLIBC], [1], [Define to 1 if tag_c is found])
+  ])
+], [-lm])
+AC_SUBST([TAGLIBC_CFLAGS])
+AC_SUBST([TAGLIBC_LIBS]) 
 
-PKG_CHECK_MODULES([gthread],
-                  [gthread-2.0 >= 2.14.0],
-		  [],
-                  [AC_MSG_ERROR(gthread-2.14.0 is required)])
+AC_OUTPUT([
+Makefile
+po/Makefile.in
+src/Makefile
+])
 
-PKG_CHECK_MODULES([gio],
-                  [gio-2.0 >= 2.16.3],
-		  [],
-                  [AC_MSG_ERROR(gio-2.16.3 is required)])
-
-PKG_CHECK_MODULES([gtk],
-                  [gtk+-2.0 >= 2.10.14],
-		  [],
-                  [AC_MSG_ERROR(gtk-2.10.14 is required)])
-
-PKG_CHECK_MODULES([taglib],
-                  [taglib >= 1.4],
-		  [],
-                  [AC_MSG_ERROR(taglib-1.4-2 is required)])
-
-PKG_CHECK_MODULES([mad],
-                  [mad >= 0.15],
-		  [],
-                  [AC_MSG_ERROR(libmad-0.15 is required)])
-
-PKG_CHECK_MODULES([sqlite3],
-                  [sqlite3 >= 3.4],
-		  [],
-                  [AC_MSG_ERROR(sqlite-3.4 is required)])
-
-PKG_CHECK_MODULES([dbus],
-                  [dbus-glib-1 >= 0.74],
-		  [],
-                  [AC_MSG_ERROR(dbus-glib-1 is required)])
-
-PKG_CHECK_MODULES([libnotify],
-                  [libnotify >= 0.4.4],
-		  [],
-                  [AC_MSG_ERROR(libnotify-0.4.4 is required)])
-
-PKG_CHECK_MODULES([sndfile],
-                  [sndfile >= 1.0.17],
-		  [],
-                  [AC_MSG_ERROR(libsndfile-1.0.17 is required)])
-
-PKG_CHECK_MODULES([vorbisfile],
-                  [vorbisfile >= 1.2.0],
-		  [],
-                  [AC_MSG_ERROR(vorbisfile-1.1.3 is required)])
-
-PKG_CHECK_MODULES([libcurl],
-                  [libcurl >= 7.18],
-		  [],
-                  [AC_MSG_ERROR(curl-7.18 is required)])
-
-PKG_CHECK_MODULES([libcdio],
-                  [libcdio >= 0.78],
-		  [],
-                  [AC_MSG_ERROR(libcdio-0.78 is required)])
-
-PKG_CHECK_MODULES([libcdio_paranoia],
-                  [libcdio_paranoia >= 0.78],
-		  [],
-                  [AC_MSG_ERROR(libcdio_paranoia-0.78 is required)])
-
-PKG_CHECK_MODULES([libcddb],
-                  [libcddb >= 1.2.1],
-		  [],
-                  [AC_MSG_ERROR(libcddb-1.3.0 is required)])
-
-PKG_CHECK_MODULES([libmodplug],
-                  [libmodplug >= 0.7.0],
-		  [],
-                  [AC_MSG_ERROR(libmodplug-0.8.0 is required)])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
-AC_CONFIG_FILES([Makefile
-                 src/Makefile])
-AC_OUTPUT

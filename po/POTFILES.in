@@ -1,0 +1,9 @@
+src/gui.c
+src/pragha.c
+src/panel.c
+src/current_playlist.c
+src/librarytree.c
+src/statusicon.c
+src/tags.c
+src/pref.c
+src/menu.c

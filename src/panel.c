@@ -159,16 +159,16 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 
 	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
 	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s", 
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
 						str ,
 						cwin->cstate->curr_mobj->tags->artist, 
 						cwin->cstate->curr_mobj->tags->album);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">by</span></small> %s", 
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
 						str ,
 						cwin->cstate->curr_mobj->tags->artist);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">in</span></small> %s", 
+		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
 						str ,
 						cwin->cstate->curr_mobj->tags->album);
 	else	str = g_markup_printf_escaped ("%s", 
@@ -190,7 +190,7 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 void unset_current_song_info(struct con_win *cwin)
 {
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label),
-				  "<b>Not playing</b>");
+				  _("<b>Not playing</b>"));
 	gtk_label_set_markup(GTK_LABEL(cwin->track_length_label),"<small>--:--</small>");
 	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label),"<small>00:00</small>");
 }

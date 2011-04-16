@@ -91,16 +91,16 @@ void show_osd(struct con_win *cwin)
 
 	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
 	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped ("by %s the %s", 
+		body = g_markup_printf_escaped (_("by %s in %s"), 
 						cwin->cstate->curr_mobj->tags->artist, 
 						cwin->cstate->curr_mobj->tags->album);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1))
-		body = g_markup_printf_escaped ("by %s", 
+		body = g_markup_printf_escaped (_("by %s"), 
 						cwin->cstate->curr_mobj->tags->artist);
 	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		body = g_markup_printf_escaped ("in %s", 
+		body = g_markup_printf_escaped (_("in %s"), 
 						cwin->cstate->curr_mobj->tags->album);
-	else	body = g_markup_printf_escaped ("Unknown Tags");
+	else	body = g_markup_printf_escaped (_("Unknown Tags"));
 
 	/* Create notification instance */
 
@@ -137,7 +137,7 @@ void show_osd(struct con_win *cwin)
 void status_icon_tooltip_update(struct con_win *cwin)
 {
 gchar *tooltip;
-tooltip = g_strdup_printf("%s by %s", cwin->cstate->curr_mobj->tags->title,
+tooltip = g_strdup_printf(_("%s by %s"), cwin->cstate->curr_mobj->tags->title,
 			  cwin->cstate->curr_mobj->tags->artist);
 #if GTK_CHECK_VERSION(2, 10, 0)
 	GtkTooltips *tooltips = gtk_tooltips_new ();

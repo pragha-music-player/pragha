@@ -174,10 +174,12 @@ static void add_entry_library(gint location_id,
 		node_data = get_containing_folder(location);
 	} else {
 		if (G_UNLIKELY(g_utf8_strlen(node_data, -1) == 0)) {
-			node_data = g_strconcat("Unknown ",
-				g_slist_nth_data(cwin->cpref->library_tree_nodes,
-						 node_level),
-						NULL);
+			if(!g_strncasecmp("Artist",g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level),4))
+					node_data = g_strdup_printf(_("Unknown Artist"));
+			else if(!g_strncasecmp("Album",g_slist_nth_data(cwin->cpref->library_tree_nodes,node_level),4))
+					node_data = g_strdup_printf(_("Unknown Album"));
+			else if(!g_strncasecmp("Genre", g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level), 4))
+						node_data = g_strdup_printf(_("Unknown Genre"));
 			u_flag = TRUE;
 		}
 	}
@@ -219,17 +221,21 @@ static void add_entry_library(gint location_id,
 		node_type = choose_node_type(node_level, cwin);
 		node_pixbuf = choose_node_pixbuf(node_level, cwin);
 
-		if (node_type == NODE_BASENAME) {
+
+		if (node_type == NODE_BASENAME)
 			node_data = g_path_get_basename(location);
-		} else {
+		else {
 			if (G_UNLIKELY(g_utf8_strlen(node_data, -1) == 0)) {
 				if (node_type == NODE_TRACK)
 					node_data = g_path_get_basename(location);
-				else 
-					node_data = g_strconcat("Unknown ",
-					g_slist_nth_data(cwin->cpref->library_tree_nodes,
-							 node_level),
-								NULL);
+				else {
+				if(!g_strncasecmp("Artist",g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level),4))
+						node_data = g_strdup_printf(_("Unknown Artist"));
+				else if(!g_strncasecmp("Album",g_slist_nth_data(cwin->cpref->library_tree_nodes,node_level),4))
+						node_data = g_strdup_printf(_("Unknown Album"));
+				else if(!g_strncasecmp("Genre", g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level), 4))
+						node_data = g_strdup_printf(_("Unknown Genre"));
+				}
 				u_flag = TRUE;
 			}
 		}
@@ -791,7 +797,7 @@ void folder_file_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = FOLDER_FILE;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Folder / File");
+			_("Folder / File"));
 
 	init_library_view(cwin);
 }
@@ -808,7 +814,7 @@ void artist_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = ARTIST_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Artist / Track");
+			_("Artist / Track"));
 
 	init_library_view(cwin);
 }
@@ -825,7 +831,7 @@ void album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = ALBUM_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Album / Track");
+			_("Album / Track"));
 
 	init_library_view(cwin);
 }
@@ -842,7 +848,7 @@ void genre_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = GENRE_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Genre / Track");
+			_("Genre / Track"));
 
 	init_library_view(cwin);
 }
@@ -861,7 +867,7 @@ void artist_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = ARTIST_ALBUM_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Artist / Album / Track");
+			_("Artist / Album / Track"));
 
 	init_library_view(cwin);
 }
@@ -880,7 +886,7 @@ void genre_album_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = GENRE_ALBUM_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Genre / Album / Track");
+			_("Genre / Album / Track"));
 
 	init_library_view(cwin);
 }
@@ -899,7 +905,7 @@ void genre_artist_track_library_tree(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->cur_library_view = GENRE_ARTIST_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Genre / Artist / Track");
+			_("Genre / Artist / Track"));
 
 	init_library_view(cwin);
 }
@@ -920,7 +926,7 @@ void genre_artist_album_track_library_tree(GtkAction *action, struct con_win *cw
 	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM_TRACK;
 
 	gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),
-			"Genre / Artist / Album / Track");
+			_("Genre / Artist / Album / Track"));
 
 	init_library_view(cwin);
 }
@@ -1227,6 +1233,36 @@ void init_library_view(struct con_win *cwin)
 		"GENRE.name ASC, ARTIST.name ASC, ALBUM.name ASC, TRACK.track_no ASC"};
 
 	cwin->cstate->view_change = TRUE;
+
+	switch(cwin->cpref->cur_library_view) {
+	case FOLDER_FILE:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Folder / File"));
+		break;
+	case ARTIST_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist / Track"));		
+		break;
+	case ALBUM_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Album / Track"));	
+		break;
+	case GENRE_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Track"));
+		break;
+	case ARTIST_ALBUM_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Artist / Album / Track"));
+		break;
+	case GENRE_ARTIST_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist / Track"));
+		break;
+	case GENRE_ALBUM_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Album / Track"));
+		break;
+	case GENRE_ARTIST_ALBUM_TRACK:
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label),_("Genre / Artist / Album / Track"));
+		break;
+	default:
+		break;
+	}
+
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->combo_order), FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
 

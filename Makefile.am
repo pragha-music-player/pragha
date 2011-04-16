@@ -1,4 +1,10 @@
-SUBDIRS = src
+SUBDIRS =								\
+	po								\
+	src
+
+AUTOMAKE_OPTIONS =							\
+	1.8								\
+	dist-bzip2
 
 man_MANS = data/pragha.1
 

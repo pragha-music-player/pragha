@@ -1,49 +1,15 @@
-DEFINES = -DSHAREDIR=\""$(pkgdatadir)"\"
+INCLUDES =								\
+	-DDBUS_API_SUBJECT_TO_CHANGE					\
+	-DG_LOG_DOMAIN=\"snyder\"					\
+	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
+	-DSHAREDIR=\""$(pkgdatadir)"\"					\
+	-I$(top_srcdir)
 
 bin_PROGRAMS = pragha
 
 pragha_CFLAGS = $(DEFINES)
 
-pragha_LDADD = $(glib_LIBS) \
-	$(gthread_LIBS) \
-	$(gio_LIBS) \
-	$(gtk_LIBS) \
-	$(mad_LIBS) \
-	$(flac_LIBS) \
-	$(sqlite3_LIBS) \
-	$(ao_LIBS) \
-	$(alsa_LIBS) \
-	$(dbus_LIBS) \
-	$(libnotify_LIBS) \
-	$(sndfile_LIBS) \
-	$(vorbisfile_LIBS) \
-	$(libmodplug_LIBS) \
-	$(libcurl_LIBS) \
-	$(libcdio_LIBS) \
-	$(libcdio_paranoia_LIBS) \
-	$(libcddb_LIBS) \
-	-ltag_c
-
-AM_CPPFLAGS = $(glib_CFLAGS) \
-	$(gio_CFLAGS) \
-	$(gtk_CFLAGS) \
-	$(mad_CFLAGS) \
-	$(flac_CFLAGS) \
-	$(sqlite3_CFLAGS) \
-	$(taglib_CFLAGS) \
-	$(ao_CFLAGS) \
-	$(alsa_CFLAGS) \
-	$(dbus_CFLAGS) \
-	$(libnotify_CFLAGS) \
-	$(sndfile_CFLAGS) \
-	$(vorbisfile_CFLAGS) \
-	$(libcurl_CFLAGS) \
-	$(libcdio_CFLAGS) \
-	$(libcddb_CFLAGS) \
-	-I$(top_srcdir)/src/include \
-	-Wall
-
-pragha_SOURCES = pragha.c \
+pragha_SOURCES =pragha.c \
 		init.c \
 		gui.c \
 		menu.c \
@@ -84,3 +50,45 @@ pragha_SOURCES = pragha.c \
 		mod.h \
 		flac.h \
 		cdda.h
+
+pragha_CFLAGS =	$(GLIB_CFLAGS) 						\
+	$(GTHREAD_CFLAGS)						\
+	$(GIO_CFLAGS) 							\
+	$(GTK_CFLAGS) 							\
+	$(MAD_CFLAGS) 							\
+	$(FLAC_CFLAGS) 							\
+	$(SQLITE3_CFLAGS) 						\
+	$(TAGLIB_CFLAGS) 						\
+	$(TAGLIBC_CFLAGS) 						\
+	$(AO_CFLAGS) 							\
+	$(ALSA_CFLAGS) 							\
+	$(DBUS_CFLAGS) 							\
+	$(LIBNOTIFY_CFLAGS) 						\
+	$(SNDFILE_CFLAGS) 						\
+	$(VORBISFILE_CFLAGS) 						\
+	$(LIBCURL_CFLAGS) 						\
+	$(LIBCDIO_CFLAGS) 						\
+	$(LIBCDDB_CFLAGS) 						\
+	-I$(top_srcdir)/src/include 					\
+	-Wall
+
+pragha_LDFLAGS = $(GLIB_LIBS) 						\
+	$(GTHREAD_LIBS)							\
+	$(GIO_LIBS) 							\
+	$(GTK_LIBS) 							\
+	$(MAD_LIBS) 							\
+	$(FLAC_LIBS) 							\
+	$(SQLITE3_LIBS)							\
+	$(TAGLIB_LIBS)							\
+	$(TAGLIBC_LIBS)							\
+	$(AO_LIBS) 							\
+	$(ALSA_LIBS) 							\
+	$(DBUS_LIBS) 							\
+	$(LIBNOTIFY_LIBS) 						\
+	$(SNDFILE_LIBS) 						\
+	$(VORBISFILE_LIBS) 						\
+	$(LIBMODPLUG_LIBS) 						\
+	$(LIBCURL_LIBS) 						\
+	$(LIBCDIO_LIBS) 						\
+	$(LIBCDIO_PARANOIA_LIBS) 					\
+	$(LIBCDDB_LIBS)

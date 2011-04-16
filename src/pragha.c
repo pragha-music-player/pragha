@@ -155,9 +155,10 @@ gint main(gint argc, gchar *argv[])
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 	debug_level = 0;
 
-/*	setlocale(LC_ALL,"");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);*/
+	setlocale (LC_ALL, "");
+	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
 
 	if (init_dbus(cwin) == -1) {
 		g_critical("Unable to init dbus connection");

@@ -18,9 +18,9 @@
 
 #include "pragha.h"
 
-const gchar *album_art_pattern_info = "Patterns should be of the form:\
+const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
-Wildcards are not accepted as of now ( patches welcome :-) ).";
+Wildcards are not accepted as of now ( patches welcome :-) ).");
 
 static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 {
@@ -32,7 +32,7 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 					GTK_BUTTONS_OK,
 					"%s",
 					album_art_pattern_info);
-	gtk_window_set_title(GTK_WINDOW(dialog), "Album art pattern");
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Album art pattern"));
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(dialog);
 }
@@ -247,7 +247,7 @@ static void library_add_cb(GtkButton *button, struct con_win *cwin)
 
 	/* Create a folder chooser dialog */
 
-	dialog = gtk_file_chooser_dialog_new("Select a folder to add to library",
+	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -1098,7 +1098,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* The main preferences dialog */
 
-	dialog = gtk_dialog_new_with_buttons("Preferences",
+	dialog = gtk_dialog_new_with_buttons(_("Preferences"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_MODAL,
 					     GTK_STOCK_CANCEL,
@@ -1111,10 +1111,10 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Labels */
 
-	label_general = gtk_label_new("General");
-	label_audio = gtk_label_new("Audio");
-	label_library = gtk_label_new("Library");
-	label_lastfm = gtk_label_new("Last.fm");
+	label_general = gtk_label_new(_("General"));
+	label_audio = gtk_label_new(_("Audio"));
+	label_library = gtk_label_new(_("Library"));
+	label_lastfm = gtk_label_new(_("Last.fm"));
 
 	/* Boxes */
 
@@ -1140,18 +1140,18 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Hidden files */
 
-	hidden_files = gtk_check_button_new_with_label("Show Hidden Files in "
-						       "File View");
+	hidden_files = gtk_check_button_new_with_label(_("Show Hidden Files in "
+						       "File View"));
 
 	/* Album art */
 
-	album_art = gtk_check_button_new_with_label("Show Album art in Panel");
+	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
 
 	album_art_pattern = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
 				 ALBUM_ART_PATTERN_LEN);
 	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
-	album_art_pattern_label = gtk_label_new("Album art file pattern");
+	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
 
 	hbox_album_art_pattern = gtk_hbox_new(FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox_album_art_pattern),
@@ -1167,12 +1167,12 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Notification */
 
-	osd = gtk_check_button_new_with_label("Show OSD for track change");
+	osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
 
 	/* Save current playlist */
 
-	save_playlist = gtk_check_button_new_with_label("Save/Restore "
-							"current playlist");
+	save_playlist = gtk_check_button_new_with_label(_("Save/Restore "
+							"current playlist"));
 
 	/* Pack general items */
 
@@ -1204,18 +1204,18 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Software mixer */
 
-	soft_mixer = gtk_check_button_new_with_label("Use software mixer");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), "Restart Required");
+	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
 
 	/* CDDB */
 
-	use_cddb = gtk_check_button_new_with_label("Connect to CDDB server");
+	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 
 	/* Audio Sink */
 
 	audio_sink_combo = gtk_combo_box_new_text();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_sink_combo),
-				    "Restart Required");
+				    _("Restart Required"));
 
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  DEFAULT_SINK);
@@ -1224,7 +1224,7 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  OSS_SINK);
 
-	sink_label = gtk_label_new("Audio sink ");
+	sink_label = gtk_label_new(_("Audio sink"));
 	hbox_sink = gtk_hbox_new(FALSE, 2);
 
 	gtk_box_pack_start(GTK_BOX(hbox_sink),
@@ -1241,10 +1241,10 @@ void preferences_dialog(struct con_win *cwin)
 	/* Audio Device */
 
 	audio_device_combo = gtk_combo_box_entry_new_text();
-	audio_device_label = gtk_label_new("Audio Device ");
+	audio_device_label = gtk_label_new(_("Audio Device"));
 	hbox_audio_device = gtk_hbox_new(FALSE, 2);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_device_combo),
-				    "Restart Required");
+				    _("Restart Required"));
 
 	gtk_box_pack_start(GTK_BOX(hbox_audio_device),
 			   audio_device_label,
@@ -1259,7 +1259,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Audio CD device */
 
-	audio_cd_device_label = gtk_label_new("Audio CD Device");
+	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
 	audio_cd_device_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry),
 				 AUDIO_CD_DEVICE_ENTRY_LEN);
@@ -1312,7 +1312,7 @@ void preferences_dialog(struct con_win *cwin)
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Folder",
+	column = gtk_tree_view_column_new_with_attributes(_("Folder"),
 							  renderer,
 							  "text",
 							  0,
@@ -1359,11 +1359,11 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Last.fm */
 
-	lastfm_check = gtk_check_button_new_with_label("Last.fm Support");
+	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
 	lastfm_uname = gtk_entry_new();
 	lastfm_pass = gtk_entry_new();
-	lastfm_ulabel = gtk_label_new("Username");
-	lastfm_plabel = gtk_label_new("Password");
+	lastfm_ulabel = gtk_label_new(_("Username"));
+	lastfm_plabel = gtk_label_new(_("Password"));
 	lastfm_uhbox = gtk_hbox_new(FALSE, 2);
 	lastfm_phbox = gtk_hbox_new(FALSE, 2);
 

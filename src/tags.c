@@ -403,13 +403,12 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gchar *year = NULL, *tno = NULL;
 
 	/* Create labels */
-
-	label_tno = gtk_label_new(P_TNO_FULL_STR);
-	label_title = gtk_label_new(P_TITLE_STR);
-	label_artist = gtk_label_new(P_ARTIST_STR);
-	label_album = gtk_label_new(P_ALBUM_STR);
-	label_genre = gtk_label_new(P_GENRE_STR);
-	label_year = gtk_label_new(P_YEAR_STR);
+	label_tno = gtk_label_new(_("Track No"));
+	label_title = gtk_label_new(_("Title"));
+	label_artist = gtk_label_new(_("Artist"));
+	label_album = gtk_label_new(_("Album"));
+	label_genre = gtk_label_new(_("Genre"));
+	label_year = gtk_label_new(_("Year"));
 
 	/* Create entry fields */
 

@@ -53,7 +53,7 @@ static void update_status_bar(struct con_win *cwin)
 
 	total_playtime = get_total_playtime(cwin);
 	tot_str = convert_length_str(total_playtime);
-	str = g_strdup_printf("%i Tracks - %s", cwin->cstate->tracks_curr_playlist, tot_str);
+	str = g_strdup_printf(_("%i Tracks - %s"), cwin->cstate->tracks_curr_playlist, tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
@@ -1038,17 +1038,17 @@ void track_properties_current_playlist(GtkAction *action, struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
 	gint i=0;
-	gchar tags[11][20] = {P_TNO_FULL_STR,
-			      P_TITLE_STR,
-			      P_ARTIST_STR,
-			      P_ALBUM_STR,
-			      P_GENRE_STR,
-			      P_YEAR_STR,
-			      P_LENGTH_STR,
-			      P_BITRATE_STR,
-			      "Channels",
-			      "Samplerate",
-			      P_FILENAME_STR};
+	gchar tags[11][20] = {N_("Track No"),
+			      N_("Title"),
+			      N_("Artist"),
+			      N_("Album"),
+			      N_("Genre"),
+			      N_("Year"),
+			      N_("Length"),
+			      N_("Bitrate"),
+			      N_("Channels"),
+			      N_("Samplerate"),
+			      N_("Filename")};
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1097,7 +1097,7 @@ void track_properties_current_playlist(GtkAction *action, struct con_win *cwin)
 			      samplerate,
 			      u_file};
 
-			dialog = gtk_dialog_new_with_buttons("Track Information",
+			dialog = gtk_dialog_new_with_buttons(_("Track Information"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_MODAL |
 					     GTK_DIALOG_DESTROY_WITH_PARENT,

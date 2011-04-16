@@ -39,7 +39,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -63,19 +63,10 @@ am_pragha_OBJECTS = pragha-pragha.$(OBJEXT) pragha-init.$(OBJEXT) \
 	pragha-eggtrayicon.$(OBJEXT) pragha-sexy-icon-entry.$(OBJEXT) \
 	pragha-sexy-marshal.$(OBJEXT)
 pragha_OBJECTS = $(am_pragha_OBJECTS)
-am__DEPENDENCIES_1 =
-pragha_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+pragha_LDADD = $(LDADD)
 pragha_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(pragha_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+	--mode=link $(CCLD) $(pragha_CFLAGS) $(CFLAGS) \
+	$(pragha_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -94,18 +85,33 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ALSA_CFLAGS = @ALSA_CFLAGS@
+ALSA_LIBS = @ALSA_LIBS@
+ALSA_REQUIRED_VERSION = @ALSA_REQUIRED_VERSION@
+ALSA_VERSION = @ALSA_VERSION@
 AMTAR = @AMTAR@
+AO_CFLAGS = @AO_CFLAGS@
+AO_LIBS = @AO_LIBS@
+AO_REQUIRED_VERSION = @AO_REQUIRED_VERSION@
+AO_VERSION = @AO_VERSION@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
+DATADIRNAME = @DATADIRNAME@
+DBUS_CFLAGS = @DBUS_CFLAGS@
+DBUS_LIBS = @DBUS_LIBS@
+DBUS_REQUIRED_VERSION = @DBUS_REQUIRED_VERSION@
+DBUS_VERSION = @DBUS_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
@@ -116,22 +122,75 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FLAC_CFLAGS = @FLAC_CFLAGS@
+FLAC_LIBS = @FLAC_LIBS@
+FLAC_REQUIRED_VERSION = @FLAC_REQUIRED_VERSION@
+FLAC_VERSION = @FLAC_VERSION@
+GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GIO_CFLAGS = @GIO_CFLAGS@
+GIO_LIBS = @GIO_LIBS@
+GIO_REQUIRED_VERSION = @GIO_REQUIRED_VERSION@
+GIO_VERSION = @GIO_VERSION@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GTHREAD_CFLAGS = @GTHREAD_CFLAGS@
+GTHREAD_LIBS = @GTHREAD_LIBS@
+GTHREAD_REQUIRED_VERSION = @GTHREAD_REQUIRED_VERSION@
+GTHREAD_VERSION = @GTHREAD_VERSION@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
+GTK_VERSION = @GTK_VERSION@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INSTOBJEXT = @INSTOBJEXT@
+INTLLIBS = @INTLLIBS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBCDDB_CFLAGS = @LIBCDDB_CFLAGS@
+LIBCDDB_LIBS = @LIBCDDB_LIBS@
+LIBCDDB_REQUIRED_VERSION = @LIBCDDB_REQUIRED_VERSION@
+LIBCDDB_VERSION = @LIBCDDB_VERSION@
+LIBCDIO_CFLAGS = @LIBCDIO_CFLAGS@
+LIBCDIO_LIBS = @LIBCDIO_LIBS@
+LIBCDIO_PARANOIA_CFLAGS = @LIBCDIO_PARANOIA_CFLAGS@
+LIBCDIO_PARANOIA_LIBS = @LIBCDIO_PARANOIA_LIBS@
+LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
+LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
+LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
+LIBCDIO_VERSION = @LIBCDIO_VERSION@
+LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
+LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBCURL_REQUIRED_VERSION = @LIBCURL_REQUIRED_VERSION@
+LIBCURL_VERSION = @LIBCURL_VERSION@
+LIBMODPLUG_CFLAGS = @LIBMODPLUG_CFLAGS@
+LIBMODPLUG_LIBS = @LIBMODPLUG_LIBS@
+LIBMODPLUG_REQUIRED_VERSION = @LIBMODPLUG_REQUIRED_VERSION@
+LIBMODPLUG_VERSION = @LIBMODPLUG_VERSION@
+LIBNOTIFY_CFLAGS = @LIBNOTIFY_CFLAGS@
+LIBNOTIFY_LIBS = @LIBNOTIFY_LIBS@
+LIBNOTIFY_REQUIRED_VERSION = @LIBNOTIFY_REQUIRED_VERSION@
+LIBNOTIFY_VERSION = @LIBNOTIFY_VERSION@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+MAD_CFLAGS = @MAD_CFLAGS@
+MAD_LIBS = @MAD_LIBS@
+MAD_REQUIRED_VERSION = @MAD_REQUIRED_VERSION@
+MAD_VERSION = @MAD_VERSION@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
+MSGFMT_OPTS = @MSGFMT_OPTS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -146,27 +205,48 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+POFILES = @POFILES@
+POSUB = @POSUB@
+PO_IN_DATADIR_FALSE = @PO_IN_DATADIR_FALSE@
+PO_IN_DATADIR_TRUE = @PO_IN_DATADIR_TRUE@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SNDFILE_CFLAGS = @SNDFILE_CFLAGS@
+SNDFILE_LIBS = @SNDFILE_LIBS@
+SNDFILE_REQUIRED_VERSION = @SNDFILE_REQUIRED_VERSION@
+SNDFILE_VERSION = @SNDFILE_VERSION@
+SQLITE3_CFLAGS = @SQLITE3_CFLAGS@
+SQLITE3_LIBS = @SQLITE3_LIBS@
+SQLITE3_REQUIRED_VERSION = @SQLITE3_REQUIRED_VERSION@
+SQLITE3_VERSION = @SQLITE3_VERSION@
 STRIP = @STRIP@
+TAGLIBC_CFLAGS = @TAGLIBC_CFLAGS@
+TAGLIBC_LIBS = @TAGLIBC_LIBS@
+TAGLIB_CFLAGS = @TAGLIB_CFLAGS@
+TAGLIB_LIBS = @TAGLIB_LIBS@
+TAGLIB_REQUIRED_VERSION = @TAGLIB_REQUIRED_VERSION@
+TAGLIB_VERSION = @TAGLIB_VERSION@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+VORBISFILE_CFLAGS = @VORBISFILE_CFLAGS@
+VORBISFILE_LIBS = @VORBISFILE_LIBS@
+VORBISFILE_REQUIRED_VERSION = @VORBISFILE_REQUIRED_VERSION@
+VORBISFILE_VERSION = @VORBISFILE_VERSION@
+XGETTEXT = @XGETTEXT@
+XGETTEXT_ARGS = @XGETTEXT_ARGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-alsa_CFLAGS = @alsa_CFLAGS@
-alsa_LIBS = @alsa_LIBS@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
-ao_CFLAGS = @ao_CFLAGS@
-ao_LIBS = @ao_LIBS@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -176,19 +256,9 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-dbus_CFLAGS = @dbus_CFLAGS@
-dbus_LIBS = @dbus_LIBS@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-flac_CFLAGS = @flac_CFLAGS@
-flac_LIBS = @flac_LIBS@
-gio_CFLAGS = @gio_CFLAGS@
-gio_LIBS = @gio_LIBS@
-gthread_CFLAGS = @gthread_CFLAGS@
-gthread_LIBS = @gthread_LIBS@
-gtk_CFLAGS = @gtk_CFLAGS@
-gtk_LIBS = @gtk_LIBS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -198,25 +268,11 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-libcddb_CFLAGS = @libcddb_CFLAGS@
-libcddb_LIBS = @libcddb_LIBS@
-libcdio_CFLAGS = @libcdio_CFLAGS@
-libcdio_LIBS = @libcdio_LIBS@
-libcdio_paranoia_CFLAGS = @libcdio_paranoia_CFLAGS@
-libcdio_paranoia_LIBS = @libcdio_paranoia_LIBS@
-libcurl_CFLAGS = @libcurl_CFLAGS@
-libcurl_LIBS = @libcurl_LIBS@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libmodplug_CFLAGS = @libmodplug_CFLAGS@
-libmodplug_LIBS = @libmodplug_LIBS@
-libnotify_CFLAGS = @libnotify_CFLAGS@
-libnotify_LIBS = @libnotify_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
-mad_CFLAGS = @mad_CFLAGS@
-mad_LIBS = @mad_LIBS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -226,59 +282,38 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-sndfile_CFLAGS = @sndfile_CFLAGS@
-sndfile_LIBS = @sndfile_LIBS@
-sqlite3_CFLAGS = @sqlite3_CFLAGS@
-sqlite3_LIBS = @sqlite3_LIBS@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
-taglib_CFLAGS = @taglib_CFLAGS@
-taglib_LIBS = @taglib_LIBS@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-vorbisfile_CFLAGS = @vorbisfile_CFLAGS@
-vorbisfile_LIBS = @vorbisfile_LIBS@
-DEFINES = -DSHAREDIR=\""$(pkgdatadir)"\"
-pragha_CFLAGS = $(DEFINES)
-pragha_LDADD = $(glib_LIBS) \
-	$(gthread_LIBS) \
-	$(gio_LIBS) \
-	$(gtk_LIBS) \
-	$(mad_LIBS) \
-	$(flac_LIBS) \
-	$(sqlite3_LIBS) \
-	$(ao_LIBS) \
-	$(alsa_LIBS) \
-	$(dbus_LIBS) \
-	$(libnotify_LIBS) \
-	$(sndfile_LIBS) \
-	$(vorbisfile_LIBS) \
-	$(libmodplug_LIBS) \
-	$(libcurl_LIBS) \
-	$(libcdio_LIBS) \
-	$(libcdio_paranoia_LIBS) \
-	$(libcddb_LIBS) \
-	-ltag_c
+INCLUDES = \
+	-DDBUS_API_SUBJECT_TO_CHANGE					\
+	-DG_LOG_DOMAIN=\"snyder\"					\
+	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
+	-DSHAREDIR=\""$(pkgdatadir)"\"					\
+	-I$(top_srcdir)
 
-AM_CPPFLAGS = $(glib_CFLAGS) \
-	$(gio_CFLAGS) \
-	$(gtk_CFLAGS) \
-	$(mad_CFLAGS) \
-	$(flac_CFLAGS) \
-	$(sqlite3_CFLAGS) \
-	$(taglib_CFLAGS) \
-	$(ao_CFLAGS) \
-	$(alsa_CFLAGS) \
-	$(dbus_CFLAGS) \
-	$(libnotify_CFLAGS) \
-	$(sndfile_CFLAGS) \
-	$(vorbisfile_CFLAGS) \
-	$(libcurl_CFLAGS) \
-	$(libcdio_CFLAGS) \
-	$(libcddb_CFLAGS) \
-	-I$(top_srcdir)/src/include \
+pragha_CFLAGS = $(GLIB_CFLAGS) 						\
+	$(GTHREAD_CFLAGS)						\
+	$(GIO_CFLAGS) 							\
+	$(GTK_CFLAGS) 							\
+	$(MAD_CFLAGS) 							\
+	$(FLAC_CFLAGS) 							\
+	$(SQLITE3_CFLAGS) 						\
+	$(TAGLIB_CFLAGS) 						\
+	$(TAGLIBC_CFLAGS) 						\
+	$(AO_CFLAGS) 							\
+	$(ALSA_CFLAGS) 							\
+	$(DBUS_CFLAGS) 							\
+	$(LIBNOTIFY_CFLAGS) 						\
+	$(SNDFILE_CFLAGS) 						\
+	$(VORBISFILE_CFLAGS) 						\
+	$(LIBCURL_CFLAGS) 						\
+	$(LIBCDIO_CFLAGS) 						\
+	$(LIBCDDB_CFLAGS) 						\
+	-I$(top_srcdir)/src/include 					\
 	-Wall
 
 pragha_SOURCES = pragha.c \
@@ -323,11 +358,32 @@ pragha_SOURCES = pragha.c \
 		flac.h \
 		cdda.h
 
+pragha_LDFLAGS = $(GLIB_LIBS) 						\
+	$(GTHREAD_LIBS)							\
+	$(GIO_LIBS) 							\
+	$(GTK_LIBS) 							\
+	$(MAD_LIBS) 							\
+	$(FLAC_LIBS) 							\
+	$(SQLITE3_LIBS)							\
+	$(TAGLIB_LIBS)							\
+	$(TAGLIBC_LIBS)							\
+	$(AO_LIBS) 							\
+	$(ALSA_LIBS) 							\
+	$(DBUS_LIBS) 							\
+	$(LIBNOTIFY_LIBS) 						\
+	$(SNDFILE_LIBS) 						\
+	$(VORBISFILE_LIBS) 						\
+	$(LIBMODPLUG_LIBS) 						\
+	$(LIBCURL_LIBS) 						\
+	$(LIBCDIO_LIBS) 						\
+	$(LIBCDIO_PARANOIA_LIBS) 					\
+	$(LIBCDDB_LIBS)
+
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -336,9 +392,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/Makefile
+	  $(AUTOMAKE) --gnu  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -352,9 +408,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)

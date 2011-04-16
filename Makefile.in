@@ -35,15 +35,16 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure ABOUT-NLS ChangeLog config.guess \
-	config.rpath config.sub depcomp install-sh ltmain.sh missing
+	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
+	config.guess config.sub depcomp install-sh ltmain.sh missing \
+	mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
 SOURCES =
@@ -84,23 +85,38 @@ am__remove_distdir = \
   { test ! -d $(distdir) \
     || { find $(distdir) -type d ! -perm -200 -exec chmod u+w {} ';' \
          && rm -fr $(distdir); }; }
-DIST_ARCHIVES = $(distdir).tar.gz
+DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.bz2
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
+ALSA_CFLAGS = @ALSA_CFLAGS@
+ALSA_LIBS = @ALSA_LIBS@
+ALSA_REQUIRED_VERSION = @ALSA_REQUIRED_VERSION@
+ALSA_VERSION = @ALSA_VERSION@
 AMTAR = @AMTAR@
+AO_CFLAGS = @AO_CFLAGS@
+AO_LIBS = @AO_LIBS@
+AO_REQUIRED_VERSION = @AO_REQUIRED_VERSION@
+AO_VERSION = @AO_VERSION@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
+DATADIRNAME = @DATADIRNAME@
+DBUS_CFLAGS = @DBUS_CFLAGS@
+DBUS_LIBS = @DBUS_LIBS@
+DBUS_REQUIRED_VERSION = @DBUS_REQUIRED_VERSION@
+DBUS_VERSION = @DBUS_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
@@ -111,22 +127,75 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FLAC_CFLAGS = @FLAC_CFLAGS@
+FLAC_LIBS = @FLAC_LIBS@
+FLAC_REQUIRED_VERSION = @FLAC_REQUIRED_VERSION@
+FLAC_VERSION = @FLAC_VERSION@
+GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GIO_CFLAGS = @GIO_CFLAGS@
+GIO_LIBS = @GIO_LIBS@
+GIO_REQUIRED_VERSION = @GIO_REQUIRED_VERSION@
+GIO_VERSION = @GIO_VERSION@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GTHREAD_CFLAGS = @GTHREAD_CFLAGS@
+GTHREAD_LIBS = @GTHREAD_LIBS@
+GTHREAD_REQUIRED_VERSION = @GTHREAD_REQUIRED_VERSION@
+GTHREAD_VERSION = @GTHREAD_VERSION@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
+GTK_VERSION = @GTK_VERSION@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INSTOBJEXT = @INSTOBJEXT@
+INTLLIBS = @INTLLIBS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBCDDB_CFLAGS = @LIBCDDB_CFLAGS@
+LIBCDDB_LIBS = @LIBCDDB_LIBS@
+LIBCDDB_REQUIRED_VERSION = @LIBCDDB_REQUIRED_VERSION@
+LIBCDDB_VERSION = @LIBCDDB_VERSION@
+LIBCDIO_CFLAGS = @LIBCDIO_CFLAGS@
+LIBCDIO_LIBS = @LIBCDIO_LIBS@
+LIBCDIO_PARANOIA_CFLAGS = @LIBCDIO_PARANOIA_CFLAGS@
+LIBCDIO_PARANOIA_LIBS = @LIBCDIO_PARANOIA_LIBS@
+LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
+LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
+LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
+LIBCDIO_VERSION = @LIBCDIO_VERSION@
+LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
+LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBCURL_REQUIRED_VERSION = @LIBCURL_REQUIRED_VERSION@
+LIBCURL_VERSION = @LIBCURL_VERSION@
+LIBMODPLUG_CFLAGS = @LIBMODPLUG_CFLAGS@
+LIBMODPLUG_LIBS = @LIBMODPLUG_LIBS@
+LIBMODPLUG_REQUIRED_VERSION = @LIBMODPLUG_REQUIRED_VERSION@
+LIBMODPLUG_VERSION = @LIBMODPLUG_VERSION@
+LIBNOTIFY_CFLAGS = @LIBNOTIFY_CFLAGS@
+LIBNOTIFY_LIBS = @LIBNOTIFY_LIBS@
+LIBNOTIFY_REQUIRED_VERSION = @LIBNOTIFY_REQUIRED_VERSION@
+LIBNOTIFY_VERSION = @LIBNOTIFY_VERSION@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+MAD_CFLAGS = @MAD_CFLAGS@
+MAD_LIBS = @MAD_LIBS@
+MAD_REQUIRED_VERSION = @MAD_REQUIRED_VERSION@
+MAD_VERSION = @MAD_VERSION@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
+MSGFMT_OPTS = @MSGFMT_OPTS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -141,27 +210,48 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+POFILES = @POFILES@
+POSUB = @POSUB@
+PO_IN_DATADIR_FALSE = @PO_IN_DATADIR_FALSE@
+PO_IN_DATADIR_TRUE = @PO_IN_DATADIR_TRUE@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SNDFILE_CFLAGS = @SNDFILE_CFLAGS@
+SNDFILE_LIBS = @SNDFILE_LIBS@
+SNDFILE_REQUIRED_VERSION = @SNDFILE_REQUIRED_VERSION@
+SNDFILE_VERSION = @SNDFILE_VERSION@
+SQLITE3_CFLAGS = @SQLITE3_CFLAGS@
+SQLITE3_LIBS = @SQLITE3_LIBS@
+SQLITE3_REQUIRED_VERSION = @SQLITE3_REQUIRED_VERSION@
+SQLITE3_VERSION = @SQLITE3_VERSION@
 STRIP = @STRIP@
+TAGLIBC_CFLAGS = @TAGLIBC_CFLAGS@
+TAGLIBC_LIBS = @TAGLIBC_LIBS@
+TAGLIB_CFLAGS = @TAGLIB_CFLAGS@
+TAGLIB_LIBS = @TAGLIB_LIBS@
+TAGLIB_REQUIRED_VERSION = @TAGLIB_REQUIRED_VERSION@
+TAGLIB_VERSION = @TAGLIB_VERSION@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+VORBISFILE_CFLAGS = @VORBISFILE_CFLAGS@
+VORBISFILE_LIBS = @VORBISFILE_LIBS@
+VORBISFILE_REQUIRED_VERSION = @VORBISFILE_REQUIRED_VERSION@
+VORBISFILE_VERSION = @VORBISFILE_VERSION@
+XGETTEXT = @XGETTEXT@
+XGETTEXT_ARGS = @XGETTEXT_ARGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-alsa_CFLAGS = @alsa_CFLAGS@
-alsa_LIBS = @alsa_LIBS@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
-ao_CFLAGS = @ao_CFLAGS@
-ao_LIBS = @ao_LIBS@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -171,19 +261,9 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-dbus_CFLAGS = @dbus_CFLAGS@
-dbus_LIBS = @dbus_LIBS@
 docdir = $(pkgdatadir)/doc
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-flac_CFLAGS = @flac_CFLAGS@
-flac_LIBS = @flac_LIBS@
-gio_CFLAGS = @gio_CFLAGS@
-gio_LIBS = @gio_LIBS@
-gthread_CFLAGS = @gthread_CFLAGS@
-gthread_LIBS = @gthread_LIBS@
-gtk_CFLAGS = @gtk_CFLAGS@
-gtk_LIBS = @gtk_LIBS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -193,25 +273,11 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-libcddb_CFLAGS = @libcddb_CFLAGS@
-libcddb_LIBS = @libcddb_LIBS@
-libcdio_CFLAGS = @libcdio_CFLAGS@
-libcdio_LIBS = @libcdio_LIBS@
-libcdio_paranoia_CFLAGS = @libcdio_paranoia_CFLAGS@
-libcdio_paranoia_LIBS = @libcdio_paranoia_LIBS@
-libcurl_CFLAGS = @libcurl_CFLAGS@
-libcurl_LIBS = @libcurl_LIBS@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libmodplug_CFLAGS = @libmodplug_CFLAGS@
-libmodplug_LIBS = @libmodplug_LIBS@
-libnotify_CFLAGS = @libnotify_CFLAGS@
-libnotify_LIBS = @libnotify_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
-mad_CFLAGS = @mad_CFLAGS@
-mad_LIBS = @mad_LIBS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -221,21 +287,20 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-sndfile_CFLAGS = @sndfile_CFLAGS@
-sndfile_LIBS = @sndfile_LIBS@
-sqlite3_CFLAGS = @sqlite3_CFLAGS@
-sqlite3_LIBS = @sqlite3_LIBS@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
-taglib_CFLAGS = @taglib_CFLAGS@
-taglib_LIBS = @taglib_LIBS@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-vorbisfile_CFLAGS = @vorbisfile_CFLAGS@
-vorbisfile_LIBS = @vorbisfile_LIBS@
-SUBDIRS = src
+SUBDIRS = \
+	po								\
+	src
+
+AUTOMAKE_OPTIONS = \
+	1.8								\
+	dist-bzip2
+
 man_MANS = data/pragha.1
 doc_DATA = README ChangeLog FAQ
 imagedir = $(pkgdatadir)/data
@@ -266,19 +331,19 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --gnu '; \
+	      cd $(srcdir) && $(AUTOMAKE) --gnu  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --gnu  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -293,9 +358,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -307,7 +372,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in:  $(am__configure_deps) 
+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	rm -f stamp-h1
 	touch $@
@@ -620,7 +685,6 @@ distdir: $(DISTFILES)
 dist-gzip: distdir
 	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
 	$(am__remove_distdir)
-
 dist-bzip2: distdir
 	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
 	$(am__remove_distdir)
@@ -644,6 +708,7 @@ dist-zip: distdir
 
 dist dist-all: distdir
 	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
+	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
 	$(am__remove_distdir)
 
 # This target untars the dist file and tries a VPATH configuration.  Then

@@ -1,0 +1,475 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-06-23 11:51-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/gui.c:153
+msgid "_File"
+msgstr ""
+
+#: src/gui.c:154
+msgid "_Edit"
+msgstr ""
+
+#: src/gui.c:155
+msgid "_Tools"
+msgstr ""
+
+#: src/gui.c:156
+msgid "_Help"
+msgstr ""
+
+#: src/gui.c:157 src/gui.c:319
+msgid "_Open File"
+msgstr ""
+
+#: src/gui.c:158
+msgid "Open a media file"
+msgstr ""
+
+#: src/gui.c:159 src/gui.c:321
+msgid "_Play Audio CD"
+msgstr ""
+
+#: src/gui.c:161 src/gui.c:323
+msgid "Prev Track"
+msgstr ""
+
+#: src/gui.c:163 src/gui.c:325
+msgid "Play/Pause"
+msgstr ""
+
+#: src/gui.c:165 src/gui.c:327
+msgid "Stop"
+msgstr ""
+
+#: src/gui.c:167 src/gui.c:329
+msgid "Next Track"
+msgstr ""
+
+#: src/gui.c:169 src/gui.c:331
+msgid "_Quit"
+msgstr ""
+
+#: src/gui.c:171
+msgid "_Expand All in Library"
+msgstr ""
+
+#: src/gui.c:173
+msgid "_Collapse All in Library"
+msgstr ""
+
+#: src/gui.c:175
+msgid "Search Library"
+msgstr ""
+
+#: src/gui.c:177
+msgid "Search Playlist"
+msgstr ""
+
+#: src/gui.c:179
+msgid "_Preferences"
+msgstr ""
+
+#: src/gui.c:181
+msgid "_Rescan Library"
+msgstr ""
+
+#: src/gui.c:183
+msgid "_Update Library"
+msgstr ""
+
+#: src/gui.c:185
+msgid "_Add All to Current Playlist"
+msgstr ""
+
+#: src/gui.c:187
+msgid "_Statistics"
+msgstr ""
+
+#: src/gui.c:189
+msgid "_Library View"
+msgstr ""
+
+#: src/gui.c:190 src/gui.c:283 src/librarytree.c:800 src/librarytree.c:1239
+msgid "Folder / File"
+msgstr ""
+
+#: src/gui.c:192 src/gui.c:285 src/librarytree.c:817 src/librarytree.c:1242
+msgid "Artist / Track"
+msgstr ""
+
+#: src/gui.c:194 src/gui.c:287 src/librarytree.c:834 src/librarytree.c:1245
+msgid "Album / Track"
+msgstr ""
+
+#: src/gui.c:196 src/gui.c:289 src/librarytree.c:851 src/librarytree.c:1248
+msgid "Genre / Track"
+msgstr ""
+
+#: src/gui.c:198 src/gui.c:291 src/librarytree.c:870 src/librarytree.c:1251
+msgid "Artist / Album / Track"
+msgstr ""
+
+#: src/gui.c:200 src/gui.c:293 src/librarytree.c:889 src/librarytree.c:1257
+msgid "Genre / Album / Track"
+msgstr ""
+
+#: src/gui.c:202 src/gui.c:295 src/librarytree.c:908 src/librarytree.c:1254
+msgid "Genre / Artist / Track"
+msgstr ""
+
+#: src/gui.c:204 src/gui.c:297 src/librarytree.c:929 src/librarytree.c:1260
+msgid "Genre / Artist / Album / Track"
+msgstr ""
+
+#: src/gui.c:206 src/gui.c:317
+msgid "About"
+msgstr ""
+
+#: src/gui.c:208
+msgid "Homepage"
+msgstr ""
+
+#: src/gui.c:210
+msgid "Community"
+msgstr ""
+
+#: src/gui.c:212
+msgid "Wiki"
+msgstr ""
+
+#: src/gui.c:217
+msgid "_Shuffle"
+msgstr ""
+
+#: src/gui.c:220
+msgid "_Repeat"
+msgstr ""
+
+#: src/gui.c:226
+msgid "Remove"
+msgstr ""
+
+#: src/gui.c:228
+msgid "Crop"
+msgstr ""
+
+#: src/gui.c:230 src/gui.c:260
+msgid "Edit tags"
+msgstr ""
+
+#: src/gui.c:232
+msgid "Properties"
+msgstr ""
+
+#: src/gui.c:234
+msgid "Save Selected as Playlist"
+msgstr ""
+
+#: src/gui.c:236
+msgid "Save Complete Playlist"
+msgstr ""
+
+#: src/gui.c:238
+msgid "Clear Playlist"
+msgstr ""
+
+#: src/gui.c:240
+msgid "Clear Sort"
+msgstr ""
+
+#: src/gui.c:245 src/gui.c:256 src/gui.c:276
+msgid "Play"
+msgstr ""
+
+#: src/gui.c:247 src/gui.c:258 src/gui.c:278
+msgid "Enqueue"
+msgstr ""
+
+#: src/gui.c:249
+msgid "Delete"
+msgstr ""
+
+#: src/gui.c:251
+msgid "Export"
+msgstr ""
+
+#: src/gui.c:262
+msgid "Delete from Library"
+msgstr ""
+
+#: src/gui.c:264
+msgid "Delete from HDD"
+msgstr ""
+
+#: src/gui.c:269
+msgid "Enqueue (Recursive)"
+msgstr ""
+
+#: src/gui.c:271
+msgid "Enqueue (Non-Recursive)"
+msgstr ""
+
+#: src/gui.c:792 src/pref.c:1116
+msgid "Library"
+msgstr ""
+
+#: src/gui.c:810
+msgid "Files"
+msgstr ""
+
+#: src/gui.c:821
+msgid "Pragha Music Manager"
+msgstr ""
+
+#. Create the checkmenu items
+#: src/gui.c:959 src/gui.c:1075
+msgid "Track"
+msgstr ""
+
+#: src/gui.c:960 src/gui.c:1076 src/current_playlist.c:1042 src/tags.c:407
+msgid "Title"
+msgstr ""
+
+#: src/gui.c:961 src/gui.c:1077 src/current_playlist.c:1043 src/tags.c:408
+msgid "Artist"
+msgstr ""
+
+#: src/gui.c:962 src/gui.c:1078 src/current_playlist.c:1044 src/tags.c:409
+msgid "Album"
+msgstr ""
+
+#: src/gui.c:963 src/gui.c:1079 src/current_playlist.c:1045 src/tags.c:410
+msgid "Genre"
+msgstr ""
+
+#: src/gui.c:964 src/gui.c:1080 src/current_playlist.c:1048
+msgid "Bitrate"
+msgstr ""
+
+#: src/gui.c:965 src/gui.c:1081 src/current_playlist.c:1046 src/tags.c:411
+msgid "Year"
+msgstr ""
+
+#: src/gui.c:966 src/gui.c:1082 src/current_playlist.c:1047
+msgid "Length"
+msgstr ""
+
+#: src/gui.c:967 src/gui.c:1083 src/current_playlist.c:1051
+msgid "Filename"
+msgstr ""
+
+#: src/gui.c:1769 src/panel.c:193
+msgid "<b>Not playing</b>"
+msgstr ""
+
+#: src/panel.c:162
+#, c-format
+msgid ""
+"%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
+"\"light\">in</span></small> %s"
+msgstr ""
+
+#: src/panel.c:167
+#, c-format
+msgid "%s <small><span weight=\"light\">by</span></small> %s"
+msgstr ""
+
+#: src/panel.c:171
+#, c-format
+msgid "%s <small><span weight=\"light\">in</span></small> %s"
+msgstr ""
+
+#: src/current_playlist.c:56
+#, c-format
+msgid "%i Tracks - %s"
+msgstr ""
+
+#. Create labels
+#: src/current_playlist.c:1041 src/tags.c:406
+msgid "Track No"
+msgstr ""
+
+#: src/current_playlist.c:1049
+msgid "Channels"
+msgstr ""
+
+#: src/current_playlist.c:1050
+msgid "Samplerate"
+msgstr ""
+
+#: src/current_playlist.c:1100
+msgid "Track Information"
+msgstr ""
+
+#: src/librarytree.c:178 src/librarytree.c:233
+#, c-format
+msgid "Unknown Artist"
+msgstr ""
+
+#: src/librarytree.c:180 src/librarytree.c:235
+#, c-format
+msgid "Unknown Album"
+msgstr ""
+
+#: src/librarytree.c:182 src/librarytree.c:237
+#, c-format
+msgid "Unknown Genre"
+msgstr ""
+
+#: src/statusicon.c:94
+#, c-format
+msgid "by %s in %s"
+msgstr ""
+
+#: src/statusicon.c:98
+#, c-format
+msgid "by %s"
+msgstr ""
+
+#: src/statusicon.c:101
+#, c-format
+msgid "in %s"
+msgstr ""
+
+#: src/statusicon.c:103
+#, c-format
+msgid "Unknown Tags"
+msgstr ""
+
+#: src/statusicon.c:140
+#, c-format
+msgid "%s by %s"
+msgstr ""
+
+#: src/pref.c:21
+msgid ""
+"Patterns should be of the form:<filename>;<filename>;....\n"
+"A maximum of six patterns are allowed.\n"
+"Wildcards are not accepted as of now ( patches welcome :-) )."
+msgstr ""
+
+#: src/pref.c:35
+msgid "Album art pattern"
+msgstr ""
+
+#. Create a folder chooser dialog
+#: src/pref.c:250
+msgid "Select a folder to add to library"
+msgstr ""
+
+#. The main preferences dialog
+#: src/pref.c:1101
+msgid "Preferences"
+msgstr ""
+
+#. Labels
+#: src/pref.c:1114
+msgid "General"
+msgstr ""
+
+#: src/pref.c:1115
+msgid "Audio"
+msgstr ""
+
+#: src/pref.c:1117
+msgid "Last.fm"
+msgstr ""
+
+#. Hidden files
+#: src/pref.c:1143
+msgid "Show Hidden Files in File View"
+msgstr ""
+
+#. Album art
+#: src/pref.c:1148
+msgid "Show Album art in Panel"
+msgstr ""
+
+#: src/pref.c:1154
+msgid "Album art file pattern"
+msgstr ""
+
+#. Notification
+#: src/pref.c:1170
+msgid "Show OSD for track change"
+msgstr ""
+
+#. Save current playlist
+#: src/pref.c:1174
+msgid "Save/Restore current playlist"
+msgstr ""
+
+#. Software mixer
+#: src/pref.c:1207
+msgid "Use software mixer"
+msgstr ""
+
+#: src/pref.c:1208 src/pref.c:1218 src/pref.c:1247
+msgid "Restart Required"
+msgstr ""
+
+#. CDDB
+#: src/pref.c:1212
+msgid "Connect to CDDB server"
+msgstr ""
+
+#: src/pref.c:1227
+msgid "Audio sink"
+msgstr ""
+
+#: src/pref.c:1244
+msgid "Audio Device"
+msgstr ""
+
+#. Audio CD device
+#: src/pref.c:1262
+msgid "Audio CD Device"
+msgstr ""
+
+#: src/pref.c:1315
+msgid "Folder"
+msgstr ""
+
+#. Last.fm
+#: src/pref.c:1362
+msgid "Last.fm Support"
+msgstr ""
+
+#: src/pref.c:1365
+msgid "Username"
+msgstr ""
+
+#: src/pref.c:1366
+msgid "Password"
+msgstr ""
+
+#: src/menu.c:566
+msgid "Total Tracks:"
+msgstr ""
+
+#: src/menu.c:568
+msgid "Total Artists:"
+msgstr ""
+
+#: src/menu.c:570
+msgid "Total Albums:"
+msgstr ""
+
+#: src/menu.c:572
+msgid "Statistics"
+msgstr ""
