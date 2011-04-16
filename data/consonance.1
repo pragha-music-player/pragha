@@ -1,0 +1,107 @@
+.TH "consonance" "1" "0.5.1" "sujith" ""
+.SH "NAME"
+.LP 
+consonance \- A lightweight music manager
+.SH "SYNTAX"
+.LP 
+consonance [OPTION...] [URI1 [URI2...]]
+.SH "DESCRIPTION"
+.LP 
+Consonance is a lightweight music manager that aims to be fast, bloat\-free, and light on memory consumption. It is written completely in C and GTK+. Some of the features are:
+.LP
+.br 
+  * Library management using sqlite3
+.br 
+  * Multiple views
+.br 
+  * OSD support
+.br 
+  * mp3, ogg, flac, wav, modplug and CDDA support
+.LP 
+Consonance is released under the GNU General Public Licence version 3 (GPLv3).
+
+.SH "OPTIONS"
+.LP 
+.TP 
+\fB\-?, \-\-help\fR
+Output help information and exit.
+.TP 
+\fB\-\-help\-all\fR
+Output all help options and exit.
+.TP 
+\fB\-\-help\-gtk\fR
+Output GTK+ Options and exit.
+.TP 
+\fB\-v, \-\-version\fR
+Output version information and exit.
+.TP 
+\fB\-e, \-\-debug\fR
+Enable Debug ( Levels: 1,2,3,4 )
+.TP 
+\fB\-p, \-\-play\fR
+Start playing.
+.TP 
+\fB\-s, \-\-stop\fR
+Stop playing.
+.TP 
+\fB\-t, \-\-pause\fR
+Pause/Resume the current song.
+.TP 
+\fB\-r, \-\-prev\fR
+Play the previous song in the playlist.               
+.TP 
+\fB\-n, \-\-next\fR
+Play the next song in the playlist. 
+.TP 
+\fB\-f, \-\-shuffle\fR
+Toggle shuffle mode.
+.TP
+\fB\-u, \-\-repeat\fR
+Toggle repeat mode.
+.TP
+\fB\-i, \-\-inc_vol\fR
+Increase the volume by 1.
+.TP             
+\fB\-d, \-\-dec_vol\fR
+Decrease the volume by 1.
+.TP             
+\fB\-o, \-\-show_osd\fR
+Show OSD notification (a popup window with info about the current song).
+.TP             
+\fB\-c, \-\-current_state\fR
+Get current player state.
+.TP
+\fB\-a, \-\-audio_backend\fR
+Audio backend (valid options: alsa/oss)
+.TP
+\fB\-g, \-\-audio_device\fR
+Audio Device (For ALSA: hw:0,0 etc.., For OSS: /dev/dsp etc..)
+.TP
+\fB\-m, \-\-audio_mixer\fR
+Mixer Element (For ALSA: Master, PCM, etc.., For OSS: /dev/mixer, etc...)
+.TP             
+\fB\-\-display=DISPLAY\fR
+Set the X display to use.
+
+.SH "USAGE"
+.LP 
+* Add a library location in menu Edit \- Preferences.
+.br 
+* Rescan Library from menu Tools.
+.br 
+* Start using. :-)
+
+.SH "FILES"
+.TP 
+$HOME/.consonance/condb
+Library database (in sqlite3 format)
+.TP 
+$HOME/.consonance/conrc
+personal settings (use the GUI interface to change them, Edit \- Preferences)
+.SH "AUTHORS"
+.nf 
+Consonance written by Sujith <m.sujith@gmail.com>
+Man page written by Martin Zelaia <martintxo@sindominio.net>
+.SH "SEE ALSO"
+.LP 
+http://sites.google.com/site/consonancemanager

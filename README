@@ -1,0 +1,38 @@
+consonance v0.5.1 [http://sites.google.com/site/consonancemanager]
+
+A lightweight GTK+ music manager.
+
+Installation Procedure:
+-----------------------
+
+./configure
+make
+sudo make install
+
+(For the git repository do a ./autogen.sh first)
+
+Usage:
+------
+
+* Add a library location in preferences.
+* Rescan Library from Tools.
+* Start using.
+
+OSD Notifications:
+------------------
+
+* Install notification-daemon.
+  In Arch linux, use 'sudo pacman -S notification-deamon'
+
+Bugs:
+-----
+
+* Report them to m.sujith@gmail.com
+
+Images:
+------
+artist.png     - from Crystal Icon Set [ http://www.everaldo.com/ ]
+album.png      - from openclipart.org
+track.png      - from openclipart.org
+genre.png      - from openclipart.org
+consonance.png - contributed by coarseSand on ARCH forums.

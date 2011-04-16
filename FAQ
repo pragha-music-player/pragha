@@ -1,0 +1,9 @@
+Frequently Answered Questions
+=============================
+
+Q. Why the fsck does a freaking music player consume so much CPU ?
+A. Use the HW device directly in ALSA (hw:0,0). The 'default' device
+   is dmix which is setup with a samplerate of 48Khz while most tracks
+   are in 44.1Khz samplerate. Resampling is cpu intensive. Using the HW
+   device, bypassing the dmix plugin is the current workaround.
+   Of course, you lose the advantages of dmix in the process.

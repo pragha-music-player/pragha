@@ -1,0 +1,33 @@
+v0.5.1
+	Support for deleting library entries.
+v0.5
+	Audio CD playback / CDDB support.
+	Audio device selection (ALSA/OSS).
+	Last.fm submission.
+	Playlist Export (M3U)
+v0.4.1
+	Fix a Gthread initialization bug
+v0.4
+	Modplug support ( By woolf.linux@bumiller.com )
+	Tag Editing.
+	UTF-8 support.
+	Command line option to choose audio backend.
+	DnD on 64-bit platforms ( Bugfix )
+	A new manpage ( By Martin Zelaia <martintxo@sindominio.net )
+v0.3.1
+	OSS support.
+	Software mixer support.
+	Current playlist search.
+	Save/Restore current playlist.
+	Command line option (consonance -c) to get player state.
+	Library updation feature.
+	User defined album art file pattern.
+v0.3
+	Add FLAC, WAV, OGG support. (FLAC support by Jared Casper <jaredcasper@gmail.com>)
+	DnD support.
+	Playlist management.
+	Search through library (simple).
+v0.2
+	0.2 released.
+v0.1
+	0.1 released.
