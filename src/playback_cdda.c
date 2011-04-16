@@ -329,7 +329,7 @@ cddb_clean:
 	}
 add:
 	add_audio_cd_tracks(cwin);
-	CDEBUG(DBG_INFO, "Succesfully opened Audio CD device");
+	CDEBUG(DBG_INFO, "Successfully opened Audio CD device");
 
 	play_first_current_playlist(cwin);
 }

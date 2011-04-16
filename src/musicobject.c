@@ -204,6 +204,41 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
+void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin)
+{
+	if (!changed)
+		return;
+
+	CDEBUG(DBG_VERBOSE, "Tags Updates: 0x%x", changed);
+
+	if (changed & TAG_TNO_CHANGED) {
+		mobj->tags->track_no = ntag->track_no;
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+		g_free(mobj->tags->title);
+		mobj->tags->title = g_strdup(ntag->title);
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		g_free(mobj->tags->artist);
+		mobj->tags->artist = g_strdup(ntag->artist);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		g_free(mobj->tags->album);
+		mobj->tags->album = g_strdup(ntag->album);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		g_free(mobj->tags->genre);
+		mobj->tags->genre = g_strdup(ntag->genre);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		mobj->tags->year = ntag->year;
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		g_free(mobj->tags->comment);
+		mobj->tags->comment = g_strdup(ntag->comment);
+	}
+}
+
 void delete_musicobject(struct musicobject *mobj)
 {
 	CDEBUG(DBG_MOBJ, "Freeing musicobject: %s", mobj->file);

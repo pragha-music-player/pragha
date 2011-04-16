@@ -1132,10 +1132,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	GArray *loc_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data;
-	gchar *title, *artist, *album, *genre, *year;
+	gchar *node_data = NULL;
 
-	node_data = title = artist = album = genre = year = NULL;
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
 
@@ -1163,15 +1161,20 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 					  "location_id : %d",
 					  location_id);
 				goto exit;
-			} else {
+			}
+			else {
 				otag.track_no = mobj->tags->track_no;
 				otag.title = mobj->tags->title;
 				otag.artist = mobj->tags->artist;
 				otag.album = mobj->tags->album;
 				otag.genre = mobj->tags->genre;
+				otag.comment = mobj->tags->comment;
 				otag.year =  mobj->tags->year;
+
+				changed = tag_edit_dialog(&otag, &ntag, mobj->file, cwin);
 			}
-		} else {
+		}
+		else {
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
 
 			switch(node_type) {
@@ -1187,12 +1190,10 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			default:
 				break;
 			}
+		changed = tag_edit_dialog(&otag, &ntag, NULL, cwin);
 		}
 	}
 
-	/* Prompt the user for tag changes */
-
-	changed = tag_edit_dialog(&otag, &ntag, cwin);
 	if (!changed)
 		goto exit;
 
@@ -1220,13 +1221,13 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 exit:
 	/* Cleanup */
 
-	g_free(year);
 	g_free(node_data);
 
 	g_free(ntag.title);
 	g_free(ntag.artist);
 	g_free(ntag.album);
 	g_free(ntag.genre);
+	g_free(ntag.comment);
 
 	if (mobj)
 		delete_musicobject(mobj);

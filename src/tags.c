@@ -408,28 +408,45 @@ clear_pressed (GtkEntry       *entry,
 		gint            position,
 		GdkEventButton *event)
 {
-	if (position == GTK_ENTRY_ICON_SECONDARY)
+	if (position == GTK_ENTRY_ICON_SECONDARY) {
 		gtk_entry_set_text (entry, "");
+		gtk_widget_grab_focus(GTK_WIDGET(entry));
+	}
 }
 
-gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
+static void
+directory_pressed (GtkEntry       *entry,
+		gint            position,
+		GdkEventButton *event,
+		gchar *file)
+{
+	if (position == GTK_ENTRY_ICON_SECONDARY && file) {
+		gchar *uri = get_display_filename(file, TRUE);
+		open_url(NULL, uri);
+		g_free(uri);
+	}
+}
+
+gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 		     struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkWidget *tag_table;
-	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year, *label_comment;
+	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year, *label_comment, *label_file;
 	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year, *chk_comment;
-	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment;
+	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment, *entry_file;
 	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
 	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
 
-	gint result, changed = 0;
+	gint location_id, result, changed = 0;
+	struct musicobject *mobj = NULL;
+	gchar *uri = NULL;
 
 	/*Create table*/
 
-	tag_table = gtk_table_new(7, 2, FALSE);
+	tag_table = gtk_table_new(8, 2, FALSE);
 
 	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 5);
 	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
@@ -444,6 +461,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	label_tno = gtk_label_new(_("Track No"));
 	label_year = gtk_label_new(_("Year"));
 	label_comment = gtk_label_new(_("Comment"));
+	label_file = gtk_label_new(_("File"));
 
 	gtk_misc_set_alignment(GTK_MISC (label_title), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_artist), 1, 0.5);
@@ -452,6 +470,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_misc_set_alignment(GTK_MISC (label_tno), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_year), 1, 0.5);
 	gtk_misc_set_alignment(GTK_MISC (label_comment), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_file), 1, 0.5);
 
 	/* Create entry fields */
 
@@ -467,6 +486,8 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (entry_comment), FALSE);
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry_comment));
 
+	entry_file = gtk_entry_new();
+
 	gtk_entry_set_max_length(GTK_ENTRY(entry_title), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_artist), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_album), TAG_MAX_LEN);
@@ -480,6 +501,9 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_DIRECTORY);
+
+	gtk_entry_set_editable (GTK_ENTRY(entry_file), FALSE);
 
 	g_signal_connect(G_OBJECT(entry_tno), "key-press-event",
 			 G_CALLBACK(entry_validate_cb), cwin);
@@ -662,6 +686,15 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND,
 			0, 0);
 
+	gtk_table_attach(GTK_TABLE (tag_table), label_file,
+			0, 1, 7, 8,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), entry_file,
+			1, 2, 7, 8,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
 	/* The main edit dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Edit tags"),
@@ -672,6 +705,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
 					     NULL);
+
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
 	/* Add to the dialog's main vbox */
@@ -694,6 +728,13 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
 	if (otag->comment)
 		gtk_text_buffer_set_text (buffer, otag->comment, -1);
+
+	if (file) {
+		gtk_entry_set_text(GTK_ENTRY(entry_file), file);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
+	}
+	else
+		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
 
 	g_signal_connect(G_OBJECT(entry_title),
 			 "changed",
@@ -740,10 +781,34 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			"icon-press",
 			G_CALLBACK (clear_pressed),
 			NULL);
+	g_signal_connect (G_OBJECT(entry_file),
+			"icon-press",
+			G_CALLBACK (directory_pressed),
+			file);
 
 	gtk_widget_show_all(dialog);
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	while ((result = gtk_dialog_run (GTK_DIALOG (dialog))) &&
+		(result != GTK_RESPONSE_CANCEL) &&
+		(result != GTK_RESPONSE_OK) &&
+		(result != GTK_RESPONSE_DELETE_EVENT)) {
+
+		if(result == GTK_RESPONSE_HELP){
+			if (g_str_has_prefix(file, "cdda://"))
+				mobj = new_musicobject_from_cdda(cwin, otag->track_no);
+			else {
+				uri = sanitize_string_sqlite3(file);
+
+				if ((location_id = find_location_db(uri, cwin)))
+					mobj = new_musicobject_from_db(location_id, cwin);
+				else
+					mobj = new_musicobject_from_file(file);
+			}
+			track_properties(mobj, cwin);
+		}
+	}
+
+
 	switch (result)
 	{
 	case GTK_RESPONSE_OK:
@@ -784,13 +849,18 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 			changed |= TAG_COMMENT_CHANGED;
 		}
 		break;
+	case GTK_RESPONSE_DELETE_EVENT:
+		break;
 	case GTK_RESPONSE_CANCEL:
 		break;
 	default:
 		break;
 	}
-
 	gtk_widget_destroy(dialog);
+
+	if (mobj)
+		delete_musicobject(mobj);
+	g_free(uri);
 
 	return changed;
 }
@@ -803,7 +873,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
-	GtkTreePath *path;
+	GtkTreePath *path = NULL, *path_current = NULL;
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL, *file_arr = NULL;
@@ -816,10 +886,12 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 	sel = gtk_tree_selection_count_selected_rows(selection);
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (!sel)
 		return;
+
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+	path_current = current_playlist_get_actual(cwin);
 
 	/* Setup initial entries */
 
@@ -836,11 +908,12 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		}
 
 		memcpy(&otag, mobj->tags, sizeof(struct tags));
+		changed = tag_edit_dialog(&otag, &ntag, mobj->file, cwin);
+	}
+	else {
+		changed = tag_edit_dialog(&otag, &ntag, NULL, cwin);
 	}
 
-	/* Prompt the user for tag changes */
-
-	changed = tag_edit_dialog(&otag, &ntag, cwin);
 	if (!changed)
 		goto exit;
 
@@ -859,6 +932,16 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 			g_warning("Invalid mobj pointer");
 			continue;
 		}
+
+		update_musicobject(mobj, changed, &ntag, cwin);
+		update_track_current_playlist(&iter, changed, mobj, cwin);
+
+		if (gtk_tree_path_compare(path, path_current) == 0) {
+			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
+			if(cwin->cstate->state != ST_STOPPED)
+				__update_current_song_info(cwin);
+		}
+
 		sfile = sanitize_string_sqlite3(mobj->file);
 		location_id = find_location_db(sfile, cwin);
 		if (location_id) {
@@ -873,39 +956,6 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	tag_update(loc_arr, file_arr, changed, &ntag, cwin);
 
-	/* NB: Optimize this to just refresh the changed tracks */
-
-	if (changed && (loc_arr || file_arr))
-		remove_current_playlist(NULL, cwin);
-
-	if (changed && loc_arr) {
-		gint elem = 0;
-		for (j = 0; j < loc_arr->len; j++) {
-			elem = g_array_index(loc_arr, gint, j);
-			if (elem) {
-				mobj = new_musicobject_from_db(elem, cwin);
-				if (!mobj)
-					g_critical("Invalid location ID");
-				else
-					append_current_playlist(mobj, cwin);
-			}
-		}
-	}
-
-	if (changed && file_arr) {
-		gchar *elem = NULL;
-		for (j = 0; j < file_arr->len; j++) {
-			elem = g_array_index(file_arr, gchar *, j);
-			if (elem) {
-				mobj = new_musicobject_from_file(elem);
-				if (!mobj)
-					g_critical("Invalid File");
-				else
-					append_current_playlist(mobj, cwin);
-			}
-		}
-	}
-
 	if (changed && (loc_arr || file_arr))
 		init_library_view(cwin);
 exit:
@@ -915,6 +965,7 @@ exit:
 		path = i->data;
 		gtk_tree_path_free(path);
 	}
+	gtk_tree_path_free(path_current);
 
 	if (loc_arr)
 		g_array_free(loc_arr, TRUE);

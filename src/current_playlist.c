@@ -1286,253 +1286,150 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 /* Show track properties dialog
    This function is a fscking eyesore. */
 
-void track_properties_current_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	track_properties_current_playlist(cwin);
-}
-
-void track_properties_current_playlist(struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkWidget *dialog;
-	GtkTreeSelection *selection;
-	GList *list;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
-	gint i=0;
-	gchar tags[12][20] = {N_("Track No"),
-			      N_("Title"),
-			      N_("Artist"),
-			      N_("Album"),
-			      N_("Genre"),
-			      N_("Year"),
-			      N_("Comment"),
-			      N_("Length"),
-			      N_("Bitrate"),
-			      N_("Channels"),
-			      N_("Samplerate"),
-			      N_("Filename")};
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-	if (list) {
-		path = list->data;
-		gtk_tree_model_get_iter(model, &iter, path);
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (mobj) {
-			gchar *tno = g_strdup_printf("%d", mobj->tags->track_no);
-			gchar *year = g_strdup_printf("%d", mobj->tags->year);
-			gchar *length = convert_length_str(mobj->tags->length);
-			gchar *bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
-			gchar *channels = g_strdup_printf("%d", mobj->tags->channels);
-			gchar *samplerate = g_strdup_printf("%d", mobj->tags->samplerate);
-			gchar *u_file = get_display_name(mobj);
-
-			gchar *tr_info[12] = {tno,
-			      (mobj->tags->title && strlen(mobj->tags->title)) ?
-			      mobj->tags->title : _("Unknown Tags"),
-			      (mobj->tags->artist && strlen(mobj->tags->artist)) ?
-			      mobj->tags->artist : _("Unknown Tags"),
-			      (mobj->tags->album && strlen(mobj->tags->album)) ?
-			      mobj->tags->album : _("Unknown Tags"),
-			      (mobj->tags->genre && strlen(mobj->tags->genre)) ?
-			      mobj->tags->genre : _("Unknown Tags"),
-			      year,
-			      (mobj->tags->comment && strlen(mobj->tags->comment)) ?
-			      mobj->tags->comment : _("Unknown Tags"),
-			      length,
-			      bitrate,
-			      channels,
-			      samplerate,
-			      u_file};
-
-			dialog = gtk_dialog_new_with_buttons(_("Track Information"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_DIALOG_MODAL |
-					     GTK_DIALOG_DESTROY_WITH_PARENT,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_ACCEPT,
-					     NULL);
-			tag_box = gtk_vbox_new(FALSE, 0);
-			info_box = gtk_vbox_new(FALSE, 0);
-			t_hbox = gtk_hbox_new(FALSE, 0);
-
-			for (i=0; i<12; i++) {
-				align = gtk_alignment_new(0, 0, 0, 0);
-				tag_label = gtk_label_new(tags[i]);
-				gtk_label_set_selectable(GTK_LABEL(tag_label), TRUE);
-				gtk_container_add(GTK_CONTAINER(align), tag_label);
-				gtk_box_pack_start(GTK_BOX(tag_box),
-						   GTK_WIDGET(align),
-						   FALSE,
-						   FALSE,
-						   0);
-				align = gtk_alignment_new(0, 0, 0, 0);
-				info_label = gtk_label_new(tr_info[i]);
-				gtk_label_set_selectable(GTK_LABEL(info_label), TRUE);
-				gtk_label_set_line_wrap(GTK_LABEL(info_label), TRUE);
-				gtk_container_add(GTK_CONTAINER(align), info_label);
-				gtk_box_pack_start(GTK_BOX(info_box),
-						   GTK_WIDGET(align),
-						   FALSE,
-						   FALSE,
-						   0);
-			}
-
-			gtk_box_pack_start(GTK_BOX(t_hbox),
-					   GTK_WIDGET(tag_box),
-					   FALSE,
-					   FALSE,
-					   10);
-			gtk_box_pack_start(GTK_BOX(t_hbox),
-					   GTK_WIDGET(info_box),
-					   FALSE,
-					   FALSE,
-					   10);
-			gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),
-					  GTK_WIDGET(t_hbox));
-			gtk_widget_show_all(dialog);
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-
-			g_free(tno);
-			g_free(year);
-			g_free(length);
-			g_free(bitrate);
-			g_free(channels);
-			g_free(samplerate);
-			g_free(u_file);
-		}
-		else
-			g_critical("Dangling music object");
-
-		gtk_tree_path_free(path);
-		g_list_free(list);
-	}
-}
-
-/* Show track properties dialog
-   This function is a fscking eyesore. */
-
-void track_properties_current_playing_action(GtkAction *action, struct con_win *cwin)
-{
-	track_properties_current_playing(cwin);
-}
-
-void track_properties_current_playing(struct con_win *cwin)
+void track_properties(struct musicobject *mobj, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
-	gint i=0;
-	gchar tags[12][20] = {N_("Track No"),
-			      N_("Title"),
-			      N_("Artist"),
-			      N_("Album"),
-			      N_("Genre"),
-			      N_("Year"),
-			      N_("Comment"),
-			      N_("Length"),
-			      N_("Bitrate"),
-			      N_("Channels"),
-			      N_("Samplerate"),
-			      N_("Filename")};
+	GtkWidget *properties_table;
+	GtkWidget *label_length, *label_bitrate, *label_channels, *label_samplerate, *label_folder, *label_filename;
+	GtkWidget *info_length, *info_bitrate, *info_channels, *info_samplerate, *info_folder, *info_filename;
 
-	if (cwin->cstate->curr_mobj) {
-		gchar *tno = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->track_no);
-		gchar *year = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->year);
-		gchar *length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
-		gchar *bitrate = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->bitrate);
-		gchar *channels = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->channels);
-		gchar *samplerate = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->samplerate);
-		gchar *u_file = get_display_name(cwin->cstate->curr_mobj);
+	gchar *length = NULL, *bitrate = NULL, *channels = NULL, *samplerate = NULL, *folder = NULL, *filename = NULL;
 
-		gchar *tr_info[12] = {tno,
-				     (cwin->cstate->curr_mobj->tags->title && strlen(cwin->cstate->curr_mobj->tags->title)) ?
-				     cwin->cstate->curr_mobj->tags->title : _("Unknown Tags"),
-				     (cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
-				     cwin->cstate->curr_mobj->tags->artist : _("Unknown Tags"),
-				     (cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?
-				     cwin->cstate->curr_mobj->tags->album : _("Unknown Tags"),
-				     (cwin->cstate->curr_mobj->tags->genre && strlen(cwin->cstate->curr_mobj->tags->genre)) ?
-				     cwin->cstate->curr_mobj->tags->genre : _("Unknown Tags"),
-				     year,
-				     (cwin->cstate->curr_mobj->tags->comment && strlen(cwin->cstate->curr_mobj->tags->comment)) ?
-				     cwin->cstate->curr_mobj->tags->comment : _("Unknown Tags"),
-				     length,
-				     bitrate,
-				     channels,
-				     samplerate,
-				     u_file};
-		dialog = gtk_dialog_new_with_buttons(_("Track Information"),
+	if(!mobj)
+		return;
+
+	length = convert_length_str(mobj->tags->length);
+	bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
+	channels = g_strdup_printf("%d", mobj->tags->channels);
+	samplerate = g_strdup_printf("%d", mobj->tags->samplerate);
+	folder = get_display_filename(mobj->file, TRUE);
+	filename = get_display_name(mobj);
+
+	/* Create table */
+
+	properties_table = gtk_table_new(6, 2, FALSE);
+
+	gtk_table_set_col_spacings(GTK_TABLE(properties_table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(properties_table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(properties_table), 5);
+
+	/* Create labels */
+
+	label_length = gtk_label_new(_("Length"));
+	label_bitrate = gtk_label_new(_("Bitrate"));
+	label_channels = gtk_label_new(_("Channels"));
+	label_samplerate = gtk_label_new(_("Samplerate"));
+	label_folder = gtk_label_new(_("Folder"));
+	label_filename = gtk_label_new(_("Filename"));
+
+	gtk_misc_set_alignment(GTK_MISC (label_length), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_bitrate), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_channels), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_samplerate), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_folder), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_filename), 1, 0);
+
+	/* Create info labels */
+
+	info_length = gtk_label_new(length);
+	info_bitrate = gtk_label_new(bitrate);
+	info_channels = gtk_label_new(channels);
+	info_samplerate = gtk_label_new(samplerate);
+	info_folder = gtk_label_new(folder);
+	info_filename = gtk_label_new(filename);
+
+	gtk_misc_set_alignment(GTK_MISC (info_length), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_bitrate), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_channels), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_samplerate), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_folder), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_filename), 0, 0);
+
+	gtk_label_set_selectable(GTK_LABEL(info_length), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_bitrate), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_channels), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_samplerate), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_folder), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_filename), TRUE);
+
+	/* Attach labels */
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_length,
+			0, 1, 0, 1,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_length,
+			1, 2, 0, 1,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_bitrate,
+			0, 1, 1, 2,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_bitrate,
+			1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_channels,
+			0, 1, 2, 3,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_channels,
+			1, 2, 2, 3,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_samplerate,
+			0, 1, 3, 4,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_samplerate,
+			1, 2, 3, 4,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_folder,
+			0, 1, 4, 5,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_folder,
+			1, 2, 4, 5,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_filename,
+			0, 1, 5, 6,
+			GTK_FILL, GTK_SHRINK,
+			0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_filename,
+			1, 2, 5, 6,
+			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+			0, 0);
+
+	/* The main edit dialog */
+
+	dialog = gtk_dialog_new_with_buttons(_("Details"),
 					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_DIALOG_MODAL |
-					     GTK_DIALOG_DESTROY_WITH_PARENT,
+					     GTK_DIALOG_MODAL,
 					     GTK_STOCK_OK,
-					     GTK_RESPONSE_ACCEPT,
+					     GTK_RESPONSE_OK,
 					     NULL);
 
-		tag_box = gtk_vbox_new(FALSE, 0);
-		info_box = gtk_vbox_new(FALSE, 0);
-		t_hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), properties_table);
 
-		for (i=0; i<12; i++) {
-			align = gtk_alignment_new(0, 0, 0, 0);
-			tag_label = gtk_label_new(tags[i]);
-			gtk_label_set_selectable(GTK_LABEL(tag_label), TRUE);
-			gtk_container_add(GTK_CONTAINER(align), tag_label);
-			gtk_box_pack_start(GTK_BOX(tag_box),
-					   GTK_WIDGET(align),
-					   FALSE,
-					   FALSE,
-					   0);
-			align = gtk_alignment_new(0, 0, 0, 0);
-			info_label = gtk_label_new(tr_info[i]);
-			gtk_label_set_selectable(GTK_LABEL(info_label), TRUE);
-			gtk_label_set_line_wrap(GTK_LABEL(info_label), TRUE);
-			gtk_container_add(GTK_CONTAINER(align), info_label);
-				gtk_box_pack_start(GTK_BOX(info_box),
-					   GTK_WIDGET(align),
-					   FALSE,
-					   FALSE,
-					   0);
-		}
+	gtk_widget_show_all(dialog);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
 
-		gtk_box_pack_start(GTK_BOX(t_hbox),
-				   GTK_WIDGET(tag_box),
-				   FALSE,
-				   FALSE,
-				   10);
-		gtk_box_pack_start(GTK_BOX(t_hbox),
-				   GTK_WIDGET(info_box),
-				   FALSE,
-				   FALSE,
-				   10);
-
-		gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),
-				  GTK_WIDGET(t_hbox));
-
-		gtk_widget_show_all(dialog);
-
-		gtk_dialog_run(GTK_DIALOG(dialog));
-
-		gtk_widget_destroy(dialog);
-
-		g_free(tno);
-		g_free(year);
-		g_free(length);
-		g_free(bitrate);
-		g_free(channels);
-		g_free(samplerate);
-		g_free(u_file);
-	}
-	else
-		track_properties_current_playlist(cwin);
+	g_free(length);
+	g_free(bitrate);
+	g_free(channels);
+	g_free(samplerate);
+	g_free(folder);
+	g_free(filename);
 }
-
 
 /* Clear all rows from current playlist */
 
@@ -1565,13 +1462,63 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	update_status_bar(cwin);
 }
 
+/* Update a track to the current playlist */
+
+void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_filename = NULL;
+
+	if (!changed)
+		return;
+
+	CDEBUG(DBG_VERBOSE, "Track Updates: 0x%x", changed);
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	ch_year = g_strdup_printf("%d", mobj->tags->year);
+	ch_filename = get_display_name(mobj);
+
+	if(mobj->tags->track_no)
+		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
+	if(mobj->tags->year)
+		ch_year = g_strdup_printf("%d", mobj->tags->year);
+
+	if (changed & TAG_TNO_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TRACK_NO, ch_track_no, -1);
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE,
+					(mobj->tags->title && strlen(mobj->tags->title)) ? mobj->tags->title : ch_filename, -1);
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ARTIST, mobj->tags->artist,-1);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM, mobj->tags->album,-1);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_GENRE, mobj->tags->genre,-1);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_YEAR, ch_year, -1);
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_COMMENT, mobj->tags->comment,-1);
+	}
+
+	g_free(ch_track_no);
+	g_free(ch_year);
+	g_free(ch_filename);
+}
+
 /* Insert a track to the current playlist */
 
 void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *ch_length, *ch_track_no, *ch_year, *ch_bitrate, *ch_filename;
+	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -1585,14 +1532,13 @@ void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkT
 	}
 
 	ch_length = convert_length_str(mobj->tags->length);
-	ch_year = g_strdup_printf("%d", mobj->tags->year);
 	ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
 	ch_filename = get_display_name(mobj);
 
 	if(mobj->tags->track_no)
 		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
-	else
-		ch_track_no = NULL;
+	if(mobj->tags->year)
+		ch_year = g_strdup_printf("%d", mobj->tags->year);
 
 	if (drop_after)
 		gtk_list_store_insert_after(GTK_LIST_STORE(model), &iter, pos);
@@ -2006,7 +1952,7 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 					 GdkEventButton *event,
 					 struct con_win *cwin)
 {
-	GtkWidget *popup_menu, *track_prop;
+	GtkWidget *popup_menu, *item_widget;
 	gboolean ret = FALSE;
 	GtkTreeSelection *selection;
 	gint n_select = 0;
@@ -2039,52 +1985,40 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			/* 'Properties' menuitem is shown only for a single selection */
-
-			track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu,
-							       "/popup/Properties");
-			if (!track_prop)
-				g_critical("Unable to find prop widget");
-
 			n_select = gtk_tree_selection_count_selected_rows(selection);
-
-			if (n_select != 1)
-				gtk_widget_set_sensitive (GTK_WIDGET(track_prop), FALSE);
-			else
-				gtk_widget_set_sensitive (GTK_WIDGET(track_prop), TRUE);
 
 			if (gtk_tree_model_get_iter(model, &iter, path)){
 				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
 
 				if(is_queue){
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
-					gtk_widget_hide(GTK_WIDGET(track_prop));
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
+					gtk_widget_hide(GTK_WIDGET(item_widget));
 
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
-					gtk_widget_show(GTK_WIDGET(track_prop));
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
+					gtk_widget_show(GTK_WIDGET(item_widget));
 
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
-					gtk_widget_set_sensitive (GTK_WIDGET(track_prop), TRUE);
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 				}
 				else{
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
-					gtk_widget_set_sensitive (GTK_WIDGET(track_prop), TRUE);
-					gtk_widget_show(GTK_WIDGET(track_prop));
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+					gtk_widget_show(GTK_WIDGET(item_widget));
 
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
-					gtk_widget_hide(GTK_WIDGET(track_prop));
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
+					gtk_widget_hide(GTK_WIDGET(item_widget));
 
-					track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
-					gtk_widget_set_sensitive (GTK_WIDGET(track_prop), TRUE);
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 				}
 			}
 			else{
-				track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
-				gtk_widget_set_sensitive (GTK_WIDGET(track_prop), FALSE);
-				gtk_widget_show(GTK_WIDGET(track_prop));
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
+				gtk_widget_show(GTK_WIDGET(item_widget));
 
-				track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
-				gtk_widget_hide(GTK_WIDGET(track_prop));
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
+				gtk_widget_hide(GTK_WIDGET(item_widget));
 			}
 
 			/* If more than one track is selected, don't propagate event */
@@ -2097,18 +2031,15 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 			gtk_tree_path_free(path);
 		}
 		else{
-			track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
-			gtk_widget_set_sensitive (GTK_WIDGET(track_prop), FALSE);
-			gtk_widget_show(GTK_WIDGET(track_prop));
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
+			gtk_widget_show(GTK_WIDGET(item_widget));
 
-			track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
-			gtk_widget_hide(GTK_WIDGET(track_prop));
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
+			gtk_widget_hide(GTK_WIDGET(item_widget));
 
-			track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Properties");
-			gtk_widget_set_sensitive (GTK_WIDGET(track_prop), FALSE);
-
-			track_prop = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
-			gtk_widget_set_sensitive (GTK_WIDGET(track_prop), FALSE);
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			gtk_tree_selection_unselect_all(selection);
 		}

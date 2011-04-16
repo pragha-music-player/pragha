@@ -29,7 +29,7 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Stop\"/>				\
 			<menuitem action=\"Next\"/>				\
 			<separator/>						\
-			<menuitem action=\"Properties\"/>			\
+			<menuitem action=\"Edit tags\"/>			\
 			<separator/>						\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
@@ -93,7 +93,6 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Save selection\"/>					\
 	<menuitem action=\"Save playlist\"/>					\
 	<separator/>				    				\
-	<menuitem action=\"Properties\"/>	    				\
 	<menuitem action=\"Edit tags\"/>					\
 	<separator/>				    				\
 	</popup>				    				\
@@ -151,7 +150,7 @@ gchar *systray_menu_xml = "<ui>				\
 		<menuitem action=\"Stop\"/>		\
 		<menuitem action=\"Next\"/>		\
 		<separator/>				\
-		<menuitem action=\"Properties\"/>	\
+		<menuitem action=\"Edit tags\"/>	\
 		<separator/>				\
 		<menuitem action=\"Quit\"/>		\
 	</popup>					\
@@ -175,8 +174,8 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next track"),
 	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
-	{"Properties", GTK_STOCK_PROPERTIES, N_("_Properties"),
-	 NULL, "Properties", G_CALLBACK(track_properties_current_playing_action)},
+	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
+	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
@@ -212,7 +211,7 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Forum of pragha", G_CALLBACK(community_action)},
 	{"Wiki", GTK_STOCK_YES, N_("Wiki"),
 	 NULL, "Wiki of pragha", G_CALLBACK(wiki_action)},
-	{"Translate Pragha", NULL, N_("Translate Pragha"),
+	{"Translate Pragha", "preferences-desktop-locale", N_("Translate Pragha"),
 	 NULL, "Translate Pragha", G_CALLBACK(translate_action)},
 	{"About", GTK_STOCK_ABOUT, N_("About"),
 	 NULL, "About pragha", G_CALLBACK(about_action)},
@@ -250,8 +249,6 @@ GtkActionEntry cp_context_aentries[] = {
 	 NULL, "Crop the playlist", G_CALLBACK(crop_current_playlist)},
 	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
 	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_current_playlist)},
-	{"Properties", GTK_STOCK_PROPERTIES, N_("Properties"),
-	 NULL, "Track Properties", G_CALLBACK(track_properties_current_playlist_action)},
 	{"Save selection", GTK_STOCK_SAVE, N_("Save selection"),
 	 NULL, "Save selected tracks as playlist", G_CALLBACK(save_selected_playlist)},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist"),
@@ -322,8 +319,8 @@ GtkActionEntry systray_menu_aentries[] = {
 	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next Track"),
 	 NULL, "Next Track", G_CALLBACK(next_action)},
-	{"Properties", GTK_STOCK_PROPERTIES, N_("_Properties"),
-	 NULL, "Properties", G_CALLBACK(track_properties_current_playing_action)},
+	{"Edit tags", GTK_STOCK_INFO, N_("Edit tags"),
+	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 NULL, "Quit", G_CALLBACK(systray_quit)}
 };
@@ -1699,8 +1696,10 @@ icon_pressed_cb (GtkEntry       *entry,
 		GdkEventButton *event,
 		gpointer        data)
 {
-	if (position == GTK_ENTRY_ICON_SECONDARY)
+	if (position == GTK_ENTRY_ICON_SECONDARY) {
 		gtk_entry_set_text (entry, "");
+		gtk_widget_grab_focus(GTK_WIDGET(entry));
+	}
 }
 
 /* Search (simple) */

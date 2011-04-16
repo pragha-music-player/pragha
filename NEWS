@@ -1,7 +1,34 @@
 =====================================================
-Overview of changes in Pragha 0.8.1
+Overview of changes in Pragha 0.8.2 "Quasi One.Zero"
 =====================================================
 
+News:
+	Add filename entry to tag editor dialog with a open folder icon.
+	Add Details button to tag editor dialog that open the properties dialog.
+	Update current playlist when edit tags.
+	=> No More eliminate the edited tracks => Not more lost in queue list when you
+	   edit a file!, & NOT lose the currently played song!, and a tiny more speed.
+
+Others Changes:
+	Add VERY basic session management support.
+	Add spinner when update/rescan music db if Gtk >= 2.20.
+	Add folder label to properties dialog.
+	Grab focus when clear entrys.
+
+Updates Translations:
+	Update de, es, and ru tranlations.
+	Update po files.
+
+Bugs fixed:
+	Fix small spelling mistake. thank to c_k...@gmx.de.
+	D'Oh!. Add Dutch translatition in subversion.
+	Initialized pointers!.
+	Remove unused vars.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.8.1
 News:
 	Add Translate Pragha (Link to Transifex) in Help menu.
 	New "Associate notifications to system tray" option.
@@ -23,11 +50,6 @@ Updates Translations:
 Bugs fixed:
 	Fix typo thanks to Timm Bäder.
 	Expand only comment field when change window size in edit tag dialog.
-
-
-======================================================
-OTHERS REALESES:
-======================================================
 V0.8.0.2
 	Update German translation. Thanks to Christoph Wickert.
 	Disable Global keybindings if gtk < 2.20.
