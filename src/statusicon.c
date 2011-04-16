@@ -116,7 +116,7 @@ void show_osd(struct con_win *cwin)
 {
 	GError *error = NULL;
 	NotifyNotification *osd;
-	gchar *summary, *length, *str;
+	gchar *summary, *body, *length, *str;
 
 	/* Check if OSD is enabled in preferences */
 
@@ -130,7 +130,10 @@ void show_osd(struct con_win *cwin)
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
 
-	summary = g_markup_printf_escaped("%s: %s\n%s: %s\n%s: %s\n%s: %s",
+
+	summary = g_strdup(_("Pragha Music Player"));
+
+	body = g_markup_printf_escaped("%s: %s\n%s: %s\n%s: %s\n%s: %s",
  			_("Title"), str,
  			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
  			_("Album"), cwin->cstate->curr_mobj->tags->album,
@@ -140,7 +143,7 @@ void show_osd(struct con_win *cwin)
 
 	if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
 		osd = notify_notification_new_with_status_icon((const gchar *) summary,
-								NULL, NULL,
+								body, NULL,
 								GTK_STATUS_ICON(cwin->status_icon));
 	}
 	else {
@@ -172,6 +175,7 @@ void show_osd(struct con_win *cwin)
 	/* Cleanup */
 
 	g_free(summary);
+	g_free(body);
 	g_free(length);
 	g_free(str);
 }

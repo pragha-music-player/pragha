@@ -21,6 +21,7 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -30,6 +31,9 @@
 #include <gdk/gdkx.h>
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
+
+#if GTK_CHECK_VERSION(2,20,0)
+/* for Keybinder you need Gtk >= 2.20 */
 
 #include "keybinder.h"
 
@@ -503,3 +507,5 @@ keybinder_get_current_event_time (void)
 	else
 		return GDK_CURRENT_TIME;
 }
+
+#endif /* ! GTK_CHECK_VERSION(2,20,0) */

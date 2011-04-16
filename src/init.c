@@ -945,7 +945,7 @@ gint init_musicdbase(struct con_win *cwin)
 						"/pragha/pragha.db");
 
 
-	if (g_ascii_strcasecmp(cwin->cpref->installed_version, PACKAGE_VERSION) !=0 ) {
+	if (g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
 		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
 		ret = g_unlink(cwin->cdbase->db_file);
 		if (ret != 0)
@@ -1120,6 +1120,8 @@ gint init_notify(struct con_win *cwin)
 	return 0;
 }
 
+#if GTK_CHECK_VERSION (2, 20, 0)
+/* for Keybinder you need Gtk >= 2.20 */
 gint init_keybinder(struct con_win *cwin)
 {
 	keybinder_init ();
@@ -1132,6 +1134,7 @@ gint init_keybinder(struct con_win *cwin)
 
 	return 0;
 }
+#endif
 
 gint init_lastfm(struct con_win *cwin)
 {

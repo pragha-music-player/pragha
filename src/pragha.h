@@ -96,6 +96,8 @@
 #define FULLSCREEN_STATE	"fullscreen"
 #define ICONIFIED_STATE		"iconified"
 
+#define MIN_DATABASE_VERSION	"0.8.0"
+
 #define DEFAULT_SINK "default"
 #define ALSA_SINK    "alsa"
 #define OSS_SINK     "oss"
@@ -168,7 +170,6 @@
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
 #define KEY_FUSE_FOLDERS	   "library_fuse_folders"
-
 
 #define GROUP_AUDIO    "Audio"
 #define KEY_AUDIO_SINK             "audio_sink"

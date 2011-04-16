@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 21:23-0300\n"
-"PO-Revision-Date: 2010-07-14 13:21-0300\n"
-"Last-Translator: Matias <mati86dl@gmail.com>\n"
+"POT-Creation-Date: 2010-07-30 12:53-0300\n"
+"PO-Revision-Date: 2010-07-30 11:26+0100\n"
+"Last-Translator: Christoph Wickert <cwickert@fedoraproject.org>\n"
 "Language-Team: Deutsch\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -215,19 +215,19 @@ msgstr "Alles in der Musikbibliothek _aufklappen"
 msgid "_Collapse library"
 msgstr "Alles in der Musikbibliothek _zuklappen"
 
-#: src/gui.c:288
-msgid "Folder structure"
-msgstr ""
+#: src/gui.c:288 src/librarytree.c:1258
+msgid "Folders structure"
+msgstr "Verzeichnisbaum"
 
 #: src/gui.c:290 src/gui.c:726 src/gui.c:857 src/current_playlist.c:1307
-#: src/current_playlist.c:1433 src/librarytree.c:1261 src/statusicon.c:135
-#: src/statusicon.c:193 src/tags.c:441
+#: src/current_playlist.c:1433 src/librarytree.c:1261 src/statusicon.c:138
+#: src/statusicon.c:197 src/tags.c:441
 msgid "Artist"
 msgstr "Interpret"
 
 #: src/gui.c:292 src/gui.c:727 src/gui.c:858 src/current_playlist.c:1308
-#: src/current_playlist.c:1434 src/librarytree.c:1265 src/statusicon.c:136
-#: src/statusicon.c:194 src/tags.c:442
+#: src/current_playlist.c:1434 src/librarytree.c:1265 src/statusicon.c:139
+#: src/statusicon.c:198 src/tags.c:442
 msgid "Album"
 msgstr "Album"
 
@@ -256,11 +256,11 @@ msgstr "Genre / Interpret / Album"
 msgid "Prev Track"
 msgstr "Vorheriger Titel"
 
-#: src/gui.c:319 src/gui.c:1569 src/statusicon.c:160
+#: src/gui.c:319 src/gui.c:1569 src/statusicon.c:163
 msgid "Next Track"
 msgstr "Nächster Titel"
 
-#: src/gui.c:617
+#: src/gui.c:617 src/statusicon.c:134
 #, fuzzy
 msgid "Pragha Music Player"
 msgstr "Pragha Music Manager"
@@ -272,7 +272,7 @@ msgstr "Spur"
 
 #. Create labels
 #: src/gui.c:725 src/gui.c:856 src/current_playlist.c:1306
-#: src/current_playlist.c:1432 src/statusicon.c:134 src/statusicon.c:192
+#: src/current_playlist.c:1432 src/statusicon.c:137 src/statusicon.c:196
 #: src/tags.c:440
 msgid "Title"
 msgstr "Titel"
@@ -294,7 +294,7 @@ msgid "Comment"
 msgstr "Gemeinschaft"
 
 #: src/gui.c:732 src/gui.c:863 src/current_playlist.c:1312
-#: src/current_playlist.c:1438 src/statusicon.c:137 src/statusicon.c:195
+#: src/current_playlist.c:1438 src/statusicon.c:140 src/statusicon.c:199
 msgid "Length"
 msgstr "Länge"
 
@@ -332,7 +332,7 @@ msgstr "In einer zufälligen Reihenfolge wiedergeben"
 msgid "Repeat playback list at the end"
 msgstr "Wiedergabe wiederholen"
 
-#: src/gui.c:1614 src/panel.c:218 src/statusicon.c:189
+#: src/gui.c:1614 src/panel.c:218 src/statusicon.c:193
 msgid "<b>Not playing</b>"
 msgstr "<b>Keine Wiedergabe</b>"
 
@@ -432,10 +432,6 @@ msgstr ""
 "\n"
 "Warnung: Die Datei kann nach dem Löschen nicht wiederhergestellt werden."
 
-#: src/librarytree.c:1258
-msgid "Folders structure"
-msgstr ""
-
 #: src/pref.c:21
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
@@ -513,16 +509,14 @@ msgstr "Wenn Pragha startet"
 
 #. General Check_buttons
 #: src/pref.c:1472
-#, fuzzy
 msgid "Minimize Pragha when close the window"
-msgstr "Pragha minimieren, wenn das Fenster geschlossen wird"
+msgstr "Pragha beim Schließen des Fensters minimieren"
 
 #: src/pref.c:1473
 msgid "Restore last playlist"
 msgstr "Letzte Wiedergabeliste wiederherstellen"
 
 #: src/pref.c:1474
-#, fuzzy
 msgid "Add files recurcively"
 msgstr "Dateien rekursiv hinzufügen"
 
@@ -558,7 +552,7 @@ msgstr "Ordner"
 
 #: src/pref.c:1666
 msgid "Merge folders in the folders estructure view"
-msgstr ""
+msgstr "Ordner im Verzeichnisbaum zusammenführen"
 
 #. Last.fm
 #: src/pref.c:1684
@@ -619,7 +613,9 @@ msgstr "Statistiken"
 
 #: src/menu.c:826
 msgid "translator-credits"
-msgstr "Übersetzer"
+msgstr ""
+"PhotonX\n"
+"Christoph Wickert <cwickert@fedoraproject.org>"
 
 #: src/utils.c:222
 msgid "days"
@@ -636,6 +632,9 @@ msgstr "Der Browser konnte nicht geöffnet werden"
 #: src/playlist.c:513
 msgid "Export playlist to file"
 msgstr "Wiedergabeliste in Datei speichern"
+
+#~ msgid "Folder structure"
+#~ msgstr "Verzeichnisbaum"
 
 #~ msgid "Folder / File"
 #~ msgstr "Ordner / Datei"

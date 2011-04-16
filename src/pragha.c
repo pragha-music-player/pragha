@@ -126,11 +126,14 @@ void common_cleanup(struct con_win *cwin)
 	if (notify_is_initted())
 		notify_uninit();
 
+	#if GTK_CHECK_VERSION(2,20,0)
+	/* for Keybinder you need Gtk >= 2.20 */
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);
 	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
 	keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
 	keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
+	#endif
 
 	g_option_context_free(cwin->cmd_context);
 
@@ -220,10 +223,13 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
+	#if GTK_CHECK_VERSION (2, 20, 0)
+	/* for Keybinder you need Gtk >= 2.20 */
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
+	#endif
 
 	init_state(cwin);
 

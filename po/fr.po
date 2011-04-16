@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: praga 0.7.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 21:23-0300\n"
+"POT-Creation-Date: 2010-07-30 12:53-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: \n"
@@ -215,19 +215,19 @@ msgstr "_Maximiser la vue de la Bibliothèque"
 msgid "_Collapse library"
 msgstr "_Minimiser la vue de la Bibliothèque"
 
-#: src/gui.c:288
-msgid "Folder structure"
+#: src/gui.c:288 src/librarytree.c:1258
+msgid "Folders structure"
 msgstr ""
 
 #: src/gui.c:290 src/gui.c:726 src/gui.c:857 src/current_playlist.c:1307
-#: src/current_playlist.c:1433 src/librarytree.c:1261 src/statusicon.c:135
-#: src/statusicon.c:193 src/tags.c:441
+#: src/current_playlist.c:1433 src/librarytree.c:1261 src/statusicon.c:138
+#: src/statusicon.c:197 src/tags.c:441
 msgid "Artist"
 msgstr "Artiste"
 
 #: src/gui.c:292 src/gui.c:727 src/gui.c:858 src/current_playlist.c:1308
-#: src/current_playlist.c:1434 src/librarytree.c:1265 src/statusicon.c:136
-#: src/statusicon.c:194 src/tags.c:442
+#: src/current_playlist.c:1434 src/librarytree.c:1265 src/statusicon.c:139
+#: src/statusicon.c:198 src/tags.c:442
 msgid "Album"
 msgstr "Album"
 
@@ -256,11 +256,11 @@ msgstr "Genre / Artiste / Album"
 msgid "Prev Track"
 msgstr "Morceau Précédent"
 
-#: src/gui.c:319 src/gui.c:1569 src/statusicon.c:160
+#: src/gui.c:319 src/gui.c:1569 src/statusicon.c:163
 msgid "Next Track"
 msgstr "Morceau Suivant"
 
-#: src/gui.c:617
+#: src/gui.c:617 src/statusicon.c:134
 #, fuzzy
 msgid "Pragha Music Player"
 msgstr "Pragha Music Manager"
@@ -272,7 +272,7 @@ msgstr "Piste"
 
 #. Create labels
 #: src/gui.c:725 src/gui.c:856 src/current_playlist.c:1306
-#: src/current_playlist.c:1432 src/statusicon.c:134 src/statusicon.c:192
+#: src/current_playlist.c:1432 src/statusicon.c:137 src/statusicon.c:196
 #: src/tags.c:440
 msgid "Title"
 msgstr "Titre"
@@ -294,7 +294,7 @@ msgid "Comment"
 msgstr "Communauté"
 
 #: src/gui.c:732 src/gui.c:863 src/current_playlist.c:1312
-#: src/current_playlist.c:1438 src/statusicon.c:137 src/statusicon.c:195
+#: src/current_playlist.c:1438 src/statusicon.c:140 src/statusicon.c:199
 msgid "Length"
 msgstr "Durée"
 
@@ -333,7 +333,7 @@ msgstr ""
 msgid "Repeat playback list at the end"
 msgstr ""
 
-#: src/gui.c:1614 src/panel.c:218 src/statusicon.c:189
+#: src/gui.c:1614 src/panel.c:218 src/statusicon.c:193
 msgid "<b>Not playing</b>"
 msgstr "<b>Arrêté</b>"
 
@@ -424,10 +424,6 @@ msgid ""
 "Are you sure you want to delete current file from HDD?\n"
 "\n"
 "Warning: Once deleted, the file cannot be recovered."
-msgstr ""
-
-#: src/librarytree.c:1258
-msgid "Folders structure"
 msgstr ""
 
 #: src/pref.c:21

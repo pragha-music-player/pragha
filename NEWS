@@ -29,6 +29,17 @@ Bugs fixed:
 
 Update po files.
 
+V0.8.0.1
+	Eliminate previous incompatible db.
+	Show message dialog to rescand libray.
+
+V0.8.0.2
+	Update German translation. Thanks to Christoph Wickert.
+	Disable Global keybindings if gtk < 2.20.
+	Add "Pragha Music Player" to the sumary of notifications and so displayed correctly. In notify-osd for example.
+	Eliminate previous incompatible db only if minor to 0.8.0.
+	Drop "Folder structure" bad string.
+
 (1) Again thank you very much to Roberto DMD.
 
 ======================================================
