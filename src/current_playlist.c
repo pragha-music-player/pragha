@@ -52,7 +52,7 @@ static void update_status_bar(struct con_win *cwin)
 
 	total_playtime = get_total_playtime(cwin);
 	tot_str = convert_length_str(total_playtime);
-	str = g_strdup_printf("%i Pistas - %s", cwin->cstate->tracks_curr_playlist, tot_str);
+	str = g_strdup_printf("%i Tracks - %s", cwin->cstate->tracks_curr_playlist, tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 

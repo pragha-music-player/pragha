@@ -326,6 +326,35 @@ egg_tray_icon_have_manager (EggTrayIcon *icon)
     return FALSE;
 }
 
+static gboolean
+transparent_expose_event (GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
+{
+  gdk_window_clear_area (widget->window, event->area.x, event->area.y,
+			 event->area.width, event->area.height);
+  return FALSE;
+}
+
+static void
+make_transparent_again (GtkWidget *widget, GtkStyle *previous_style,
+			gpointer user_data)
+{
+  gdk_window_set_back_pixmap (widget->window, NULL, TRUE);
+}
+
+static void
+make_transparent (GtkWidget *widget, gpointer user_data)
+{
+  if (GTK_WIDGET_NO_WINDOW (widget) || GTK_WIDGET_APP_PAINTABLE (widget))
+    return;
+
+  gtk_widget_set_app_paintable (widget, TRUE);
+  gtk_widget_set_double_buffered (widget, FALSE);
+  gdk_window_set_back_pixmap (widget->window, NULL, TRUE);
+  g_signal_connect (widget, "expose_event",
+		    G_CALLBACK (transparent_expose_event), NULL);
+  g_signal_connect_after (widget, "style_set",
+			  G_CALLBACK (make_transparent_again), NULL);
+}
 
 static void egg_tray_icon_realize(GtkWidget * widget)
 {
@@ -338,6 +367,8 @@ static void egg_tray_icon_realize(GtkWidget * widget)
 
    if (GTK_WIDGET_CLASS(parent_class)->realize)
       GTK_WIDGET_CLASS(parent_class)->realize(widget);
+
+   make_transparent (widget, NULL);
 
    screen = gtk_widget_get_screen(widget);
    display = gdk_screen_get_display(screen);

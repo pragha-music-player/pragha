@@ -1861,7 +1861,7 @@ GtkWidget* create_search_current_bar(struct con_win *cwin)
 
 	hbox_bar = gtk_hbox_new(FALSE, 0);
 	icon_find =  gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-	label_find = gtk_label_new("Buscar:");
+	label_find = gtk_label_new("Find:");
 	search_current_entry = gtk_entry_new();
 	cancel_button = gtk_button_new();
 
