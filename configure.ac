@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [0])
 m4_define([pragha_version_minor], [94])
-m4_define([pragha_version_micro], [0])
+m4_define([pragha_version_micro], [1])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -55,6 +55,7 @@ XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.16.0])
 XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([DBUS], [dbus-1], [0.74])
+XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.74])
 XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])

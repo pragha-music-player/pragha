@@ -68,10 +68,10 @@ News:
 	Complete MPRIS2 track list interface.
 	Add option to init MPRIS2 in preferences.
 	Restore Search Lyrics with a dialog using Chartlyrics.com.
-	Add new popup menu when current playlist is emply.
+	Add a new popup menu when current playlist is emply.
 
 Others Changes:
-	Now depend on external libclastfm >=0.4 (Optional).
+	Now depend on external libclastfm >= 0.4 (Optional).
 
 Updates Translations:
 	Add Turkisk translation thanks to Hakan.
@@ -87,6 +87,16 @@ Bugs fixed:
 	Drop unused vars.
 
 Note: http://liblastfm.sourceforge.net now is libclastfm due to incompatibility with the official library.
+
+V0.94.1
+News:
+	Implement a dialog to skip tracks if fails playback.
+	
+Bugs fixed:
+	Compile with Gcc 4.6, with all that this implies.
+	Use _tree_row_references to edit track.
+	Get the files to change quickly, to prevent when finished the song and change the selection.
+	Always check the current song to prevent when finished and change the song.
 
 ======================================================
 OTHERS REALESES:

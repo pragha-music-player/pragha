@@ -50,13 +50,11 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 
 	struct musicobject *mobj;
 	gint num_tracks = 0, i = 0;
-	gint first_track;
 
 	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);
 	if (!num_tracks)
 		return;
 
-	first_track = cdio_get_first_track_num(cwin->cstate->cdda_drive->p_cdio);
 	clear_current_playlist(NULL, cwin);
 
 	for (i = 1; i <= num_tracks; i++) {

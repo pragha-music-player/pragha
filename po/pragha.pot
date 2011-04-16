@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-11 09:50-0300\n"
+"POT-Creation-Date: 2011-04-11 18:56-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -194,7 +194,7 @@ msgstr ""
 msgid "Library"
 msgstr ""
 
-#: src/gui.c:275 src/gui.c:296 src/gui.c:689 src/playlist.c:923
+#: src/gui.c:275 src/gui.c:296 src/gui.c:689 src/playlist.c:919
 msgid "Playlists"
 msgstr ""
 
@@ -246,38 +246,38 @@ msgstr ""
 msgid "_Collapse library"
 msgstr ""
 
-#: src/gui.c:353 src/librarytree.c:1354
+#: src/gui.c:353 src/librarytree.c:1341
 msgid "Folders structure"
 msgstr ""
 
-#: src/gui.c:355 src/gui.c:809 src/gui.c:973 src/pragha.h:85
-#: src/librarytree.c:1357 src/statusicon.c:215 src/tags.c:391
+#: src/gui.c:355 src/gui.c:808 src/gui.c:972 src/pragha.h:85
+#: src/librarytree.c:1344 src/statusicon.c:215 src/tags.c:391
 msgid "Artist"
 msgstr ""
 
-#: src/gui.c:357 src/gui.c:810 src/gui.c:974 src/pragha.h:86
-#: src/librarytree.c:1361 src/statusicon.c:216 src/tags.c:392
+#: src/gui.c:357 src/gui.c:809 src/gui.c:973 src/pragha.h:86
+#: src/librarytree.c:1348 src/statusicon.c:216 src/tags.c:392
 msgid "Album"
 msgstr ""
 
-#: src/gui.c:359 src/gui.c:811 src/gui.c:975 src/pragha.h:87
-#: src/librarytree.c:1365 src/tags.c:393
+#: src/gui.c:359 src/gui.c:810 src/gui.c:974 src/pragha.h:87
+#: src/librarytree.c:1352 src/tags.c:393
 msgid "Genre"
 msgstr ""
 
-#: src/gui.c:361 src/librarytree.c:1369
+#: src/gui.c:361 src/librarytree.c:1356
 msgid "Artist / Album"
 msgstr ""
 
-#: src/gui.c:363 src/librarytree.c:1377
+#: src/gui.c:363 src/librarytree.c:1364
 msgid "Genre / Album"
 msgstr ""
 
-#: src/gui.c:365 src/librarytree.c:1373
+#: src/gui.c:365 src/librarytree.c:1360
 msgid "Genre / Artist"
 msgstr ""
 
-#: src/gui.c:367 src/librarytree.c:1381
+#: src/gui.c:367 src/librarytree.c:1368
 msgid "Genre / Artist / Album"
 msgstr ""
 
@@ -285,7 +285,7 @@ msgstr ""
 msgid "Prev Track"
 msgstr ""
 
-#: src/gui.c:384 src/gui.c:1701 src/statusicon.c:180
+#: src/gui.c:384 src/gui.c:1698 src/statusicon.c:180
 msgid "Next Track"
 msgstr ""
 
@@ -294,72 +294,72 @@ msgid "Pragha Music Player"
 msgstr ""
 
 #. Create the checkmenu items
-#: src/gui.c:807 src/gui.c:971 src/current-playlist.c:70
+#: src/gui.c:806 src/gui.c:970 src/current-playlist.c:70
 msgid "Track"
 msgstr ""
 
 #. Create labels
-#: src/gui.c:808 src/gui.c:972 src/pragha.h:84 src/statusicon.c:214
+#: src/gui.c:807 src/gui.c:971 src/pragha.h:84 src/statusicon.c:214
 #: src/tags.c:390
 msgid "Title"
 msgstr ""
 
-#: src/gui.c:812 src/gui.c:976 src/pragha.h:88 src/current-playlist.c:1299
+#: src/gui.c:811 src/gui.c:975 src/pragha.h:88 src/current-playlist.c:1292
 msgid "Bitrate"
 msgstr ""
 
-#: src/gui.c:813 src/gui.c:977 src/pragha.h:89 src/tags.c:395
+#: src/gui.c:812 src/gui.c:976 src/pragha.h:89 src/tags.c:395
 msgid "Year"
 msgstr ""
 
-#: src/gui.c:814 src/gui.c:978 src/pragha.h:90 src/tags.c:396
+#: src/gui.c:813 src/gui.c:977 src/pragha.h:90 src/tags.c:396
 msgid "Comment"
 msgstr ""
 
 #. Create labels
-#: src/gui.c:815 src/gui.c:979 src/pragha.h:91 src/current-playlist.c:1298
+#: src/gui.c:814 src/gui.c:978 src/pragha.h:91 src/current-playlist.c:1291
 #: src/statusicon.c:217
 msgid "Length"
 msgstr ""
 
-#: src/gui.c:816 src/gui.c:980 src/pragha.h:92 src/current-playlist.c:1303
+#: src/gui.c:815 src/gui.c:979 src/pragha.h:92 src/current-playlist.c:1296
 msgid "Filename"
 msgstr ""
 
-#: src/gui.c:819
+#: src/gui.c:818
 msgid "Clear sort"
 msgstr ""
 
 #. Tooltips
-#: src/gui.c:1699
+#: src/gui.c:1696
 msgid "Play / Pause Track"
 msgstr ""
 
-#: src/gui.c:1700
+#: src/gui.c:1697
 msgid "Previous Track"
 msgstr ""
 
-#: src/gui.c:1702
+#: src/gui.c:1699
 msgid "Stop playback"
 msgstr ""
 
-#: src/gui.c:1704
+#: src/gui.c:1701
 msgid "Leave Fullscreen"
 msgstr ""
 
-#: src/gui.c:1705
+#: src/gui.c:1702
 msgid "Play songs in a random order"
 msgstr ""
 
-#: src/gui.c:1706
+#: src/gui.c:1703
 msgid "Repeat playback list at the end"
 msgstr ""
 
-#: src/gui.c:1746 src/panel.c:213 src/statusicon.c:211
+#: src/gui.c:1743 src/panel.c:213 src/statusicon.c:211
 msgid "<b>Not playing</b>"
 msgstr ""
 
-#: src/gui.c:1967
+#: src/gui.c:1964
 msgid "Options of the library"
 msgstr ""
 
@@ -424,20 +424,20 @@ msgstr ""
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr ""
 
-#: src/current-playlist.c:1300
+#: src/current-playlist.c:1293
 msgid "Channels"
 msgstr ""
 
-#: src/current-playlist.c:1301
+#: src/current-playlist.c:1294
 msgid "Samplerate"
 msgstr ""
 
-#: src/current-playlist.c:1302
+#: src/current-playlist.c:1295
 msgid "Folder"
 msgstr ""
 
 #. The main edit dialog
-#: src/current-playlist.c:1393 src/tags.c:665
+#: src/current-playlist.c:1386 src/tags.c:665
 msgid "Details"
 msgstr ""
 
@@ -462,18 +462,18 @@ msgstr ""
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr ""
 
-#: src/librarytree.c:1111
+#: src/librarytree.c:1100
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
 
-#: src/librarytree.c:1169
+#: src/librarytree.c:1157
 msgid "Really want to move the files to trash?"
 msgstr ""
 
-#: src/librarytree.c:1171
+#: src/librarytree.c:1159
 msgid "Delete immediately instead of move to trash"
 msgstr ""
 
@@ -698,26 +698,26 @@ msgstr ""
 msgid "Unable to open the browser"
 msgstr ""
 
-#: src/playlist.c:539
+#: src/playlist.c:536
 msgid "Export playlist to file"
 msgstr ""
 
-#: src/pragha-lastfm.c:251
+#: src/pragha-lastfm.c:254
 msgid "Playcount:"
 msgstr ""
 
-#: src/pragha-lastfm.c:257
+#: src/pragha-lastfm.c:260
 msgid "Summary:"
 msgstr ""
 
-#: src/pragha-lastfm.c:273
+#: src/pragha-lastfm.c:276
 msgid "Similar artists:"
 msgstr ""
 
-#: src/pragha-lastfm.c:282
+#: src/pragha-lastfm.c:285
 msgid "Lastfm artist info"
 msgstr ""
 
-#: src/pragha-lastfm.c:289
+#: src/pragha-lastfm.c:292
 msgid "View more..."
 msgstr ""

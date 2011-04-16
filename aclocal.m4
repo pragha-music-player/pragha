@@ -13,8 +13,8 @@
 
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.66],,
-[m4_warning([this file was generated for autoconf 2.66.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.68],,
+[m4_warning([this file was generated for autoconf 2.68.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -622,10 +622,13 @@ _LT_DECL([], [exeext], [0], [Executable file suffix (normally "")])dnl
 dnl
 m4_require([_LT_FILEUTILS_DEFAULTS])dnl
 m4_require([_LT_CHECK_SHELL_FEATURES])dnl
+m4_require([_LT_PATH_CONVERSION_FUNCTIONS])dnl
 m4_require([_LT_CMD_RELOAD])dnl
 m4_require([_LT_CHECK_MAGIC_METHOD])dnl
+m4_require([_LT_CHECK_SHAREDLIB_FROM_LINKLIB])dnl
 m4_require([_LT_CMD_OLD_ARCHIVE])dnl
 m4_require([_LT_CMD_GLOBAL_SYMBOLS])dnl
+m4_require([_LT_WITH_SYSROOT])dnl
 
 _LT_CONFIG_LIBTOOL_INIT([
 # See if we are running on zsh, and set the options which allow our
@@ -1196,15 +1199,12 @@ _LT_EOF
   # if finds mixed CR/LF and LF-only lines.  Since sed operates in
   # text mode, it properly converts lines to CR/LF.  This bash problem
   # is reportedly fixed, but why not run on old versions too?
-  sed '/^# Generated shell functions inserted here/q' "$ltmain" >> "$cfgfile" \
-    || (rm -f "$cfgfile"; exit 1)
+  sed '$q' "$ltmain" >> "$cfgfile" \
+     || (rm -f "$cfgfile"; exit 1)
 
-  _LT_PROG_XSI_SHELLFNS
+  _LT_PROG_REPLACE_SHELLFNS
 
-  sed -n '/^# Generated shell functions inserted here/,$p' "$ltmain" >> "$cfgfile" \
-    || (rm -f "$cfgfile"; exit 1)
-
-  mv -f "$cfgfile" "$ofile" ||
+   mv -f "$cfgfile" "$ofile" ||
     (rm -f "$ofile" && cp "$cfgfile" "$ofile" && rm -f "$cfgfile")
   chmod +x "$ofile"
 ],
@@ -1521,30 +1521,41 @@ m4_defun([_LT_DARWIN_LINKER_FEATURES],
   fi
 ])
 
-# _LT_SYS_MODULE_PATH_AIX
-# -----------------------
+# _LT_SYS_MODULE_PATH_AIX([TAGNAME])
+# ----------------------------------
 # Links a minimal program and checks the executable
 # for the system default hardcoded library path. In most cases,
 # this is /usr/lib:/lib, but when the MPI compilers are used
 # the location of the communication and MPI libs are included too.
 # If we don't find anything, use the default library path according
 # to the aix ld manual.
+# Store the results from the different compilers for each TAGNAME.
+# Allow to override them for all tags through lt_cv_aix_libpath.
 m4_defun([_LT_SYS_MODULE_PATH_AIX],
 [m4_require([_LT_DECL_SED])dnl
-AC_LINK_IFELSE(AC_LANG_PROGRAM,[
-lt_aix_libpath_sed='
-    /Import File Strings/,/^$/ {
-	/^0/ {
-	    s/^0  *\(.*\)$/\1/
-	    p
-	}
-    }'
-aix_libpath=`dump -H conftest$ac_exeext 2>/dev/null | $SED -n -e "$lt_aix_libpath_sed"`
-# Check for a 64-bit object if we didn't find anything.
-if test -z "$aix_libpath"; then
-  aix_libpath=`dump -HX64 conftest$ac_exeext 2>/dev/null | $SED -n -e "$lt_aix_libpath_sed"`
-fi],[])
-if test -z "$aix_libpath"; then aix_libpath="/usr/lib:/lib"; fi
+if test "${lt_cv_aix_libpath+set}" = set; then
+  aix_libpath=$lt_cv_aix_libpath
+else
+  AC_CACHE_VAL([_LT_TAGVAR([lt_cv_aix_libpath_], [$1])],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM],[
+  lt_aix_libpath_sed='[
+      /Import File Strings/,/^$/ {
+	  /^0/ {
+	      s/^0  *\([^ ]*\) *$/\1/
+	      p
+	  }
+      }]'
+  _LT_TAGVAR([lt_cv_aix_libpath_], [$1])=`dump -H conftest$ac_exeext 2>/dev/null | $SED -n -e "$lt_aix_libpath_sed"`
+  # Check for a 64-bit object if we didn't find anything.
+  if test -z "$_LT_TAGVAR([lt_cv_aix_libpath_], [$1])"; then
+    _LT_TAGVAR([lt_cv_aix_libpath_], [$1])=`dump -HX64 conftest$ac_exeext 2>/dev/null | $SED -n -e "$lt_aix_libpath_sed"`
+  fi],[])
+  if test -z "$_LT_TAGVAR([lt_cv_aix_libpath_], [$1])"; then
+    _LT_TAGVAR([lt_cv_aix_libpath_], [$1])="/usr/lib:/lib"
+  fi
+  ])
+  aix_libpath=$_LT_TAGVAR([lt_cv_aix_libpath_], [$1])
+fi
 ])# _LT_SYS_MODULE_PATH_AIX
 
 
@@ -1569,7 +1580,7 @@ ECHO=$ECHO$ECHO$ECHO$ECHO$ECHO$ECHO
 
 AC_MSG_CHECKING([how to print strings])
 # Test print first, because it will be a builtin if present.
-if test "X`print -r -- -n 2>/dev/null`" = X-n && \
+if test "X`( print -r -- -n ) 2>/dev/null`" = X-n && \
    test "X`print -r -- $ECHO 2>/dev/null`" = "X$ECHO"; then
   ECHO='print -r --'
 elif test "X`printf %s $ECHO 2>/dev/null`" = "X$ECHO"; then
@@ -1612,6 +1623,39 @@ _LT_DECL([], [SHELL], [1], [Shell to use when invoking shell scripts])
 _LT_DECL([], [ECHO], [1], [An echo program that protects backslashes])
 ])# _LT_PROG_ECHO_BACKSLASH
 
+
+# _LT_WITH_SYSROOT
+# ----------------
+AC_DEFUN([_LT_WITH_SYSROOT],
+[AC_MSG_CHECKING([for sysroot])
+AC_ARG_WITH([sysroot],
+[  --with-sysroot[=DIR] Search for dependent libraries within DIR
+                        (or the compiler's sysroot if not specified).],
+[], [with_sysroot=no])
+
+dnl lt_sysroot will always be passed unquoted.  We quote it here
+dnl in case the user passed a directory name.
+lt_sysroot=
+case ${with_sysroot} in #(
+ yes)
+   if test "$GCC" = yes; then
+     lt_sysroot=`$CC --print-sysroot 2>/dev/null`
+   fi
+   ;; #(
+ /*)
+   lt_sysroot=`echo "$with_sysroot" | sed -e "$sed_quote_subst"`
+   ;; #(
+ no|'')
+   ;; #(
+ *)
+   AC_MSG_RESULT([${with_sysroot}])
+   AC_MSG_ERROR([The sysroot must be an absolute path.])
+   ;;
+esac
+
+ AC_MSG_RESULT([${lt_sysroot:-no}])
+_LT_DECL([], [lt_sysroot], [0], [The root where to search for ]dnl
+[dependent libraries, and in which our libraries should be installed.])])
 
 # _LT_ENABLE_LOCK
 # ---------------
@@ -1759,14 +1803,47 @@ need_locks="$enable_libtool_lock"
 ])# _LT_ENABLE_LOCK
 
 
+# _LT_PROG_AR
+# -----------
+m4_defun([_LT_PROG_AR],
+[AC_CHECK_TOOLS(AR, [ar], false)
+: ${AR=ar}
+: ${AR_FLAGS=cru}
+_LT_DECL([], [AR], [1], [The archiver])
+_LT_DECL([], [AR_FLAGS], [1], [Flags to create an archive])
+
+AC_CACHE_CHECK([for archiver @FILE support], [lt_cv_ar_at_file],
+  [lt_cv_ar_at_file=no
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM],
+     [echo conftest.$ac_objext > conftest.lst
+      lt_ar_try='$AR $AR_FLAGS libconftest.a @conftest.lst >&AS_MESSAGE_LOG_FD'
+      AC_TRY_EVAL([lt_ar_try])
+      if test "$ac_status" -eq 0; then
+	# Ensure the archiver fails upon bogus file names.
+	rm -f conftest.$ac_objext libconftest.a
+	AC_TRY_EVAL([lt_ar_try])
+	if test "$ac_status" -ne 0; then
+          lt_cv_ar_at_file=@
+        fi
+      fi
+      rm -f conftest.* libconftest.a
+     ])
+  ])
+
+if test "x$lt_cv_ar_at_file" = xno; then
+  archiver_list_spec=
+else
+  archiver_list_spec=$lt_cv_ar_at_file
+fi
+_LT_DECL([], [archiver_list_spec], [1],
+  [How to feed a file listing to the archiver])
+])# _LT_PROG_AR
+
+
 # _LT_CMD_OLD_ARCHIVE
 # -------------------
 m4_defun([_LT_CMD_OLD_ARCHIVE],
-[AC_CHECK_TOOL(AR, ar, false)
-test -z "$AR" && AR=ar
-test -z "$AR_FLAGS" && AR_FLAGS=cru
-_LT_DECL([], [AR], [1], [The archiver])
-_LT_DECL([], [AR_FLAGS], [1])
+[_LT_PROG_AR
 
 AC_CHECK_TOOL(STRIP, strip, :)
 test -z "$STRIP" && STRIP=:
@@ -2106,10 +2183,10 @@ else
 /* When -fvisbility=hidden is used, assume the code has been annotated
    correspondingly for the symbols needed.  */
 #if defined(__GNUC__) && (((__GNUC__ == 3) && (__GNUC_MINOR__ >= 3)) || (__GNUC__ > 3))
-void fnord () __attribute__((visibility("default")));
+int fnord () __attribute__((visibility("default")));
 #endif
 
-void fnord () { int i=42; }
+int fnord () { return 42; }
 int main ()
 {
   void *self = dlopen (0, LT_DLGLOBAL|LT_DLLAZY_OR_NOW);
@@ -2649,8 +2726,9 @@ cygwin* | mingw* | pw32* | cegcc*)
   need_version=no
   need_lib_prefix=no
 
-  case $GCC,$host_os in
-  yes,cygwin* | yes,mingw* | yes,pw32* | yes,cegcc*)
+  case $GCC,$cc_basename in
+  yes,*)
+    # gcc
     library_names_spec='$libname.dll.a'
     # DLL is installed to $(libdir)/../bin by postinstall_cmds
     postinstall_cmds='base_file=`basename \${file}`~
@@ -2683,13 +2761,71 @@ m4_if([$1], [],[
       library_names_spec='`echo ${libname} | sed -e 's/^lib/pw/'``echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
       ;;
     esac
+    dynamic_linker='Win32 ld.exe'
+    ;;
+
+  *,cl*)
+    # Native MSVC
+    libname_spec='$name'
+    soname_spec='${libname}`echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
+    library_names_spec='${libname}.dll.lib'
+
+    case $build_os in
+    mingw*)
+      sys_lib_search_path_spec=
+      lt_save_ifs=$IFS
+      IFS=';'
+      for lt_path in $LIB
+      do
+        IFS=$lt_save_ifs
+        # Let DOS variable expansion print the short 8.3 style file name.
+        lt_path=`cd "$lt_path" 2>/dev/null && cmd //C "for %i in (".") do @echo %~si"`
+        sys_lib_search_path_spec="$sys_lib_search_path_spec $lt_path"
+      done
+      IFS=$lt_save_ifs
+      # Convert to MSYS style.
+      sys_lib_search_path_spec=`$ECHO "$sys_lib_search_path_spec" | sed -e 's|\\\\|/|g' -e 's| \\([[a-zA-Z]]\\):| /\\1|g' -e 's|^ ||'`
+      ;;
+    cygwin*)
+      # Convert to unix form, then to dos form, then back to unix form
+      # but this time dos style (no spaces!) so that the unix form looks
+      # like /cygdrive/c/PROGRA~1:/cygdr...
+      sys_lib_search_path_spec=`cygpath --path --unix "$LIB"`
+      sys_lib_search_path_spec=`cygpath --path --dos "$sys_lib_search_path_spec" 2>/dev/null`
+      sys_lib_search_path_spec=`cygpath --path --unix "$sys_lib_search_path_spec" | $SED -e "s/$PATH_SEPARATOR/ /g"`
+      ;;
+    *)
+      sys_lib_search_path_spec="$LIB"
+      if $ECHO "$sys_lib_search_path_spec" | [$GREP ';[c-zC-Z]:/' >/dev/null]; then
+        # It is most probably a Windows format PATH.
+        sys_lib_search_path_spec=`$ECHO "$sys_lib_search_path_spec" | $SED -e 's/;/ /g'`
+      else
+        sys_lib_search_path_spec=`$ECHO "$sys_lib_search_path_spec" | $SED -e "s/$PATH_SEPARATOR/ /g"`
+      fi
+      # FIXME: find the short name or the path components, as spaces are
+      # common. (e.g. "Program Files" -> "PROGRA~1")
+      ;;
+    esac
+
+    # DLL is installed to $(libdir)/../bin by postinstall_cmds
+    postinstall_cmds='base_file=`basename \${file}`~
+      dlpath=`$SHELL 2>&1 -c '\''. $dir/'\''\${base_file}'\''i; echo \$dlname'\''`~
+      dldir=$destdir/`dirname \$dlpath`~
+      test -d \$dldir || mkdir -p \$dldir~
+      $install_prog $dir/$dlname \$dldir/$dlname'
+    postuninstall_cmds='dldll=`$SHELL 2>&1 -c '\''. $file; echo \$dlname'\''`~
+      dlpath=$dir/\$dldll~
+       $RM \$dlpath'
+    shlibpath_overrides_runpath=yes
+    dynamic_linker='Win32 link.exe'
     ;;
 
   *)
+    # Assume MSVC wrapper
     library_names_spec='${libname}`echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext} $libname.lib'
+    dynamic_linker='Win32 ld.exe'
     ;;
   esac
-  dynamic_linker='Win32 ld.exe'
   # FIXME: first we should search . and the directory the executable is in
   shlibpath_var=PATH
   ;;
@@ -3397,6 +3533,11 @@ case $reload_flag in
 esac
 reload_cmds='$LD$reload_flag -o $output$reload_objs'
 case $host_os in
+  cygwin* | mingw* | pw32* | cegcc*)
+    if test "$GCC" != yes; then
+      reload_cmds=false
+    fi
+    ;;
   darwin*)
     if test "$GCC" = yes; then
       reload_cmds='$LTCC $LTCFLAGS -nostdlib ${wl}-r -o $output$reload_objs'
@@ -3615,6 +3756,21 @@ tpf*)
   ;;
 esac
 ])
+
+file_magic_glob=
+want_nocaseglob=no
+if test "$build" = "$host"; then
+  case $host_os in
+  mingw* | pw32*)
+    if ( shopt | grep nocaseglob ) >/dev/null 2>&1; then
+      want_nocaseglob=yes
+    else
+      file_magic_glob=`echo aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ | $SED -e "s/\(..\)/s\/[[\1]]\/[[\1]]\/g;/g"`
+    fi
+    ;;
+  esac
+fi
+
 file_magic_cmd=$lt_cv_file_magic_cmd
 deplibs_check_method=$lt_cv_deplibs_check_method
 test -z "$deplibs_check_method" && deplibs_check_method=unknown
@@ -3622,7 +3778,11 @@ test -z "$deplibs_check_method" && deplibs_check_method=unknown
 _LT_DECL([], [deplibs_check_method], [1],
     [Method to check whether dependent libraries are shared objects])
 _LT_DECL([], [file_magic_cmd], [1],
-    [Command to use when deplibs_check_method == "file_magic"])
+    [Command to use when deplibs_check_method = "file_magic"])
+_LT_DECL([], [file_magic_glob], [1],
+    [How to find potential files when deplibs_check_method = "file_magic"])
+_LT_DECL([], [want_nocaseglob], [1],
+    [Find potential files using nocaseglob when deplibs_check_method = "file_magic"])
 ])# _LT_CHECK_MAGIC_METHOD
 
 
@@ -3724,6 +3884,67 @@ AU_ALIAS([AC_PROG_NM], [LT_PATH_NM])
 dnl aclocal-1.4 backwards compatibility:
 dnl AC_DEFUN([AM_PROG_NM], [])
 dnl AC_DEFUN([AC_PROG_NM], [])
+
+# _LT_CHECK_SHAREDLIB_FROM_LINKLIB
+# --------------------------------
+# how to determine the name of the shared library
+# associated with a specific link library.
+#  -- PORTME fill in with the dynamic library characteristics
+m4_defun([_LT_CHECK_SHAREDLIB_FROM_LINKLIB],
+[m4_require([_LT_DECL_EGREP])
+m4_require([_LT_DECL_OBJDUMP])
+m4_require([_LT_DECL_DLLTOOL])
+AC_CACHE_CHECK([how to associate runtime and link libraries],
+lt_cv_sharedlib_from_linklib_cmd,
+[lt_cv_sharedlib_from_linklib_cmd='unknown'
+
+case $host_os in
+cygwin* | mingw* | pw32* | cegcc*)
+  # two different shell functions defined in ltmain.sh
+  # decide which to use based on capabilities of $DLLTOOL
+  case `$DLLTOOL --help 2>&1` in
+  *--identify-strict*)
+    lt_cv_sharedlib_from_linklib_cmd=func_cygming_dll_for_implib
+    ;;
+  *)
+    lt_cv_sharedlib_from_linklib_cmd=func_cygming_dll_for_implib_fallback
+    ;;
+  esac
+  ;;
+*)
+  # fallback: assume linklib IS sharedlib
+  lt_cv_sharedlib_from_linklib_cmd="$ECHO"
+  ;;
+esac
+])
+sharedlib_from_linklib_cmd=$lt_cv_sharedlib_from_linklib_cmd
+test -z "$sharedlib_from_linklib_cmd" && sharedlib_from_linklib_cmd=$ECHO
+
+_LT_DECL([], [sharedlib_from_linklib_cmd], [1],
+    [Command to associate shared and link libraries])
+])# _LT_CHECK_SHAREDLIB_FROM_LINKLIB
+
+
+# _LT_PATH_MANIFEST_TOOL
+# ----------------------
+# locate the manifest tool
+m4_defun([_LT_PATH_MANIFEST_TOOL],
+[AC_CHECK_TOOL(MANIFEST_TOOL, mt, :)
+test -z "$MANIFEST_TOOL" && MANIFEST_TOOL=mt
+AC_CACHE_CHECK([if $MANIFEST_TOOL is a manifest tool], [lt_cv_path_mainfest_tool],
+  [lt_cv_path_mainfest_tool=no
+  echo "$as_me:$LINENO: $MANIFEST_TOOL '-?'" >&AS_MESSAGE_LOG_FD
+  $MANIFEST_TOOL '-?' 2>conftest.err > conftest.out
+  cat conftest.err >&AS_MESSAGE_LOG_FD
+  if $GREP 'Manifest Tool' conftest.out > /dev/null; then
+    lt_cv_path_mainfest_tool=yes
+  fi
+  rm -f conftest*])
+if test "x$lt_cv_path_mainfest_tool" != xyes; then
+  MANIFEST_TOOL=:
+fi
+_LT_DECL([], [MANIFEST_TOOL], [1], [Manifest tool])dnl
+])# _LT_PATH_MANIFEST_TOOL
 
 
 # LT_LIB_M
@@ -3851,8 +4072,8 @@ esac
 lt_cv_sys_global_symbol_to_cdecl="sed -n -e 's/^T .* \(.*\)$/extern int \1();/p' -e 's/^$symcode* .* \(.*\)$/extern char \1;/p'"
 
 # Transform an extracted symbol line into symbol name and symbol address
-lt_cv_sys_global_symbol_to_c_name_address="sed -n -e 's/^: \([[^ ]]*\) $/  {\\\"\1\\\", (void *) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"\2\", (void *) \&\2},/p'"
-lt_cv_sys_global_symbol_to_c_name_address_lib_prefix="sed -n -e 's/^: \([[^ ]]*\) $/  {\\\"\1\\\", (void *) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \(lib[[^ ]]*\)$/  {\"\2\", (void *) \&\2},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"lib\2\", (void *) \&\2},/p'"
+lt_cv_sys_global_symbol_to_c_name_address="sed -n -e 's/^: \([[^ ]]*\)[[ ]]*$/  {\\\"\1\\\", (void *) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"\2\", (void *) \&\2},/p'"
+lt_cv_sys_global_symbol_to_c_name_address_lib_prefix="sed -n -e 's/^: \([[^ ]]*\)[[ ]]*$/  {\\\"\1\\\", (void *) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \(lib[[^ ]]*\)$/  {\"\2\", (void *) \&\2},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"lib\2\", (void *) \&\2},/p'"
 
 # Handle CRLF in mingw tool chain
 opt_cr=
@@ -3888,6 +4109,7 @@ for ac_symprfx in "" "_"; do
   else
     lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[[	 ]]\($symcode$symcode*\)[[	 ]][[	 ]]*$ac_symprfx$sympat$opt_cr$/$symxfrm/p'"
   fi
+  lt_cv_sys_global_symbol_pipe="$lt_cv_sys_global_symbol_pipe | sed '/ __gnu_lto/d'"
 
   # Check to see that the pipe works correctly.
   pipe_works=no
@@ -3921,6 +4143,18 @@ _LT_EOF
       if $GREP ' nm_test_var$' "$nlist" >/dev/null; then
 	if $GREP ' nm_test_func$' "$nlist" >/dev/null; then
 	  cat <<_LT_EOF > conftest.$ac_ext
+/* Keep this code in sync between libtool.m4, ltmain, lt_system.h, and tests.  */
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(_WIN32_WCE)
+/* DATA imports from DLLs on WIN32 con't be const, because runtime
+   relocations are performed -- see ld's documentation on pseudo-relocs.  */
+# define LT@&t@_DLSYM_CONST
+#elif defined(__osf__)
+/* This system does not cope well with relocations in const data.  */
+# define LT@&t@_DLSYM_CONST
+#else
+# define LT@&t@_DLSYM_CONST const
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -3932,7 +4166,7 @@ _LT_EOF
 	  cat <<_LT_EOF >> conftest.$ac_ext
 
 /* The mapping between symbol names and symbols.  */
-const struct {
+LT@&t@_DLSYM_CONST struct {
   const char *name;
   void       *address;
 }
@@ -3958,15 +4192,15 @@ static const void *lt_preloaded_setup() {
 _LT_EOF
 	  # Now try linking the two files.
 	  mv conftest.$ac_objext conftstm.$ac_objext
-	  lt_save_LIBS="$LIBS"
-	  lt_save_CFLAGS="$CFLAGS"
+	  lt_globsym_save_LIBS=$LIBS
+	  lt_globsym_save_CFLAGS=$CFLAGS
 	  LIBS="conftstm.$ac_objext"
 	  CFLAGS="$CFLAGS$_LT_TAGVAR(lt_prog_compiler_no_builtin_flag, $1)"
 	  if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
 	    pipe_works=yes
 	  fi
-	  LIBS="$lt_save_LIBS"
-	  CFLAGS="$lt_save_CFLAGS"
+	  LIBS=$lt_globsym_save_LIBS
+	  CFLAGS=$lt_globsym_save_CFLAGS
 	else
 	  echo "cannot find nm_test_func in $nlist" >&AS_MESSAGE_LOG_FD
 	fi
@@ -3999,6 +4233,13 @@ else
   AC_MSG_RESULT(ok)
 fi
 
+# Response file support.
+if test "$lt_cv_nm_interface" = "MS dumpbin"; then
+  nm_file_list_spec='@'
+elif $NM --help 2>/dev/null | grep '[[@]]FILE' >/dev/null; then
+  nm_file_list_spec='@'
+fi
+
 _LT_DECL([global_symbol_pipe], [lt_cv_sys_global_symbol_pipe], [1],
     [Take the output of nm and produce a listing of raw symbols and C names])
 _LT_DECL([global_symbol_to_cdecl], [lt_cv_sys_global_symbol_to_cdecl], [1],
@@ -4009,6 +4250,8 @@ _LT_DECL([global_symbol_to_c_name_address],
 _LT_DECL([global_symbol_to_c_name_address_lib_prefix],
     [lt_cv_sys_global_symbol_to_c_name_address_lib_prefix], [1],
     [Transform the output of nm in a C name address pair when lib prefix is needed])
+_LT_DECL([], [nm_file_list_spec], [1],
+    [Specify filename containing input files for $NM])
 ]) # _LT_CMD_GLOBAL_SYMBOLS
 
 
@@ -4020,7 +4263,6 @@ _LT_TAGVAR(lt_prog_compiler_wl, $1)=
 _LT_TAGVAR(lt_prog_compiler_pic, $1)=
 _LT_TAGVAR(lt_prog_compiler_static, $1)=
 
-AC_MSG_CHECKING([for $compiler option to produce PIC])
 m4_if([$1], [CXX], [
   # C++ specific cases for pic, static, wl, etc.
   if test "$GXX" = yes; then
@@ -4124,6 +4366,12 @@ m4_if([$1], [CXX], [
 	  # _LT_TAGVAR(lt_prog_compiler_static, $1)="--no_auto_instantiation -u __main -u __premain -u _abort -r $COOL_DIR/lib/libOrb.a $MVME_DIR/lib/CC/libC.a $MVME_DIR/lib/classix/libcx.s.a"
 	  ;;
 	esac
+	;;
+      mingw* | cygwin* | os2* | pw32* | cegcc*)
+	# This hack is so that the source file can tell whether it is being
+	# built for inclusion in a dll (and should export symbols for example).
+	m4_if([$1], [GCJ], [],
+	  [_LT_TAGVAR(lt_prog_compiler_pic, $1)='-DDLL_EXPORT'])
 	;;
       dgux*)
 	case $cc_basename in
@@ -4499,6 +4747,12 @@ m4_if([$1], [CXX], [
 	_LT_TAGVAR(lt_prog_compiler_pic, $1)='--shared'
 	_LT_TAGVAR(lt_prog_compiler_static, $1)='--static'
 	;;
+      nagfor*)
+	# NAG Fortran compiler
+	_LT_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,-Wl,,'
+	_LT_TAGVAR(lt_prog_compiler_pic, $1)='-PIC'
+	_LT_TAGVAR(lt_prog_compiler_static, $1)='-Bstatic'
+	;;
       pgcc* | pgf77* | pgf90* | pgf95* | pgfortran*)
         # Portland Group compilers (*not* the Pentium gcc compiler,
 	# which looks to be a dead project)
@@ -4618,9 +4872,11 @@ case $host_os in
     _LT_TAGVAR(lt_prog_compiler_pic, $1)="$_LT_TAGVAR(lt_prog_compiler_pic, $1)@&t@m4_if([$1],[],[ -DPIC],[m4_if([$1],[CXX],[ -DPIC],[])])"
     ;;
 esac
-AC_MSG_RESULT([$_LT_TAGVAR(lt_prog_compiler_pic, $1)])
-_LT_TAGDECL([wl], [lt_prog_compiler_wl], [1],
-	[How to pass a linker flag through the compiler])
+
+AC_CACHE_CHECK([for $compiler option to produce PIC],
+  [_LT_TAGVAR(lt_cv_prog_compiler_pic, $1)],
+  [_LT_TAGVAR(lt_cv_prog_compiler_pic, $1)=$_LT_TAGVAR(lt_prog_compiler_pic, $1)])
+_LT_TAGVAR(lt_prog_compiler_pic, $1)=$_LT_TAGVAR(lt_cv_prog_compiler_pic, $1)
 
 #
 # Check to make sure the PIC flag actually works.
@@ -4639,6 +4895,8 @@ fi
 _LT_TAGDECL([pic_flag], [lt_prog_compiler_pic], [1],
 	[Additional compiler flags for building library objects])
 
+_LT_TAGDECL([wl], [lt_prog_compiler_wl], [1],
+	[How to pass a linker flag through the compiler])
 #
 # Check to make sure the static flag actually works.
 #
@@ -4659,6 +4917,7 @@ _LT_TAGDECL([link_static_flag], [lt_prog_compiler_static], [1],
 m4_defun([_LT_LINKER_SHLIBS],
 [AC_REQUIRE([LT_PATH_LD])dnl
 AC_REQUIRE([LT_PATH_NM])dnl
+m4_require([_LT_PATH_MANIFEST_TOOL])dnl
 m4_require([_LT_FILEUTILS_DEFAULTS])dnl
 m4_require([_LT_DECL_EGREP])dnl
 m4_require([_LT_DECL_SED])dnl
@@ -4667,6 +4926,7 @@ m4_require([_LT_TAG_COMPILER])dnl
 AC_MSG_CHECKING([whether the $compiler linker ($LD) supports shared libraries])
 m4_if([$1], [CXX], [
   _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
+  _LT_TAGVAR(exclude_expsyms, $1)=['_GLOBAL_OFFSET_TABLE_|_GLOBAL__F[ID]_.*']
   case $host_os in
   aix[[4-9]]*)
     # If we're using GNU nm, then we don't want the "-C" option.
@@ -4681,15 +4941,20 @@ m4_if([$1], [CXX], [
     ;;
   pw32*)
     _LT_TAGVAR(export_symbols_cmds, $1)="$ltdll_cmds"
-  ;;
+    ;;
   cygwin* | mingw* | cegcc*)
-    _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[[BCDGRS]][[ ]]/s/.*[[ ]]\([[^ ]]*\)/\1 DATA/;/^.*[[ ]]__nm__/s/^.*[[ ]]__nm__\([[^ ]]*\)[[ ]][[^ ]]*/\1 DATA/;/^I[[ ]]/d;/^[[AITW]][[ ]]/s/.* //'\'' | sort | uniq > $export_symbols'
-  ;;
+    case $cc_basename in
+    cl*) ;;
+    *)
+      _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[[BCDGRS]][[ ]]/s/.*[[ ]]\([[^ ]]*\)/\1 DATA/;s/^.*[[ ]]__nm__\([[^ ]]*\)[[ ]][[^ ]]*/\1 DATA/;/^I[[ ]]/d;/^[[AITW]][[ ]]/s/.* //'\'' | sort | uniq > $export_symbols'
+      _LT_TAGVAR(exclude_expsyms, $1)=['[_]+GLOBAL_OFFSET_TABLE_|[_]+GLOBAL__[FID]_.*|[_]+head_[A-Za-z0-9_]+_dll|[A-Za-z0-9_]+_dll_iname']
+      ;;
+    esac
+    ;;
   *)
     _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
-  ;;
+    ;;
   esac
-  _LT_TAGVAR(exclude_expsyms, $1)=['_GLOBAL_OFFSET_TABLE_|_GLOBAL__F[ID]_.*']
 ], [
   runpath_var=
   _LT_TAGVAR(allow_undefined_flag, $1)=
@@ -4857,7 +5122,8 @@ _LT_EOF
       _LT_TAGVAR(allow_undefined_flag, $1)=unsupported
       _LT_TAGVAR(always_export_symbols, $1)=no
       _LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
-      _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[[BCDGRS]][[ ]]/s/.*[[ ]]\([[^ ]]*\)/\1 DATA/'\'' | $SED -e '\''/^[[AITW]][[ ]]/s/.*[[ ]]//'\'' | sort | uniq > $export_symbols'
+      _LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[[BCDGRS]][[ ]]/s/.*[[ ]]\([[^ ]]*\)/\1 DATA/;s/^.*[[ ]]__nm__\([[^ ]]*\)[[ ]][[^ ]]*/\1 DATA/;/^I[[ ]]/d;/^[[AITW]][[ ]]/s/.* //'\'' | sort | uniq > $export_symbols'
+      _LT_TAGVAR(exclude_expsyms, $1)=['[_]+GLOBAL_OFFSET_TABLE_|[_]+GLOBAL__[FID]_.*|[_]+head_[A-Za-z0-9_]+_dll|[A-Za-z0-9_]+_dll_iname']
 
       if $LD --help 2>&1 | $GREP 'auto-import' > /dev/null; then
         _LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags -o $output_objdir/$soname ${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
@@ -4905,7 +5171,7 @@ _LT_EOF
       if $LD --help 2>&1 | $EGREP ': supported targets:.* elf' > /dev/null \
 	 && test "$tmp_diet" = no
       then
-	tmp_addflag=
+	tmp_addflag=' $pic_flag'
 	tmp_sharedflag='-shared'
 	case $cc_basename,$host_cpu in
         pgcc*)				# Portland Group C compiler
@@ -4975,8 +5241,8 @@ _LT_EOF
 	_LT_TAGVAR(archive_cmds, $1)='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
       else
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
-	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
       fi
       ;;
 
@@ -4994,8 +5260,8 @@ _LT_EOF
 
 _LT_EOF
       elif $LD --help 2>&1 | $GREP ': supported targets:.* elf' > /dev/null; then
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
-	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
       else
 	_LT_TAGVAR(ld_shlibs, $1)=no
       fi
@@ -5041,8 +5307,8 @@ _LT_EOF
 
     *)
       if $LD --help 2>&1 | $GREP ': supported targets:.* elf' > /dev/null; then
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
-	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
       else
 	_LT_TAGVAR(ld_shlibs, $1)=no
       fi
@@ -5172,7 +5438,7 @@ _LT_EOF
 	_LT_TAGVAR(allow_undefined_flag, $1)='-berok'
         # Determine the default libpath from the value encoded in an
         # empty executable.
-        _LT_SYS_MODULE_PATH_AIX
+        _LT_SYS_MODULE_PATH_AIX([$1])
         _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-blibpath:$libdir:'"$aix_libpath"
         _LT_TAGVAR(archive_expsym_cmds, $1)='$CC -o $output_objdir/$soname $libobjs $deplibs '"\${wl}$no_entry_flag"' $compiler_flags `if test "x${allow_undefined_flag}" != "x"; then func_echo_all "${wl}${allow_undefined_flag}"; else :; fi` '"\${wl}$exp_sym_flag:\$export_symbols $shared_flag"
       else
@@ -5183,7 +5449,7 @@ _LT_EOF
 	else
 	 # Determine the default libpath from the value encoded in an
 	 # empty executable.
-	 _LT_SYS_MODULE_PATH_AIX
+	 _LT_SYS_MODULE_PATH_AIX([$1])
 	 _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-blibpath:$libdir:'"$aix_libpath"
 	  # Warning - without using the other run time loading flags,
 	  # -berok will link without error, but may produce a broken library.
@@ -5227,20 +5493,63 @@ _LT_EOF
       # Microsoft Visual C++.
       # hardcode_libdir_flag_spec is actually meaningless, as there is
       # no search path for DLLs.
-      _LT_TAGVAR(hardcode_libdir_flag_spec, $1)=' '
-      _LT_TAGVAR(allow_undefined_flag, $1)=unsupported
-      # Tell ltmain to make .lib files, not .a files.
-      libext=lib
-      # Tell ltmain to make .dll files, not .so files.
-      shrext_cmds=".dll"
-      # FIXME: Setting linknames here is a bad hack.
-      _LT_TAGVAR(archive_cmds, $1)='$CC -o $lib $libobjs $compiler_flags `func_echo_all "$deplibs" | $SED '\''s/ -lc$//'\''` -link -dll~linknames='
-      # The linker will automatically build a .lib file if we build a DLL.
-      _LT_TAGVAR(old_archive_from_new_cmds, $1)='true'
-      # FIXME: Should let the user specify the lib program.
-      _LT_TAGVAR(old_archive_cmds, $1)='lib -OUT:$oldlib$oldobjs$old_deplibs'
-      _LT_TAGVAR(fix_srcfile_path, $1)='`cygpath -w "$srcfile"`'
-      _LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
+      case $cc_basename in
+      cl*)
+	# Native MSVC
+	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)=' '
+	_LT_TAGVAR(allow_undefined_flag, $1)=unsupported
+	_LT_TAGVAR(always_export_symbols, $1)=yes
+	_LT_TAGVAR(file_list_spec, $1)='@'
+	# Tell ltmain to make .lib files, not .a files.
+	libext=lib
+	# Tell ltmain to make .dll files, not .so files.
+	shrext_cmds=".dll"
+	# FIXME: Setting linknames here is a bad hack.
+	_LT_TAGVAR(archive_cmds, $1)='$CC -o $output_objdir/$soname $libobjs $compiler_flags $deplibs -Wl,-dll~linknames='
+	_LT_TAGVAR(archive_expsym_cmds, $1)='if test "x`$SED 1q $export_symbols`" = xEXPORTS; then
+	    sed -n -e 's/\\\\\\\(.*\\\\\\\)/-link\\\ -EXPORT:\\\\\\\1/' -e '1\\\!p' < $export_symbols > $output_objdir/$soname.exp;
+	  else
+	    sed -e 's/\\\\\\\(.*\\\\\\\)/-link\\\ -EXPORT:\\\\\\\1/' < $export_symbols > $output_objdir/$soname.exp;
+	  fi~
+	  $CC -o $tool_output_objdir$soname $libobjs $compiler_flags $deplibs "@$tool_output_objdir$soname.exp" -Wl,-DLL,-IMPLIB:"$tool_output_objdir$libname.dll.lib"~
+	  linknames='
+	# The linker will not automatically build a static lib if we build a DLL.
+	# _LT_TAGVAR(old_archive_from_new_cmds, $1)='true'
+	_LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
+	_LT_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[[BCDGRS]][[ ]]/s/.*[[ ]]\([[^ ]]*\)/\1,DATA/'\'' | $SED -e '\''/^[[AITW]][[ ]]/s/.*[[ ]]//'\'' | sort | uniq > $export_symbols'
+	# Don't use ranlib
+	_LT_TAGVAR(old_postinstall_cmds, $1)='chmod 644 $oldlib'
+	_LT_TAGVAR(postlink_cmds, $1)='lt_outputfile="@OUTPUT@"~
+	  lt_tool_outputfile="@TOOL_OUTPUT@"~
+	  case $lt_outputfile in
+	    *.exe|*.EXE) ;;
+	    *)
+	      lt_outputfile="$lt_outputfile.exe"
+	      lt_tool_outputfile="$lt_tool_outputfile.exe"
+	      ;;
+	  esac~
+	  if test "$MANIFEST_TOOL" != ":" && test -f "$lt_outputfile.manifest"; then
+	    $MANIFEST_TOOL -manifest "$lt_tool_outputfile.manifest" -outputresource:"$lt_tool_outputfile" || exit 1;
+	    $RM "$lt_outputfile.manifest";
+	  fi'
+	;;
+      *)
+	# Assume MSVC wrapper
+	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)=' '
+	_LT_TAGVAR(allow_undefined_flag, $1)=unsupported
+	# Tell ltmain to make .lib files, not .a files.
+	libext=lib
+	# Tell ltmain to make .dll files, not .so files.
+	shrext_cmds=".dll"
+	# FIXME: Setting linknames here is a bad hack.
+	_LT_TAGVAR(archive_cmds, $1)='$CC -o $lib $libobjs $compiler_flags `func_echo_all "$deplibs" | $SED '\''s/ -lc$//'\''` -link -dll~linknames='
+	# The linker will automatically build a .lib file if we build a DLL.
+	_LT_TAGVAR(old_archive_from_new_cmds, $1)='true'
+	# FIXME: Should let the user specify the lib program.
+	_LT_TAGVAR(old_archive_cmds, $1)='lib -OUT:$oldlib$oldobjs$old_deplibs'
+	_LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
+	;;
+      esac
       ;;
 
     darwin* | rhapsody*)
@@ -5278,7 +5587,7 @@ _LT_EOF
 
     # FreeBSD 3 and greater uses gcc -shared to do shared libraries.
     freebsd* | dragonfly*)
-      _LT_TAGVAR(archive_cmds, $1)='$CC -shared -o $lib $libobjs $deplibs $compiler_flags'
+      _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
       _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-R$libdir'
       _LT_TAGVAR(hardcode_direct, $1)=yes
       _LT_TAGVAR(hardcode_shlibpath_var, $1)=no
@@ -5286,7 +5595,7 @@ _LT_EOF
 
     hpux9*)
       if test "$GCC" = yes; then
-	_LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/$soname~$CC -shared -fPIC ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/$soname~$CC -shared $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
       else
 	_LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/$soname~$LD -b +b $install_libdir -o $output_objdir/$soname $libobjs $deplibs $linker_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
       fi
@@ -5302,7 +5611,7 @@ _LT_EOF
 
     hpux10*)
       if test "$GCC" = yes && test "$with_gnu_ld" = no; then
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared -fPIC ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
       else
 	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname +b $install_libdir -o $lib $libobjs $deplibs $linker_flags'
       fi
@@ -5326,10 +5635,10 @@ _LT_EOF
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared ${wl}+h ${wl}$soname -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
-	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared -fPIC ${wl}+h ${wl}$soname ${wl}+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag ${wl}+h ${wl}$soname ${wl}+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
-	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared -fPIC ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	esac
       else
@@ -5376,16 +5685,31 @@ _LT_EOF
 
     irix5* | irix6* | nonstopux*)
       if test "$GCC" = yes; then
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
 	# Try to use the -exported_symbol ld option, if it does not
 	# work, assume that -exports_file does not work either and
 	# implicitly export all symbols.
-        save_LDFLAGS="$LDFLAGS"
-        LDFLAGS="$LDFLAGS -shared ${wl}-exported_symbol ${wl}foo ${wl}-update_registry ${wl}/dev/null"
-        AC_LINK_IFELSE(int foo(void) {},
-          _LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations ${wl}-exports_file ${wl}$export_symbols -o $lib'
-        )
-        LDFLAGS="$save_LDFLAGS"
+	# This should be the same for all languages, so no per-tag cache variable.
+	AC_CACHE_CHECK([whether the $host_os linker accepts -exported_symbol],
+	  [lt_cv_irix_exported_symbol],
+	  [save_LDFLAGS="$LDFLAGS"
+	   LDFLAGS="$LDFLAGS -shared ${wl}-exported_symbol ${wl}foo ${wl}-update_registry ${wl}/dev/null"
+	   AC_LINK_IFELSE(
+	     [AC_LANG_SOURCE(
+	        [AC_LANG_CASE([C], [[int foo (void) { return 0; }]],
+			      [C++], [[int foo (void) { return 0; }]],
+			      [Fortran 77], [[
+      subroutine foo
+      end]],
+			      [Fortran], [[
+      subroutine foo
+      end]])])],
+	      [lt_cv_irix_exported_symbol=yes],
+	      [lt_cv_irix_exported_symbol=no])
+           LDFLAGS="$save_LDFLAGS"])
+	if test "$lt_cv_irix_exported_symbol" = yes; then
+          _LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations ${wl}-exports_file ${wl}$export_symbols -o $lib'
+	fi
       else
 	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry ${output_objdir}/so_locations -o $lib'
 	_LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry ${output_objdir}/so_locations -exports_file $export_symbols -o $lib'
@@ -5470,7 +5794,7 @@ _LT_EOF
     osf4* | osf5*)	# as osf3* with the addition of -msym flag
       if test "$GCC" = yes; then
 	_LT_TAGVAR(allow_undefined_flag, $1)=' ${wl}-expect_unresolved ${wl}\*'
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared${allow_undefined_flag} $libobjs $deplibs $compiler_flags ${wl}-msym ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared${allow_undefined_flag} $pic_flag $libobjs $deplibs $compiler_flags ${wl}-msym ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
 	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath ${wl}$libdir'
       else
 	_LT_TAGVAR(allow_undefined_flag, $1)=' -expect_unresolved \*'
@@ -5489,9 +5813,9 @@ _LT_EOF
       _LT_TAGVAR(no_undefined_flag, $1)=' -z defs'
       if test "$GCC" = yes; then
 	wlarc='${wl}'
-	_LT_TAGVAR(archive_cmds, $1)='$CC -shared ${wl}-z ${wl}text ${wl}-h ${wl}$soname -o $lib $libobjs $deplibs $compiler_flags'
+	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag ${wl}-z ${wl}text ${wl}-h ${wl}$soname -o $lib $libobjs $deplibs $compiler_flags'
 	_LT_TAGVAR(archive_expsym_cmds, $1)='echo "{ global:" > $lib.exp~cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $lib.exp~echo "local: *; };" >> $lib.exp~
-	  $CC -shared ${wl}-z ${wl}text ${wl}-M ${wl}$lib.exp ${wl}-h ${wl}$soname -o $lib $libobjs $deplibs $compiler_flags~$RM $lib.exp'
+	  $CC -shared $pic_flag ${wl}-z ${wl}text ${wl}-M ${wl}$lib.exp ${wl}-h ${wl}$soname -o $lib $libobjs $deplibs $compiler_flags~$RM $lib.exp'
       else
 	case `$CC -V 2>&1` in
 	*"Compilers 5.0"*)
@@ -5763,8 +6087,6 @@ _LT_TAGDECL([], [inherit_rpath], [0],
     to runtime path list])
 _LT_TAGDECL([], [link_all_deplibs], [0],
     [Whether libtool must link a program against all its dependency libraries])
-_LT_TAGDECL([], [fix_srcfile_path], [1],
-    [Fix the shell variable $srcfile for the compiler])
 _LT_TAGDECL([], [always_export_symbols], [0],
     [Set to "yes" if exported symbols are required])
 _LT_TAGDECL([], [export_symbols_cmds], [2],
@@ -5775,6 +6097,8 @@ _LT_TAGDECL([], [include_expsyms], [1],
     [Symbols that must always be exported])
 _LT_TAGDECL([], [prelink_cmds], [2],
     [Commands necessary for linking programs (against libraries) with templates])
+_LT_TAGDECL([], [postlink_cmds], [2],
+    [Commands necessary for finishing linking programs])
 _LT_TAGDECL([], [file_list_spec], [1],
     [Specify filename containing input files])
 dnl FIXME: Not yet implemented
@@ -5872,6 +6196,7 @@ CC="$lt_save_CC"
 m4_defun([_LT_LANG_CXX_CONFIG],
 [m4_require([_LT_FILEUTILS_DEFAULTS])dnl
 m4_require([_LT_DECL_EGREP])dnl
+m4_require([_LT_PATH_MANIFEST_TOOL])dnl
 if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
     ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
     (test "X$CXX" != "Xg++"))) ; then
@@ -5933,6 +6258,7 @@ if test "$_lt_caught_CXX_error" != yes; then
 
   # Allow CC to be a program name with arguments.
   lt_save_CC=$CC
+  lt_save_CFLAGS=$CFLAGS
   lt_save_LD=$LD
   lt_save_GCC=$GCC
   GCC=$GXX
@@ -5950,6 +6276,7 @@ if test "$_lt_caught_CXX_error" != yes; then
   fi
   test -z "${LDCXX+set}" || LD=$LDCXX
   CC=${CXX-"c++"}
+  CFLAGS=$CXXFLAGS
   compiler=$CC
   _LT_TAGVAR(compiler, $1)=$CC
   _LT_CC_BASENAME([$compiler])
@@ -5971,8 +6298,8 @@ if test "$_lt_caught_CXX_error" != yes; then
       # Check if GNU C++ uses GNU ld as the underlying linker, since the
       # archiving commands below assume that GNU ld is being used.
       if test "$with_gnu_ld" = yes; then
-        _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname -o $lib'
-        _LT_TAGVAR(archive_expsym_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+        _LT_TAGVAR(archive_cmds, $1)='$CC $pic_flag -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname -o $lib'
+        _LT_TAGVAR(archive_expsym_cmds, $1)='$CC $pic_flag -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
 
         _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath ${wl}$libdir'
         _LT_TAGVAR(export_dynamic_flag_spec, $1)='${wl}--export-dynamic'
@@ -6113,7 +6440,7 @@ if test "$_lt_caught_CXX_error" != yes; then
           _LT_TAGVAR(allow_undefined_flag, $1)='-berok'
           # Determine the default libpath from the value encoded in an empty
           # executable.
-          _LT_SYS_MODULE_PATH_AIX
+          _LT_SYS_MODULE_PATH_AIX([$1])
           _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-blibpath:$libdir:'"$aix_libpath"
 
           _LT_TAGVAR(archive_expsym_cmds, $1)='$CC -o $output_objdir/$soname $libobjs $deplibs '"\${wl}$no_entry_flag"' $compiler_flags `if test "x${allow_undefined_flag}" != "x"; then func_echo_all "${wl}${allow_undefined_flag}"; else :; fi` '"\${wl}$exp_sym_flag:\$export_symbols $shared_flag"
@@ -6125,7 +6452,7 @@ if test "$_lt_caught_CXX_error" != yes; then
           else
 	    # Determine the default libpath from the value encoded in an
 	    # empty executable.
-	    _LT_SYS_MODULE_PATH_AIX
+	    _LT_SYS_MODULE_PATH_AIX([$1])
 	    _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-blibpath:$libdir:'"$aix_libpath"
 	    # Warning - without using the other run time loading flags,
 	    # -berok will link without error, but may produce a broken library.
@@ -6167,29 +6494,75 @@ if test "$_lt_caught_CXX_error" != yes; then
         ;;
 
       cygwin* | mingw* | pw32* | cegcc*)
-        # _LT_TAGVAR(hardcode_libdir_flag_spec, $1) is actually meaningless,
-        # as there is no search path for DLLs.
-        _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
-        _LT_TAGVAR(export_dynamic_flag_spec, $1)='${wl}--export-all-symbols'
-        _LT_TAGVAR(allow_undefined_flag, $1)=unsupported
-        _LT_TAGVAR(always_export_symbols, $1)=no
-        _LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
+	case $GXX,$cc_basename in
+	,cl* | no,cl*)
+	  # Native MSVC
+	  # hardcode_libdir_flag_spec is actually meaningless, as there is
+	  # no search path for DLLs.
+	  _LT_TAGVAR(hardcode_libdir_flag_spec, $1)=' '
+	  _LT_TAGVAR(allow_undefined_flag, $1)=unsupported
+	  _LT_TAGVAR(always_export_symbols, $1)=yes
+	  _LT_TAGVAR(file_list_spec, $1)='@'
+	  # Tell ltmain to make .lib files, not .a files.
+	  libext=lib
+	  # Tell ltmain to make .dll files, not .so files.
+	  shrext_cmds=".dll"
+	  # FIXME: Setting linknames here is a bad hack.
+	  _LT_TAGVAR(archive_cmds, $1)='$CC -o $output_objdir/$soname $libobjs $compiler_flags $deplibs -Wl,-dll~linknames='
+	  _LT_TAGVAR(archive_expsym_cmds, $1)='if test "x`$SED 1q $export_symbols`" = xEXPORTS; then
+	      $SED -n -e 's/\\\\\\\(.*\\\\\\\)/-link\\\ -EXPORT:\\\\\\\1/' -e '1\\\!p' < $export_symbols > $output_objdir/$soname.exp;
+	    else
+	      $SED -e 's/\\\\\\\(.*\\\\\\\)/-link\\\ -EXPORT:\\\\\\\1/' < $export_symbols > $output_objdir/$soname.exp;
+	    fi~
+	    $CC -o $tool_output_objdir$soname $libobjs $compiler_flags $deplibs "@$tool_output_objdir$soname.exp" -Wl,-DLL,-IMPLIB:"$tool_output_objdir$libname.dll.lib"~
+	    linknames='
+	  # The linker will not automatically build a static lib if we build a DLL.
+	  # _LT_TAGVAR(old_archive_from_new_cmds, $1)='true'
+	  _LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
+	  # Don't use ranlib
+	  _LT_TAGVAR(old_postinstall_cmds, $1)='chmod 644 $oldlib'
+	  _LT_TAGVAR(postlink_cmds, $1)='lt_outputfile="@OUTPUT@"~
+	    lt_tool_outputfile="@TOOL_OUTPUT@"~
+	    case $lt_outputfile in
+	      *.exe|*.EXE) ;;
+	      *)
+		lt_outputfile="$lt_outputfile.exe"
+		lt_tool_outputfile="$lt_tool_outputfile.exe"
+		;;
+	    esac~
+	    func_to_tool_file "$lt_outputfile"~
+	    if test "$MANIFEST_TOOL" != ":" && test -f "$lt_outputfile.manifest"; then
+	      $MANIFEST_TOOL -manifest "$lt_tool_outputfile.manifest" -outputresource:"$lt_tool_outputfile" || exit 1;
+	      $RM "$lt_outputfile.manifest";
+	    fi'
+	  ;;
+	*)
+	  # g++
+	  # _LT_TAGVAR(hardcode_libdir_flag_spec, $1) is actually meaningless,
+	  # as there is no search path for DLLs.
+	  _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
+	  _LT_TAGVAR(export_dynamic_flag_spec, $1)='${wl}--export-all-symbols'
+	  _LT_TAGVAR(allow_undefined_flag, $1)=unsupported
+	  _LT_TAGVAR(always_export_symbols, $1)=no
+	  _LT_TAGVAR(enable_shared_with_static_runtimes, $1)=yes
 
-        if $LD --help 2>&1 | $GREP 'auto-import' > /dev/null; then
-          _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags -o $output_objdir/$soname ${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
-          # If the export-symbols file already is a .def file (1st line
-          # is EXPORTS), use it as is; otherwise, prepend...
-          _LT_TAGVAR(archive_expsym_cmds, $1)='if test "x`$SED 1q $export_symbols`" = xEXPORTS; then
-	    cp $export_symbols $output_objdir/$soname.def;
-          else
-	    echo EXPORTS > $output_objdir/$soname.def;
-	    cat $export_symbols >> $output_objdir/$soname.def;
-          fi~
-          $CC -shared -nostdlib $output_objdir/$soname.def $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags -o $output_objdir/$soname ${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
-        else
-          _LT_TAGVAR(ld_shlibs, $1)=no
-        fi
-        ;;
+	  if $LD --help 2>&1 | $GREP 'auto-import' > /dev/null; then
+	    _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags -o $output_objdir/$soname ${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
+	    # If the export-symbols file already is a .def file (1st line
+	    # is EXPORTS), use it as is; otherwise, prepend...
+	    _LT_TAGVAR(archive_expsym_cmds, $1)='if test "x`$SED 1q $export_symbols`" = xEXPORTS; then
+	      cp $export_symbols $output_objdir/$soname.def;
+	    else
+	      echo EXPORTS > $output_objdir/$soname.def;
+	      cat $export_symbols >> $output_objdir/$soname.def;
+	    fi~
+	    $CC -shared -nostdlib $output_objdir/$soname.def $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags -o $output_objdir/$soname ${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
+	  else
+	    _LT_TAGVAR(ld_shlibs, $1)=no
+	  fi
+	  ;;
+	esac
+	;;
       darwin* | rhapsody*)
         _LT_DARWIN_LINKER_FEATURES($1)
 	;;
@@ -6264,7 +6637,7 @@ if test "$_lt_caught_CXX_error" != yes; then
             ;;
           *)
             if test "$GXX" = yes; then
-              _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/$soname~$CC -shared -nostdlib -fPIC ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
+              _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/$soname~$CC -shared -nostdlib $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
             else
               # FIXME: insert proper C++ library support
               _LT_TAGVAR(ld_shlibs, $1)=no
@@ -6335,10 +6708,10 @@ if test "$_lt_caught_CXX_error" != yes; then
 	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib -fPIC ${wl}+h ${wl}$soname -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	            ;;
 	          ia64*)
-	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib -fPIC ${wl}+h ${wl}$soname ${wl}+nodefaultrpath -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
+	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $pic_flag ${wl}+h ${wl}$soname ${wl}+nodefaultrpath -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	            ;;
 	          *)
-	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib -fPIC ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
+	            _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $pic_flag ${wl}+h ${wl}$soname ${wl}+b ${wl}$install_libdir -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags'
 	            ;;
 	        esac
 	      fi
@@ -6379,9 +6752,9 @@ if test "$_lt_caught_CXX_error" != yes; then
           *)
 	    if test "$GXX" = yes; then
 	      if test "$with_gnu_ld" = no; then
-	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
+	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
 	      else
-	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` -o $lib'
+	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` -o $lib'
 	      fi
 	    fi
 	    _LT_TAGVAR(link_all_deplibs, $1)=yes
@@ -6659,7 +7032,7 @@ if test "$_lt_caught_CXX_error" != yes; then
 	          _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib ${allow_undefined_flag} $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
 		  ;;
 	        *)
-	          _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib ${allow_undefined_flag} $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-msym ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
+	          _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -nostdlib ${allow_undefined_flag} $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-msym ${wl}-soname ${wl}$soname `test -n "$verstring" && func_echo_all "${wl}-set_version ${wl}$verstring"` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
 		  ;;
 	      esac
 
@@ -6746,9 +7119,9 @@ if test "$_lt_caught_CXX_error" != yes; then
 	    if test "$GXX" = yes && test "$with_gnu_ld" = no; then
 	      _LT_TAGVAR(no_undefined_flag, $1)=' ${wl}-z ${wl}defs'
 	      if $CC --version | $GREP -v '^2\.7' > /dev/null; then
-	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared -nostdlib $LDFLAGS $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-h $wl$soname -o $lib'
+	        _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -nostdlib $LDFLAGS $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-h $wl$soname -o $lib'
 	        _LT_TAGVAR(archive_expsym_cmds, $1)='echo "{ global:" > $lib.exp~cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $lib.exp~echo "local: *; };" >> $lib.exp~
-		  $CC -shared -nostdlib ${wl}-M $wl$lib.exp -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags~$RM $lib.exp'
+		  $CC -shared $pic_flag -nostdlib ${wl}-M $wl$lib.exp -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags~$RM $lib.exp'
 
 	        # Commands to make compiler produce verbose output that lists
 	        # what "hidden" libraries, object files and flags are used when
@@ -6877,6 +7250,7 @@ if test "$_lt_caught_CXX_error" != yes; then
   fi # test -n "$compiler"
 
   CC=$lt_save_CC
+  CFLAGS=$lt_save_CFLAGS
   LDCXX=$LD
   LD=$lt_save_LD
   GCC=$lt_save_GCC
@@ -6891,6 +7265,29 @@ AC_LANG_POP
 ])# _LT_LANG_CXX_CONFIG
 
 
+# _LT_FUNC_STRIPNAME_CNF
+# ----------------------
+# func_stripname_cnf prefix suffix name
+# strip PREFIX and SUFFIX off of NAME.
+# PREFIX and SUFFIX must not contain globbing or regex special
+# characters, hashes, percent signs, but SUFFIX may contain a leading
+# dot (in which case that matches only a dot).
+#
+# This function is identical to the (non-XSI) version of func_stripname,
+# except this one can be used by m4 code that may be executed by configure,
+# rather than the libtool script.
+m4_defun([_LT_FUNC_STRIPNAME_CNF],[dnl
+AC_REQUIRE([_LT_DECL_SED])
+AC_REQUIRE([_LT_PROG_ECHO_BACKSLASH])
+func_stripname_cnf ()
+{
+  case ${2} in
+  .*) func_stripname_result=`$ECHO "${3}" | $SED "s%^${1}%%; s%\\\\${2}\$%%"`;;
+  *)  func_stripname_result=`$ECHO "${3}" | $SED "s%^${1}%%; s%${2}\$%%"`;;
+  esac
+} # func_stripname_cnf
+])# _LT_FUNC_STRIPNAME_CNF
+
 # _LT_SYS_HIDDEN_LIBDEPS([TAGNAME])
 # ---------------------------------
 # Figure out "hidden" library dependencies from verbose
@@ -6899,6 +7296,7 @@ AC_LANG_POP
 # objects, libraries and library flags.
 m4_defun([_LT_SYS_HIDDEN_LIBDEPS],
 [m4_require([_LT_FILEUTILS_DEFAULTS])dnl
+AC_REQUIRE([_LT_FUNC_STRIPNAME_CNF])dnl
 # Dependencies to place before and after the object being linked:
 _LT_TAGVAR(predep_objects, $1)=
 _LT_TAGVAR(postdep_objects, $1)=
@@ -6949,6 +7347,13 @@ public class foo {
 };
 _LT_EOF
 ])
+
+_lt_libdeps_save_CFLAGS=$CFLAGS
+case "$CC $CFLAGS " in #(
+*\ -flto*\ *) CFLAGS="$CFLAGS -fno-lto" ;;
+*\ -fwhopr*\ *) CFLAGS="$CFLAGS -fno-whopr" ;;
+esac
+
 dnl Parse the compiler output and extract the necessary
 dnl objects, libraries and library flags.
 if AC_TRY_EVAL(ac_compile); then
@@ -6960,7 +7365,7 @@ if AC_TRY_EVAL(ac_compile); then
   pre_test_object_deps_done=no
 
   for p in `eval "$output_verbose_link_cmd"`; do
-    case $p in
+    case ${prev}${p} in
 
     -L* | -R* | -l*)
        # Some compilers place space between "-{L,R}" and the path.
@@ -6969,13 +7374,22 @@ if AC_TRY_EVAL(ac_compile); then
           test $p = "-R"; then
 	 prev=$p
 	 continue
-       else
-	 prev=
        fi
 
+       # Expand the sysroot to ease extracting the directories later.
+       if test -z "$prev"; then
+         case $p in
+         -L*) func_stripname_cnf '-L' '' "$p"; prev=-L; p=$func_stripname_result ;;
+         -R*) func_stripname_cnf '-R' '' "$p"; prev=-R; p=$func_stripname_result ;;
+         -l*) func_stripname_cnf '-l' '' "$p"; prev=-l; p=$func_stripname_result ;;
+         esac
+       fi
+       case $p in
+       =*) func_stripname_cnf '=' '' "$p"; p=$lt_sysroot$func_stripname_result ;;
+       esac
        if test "$pre_test_object_deps_done" = no; then
-	 case $p in
-	 -L* | -R*)
+	 case ${prev} in
+	 -L | -R)
 	   # Internal compiler library paths should come after those
 	   # provided the user.  The postdeps already come after the
 	   # user supplied libs so there is no need to process them.
@@ -6995,8 +7409,10 @@ if AC_TRY_EVAL(ac_compile); then
 	   _LT_TAGVAR(postdeps, $1)="${_LT_TAGVAR(postdeps, $1)} ${prev}${p}"
 	 fi
        fi
+       prev=
        ;;
 
+    *.lto.$objext) ;; # Ignore GCC LTO objects
     *.$objext)
        # This assumes that the test object file only shows up
        # once in the compiler output.
@@ -7032,6 +7448,7 @@ else
 fi
 
 $RM -f confest.$objext
+CFLAGS=$_lt_libdeps_save_CFLAGS
 
 # PORTME: override above test on systems where it is broken
 m4_if([$1], [CXX],
@@ -7181,7 +7598,9 @@ if test "$_lt_disable_F77" != yes; then
   # Allow CC to be a program name with arguments.
   lt_save_CC="$CC"
   lt_save_GCC=$GCC
+  lt_save_CFLAGS=$CFLAGS
   CC=${F77-"f77"}
+  CFLAGS=$FFLAGS
   compiler=$CC
   _LT_TAGVAR(compiler, $1)=$CC
   _LT_CC_BASENAME([$compiler])
@@ -7235,6 +7654,7 @@ if test "$_lt_disable_F77" != yes; then
 
   GCC=$lt_save_GCC
   CC="$lt_save_CC"
+  CFLAGS="$lt_save_CFLAGS"
 fi # test "$_lt_disable_F77" != yes
 
 AC_LANG_POP
@@ -7311,7 +7731,9 @@ if test "$_lt_disable_FC" != yes; then
   # Allow CC to be a program name with arguments.
   lt_save_CC="$CC"
   lt_save_GCC=$GCC
+  lt_save_CFLAGS=$CFLAGS
   CC=${FC-"f95"}
+  CFLAGS=$FCFLAGS
   compiler=$CC
   GCC=$ac_cv_fc_compiler_gnu
 
@@ -7367,7 +7789,8 @@ if test "$_lt_disable_FC" != yes; then
   fi # test -n "$compiler"
 
   GCC=$lt_save_GCC
-  CC="$lt_save_CC"
+  CC=$lt_save_CC
+  CFLAGS=$lt_save_CFLAGS
 fi # test "$_lt_disable_FC" != yes
 
 AC_LANG_POP
@@ -7404,10 +7827,12 @@ _LT_COMPILER_BOILERPLATE
 _LT_LINKER_BOILERPLATE
 
 # Allow CC to be a program name with arguments.
-lt_save_CC="$CC"
+lt_save_CC=$CC
+lt_save_CFLAGS=$CFLAGS
 lt_save_GCC=$GCC
 GCC=yes
 CC=${GCJ-"gcj"}
+CFLAGS=$GCJFLAGS
 compiler=$CC
 _LT_TAGVAR(compiler, $1)=$CC
 _LT_TAGVAR(LD, $1)="$LD"
@@ -7434,7 +7859,8 @@ fi
 AC_LANG_RESTORE
 
 GCC=$lt_save_GCC
-CC="$lt_save_CC"
+CC=$lt_save_CC
+CFLAGS=$lt_save_CFLAGS
 ])# _LT_LANG_GCJ_CONFIG
 
 
@@ -7469,9 +7895,11 @@ _LT_LINKER_BOILERPLATE
 
 # Allow CC to be a program name with arguments.
 lt_save_CC="$CC"
+lt_save_CFLAGS=$CFLAGS
 lt_save_GCC=$GCC
 GCC=
 CC=${RC-"windres"}
+CFLAGS=
 compiler=$CC
 _LT_TAGVAR(compiler, $1)=$CC
 _LT_CC_BASENAME([$compiler])
@@ -7484,7 +7912,8 @@ fi
 
 GCC=$lt_save_GCC
 AC_LANG_RESTORE
-CC="$lt_save_CC"
+CC=$lt_save_CC
+CFLAGS=$lt_save_CFLAGS
 ])# _LT_LANG_RC_CONFIG
 
 
@@ -7543,6 +7972,15 @@ _LT_DECL([], [OBJDUMP], [1], [An object symbol dumper])
 AC_SUBST([OBJDUMP])
 ])
 
+# _LT_DECL_DLLTOOL
+# ----------------
+# Ensure DLLTOOL variable is set.
+m4_defun([_LT_DECL_DLLTOOL],
+[AC_CHECK_TOOL(DLLTOOL, dlltool, false)
+test -z "$DLLTOOL" && DLLTOOL=dlltool
+_LT_DECL([], [DLLTOOL], [1], [DLL creation program])
+AC_SUBST([DLLTOOL])
+])
 
 # _LT_DECL_SED
 # ------------
@@ -7634,8 +8072,8 @@ m4_defun([_LT_CHECK_SHELL_FEATURES],
 # Try some XSI features
 xsi_shell=no
 ( _lt_dummy="a/b/c"
-  test "${_lt_dummy##*/},${_lt_dummy%/*},"${_lt_dummy%"$_lt_dummy"}, \
-      = c,a/b,, \
+  test "${_lt_dummy##*/},${_lt_dummy%/*},${_lt_dummy#??}"${_lt_dummy%"$_lt_dummy"}, \
+      = c,a/b,b/c, \
     && eval 'test $(( 1 + 1 )) -eq 2 \
     && test "${#_lt_dummy}" -eq 5' ) >/dev/null 2>&1 \
   && xsi_shell=yes
@@ -7674,209 +8112,165 @@ _LT_DECL([NL2SP], [lt_NL2SP], [1], [turn newlines into spaces])dnl
 ])# _LT_CHECK_SHELL_FEATURES
 
 
-# _LT_PROG_XSI_SHELLFNS
-# ---------------------
-# Bourne and XSI compatible variants of some useful shell functions.
-m4_defun([_LT_PROG_XSI_SHELLFNS],
-[case $xsi_shell in
-  yes)
-    cat << \_LT_EOF >> "$cfgfile"
-
-# func_dirname file append nondir_replacement
-# Compute the dirname of FILE.  If nonempty, add APPEND to the result,
-# otherwise set result to NONDIR_REPLACEMENT.
-func_dirname ()
-{
-  case ${1} in
-    */*) func_dirname_result="${1%/*}${2}" ;;
-    *  ) func_dirname_result="${3}" ;;
-  esac
-}
-
-# func_basename file
-func_basename ()
-{
-  func_basename_result="${1##*/}"
-}
-
-# func_dirname_and_basename file append nondir_replacement
-# perform func_basename and func_dirname in a single function
-# call:
-#   dirname:  Compute the dirname of FILE.  If nonempty,
-#             add APPEND to the result, otherwise set result
-#             to NONDIR_REPLACEMENT.
-#             value returned in "$func_dirname_result"
-#   basename: Compute filename of FILE.
-#             value retuned in "$func_basename_result"
-# Implementation must be kept synchronized with func_dirname
-# and func_basename. For efficiency, we do not delegate to
-# those functions but instead duplicate the functionality here.
-func_dirname_and_basename ()
-{
-  case ${1} in
-    */*) func_dirname_result="${1%/*}${2}" ;;
-    *  ) func_dirname_result="${3}" ;;
-  esac
-  func_basename_result="${1##*/}"
-}
-
-# func_stripname prefix suffix name
-# strip PREFIX and SUFFIX off of NAME.
-# PREFIX and SUFFIX must not contain globbing or regex special
-# characters, hashes, percent signs, but SUFFIX may contain a leading
-# dot (in which case that matches only a dot).
-func_stripname ()
-{
-  # pdksh 5.2.14 does not do ${X%$Y} correctly if both X and Y are
-  # positional parameters, so assign one to ordinary parameter first.
-  func_stripname_result=${3}
-  func_stripname_result=${func_stripname_result#"${1}"}
-  func_stripname_result=${func_stripname_result%"${2}"}
-}
-
-# func_opt_split
-func_opt_split ()
-{
-  func_opt_split_opt=${1%%=*}
-  func_opt_split_arg=${1#*=}
-}
-
-# func_lo2o object
-func_lo2o ()
-{
-  case ${1} in
-    *.lo) func_lo2o_result=${1%.lo}.${objext} ;;
-    *)    func_lo2o_result=${1} ;;
-  esac
-}
-
-# func_xform libobj-or-source
-func_xform ()
-{
-  func_xform_result=${1%.*}.lo
-}
-
-# func_arith arithmetic-term...
-func_arith ()
-{
-  func_arith_result=$(( $[*] ))
-}
-
-# func_len string
-# STRING may not start with a hyphen.
-func_len ()
-{
-  func_len_result=${#1}
-}
-
-_LT_EOF
-    ;;
-  *) # Bourne compatible functions.
-    cat << \_LT_EOF >> "$cfgfile"
-
-# func_dirname file append nondir_replacement
-# Compute the dirname of FILE.  If nonempty, add APPEND to the result,
-# otherwise set result to NONDIR_REPLACEMENT.
-func_dirname ()
-{
-  # Extract subdirectory from the argument.
-  func_dirname_result=`$ECHO "${1}" | $SED "$dirname"`
-  if test "X$func_dirname_result" = "X${1}"; then
-    func_dirname_result="${3}"
-  else
-    func_dirname_result="$func_dirname_result${2}"
-  fi
-}
-
-# func_basename file
-func_basename ()
-{
-  func_basename_result=`$ECHO "${1}" | $SED "$basename"`
-}
-
-dnl func_dirname_and_basename
-dnl A portable version of this function is already defined in general.m4sh
-dnl so there is no need for it here.
-
-# func_stripname prefix suffix name
-# strip PREFIX and SUFFIX off of NAME.
-# PREFIX and SUFFIX must not contain globbing or regex special
-# characters, hashes, percent signs, but SUFFIX may contain a leading
-# dot (in which case that matches only a dot).
-# func_strip_suffix prefix name
-func_stripname ()
-{
-  case ${2} in
-    .*) func_stripname_result=`$ECHO "${3}" | $SED "s%^${1}%%; s%\\\\${2}\$%%"`;;
-    *)  func_stripname_result=`$ECHO "${3}" | $SED "s%^${1}%%; s%${2}\$%%"`;;
-  esac
-}
-
-# sed scripts:
-my_sed_long_opt='1s/^\(-[[^=]]*\)=.*/\1/;q'
-my_sed_long_arg='1s/^-[[^=]]*=//'
-
-# func_opt_split
-func_opt_split ()
-{
-  func_opt_split_opt=`$ECHO "${1}" | $SED "$my_sed_long_opt"`
-  func_opt_split_arg=`$ECHO "${1}" | $SED "$my_sed_long_arg"`
-}
-
-# func_lo2o object
-func_lo2o ()
-{
-  func_lo2o_result=`$ECHO "${1}" | $SED "$lo2o"`
-}
-
-# func_xform libobj-or-source
-func_xform ()
-{
-  func_xform_result=`$ECHO "${1}" | $SED 's/\.[[^.]]*$/.lo/'`
-}
-
-# func_arith arithmetic-term...
-func_arith ()
-{
-  func_arith_result=`expr "$[@]"`
-}
-
-# func_len string
-# STRING may not start with a hyphen.
-func_len ()
-{
-  func_len_result=`expr "$[1]" : ".*" 2>/dev/null || echo $max_cmd_len`
-}
-
-_LT_EOF
-esac
-
-case $lt_shell_append in
-  yes)
-    cat << \_LT_EOF >> "$cfgfile"
-
-# func_append var value
-# Append VALUE to the end of shell variable VAR.
-func_append ()
-{
-  eval "$[1]+=\$[2]"
-}
-_LT_EOF
-    ;;
-  *)
-    cat << \_LT_EOF >> "$cfgfile"
-
-# func_append var value
-# Append VALUE to the end of shell variable VAR.
-func_append ()
-{
-  eval "$[1]=\$$[1]\$[2]"
-}
-
-_LT_EOF
-    ;;
-  esac
+# _LT_PROG_FUNCTION_REPLACE (FUNCNAME, REPLACEMENT-BODY)
+# ------------------------------------------------------
+# In `$cfgfile', look for function FUNCNAME delimited by `^FUNCNAME ()$' and
+# '^} FUNCNAME ', and replace its body with REPLACEMENT-BODY.
+m4_defun([_LT_PROG_FUNCTION_REPLACE],
+[dnl {
+sed -e '/^$1 ()$/,/^} # $1 /c\
+$1 ()\
+{\
+m4_bpatsubsts([$2], [$], [\\], [^\([	 ]\)], [\\\1])
+} # Extended-shell $1 implementation' "$cfgfile" > $cfgfile.tmp \
+  && mv -f "$cfgfile.tmp" "$cfgfile" \
+    || (rm -f "$cfgfile" && cp "$cfgfile.tmp" "$cfgfile" && rm -f "$cfgfile.tmp")
+test 0 -eq $? || _lt_function_replace_fail=:
 ])
+
+
+# _LT_PROG_REPLACE_SHELLFNS
+# -------------------------
+# Replace existing portable implementations of several shell functions with
+# equivalent extended shell implementations where those features are available..
+m4_defun([_LT_PROG_REPLACE_SHELLFNS],
+[if test x"$xsi_shell" = xyes; then
+  _LT_PROG_FUNCTION_REPLACE([func_dirname], [dnl
+    case ${1} in
+      */*) func_dirname_result="${1%/*}${2}" ;;
+      *  ) func_dirname_result="${3}" ;;
+    esac])
+
+  _LT_PROG_FUNCTION_REPLACE([func_basename], [dnl
+    func_basename_result="${1##*/}"])
+
+  _LT_PROG_FUNCTION_REPLACE([func_dirname_and_basename], [dnl
+    case ${1} in
+      */*) func_dirname_result="${1%/*}${2}" ;;
+      *  ) func_dirname_result="${3}" ;;
+    esac
+    func_basename_result="${1##*/}"])
+
+  _LT_PROG_FUNCTION_REPLACE([func_stripname], [dnl
+    # pdksh 5.2.14 does not do ${X%$Y} correctly if both X and Y are
+    # positional parameters, so assign one to ordinary parameter first.
+    func_stripname_result=${3}
+    func_stripname_result=${func_stripname_result#"${1}"}
+    func_stripname_result=${func_stripname_result%"${2}"}])
+
+  _LT_PROG_FUNCTION_REPLACE([func_split_long_opt], [dnl
+    func_split_long_opt_name=${1%%=*}
+    func_split_long_opt_arg=${1#*=}])
+
+  _LT_PROG_FUNCTION_REPLACE([func_split_short_opt], [dnl
+    func_split_short_opt_arg=${1#??}
+    func_split_short_opt_name=${1%"$func_split_short_opt_arg"}])
+
+  _LT_PROG_FUNCTION_REPLACE([func_lo2o], [dnl
+    case ${1} in
+      *.lo) func_lo2o_result=${1%.lo}.${objext} ;;
+      *)    func_lo2o_result=${1} ;;
+    esac])
+
+  _LT_PROG_FUNCTION_REPLACE([func_xform], [    func_xform_result=${1%.*}.lo])
+
+  _LT_PROG_FUNCTION_REPLACE([func_arith], [    func_arith_result=$(( $[*] ))])
+
+  _LT_PROG_FUNCTION_REPLACE([func_len], [    func_len_result=${#1}])
+fi
+
+if test x"$lt_shell_append" = xyes; then
+  _LT_PROG_FUNCTION_REPLACE([func_append], [    eval "${1}+=\\${2}"])
+
+  _LT_PROG_FUNCTION_REPLACE([func_append_quoted], [dnl
+    func_quote_for_eval "${2}"
+dnl m4 expansion turns \\\\ into \\, and then the shell eval turns that into \
+    eval "${1}+=\\\\ \\$func_quote_for_eval_result"])
+
+  # Save a `func_append' function call where possible by direct use of '+='
+  sed -e 's%func_append \([[a-zA-Z_]]\{1,\}\) "%\1+="%g' $cfgfile > $cfgfile.tmp \
+    && mv -f "$cfgfile.tmp" "$cfgfile" \
+      || (rm -f "$cfgfile" && cp "$cfgfile.tmp" "$cfgfile" && rm -f "$cfgfile.tmp")
+  test 0 -eq $? || _lt_function_replace_fail=:
+else
+  # Save a `func_append' function call even when '+=' is not available
+  sed -e 's%func_append \([[a-zA-Z_]]\{1,\}\) "%\1="$\1%g' $cfgfile > $cfgfile.tmp \
+    && mv -f "$cfgfile.tmp" "$cfgfile" \
+      || (rm -f "$cfgfile" && cp "$cfgfile.tmp" "$cfgfile" && rm -f "$cfgfile.tmp")
+  test 0 -eq $? || _lt_function_replace_fail=:
+fi
+
+if test x"$_lt_function_replace_fail" = x":"; then
+  AC_MSG_WARN([Unable to substitute extended shell functions in $ofile])
+fi
+])
+
+# _LT_PATH_CONVERSION_FUNCTIONS
+# -----------------------------
+# Determine which file name conversion functions should be used by
+# func_to_host_file (and, implicitly, by func_to_host_path).  These are needed
+# for certain cross-compile configurations and native mingw.
+m4_defun([_LT_PATH_CONVERSION_FUNCTIONS],
+[AC_REQUIRE([AC_CANONICAL_HOST])dnl
+AC_REQUIRE([AC_CANONICAL_BUILD])dnl
+AC_MSG_CHECKING([how to convert $build file names to $host format])
+AC_CACHE_VAL(lt_cv_to_host_file_cmd,
+[case $host in
+  *-*-mingw* )
+    case $build in
+      *-*-mingw* ) # actually msys
+        lt_cv_to_host_file_cmd=func_convert_file_msys_to_w32
+        ;;
+      *-*-cygwin* )
+        lt_cv_to_host_file_cmd=func_convert_file_cygwin_to_w32
+        ;;
+      * ) # otherwise, assume *nix
+        lt_cv_to_host_file_cmd=func_convert_file_nix_to_w32
+        ;;
+    esac
+    ;;
+  *-*-cygwin* )
+    case $build in
+      *-*-mingw* ) # actually msys
+        lt_cv_to_host_file_cmd=func_convert_file_msys_to_cygwin
+        ;;
+      *-*-cygwin* )
+        lt_cv_to_host_file_cmd=func_convert_file_noop
+        ;;
+      * ) # otherwise, assume *nix
+        lt_cv_to_host_file_cmd=func_convert_file_nix_to_cygwin
+        ;;
+    esac
+    ;;
+  * ) # unhandled hosts (and "normal" native builds)
+    lt_cv_to_host_file_cmd=func_convert_file_noop
+    ;;
+esac
+])
+to_host_file_cmd=$lt_cv_to_host_file_cmd
+AC_MSG_RESULT([$lt_cv_to_host_file_cmd])
+_LT_DECL([to_host_file_cmd], [lt_cv_to_host_file_cmd],
+         [0], [convert $build file names to $host format])dnl
+
+AC_MSG_CHECKING([how to convert $build file names to toolchain format])
+AC_CACHE_VAL(lt_cv_to_tool_file_cmd,
+[#assume ordinary cross tools, or native build.
+lt_cv_to_tool_file_cmd=func_convert_file_noop
+case $host in
+  *-*-mingw* )
+    case $build in
+      *-*-mingw* ) # actually msys
+        lt_cv_to_tool_file_cmd=func_convert_file_msys_to_w32
+        ;;
+    esac
+    ;;
+esac
+])
+to_tool_file_cmd=$lt_cv_to_tool_file_cmd
+AC_MSG_RESULT([$lt_cv_to_tool_file_cmd])
+_LT_DECL([to_tool_file_cmd], [lt_cv_to_tool_file_cmd],
+         [0], [convert $build files to toolchain format])dnl
+])# _LT_PATH_CONVERSION_FUNCTIONS
 
 # Helper functions for option handling.                    -*- Autoconf -*-
 #
@@ -8375,17 +8769,17 @@ m4_define([lt_dict_filter],
 # unlimited permission to copy and/or distribute it, with or without
 # modifications, as long as this notice is preserved.
 
-# Generated from ltversion.in.
+# @configure_input@
 
-# serial 3175 ltversion.m4
+# serial 3293 ltversion.m4
 # This file is part of GNU Libtool
 
-m4_define([LT_PACKAGE_VERSION], [2.2.10])
-m4_define([LT_PACKAGE_REVISION], [1.3175])
+m4_define([LT_PACKAGE_VERSION], [2.4])
+m4_define([LT_PACKAGE_REVISION], [1.3293])
 
 AC_DEFUN([LTVERSION_VERSION],
-[macro_version='2.2.10'
-macro_revision='1.3175'
+[macro_version='2.4'
+macro_revision='1.3293'
 _LT_DECL(, macro_version, 0, [Which release of libtool.m4 was used?])
 _LT_DECL(, macro_revision, 0)
 ])
@@ -8488,6 +8882,527 @@ m4_ifndef([_LT_PROG_ECHO_BACKSLASH],	[AC_DEFUN([_LT_PROG_ECHO_BACKSLASH])])
 m4_ifndef([_LT_PROG_F77],		[AC_DEFUN([_LT_PROG_F77])])
 m4_ifndef([_LT_PROG_FC],		[AC_DEFUN([_LT_PROG_FC])])
 m4_ifndef([_LT_PROG_CXX],		[AC_DEFUN([_LT_PROG_CXX])])
+
+dnl $Id$
+dnl
+dnl Copyright (c) 2002-2006
+dnl         The Xfce development team. All rights reserved.
+dnl
+dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
+dnl
+dnl This program is free software; you can redistribute it and/or modify it
+dnl under the terms of the GNU General Public License as published by the Free
+dnl Software Foundation; either version 2 of the License, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but WITHOUT
+dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+dnl more details.
+dnl
+dnl You should have received a copy of the GNU General Public License along with
+dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+dnl Place, Suite 330, Boston, MA  02111-1307  USA
+dnl
+dnl xdt-depends
+dnl -----------
+dnl  Contains M4 macros to check for software dependencies.
+dnl  Partly based on prior work of the XDG contributors.
+dnl
+
+
+
+dnl We need recent a autoconf version
+AC_PREREQ([2.53])
+
+
+
+dnl XDT_PROG_PKG_CONFIG()
+dnl
+dnl Checks for the freedesktop.org pkg-config
+dnl utility and sets the PKG_CONFIG environment
+dnl variable to the full path if found.
+dnl
+AC_DEFUN([XDT_PROG_PKG_CONFIG],
+[
+  # minimum supported version of pkg-config
+  xdt_cv_PKG_CONFIG_MIN_VERSION=0.9.0
+
+  # lookup pkg-config utility
+  if test x"$PKG_CONFIG" = x""; then
+    AC_PATH_PROG([PKG_CONFIG], [pkg-config], [no])
+
+    if test x"$PKG_CONFIG" = x"no"; then
+      echo "*** The pkg-config utility could not be found on your system."
+      echo "*** Make sure it is in your path, or set the PKG_CONFIG"
+      echo "*** environment variable to the full path to pkg-config."
+      echo "*** You can download pkg-config from the freedesktop.org"
+      echo "*** software repository at"
+      echo "***"
+      echo "***    http://www.freedesktop.org/software/pkgconfig"
+      echo "***"
+      exit 1
+    fi
+
+    # check pkg-config version
+    AC_MSG_CHECKING([for pkg-config >= $xdt_cv_PKG_CONFIG_MIN_VERSION])
+    if $PKG_CONFIG --atleast-pkgconfig-version $xdt_cv_PKG_CONFIG_MIN_VERSION; then
+      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
+      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
+    else
+      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
+      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
+      echo "*** Your version of pkg-config is too old. You need atleast"
+      echo "*** pkg-config $xdt_cv_PKG_CONFIG_MIN_VERSION or newer. You can download pkg-config "
+      echo "*** from the freedesktop.org software repository at"
+      echo "***"
+      echo "***    http://www.freedesktop.org/software/pkgconfig"
+      echo "***"
+      exit 1
+    fi
+  fi
+])
+
+
+
+dnl XDT_CHECK_PACKAGE(varname, package, version, [action-if], [action-if-not])
+dnl
+dnl Checks if "package" >= "version" is installed on the
+dnl target system, using the pkg-config utility. If the
+dnl dependency is met, "varname"_CFLAGS, "varname"_LIBS,
+dnl "varname"_VERSION and "varname"_REQUIRED_VERSION
+dnl will be set and marked for substition.
+dnl
+dnl "varname"_REQUIRED_VERSION will be set to the value of
+dnl "version". This is mostly useful to automatically
+dnl place the correct version information into the RPM
+dnl .spec file.
+dnl
+dnl In addition, if the dependency is met, "action-if" will
+dnl be executed if given.
+dnl
+dnl If the package check fails, "action-if-not" will be
+dnl executed. If this parameter isn't specified, a diagnostic
+dnl message will be printed and the configure script will
+dnl be terminated with exit code 1.
+dnl
+AC_DEFUN([XDT_CHECK_PACKAGE],
+[
+  XDT_PROG_PKG_CONFIG()
+
+  AC_MSG_CHECKING([for $2 >= $3])
+  if $PKG_CONFIG "--atleast-version=$3" "$2" >/dev/null 2>&1; then
+    $1_VERSION=`$PKG_CONFIG --modversion "$2"`
+    AC_MSG_RESULT([$$1_VERSION])
+
+    AC_MSG_CHECKING([$1_CFLAGS])
+    $1_CFLAGS=`$PKG_CONFIG --cflags "$2"`
+    AC_MSG_RESULT([$$1_CFLAGS])
+
+    AC_MSG_CHECKING([$1_LIBS])
+    $1_LIBS=`$PKG_CONFIG --libs "$2"`
+    AC_MSG_RESULT([$$1_LIBS])
+
+    $1_REQUIRED_VERSION=$3
+
+    AC_SUBST([$1_VERSION])
+    AC_SUBST([$1_CFLAGS])
+    AC_SUBST([$1_LIBS])
+    AC_SUBST([$1_REQUIRED_VERSION])
+
+    ifelse([$4], , , [$4])
+  elif $PKG_CONFIG --exists "$2" >/dev/null 2>&1; then
+    xdt_cv_version=`$PKG_CONFIG --modversion "$2"`
+    AC_MSG_RESULT([found, but $xdt_cv_version])
+
+    ifelse([$5], ,
+    [
+      echo "*** The required package $2 was found on your system,"
+      echo "*** but the installed version ($xdt_cv_version) is too old."
+      echo "*** Please upgrade $2 to atleast version $3, or adjust"
+      echo "*** the PKG_CONFIG_PATH environment variable if you installed"
+      echo "*** the new version of the package in a nonstandard prefix so"
+      echo "*** pkg-config is able to find it."
+      exit 1
+    ], [$5])
+  else
+    AC_MSG_RESULT([not found])
+
+    ifelse([$5], ,
+    [
+      echo "*** The required package $2 was not found on your system."
+      echo "*** Please install $2 (atleast version $3) or adjust"
+      echo "*** the PKG_CONFIG_PATH environment variable if you"
+      echo "*** installed the package in a nonstandard prefix so that"
+      echo "*** pkg-config is able to find it."
+      exit 1
+    ], [$5])
+  fi
+])
+
+
+
+dnl XDT_CHECK_OPTIONAL_PACKAGE(varname, package, version, optionname, helpstring, [default])
+dnl
+dnl Checks for an optional dependency on "package" >= "version". "default"
+dnl can be "yes" or "no" (defaults to "yes" if not specified) and controls
+dnl whether configure should check this dependency by default, or only if
+dnl the user explicitly enables it using a command line switch.
+dnl
+dnl This macro automatically adds a commandline switch based on the "optionname"
+dnl parameter (--enable-optionname/--disable-optionname), which allows the
+dnl user to explicitly control whether this optional dependency should be
+dnl enabled or not. The "helpstring" parameter gives a brief(!) description
+dnl about this dependency.
+dnl
+dnl If the user chose to enable this dependency and the required package
+dnl was found, this macro defines the variable "varname"_FOUND and sets it
+dnl to the string "yes", in addition to the 4 variables set by XDT_CHECK_PACKAGE.
+dnl But "varname"_FOUND will not be marked for substition. Furthermore,
+dnl a CPP define HAVE_"varname" will be placed in config.h (or added to
+dnl the cc command line, depending on your configure.ac) and set to
+dnl 1.
+dnl
+AC_DEFUN([XDT_CHECK_OPTIONAL_PACKAGE],
+[
+  AC_REQUIRE([XDT_PROG_PKG_CONFIG])
+
+  AC_ARG_ENABLE([$4],
+AC_HELP_STRING([--enable-$4], [Enable checking for $5 (default=m4_default([$6], [yes]))])
+AC_HELP_STRING([--disable-$4], [Disable checking for $5]),
+    [xdt_cv_$1_check=$enableval], [xdt_cv_$1_check=m4_default([$6], [yes])])
+
+  if test x"$xdt_cv_$1_check" = x"yes"; then
+    if $PKG_CONFIG --exists "$2 >= $3" >/dev/null 2>&1; then
+      XDT_CHECK_PACKAGE([$1], [$2], [$3],
+      [
+        AC_DEFINE([HAVE_$1], [1], [Define if $2 >= $3 present])
+        $1_FOUND="yes"
+      ])
+    else
+      AC_MSG_CHECKING([for optional package $2 >= $3])
+      AC_MSG_RESULT([not found])
+    fi
+  else
+    AC_MSG_CHECKING([for optional package $2])
+    AC_MSG_RESULT([disabled])
+  fi
+
+  AM_CONDITIONAL([HAVE_$1], [test x"$$1_FOUND" = x"yes"])
+])
+
+
+
+dnl BM_DEPEND(varname, package, version)
+dnl
+dnl Simple wrapper for XDT_CHECK_PACKAGE("varname", "package", "version"). Kept
+dnl for backward compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_DEPEND],
+[
+  XDT_CHECK_PACKAGE([$1], [$2], [$3])
+])
+
+
+
+dnl BM_DEPEND_CHECK(var, pkg, version, name, helpstring, default)
+dnl
+dnl Simple wrapper for XDT_CHECK_OPTIONAL_PACKAGE(). Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_DEPEND_CHECK],
+[
+  XDT_CHECK_OPTIONAL_PACKAGE([$1], [$2], [$3], [$4], [$5], [$6])
+])
+
+
+
+dnl XDT_CHECK_LIBX11()
+dnl
+dnl Executes various checks for X11. Sets LIBX11_CFLAGS, LIBX11_LDFLAGS
+dnl and LIBX11_LIBS (and marks them for substitution). In addition
+dnl HAVE_LIBX11 is set to 1 in config.h, if the X window system and
+dnl the development files are detected on the target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBX11],
+[
+  AC_REQUIRE([AC_PATH_XTRA])
+
+  LIBX11_CFLAGS= LIBX11_LDFLAGS= LIBX11_LIBS=
+  if test x"$no_x" != x"yes"; then
+    AC_CHECK_LIB([X11], [main],
+    [
+      AC_DEFINE([HAVE_LIBX11], [1], [Define if libX11 is available])
+      LIBX11_CFLAGS="$X_CFLAGS"
+      for option in $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS; do
+      	case "$option" in
+        -L*)
+          path=`echo $option | sed 's/^-L//'`
+          if test x"$path" != x""; then
+            LIBX11_LDFLAGS="$LIBX11_LDFLAGS -L$path"
+          fi
+          ;;
+        *)
+          LIBX11_LIBS="$LIBX11_LIBS $option"
+          ;;
+        esac
+      done
+      if ! echo $LIBX11_LIBS | grep -- '-lX11' >/dev/null; then
+        LIBX11_LIBS="$LIBX11_LIBS -lX11"
+      fi
+    ], [], [$X_CFLAGS $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS])
+  fi
+  AC_SUBST([LIBX11_CFLAGS])
+  AC_SUBST([LIBX11_LDFLAGS])
+  AC_SUBST([LIBX11_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBX11_REQUIRE()
+dnl
+dnl Similar to XDT_CHECK_LIBX11(), but terminates with an error if
+dnl the X window system and development files aren't detected on the
+dnl target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBX11_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+  
+  if test x"$no_x" = x"yes"; then
+    AC_MSG_ERROR([X Window system libraries and header files are required])
+  fi
+])
+
+
+
+dnl XDT_CHECK_LIBSM()
+dnl
+dnl Checks whether the session management library is present on the
+dnl target system, and sets LIBSM_CFLAGS, LIBSM_LDFLAGS and LIBSM_LIBS
+dnl properly. In addition, HAVE_LIBSM will be set to 1 in config.h
+dnl if libSM is detected.
+dnl
+AC_DEFUN([XDT_CHECK_LIBSM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+
+  LIBSM_CFLAGS= LIBSM_LDFLAGS= LIBSM_LIBS=
+  if test x"$no_x" != x"yes"; then
+    AC_CHECK_LIB([SM], [SmcSaveYourselfDone],
+    [
+      AC_DEFINE([HAVE_LIBSM], [1], [Define if libSM is available])
+      LIBSM_CFLAGS="$LIBX11_CFLAGS"
+      LIBSM_LDFLAGS="$LIBX11_LDFLAGS"
+      LIBSM_LIBS="$LIBX11_LIBS"
+      if ! echo $LIBSM_LIBS | grep -- '-lSM' >/dev/null; then
+        LIBSM_LIBS="$LIBSM_LIBS -lSM -lICE"
+      fi
+    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lICE])
+  fi
+  AC_SUBST([LIBSM_CFLAGS])
+  AC_SUBST([LIBSM_LDFLAGS])
+  AC_SUBST([LIBSM_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBXPM()
+dnl
+dnl Checks if the Xpm library is present on the target system, and
+dnl sets LIBXPM_CFLAGS, LIBXPM_LDFLAGS and LIBXPM_LIBS. In addition,
+dnl HAVE_LIBXPM will be set to 1 in config.h if libXpm is detected.
+dnl
+AC_DEFUN([XDT_CHECK_LIBXPM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+
+  LIBXPM_CFLAGS= LIBXPM_LDFLAGS= LIBXPM_LIBS=
+  if test "$no_x" != "yes"; then
+    AC_CHECK_LIB([Xpm], [main],
+    [
+      AC_DEFINE([HAVE_LIBXPM], [1], [Define if libXpm is available])
+      LIBXPM_CFLAGS="$LIBX11_CFLAGS"
+      LIBXPM_LDFLAGS="$LIBX11_LDFLAGS"
+      LIBXPM_LIBS="$LIBX11_LIBS"
+      if ! echo $LIBXPM_LIBS | grep -- '-lXpm' >/dev/null; then
+        LIBXPM_LIBS="$LIBXPM_LIBS -lXpm"
+      fi
+    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lXpm])
+  fi
+  AC_SUBST([LIBXPM_CFLAGS])
+  AC_SUBST([LIBXPM_LDFLAGS])
+  AC_SUBST([LIBXPM_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBXPM_REQUIRE()
+dnl
+dnl Similar to XDT_CHECK_LIBXPM(), but fails if the Xpm library isn't
+dnl present on the target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBXPM_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
+  AC_REQUIRE([XDT_CHECK_LIBXPM])
+
+  if test x"$LIBXPM_LIBS" = x""; then
+    AC_MSG_ERROR([The Xpm library was not found on your system])
+  fi
+])
+
+
+
+dnl BM_LIBX11()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBX11. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBX11],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+])
+
+
+
+dnl BM_LIBX11_REQUIRE()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBX11_REQUIRE. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBX11_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
+])
+
+
+
+dnl BM_LIBSM()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBSM. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBSM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBSM])
+])
+
+
+
+dnl BM_LIBXPM
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBXPM. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBXPM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBXPM])
+])
+
+
+
+dnl BM_LIBXPM_REQUIRE
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBXPM_REQUIRE. Kept for
+dnl backward compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBXPM_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBXPM_REQUIRE])
+])
+
+
+dnl $Id$
+dnl
+dnl Copyright (c) 2002-2006
+dnl         The Xfce development team. All rights reserved.
+dnl
+dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
+dnl
+dnl This program is free software; you can redistribute it and/or modify it
+dnl under the terms of the GNU General Public License as published by the Free
+dnl Software Foundation; either version 2 of the License, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but WITHOUT
+dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+dnl more details.
+dnl
+dnl You should have received a copy of the GNU General Public License along with
+dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+dnl Place, Suite 330, Boston, MA  02111-1307  USA
+dnl
+dnl xdt-i18n
+dnl --------
+dnl  Internalization M4 macros.
+dnl
+
+
+dnl XDT_I18N(LINGUAS [, PACKAGE])
+dnl
+dnl This macro takes care of setting up everything for i18n support.
+dnl
+dnl If PACKAGE isn't specified, it defaults to the package tarname; see
+dnl the description of AC_INIT() for an explanation of what makes up
+dnl the package tarname. Normally, you don't need to specify PACKAGE,
+dnl but you can stick with the default.
+dnl
+AC_DEFUN([XDT_I18N],
+[
+  dnl Substitute GETTEXT_PACKAGE variable
+  GETTEXT_PACKAGE=m4_default([$2], [AC_PACKAGE_TARNAME()])
+  AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Name of default gettext domain])
+  AC_SUBST([GETTEXT_PACKAGE])
+
+  dnl gettext and stuff
+  ALL_LINGUAS="$1"
+  AM_GLIB_GNU_GETTEXT()
+
+  dnl This is required on some Linux systems
+  AC_CHECK_FUNC([bind_textdomain_codeset])
+
+  dnl Determine where to install locale files
+  AC_MSG_CHECKING([for locales directory])
+  AC_ARG_WITH([locales-dir], 
+  [
+    AC_HELP_STRING([--with-locales-dir=DIR], [Install locales into DIR])
+  ], [localedir=$withval],
+  [
+    if test x"$CATOBJEXT" = x".mo"; then
+      localedir=$libdir/locale
+    else
+      localedir=$datadir/locale
+    fi
+  ])
+  AC_MSG_RESULT([$localedir])
+  AC_SUBST([localedir])
+
+  dnl Determine additional xgettext flags
+  AC_MSG_CHECKING([for additional xgettext flags])
+  if test x"$XGETTEXT_ARGS" = x""; then
+    XGETTEXT_ARGS="--keyword=Q_ --from-code=UTF-8";
+  else
+    XGETTEXT_ARGS="$XGETTEXT_ARGS --keyword=Q_ --from-code=UTF-8";
+  fi
+  AC_SUBST([XGETTEXT_ARGS])
+  AC_MSG_RESULT([$XGETTEXT_ARGS])
+])
+
+
+
+dnl BM_I18N(PACKAGE, LINGUAS)
+dnl
+dnl Simple wrapper for XDT_I18N(LINGUAS, PACKAGE). Kept for
+dnl backward compatibility. Will be removed in the
+dnl future.
+dnl
+AC_DEFUN([BM_I18N],
+[
+  XDT_I18N([$2], [$1])
+])
+
 
 # Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008  Free Software Foundation, Inc.
 #
@@ -9497,525 +10412,4 @@ AC_MSG_RESULT([$am_cv_prog_tar_$1])])
 AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
-
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
-dnl         The Xfce development team. All rights reserved.
-dnl
-dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
-dnl
-dnl This program is free software; you can redistribute it and/or modify it
-dnl under the terms of the GNU General Public License as published by the Free
-dnl Software Foundation; either version 2 of the License, or (at your option)
-dnl any later version.
-dnl
-dnl This program is distributed in the hope that it will be useful, but WITHOUT
-dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-dnl more details.
-dnl
-dnl You should have received a copy of the GNU General Public License along with
-dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-dnl Place, Suite 330, Boston, MA  02111-1307  USA
-dnl
-dnl xdt-depends
-dnl -----------
-dnl  Contains M4 macros to check for software dependencies.
-dnl  Partly based on prior work of the XDG contributors.
-dnl
-
-
-
-dnl We need recent a autoconf version
-AC_PREREQ([2.53])
-
-
-
-dnl XDT_PROG_PKG_CONFIG()
-dnl
-dnl Checks for the freedesktop.org pkg-config
-dnl utility and sets the PKG_CONFIG environment
-dnl variable to the full path if found.
-dnl
-AC_DEFUN([XDT_PROG_PKG_CONFIG],
-[
-  # minimum supported version of pkg-config
-  xdt_cv_PKG_CONFIG_MIN_VERSION=0.9.0
-
-  # lookup pkg-config utility
-  if test x"$PKG_CONFIG" = x""; then
-    AC_PATH_PROG([PKG_CONFIG], [pkg-config], [no])
-
-    if test x"$PKG_CONFIG" = x"no"; then
-      echo "*** The pkg-config utility could not be found on your system."
-      echo "*** Make sure it is in your path, or set the PKG_CONFIG"
-      echo "*** environment variable to the full path to pkg-config."
-      echo "*** You can download pkg-config from the freedesktop.org"
-      echo "*** software repository at"
-      echo "***"
-      echo "***    http://www.freedesktop.org/software/pkgconfig"
-      echo "***"
-      exit 1
-    fi
-
-    # check pkg-config version
-    AC_MSG_CHECKING([for pkg-config >= $xdt_cv_PKG_CONFIG_MIN_VERSION])
-    if $PKG_CONFIG --atleast-pkgconfig-version $xdt_cv_PKG_CONFIG_MIN_VERSION; then
-      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
-      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
-    else
-      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
-      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
-      echo "*** Your version of pkg-config is too old. You need atleast"
-      echo "*** pkg-config $xdt_cv_PKG_CONFIG_MIN_VERSION or newer. You can download pkg-config "
-      echo "*** from the freedesktop.org software repository at"
-      echo "***"
-      echo "***    http://www.freedesktop.org/software/pkgconfig"
-      echo "***"
-      exit 1
-    fi
-  fi
-])
-
-
-
-dnl XDT_CHECK_PACKAGE(varname, package, version, [action-if], [action-if-not])
-dnl
-dnl Checks if "package" >= "version" is installed on the
-dnl target system, using the pkg-config utility. If the
-dnl dependency is met, "varname"_CFLAGS, "varname"_LIBS,
-dnl "varname"_VERSION and "varname"_REQUIRED_VERSION
-dnl will be set and marked for substition.
-dnl
-dnl "varname"_REQUIRED_VERSION will be set to the value of
-dnl "version". This is mostly useful to automatically
-dnl place the correct version information into the RPM
-dnl .spec file.
-dnl
-dnl In addition, if the dependency is met, "action-if" will
-dnl be executed if given.
-dnl
-dnl If the package check fails, "action-if-not" will be
-dnl executed. If this parameter isn't specified, a diagnostic
-dnl message will be printed and the configure script will
-dnl be terminated with exit code 1.
-dnl
-AC_DEFUN([XDT_CHECK_PACKAGE],
-[
-  XDT_PROG_PKG_CONFIG()
-
-  AC_MSG_CHECKING([for $2 >= $3])
-  if $PKG_CONFIG "--atleast-version=$3" "$2" >/dev/null 2>&1; then
-    $1_VERSION=`$PKG_CONFIG --modversion "$2"`
-    AC_MSG_RESULT([$$1_VERSION])
-
-    AC_MSG_CHECKING([$1_CFLAGS])
-    $1_CFLAGS=`$PKG_CONFIG --cflags "$2"`
-    AC_MSG_RESULT([$$1_CFLAGS])
-
-    AC_MSG_CHECKING([$1_LIBS])
-    $1_LIBS=`$PKG_CONFIG --libs "$2"`
-    AC_MSG_RESULT([$$1_LIBS])
-
-    $1_REQUIRED_VERSION=$3
-
-    AC_SUBST([$1_VERSION])
-    AC_SUBST([$1_CFLAGS])
-    AC_SUBST([$1_LIBS])
-    AC_SUBST([$1_REQUIRED_VERSION])
-
-    ifelse([$4], , , [$4])
-  elif $PKG_CONFIG --exists "$2" >/dev/null 2>&1; then
-    xdt_cv_version=`$PKG_CONFIG --modversion "$2"`
-    AC_MSG_RESULT([found, but $xdt_cv_version])
-
-    ifelse([$5], ,
-    [
-      echo "*** The required package $2 was found on your system,"
-      echo "*** but the installed version ($xdt_cv_version) is too old."
-      echo "*** Please upgrade $2 to atleast version $3, or adjust"
-      echo "*** the PKG_CONFIG_PATH environment variable if you installed"
-      echo "*** the new version of the package in a nonstandard prefix so"
-      echo "*** pkg-config is able to find it."
-      exit 1
-    ], [$5])
-  else
-    AC_MSG_RESULT([not found])
-
-    ifelse([$5], ,
-    [
-      echo "*** The required package $2 was not found on your system."
-      echo "*** Please install $2 (atleast version $3) or adjust"
-      echo "*** the PKG_CONFIG_PATH environment variable if you"
-      echo "*** installed the package in a nonstandard prefix so that"
-      echo "*** pkg-config is able to find it."
-      exit 1
-    ], [$5])
-  fi
-])
-
-
-
-dnl XDT_CHECK_OPTIONAL_PACKAGE(varname, package, version, optionname, helpstring, [default])
-dnl
-dnl Checks for an optional dependency on "package" >= "version". "default"
-dnl can be "yes" or "no" (defaults to "yes" if not specified) and controls
-dnl whether configure should check this dependency by default, or only if
-dnl the user explicitly enables it using a command line switch.
-dnl
-dnl This macro automatically adds a commandline switch based on the "optionname"
-dnl parameter (--enable-optionname/--disable-optionname), which allows the
-dnl user to explicitly control whether this optional dependency should be
-dnl enabled or not. The "helpstring" parameter gives a brief(!) description
-dnl about this dependency.
-dnl
-dnl If the user chose to enable this dependency and the required package
-dnl was found, this macro defines the variable "varname"_FOUND and sets it
-dnl to the string "yes", in addition to the 4 variables set by XDT_CHECK_PACKAGE.
-dnl But "varname"_FOUND will not be marked for substition. Furthermore,
-dnl a CPP define HAVE_"varname" will be placed in config.h (or added to
-dnl the cc command line, depending on your configure.ac) and set to
-dnl 1.
-dnl
-AC_DEFUN([XDT_CHECK_OPTIONAL_PACKAGE],
-[
-  AC_REQUIRE([XDT_PROG_PKG_CONFIG])
-
-  AC_ARG_ENABLE([$4],
-AC_HELP_STRING([--enable-$4], [Enable checking for $5 (default=m4_default([$6], [yes]))])
-AC_HELP_STRING([--disable-$4], [Disable checking for $5]),
-    [xdt_cv_$1_check=$enableval], [xdt_cv_$1_check=m4_default([$6], [yes])])
-
-  if test x"$xdt_cv_$1_check" = x"yes"; then
-    if $PKG_CONFIG --exists "$2 >= $3" >/dev/null 2>&1; then
-      XDT_CHECK_PACKAGE([$1], [$2], [$3],
-      [
-        AC_DEFINE([HAVE_$1], [1], [Define if $2 >= $3 present])
-        $1_FOUND="yes"
-      ])
-    else
-      AC_MSG_CHECKING([for optional package $2 >= $3])
-      AC_MSG_RESULT([not found])
-    fi
-  else
-    AC_MSG_CHECKING([for optional package $2])
-    AC_MSG_RESULT([disabled])
-  fi
-
-  AM_CONDITIONAL([HAVE_$1], [test x"$$1_FOUND" = x"yes"])
-])
-
-
-
-dnl BM_DEPEND(varname, package, version)
-dnl
-dnl Simple wrapper for XDT_CHECK_PACKAGE("varname", "package", "version"). Kept
-dnl for backward compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_DEPEND],
-[
-  XDT_CHECK_PACKAGE([$1], [$2], [$3])
-])
-
-
-
-dnl BM_DEPEND_CHECK(var, pkg, version, name, helpstring, default)
-dnl
-dnl Simple wrapper for XDT_CHECK_OPTIONAL_PACKAGE(). Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_DEPEND_CHECK],
-[
-  XDT_CHECK_OPTIONAL_PACKAGE([$1], [$2], [$3], [$4], [$5], [$6])
-])
-
-
-
-dnl XDT_CHECK_LIBX11()
-dnl
-dnl Executes various checks for X11. Sets LIBX11_CFLAGS, LIBX11_LDFLAGS
-dnl and LIBX11_LIBS (and marks them for substitution). In addition
-dnl HAVE_LIBX11 is set to 1 in config.h, if the X window system and
-dnl the development files are detected on the target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBX11],
-[
-  AC_REQUIRE([AC_PATH_XTRA])
-
-  LIBX11_CFLAGS= LIBX11_LDFLAGS= LIBX11_LIBS=
-  if test x"$no_x" != x"yes"; then
-    AC_CHECK_LIB([X11], [main],
-    [
-      AC_DEFINE([HAVE_LIBX11], [1], [Define if libX11 is available])
-      LIBX11_CFLAGS="$X_CFLAGS"
-      for option in $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS; do
-      	case "$option" in
-        -L*)
-          path=`echo $option | sed 's/^-L//'`
-          if test x"$path" != x""; then
-            LIBX11_LDFLAGS="$LIBX11_LDFLAGS -L$path"
-          fi
-          ;;
-        *)
-          LIBX11_LIBS="$LIBX11_LIBS $option"
-          ;;
-        esac
-      done
-      if ! echo $LIBX11_LIBS | grep -- '-lX11' >/dev/null; then
-        LIBX11_LIBS="$LIBX11_LIBS -lX11"
-      fi
-    ], [], [$X_CFLAGS $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS])
-  fi
-  AC_SUBST([LIBX11_CFLAGS])
-  AC_SUBST([LIBX11_LDFLAGS])
-  AC_SUBST([LIBX11_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBX11_REQUIRE()
-dnl
-dnl Similar to XDT_CHECK_LIBX11(), but terminates with an error if
-dnl the X window system and development files aren't detected on the
-dnl target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBX11_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-  
-  if test x"$no_x" = x"yes"; then
-    AC_MSG_ERROR([X Window system libraries and header files are required])
-  fi
-])
-
-
-
-dnl XDT_CHECK_LIBSM()
-dnl
-dnl Checks whether the session management library is present on the
-dnl target system, and sets LIBSM_CFLAGS, LIBSM_LDFLAGS and LIBSM_LIBS
-dnl properly. In addition, HAVE_LIBSM will be set to 1 in config.h
-dnl if libSM is detected.
-dnl
-AC_DEFUN([XDT_CHECK_LIBSM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-
-  LIBSM_CFLAGS= LIBSM_LDFLAGS= LIBSM_LIBS=
-  if test x"$no_x" != x"yes"; then
-    AC_CHECK_LIB([SM], [SmcSaveYourselfDone],
-    [
-      AC_DEFINE([HAVE_LIBSM], [1], [Define if libSM is available])
-      LIBSM_CFLAGS="$LIBX11_CFLAGS"
-      LIBSM_LDFLAGS="$LIBX11_LDFLAGS"
-      LIBSM_LIBS="$LIBX11_LIBS"
-      if ! echo $LIBSM_LIBS | grep -- '-lSM' >/dev/null; then
-        LIBSM_LIBS="$LIBSM_LIBS -lSM -lICE"
-      fi
-    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lICE])
-  fi
-  AC_SUBST([LIBSM_CFLAGS])
-  AC_SUBST([LIBSM_LDFLAGS])
-  AC_SUBST([LIBSM_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBXPM()
-dnl
-dnl Checks if the Xpm library is present on the target system, and
-dnl sets LIBXPM_CFLAGS, LIBXPM_LDFLAGS and LIBXPM_LIBS. In addition,
-dnl HAVE_LIBXPM will be set to 1 in config.h if libXpm is detected.
-dnl
-AC_DEFUN([XDT_CHECK_LIBXPM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-
-  LIBXPM_CFLAGS= LIBXPM_LDFLAGS= LIBXPM_LIBS=
-  if test "$no_x" != "yes"; then
-    AC_CHECK_LIB([Xpm], [main],
-    [
-      AC_DEFINE([HAVE_LIBXPM], [1], [Define if libXpm is available])
-      LIBXPM_CFLAGS="$LIBX11_CFLAGS"
-      LIBXPM_LDFLAGS="$LIBX11_LDFLAGS"
-      LIBXPM_LIBS="$LIBX11_LIBS"
-      if ! echo $LIBXPM_LIBS | grep -- '-lXpm' >/dev/null; then
-        LIBXPM_LIBS="$LIBXPM_LIBS -lXpm"
-      fi
-    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lXpm])
-  fi
-  AC_SUBST([LIBXPM_CFLAGS])
-  AC_SUBST([LIBXPM_LDFLAGS])
-  AC_SUBST([LIBXPM_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBXPM_REQUIRE()
-dnl
-dnl Similar to XDT_CHECK_LIBXPM(), but fails if the Xpm library isn't
-dnl present on the target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBXPM_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
-  AC_REQUIRE([XDT_CHECK_LIBXPM])
-
-  if test x"$LIBXPM_LIBS" = x""; then
-    AC_MSG_ERROR([The Xpm library was not found on your system])
-  fi
-])
-
-
-
-dnl BM_LIBX11()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBX11. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBX11],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-])
-
-
-
-dnl BM_LIBX11_REQUIRE()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBX11_REQUIRE. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBX11_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
-])
-
-
-
-dnl BM_LIBSM()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBSM. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBSM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBSM])
-])
-
-
-
-dnl BM_LIBXPM
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBXPM. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBXPM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBXPM])
-])
-
-
-
-dnl BM_LIBXPM_REQUIRE
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBXPM_REQUIRE. Kept for
-dnl backward compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBXPM_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBXPM_REQUIRE])
-])
-
-
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
-dnl         The Xfce development team. All rights reserved.
-dnl
-dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
-dnl
-dnl This program is free software; you can redistribute it and/or modify it
-dnl under the terms of the GNU General Public License as published by the Free
-dnl Software Foundation; either version 2 of the License, or (at your option)
-dnl any later version.
-dnl
-dnl This program is distributed in the hope that it will be useful, but WITHOUT
-dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-dnl more details.
-dnl
-dnl You should have received a copy of the GNU General Public License along with
-dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-dnl Place, Suite 330, Boston, MA  02111-1307  USA
-dnl
-dnl xdt-i18n
-dnl --------
-dnl  Internalization M4 macros.
-dnl
-
-
-dnl XDT_I18N(LINGUAS [, PACKAGE])
-dnl
-dnl This macro takes care of setting up everything for i18n support.
-dnl
-dnl If PACKAGE isn't specified, it defaults to the package tarname; see
-dnl the description of AC_INIT() for an explanation of what makes up
-dnl the package tarname. Normally, you don't need to specify PACKAGE,
-dnl but you can stick with the default.
-dnl
-AC_DEFUN([XDT_I18N],
-[
-  dnl Substitute GETTEXT_PACKAGE variable
-  GETTEXT_PACKAGE=m4_default([$2], [AC_PACKAGE_TARNAME()])
-  AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Name of default gettext domain])
-  AC_SUBST([GETTEXT_PACKAGE])
-
-  dnl gettext and stuff
-  ALL_LINGUAS="$1"
-  AM_GLIB_GNU_GETTEXT()
-
-  dnl This is required on some Linux systems
-  AC_CHECK_FUNC([bind_textdomain_codeset])
-
-  dnl Determine where to install locale files
-  AC_MSG_CHECKING([for locales directory])
-  AC_ARG_WITH([locales-dir], 
-  [
-    AC_HELP_STRING([--with-locales-dir=DIR], [Install locales into DIR])
-  ], [localedir=$withval],
-  [
-    if test x"$CATOBJEXT" = x".mo"; then
-      localedir=$libdir/locale
-    else
-      localedir=$datadir/locale
-    fi
-  ])
-  AC_MSG_RESULT([$localedir])
-  AC_SUBST([localedir])
-
-  dnl Determine additional xgettext flags
-  AC_MSG_CHECKING([for additional xgettext flags])
-  if test x"$XGETTEXT_ARGS" = x""; then
-    XGETTEXT_ARGS="--keyword=Q_ --from-code=UTF-8";
-  else
-    XGETTEXT_ARGS="$XGETTEXT_ARGS --keyword=Q_ --from-code=UTF-8";
-  fi
-  AC_SUBST([XGETTEXT_ARGS])
-  AC_MSG_RESULT([$XGETTEXT_ARGS])
-])
-
-
-
-dnl BM_I18N(PACKAGE, LINGUAS)
-dnl
-dnl Simple wrapper for XDT_I18N(LINGUAS, PACKAGE). Kept for
-dnl backward compatibility. Will be removed in the
-dnl future.
-dnl
-AC_DEFUN([BM_I18N],
-[
-  XDT_I18N([$2], [$1])
-])
-
 

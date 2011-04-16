@@ -474,7 +474,6 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				     struct con_win *cwin)
 {
 	GtkWidget *popup_menu;
-	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
@@ -495,8 +494,6 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			break;
 		case 2:
 			if (!gtk_tree_selection_path_is_selected(selection, path)){
-				model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
@@ -537,7 +534,6 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 				     struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	gint n_select = 0;
 	GtkTreePath *path;
 	
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -548,7 +544,6 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 		return FALSE;
 	}
 
-	n_select = gtk_tree_selection_count_selected_rows(selection);
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
@@ -619,14 +614,12 @@ void dnd_library_tree_get(GtkWidget *widget,
 			  struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GList *list = NULL, *l;
 	GArray *loc_arr;
 
 	switch(info) {
 	case TARGET_LOCATION_ID:
-		filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						       cwin->library_tree));
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 							cwin->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -984,12 +977,11 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 
 void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1019,12 +1011,11 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1058,12 +1049,11 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 }
 void library_tree_add_to_playlist(struct con_win *cwin)
 {
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1092,14 +1082,13 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 	gchar *query;
 	gint result;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1148,7 +1137,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkWidget *toggle_unlink;
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
@@ -1157,7 +1146,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr;
 	gboolean unlink = FALSE;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1220,7 +1208,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	struct tags otag, ntag;
 	struct musicobject *mobj = NULL;
 	enum node_type node_type = 0;
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GtkTreeIter iter;
@@ -1232,7 +1220,6 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
 	list = gtk_tree_selection_get_selected_rows(selection, &model);

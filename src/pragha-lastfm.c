@@ -43,6 +43,8 @@ gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 	struct db_result result;
 	struct musicobject *mobj = NULL;
 
+	CDEBUG(DBG_LASTFM, "Try to add: %s - %s", artist, title);
+
 	s_artist = sanitize_string_sqlite3(artist);
 	s_title = sanitize_string_sqlite3(title);
 
@@ -71,36 +73,37 @@ void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
-	gint rv;
+	gint i = 1, try = 0, added = 0;
+	gchar *summary = NULL;
 
 	if (!cwin->clastfm->connected) {
 		CDEBUG(DBG_LASTFM, "No connection Last.fm has been established");
 		return;
 	}
 
-	rv = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
+	while (LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
 			cwin->cpref->lw.lastfm_user,
-			-1, &results);
-
-	if(rv != LASTFM_STATUS_OK) {
-		g_warning("Last.fm get loved failed");
-		return;
+			i, &results)) {
+		for(li=results; li; li=li->next) {
+			track = li->data;
+			try++;
+			if (try_add_track_from_db (track->artist, track->name, cwin))
+				added++;
+		}
+		i++;
+		LASTFM_free_track_info_list (results);
 	}
 
-	for(li=results; li; li=li->next) {
-		track = li->data;
-		CDEBUG(DBG_LASTFM, "Try to add: %s - %s", track->artist, track->name);
-		try_add_track_from_db (track->artist, track->name, cwin);
-	}
-
-	LASTFM_free_track_info_list (results);
+	summary = g_strdup_printf("Added %d song of last %d loved on Last.fm", added, try);
+	set_status_message(summary, cwin);
+	g_free(summary);
 }
 
 void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
-	gint rv, added, tray;
+	gint rv, added, try;
 	gchar *summary = NULL;
 
 	if(cwin->cstate->state == ST_STOPPED)
@@ -121,14 +124,14 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	for(li=results, added=0, tray=0 ; li; li=li->next) {
+	for(li=results, added=0, try=0 ; li; li=li->next) {
 		track = li->data;
-		tray++;
+		try++;
 		if (try_add_track_from_db (track->artist, track->name, cwin))
 			added++;
 	}
 
-	summary = g_strdup_printf("Added %d song of %d sugested from Last.fm", added, tray);
+	summary = g_strdup_printf("Added %d song of %d sugested from Last.fm", added, try);
 	set_status_message(summary, cwin);
 
 	LASTFM_free_track_info_list (results);

@@ -709,7 +709,7 @@ static GtkWidget * create_toggles_buttons(struct con_win *cwin)
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *browse_mode;
-	GtkWidget *vbox_lib, *vbox_page;
+	GtkWidget *vbox_lib;
 	GtkWidget *library_tree, *playlist_tree;
 	GtkWidget *playlists_tree_scroll, *library_tree_scroll;
 	GtkWidget *order_selector, *search_bar;
@@ -746,7 +746,6 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   TRUE,
 			   0);
 
-	vbox_page = gtk_vbox_new(FALSE, 0);
 	playlists_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(playlists_tree_scroll),
 				       GTK_POLICY_AUTOMATIC,
@@ -1551,7 +1550,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 {
 	GtkWidget *left_controls_align, *right_controls_align;
 	GtkWidget *playing;
-	GtkWidget *vbox_order;
 	GtkWidget *hbox_panel, *left_controls, *right_controls;
 	GtkWidget *play_button, *stop_button, *prev_button, *next_button;
 	GtkWidget *unfull_button, *sep, *shuffle_button, *repeat_button, *vol_button;
@@ -1559,7 +1557,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 	GtkObject *vol_adjust;
 
 	hbox_panel = gtk_hbox_new(FALSE, 5);
-	vbox_order = gtk_vbox_new(FALSE, 1);
 	left_controls = gtk_hbox_new(FALSE, 1);
 	right_controls = gtk_hbox_new(FALSE, 1);
 

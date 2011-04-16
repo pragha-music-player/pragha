@@ -544,6 +544,7 @@ struct con_gst {
 	GstElement *audio_sink;
 	int timer;
 	gdouble curr_vol;
+	gboolean emitted_error;
 };
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {

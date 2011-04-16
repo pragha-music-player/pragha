@@ -21,7 +21,8 @@
 #include <gst/interfaces/streamvolume.h>
 #endif
 
-#define GLOW_COLOR	"#FF0000"
+#define NOT_FOUND_COLOR	"#C5C5C5"
+#define ERROR_COLOR	"#FF0000"
 
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),
@@ -289,63 +290,90 @@ backend_resume(struct con_win *cwin)
 static void
 backend_error (GstMessage *message, struct con_win *cwin)
 {
-	/*GtkWidget *dialog;
+	GtkWidget *dialog;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkTreePath *path = NULL;
+	gboolean emit = TRUE;
 	GError *error;
 	gchar *dbg_info = NULL;
 	gint response;
 
 	gst_message_parse_error (message, &error, &dbg_info);
 
-	CDEBUG(DBG_BACKEND, "Gstreamer error: %s", error->message);
+	/* Gstreamer doc: When an error has occured
+	 * playbin should be set back to READY or NULL state.
+	 */
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
 
-	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
-					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_ERROR,
-					GTK_BUTTONS_NONE,
-					_("<b>Error playing current track.</b>\n\n<b>Reason:</b> %s"),
-					error->message);
+	/* Next code inspired on rhynthmbox.
+	 * If we've already got an error, ignore 'internal data flow error'
+	 * type messages, as they're too generic to be helpful.
+	 */
+	if (cwin->cgst->emitted_error &&
+		error->domain == GST_STREAM_ERROR &&
+		error->code == GST_STREAM_ERROR_FAILED) {
+		CDEBUG(DBG_BACKEND, "Ignoring generic error \"%s\"", error->message);
+		emit = FALSE;
+	}
 
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_STOP, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
+	if(emit) {
+		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
-	response = gtk_dialog_run (GTK_DIALOG (dialog));
-	gtk_widget_destroy (dialog);
+		path = current_playlist_get_actual(cwin);
+		if (path) {
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
-	switch (response) {
-		case GTK_RESPONSE_APPLY: {
-			cwin->cstate->state = ST_PLAYING;
-			play_next_track(cwin);
-			break;
+			if (gtk_tree_model_get_iter(model, &iter, path)) {
+				if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
+					gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, NOT_FOUND_COLOR, -1);
+				else
+					gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, ERROR_COLOR, -1);
+			}
+			gtk_tree_path_free(path);
+			path = NULL;
 		}
-		case GTK_RESPONSE_ACCEPT: {
-			backend_stop(cwin);
-			break;
+
+		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
+						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+						GTK_MESSAGE_QUESTION,
+						GTK_BUTTONS_NONE,
+						_("<b>Error playing current track.</b>\n<b>Reason:</b> %s"),
+						error->message);
+
+		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
+		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
+
+		response = gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);
+
+		switch (response) {
+			case GTK_RESPONSE_APPLY: {
+				struct musicobject *mobj = NULL;
+				cwin->cstate->state = ST_PLAYING;
+				path = current_playlist_get_next(cwin);
+				if (path) {
+					mobj = current_playlist_mobj_at_path(path, cwin);
+					backend_start(mobj, cwin);
+					update_current_state(path, PLAYLIST_NEXT, cwin);
+					gtk_tree_path_free(path);
+				}
+				break;
+			}
+			case GTK_RESPONSE_ACCEPT:
+			case GTK_RESPONSE_DELETE_EVENT:
+			default: {
+				backend_stop(cwin);
+				break;
+			}
 		}
-		case GTK_RESPONSE_DELETE_EVENT:
-		default:
-			break;
+
+		cwin->cgst->emitted_error = TRUE;
 	}
 
 	g_error_free (error);
-	g_free (dbg_info);*/
-
-	GError *error;
-	gchar *dbg_info = NULL;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreePath *path = NULL;
-
-	gst_message_parse_error (message, &error, &dbg_info);
-	CDEBUG(DBG_BACKEND, "Gstreamer error: %s", error->message);
-
-	path = current_playlist_get_actual(cwin);
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-		gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, GLOW_COLOR, -1);
-
-	g_error_free (error);
 	g_free (dbg_info);
+
 }
 
 void
@@ -423,6 +451,7 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 			#ifdef HAVE_LIBCLASTFM
 			time(&cwin->clastfm->playback_started);
 			#endif
+			cwin->cgst->emitted_error = FALSE;
 			break;
 		}
 		case GST_STATE_PAUSED: {
@@ -524,6 +553,8 @@ gint backend_init(struct con_win *cwin)
 
 	backend_set_soft_volume(cwin);
 	emit_volume_changed_idle(cwin);
+
+	cwin->cgst->emitted_error = FALSE;
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 

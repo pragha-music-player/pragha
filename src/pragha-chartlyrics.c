@@ -23,7 +23,6 @@
 #define LARGE_BUFFER	1024
 #define CHARTLYRICS_API_ROOT	"http://api.chartlyrics.com/apiv1.asmx/"
 
-//2a3ea713422cbc97470b0c38c6e5a552
 typedef struct {
 	unsigned int id;
 	char checksum[33];
@@ -71,7 +70,6 @@ void print_lyric(FILE *f, Lyric *l){
 
 Lyric *chartlyrics_get_info(const char *song, const char *artist)
 {
-	int rv;
 	char *buffer;
 	WebData *data = NULL;
 	XMLNode *xml = NULL, *xi, *xj;
@@ -96,7 +94,7 @@ Lyric *chartlyrics_get_info(const char *song, const char *artist)
 	q_artist = curl_easy_escape(curl,artist,0);
 	q_song = curl_easy_escape(curl,song,0);
 
-	rv = snprintf(buffer,LARGE_BUFFER,
+	snprintf(buffer,LARGE_BUFFER,
 		"%s%s?artist=%s&song=%s",
 		CHARTLYRICS_API_ROOT,"SearchLyricDirect",q_artist,q_song);
 	curl_free(q_artist);

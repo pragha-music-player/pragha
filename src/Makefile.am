@@ -46,6 +46,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(TAGLIB_CFLAGS) 						\
 	$(TAGLIBC_CFLAGS) 						\
 	$(DBUS_CFLAGS) 							\
+	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBX11_CFLAGS)						\
 	$(LIBCDIO_CFLAGS) 						\
@@ -62,6 +63,7 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(TAGLIB_LIBS)							\
 	$(TAGLIBC_LIBS)							\
 	$(DBUS_LIBS) 							\
+	$(DBUS_GLIB_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\

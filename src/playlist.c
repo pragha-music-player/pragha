@@ -337,7 +337,6 @@ gboolean playlist_tree_button_release_cb(GtkWidget *widget,
 				     struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	gint n_select = 0;
 	GtkTreePath *path;
 	
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
@@ -348,7 +347,6 @@ gboolean playlist_tree_button_release_cb(GtkWidget *widget,
 		return FALSE;
 	}
 
-	n_select = gtk_tree_selection_count_selected_rows(selection);
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
@@ -477,9 +475,8 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	gchar *playlist, *s_playlist;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
 
@@ -730,7 +727,6 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 
 	switch(info) {
 	case TARGET_PLAYLIST:
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
