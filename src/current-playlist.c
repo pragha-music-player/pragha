@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -18,8 +18,6 @@
 
 #include <string.h>
 #include "pragha.h"
-
-#define GLOW_COLOR	"#A9D0F5"
 
 /*********************/
 /* General functions */
@@ -139,8 +137,6 @@ void requeue_track_refs (struct con_win *cwin)
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, ch_queue_no, -1);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, TRUE, -1);
 
-			gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, GLOW_COLOR, -1);
-
 			g_free(ch_queue_no);
 		}
 		gtk_tree_path_free(lpath);
@@ -171,8 +167,6 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, FALSE, -1);
-
-				gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, NULL, -1);
 			}
 			gtk_tree_path_free(lpath);
 			list = list->next;
@@ -1762,12 +1756,12 @@ void play_next_track(struct con_win *cwin)
 	/* Get the next track to be played */
 	path = current_playlist_get_next(cwin);
 
+	/* Stop currently playing track */
+	backend_stop(cwin);
+
 	/* No more tracks */
 	if (!path)
 		return;
-
-	/* Stop currently playing track */
-	backend_stop(cwin);
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path(path, cwin);

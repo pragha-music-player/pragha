@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -912,13 +912,6 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  "background",
 							  PL_COLOR_COL,
 							  NULL);
-	/*column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
-							   renderer,
-							   "text",
-							   P_TRACK_NO,
-							  "background",
-							  PL_COLOR_COL,
-							  NULL);*/
 
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
@@ -1789,7 +1782,7 @@ void create_status_icon(struct con_win *cwin)
 		status_icon = gtk_status_icon_new_from_pixbuf(cwin->pixbuf->pixbuf_app);
 	else
 		status_icon = gtk_status_icon_new_from_stock(GTK_STOCK_NEW);
- 
+
 	g_signal_connect (status_icon, "button-press-event", G_CALLBACK (status_icon_clicked), cwin);
 	g_signal_connect (status_icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
  
@@ -1834,7 +1827,7 @@ gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
 	if(cwin->cpref->close_to_tray){
 		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))){
-			toogle_main_window(cwin);
+			toogle_main_window(cwin, FALSE);
 		}
 		else{
 			g_warning("(%s): No embedded status_icon.", __func__);

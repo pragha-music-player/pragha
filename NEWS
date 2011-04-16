@@ -33,6 +33,25 @@ Updates Translations:
 	Add Hungiran translatiton.
 	Update others translation.
 
+0.93
+News:
+	Add MPRIS2 control support and emit a dbus signal named 'update_state' thanks to Hakan Erduman.
+	Added a DBus message to toggle the visibility of the player thanks to Hakan Erduman.
+	Restore lastfm scrobbling support thanks to http://liblastfm.sourceforge.net/.
+	* Use Scrobbling API 2.0.
+	* Now is correctly identified like Pragha.
+
+Bugs fixed:
+	Fix regression on generation of recently-used data introduced in 241.
+	Support to libnotify 0.7. (Hate it with all my heart.)
+	Again, change notifications according to the standard. (xfce4-notifyd follows strictly)
+
+Updates Translations:
+	Updated Czech translation thank to Alois.
+
+Note: Temporarily disables search lyrics, by license change of http://www.lyricsplugin.com.
+
+
 ======================================================
 OTHERS REALESES:
 ======================================================

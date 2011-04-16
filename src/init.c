@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -47,6 +47,8 @@ GOptionEntry cmd_entries[] = {
 	 cmd_dec_volume, "Decrease volume by 1", NULL},
 	{"show_osd", 'o', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_show_osd, "Show OSD notification", NULL},
+	{"toggle_view", 'x', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_toggle_view, "Toggle player visibility", NULL},
 	{"current_state", 'c', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_current_state, "Get current player state", NULL},
 	{"audio_backend", 'a', 0, G_OPTION_ARG_STRING,
@@ -952,6 +954,27 @@ gint init_musicdbase(struct con_win *cwin)
 	return init_dbase_schema(cwin);
 }
 
+gint init_lastfm(struct con_win *cwin)
+{
+	gint rv;
+
+	if (!cwin->cpref->lw.lastfm_support)
+		return 0;
+
+	CDEBUG(DBG_INFO, "Initializing LASTFM");
+
+	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+
+	rv = LASTFM_login(cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
+
+	if(rv != 0) {
+		g_critical("Unable to login on Lastfm");
+		cwin->cpref->lw.lastfm_support = FALSE;
+	}
+
+	return 0;
+}
+
 gint init_notify(struct con_win *cwin)
 {
 	if (cwin->cpref->show_osd) {
@@ -1051,6 +1074,9 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
+	gtk_action_set_sensitive(action, FALSE);
 }
 
 void init_pixbufs(struct con_win *cwin)
@@ -1165,7 +1191,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Systray */
 
 	create_status_icon(cwin);
-
+	
 	/* Main Vbox */
 
 	vbox = gtk_vbox_new(FALSE, 2);

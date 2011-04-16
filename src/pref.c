@@ -236,6 +236,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
 		}
+		init_lastfm(cwin);
 
 		cwin->cpref->use_cddb =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -593,10 +594,17 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->show_osd_w),
 					     TRUE);
+	#if NOTIFY_CHECK_VERSION (0, 7, 0)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->osd_in_systray_w),
+					     FALSE);
+		gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, FALSE);
+	#else
 	if (cwin->cpref->osd_in_systray)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->osd_in_systray_w),
 					     TRUE);
+	#endif
 	if (cwin->cpref->albumart_in_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->albumart_in_osd_w),
@@ -607,9 +615,8 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->actions_in_osd_w),
 					     TRUE);
-	/* Service Internet Option */
 
-	cwin->cpref->lw.lastfm_support = FALSE;
+	/* Service Internet Option */
 
 	if (cwin->cpref->lw.lastfm_support) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
@@ -1257,31 +1264,48 @@ int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 /* Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan */
 gpointer sokoke_xfce_header_new(struct con_win *cwin)
 {
-	GtkWidget* entry = gtk_entry_new();
+	GtkWidget* entry;
+	GtkWidget* xfce_heading;
+	GtkWidget* hbox;
+	GtkWidget* vbox;
+	GtkWidget* image;
+	GtkWidget* label;
+	GtkWidget* separator;
 	gchar* markup;
 
-	GtkWidget* xfce_heading = gtk_event_box_new();
+	entry = gtk_entry_new();
+	xfce_heading = gtk_event_box_new();
 
 	gtk_widget_modify_bg(xfce_heading,
 				GTK_STATE_NORMAL,
 				&entry->style->base[GTK_STATE_NORMAL]);
-	GtkWidget* hbox = gtk_hbox_new(FALSE, 12);
 
+	hbox = gtk_hbox_new(FALSE, 12);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
-	GtkWidget* image = gtk_image_new_from_icon_name("pragha",
-							GTK_ICON_SIZE_DIALOG);
-	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	GtkWidget* label = gtk_label_new(NULL);
+
+	image = gtk_image_new_from_icon_name("pragha", GTK_ICON_SIZE_DIALOG);
+
+	label = gtk_label_new(NULL);
 	gtk_widget_modify_fg(label,
 				GTK_STATE_NORMAL,
 				&entry->style->text[GTK_STATE_NORMAL]);
         markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", _("Preferences of Pragha"));
 	gtk_label_set_markup(GTK_LABEL(label), markup);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
 	g_free(markup);
+	gtk_widget_destroy (entry);
 
-	return xfce_heading;
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
+
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
+
+	separator = gtk_hseparator_new ();
+	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
+
+	return vbox;
 }
 
 void preferences_dialog(struct con_win *cwin)
@@ -1650,8 +1674,6 @@ void preferences_dialog(struct con_win *cwin)
 	/* Services Last.fm */
 
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
-
-	gtk_widget_set_sensitive(lastfm_check, FALSE);
 
 	lastfm_uname = gtk_entry_new();
 	lastfm_pass = gtk_entry_new();

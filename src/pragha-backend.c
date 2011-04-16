@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2010-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -21,7 +21,7 @@
 #include <gst/interfaces/streamvolume.h>
 #endif
 
-#define DURATION_IS_VALID(x) (x != 0 && x != (guint64) -1)
+#define GLOW_COLOR	"#FF0000"
 
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),
@@ -101,6 +101,8 @@ backend_get_current_position(struct con_win *cwin)
 void
 backend_seek (guint64 seek, struct con_win *cwin)
 {
+	CDEBUG(DBG_BACKEND, "Seeking playback");
+
 	gst_element_seek (cwin->cgst->pipeline,
 	       1.0,
 	       GST_FORMAT_TIME,
@@ -238,83 +240,132 @@ backend_is_paused(struct con_win *cwin)
 	return FALSE;
 }
 
-void
-waitforpipeline(int state, struct con_win *cwin)
+gboolean
+backend_need_stopped(struct con_win *cwin)
 {
-	GstState istate, ipending;
-	gst_element_get_state(cwin->cgst->pipeline, &istate, &ipending, GST_CLOCK_TIME_NONE);
+	GstState state;
+	gst_element_get_state(GST_ELEMENT(cwin->cgst->pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
 
-	if ((istate == GST_STATE_VOID_PENDING) || (istate == state))
-	        return;
+	if ((state == GST_STATE_PAUSED) || (state == GST_STATE_PLAYING))
+		return TRUE;
 
-	gst_element_set_state(cwin->cgst->pipeline, state);
-
-	do {
-		gst_element_get_state(cwin->cgst->pipeline, &istate, &ipending, GST_CLOCK_TIME_NONE);
-		if (istate == GST_STATE_VOID_PENDING)
-			return;
-
-	} while (istate != state);
+	return FALSE;
 }
 
 void
 backend_stop(struct con_win *cwin)
 {
-	CDEBUG(DBG_INFO, "Stopping playback");
-
-	if(cwin->cgst->timer > 0) {
-		g_source_remove(cwin->cgst->timer);
-		cwin->cgst->timer = 0;
-	}
+	CDEBUG(DBG_BACKEND, "Stopping playback");
 
 	if (cwin->cstate->curr_mobj_clear) {
 		delete_musicobject(cwin->cstate->curr_mobj);
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	waitforpipeline(GST_STATE_NULL, cwin);
+	if(backend_need_stopped(cwin))
+		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 
 	unset_current_song_info(cwin);
 	unset_track_progress_bar(cwin);
 	unset_album_art(cwin);
-
-	cwin->cstate->state = ST_STOPPED;
-	play_button_toggle_state(cwin);
 }
 
 void
 backend_pause(struct con_win *cwin)
 {
-	CDEBUG(DBG_INFO, "Pause playback");
+	CDEBUG(DBG_BACKEND, "Pause playback");
 
-	if(cwin->cgst->timer > 0) {
-		g_source_remove(cwin->cgst->timer);
-		cwin->cgst->timer = 0;
-	}
-
-	waitforpipeline(GST_STATE_PAUSED, cwin);
-
-	cwin->cstate->state = ST_PAUSED;
-	play_button_toggle_state(cwin);
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
 }
 
 void
 backend_resume(struct con_win *cwin)
 {
-	CDEBUG(DBG_INFO, "Resuming playback");
+	CDEBUG(DBG_BACKEND, "Resuming playback");
 
-	waitforpipeline(GST_STATE_PLAYING, cwin);
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+}
 
-	if(cwin->cgst->timer == 0)
-		cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
+static void
+backend_error (GstMessage *message, struct con_win *cwin)
+{
+	/*GtkWidget *dialog;
+	GError *error;
+	gchar *dbg_info = NULL;
+	gint response;
 
-	cwin->cstate->state = ST_PLAYING;
-	play_button_toggle_state(cwin);
+	gst_message_parse_error (message, &error, &dbg_info);
+
+	CDEBUG(DBG_BACKEND, "Gstreamer error: %s", error->message);
+
+	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_ERROR,
+					GTK_BUTTONS_NONE,
+					_("<b>Error playing current track.</b>\n\n<b>Reason:</b> %s"),
+					error->message);
+
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_STOP, GTK_RESPONSE_ACCEPT);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
+
+	response = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy (dialog);
+
+	switch (response) {
+		case GTK_RESPONSE_APPLY: {
+			cwin->cstate->state = ST_PLAYING;
+			play_next_track(cwin);
+			break;
+		}
+		case GTK_RESPONSE_ACCEPT: {
+			backend_stop(cwin);
+			break;
+		}
+		case GTK_RESPONSE_DELETE_EVENT:
+		default:
+			break;
+	}
+
+	g_error_free (error);
+	g_free (dbg_info);*/
+
+	GError *error;
+	gchar *dbg_info = NULL;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkTreePath *path = NULL;
+
+	gst_message_parse_error (message, &error, &dbg_info);
+	CDEBUG(DBG_BACKEND, "Gstreamer error: %s", error->message);
+
+	path = current_playlist_get_actual(cwin);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, GLOW_COLOR, -1);
+
+	g_error_free (error);
+	g_free (dbg_info);
+}
+
+void
+backend_eos(struct con_win *cwin)
+{
+	CDEBUG(DBG_BACKEND, "EOS playback");
+
+	if (cwin->cstate->curr_mobj_clear) {
+		delete_musicobject(cwin->cstate->curr_mobj);
+		cwin->cstate->curr_mobj_clear = FALSE;
+	}
+
+	play_next_track(cwin);
 }
 
 void
 backend_start(struct musicobject *mobj, struct con_win *cwin)
 {
+	CDEBUG(DBG_BACKEND, "Starting playback");
+
 	if (!mobj) {
 		g_critical("Dangling entry in current playlist");
 		return;
@@ -329,11 +380,6 @@ backend_start(struct musicobject *mobj, struct con_win *cwin)
 	cwin->cstate->curr_mobj_clear = FALSE;
 
 	backend_play(cwin);
-
-	cwin->cstate->state = ST_PLAYING;
-	play_button_toggle_state(cwin);
-
-	CDEBUG(DBG_INFO, "Starting playback");
 }
 
 void
@@ -344,7 +390,7 @@ backend_play(struct con_win *cwin)
 	if (!cwin->cstate->curr_mobj->file)
 		return;
 
-	CDEBUG(DBG_INFO, "Playing : %s", cwin->cstate->curr_mobj->file);
+	CDEBUG(DBG_BACKEND, "Playing: %s", cwin->cstate->curr_mobj->file);
 
 	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
 		uri = g_filename_to_uri (cwin->cstate->curr_mobj->file, NULL, NULL);
@@ -355,26 +401,70 @@ backend_play(struct con_win *cwin)
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
 	}
 
-	waitforpipeline(GST_STATE_PLAYING, cwin);
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+}
 
-	if(cwin->cgst->timer == 0)
-		cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
+static void
+backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
+{
+	CDEBUG(DBG_BACKEND, "State change %s to %s. Pending: %s",
+		gst_element_state_get_name (old),
+		gst_element_state_get_name (new),
+		gst_element_state_get_name (pending));
+
+	if (pending != GST_STATE_VOID_PENDING)
+		return;
+
+	switch (new) {
+		case GST_STATE_PLAYING: {
+			cwin->cstate->state = ST_PLAYING;
+			if(cwin->cgst->timer == 0)
+				cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
+			time(&cwin->clastfm->playback_started);
+			break;
+		}
+		case GST_STATE_PAUSED: {
+			cwin->cstate->state = ST_PAUSED;
+			if(cwin->cgst->timer > 0) {
+				g_source_remove(cwin->cgst->timer);
+				cwin->cgst->timer = 0;
+			}
+			break;
+		}
+		case GST_STATE_READY:
+		case GST_STATE_NULL: {
+			cwin->cstate->state = ST_STOPPED;
+			if(cwin->cgst->timer > 0) {
+				g_source_remove(cwin->cgst->timer);
+				cwin->cgst->timer = 0;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+	play_button_toggle_state(cwin);
+
+	update_lastfm(cwin);
+
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct con_win *cwin)
 {
 	switch(GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_EOS:
-			play_next_track(cwin);
+			backend_eos(cwin);
 			break;
+		case GST_MESSAGE_STATE_CHANGED: {
+			GstState old, new, pending;
+			gst_message_parse_state_changed (msg, &old, &new, &pending);
+			if (GST_MESSAGE_SRC (msg) == GST_OBJECT (cwin->cgst->pipeline))
+				backend_evaluate_state (old, new, pending, cwin);
+			break;
+		}
 		case GST_MESSAGE_ERROR: {
-			GError *err = NULL;
-			gchar *dbg_info = NULL;
-			gst_message_parse_error (msg, &err, &dbg_info);
-      			g_print("Gstreamer Error: %s\n", err->message);
-			g_error_free (err);
-			g_free (dbg_info);
-			play_next_track(cwin);
+			backend_error(msg, cwin);
 			break;
 		}
     		default:
@@ -387,10 +477,11 @@ void
 backend_quit(struct con_win *cwin)
 {
 	if (cwin->cgst->pipeline != NULL) {
-		waitforpipeline(GST_STATE_NULL, cwin);
+		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
 		gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
 		cwin->cgst->pipeline = NULL;
 	}
+	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }
 
 gint backend_init(struct con_win *cwin)
@@ -411,10 +502,10 @@ gint backend_init(struct con_win *cwin)
 	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)){
 		cwin->cgst->audio_sink = gst_element_factory_make ("alsasink", "audio-sink");
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
+	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
 		cwin->cgst->audio_sink = gst_element_factory_make ("oss4sink", "audio-sink");
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
+	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
 		cwin->cgst->audio_sink = gst_element_factory_make ("pulsesink", "audio-sink");
 	}
 
@@ -435,7 +526,7 @@ gint backend_init(struct con_win *cwin)
 
 	gst_object_unref(bus);
 
-	CDEBUG(DBG_INFO, "Pipeline construction complete");
+	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
 
 	return 0;
 }

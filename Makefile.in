@@ -38,8 +38,8 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing \
-	mkinstalldirs
+	THANKS config.guess config.sub depcomp install-sh ltmain.sh \
+	missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -213,6 +213,10 @@ LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
 LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
 LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
 LIBCDIO_VERSION = @LIBCDIO_VERSION@
+LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
+LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBCURL_REQUIRED_VERSION = @LIBCURL_REQUIRED_VERSION@
+LIBCURL_VERSION = @LIBCURL_VERSION@
 LIBKEYBINDER_CFLAGS = @LIBKEYBINDER_CFLAGS@
 LIBKEYBINDER_LIBS = @LIBKEYBINDER_LIBS@
 LIBKEYBINDER_REQUIRED_VERSION = @LIBKEYBINDER_REQUIRED_VERSION@
@@ -241,6 +245,10 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
+OPENSSL_LIBS = @OPENSSL_LIBS@
+OPENSSL_REQUIRED_VERSION = @OPENSSL_REQUIRED_VERSION@
+OPENSSL_VERSION = @OPENSSL_VERSION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -335,7 +343,7 @@ AUTOMAKE_OPTIONS = \
 	dist-bzip2
 
 man_MANS = data/pragha.1
-doc_DATA = README ChangeLog NEWS FAQ
+doc_DATA = ChangeLog FAQ NEWS README THANKS
 imagedir = $(datadir)/pixmaps/pragha
 image_DATA = \
 	data/album.png	\

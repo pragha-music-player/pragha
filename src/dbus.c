@@ -63,20 +63,32 @@ static void dbus_repeat_handler(struct con_win *cwin)
 				     cwin->repeat_button), TRUE);
 }
 
-/* FIXME*/
 static void dbus_inc_vol_handler(struct con_win *cwin)
 {
-	/*cwin->cmixer->inc_volume(cwin);*/
+	cwin->cgst->curr_vol += 0.05;
+
+	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
+
+	backend_update_volume(cwin);
 }
 
 static void dbus_dec_vol_handler(struct con_win *cwin)
 {
-	/*cwin->cmixer->dec_volume(cwin);*/
+	cwin->cgst->curr_vol -= 0.05;
+
+	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
+
+	backend_update_volume(cwin);
 }
 
 static void dbus_show_osd_handler(struct con_win *cwin)
 {
 	show_osd(cwin);
+}
+
+static void dbus_toggle_handler(struct con_win *cwin)
+{
+	toogle_main_window(cwin, TRUE);
 }
 
 static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
@@ -205,12 +217,19 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 		dbus_show_osd_handler(data);
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
+	else if (dbus_message_is_signal(msg, DBUS_INTERFACE, DBUS_SIG_TOGGLE_VIEW)) {
+		dbus_toggle_handler(data);
+		return DBUS_HANDLER_RESULT_HANDLED;
+	}
 	else if (dbus_message_is_signal(msg, DBUS_INTERFACE, DBUS_SIG_ADD_FILE)) {
 		dbus_add_file(msg, data);
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
 	else if (dbus_message_is_method_call(msg, DBUS_INTERFACE, DBUS_METHOD_CURRENT_STATE)) {
 		dbus_current_state(msg, data);
+		return DBUS_HANDLER_RESULT_HANDLED;
+	}
+	else if (dbus_message_is_method_call(msg, DBUS_INTERFACE, DBUS_EVENT_UPDATE_STATE)) {
 		return DBUS_HANDLER_RESULT_HANDLED;
 	}
 
@@ -234,6 +253,8 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 		g_critical("Unable to send DBUS message");
 		goto exit;
 	}
+	/*if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE))
+		mpris_update_any(cwin);*/
 
 	dbus_connection_flush(cwin->con_dbus);
 exit:

@@ -137,6 +137,17 @@ gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
 	return TRUE;
 }
 
+gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
+		      struct con_win *cwin, GError **error)
+{
+	if (!cwin->cstate->unique_instance) {
+		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
+		exit(0);
+	}
+
+	return TRUE;
+}
+
 gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 			   struct con_win *cwin, GError **error)
 {
@@ -250,3 +261,4 @@ bad:
 exit:
 	return ret;
 }
+

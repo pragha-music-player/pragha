@@ -5,11 +5,11 @@ dnl
 
 dnl Version information
 m4_define([pragha_version_major], [0])
-m4_define([pragha_version_minor], [92])
+m4_define([pragha_version_minor], [93])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2010
+AC_COPYRIGHT([Copyright (c) 2009-2011
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 
@@ -19,6 +19,23 @@ dnl  Initialize automake
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE()
+
+dnl *********************
+dnl * Debugging support *
+dnl *********************
+AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
+	case "${enableval}" in
+	   yes)	debug=true ;
+		CFLAGS="$CFLAGS -DDEBUG -D_DEBUG -g -ggdb -O0 -fno-inline -fno-inline-functions" ;;
+	    no)	debug=false ;
+		CFLAGS="$CFLAGS -DNDEBUG -O3 -Werror" ;;
+	     *)	AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+	esac
+],[	debug=false
+	CFLAGS="$CFLAGS -DNDEBUG -O3 -Werror"
+])
+AC_SUBST(CFLAGS)
+
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Check for basic programs
@@ -41,6 +58,8 @@ XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
+XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
+XDT_CHECK_PACKAGE([OPENSSL], [openssl], [1.0.0])
 XDT_CHECK_PACKAGE([LIBX11], [x11], 1.0.0)
 
 dnl Check for taglib_c
@@ -76,6 +95,13 @@ Makefile
 po/Makefile.in
 src/Makefile
 ])
+
+case "$debug" in
+     "true" )
+	AC_MSG_RESULT([Debugging enabled, optimizations disabled.]) ;;
+esac
+ 
+AC_MSG_RESULT([CFLAGS = $CFLAGS]) 
 
 echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"

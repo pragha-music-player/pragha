@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -55,6 +55,11 @@
 
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
+#include "lastfm.h"
+
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#endif
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
@@ -116,15 +121,8 @@
 #define TRACK_PROGRESS_BAR_STOPPED  _("Stopped")
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
-#define LASTFM_URL                 "http://post.audioscrobbler.com"
-#define LASTFM_PORT                80
-#define LASTFM_CONN_TIMEOUT        20 /* seconds */
-#define LASTFM_OPER_TIMEOUT        60 /* seconds */
-#define LASTFM_SUBMISSION_PROTOCOL "1.2.1"
-#define LASTFM_CLIENT_ID           "cns"
-#define LASTFM_CLIENT_VERSION      ".0.4.1"
-#define LASTFM_MIN_PLAYTIME        30  /* seconds */
-#define LASTFM_MIN_DURATION        240 /* seconds */
+#define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
+#define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
 
 #define DBUS_PATH      "/org/pragha/DBus"
 #define DBUS_NAME      "org.pragha.DBus"
@@ -139,10 +137,13 @@
 #define DBUS_SIG_REPEAT   "repeat"
 #define DBUS_SIG_INC_VOL  "inc_vol"
 #define DBUS_SIG_DEC_VOL  "dec_vol"
+#define DBUS_SIG_TOGGLE_VIEW      "toggle_view"
+#define DBUS_SIG_SHOW_OSD "show_osd"
 #define DBUS_SIG_SHOW_OSD "show_osd"
 #define DBUS_SIG_ADD_FILE "add_files"
 
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
+#define DBUS_EVENT_UPDATE_STATE   "update_state"
 
 #define GROUP_GENERAL  "General"
 #define KEY_INSTALLED_VERSION      "installed_version"
@@ -216,10 +217,12 @@ typedef enum {
 } PraghaDeleteResponseType;
 
 enum debug_level {
-	DBG_INFO = 1,
+	DBG_BACKEND = 1,
+	DBG_INFO,
 	DBG_MOBJ,
 	DBG_DB,
 	DBG_VERBOSE,
+	DBG_LASTFM
 };
 
 /* Current playlist movement */
@@ -533,12 +536,23 @@ struct con_gst {
 	gdouble curr_vol;
 };
 
+#define LASTFM_NOT_CONNECTED 1<<1
+#define LASTFM_CONNECTED     1<<2
+
+struct con_lastfm {
+	LASTFM_SESSION *session_id;
+	gint lastfm_handler_id;
+	gint state;
+	time_t playback_started;
+};
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
 	struct con_gst *cgst;
+	struct con_lastfm *clastfm;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
@@ -796,6 +810,8 @@ void update_track_db(gint location_id, gint changed,
 		     struct con_win *cwin);
 gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
 gchar** get_playlist_names_db(struct con_win *cwin);
+gint get_playlist_count_db(struct con_win *cwin);
+gint get_tracklist_count_db(struct con_win *cwin);
 void delete_playlist_db(gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
 void flush_stale_entries_db(struct con_win *cwin);
@@ -1041,6 +1057,8 @@ gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
 			struct con_win *cwin, GError **error);
 gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
 		      struct con_win *cwin, GError **error);
+gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
+		      struct con_win *cwin, GError **error);
 gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
 			   struct con_win *cwin, GError **error);
 gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
@@ -1053,6 +1071,10 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 				      gpointer data);
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 
+/* MPRIS functions */
+gint mpris_init(struct con_win *cwin);
+void mpris_update_any(struct con_win *cwin);
+void mpris_cleanup();
 /* Utilities */
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
@@ -1095,6 +1117,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
+gint init_lastfm(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_keybinder(struct con_win *cwin);
 void init_state(struct con_win *cwin);
@@ -1106,8 +1129,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
-void toogle_main_window(struct con_win *cwin);
+void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
 void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
 GtkUIManager* create_systray_menu(struct con_win *cwin);
+
+void update_lastfm(struct con_win *cwin);
 
 #endif /* PRAGHA_H */

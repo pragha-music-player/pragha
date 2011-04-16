@@ -65,6 +65,9 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 void add_recent_file (gchar *filename)
 {
 	GtkRecentData recent_data;
+	gchar *uri = NULL;
+
+	uri = g_filename_to_uri(filename, NULL, NULL);
 
 	recent_data.mime_type = get_mime_type(filename);
 	if (recent_data.mime_type == NULL)
@@ -77,12 +80,13 @@ void add_recent_file (gchar *filename)
 	recent_data.groups = NULL;
 	recent_data.is_private = FALSE;
 
-	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), filename, &recent_data);
+	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &recent_data);
 
 	g_free (recent_data.display_name);
 	g_free (recent_data.mime_type);
 	g_free (recent_data.app_name);
 	g_free (recent_data.app_exec);
+	g_free (uri);
 }
 
 /* Add selected files from the file chooser to the current playlist */

@@ -5,6 +5,7 @@ INCLUDES =								\
 	-DG_LOG_DOMAIN=\"pragha\"					\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
+	-DDESKTOPENTRY=\""$(datadir)/applications/pragha.desktop"\"	\
 	-I$(top_srcdir)
 
 pragha_SOURCES =cdda.c \
@@ -14,12 +15,11 @@ pragha_SOURCES =cdda.c \
 		db.c \
 		dbus.c \
 		filetree.c \
-		gtkcellrendererbubble.c \
-		gtkcellrendererbubble.h \
 		gui.c \
 		init.c \
 		librarytree.c \
 		menu.c \
+		mpris.c \
 		musicobject.c \
 		panel.c \
 		playlist.c \
@@ -29,7 +29,19 @@ pragha_SOURCES =cdda.c \
 		pref.c \
 		statusicon.c \
 		tags.c \
-		utils.c
+		utils.c \
+		gtkcellrendererbubble.c \
+		gtkcellrendererbubble.h \
+		lastfm.c \
+		lastfm.h \
+		lfm_helper.c \
+		lfm_helper.h \
+		album.c \
+		artist.c \
+		user.c \
+		track.c \
+		scrobbler.c \
+		pragha-lastfm.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\
@@ -44,6 +56,8 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(LIBX11_CFLAGS)						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
+	$(LIBCURL_CFLAGS)						\
+	$(OPENSSL_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -59,6 +73,8 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS) 						\
+	$(LIBCURL_LIBS)							\
+	$(OPENSSL_LIBS) 						\
 	$(LIBX11_LIBS)
 
 if HAVE_GSTREAMER_PLUGINS_BASE
@@ -71,5 +87,3 @@ if HAVE_LIBKEYBINDER
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
 pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
 endif
-
-

@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include <locale.h> /* require LC_ALL */
 
 gint debug_level;
 
@@ -89,6 +90,11 @@ void common_cleanup(struct con_win *cwin)
 	sqlite3_close(cwin->cdbase->db);
 	g_slice_free(struct con_dbase, cwin->cdbase);
 
+	if (!cwin->cpref->lw.lastfm_support)
+		LASTFM_dinit(cwin->clastfm->session_id);
+
+	g_slice_free(struct con_lastfm, cwin->clastfm);
+
 	dbus_connection_remove_filter(cwin->con_dbus,
 				      dbus_filter_handler,
 				      cwin);
@@ -96,6 +102,8 @@ void common_cleanup(struct con_win *cwin)
 			      "type='signal',path='/org/pragha/DBus'",
 			      NULL);
 	dbus_connection_unref(cwin->con_dbus);
+
+	mpris_cleanup();
 
 	if (notify_is_initted())
 		notify_uninit();
@@ -133,6 +141,7 @@ gint main(gint argc, gchar *argv[])
 	cwin->cstate = g_slice_new0(struct con_state);
 	cwin->cdbase = g_slice_new0(struct con_dbase);
 	cwin->cgst = g_slice_new0(struct con_gst);
+	cwin->clastfm = g_slice_new0(struct con_lastfm);
 	debug_level = 0;
 
 	setlocale (LC_ALL, "");
@@ -147,6 +156,11 @@ gint main(gint argc, gchar *argv[])
 
 	if (init_dbus_handlers(cwin) == -1) {
 		g_critical("Unable to initialize DBUS filter handlers");
+		return -1;
+	}
+
+	if (mpris_init(cwin) == -1) {
+		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
 
@@ -166,6 +180,10 @@ gint main(gint argc, gchar *argv[])
 	if (init_musicdbase(cwin) == -1) {
 		g_critical("Unable to init music dbase");
 		return -1;
+	}
+
+	if (init_lastfm(cwin) == -1) {
+		g_critical("Unable to initialize Lastfm");
 	}
 
 	if (init_notify(cwin) == -1) {
