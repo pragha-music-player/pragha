@@ -1,7 +1,34 @@
 =====================================================
-Overview of changes in Pragha 0.7.2 "Queue Support!."
+Overview of changes in Pragha 0.7.3
 =====================================================
 
+Drop file pane in favor of gtk-file-chooser.
+	Support for adding folders recursively in file chooser. (Based on Audacius code. /src/ui_fileopen.c)
+	Support for recent files in file chooser.
+	Now remember last folder used.
+
+Others Changes:
+	Middle click on the library/playlists view append songs to current playlist.
+	Queue and dequeue pressing 'Q'.
+	If pragha minimized or without focus, when clicked statusicon restore mainwindow focus.
+	Now the second panel is the playlists.
+	Drop album.png in favor of the icon theme instaled.
+ 
+Updates Translations:
+	Spanish translation thanks to msdelos.
+	Polish translation thanks to Sid.
+	Update po files.
+
+Bugs fixed:
+	Use g_get_user_config_dir() instead of g_get_home_dir() and then concatenating "/.config". Thanks to Sebcactus.
+	OK/Cancel buttons in Edit Tags and Save Playlist dialog are inverted.
+	When move around the library with the keyboard, this does not advance.
+
+======================================================
+OTHERS REALESES:
+======================================================
+
+V0.7.2
 Basic queue playlist support!-)
 	Now you can add and remove multiple songs to be played.	
 	(Special thanks to Christian Hergert by gtkcellrendererbubble.)
@@ -29,10 +56,6 @@ Bugs fixed:
 	Fixs GDK_Delete no work in search entry.
 
 Note: When playing songs from the play queue, deletes references to previous songs.
-
-======================================================
-OTHERS REALESES:
-======================================================
 
 V0.7.1.1: Update of french translation thank to Aloïs Halel.
 

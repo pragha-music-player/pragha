@@ -47,15 +47,17 @@ GtkWindow * window = GTK_WINDOW( cwin->mainwindow );
 static int  x = 0, y = 0;
 
 	if (present) {
-		gtk_window_get_position( window, &x, &y );
-		gtk_widget_hide(GTK_WIDGET(window));
+		if(gtk_window_is_active(GTK_WINDOW (cwin->mainwindow))){
+			gtk_window_get_position( window, &x, &y );
+			gtk_widget_hide(GTK_WIDGET(window));
+		}
+		else gtk_window_present( window );
 	}
 	else{
 		gtk_window_set_skip_taskbar_hint( window , FALSE );
 		if( x != 0 && y != 0 )
 			gtk_window_move( window , x, y );
 		gtk_widget_show( GTK_WIDGET( window ) );
-		gtk_window_deiconify( window );
 		gtk_window_present( window );
 	}
 }

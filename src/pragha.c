@@ -83,7 +83,7 @@ static void common_cleanup(struct con_win *cwin)
 	g_slice_free(struct con_pref, cwin->cpref);
 
 	g_rand_free(cwin->cstate->rand);
-	g_free(cwin->cstate->file_tree_pwd);
+	g_free(cwin->cstate->last_folder);
 	g_mutex_free(cwin->cstate->c_mutex);
 
 	/* Hack, hack */

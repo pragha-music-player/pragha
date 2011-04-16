@@ -626,10 +626,10 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	dialog = gtk_dialog_new_with_buttons(_("Save playlist"),
 			     GTK_WINDOW(cwin->mainwindow),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			     GTK_STOCK_OK,
-			     GTK_RESPONSE_ACCEPT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
+			     GTK_STOCK_OK,
+			     GTK_RESPONSE_ACCEPT,
 			     NULL);
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_new, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_add, TRUE, TRUE, 2);
@@ -1061,9 +1061,17 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	g_list_free (list);
 }
 
-/*Totem Code*/
+/* Based on Totem Code */
 int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
 {
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreeRowReference *ref;
+	GtkTreeIter iter;
+	GList *list;
+	gint n_select = 0;
+	gboolean is_queue = FALSE;
+
 	/* Special case some shortcuts 
 	if (event->state != 0) {
 		if ((event->state & GDK_CONTROL_MASK)
@@ -1085,6 +1093,28 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 		return FALSE;
 	if (event->keyval == GDK_Delete){
 		remove_current_playlist(NULL, cwin);
+		return TRUE;
+	}
+	else if(event->keyval == GDK_q || event->keyval == GDK_Q){
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+		n_select = gtk_tree_selection_count_selected_rows(selection);
+
+		if(n_select==1){
+			list = gtk_tree_selection_get_selected_rows(selection, NULL);
+			if (gtk_tree_model_get_iter(model, &iter, list->data)){
+				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
+				if(is_queue)
+					delete_queue_track_refs(list->data, cwin);
+				else{
+					ref = gtk_tree_row_reference_new(model, list->data);
+					cwin->cstate->queue_track_refs = g_list_append(cwin->cstate->queue_track_refs, ref);
+				}
+				requeue_track_refs(cwin);
+			}
+			gtk_tree_path_free(list->data);
+			g_list_free (list);
+		}
 		return TRUE;
 	}
 	return FALSE;
@@ -2055,17 +2085,7 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 {
 	GdkAtom target;
 
-	if (gtk_drag_get_source_widget(context) == cwin->file_tree) {
-		CDEBUG(DBG_VERBOSE, "DnD: file_tree");
-		target = GDK_POINTER_TO_ATOM(g_list_nth_data(context->targets,
-							     TARGET_FILENAME));
-		gtk_drag_get_data(widget,
-				  context,
-				  target,
-				  time);
-		return TRUE;
-	}
-	else if (gtk_drag_get_source_widget(context) == cwin->library_tree) {
+	if (gtk_drag_get_source_widget(context) == cwin->library_tree) {
 		CDEBUG(DBG_VERBOSE, "DnD: library_tree");
 		target = GDK_POINTER_TO_ATOM(g_list_nth_data(context->targets,
 							     TARGET_LOCATION_ID));
@@ -2108,7 +2128,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GtkTreeViewDropPosition pos = 0;
 	GList *list = NULL, *l;
 	struct musicobject *mobj = NULL;
-	GArray *loc_arr, *file_arr, *playlist_arr;
+	GArray *loc_arr, *playlist_arr;
 	gint i = 0, elem = 0;
 	gchar *name = NULL;
 	gboolean ret;
@@ -2199,34 +2219,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		} while (elem != 0);
 
 		g_array_free(loc_arr, TRUE);
-
-		break;
-	case TARGET_FILENAME:
-		file_arr = *(GArray **)data->data;
-		if (!file_arr)
-			g_warning("No selections to process in DnD");
-
-		CDEBUG(DBG_VERBOSE, "Target: FILENAME, "
-		       "selection: %p, file_arr: %p",
-		       data->data, file_arr);
-
-		while(1) {
-			name = g_array_index(file_arr, gchar*, i);
-			if (name) {
-				mobj = new_musicobject_from_file(name);
-				if (!mobj)
-					g_critical("Invalid Filename: %s",
-						   name);
-				else
-					append_current_playlist(mobj, cwin);
-				g_free(name);
-				i++;
-			}
-			else
-				break;
-		};
-
-		g_array_free(file_arr, TRUE);
 
 		break;
 	case TARGET_PLAYLIST:

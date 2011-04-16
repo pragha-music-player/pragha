@@ -570,10 +570,10 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	dialog = gtk_dialog_new_with_buttons("Edit tags",
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_MODAL,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_OK,
 					     GTK_STOCK_CANCEL,
 					     GTK_RESPONSE_CANCEL,
+					     GTK_STOCK_OK,
+					     GTK_RESPONSE_OK,
 					     NULL);
 
 	/* Add to the dialog's main vbox */

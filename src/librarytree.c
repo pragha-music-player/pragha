@@ -485,31 +485,48 @@ gboolean library_tree_right_click_cb(GtkWidget *widget,
 				     struct con_win *cwin)
 {
 	GtkWidget *popup_menu;
+	GtkTreeModel *model;
+	GtkTreePath *path;
 	GtkTreeSelection *selection;
-	gboolean ret = FALSE;
+	gboolean many_selected = FALSE;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
 	switch(event->button) {
+	case 2:
+		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(cwin->library_tree),
+						  event->x, event->y,
+						  &path, NULL, NULL, NULL)){
+			if (!gtk_tree_selection_path_is_selected(selection, path)){
+				model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+
+				gtk_tree_selection_unselect_all(selection);
+				gtk_tree_selection_select_path(selection, path);
+			}
+			library_tree_add_to_playlist(cwin);
+			gtk_tree_path_free(path);
+		}
+		else gtk_tree_selection_unselect_all(selection);
+
+		break;
 	case 3:
 		popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
 						       "/popup");
 		gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 			       event->button, event->time);
 
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-
 		/* If more than one track is selected, don't propagate event */
 
 		if (gtk_tree_selection_count_selected_rows(selection) > 1)
-			ret = TRUE;
+			many_selected = TRUE;
 		else
-			ret = FALSE;
+			many_selected = FALSE;
 		break;
 	default:
-		ret = FALSE;
+		many_selected = FALSE;
 		break;
 	}
-
-	return ret;
+	return many_selected;
 }
 
 gboolean library_page_right_click_cb(GtkWidget *widget,
@@ -985,7 +1002,11 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	}
 }
 
-void library_tree_add_to_playlist(GtkAction *action, struct con_win *cwin)
+void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	library_tree_add_to_playlist(cwin);
+}
+void library_tree_add_to_playlist(struct con_win *cwin)
 {
 	GtkTreeModel *model, *filter_model;
 	GtkTreeSelection *selection;

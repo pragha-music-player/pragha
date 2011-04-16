@@ -102,7 +102,6 @@
 
 #define PROGRESS_BAR_TEXT           "Scanning"
 #define TRACK_PROGRESS_BAR_STOPPED  "Stopped"
-#define UP_DIR                      ".."
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
 #define LASTFM_URL                 "http://post.audioscrobbler.com"
@@ -142,8 +141,8 @@
 #define KEY_LIBRARY_DIR            "library_dir"
 #define KEY_LIBRARY_DELETE         "library_delete"
 #define KEY_LIBRARY_ADD            "library_add"
-#define KEY_FILETREE_PWD           "filetree_pwd"
-#define KEY_SHOW_HIDDEN_FILE       "show_hidden_files"
+#define KEY_LAST_FOLDER            "last_folder"
+#define KEY_ADD_RECURSIVELY_FILES  "add_recursively_files"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
@@ -189,15 +188,6 @@ enum debug_level {
 	DBG_VERBOSE,
 };
 
-/* Systray pAch */
-
-#define EGG_TYPE_TRAY_ICON (egg_tray_icon_get_type ())
-#define EGG_TRAY_ICON(obj)	(G_TYPE_CHECK_INSTANCE_CAST ((obj), EGG_TYPE_TRAY_ICON, EggTrayIcon))
-#define EGG_TRAY_ICON_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), EGG_TYPE_TRAY_ICON, EggTrayIconClass))
-#define EGG_IS_TRAY_ICON(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), EGG_TYPE_TRAY_ICON))
-#define EGG_IS_TRAY_ICON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), EGG_TYPE_TRAY_ICON))
-#define EGG_TRAY_ICON_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), EGG_TYPE_TRAY_ICON, EggTrayIconClass))
-
 /* Current playlist movement */
 
 enum playlist_action {
@@ -221,13 +211,6 @@ enum player_state {
 	ST_PLAYING = 1,
 	ST_STOPPED,
 	ST_PAUSED
-};
-
-/* Main view notebook pages */
-
-enum page_view {
-	PAGE_LIBRARY,
-	PAGE_FILE,
 };
 
 /* Node types in library view */
@@ -260,15 +243,6 @@ enum playlist_columns {
 	N_PL_COLUMNS
 };
 
-/* Columns in File tree view */
-
-enum file_columns {
-	F_PIXBUF,
-	F_NAME,
-	F_FILE_TYPE,
-	N_F_COLUMNS
-};
-
 /* Columns in current playlist view */
 
 enum curplaylist_columns {
@@ -293,7 +267,6 @@ enum curplaylist_columns {
 
 enum dnd_target {
 	TARGET_LOCATION_ID,
-	TARGET_FILENAME,
 	TARGET_PLAYLIST
 };
 
@@ -328,13 +301,6 @@ enum file_type {
 	FILE_OGGVORBIS,
 	FILE_MODPLUG,
 	FILE_CDDA
-};
-
-/* Node type in Filetree */
-
-enum filetree_node {
-	F_TYPE_FILE,
-	F_TYPE_DIR
 };
 
 /* Track sources for last.fm submission */
@@ -400,7 +366,7 @@ struct con_pref {
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
 	gchar *configrc_file;
-	gboolean show_hidden_files;
+	gboolean add_recursively_files;
 	gboolean show_album_art;
 	gboolean show_osd;
 	gboolean timer_remaining_mode;
@@ -469,7 +435,7 @@ struct lastfm_track {
  * @newsec: Arg for idle func invoked from playback thread
  * @lastfm_hard_failure: If more than 3, should do a handshake again
  * @seek_fraction: New seek fraction to pass to playback thread
- * @file_tree_pwd: Current folder on display in File tree
+ * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
  * @rand: To generate random numbers
  * @c_thread: Playback thread
@@ -500,7 +466,7 @@ struct con_state {
 	gint lastfm_hard_failure;
 	gint timeout_id;
 	gdouble seek_fraction;
-	gchar *file_tree_pwd;
+	gchar *last_folder;
 	gchar *filter_entry;
 	GRand *rand;
 	GThread *c_thread;
@@ -531,7 +497,7 @@ struct con_mixer {
 };
 
 struct con_dbase {
-	gchar *db_file;	/* Filename of the DB file (~/.condb) */
+	gchar *db_file;	/* Filename of the DB file (~/.pragha.db) */
 	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
 };
 
@@ -578,7 +544,7 @@ struct con_win {
 	GtkWidget *search_current_entry;
 	GtkWidget *browse_mode;
 	GtkWidget *toggle_lib;
-	GtkWidget *toggle_file;
+	GtkWidget *toggle_playlists;
 	GtkWidget *combo_order;
 	GtkWidget *combo_order_label;
 	GtkWidget *track_length_label;
@@ -586,7 +552,6 @@ struct con_win {
 	GtkWidget *now_playing_label;
 	GtkWidget *library_tree;
 	GtkWidget *playlist_tree;
-	GtkWidget *file_tree;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GOptionContext *cmd_context;
@@ -597,8 +562,6 @@ struct con_win {
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
-	GtkUIManager *file_tree_dir_context_menu;
-	GtkUIManager *file_tree_file_context_menu;
 	GtkUIManager *systray_menu;
 	DBusConnection *con_dbus;
 };
@@ -670,7 +633,7 @@ void repeat_action(GtkToggleAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
 void fullscreen_action (GtkAction *action, struct con_win *cwin);
 void library_pane_action (GtkAction *action, struct con_win *cwin);
-void files_pane_action (GtkAction *action, struct con_win *cwin);
+void playlists_pane_action (GtkAction *action, struct con_win *cwin);
 void status_bar_action (GtkAction *action, struct con_win *cwin);
 void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
@@ -714,28 +677,6 @@ void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 
 void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin);
 void __recur_add(gchar *dir_name, struct con_win *cwin);
-void update_file_tree(gchar *new_dir, struct con_win *cwin);
-void populate_file_tree(const gchar *new_dir, struct con_win *cwin);
-void file_tree_row_activated_cb(GtkTreeView *file_tree,
-				GtkTreePath *path,
-				GtkTreeViewColumn *column,
-				struct con_win *cwin);
-gboolean file_tree_right_click_cb(GtkWidget *widget,
-				  GdkEventButton *event,
-				  struct con_win *cwin);
-void file_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
-void file_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
-void file_tree_add_to_playlist_recur(GtkAction *action, struct con_win *cwin);
-void file_tree_add_to_playlist_non_recur(GtkAction *action, struct con_win *cwin);
-void file_tree_show_hidden_files(GtkToggleAction *action, struct con_win *cwin);
-void dnd_file_tree_get(GtkWidget *widget,
-		       GdkDragContext *context,
-		       GtkSelectionData *data,
-		       guint info,
-		       guint time,
-		       struct con_win *cwin);
-gint file_tree_sort_func(GtkTreeModel *model, GtkTreeIter *a,
-			 GtkTreeIter *b, gpointer data);
 
 /* Musicobject functions */
 
@@ -795,7 +736,8 @@ void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
-void library_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
+void library_tree_add_to_playlist(struct con_win *cwin);
+void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
@@ -849,7 +791,8 @@ gboolean playlist_tree_right_click_cb(GtkWidget *widget,
 				      GdkEventButton *event,
 				      struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
-void playlist_tree_add_to_playlist(GtkAction *action, struct con_win *cwin);
+void playlist_tree_add_to_playlist(struct con_win *cwin);
+void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 void open_m3u_playlist(gchar *file, struct con_win *cwin);
@@ -1058,9 +1001,7 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 
 /* Utilities */
 
-gboolean is_hidden_file(const gchar *file);
 gboolean is_playable_file(const gchar *file);
-gboolean is_base_dir_and_accessible(gchar *file, struct con_win *cwin);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(gchar *str);

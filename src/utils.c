@@ -30,26 +30,6 @@ const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
 
 /* Accepts only absolute filename */
 
-gboolean is_hidden_file(const gchar *file)
-{
-	gchar *base_name;
-	gint ret;
-
-	if (!file)
-		return FALSE;
-
-	base_name = g_path_get_basename(file);
-	if (base_name[0] == '.')
-		ret = TRUE;
-	else
-		ret = FALSE;
-
-	g_free(base_name);
-	return ret;
-}
-
-/* Accepts only absolute filename */
-
 gboolean is_playable_file(const gchar *file)
 {
 	if (!file)
@@ -60,29 +40,6 @@ gboolean is_playable_file(const gchar *file)
 		return TRUE;
 	else
 		return FALSE;
-}
-
-/* Accepts only basename */
-
-gboolean is_base_dir_and_accessible(gchar *file, struct con_win *cwin)
-{
-	gint ret;
-	gchar *absolute_name;
-
-	if (!file)
-		return FALSE;
-
-	absolute_name = g_strdup_printf("%s/%s", cwin->cstate->file_tree_pwd,
-					file);
-	if (g_file_test(absolute_name,
-			G_FILE_TEST_IS_DIR) &&
-	    !g_access(absolute_name, R_OK | X_OK))
-		ret = TRUE;
-	else
-		ret = FALSE;
-
-	g_free(absolute_name);
-	return ret;
 }
 
 /* Accepts only absolute path */

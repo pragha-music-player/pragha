@@ -278,31 +278,50 @@ gboolean playlist_tree_right_click_cb(GtkWidget *widget,
 				      struct con_win *cwin)
 {
 	GtkWidget *popup_menu;
+	GtkTreeModel *model;
+	GtkTreePath *path;
 	GtkTreeSelection *selection;
-	gboolean ret = FALSE;
+	gboolean many_selected = FALSE;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 
 	switch(event->button) {
+	case 2:
+		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(cwin->playlist_tree),
+						  event->x, event->y,
+						  &path, NULL, NULL, NULL)){
+			if (!gtk_tree_selection_path_is_selected(selection, path)){
+				model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
+
+				gtk_tree_selection_unselect_all(selection);
+				gtk_tree_selection_select_path(selection, path);
+			}
+			gtk_tree_path_free(path);
+
+			playlist_tree_add_to_playlist(cwin);
+		}
+		else gtk_tree_selection_unselect_all(selection);
+
+		break;
 	case 3:
 		popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
 						       "/popup");
 		gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 			       event->button, event->time);
 
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
-
 		/* If more than one track is selected, don't propagate event */
 
 		if (gtk_tree_selection_count_selected_rows(selection) > 1)
-			ret = TRUE;
+			many_selected = TRUE;
 		else
-			ret = FALSE;
+			many_selected = FALSE;
 		break;
 	default:
-		ret = FALSE;
+		many_selected = FALSE;
 		break;
 	}
 
-	return ret;
+	return many_selected;
 }
 
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
@@ -346,7 +365,12 @@ void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	}
 }
 
-void playlist_tree_add_to_playlist(GtkAction *action, struct con_win *cwin)
+void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	playlist_tree_add_to_playlist(cwin);
+}
+
+void playlist_tree_add_to_playlist(struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -810,19 +834,13 @@ void init_playlist_view(struct con_win *cwin)
 	gint i = 0;
 	gchar *query;
 	struct db_result result;
-	GtkTreeIter iter, r_iter;
-	GtkTreePath *r_path = NULL;
+	GtkTreeIter iter;
 	GtkTreeModel *model;
-	gboolean expanded = FALSE;
 
 	cwin->cstate->view_change = TRUE;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
-	if (gtk_tree_model_get_iter_first(model, &r_iter)) {
-		r_path = gtk_tree_model_get_path(model, &r_iter);
-		expanded = gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->playlist_tree),
-						      r_path);
-	}
+
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
 	gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -850,24 +868,15 @@ void init_playlist_view(struct con_win *cwin)
 
 		while(gtk_events_pending()) {
 			if (gtk_main_iteration_do(FALSE)) {
-				if (r_path)
-					gtk_tree_path_free(r_path);
 				sqlite3_free_table(result.resultp);
 				return;
 			}
 		}
 	}
 
-	if (r_path) {
-		if (expanded)
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->playlist_tree),
-						 r_path, FALSE);
-		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->playlist_tree),
-						   r_path);
-
-		gtk_tree_path_free(r_path);
-	}
 	sqlite3_free_table(result.resultp);
+
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));
+
 	cwin->cstate->view_change = FALSE;
 }

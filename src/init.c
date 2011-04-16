@@ -199,7 +199,7 @@ gint init_config(struct con_win *cwin)
 	gint *col_widths, *win_size;
 	gchar *conrc, *condir, **libs, **columns, **nodes, *last_rescan_time;
 	gchar *u_file;
-	const gchar *home;
+	const gchar *config_dir;
 	gboolean err = FALSE;
 	gboolean libs_f,
 		lib_add_f,
@@ -208,8 +208,8 @@ gint init_config(struct con_win *cwin)
 		nodes_f,
 		col_widths_f,
 		cur_lib_view_f,
-		hidden_f,
-		file_tree_pwd_f,
+		recursively_f,
+		last_folder_f,
 		album_f,
 		album_art_pattern_f,
 		osd_f,
@@ -231,14 +231,14 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	libs_f = lib_add_f = lib_delete_f = columns_f = nodes_f = cur_lib_view_f = FALSE;
-	file_tree_pwd_f = hidden_f = album_f = osd_f = fullscreen_f = status_bar_f = lastfm_f = FALSE;
+	last_folder_f = recursively_f = album_f = osd_f = fullscreen_f = status_bar_f = lastfm_f = FALSE;
 	software_mixer_f = save_playlist_f = album_art_pattern_f = use_cddb_f = FALSE;
 	shuffle_f = repeat_f = window_size_f = all_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = FALSE;
 
-	home = g_get_home_dir();
-	condir = g_strdup_printf("%s%s", home, "/.config/pragha");
-	conrc = g_strdup_printf("%s%s", home, "/.config/pragha/config");
+	config_dir = g_get_user_config_dir();
+	condir = g_strdup_printf("%s%s", config_dir, "/pragha");
+	conrc = g_strdup_printf("%s%s", config_dir, "/pragha/config");
 
 	/* Does .config/pragha exist ? */
 
@@ -523,39 +523,39 @@ gint init_config(struct con_win *cwin)
 			lib_delete_f = TRUE;
 		}
 
-		/* Retrieve hidden files option */
+		/* Retrieve add recursively files option */
 
-		cwin->cpref->show_hidden_files =
+		cwin->cpref->add_recursively_files =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
-					       KEY_SHOW_HIDDEN_FILE,
+					       KEY_ADD_RECURSIVELY_FILES,
 					       &error);
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			hidden_f = TRUE;
+			recursively_f = TRUE;
 		}
 
 		/* Retrieve filetree pwd */
 
 		u_file = g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
-					       KEY_FILETREE_PWD,
+					       KEY_LAST_FOLDER,
 					       &error);
 		if (!u_file) {
 			g_error_free(error);
 			error = NULL;
-			file_tree_pwd_f = TRUE;
+			last_folder_f = TRUE;
 		} else {
-			cwin->cstate->file_tree_pwd = g_filename_from_utf8(u_file,
+			cwin->cstate->last_folder = g_filename_from_utf8(u_file,
 							   -1, NULL, NULL, &error);
-			if (!cwin->cstate->file_tree_pwd) {
+			if (!cwin->cstate->last_folder) {
 				g_warning("Unable to get filename "
 					  "from UTF-8 string: %s",
 					  u_file);
 				g_error_free(error);
 				error = NULL;
-				file_tree_pwd_f = TRUE;
+				last_folder_f = TRUE;
 			}
 			g_free(u_file);
 		}
@@ -821,10 +821,10 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || cur_lib_view_f)
 		cwin->cpref->cur_library_view = ARTIST_ALBUM;
-	if (all_f || hidden_f)
-		cwin->cpref->show_hidden_files = FALSE;
-	if (all_f || file_tree_pwd_f)
-		cwin->cstate->file_tree_pwd = (gchar*)g_get_home_dir();
+	if (all_f || recursively_f)
+		cwin->cpref->add_recursively_files = FALSE;
+	if (all_f || last_folder_f)
+		cwin->cstate->last_folder = (gchar*)g_get_home_dir();
 	if (all_f || album_f)
 		cwin->cpref->show_album_art = TRUE;
 	if (all_f || osd_f)
@@ -871,9 +871,9 @@ gint init_musicdbase(struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Initializing music dbase");
 
-	home = g_get_home_dir();
+	home = g_get_user_config_dir();
 	cwin->cdbase->db_file = g_strdup_printf("%s%s", home,
-						"/.config/pragha/pragha.db");
+						"/pragha/pragha.db");
 
 	/* Create the database file */
 
@@ -1138,9 +1138,6 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
-
-	action = gtk_ui_manager_get_action(cwin->file_tree_file_context_menu,"/popup/Show hidden files");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->show_hidden_files);
 }
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)

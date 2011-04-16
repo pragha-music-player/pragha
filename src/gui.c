@@ -51,7 +51,7 @@ gchar *main_menu_xml = "<ui>							\
 			<separator/>						\
 			<menu action=\"Lateral panel\">				\
 				<menuitem action=\"Library\"/>			\
-				<menuitem action=\"Files\"/>			\
+				<menuitem action=\"Playlists\"/>		\
 			</menu>							\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
@@ -115,24 +115,6 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<menuitem action=\"Edit\"/>			\
 	<menuitem action=\"Delete (From library)\"/>	\
 	<menuitem action=\"Delete (From HDD)\"/>	\
-	</popup>					\
-	</ui>";
-
-gchar *file_tree_dir_context_menu_xml = "<ui>			\
-	<popup>							\
-	<menuitem action=\"Add to playlist (Recursive)\"/>	\
-	<menuitem action=\"Add to playlist (Non recursive)\"/>	\
-	<separator/>						\
-	<menuitem action=\"Show hidden files\"/>		\
-	</popup>						\
-	</ui>";
-
-gchar *file_tree_file_context_menu_xml = "<ui>		\
-	<popup>						\
-	<menuitem action=\"Add to playlist\"/>		\
-	<menuitem action=\"Replace playlist\"/>		\
-	<separator/>					\
-	<menuitem action=\"Show hidden files\"/>	\
 	</popup>					\
 	</ui>";
 
@@ -245,15 +227,12 @@ GtkToggleActionEntry toggles_entries[] = {
 	{"Library", NULL, N_("Library"),
 	 NULL, "Library", G_CALLBACK(library_pane_action),
 	TRUE},
-	{"Files", NULL, N_("Files"),
-	 NULL, "Files", G_CALLBACK(files_pane_action),
+	{"Playlists", NULL, N_("Playlists"),
+	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
 	FALSE},
 	{"Status bar", NULL, N_("Status bar"),
 	 NULL, "Status bar", G_CALLBACK(status_bar_action),
-	TRUE},
-	{"Show hidden files", NULL, N_("Show _hidden files"),
-	 "<Control>H", "Show hidden files", G_CALLBACK(file_tree_show_hidden_files),
-	 FALSE}
+	TRUE}
 };
 
 GtkActionEntry cp_context_aentries[] = {
@@ -279,7 +258,7 @@ GtkActionEntry cp_context_aentries[] = {
 
 GtkActionEntry playlist_tree_context_aentries[] = {
 	{"Add to playlist", GTK_STOCK_ADD, N_("_Add to playlist"),
-	 NULL, "Add to playlist", G_CALLBACK(playlist_tree_add_to_playlist)},
+	 NULL, "Add to playlist", G_CALLBACK(playlist_tree_add_to_playlist_action)},
 	{"Replace playlist", NULL, N_("_Replace playlist"),
 	 NULL, "Replace playlist", G_CALLBACK(playlist_tree_replace_playlist)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
@@ -290,7 +269,7 @@ GtkActionEntry playlist_tree_context_aentries[] = {
 
 GtkActionEntry library_tree_context_aentries[] = {
 	{"Add to playlist", GTK_STOCK_ADD, N_("_Add to playlist"),
-	 NULL, "Add to playlist", G_CALLBACK(library_tree_add_to_playlist)},
+	 NULL, "Add to playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace playlist", NULL, N_("_Replace playlist"),
 	 NULL, "Replace playlist", G_CALLBACK(library_tree_replace_playlist)},
 	{"Edit", GTK_STOCK_EDIT, N_("Edit tags"),
@@ -299,20 +278,6 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 NULL, "Delete from library", G_CALLBACK(library_tree_delete_db)},
 	{"Delete (From HDD)", GTK_STOCK_REMOVE, N_("Delete from HDD"),
 	 NULL, "Delete from HDD", G_CALLBACK(library_tree_delete_hdd)}
-};
-
-GtkActionEntry file_tree_dir_context_aentries[] = {
-	{"Add to playlist (Recursive)", GTK_STOCK_ADD, N_("Add to playlist (Recursive)"),
-	 NULL, "Add to playlist (Recursive)", G_CALLBACK(file_tree_add_to_playlist_recur)},
-	{"Add to playlist (Non recursive)", GTK_STOCK_ADD, N_("Add to playlist (Non recursive)"),
-	 NULL, "Add to playlist (Non recursive)", G_CALLBACK(file_tree_add_to_playlist_non_recur)}
-};
-
-GtkActionEntry file_tree_file_context_aentries[] = {
-	{"Add to playlist", GTK_STOCK_ADD, N_("_Add to playlist"),
-	 NULL, "Add to playlist", G_CALLBACK(file_tree_add_to_playlist)},
-	{"Replace playlist", NULL, N_("_Replace playlist"),
-	 NULL, "Replace playlist", G_CALLBACK(file_tree_replace_playlist)}
 };
 
 GtkActionEntry library_page_context_aentries[] = {
@@ -361,7 +326,6 @@ GtkActionEntry systray_menu_aentries[] = {
 
 GtkTargetEntry tentries[] = {
 	{"LOCATION_ID", GTK_TARGET_SAME_APP, TARGET_LOCATION_ID},
-	{"FILENAME", GTK_TARGET_SAME_APP, TARGET_FILENAME},
 	{"PLAYLIST", GTK_TARGET_SAME_APP, TARGET_PLAYLIST}
 };
 
@@ -451,17 +415,18 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 		g_error_free(error);
 		error = NULL;
 	}
-	cwin->pixbuf->pixbuf_album = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-								       "/album.png",
-								       width,
-								       height,
-								       TRUE,
-								       &error);
+
+	cwin->pixbuf->pixbuf_album = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+							      "media-optical",
+							      width,
+							      0,
+							      &error);
 	if (!cwin->pixbuf->pixbuf_album) {
 		g_warning("Unable to load album png : %s", error->message);
 		g_error_free(error);
 		error = NULL;
 	}
+
 	cwin->pixbuf->pixbuf_track = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
 								       "/track.png",
 								       width,
@@ -473,6 +438,7 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 		g_error_free(error);
 		error = NULL;
 	}
+
 	cwin->pixbuf->pixbuf_genre = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
 								       "/genre.png",
 								       width,
@@ -523,166 +489,6 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 	return library_tree;
 }
 
-/*************/
-/* File Tree */
-/*************/
-
-static GtkUIManager* create_file_tree_dir_context_menu(GtkWidget *file_tree,
-						       struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("File Tree Dir Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       file_tree_dir_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create file tree dir context menu, err : %s",
-			   error->message);
-	}
-	
-	gtk_action_group_add_actions(context_actions,
-				     file_tree_dir_context_aentries,
-				     G_N_ELEMENTS(file_tree_dir_context_aentries),
-				     (gpointer)cwin);
-	gtk_action_group_add_toggle_actions (context_actions, 
-					toggles_entries, G_N_ELEMENTS(toggles_entries), 
-					cwin);
-					
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(context_menu));
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	return context_menu;
-}
-
-static GtkUIManager* create_file_tree_file_context_menu(GtkWidget *file_tree,
-							struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("File Tree File Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       file_tree_file_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create file tree dir context menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(context_actions,
-				     file_tree_file_context_aentries,
-				     G_N_ELEMENTS(file_tree_file_context_aentries),
-				     (gpointer)cwin);
-	gtk_action_group_add_toggle_actions (context_actions, 
-					toggles_entries, G_N_ELEMENTS(toggles_entries), 
-					cwin);
-				     
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(context_menu));
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	
-	return context_menu;
-}
-
-static GtkWidget* create_file_tree(struct con_win *cwin)
-{
-	GtkWidget *file_tree;
-	GtkListStore *store;
-	GtkTreeModel *model;
-	GtkTreeSortable *sortable;
-	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
-	GError *error = NULL;
-
-	/* Create the tree store */
-
-	store = gtk_list_store_new(N_F_COLUMNS,
-				   GDK_TYPE_PIXBUF,
-				   G_TYPE_STRING,
-				   G_TYPE_INT);
-
-	/* Create the tree view */
-
-	file_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(file_tree));
-	sortable = GTK_TREE_SORTABLE(model);
-
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(file_tree), FALSE);
-	gtk_tree_sortable_set_sort_column_id(sortable, F_NAME, GTK_SORT_ASCENDING);
-	gtk_tree_sortable_set_sort_func(sortable,
-					F_NAME,
-					file_tree_sort_func,
-					(gpointer)cwin,
-					NULL);
-
-	/* Create pixbufs */
-
-	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-							    "gtk-directory",
-							    16, 0, &error);
-	if( error != NULL )
-		g_warning("Unable to load gtk-directory icon, err : %s",
-			  error->message);
-	cwin->pixbuf->pixbuf_file = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-							     "gtk-file",
-							     16, 0, &error);
-	if( error != NULL )
-		g_warning("Unable to load gtk-file icon, err : %s",
-			  error->message);
-
-	/* Create the columns and cell renderers */
-
-	column = gtk_tree_view_column_new();
-
-	renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(column, renderer,
-					    "pixbuf", F_PIXBUF,
-					    NULL);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_set_attributes(column, renderer,
-					    "text", F_NAME,
-					    NULL);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(file_tree), column);
-
-	cwin->file_tree = file_tree;
-
-	/* Setup row activation cb handling */
-
-	g_signal_connect(G_OBJECT(file_tree), "row-activated",
-			 G_CALLBACK(file_tree_row_activated_cb), cwin);
-
-	/* Create right click popup menu */
-
-	cwin->file_tree_dir_context_menu = create_file_tree_dir_context_menu(file_tree,
-									     cwin);
-	cwin->file_tree_file_context_menu = create_file_tree_file_context_menu(file_tree,
-									       cwin);
-
-	/* Signal handler for right-clicking */
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(file_tree)), "button-release-event",
-			 G_CALLBACK(file_tree_right_click_cb), cwin);
-
-	g_object_unref(store);
-	return file_tree;
-}
-
 /*****************/
 /* Playlist Tree */
 /*****************/
@@ -724,6 +530,7 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
+	GError *error = NULL;
 
 	/* Create the tree store */
 
@@ -760,10 +567,19 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(playlist_tree), column);
 
-	cwin->playlist_tree = playlist_tree;
+	/* Create pixbufs */
 
-	g_signal_connect(G_OBJECT(playlist_tree), "row-activated",
-			 G_CALLBACK(playlist_tree_row_activated_cb), cwin);
+	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+							    "gtk-directory",
+							    16, 0, &error);
+	if( error != NULL )
+		g_warning("Unable to load gtk-directory icon, err : %s", error->message);
+
+	cwin->pixbuf->pixbuf_file = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
+							     "gtk-file",
+							     16, 0, &error);
+	if( error != NULL )
+		g_warning("Unable to load gtk-file icon, err : %s", error->message);
 
 	/* Create right click popup menu */
 
@@ -772,10 +588,15 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 
 	/* Signal handler for right-clicking */
 
+	g_signal_connect(G_OBJECT(playlist_tree), "row-activated",
+			 G_CALLBACK(playlist_tree_row_activated_cb), cwin);
+
 	g_signal_connect(G_OBJECT(GTK_WIDGET(playlist_tree)), "button-press-event",
 			 G_CALLBACK(playlist_tree_right_click_cb), cwin);
 
 	g_object_unref(store);
+
+	cwin->playlist_tree = playlist_tree;
 
 	return playlist_tree;
 }
@@ -843,18 +664,18 @@ static GtkWidget * create_toggles_buttons(struct con_win *cwin)
 	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),FALSE);
 
-	l = gtk_label_new_with_mnemonic(_("Files"));
+	l = gtk_label_new_with_mnemonic(_("Playlists"));
 	gtk_label_set_angle(GTK_LABEL(l), 90);
 	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
 	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
-	cwin->toggle_file=w;
+	cwin->toggle_playlists=w;
 
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_file)), "toggled",
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "toggled",
 			G_CALLBACK( toggled_cb ), cwin );
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_file)), "button-press-event",
+	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "button-press-event",
 			G_CALLBACK(library_page_right_click_cb), cwin);
 
-	l = gtk_label_new_with_mnemonic( _("Pragha Music Manager") );
+	l = gtk_label_new_with_mnemonic(_("Pragha Music Manager"));
 	gtk_label_set_angle(GTK_LABEL(l), 90);
 	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
 
@@ -867,99 +688,65 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *browse_mode;
 	GtkWidget *vbox_lib, *vbox_page;
-	GtkWidget *file_tree, *library_tree, *playlist_tree;
-	GtkWidget *file_tree_scroll, *library_tree_scroll;
-	GtkWidget *sep;
+	GtkWidget *library_tree, *playlist_tree;
+	GtkWidget *playlists_tree_scroll, *library_tree_scroll;
 	GtkWidget *order_selector, *search_bar;
 
 	browse_mode = gtk_notebook_new();
 
-	vbox_page = gtk_vbox_new(FALSE, 0);
 	vbox_lib = gtk_vbox_new(FALSE, 0);
-
-	sep = gtk_hseparator_new();
-
-	/* The scrollbar window widgets */
-
-	file_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
 	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
-
-	/* Set scrollbar policies */
-
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_tree_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
 				       GTK_POLICY_AUTOMATIC,
 				       GTK_POLICY_AUTOMATIC);
-
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(file_tree_scroll),
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 					GTK_SHADOW_IN);
-
-	/* The actual notebook page widgets */
-
-	file_tree = create_file_tree(cwin);
-
 	search_bar = create_search_bar(cwin);
 	order_selector = create_combo_order (cwin);
 	library_tree = create_library_tree(cwin);
-	playlist_tree = create_playlist_tree(cwin);
 
-	/* Store playlist/library tree in hbox */
+	gtk_container_add(GTK_CONTAINER(library_tree_scroll), library_tree);
 
-	gtk_box_pack_start(GTK_BOX(vbox_page),
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   order_selector,
 			   FALSE,
 			   FALSE,
 			   0);
-
-	gtk_box_pack_start(GTK_BOX(vbox_page),
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   search_bar,
 			   FALSE,
 			   FALSE,
 			   2);
 
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
-			   playlist_tree,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-			   sep,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-			   library_tree,
+			   library_tree_scroll,
 			   TRUE,
 			   TRUE,
 			   0);
 
-	/* Store them in the scrollbar widgets */
-
-	gtk_container_add(GTK_CONTAINER(file_tree_scroll), file_tree);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(library_tree_scroll),
-					      vbox_lib);
-
-	gtk_box_pack_start(GTK_BOX(vbox_page),
-				library_tree_scroll,
-				TRUE,
-				TRUE,
-				0);
+	vbox_page = gtk_vbox_new(FALSE, 0);
+	playlists_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(playlists_tree_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(playlists_tree_scroll),
+					GTK_SHADOW_IN);
+	playlist_tree = create_playlist_tree(cwin);
+	gtk_container_add(GTK_CONTAINER(playlists_tree_scroll), playlist_tree);
 
 	/* Append the notebook page widgets */
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 vbox_page,
+				 vbox_lib,
 				 NULL);
 	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 file_tree_scroll,
+				 playlists_tree_scroll,
 				 NULL);
 
 	cwin->browse_mode = browse_mode;
 
-	gtk_notebook_set_show_tabs (GTK_NOTEBOOK(browse_mode),FALSE);
-	gtk_notebook_set_show_border (GTK_NOTEBOOK(browse_mode),FALSE);
+	gtk_notebook_set_show_tabs (GTK_NOTEBOOK(browse_mode), FALSE);
+	gtk_notebook_set_show_border (GTK_NOTEBOOK(browse_mode), FALSE);
 
 	/* Signal handler for right-clicking on a page */
 
@@ -1446,19 +1233,6 @@ static void init_dnd(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(cwin->library_tree),
 			 "drag-data-get",
 			 G_CALLBACK(dnd_library_tree_get),
-			 cwin);
-
-	/* Source: File View */
-
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->file_tree),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY);
-
-	g_signal_connect(G_OBJECT(cwin->file_tree),
-			 "drag-data-get",
-			 G_CALLBACK(dnd_file_tree_get),
 			 cwin);
 
 	/* Source: Playlist View */

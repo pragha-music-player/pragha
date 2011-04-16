@@ -664,26 +664,26 @@ void save_preferences(struct con_win *cwin)
 			       KEY_LIBRARY_VIEW_ORDER,
 			       cwin->cpref->cur_library_view);
 
-	/* Hidden Files option */
+	/* Add recursively in file chooser option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
-			       KEY_SHOW_HIDDEN_FILE,
-			       cwin->cpref->show_hidden_files);
+			       KEY_ADD_RECURSIVELY_FILES,
+			       cwin->cpref->add_recursively_files);
 
-	/* Filetree PWD */
+	/* Last Folder used in file chooser */
 
-	u_file = g_filename_to_utf8(cwin->cstate->file_tree_pwd, -1,
+	u_file = g_filename_to_utf8(cwin->cstate->last_folder, -1,
 				    NULL, NULL, &error);
 	if (!u_file) {
 		g_warning("Unable to convert file to UTF-8: %s",
-			  cwin->cstate->file_tree_pwd);
+			  cwin->cstate->last_folder);
 		g_error_free(error);
 		error = NULL;
 	} else {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_GENERAL,
-				      KEY_FILETREE_PWD,
+				      KEY_LAST_FOLDER,
 				      u_file);
 		g_free(u_file);
 	}

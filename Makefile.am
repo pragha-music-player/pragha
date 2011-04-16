@@ -14,7 +14,6 @@ doc_DATA = README ChangeLog FAQ
 imagedir = $(datadir)/pixmaps/pragha
 image_DATA = 		\
 	data/artist.png	\
-	data/album.png	\
 	data/track.png  \
 	data/cover.png  \
 	data/genre.png	\
