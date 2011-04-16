@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 const gchar *album_art_pattern_info = "Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\

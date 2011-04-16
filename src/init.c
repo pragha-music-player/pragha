@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;
@@ -145,7 +146,7 @@ gint init_dbus_handlers(struct con_win *cwin)
 	}
 
 	dbus_bus_add_match(cwin->con_dbus,
-			   "type='signal',path='/org/consonance/DBus'",
+			   "type='signal',path='/org/pragha/DBus'",
 			   &error);
 	if (dbus_error_is_set(&error)) {
 		g_critical("Unable to register match rule for DBUS");
@@ -234,10 +235,10 @@ gint init_config(struct con_win *cwin)
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = FALSE;
 
 	home = g_get_home_dir();
-	condir = g_strdup_printf("%s%s", home, "/.consonance");
-	conrc = g_strdup_printf("%s%s", home, "/.consonance/conrc");
+	condir = g_strdup_printf("%s%s", home, "/.config/pragha");
+	conrc = g_strdup_printf("%s%s", home, "/.config/pragha/config");
 
-	/* Does .consonance exist ? */
+	/* Does .config/pragha exist ? */
 
 	if (g_file_test(condir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
 		if (g_mkdir(condir, S_IRWXU) == -1) {
@@ -245,7 +246,7 @@ gint init_config(struct con_win *cwin)
 				   strerror(errno));
 			err = TRUE;
 		}
-		CDEBUG(DBG_INFO, "Created .consonance");
+		CDEBUG(DBG_INFO, "Created .config/pragha");
 	}
 
 	cwin->cpref->configrc_file = g_strdup(conrc);
@@ -255,11 +256,11 @@ gint init_config(struct con_win *cwin)
 
 	if (g_file_test(conrc, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		if (g_creat(conrc, S_IRWXU) == -1) {
-			g_critical("Unable to create conrc, err: %s",
+			g_critical("Unable to create config file, err: %s",
 				   strerror(errno));
 			err = TRUE;
 		}
-		CDEBUG(DBG_INFO, "Created conrc");
+		CDEBUG(DBG_INFO, "Created config file");
 	}
 
 	/* Load the settings file */
@@ -268,7 +269,7 @@ gint init_config(struct con_win *cwin)
 				       conrc,
 				       G_KEY_FILE_NONE,
 				       &error)) {
-		g_critical("Unable to load conrc, err: %s", error->message);
+		g_critical("Unable to load config file, err: %s", error->message);
 		g_error_free(error);
 		all_f = TRUE;
 	}
@@ -814,7 +815,7 @@ gint init_musicdbase(struct con_win *cwin)
 
 	home = g_get_home_dir();
 	cwin->cdbase->db_file = g_strdup_printf("%s%s", home,
-						"/.consonance/condb");
+						"/.config/pragha/pragha.db");
 
 	/* Create the database file */
 
@@ -1067,8 +1068,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_init(&argc, &argv);
 
-        g_set_application_name("Consonance Musi Manager");
-        g_setenv("PULSE_PROP_media.role", "video", TRUE);
+        g_set_application_name("Pragha Music Manager");
+        g_setenv("PULSE_PROP_media.role", "music", TRUE);
 
 
 	/* Main window */
@@ -1082,7 +1083,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	}
 
 	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(SHAREDIR 
-							    "/data/consonance.png",
+							    "/data/pragha.png",
 							    &error);
 	if (!cwin->pixbuf->pixbuf_app) {
 		g_warning("Unable to load app png : %s", error->message);
@@ -1093,13 +1094,13 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
 				    cwin->pixbuf->pixbuf_app);
 	}
-	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), "Consonance");
+	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), "pragha");
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",
 			 G_CALLBACK(exit_gui), cwin);
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "destroy",
-			 G_CALLBACK(exit_consonance), cwin);
+			 G_CALLBACK(exit_pragha), cwin);
 
 	/* Set Default Size */
 

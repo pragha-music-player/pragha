@@ -1,16 +1,13 @@
 DEFINES = -DSHAREDIR=\""$(pkgdatadir)"\"
 
-bin_PROGRAMS = consonance
+bin_PROGRAMS = pragha
 
-consonance_CFLAGS = $(DEFINES)
+pragha_CFLAGS = $(DEFINES)
 
-consonance_LDADD = $(glib_LIBS) \
+pragha_LDADD = $(glib_LIBS) \
 	$(gthread_LIBS) \
 	$(gio_LIBS) \
 	$(gtk_LIBS) \
-	$(libxfcegui4_LIBS) \
-	$(libxfceutil4_LIBS) \
-	$(libexo_LIBS) \
 	$(mad_LIBS) \
 	$(flac_LIBS) \
 	$(sqlite3_LIBS) \
@@ -30,9 +27,6 @@ consonance_LDADD = $(glib_LIBS) \
 AM_CPPFLAGS = $(glib_CFLAGS) \
 	$(gio_CFLAGS) \
 	$(gtk_CFLAGS) \
-	$(libxfcegui4_CFLAGS) \
-	$(libxfceutil4_CFLAGS) \
-	$(libexo_CFLAGS) \
 	$(mad_CFLAGS) \
 	$(flac_CFLAGS) \
 	$(sqlite3_CFLAGS) \
@@ -49,7 +43,7 @@ AM_CPPFLAGS = $(glib_CFLAGS) \
 	-I$(top_srcdir)/src/include \
 	-Wall
 
-consonance_SOURCES = consonance.c \
+pragha_SOURCES = pragha.c \
 		init.c \
 		gui.c \
 		menu.c \
@@ -82,7 +76,7 @@ consonance_SOURCES = consonance.c \
 		sexy-icon-entry.h \
 		sexy-marshal.c \
 		sexy-marshal.h \
-		consonance.h \
+		pragha.h \
 		md5.h \
 		wav.h \
 		oggvorbis.h \

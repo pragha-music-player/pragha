@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 GtkWidget *stooltip;
 
@@ -207,5 +208,5 @@ void systray_next(GtkAction *action, struct con_win *cwin)
 
 void systray_quit(GtkAction *action, struct con_win *cwin)
 {
-	exit_consonance(NULL, cwin);
+	exit_pragha(NULL, cwin);
 }

@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 gint debug_level;
 
@@ -117,7 +118,7 @@ static void common_cleanup(struct con_win *cwin)
 				      dbus_filter_handler,
 				      cwin);
 	dbus_bus_remove_match(cwin->con_dbus,
-			      "type='signal',path='/org/consonance/DBus'",
+			      "type='signal',path='/org/pragha/DBus'",
 			      NULL);
 	dbus_connection_unref(cwin->con_dbus);
 
@@ -129,7 +130,7 @@ static void common_cleanup(struct con_win *cwin)
 	g_slice_free(struct con_win, cwin);
 }
 
-void exit_consonance(GtkWidget *widget, struct con_win *cwin)
+void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 {
 	if (cwin->cpref->save_playlist)
 		save_current_playlist_state(cwin);
@@ -153,6 +154,10 @@ gint main(gint argc, gchar *argv[])
 	cwin->clibao = g_slice_new0(struct con_libao);
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 	debug_level = 0;
+
+/*	setlocale(LC_ALL,"");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);*/
 
 	if (init_dbus(cwin) == -1) {
 		g_critical("Unable to init dbus connection");

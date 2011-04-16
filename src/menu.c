@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 gulong signal_search_click;
 gulong signal_search_key;
@@ -212,46 +213,46 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_widget_destroy(dialog);
 }
 
-/* Handler for the 'Play Audio CD' item in the Consonance menu */
+/* Handler for the 'Play Audio CD' item in the pragha menu */
 
 void play_audio_cd_action(GtkAction *action, struct con_win *cwin)
 {
 	play_audio_cd(cwin);
 }
 
-/* Handler for the 'Prev' item in the Consonance menu */
+/* Handler for the 'Prev' item in the pragha menu */
 
 void prev_action(GtkAction *action, struct con_win *cwin)
 {
 	play_prev_track(cwin);
 }
 
-/* Handler for the 'Play / Pause' item in the Consonance menu */
+/* Handler for the 'Play / Pause' item in the pragha menu */
 
 void play_pause_action(GtkAction *action, struct con_win *cwin)
 {
 	play_pause_resume(cwin);
 }
 
-/* Handler for the 'Stop' item in the Consonance menu */
+/* Handler for the 'Stop' item in the pragha menu */
 
 void stop_action(GtkAction *action, struct con_win *cwin)
 {
 	stop_playback(cwin);
 }
 
-/* Handler for the 'Next' item in the Consonance menu */
+/* Handler for the 'Next' item in the pragha menu */
 
 void next_action (GtkAction *action, struct con_win *cwin)
 {
 	play_next_track(cwin);
 }
 
-/* Handler for the 'Quit' item in the Consonance menu */
+/* Handler for the 'Quit' item in the pragha menu */
 
 void quit_action(GtkAction *action, struct con_win *cwin)
 {
-	exit_consonance(NULL, cwin);
+	exit_pragha(NULL, cwin);
 }
 
 /* Handler for 'Expand All' option in the Edit menu */
@@ -579,6 +580,7 @@ void about_widget(struct con_win *cwin)
 {
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
+		"matias ( mati86dl@gmail.com )",
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(cwin->mainwindow),
@@ -607,7 +609,7 @@ void community_action(GtkAction *action, struct con_win *cwin)
 
 void wiki_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *uri = "http://tux-goodies.wikispaces.com/bugs";
+	const gchar *uri = "http://pragha.wikispaces.com/";
 	open_url(uri);
 }
 

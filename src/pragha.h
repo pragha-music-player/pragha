@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,8 +16,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef CONSONANCE_H
-#define CONSONANCE_H
+#ifndef PRAGHA_H
+#define PRAGHA_H
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -45,6 +46,7 @@
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
 #include <cddb/cddb.h>
+/*#include <libintl.h>*/
 
 #include "mp3.h"
 #include "wav.h"
@@ -58,7 +60,7 @@
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
 #define BROWSE_MODE_SIZE           90
-#define ALBUM_ART_SIZE             32
+#define ALBUM_ART_SIZE             36
 #define PROGRESS_BAR_WIDTH         300
 #define COL_WIDTH_THRESH           30
 #define DEFAULT_PLAYLIST_COL_WIDTH 200
@@ -114,9 +116,9 @@
 #define LASTFM_MIN_PLAYTIME        30  /* seconds */
 #define LASTFM_MIN_DURATION        240 /* seconds */
 
-#define DBUS_PATH      "/org/consonance/DBus"
-#define DBUS_NAME      "org.consonance.DBus"
-#define DBUS_INTERFACE "org.consonance.DBus"
+#define DBUS_PATH      "/org/pragha/DBus"
+#define DBUS_NAME      "org.pragha.DBus"
+#define DBUS_INTERFACE "org.pragha.DBus"
 
 #define DBUS_SIG_PLAY     "play"
 #define DBUS_SIG_STOP     "stop"
@@ -1079,10 +1081,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Others */
 
-void exit_consonance(GtkWidget *widget, struct con_win *cwin);
+void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean        present);
 void	systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
 static GtkUIManager* create_systray_menu(struct con_win *cwin);
 
-#endif /* CONSONANCE_H */
+#endif /* PRAGHA_H */

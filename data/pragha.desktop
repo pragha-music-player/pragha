@@ -1,10 +1,10 @@
 [Desktop Entry]
-Name=Consonance
+Name=Pragha
 GenericName=Music Manager
 Type=Application
 Comment=A lightweight music manager
-Icon=consonance.png
-Exec=consonance %F
+Icon=pragha.png
+Exec=pragha %F
 Terminal=false
 MimeType=audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav
 Categories=GTK:Application;AudioVideo;Player

@@ -1,6 +1,6 @@
 SUBDIRS = src
 
-man_MANS = data/consonance.1
+man_MANS = data/pragha.1
 
 docdir= $(pkgdatadir)/doc
 doc_DATA = README ChangeLog FAQ
@@ -12,15 +12,13 @@ image_DATA = 		\
 	data/track.png  \
 	data/cover.png  \
 	data/genre.png	\
-	data/consonance.png	\
-	data/bookmark_starred.png \
-	data/bookmark_unstarred.png
+	data/pragha.png
 
 iconsdir = $(datadir)/icons/hicolor/scalable/apps
-icons_DATA = data/consonance.png
+icons_DATA = data/pragha.png
 
 desktopdir = $(datadir)/applications
-desktop_DATA = data/consonance.desktop
+desktop_DATA = data/pragha.desktop
 
 EXTRA_DIST = 		\
 	$(text_DATA)	\

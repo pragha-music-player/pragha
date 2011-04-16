@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -17,7 +18,7 @@
 
 #include <string.h>
 #include <fcntl.h>
-#include "consonance.h"
+#include "pragha.h"
 
 const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
 const gchar *mime_wav[] = {"audio/x-wav", NULL};

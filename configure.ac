@@ -1,8 +1,8 @@
-AC_INIT([consonance], [0.5.93], [m.sujith@gmail.com])
+AC_INIT([pragha], [0.6.0], [mati86dl@gmail.com])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PREREQ(2.61)
-AC_CONFIG_SRCDIR([src/consonance.c])
+AC_CONFIG_SRCDIR([src/pragha.c])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.

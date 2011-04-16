@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 gchar *main_menu_xml = "<ui>							\
 	<menubar name=\"Menubar\">						\
@@ -154,15 +155,15 @@ GtkActionEntry main_aentries[] = {
 	{"Play Audio CD", GTK_STOCK_CDROM, "_Play Audio CD",
 	 NULL, "Play a Audio CD", G_CALLBACK(play_audio_cd_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, "Prev Track",
-	 NULL, "Reproducir Pista Anterior", G_CALLBACK(prev_action)},
+	 NULL, "Prev Track", G_CALLBACK(prev_action)},
 	{"Play_Pause", GTK_STOCK_MEDIA_PLAY, "Play/Pause",
-	 NULL, "About Consonance", G_CALLBACK(play_pause_action)},
+	 NULL, "Play/Pause", G_CALLBACK(play_pause_action)},
 	{"Stop", GTK_STOCK_MEDIA_STOP, "Stop",
-	 NULL, "About Consonance", G_CALLBACK(stop_action)},
+	 NULL, "Stop", G_CALLBACK(stop_action)},
 	{"Next", GTK_STOCK_MEDIA_NEXT, "Next Track",
-	 NULL, "About Consonance", G_CALLBACK(next_action)},
+	 NULL, "Next Track", G_CALLBACK(next_action)},
 	{"Quit", GTK_STOCK_QUIT, "_Quit",
-	 "<Control>Q", "Quit consonance", G_CALLBACK(quit_action)},
+	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Expand All", GTK_STOCK_GOTO_LAST, "_Expand All in Library",
 	 NULL, "Expand All in Library", G_CALLBACK(expand_all_action)},
 	{"Collapse All", GTK_STOCK_GOTO_FIRST, "_Collapse All in Library",
@@ -199,13 +200,13 @@ GtkActionEntry main_aentries[] = {
 	{"genre_artist_album_track", GTK_STOCK_REFRESH, "Genre / Artist / Album / Track",
 	 NULL, "Genre / Artist / Album / Track", G_CALLBACK(genre_artist_album_track_library_tree)},
 	{"About", GTK_STOCK_ABOUT, "About",
-	 NULL, "About Consonance", G_CALLBACK(about_action)},
+	 NULL, "About pragha", G_CALLBACK(about_action)},
 	{"Home", GTK_STOCK_HOME, "Homepage",
-	 NULL, "Home of Consonance", G_CALLBACK(home_action)},
+	 NULL, "Homepage", G_CALLBACK(home_action)},
 	{"Community", GTK_STOCK_INFO, "Community",
-	 NULL, "Forum or Consonance", G_CALLBACK(community_action)},
+	 NULL, "Forum or pragha", G_CALLBACK(community_action)},
 	{"Wiki", GTK_STOCK_YES, "Wiki",
-	 NULL, "Wiki of Consonance", G_CALLBACK(wiki_action)},
+	 NULL, "Wiki of pragha", G_CALLBACK(wiki_action)},
 };
 
 GtkToggleActionEntry toggles_entries[] = {
@@ -786,7 +787,7 @@ static GtkWidget * create_toggles_buttons(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_file)), "button-press-event",
 			G_CALLBACK(library_page_right_click_cb), cwin);
 
-	l = gtk_label_new_with_mnemonic( "Consonance Music Manager" );
+	l = gtk_label_new_with_mnemonic( "Pragha Music Manager" );
 	gtk_label_set_angle(GTK_LABEL(l), 90);
 	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
 
@@ -1462,7 +1463,6 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	gtk_ui_manager_insert_action_group(main_menu, main_actions, 0);
 
 	action = gtk_action_group_get_action (main_actions, "Stop");
-	gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
 
 	action = gtk_action_group_get_action (main_actions, "Shuffle");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
@@ -1723,21 +1723,16 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 GtkWidget* create_playing_box(struct con_win *cwin)
 {
-	GtkWidget *now_playing_label, *track_length_label, *track_time_label;
-	GtkWidget *track_progress_bar, *track_progress_align;
-	GtkWidget *new_vbox,*new_hbox, *hbox;
-	GtkWidget *bookmark_image;
+GtkWidget *now_playing_label,*track_length_label,*track_time_label;
+GtkWidget *track_progress_bar, *track_progress_align;
+GtkWidget *new_vbox,*new_hbox; 
 
 	now_playing_label = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
 	gtk_label_set_markup(GTK_LABEL(now_playing_label),"<b>Not playing</b>");
-	gtk_misc_set_alignment (GTK_MISC(now_playing_label), 0 , 1);
-
-	bookmark_image = gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/bookmark_unstarred.png",
-											20, 20, NULL));
+	gtk_misc_set_alignment (GTK_MISC(now_playing_label),0,1);
 
 	new_vbox = gtk_vbox_new(FALSE, 1);
-	hbox = gtk_hbox_new(FALSE, 1);
 	new_hbox = gtk_hbox_new(FALSE, 1);
 
 	/* Setup track progress */
@@ -1766,13 +1761,6 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	cwin->track_time_label =	track_time_label;
 	cwin->track_length_label = 	track_length_label;
 
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   GTK_WIDGET(now_playing_label),
-			   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox),
- 			   bookmark_image,
- 			   FALSE, FALSE, 0);
-
 	gtk_box_pack_start(GTK_BOX(new_hbox),
 			   GTK_WIDGET(track_time_label),
 			   FALSE, FALSE, 3);
@@ -1784,13 +1772,12 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 			   FALSE, FALSE, 3);
 
 	gtk_box_pack_start(GTK_BOX(new_vbox),
-			   GTK_WIDGET(hbox),
+			   GTK_WIDGET(now_playing_label),
 			   TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(new_vbox),
 			   GTK_WIDGET(new_hbox),
 			   TRUE, TRUE, 0);
 return new_vbox;
-
 }
 
 GtkWidget* create_status_bar(struct con_win *cwin)
@@ -1894,8 +1881,8 @@ create_systray_icon (struct con_win *cwin)
 	#endif
 
 	/* create the tray icon */
-	icon = egg_tray_icon_new ("Consonance");
-	status_icon = gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/consonance.png", 20, 20, NULL);
+	icon = egg_tray_icon_new ("pragha");
+	status_icon = gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/pragha.png", 22, 22, NULL);
 
 	#if GTK_CHECK_VERSION(2, 10, 0)
 		gtk_tooltips_set_tip (tooltips,GTK_WIDGET(icon) , PACKAGE_STRING, NULL);

@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,14 +16,14 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 /* Handler for 'version' option on the cmdline */
 
 gboolean cmd_version(const gchar *opt_name, const gchar *val,
 		     struct con_win *cwin, GError **error)
 {
-	g_print("Consonance %s\n", PACKAGE_VERSION);
+	g_print("pragha %s\n", PACKAGE_VERSION);
 	exit(0);
 }
 

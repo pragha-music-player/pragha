@@ -1,5 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -15,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "consonance.h"
+#include "pragha.h"
 
 /* Get the first image file from the directory and create a pixbuf of that file */
 
@@ -158,7 +159,7 @@ void __update_current_song_info(struct con_win *cwin, gint length)
 
 	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, -1)
 	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, -1))
-		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">the</span></small> %s", 
+		str = g_markup_printf_escaped ("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s", 
 						str ,
 						cwin->cstate->curr_mobj->tags->artist, 
 						cwin->cstate->curr_mobj->tags->album);
