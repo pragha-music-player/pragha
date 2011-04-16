@@ -34,13 +34,6 @@ const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
 
-/*static gchar *asf_exts[] = { "asf", "wm", "wma", "wmv", NULL };
-static gchar *flac_exts[] = { "flac", NULL };
-static gchar *m4a_exts[] = { "m4a", NULL };
-static gchar *mp3_exts[] = { "mp3", "mp2", "mp1", "mpga", NULL };
-static gchar *ogg_exts[] = { "anx", "ogg", "ogm", NULL };
-static gchar *wav_exts[] = { "wav", NULL };*/
-
 /* Accepts only absolute filename */
 
 gboolean is_playable_file(const gchar *file)
@@ -194,7 +187,6 @@ enum file_type get_file_type(gchar *file)
 		else if (is_valid_mime(result, mime_mp4))
 			ret = FILE_MP4;
 		#endif
-
 		else ret = -1;
 	}
 

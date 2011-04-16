@@ -415,8 +415,10 @@ static void update_audio_device_oss(struct con_win *cwin)
 static void update_audio_device_pulse(struct con_win *cwin)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->audio_device_w), FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->cpref->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
+	cwin->cpref->software_mixer = FALSE;
 }
 
 static void update_audio_device_default(struct con_win *cwin)
@@ -435,8 +437,10 @@ static void update_audio_device_default(struct con_win *cwin)
 				 cwin->cpref->audio_device_w),
 				 0);
 
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->cpref->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
+	cwin->cpref->software_mixer = FALSE;
 }
 
 /* The enumerated audio devices have to be changed here */
@@ -597,11 +601,12 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->albumart_in_osd_w),
 					     TRUE);
-	if (cwin->cpref->actions_in_osd)
+	if (!can_support_actions())
+		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, FALSE);
+	else if (cwin->cpref->actions_in_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->actions_in_osd_w),
 					     TRUE);
-
 	/* Service Internet Option */
 
 	cwin->cpref->lw.lastfm_support = FALSE;
@@ -1037,7 +1042,7 @@ void save_preferences(struct con_win *cwin)
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
-				       50);
+				       cwin->cgst->curr_vol);
 	}
 
 	/* Save audio CD Device */

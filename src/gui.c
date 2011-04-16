@@ -102,6 +102,7 @@ gchar *playlist_tree_context_menu_xml = "<ui>	\
 	<popup>					\
 	<menuitem action=\"Add to playlist\"/>	\
 	<menuitem action=\"Replace playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>	\
 	<separator/>				\
 	<menuitem action=\"Delete\"/>		\
 	<menuitem action=\"Export\"/>		\
@@ -112,6 +113,7 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	<popup>						\
 	<menuitem action=\"Add to playlist\"/>		\
 	<menuitem action=\"Replace playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>		\
 	<separator/>					\
 	<menuitem action=\"Edit tags\"/>		\
 	<separator/>					\
@@ -263,6 +265,8 @@ GtkActionEntry playlist_tree_context_aentries[] = {
 	 NULL, "Add to playlist", G_CALLBACK(playlist_tree_add_to_playlist_action)},
 	{"Replace playlist", NULL, N_("_Replace playlist"),
 	 NULL, "Replace playlist", G_CALLBACK(playlist_tree_replace_playlist)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 NULL, "Replace and play", G_CALLBACK(playlist_tree_replace_and_play)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
 	 NULL, "Delete", G_CALLBACK(playlist_tree_delete)},
 	{"Export", GTK_STOCK_SAVE, N_("Export"),
@@ -274,6 +278,8 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 NULL, "Add to playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace playlist", NULL, N_("_Replace playlist"),
 	 NULL, "Replace playlist", G_CALLBACK(library_tree_replace_playlist)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 NULL, "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 NULL, "Edit tags", G_CALLBACK(library_tree_edit_tags)},
 	{"Move to trash", "user-trash", N_("Move to _trash"),
@@ -1543,7 +1549,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_button_set_relief(GTK_BUTTON(shuffle_button), GTK_RELIEF_NONE);
 	gtk_button_set_relief(GTK_BUTTON(repeat_button), GTK_RELIEF_NONE);
 	vol_button = gtk_volume_button_new();
-	vol_adjust = gtk_adjustment_new(0, 0, 100, 1, 5, 0);
+	vol_adjust = gtk_adjustment_new(100, 0, 100, 2, 5, 1);
 	gtk_scale_button_set_adjustment(GTK_SCALE_BUTTON(vol_button),
 					GTK_ADJUSTMENT(vol_adjust));
 
@@ -1592,10 +1598,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 			G_CALLBACK(repeat_button_handler), cwin );
 	g_signal_connect(G_OBJECT(vol_button), "value-changed",
 			 G_CALLBACK(vol_button_handler), cwin);
-
-	/* Initial state of various widgets from stored preferences */
-
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(vol_button), 50);
 
 	/* References to widgets */
 

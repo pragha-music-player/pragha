@@ -35,6 +35,12 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = pragha$(EXEEXT)
+@HAVE_GSTREAMER_PLUGINS_BASE_TRUE@am__append_1 = $(GSTREAMER_BASE_CFLAGS)
+@HAVE_GSTREAMER_PLUGINS_BASE_TRUE@am__append_2 = $(GSTREAMER_BASE_LIBS)				\
+@HAVE_GSTREAMER_PLUGINS_BASE_TRUE@	$(GSTREAMER_PLUGINS_BASE_LIBS) -lgstinterfaces-0.10
+
+@HAVE_LIBKEYBINDER_TRUE@am__append_3 = $(LIBKEYBINDER_CFLAGS)
+@HAVE_LIBKEYBINDER_TRUE@am__append_4 = $(LIBKEYBINDER_LIBS)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -47,10 +53,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_pragha_OBJECTS = pragha-bind.$(OBJEXT) pragha-cdda.$(OBJEXT) \
-	pragha-cmdline.$(OBJEXT) pragha-current-playlist.$(OBJEXT) \
-	pragha-db.$(OBJEXT) pragha-dbus.$(OBJEXT) \
-	pragha-filetree.$(OBJEXT) \
+am_pragha_OBJECTS = pragha-cdda.$(OBJEXT) pragha-cmdline.$(OBJEXT) \
+	pragha-current-playlist.$(OBJEXT) pragha-db.$(OBJEXT) \
+	pragha-dbus.$(OBJEXT) pragha-filetree.$(OBJEXT) \
 	pragha-gtkcellrendererbubble.$(OBJEXT) pragha-gui.$(OBJEXT) \
 	pragha-init.$(OBJEXT) pragha-librarytree.$(OBJEXT) \
 	pragha-menu.$(OBJEXT) pragha-musicobject.$(OBJEXT) \
@@ -136,8 +141,16 @@ GIO_VERSION = @GIO_VERSION@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GSTREAMER_BASE_CFLAGS = @GSTREAMER_BASE_CFLAGS@
+GSTREAMER_BASE_LIBS = @GSTREAMER_BASE_LIBS@
+GSTREAMER_BASE_REQUIRED_VERSION = @GSTREAMER_BASE_REQUIRED_VERSION@
+GSTREAMER_BASE_VERSION = @GSTREAMER_BASE_VERSION@
 GSTREAMER_CFLAGS = @GSTREAMER_CFLAGS@
 GSTREAMER_LIBS = @GSTREAMER_LIBS@
+GSTREAMER_PLUGINS_BASE_CFLAGS = @GSTREAMER_PLUGINS_BASE_CFLAGS@
+GSTREAMER_PLUGINS_BASE_LIBS = @GSTREAMER_PLUGINS_BASE_LIBS@
+GSTREAMER_PLUGINS_BASE_REQUIRED_VERSION = @GSTREAMER_PLUGINS_BASE_REQUIRED_VERSION@
+GSTREAMER_PLUGINS_BASE_VERSION = @GSTREAMER_PLUGINS_BASE_VERSION@
 GSTREAMER_REQUIRED_VERSION = @GSTREAMER_REQUIRED_VERSION@
 GSTREAMER_VERSION = @GSTREAMER_VERSION@
 GTK_CFLAGS = @GTK_CFLAGS@
@@ -165,6 +178,10 @@ LIBCDIO_PARANOIA_REQUIRED_VERSION = @LIBCDIO_PARANOIA_REQUIRED_VERSION@
 LIBCDIO_PARANOIA_VERSION = @LIBCDIO_PARANOIA_VERSION@
 LIBCDIO_REQUIRED_VERSION = @LIBCDIO_REQUIRED_VERSION@
 LIBCDIO_VERSION = @LIBCDIO_VERSION@
+LIBKEYBINDER_CFLAGS = @LIBKEYBINDER_CFLAGS@
+LIBKEYBINDER_LIBS = @LIBKEYBINDER_LIBS@
+LIBKEYBINDER_REQUIRED_VERSION = @LIBKEYBINDER_REQUIRED_VERSION@
+LIBKEYBINDER_VERSION = @LIBKEYBINDER_VERSION@
 LIBNOTIFY_CFLAGS = @LIBNOTIFY_CFLAGS@
 LIBNOTIFY_LIBS = @LIBNOTIFY_LIBS@
 LIBNOTIFY_REQUIRED_VERSION = @LIBNOTIFY_REQUIRED_VERSION@
@@ -281,23 +298,7 @@ INCLUDES = \
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
 	-I$(top_srcdir)
 
-pragha_CFLAGS = $(GSTREAMER_CFLAGS) 					\
-	$(GLIB_CFLAGS) 							\
-	$(GIO_CFLAGS) 							\
-	$(GTK_CFLAGS) 							\
-	$(SQLITE3_CFLAGS) 						\
-	$(TAGLIB_CFLAGS) 						\
-	$(TAGLIBC_CFLAGS) 						\
-	$(DBUS_CFLAGS) 							\
-	$(LIBNOTIFY_CFLAGS) 						\
-	$(LIBX11_CFLAGS)						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
-	-I$(top_srcdir)/src/include 					\
-	-Wall
-
-pragha_SOURCES = bind.c \
-		cdda.c \
+pragha_SOURCES = cdda.c \
 		cdda.h \
 		cmdline.c \
 		current-playlist.c \
@@ -308,7 +309,6 @@ pragha_SOURCES = bind.c \
 		gtkcellrendererbubble.h \
 		gui.c \
 		init.c \
-		keybinder.h \
 		librarytree.c \
 		menu.c \
 		musicobject.c \
@@ -322,20 +322,17 @@ pragha_SOURCES = bind.c \
 		tags.c \
 		utils.c
 
-pragha_LDFLAGS = $(GSTREAMER_LIBS) 					\
-	$(GLIB_LIBS) 							\
-	$(GIO_LIBS) 							\
-	$(GTK_LIBS) 							\
-	$(SQLITE3_LIBS)							\
-	$(TAGLIB_LIBS)							\
-	$(TAGLIBC_LIBS)							\
-	$(DBUS_LIBS) 							\
-	$(LIBNOTIFY_LIBS) 						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS) 						\
-	$(LIBX11_LIBS)
-
+pragha_CFLAGS = $(GSTREAMER_CFLAGS) $(GSTREAMER_BASE_CFLAGS) \
+	$(GLIB_CFLAGS) $(GIO_CFLAGS) $(GTK_CFLAGS) $(SQLITE3_CFLAGS) \
+	$(TAGLIB_CFLAGS) $(TAGLIBC_CFLAGS) $(DBUS_CFLAGS) \
+	$(LIBNOTIFY_CFLAGS) $(LIBX11_CFLAGS) $(LIBCDIO_CFLAGS) \
+	$(LIBCDDB_CFLAGS) -I$(top_srcdir)/src/include -Wall \
+	$(am__append_1) $(am__append_3)
+pragha_LDFLAGS = $(GSTREAMER_LIBS) $(GLIB_LIBS) $(GIO_LIBS) \
+	$(GTK_LIBS) $(SQLITE3_LIBS) $(TAGLIB_LIBS) $(TAGLIBC_LIBS) \
+	$(DBUS_LIBS) $(LIBNOTIFY_LIBS) $(LIBCDIO_LIBS) \
+	$(LIBCDIO_PARANOIA_LIBS) $(LIBCDDB_LIBS) $(LIBX11_LIBS) \
+	$(am__append_2) $(am__append_4)
 all: all-am
 
 .SUFFIXES:
@@ -423,7 +420,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-bind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-cdda.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-cmdline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-current-playlist.Po@am__quote@
@@ -468,22 +464,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-pragha-bind.o: bind.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.o -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
-
-pragha-bind.obj: bind.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.obj -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
 
 pragha-cdda.o: cdda.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-cdda.o -MD -MP -MF $(DEPDIR)/pragha-cdda.Tpo -c -o pragha-cdda.o `test -f 'cdda.c' || echo '$(srcdir)/'`cdda.c

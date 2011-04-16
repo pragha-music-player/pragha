@@ -100,8 +100,7 @@ void common_cleanup(struct con_win *cwin)
 	if (notify_is_initted())
 		notify_uninit();
 
-	#if GTK_CHECK_VERSION(2,20,0)
-	/* for Keybinder you need Gtk >= 2.20 */
+	#ifdef HAVE_LIBKEYBINDER
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);
 	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
@@ -174,23 +173,23 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	#if GTK_CHECK_VERSION (2, 20, 0)
-	/* for Keybinder you need Gtk >= 2.20 */
+	#ifdef HAVE_LIBKEYBINDER
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
 	#endif
 
+	init_state(cwin);
+
+	gdk_threads_enter();
+	init_gui(argc, argv, cwin);
+
 	if(backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
 		return -1;	
 	}
 
-	init_state(cwin);
-
-	gdk_threads_enter();
-	init_gui(argc, argv, cwin);
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 	gtk_main();
 	gdk_threads_leave();

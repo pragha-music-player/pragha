@@ -362,22 +362,15 @@ gboolean playlist_tree_button_release_cb(GtkWidget *widget,
 
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
-	/* Clear current playlist first */
-
-	clear_current_playlist(NULL, cwin);
-
 	if (list) {
-
-		/* Add all the rows to the current playlist */
+		clear_current_playlist(NULL, cwin);
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
@@ -401,6 +394,41 @@ void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	}
 }
 
+void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *list, *i;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	if (list) {
+		clear_current_playlist(NULL, cwin);
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			if (gtk_tree_path_get_depth(path) > 1)
+				add_row_current_playlist(path, cwin);
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			since main loop is no more. */
+
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					g_list_free(list);
+					return;
+				}
+			}
+		}
+		g_list_free(list);
+	}
+
+	play_first_current_playlist(cwin);
+}
+
 void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
 {
 	playlist_tree_add_to_playlist(cwin);
@@ -408,12 +436,10 @@ void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwi
 
 void playlist_tree_add_to_playlist(struct con_win *cwin)
 {
-	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 

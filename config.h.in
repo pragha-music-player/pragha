@@ -18,11 +18,17 @@
 /* Define if the GNU gettext() function is already present or preinstalled. */
 #undef HAVE_GETTEXT
 
+/* Define if gstreamer-plugins-base-0.10 >= 0.10 present */
+#undef HAVE_GSTREAMER_PLUGINS_BASE
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define if your <locale.h> file defines LC_MESSAGES. */
 #undef HAVE_LC_MESSAGES
+
+/* Define if keybinder >= 0.2.0 present */
+#undef HAVE_LIBKEYBINDER
 
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H

@@ -95,7 +95,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	if (!data)
 		return;
 
-	if (g_file_test(data, G_FILE_TEST_IS_DIR)){
+	if (g_file_test(data, G_FILE_TEST_IS_DIR)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(data, cwin);
 		else
@@ -103,7 +103,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 		g_free(data);
 		return;
 	}
-	else if (is_m3u_playlist(data)){
+	else if (is_m3u_playlist(data)) {
 		open_m3u_playlist(data, cwin);
 	}
 	else{
@@ -947,7 +947,7 @@ void wiki_action(GtkAction *action, struct con_win *cwin)
 
 void translate_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/c/Pragha/";
+	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
 	open_url(cwin, uri);
 }
 

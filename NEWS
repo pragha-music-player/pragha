@@ -1,7 +1,8 @@
 ==============================================================
-Overview of changes in Pragha 0.91 "Good news, or aberration?."
+Overview of changes in Pragha 0.9* "Good news, or aberration?."
 ==============================================================
 
+V0.91
 News:
 	Ported to use gstreamer.
 
@@ -14,8 +15,23 @@ Regressions: :(
  * Lastfm not working. Soon fix it using https://github.com/felipec/libscrobbler. Adding librefm and love support.
  * Lost Mod file support. Sorry.. but someone used it? In fact very easy to add support for this. Maybe fix it later.
 
-Then, everything should work. :)
+Then, everything else should work. :)
 
+V0.92
+News:
+	Use cubic volume if available (Need gstreamer-plugins-base-devel).
+	Sink volume with audio backend changes.
+	"Restore" replace and play option.
+
+Others Changes:
+	Depend on external libkeybinder (Optional).
+
+Bugs fixed:
+	Disable "Add actions.." options if the notifier does not support it.
+
+Updates Translations:
+	Add Hungiran translatiton.
+	Update others translation.
 
 ======================================================
 OTHERS REALESES:

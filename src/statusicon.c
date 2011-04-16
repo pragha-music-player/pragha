@@ -98,7 +98,7 @@ notify_Next_Callback (NotifyNotification *osd,
 }
 
 
-static gboolean
+gboolean
 can_support_actions( void )
 {
 	static gboolean supported;
@@ -231,20 +231,21 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 	if (event->type != GDK_SCROLL)
 		return;
 
-	cwin->cgst->curr_vol = backend_get_volume (cwin);
-
 	switch (event->direction){
 		case GDK_SCROLL_UP:
-			cwin->cgst->curr_vol += 2;
+			cwin->cgst->curr_vol += 0.02;
 			break;
 		case GDK_SCROLL_DOWN:
-			cwin->cgst->curr_vol -= 2;
+			cwin->cgst->curr_vol -= 0.02;
 			break;
 		default:
 			return;
 	}
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button),
-						cwin->cgst->curr_vol);
+
+	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
+
+	backend_update_volume(cwin);
+
 	return;
 }
 

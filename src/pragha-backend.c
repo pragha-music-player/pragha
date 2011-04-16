@@ -17,6 +17,10 @@
 
 #include "pragha.h"
 
+#if HAVE_GSTREAMER_PLUGINS_BASE
+#include <gst/interfaces/streamvolume.h>
+#endif
+
 #define DURATION_IS_VALID(x) (x != 0 && x != (guint64) -1)
 
 typedef enum {
@@ -120,26 +124,96 @@ backend_set_soft_volume(struct con_win *cwin)
 	g_object_set (G_OBJECT(cwin->cgst->pipeline), "flags", flags, NULL);
 }
 
-gint64
+gdouble
 backend_get_volume(struct con_win *cwin)
 {
-	gdouble vol;
+	gdouble volume;
 
-	g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &vol, NULL); 
-	return ((gint64) (vol * 100));
+#if HAVE_GSTREAMER_PLUGINS_BASE
+	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME)) {
+		volume = gst_stream_volume_get_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
+						    GST_STREAM_VOLUME_FORMAT_CUBIC);
+	} else {
+		g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
+	}
+#else
+	g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
+#endif
+
+	return volume;
+}
+
+gboolean
+emit_volume_changed_idle (struct con_win *cwin)
+{
+	cwin->cgst->curr_vol = backend_get_volume(cwin);
+
+	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
+	 * we still get another one anyway. */
+
+	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
+	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+
+	return FALSE;
 }
 
 void
-backend_set_volume(gdouble vol, struct con_win *cwin)
+volume_notify_cb (GObject *element, GstObject *prop_object, GParamSpec *pspec, struct con_win *cwin)
 {
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", vol/100, NULL);
-	cwin->cgst->curr_vol = (gint) vol * 100;
+	g_idle_add ((GSourceFunc) emit_volume_changed_idle, cwin);
+}
+
+void
+backend_set_volume(gdouble volume, struct con_win *cwin)
+{
+	volume = CLAMP (volume, 0.0, 1.0);
+
+	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
+	 * we still get another one anyway. */
+
+	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
+#if HAVE_GSTREAMER_PLUGINS_BASE
+	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME))
+		gst_stream_volume_set_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
+					      GST_STREAM_VOLUME_FORMAT_CUBIC, volume);
+	else
+		g_object_set (cwin->cgst->pipeline, "volume", volume, NULL);
+#else
+	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
+#endif
+	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
+
+	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * volume);
+	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+
+	cwin->cgst->curr_vol = volume;
 }
 
 void
 backend_update_volume(struct con_win *cwin)
 {
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", cwin->cgst->curr_vol/100, NULL);
+	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
+
+	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
+	 * we still get another one anyway. */
+
+	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
+#if HAVE_GSTREAMER_PLUGINS_BASE
+	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME))
+		gst_stream_volume_set_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
+					      GST_STREAM_VOLUME_FORMAT_CUBIC, cwin->cgst->curr_vol);
+	else
+		g_object_set (cwin->cgst->pipeline, "volume", cwin->cgst->curr_vol, NULL);
+#else
+	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", cwin->cgst->curr_vol, NULL);
+#endif
+	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
+
+	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
+	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 }
 
 gboolean
@@ -165,6 +239,25 @@ backend_is_paused(struct con_win *cwin)
 }
 
 void
+waitforpipeline(int state, struct con_win *cwin)
+{
+	GstState istate, ipending;
+	gst_element_get_state(cwin->cgst->pipeline, &istate, &ipending, GST_CLOCK_TIME_NONE);
+
+	if ((istate == GST_STATE_VOID_PENDING) || (istate == state))
+	        return;
+
+	gst_element_set_state(cwin->cgst->pipeline, state);
+
+	do {
+		gst_element_get_state(cwin->cgst->pipeline, &istate, &ipending, GST_CLOCK_TIME_NONE);
+		if (istate == GST_STATE_VOID_PENDING)
+			return;
+
+	} while (istate != state);
+}
+
+void
 backend_stop(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Stopping playback");
@@ -179,7 +272,7 @@ backend_stop(struct con_win *cwin)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	gst_element_set_state (GST_ELEMENT(cwin->cgst->pipeline), GST_STATE_NULL);
+	waitforpipeline(GST_STATE_NULL, cwin);
 
 	unset_current_song_info(cwin);
 	unset_track_progress_bar(cwin);
@@ -199,7 +292,7 @@ backend_pause(struct con_win *cwin)
 		cwin->cgst->timer = 0;
 	}
 
-	gst_element_set_state (GST_ELEMENT(cwin->cgst->pipeline), GST_STATE_PAUSED);
+	waitforpipeline(GST_STATE_PAUSED, cwin);
 
 	cwin->cstate->state = ST_PAUSED;
 	play_button_toggle_state(cwin);
@@ -210,7 +303,7 @@ backend_resume(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Resuming playback");
 
-	gst_element_set_state(GST_ELEMENT(cwin->cgst->pipeline), GST_STATE_PLAYING);
+	waitforpipeline(GST_STATE_PLAYING, cwin);
 
 	if(cwin->cgst->timer == 0)
 		cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
@@ -262,7 +355,7 @@ backend_play(struct con_win *cwin)
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
 	}
 
-	gst_element_set_state(GST_ELEMENT(cwin->cgst->pipeline), GST_STATE_PLAYING);
+	waitforpipeline(GST_STATE_PLAYING, cwin);
 
 	if(cwin->cgst->timer == 0)
 		cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
@@ -293,22 +386,8 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 void
 backend_quit(struct con_win *cwin)
 {
-	gdouble volume;
-	gdouble step;
-
 	if (cwin->cgst->pipeline != NULL) {
-		volume = backend_get_volume (cwin);
-
-		if ((cwin->cstate->state == ST_PLAYING) && (volume != 0)) {
-			while(volume > 0) {
-				step = volume - volume / 5;
-				backend_set_volume(step < 0.1 ? 0 : step, cwin);
-				volume = backend_get_volume (cwin);
-				g_usleep(40000);
-			}
-		}
-
-		gst_element_set_state(GST_ELEMENT(cwin->cgst->pipeline), GST_STATE_NULL);
+		waitforpipeline(GST_STATE_NULL, cwin);
 		gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
 		cwin->cgst->pipeline = NULL;
 	}
@@ -322,7 +401,10 @@ gint backend_init(struct con_win *cwin)
 
 	if ((cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin")) == NULL)
 		return -1;
-	
+
+	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "deep-notify::volume",
+			  G_CALLBACK (volume_notify_cb), cwin);
+
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
 
@@ -347,10 +429,13 @@ gint backend_init(struct con_win *cwin)
 	gst_bus_add_watch(bus, (GstBusFunc) backend_gstreamer_bus_call, cwin);
 
 	backend_set_soft_volume(cwin);
+	emit_volume_changed_idle(cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 
 	gst_object_unref(bus);
+
+	CDEBUG(DBG_INFO, "Pipeline construction complete");
 
 	return 0;
 }

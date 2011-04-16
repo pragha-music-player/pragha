@@ -565,7 +565,7 @@ void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
 
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
-	cwin->cgst->curr_vol = value;
+	cwin->cgst->curr_vol = value / 100;
 	backend_update_volume(cwin);
 }
 

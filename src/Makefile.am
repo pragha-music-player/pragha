@@ -7,10 +7,7 @@ INCLUDES =								\
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
 	-I$(top_srcdir)
 
-pragha_CFLAGS = $(DEFINES)
-
-pragha_SOURCES =bind.c \
-		cdda.c \
+pragha_SOURCES =cdda.c \
 		cdda.h \
 		cmdline.c \
 		current-playlist.c \
@@ -21,7 +18,6 @@ pragha_SOURCES =bind.c \
 		gtkcellrendererbubble.h \
 		gui.c \
 		init.c \
-		keybinder.h \
 		librarytree.c \
 		menu.c \
 		musicobject.c \
@@ -35,7 +31,8 @@ pragha_SOURCES =bind.c \
 		tags.c \
 		utils.c
 
-pragha_CFLAGS =	$(GSTREAMER_CFLAGS) 					\
+pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
+	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
 	$(GIO_CFLAGS) 							\
 	$(GTK_CFLAGS) 							\
@@ -50,7 +47,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS) 					\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-pragha_LDFLAGS = $(GSTREAMER_LIBS) 					\
+pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
@@ -63,3 +60,16 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS) 					\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS) 						\
 	$(LIBX11_LIBS)
+
+if HAVE_GSTREAMER_PLUGINS_BASE
+pragha_CFLAGS += $(GSTREAMER_BASE_CFLAGS)
+pragha_LDFLAGS += $(GSTREAMER_BASE_LIBS)				\
+	$(GSTREAMER_PLUGINS_BASE_LIBS) -lgstinterfaces-0.10
+endif
+
+if HAVE_LIBKEYBINDER
+pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
+pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
+endif
+
+

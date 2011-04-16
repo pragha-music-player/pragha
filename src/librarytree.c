@@ -1017,6 +1017,41 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	}
 }
 
+void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model, *filter_model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *list, *i;
+
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		clear_current_playlist(action, cwin);
+
+		/* Add all the rows to the current playlist */
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			add_row_current_playlist(path, model, cwin);
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+
+			while(gtk_events_pending())
+				if (gtk_main_iteration_do(FALSE))
+					return;
+		}
+		
+		g_list_free(list);
+	}
+	play_first_current_playlist(cwin);
+}
+
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
 {
 	library_tree_add_to_playlist(cwin);

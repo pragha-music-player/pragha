@@ -962,8 +962,7 @@ gint init_notify(struct con_win *cwin)
 	return 0;
 }
 
-#if GTK_CHECK_VERSION (2, 20, 0)
-/* for Keybinder you need Gtk >= 2.20 */
+#ifdef HAVE_LIBKEYBINDER
 gint init_keybinder(struct con_win *cwin)
 {
 	keybinder_init ();

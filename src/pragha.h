@@ -23,6 +23,10 @@
 #include <config.h>
 #endif
 
+#ifdef HAVE_LIBKEYBINDER
+#include <keybinder.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -51,7 +55,6 @@
 
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
-#include "keybinder.h"
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
@@ -761,6 +764,7 @@ void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
+void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void library_tree_add_to_playlist(struct con_win *cwin);
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
@@ -822,6 +826,7 @@ gboolean playlist_tree_button_release_cb(GtkWidget *widget,
 				      GdkEventButton *event,
 				      struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
+void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
@@ -972,8 +977,8 @@ void backend_seek (guint64 seek, struct con_win *cwin);
 gint64 backend_get_current_length(struct con_win *cwin);
 gint64 backend_get_current_position(struct con_win *cwin);
 void backend_set_soft_volume(struct con_win *cwin);
-gint64 backend_get_volume (struct con_win *cwin);
-void backend_set_volume (gdouble vol, struct con_win *cwin);
+gdouble backend_get_volume (struct con_win *cwin);
+void backend_set_volume (gdouble volume, struct con_win *cwin);
 void backend_update_volume (struct con_win *cwin);
 gboolean backend_is_playing(struct con_win *cwin);
 gboolean backend_is_paused(struct con_win *cwin);
@@ -997,6 +1002,7 @@ gint open_audio_device(gint samplerate, gint channels,
 
 /* Systray functions */
 
+gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
 gboolean status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin);
 gboolean status_get_tooltip_cb (GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,GtkTooltip *tooltip, struct con_win *cwin);
