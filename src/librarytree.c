@@ -1272,6 +1272,7 @@ void init_library_view(struct con_win *cwin)
 
 	g_object_ref(filter_model); 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
 	/* Query and insert entries */
 
