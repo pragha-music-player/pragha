@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Swedish\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 16:52-0300\n"
+"POT-Creation-Date: 2010-07-29 21:23-0300\n"
 "PO-Revision-Date: 2010-07-14 13:24-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Swedish team <LL@li.org>\n"
@@ -597,27 +597,27 @@ msgstr "Supportad media"
 msgid "All files"
 msgstr "Alla filer"
 
-#: src/menu.c:584 src/menu.c:718
+#: src/menu.c:588 src/menu.c:722
 msgid "Library scan complete"
 msgstr "Biblioteksavsökning färdig"
 
-#: src/menu.c:799
+#: src/menu.c:803
 msgid "Total Tracks:"
 msgstr "Antal Spår:"
 
-#: src/menu.c:801
+#: src/menu.c:805
 msgid "Total Artists:"
 msgstr "Antal Artister:"
 
-#: src/menu.c:803
+#: src/menu.c:807
 msgid "Total Albums:"
 msgstr "Antal Album:"
 
-#: src/menu.c:805
+#: src/menu.c:809
 msgid "Statistics"
 msgstr "Statistik"
 
-#: src/menu.c:822
+#: src/menu.c:826
 msgid "translator-credits"
 msgstr "Översättare"
 

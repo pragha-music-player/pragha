@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ukrainian\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 16:52-0300\n"
+"POT-Creation-Date: 2010-07-29 21:23-0300\n"
 "PO-Revision-Date: 2010-07-14 13:24-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Ukrainian\n"
@@ -617,27 +617,27 @@ msgstr "Підтримувані типи"
 msgid "All files"
 msgstr "Всі файли"
 
-#: src/menu.c:584 src/menu.c:718
+#: src/menu.c:588 src/menu.c:722
 msgid "Library scan complete"
 msgstr "Колекція просканувалася"
 
-#: src/menu.c:799
+#: src/menu.c:803
 msgid "Total Tracks:"
 msgstr "Кількість Треків:"
 
-#: src/menu.c:801
+#: src/menu.c:805
 msgid "Total Artists:"
 msgstr "Кількість Виконавців:"
 
-#: src/menu.c:803
+#: src/menu.c:807
 msgid "Total Albums:"
 msgstr "Кількість Альбомів:"
 
-#: src/menu.c:805
+#: src/menu.c:809
 msgid "Statistics"
 msgstr "Статистика"
 
-#: src/menu.c:822
+#: src/menu.c:826
 msgid "translator-credits"
 msgstr ""
 

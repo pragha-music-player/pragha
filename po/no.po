@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 16:52-0300\n"
+"POT-Creation-Date: 2010-07-29 21:23-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: \n"
@@ -611,27 +611,27 @@ msgstr "Støttet media"
 msgid "All files"
 msgstr "Alle filer"
 
-#: src/menu.c:584 src/menu.c:718
+#: src/menu.c:588 src/menu.c:722
 msgid "Library scan complete"
 msgstr "Skanning av samling ferdig"
 
-#: src/menu.c:799
+#: src/menu.c:803
 msgid "Total Tracks:"
 msgstr "Antall Låter:"
 
-#: src/menu.c:801
+#: src/menu.c:805
 msgid "Total Artists:"
 msgstr "Antall Artister:"
 
-#: src/menu.c:803
+#: src/menu.c:807
 msgid "Total Albums:"
 msgstr "Antall Album:"
 
-#: src/menu.c:805
+#: src/menu.c:809
 msgid "Statistics"
 msgstr "Statistikker"
 
-#: src/menu.c:822
+#: src/menu.c:826
 msgid "translator-credits"
 msgstr ""
 

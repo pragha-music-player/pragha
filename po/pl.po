@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Polski (polish)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 16:52-0300\n"
+"POT-Creation-Date: 2010-07-29 21:23-0300\n"
 "PO-Revision-Date: 2010-05-20 18:41+0100\n"
 "Last-Translator: Sid <translations@sidowo.uni.cc>\n"
 "Language-Team: Polski (polish) <translations@sidowo.uni.cc>\n"
@@ -603,27 +603,27 @@ msgstr "Obsługiwane formaty"
 msgid "All files"
 msgstr "Wszystkie pliki"
 
-#: src/menu.c:584 src/menu.c:718
+#: src/menu.c:588 src/menu.c:722
 msgid "Library scan complete"
 msgstr "Zakończono skanowanie biblioteki"
 
-#: src/menu.c:799
+#: src/menu.c:803
 msgid "Total Tracks:"
 msgstr "Utworów:"
 
-#: src/menu.c:801
+#: src/menu.c:805
 msgid "Total Artists:"
 msgstr "Wykonawców:"
 
-#: src/menu.c:803
+#: src/menu.c:807
 msgid "Total Albums:"
 msgstr "Albumów:"
 
-#: src/menu.c:805
+#: src/menu.c:809
 msgid "Statistics"
 msgstr "Statystyki"
 
-#: src/menu.c:822
+#: src/menu.c:826
 msgid "translator-credits"
 msgstr ""
 "Sid\n"

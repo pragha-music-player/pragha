@@ -867,7 +867,7 @@ gint init_dbase_schema(struct con_win *cwin)
 				"(%s, %s, UNIQUE(name));",
 				"id INTEGER PRIMARY KEY",
 				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query,cwin,  NULL))
+	if (!exec_sqlite_query(query, cwin, NULL))
 		return -1;
 
 
@@ -905,7 +905,7 @@ gint init_dbase_schema(struct con_win *cwin)
 				"(%s, %s, UNIQUE(name));",
 				"id INTEGER PRIMARY KEY",
 				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query,cwin,  NULL))
+	if (!exec_sqlite_query(query, cwin, NULL))
 		return -1;
 
 	/* Create 'PLAYLIST_TRACKS' table */

@@ -910,6 +910,29 @@ gint init_config(struct con_win *cwin)
 		return 0;
 }
 
+static gboolean rescand_icompatible_db(gpointer data)
+{
+	struct con_win *cwin = data;
+
+	GtkWidget *dialog;
+	gint result;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+					GTK_DIALOG_MODAL,
+					GTK_MESSAGE_WARNING,
+					GTK_BUTTONS_YES_NO,
+					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
+					"Want to upgrade the collection?."));
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if( result == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+
+	return TRUE;
+}
+
 gint init_musicdbase(struct con_win *cwin)
 {
 	gint ret;
@@ -921,6 +944,15 @@ gint init_musicdbase(struct con_win *cwin)
 	cwin->cdbase->db_file = g_strdup_printf("%s%s", home,
 						"/pragha/pragha.db");
 
+
+	if (g_ascii_strcasecmp(cwin->cpref->installed_version, PACKAGE_VERSION) !=0 ) {
+		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
+		ret = g_unlink(cwin->cdbase->db_file);
+		if (ret != 0)
+			g_warning("%s", strerror(ret));
+		gtk_init_add(rescand_icompatible_db, cwin);
+	}
+
 	/* Create the database file */
 
 	ret = sqlite3_open(cwin->cdbase->db_file, &cwin->cdbase->db);
@@ -929,14 +961,6 @@ gint init_musicdbase(struct con_win *cwin)
 			   cwin->cdbase->db_file);
 		g_free(cwin->cdbase->db_file);
 		return -1;
-	}
-
-	if (g_ascii_strcasecmp(cwin->cpref->installed_version, PACKAGE_VERSION)) {
-		g_critical("Music database is incompatible with previous to 0.8.0. Please rescand library.");
-		if (drop_dbase_schema(cwin) == -1) {
-			g_critical("Unable to drop database schema");
-			return -1;
-		}
 	}
 
 	return init_dbase_schema(cwin);

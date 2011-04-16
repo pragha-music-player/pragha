@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-29 16:52-0300\n"
+"POT-Creation-Date: 2010-07-29 21:23-0300\n"
 "PO-Revision-Date: 2010-07-14 13:21-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Deutsch\n"
@@ -597,27 +597,27 @@ msgstr "Unterstützte Mediendateien"
 msgid "All files"
 msgstr "Alle Dateien"
 
-#: src/menu.c:584 src/menu.c:718
+#: src/menu.c:588 src/menu.c:722
 msgid "Library scan complete"
 msgstr "Einlesen der Musikbibliothek abgeschlossen"
 
-#: src/menu.c:799
+#: src/menu.c:803
 msgid "Total Tracks:"
 msgstr "Gesamtzahl der Titel:"
 
-#: src/menu.c:801
+#: src/menu.c:805
 msgid "Total Artists:"
 msgstr "Anzahl der Künstler:"
 
-#: src/menu.c:803
+#: src/menu.c:807
 msgid "Total Albums:"
 msgstr "Anzahl der Alben:"
 
-#: src/menu.c:805
+#: src/menu.c:809
 msgid "Statistics"
 msgstr "Statistiken"
 
-#: src/menu.c:822
+#: src/menu.c:826
 msgid "translator-credits"
 msgstr "Übersetzer"
 

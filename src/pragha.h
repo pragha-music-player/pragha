@@ -655,7 +655,6 @@ static inline void lastfm_track_reset(struct con_win *cwin,
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
-
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void play_audio_cd_action(GtkAction *action, struct con_win *cwin);
 void prev_action(GtkAction *action, struct con_win *cwin);
@@ -685,6 +684,8 @@ void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
+
+void rescan_library_handler(struct con_win *cwin);
 
 /* Global Hotkeys handlers */
 void keybind_prev_handler (const char *keystring, gpointer data);

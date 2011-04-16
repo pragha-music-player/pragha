@@ -512,8 +512,12 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 }
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
-
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
+{
+	rescan_library_handler(cwin);
+}
+
+void rescan_library_handler(struct con_win *cwin)
 {
 	GtkWidget *msg_dialog;
 	GtkWidget *progress_bar;
