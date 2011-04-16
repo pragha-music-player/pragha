@@ -1,8 +1,35 @@
 =====================================================
-Overview of changes in Pragha 0.7.3
+Overview of changes in Pragha 0.7.4
 =====================================================
 
-Drop file pane in favor of gtk-file-chooser.
+News:
+	Add next action to notifications.
+	Improved time library indexing.
+	Add option to start pragha minimized, fullscreen, or remember the last window state. Inspired in Nathan Wayde patch. Thanks!.
+	Add option to minimize pragha when close window.
+	Add button in panel to leave fullscreen.
+
+Others Changes:
+	Set the labels to wrap on display properties dialog. Thanks to Nathan Wayde.  
+	New Layout of edit track dialog.
+	Use AM_SILENT_RULES if available.
+
+Updates Translations:
+	German translation thanks to PhotonX.
+	Polish translation thanks to Sid.
+	Update po files.
+
+Bugs fixed:
+	Now work queue list when sequential playlist.
+	Hide sidebar when restore mainwindow and originally no showed.
+	Hide album art when restore mainwindow if set to no show.
+	Fixes some memory leaks.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.3
+Drop File Pane in favor of gtk-file-chooser.
 	Support for adding folders recursively in file chooser. (Based on Audacius code. /src/ui_fileopen.c)
 	Support for recent files in file chooser.
 	Now remember last folder used.
@@ -23,10 +50,6 @@ Bugs fixed:
 	Use g_get_user_config_dir() instead of g_get_home_dir() and then concatenating "/.config". Thanks to Sebcactus.
 	OK/Cancel buttons in Edit Tags and Save Playlist dialog are inverted.
 	When move around the library with the keyboard, this does not advance.
-
-======================================================
-OTHERS REALESES:
-======================================================
 
 V0.7.2
 Basic queue playlist support!-)

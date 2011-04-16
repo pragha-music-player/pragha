@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -312,6 +312,19 @@ void unset_album_art(struct con_win *cwin)
 			  GTK_WIDGET(cwin->album_art));
 	gtk_widget_show_all(cwin->album_art_frame);
 	}
+}
+
+/* Handler for the 'Leave fullscren' button item in Panel */
+
+void
+unfull_button_handler (GtkButton *button, struct con_win *cwin)
+{
+	GtkAction *action_fullscreen;
+
+	action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
+
 }
 
 /* Handler for the 'Shuffle' button item in Panel */

@@ -8401,527 +8401,6 @@ m4_ifndef([_LT_AC_LANG_RC_CONFIG],	[AC_DEFUN([_LT_AC_LANG_RC_CONFIG])])
 m4_ifndef([AC_LIBTOOL_CONFIG],		[AC_DEFUN([AC_LIBTOOL_CONFIG])])
 m4_ifndef([_LT_AC_FILE_LTDLL_C],	[AC_DEFUN([_LT_AC_FILE_LTDLL_C])])
 
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
-dnl         The Xfce development team. All rights reserved.
-dnl
-dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
-dnl
-dnl This program is free software; you can redistribute it and/or modify it
-dnl under the terms of the GNU General Public License as published by the Free
-dnl Software Foundation; either version 2 of the License, or (at your option)
-dnl any later version.
-dnl
-dnl This program is distributed in the hope that it will be useful, but WITHOUT
-dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-dnl more details.
-dnl
-dnl You should have received a copy of the GNU General Public License along with
-dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-dnl Place, Suite 330, Boston, MA  02111-1307  USA
-dnl
-dnl xdt-depends
-dnl -----------
-dnl  Contains M4 macros to check for software dependencies.
-dnl  Partly based on prior work of the XDG contributors.
-dnl
-
-
-
-dnl We need recent a autoconf version
-AC_PREREQ([2.53])
-
-
-
-dnl XDT_PROG_PKG_CONFIG()
-dnl
-dnl Checks for the freedesktop.org pkg-config
-dnl utility and sets the PKG_CONFIG environment
-dnl variable to the full path if found.
-dnl
-AC_DEFUN([XDT_PROG_PKG_CONFIG],
-[
-  # minimum supported version of pkg-config
-  xdt_cv_PKG_CONFIG_MIN_VERSION=0.9.0
-
-  # lookup pkg-config utility
-  if test x"$PKG_CONFIG" = x""; then
-    AC_PATH_PROG([PKG_CONFIG], [pkg-config], [no])
-
-    if test x"$PKG_CONFIG" = x"no"; then
-      echo "*** The pkg-config utility could not be found on your system."
-      echo "*** Make sure it is in your path, or set the PKG_CONFIG"
-      echo "*** environment variable to the full path to pkg-config."
-      echo "*** You can download pkg-config from the freedesktop.org"
-      echo "*** software repository at"
-      echo "***"
-      echo "***    http://www.freedesktop.org/software/pkgconfig"
-      echo "***"
-      exit 1
-    fi
-
-    # check pkg-config version
-    AC_MSG_CHECKING([for pkg-config >= $xdt_cv_PKG_CONFIG_MIN_VERSION])
-    if $PKG_CONFIG --atleast-pkgconfig-version $xdt_cv_PKG_CONFIG_MIN_VERSION; then
-      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
-      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
-    else
-      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
-      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
-      echo "*** Your version of pkg-config is too old. You need atleast"
-      echo "*** pkg-config $xdt_cv_PKG_CONFIG_MIN_VERSION or newer. You can download pkg-config "
-      echo "*** from the freedesktop.org software repository at"
-      echo "***"
-      echo "***    http://www.freedesktop.org/software/pkgconfig"
-      echo "***"
-      exit 1
-    fi
-  fi
-])
-
-
-
-dnl XDT_CHECK_PACKAGE(varname, package, version, [action-if], [action-if-not])
-dnl
-dnl Checks if "package" >= "version" is installed on the
-dnl target system, using the pkg-config utility. If the
-dnl dependency is met, "varname"_CFLAGS, "varname"_LIBS,
-dnl "varname"_VERSION and "varname"_REQUIRED_VERSION
-dnl will be set and marked for substition.
-dnl
-dnl "varname"_REQUIRED_VERSION will be set to the value of
-dnl "version". This is mostly useful to automatically
-dnl place the correct version information into the RPM
-dnl .spec file.
-dnl
-dnl In addition, if the dependency is met, "action-if" will
-dnl be executed if given.
-dnl
-dnl If the package check fails, "action-if-not" will be
-dnl executed. If this parameter isn't specified, a diagnostic
-dnl message will be printed and the configure script will
-dnl be terminated with exit code 1.
-dnl
-AC_DEFUN([XDT_CHECK_PACKAGE],
-[
-  XDT_PROG_PKG_CONFIG()
-
-  AC_MSG_CHECKING([for $2 >= $3])
-  if $PKG_CONFIG "--atleast-version=$3" "$2" >/dev/null 2>&1; then
-    $1_VERSION=`$PKG_CONFIG --modversion "$2"`
-    AC_MSG_RESULT([$$1_VERSION])
-
-    AC_MSG_CHECKING([$1_CFLAGS])
-    $1_CFLAGS=`$PKG_CONFIG --cflags "$2"`
-    AC_MSG_RESULT([$$1_CFLAGS])
-
-    AC_MSG_CHECKING([$1_LIBS])
-    $1_LIBS=`$PKG_CONFIG --libs "$2"`
-    AC_MSG_RESULT([$$1_LIBS])
-
-    $1_REQUIRED_VERSION=$3
-
-    AC_SUBST([$1_VERSION])
-    AC_SUBST([$1_CFLAGS])
-    AC_SUBST([$1_LIBS])
-    AC_SUBST([$1_REQUIRED_VERSION])
-
-    ifelse([$4], , , [$4])
-  elif $PKG_CONFIG --exists "$2" >/dev/null 2>&1; then
-    xdt_cv_version=`$PKG_CONFIG --modversion "$2"`
-    AC_MSG_RESULT([found, but $xdt_cv_version])
-
-    ifelse([$5], ,
-    [
-      echo "*** The required package $2 was found on your system,"
-      echo "*** but the installed version ($xdt_cv_version) is too old."
-      echo "*** Please upgrade $2 to atleast version $3, or adjust"
-      echo "*** the PKG_CONFIG_PATH environment variable if you installed"
-      echo "*** the new version of the package in a nonstandard prefix so"
-      echo "*** pkg-config is able to find it."
-      exit 1
-    ], [$5])
-  else
-    AC_MSG_RESULT([not found])
-
-    ifelse([$5], ,
-    [
-      echo "*** The required package $2 was not found on your system."
-      echo "*** Please install $2 (atleast version $3) or adjust"
-      echo "*** the PKG_CONFIG_PATH environment variable if you"
-      echo "*** installed the package in a nonstandard prefix so that"
-      echo "*** pkg-config is able to find it."
-      exit 1
-    ], [$5])
-  fi
-])
-
-
-
-dnl XDT_CHECK_OPTIONAL_PACKAGE(varname, package, version, optionname, helpstring, [default])
-dnl
-dnl Checks for an optional dependency on "package" >= "version". "default"
-dnl can be "yes" or "no" (defaults to "yes" if not specified) and controls
-dnl whether configure should check this dependency by default, or only if
-dnl the user explicitly enables it using a command line switch.
-dnl
-dnl This macro automatically adds a commandline switch based on the "optionname"
-dnl parameter (--enable-optionname/--disable-optionname), which allows the
-dnl user to explicitly control whether this optional dependency should be
-dnl enabled or not. The "helpstring" parameter gives a brief(!) description
-dnl about this dependency.
-dnl
-dnl If the user chose to enable this dependency and the required package
-dnl was found, this macro defines the variable "varname"_FOUND and sets it
-dnl to the string "yes", in addition to the 4 variables set by XDT_CHECK_PACKAGE.
-dnl But "varname"_FOUND will not be marked for substition. Furthermore,
-dnl a CPP define HAVE_"varname" will be placed in config.h (or added to
-dnl the cc command line, depending on your configure.ac) and set to
-dnl 1.
-dnl
-AC_DEFUN([XDT_CHECK_OPTIONAL_PACKAGE],
-[
-  AC_REQUIRE([XDT_PROG_PKG_CONFIG])
-
-  AC_ARG_ENABLE([$4],
-AC_HELP_STRING([--enable-$4], [Enable checking for $5 (default=m4_default([$6], [yes]))])
-AC_HELP_STRING([--disable-$4], [Disable checking for $5]),
-    [xdt_cv_$1_check=$enableval], [xdt_cv_$1_check=m4_default([$6], [yes])])
-
-  if test x"$xdt_cv_$1_check" = x"yes"; then
-    if $PKG_CONFIG --exists "$2 >= $3" >/dev/null 2>&1; then
-      XDT_CHECK_PACKAGE([$1], [$2], [$3],
-      [
-        AC_DEFINE([HAVE_$1], [1], [Define if $2 >= $3 present])
-        $1_FOUND="yes"
-      ])
-    else
-      AC_MSG_CHECKING([for optional package $2 >= $3])
-      AC_MSG_RESULT([not found])
-    fi
-  else
-    AC_MSG_CHECKING([for optional package $2])
-    AC_MSG_RESULT([disabled])
-  fi
-
-  AM_CONDITIONAL([HAVE_$1], [test x"$$1_FOUND" = x"yes"])
-])
-
-
-
-dnl BM_DEPEND(varname, package, version)
-dnl
-dnl Simple wrapper for XDT_CHECK_PACKAGE("varname", "package", "version"). Kept
-dnl for backward compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_DEPEND],
-[
-  XDT_CHECK_PACKAGE([$1], [$2], [$3])
-])
-
-
-
-dnl BM_DEPEND_CHECK(var, pkg, version, name, helpstring, default)
-dnl
-dnl Simple wrapper for XDT_CHECK_OPTIONAL_PACKAGE(). Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_DEPEND_CHECK],
-[
-  XDT_CHECK_OPTIONAL_PACKAGE([$1], [$2], [$3], [$4], [$5], [$6])
-])
-
-
-
-dnl XDT_CHECK_LIBX11()
-dnl
-dnl Executes various checks for X11. Sets LIBX11_CFLAGS, LIBX11_LDFLAGS
-dnl and LIBX11_LIBS (and marks them for substitution). In addition
-dnl HAVE_LIBX11 is set to 1 in config.h, if the X window system and
-dnl the development files are detected on the target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBX11],
-[
-  AC_REQUIRE([AC_PATH_XTRA])
-
-  LIBX11_CFLAGS= LIBX11_LDFLAGS= LIBX11_LIBS=
-  if test x"$no_x" != x"yes"; then
-    AC_CHECK_LIB([X11], [main],
-    [
-      AC_DEFINE([HAVE_LIBX11], [1], [Define if libX11 is available])
-      LIBX11_CFLAGS="$X_CFLAGS"
-      for option in $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS; do
-      	case "$option" in
-        -L*)
-          path=`echo $option | sed 's/^-L//'`
-          if test x"$path" != x""; then
-            LIBX11_LDFLAGS="$LIBX11_LDFLAGS -L$path"
-          fi
-          ;;
-        *)
-          LIBX11_LIBS="$LIBX11_LIBS $option"
-          ;;
-        esac
-      done
-      if ! echo $LIBX11_LIBS | grep -- '-lX11' >/dev/null; then
-        LIBX11_LIBS="$LIBX11_LIBS -lX11"
-      fi
-    ], [], [$X_CFLAGS $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS])
-  fi
-  AC_SUBST([LIBX11_CFLAGS])
-  AC_SUBST([LIBX11_LDFLAGS])
-  AC_SUBST([LIBX11_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBX11_REQUIRE()
-dnl
-dnl Similar to XDT_CHECK_LIBX11(), but terminates with an error if
-dnl the X window system and development files aren't detected on the
-dnl target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBX11_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-  
-  if test x"$no_x" = x"yes"; then
-    AC_MSG_ERROR([X Window system libraries and header files are required])
-  fi
-])
-
-
-
-dnl XDT_CHECK_LIBSM()
-dnl
-dnl Checks whether the session management library is present on the
-dnl target system, and sets LIBSM_CFLAGS, LIBSM_LDFLAGS and LIBSM_LIBS
-dnl properly. In addition, HAVE_LIBSM will be set to 1 in config.h
-dnl if libSM is detected.
-dnl
-AC_DEFUN([XDT_CHECK_LIBSM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-
-  LIBSM_CFLAGS= LIBSM_LDFLAGS= LIBSM_LIBS=
-  if test x"$no_x" != x"yes"; then
-    AC_CHECK_LIB([SM], [SmcSaveYourselfDone],
-    [
-      AC_DEFINE([HAVE_LIBSM], [1], [Define if libSM is available])
-      LIBSM_CFLAGS="$LIBX11_CFLAGS"
-      LIBSM_LDFLAGS="$LIBX11_LDFLAGS"
-      LIBSM_LIBS="$LIBX11_LIBS"
-      if ! echo $LIBSM_LIBS | grep -- '-lSM' >/dev/null; then
-        LIBSM_LIBS="$LIBSM_LIBS -lSM -lICE"
-      fi
-    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lICE])
-  fi
-  AC_SUBST([LIBSM_CFLAGS])
-  AC_SUBST([LIBSM_LDFLAGS])
-  AC_SUBST([LIBSM_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBXPM()
-dnl
-dnl Checks if the Xpm library is present on the target system, and
-dnl sets LIBXPM_CFLAGS, LIBXPM_LDFLAGS and LIBXPM_LIBS. In addition,
-dnl HAVE_LIBXPM will be set to 1 in config.h if libXpm is detected.
-dnl
-AC_DEFUN([XDT_CHECK_LIBXPM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-
-  LIBXPM_CFLAGS= LIBXPM_LDFLAGS= LIBXPM_LIBS=
-  if test "$no_x" != "yes"; then
-    AC_CHECK_LIB([Xpm], [main],
-    [
-      AC_DEFINE([HAVE_LIBXPM], [1], [Define if libXpm is available])
-      LIBXPM_CFLAGS="$LIBX11_CFLAGS"
-      LIBXPM_LDFLAGS="$LIBX11_LDFLAGS"
-      LIBXPM_LIBS="$LIBX11_LIBS"
-      if ! echo $LIBXPM_LIBS | grep -- '-lXpm' >/dev/null; then
-        LIBXPM_LIBS="$LIBXPM_LIBS -lXpm"
-      fi
-    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lXpm])
-  fi
-  AC_SUBST([LIBXPM_CFLAGS])
-  AC_SUBST([LIBXPM_LDFLAGS])
-  AC_SUBST([LIBXPM_LIBS])
-])
-
-
-
-dnl XDT_CHECK_LIBXPM_REQUIRE()
-dnl
-dnl Similar to XDT_CHECK_LIBXPM(), but fails if the Xpm library isn't
-dnl present on the target system.
-dnl
-AC_DEFUN([XDT_CHECK_LIBXPM_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
-  AC_REQUIRE([XDT_CHECK_LIBXPM])
-
-  if test x"$LIBXPM_LIBS" = x""; then
-    AC_MSG_ERROR([The Xpm library was not found on your system])
-  fi
-])
-
-
-
-dnl BM_LIBX11()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBX11. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBX11],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11])
-])
-
-
-
-dnl BM_LIBX11_REQUIRE()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBX11_REQUIRE. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBX11_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
-])
-
-
-
-dnl BM_LIBSM()
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBSM. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBSM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBSM])
-])
-
-
-
-dnl BM_LIBXPM
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBXPM. Kept for backward
-dnl compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBXPM],
-[
-  AC_REQUIRE([XDT_CHECK_LIBXPM])
-])
-
-
-
-dnl BM_LIBXPM_REQUIRE
-dnl
-dnl Simple wrapper for XDT_CHECK_LIBXPM_REQUIRE. Kept for
-dnl backward compatibility. Will be removed in the future.
-dnl
-AC_DEFUN([BM_LIBXPM_REQUIRE],
-[
-  AC_REQUIRE([XDT_CHECK_LIBXPM_REQUIRE])
-])
-
-
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
-dnl         The Xfce development team. All rights reserved.
-dnl
-dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
-dnl
-dnl This program is free software; you can redistribute it and/or modify it
-dnl under the terms of the GNU General Public License as published by the Free
-dnl Software Foundation; either version 2 of the License, or (at your option)
-dnl any later version.
-dnl
-dnl This program is distributed in the hope that it will be useful, but WITHOUT
-dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-dnl more details.
-dnl
-dnl You should have received a copy of the GNU General Public License along with
-dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-dnl Place, Suite 330, Boston, MA  02111-1307  USA
-dnl
-dnl xdt-i18n
-dnl --------
-dnl  Internalization M4 macros.
-dnl
-
-
-dnl XDT_I18N(LINGUAS [, PACKAGE])
-dnl
-dnl This macro takes care of setting up everything for i18n support.
-dnl
-dnl If PACKAGE isn't specified, it defaults to the package tarname; see
-dnl the description of AC_INIT() for an explanation of what makes up
-dnl the package tarname. Normally, you don't need to specify PACKAGE,
-dnl but you can stick with the default.
-dnl
-AC_DEFUN([XDT_I18N],
-[
-  dnl Substitute GETTEXT_PACKAGE variable
-  GETTEXT_PACKAGE=m4_default([$2], [AC_PACKAGE_TARNAME()])
-  AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Name of default gettext domain])
-  AC_SUBST([GETTEXT_PACKAGE])
-
-  dnl gettext and stuff
-  ALL_LINGUAS="$1"
-  AM_GLIB_GNU_GETTEXT()
-
-  dnl This is required on some Linux systems
-  AC_CHECK_FUNC([bind_textdomain_codeset])
-
-  dnl Determine where to install locale files
-  AC_MSG_CHECKING([for locales directory])
-  AC_ARG_WITH([locales-dir], 
-  [
-    AC_HELP_STRING([--with-locales-dir=DIR], [Install locales into DIR])
-  ], [localedir=$withval],
-  [
-    if test x"$CATOBJEXT" = x".mo"; then
-      localedir=$libdir/locale
-    else
-      localedir=$datadir/locale
-    fi
-  ])
-  AC_MSG_RESULT([$localedir])
-  AC_SUBST([localedir])
-
-  dnl Determine additional xgettext flags
-  AC_MSG_CHECKING([for additional xgettext flags])
-  if test x"$XGETTEXT_ARGS" = x""; then
-    XGETTEXT_ARGS="--keyword=Q_ --from-code=UTF-8";
-  else
-    XGETTEXT_ARGS="$XGETTEXT_ARGS --keyword=Q_ --from-code=UTF-8";
-  fi
-  AC_SUBST([XGETTEXT_ARGS])
-  AC_MSG_RESULT([$XGETTEXT_ARGS])
-])
-
-
-
-dnl BM_I18N(PACKAGE, LINGUAS)
-dnl
-dnl Simple wrapper for XDT_I18N(LINGUAS, PACKAGE). Kept for
-dnl backward compatibility. Will be removed in the
-dnl future.
-dnl
-AC_DEFUN([BM_I18N],
-[
-  XDT_I18N([$2], [$1])
-])
-
-
 # Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
@@ -9761,6 +9240,33 @@ Check your system clock])
 fi
 AC_MSG_RESULT(yes)])
 
+# Copyright (C) 2009  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# serial 1
+
+# AM_SILENT_RULES([DEFAULT])
+# --------------------------
+# Enable less verbose build rules; with the default set to DEFAULT
+# (`yes' being less verbose, `no' or empty being verbose).
+AC_DEFUN([AM_SILENT_RULES],
+[AC_ARG_ENABLE([silent-rules],
+[  --enable-silent-rules          less verbose build output (undo: `make V=1')
+  --disable-silent-rules         verbose build output (undo: `make V=0')])
+case $enable_silent_rules in
+yes) AM_DEFAULT_VERBOSITY=0;;
+no)  AM_DEFAULT_VERBOSITY=1;;
+*)   AM_DEFAULT_VERBOSITY=m4_if([$1], [yes], [0], [1]);;
+esac
+AC_SUBST([AM_DEFAULT_VERBOSITY])dnl
+AM_BACKSLASH='\'
+AC_SUBST([AM_BACKSLASH])dnl
+_AM_SUBST_NOTMAKE([AM_BACKSLASH])dnl
+])
+
 # Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
@@ -9903,4 +9409,525 @@ AC_MSG_RESULT([$am_cv_prog_tar_$1])])
 AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
+
+dnl $Id$
+dnl
+dnl Copyright (c) 2002-2006
+dnl         The Xfce development team. All rights reserved.
+dnl
+dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
+dnl
+dnl This program is free software; you can redistribute it and/or modify it
+dnl under the terms of the GNU General Public License as published by the Free
+dnl Software Foundation; either version 2 of the License, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but WITHOUT
+dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+dnl more details.
+dnl
+dnl You should have received a copy of the GNU General Public License along with
+dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+dnl Place, Suite 330, Boston, MA  02111-1307  USA
+dnl
+dnl xdt-depends
+dnl -----------
+dnl  Contains M4 macros to check for software dependencies.
+dnl  Partly based on prior work of the XDG contributors.
+dnl
+
+
+
+dnl We need recent a autoconf version
+AC_PREREQ([2.53])
+
+
+
+dnl XDT_PROG_PKG_CONFIG()
+dnl
+dnl Checks for the freedesktop.org pkg-config
+dnl utility and sets the PKG_CONFIG environment
+dnl variable to the full path if found.
+dnl
+AC_DEFUN([XDT_PROG_PKG_CONFIG],
+[
+  # minimum supported version of pkg-config
+  xdt_cv_PKG_CONFIG_MIN_VERSION=0.9.0
+
+  # lookup pkg-config utility
+  if test x"$PKG_CONFIG" = x""; then
+    AC_PATH_PROG([PKG_CONFIG], [pkg-config], [no])
+
+    if test x"$PKG_CONFIG" = x"no"; then
+      echo "*** The pkg-config utility could not be found on your system."
+      echo "*** Make sure it is in your path, or set the PKG_CONFIG"
+      echo "*** environment variable to the full path to pkg-config."
+      echo "*** You can download pkg-config from the freedesktop.org"
+      echo "*** software repository at"
+      echo "***"
+      echo "***    http://www.freedesktop.org/software/pkgconfig"
+      echo "***"
+      exit 1
+    fi
+
+    # check pkg-config version
+    AC_MSG_CHECKING([for pkg-config >= $xdt_cv_PKG_CONFIG_MIN_VERSION])
+    if $PKG_CONFIG --atleast-pkgconfig-version $xdt_cv_PKG_CONFIG_MIN_VERSION; then
+      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
+      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
+    else
+      xdt_cv_PKG_CONFIG_VERSION=`$PKG_CONFIG --version`
+      AC_MSG_RESULT([$xdt_cv_PKG_CONFIG_VERSION])
+      echo "*** Your version of pkg-config is too old. You need atleast"
+      echo "*** pkg-config $xdt_cv_PKG_CONFIG_MIN_VERSION or newer. You can download pkg-config "
+      echo "*** from the freedesktop.org software repository at"
+      echo "***"
+      echo "***    http://www.freedesktop.org/software/pkgconfig"
+      echo "***"
+      exit 1
+    fi
+  fi
+])
+
+
+
+dnl XDT_CHECK_PACKAGE(varname, package, version, [action-if], [action-if-not])
+dnl
+dnl Checks if "package" >= "version" is installed on the
+dnl target system, using the pkg-config utility. If the
+dnl dependency is met, "varname"_CFLAGS, "varname"_LIBS,
+dnl "varname"_VERSION and "varname"_REQUIRED_VERSION
+dnl will be set and marked for substition.
+dnl
+dnl "varname"_REQUIRED_VERSION will be set to the value of
+dnl "version". This is mostly useful to automatically
+dnl place the correct version information into the RPM
+dnl .spec file.
+dnl
+dnl In addition, if the dependency is met, "action-if" will
+dnl be executed if given.
+dnl
+dnl If the package check fails, "action-if-not" will be
+dnl executed. If this parameter isn't specified, a diagnostic
+dnl message will be printed and the configure script will
+dnl be terminated with exit code 1.
+dnl
+AC_DEFUN([XDT_CHECK_PACKAGE],
+[
+  XDT_PROG_PKG_CONFIG()
+
+  AC_MSG_CHECKING([for $2 >= $3])
+  if $PKG_CONFIG "--atleast-version=$3" "$2" >/dev/null 2>&1; then
+    $1_VERSION=`$PKG_CONFIG --modversion "$2"`
+    AC_MSG_RESULT([$$1_VERSION])
+
+    AC_MSG_CHECKING([$1_CFLAGS])
+    $1_CFLAGS=`$PKG_CONFIG --cflags "$2"`
+    AC_MSG_RESULT([$$1_CFLAGS])
+
+    AC_MSG_CHECKING([$1_LIBS])
+    $1_LIBS=`$PKG_CONFIG --libs "$2"`
+    AC_MSG_RESULT([$$1_LIBS])
+
+    $1_REQUIRED_VERSION=$3
+
+    AC_SUBST([$1_VERSION])
+    AC_SUBST([$1_CFLAGS])
+    AC_SUBST([$1_LIBS])
+    AC_SUBST([$1_REQUIRED_VERSION])
+
+    ifelse([$4], , , [$4])
+  elif $PKG_CONFIG --exists "$2" >/dev/null 2>&1; then
+    xdt_cv_version=`$PKG_CONFIG --modversion "$2"`
+    AC_MSG_RESULT([found, but $xdt_cv_version])
+
+    ifelse([$5], ,
+    [
+      echo "*** The required package $2 was found on your system,"
+      echo "*** but the installed version ($xdt_cv_version) is too old."
+      echo "*** Please upgrade $2 to atleast version $3, or adjust"
+      echo "*** the PKG_CONFIG_PATH environment variable if you installed"
+      echo "*** the new version of the package in a nonstandard prefix so"
+      echo "*** pkg-config is able to find it."
+      exit 1
+    ], [$5])
+  else
+    AC_MSG_RESULT([not found])
+
+    ifelse([$5], ,
+    [
+      echo "*** The required package $2 was not found on your system."
+      echo "*** Please install $2 (atleast version $3) or adjust"
+      echo "*** the PKG_CONFIG_PATH environment variable if you"
+      echo "*** installed the package in a nonstandard prefix so that"
+      echo "*** pkg-config is able to find it."
+      exit 1
+    ], [$5])
+  fi
+])
+
+
+
+dnl XDT_CHECK_OPTIONAL_PACKAGE(varname, package, version, optionname, helpstring, [default])
+dnl
+dnl Checks for an optional dependency on "package" >= "version". "default"
+dnl can be "yes" or "no" (defaults to "yes" if not specified) and controls
+dnl whether configure should check this dependency by default, or only if
+dnl the user explicitly enables it using a command line switch.
+dnl
+dnl This macro automatically adds a commandline switch based on the "optionname"
+dnl parameter (--enable-optionname/--disable-optionname), which allows the
+dnl user to explicitly control whether this optional dependency should be
+dnl enabled or not. The "helpstring" parameter gives a brief(!) description
+dnl about this dependency.
+dnl
+dnl If the user chose to enable this dependency and the required package
+dnl was found, this macro defines the variable "varname"_FOUND and sets it
+dnl to the string "yes", in addition to the 4 variables set by XDT_CHECK_PACKAGE.
+dnl But "varname"_FOUND will not be marked for substition. Furthermore,
+dnl a CPP define HAVE_"varname" will be placed in config.h (or added to
+dnl the cc command line, depending on your configure.ac) and set to
+dnl 1.
+dnl
+AC_DEFUN([XDT_CHECK_OPTIONAL_PACKAGE],
+[
+  AC_REQUIRE([XDT_PROG_PKG_CONFIG])
+
+  AC_ARG_ENABLE([$4],
+AC_HELP_STRING([--enable-$4], [Enable checking for $5 (default=m4_default([$6], [yes]))])
+AC_HELP_STRING([--disable-$4], [Disable checking for $5]),
+    [xdt_cv_$1_check=$enableval], [xdt_cv_$1_check=m4_default([$6], [yes])])
+
+  if test x"$xdt_cv_$1_check" = x"yes"; then
+    if $PKG_CONFIG --exists "$2 >= $3" >/dev/null 2>&1; then
+      XDT_CHECK_PACKAGE([$1], [$2], [$3],
+      [
+        AC_DEFINE([HAVE_$1], [1], [Define if $2 >= $3 present])
+        $1_FOUND="yes"
+      ])
+    else
+      AC_MSG_CHECKING([for optional package $2 >= $3])
+      AC_MSG_RESULT([not found])
+    fi
+  else
+    AC_MSG_CHECKING([for optional package $2])
+    AC_MSG_RESULT([disabled])
+  fi
+
+  AM_CONDITIONAL([HAVE_$1], [test x"$$1_FOUND" = x"yes"])
+])
+
+
+
+dnl BM_DEPEND(varname, package, version)
+dnl
+dnl Simple wrapper for XDT_CHECK_PACKAGE("varname", "package", "version"). Kept
+dnl for backward compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_DEPEND],
+[
+  XDT_CHECK_PACKAGE([$1], [$2], [$3])
+])
+
+
+
+dnl BM_DEPEND_CHECK(var, pkg, version, name, helpstring, default)
+dnl
+dnl Simple wrapper for XDT_CHECK_OPTIONAL_PACKAGE(). Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_DEPEND_CHECK],
+[
+  XDT_CHECK_OPTIONAL_PACKAGE([$1], [$2], [$3], [$4], [$5], [$6])
+])
+
+
+
+dnl XDT_CHECK_LIBX11()
+dnl
+dnl Executes various checks for X11. Sets LIBX11_CFLAGS, LIBX11_LDFLAGS
+dnl and LIBX11_LIBS (and marks them for substitution). In addition
+dnl HAVE_LIBX11 is set to 1 in config.h, if the X window system and
+dnl the development files are detected on the target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBX11],
+[
+  AC_REQUIRE([AC_PATH_XTRA])
+
+  LIBX11_CFLAGS= LIBX11_LDFLAGS= LIBX11_LIBS=
+  if test x"$no_x" != x"yes"; then
+    AC_CHECK_LIB([X11], [main],
+    [
+      AC_DEFINE([HAVE_LIBX11], [1], [Define if libX11 is available])
+      LIBX11_CFLAGS="$X_CFLAGS"
+      for option in $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS; do
+      	case "$option" in
+        -L*)
+          path=`echo $option | sed 's/^-L//'`
+          if test x"$path" != x""; then
+            LIBX11_LDFLAGS="$LIBX11_LDFLAGS -L$path"
+          fi
+          ;;
+        *)
+          LIBX11_LIBS="$LIBX11_LIBS $option"
+          ;;
+        esac
+      done
+      if ! echo $LIBX11_LIBS | grep -- '-lX11' >/dev/null; then
+        LIBX11_LIBS="$LIBX11_LIBS -lX11"
+      fi
+    ], [], [$X_CFLAGS $X_PRE_LIBS $X_EXTRA_LIBS $X_LIBS])
+  fi
+  AC_SUBST([LIBX11_CFLAGS])
+  AC_SUBST([LIBX11_LDFLAGS])
+  AC_SUBST([LIBX11_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBX11_REQUIRE()
+dnl
+dnl Similar to XDT_CHECK_LIBX11(), but terminates with an error if
+dnl the X window system and development files aren't detected on the
+dnl target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBX11_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+  
+  if test x"$no_x" = x"yes"; then
+    AC_MSG_ERROR([X Window system libraries and header files are required])
+  fi
+])
+
+
+
+dnl XDT_CHECK_LIBSM()
+dnl
+dnl Checks whether the session management library is present on the
+dnl target system, and sets LIBSM_CFLAGS, LIBSM_LDFLAGS and LIBSM_LIBS
+dnl properly. In addition, HAVE_LIBSM will be set to 1 in config.h
+dnl if libSM is detected.
+dnl
+AC_DEFUN([XDT_CHECK_LIBSM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+
+  LIBSM_CFLAGS= LIBSM_LDFLAGS= LIBSM_LIBS=
+  if test x"$no_x" != x"yes"; then
+    AC_CHECK_LIB([SM], [SmcSaveYourselfDone],
+    [
+      AC_DEFINE([HAVE_LIBSM], [1], [Define if libSM is available])
+      LIBSM_CFLAGS="$LIBX11_CFLAGS"
+      LIBSM_LDFLAGS="$LIBX11_LDFLAGS"
+      LIBSM_LIBS="$LIBX11_LIBS"
+      if ! echo $LIBSM_LIBS | grep -- '-lSM' >/dev/null; then
+        LIBSM_LIBS="$LIBSM_LIBS -lSM -lICE"
+      fi
+    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lICE])
+  fi
+  AC_SUBST([LIBSM_CFLAGS])
+  AC_SUBST([LIBSM_LDFLAGS])
+  AC_SUBST([LIBSM_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBXPM()
+dnl
+dnl Checks if the Xpm library is present on the target system, and
+dnl sets LIBXPM_CFLAGS, LIBXPM_LDFLAGS and LIBXPM_LIBS. In addition,
+dnl HAVE_LIBXPM will be set to 1 in config.h if libXpm is detected.
+dnl
+AC_DEFUN([XDT_CHECK_LIBXPM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+
+  LIBXPM_CFLAGS= LIBXPM_LDFLAGS= LIBXPM_LIBS=
+  if test "$no_x" != "yes"; then
+    AC_CHECK_LIB([Xpm], [main],
+    [
+      AC_DEFINE([HAVE_LIBXPM], [1], [Define if libXpm is available])
+      LIBXPM_CFLAGS="$LIBX11_CFLAGS"
+      LIBXPM_LDFLAGS="$LIBX11_LDFLAGS"
+      LIBXPM_LIBS="$LIBX11_LIBS"
+      if ! echo $LIBXPM_LIBS | grep -- '-lXpm' >/dev/null; then
+        LIBXPM_LIBS="$LIBXPM_LIBS -lXpm"
+      fi
+    ], [], [$LIBX11_CFLAGS $LIBX11_LDFLAGS $LIBX11_LIBS -lXpm])
+  fi
+  AC_SUBST([LIBXPM_CFLAGS])
+  AC_SUBST([LIBXPM_LDFLAGS])
+  AC_SUBST([LIBXPM_LIBS])
+])
+
+
+
+dnl XDT_CHECK_LIBXPM_REQUIRE()
+dnl
+dnl Similar to XDT_CHECK_LIBXPM(), but fails if the Xpm library isn't
+dnl present on the target system.
+dnl
+AC_DEFUN([XDT_CHECK_LIBXPM_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
+  AC_REQUIRE([XDT_CHECK_LIBXPM])
+
+  if test x"$LIBXPM_LIBS" = x""; then
+    AC_MSG_ERROR([The Xpm library was not found on your system])
+  fi
+])
+
+
+
+dnl BM_LIBX11()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBX11. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBX11],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11])
+])
+
+
+
+dnl BM_LIBX11_REQUIRE()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBX11_REQUIRE. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBX11_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBX11_REQUIRE])
+])
+
+
+
+dnl BM_LIBSM()
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBSM. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBSM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBSM])
+])
+
+
+
+dnl BM_LIBXPM
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBXPM. Kept for backward
+dnl compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBXPM],
+[
+  AC_REQUIRE([XDT_CHECK_LIBXPM])
+])
+
+
+
+dnl BM_LIBXPM_REQUIRE
+dnl
+dnl Simple wrapper for XDT_CHECK_LIBXPM_REQUIRE. Kept for
+dnl backward compatibility. Will be removed in the future.
+dnl
+AC_DEFUN([BM_LIBXPM_REQUIRE],
+[
+  AC_REQUIRE([XDT_CHECK_LIBXPM_REQUIRE])
+])
+
+
+dnl $Id$
+dnl
+dnl Copyright (c) 2002-2006
+dnl         The Xfce development team. All rights reserved.
+dnl
+dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
+dnl
+dnl This program is free software; you can redistribute it and/or modify it
+dnl under the terms of the GNU General Public License as published by the Free
+dnl Software Foundation; either version 2 of the License, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but WITHOUT
+dnl ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+dnl more details.
+dnl
+dnl You should have received a copy of the GNU General Public License along with
+dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+dnl Place, Suite 330, Boston, MA  02111-1307  USA
+dnl
+dnl xdt-i18n
+dnl --------
+dnl  Internalization M4 macros.
+dnl
+
+
+dnl XDT_I18N(LINGUAS [, PACKAGE])
+dnl
+dnl This macro takes care of setting up everything for i18n support.
+dnl
+dnl If PACKAGE isn't specified, it defaults to the package tarname; see
+dnl the description of AC_INIT() for an explanation of what makes up
+dnl the package tarname. Normally, you don't need to specify PACKAGE,
+dnl but you can stick with the default.
+dnl
+AC_DEFUN([XDT_I18N],
+[
+  dnl Substitute GETTEXT_PACKAGE variable
+  GETTEXT_PACKAGE=m4_default([$2], [AC_PACKAGE_TARNAME()])
+  AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"], [Name of default gettext domain])
+  AC_SUBST([GETTEXT_PACKAGE])
+
+  dnl gettext and stuff
+  ALL_LINGUAS="$1"
+  AM_GLIB_GNU_GETTEXT()
+
+  dnl This is required on some Linux systems
+  AC_CHECK_FUNC([bind_textdomain_codeset])
+
+  dnl Determine where to install locale files
+  AC_MSG_CHECKING([for locales directory])
+  AC_ARG_WITH([locales-dir], 
+  [
+    AC_HELP_STRING([--with-locales-dir=DIR], [Install locales into DIR])
+  ], [localedir=$withval],
+  [
+    if test x"$CATOBJEXT" = x".mo"; then
+      localedir=$libdir/locale
+    else
+      localedir=$datadir/locale
+    fi
+  ])
+  AC_MSG_RESULT([$localedir])
+  AC_SUBST([localedir])
+
+  dnl Determine additional xgettext flags
+  AC_MSG_CHECKING([for additional xgettext flags])
+  if test x"$XGETTEXT_ARGS" = x""; then
+    XGETTEXT_ARGS="--keyword=Q_ --from-code=UTF-8";
+  else
+    XGETTEXT_ARGS="$XGETTEXT_ARGS --keyword=Q_ --from-code=UTF-8";
+  fi
+  AC_SUBST([XGETTEXT_ARGS])
+  AC_MSG_RESULT([$XGETTEXT_ARGS])
+])
+
+
+
+dnl BM_I18N(PACKAGE, LINGUAS)
+dnl
+dnl Simple wrapper for XDT_I18N(LINGUAS, PACKAGE). Kept for
+dnl backward compatibility. Will be removed in the
+dnl future.
+dnl
+AC_DEFUN([BM_I18N],
+[
+  XDT_I18N([$2], [$1])
+])
+
 

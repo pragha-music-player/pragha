@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -44,7 +44,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 {
 	GError *error = NULL;
 	gboolean aa, osd, ret;
-	gchar *u_folder = NULL, *audio_sink = NULL;
+	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
 	GtkTreeIter iter;
@@ -54,6 +54,29 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	case GTK_RESPONSE_CANCEL:
 		break;
 	case GTK_RESPONSE_OK:
+		/* Windows init start option */
+
+		window_state_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cwin->cpref->window_state_combo));
+
+		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
+		}
+		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
+		}
+		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
+			cwin->cpref->remember_window_state = FALSE;
+			g_free(cwin->cpref->start_mode);
+			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
+		}
+		else 	cwin->cpref->remember_window_state = TRUE;
+
+		g_free(window_state_sink);
+
 		/* Validate album art pattern, if invalid bail out immediately */
 
 		if (GTK_WIDGET_VISIBLE(cwin->cpref->album_art_pattern_w)){
@@ -83,6 +106,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		cwin->cpref->album_art_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w));
 
 		album_art_toggle_state(cwin);
+
+		/* close_to_tray */
+
+		aa = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->close_to_tray_w));
+		if (aa)
+			cwin->cpref->close_to_tray = TRUE;
+		else
+			cwin->cpref->close_to_tray = FALSE;
 
 		/* OSD */
 
@@ -505,6 +537,19 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeModel *model;
 	GError *error = NULL;
 
+	if(cwin->cpref->remember_window_state)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 0);
+	else{
+		if(cwin->cpref->start_mode){
+			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))		
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 1);		
+			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 2);
+			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo), 3);
+		}
+	}
+
 	/* Update album art */
 
 	if (cwin->cpref->show_album_art)
@@ -512,11 +557,19 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->cpref->album_art),
 					     TRUE);
 
+	/* Update close to tray */
+
+	if (cwin->cpref->close_to_tray)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->close_to_tray_w),
+					     TRUE);
+
 	/* Update OSD */
 
 	if (cwin->cpref->show_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->osd), TRUE);
+					     cwin->cpref->osd),
+					     TRUE);
 
 	/* Update save playlist */
 
@@ -825,16 +878,9 @@ void save_preferences(struct con_win *cwin)
 			       KEY_USE_CDDB,
 			       cwin->cpref->use_cddb);
 
-	/* Fullscreen option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_FULLSCREEN,
-			       cwin->cpref->fullscreen);
-
 	/* Add Window size if not fullscreen*/
 
-	if (!cwin->cpref->fullscreen){
+	if (!cwin->cstate->fullscreen){
 		window_size = g_new0(gint, 2);
 		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
 				    &win_width,
@@ -904,6 +950,38 @@ void save_preferences(struct con_win *cwin)
 		}
 	}
 
+	/* Save last window state */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_REMEMBER_STATE,
+			       cwin->cpref->remember_window_state);
+
+	if(cwin->cpref->remember_window_state){
+		if(cwin->cstate->fullscreen){
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_START_MODE,
+					      FULLSCREEN_STATE);
+		}
+		else if(cwin->cstate->iconified){
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_START_MODE,
+					      ICONIFIED_STATE);
+		}
+		else g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_START_MODE,
+					      NORMAL_STATE);
+	}
+	else{
+			g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_START_MODE,
+					      cwin->cpref->start_mode);
+	}
+
 	/* Save playlist option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
@@ -936,6 +1014,13 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
+
+	/* Close to tray option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_CLOSE_TO_TRAY,
+			       cwin->cpref->close_to_tray);
 
 	/* List of columns visible in current playlist */
 
@@ -1170,7 +1255,8 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *dialog, *vbox_all, *pref_notebook, *hbox_library;
 	GtkWidget *general_vbox, *audio_vbox, *library_vbox, *lastfm_vbox;
 	GtkWidget *label_general, *label_library, *label_audio, *label_lastfm;
-	GtkWidget *album_art, *osd, *save_playlist, *use_cddb;
+	GtkWidget *start_label, *hbox_start;
+	GtkWidget *window_state_combo, *close_to_tray, *album_art, *osd, *save_playlist, *use_cddb;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern;
 	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
 	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
@@ -1297,24 +1383,56 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   0);
 
-	/* Notification */
+	/* Save Window State */
 
+	window_state_combo = gtk_combo_box_new_text ();
+
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Remember last window state"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start normal"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start fullscreen"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start in system tray"));
+
+	start_label = gtk_label_new(_("When pragha start"));
+
+	hbox_start = gtk_hbox_new(FALSE, 10);
+
+	gtk_box_pack_start(GTK_BOX(hbox_start),
+			   start_label,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_end(GTK_BOX(hbox_start),
+			 window_state_combo,
+			 FALSE,
+			 FALSE,
+			 0);
+
+	/*General Check_buttons*/
+
+	close_to_tray = gtk_check_button_new_with_label(_("Minimize pragha when close the window"));
+
+	save_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
 	osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-
-	/* Save current playlist */
-
-	save_playlist = gtk_check_button_new_with_label(_("Save/Restore "
-							"current playlist"));
 
 	/* Pack general items */
 
 	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   osd,
+			   hbox_start,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   close_to_tray,
 			   FALSE,
 			   FALSE,
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   save_playlist,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   osd,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1555,7 +1673,8 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), vbox_all, TRUE, TRUE, 0);
 
 	/* Store references */
-
+	cwin->cpref->window_state_combo = window_state_combo;
+	cwin->cpref->close_to_tray_w = close_to_tray;
 	cwin->cpref->album_art = album_art;
 	cwin->cpref->osd = osd;
 	cwin->cpref->save_playlist_w = save_playlist;

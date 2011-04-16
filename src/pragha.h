@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -35,6 +35,7 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
@@ -88,6 +89,10 @@
 #define P_FOLDER_STR        "Folder"	/* Containing folder */
 #define P_BASENAME_STR      "Basename"	/* Base name of the file */
 
+#define NORMAL_STATE		"normal"
+#define FULLSCREEN_STATE	"fullscreen"
+#define ICONIFIED_STATE		"iconified"
+
 #define DEFAULT_SINK "default"
 #define ALSA_SINK    "alsa"
 #define OSS_SINK     "oss"
@@ -100,8 +105,8 @@
 #define ALSA_DEFAULT_DEVICE "default"
 #define OSS_DEFAULT_DEVICE  "/dev/dsp"
 
-#define PROGRESS_BAR_TEXT           "Scanning"
-#define TRACK_PROGRESS_BAR_STOPPED  "Stopped"
+#define PROGRESS_BAR_TEXT           _("Scanning")
+#define TRACK_PROGRESS_BAR_STOPPED  _("Stopped")
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
 #define LASTFM_URL                 "http://post.audioscrobbler.com"
@@ -147,12 +152,13 @@
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
 #define KEY_SHOW_OSD               "show_osd"
-#define KEY_TIMER_MODE		   "timer_mode"
-#define KEY_FULLSCREEN		   "fullscreen"
 #define KEY_STATUS_BAR		   "status_bar"
 
+#define KEY_REMEMBER_STATE	   "remember_window_state"
+#define KEY_START_MODE		   "start_mode"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
 #define KEY_CURRENT_REF		   "current_ref"
+#define KEY_CLOSE_TO_TRAY	   "close_to_tray"
 #define KEY_SHUFFLE                "shuffle"
 #define KEY_REPEAT                 "repeat"
 #define KEY_PLAYLIST_COLUMNS       "playlist_columns"
@@ -357,6 +363,7 @@ struct con_pref {
 	gchar *installed_version;
 	gchar *audio_sink;
 	gchar *album_art_pattern;
+	gchar *start_mode;
 	gchar *audio_alsa_device;
 	gchar *audio_oss_device;
 	gchar *audio_cd_device;
@@ -375,7 +382,8 @@ struct con_pref {
 	gboolean save_playlist;
 	gboolean software_mixer;
 	gboolean use_cddb;
-	gboolean fullscreen;
+	gboolean close_to_tray;
+	gboolean remember_window_state;
 	gboolean status_bar;
 	GSList *library_dir;
 	GSList *playlist_columns;
@@ -383,6 +391,8 @@ struct con_pref {
 	GSList *library_tree_nodes;
 	GSList *lib_delete;
 	GSList *lib_add;
+	GtkWidget *window_state_combo;
+	GtkWidget *close_to_tray_w;
 	GtkWidget *album_art;
 	GtkWidget *osd;
 	GtkWidget *save_playlist_w;
@@ -459,6 +469,8 @@ struct con_state {
 	gboolean view_change;
 	gboolean curr_mobj_clear;
 	gboolean advance_track;
+	gboolean fullscreen;
+	gboolean iconified; /*in_sytray*/
 	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
@@ -535,6 +547,7 @@ struct con_win {
 	GtkWidget *play_button;
 	GtkWidget *stop_button;
 	GtkWidget *next_button;
+	GtkWidget *unfull_button;
 	GtkWidget *shuffle_button;
 	GtkWidget *repeat_button;
 	GtkWidget *vol_button;
@@ -659,6 +672,7 @@ void track_progress_change_cb(GtkWidget *widget,
 			      struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
+void unfull_button_handler(GtkButton *button, struct con_win *cwin);
 void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin);
 void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
@@ -1058,6 +1072,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Others */
 
+void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean        present);

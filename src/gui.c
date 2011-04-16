@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -1456,7 +1456,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 	GtkWidget *playing;
 	GtkWidget *vbox_order;
 	GtkWidget *hbox_panel, *left_controls, *right_controls;
-	GtkWidget *play_button, *stop_button, *prev_button, *next_button, *sep, *shuffle_button, *repeat_button, *vol_button;
+	GtkWidget *play_button, *stop_button, *prev_button, *next_button;
+	GtkWidget *unfull_button, *sep, *shuffle_button, *repeat_button, *vol_button;
 	GtkWidget *album_art_frame = NULL;
 	GtkObject *vol_adjust;
 
@@ -1491,6 +1492,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_button_set_relief(GTK_BUTTON(next_button), GTK_RELIEF_NONE);
 	gtk_button_set_relief(GTK_BUTTON(play_button), GTK_RELIEF_NONE);
 
+
 	gtk_button_set_image(GTK_BUTTON(prev_button),
 			     gtk_image_new_from_stock(GTK_STOCK_MEDIA_PREVIOUS,
 						      GTK_ICON_SIZE_LARGE_TOOLBAR));
@@ -1521,6 +1523,12 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_container_add(GTK_CONTAINER(left_controls_align), left_controls);
 
 	/* Setup Right control buttons */
+
+	unfull_button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(unfull_button), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(unfull_button),
+			     gtk_image_new_from_stock(GTK_STOCK_LEAVE_FULLSCREEN,
+						      GTK_ICON_SIZE_LARGE_TOOLBAR));
 
 	sep = gtk_vseparator_new();
 
@@ -1553,6 +1561,9 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_box_pack_end(GTK_BOX(right_controls),
 			   GTK_WIDGET(repeat_button),
 			   FALSE, FALSE, 0);
+ 	gtk_box_pack_end(GTK_BOX(right_controls),
+			   GTK_WIDGET(unfull_button),
+			   FALSE, FALSE, 0);
 
 	right_controls_align = gtk_alignment_new(0, 0.5, 0, 0);
 	gtk_container_add(GTK_CONTAINER(right_controls_align), right_controls);
@@ -1568,6 +1579,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(next_button), "clicked",
 			 G_CALLBACK(next_button_handler), cwin);
 
+	g_signal_connect(G_OBJECT(GTK_BUTTON(unfull_button)), "clicked",
+			 G_CALLBACK(unfull_button_handler), cwin );
 	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(shuffle_button)), "toggled",
 			 G_CALLBACK(shuffle_button_handler), cwin );
 	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(repeat_button)), "toggled",
@@ -1587,6 +1600,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 	cwin->play_button = play_button;
 	cwin->stop_button = stop_button;
 	cwin->next_button = next_button;
+
+	cwin->unfull_button = unfull_button;
 	cwin->shuffle_button = shuffle_button;
 	cwin->repeat_button = repeat_button;
 	cwin->vol_button = vol_button;
@@ -1597,6 +1612,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), _("Previous Track"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), _("Stop playback"));
+
+	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
 
@@ -1854,12 +1871,22 @@ gboolean dialog_audio_init(gpointer data)
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if(!gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
-		g_warning("(%s): No embedded status_icon.", __func__);
-		gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
+	if(cwin->cpref->close_to_tray){
+		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))){
+			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+			cwin->cstate->iconified = TRUE;
+		}
+		else{
+			g_warning("(%s): No embedded status_icon.", __func__);
+			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
+		}
 	}
-	else	gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
-
+	else{
+		if (cwin->cpref->save_playlist)
+			save_current_playlist_state(cwin);
+		common_cleanup(cwin);
+		gtk_main_quit();
+	}
 	return TRUE;
 }
 

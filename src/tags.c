@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -391,40 +391,54 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		     struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *label_tno, *label_title, *label_artist;
-	GtkWidget *label_album, *label_genre, *label_year;
-	GtkWidget *chk_tno, *chk_title, *chk_artist, *chk_album;
-	GtkWidget *chk_genre, *chk_year;
-	GtkWidget *entry_tno, *entry_title, *entry_artist;
-	GtkWidget *entry_album, *entry_genre, *entry_year;
-	GtkWidget *vbox_label, *vbox_entry, *vbox_chk;
-	GtkWidget *hbox_all;
+	GtkWidget *tag_table;
+	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year;
+	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year;
+	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year;
+	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year;
+	GtkWidget *hbox_spins;
+
 	gint result, changed = 0;
-	gchar *year = NULL, *tno = NULL;
+
+	/*Create table*/
+
+	tag_table = gtk_table_new(5, 2, FALSE);
+
+	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 15);
+	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(tag_table), 5);
 
 	/* Create labels */
-	label_tno = gtk_label_new(_("Track No"));
+
 	label_title = gtk_label_new(_("Title"));
 	label_artist = gtk_label_new(_("Artist"));
 	label_album = gtk_label_new(_("Album"));
 	label_genre = gtk_label_new(_("Genre"));
+	label_tno = gtk_label_new(_("Track No"));
 	label_year = gtk_label_new(_("Year"));
+
+	gtk_misc_set_alignment(GTK_MISC (label_title), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_artist), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_album), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_genre), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_tno), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_year), 1, 0.5);
 
 	/* Create entry fields */
 
-	entry_tno = gtk_entry_new();
 	entry_title = gtk_entry_new();
 	entry_artist = gtk_entry_new();
 	entry_album = gtk_entry_new();
 	entry_genre = gtk_entry_new();
-	entry_year = gtk_entry_new();
 
-	gtk_entry_set_max_length(GTK_ENTRY(entry_tno), TAG_MAX_LEN);
+	entry_tno = gtk_spin_button_new_with_range (0, 2030, 1);
+	entry_year = gtk_spin_button_new_with_range (0, 2030, 1);
+
+
 	gtk_entry_set_max_length(GTK_ENTRY(entry_title), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_artist), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_album), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_genre), TAG_MAX_LEN);
-	gtk_entry_set_max_length(GTK_ENTRY(entry_year), TAG_MAX_LEN);
 
 	gtk_entry_set_completion(GTK_ENTRY(entry_artist), cwin->completion[0]);
 	gtk_entry_set_completion(GTK_ENTRY(entry_album), cwin->completion[1]);
@@ -437,137 +451,142 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 
 	/* Create checkboxes */
 
-	chk_tno = gtk_check_button_new();
 	chk_title = gtk_check_button_new();
 	chk_artist = gtk_check_button_new();
 	chk_album = gtk_check_button_new();
 	chk_genre = gtk_check_button_new();
 	chk_year = gtk_check_button_new();
+	chk_tno = gtk_check_button_new();
 
-	/* Create hboxes */
 
-	vbox_label = gtk_vbox_new(TRUE, 2);
-	vbox_entry = gtk_vbox_new(TRUE, 2);
-	vbox_chk = gtk_vbox_new(TRUE, 2);
+	hbox_title = gtk_hbox_new(FALSE, 0);
+	hbox_artist = gtk_hbox_new(FALSE, 0);
+	hbox_album = gtk_hbox_new(FALSE, 0);
+	hbox_genre = gtk_hbox_new(FALSE, 0);
+	hbox_year = gtk_hbox_new(FALSE, 0);
+	hbox_tno = gtk_hbox_new(FALSE, 0);
 
-	/* Fill vboxes */
+	hbox_spins = gtk_hbox_new(FALSE, 5);
 
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_tno,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_title,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_artist,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_album,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_genre,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_label),
-			   label_year,
-			   FALSE,
-			   FALSE,
-			   2);
+	/* Create hobxs(ENTRY CHECHK) and attach in table */
 
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
-			   entry_tno,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
+	gtk_box_pack_start(GTK_BOX(hbox_title),
 			   entry_title,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
-			   entry_artist,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
-			   entry_album,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
-			   entry_genre,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_entry),
-			   entry_year,
-			   FALSE,
-			   FALSE,
-			   2);
-
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
-			   chk_tno,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_title),
 			   chk_title,
 			   FALSE,
 			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
+			   0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_title,
+			0, 1, 0, 1,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_title,
+			1, 2, 0, 1);
+
+	gtk_box_pack_start(GTK_BOX(hbox_artist),
+			   entry_artist,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_artist),
 			   chk_artist,
 			   FALSE,
 			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
+			   0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_artist,
+			0, 1, 1, 2,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_artist,
+			1, 2, 1, 2);
+
+	gtk_box_pack_start(GTK_BOX(hbox_album),
+			   entry_album,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_album),
 			   chk_album,
 			   FALSE,
 			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
+			   0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_album,
+			0, 1, 2, 3,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_album,
+			1, 2, 2, 3);
+
+	gtk_box_pack_start(GTK_BOX(hbox_genre),
+			   entry_genre,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_genre),
 			   chk_genre,
 			   FALSE,
 			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(vbox_chk),
+			   0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_genre,
+			0, 1, 3, 4,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_genre,
+			1, 2, 3, 4);
+
+	gtk_box_pack_start(GTK_BOX(hbox_tno),
+			   entry_tno,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_tno),
+			   chk_tno,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_year),
+			   label_year,
+			   FALSE,
+			   FALSE,
+			   5);
+	gtk_box_pack_start(GTK_BOX(hbox_year),
+			   entry_year,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_year),
 			   chk_year,
 			   FALSE,
 			   FALSE,
-			   2);
+			   0);
 
-	/* Add all elements to a hbox */
-
-	hbox_all = gtk_hbox_new(FALSE, 2);
-
-	gtk_box_pack_start(GTK_BOX(hbox_all),
-			   vbox_label,
-			   FALSE,
-			   FALSE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(hbox_all),
-			   vbox_entry,
+	gtk_box_pack_start(GTK_BOX(hbox_spins),
+			   hbox_tno,
 			   TRUE,
 			   TRUE,
-			   2);
-	gtk_box_pack_start(GTK_BOX(hbox_all),
-			   vbox_chk,
-			   FALSE,
-			   FALSE,
-			   2);
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_spins),
+			   hbox_year,
+			   TRUE,
+			   TRUE,
+			   0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_tno,
+			0, 1, 4, 5,
+			GTK_FILL, GTK_FILL|GTK_EXPAND,
+			0, 0);
+	gtk_table_attach_defaults(GTK_TABLE (tag_table), hbox_spins,
+			1, 2, 4, 5);
 
 	/* The main edit dialog */
 
-	dialog = gtk_dialog_new_with_buttons("Edit tags",
+	dialog = gtk_dialog_new_with_buttons(_("Edit tags"),
 					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_MODAL,
 					     GTK_STOCK_CANCEL,
@@ -575,17 +594,14 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
 					     NULL);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 400, -1);
 
 	/* Add to the dialog's main vbox */
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox_all);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), tag_table);
 
 	/* Fill in initial entries */
 
-	if (otag->track_no) {
-		tno = g_strdup_printf("%d", otag->track_no);
-		gtk_entry_set_text(GTK_ENTRY(entry_tno), tno);
-	}
 	if (otag->title)
 		gtk_entry_set_text(GTK_ENTRY(entry_title), otag->title);
 	if (otag->artist)
@@ -594,10 +610,10 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		gtk_entry_set_text(GTK_ENTRY(entry_album), otag->album);
 	if (otag->genre)
 		gtk_entry_set_text(GTK_ENTRY(entry_genre), otag->genre);
-	if (otag->year) {
-		year = g_strdup_printf("%d", otag->year);
-		gtk_entry_set_text(GTK_ENTRY(entry_year), year);
-	}
+	if (otag->track_no)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)otag->track_no);
+	if (otag->year)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
 
 	gtk_widget_show_all(dialog);
 
@@ -607,7 +623,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 	case GTK_RESPONSE_OK:
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_tno))) {
 			ntag->track_no =
-				atoi(gtk_entry_get_text(GTK_ENTRY(entry_tno)));
+				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_tno));
 			changed |= TAG_TNO_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_title))) {
@@ -632,7 +648,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_year))) {
 			ntag->year =
-				atoi(gtk_entry_get_text(GTK_ENTRY(entry_year)));
+				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year));
 			changed |= TAG_YEAR_CHANGED;
 		}
 		break;
@@ -642,8 +658,6 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag,
 		break;
 	}
 
-	g_free(tno);
-	g_free(year);
 	gtk_widget_destroy(dialog);
 
 	return changed;

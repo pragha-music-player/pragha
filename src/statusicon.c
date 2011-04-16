@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -50,6 +50,7 @@ static int  x = 0, y = 0;
 		if(gtk_window_is_active(GTK_WINDOW (cwin->mainwindow))){
 			gtk_window_get_position( window, &x, &y );
 			gtk_widget_hide(GTK_WIDGET(window));
+			cwin->cstate->iconified = TRUE;
 		}
 		else gtk_window_present( window );
 	}
@@ -57,9 +58,50 @@ static int  x = 0, y = 0;
 		gtk_window_set_skip_taskbar_hint( window , FALSE );
 		if( x != 0 && y != 0 )
 			gtk_window_move( window , x, y );
-		gtk_widget_show( GTK_WIDGET( window ) );
+		gtk_widget_show_all( GTK_WIDGET( window ) );
+
+		if(!cwin->cpref->show_album_art)
+			if (cwin->album_art_frame)
+				gtk_widget_hide(cwin->album_art_frame);
+		if(!cwin->cstate->fullscreen)
+			gtk_widget_hide(cwin->unfull_button);
+		if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)))
+			gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
+
 		gtk_window_present( window );
+		cwin->cstate->iconified = FALSE;
 	}
+}
+
+static void
+notify_next_Callback (NotifyNotification *osd,
+                const char *action,
+                struct con_win *cwin)
+{
+	notify_notification_close (osd, NULL);
+	play_next_track(cwin);
+}
+
+static gboolean
+can_support_actions( void )
+{
+	static gboolean supported;
+	static gboolean have_checked = FALSE;
+
+	if( !have_checked ){
+		GList * c;
+		GList * caps = notify_get_server_caps( );
+
+		have_checked = TRUE;
+
+		for( c=caps; c && !supported; c=c->next )
+			supported = !strcmp( "actions", (char*)c->data );
+
+		g_list_foreach( caps, (GFunc)g_free, NULL );
+		g_list_free( caps );
+	}
+
+	return supported;
 }
 
 /* For want of a better place, this is here ... */
@@ -86,7 +128,7 @@ void show_osd(struct con_win *cwin)
  			_("Title"), str,
  			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
  			_("Album"), cwin->cstate->curr_mobj->tags->album,
-			_("Length"), convert_length_str(cwin->cstate->curr_mobj->tags->length));
+			_("Length"), length);
 
 	/* Create notification instance */
 
@@ -94,6 +136,7 @@ void show_osd(struct con_win *cwin)
 					NULL,
 					NULL,
 					GTK_STATUS_ICON(cwin->status_icon));
+
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
 
 	/* Add album art if set */
@@ -104,6 +147,13 @@ void show_osd(struct con_win *cwin)
 				cwin->album_art)) == GTK_IMAGE_PIXBUF))
 		notify_notification_set_icon_from_pixbuf(osd,
 				 gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+
+	if(can_support_actions( )){
+                notify_notification_add_action(
+                    osd, "media-next", _("Next Track" ),
+                    NOTIFY_ACTION_CALLBACK(notify_next_Callback), cwin,
+                    NULL );
+	}
 
 	/* Show OSD */
 
@@ -116,7 +166,6 @@ void show_osd(struct con_win *cwin)
 	g_free(summary);
 	g_free(length);
 	g_free(str);
-	g_object_unref(G_OBJECT(osd));
 }
 
 gboolean status_get_tooltip_cb (GtkWidget        *widget,
@@ -136,12 +185,13 @@ gboolean status_get_tooltip_cb (GtkWidget        *widget,
  			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
  			_("Album"), cwin->cstate->curr_mobj->tags->album,
 			_("Length"), gtk_label_get_text (GTK_LABEL(cwin->track_time_label)),
-			convert_length_str(cwin->cstate->curr_mobj->tags->length));
+			gtk_label_get_text (GTK_LABEL(cwin->track_length_label)));
 	}
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);
 
-	gtk_tooltip_set_icon (tooltip, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+	if (cwin->cpref->show_album_art && cwin->album_art)
+		gtk_tooltip_set_icon (tooltip, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
 
 	return TRUE;
 }

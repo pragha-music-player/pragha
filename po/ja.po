@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pragha 0.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-12 11:05-0200\n"
+"POT-Creation-Date: 2010-04-22 21:03-0300\n"
 "PO-Revision-Date: 2009-10-18 22:38+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -158,7 +158,7 @@ msgstr "繰り返し(_R)"
 msgid "_Fullscreen"
 msgstr "全画面化(_F)"
 
-#: src/gui.c:227 src/gui.c:649 src/pref.c:1206
+#: src/gui.c:227 src/gui.c:649 src/pref.c:1292
 msgid "Library"
 msgstr "ライブラリ"
 
@@ -179,7 +179,8 @@ msgstr "停止"
 msgid "Remove to playback queue"
 msgstr ""
 
-#: src/gui.c:247 src/gui.c:275
+#. The main edit dialog
+#: src/gui.c:247 src/gui.c:275 src/tags.c:589
 msgid "Edit tags"
 msgstr "タグの編集"
 
@@ -219,41 +220,41 @@ msgstr "ライブラリを展開(_E)"
 msgid "_Collapse library"
 msgstr "ライブラリを折り畳む(_C)"
 
-#: src/gui.c:288 src/librarytree.c:832 src/librarytree.c:1274
+#: src/gui.c:288 src/librarytree.c:833 src/librarytree.c:1275
 msgid "Folder / File"
 msgstr "フォルダ / ファイル"
 
 #: src/gui.c:290 src/gui.c:786 src/gui.c:911 src/current_playlist.c:1268
-#: src/current_playlist.c:1405 src/librarytree.c:849 src/librarytree.c:1277
-#: src/statusicon.c:87 src/statusicon.c:136 src/tags.c:408
+#: src/current_playlist.c:1406 src/librarytree.c:850 src/librarytree.c:1278
+#: src/statusicon.c:129 src/statusicon.c:185 src/tags.c:414
 msgid "Artist"
 msgstr "アーティスト"
 
 #: src/gui.c:292 src/gui.c:787 src/gui.c:912 src/current_playlist.c:1269
-#: src/current_playlist.c:1406 src/librarytree.c:866 src/librarytree.c:1280
-#: src/statusicon.c:88 src/statusicon.c:137 src/tags.c:409
+#: src/current_playlist.c:1407 src/librarytree.c:867 src/librarytree.c:1281
+#: src/statusicon.c:130 src/statusicon.c:186 src/tags.c:415
 msgid "Album"
 msgstr "アルバム"
 
 #: src/gui.c:294 src/gui.c:788 src/gui.c:913 src/current_playlist.c:1270
-#: src/current_playlist.c:1407 src/librarytree.c:883 src/librarytree.c:1283
-#: src/tags.c:410
+#: src/current_playlist.c:1408 src/librarytree.c:884 src/librarytree.c:1284
+#: src/tags.c:416
 msgid "Genre"
 msgstr "ジャンル"
 
-#: src/gui.c:296 src/librarytree.c:902 src/librarytree.c:1286
+#: src/gui.c:296 src/librarytree.c:903 src/librarytree.c:1287
 msgid "Artist / Album"
 msgstr "アーティスト / アルバム"
 
-#: src/gui.c:298 src/librarytree.c:921 src/librarytree.c:1292
+#: src/gui.c:298 src/librarytree.c:922 src/librarytree.c:1293
 msgid "Genre / Album"
 msgstr "ジャンル / アルバム"
 
-#: src/gui.c:300 src/librarytree.c:940 src/librarytree.c:1289
+#: src/gui.c:300 src/librarytree.c:941 src/librarytree.c:1290
 msgid "Genre / Artist"
 msgstr "ジャンル / アーティスト"
 
-#: src/gui.c:302 src/librarytree.c:961 src/librarytree.c:1295
+#: src/gui.c:302 src/librarytree.c:962 src/librarytree.c:1296
 msgid "Genre / Artist / Album"
 msgstr "ジャンル / アーティスト / アルバム"
 
@@ -261,7 +262,7 @@ msgstr "ジャンル / アーティスト / アルバム"
 msgid "Prev Track"
 msgstr "前のトラック"
 
-#: src/gui.c:319 src/gui.c:1598
+#: src/gui.c:319 src/gui.c:1613 src/statusicon.c:153
 msgid "Next Track"
 msgstr "次のトラック"
 
@@ -274,29 +275,30 @@ msgstr "Pragha Music Manager"
 msgid "Track"
 msgstr "トラック"
 
+#. Create labels
 #: src/gui.c:785 src/gui.c:910 src/current_playlist.c:1267
-#: src/current_playlist.c:1404 src/statusicon.c:86 src/statusicon.c:135
-#: src/tags.c:407
+#: src/current_playlist.c:1405 src/statusicon.c:128 src/statusicon.c:184
+#: src/tags.c:413
 msgid "Title"
 msgstr "タイトル"
 
 #: src/gui.c:789 src/gui.c:914 src/current_playlist.c:1273
-#: src/current_playlist.c:1410
+#: src/current_playlist.c:1411
 msgid "Bitrate"
 msgstr "ビットレート"
 
 #: src/gui.c:790 src/gui.c:915 src/current_playlist.c:1271
-#: src/current_playlist.c:1408 src/tags.c:411
+#: src/current_playlist.c:1409 src/tags.c:418
 msgid "Year"
 msgstr "年"
 
 #: src/gui.c:791 src/gui.c:916 src/current_playlist.c:1272
-#: src/current_playlist.c:1409 src/statusicon.c:89 src/statusicon.c:138
+#: src/current_playlist.c:1410 src/statusicon.c:131 src/statusicon.c:187
 msgid "Length"
 msgstr "時間"
 
 #: src/gui.c:792 src/gui.c:917 src/current_playlist.c:1276
-#: src/current_playlist.c:1413
+#: src/current_playlist.c:1414
 msgid "Filename"
 msgstr "ファイル名"
 
@@ -309,31 +311,36 @@ msgid "Save complete playlist"
 msgstr "完全なプレイリストを保存"
 
 #. Tooltips
-#: src/gui.c:1596
+#: src/gui.c:1611
 msgid "Play / Pause Track"
 msgstr "トラックの再生/一時停止"
 
-#: src/gui.c:1597
+#: src/gui.c:1612
 msgid "Previous Track"
 msgstr "前のトラック"
 
-#: src/gui.c:1599
+#: src/gui.c:1614
 msgid "Stop playback"
 msgstr "停止"
 
-#: src/gui.c:1600
+#: src/gui.c:1616
+#, fuzzy
+msgid "Leave Fullscreen"
+msgstr "全画面化(_F)"
+
+#: src/gui.c:1617
 msgid "Play songs in a random order"
 msgstr ""
 
-#: src/gui.c:1601
+#: src/gui.c:1618
 msgid "Repeat playback list at the end"
 msgstr ""
 
-#: src/gui.c:1640 src/panel.c:200 src/statusicon.c:132
+#: src/gui.c:1657 src/panel.c:200 src/statusicon.c:181
 msgid "<b>Not playing</b>"
 msgstr "<b>再生していません</b>"
 
-#: src/gui.c:1898
+#: src/gui.c:1925
 msgid "Options of the library"
 msgstr "ライブラリのオプション"
 
@@ -372,41 +379,40 @@ msgstr "既存のプレイリストに追加"
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> は予約されたプレイリスト名です"
 
-#. Create labels
-#: src/current_playlist.c:1266 src/current_playlist.c:1403 src/tags.c:406
+#: src/current_playlist.c:1266 src/current_playlist.c:1404 src/tags.c:417
 msgid "Track No"
 msgstr "トラック番号"
 
-#: src/current_playlist.c:1274 src/current_playlist.c:1411
+#: src/current_playlist.c:1274 src/current_playlist.c:1412
 msgid "Channels"
 msgstr "チャンネル"
 
-#: src/current_playlist.c:1275 src/current_playlist.c:1412
+#: src/current_playlist.c:1275 src/current_playlist.c:1413
 msgid "Samplerate"
 msgstr "サンプルレート"
 
 #: src/current_playlist.c:1311 src/current_playlist.c:1313
 #: src/current_playlist.c:1315 src/current_playlist.c:1317
-#: src/current_playlist.c:1440 src/current_playlist.c:1442
-#: src/current_playlist.c:1444 src/current_playlist.c:1446
+#: src/current_playlist.c:1441 src/current_playlist.c:1443
+#: src/current_playlist.c:1445 src/current_playlist.c:1447
 msgid "Unknown Tags"
 msgstr "タグ不明"
 
-#: src/current_playlist.c:1325 src/current_playlist.c:1453
+#: src/current_playlist.c:1325 src/current_playlist.c:1454
 msgid "Track Information"
 msgstr "トラック情報"
 
-#: src/librarytree.c:178 src/librarytree.c:233
+#: src/librarytree.c:179 src/librarytree.c:234
 #, c-format
 msgid "Unknown Artist"
 msgstr "アーティスト不明"
 
-#: src/librarytree.c:180 src/librarytree.c:235
+#: src/librarytree.c:181 src/librarytree.c:236
 #, c-format
 msgid "Unknown Album"
 msgstr "アルバム不明"
 
-#: src/librarytree.c:182 src/librarytree.c:237
+#: src/librarytree.c:183 src/librarytree.c:238
 #, c-format
 msgid "Unknown Genre"
 msgstr "ジャンル不明"
@@ -425,93 +431,118 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "アルバムアートのパターン"
 
+#: src/pref.c:61 src/pref.c:1391
+msgid "Start normal"
+msgstr ""
+
+#: src/pref.c:66 src/pref.c:1392
+#, fuzzy
+msgid "Start fullscreen"
+msgstr "全画面化(_F)"
+
+#: src/pref.c:71 src/pref.c:1393
+msgid "Start in system tray"
+msgstr ""
+
 #. Create a folder chooser dialog
-#: src/pref.c:238
+#: src/pref.c:270
 msgid "Select a folder to add to library"
 msgstr "ライブラリに追加するフォルダを選択してください"
 
 #. The main preferences dialog
-#: src/pref.c:1159 src/pref.c:1191
+#: src/pref.c:1244 src/pref.c:1277
 msgid "Preferences"
 msgstr "設定"
 
 #. Labels
-#: src/pref.c:1204
+#: src/pref.c:1290
 msgid "General"
 msgstr "一般"
 
-#: src/pref.c:1205
+#: src/pref.c:1291
 msgid "Audio"
 msgstr "オーディオ"
 
-#: src/pref.c:1207
+#: src/pref.c:1293
 msgid "Last.fm"
 msgstr "Last.fm"
 
 #. CDDB
-#: src/pref.c:1248
+#: src/pref.c:1334
 msgid "Connect to CDDB server"
 msgstr "CDDB サーバに接続する"
 
 #. Album art
-#: src/pref.c:1252
+#: src/pref.c:1338
 msgid "Show Album art in Panel"
 msgstr "パネルにアルバムアートを表示する"
 
-#: src/pref.c:1255
+#: src/pref.c:1341
 msgid "Size of Album art"
 msgstr "アルバムアートのサイズ"
 
-#: src/pref.c:1273
+#: src/pref.c:1359
 msgid "Album art file pattern"
 msgstr "アルバムアートのファイルパターン"
 
-#. Notification
-#: src/pref.c:1302
+#: src/pref.c:1390
+msgid "Remember last window state"
+msgstr ""
+
+#: src/pref.c:1395
+msgid "When pragha start"
+msgstr ""
+
+#. General Check_buttons
+#: src/pref.c:1412
+msgid "Minimize pragha when close the window"
+msgstr ""
+
+#: src/pref.c:1414
+#, fuzzy
+msgid "Restore last playlist"
+msgstr "カレントプレイリストを保存/復元する"
+
+#: src/pref.c:1415
 msgid "Show OSD for track change"
 msgstr "トラック変更時に OSD で表示する"
 
-#. Save current playlist
-#: src/pref.c:1306
-msgid "Save/Restore current playlist"
-msgstr "カレントプレイリストを保存/復元する"
-
 #. Software mixer
-#: src/pref.c:1339
+#: src/pref.c:1457
 msgid "Use software mixer"
 msgstr "ソフトウェアミキサーを使用する"
 
-#: src/pref.c:1340 src/pref.c:1346 src/pref.c:1375
+#: src/pref.c:1458 src/pref.c:1464 src/pref.c:1493
 msgid "Restart Required"
 msgstr "再起動が必要です"
 
-#: src/pref.c:1355
+#: src/pref.c:1473
 msgid "Audio sink"
 msgstr "オーディオシンク"
 
-#: src/pref.c:1372
+#: src/pref.c:1490
 msgid "Audio Device"
 msgstr "オーディオデバイス"
 
 #. Audio CD device
-#: src/pref.c:1390
+#: src/pref.c:1508
 msgid "Audio CD Device"
 msgstr "オーディオ CD デバイス"
 
-#: src/pref.c:1438
+#: src/pref.c:1556
 msgid "Folder"
 msgstr "フォルダ"
 
 #. Last.fm
-#: src/pref.c:1493
+#: src/pref.c:1611
 msgid "Last.fm Support"
 msgstr "Last.fm サポートを有効にする"
 
-#: src/pref.c:1496
+#: src/pref.c:1614
 msgid "Username"
 msgstr "ユーザ名"
 
-#: src/pref.c:1497
+#: src/pref.c:1615
 msgid "Password"
 msgstr "パスワード"
 
@@ -539,27 +570,27 @@ msgstr "サポートメディア"
 msgid "All files"
 msgstr "全てのファイル"
 
-#: src/menu.c:563 src/menu.c:672
+#: src/menu.c:572 src/menu.c:688
 msgid "Library scan complete"
 msgstr "ライブラリのスキャンが完了しました"
 
-#: src/menu.c:755
+#: src/menu.c:771
 msgid "Total Tracks:"
 msgstr "総トラック数:"
 
-#: src/menu.c:757
+#: src/menu.c:773
 msgid "Total Artists:"
 msgstr "総アーティスト数:"
 
-#: src/menu.c:759
+#: src/menu.c:775
 msgid "Total Albums:"
 msgstr "総アルバム数:"
 
-#: src/menu.c:761
+#: src/menu.c:777
 msgid "Statistics"
 msgstr "統計情報"
 
-#: src/menu.c:778
+#: src/menu.c:794
 msgid "translator-credits"
 msgstr "Masato Hashimoto <cabezon.hashimoto@gmail.com>, 2009."
 

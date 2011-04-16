@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -213,7 +213,8 @@ gint init_config(struct con_win *cwin)
 		album_f,
 		album_art_pattern_f,
 		osd_f,
-		fullscreen_f,
+		remember_window_state_f,
+		close_to_tray_f,
 		status_bar_f,
 		save_playlist_f,
 		lastfm_f,
@@ -231,7 +232,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	libs_f = lib_add_f = lib_delete_f = columns_f = nodes_f = cur_lib_view_f = FALSE;
-	last_folder_f = recursively_f = album_f = osd_f = fullscreen_f = status_bar_f = lastfm_f = FALSE;
+	last_folder_f = recursively_f = album_f = osd_f = remember_window_state_f = close_to_tray_f = status_bar_f = lastfm_f = FALSE;
 	software_mixer_f = save_playlist_f = album_art_pattern_f = use_cddb_f = FALSE;
 	shuffle_f = repeat_f = window_size_f = all_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = FALSE;
@@ -306,18 +307,45 @@ gint init_config(struct con_win *cwin)
 			window_size_f = TRUE;
 		}
 
-		/* Retrieve Fullscreen option */
+		/* Retrieve Remember last window state option */
 
-		cwin->cpref->fullscreen =
+		cwin->cpref->remember_window_state =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
-					       KEY_FULLSCREEN,
+					       KEY_REMEMBER_STATE,
 					       &error);
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			fullscreen_f = FALSE;
+			remember_window_state_f = TRUE;
 		}
+
+		/* Retrieve last window stat */
+
+		cwin->cpref->start_mode =
+			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+					      GROUP_GENERAL,
+					      KEY_START_MODE,
+					      &error);
+		if (!cwin->cpref->start_mode) {
+			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
+			g_error_free(error);
+			error = NULL;
+		}
+
+		/* Retrieve close to system tray option */
+
+		cwin->cpref->close_to_tray =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_CLOSE_TO_TRAY,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			close_to_tray_f = TRUE;
+		}
+
 
 		/* Retrieve view status bar option */
 
@@ -329,7 +357,7 @@ gint init_config(struct con_win *cwin)
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			status_bar_f = FALSE;
+			status_bar_f = TRUE;
 		}
 
 		/* Retrieve list of libraries */
@@ -829,8 +857,10 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->show_album_art = TRUE;
 	if (all_f || osd_f)
 		cwin->cpref->show_osd = FALSE;
-	if (all_f || fullscreen_f)
-		cwin->cpref->fullscreen = FALSE;
+	if (all_f || remember_window_state_f)
+		cwin->cpref->remember_window_state = TRUE;
+	if (all_f || close_to_tray_f)
+		cwin->cpref->close_to_tray = FALSE;
 	if (all_f || status_bar_f)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || save_playlist_f)
@@ -1134,7 +1164,7 @@ void init_menu_actions(struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->repeat);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->fullscreen);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cstate->fullscreen);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
@@ -1226,7 +1256,20 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Show main window */
 
-	gtk_widget_show_all(cwin->mainwindow);
+ 	gtk_widget_show_all(cwin->mainwindow);
+
+	gtk_widget_hide(cwin->unfull_button);
+
+	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+		cwin->cstate->fullscreen = TRUE;
+	else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE)){
+		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
+			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+		else gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
+
+		cwin->cstate->iconified = TRUE;
+	}
+	else gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 
 	init_menu_actions(cwin);
 	init_toggle_buttons(cwin);

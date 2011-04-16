@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -910,16 +910,16 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return NULL;
 
-	switch (cwin->cpref->shuffle) {
-		case TRUE:
-			if(cwin->cstate->queue_track_refs){
-				path = get_next_queue_track(cwin);
-				model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-				ref = gtk_tree_row_reference_new(model, path);
-				reset_rand_track_refs(ref, cwin);
-				cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-			}
-			else{
+	if(cwin->cstate->queue_track_refs){
+		path = get_next_queue_track(cwin);
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		ref = gtk_tree_row_reference_new(model, path);
+		reset_rand_track_refs(ref, cwin);
+		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+	}
+	else{
+		switch (cwin->cpref->shuffle) {
+			case TRUE:
 				last = g_list_last(cwin->cstate->rand_track_refs);
 				if ((!cwin->cstate->curr_rand_ref) || (last && (cwin->cstate->curr_rand_ref == last->data))){
 					path = get_next_unplayed_random_track(cwin);
@@ -927,14 +927,14 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 						rand_unplayed = TRUE;
 				}
 				else path = get_next_random_ref_track(cwin);
-			}
-			break;
-		case FALSE:
-			path = get_next_sequential_track(cwin);
-			if (!path) seq_last = TRUE;
-			break;
-		default:
-			break;
+				break;
+			case FALSE:
+				path = get_next_sequential_track(cwin);
+				if (!path) seq_last = TRUE;
+				break;
+			default:
+				break;
+		}
 	}
 	if (rand_unplayed && cwin->cpref->repeat)
 		path = get_next_random_track(cwin);
@@ -1346,6 +1346,7 @@ void track_properties_current_playlist(struct con_win *cwin)
 				align = gtk_alignment_new(0, 0, 0, 0);
 				info_label = gtk_label_new(tr_info[i]);
 				gtk_label_set_selectable(GTK_LABEL(info_label), TRUE);
+				gtk_label_set_line_wrap(GTK_LABEL(info_label), TRUE);
 				gtk_container_add(GTK_CONTAINER(align), info_label);
 				gtk_box_pack_start(GTK_BOX(info_box),
 						   GTK_WIDGET(align),
@@ -1475,6 +1476,7 @@ void track_properties_current_playing(struct con_win *cwin)
 			align = gtk_alignment_new(0, 0, 0, 0);
 			info_label = gtk_label_new(tr_info[i]);
 			gtk_label_set_selectable(GTK_LABEL(info_label), TRUE);
+			gtk_label_set_line_wrap(GTK_LABEL(info_label), TRUE);
 			gtk_container_add(GTK_CONTAINER(align), info_label);
 				gtk_box_pack_start(GTK_BOX(info_box),
 					   GTK_WIDGET(align),

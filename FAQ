@@ -1,12 +1,5 @@
 Frequently Answered Questions
 =============================
-Q. How to install in ubuntu.
-A. sudo apt-get install libasound-dev libao-dev libgtk2.0-dev libflac-dev \
-libglib2.0-dev libtagc0-dev libmad0-dev libsqlite3-dev libdbus-1-dev \
-libnotify-dev libsndfile1-dev libvorbis-dev libcurl4-openssl-dev libcdio-dev \
-libcdio-paranoia-dev libcddb-dev libmodplug-dev
-   make
-   sudo make install
 
 Q. Why the fsck does a freaking music player consume so much CPU ?
 A. Use the HW device directly in ALSA (hw:0,0). The 'default' device

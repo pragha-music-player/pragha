@@ -1,13 +1,16 @@
 dnl Version information
 m4_define([pragha_version_major], [0])
 m4_define([pragha_version_minor], [7])
-m4_define([pragha_version_micro], [3])
+m4_define([pragha_version_micro], [4])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2010
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
+
+# Use AM_SILENT_RULES if present
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Initialize automake
 AM_INIT_AUTOMAKE([AC_PACKAGE_TARNAME()], [AC_PACKAGE_VERSION()])
