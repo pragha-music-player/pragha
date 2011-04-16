@@ -172,8 +172,9 @@ static void add_entry_library(gint location_id,
 	/* Only root node can be of type NODE_FOLDER */
 
 	if (node_type == NODE_FOLDER) {
-		node_data = get_containing_folder(location);
-	} else {
+		node_data = get_display_filename(location, TRUE);
+	}
+	else {
 		if (G_UNLIKELY(g_utf8_strlen(node_data, -1) == 0)) {
 			if(!g_strncasecmp("Artist",g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level),4))
 					node_data = g_strdup_printf(_("Unknown Artist"));
@@ -223,8 +224,9 @@ static void add_entry_library(gint location_id,
 		node_pixbuf = choose_node_pixbuf(node_level, cwin);
 
 
-		if (node_type == NODE_BASENAME)
-			node_data = g_path_get_basename(location);
+		if (node_type == NODE_BASENAME) {
+			node_data = get_display_filename(location, FALSE);
+		}
 		else {
 			if (G_UNLIKELY(g_utf8_strlen(node_data, -1) == 0)) {
 				if (node_type == NODE_TRACK)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pragha 0.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-18 20:37-0300\n"
+"POT-Creation-Date: 2010-06-24 14:51-0300\n"
 "PO-Revision-Date: 2009-10-18 22:38+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -93,7 +93,7 @@ msgstr "プレイリストのクリア"
 msgid "Save selection"
 msgstr "選択した楽曲の保存"
 
-#: src/gui.c:190 src/gui.c:253 src/current_playlist.c:626
+#: src/gui.c:190 src/gui.c:253 src/current_playlist.c:638
 msgid "Save playlist"
 msgstr "プレイリストの保存"
 
@@ -220,41 +220,41 @@ msgstr "ライブラリを展開(_E)"
 msgid "_Collapse library"
 msgstr "ライブラリを折り畳む(_C)"
 
-#: src/gui.c:288 src/librarytree.c:883 src/librarytree.c:1351
+#: src/gui.c:288 src/librarytree.c:885 src/librarytree.c:1353
 msgid "Folder / File"
 msgstr "フォルダ / ファイル"
 
-#: src/gui.c:290 src/gui.c:793 src/gui.c:917 src/current_playlist.c:1269
-#: src/current_playlist.c:1407 src/librarytree.c:900 src/librarytree.c:1354
+#: src/gui.c:290 src/gui.c:793 src/gui.c:917 src/current_playlist.c:1280
+#: src/current_playlist.c:1403 src/librarytree.c:902 src/librarytree.c:1356
 #: src/statusicon.c:133 src/statusicon.c:187 src/tags.c:426
 msgid "Artist"
 msgstr "アーティスト"
 
-#: src/gui.c:292 src/gui.c:794 src/gui.c:918 src/current_playlist.c:1270
-#: src/current_playlist.c:1408 src/librarytree.c:917 src/librarytree.c:1357
+#: src/gui.c:292 src/gui.c:794 src/gui.c:918 src/current_playlist.c:1281
+#: src/current_playlist.c:1404 src/librarytree.c:919 src/librarytree.c:1359
 #: src/statusicon.c:134 src/statusicon.c:188 src/tags.c:427
 msgid "Album"
 msgstr "アルバム"
 
-#: src/gui.c:294 src/gui.c:795 src/gui.c:919 src/current_playlist.c:1271
-#: src/current_playlist.c:1409 src/librarytree.c:934 src/librarytree.c:1360
+#: src/gui.c:294 src/gui.c:795 src/gui.c:919 src/current_playlist.c:1282
+#: src/current_playlist.c:1405 src/librarytree.c:936 src/librarytree.c:1362
 #: src/tags.c:428
 msgid "Genre"
 msgstr "ジャンル"
 
-#: src/gui.c:296 src/librarytree.c:953 src/librarytree.c:1363
+#: src/gui.c:296 src/librarytree.c:955 src/librarytree.c:1365
 msgid "Artist / Album"
 msgstr "アーティスト / アルバム"
 
-#: src/gui.c:298 src/librarytree.c:972 src/librarytree.c:1369
+#: src/gui.c:298 src/librarytree.c:974 src/librarytree.c:1371
 msgid "Genre / Album"
 msgstr "ジャンル / アルバム"
 
-#: src/gui.c:300 src/librarytree.c:991 src/librarytree.c:1366
+#: src/gui.c:300 src/librarytree.c:993 src/librarytree.c:1368
 msgid "Genre / Artist"
 msgstr "ジャンル / アーティスト"
 
-#: src/gui.c:302 src/librarytree.c:1012 src/librarytree.c:1372
+#: src/gui.c:302 src/librarytree.c:1014 src/librarytree.c:1374
 msgid "Genre / Artist / Album"
 msgstr "ジャンル / アーティスト / アルバム"
 
@@ -271,34 +271,34 @@ msgid "Pragha Music Manager"
 msgstr "Pragha Music Manager"
 
 #. Create the checkmenu items
-#: src/gui.c:791 src/gui.c:915 src/current_playlist.c:58
+#: src/gui.c:791 src/gui.c:915 src/current_playlist.c:70
 msgid "Track"
 msgstr "トラック"
 
 #. Create labels
-#: src/gui.c:792 src/gui.c:916 src/current_playlist.c:1268
-#: src/current_playlist.c:1406 src/statusicon.c:132 src/statusicon.c:186
+#: src/gui.c:792 src/gui.c:916 src/current_playlist.c:1279
+#: src/current_playlist.c:1402 src/statusicon.c:132 src/statusicon.c:186
 #: src/tags.c:425
 msgid "Title"
 msgstr "タイトル"
 
-#: src/gui.c:796 src/gui.c:920 src/current_playlist.c:1274
-#: src/current_playlist.c:1412
+#: src/gui.c:796 src/gui.c:920 src/current_playlist.c:1285
+#: src/current_playlist.c:1408
 msgid "Bitrate"
 msgstr "ビットレート"
 
-#: src/gui.c:797 src/gui.c:921 src/current_playlist.c:1272
-#: src/current_playlist.c:1410 src/tags.c:430
+#: src/gui.c:797 src/gui.c:921 src/current_playlist.c:1283
+#: src/current_playlist.c:1406 src/tags.c:430
 msgid "Year"
 msgstr "年"
 
-#: src/gui.c:798 src/gui.c:922 src/current_playlist.c:1273
-#: src/current_playlist.c:1411 src/statusicon.c:135 src/statusicon.c:189
+#: src/gui.c:798 src/gui.c:922 src/current_playlist.c:1284
+#: src/current_playlist.c:1407 src/statusicon.c:135 src/statusicon.c:189
 msgid "Length"
 msgstr "時間"
 
-#: src/gui.c:799 src/gui.c:923 src/current_playlist.c:1277
-#: src/current_playlist.c:1415
+#: src/gui.c:799 src/gui.c:923 src/current_playlist.c:1288
+#: src/current_playlist.c:1411
 msgid "Filename"
 msgstr "ファイル名"
 
@@ -359,68 +359,68 @@ msgstr "%s <small><span weight=\"light\">by</span></small> %s"
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
 msgstr "%s <small><span weight=\"light\">in</span></small> %s"
 
-#: src/current_playlist.c:58
+#: src/current_playlist.c:70
 msgid "Tracks"
 msgstr "トラック"
 
-#: src/current_playlist.c:612
+#: src/current_playlist.c:624
 msgid "Save as a new playlist"
 msgstr "新しいプレイリストとして保存"
 
-#: src/current_playlist.c:614
+#: src/current_playlist.c:626
 msgid "Append to an existing playlist"
 msgstr "既存のプレイリストに追加"
 
-#: src/current_playlist.c:691
+#: src/current_playlist.c:703
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b> は予約されたプレイリスト名です"
 
-#: src/current_playlist.c:1267 src/current_playlist.c:1405 src/tags.c:429
+#: src/current_playlist.c:1278 src/current_playlist.c:1401 src/tags.c:429
 msgid "Track No"
 msgstr "トラック番号"
 
-#: src/current_playlist.c:1275 src/current_playlist.c:1413
+#: src/current_playlist.c:1286 src/current_playlist.c:1409
 msgid "Channels"
 msgstr "チャンネル"
 
-#: src/current_playlist.c:1276 src/current_playlist.c:1414
+#: src/current_playlist.c:1287 src/current_playlist.c:1410
 msgid "Samplerate"
 msgstr "サンプルレート"
 
-#: src/current_playlist.c:1312 src/current_playlist.c:1314
-#: src/current_playlist.c:1316 src/current_playlist.c:1318
-#: src/current_playlist.c:1442 src/current_playlist.c:1444
-#: src/current_playlist.c:1446 src/current_playlist.c:1448
+#: src/current_playlist.c:1309 src/current_playlist.c:1311
+#: src/current_playlist.c:1313 src/current_playlist.c:1315
+#: src/current_playlist.c:1424 src/current_playlist.c:1426
+#: src/current_playlist.c:1428 src/current_playlist.c:1430
 msgid "Unknown Tags"
 msgstr "タグ不明"
 
-#: src/current_playlist.c:1326 src/current_playlist.c:1455
+#: src/current_playlist.c:1323 src/current_playlist.c:1437
 msgid "Track Information"
 msgstr "トラック情報"
 
-#: src/librarytree.c:179 src/librarytree.c:234
+#: src/librarytree.c:180 src/librarytree.c:236
 #, c-format
 msgid "Unknown Artist"
 msgstr "アーティスト不明"
 
-#: src/librarytree.c:181 src/librarytree.c:236
+#: src/librarytree.c:182 src/librarytree.c:238
 #, c-format
 msgid "Unknown Album"
 msgstr "アルバム不明"
 
-#: src/librarytree.c:183 src/librarytree.c:238
+#: src/librarytree.c:184 src/librarytree.c:240
 #, c-format
 msgid "Unknown Genre"
 msgstr "ジャンル不明"
 
-#: src/librarytree.c:1112
+#: src/librarytree.c:1114
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
 
-#: src/librarytree.c:1167
+#: src/librarytree.c:1169
 msgid ""
 "Are you sure you want to delete current file from HDD?\n"
 "\n"
@@ -616,7 +616,7 @@ msgstr "日"
 msgid "day"
 msgstr "日"
 
-#: src/utils.c:430
+#: src/utils.c:453
 msgid "Unable to open the browser"
 msgstr "ブラウザを表示できません"
 

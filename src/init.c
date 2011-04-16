@@ -1095,6 +1095,19 @@ gint init_notify(struct con_win *cwin)
 	return 0;
 }
 
+gint init_keybinder(struct con_win *cwin)
+{
+	keybinder_init ();
+
+	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, cwin);
+	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, cwin);
+	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, cwin);
+	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, cwin);
+	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, cwin);
+
+	return 0;
+}
+
 gint init_lastfm(struct con_win *cwin)
 {
 	gint ret = 0;

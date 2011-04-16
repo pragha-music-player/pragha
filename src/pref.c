@@ -111,7 +111,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		ctt = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->close_to_tray_w));
-		if (aa)
+		if (ctt)
 			cwin->cpref->close_to_tray = TRUE;
 		else
 			cwin->cpref->close_to_tray = FALSE;

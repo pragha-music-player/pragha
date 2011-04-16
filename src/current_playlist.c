@@ -23,6 +23,18 @@
 /* General functions */
 /*********************/
 
+static gchar* get_display_name(struct musicobject *mobj)
+{
+	gchar *name = NULL;
+	
+	if (mobj->file_type == FILE_CDDA) {
+		name = g_strdup(mobj->file);
+	} else {
+		name = get_display_filename(mobj->file, FALSE);
+	}
+	return name;
+}
+
 static gint get_total_playtime(struct con_win *cwin)
 {
 	GtkTreeModel *model;
@@ -1254,7 +1266,6 @@ void track_properties_current_playlist_action(GtkAction *action, struct con_win 
 
 void track_properties_current_playlist(struct con_win *cwin)
 {
-	GError *error = NULL;
 	GtkTreeModel *model;
 	GtkWidget *dialog;
 	GtkTreeSelection *selection;
@@ -1291,21 +1302,7 @@ void track_properties_current_playlist(struct con_win *cwin)
 			gchar *bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
 			gchar *channels = g_strdup_printf("%d", mobj->tags->channels);
 			gchar *samplerate = g_strdup_printf("%d", mobj->tags->samplerate);
-			gchar *u_file;
-
-			if (mobj->file_type == FILE_CDDA) {
-				u_file = g_strdup(mobj->file);
-			} else {
-				u_file = g_filename_to_utf8(mobj->file, -1,
-							    NULL, NULL, &error);
-				if (!u_file) {
-					g_warning("Unable to convert file"
-						  " to UTF-8: %s",
-						  mobj->file);
-					g_error_free(error);
-					error = NULL;
-				}
-			}
+			gchar *u_file = get_display_name(mobj);;
 
 			gchar *tr_info[11] = {tno,
 			      (mobj->tags->title && strlen(mobj->tags->title)) ?
@@ -1398,7 +1395,6 @@ void track_properties_current_playing_action(GtkAction *action, struct con_win *
 
 void track_properties_current_playing(struct con_win *cwin)
 {
-	GError *error = NULL;
 	GtkWidget *dialog;
 	GtkWidget *t_hbox, *align, *tag_box, *info_box, *tag_label, *info_label;
 	gint i=0;
@@ -1421,22 +1417,8 @@ void track_properties_current_playing(struct con_win *cwin)
 		gchar *bitrate = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->bitrate);
 		gchar *channels = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->channels);
 		gchar *samplerate = g_strdup_printf("%d", cwin->cstate->curr_mobj->tags->samplerate);
-		gchar *u_file;
+		gchar *u_file = get_display_name(cwin->cstate->curr_mobj);
 
-		if (cwin->cstate->curr_mobj->file_type == FILE_CDDA) {
-			u_file = g_strdup(cwin->cstate->curr_mobj->file);
-		}
-		else {
-			u_file = g_filename_to_utf8(cwin->cstate->curr_mobj->file, -1,
-						    NULL, NULL, &error);
-			if (!u_file) {
-				g_warning("Unable to convert file"
-					  " to UTF-8: %s",
-					  cwin->cstate->curr_mobj->file);
-				g_error_free(error);
-				error = NULL;
-			}
-		}
 		gchar *tr_info[11] = {tno,
 				     (cwin->cstate->curr_mobj->tags->title && strlen(cwin->cstate->curr_mobj->tags->title)) ?
 				     cwin->cstate->curr_mobj->tags->title : _("Unknown Tags"),
@@ -1572,16 +1554,12 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	ch_length = convert_length_str(mobj->tags->length);
 	ch_year = g_strdup_printf("%d", mobj->tags->year);
 	ch_bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
+	ch_filename = get_display_name(mobj);
 
 	if(mobj->tags->track_no)
 		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
 	else
 		ch_track_no = NULL;
-
-	if (mobj->file_type != FILE_CDDA)
-		ch_filename = g_path_get_basename(mobj->file);
-	else
-		ch_filename = g_strdup(mobj->file);
 
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
@@ -1590,7 +1568,7 @@ void append_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 			   P_BUBBLE, FALSE, 
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
-					mobj->tags->title : g_path_get_basename(mobj->file),
+					mobj->tags->title : ch_filename,
 			   P_ARTIST, mobj->tags->artist,
 			   P_ALBUM, mobj->tags->album,
 			   P_GENRE, mobj->tags->genre,

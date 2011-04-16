@@ -265,7 +265,8 @@ gboolean is_present_str_list(const gchar *str, GSList *list)
 				break;
 			}
 		}
-	} else {
+	}
+	else {
 		ret = FALSE;
 	}
 
@@ -293,22 +294,27 @@ GSList* delete_from_str_list(const gchar *str, GSList *list)
 	return list;
 }
 
-/* Return the containing folder of given path. Returned string must be freed. */
+/* Returns either the basename of the given filename, or (if the parameter 
+ * get_folder is set) the basename of the container folder of filename. In both
+ * cases the returned string is encoded in utf-8 format. If GLib can not make
+ * sense of the encoding of filename, as a last resort it replaces unknown
+ * characters with U+FFFD, the Unicode replacement character */
 
-gchar* get_containing_folder(gchar *path)
+gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 {
-	gchar *dir;
-	gchar *base;
-
-	if (!path)
-		return NULL;
-
-	dir = g_path_get_dirname(path);
-	base = g_path_get_basename(dir);
-
-	g_free(dir);
-
-	return base;
+	gchar *utf8_filename = NULL;
+	gchar *dir = NULL;
+	
+	/* Get the containing folder of the file or the file itself ? */
+	if (get_folder) {
+		dir = g_path_get_dirname(filename);
+		utf8_filename = g_filename_display_basename(dir);
+		g_free(dir);
+	}
+	else {
+		utf8_filename = g_filename_display_basename(filename);
+	}
+	return utf8_filename;
 }
 
 /* Free a list of strings */
@@ -418,22 +424,37 @@ exit:
 /* callback used to open default browser when URLs got clicked */
 void open_url(struct con_win *cwin, const gchar *url)
 {
-	GError *error = NULL;
-
-	gtk_show_uri (NULL, url,  gtk_get_current_event_time (), &error);
-
-	if (error != NULL){
+	gboolean success = TRUE;
+	const gchar *argv[3];
+	gchar *methods[] = {"xdg-open","firefox","mozilla","opera","konqueror",NULL};
+	int i = 0;
+			
+	/* First try gtk_show_uri() (will fail if gvfs is not installed) */
+	if (!gtk_show_uri (NULL, url,  gtk_get_current_event_time (), NULL)) {
+		success = FALSE;
+		argv[1] = url;
+		argv[2] = NULL;
+		/* Next try all available methods for opening the URL */
+		while (methods[i] != NULL) {
+			argv[0] = methods[i++];
+			if (g_spawn_async(NULL, (gchar**)argv, NULL, G_SPAWN_SEARCH_PATH,
+				NULL, NULL, NULL, NULL)) {
+				success = TRUE;
+				break;
+			}
+		}
+	}
+	/* No method was found to open the URL */
+	if (!success) {
 		GtkWidget *d;
 		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow), 
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, 
 					"%s", _("Unable to open the browser"));
-		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (d),
-							"%s", error->message);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (d),
+							 "%s", "No methods supported");
 		g_signal_connect (d, "response", G_CALLBACK (gtk_widget_destroy), NULL);
 		gtk_window_present (GTK_WINDOW (d));
-		g_error_free (error);
-		error = NULL;
 	}
 }
 

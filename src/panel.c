@@ -183,7 +183,7 @@ void __update_current_song_info(struct con_win *cwin)
 	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
 		str_title = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
-		str_title = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
+		str_title = get_display_filename(cwin->cstate->curr_mobj->file, FALSE);
 
 	if (cwin->cstate->curr_mobj->file_type == FILE_CDDA){
 		str = g_markup_printf_escaped ("%s", str_title);
@@ -297,21 +297,21 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				g_object_unref(G_OBJECT(scaled_album_art));
 				g_object_unref(G_OBJECT(album_art));
 			}
-			scaled_frame = gdk_pixbuf_scale_simple (frame,
-								cwin->cpref->album_art_size,
-								cwin->cpref->album_art_size,
-								GDK_INTERP_BILINEAR);
-			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
-
-			g_object_unref(G_OBJECT(scaled_frame));
-			g_object_unref(G_OBJECT(frame));
-
-			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-					  GTK_WIDGET(cwin->album_art));
-			gtk_widget_show_all(cwin->album_art_frame);
-
 			g_free(dir);
 		}
+
+		scaled_frame = gdk_pixbuf_scale_simple (frame,
+							cwin->cpref->album_art_size,
+							cwin->cpref->album_art_size,
+							GDK_INTERP_BILINEAR);
+		cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
+
+		g_object_unref(G_OBJECT(scaled_frame));
+		g_object_unref(G_OBJECT(frame));
+
+		gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+				  GTK_WIDGET(cwin->album_art));
+		gtk_widget_show_all(cwin->album_art_frame);
 	}
 }
 
@@ -416,10 +416,15 @@ void shuffle_button (struct con_win *cwin)
 	}
 }
 
+void keybind_play_handler (const char *keystring, gpointer data)
+{
+	struct con_win *cwin = data;
+	play_pause_resume(cwin);
+}
+
 void play_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_pause_resume(cwin);
-	gtk_widget_grab_focus(cwin->current_playlist);
 }
 
 void play_pause_resume(struct con_win *cwin)
@@ -477,22 +482,48 @@ void play_pause_resume(struct con_win *cwin)
 	}
 }
 
+void keybind_stop_handler (const char *keystring, gpointer data)
+{
+	struct con_win *cwin = data;
+	stop_playback(cwin);
+}
+
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	stop_playback(cwin);
-	gtk_widget_grab_focus(cwin->current_playlist);
+}
+
+void keybind_prev_handler (const char *keystring, gpointer data)
+{
+	struct con_win *cwin = data;
+	play_prev_track(cwin);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_prev_track(cwin);
-	gtk_widget_grab_focus(cwin->current_playlist);
+}
+
+void keybind_next_handler (const char *keystring, gpointer data)
+{
+	struct con_win *cwin = data;
+	play_next_track(cwin);
 }
 
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_next_track(cwin);
 	gtk_widget_grab_focus(cwin->current_playlist);
+}
+
+void keybind_media_handler (const char *keystring, gpointer data)
+{
+	struct con_win *cwin = data;
+
+	if (GTK_WIDGET_VISIBLE(cwin->mainwindow))
+		toogle_main_window (cwin, TRUE);
+	else
+		toogle_main_window (cwin, FALSE);
 }
 
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)

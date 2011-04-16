@@ -55,7 +55,9 @@
 #include "oggvorbis.h"
 #include "cdda.h"
 #include "mod.h"
+
 #include "gtkcellrendererbubble.h"
+#include "keybinder.h"
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
@@ -679,6 +681,13 @@ void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
+/* Global Hotkeys handlers */
+void keybind_prev_handler (const char *keystring, gpointer data);
+void keybind_play_handler (const char *keystring, gpointer data);
+void keybind_stop_handler (const char *keystring, gpointer data);
+void keybind_next_handler (const char *keystring, gpointer data);
+void keybind_media_handler (const char *keystring, gpointer data);
+
 /* Panel actions */
 gboolean update_current_song_info(gpointer data);
 void __update_progress_song_info(struct con_win *cwin, gint length);
@@ -1066,7 +1075,7 @@ gboolean is_image_file(gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);
-gchar* get_containing_folder(gchar *path);
+gchar* get_display_filename(const gchar *filename, gboolean get_folder);
 void free_str_list(GSList *list);
 gint compare_utf8_str(gchar *str1, gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
@@ -1106,6 +1115,7 @@ gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
+gint init_keybinder(struct con_win *cwin);
 gint init_lastfm(struct con_win *cwin);
 void init_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);

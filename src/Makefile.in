@@ -62,7 +62,7 @@ am_pragha_OBJECTS = pragha-pragha.$(OBJEXT) pragha-init.$(OBJEXT) \
 	pragha-statusicon.$(OBJEXT) pragha-cmdline.$(OBJEXT) \
 	pragha-dbus.$(OBJEXT) pragha-playlist.$(OBJEXT) \
 	pragha-md5.$(OBJEXT) pragha-lastfm.$(OBJEXT) \
-	pragha-gtkcellrendererbubble.$(OBJEXT)
+	pragha-gtkcellrendererbubble.$(OBJEXT) pragha-bind.$(OBJEXT)
 pragha_OBJECTS = $(am_pragha_OBJECTS)
 pragha_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -197,6 +197,10 @@ LIBNOTIFY_VERSION = @LIBNOTIFY_VERSION@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBX11_CFLAGS = @LIBX11_CFLAGS@
+LIBX11_LIBS = @LIBX11_LIBS@
+LIBX11_REQUIRED_VERSION = @LIBX11_REQUIRED_VERSION@
+LIBX11_VERSION = @LIBX11_VERSION@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -333,6 +337,7 @@ pragha_CFLAGS = $(GLIB_CFLAGS) 						\
 	$(LIBCURL_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
+	$(LIBX11_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -372,7 +377,9 @@ pragha_SOURCES = pragha.c \
 		flac.h \
 		cdda.h \
 		gtkcellrendererbubble.c \
-		gtkcellrendererbubble.h
+		gtkcellrendererbubble.h \
+		bind.c \
+		keybinder.h
 
 pragha_LDFLAGS = $(GLIB_LIBS) 						\
 	$(GTHREAD_LIBS)							\
@@ -393,7 +400,8 @@ pragha_LDFLAGS = $(GLIB_LIBS) 						\
 	$(LIBCURL_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)
+	$(LIBCDDB_LIBS)							\
+	$(LIBX11_LIBS)
 
 all: all-am
 
@@ -483,6 +491,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-audio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-bind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-cmdline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-current_playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-db.Po@am__quote@
@@ -982,6 +991,22 @@ pragha-gtkcellrendererbubble.obj: gtkcellrendererbubble.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gtkcellrendererbubble.c' object='pragha-gtkcellrendererbubble.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-gtkcellrendererbubble.obj `if test -f 'gtkcellrendererbubble.c'; then $(CYGPATH_W) 'gtkcellrendererbubble.c'; else $(CYGPATH_W) '$(srcdir)/gtkcellrendererbubble.c'; fi`
+
+pragha-bind.o: bind.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.o -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.o `test -f 'bind.c' || echo '$(srcdir)/'`bind.c
+
+pragha-bind.obj: bind.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-bind.obj -MD -MP -MF $(DEPDIR)/pragha-bind.Tpo -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pragha-bind.Tpo $(DEPDIR)/pragha-bind.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bind.c' object='pragha-bind.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-bind.obj `if test -f 'bind.c'; then $(CYGPATH_W) 'bind.c'; else $(CYGPATH_W) '$(srcdir)/bind.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

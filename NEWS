@@ -1,6 +1,23 @@
 =====================================================
-Overview of changes in Pragha 0.7.6
+Overview of changes in Pragha 0.7.7
 =====================================================
+News:
+	Global keybindings with keybinder. Inspired on osdlyrics
+
+Updates Translations:
+	Add Brazilian Portuguese translation. Thanks to Sergio Cipolla.
+
+Bugs fixed:
+	Fix display files with non-utf8 locale. Thanks to Roberto DMD.
+	Fix open urls without gvfs. Thanks to Roberto DMD.
+	Add files recursively with dbus and command line according to preferences.
+	Shows album art when playing audio cd
+	D'Oh!. No remember Close to tray option.
+
+======================================================
+OTHERS REALESES:
+======================================================
+V0.7.6
 News:
 	Drag'n drop several items in Library/Playlist/Current_playlist. Very thanks to Guillaume Royer.
 	Add files to the current playlist by dragging them from file browser. Very thanks to Guillaume Royer.
@@ -20,9 +37,6 @@ Bugs fixed:
 	No resize panel, when change windows size.
 	Remove unused variables.
 
-======================================================
-OTHERS REALESES:
-======================================================
 V0.7.5.2
 	Update Polish translation. Thanks to Sid.
 
