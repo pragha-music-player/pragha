@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha svn rev. 60\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:53-0300\n"
+"POT-Creation-Date: 2010-05-21 10:58-0300\n"
 "PO-Revision-Date: 2010-05-08 14:21+0100\n"
 "Last-Translator: Michael Kogan <michael.kogan@gmx.net>\n"
 "Language-Team: Deutsch\n"
@@ -586,23 +586,23 @@ msgstr "Alle Dateien"
 msgid "Library scan complete"
 msgstr "Einlesen der Musikbibliothek abgeschlossen"
 
-#: src/menu.c:776
+#: src/menu.c:774
 msgid "Total Tracks:"
 msgstr "Gesamtzahl der Titel:"
 
-#: src/menu.c:778
+#: src/menu.c:776
 msgid "Total Artists:"
 msgstr "Anzahl der Künstler:"
 
-#: src/menu.c:780
+#: src/menu.c:778
 msgid "Total Albums:"
 msgstr "Anzahl der Alben:"
 
-#: src/menu.c:782
+#: src/menu.c:780
 msgid "Statistics"
 msgstr "Statistiken"
 
-#: src/menu.c:799
+#: src/menu.c:797
 msgid "translator-credits"
 msgstr "Übersetzer"
 

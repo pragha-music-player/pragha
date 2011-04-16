@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:53-0300\n"
+"POT-Creation-Date: 2010-05-21 10:58-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Kim Ljosdal <kim357@web.de>\n"
 "Language-Team: \n"
@@ -603,23 +603,23 @@ msgstr "Alle filer"
 msgid "Library scan complete"
 msgstr "Skanning av samling ferdig"
 
-#: src/menu.c:776
+#: src/menu.c:774
 msgid "Total Tracks:"
 msgstr "Antall Låter:"
 
-#: src/menu.c:778
+#: src/menu.c:776
 msgid "Total Artists:"
 msgstr "Antall Artister:"
 
-#: src/menu.c:780
+#: src/menu.c:778
 msgid "Total Albums:"
 msgstr "Antall Album:"
 
-#: src/menu.c:782
+#: src/menu.c:780
 msgid "Statistics"
 msgstr "Statistikker"
 
-#: src/menu.c:799
+#: src/menu.c:797
 msgid "translator-credits"
 msgstr ""
 

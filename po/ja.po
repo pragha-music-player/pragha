@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pragha 0.6.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:53-0300\n"
+"POT-Creation-Date: 2010-05-21 10:58-0300\n"
 "PO-Revision-Date: 2009-10-18 22:38+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -588,23 +588,23 @@ msgstr "全てのファイル"
 msgid "Library scan complete"
 msgstr "ライブラリのスキャンが完了しました"
 
-#: src/menu.c:776
+#: src/menu.c:774
 msgid "Total Tracks:"
 msgstr "総トラック数:"
 
-#: src/menu.c:778
+#: src/menu.c:776
 msgid "Total Artists:"
 msgstr "総アーティスト数:"
 
-#: src/menu.c:780
+#: src/menu.c:778
 msgid "Total Albums:"
 msgstr "総アルバム数:"
 
-#: src/menu.c:782
+#: src/menu.c:780
 msgid "Statistics"
 msgstr "統計情報"
 
-#: src/menu.c:799
+#: src/menu.c:797
 msgid "translator-credits"
 msgstr "Masato Hashimoto <cabezon.hashimoto@gmail.com>, 2009."
 

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Polski (polish)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:53-0300\n"
-"PO-Revision-Date: 2010-04-02 12:59+0100\n"
+"POT-Creation-Date: 2010-05-21 10:58-0300\n"
+"PO-Revision-Date: 2010-05-20 18:41+0100\n"
 "Last-Translator: Sid <translations@sidowo.uni.cc>\n"
 "Language-Team: Polski (polish) <translations@sidowo.uni.cc>\n"
 "MIME-Version: 1.0\n"
@@ -323,9 +323,8 @@ msgid "Stop playback"
 msgstr "Zatrzymaj odtwarzanie"
 
 #: src/gui.c:1593
-#, fuzzy
 msgid "Leave Fullscreen"
-msgstr "Pełny _ekran"
+msgstr "Opuść tryb _pełnoekranowy"
 
 #: src/gui.c:1594
 msgid "Play songs in a random order"
@@ -422,6 +421,10 @@ msgid ""
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
+"Czy na pewno chcesz usunąć bieżący plik z biblioteki?\n"
+"\n"
+"Ostrzeżenie: Aby przywrócić wymagane jest ponowne skanowanie całej "
+"biblioteki."
 
 #: src/librarytree.c:1117
 msgid ""
@@ -429,6 +432,9 @@ msgid ""
 "\n"
 "Warning: Once deleted, the file cannot be recovered."
 msgstr ""
+"Czy na pewno chcesz usunąć bieżący plik z dysku?\n"
+"\n"
+"Ostrzeżenie: Gdy usuniesz plik, nie będzie go można przywrócić."
 
 #: src/pref.c:21
 msgid ""
@@ -446,16 +452,15 @@ msgstr "Okładka albumu"
 
 #: src/pref.c:61 src/pref.c:1391
 msgid "Start normal"
-msgstr ""
+msgstr "Uruchom normalnie"
 
 #: src/pref.c:66 src/pref.c:1392
-#, fuzzy
 msgid "Start fullscreen"
-msgstr "Pełny _ekran"
+msgstr "Włącz _tryb pełnoekranowy"
 
 #: src/pref.c:71 src/pref.c:1393
 msgid "Start in system tray"
-msgstr ""
+msgstr "Uruchom w trayu"
 
 #. Create a folder chooser dialog
 #: src/pref.c:270
@@ -500,21 +505,20 @@ msgstr "Wzorzec pliku z okładką"
 
 #: src/pref.c:1390
 msgid "Remember last window state"
-msgstr ""
+msgstr "Zapamiętaj ostatnie położenie okna"
 
 #: src/pref.c:1395
 msgid "When Pragha start"
-msgstr ""
+msgstr "Podczas startu Pragha"
 
 #. General Check_buttons
 #: src/pref.c:1412
 msgid "Minimize pragha when close the window"
-msgstr ""
+msgstr "Minimalizuj program po zamknięciu okna"
 
 #: src/pref.c:1414
-#, fuzzy
 msgid "Restore last playlist"
-msgstr "Zachowaj listę odtwarzania"
+msgstr "Przywróć ostatnią listę odtwarzania"
 
 #: src/pref.c:1415
 msgid "Show OSD for track change"
@@ -587,23 +591,23 @@ msgstr "Wszystkie pliki"
 msgid "Library scan complete"
 msgstr "Zakończono skanowanie biblioteki"
 
-#: src/menu.c:776
+#: src/menu.c:774
 msgid "Total Tracks:"
 msgstr "Utworów:"
 
-#: src/menu.c:778
+#: src/menu.c:776
 msgid "Total Artists:"
 msgstr "Wykonawców:"
 
-#: src/menu.c:780
+#: src/menu.c:778
 msgid "Total Albums:"
 msgstr "Albumów:"
 
-#: src/menu.c:782
+#: src/menu.c:780
 msgid "Statistics"
 msgstr "Statystyki"
 
-#: src/menu.c:799
+#: src/menu.c:797
 msgid "translator-credits"
 msgstr ""
 "Sid\n"

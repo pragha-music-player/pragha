@@ -2269,7 +2269,6 @@ void init_current_playlist_view(struct con_win *cwin)
 	GError *error = NULL;
 	GtkTreePath *path=NULL;
  	GtkTreeSelection *selection;
-	GtkTreeModel *model;
 
 	add_playlist_current_playlist(SAVE_PLAYLIST_STATE, cwin);
 
@@ -2283,7 +2282,6 @@ void init_current_playlist_view(struct con_win *cwin)
 		return;
 	}
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	path = gtk_tree_path_new_from_string(ref);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));

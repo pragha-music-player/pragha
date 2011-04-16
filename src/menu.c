@@ -704,9 +704,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	gchar *query;
 	struct db_result result;
 	struct musicobject *mobj;
-	GtkTreeModel *model;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	clear_current_playlist(action, cwin);
 
 	/* Query and insert entries */

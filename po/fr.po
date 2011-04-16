@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: praga 0.7.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:53-0300\n"
+"POT-Creation-Date: 2010-05-21 10:58-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: alois halel <alois.halel@gmail.com>\n"
 "Language-Team: \n"
@@ -583,23 +583,23 @@ msgstr "Tout les fichiers"
 msgid "Library scan complete"
 msgstr "Scan de la bibliothèque terminé"
 
-#: src/menu.c:776
+#: src/menu.c:774
 msgid "Total Tracks:"
 msgstr "Total de Pistes"
 
-#: src/menu.c:778
+#: src/menu.c:776
 msgid "Total Artists:"
 msgstr "Total d'artistes"
 
-#: src/menu.c:780
+#: src/menu.c:778
 msgid "Total Albums:"
 msgstr "Total d'albums"
 
-#: src/menu.c:782
+#: src/menu.c:780
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: src/menu.c:799
+#: src/menu.c:797
 msgid "translator-credits"
 msgstr ""
 "Olivier Karquel <yellowspoon@free.fr>\n"
