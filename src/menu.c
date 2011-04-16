@@ -273,7 +273,7 @@ void collapse_all_action(GtkAction *action, struct con_win *cwin)
 
 void search_library_action(GtkAction *action, struct con_win *cwin)
 {
-	gtk_widget_grab_focus(cwin->search_entry);
+	gtk_widget_grab_focus(GTK_WIDGET(cwin->search_entry));
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
@@ -585,33 +585,33 @@ void about_widget(struct con_win *cwin)
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(cwin->mainwindow),
-			      "logo", cwin->pixbuf->pixbuf_app,
-			      "authors", authors,
-			      "comments", "A lightweight GTK+ music manager",
-			      "copyright", "(C) 2007-2009 Sujith",
-			      "license", license,
-			      "name", PACKAGE_NAME,
-			      "version", PACKAGE_VERSION,
-			      NULL);
-
+				"logo", cwin->pixbuf->pixbuf_app,
+				"authors", authors,
+				"translator-credits", _("translator-credits"),
+				"comments", "A lightweight GTK+ music manager",
+				"copyright", "(C) 2007-2009 Sujith",
+				"license", license,
+				"name", PACKAGE_NAME,
+				"version", PACKAGE_VERSION,
+				NULL);
 }
 
 void home_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri);
+	open_url(cwin, uri);
 }
 
 void community_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
-	open_url(uri);
+	open_url(cwin, uri);
 }
 
 void wiki_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri);
+	open_url(cwin, uri);
 }
 
 void about_action(GtkAction *action, struct con_win *cwin)

@@ -30,7 +30,7 @@ static void dbus_stop_handler(struct con_win *cwin)
 
 static void dbus_pause_handler(struct con_win *cwin)
 {
-	pause_resume_track(cwin);
+	play_pause_resume(cwin);
 }
 
 static void dbus_next_handler(struct con_win *cwin)

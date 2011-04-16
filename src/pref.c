@@ -653,6 +653,8 @@ void save_preferences(struct con_win *cwin)
 	GSList *list;
 	GList *cols, *j;
 	GtkTreeViewColumn *col;
+	gchar *ref_char = NULL;
+	GtkTreePath *path = NULL;
 
 	/* Version */
 
@@ -823,8 +825,15 @@ void save_preferences(struct con_win *cwin)
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_AUDIO,
-			       KEY_SOFWARE_MIXER,
+			       KEY_SOFTWARE_MIXER,
 			       cwin->cpref->software_mixer);
+
+	if(cwin->cpref->software_mixer){
+		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
+				       GROUP_AUDIO,
+				       KEY_SOFTWARE_VOLUME,
+				       cwin->cmixer->curr_vol);
+	}
 
 	/* CDDB server option */
 
@@ -904,12 +913,29 @@ void save_preferences(struct con_win *cwin)
 
 	/* Reference to current play */
 
-	if(cwin->cstate->tracks_curr_playlist){
+	path = current_playlist_get_actual(cwin);
+
+	if(path){
+		ref_char = gtk_tree_path_to_string (path);
+		gtk_tree_path_free(path);
+
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_PLAYLIST,
-				      KEY_CURRENT_REF,
-				      get_ref_current_track(cwin));
+					GROUP_PLAYLIST,
+					KEY_CURRENT_REF,
+					ref_char);
+		g_free (ref_char);
+	}
+	else{
+		if (g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_PLAYLIST,
+				       KEY_CURRENT_REF,
+				       &error)){
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_PLAYLIST,
+					      KEY_CURRENT_REF,
+					      &error);
 		}
+	}
 
 	/* List of columns visible in current playlist */
 
@@ -1109,6 +1135,36 @@ void save_preferences(struct con_win *cwin)
 	g_free(data);
 }
 
+/* Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan */
+gpointer sokoke_xfce_header_new(struct con_win *cwin)
+{
+	GtkWidget* entry = gtk_entry_new();
+	gchar* markup;
+
+	GtkWidget* xfce_heading = gtk_event_box_new();
+
+	gtk_widget_modify_bg(xfce_heading,
+				GTK_STATE_NORMAL,
+				&entry->style->base[GTK_STATE_NORMAL]);
+	GtkWidget* hbox = gtk_hbox_new(FALSE, 12);
+
+	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
+	GtkWidget* image = gtk_image_new_from_icon_name("gtk-preferences",
+							GTK_ICON_SIZE_DIALOG);
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
+	GtkWidget* label = gtk_label_new(NULL);
+	gtk_widget_modify_fg(label,
+				GTK_STATE_NORMAL,
+				&entry->style->text[GTK_STATE_NORMAL]);
+        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", _("Preferences"));
+	gtk_label_set_markup(GTK_LABEL(label), markup);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
+	g_free(markup);
+
+	return xfce_heading;
+}
+
 void preferences_dialog(struct con_win *cwin)
 {
 	GtkWidget *dialog, *vbox_all, *pref_notebook, *hbox_library;
@@ -1117,16 +1173,18 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *hidden_files, *album_art, *osd, *save_playlist, *use_cddb;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *album_art_pattern;
 	GtkWidget *lastfm_uhbox, *lastfm_ulabel, *lastfm_phbox, *lastfm_plabel;
-	GtkWidget *soft_mixer, *library_view, *album_art_pattern_label;
+	GtkWidget *soft_mixer, *library_view, *library_view_scroll, *album_art_pattern_label;
 	GtkWidget *audio_cd_device_label, *audio_cd_device_entry;
 	GtkWidget *library_bbox_align, *library_bbox, *library_add, *library_remove;
 	GtkWidget *audio_sink_combo, *sink_label, *hbox_sink;
 	GtkWidget *hbox_album_art_pattern, *hbox_audio_cd_device;
 	GtkWidget *audio_device_combo, *audio_device_label, *hbox_audio_device;
 	GtkWidget *album_art_size, *album_art_size_label, *hbox_album_art_size, *vbox_album_art;
+	GtkWidget *header, *alignment;
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
+
 
 	/* The main preferences dialog */
 
@@ -1159,16 +1217,31 @@ void preferences_dialog(struct con_win *cwin)
 
 	pref_notebook = gtk_notebook_new();
 
-	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 8);
+	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
 
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox,
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
 				 label_general);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), audio_vbox,
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), general_vbox);
+
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
 				 label_audio);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox,
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), audio_vbox);
+
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
 				 label_library);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), lastfm_vbox,
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), library_vbox);
+
+	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
 				 label_lastfm);
+	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
+	gtk_container_add(GTK_CONTAINER(alignment), lastfm_vbox);
 
 	/* Hidden files */
 
@@ -1366,7 +1439,7 @@ void preferences_dialog(struct con_win *cwin)
 
  	/* Library List */
 
-	hbox_library = gtk_hbox_new(FALSE, 2);
+	hbox_library = gtk_hbox_new(FALSE, 6);
 
 	library_store = gtk_list_store_new(1, G_TYPE_STRING);
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
@@ -1380,7 +1453,15 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
 
-	library_bbox_align = gtk_alignment_new(0, 0.5, 0, 0);
+	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_view_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_view_scroll),
+					GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(library_view_scroll), library_view);
+
+	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
 	library_bbox = gtk_vbutton_box_new();
 	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
 	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
@@ -1399,7 +1480,7 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_container_add(GTK_CONTAINER(library_bbox_align), library_bbox);
 
 	gtk_box_pack_start(GTK_BOX(hbox_library),
-			   library_view,
+			   library_view_scroll,
 			   TRUE,
 			   TRUE,
 			   0);
@@ -1413,9 +1494,9 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(library_vbox),
 			   hbox_library,
-			   FALSE,
-			   FALSE,
-			   0);
+			   TRUE,
+			   TRUE,
+			   2);
 
 	/* Last.fm */
 
@@ -1477,7 +1558,11 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox_all);
+
+	header = sokoke_xfce_header_new (cwin);
+
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), vbox_all, TRUE, TRUE, 0);
 
 	/* Store references */
 

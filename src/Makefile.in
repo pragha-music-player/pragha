@@ -61,9 +61,7 @@ am_pragha_OBJECTS = pragha-pragha.$(OBJEXT) pragha-init.$(OBJEXT) \
 	pragha-threads.$(OBJEXT) pragha-audio.$(OBJEXT) \
 	pragha-statusicon.$(OBJEXT) pragha-cmdline.$(OBJEXT) \
 	pragha-dbus.$(OBJEXT) pragha-playlist.$(OBJEXT) \
-	pragha-md5.$(OBJEXT) pragha-lastfm.$(OBJEXT) \
-	pragha-eggtrayicon.$(OBJEXT) pragha-sexy-icon-entry.$(OBJEXT) \
-	pragha-sexy-marshal.$(OBJEXT)
+	pragha-md5.$(OBJEXT) pragha-lastfm.$(OBJEXT)
 pragha_OBJECTS = $(am_pragha_OBJECTS)
 pragha_LDADD = $(LDADD)
 pragha_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -346,12 +344,6 @@ pragha_SOURCES = pragha.c \
 		playlist.c \
 		md5.c \
 		lastfm.c \
-		eggtrayicon.c \
-		eggtrayicon.h \
-		sexy-icon-entry.c \
-		sexy-icon-entry.h \
-		sexy-marshal.c \
-		sexy-marshal.h \
 		pragha.h \
 		md5.h \
 		wav.h \
@@ -474,7 +466,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-current_playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-dbus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-eggtrayicon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-filetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-gui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-init.Po@am__quote@
@@ -493,8 +484,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-playlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-pragha.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-pref.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-sexy-icon-entry.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-sexy-marshal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-statusicon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-tags.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pragha-threads.Po@am__quote@
@@ -898,48 +887,6 @@ pragha-lastfm.obj: lastfm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lastfm.c' object='pragha-lastfm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-lastfm.obj `if test -f 'lastfm.c'; then $(CYGPATH_W) 'lastfm.c'; else $(CYGPATH_W) '$(srcdir)/lastfm.c'; fi`
-
-pragha-eggtrayicon.o: eggtrayicon.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-eggtrayicon.o -MD -MP -MF $(DEPDIR)/pragha-eggtrayicon.Tpo -c -o pragha-eggtrayicon.o `test -f 'eggtrayicon.c' || echo '$(srcdir)/'`eggtrayicon.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-eggtrayicon.Tpo $(DEPDIR)/pragha-eggtrayicon.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eggtrayicon.c' object='pragha-eggtrayicon.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-eggtrayicon.o `test -f 'eggtrayicon.c' || echo '$(srcdir)/'`eggtrayicon.c
-
-pragha-eggtrayicon.obj: eggtrayicon.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-eggtrayicon.obj -MD -MP -MF $(DEPDIR)/pragha-eggtrayicon.Tpo -c -o pragha-eggtrayicon.obj `if test -f 'eggtrayicon.c'; then $(CYGPATH_W) 'eggtrayicon.c'; else $(CYGPATH_W) '$(srcdir)/eggtrayicon.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-eggtrayicon.Tpo $(DEPDIR)/pragha-eggtrayicon.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='eggtrayicon.c' object='pragha-eggtrayicon.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-eggtrayicon.obj `if test -f 'eggtrayicon.c'; then $(CYGPATH_W) 'eggtrayicon.c'; else $(CYGPATH_W) '$(srcdir)/eggtrayicon.c'; fi`
-
-pragha-sexy-icon-entry.o: sexy-icon-entry.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-sexy-icon-entry.o -MD -MP -MF $(DEPDIR)/pragha-sexy-icon-entry.Tpo -c -o pragha-sexy-icon-entry.o `test -f 'sexy-icon-entry.c' || echo '$(srcdir)/'`sexy-icon-entry.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-sexy-icon-entry.Tpo $(DEPDIR)/pragha-sexy-icon-entry.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-icon-entry.c' object='pragha-sexy-icon-entry.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-sexy-icon-entry.o `test -f 'sexy-icon-entry.c' || echo '$(srcdir)/'`sexy-icon-entry.c
-
-pragha-sexy-icon-entry.obj: sexy-icon-entry.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-sexy-icon-entry.obj -MD -MP -MF $(DEPDIR)/pragha-sexy-icon-entry.Tpo -c -o pragha-sexy-icon-entry.obj `if test -f 'sexy-icon-entry.c'; then $(CYGPATH_W) 'sexy-icon-entry.c'; else $(CYGPATH_W) '$(srcdir)/sexy-icon-entry.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-sexy-icon-entry.Tpo $(DEPDIR)/pragha-sexy-icon-entry.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-icon-entry.c' object='pragha-sexy-icon-entry.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-sexy-icon-entry.obj `if test -f 'sexy-icon-entry.c'; then $(CYGPATH_W) 'sexy-icon-entry.c'; else $(CYGPATH_W) '$(srcdir)/sexy-icon-entry.c'; fi`
-
-pragha-sexy-marshal.o: sexy-marshal.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-sexy-marshal.o -MD -MP -MF $(DEPDIR)/pragha-sexy-marshal.Tpo -c -o pragha-sexy-marshal.o `test -f 'sexy-marshal.c' || echo '$(srcdir)/'`sexy-marshal.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-sexy-marshal.Tpo $(DEPDIR)/pragha-sexy-marshal.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-marshal.c' object='pragha-sexy-marshal.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-sexy-marshal.o `test -f 'sexy-marshal.c' || echo '$(srcdir)/'`sexy-marshal.c
-
-pragha-sexy-marshal.obj: sexy-marshal.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -MT pragha-sexy-marshal.obj -MD -MP -MF $(DEPDIR)/pragha-sexy-marshal.Tpo -c -o pragha-sexy-marshal.obj `if test -f 'sexy-marshal.c'; then $(CYGPATH_W) 'sexy-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sexy-marshal.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pragha-sexy-marshal.Tpo $(DEPDIR)/pragha-sexy-marshal.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sexy-marshal.c' object='pragha-sexy-marshal.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pragha_CFLAGS) $(CFLAGS) -c -o pragha-sexy-marshal.obj `if test -f 'sexy-marshal.c'; then $(CYGPATH_W) 'sexy-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sexy-marshal.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

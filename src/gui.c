@@ -47,21 +47,10 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Update Library\"/>			\
 			<menuitem action=\"Add All\"/>				\
 			<menuitem action=\"Statistics\"/>			\
-			<menu action=\"Library View Menu\">			\
-				<menuitem action=\"folder_file\"/>		\
-				<menuitem action=\"artist\"/>		\
-				<menuitem action=\"album\"/>		\
-				<menuitem action=\"genre\"/>		\
-				<menuitem action=\"artist_album\"/>	\
-				<menuitem action=\"genre_artist\"/>	\
-				<menuitem action=\"genre_album\"/>	\
-				<menuitem action=\"genre_artist_album\"/>	\
-				<menuitem action=\"folder_file\"/>		\
-			</menu>							\
 		</menu>								\
 		<menu action=\"HelpMenu\">					\
 			<menuitem action=\"Home\"/>				\
-			<menuitem action=\"Community\"/>		\
+			<menuitem action=\"Community\"/>			\
 			<menuitem action=\"Wiki\"/>				\
 			<separator/>							\
 			<menuitem action=\"About\"/>				\
@@ -69,19 +58,19 @@ gchar *main_menu_xml = "<ui>							\
 	</menubar>								\
 </ui>";
 
-gchar *cp_context_menu_xml = "<ui>		    		\
-	<popup>					    		\
-	<menuitem action=\"Remove\"/>		    		\
-	<menuitem action=\"Crop\"/>		    		\
-	<menuitem action=\"Edit tags\"/>			\
-	<menuitem action=\"Properties\"/>	    		\
-	<separator/>				    		\
-	<menuitem action=\"Save Selected as Playlist\"/>	\
-	<menuitem action=\"Save Complete Playlist\"/>		\
-	<menuitem action=\"Clear Playlist\"/>	    		\
-	<separator/>				    		\
-	<menuitem action=\"Clear Sort\"/>	    		\
-	</popup>				    		\
+gchar *cp_context_menu_xml = "<ui>		    				\
+	<popup>					    				\
+	<menuitem action=\"Remove\"/>		    				\
+	<menuitem action=\"Crop\"/>		    				\
+	<menuitem action=\"Edit tags\"/>					\
+	<menuitem action=\"Properties\"/>	    				\
+	<separator/>				    				\
+	<menuitem action=\"Save Selected as Playlist\"/>			\
+	<menuitem action=\"Save Complete Playlist\"/>				\
+	<menuitem action=\"Clear Playlist\"/>	    				\
+	<separator/>				    				\
+	<menuitem action=\"Clear Sort\"/>	    				\
+	</popup>				    				\
 	</ui>";
 
 gchar *playlist_tree_context_menu_xml = "<ui>	\
@@ -186,23 +175,6 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Add All", G_CALLBACK(add_all_action)},
 	{"Statistics", GTK_STOCK_INFO, N_("_Statistics"),
 	 NULL, "Statistics", G_CALLBACK(statistics_action)},
-	{"Library View Menu", GTK_STOCK_GO_FORWARD, N_("_Library View")},
-	{"folder_file", GTK_STOCK_REFRESH, N_("Folder / File"),
-	 NULL, "Folder/File", G_CALLBACK(folder_file_library_tree)},
-	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
-	 NULL, "Artist", G_CALLBACK(artist_library_tree)},
-	{"album", GTK_STOCK_REFRESH, N_("Album"),
-	 NULL, "Album", G_CALLBACK(album_library_tree)},
-	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
-	 NULL, "Genre", G_CALLBACK(genre_library_tree)},
-	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
-	 NULL, "Artist / Album", G_CALLBACK(artist_album_library_tree)},
-	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
-	 NULL, "Genre / Album", G_CALLBACK(genre_album_library_tree)},
-	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
-	 NULL, "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
-	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
-	 NULL, "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)},
 	{"About", GTK_STOCK_ABOUT, N_("About"),
 	 NULL, "About pragha", G_CALLBACK(about_action)},
 	{"Home", GTK_STOCK_HOME, N_("Homepage"),
@@ -228,7 +200,7 @@ GtkActionEntry cp_context_aentries[] = {
 	{"Crop", GTK_STOCK_CUT, N_("Crop"),
 	 "<Control>C", "Crop the playlist", G_CALLBACK(crop_current_playlist)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
-	 "<Control>E", "Edit tags for this track", G_CALLBACK(edit_tags_current_playlist)},
+	 "<Control>E", "Edit tag for this track", G_CALLBACK(edit_tags_current_playlist)},
 	{"Properties", GTK_STOCK_PROPERTIES, N_("Properties"),
 	 NULL, "Track Properties", G_CALLBACK(track_properties_current_playlist)},
 	{"Save Selected as Playlist", GTK_STOCK_SAVE, N_("Save Selected as Playlist"),
@@ -1424,7 +1396,7 @@ static void init_dnd(struct con_win *cwin)
 			 cwin);
 }
 
-static GtkUIManager* create_systray_menu(struct con_win *cwin)
+GtkUIManager* create_systray_menu(struct con_win *cwin)
 {
 	GtkUIManager *menu = NULL;
 	GtkActionGroup *actions;
@@ -1832,31 +1804,39 @@ GtkWidget* create_status_bar(struct con_win *cwin)
 	return status_bar;
 }
 
+static void
+icon_pressed_cb (GtkEntry       *entry,
+		gint            position,
+		GdkEventButton *event,
+		gpointer        data)
+{
+	if (position == GTK_ENTRY_ICON_SECONDARY)
+		gtk_entry_set_text (entry, "");
+}
+
 /* Search (simple) */
 
 GtkWidget* create_search_bar(struct con_win *cwin)
 {
 	GtkWidget *search_entry;
-	GtkWidget *image;
 
-	search_entry = sexy_icon_entry_new( );
-	sexy_icon_entry_add_clear_button( SEXY_ICON_ENTRY( search_entry ) );
-	image = gtk_image_new_from_stock( GTK_STOCK_FIND, GTK_ICON_SIZE_MENU );
-	sexy_icon_entry_set_icon( SEXY_ICON_ENTRY(
-				search_entry ), SEXY_ICON_ENTRY_PRIMARY,
-				GTK_IMAGE( image ) );
-	sexy_icon_entry_set_icon_highlight( SEXY_ICON_ENTRY(
-				search_entry ), SEXY_ICON_ENTRY_PRIMARY,
-				TRUE );
+	search_entry = gtk_entry_new ();
 
-	cwin->search_entry = search_entry;
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 
 	/* Signal handlers */
 
-	g_signal_connect(G_OBJECT(cwin->search_entry),
+	g_signal_connect (G_OBJECT(search_entry),
+			"icon-press",
+			G_CALLBACK (icon_pressed_cb),
+			cwin);
+	g_signal_connect(G_OBJECT(search_entry),
 			 "changed",
 			 G_CALLBACK(simple_library_search_keyrelease_handler),
 			 cwin);
+
+	cwin->search_entry = search_entry;
 
 	return search_entry;
 
@@ -1909,39 +1889,23 @@ GtkWidget* create_search_current_bar(struct con_win *cwin)
 	return hbox_bar;
 }
 
-void
-create_systray_icon (struct con_win *cwin)
+void create_status_icon(struct con_win *cwin)
 {
-	GdkPixbuf	*status_icon;
-	GtkWidget	*systray_icon;
+	GtkStatusIcon *status_icon;
 	GtkUIManager *systray_menu;
-	EggTrayIcon	*icon = NULL;
 
-	#if GTK_CHECK_VERSION(2, 10, 0)
-		GtkTooltips *tooltips = gtk_tooltips_new ();
-	#endif
-
-	/* create the tray icon */
-	icon = egg_tray_icon_new ("pragha");
-	status_icon = gdk_pixbuf_new_from_file_at_size(SHAREDIR "/data/pragha.png", 22, 22, NULL);
-
-	#if GTK_CHECK_VERSION(2, 10, 0)
-		gtk_tooltips_set_tip (tooltips,GTK_WIDGET(icon) , PACKAGE_STRING, NULL);
-	#else
-		gtk_widget_set_tooltip_text (GTK_WIDGET(icon), PACKAGE_STRING);
-	#endif
-
-	systray_icon = gtk_image_new_from_pixbuf (status_icon);
-	gtk_container_add (GTK_CONTAINER (icon), systray_icon);
-	g_object_unref (status_icon);
-
-	g_signal_connect (icon, "button-press-event", G_CALLBACK (systray_icon_clicked), cwin);
-	g_signal_connect (icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
-
-	gtk_widget_set_colormap(GTK_WIDGET(icon), gdk_screen_get_rgb_colormap(gdk_screen_get_default()));
-
-	gtk_widget_show (GTK_WIDGET(systray_icon));
-	gtk_widget_show (GTK_WIDGET(icon));
+	if (cwin->pixbuf->pixbuf_app)
+		status_icon = gtk_status_icon_new_from_pixbuf(cwin->pixbuf->pixbuf_app);
+	else
+		status_icon = gtk_status_icon_new_from_stock(GTK_STOCK_NEW);
+ 
+	g_signal_connect (status_icon, "button-press-event", G_CALLBACK (status_icon_clicked), cwin);
+	g_signal_connect (status_icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
+ 
+	g_object_set (G_OBJECT(status_icon), "has-tooltip", TRUE, NULL);
+	g_signal_connect(G_OBJECT(status_icon), "query-tooltip", 
+			G_CALLBACK(status_get_tooltip_cb),
+			cwin);
 
 	/* Systray right click menu */
 
@@ -1949,7 +1913,7 @@ create_systray_icon (struct con_win *cwin)
 
 	/* Store reference */
 
-	cwin->status_icon = icon;
+	cwin->status_icon = status_icon;
 	cwin->systray_menu = systray_menu;
 }
 
@@ -1977,12 +1941,12 @@ gboolean dialog_audio_init(gpointer data)
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if (!egg_tray_icon_have_manager (EGG_TRAY_ICON (cwin->status_icon))) {
+	if(!gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
 		g_warning("(%s): No embedded status_icon.", __func__);
 		gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
-		return TRUE;
 	}
-	gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+	else	gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+
 	return TRUE;
 }
 

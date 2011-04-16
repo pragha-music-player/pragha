@@ -1,285 +1,281 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-10-02 21:19-0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Kim Ljosdal <kim357@web.de>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Norwegian Bokmal\n"
+"X-Poedit-Country: NORWAY\n"
 
 #: src/gui.c:142
 msgid "_File"
-msgstr ""
+msgstr "_Fil"
 
 #: src/gui.c:143
 msgid "_Edit"
-msgstr ""
+msgstr "_Rediger"
 
 #: src/gui.c:144
 msgid "_Tools"
-msgstr ""
+msgstr "_Verktøy"
 
 #: src/gui.c:145
 msgid "_Help"
-msgstr ""
+msgstr "_Hjelp"
 
 #: src/gui.c:146 src/gui.c:276
 msgid "_Open File"
-msgstr ""
+msgstr "_Åpne Fil"
 
 #: src/gui.c:147
 msgid "Open a media file"
-msgstr ""
+msgstr "Åpne en mediafil"
 
 #: src/gui.c:148 src/gui.c:278
 msgid "_Play Audio CD"
-msgstr ""
+msgstr "_Spill Audio CD"
 
 #: src/gui.c:150 src/gui.c:280
 msgid "Prev Track"
-msgstr ""
+msgstr "Forrige Spor"
 
 #: src/gui.c:152 src/gui.c:282
 msgid "Play/Pause"
-msgstr ""
+msgstr "Spill/Pause"
 
 #: src/gui.c:154 src/gui.c:284
 msgid "Stop"
-msgstr ""
+msgstr "Stopp"
 
 #: src/gui.c:156 src/gui.c:286 src/gui.c:1685
 msgid "Next Track"
-msgstr ""
+msgstr "Neste Spor"
 
 #: src/gui.c:158 src/gui.c:288
 msgid "_Quit"
-msgstr ""
+msgstr "_Avslutt"
 
 #: src/gui.c:160
 msgid "_Expand All in Library"
-msgstr ""
+msgstr "_Utvid Alt i Samling"
 
 #: src/gui.c:162
 msgid "_Collapse All in Library"
-msgstr ""
+msgstr "_Kollaps Alt i Samling"
 
 #: src/gui.c:164
 msgid "Search Library"
-msgstr ""
+msgstr "Søk Samling"
 
 #: src/gui.c:166
 msgid "Search Playlist"
-msgstr ""
+msgstr "Søk Spilleliste"
 
 #: src/gui.c:168
 msgid "_Preferences"
-msgstr ""
+msgstr "_Innstillinger"
 
 #: src/gui.c:170
 msgid "_Rescan Library"
-msgstr ""
+msgstr "_Skann Samling"
 
 #: src/gui.c:172
 msgid "_Update Library"
-msgstr ""
+msgstr "_Oppdater Samling"
 
 #: src/gui.c:174
 msgid "_Add All to Current Playlist"
-msgstr ""
+msgstr "_Legg Til Alt til Spillelisten"
 
 #: src/gui.c:176
 msgid "_Statistics"
-msgstr ""
+msgstr "_Statistikker"
 
 #: src/gui.c:178 src/gui.c:274
 msgid "About"
-msgstr ""
+msgstr "Om"
 
 #: src/gui.c:180
 msgid "Homepage"
-msgstr ""
+msgstr "Hjemmeside"
 
 #: src/gui.c:182
 msgid "Community"
-msgstr ""
+msgstr "Fellesskap"
 
 #: src/gui.c:184
 msgid "Wiki"
-msgstr ""
+msgstr "Wiki"
 
 #: src/gui.c:189
 msgid "_Shuffle"
-msgstr ""
+msgstr "_Tilfeldig"
 
 #: src/gui.c:192
 msgid "_Repeat"
-msgstr ""
+msgstr "_Gjenta"
 
 #: src/gui.c:198
 msgid "Remove"
-msgstr ""
+msgstr "Fjern"
 
 #: src/gui.c:200
 msgid "Crop"
-msgstr ""
+msgstr "Trimme"
 
 #: src/gui.c:202 src/gui.c:232
 msgid "Edit tags"
-msgstr ""
+msgstr "Rediger tagger"
 
 #: src/gui.c:204
 msgid "Properties"
-msgstr ""
+msgstr "Egenskaper"
 
 #: src/gui.c:206
 msgid "Save Selected as Playlist"
-msgstr ""
+msgstr "Lagre Valgte som Spilleliste"
 
 #: src/gui.c:208
 msgid "Save Complete Playlist"
-msgstr ""
+msgstr "Lagre Hele Spilleliste"
 
 #: src/gui.c:210
 msgid "Clear Playlist"
-msgstr ""
+msgstr "Tøm Spilleliste"
 
 #: src/gui.c:212
 msgid "Clear Sort"
-msgstr ""
+msgstr "Tøm Sortering"
 
 #: src/gui.c:217 src/gui.c:228 src/gui.c:248
 msgid "Play"
-msgstr ""
+msgstr "Spill"
 
 #: src/gui.c:219 src/gui.c:230 src/gui.c:250
 msgid "Enqueue"
-msgstr ""
+msgstr "Legg i Kø"
 
 #: src/gui.c:221
 msgid "Delete"
-msgstr ""
+msgstr "Slett"
 
 #: src/gui.c:223
 msgid "Export"
-msgstr ""
+msgstr "Eksporter"
 
 #: src/gui.c:234
 msgid "Delete from Library"
-msgstr ""
+msgstr "Fjern fra Samling"
 
 #: src/gui.c:236
 msgid "Delete from HDD"
-msgstr ""
+msgstr "Slett fra HDD"
 
 #: src/gui.c:241
 msgid "Enqueue (Recursive)"
-msgstr ""
+msgstr "Legg i Kø (Rekursiv)"
 
 #: src/gui.c:243
 msgid "Enqueue (Non-Recursive)"
-msgstr ""
+msgstr "Legg i Kø (Ikke-Rekursiv)"
 
 #: src/gui.c:255 src/librarytree.c:815 src/librarytree.c:1255
 msgid "Folder / File"
-msgstr ""
+msgstr "Mappe / Fil"
 
 #: src/gui.c:257 src/gui.c:918 src/gui.c:1034 src/current_playlist.c:1046
 #: src/librarytree.c:832 src/librarytree.c:1258 src/statusicon.c:147
 #: src/tags.c:408
 msgid "Artist"
-msgstr ""
+msgstr "Artist"
 
 #: src/gui.c:259 src/gui.c:919 src/gui.c:1035 src/current_playlist.c:1047
 #: src/librarytree.c:849 src/librarytree.c:1261 src/statusicon.c:148
 #: src/tags.c:409
 msgid "Album"
-msgstr ""
+msgstr "Album"
 
 #: src/gui.c:261 src/gui.c:920 src/gui.c:1036 src/current_playlist.c:1048
 #: src/librarytree.c:866 src/librarytree.c:1264 src/tags.c:410
 msgid "Genre"
-msgstr ""
+msgstr "Genre"
 
 #: src/gui.c:263 src/librarytree.c:885 src/librarytree.c:1267
 msgid "Artist / Album"
-msgstr ""
+msgstr "Artist / Album"
 
 #: src/gui.c:265 src/librarytree.c:904 src/librarytree.c:1273
 msgid "Genre / Album"
-msgstr ""
+msgstr "Genre / Album"
 
 #: src/gui.c:267 src/librarytree.c:923 src/librarytree.c:1270
 msgid "Genre / Artist"
-msgstr ""
+msgstr "Genre / Artist"
 
 #: src/gui.c:269 src/librarytree.c:944 src/librarytree.c:1276
 msgid "Genre / Artist / Album"
-msgstr ""
+msgstr "Genre / Artist / Album"
 
 #: src/gui.c:749 src/pref.c:1206
 msgid "Library"
-msgstr ""
+msgstr "Samling"
 
 #: src/gui.c:767
 msgid "Files"
-msgstr ""
+msgstr "Filer"
 
 #: src/gui.c:778
 msgid "Pragha Music Manager"
-msgstr ""
+msgstr "Pragha Musikk Manager"
 
 #. Create the checkmenu items
 #: src/gui.c:916 src/gui.c:1032
 msgid "Track"
-msgstr ""
+msgstr "Spor"
 
 #: src/gui.c:917 src/gui.c:1033 src/current_playlist.c:1045
 #: src/statusicon.c:146 src/tags.c:407
 msgid "Title"
-msgstr ""
+msgstr "Tittel"
 
 #: src/gui.c:921 src/gui.c:1037 src/current_playlist.c:1051
 msgid "Bitrate"
-msgstr ""
+msgstr "Bithastighet"
 
 #: src/gui.c:922 src/gui.c:1038 src/current_playlist.c:1049 src/tags.c:411
 msgid "Year"
-msgstr ""
+msgstr "År"
 
 #: src/gui.c:923 src/gui.c:1039 src/current_playlist.c:1050
 #: src/statusicon.c:149
 msgid "Length"
-msgstr ""
+msgstr "Lengde"
 
 #: src/gui.c:924 src/gui.c:1040 src/current_playlist.c:1054
 msgid "Filename"
-msgstr ""
+msgstr "Filnavn"
 
 #. Tooltips
 #: src/gui.c:1683
 msgid "Play / Pause Track"
-msgstr ""
+msgstr "Spill / Pause Spor"
 
 #: src/gui.c:1684
 msgid "Previous Track"
-msgstr ""
+msgstr "Forrige Spor"
 
 #: src/gui.c:1686
 msgid "Stop playback"
-msgstr ""
+msgstr "Stopp Spilling"
 
 #: src/gui.c:1729 src/panel.c:198 src/statusicon.c:143
 msgid "<b>Not playing</b>"
-msgstr ""
+msgstr "<b>Spiller ikke</b>"
 
 #: src/panel.c:159
 #, c-format
@@ -287,89 +283,91 @@ msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
+"%s <small><span weight=\"light\">av</span></small> %s <small><span weight="
+"\"light\">i</span></small> %s"
 
 #: src/panel.c:164
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr ""
+msgstr "%s <small><span weight=\"light\">av</span></small> %s"
 
 #: src/panel.c:168
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr ""
+msgstr "%s <small><span weight=\"light\">i</span></small> %s"
 
 #: src/current_playlist.c:56
 #, c-format
 msgid "%i Tracks - %s"
-msgstr ""
+msgstr "%i Spor - %s"
 
 #: src/current_playlist.c:519
 msgid "Save as a new playlist"
-msgstr ""
+msgstr "Lagre som ny spilleliste"
 
 #: src/current_playlist.c:521
 msgid "Append to an existing playlist"
-msgstr ""
+msgstr "Legg til en eksisterende spilleliste"
 
 #: src/current_playlist.c:533
 msgid "Save playlist"
-msgstr ""
+msgstr "Lagre Spilleliste"
 
 #: src/current_playlist.c:598
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr ""
+msgstr "<b>con_playlist</b>er et navn som allerede er brukt"
 
 #. Create labels
 #: src/current_playlist.c:1044 src/tags.c:406
 msgid "Track No"
-msgstr ""
+msgstr "Tittel"
 
 #: src/current_playlist.c:1052
 msgid "Channels"
-msgstr ""
+msgstr "Kanaler"
 
 #: src/current_playlist.c:1053
 msgid "Samplerate"
-msgstr ""
+msgstr "Samplingsfrekvens"
 
 #: src/current_playlist.c:1103
 msgid "Track Information"
-msgstr ""
+msgstr "Spor Informasjon"
 
 #: src/librarytree.c:178 src/librarytree.c:233
 #, c-format
 msgid "Unknown Artist"
-msgstr ""
+msgstr "Ukjent Artist"
 
 #: src/librarytree.c:180 src/librarytree.c:235
 #, c-format
 msgid "Unknown Album"
-msgstr ""
+msgstr "Ukjent Album"
 
 #: src/librarytree.c:182 src/librarytree.c:237
 #, c-format
 msgid "Unknown Genre"
-msgstr ""
+msgstr "Ukjent Genre"
 
 #: src/statusicon.c:90
 #, c-format
 msgid "by %s in %s"
-msgstr ""
+msgstr "av %s i %s"
 
 #: src/statusicon.c:94
 #, c-format
 msgid "by %s"
-msgstr ""
+msgstr "av %s"
 
 #: src/statusicon.c:97
 #, c-format
 msgid "in %s"
-msgstr ""
+msgstr "i %s"
 
 #: src/statusicon.c:99
 #, c-format
 msgid "Unknown Tags"
-msgstr ""
+msgstr "Ukjente Tags"
 
 #: src/pref.c:21
 msgid ""
@@ -377,146 +375,149 @@ msgid ""
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
+"Mønstre bør se slik ut:<filename>;<filename>;....\n"
+"Maksimalt seks mønstre er tillatt.\n"
+"Wildcards godtas ikke fra nå av (patcher velkommen :-) )."
 
 #: src/pref.c:35
 msgid "Album art pattern"
-msgstr ""
+msgstr "Albumcover mønster"
 
 #. Create a folder chooser dialog
 #: src/pref.c:248
 msgid "Select a folder to add to library"
-msgstr ""
+msgstr "Velg en mappe for å legge til samling"
 
 #. The main preferences dialog
 #: src/pref.c:1159 src/pref.c:1191
 msgid "Preferences"
-msgstr ""
+msgstr "Preferanser"
 
 #. Labels
 #: src/pref.c:1204
 msgid "General"
-msgstr ""
+msgstr "Generell"
 
 #: src/pref.c:1205
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 #: src/pref.c:1207
 msgid "Last.fm"
-msgstr ""
+msgstr "Last.fm"
 
 #. Hidden files
 #: src/pref.c:1248
 msgid "Show Hidden Files in File View"
-msgstr ""
+msgstr "Vis Skjulte Filer i Filvisning"
 
 #. Album art
 #: src/pref.c:1253
 msgid "Show Album art in Panel"
-msgstr ""
+msgstr "Vis Albumcover i Panel"
 
 #: src/pref.c:1256
 msgid "Size of Album art"
-msgstr ""
+msgstr "Størrelse på Albumcover"
 
 #: src/pref.c:1274
 msgid "Album art file pattern"
-msgstr ""
+msgstr "Albumcover filmønster"
 
 #. Notification
 #: src/pref.c:1303
 msgid "Show OSD for track change"
-msgstr ""
+msgstr "Vis OSD for spor endring"
 
 #. Save current playlist
 #: src/pref.c:1307
 msgid "Save/Restore current playlist"
-msgstr ""
+msgstr "Lagre/Gjenopprett spillelisten"
 
 #. Software mixer
 #: src/pref.c:1340
 msgid "Use software mixer"
-msgstr ""
+msgstr "Bruk mykvare mikser"
 
 #: src/pref.c:1341 src/pref.c:1351 src/pref.c:1380
 msgid "Restart Required"
-msgstr ""
+msgstr "Krever Omstart"
 
 #. CDDB
 #: src/pref.c:1345
 msgid "Connect to CDDB server"
-msgstr ""
+msgstr "Koble til CDDB server"
 
 #: src/pref.c:1360
 msgid "Audio sink"
-msgstr ""
+msgstr "Audio synk"
 
 #: src/pref.c:1377
 msgid "Audio Device"
-msgstr ""
+msgstr "Lydenhet"
 
 #. Audio CD device
 #: src/pref.c:1395
 msgid "Audio CD Device"
-msgstr ""
+msgstr "Audio CD Enhet"
 
 #: src/pref.c:1448
 msgid "Folder"
-msgstr ""
+msgstr "Mappe"
 
 #. Last.fm
 #: src/pref.c:1503
 msgid "Last.fm Support"
-msgstr ""
+msgstr "Last.fm Støtte"
 
 #: src/pref.c:1506
 msgid "Username"
-msgstr ""
+msgstr "Brukernavn"
 
 #: src/pref.c:1507
 msgid "Password"
-msgstr ""
+msgstr "Passord"
 
 #: src/menu.c:94
 msgid "Update Library"
-msgstr ""
+msgstr "Oppdater"
 
 #: src/menu.c:94
 msgid "Rescan Library"
-msgstr ""
+msgstr "Skann Samling"
 
 #. Create a file chooser dialog
 #: src/menu.c:146
 msgid "Select a file to play"
-msgstr ""
+msgstr "Velg fil for avspilling"
 
 #: src/menu.c:160
 msgid "Supported media"
-msgstr ""
+msgstr "Støttet media"
 
 #: src/menu.c:188
 msgid "All files"
-msgstr ""
+msgstr "Alle filer"
 
 #: src/menu.c:375 src/menu.c:484
 msgid "Library scan complete"
-msgstr ""
+msgstr "Skanning av samling ferdig"
 
 #: src/menu.c:567
 msgid "Total Tracks:"
-msgstr ""
+msgstr "Antall Låter:"
 
 #: src/menu.c:569
 msgid "Total Artists:"
-msgstr ""
+msgstr "Antall Artister:"
 
 #: src/menu.c:571
 msgid "Total Albums:"
-msgstr ""
+msgstr "Antall Album:"
 
 #: src/menu.c:573
 msgid "Statistics"
-msgstr ""
+msgstr "Statistikker"
 
 #: src/menu.c:590
 msgid "translator-credits"
@@ -524,11 +525,11 @@ msgstr ""
 
 #: src/utils.c:265
 msgid "days"
-msgstr ""
+msgstr "dager"
 
 #: src/utils.c:265
 msgid "day"
-msgstr ""
+msgstr "dag"
 
 #: src/utils.c:473
 msgid "Unable to open the browser"
@@ -536,8 +537,14 @@ msgstr ""
 
 #: src/playlist.c:457
 msgid "Export playlist to file"
-msgstr ""
+msgstr "Eksporter spilleliste til fil"
 
 #: src/playlist.c:837
 msgid "Playlists"
-msgstr ""
+msgstr "Spillelister"
+
+#~ msgid "_Library View"
+#~ msgstr "_Utseende for Samling"
+
+#~ msgid "%s by %s"
+#~ msgstr "%s av %s"

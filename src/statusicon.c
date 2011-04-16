@@ -18,10 +18,8 @@
 
 #include "pragha.h"
 
-GtkWidget *stooltip;
-
 gboolean
-systray_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin)
+status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin)
 {
 	GtkWidget *popup_menu;
 	switch (event->button)
@@ -43,23 +41,23 @@ systray_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *
 	return TRUE;
 }
 
-void toogle_main_window(struct con_win *cwin, gboolean        present)
+void toogle_main_window(struct con_win *cwin, gboolean present)
 {
 GtkWindow * window = GTK_WINDOW( cwin->mainwindow );
 static int  x = 0, y = 0;
 
 	if (present) {
-	        gtk_window_get_position( window, &x, &y );
+		gtk_window_get_position( window, &x, &y );
 		gtk_widget_hide(GTK_WIDGET(window));
 	}
 	else{
-	        gtk_window_set_skip_taskbar_hint( window , FALSE );
-	        if( x != 0 && y != 0 )
-	            gtk_window_move( window , x, y );
-	        gtk_widget_show( GTK_WIDGET( window ) );
-        	gtk_window_deiconify( window );
+		gtk_window_set_skip_taskbar_hint( window , FALSE );
+		if( x != 0 && y != 0 )
+			gtk_window_move( window , x, y );
+		gtk_widget_show( GTK_WIDGET( window ) );
+		gtk_window_deiconify( window );
 		gtk_window_present( window );
-		}
+	}
 }
 
 /* For want of a better place, this is here ... */
@@ -102,10 +100,10 @@ void show_osd(struct con_win *cwin)
 
 	/* Create notification instance */
 
-	osd = notify_notification_new(etitle,
+	osd = notify_notification_new_with_status_icon(etitle,
 					(const gchar *)body,
 					NULL,
-					GTK_WIDGET(cwin->status_icon));
+					GTK_STATUS_ICON(cwin->status_icon));
 	notify_notification_set_timeout(osd, OSD_TIMEOUT);
 
 	/* Add album art if set */
@@ -132,27 +130,30 @@ void show_osd(struct con_win *cwin)
 	g_object_unref(G_OBJECT(osd));
 }
 
-void status_icon_tooltip_update(struct con_win *cwin)
+gboolean status_get_tooltip_cb (GtkWidget        *widget,
+					gint              x,
+					gint              y,
+					gboolean          keyboard_mode,
+					GtkTooltip       *tooltip,
+					struct con_win *cwin) 
 {
-gchar *tooltip;
-tooltip = g_strdup_printf(_("%s by %s"), cwin->cstate->curr_mobj->tags->title,
-			  cwin->cstate->curr_mobj->tags->artist);
-#if GTK_CHECK_VERSION(2, 10, 0)
-	GtkTooltips *tooltips = gtk_tooltips_new ();
-	gtk_tooltips_set_tip (tooltips,GTK_WIDGET(cwin->status_icon) , tooltip , NULL);
-#else
-	gtk_widget_set_tooltip_text (GTK_WIDGET(cwin->status_icon), tooltip);
-#endif
-}
+	gchar *markup_text;
 
-void unset_status_icon_tooltip(struct con_win *cwin)
-{
-#if GTK_CHECK_VERSION(2, 10, 0)
-	GtkTooltips *tooltips = gtk_tooltips_new ();
-	gtk_tooltips_set_tip (tooltips,GTK_WIDGET(cwin->status_icon) , PACKAGE_STRING , NULL);
-#else
-	gtk_widget_set_tooltip_text (GTK_WIDGET(cwin->status_icon), PACKAGE_STRING);
-#endif
+	if (cwin->cstate->state == ST_STOPPED)
+		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
+	else {
+		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s",
+			_("Title"), cwin->cstate->curr_mobj->tags->title,
+			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
+			_("Album"), cwin->cstate->curr_mobj->tags->album,
+			_("Length"), convert_length_str(cwin->cstate->curr_mobj->tags->length));
+	}
+	gtk_tooltip_set_markup (tooltip, markup_text);
+	g_free(markup_text);
+
+	gtk_tooltip_set_icon (tooltip, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+
+	return TRUE;
 }
 
 void

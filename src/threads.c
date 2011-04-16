@@ -317,7 +317,6 @@ void stop_playback(struct con_win *cwin)
 		unset_current_song_info(cwin);
 		unset_track_progress_bar(cwin);
 		unset_album_art(cwin);
-		unset_status_icon_tooltip(cwin);
 
 		cwin->cstate->c_thread = NULL;
 		cwin->cstate->state = ST_STOPPED;

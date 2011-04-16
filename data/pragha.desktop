@@ -7,4 +7,4 @@ Icon=pragha.png
 Exec=pragha %F
 Terminal=false
 MimeType=audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav
-Categories=GTK:Application;AudioVideo;Player
+Categories=GTK;Application;AudioVideo;Player

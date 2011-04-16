@@ -410,9 +410,21 @@ static void oss_deinit_mixer(struct con_win *cwin)
 
 static gint soft_init_mixer(struct con_win *cwin)
 {
+	GError *error = NULL;
+
 	cwin->cmixer->min_vol = 0;
 	cwin->cmixer->max_vol = 100;
-	cwin->cmixer->curr_vol = 100;
+
+	cwin->cmixer->curr_vol = (int)
+		g_key_file_get_integer(cwin->cpref->configrc_keyfile,
+				       GROUP_AUDIO,
+				       KEY_SOFTWARE_VOLUME,
+				       &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+		cwin->cmixer->curr_vol = 100;
+	}
 
 	CDEBUG(DBG_INFO, "Max vol: %ld, Curr vol: %ld",
 	       cwin->cmixer->max_vol, cwin->cmixer->curr_vol);

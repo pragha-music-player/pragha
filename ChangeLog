@@ -1,69 +1,72 @@
-V0.6.3
-	Add remaining time mode to panel.
-	Pragha remeber and showed last played song.
-	Small optimization in library_tree.
-	Fixs critical warnings.
-	Updated czech translation by Alois Nespor.
-0.6.2.2
-	Add German translation, thanks to PhotonX
-	Drops some strings "Tracks" confused.
-0.6.2.1
-	Add russian and ukrainian language, thanks to Evgen.
-V0.6.2
-	Pargha is 100% translatable one.
-	Add Japanese translation. - Tanks Masato hashimoto, Xfce-i18n team_ja.
-	Add czech translation. - Tanks alois.nespor.
-	Add Portuguese-Brazil. - Tanks Lyceuhns.
-	Add option to resize album art in preferences.
-V0.6.1
-	International Support (ES)
-V0.6.0
-	Now is Pragha Music Manager!-)
+r92 | mati86dl@gmail.com | 2009-10-02
+	Pragha 0.7.0 "Great Like House".
 
-v0.5.93
-	Sync systray and panel volume.
-	Fix icon of consonance in gnome_main_menu and xfce menu.
-	Small adjustments in the language.
-v0.5.92
-	Problem of the panel background image fixed.
-	Elimine Spanish.
-v0.5.91 / v0.5.90
-	Other gui
-	Incress and decress volume level in systray, Play/Pasue/Resume with central click of mouse...
-	notifications only are if consonance not this in first plane and new text layout
-	A new button "jump to now playing"
-	In help menu show link to Consonance homepage, a Nonofficial wiki and forum..
+r92 | mati86dl@gmail.com | 2009-10-02
+	Prepare to Pragha 0.7.0 "Great Like House".
+	Use gtk_show_uri to lauch Browser.
+	Remove useless "Edit tag <Title> in the selected tracks" menu item in playlist.
+	Update po files.
 
-v0.5.1
-	Support for deleting library entries.
-v0.5
-	Audio CD playback / CDDB support.
-	Audio device selection (ALSA/OSS).
-	Last.fm submission.
-	Playlist Export (M3U)
-v0.4.1
-	Fix a Gthread initialization bug
-v0.4
-	Modplug support ( By woolf.linux@bumiller.com )
-	Tag Editing.
-	UTF-8 support.
-	Command line option to choose audio backend.
-	DnD on 64-bit platforms ( Bugfix )
-	A new manpage ( By Martin Zelaia <martintxo@sindominio.net )
-v0.3.1
-	OSS support.
-	Software mixer support.
-	Current playlist search.
-	Save/Restore current playlist.
-	Command line option (consonance -c) to get player state.
-	Library updation feature.
-	User defined album art file pattern.
-v0.3
-	Add FLAC, WAV, OGG support. (FLAC support by Jared Casper <jaredcasper@gmail.com>)
-	DnD support.
-	Playlist management.
-	Search through library (simple).
-v0.2
-	0.2 released.
-v0.1
-	0.1 released.
+r91 | mati86dl@gmail.com | 2009-10-02
+	D'Oh!. (GSourceFunc) always returns gbolean.
+
+r90 | mati86dl@gmail.com | 2009-10-02
+	Fix headers Warnigs.
+	Update pragha.pot and Polish Translation.
+
+r89 | mati86dl@gmail.com | 2009-10-02 11:22:12
+	Optimization when search library_tree. Add g_timeout_add.
+
+r88 | mati86dl@gmail.com | 2009-10-01 20:10:07
+	Better layout of Preferences Dialog.
+	(Simil xfce preferences dialogs, thank to midori web browser)
+	Fix status tooltips warning when song info use & character.
+	(D'Oh!. Use g_markup_printf_escaped instead of g_strdup_printf)
+
+r87 | mati86dl@gmail.com | 2009-09-29 20:36:32
+	Fix Warnings when playlist is empty and restore pragha. More efficient.
+
+r86 | mati86dl@gmail.com | 2009-09-29 20:25:04 -0300 (mar 29 de sep de 2009)
+	Fix Warnings when playlist is empty and restore pragha.
+
+r85 | mati86dl@gmail.com | 2009-09-29 19:54:37 -0300 (mar 29 de sep de 2009)
+	Better layout of Preferences Dialog
+
+r84 | mati86dl@gmail.com | 2009-09-28 21:05:36 -0300 (lun 28 de sep de 2009)
+	Fixs CRITICALS when not reproduce music and close pragha.
+
+r83 | mati86dl@gmail.com | 2009-09-28 20:56:28 -0300 (lun 28 de sep de 2009)
+	Add norwegian language, thanks to Kim.
+
+r82 | mati86dl@gmail.com | 2009-09-28 20:51:10 -0300 (lun 28 de sep de 2009)
+	Save and retrieve software mixer volume.
+
+r81 | mati86dl@gmail.com | 2009-09-18 17:13:41 -0300 (vie 18 de sep de 2009)
+	FIX Segment Violation when click button "go to current track"
+
+r80 | mati86dl@gmail.com | 2009-09-12 11:21:10 -0300 (sáb 12 de sep de 2009)
+	Add Polish translation thanks to Krzysztof Komorowski
+
+r79 | mati86dl@gmail.com | 2009-09-12 10:54:41 -0300 (sáb 12 de sep de 2009)
+	"pragha -t", now Play, Pause and resume the song.
+
+r78 | mati86dl@gmail.com | 2009-09-11 21:58:50 -0300 (vie 11 de sep de 2009)
+	Add translator-credits to about dialog.
+
+r77 | mati86dl@gmail.com | 2009-09-11 19:39:45 -0300 (vie 11 de sep de 2009)
+	Better tooltip in systray.
+
+r76 | mati86dl@gmail.com | 2009-09-11 18:03:06 -0300 (vie 11 de sep de 2009)
+	Show OSD on mouse over on StatusIcon
+	Fix warnings when compiling.
+
+r75 | mati86dl@gmail.com | 2009-09-11 17:00:52 -0300 (vie 11 de sep de 2009)
+	Remove "Library View Menu"
+
+r74 | mati86dl@gmail.com | 2009-09-11 14:58:37 -0300 (vie 11 de sep de 2009)
+	Drop SexyIconEntry
+
+r73 | mati86dl@gmail.com | 2009-09-11 14:05:19 -0300 (vie 11 de sep de 2009)
+	Now depends of GTK>=2.16,=> Drop eggtrayicon.
+	Fix pragha.desktop file, reported in http://pragha.wikispaces.com/Bugs.
+	Add (Useless) "Edit tag <Title> in the selected tracks" menu item in playlist.

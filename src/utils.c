@@ -459,25 +459,25 @@ exit:
 }
 
 /* callback used to open default browser when URLs got clicked */
-void open_url(const gchar *url)
+void open_url(struct con_win *cwin, const gchar *url)
 {
-    /* FIXME: is there any better way to do this? */
-    const char* programs[] = { "exo-open", "gnome-open" /* Sorry, KDE users. :-P */, "xdg-open" };
-    int i;
-    for(  i = 0; i < G_N_ELEMENTS(programs); ++i)
-    {
-        gchar* open_cmd = NULL;
-        if( (open_cmd = g_find_program_in_path( programs[i] )) )
-        {
-             char* argv [3];
-             argv [0] = programs[i];
-             argv [1] = (gchar *) url;
-             argv [2] = NULL;
-             g_spawn_async (NULL, argv, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, NULL);
-             g_free( open_cmd );
-             break;
-        }
-    }
+	GError *error = NULL;
+
+	gtk_show_uri (NULL, url,  gtk_get_current_event_time (), &error);
+
+	if (error != NULL){
+		GtkWidget *d;
+		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow), 
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, 
+					"%s", _("Unable to open the browser"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (d),
+							"%s", error->message);
+		g_signal_connect (d, "response", G_CALLBACK (gtk_widget_destroy), NULL);
+		gtk_window_present (GTK_WINDOW (d));
+		g_error_free (error);
+		error = NULL;
+	}
 }
 
 /* It gives the position of the menu on the 

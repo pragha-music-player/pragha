@@ -54,8 +54,6 @@
 #include "oggvorbis.h"
 #include "cdda.h"
 #include "mod.h"
-#include "eggtrayicon.h"
-#include "sexy-icon-entry.h"
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480
@@ -169,7 +167,8 @@
 #define KEY_AUDIO_SINK             "audio_sink"
 #define KEY_AUDIO_ALSA_DEVICE      "audio_alsa_device"
 #define KEY_AUDIO_OSS_DEVICE       "audio_oss_device"
-#define KEY_SOFWARE_MIXER          "software_mixer"
+#define KEY_SOFTWARE_MIXER         "software_mixer"
+#define KEY_SOFTWARE_VOLUME	   "software_volume"
 #define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
 #define KEY_USE_CDDB               "use_cddb"
 
@@ -493,6 +492,7 @@ struct con_state {
 	gint unplayed_tracks;
 	gint newsec;
 	gint lastfm_hard_failure;
+	gint timeout_id;
 	gdouble seek_fraction;
 	gchar *file_tree_pwd;
 	gchar *filter_entry;
@@ -584,6 +584,7 @@ struct con_win {
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GOptionContext *cmd_context;
+	GtkStatusIcon *status_icon;
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *cp_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
@@ -593,7 +594,6 @@ struct con_win {
 	GtkUIManager *file_tree_file_context_menu;
 	GtkUIManager *systray_menu;
 	DBusConnection *con_dbus;
-	EggTrayIcon *status_icon;
 };
 extern gulong switch_cb_id;
 extern gint debug_level;
@@ -671,8 +671,7 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
 /* Panel actions */
-void selection_current_track_handler(GtkButton *button, struct con_win *cwin);
-void selection_current_track(struct con_win *cwin);
+void selection_current_track(GtkButton *button, struct con_win *cwin);
 gboolean update_current_song_info(gpointer data);
 void __update_current_song_info(struct con_win *cwin, gint length);
 void unset_current_song_info(struct con_win *cwin);
@@ -768,9 +767,8 @@ void dnd_library_tree_get(GtkWidget *widget,
 			  guint time,
 			  struct con_win *cwin);
 void simple_library_search_keyrelease(struct con_win *cwin);
-gboolean simple_library_search_keyrelease_handler(GtkWidget *entry,
+gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 						  struct con_win *cwin);
-void cancel_simple_library_search_handler(GtkButton *button, struct con_win *cwin);
 void clear_library_search(struct con_win *cwin);
 void folder_file_library_tree(GtkAction *action, struct con_win *cwin);
 void artist_library_tree(GtkAction *action, struct con_win *cwin);
@@ -811,6 +809,7 @@ gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
 gchar** get_playlist_names_db(struct con_win *cwin);
 void delete_playlist_db(gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
+void flush_stale_entries_db(struct con_win *cwin);
 void flush_db(struct con_win *cwin);
 void rescan_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
@@ -981,10 +980,9 @@ gint open_audio_device(gint samplerate, gint channels,
 /* Systray functions */
 
 void show_osd(struct con_win *cwin);
-gboolean systray_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin);
-void status_icon_tooltip_update(struct con_win *cwin);
-void unset_status_icon_tooltip(struct con_win *cwin);
-void create_systray_icon (struct con_win *cwin);
+gboolean status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin);
+gboolean status_get_tooltip_cb (GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,GtkTooltip *tooltip, struct con_win *cwin);
+void create_status_icon (struct con_win *cwin);
 void systray_display_popup_menu (struct con_win *cwin);
 void systray_play(GtkAction *action, struct con_win *cwin);
 void systray_stop(GtkAction *action, struct con_win *cwin);
@@ -1049,7 +1047,7 @@ void free_str_list(GSList *list);
 gint compare_utf8_str(gchar *str1, gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 gboolean is_m3u_playlist(gchar *file);
-void open_url(const gchar *url);
+void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
@@ -1095,7 +1093,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean        present);
-void	systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
-static GtkUIManager* create_systray_menu(struct con_win *cwin);
+void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
+GtkUIManager* create_systray_menu(struct con_win *cwin);
 
 #endif /* PRAGHA_H */

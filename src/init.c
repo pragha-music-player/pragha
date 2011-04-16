@@ -32,7 +32,7 @@ GOptionEntry cmd_entries[] = {
 	{"stop", 's', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_stop, "Stop", NULL},
 	{"pause", 't', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_pause, "Pause/Resume", NULL},
+	 cmd_pause, "Play/Pause/Resume", NULL},
 	{"prev", 'r', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_prev, "Prev", NULL},
 	{"next", 'n', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
@@ -571,7 +571,7 @@ gint init_config(struct con_win *cwin)
 			cwin->cpref->album_art_size = ALBUM_ART_SIZE;
 		}
 
-	/* Mode remaining time option */
+		/* Mode remaining time option */
 
 		cwin->cpref->timer_remaining_mode =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
@@ -648,7 +648,7 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->software_mixer =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_AUDIO,
-					       KEY_SOFWARE_MIXER,
+					       KEY_SOFTWARE_MIXER,
 					       &error);
 		if (error) {
 			g_error_free(error);
@@ -1136,7 +1136,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Systray */
 
-	create_systray_icon(cwin);
+	create_status_icon(cwin);
 	init_pixbuf(cwin);
 
 	/* Main Vbox */
