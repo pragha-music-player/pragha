@@ -84,6 +84,16 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 		}
 		break;
 	#endif
+	#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+	case FILE_APE:
+		if (get_ape_info(file, mobj->tags))
+			mobj->file_type = FILE_APE;
+		else {
+			g_critical("APE Info failed");
+			goto bad;
+		}
+		break;
+	#endif
 	default:
 		break;
 	}

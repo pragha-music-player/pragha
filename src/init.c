@@ -910,6 +910,9 @@ gint init_config(struct con_win *cwin)
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
 
+	/* Init Gstreamer flags */
+	cwin->cgst->emitted_error = FALSE;
+
 	/* Cleanup */
 
 	g_free(conrc);

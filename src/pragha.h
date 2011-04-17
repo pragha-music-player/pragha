@@ -354,6 +354,9 @@ enum file_type {
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	FILE_MP4,
 #endif
+#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+	FILE_APE
+#endif
 	FILE_CDDA
 };
 
@@ -546,6 +549,7 @@ struct con_gst {
 	gdouble curr_vol;
 	gboolean emitted_error;
 };
+
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
@@ -554,6 +558,7 @@ struct con_lastfm {
 	time_t playback_started;
 };
 #endif
+
 struct con_mpris2 {
 	guint owner_id;
 	GDBusNodeInfo *introspection_data;
@@ -631,6 +636,10 @@ extern const gchar *mime_asf[];
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 extern const gchar *mime_mp4[];
 #endif
+#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+extern const gchar *mime_ape[];
+#endif
+
 
 extern const gchar *mime_image[];
 
@@ -718,8 +727,7 @@ void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
 void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin);
-void vol_button_handler(GtkScaleButton *button, gdouble value,
-			struct con_win *cwin);
+void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin);
 void play_button_toggle_state(struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
 void resize_album_art_frame(struct con_win *cwin);
@@ -752,6 +760,9 @@ gboolean get_asf_info(gchar *file, struct tags *tags);
 #endif
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 gboolean get_mp4_info(gchar *file, struct tags *tags);
+#endif
+#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+gboolean get_ape_info(gchar *file, struct tags *tags);
 #endif
 gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);

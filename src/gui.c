@@ -1509,7 +1509,6 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	return hbox;
 }
 
-
 GtkWidget* create_paned_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;

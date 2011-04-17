@@ -598,13 +598,13 @@ void play_button_toggle_state(struct con_win *cwin)
 		 (cwin->cstate->state == ST_STOPPED))
 		gtk_button_set_image(GTK_BUTTON(cwin->play_button),
 				     cwin->pixbuf->image_play);
-}	
+}
 
 /* Toggle appearance of album art widget */
 
 void album_art_toggle_state(struct con_win *cwin)
 {
-	CDEBUG(DBG_INFO, "Tocggle album art");
+	CDEBUG(DBG_INFO, "Toggle state of album art");
 
 	if (cwin->cpref->show_album_art) {
 		if (!cwin->album_art_frame) {

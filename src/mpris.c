@@ -169,6 +169,15 @@ static GVariant* mpris_Root_get_SupportedMimeTypes(struct con_win *cwin) {
 		"['audio/x-mp3', 'audio/mpeg', 'audio/x-mpeg', 'audio/mpeg3', "
 		"'audio/mp3', 'application/ogg', 'application/x-ogg', 'audio/vorbis', "
 		"'audio/x-vorbis', 'audio/ogg', 'audio/x-ogg', 'audio/x-flac', "
+		#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
+		"'video/x-ms-asf', 'audio/x-ms-wma', "
+		#endif
+		#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
+		"'audio/x-m4a', "
+		#endif
+		#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+		"'application/x-ape', 'audio/ape', 'audio/x-ape', "
+		#endif
 		"'application/x-flac', 'audio/flac', 'audio/x-wav']", NULL, NULL, NULL);
 }
 
@@ -405,7 +414,7 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 	}
 	if(!found)
 		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation, 
-				DBUS_ERROR_INVALID_ARGS, "Unkown or malformed playlist object path.");
+				DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 		
 	g_free(playlist);
 	return NULL; 
@@ -526,7 +535,7 @@ static GVariant* mpris_TrackList_GoTo(struct con_win *cwin, GVariant* parameters
 			GTK_TREE_VIEW(cwin->current_playlist), tree_path, NULL, cwin);
 	} else
 		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation, 
-				DBUS_ERROR_INVALID_ARGS, "Unkown or malformed playlist object path.");
+				DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 	return NULL; 
 }
 static GVariant* mpris_TrackList_get_Tracks(struct con_win *cwin) { 

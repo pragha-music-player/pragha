@@ -253,7 +253,7 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 
 void systray_play(GtkAction *action, struct con_win *cwin)
 {
-	play_pause_resume( cwin);
+	play_pause_resume(cwin);
 }
 
 void systray_stop(GtkAction *action, struct con_win *cwin)

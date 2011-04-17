@@ -287,6 +287,19 @@ backend_resume(struct con_win *cwin)
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
 }
 
+void
+backend_eos(struct con_win *cwin)
+{
+	CDEBUG(DBG_BACKEND, "EOS playback");
+
+	if (cwin->cstate->curr_mobj_clear) {
+		delete_musicobject(cwin->cstate->curr_mobj);
+		cwin->cstate->curr_mobj_clear = FALSE;
+	}
+
+	play_next_track(cwin);
+}
+
 static void
 backend_error (GstMessage *message, struct con_win *cwin)
 {
@@ -331,15 +344,14 @@ backend_error (GstMessage *message, struct con_win *cwin)
 					gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, ERROR_COLOR, -1);
 			}
 			gtk_tree_path_free(path);
-			path = NULL;
 		}
 
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
 						GTK_BUTTONS_NONE,
-						_("<b>Error playing current track.</b>\n<b>Reason:</b> %s"),
-						error->message);
+						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
+						cwin->cstate->curr_mobj->file, error->message);
 
 		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
 		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
@@ -349,15 +361,8 @@ backend_error (GstMessage *message, struct con_win *cwin)
 
 		switch (response) {
 			case GTK_RESPONSE_APPLY: {
-				struct musicobject *mobj = NULL;
 				cwin->cstate->state = ST_PLAYING;
-				path = current_playlist_get_next(cwin);
-				if (path) {
-					mobj = current_playlist_mobj_at_path(path, cwin);
-					backend_start(mobj, cwin);
-					update_current_state(path, PLAYLIST_NEXT, cwin);
-					gtk_tree_path_free(path);
-				}
+				backend_eos (cwin);
 				break;
 			}
 			case GTK_RESPONSE_ACCEPT:
@@ -374,19 +379,6 @@ backend_error (GstMessage *message, struct con_win *cwin)
 	g_error_free (error);
 	g_free (dbg_info);
 
-}
-
-void
-backend_eos(struct con_win *cwin)
-{
-	CDEBUG(DBG_BACKEND, "EOS playback");
-
-	if (cwin->cstate->curr_mobj_clear) {
-		delete_musicobject(cwin->cstate->curr_mobj);
-		cwin->cstate->curr_mobj_clear = FALSE;
-	}
-
-	play_next_track(cwin);
 }
 
 void
@@ -522,7 +514,9 @@ gint backend_init(struct con_win *cwin)
 
 	gst_init(NULL, NULL);
 
-	if ((cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin")) == NULL)
+	cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
+
+	if (cwin->cgst->pipeline == NULL)
 		return -1;
 
 	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "deep-notify::volume",
@@ -532,19 +526,26 @@ gint backend_init(struct con_win *cwin)
 	   Need review then when return the audio preferences. */
 
 	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)){
+		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("alsasink", "audio-sink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
+		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("oss4sink", "audio-sink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
+		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("pulsesink", "audio-sink");
 	}
 
 	if(cwin->cgst->audio_sink == NULL) {
+		CDEBUG(DBG_BACKEND, "Setting autoaudiosink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("autoaudiosink", "audio-sink");
 	}
-	
+
+	if(cwin->cgst->audio_sink == NULL)
+		return -1;
+		
 	g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
 
 	bus = gst_pipeline_get_bus(GST_PIPELINE(cwin->cgst->pipeline));

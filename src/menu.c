@@ -307,6 +307,12 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_mp4[i++]);
 	#endif
+	#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+	i = 0;
+	while (mime_ape[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_ape[i++]);
+	#endif
 
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 

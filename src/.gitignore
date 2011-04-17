@@ -1,4 +1,7 @@
 /.deps
+/.libs
 Makefile
 Makefile.in
+pragha
+*.o
 *~

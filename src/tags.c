@@ -95,6 +95,11 @@ gboolean get_mp4_info(gchar *file, struct tags *tags)
 	return get_info_taglib(file, tags);
 }
 
+gboolean get_ape_info(gchar *file, struct tags *tags)
+{
+	return get_info_taglib(file, tags);
+}
+
 gboolean save_tags_to_file(gchar *file, struct tags *ntag,
 			   int changed, struct con_win *cwin)
 {
