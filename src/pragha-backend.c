@@ -529,24 +529,29 @@ gint backend_init(struct con_win *cwin)
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("alsasink", "audio-sink");
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
+	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("oss4sink", "audio-sink");
+	}
+	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
+		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
+		cwin->cgst->audio_sink = gst_element_factory_make ("ossink", "audio-sink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("pulsesink", "audio-sink");
 	}
-
-	if(cwin->cgst->audio_sink == NULL) {
-		CDEBUG(DBG_BACKEND, "Setting autoaudiosink");
+	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, AUTO_SINK)){
+		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
 		cwin->cgst->audio_sink = gst_element_factory_make ("autoaudiosink", "audio-sink");
 	}
 
-	if(cwin->cgst->audio_sink == NULL)
-		return -1;
-		
-	g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
+	if(cwin->cgst->audio_sink == NULL) {
+		CDEBUG(DBG_BACKEND, "Try to use the default audiosink");
+	}
+	else {
+		g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
+	}
 
 	bus = gst_pipeline_get_bus(GST_PIPELINE(cwin->cgst->pipeline));
 
