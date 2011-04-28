@@ -457,8 +457,9 @@ gboolean lastfm_now_playing_handler (gpointer data)
 {
 	pthread_t tid;
 	struct con_win *cwin = data;
+	gint length;
 
-	CDEBUG(DBG_LASTFM, "Now player Handler");
+	CDEBUG(DBG_LASTFM, "Now playing Handler");
 
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
@@ -470,29 +471,13 @@ gboolean lastfm_now_playing_handler (gpointer data)
 
 	pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
 
-	return FALSE;
-}
-
-void update_lastfm (struct con_win *cwin)
-{
-	int length;
-
-	CDEBUG(DBG_LASTFM, "Update lastfm");
-
-	if(cwin->clastfm->lastfm_handler_id)
-		g_source_remove(cwin->clastfm->lastfm_handler_id);
-
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
 	 * and scrob when track is at 50% or 4mins, whichever comes
 	 * first */
 
-	if(cwin->cstate->state != ST_PLAYING)
-		return;
-	else
-		lastfm_now_playing_handler(cwin);
-
-	if(cwin->cstate->curr_mobj->tags->length < 30) return;
+	if(cwin->cstate->curr_mobj->tags->length < 30)
+		return FALSE;
 
 	if((cwin->cstate->curr_mobj->tags->length / 2) > 240) {
 		length = 240;
@@ -504,5 +489,22 @@ void update_lastfm (struct con_win *cwin)
 	cwin->clastfm->lastfm_handler_id = gdk_threads_add_timeout_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, length,
 			lastfm_scrob_handler, cwin, NULL);
+
+	return FALSE;
+}
+
+void update_lastfm (struct con_win *cwin)
+{
+	CDEBUG(DBG_LASTFM, "Update lastfm");
+
+	if(cwin->clastfm->lastfm_handler_id)
+		g_source_remove(cwin->clastfm->lastfm_handler_id);
+
+	if(cwin->cstate->state != ST_PLAYING)
+		return;
+
+	cwin->clastfm->lastfm_handler_id = gdk_threads_add_timeout_seconds_full(
+			G_PRIORITY_DEFAULT_IDLE, 5,
+			lastfm_now_playing_handler, cwin, NULL);
 }
 #endif
