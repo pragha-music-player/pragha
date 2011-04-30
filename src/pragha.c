@@ -165,11 +165,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (cwin->cpref->use_mpris2 && mpris_init(cwin) == -1) {
-		g_critical("Unable to initialize MPRIS");
-		return -1;
-	}
-
 	if (init_options(cwin, argc, argv) == -1)
 		return -1;
 
@@ -205,6 +200,11 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 	#endif
+
+	if (mpris_init(cwin) == -1) {
+		g_critical("Unable to initialize MPRIS");
+		return -1;
+	}
 
 	init_state(cwin);
 

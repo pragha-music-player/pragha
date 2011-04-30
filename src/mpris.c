@@ -758,7 +758,10 @@ void mpris_update_any(struct con_win *cwin) {
 	gboolean change_detected = FALSE;
 	GVariantBuilder *b;
 	gchar *newtitle;
-	
+
+	if (cwin->cpref->use_mpris2)
+		return;
+
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 	
@@ -909,6 +912,9 @@ void mpris_update_tracklist_changed(struct con_win *cwin) {
 
 gint mpris_init(struct con_win *cwin)
 {
+	if (!cwin->cpref->use_mpris2)
+		return 0;
+
 	CDEBUG(DBG_INFO, "Initializing MPRIS");
 	g_type_init();
 
