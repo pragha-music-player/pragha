@@ -1414,7 +1414,7 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  PULSE_SINK);
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
-				  _("Try to automatically select"));
+				  AUTO_SINK);
 
 	sink_label = gtk_label_new(_("Audio sink"));
 	hbox_sink = gtk_hbox_new(FALSE, 2);
