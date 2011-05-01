@@ -759,11 +759,10 @@ void mpris_update_any(struct con_win *cwin) {
 	GVariantBuilder *b;
 	gchar *newtitle;
 
-	if (cwin->cpref->use_mpris2)
-		return;
-
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
+	if(NULL == cwin->cstate->curr_mobj)
+		return;
 	
 	newtitle = cwin->cstate->curr_mobj->file;
 	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
