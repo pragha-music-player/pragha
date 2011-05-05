@@ -113,6 +113,9 @@ Bugs fixed:
 	Better debugs messages on playbin constructs.
 	Fix Typos.
 
+V0.95.0.1
+	Prepend interfece string to PropertiesChanged signal.
+
 ======================================================
 OTHERS REALESES:
 ======================================================
