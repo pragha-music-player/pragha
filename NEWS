@@ -98,6 +98,21 @@ Bugs fixed:
 	Get the files to change quickly, to prevent when finished the song and change the selection.
 	Always check the current song to prevent when finished and change the song.
 
+V0.95.0
+News:
+	Add support for MonkeyAudio songs.
+	Now difference between oss4 and oss3.
+	Adds another option to use the default sink.
+
+Bugs fixed:
+	Wait 5 seconds to update the current song on lastfm.
+	=> Fix crash when rapidly changing songs.
+	=> Uses less network when rapidly changing songs.
+	Fix never init Mpris2 interface when init.
+	Start pragha with file arguments.
+	Better debugs messages on playbin constructs.
+	Fix Typos.
+
 ======================================================
 OTHERS REALESES:
 ======================================================
@@ -210,6 +225,8 @@ Bugs fixed:
 	Use correct PULSE_PROP_media.role audio, instead music.
 	Use Singly-Linked List in queue list.
 	Remove useless compilation flag in db.
+
+(1) Again thank you very much to Roberto DMD. A new feature that everyone loved.
 
 Update po files.
 
@@ -417,6 +434,10 @@ Bugs fixed:
 	Fix crash when click "go to current track".
 	Fix criticals warnings when run and compile pragha.
 	Fix pragha.desktop file.
+V0.6.3.1
+	Fix bug (Great like a house) in Libraryview.
+	Add French translation, thanks to Alois Halel.
+
 V0.6.3
 	Add remaining time mode to panel.
 	Pragha remeber and showed last played song.

@@ -222,11 +222,6 @@ gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
 
-	if (cwin->cstate->unique_instance) {
-		ret = FALSE;
-		goto exit;
-	}
-
 	msg = dbus_message_new_signal(DBUS_PATH, DBUS_INTERFACE, DBUS_SIG_ADD_FILE);
 	if (!msg) {
 		g_critical("Unable to allocate memory for DBUS message");

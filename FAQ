@@ -1,9 +1,11 @@
 Frequently Answered Questions
 =============================
 
-Q. Why the fsck does a freaking music player consume so much CPU ?
-A. Use the HW device directly in ALSA (hw:0,0). The 'default' device
-   is dmix which is setup with a samplerate of 48Khz while most tracks
-   are in 44.1Khz samplerate. Resampling is cpu intensive. Using the HW
-   device, bypassing the dmix plugin is the current workaround.
-   Of course, you lose the advantages of dmix in the process.
+Q. Pragha does not play certain audio file.
+A. Pragha adds new audio formats on a par with taglib.
+   If compiled with taglib = 1.4, pragha support ogg, flac, mpeg, wav
+   and all variants. If taglib = 1.6 add support to asf, wma and m4a.
+   If taglib >= 1.7 also support ape files.
+   Then you need to install the gstreamer codecs needed to play them.
+   In general installing gstreamer-plugins-bad and gstreamer-plugins-ugly
+   you can play all files.
