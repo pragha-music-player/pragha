@@ -109,8 +109,10 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	/* If URI is a dir, do a non-recursive add of all files under it */
 
 	if (is_dir_and_accessible(file, cwin)) {
-		__non_recur_add(file, TRUE, cwin);
-		return;
+		if(cwin->cpref->add_recursively_files)
+			__recur_add(file, cwin);
+		else
+			__non_recur_add(file, TRUE, cwin);
 	}
 
 	/* If URI is a file, just enqueue it */

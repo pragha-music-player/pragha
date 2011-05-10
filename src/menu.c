@@ -62,7 +62,7 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 
 /* Generate and add the recently-used data */
 
-void add_recent_file (gchar *filename)
+gboolean add_recent_file (gchar *filename)
 {
 	GtkRecentData recent_data;
 	gchar *uri = NULL;
@@ -71,7 +71,7 @@ void add_recent_file (gchar *filename)
 
 	recent_data.mime_type = get_mime_type(filename);
 	if (recent_data.mime_type == NULL)
-		return;
+		return FALSE;
 
 	recent_data.display_name = g_filename_display_basename (filename);
 	recent_data.app_name = g_strdup (g_get_application_name ());
@@ -87,6 +87,8 @@ void add_recent_file (gchar *filename)
 	g_free (recent_data.app_name);
 	g_free (recent_data.app_exec);
 	g_free (uri);
+	
+	return FALSE;
 }
 
 /* Add selected files from the file chooser to the current playlist */
@@ -114,7 +116,8 @@ void handle_selected_file(gpointer data, gpointer udata)
 		mobj = new_musicobject_from_file(data);
 		if (mobj) {
 			append_current_playlist(mobj, cwin);
-			add_recent_file(data);
+			g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) add_recent_file,
+							data, NULL);
 		}
 	}
 	g_free(data);
