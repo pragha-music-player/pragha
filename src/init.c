@@ -1248,7 +1248,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
 
-	/* Init window state*/
+	/* Init window state */
 
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {
 		gtk_widget_show_all(cwin->mainwindow);
@@ -1267,7 +1267,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	else {
 		gtk_widget_show_all(cwin->mainwindow);
 		gtk_widget_hide(cwin->unfull_button);
-		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 	}
 
 	init_menu_actions(cwin);

@@ -41,9 +41,6 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity)
 {
 	static gint x = 0, y = 0;
-	GdkWindowState state;
-
-	state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
 
 	if (GTK_WIDGET_VISIBLE(cwin->mainwindow)) {
 		if(ignoreActivity || gtk_window_is_active(GTK_WINDOW(cwin->mainwindow))){
@@ -53,23 +50,12 @@ void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity)
 		}
 		else gtk_window_present(GTK_WINDOW(cwin->mainwindow));
 	}
-	else{
-		if(x <= 0)
-			x = 0;
-		if (y <= 0 )
-			y = 0;
+	else {
+		if (x <= 0) x = 0;
+		if (y <= 0) y = 0;
 
 		gtk_window_move(GTK_WINDOW(cwin->mainwindow), x, y);
-
 		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
-
-		if(!cwin->cpref->show_album_art && cwin->album_art_frame)
-			gtk_widget_hide(cwin->album_art_frame);
-		if(!(state & GDK_WINDOW_STATE_FULLSCREEN))
-			gtk_widget_hide(cwin->unfull_button);
-		if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))
-			&& !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)))
-				gtk_widget_hide_all(GTK_WIDGET(cwin->browse_mode));
 	}
 }
 
