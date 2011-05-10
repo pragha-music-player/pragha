@@ -249,15 +249,20 @@ XMLNode *xmlnode_get(XMLNode *root, const char **path, const char *name, const c
 size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data){
 	size_t realsize = size * nmemb;
 	WebData *mem = data;
+	char *page = NULL;
 
 	/* Realloc the existing size + the new data size + 1 for the null terminator */
-	mem->page = myrealloc(mem->page, mem->size + realsize + 1);
-	if (mem->page) {
+	page = myrealloc(mem->page, mem->size + realsize + 1);
+	if (page) {
+		mem->page = page;
 		memcpy(mem->page+mem->size, ptr, realsize);
 		mem->size += realsize;
 		mem->page[mem->size] = 0;
+		return realsize;
+	}else {
+		perror("write_cb: Could not realloc");
+		return 0;
 	}
-	return realsize;
 }
 
 int chartlyrics_helper_free_page(WebData *wpage){
