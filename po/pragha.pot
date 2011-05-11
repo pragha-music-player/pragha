@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-11 18:56-0300\n"
+"POT-Creation-Date: 2011-05-10 23:12-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "_File"
 msgstr ""
 
-#: src/gui.c:188
+#: src/gui.c:188 src/pragha-chartlyrics.c:206
 msgid "_Edit"
 msgstr ""
 
@@ -66,7 +66,7 @@ msgid "Next track"
 msgstr ""
 
 #. The main edit dialog
-#: src/gui.c:204 src/gui.c:310 src/gui.c:340 src/gui.c:386 src/tags.c:630
+#: src/gui.c:204 src/gui.c:310 src/gui.c:340 src/gui.c:386 src/tags.c:635
 msgid "Edit tags"
 msgstr ""
 
@@ -190,7 +190,7 @@ msgstr ""
 msgid "_Fullscreen"
 msgstr ""
 
-#: src/gui.c:272 src/gui.c:293 src/gui.c:671 src/pref.c:1325
+#: src/gui.c:272 src/gui.c:293 src/gui.c:671 src/pref.c:1351
 msgid "Library"
 msgstr ""
 
@@ -251,17 +251,17 @@ msgid "Folders structure"
 msgstr ""
 
 #: src/gui.c:355 src/gui.c:808 src/gui.c:972 src/pragha.h:85
-#: src/librarytree.c:1344 src/statusicon.c:215 src/tags.c:391
+#: src/librarytree.c:1344 src/statusicon.c:201 src/tags.c:396
 msgid "Artist"
 msgstr ""
 
 #: src/gui.c:357 src/gui.c:809 src/gui.c:973 src/pragha.h:86
-#: src/librarytree.c:1348 src/statusicon.c:216 src/tags.c:392
+#: src/librarytree.c:1348 src/statusicon.c:202 src/tags.c:397
 msgid "Album"
 msgstr ""
 
 #: src/gui.c:359 src/gui.c:810 src/gui.c:974 src/pragha.h:87
-#: src/librarytree.c:1352 src/tags.c:393
+#: src/librarytree.c:1352 src/tags.c:398
 msgid "Genre"
 msgstr ""
 
@@ -281,11 +281,11 @@ msgstr ""
 msgid "Genre / Artist / Album"
 msgstr ""
 
-#: src/gui.c:378 src/statusicon.c:176
+#: src/gui.c:378 src/statusicon.c:162
 msgid "Prev Track"
 msgstr ""
 
-#: src/gui.c:384 src/gui.c:1698 src/statusicon.c:180
+#: src/gui.c:384 src/gui.c:1697 src/statusicon.c:166
 msgid "Next Track"
 msgstr ""
 
@@ -299,8 +299,8 @@ msgid "Track"
 msgstr ""
 
 #. Create labels
-#: src/gui.c:807 src/gui.c:971 src/pragha.h:84 src/statusicon.c:214
-#: src/tags.c:390
+#: src/gui.c:807 src/gui.c:971 src/pragha.h:84 src/statusicon.c:200
+#: src/tags.c:395
 msgid "Title"
 msgstr ""
 
@@ -308,17 +308,17 @@ msgstr ""
 msgid "Bitrate"
 msgstr ""
 
-#: src/gui.c:812 src/gui.c:976 src/pragha.h:89 src/tags.c:395
+#: src/gui.c:812 src/gui.c:976 src/pragha.h:89 src/tags.c:400
 msgid "Year"
 msgstr ""
 
-#: src/gui.c:813 src/gui.c:977 src/pragha.h:90 src/tags.c:396
+#: src/gui.c:813 src/gui.c:977 src/pragha.h:90 src/tags.c:401
 msgid "Comment"
 msgstr ""
 
 #. Create labels
 #: src/gui.c:814 src/gui.c:978 src/pragha.h:91 src/current-playlist.c:1291
-#: src/statusicon.c:217
+#: src/statusicon.c:203
 msgid "Length"
 msgstr ""
 
@@ -331,63 +331,63 @@ msgid "Clear sort"
 msgstr ""
 
 #. Tooltips
-#: src/gui.c:1696
+#: src/gui.c:1695
 msgid "Play / Pause Track"
 msgstr ""
 
-#: src/gui.c:1697
+#: src/gui.c:1696
 msgid "Previous Track"
 msgstr ""
 
-#: src/gui.c:1699
+#: src/gui.c:1698
 msgid "Stop playback"
 msgstr ""
 
-#: src/gui.c:1701
+#: src/gui.c:1700
 msgid "Leave Fullscreen"
 msgstr ""
 
-#: src/gui.c:1702
+#: src/gui.c:1701
 msgid "Play songs in a random order"
 msgstr ""
 
-#: src/gui.c:1703
+#: src/gui.c:1702
 msgid "Repeat playback list at the end"
 msgstr ""
 
-#: src/gui.c:1743 src/panel.c:213 src/statusicon.c:211
+#: src/gui.c:1742 src/panel.c:213 src/statusicon.c:197
 msgid "<b>Not playing</b>"
 msgstr ""
 
-#: src/gui.c:1964
+#: src/gui.c:1963
 msgid "Options of the library"
 msgstr ""
 
-#: src/pragha.h:83 src/tags.c:394
+#: src/pragha.h:83 src/tags.c:399
 msgid "Track No"
 msgstr ""
 
-#: src/pragha.h:123
+#: src/pragha.h:125
 msgid "Scanning"
 msgstr ""
 
-#: src/pragha.h:124
+#: src/pragha.h:126
 msgid "Stopped"
 msgstr ""
 
-#: src/pragha.h:213
+#: src/pragha.h:215
 msgid "en"
 msgstr ""
 
-#: src/pragha.h:215
+#: src/pragha.h:217
 msgid "_Skip"
 msgstr ""
 
-#: src/pragha.h:216
+#: src/pragha.h:218
 msgid "S_kip All"
 msgstr ""
 
-#: src/pragha.h:217
+#: src/pragha.h:219
 msgid "Delete _All"
 msgstr ""
 
@@ -398,7 +398,7 @@ msgid ""
 "\"light\">in</span></small> %s"
 msgstr ""
 
-#: src/panel.c:195
+#: src/panel.c:195 src/pragha-chartlyrics.c:210
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr ""
@@ -437,15 +437,15 @@ msgid "Folder"
 msgstr ""
 
 #. The main edit dialog
-#: src/current-playlist.c:1386 src/tags.c:665
+#: src/current-playlist.c:1386 src/tags.c:670
 msgid "Details"
 msgstr ""
 
-#: src/librarytree.c:189 src/statusicon.c:148
+#: src/librarytree.c:189 src/statusicon.c:134
 msgid "Unknown Artist"
 msgstr ""
 
-#: src/librarytree.c:195 src/statusicon.c:150
+#: src/librarytree.c:195 src/statusicon.c:136
 msgid "Unknown Album"
 msgstr ""
 
@@ -477,12 +477,12 @@ msgstr ""
 msgid "Delete immediately instead of move to trash"
 msgstr ""
 
-#: src/statusicon.c:146
+#: src/statusicon.c:132
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 msgstr ""
 
-#: src/tags.c:397
+#: src/tags.c:402
 msgid "File"
 msgstr ""
 
@@ -497,204 +497,200 @@ msgstr ""
 msgid "Album art pattern"
 msgstr ""
 
-#: src/pref.c:136 src/pref.c:1543
+#: src/pref.c:143 src/pref.c:1573
 msgid "Start normal"
 msgstr ""
 
-#: src/pref.c:141 src/pref.c:1544
+#: src/pref.c:148 src/pref.c:1574
 msgid "Start fullscreen"
 msgstr ""
 
-#: src/pref.c:146 src/pref.c:1545
+#: src/pref.c:153 src/pref.c:1575
 msgid "Start in system tray"
 msgstr ""
 
 #. Create a folder chooser dialog
-#: src/pref.c:280
+#: src/pref.c:287
 msgid "Select a folder to add to library"
 msgstr ""
 
 #. The main preferences dialog
 #. Add to dialog
-#: src/pref.c:1313 src/pref.c:1729
+#: src/pref.c:1339 src/pref.c:1759
 msgid "Preferences of Pragha"
 msgstr ""
 
 #. Labels
-#: src/pref.c:1324
+#: src/pref.c:1350
 msgid "Audio"
 msgstr ""
 
-#: src/pref.c:1326
+#: src/pref.c:1352
 msgid "General"
 msgstr ""
 
-#: src/pref.c:1327
+#: src/pref.c:1353
 msgid "Notifications"
 msgstr ""
 
-#: src/pref.c:1328
+#: src/pref.c:1354
 msgid "Internet Services"
 msgstr ""
 
-#: src/pref.c:1378 src/pref.c:1409 src/pref.c:1444
+#: src/pref.c:1404 src/pref.c:1439 src/pref.c:1474
 msgid "Restart Required"
 msgstr ""
 
-#: src/pref.c:1381
-msgid "Select automatically"
-msgstr ""
-
-#: src/pref.c:1389
+#: src/pref.c:1419
 msgid "Audio sink"
 msgstr ""
 
-#: src/pref.c:1406
+#: src/pref.c:1436
 msgid "Audio Device"
 msgstr ""
 
 #. Audio CD device
-#: src/pref.c:1424
+#: src/pref.c:1454
 msgid "Audio CD Device"
 msgstr ""
 
 #. Software mixer
-#: src/pref.c:1443
+#: src/pref.c:1473
 msgid "Use software mixer"
 msgstr ""
 
-#: src/pref.c:1477
+#: src/pref.c:1507
 msgid "Folders"
 msgstr ""
 
-#: src/pref.c:1522
+#: src/pref.c:1552
 msgid "Merge folders in the folders estructure view"
 msgstr ""
 
-#: src/pref.c:1542
+#: src/pref.c:1572
 msgid "Remember last window state"
 msgstr ""
 
-#: src/pref.c:1547
+#: src/pref.c:1577
 msgid "Restore last playlist"
 msgstr ""
 
-#: src/pref.c:1549
+#: src/pref.c:1579
 msgid "Minimize Pragha when close the window"
 msgstr ""
 
-#: src/pref.c:1550
+#: src/pref.c:1580
 msgid "Add files recursively"
 msgstr ""
 
-#: src/pref.c:1552
+#: src/pref.c:1582
 msgid "Show Album art in Panel"
 msgstr ""
 
-#: src/pref.c:1555
+#: src/pref.c:1585
 msgid "Size of Album art"
 msgstr ""
 
-#: src/pref.c:1573
+#: src/pref.c:1603
 msgid "Album art file pattern"
 msgstr ""
 
 #. Notification OSD
-#: src/pref.c:1627
+#: src/pref.c:1657
 msgid "Show OSD for track change"
 msgstr ""
 
-#: src/pref.c:1628
+#: src/pref.c:1658
 msgid "Associate notifications to system tray"
 msgstr ""
 
-#: src/pref.c:1629
+#: src/pref.c:1659
 msgid "Show Album art in notifications"
 msgstr ""
 
-#: src/pref.c:1630
+#: src/pref.c:1660
 msgid "Add actions to change track to notifications"
 msgstr ""
 
-#: src/pref.c:1655
+#: src/pref.c:1685
 msgid "Last.fm Support"
 msgstr ""
 
-#: src/pref.c:1659
+#: src/pref.c:1689
 msgid "Username"
 msgstr ""
 
-#: src/pref.c:1660
+#: src/pref.c:1690
 msgid "Password"
 msgstr ""
 
 #. Services CDDB
-#: src/pref.c:1672
+#: src/pref.c:1702
 msgid "Connect to CDDB server"
 msgstr ""
 
 #. Services MPRIS2
-#: src/pref.c:1676
+#: src/pref.c:1706
 msgid "Allow remote control with MPRIS2 interface"
 msgstr ""
 
-#: src/menu.c:133
+#: src/menu.c:136
 msgid "Update Library"
 msgstr ""
 
-#: src/menu.c:133
+#: src/menu.c:136
 msgid "Rescan Library"
 msgstr ""
 
-#: src/menu.c:238
+#: src/menu.c:241
 msgid "Select a file to play"
 msgstr ""
 
-#: src/menu.c:259
+#: src/menu.c:262
 msgid "Add recursively files"
 msgstr ""
 
-#: src/menu.c:280
+#: src/menu.c:283
 msgid "Supported media"
 msgstr ""
 
-#: src/menu.c:314
+#: src/menu.c:323
 msgid "All files"
 msgstr ""
 
-#: src/menu.c:675 src/menu.c:809
+#: src/menu.c:684 src/menu.c:818
 msgid "Library scan complete"
 msgstr ""
 
-#: src/menu.c:901
+#: src/menu.c:910
 msgid "Total Tracks:"
 msgstr ""
 
-#: src/menu.c:903
+#: src/menu.c:912
 msgid "Total Artists:"
 msgstr ""
 
-#: src/menu.c:905
+#: src/menu.c:914
 msgid "Total Albums:"
 msgstr ""
 
-#: src/menu.c:907
+#: src/menu.c:916
 msgid "Statistics"
 msgstr ""
 
-#: src/menu.c:924
+#: src/menu.c:933
 msgid "translator-credits"
 msgstr ""
 
-#: src/utils.c:333
+#: src/utils.c:341
 msgid "days"
 msgstr ""
 
-#: src/utils.c:333
+#: src/utils.c:341
 msgid "day"
 msgstr ""
 
-#: src/utils.c:564
+#: src/utils.c:572
 msgid "Unable to open the browser"
 msgstr ""
 
@@ -702,22 +698,72 @@ msgstr ""
 msgid "Export playlist to file"
 msgstr ""
 
-#: src/pragha-lastfm.c:254
+#: src/pragha-lastfm.c:84 src/pragha-lastfm.c:123 src/pragha-lastfm.c:168
+#: src/pragha-lastfm.c:234 src/pragha-lastfm.c:363 src/pragha-lastfm.c:400
+#: src/pragha-lastfm.c:444 src/pragha-lastfm.c:489
+msgid "No connection Last.fm has been established."
+msgstr ""
+
+#: src/pragha-lastfm.c:102
+#, c-format
+msgid "Added %d songs of the last %d loved on Last.fm."
+msgstr ""
+
+#: src/pragha-lastfm.c:104
+#, c-format
+msgid "You had no favorite songs on Last.fm."
+msgstr ""
+
+#: src/pragha-lastfm.c:144
+#, c-format
+msgid "Added %d songs of %d sugested from Last.fm."
+msgstr ""
+
+#: src/pragha-lastfm.c:146
+#, c-format
+msgid "Last.fm not suggest any similar song."
+msgstr ""
+
+#: src/pragha-lastfm.c:175 src/pragha-lastfm.c:209
+msgid "Album art not found on Last.fm."
+msgstr ""
+
+#: src/pragha-lastfm.c:241
+msgid "Artist information not found on Last.fm."
+msgstr ""
+
+#: src/pragha-lastfm.c:267
 msgid "Playcount:"
 msgstr ""
 
-#: src/pragha-lastfm.c:260
+#: src/pragha-lastfm.c:273
 msgid "Summary:"
 msgstr ""
 
-#: src/pragha-lastfm.c:276
+#: src/pragha-lastfm.c:289
 msgid "Similar artists:"
 msgstr ""
 
-#: src/pragha-lastfm.c:285
+#: src/pragha-lastfm.c:298
 msgid "Lastfm artist info"
 msgstr ""
 
-#: src/pragha-lastfm.c:292
+#: src/pragha-lastfm.c:305
 msgid "View more..."
+msgstr ""
+
+#: src/pragha-lastfm.c:346
+msgid "Love song on Last.fm failed"
+msgstr ""
+
+#: src/pragha-lastfm.c:383
+msgid "Unlove song on Last.fm failed"
+msgstr ""
+
+#: src/pragha-lastfm.c:470
+msgid "Update current song on Last.fm failed"
+msgstr ""
+
+#: src/pragha-chartlyrics.c:173
+msgid "Error searching Lyric on Chartlyrics."
 msgstr ""

@@ -170,7 +170,7 @@ void chartlyric_dialog (struct con_win *cwin)
 	lyric_info = chartlyrics_get_info (cwin->cstate->curr_mobj->tags->title, cwin->cstate->curr_mobj->tags->artist);
 
 	if(!lyric_info) {
-		set_status_message("No lyric found", cwin);
+		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
 		return;
 	}
 
