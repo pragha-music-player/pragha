@@ -242,8 +242,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			cwin->cpref->lw.lastfm_pass =
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
+
+			if (!cwin->clastfm->connected)
+				init_lastfm(cwin);
 		}
-		init_lastfm(cwin);
 #endif
 		cwin->cpref->use_cddb =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -385,6 +387,11 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
+
+	if(!is_active && cwin->clastfm->connected) {
+		LASTFM_dinit(cwin->clastfm->session_id);
+		cwin->clastfm->connected = FALSE;
+	}
 }
 #endif
 /* Toggle album art pattern */
