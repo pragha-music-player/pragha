@@ -728,6 +728,8 @@ void update_current_state(GtkTreePath *path,
 						     path, NULL, TRUE, 1.0, 0.0);
 		}
 	}
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
+					path, NULL, FALSE);
 
 	/* Update current song info */
 
@@ -1027,6 +1029,8 @@ void jump_to_playing_song(struct con_win *cwin)
 			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
 						     path, NULL, TRUE, 0.5, 0.0);
 		}
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
+						path, NULL, FALSE);
 
 		gtk_tree_path_free(path);
 	}
@@ -2668,6 +2672,8 @@ void init_current_playlist_view(struct con_win *cwin)
 		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
 					     path, NULL, TRUE, 0.5, 0.0);
 	}
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
+					path, NULL, FALSE);
 
 	gtk_tree_path_free(path);
 
