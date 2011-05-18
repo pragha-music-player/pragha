@@ -2415,6 +2415,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		       data->data, loc_arr);
 
 		g_object_ref(model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 		
 		do {
@@ -2438,7 +2439,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		g_array_free(loc_arr, TRUE);
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(model);
+
 		update_status_bar(cwin);
 
 		break;
@@ -2602,7 +2605,9 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	GtkTreeModel *model;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
 	g_object_ref(model); 
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	s_playlist = sanitize_string_sqlite3(SAVE_PLAYLIST_STATE);
@@ -2624,6 +2629,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 	g_object_unref(model);
 
 	update_status_bar(cwin);

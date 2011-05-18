@@ -1378,7 +1378,9 @@ void init_library_view(struct con_win *cwin)
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
 	g_object_ref(filter_model); 
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
 	if (cwin->cpref->cur_library_view != FOLDERS) {
@@ -1418,6 +1420,7 @@ void init_library_view(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), TRUE);
 	g_object_unref(filter_model);
 
 	/* Refresh tag completion entries too */

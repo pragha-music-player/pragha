@@ -834,8 +834,9 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	clear_current_playlist(action, cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	g_object_ref(model); 
 
+	g_object_ref(model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	/* Query and insert entries */
@@ -871,6 +872,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 		sqlite3_free_table(result.resultp);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 	g_object_unref(model);
 
 	update_status_bar(cwin);
