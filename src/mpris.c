@@ -300,13 +300,16 @@ static GVariant * handle_get_trackid(struct musicobject *mobj) {
 	g_snprintf(o, 260, "%s/TrackList/%p", MPRIS_PATH, mobj);
 	return g_variant_new_object_path(o);
 }
+
 static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
+	gchar *artists = g_strdup_printf("['%s']", mobj->tags->artist);
 	gchar *genres = g_strdup_printf("['%s']", mobj->tags->genre);
 	gchar *date = g_strdup_printf("%d", mobj->tags->year);
 	gchar *comments = g_strdup_printf("['%s']", mobj->tags->comment);
 	gchar *url = g_str_has_prefix(mobj->file, "cdda") ? 
 		g_strdup(mobj->file) : 
 		g_filename_to_uri(mobj->file, NULL, NULL);
+
 	g_variant_builder_add (b, "{sv}", "mpris:trackid", 
 		handle_get_trackid(mobj));
 	g_variant_builder_add (b, "{sv}", "xesam:url", 
@@ -314,7 +317,7 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
 	g_variant_builder_add (b, "{sv}", "xesam:title", 
 		g_variant_new_string(mobj->tags->title));
 	g_variant_builder_add (b, "{sv}", "xesam:artist", 
-		g_variant_new_string(mobj->tags->artist));
+		g_variant_parse(G_VARIANT_TYPE("as"), artists, NULL, NULL, NULL));
 	g_variant_builder_add (b, "{sv}", "xesam:album", 
 		g_variant_new_string(mobj->tags->album));
 	g_variant_builder_add (b, "{sv}", "xesam:genre", 
@@ -324,7 +327,7 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber", 
 		g_variant_new_int32(mobj->tags->track_no));
 	g_variant_builder_add (b, "{sv}", "xesam:comment", 
-		g_variant_new_string(comments));
+		g_variant_parse(G_VARIANT_TYPE("as"), comments, NULL, NULL, NULL));
 	g_variant_builder_add (b, "{sv}", "mpris:length", 
 		g_variant_new_int64(mobj->tags->length * 1000000l));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate", 
@@ -333,6 +336,7 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
 		g_variant_new_int32(mobj->tags->channels));
 	g_variant_builder_add (b, "{sv}", "audio-samplerate", 
 		g_variant_new_int32(mobj->tags->samplerate));
+	g_free(artists);
 	g_free(genres);
 	g_free(date);
 	g_free(comments);
@@ -757,14 +761,14 @@ on_name_lost (GDBusConnection *connection,
 void mpris_update_any(struct con_win *cwin) {
 	gboolean change_detected = FALSE;
 	GVariantBuilder *b;
-	gchar *newtitle;
+	gchar *newtitle = NULL;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
-	if(NULL == cwin->cstate->curr_mobj)
-		return;
-	
-	newtitle = cwin->cstate->curr_mobj->file;
+
+	if (cwin->cstate->state != ST_STOPPED)
+		newtitle = cwin->cstate->curr_mobj->file;
+
 	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
 	if(cwin->cmpris2->saved_shuffle != cwin->cpref->shuffle)
 	{
@@ -812,6 +816,7 @@ void mpris_update_any(struct con_win *cwin) {
 			"org.freedesktop.DBus.Properties", "PropertiesChanged",
 			g_variant_new_tuple(tuples, 3) , NULL);
 	}
+	g_variant_builder_unref(b);
 }
 
 void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj) {
