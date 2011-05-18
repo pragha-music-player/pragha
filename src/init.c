@@ -1163,12 +1163,18 @@ void init_pixbufs(struct con_win *cwin)
 		g_warning("Unable to load genre png");
 
 	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-							    "gtk-directory",
+							    "folder-music",
 							    16,
 							    0,
 							    NULL);
 	if (!cwin->pixbuf->pixbuf_dir)
-		g_warning("Unable to load subdir png");
+		cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
+										"gtk-directory",
+										16,
+										0,
+										NULL);
+	if (!cwin->pixbuf->pixbuf_dir)
+		g_warning("Unable to load folder png");
 }
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
