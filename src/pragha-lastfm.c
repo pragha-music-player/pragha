@@ -70,68 +70,78 @@ bad:
 
 	return location_id;
 }
-
-void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
+void *do_lastfm_add_favorites_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
 	gint i = 1, try = 0, added = 0;
 	gchar *summary = NULL;
-	
-	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
-	if (!cwin->clastfm->connected) {
-		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return;
-	}
+	struct con_win *cwin = data;
 
 	while (LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
 			cwin->cpref->lw.lastfm_user,
 			i, &results)) {
+		gdk_threads_enter();
 		for(li=results; li; li=li->next) {
 			track = li->data;
 			try++;
 			if (try_add_track_from_db (track->artist, track->name, cwin))
 				added++;
 		}
+		gdk_threads_leave();
 		i++;
 		LASTFM_free_track_info_list (results);
 	}
-	
+
 	if(try > 0)
 		summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."), added, try);
 	else
 		summary = g_strdup_printf(_("You had no favorite songs on Last.fm."));
 
+	gdk_threads_enter();
 	set_status_message(summary, cwin);
+	gdk_threads_leave();
+
 	g_free(summary);
+
+	return NULL;
 }
 
-void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
+void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 {
-	LFMList *results = NULL, *li;
-	LASTFM_TRACK_INFO *track;
-	gint rv, added, try;
-	gchar *summary = NULL;
+	pthread_t tid;
 
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	CDEBUG(DBG_LASTFM, "Get similar action");
+	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if (!cwin->clastfm->connected) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
+	pthread_create (&tid, NULL, do_lastfm_add_favorites_action, cwin);
+}
+
+
+void *do_lastfm_get_similar_action (gpointer data)
+{
+	LFMList *results = NULL, *li;
+	LASTFM_TRACK_INFO *track = NULL;
+	gint rv, added, try;
+	gchar *summary = NULL;
+
+	struct con_win *cwin = data;
 
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
 			cwin->cstate->curr_mobj->tags->title,
 			cwin->cstate->curr_mobj->tags->artist,
 			50, &results);
 
+	gdk_threads_enter();
+
 	if(rv != LASTFM_STATUS_OK) {
 		set_status_message("Error searching similar songs on Last.fm.", cwin);
-		return;
+		gdk_threads_leave();
+		return NULL;
 	}
 
 	for(li=results, added=0, try=0 ; li; li=li->next) {
@@ -144,11 +154,31 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
 	else
 		summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
-		
+
 	set_status_message(summary, cwin);
+
+	gdk_threads_leave();
 
 	LASTFM_free_track_info_list (results);
 	g_free(summary);
+
+	return NULL;
+}
+
+void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	CDEBUG(DBG_LASTFM, "Get similar action");
+
+	if (!cwin->clastfm->connected) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
 }
 
 void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
@@ -225,10 +255,12 @@ void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
 	GtkWidget *header, *view, *frame, *scrolled;
 	gint i, result;
 
-	LASTFM_ARTIST_INFO *artist;
+	LASTFM_ARTIST_INFO *artist = NULL;
 
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
+
+	CDEBUG(DBG_LASTFM, "Get Artist info Action");
 
 	if (!cwin->clastfm->connected) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
