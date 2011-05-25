@@ -38,24 +38,20 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	return TRUE;
 }
 
-void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity)
+void toogle_main_window (struct con_win *cwin, gboolean ignoreActivity)
 {
-	static gint x = 0, y = 0;
+	gint x = 0, y = 0;
 
-	if (GTK_WIDGET_VISIBLE(cwin->mainwindow)) {
-		if(ignoreActivity || gtk_window_is_active(GTK_WINDOW(cwin->mainwindow))){
-			gtk_window_get_position(GTK_WINDOW(cwin->mainwindow), &x, &y );
-			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
-			gtk_window_move (GTK_WINDOW(cwin->mainwindow),x ,y);
+	if (GTK_WIDGET_VISIBLE (cwin->mainwindow)) {
+		if (ignoreActivity || gtk_window_is_active (GTK_WINDOW(cwin->mainwindow))){
+			gtk_window_get_position (GTK_WINDOW(cwin->mainwindow), &x, &y);
+			gtk_widget_hide (GTK_WIDGET(cwin->mainwindow));
+			gtk_window_move (GTK_WINDOW(cwin->mainwindow), x ,y);
 		}
-		else gtk_window_present(GTK_WINDOW(cwin->mainwindow));
+		else gtk_window_present (GTK_WINDOW(cwin->mainwindow));
 	}
 	else {
-		if (x <= 0) x = 0;
-		if (y <= 0) y = 0;
-
-		gtk_window_move(GTK_WINDOW(cwin->mainwindow), x, y);
-		gtk_window_present(GTK_WINDOW(cwin->mainwindow));
+		gtk_widget_show (GTK_WIDGET(cwin->mainwindow));
 	}
 }
 
