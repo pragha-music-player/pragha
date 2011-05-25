@@ -910,8 +910,10 @@ gint init_config(struct con_win *cwin)
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
 
-	/* Init Gstreamer flags */
+	/* Init default flags */
+
 	cwin->cgst->emitted_error = FALSE;
+	cwin->clastfm->connected = FALSE;
 
 	/* Cleanup */
 
@@ -979,31 +981,6 @@ gint init_musicdbase(struct con_win *cwin)
 
 	return init_dbase_schema(cwin);
 }
-
-#ifdef HAVE_LIBCLASTFM
-gint init_lastfm(struct con_win *cwin)
-{
-	gint rv;
-
-	if (!cwin->cpref->lw.lastfm_support)
-		return 0;
-
-	CDEBUG(DBG_INFO, "Initializing LASTFM");
-
-	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
-
-	rv = LASTFM_login(cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
-
-	if(rv != 0) {
-		g_critical("Unable to login on Lastfm");
-		cwin->clastfm->connected = FALSE;
-		return -1;
-	}
-	cwin->clastfm->connected = TRUE;
-
-	return 0;
-}
-#endif
 
 gint init_notify(struct con_win *cwin)
 {

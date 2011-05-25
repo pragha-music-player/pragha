@@ -560,4 +560,33 @@ void update_lastfm (struct con_win *cwin)
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
 			lastfm_now_playing_handler, cwin, NULL);
 }
+
+void *do_init_lastfm (gpointer data)
+{
+	gint rv;
+	struct con_win *cwin = data;
+
+	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+
+	rv = LASTFM_login(cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
+
+	if(rv == 0)
+		cwin->clastfm->connected = TRUE;
+	else
+		g_critical("Unable to login on Lastfm");
+
+	return NULL;
+}
+
+gint init_lastfm (struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if (!cwin->cpref->lw.lastfm_support) {
+		CDEBUG(DBG_INFO, "Initializing LASTFM");
+
+		pthread_create (&tid, NULL, do_init_lastfm, cwin);
+	}
+	return 0;
+}
 #endif
