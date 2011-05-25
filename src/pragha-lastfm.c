@@ -114,7 +114,7 @@ void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -174,7 +174,7 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -194,7 +194,7 @@ void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
 	if (!cwin->cpref->show_album_art)
 		return;
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -262,7 +262,7 @@ void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Get Artist info Action");
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -391,7 +391,7 @@ void lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -428,7 +428,7 @@ void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -472,7 +472,7 @@ gboolean lastfm_scrob_handler(gpointer data)
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return FALSE;
 	}
@@ -517,7 +517,7 @@ gboolean lastfm_now_playing_handler (gpointer data)
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
 
-	if (!cwin->clastfm->connected) {
+	if (cwin->clastfm->session_id == NULL) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return FALSE;
 	}
@@ -568,12 +568,14 @@ void *do_init_lastfm (gpointer data)
 
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
-	rv = LASTFM_login(cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
+	rv = LASTFM_login (cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
 
-	if(rv == 0)
-		cwin->clastfm->connected = TRUE;
-	else
+	if(rv != LASTFM_STATUS_OK) {
+		LASTFM_dinit(cwin->clastfm->session_id);
+		cwin->clastfm->session_id = NULL;
+
 		g_critical("Unable to login on Lastfm");
+	}
 
 	return NULL;
 }
@@ -582,7 +584,7 @@ gint init_lastfm (struct con_win *cwin)
 {
 	pthread_t tid;
 
-	if (!cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 		pthread_create (&tid, NULL, do_init_lastfm, cwin);

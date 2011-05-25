@@ -243,7 +243,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
 
-			if (!cwin->clastfm->connected)
+			if (cwin->clastfm->session_id == NULL)
 				init_lastfm(cwin);
 		}
 #endif
@@ -388,9 +388,10 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
 
-	if(!is_active && cwin->clastfm->connected) {
+	if(!is_active && cwin->clastfm->session_id) {
+		CDEBUG(DBG_INFO, "Shutdown LASTFM");
 		LASTFM_dinit(cwin->clastfm->session_id);
-		cwin->clastfm->connected = FALSE;
+		cwin->clastfm->session_id = NULL;
 	}
 }
 #endif

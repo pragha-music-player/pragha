@@ -913,7 +913,6 @@ gint init_config(struct con_win *cwin)
 	/* Init default flags */
 
 	cwin->cgst->emitted_error = FALSE;
-	cwin->clastfm->connected = FALSE;
 
 	/* Cleanup */
 

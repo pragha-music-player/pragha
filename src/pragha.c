@@ -91,7 +91,7 @@ void common_cleanup(struct con_win *cwin)
 	sqlite3_close(cwin->cdbase->db);
 	g_slice_free(struct con_dbase, cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
-	if (!cwin->cpref->lw.lastfm_support)
+	if (cwin->clastfm->session_id)
 		LASTFM_dinit(cwin->clastfm->session_id);
 
 	g_slice_free(struct con_lastfm, cwin->clastfm);

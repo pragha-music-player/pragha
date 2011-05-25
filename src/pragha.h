@@ -556,7 +556,6 @@ struct con_gst {
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	gint lastfm_handler_id;
-	gboolean connected;
 	time_t playback_started;
 };
 #endif
