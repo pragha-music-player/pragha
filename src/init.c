@@ -859,7 +859,7 @@ gint init_config(struct con_win *cwin)
 		}
 	}
 	if (all_f || cur_lib_view_f)
-		cwin->cpref->cur_library_view = ARTIST_ALBUM;
+		cwin->cpref->cur_library_view = FOLDERS;
 	if (all_f || recursively_f)
 		cwin->cpref->add_recursively_files = FALSE;
 	if (all_f || last_folder_f)
