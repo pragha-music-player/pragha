@@ -568,6 +568,7 @@ struct con_mpris2 {
 	gboolean saved_playbackstatus;
 	gboolean saved_shuffle;
 	gchar *saved_title;
+	gdouble volume;
 	enum player_state state;
 	GError **property_error;			/* for returning errors in propget/propput */
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */

@@ -758,6 +758,7 @@ on_name_lost (GDBusConnection *connection,
 }
 
 /* pragha callbacks */
+
 void mpris_update_any(struct con_win *cwin) {
 	gboolean change_detected = FALSE;
 	GVariantBuilder *b;
@@ -787,6 +788,12 @@ void mpris_update_any(struct con_win *cwin) {
 		change_detected = TRUE;
 		cwin->cmpris2->saved_playbackstatus = cwin->cpref->repeat;
 		g_variant_builder_add (b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus(cwin));
+	}
+	if(cwin->cmpris2->volume != cwin->cgst->curr_vol)
+	{
+		change_detected = TRUE;
+		cwin->cmpris2->volume = cwin->cgst->curr_vol;
+		g_variant_builder_add (b, "{sv}", "Volume", mpris_Player_get_Volume(cwin));
 	}
 	if(g_strcmp0(cwin->cmpris2->saved_title, newtitle))
 	{
@@ -928,6 +935,7 @@ gint mpris_init(struct con_win *cwin)
 	cwin->cmpris2->saved_shuffle = false;
 	cwin->cmpris2->saved_playbackstatus = false;
 	cwin->cmpris2->saved_title = NULL;
+	cwin->cmpris2->volume = 0;
 
 	cwin->cmpris2->introspection_data = g_dbus_node_info_new_for_xml (mpris2xml, NULL);
 	g_assert (cwin->cmpris2->introspection_data != NULL);

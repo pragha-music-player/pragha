@@ -125,6 +125,8 @@ backend_set_soft_volume(struct con_win *cwin)
 		flags &= ~GST_PLAY_FLAG_SOFT_VOLUME;
 
 	g_object_set (G_OBJECT(cwin->cgst->pipeline), "flags", flags, NULL);
+	
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 gdouble
@@ -157,6 +159,8 @@ emit_volume_changed_idle (struct con_win *cwin)
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 
 	return FALSE;
 }
@@ -192,6 +196,8 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 
 	cwin->cgst->curr_vol = volume;
+
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
@@ -217,6 +223,8 @@ backend_update_volume(struct con_win *cwin)
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
+
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 gboolean
