@@ -319,6 +319,8 @@ backend_error (GstMessage *message, struct con_win *cwin)
 	GError *error;
 	gchar *dbg_info = NULL;
 	gint response;
+	GdkPixbuf *pixbuf = NULL;
+	GtkIconTheme *icon_theme;
 
 	gst_message_parse_error (message, &error, &dbg_info);
 
@@ -341,15 +343,16 @@ backend_error (GstMessage *message, struct con_win *cwin)
 	if(emit) {
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
-		path = current_playlist_get_actual(cwin);
-		if (path) {
+		if ((path = current_playlist_get_actual(cwin)) != NULL) {
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
+				icon_theme = gtk_icon_theme_get_default ();
 				if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
-					gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, NOT_FOUND_COLOR, -1);
+					pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-remove",16, 0, NULL);
 				else
-					gtk_list_store_set(GTK_LIST_STORE(model), &iter, PL_COLOR_COL, ERROR_COLOR, -1);
+					pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-dialog-warning",16, 0, NULL);
+
+				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_STATE_PIXBUF, pixbuf, -1);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -383,7 +386,8 @@ backend_error (GstMessage *message, struct con_win *cwin)
 
 		cwin->cgst->emitted_error = TRUE;
 	}
-
+	if (pixbuf)
+		g_object_unref (pixbuf);
 	g_error_free (error);
 	g_free (dbg_info);
 
