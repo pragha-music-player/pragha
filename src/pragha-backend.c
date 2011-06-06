@@ -21,9 +21,6 @@
 #include <gst/interfaces/streamvolume.h>
 #endif
 
-#define NOT_FOUND_COLOR	"#C5C5C5"
-#define ERROR_COLOR	"#FF0000"
-
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),
   GST_PLAY_FLAG_AUDIO         = (1 << 1),
