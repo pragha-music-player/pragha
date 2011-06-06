@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-19 18:21-0300\n"
+"POT-Creation-Date: 2011-06-06 19:59-0300\n"
 "PO-Revision-Date: 2011-05-18 20:45-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,7 +195,7 @@ msgstr "Повтор_ювати"
 msgid "_Fullscreen"
 msgstr "_На повний екран"
 
-#: src/gui.c:272 src/gui.c:293 src/gui.c:671 src/pref.c:1358
+#: src/gui.c:272 src/gui.c:293 src/gui.c:671 src/pref.c:1359
 msgid "Library"
 msgstr "Фонотека"
 
@@ -257,12 +257,12 @@ msgid "Folders structure"
 msgstr "Структура тек"
 
 #: src/gui.c:355 src/gui.c:808 src/gui.c:972 src/pragha.h:85
-#: src/librarytree.c:1344 src/statusicon.c:201 src/tags.c:396
+#: src/librarytree.c:1344 src/statusicon.c:197 src/tags.c:396
 msgid "Artist"
 msgstr "Виконавець"
 
 #: src/gui.c:357 src/gui.c:809 src/gui.c:973 src/pragha.h:86
-#: src/librarytree.c:1348 src/statusicon.c:202 src/tags.c:397
+#: src/librarytree.c:1348 src/statusicon.c:198 src/tags.c:397
 msgid "Album"
 msgstr "Альбом"
 
@@ -287,11 +287,11 @@ msgstr "Жанр / Виконавець"
 msgid "Genre / Artist / Album"
 msgstr "Жанр / Виконавець / Альбом"
 
-#: src/gui.c:378 src/statusicon.c:162
+#: src/gui.c:378 src/statusicon.c:158
 msgid "Prev Track"
 msgstr "Попередня доріжка"
 
-#: src/gui.c:384 src/gui.c:1697 src/statusicon.c:166
+#: src/gui.c:384 src/gui.c:1681 src/statusicon.c:162
 msgid "Next Track"
 msgstr "Наступна доріжка"
 
@@ -305,7 +305,7 @@ msgid "Track"
 msgstr "Доріжка"
 
 #. Create labels
-#: src/gui.c:807 src/gui.c:971 src/pragha.h:84 src/statusicon.c:200
+#: src/gui.c:807 src/gui.c:971 src/pragha.h:84 src/statusicon.c:196
 #: src/tags.c:395
 msgid "Title"
 msgstr "Назва"
@@ -324,7 +324,7 @@ msgstr "Коментар"
 
 #. Create labels
 #: src/gui.c:814 src/gui.c:978 src/pragha.h:91 src/current-playlist.c:1295
-#: src/statusicon.c:203
+#: src/statusicon.c:199
 msgid "Length"
 msgstr "Тривалість"
 
@@ -337,35 +337,35 @@ msgid "Clear sort"
 msgstr "Очистити сортування"
 
 #. Tooltips
-#: src/gui.c:1695
+#: src/gui.c:1679
 msgid "Play / Pause Track"
 msgstr "Відтворити / Зупинити доріжку"
 
-#: src/gui.c:1696
+#: src/gui.c:1680
 msgid "Previous Track"
 msgstr "Попередня доріжка"
 
-#: src/gui.c:1698
+#: src/gui.c:1682
 msgid "Stop playback"
 msgstr "Зупинити відтворення"
 
-#: src/gui.c:1700
+#: src/gui.c:1684
 msgid "Leave Fullscreen"
 msgstr "Вийти з повноекранного режиму"
 
-#: src/gui.c:1701
+#: src/gui.c:1685
 msgid "Play songs in a random order"
 msgstr "У випадковому порядку"
 
-#: src/gui.c:1702
+#: src/gui.c:1686
 msgid "Repeat playback list at the end"
 msgstr "Повторювати список безкінечно"
 
-#: src/gui.c:1742 src/panel.c:213 src/statusicon.c:197
+#: src/gui.c:1726 src/panel.c:213 src/statusicon.c:193
 msgid "<b>Not playing</b>"
 msgstr "<b>Не відтворюється</b>"
 
-#: src/gui.c:1963
+#: src/gui.c:1947
 msgid "Options of the library"
 msgstr "Налаштування фонотеки"
 
@@ -449,11 +449,11 @@ msgstr "Тека"
 msgid "Details"
 msgstr "Деталі"
 
-#: src/librarytree.c:189 src/statusicon.c:134
+#: src/librarytree.c:189 src/statusicon.c:130
 msgid "Unknown Artist"
 msgstr "Невідомий виконавець"
 
-#: src/librarytree.c:195 src/statusicon.c:136
+#: src/librarytree.c:195 src/statusicon.c:132
 msgid "Unknown Album"
 msgstr "Невідомий альбом"
 
@@ -488,7 +488,7 @@ msgstr "Дійсно перемістити всі ці файли у сміт
 msgid "Delete immediately instead of move to trash"
 msgstr "Вилучити остаточно і не переміщати у смітник"
 
-#: src/statusicon.c:132
+#: src/statusicon.c:128
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 msgstr ""
@@ -511,15 +511,15 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Шаблон обкладинки альбому"
 
-#: src/pref.c:143 src/pref.c:1580
+#: src/pref.c:143 src/pref.c:1581
 msgid "Start normal"
 msgstr "Звичайний запуск"
 
-#: src/pref.c:148 src/pref.c:1581
+#: src/pref.c:148 src/pref.c:1582
 msgid "Start fullscreen"
 msgstr "Запуск на повний екран"
 
-#: src/pref.c:153 src/pref.c:1582
+#: src/pref.c:153 src/pref.c:1583
 msgid "Start in system tray"
 msgstr "Запуск в системний лоток"
 
@@ -530,121 +530,121 @@ msgstr "Вибрати теку для додавання у фонотеку"
 
 #. The main preferences dialog
 #. Add to dialog
-#: src/pref.c:1346 src/pref.c:1766
+#: src/pref.c:1347 src/pref.c:1767
 msgid "Preferences of Pragha"
 msgstr "Налаштування Pragha"
 
 #. Labels
-#: src/pref.c:1357
+#: src/pref.c:1358
 msgid "Audio"
 msgstr "Аудіо"
 
-#: src/pref.c:1359
+#: src/pref.c:1360
 msgid "General"
 msgstr "Загальне"
 
-#: src/pref.c:1360
+#: src/pref.c:1361
 msgid "Notifications"
 msgstr "Сповіщення"
 
-#: src/pref.c:1361
+#: src/pref.c:1362
 msgid "Internet Services"
 msgstr "Інтернет-служби"
 
-#: src/pref.c:1411 src/pref.c:1446 src/pref.c:1481
+#: src/pref.c:1412 src/pref.c:1447 src/pref.c:1482
 msgid "Restart Required"
 msgstr "Потрібний перезапуск"
 
-#: src/pref.c:1426
+#: src/pref.c:1427
 msgid "Audio sink"
 msgstr "Аудіо система"
 
-#: src/pref.c:1443
+#: src/pref.c:1444
 msgid "Audio Device"
 msgstr "Audio пристрій"
 
 #. Audio CD device
-#: src/pref.c:1461
+#: src/pref.c:1462
 msgid "Audio CD Device"
 msgstr "Аудіо CD-пристрій"
 
 #. Software mixer
-#: src/pref.c:1480
+#: src/pref.c:1481
 msgid "Use software mixer"
 msgstr "Використовувати програмний мікшер"
 
-#: src/pref.c:1514
+#: src/pref.c:1515
 msgid "Folders"
 msgstr "Теки"
 
-#: src/pref.c:1559
+#: src/pref.c:1560
 msgid "Merge folders in the folders estructure view"
 msgstr "Об'єднати теки у дерево каталогів"
 
-#: src/pref.c:1579
+#: src/pref.c:1580
 msgid "Remember last window state"
 msgstr "Пам'ятати останнє розташування вікна"
 
-#: src/pref.c:1584
+#: src/pref.c:1585
 msgid "Restore last playlist"
 msgstr "Відновити останній список композицій"
 
-#: src/pref.c:1586
+#: src/pref.c:1587
 msgid "Minimize Pragha when close the window"
 msgstr "Мінімізувати Pragha під час закривання вікна"
 
-#: src/pref.c:1587
+#: src/pref.c:1588
 msgid "Add files recursively"
 msgstr "Додати файли рекурсивно"
 
-#: src/pref.c:1589
+#: src/pref.c:1590
 msgid "Show Album art in Panel"
 msgstr "Показувати обкладинку на панелі"
 
-#: src/pref.c:1592
+#: src/pref.c:1593
 msgid "Size of Album art"
 msgstr "Розмір обкладинки"
 
-#: src/pref.c:1610
+#: src/pref.c:1611
 msgid "Album art file pattern"
 msgstr "Шаблон файла обкладинки альбому"
 
 #. Notification OSD
-#: src/pref.c:1664
+#: src/pref.c:1665
 msgid "Show OSD for track change"
 msgstr "Показувати повідомлення про зміну доріжки"
 
-#: src/pref.c:1665
+#: src/pref.c:1666
 msgid "Associate notifications to system tray"
 msgstr "Пов'язані сповіщення у системному лотку"
 
-#: src/pref.c:1666
+#: src/pref.c:1667
 msgid "Show Album art in notifications"
 msgstr "Показувати обкладинку в сповіщеннях"
 
-#: src/pref.c:1667
+#: src/pref.c:1668
 msgid "Add actions to change track to notifications"
 msgstr "Додати дії до сповіщень щодо зміни доріжок"
 
-#: src/pref.c:1692
+#: src/pref.c:1693
 msgid "Last.fm Support"
 msgstr "Підтримка Last.fm"
 
-#: src/pref.c:1696
+#: src/pref.c:1697
 msgid "Username"
 msgstr "Ім'я користувача"
 
-#: src/pref.c:1697
+#: src/pref.c:1698
 msgid "Password"
 msgstr "Пароль"
 
 #. Services CDDB
-#: src/pref.c:1709
+#: src/pref.c:1710
 msgid "Connect to CDDB server"
 msgstr "З'єднається із сервером CDDB"
 
 #. Services MPRIS2
-#: src/pref.c:1713
+#: src/pref.c:1714
 msgid "Allow remote control with MPRIS2 interface"
 msgstr ""
 
@@ -723,8 +723,8 @@ msgid "You had no favorite songs on Last.fm."
 msgstr ""
 
 #: src/pragha-lastfm.c:118 src/pragha-lastfm.c:178 src/pragha-lastfm.c:198
-#: src/pragha-lastfm.c:373 src/pragha-lastfm.c:409 src/pragha-lastfm.c:446
-#: src/pragha-lastfm.c:490 src/pragha-lastfm.c:535
+#: src/pragha-lastfm.c:266 src/pragha-lastfm.c:395 src/pragha-lastfm.c:432
+#: src/pragha-lastfm.c:476 src/pragha-lastfm.c:521
 msgid "No connection Last.fm has been established."
 msgstr ""
 
@@ -742,40 +742,40 @@ msgstr ""
 msgid "Album art not found on Last.fm."
 msgstr ""
 
-#: src/pragha-lastfm.c:266
+#: src/pragha-lastfm.c:273
 msgid "Artist information not found on Last.fm."
 msgstr ""
 
-#: src/pragha-lastfm.c:293
+#: src/pragha-lastfm.c:299
 msgid "Playcount:"
 msgstr ""
 
-#: src/pragha-lastfm.c:299
+#: src/pragha-lastfm.c:305
 msgid "Summary:"
 msgstr ""
 
-#: src/pragha-lastfm.c:315
+#: src/pragha-lastfm.c:321
 #, fuzzy
 msgid "Similar artists:"
 msgstr "Загалом виконавців:"
 
-#: src/pragha-lastfm.c:324
+#: src/pragha-lastfm.c:330
 msgid "Lastfm artist info"
 msgstr ""
 
-#: src/pragha-lastfm.c:331
+#: src/pragha-lastfm.c:337
 msgid "View more..."
 msgstr ""
 
-#: src/pragha-lastfm.c:392
+#: src/pragha-lastfm.c:378
 msgid "Love song on Last.fm failed"
 msgstr ""
 
-#: src/pragha-lastfm.c:429
+#: src/pragha-lastfm.c:415
 msgid "Unlove song on Last.fm failed"
 msgstr ""
 
-#: src/pragha-lastfm.c:516
+#: src/pragha-lastfm.c:502
 msgid "Update current song on Last.fm failed"
 msgstr ""
 
