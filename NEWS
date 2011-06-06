@@ -116,6 +116,40 @@ Bugs fixed:
 V0.95.0.1
 	Prepend interfece string to PropertiesChanged signal.
 
+V0.96.0
+News:
+	Init Lastfm into (More smooth) thread.
+	Implement Lastfm get similar and add favorites into (More smooth) thread.
+	Better (More smooth) insert tracks from file manager.
+	Better (Much more faster) insert tracks from library tree.
+
+Others Changes:
+	Returns the icon in current playlist to show errors.
+	Use Structure Folder view by default.
+	Emit volumes changes on mpris2.
+	Use folder-music to folder structure view.
+	Set cursor when jump to current track.
+	Betters debug messages on lastfm and chartlyrics and comment everything necessary on the status bar.
+	Add recent files info on a idle func.
+
+Updates Translations:
+	Add a new translation to Simplified Chinese thanks to ifree.
+	Add a new translation to Greek thanks to koleoptero.
+	Update Dutch translation thanks to tuxmachine.
+	Update Ukrainian thanslation thanks to Sergiy_Gavrylov.
+
+Bugs fixed:
+	Remove lastfm connected flag. Use seesion_id instead.
+	Insensitive tree views when change the model.
+	Artist and Comment are array on mpris2 metadata.
+	Fix potential memory leak on mpris2.
+	Change the condition to refresh the saved_title (Fix Metadata emision).
+	Fix lastfm start every time that enter in preferences unnecessarily.
+	Fix calcule midle song lenght minus 5 seconds.
+	Fix add recurive folder with command line.
+	Test realloc on chartlyrics.
+	Remove some unuseles gtk_widget_show/hide_all.
+
 ======================================================
 OTHERS REALESES:
 ======================================================
