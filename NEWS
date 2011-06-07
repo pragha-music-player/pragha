@@ -150,6 +150,9 @@ Bugs fixed:
 	Test realloc on chartlyrics.
 	Remove some unuseles gtk_widget_show/hide_all.
 
+V0.96.0.1
+	Recontra D'Oh!. Fixs gdk_threads_enter()/gdk_threads_leave() usage.
+
 ======================================================
 OTHERS REALESES:
 ======================================================

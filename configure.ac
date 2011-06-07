@@ -7,7 +7,8 @@ dnl Version information
 m4_define([pragha_version_major], [0])
 m4_define([pragha_version_minor], [96])
 m4_define([pragha_version_micro], [0])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
+m4_define([pragha_version_nano], [1])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro().pragha_version_nano()])
 
 dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2009-2011
