@@ -493,11 +493,7 @@ void search_library_action(GtkAction *action, struct con_win *cwin)
 
 void search_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	gboolean ret;
-
-	gtk_widget_grab_focus(cwin->current_playlist);
-	g_signal_emit_by_name(G_OBJECT(cwin->current_playlist),
-			      "start-interactive-search", &ret);
+	dialog_jump_to_track (cwin);
 }
 
 /* Handler for 'Shuffle' option in the Edit menu */

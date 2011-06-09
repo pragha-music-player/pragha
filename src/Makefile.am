@@ -17,6 +17,7 @@ pragha_SOURCES =cdda.c \
 		filetree.c \
 		gui.c \
 		init.c \
+		jumptotrack.c \
 		librarytree.c \
 		menu.c \
 		mpris.c \

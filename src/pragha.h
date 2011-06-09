@@ -528,6 +528,7 @@ struct con_state {
 	gdouble seek_fraction;
 	gchar *last_folder;
 	gchar *filter_entry;
+	gchar *jump_filter;
 	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
@@ -611,6 +612,7 @@ struct con_win {
 	GtkWidget *now_playing_label;
 	GtkWidget *library_tree;
 	GtkWidget *playlist_tree;
+	GtkWidget *jump_tree;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GOptionContext *cmd_context;
@@ -1197,6 +1199,7 @@ void update_lastfm (struct con_win *cwin);
 void chartlyric_dialog (struct con_win *cwin);
 
 /* Others */
+void dialog_jump_to_track (struct con_win *cwin);
 
 void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
