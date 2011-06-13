@@ -25,15 +25,22 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 	GtkTreeIter *p_iter, GtkTreeModel *model)
 {
 	gchar *data = NULL;
-	gint i = 0;
+	gint i = 0, cmp;
 
 	while (gtk_tree_model_iter_nth_child(model, iter, p_iter, i++)) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &data, -1);
-		if (data && !g_ascii_strcasecmp(data, node_data)) {
-			g_free(data);
-			return TRUE;
-		}
+		if (data) {
+			cmp = g_ascii_strcasecmp (data, node_data);
+			if (cmp == 0) {
+				g_free(data);
+				return TRUE;
+			}
+			else if (cmp > 0) {
+				g_free(data);
+				return FALSE;
+			}
 		g_free(data);
+		}
 	}
 	return FALSE;
 }
@@ -42,7 +49,7 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
  * and p_iter must be created outside this function */
 
 static void add_child_node_by_tag(GtkTreeModel *model, GtkTreeIter *iter,
-	GtkTreeIter *p_iter, GdkPixbuf *pixbuf, const gchar *node_data, 
+	GtkTreeIter *p_iter, GdkPixbuf *pixbuf, const gchar *node_data,
 	int node_type, int location_id)
 {
 	gtk_tree_store_prepend(GTK_TREE_STORE(model), iter, p_iter);
@@ -90,14 +97,12 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 		}
 	}
 	/* Insert the new file after the last subdirectory/file by order */
-	gtk_tree_store_insert(GTK_TREE_STORE(model), iter, p_iter, pos);
-
-	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-		L_PIXBUF, pixbuf,
-		L_NODE_DATA, node_data,
-		L_NODE_TYPE, node_type,
-		L_LOCATION_ID, location_id,
-		L_VISIBILE, TRUE, -1);
+	gtk_tree_store_insert_with_values (GTK_TREE_STORE(model), iter, p_iter, pos,
+					L_PIXBUF, pixbuf,
+					L_NODE_DATA, node_data,
+					L_NODE_TYPE, node_type,
+					L_LOCATION_ID, location_id,
+					L_VISIBILE, TRUE, -1);
 }
 
 /* Helper function for add_folder_file() */
@@ -161,7 +166,7 @@ static void add_folder_file(const gchar *path, int location_id,
 /* Adds an entry to the library tree by tag (genre, artist...) */
 
 static void add_by_tag(gint location_id, gchar *location, gchar *genre,
-	gchar *artist, gchar *album, gchar *track, struct con_win *cwin,
+	gchar *album, gchar *year, gchar *artist, gchar *track, struct con_win *cwin,
 	GtkTreeModel *model)
 {
 	GtkTreeIter iter, iter2, search_iter, *p_iter = NULL;
@@ -192,8 +197,15 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		else if (!g_ascii_strcasecmp(P_ALBUM_STR, node)) {
 			node_type = NODE_ALBUM;
 			node_pixbuf = cwin->pixbuf->pixbuf_album;
-			node_data = strlen(album) ? album : g_strdup(_("Unknown Album"));
-			if (!strlen(album)) need_gfree = TRUE;
+			if(strlen(album) && strlen(year)) {
+				node_data = g_strconcat(year, " - ", album, NULL);
+			}
+			else if(strlen(album))
+				node_data = album;
+			else
+				node_data = g_strdup(_("Unknown Album"));
+
+			if (!strlen(album) || !strlen(year)) need_gfree = TRUE;
 		}
 		else if (!g_ascii_strcasecmp(P_GENRE_STR, node)) {
 			node_type = NODE_GENRE;
@@ -1354,7 +1366,7 @@ void init_library_view(struct con_win *cwin)
 		break;
 	case ARTIST_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist / Album"));
-		order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	case GENRE_ARTIST:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist"));
@@ -1362,11 +1374,11 @@ void init_library_view(struct con_win *cwin)
 		break;
 	case GENRE_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Album"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	case GENRE_ARTIST_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist / Album"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	default:
 		break;
@@ -1385,16 +1397,17 @@ void init_library_view(struct con_win *cwin)
 
 	if (cwin->cpref->cur_library_view != FOLDERS) {
 		/* Common query for all tag based library views */
-		query = g_strdup_printf("SELECT TRACK.title, ALBUM.name, ARTIST.name, GENRE.name, LOCATION.name, LOCATION.id "
-					"FROM TRACK, ALBUM, ARTIST, GENRE, LOCATION "
-					"WHERE ALBUM.id = TRACK.album AND ARTIST.id = TRACK.artist AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+		query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+					"FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+					"WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
 					"ORDER BY %s;", order_str);
 		g_free(order_str);
 			
 		exec_sqlite_query(query, cwin, &result);
 		for_each_result_row(result, i) {
-			add_by_tag(atoi(result.resultp[i+5]), result.resultp[i+4], result.resultp[i+3],
-				result.resultp[i+2], result.resultp[i+1], result.resultp[i], cwin, model);
+			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
+				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
+				cwin, model);
 			while(gtk_events_pending()) {
 				if (gtk_main_iteration_do(FALSE)) {
 					sqlite3_free_table(result.resultp);
