@@ -95,7 +95,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 		track_i++;
 
-		ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) :g_strdup(mobj->file);
+		ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) : get_display_filename (mobj->file, FALSE);
 		ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
 		ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
 
@@ -121,6 +121,8 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->jump_tree), GTK_TREE_MODEL(jump_store));
 	g_object_unref(jump_store);
+
+	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(cwin->jump_tree));
 
 	return FALSE;
 }
@@ -229,7 +231,7 @@ dialog_jump_to_track (struct con_win *cwin)
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes (column, renderer, "text", 1, NULL);
 	gtk_tree_view_column_set_spacing (column, 4);
-	gtk_tree_view_append_column( GTK_TREE_VIEW(jump_treeview), column);
+	gtk_tree_view_append_column (GTK_TREE_VIEW(jump_treeview), column);
 
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
 
@@ -238,7 +240,6 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	/* filter box */
 	search_label = gtk_label_new (_("Filter: "));
-	gtk_label_set_markup_with_mnemonic (GTK_LABEL(search_label), _("_Filter:"));
 	gtk_box_pack_start (GTK_BOX(hbox), search_label, FALSE, FALSE, 0);
 
 	search_entry = create_jump_search_bar (cwin);
@@ -248,7 +249,8 @@ dialog_jump_to_track (struct con_win *cwin)
 	scrollwin = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER(scrollwin), jump_treeview);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrollwin),
-					GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+					GTK_POLICY_AUTOMATIC,
+					GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(scrollwin),
 					GTK_SHADOW_IN);
 	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
@@ -276,7 +278,6 @@ dialog_jump_to_track (struct con_win *cwin)
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_JUMP_TO, GTK_RESPONSE_APPLY);
 
-	gtk_container_set_border_width (GTK_CONTAINER(dialog), 10);
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 600, 500);
 
 	/* Add to the dialog's main vbox */
@@ -301,7 +302,7 @@ dialog_jump_to_track (struct con_win *cwin)
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
-		/* Activate row selected current playlist to play track. */
+		/* Activate row selected on current playlist to play track. */
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->current_playlist));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
