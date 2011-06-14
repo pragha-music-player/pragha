@@ -600,7 +600,12 @@ status_bar_action (GtkAction *action, struct con_win *cwin)
 void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
-	jump_to_playing_song(cwin);
+	GtkTreePath *path = NULL;
+	path = current_playlist_get_actual(cwin);
+
+	jump_to_path_on_current_playlist (path, cwin);
+
+	gtk_tree_path_free(path);
 }
 
 /* Handler for the 'Rescan Library' item in the Tools menu */

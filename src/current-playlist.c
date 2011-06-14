@@ -649,6 +649,46 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	return playlist;
 }
 
+/* Function to jump to track on current playlist */
+
+void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
+{
+	GtkTreeSelection *selection;
+	gint cx, cy;
+
+	GdkRectangle vrect;
+	GdkRectangle crect;
+
+	if (path) {
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+
+		gtk_tree_selection_unselect_all(selection);
+		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
+
+		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
+		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
+
+		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
+
+		if (cwin->cpref->shuffle) {
+			if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+							     path, NULL, TRUE, 0.5, 0.0);
+			}
+		}
+		else {
+			if (cy < vrect.y) {
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+							     path, NULL, TRUE, 0.0, 0.0);
+			}
+			else if (cy + crect.height > vrect.y + vrect.height) {
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
+							     path, NULL, TRUE, 1.0, 0.0);
+			}
+		}
+	}
+}
+
 /* Get a new playlist name that is not reserved */
 
 static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt *choice)
@@ -691,45 +731,14 @@ void update_current_state(GtkTreePath *path,
 {
 	GtkTreeRowReference *rand_ref;
 	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	gint cx, cy;
-
-	GdkRectangle vrect;
-	GdkRectangle crect;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 
 	CDEBUG(DBG_VERBOSE, "Update the state from current playlist");
 
 	/* Update view */
 
-	gtk_tree_selection_unselect_all(selection);
-	gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
-
-	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
-	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
-
-	gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
-
-	if (cwin->cpref->shuffle) {
-		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						     path, NULL, TRUE, 0.5, 0.0);
-		}
-	}
-	else {
-		if (cy < vrect.y) {
-			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						     path, NULL, TRUE, 0.0, 0.0);
-		}
-		else if (cy + crect.height > vrect.y + vrect.height) {
-			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						     path, NULL, TRUE, 1.0, 0.0);
-		}
-	}
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
-					path, NULL, FALSE);
+	jump_to_path_on_current_playlist (path, cwin);
 
 	/* Update current song info */
 
@@ -1000,40 +1009,12 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin)
 
 void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin)
 {
-	jump_to_playing_song(cwin);
-}
-
-void jump_to_playing_song(struct con_win *cwin)
-{
-	GtkTreePath *path=NULL;
-	GtkTreeSelection *selection;
-	gint cx, cy;
-
-	GdkRectangle vrect;
-	GdkRectangle crect;
-
+	GtkTreePath *path = NULL;
 	path = current_playlist_get_actual(cwin);
 
-	if (path) {
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	jump_to_path_on_current_playlist (path, cwin);
 
-		gtk_tree_selection_unselect_all(selection);
-		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
-
-		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
-		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
-
-		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
-
-		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-						     path, NULL, TRUE, 0.5, 0.0);
-		}
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
-						path, NULL, FALSE);
-
-		gtk_tree_path_free(path);
-	}
+	gtk_tree_path_free(path);
 }
 
 /* Queue selected rows from current playlist */
@@ -2338,7 +2319,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
-	GtkTreePath *dest_path, *path;
+	GtkTreePath *dest_path = NULL, *path = NULL;
 	GtkTreeIter dest_iter, iter;
 	GtkTreeViewDropPosition pos = 0;
 	GList *list = NULL, *l;
@@ -2443,7 +2424,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		g_object_unref(model);
 
 		update_status_bar(cwin);
-
 		break;
 	case TARGET_PLAYLIST:
 		playlist_arr = *(GArray **)data->data;
@@ -2466,7 +2446,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		};
 
 		g_array_free(playlist_arr, TRUE);
-
 		break;
 	case TARGET_URI_LIST:
 		CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
@@ -2534,6 +2513,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		g_warning("Unknown DND type");
 		break;
 	}
+
+	jump_to_path_on_current_playlist (dest_path, cwin);
+
 exit:
 	gtk_tree_path_free(dest_path);
 	gtk_drag_finish(context, TRUE, FALSE, time);
@@ -2644,11 +2626,6 @@ void init_current_playlist_view(struct con_win *cwin)
 	gchar *ref = NULL;
 	GError *error = NULL;
 	GtkTreePath *path=NULL;
- 	GtkTreeSelection *selection;
-	gint cx, cy;
-
-	GdkRectangle vrect;
-	GdkRectangle crect;
 
 	init_playlist_current_playlist(cwin);
 
@@ -2663,26 +2640,9 @@ void init_current_playlist_view(struct con_win *cwin)
 	}
 
 	path = gtk_tree_path_new_from_string(ref);
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-
-	gtk_tree_selection_unselect_all(selection);
-	gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
-
-	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
-	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), path, NULL, &crect);
-
-	gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->current_playlist), crect.x, crect.y, &cx, &cy);
-
-	if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->current_playlist),
-					     path, NULL, TRUE, 0.5, 0.0);
-	}
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->current_playlist),
-					path, NULL, FALSE);
+	jump_to_path_on_current_playlist (path, cwin);
 
 	gtk_tree_path_free(path);
-
 	g_free(ref);
 }
 

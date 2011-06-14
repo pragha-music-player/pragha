@@ -905,7 +905,7 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
 void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
-
+void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_state(GtkTreePath *path,
 			  enum playlist_action action,
