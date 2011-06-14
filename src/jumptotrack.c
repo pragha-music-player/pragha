@@ -71,13 +71,52 @@ void jump_row_activated_cb (GtkTreeView *jump_tree,
 	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
 }
 
+gchar *
+search_and_set_layout (gchar *full_string, struct con_win *cwin)
+{
+	gchar *display_string = NULL;
+	gchar *needle = NULL, *haystack = NULL;
+	gchar *found = NULL;
+	gchar *prev_string = NULL, *mach_string = NULL, *last_string = NULL;
+	gint needle_len, found_len, full_string_len;
+
+	if (cwin->cstate->jump_filter == NULL)
+		display_string = g_markup_printf_escaped ("%s", full_string);
+	else {
+		needle = g_utf8_casefold (cwin->cstate->jump_filter, -1);
+		haystack = g_utf8_casefold (full_string, -1);
+
+		found = g_strrstr (haystack, needle);
+
+		if (found != NULL) {
+			needle_len = strlen (needle);
+			found_len = strlen (found);
+			full_string_len = strlen (full_string);
+
+			prev_string = g_strndup (full_string, full_string_len - found_len);
+			mach_string = g_strndup (full_string + full_string_len - found_len, needle_len);
+			last_string = g_strdup (full_string + full_string_len - found_len + needle_len);
+
+			display_string = g_markup_printf_escaped ("%s<b>%s</b>%s", prev_string, mach_string, last_string);
+
+			g_free (prev_string);
+			g_free (mach_string);
+			g_free (last_string);
+			g_free (needle);
+			g_free (haystack);
+		}
+	}
+
+	return display_string;
+}
+
 gboolean do_jump_refilter(struct con_win *cwin)
 {
 	GtkTreeModel *playlist_model;
 	GtkTreeIter playlist_iter, jump_iter;
 	struct musicobject *mobj = NULL;
 	GtkListStore *jump_store;
-	gchar *u_str = NULL, *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL, *track_data = NULL;
+	gchar *track_data_markup = NULL, *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL, *track_data = NULL;
 	gboolean ret;
 	gint track_i = 0;
 
@@ -99,22 +138,22 @@ gboolean do_jump_refilter(struct con_win *cwin)
 		ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
 		ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
 
-		track_data =  g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
+		track_data = g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
-		u_str = g_utf8_strdown (track_data, -1);
+		track_data_markup = search_and_set_layout (track_data, cwin);
 
-		if ( (cwin->cstate->jump_filter == NULL) || g_strrstr (u_str, cwin->cstate->jump_filter)) {
+		if (track_data_markup != NULL) {
 			gtk_list_store_append (jump_store, &jump_iter);
 			gtk_list_store_set (jump_store, &jump_iter,
 						0, track_i,
-						1, track_data,
+						1, track_data_markup,
 						-1);
 		}
 		g_free (ch_title);
 		g_free (ch_artist);
 		g_free (ch_album);
 		g_free (track_data);
-		g_free (u_str);
+		g_free (track_data_markup);
 
 		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
 	}
@@ -231,8 +270,9 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes (column, renderer, "text", 1, NULL);
+	gtk_tree_view_column_set_attributes (column, renderer, "markup", 1, NULL);
 	gtk_tree_view_column_set_spacing (column, 4);
+
 	gtk_tree_view_append_column (GTK_TREE_VIEW(jump_treeview), column);
 
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
