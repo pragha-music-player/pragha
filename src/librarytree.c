@@ -851,8 +851,10 @@ void clear_library_search(struct con_win *cwin)
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
-
-	cwin->cstate->filter_entry = NULL;
+	if (cwin->cstate->filter_entry != NULL) {
+		g_free (cwin->cstate->filter_entry);
+		cwin->cstate->filter_entry = NULL;
+	}
 	gtk_tree_model_foreach(model, set_all_visible, cwin);
 	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
 }
