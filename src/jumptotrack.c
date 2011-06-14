@@ -137,6 +137,11 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
+	if (cwin->cstate->jump_filter != NULL) {
+		g_free (cwin->cstate->jump_filter);
+		cwin->cstate->jump_filter = NULL;
+	}
+
 	if (cwin->cstate->timeout_id){
 		g_source_remove (cwin->cstate->timeout_id );
 		cwin->cstate->timeout_id = 0;
@@ -147,7 +152,7 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 		cwin->cstate->jump_filter = u_str;
 		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc) do_jump_refilter, cwin );
 	}
-	else{
+	else {
 		do_jump_refilter (cwin);
 	}
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
@@ -198,10 +203,7 @@ GtkWidget* create_jump_search_bar (struct con_win *cwin)
 void
 dialog_jump_to_track (struct con_win *cwin)
 {
-	GtkWidget *scrollwin;
-	GtkWidget *vbox, *sep;
-	GtkWidget *hbox, *search_label, *search_entry;
-	GtkWidget *dialog;
+	GtkWidget *dialog, *scrollwin, *vbox, *search_entry;
 	GtkWidget *jump_treeview = NULL;
 	GtkListStore *jump_store;
 	GtkCellRenderer *renderer;
@@ -235,16 +237,7 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
 
-	hbox = gtk_hbox_new (FALSE, 3);
-	gtk_box_pack_start (GTK_BOX(vbox), hbox, FALSE, FALSE, 3);
-
-	/* filter box */
-	search_label = gtk_label_new (_("Filter: "));
-	gtk_box_pack_start (GTK_BOX(hbox), search_label, FALSE, FALSE, 0);
-
 	search_entry = create_jump_search_bar (cwin);
-
-	gtk_box_pack_start (GTK_BOX(hbox), search_entry, TRUE, TRUE, 3);
 
 	scrollwin = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER(scrollwin), jump_treeview);
@@ -253,10 +246,6 @@ dialog_jump_to_track (struct con_win *cwin)
 					GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(scrollwin),
 					GTK_SHADOW_IN);
-	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
-
-	sep = gtk_hseparator_new ();
-	gtk_box_pack_start (GTK_BOX(vbox), sep, FALSE, FALSE, 0);
 
 	cwin->jump_tree = jump_treeview;
 
@@ -275,12 +264,15 @@ dialog_jump_to_track (struct con_win *cwin)
 					     GTK_RESPONSE_CANCEL,
 					     NULL);
 
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_JUMP_TO, GTK_RESPONSE_APPLY);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_ACCEPT);
 
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 600, 500);
 
 	/* Add to the dialog's main vbox */
+
+	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
+	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
 
 	gtk_container_add (GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
 	
