@@ -933,7 +933,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(struct musicobject *mobj, struct con_win *cwin);
 void clear_current_playlist(GtkAction *action, struct con_win *cwin);
 void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin);
-void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin);
+void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin);
 void append_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
 void append_current_playlist_on_model(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);

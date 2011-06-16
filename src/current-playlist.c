@@ -1549,7 +1549,7 @@ void insert_current_playlist_on_model(GtkTreeModel *model, struct musicobject *m
 
 /* Insert a track to the current playlist */
 
-void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkTreeIter *pos, struct con_win *cwin)
+void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1577,7 +1577,7 @@ void insert_current_playlist(struct musicobject *mobj, gboolean drop_after, GtkT
 
 	ch_filename = get_display_name(mobj);
 
-	if (drop_after)
+	if (droppos == GTK_TREE_VIEW_DROP_AFTER)
 		gtk_list_store_insert_after(GTK_LIST_STORE(model), &iter, pos);
 	else
 		gtk_list_store_insert_before(GTK_LIST_STORE(model), &iter, pos);
@@ -2325,7 +2325,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GList *list = NULL, *l;
 	struct musicobject *mobj = NULL;
 	GArray *loc_arr, *playlist_arr;
-	gint i = 0, elem = 0;
+	gint i = 0, elem = 0, tx, ty;
 	gchar *name = NULL;
 	gchar **uris = NULL;
 	gchar *filename = NULL;
@@ -2333,12 +2333,25 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
+	gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(cwin->current_playlist), x, y, &tx, &ty);
+
 	is_row = gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(cwin->current_playlist),
 						x, y,
 						&dest_path,
 						&pos);
+
+	switch(pos) {
+		case GTK_TREE_VIEW_DROP_INTO_OR_BEFORE:
+			pos = GTK_TREE_VIEW_DROP_BEFORE;
+			break;
+		case GTK_TREE_VIEW_DROP_INTO_OR_AFTER:
+			pos = GTK_TREE_VIEW_DROP_AFTER;
+			break;
+		default:
+			break;
+	}
 	if (is_row)
-		gtk_tree_model_get_iter(model, &dest_iter, dest_path);
+		gtk_tree_model_get_iter (model, &dest_iter, dest_path);
 
 	/* Reorder within current playlist */
 
@@ -2422,6 +2435,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(model);
+		
+		if (is_row)
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, 0.5, 0.0);
 
 		update_status_bar(cwin);
 		break;
@@ -2465,15 +2481,10 @@ void dnd_current_playlist_received(GtkWidget *widget,
 					if (!mobj)
 						g_critical("Invalid location filename");
 					else {
-						if (is_row && pos == GTK_TREE_VIEW_DROP_AFTER) {
-							insert_current_playlist(mobj, TRUE, &dest_iter, cwin);
-						}
-						else if (is_row && pos == GTK_TREE_VIEW_DROP_BEFORE) {
-							insert_current_playlist(mobj, FALSE, (is_row) ? &dest_iter : NULL, cwin);
-						}
-						else {
-							append_current_playlist(mobj, cwin);
-						}
+						if (is_row)
+							insert_current_playlist (mobj, pos, &dest_iter, cwin);
+						else
+							append_current_playlist (mobj, cwin);
 					}
 				}
 				g_free(filename);
@@ -2496,15 +2507,10 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			if (!mobj)
 				g_critical("Invalid location filename");
 			else {
-				if (is_row && pos == GTK_TREE_VIEW_DROP_AFTER) {
-					insert_current_playlist(mobj, TRUE, &dest_iter, cwin);
-				}
-				else if (is_row && pos == GTK_TREE_VIEW_DROP_BEFORE) {
-					insert_current_playlist(mobj, FALSE, (is_row) ? &dest_iter : NULL, cwin);
-				}
-				else {
+				if (is_row)
+					insert_current_playlist(mobj, pos, &dest_iter, cwin);
+				else
 					append_current_playlist(mobj, cwin);
-				}
 			}
 		}
 		g_free(filename);
@@ -2513,8 +2519,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		g_warning("Unknown DND type");
 		break;
 	}
-
-	jump_to_path_on_current_playlist (dest_path, cwin);
 
 exit:
 	gtk_tree_path_free(dest_path);
