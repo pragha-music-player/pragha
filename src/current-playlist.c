@@ -2325,20 +2325,25 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GList *list = NULL, *l;
 	struct musicobject *mobj = NULL;
 	GArray *loc_arr, *playlist_arr;
-	gint i = 0, elem = 0, tx, ty;
+	gint i = 0, elem = 0;
 	gchar *name = NULL;
 	gchar **uris = NULL;
 	gchar *filename = NULL;
 	gboolean is_row;
+	GdkRectangle vrect, crect;
+	gdouble row_align;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(cwin->current_playlist), x, y, &tx, &ty);
 
 	is_row = gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(cwin->current_playlist),
 						x, y,
 						&dest_path,
 						&pos);
+
+	gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->current_playlist), &vrect);
+	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, &crect);
+	
+	row_align = (gdouble)crect.y / (gdouble)vrect.height;
 
 	switch(pos) {
 		case GTK_TREE_VIEW_DROP_INTO_OR_BEFORE:
@@ -2437,7 +2442,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		g_object_unref(model);
 		
 		if (is_row)
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, 0.5, 0.0);
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
 
 		update_status_bar(cwin);
 		break;
