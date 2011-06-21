@@ -38,8 +38,12 @@ static gboolean update_gui(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	g_idle_add(update_track_progress_bar, cwin);
-	g_idle_add(update_current_song_info, cwin);
+	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
+
+	if(newsec > 0) {
+		__update_track_progress_bar(cwin, newsec);
+		__update_progress_song_info(cwin, newsec);
+	}
 
 	return TRUE;
 }
@@ -50,7 +54,7 @@ gboolean update_track_progress_bar(gpointer data)
 
 	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
 
-	if(newsec > 0);
+	if(newsec > 0)
 		__update_track_progress_bar(cwin, newsec);
 
 	return FALSE;
@@ -448,7 +452,7 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 		case GST_STATE_PLAYING: {
 			cwin->cstate->state = ST_PLAYING;
 			if(cwin->cgst->timer == 0)
-				cwin->cgst->timer = g_timeout_add_seconds (1, update_gui, cwin);
+				cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
 			#ifdef HAVE_LIBCLASTFM
 			time(&cwin->clastfm->playback_started);
 			#endif

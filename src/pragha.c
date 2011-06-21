@@ -208,7 +208,13 @@ gint main(gint argc, gchar *argv[])
 
 	init_state(cwin);
 
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+
+	gdk_threads_init();
+
 	gdk_threads_enter();
+
 	init_gui(argc, argv, cwin);
 
 	if(backend_init(cwin) == -1) {
@@ -218,6 +224,7 @@ gint main(gint argc, gchar *argv[])
 
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 	gtk_main();
+
 	gdk_threads_leave();
 
 	return 0;
