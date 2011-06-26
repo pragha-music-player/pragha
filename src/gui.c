@@ -1805,11 +1805,14 @@ static void
 icon_pressed_cb (GtkEntry       *entry,
 		gint            position,
 		GdkEventButton *event,
-		gpointer        data)
+		struct con_win *cwin)
 {
 	if (position == GTK_ENTRY_ICON_SECONDARY) {
 		gtk_entry_set_text (entry, "");
 		gtk_widget_grab_focus(GTK_WIDGET(entry));
+
+		if (!cwin->cpref->instant_filter)
+			clear_library_search (cwin);
 	}
 }
 
@@ -1835,6 +1838,10 @@ GtkWidget* create_search_bar(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(search_entry),
 			 "changed",
 			 G_CALLBACK(simple_library_search_keyrelease_handler),
+			 cwin);
+	g_signal_connect(G_OBJECT(search_entry),
+			 "activate",
+			 G_CALLBACK(simple_library_search_activate_handler),
 			 cwin);
 
 	cwin->search_entry = search_entry;
