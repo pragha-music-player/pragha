@@ -672,6 +672,8 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 	else
 		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
 
+	/* Connect to check the save changes when change the entry. */
+
 	g_signal_connect(G_OBJECT(entry_title),
 			 "changed",
 			 G_CALLBACK(check_entry),
@@ -701,6 +703,18 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 			 G_CALLBACK(check_entry),
 			 chk_comment);
 
+	/* Save changes when press enter. */
+	
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_title), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_artist), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_album), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_genre), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_tno), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_year), TRUE);
+
+
+	/* Connect to set clear check when click the icon. */
+
 	g_signal_connect (G_OBJECT(entry_title),
 			"icon-press",
 			G_CALLBACK (clear_pressed),
@@ -722,6 +736,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 			G_CALLBACK (directory_pressed),
 			file);
 
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog);
 
 	while ((result = gtk_dialog_run (GTK_DIALOG (dialog))) &&
