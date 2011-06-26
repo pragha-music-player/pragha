@@ -162,7 +162,7 @@
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
 #define KEY_INSTANT_FILTER         "instant_filter"
-
+#define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
@@ -444,6 +444,7 @@ struct con_pref {
 	gboolean status_bar;
 	gboolean fuse_folders;
 	gboolean instant_filter;
+	gboolean use_hint;
 	GSList *library_dir;
 	GSList *playlist_columns;
 	GSList *playlist_column_widths;

@@ -770,6 +770,20 @@ void save_preferences(struct con_win *cwin)
 			       KEY_CLOSE_TO_TRAY,
 			       cwin->cpref->close_to_tray);
 
+	/* Save instant filter option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_INSTANT_FILTER,
+			       cwin->cpref->instant_filter);
+
+	/* Save use hint option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_USE_HINT,
+			       cwin->cpref->use_hint);
+
 	/* Save show OSD option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,

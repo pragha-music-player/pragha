@@ -870,7 +870,7 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 		cwin->cstate->filter_entry = NULL;
 	}
 
-	if (gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0) {
+	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		u_str = g_utf8_strdown (text, -1);
 		cwin->cstate->filter_entry = u_str;
@@ -1486,7 +1486,7 @@ void init_library_view(struct con_win *cwin)
 	refresh_tag_completion_entries(cwin);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), TRUE);
-	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "changed", cwin);
+	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
 
 	cwin->cstate->view_change = FALSE;
 }

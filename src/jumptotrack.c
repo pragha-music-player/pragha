@@ -254,7 +254,7 @@ filter_icon_pressed_cb (GtkEntry       *entry,
 			g_free (cwin->cstate->jump_filter);
 			cwin->cstate->jump_filter = NULL;
 		}
-		if (cwin->cpref->instant_filter)
+		if (!cwin->cpref->instant_filter)
 			do_jump_refilter (cwin);
 	}
 }

@@ -499,14 +499,14 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_tree), column);
 
-	cwin->library_store = store;
-	cwin->library_tree = library_tree;
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(library_tree), cwin->cpref->use_hint);
+
+	/* Connect signals and create right click popup menu*/
+
 	g_signal_connect(G_OBJECT(library_tree), "row-activated",
 			 G_CALLBACK(library_tree_row_activated_cb), cwin);
 	g_signal_connect (G_OBJECT (library_tree), "key_press_event",
 			  G_CALLBACK(library_tree_key_press), cwin);
-
-	/* Create right click popup menu */
 
 	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
 									   cwin);
@@ -518,6 +518,9 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
  
 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
 			 G_CALLBACK(library_tree_button_release_cb), cwin);
+
+	cwin->library_store = store;
+	cwin->library_tree = library_tree;
 
 	g_object_unref(library_filter_tree);
 	
@@ -1301,6 +1304,9 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	gtk_container_add(GTK_CONTAINER(current_playlist_scroll), current_playlist);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(current_playlist_scroll),GTK_SHADOW_IN);
+
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist), cwin->cpref->use_hint);
+
 	cwin->current_playlist = current_playlist;
 
 	/* Set initial column visibility */
