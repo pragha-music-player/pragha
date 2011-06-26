@@ -819,29 +819,71 @@ gboolean do_refilter(struct con_win *cwin )
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 						  struct con_win *cwin)
 {
+	gchar *text = NULL;
+	gchar *u_str = NULL;
+	gboolean has_text;
+	
+	if (!cwin->cpref->instant_filter)
+		return FALSE;
 
+	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+
+	if (cwin->cstate->filter_entry != NULL) {
+		g_free (cwin->cstate->filter_entry);
+		cwin->cstate->filter_entry = NULL;
+	}
+
+	if (cwin->cstate->timeout_id) {
+		g_source_remove (cwin->cstate->timeout_id);
+		cwin->cstate->timeout_id = 0;
+	}
+	if (has_text) {
+		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		u_str = g_utf8_strdown (text, -1);
+		if (cwin->cstate->filter_entry != NULL)
+			g_free (cwin->cstate->filter_entry);
+		cwin->cstate->filter_entry = u_str;
+		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc)do_refilter, cwin);
+	}
+	else {
+		clear_library_search (cwin);
+	}
+	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
+				GTK_ENTRY_ICON_SECONDARY,
+				has_text); 
+	g_free (text);
+
+	return FALSE;
+}
+
+gboolean simple_library_search_activate_handler(GtkEntry *entry,
+						struct con_win *cwin)
+{
 	gchar *text = NULL;
 	gchar *u_str = NULL;
 	gboolean has_text;
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
-	if( cwin->cstate->timeout_id ){
-		g_source_remove( cwin->cstate->timeout_id );
-		cwin->cstate->timeout_id = 0;
+	if (cwin->cstate->filter_entry != NULL) {
+		g_free (cwin->cstate->filter_entry);
+		cwin->cstate->filter_entry = NULL;
 	}
-	if(has_text){
-		text = gtk_editable_get_chars( GTK_EDITABLE(entry), 0, -1 );
-		u_str = g_utf8_strdown(text, -1);
+
+	if (gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0) {
+		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		u_str = g_utf8_strdown (text, -1);
 		cwin->cstate->filter_entry = u_str;
-		cwin->cstate->timeout_id = g_timeout_add( 300, (GSourceFunc)do_refilter, cwin );
+		do_refilter (cwin);
 	}
-	else{
-		clear_library_search(cwin);
+	else {
+		clear_library_search (cwin);
 	}
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
+	g_free (text);
+
 	return FALSE;
 }
 
@@ -851,11 +893,9 @@ void clear_library_search(struct con_win *cwin)
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
-	if (cwin->cstate->filter_entry != NULL) {
-		g_free (cwin->cstate->filter_entry);
-		cwin->cstate->filter_entry = NULL;
-	}
+
 	gtk_tree_model_foreach(model, set_all_visible, cwin);
+
 	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
 }
 

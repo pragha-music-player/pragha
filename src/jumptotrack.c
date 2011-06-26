@@ -174,6 +174,9 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 	gchar *u_str = NULL;
 	gboolean has_text;
 
+	if (!cwin->cpref->instant_filter)
+		return FALSE;
+
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
 	if (cwin->cstate->jump_filter != NULL) {
@@ -194,9 +197,46 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 	else {
 		do_jump_refilter (cwin);
 	}
+
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
+
+	g_free (text);
+
+	return FALSE;
+}
+
+gboolean
+simple_jump_search_activate_handler (GtkEntry *entry,
+				     struct con_win *cwin)
+{
+
+	gchar *text = NULL;
+	gchar *u_str = NULL;
+	gboolean has_text;
+
+	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+
+	if (cwin->cstate->jump_filter != NULL) {
+		g_free (cwin->cstate->jump_filter);
+		cwin->cstate->jump_filter = NULL;
+	}
+
+	if (has_text) {
+		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		u_str = g_utf8_strdown (text, -1);
+		cwin->cstate->jump_filter = u_str;
+	}
+
+	do_jump_refilter (cwin);
+
+	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
+				GTK_ENTRY_ICON_SECONDARY,
+				has_text);
+
+	g_free (text);
+
 	return FALSE;
 }
 
@@ -204,11 +244,18 @@ static void
 filter_icon_pressed_cb (GtkEntry       *entry,
 		gint            position,
 		GdkEventButton *event,
-		gpointer        data)
+		struct con_win *cwin)
 {
 	if (position == GTK_ENTRY_ICON_SECONDARY) {
 		gtk_entry_set_text (entry, "");
 		gtk_widget_grab_focus (GTK_WIDGET(entry));
+
+		if (cwin->cstate->jump_filter != NULL) {
+			g_free (cwin->cstate->jump_filter);
+			cwin->cstate->jump_filter = NULL;
+		}
+		if (cwin->cpref->instant_filter)
+			do_jump_refilter (cwin);
 	}
 }
 
@@ -234,6 +281,10 @@ GtkWidget* create_jump_search_bar (struct con_win *cwin)
 	g_signal_connect (G_OBJECT(search_entry),
 			 "changed",
 			 G_CALLBACK(simple_jump_search_keyrelease_handler),
+			 cwin);
+	g_signal_connect (G_OBJECT(search_entry),
+			 "activate",
+			 G_CALLBACK(simple_jump_search_activate_handler),
 			 cwin);
 
 	return search_entry;
@@ -289,11 +340,11 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	cwin->jump_tree = jump_treeview;
 
-	if (cwin->cstate->jump_filter != NULL)
+	if (cwin->cstate->jump_filter != NULL) {
 		g_free (cwin->cstate->jump_filter);
-	cwin->cstate->jump_filter = NULL;
-
-	g_signal_emit_by_name (G_OBJECT (search_entry), "changed", cwin);
+		cwin->cstate->jump_filter = NULL;
+	}
+	do_jump_refilter (cwin);
 
 	/* The search dialog */
 

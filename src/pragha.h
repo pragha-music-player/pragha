@@ -161,6 +161,8 @@
 #define KEY_OSD_IN_TRAY            "osd_in_tray"
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
+#define KEY_INSTANT_FILTER         "instant_filter"
+
 
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
@@ -441,6 +443,7 @@ struct con_pref {
 	gboolean remember_window_state;
 	gboolean status_bar;
 	gboolean fuse_folders;
+	gboolean instant_filter;
 	GSList *library_dir;
 	GSList *playlist_columns;
 	GSList *playlist_column_widths;
@@ -806,8 +809,8 @@ void dnd_library_tree_get(GtkWidget *widget,
 			  guint time,
 			  struct con_win *cwin);
 void simple_library_search_keyrelease(struct con_win *cwin);
-gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
-						  struct con_win *cwin);
+gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, struct con_win *cwin);
+gboolean simple_library_search_activate_handler(GtkEntry *entry, struct con_win *cwin);
 void clear_library_search(struct con_win *cwin);
 void folders_library_tree(GtkAction *action, struct con_win *cwin);
 void artist_library_tree(GtkAction *action, struct con_win *cwin);

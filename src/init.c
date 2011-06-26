@@ -198,7 +198,7 @@ gint init_config(struct con_win *cwin)
 	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
-	gboolean use_mpris2_f;
+	gboolean use_mpris2_f, instant_filter_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
@@ -208,7 +208,7 @@ gint init_config(struct con_win *cwin)
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
-	use_mpris2_f = FALSE;
+	use_mpris2_f = instant_filter_f = FALSE;
 
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
@@ -683,6 +683,17 @@ gint init_config(struct con_win *cwin)
 			g_free(u_file);
 		}
 
+		cwin->cpref->instant_filter =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_INSTANT_FILTER,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			instant_filter_f= TRUE;
+		}
+
 		cwin->cpref->shuffle =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_PLAYLIST,
@@ -909,6 +920,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->use_cddb = TRUE;
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
+	if (all_f || instant_filter_f)
+		cwin->cpref->instant_filter = TRUE;
 
 	/* Init default flags */
 
