@@ -1269,7 +1269,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	GArray *loc_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL;
+	gchar *node_data = NULL, **split_album = NULL;;
 
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
@@ -1318,7 +1318,9 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				otag.artist = node_data;
 				break;
 			case NODE_ALBUM:
-				otag.album = node_data;
+				split_album = g_strsplit(node_data, " - ", -1);
+				otag.year = atoi (split_album[0]);
+				otag.album = split_album[1];
 				break;
 			case NODE_GENRE:
 				otag.genre = node_data;
@@ -1358,6 +1360,7 @@ exit:
 	/* Cleanup */
 
 	g_free(node_data);
+	g_strfreev (split_album);
 
 	g_free(ntag.title);
 	g_free(ntag.artist);
