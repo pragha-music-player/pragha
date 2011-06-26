@@ -457,16 +457,19 @@ struct con_pref {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 
+	GtkWidget *use_hint_w;
+	GtkWidget *album_art_w;
+	GtkWidget *album_art_size_w;
+	GtkWidget *album_art_pattern_w;
+
 	GtkWidget *library_view_w;
 	GtkWidget *fuse_folders_w;
 
+	GtkWidget *instant_filter_w;
 	GtkWidget *window_state_combo_w;
 	GtkWidget *restore_playlist_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
-	GtkWidget *album_art_w;
-	GtkWidget *album_art_size_w;
-	GtkWidget *album_art_pattern_w;
 
 	GtkWidget *show_osd_w;
 	GtkWidget *osd_in_systray_w;
