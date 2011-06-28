@@ -365,6 +365,172 @@ directory_pressed (GtkEntry       *entry,
 	}
 }
 
+static void
+popup_menu_open_folder (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file;
+	const gchar *file;
+	gchar *uri;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	struct con_win *cwin = g_object_get_data (storage, "cwin");
+
+	file = gtk_entry_get_text (GTK_ENTRY(entry_file));
+	uri = get_display_filename (file, TRUE);
+
+	open_url (cwin, uri);
+	g_free (uri);
+}
+
+static void
+popup_menu_selection_to_title (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file, *entry_title;
+	gint start_sel, end_sel;
+	gchar *clip = NULL;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
+		return;
+	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
+
+	entry_title = g_object_get_data (storage, "entry_title");
+	gtk_entry_set_text(GTK_ENTRY(entry_title), clip);
+
+	gtk_widget_grab_focus(GTK_WIDGET(entry_title));
+
+	g_free(clip);
+}
+
+static void
+popup_menu_selection_to_artist (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file, *entry_artist;
+	gint start_sel, end_sel;
+	gchar *clip = NULL;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
+		return;
+	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
+
+	entry_artist = g_object_get_data (storage, "entry_artist");
+	gtk_entry_set_text (GTK_ENTRY(entry_artist), clip);
+
+	gtk_widget_grab_focus(GTK_WIDGET(entry_artist));
+
+	g_free (clip);
+}
+
+static void
+popup_menu_selection_to_album (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file, *entry_album;
+	gint start_sel, end_sel;
+	gchar *clip = NULL;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
+		return;
+	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
+
+	entry_album = g_object_get_data (storage, "entry_album");
+	gtk_entry_set_text (GTK_ENTRY(entry_album), clip);
+
+	gtk_widget_grab_focus(GTK_WIDGET(entry_album));
+
+	g_free (clip);
+}
+
+static void
+popup_menu_selection_to_genre (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file, *entry_genre;
+	gint start_sel, end_sel;
+	gchar *clip = NULL;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
+		return;
+	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
+
+	entry_genre = g_object_get_data (storage, "entry_genre");
+	gtk_entry_set_text (GTK_ENTRY(entry_genre), clip);
+
+	gtk_widget_grab_focus(GTK_WIDGET(entry_genre));
+
+	g_free(clip);
+}
+
+static void
+popup_menu_selection_to_comment (GtkMenuItem *menuitem, gpointer storage)
+{
+	GtkWidget *entry_file, *entry_comment;
+	GtkTextBuffer *buffer;
+	gint start_sel, end_sel;
+	gchar *clip = NULL;
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
+		return;
+	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
+
+	entry_comment = g_object_get_data (storage, "entry_comment");
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry_comment));
+
+	gtk_text_buffer_set_text (buffer, clip, -1);
+
+	gtk_widget_grab_focus(GTK_WIDGET(entry_comment));
+
+	g_free(clip);
+}
+
+static void
+file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
+{
+	GtkWidget *submenu, *item;
+	GtkWidget *entry_file;
+
+	item = gtk_separator_menu_item_new ();
+	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+	gtk_widget_show (item);
+
+	item = gtk_menu_item_new_with_mnemonic (_("Selection to"));
+	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+	gtk_widget_show (item);
+
+	submenu = gtk_menu_new ();
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+
+	item = gtk_menu_item_new_with_label (_("Title"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_title), storage);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
+	item = gtk_menu_item_new_with_label (_("Artist"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_artist), storage);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
+	item = gtk_menu_item_new_with_label (_("Album"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_album), storage);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
+	item = gtk_menu_item_new_with_label (_("Genre"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_genre), storage);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
+	item = gtk_menu_item_new_with_label (_("Comment"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_comment), storage);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
+
+	gtk_widget_show_all (submenu);
+
+	entry_file = g_object_get_data (storage, "entry_file");
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), NULL, NULL))
+		gtk_widget_set_sensitive (submenu, FALSE);
+
+	item = gtk_menu_item_new_with_mnemonic (_("Open folder"));
+	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_open_folder), storage);
+	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+	gtk_widget_show (item);
+}
+
+
 gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 		     struct con_win *cwin)
 {
@@ -377,6 +543,7 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
+	gpointer storage;
 
 	gint location_id, result, changed = 0;
 	struct musicobject *mobj = NULL;
@@ -735,6 +902,20 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 			"icon-press",
 			G_CALLBACK (directory_pressed),
 			file);
+
+	storage = g_object_new(G_TYPE_OBJECT, NULL);
+	g_object_set_data(storage, "entry_title", entry_title);
+	g_object_set_data(storage, "entry_artist", entry_artist);
+	g_object_set_data(storage, "entry_album", entry_album);
+	g_object_set_data(storage, "entry_genre", entry_genre);
+	g_object_set_data(storage, "entry_comment", entry_comment);
+	g_object_set_data(storage, "entry_file", entry_file);
+	g_object_set_data(storage, "cwin", cwin);
+
+	g_signal_connect (G_OBJECT(entry_file),
+			"populate-popup",
+			G_CALLBACK (file_entry_populate_popup),
+			storage);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog);
