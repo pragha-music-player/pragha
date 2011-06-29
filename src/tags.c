@@ -530,7 +530,6 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_widget_show (item);
 }
 
-
 gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 		     struct con_win *cwin)
 {
@@ -902,6 +901,9 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 			"icon-press",
 			G_CALLBACK (directory_pressed),
 			file);
+
+	/* Genereate storage of gtk_entry and cwin,
+	 *  and add popup menu to copy selection to tags. */
 
 	storage = g_object_new(G_TYPE_OBJECT, NULL);
 	g_object_set_data(storage, "entry_title", entry_title);

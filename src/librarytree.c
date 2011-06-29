@@ -820,7 +820,6 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 						  struct con_win *cwin)
 {
 	gchar *text = NULL;
-	gchar *u_str = NULL;
 	gboolean has_text;
 	
 	if (!cwin->cpref->instant_filter)
@@ -839,10 +838,8 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	}
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
-		u_str = g_utf8_strdown (text, -1);
-		if (cwin->cstate->filter_entry != NULL)
-			g_free (cwin->cstate->filter_entry);
-		cwin->cstate->filter_entry = u_str;
+		cwin->cstate->filter_entry = g_utf8_strdown (text, -1);
+
 		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc)do_refilter, cwin);
 	}
 	else {
@@ -860,7 +857,6 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 						struct con_win *cwin)
 {
 	gchar *text = NULL;
-	gchar *u_str = NULL;
 	gboolean has_text;
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
@@ -872,8 +868,8 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
-		u_str = g_utf8_strdown (text, -1);
-		cwin->cstate->filter_entry = u_str;
+		cwin->cstate->filter_entry = g_utf8_strdown (text, -1);
+
 		do_refilter (cwin);
 	}
 	else {
@@ -1318,7 +1314,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				otag.artist = node_data;
 				break;
 			case NODE_ALBUM:
-				split_album = g_strsplit(node_data, " - ", -1);
+				split_album = g_strsplit(node_data, " - ", 2);
 				otag.year = atoi (split_album[0]);
 				otag.album = split_album[1];
 				break;

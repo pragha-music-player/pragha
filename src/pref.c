@@ -400,13 +400,12 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 }
 #endif
 
-/* Toggle album art pattern */
+/* Toggle hint of playlist */
 
 static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 {
 	cwin->cpref->use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->library_tree), cwin->cpref->use_hint);
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->current_playlist), cwin->cpref->use_hint);
 }
 
@@ -594,10 +593,12 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->use_hint_w),
 					     TRUE);
+
 	if (cwin->cpref->instant_filter)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->instant_filter_w),
 					     TRUE);
+
 	if (cwin->cpref->save_playlist)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->restore_playlist_w),
@@ -1859,8 +1860,6 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->osd_in_systray_w = osd_in_systray;
 	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
 	cwin->cpref->actions_in_osd_w = actions_in_osd;
-	cwin->cpref->use_cddb_w = use_cddb;
-	cwin->cpref->use_mpris2_w = use_mpris2;
 
 #ifdef HAVE_LIBCLASTFM
 	cwin->cpref->lw.lastfm_w = lastfm_check;
@@ -1869,6 +1868,8 @@ void preferences_dialog(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
 			 G_CALLBACK(toggle_lastfm), cwin);
 #endif
+	cwin->cpref->use_cddb_w = use_cddb;
+	cwin->cpref->use_mpris2_w = use_mpris2;
 
 	/* Setup signal handlers */
 

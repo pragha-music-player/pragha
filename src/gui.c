@@ -499,9 +499,7 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_tree), column);
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(library_tree), cwin->cpref->use_hint);
-
-	/* Connect signals and create right click popup menu*/
+	/* Connect signals and create right click popup menu */
 
 	g_signal_connect(G_OBJECT(library_tree), "row-activated",
 			 G_CALLBACK(library_tree_row_activated_cb), cwin);
@@ -1302,8 +1300,8 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	/* Store the treeview in the scrollbar widget */
 
-	gtk_container_add(GTK_CONTAINER(current_playlist_scroll), current_playlist);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(current_playlist_scroll),GTK_SHADOW_IN);
+	gtk_container_add (GTK_CONTAINER(current_playlist_scroll), current_playlist);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(current_playlist_scroll), GTK_SHADOW_IN);
 
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist), cwin->cpref->use_hint);
 
