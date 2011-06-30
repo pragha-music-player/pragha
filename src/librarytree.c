@@ -197,15 +197,14 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		else if (!g_ascii_strcasecmp(P_ALBUM_STR, node)) {
 			node_type = NODE_ALBUM;
 			node_pixbuf = cwin->pixbuf->pixbuf_album;
-			if(strlen(album) && strlen(year)) {
-				node_data = g_strconcat(year, " - ", album, NULL);
+			if (cwin->cpref->sort_by_year) {
+				node_data = g_strconcat ((strlen(year) && atoi(year)>0) ? year : _("Unknown"), " - ", strlen(album) ? album : _("Unknown Album"), NULL);
+				need_gfree = TRUE;
 			}
-			else if(strlen(album))
-				node_data = album;
-			else
-				node_data = g_strdup(_("Unknown Album"));
-
-			if (!strlen(album) || !strlen(year)) need_gfree = TRUE;
+			else {
+				node_data = strlen(album) ? album : g_strdup(_("Unknown Album"));
+				if (!strlen(album)) need_gfree = TRUE;
+			}
 		}
 		else if (!g_ascii_strcasecmp(P_GENRE_STR, node)) {
 			node_type = NODE_GENRE;
@@ -1314,9 +1313,14 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				otag.artist = node_data;
 				break;
 			case NODE_ALBUM:
-				split_album = g_strsplit(node_data, " - ", 2);
-				otag.year = atoi (split_album[0]);
-				otag.album = split_album[1];
+				if (cwin->cpref->sort_by_year) {
+					split_album = g_strsplit(node_data, " - ", 2);
+					otag.year = atoi (split_album[0]);
+					otag.album = split_album[1];
+				}
+				else {
+					otag.album = node_data;
+				}
 				break;
 			case NODE_GENRE:
 				otag.genre = node_data;
@@ -1407,7 +1411,10 @@ void init_library_view(struct con_win *cwin)
 		break;
 	case ARTIST_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist / Album"));
-		order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		if (cwin->cpref->sort_by_year)
+			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		else
+			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	case GENRE_ARTIST:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist"));
@@ -1415,11 +1422,17 @@ void init_library_view(struct con_win *cwin)
 		break;
 	case GENRE_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Album"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		if (cwin->cpref->sort_by_year)
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		else
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	case GENRE_ARTIST_ALBUM:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist / Album"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		if (cwin->cpref->sort_by_year)
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+		else
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 		break;
 	default:
 		break;

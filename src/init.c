@@ -193,7 +193,7 @@ gint init_config(struct con_win *cwin)
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
-	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f;
+	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
@@ -204,7 +204,7 @@ gint init_config(struct con_win *cwin)
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
-	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = FALSE;
+	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
@@ -560,6 +560,17 @@ gint init_config(struct con_win *cwin)
 			fuse_folders_f = TRUE;
 		}
 
+		cwin->cpref->sort_by_year = 
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_LIBRARY,
+					       KEY_SORT_BY_YEAR,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			sort_by_year_f = TRUE;
+		}
+
 		/* Retrieve General preferences */
 
 		cwin->cpref->remember_window_state =
@@ -872,6 +883,8 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || fuse_folders_f)
 		cwin->cpref->fuse_folders = FALSE;
+	if (all_f || sort_by_year_f)
+		cwin->cpref->sort_by_year = FALSE;
 	if (all_f || col_widths_f) {
 		for (i=0; i<4; i++) {
 			cwin->cpref->playlist_column_widths =

@@ -43,7 +43,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			   struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean ret, osd, test_fuse_folders;
+	gboolean ret, osd, test_change;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL;
 	gchar *audio_alsa_device = NULL, *audio_oss_device = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device;
@@ -130,11 +130,18 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			ret = gtk_tree_model_iter_next(model, &iter);
 		}
 
-		test_fuse_folders = cwin->cpref->fuse_folders;
-		cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
-
-		if ((cwin->cpref->fuse_folders != test_fuse_folders) && (cwin->cpref->cur_library_view == FOLDERS))
-			init_library_view(cwin);
+		if (cwin->cpref->cur_library_view == FOLDERS) {
+			test_change = cwin->cpref->fuse_folders;
+			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
+			if (cwin->cpref->fuse_folders != test_change)
+				init_library_view(cwin);
+		}
+		else {
+			test_change = cwin->cpref->sort_by_year;
+			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->sort_by_year_w));
+			if (cwin->cpref->sort_by_year != test_change)
+				init_library_view(cwin);
+		}
 
 		/* General preferences */
 
@@ -657,6 +664,11 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->fuse_folders_w),
 					     TRUE);
+	if (cwin->cpref->sort_by_year)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->sort_by_year_w),
+					     TRUE);
+
 	/* Notifications options */
 
 	if (cwin->cpref->show_osd)
@@ -1102,6 +1114,13 @@ void save_preferences(struct con_win *cwin)
 			       KEY_FUSE_FOLDERS,
 			       cwin->cpref->fuse_folders);
 
+	/* Save sort by year option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_LIBRARY,
+			       KEY_SORT_BY_YEAR,
+			       cwin->cpref->sort_by_year);
+
 	/* Audio Options */
 
 	/* Save Audio sink */
@@ -1368,7 +1387,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *hbox_album_art_pattern, *album_art_size, *album_art_size_label, \
 		  *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
-		  *fuse_folders, *hbox_library;
+		  *hbox_library, *fuse_folders, *sort_by_year;
 	GtkWidget *instant_filter, *window_state_combo, *restore_playlist, *close_to_tray, *add_recursively;
 	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
 #ifdef HAVE_LIBCLASTFM
@@ -1667,7 +1686,8 @@ void preferences_dialog(struct con_win *cwin)
 			   0);
 
 	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	
+	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
+
 	/* Pack all library items */
 
 	gtk_box_pack_start(GTK_BOX(library_vbox),
@@ -1680,7 +1700,14 @@ void preferences_dialog(struct con_win *cwin)
 			   fuse_folders,
 			   FALSE,
 			   FALSE,
-			   2);
+			   0);
+
+	gtk_box_pack_start(GTK_BOX(library_vbox),
+			   sort_by_year,
+			   FALSE,
+			   FALSE,
+			   0);
+
 
 	/* General Widgets */
 
@@ -1849,6 +1876,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	cwin->cpref->library_view_w = library_view;
 	cwin->cpref->fuse_folders_w = fuse_folders;
+	cwin->cpref->sort_by_year_w = sort_by_year;
 
 	cwin->cpref->instant_filter_w = instant_filter;
 	cwin->cpref->window_state_combo_w = window_state_combo;
