@@ -1398,12 +1398,15 @@ void init_library_view(struct con_win *cwin)
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Folders structure"));
 		break;
 	case ARTIST:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist"));		
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist"));
 		order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 		break;
 	case ALBUM:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Album"));	
-		order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Album"));
+		if (cwin->cpref->sort_by_year)
+			order_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+		else
+			order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 		break;
 	case GENRE:
 		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre"));
