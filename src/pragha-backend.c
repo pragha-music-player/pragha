@@ -71,6 +71,21 @@ gboolean update_current_song_info(gpointer data)
 	return FALSE;
 }
 
+static void
+backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
+{
+	GObject *source;
+
+	g_object_get (obj, "source", &source, NULL);
+
+	if (source) {
+		if (G_LIKELY(cwin->cpref->audio_cd_device)) {
+			g_object_set (source,  "device", cwin->cpref->audio_cd_device, NULL);
+		}
+		g_object_unref (source);
+	}
+}
+
 gint64
 backend_get_current_length(struct con_win *cwin)
 {
@@ -344,6 +359,7 @@ backend_error (GstMessage *message, struct con_win *cwin)
 	if(emit) {
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
+		gdk_threads_enter();
 		if ((path = current_playlist_get_actual(cwin)) != NULL) {
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
@@ -357,7 +373,6 @@ backend_error (GstMessage *message, struct con_win *cwin)
 			}
 			gtk_tree_path_free(path);
 		}
-
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
@@ -370,6 +385,7 @@ backend_error (GstMessage *message, struct con_win *cwin)
 
 		response = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
+		gdk_threads_leave();
 
 		switch (response) {
 			case GTK_RESPONSE_APPLY: {
@@ -384,7 +400,6 @@ backend_error (GstMessage *message, struct con_win *cwin)
 				break;
 			}
 		}
-
 		cwin->cgst->emitted_error = TRUE;
 	}
 	if (pixbuf)
@@ -534,6 +549,8 @@ gint backend_init(struct con_win *cwin)
 
 	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "deep-notify::volume",
 			  G_CALLBACK (volume_notify_cb), cwin);
+	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "notify::source",
+			  G_CALLBACK (backend_source_notify_cb), cwin);
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
