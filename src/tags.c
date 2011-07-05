@@ -1076,7 +1076,9 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		path = gtk_tree_row_reference_get_path(ref);
 		gtk_tree_row_reference_free(ref);
 
-		if (!gtk_tree_model_get_iter(model, &iter, path))
+		if (gtk_tree_model_get_iter(model, &iter, path))
+			gtk_tree_path_free(path);
+		else
 			continue;
 
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
@@ -1094,8 +1096,6 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 			update_musicobject(mobj, changed, &ntag, cwin);
 		}
 		update_track_current_playlist(&iter, changed, mobj, cwin);
-
-		gtk_tree_path_free(path);
 
 		if(mobj->file_type != FILE_CDDA) {
 			sfile = sanitize_string_sqlite3(mobj->file);
