@@ -922,11 +922,6 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	gboolean rand_unplayed = FALSE, seq_last = FALSE;
 	GtkTreeRowReference *ref;
 
-	/* Are we playing right now ? */
-
-	if (cwin->cstate->state == ST_STOPPED)
-		return NULL;
-
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	/* Check if tree is empty */
@@ -1926,11 +1921,16 @@ void play_next_track(struct con_win *cwin)
 	GtkTreePath *path;
 	struct musicobject *mobj = NULL;
 
-	/* Get the next track to be played */
-	path = current_playlist_get_next(cwin);
+	/* Are we playing right now ? */
+
+	if (cwin->cstate->state == ST_STOPPED)
+		return;
 
 	/* Stop currently playing track */
 	backend_stop(cwin);
+
+	/* Get the next track to be played */
+	path = current_playlist_get_next(cwin);
 
 	/* No more tracks */
 	if (!path)

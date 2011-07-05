@@ -312,20 +312,34 @@ backend_resume(struct con_win *cwin)
 }
 
 void
-backend_eos(struct con_win *cwin)
+backend_advance_playback (struct con_win *cwin)
 {
-	CDEBUG(DBG_BACKEND, "EOS playback");
+	GtkTreePath *path = NULL;
+	struct musicobject *mobj = NULL;
 
-	if (cwin->cstate->curr_mobj_clear) {
+	CDEBUG(DBG_BACKEND, "Advancing to next track");
+
+	unset_current_song_info (cwin);
+	unset_track_progress_bar (cwin);
+
+	if (cwin->cstate->curr_mobj_clear)
 		delete_musicobject(cwin->cstate->curr_mobj);
-		cwin->cstate->curr_mobj_clear = FALSE;
-	}
 
-	play_next_track(cwin);
+	path = current_playlist_get_next (cwin);
+	if (!path)
+		return;
+
+	/* Start playing new track */
+	mobj = current_playlist_mobj_at_path (path, cwin);
+
+	backend_start (mobj, cwin);
+
+	update_current_state (path, PLAYLIST_NEXT, cwin);
+	gtk_tree_path_free (path);
 }
 
 static void
-backend_error (GstMessage *message, struct con_win *cwin)
+backend_parse_error (GstMessage *message, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkTreeModel *model;
@@ -389,8 +403,7 @@ backend_error (GstMessage *message, struct con_win *cwin)
 
 		switch (response) {
 			case GTK_RESPONSE_APPLY: {
-				cwin->cstate->state = ST_PLAYING;
-				backend_eos (cwin);
+				backend_advance_playback (cwin);
 				break;
 			}
 			case GTK_RESPONSE_ACCEPT:
@@ -506,7 +519,7 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 {
 	switch(GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_EOS:
-			backend_eos(cwin);
+			backend_advance_playback (cwin);
 			break;
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState old, new, pending;
@@ -516,7 +529,7 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 			break;
 		}
 		case GST_MESSAGE_ERROR: {
-			backend_error(msg, cwin);
+			backend_parse_error (msg, cwin);
 			break;
 		}
     		default:
