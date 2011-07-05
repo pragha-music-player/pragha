@@ -419,6 +419,16 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
+	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
+	__update_current_song_info(cwin);
+
+	if ((path = current_playlist_get_actual(cwin)) != NULL) {
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		if (gtk_tree_model_get_iter(model, &iter, path))
+			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
+		gtk_tree_path_free(path);
+	}
+
 	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
@@ -441,16 +451,6 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		g_free(sfile);
 		g_free(tfile);
 	}
-
-	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
-		gtk_tree_path_free(path);
-	}
-
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
-	__update_current_song_info(cwin);
 
 exit:
 	/* Cleanup */
