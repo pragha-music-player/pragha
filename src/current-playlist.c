@@ -23,6 +23,46 @@
 /* General functions */
 /*********************/
 
+/* Update playback state pixbuf */
+
+void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_win *cwin)
+{
+	GtkTreeModel *model = NULL;
+	GtkTreeIter iter;
+	GdkPixbuf *pixbuf = NULL;
+	GtkIconTheme *icon_theme;
+
+	if (error) {
+		icon_theme = gtk_icon_theme_get_default ();
+		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-remove",16, 0, NULL);
+		else
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-dialog-warning",16, 0, NULL);
+	}
+	else {
+		switch (cwin->cstate->state)
+		{
+			case ST_PLAYING:
+				pixbuf = cwin->pixbuf->pixbuf_playing;
+				break;
+			case ST_PAUSED:
+				pixbuf = cwin->pixbuf->pixbuf_paused;
+				break;
+			default:
+				break;
+		}
+	}
+	if (path != NULL) {
+		model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
+		if (gtk_tree_model_get_iter (model, &iter, path)) {
+			gtk_list_store_set (GTK_LIST_STORE(model), &iter, P_STATUS_PIXBUF, pixbuf, -1);
+		}
+	}
+
+	if (error)
+		g_object_unref (pixbuf);
+}
+
 static gchar* get_display_name(struct musicobject *mobj)
 {
 	gchar *name = NULL;
@@ -740,6 +780,7 @@ void update_current_state(GtkTreePath *path,
 
 	/* Update view */
 
+	update_pixbuf_state_on_path (path, NULL, cwin);
 	jump_to_path_on_current_playlist (path, cwin);
 
 	/* Update current song info */
@@ -1504,9 +1545,9 @@ void insert_current_playlist_on_model(GtkTreeModel *model, struct musicobject *m
 
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
-			   P_STATE_PIXBUF, NULL,
 			   P_QUEUE, NULL,
 			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1580,9 +1621,9 @@ void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition d
 
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
-			   P_STATE_PIXBUF, NULL,
 			   P_QUEUE, NULL,
-			   P_BUBBLE, FALSE, 
+			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1658,9 +1699,9 @@ void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, 
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
-			   P_STATE_PIXBUF, NULL,
 			   P_QUEUE, NULL,
-			   P_BUBBLE, FALSE, 
+			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1733,7 +1774,8 @@ void append_current_playlist_on_model(GtkTreeModel *model, struct musicobject *m
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 			   P_MOBJ_PTR, mobj,
 			   P_QUEUE, NULL,
-			   P_BUBBLE, FALSE, 
+			   P_BUBBLE, FALSE,
+			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
 			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
@@ -1904,7 +1946,7 @@ void play_prev_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path(path, cwin);
@@ -1927,7 +1969,7 @@ void play_next_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 
 	/* Get the next track to be played */
 	path = current_playlist_get_next(cwin);
@@ -2033,8 +2075,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	struct musicobject *mobj;
-
-	backend_stop(cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	gtk_tree_model_get_iter(model, &iter, path);
@@ -2698,11 +2738,9 @@ void init_current_playlist_columns(struct con_win *cwin)
 	else
 		g_warning("(%s): No columns in playlist view", __func__);
 
-	/* Show state pixbuf column ever */
+	/* Always show queue and status pixbuf colum */
 
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist),
-				       P_STATE_PIXBUF - 1);
-	col_name = gtk_tree_view_column_get_title(col);
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist), 0);
 	gtk_tree_view_column_set_visible(col, TRUE);
 }
 

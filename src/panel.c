@@ -252,6 +252,7 @@ void track_progress_change_cb(GtkWidget *widget,
 			      struct con_win *cwin)
 {
 	gint seek = 0;
+	gdouble fraction = 0;
 
 	if (event->button != 1)
 		return;
@@ -265,6 +266,9 @@ void track_progress_change_cb(GtkWidget *widget,
 	seek = (cwin->cstate->curr_mobj->tags->length * event->x) / widget->allocation.width;
 	if (seek >= cwin->cstate->curr_mobj->tags->length)
 		seek = cwin->cstate->curr_mobj->tags->length;
+
+	fraction = (gdouble) event->x / widget->allocation.width;
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
 
 	backend_seek(seek, cwin);
 }
@@ -490,12 +494,12 @@ void play_pause_resume(struct con_win *cwin)
 void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 }
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 }
 
 void keybind_prev_handler (const char *keystring, gpointer data)

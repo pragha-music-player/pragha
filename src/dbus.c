@@ -25,7 +25,7 @@ static void dbus_play_handler(struct con_win *cwin)
 
 static void dbus_stop_handler(struct con_win *cwin)
 {
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 }
 
 static void dbus_pause_handler(struct con_win *cwin)
@@ -106,18 +106,14 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	/* If URI is a dir, do a non-recursive add of all files under it */
-
+	gdk_threads_enter();
 	if (is_dir_and_accessible(file, cwin)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
 		else
 			__non_recur_add(file, TRUE, cwin);
 	}
-
-	/* If URI is a file, just enqueue it */
-
-	if (is_playable_file(file)) {
+	else if (is_playable_file(file)) {
 		mobj = new_musicobject_from_file(file);
 		if (mobj)
 			append_current_playlist(mobj, cwin);
@@ -126,7 +122,8 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	else {
 		g_warning("Unable to add %s", file);
 	}
-}		      
+	gdk_threads_leave();
+}
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 {

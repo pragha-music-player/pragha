@@ -956,7 +956,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
-	GtkWidget *label_track,
+	GtkWidget *state_pixbuf,
+		*label_track,
 		*label_title,
 		*label_artist,
 		*label_album,
@@ -979,20 +980,27 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
 
-	/* Column : Queue Bubble*/
+	state_pixbuf = gtk_image_new_from_icon_name ("stock_volume-max", GTK_ICON_SIZE_MENU);
+
+	/* Column : Queue Bubble and Status Pixbuf */
 
 	column = gtk_tree_view_column_new ();
-
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute (column, renderer, "pixbuf", P_STATE_PIXBUF);
 
 	renderer = gtk_cell_renderer_bubble_new ();
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_tree_view_column_add_attribute (column, renderer, "markup", P_QUEUE);
 	gtk_tree_view_column_add_attribute (column, renderer, "show-bubble", P_BUBBLE);
+
+	renderer = gtk_cell_renderer_pixbuf_new ();
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_add_attribute (column, renderer, "pixbuf", P_STATUS_PIXBUF);
+
 	gtk_tree_view_column_set_resizable(column, FALSE);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column (GTK_TREE_VIEW(current_playlist), column);
+
+	gtk_tree_view_column_set_widget (column, state_pixbuf);
+	gtk_tree_view_column_set_alignment (column, 0.5);
+	gtk_widget_show (state_pixbuf);
 
 	/* Column : Track No */
 
@@ -1215,9 +1223,9 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	store = gtk_list_store_new(N_P_COLUMNS,
 				   G_TYPE_POINTER,	/* Pointer to musicobject */
-				   GDK_TYPE_PIXBUF,	/* Playing state Pixbuf */
 				   G_TYPE_STRING,	/* Queue No String */
 				   G_TYPE_BOOLEAN,	/* Show Bublle Queue */
+				   GDK_TYPE_PIXBUF,	/* Playback status pixbuf */
 				   G_TYPE_STRING,	/* Tag : Track No */
 				   G_TYPE_STRING,	/* Tag : Title */
 				   G_TYPE_STRING,	/* Tag : Artist */

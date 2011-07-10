@@ -200,11 +200,11 @@ static GVariant* mpris_Player_Pause(struct con_win *cwin, GVariant* parameters) 
 }
 static GVariant* mpris_Player_PlayPause(struct con_win *cwin, GVariant* parameters) {
 	play_pause_resume(cwin);
-	return NULL; 
+	return NULL;
 }
 static GVariant* mpris_Player_Stop(struct con_win *cwin, GVariant* parameters) {
-	backend_stop(cwin); 
-	return NULL; 
+	backend_stop(NULL, cwin);
+	return NULL;
 }
 static GVariant* mpris_Player_Seek(struct con_win *cwin, GVariant* parameters) {
 	/*gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
@@ -404,7 +404,7 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 		while(playlists[i]) {
 			gchar *list = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
 			if(!g_strcmp0(list, playlist)) {
-				backend_stop(cwin);
+				backend_stop(NULL, cwin);
 				clear_current_playlist(NULL, cwin);
 				add_playlist_current_playlist(playlists[i], cwin);
 				play_track(cwin);

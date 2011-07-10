@@ -112,7 +112,7 @@ void play_audio_cd(struct con_win *cwin)
 	lba_t lba;
 
 	/* Stop playback first */
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 
 	/* Clean earlier CDDA state */
 	if (cwin->cstate->cdda_drive) {

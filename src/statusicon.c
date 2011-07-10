@@ -240,7 +240,7 @@ void systray_play(GtkAction *action, struct con_win *cwin)
 
 void systray_stop(GtkAction *action, struct con_win *cwin)
 {
-	backend_stop(cwin);
+	backend_stop(NULL, cwin);
 }
 
 void systray_pause(GtkAction *action, struct con_win *cwin)

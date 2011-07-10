@@ -141,8 +141,6 @@ backend_set_soft_volume(struct con_win *cwin)
 		flags &= ~GST_PLAY_FLAG_SOFT_VOLUME;
 
 	g_object_set (G_OBJECT(cwin->cgst->pipeline), "flags", flags, NULL);
-	
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 gdouble
@@ -278,8 +276,10 @@ backend_need_stopped(struct con_win *cwin)
 }
 
 void
-backend_stop(struct con_win *cwin)
+backend_stop(GError *error, struct con_win *cwin)
 {
+	GtkTreePath *path = NULL;
+
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
 	if (cwin->cstate->curr_mobj_clear) {
@@ -287,51 +287,100 @@ backend_stop(struct con_win *cwin)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	if(backend_need_stopped(cwin))
-		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+
+	cwin->cstate->state = ST_STOPPED;
+
+	path = current_playlist_get_actual(cwin);
+	if (path) {
+		update_pixbuf_state_on_path(path, error, cwin);
+		gtk_tree_path_free(path);
+	}
+
+	play_button_toggle_state(cwin);
 
 	unset_current_song_info(cwin);
 	unset_track_progress_bar(cwin);
 	unset_album_art(cwin);
+
+	#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support)
+		update_lastfm(cwin);
+	#endif
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
 backend_pause(struct con_win *cwin)
 {
+	GtkTreePath *path = NULL;
+
 	CDEBUG(DBG_BACKEND, "Pause playback");
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
+
+	cwin->cstate->state = ST_PAUSED;
+
+	path = current_playlist_get_actual(cwin);
+	if (path) {
+		update_pixbuf_state_on_path(path, NULL, cwin);
+		gtk_tree_path_free(path);
+	}
+	play_button_toggle_state(cwin);
+
+	#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support)
+		update_lastfm(cwin);
+	#endif
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
 backend_resume(struct con_win *cwin)
 {
+	GtkTreePath *path = NULL;
+
 	CDEBUG(DBG_BACKEND, "Resuming playback");
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+
+	cwin->cstate->state = ST_PLAYING;
+
+	path = current_playlist_get_actual(cwin);
+	if (path) {
+		update_pixbuf_state_on_path(path, NULL, cwin);
+		gtk_tree_path_free(path);
+	}
+	play_button_toggle_state(cwin);
+
+	#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support) {
+		update_lastfm(cwin);
+	}
+	#endif
+	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
-backend_advance_playback (struct con_win *cwin)
+backend_advance_playback (GError *error, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
 	struct musicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
-	unset_current_song_info (cwin);
-	unset_track_progress_bar (cwin);
+	/* Stop to set ready and clear all info */
+	backend_stop(error, cwin);
 
-	if (cwin->cstate->curr_mobj_clear)
-		delete_musicobject(cwin->cstate->curr_mobj);
-
+	/* Get the next track to be played */
 	path = current_playlist_get_next (cwin);
+
+	/* No more tracks */
 	if (!path)
 		return;
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path (path, cwin);
-
 	backend_start (mobj, cwin);
 
 	update_current_state (path, PLAYLIST_NEXT, cwin);
@@ -342,15 +391,10 @@ static void
 backend_parse_error (GstMessage *message, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreePath *path = NULL;
 	gboolean emit = TRUE;
-	GError *error;
+	GError *error = NULL;
 	gchar *dbg_info = NULL;
 	gint response;
-	GdkPixbuf *pixbuf = NULL;
-	GtkIconTheme *icon_theme;
 
 	gst_message_parse_error (message, &error, &dbg_info);
 
@@ -374,19 +418,6 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
 		gdk_threads_enter();
-		if ((path = current_playlist_get_actual(cwin)) != NULL) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-			if (gtk_tree_model_get_iter(model, &iter, path)) {
-				icon_theme = gtk_icon_theme_get_default ();
-				if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
-					pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-remove",16, 0, NULL);
-				else
-					pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-dialog-warning",16, 0, NULL);
-
-				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_STATE_PIXBUF, pixbuf, -1);
-			}
-			gtk_tree_path_free(path);
-		}
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
@@ -403,23 +434,20 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 
 		switch (response) {
 			case GTK_RESPONSE_APPLY: {
-				backend_advance_playback (cwin);
+				backend_advance_playback (error, cwin);
 				break;
 			}
 			case GTK_RESPONSE_ACCEPT:
 			case GTK_RESPONSE_DELETE_EVENT:
 			default: {
-				backend_stop(cwin);
+				backend_stop (error, cwin);
 				break;
 			}
 		}
 		cwin->cgst->emitted_error = TRUE;
 	}
-	if (pixbuf)
-		g_object_unref (pixbuf);
 	g_error_free (error);
 	g_free (dbg_info);
-
 }
 
 void
@@ -434,7 +462,7 @@ backend_start(struct musicobject *mobj, struct con_win *cwin)
 
 	if ((cwin->cstate->state == ST_PLAYING) ||
 	    (cwin->cstate->state == ST_PAUSED)) {
-		backend_stop(cwin);
+		backend_stop(NULL, cwin);
 	}
 
 	cwin->cstate->curr_mobj = mobj;
@@ -463,63 +491,65 @@ backend_play(struct con_win *cwin)
 	}
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
-}
 
-static void
-backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
-{
-	CDEBUG(DBG_BACKEND, "State change %s to %s. Pending: %s",
-		gst_element_state_get_name (old),
-		gst_element_state_get_name (new),
-		gst_element_state_get_name (pending));
+	cwin->cstate->state = ST_PLAYING;
 
-	if (pending != GST_STATE_VOID_PENDING)
-		return;
+	play_button_toggle_state (cwin);
 
-	switch (new) {
-		case GST_STATE_PLAYING: {
-			cwin->cstate->state = ST_PLAYING;
-			if(cwin->cgst->timer == 0)
-				cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
-			#ifdef HAVE_LIBCLASTFM
-			time(&cwin->clastfm->playback_started);
-			#endif
-			cwin->cgst->emitted_error = FALSE;
-			break;
-		}
-		case GST_STATE_PAUSED: {
-			cwin->cstate->state = ST_PAUSED;
-			if(cwin->cgst->timer > 0) {
-				g_source_remove(cwin->cgst->timer);
-				cwin->cgst->timer = 0;
-			}
-			break;
-		}
-		case GST_STATE_READY:
-		case GST_STATE_NULL: {
-			cwin->cstate->state = ST_STOPPED;
-			if(cwin->cgst->timer > 0) {
-				g_source_remove(cwin->cgst->timer);
-				cwin->cgst->timer = 0;
-			}
-			break;
-		}
-		default:
-			break;
-	}
-	play_button_toggle_state(cwin);
 	#ifdef HAVE_LIBCLASTFM
 	if (cwin->cpref->lw.lastfm_support)
 		update_lastfm(cwin);
 	#endif
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
+
+	cwin->cgst->emitted_error = FALSE;
+}
+
+static void
+backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
+{
+	if (pending != GST_STATE_VOID_PENDING)
+		return;
+
+	switch (new) {
+		case GST_STATE_PLAYING: {
+			if (cwin->cstate->state == ST_PLAYING) {
+				if(cwin->cgst->timer == 0)
+					cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
+
+				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
+			}
+			break;
+		}
+		case GST_STATE_PAUSED: {
+			if (cwin->cstate->state == ST_PAUSED) {
+				if(cwin->cgst->timer > 0) {
+					g_source_remove(cwin->cgst->timer);
+					cwin->cgst->timer = 0;
+				}
+				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
+			}
+			break;
+		}
+		case GST_STATE_READY:
+		case GST_STATE_NULL: {
+			if(cwin->cgst->timer > 0) {
+				g_source_remove(cwin->cgst->timer);
+				cwin->cgst->timer = 0;
+			}
+			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct con_win *cwin)
 {
 	switch(GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_EOS:
-			backend_advance_playback (cwin);
+			backend_advance_playback (NULL, cwin);
 			break;
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState old, new, pending;

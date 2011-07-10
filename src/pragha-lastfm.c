@@ -549,13 +549,15 @@ gboolean lastfm_now_playing_handler (gpointer data)
 
 void update_lastfm (struct con_win *cwin)
 {
-	CDEBUG(DBG_LASTFM, "Update lastfm");
+	CDEBUG(DBG_LASTFM, "Update lastfm thread state");
 
 	if(cwin->clastfm->lastfm_handler_id)
 		g_source_remove(cwin->clastfm->lastfm_handler_id);
 
 	if(cwin->cstate->state != ST_PLAYING)
 		return;
+
+	time(&cwin->clastfm->playback_started);
 
 	cwin->clastfm->lastfm_handler_id = gdk_threads_add_timeout_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
