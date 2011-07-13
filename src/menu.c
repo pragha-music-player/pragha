@@ -86,6 +86,7 @@ gboolean add_recent_file (gchar *filename)
 	g_free (recent_data.mime_type);
 	g_free (recent_data.app_name);
 	g_free (recent_data.app_exec);
+	g_free (filename);
 	g_free (uri);
 	
 	return FALSE;
@@ -120,7 +121,6 @@ void handle_selected_file(gpointer data, gpointer udata)
 							data, NULL);
 		}
 	}
-	g_free(data);
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
