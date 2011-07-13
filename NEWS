@@ -153,6 +153,46 @@ Bugs fixed:
 V0.96.0.1
 	Recontra D'Oh!. Fixs gdk_threads_enter()/gdk_threads_leave() usage.
 
+V0.96.1
+	Wooow.. Search, jump and play on current playlist dialog implemened.
+
+V0.97.0
+News:
+	Return the playback status icon on current playlist. Thanks to Brett Kleinschmidt.
+	Add a popup menu on file entry of tag editor, to open folder and copy selection to title tag, artist tag, etc.
+	Add option to hint current_playlist and library view. Thanks to Brett Kleinschmidt.
+	Add option to activate instant filter or search only when press enter.
+	Add option to sort Albums in library view by release-year. Thanks to Fabian Köster.
+
+Others Changes:
+	Save changes when press enter on tag editor.
+	Init gdk_threads and use it to update progress of reproduction.
+	Highlight matches on jump dialog.
+	Minor reformat of jump dialog.
+
+Updates Translations:
+	Updated Czech translation thanks to Alois Nespor.
+
+Bugs fixed:
+	Remove curl/types.h deprecated header.
+	Immediately update the progress when seek track.
+	No restart the lastfm thread when seek track.
+	No send dbus update signal when seek track.
+	No send dbus update signal when set use sofware volume.
+	Fix pragha ignore audio cd device settings.
+	Always free the path when edit tracks of current playlist.
+	Fix no update current playlist song when change the tags from menu.
+	First update music objects and window, and later the files.
+	Directly compares the pointers to find current tack when edit tags.
+	Use gdk_threads_enter/leave to add files with dbus.
+	Use gdk_threads_enter/leave to show playback error dialog.
+	Show track_no and year only if are positive.
+	Improve the speed of the library view.
+	Update progress bar only when track position > 0.
+	Only jump to tack droped when change the model, and scroll to the same position.
+	Select and set cursor on new song when drop a tack on current playlist.
+	Fix somes memory leaks and occasional cleanup.
+
 ======================================================
 OTHERS REALESES:
 ======================================================
