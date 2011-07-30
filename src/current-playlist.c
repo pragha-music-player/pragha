@@ -2088,6 +2088,48 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }
 
+void append_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
+{
+	const gchar *playlist;
+
+	playlist = gtk_menu_item_get_label (menuitem);
+
+	append_playlist(playlist, SAVE_SELECTED, cwin);
+}
+
+void complete_add_to_playlist_submenu (struct con_win *cwin)
+{
+	struct db_result result;
+	GtkWidget *submenu, *menuitem;
+	gchar *query;
+	gint i;
+	
+	submenu = gtk_menu_new ();
+
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cp_context_menu, "/popup/Add to playlist")), submenu);
+
+	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin);
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
+
+	menuitem = gtk_separator_menu_item_new ();
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
+
+	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+
+	exec_sqlite_query (query, cwin, &result);
+
+	for_each_result_row (result, i) {
+		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cwin);
+		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
+	}
+
+	gtk_widget_show_all (submenu);
+	sqlite3_free_table (result.resultp);
+}
+
 /* Handler for current playlist click */
 
 gboolean current_playlist_button_press_cb(GtkWidget *widget,
@@ -2190,6 +2232,8 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 			gtk_tree_selection_unselect_all(selection);
 		}
+
+		complete_add_to_playlist_submenu (cwin);
 
 		popup_menu = gtk_ui_manager_get_widget(cwin->cp_context_menu,
 						       "/popup");

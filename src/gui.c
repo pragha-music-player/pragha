@@ -99,10 +99,10 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Enqueue\"/>						\
 	<separator/>				    				\
 	<menuitem action=\"Remove\"/>		    				\
-	<menuitem action=\"Crop\"/>		    				\
+	<menuitem action=\"Crop\"/>						\
 	<menuitem action=\"Clear playlist\"/>	    				\
 	<separator/>				    				\
-	<menuitem action=\"Save selection\"/>					\
+	<menuitem action=\"Add to playlist\"/>					\
 	<menuitem action=\"Save playlist\"/>					\
 	<separator/>				    				\
 	<menuitem action=\"Edit tags\"/>					\
@@ -307,14 +307,13 @@ GtkActionEntry cp_context_aentries[] = {
 	 NULL, "Delete this entry", G_CALLBACK(remove_current_playlist)},
 	{"Crop", GTK_STOCK_REMOVE, N_("Crop"),
 	 NULL, "Crop the playlist", G_CALLBACK(crop_current_playlist)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
-	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_current_playlist)},
-	{"Save selection", GTK_STOCK_SAVE, N_("Save selection"),
-	 NULL, "Save selected tracks as playlist", G_CALLBACK(save_selected_playlist)},
+	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
+	 NULL, "Clear the playlist", G_CALLBACK(clear_current_playlist)},
+	{"Add to playlist", NULL, N_("_Add to playlist")},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist"),
 	 NULL, "Save the complete playlist", G_CALLBACK(save_current_playlist)},
-	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
-	 NULL, "Clear the playlist", G_CALLBACK(clear_current_playlist)}
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
+	 NULL, "Edit tag for this track", G_CALLBACK(edit_tags_current_playlist)}
 };
 
 GtkActionEntry playlist_tree_context_aentries[] = {
@@ -1770,8 +1769,8 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
 
 	track_length_event_box = gtk_event_box_new();
-	gtk_signal_connect( GTK_OBJECT( track_length_event_box ), "button-press-event",
-			G_CALLBACK(timer_remaining_mode_change), cwin );
+	g_signal_connect (GTK_OBJECT(track_length_event_box), "button-press-event",
+			G_CALLBACK(timer_remaining_mode_change), cwin);
 	gtk_container_add(GTK_CONTAINER(track_length_event_box), track_length_align);
 
 	cwin->track_progress_bar = 	track_progress_bar;
