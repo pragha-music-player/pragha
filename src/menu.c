@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -353,11 +353,11 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_widget_show_all(window);
 }
 
-/* Handler for the 'Play Audio CD' item in the pragha menu */
+/* Handler for the 'Add Audio CD' item in the pragha menu */
 
-void play_audio_cd_action(GtkAction *action, struct con_win *cwin)
+void add_audio_cd_action(GtkAction *action, struct con_win *cwin)
 {
-	play_audio_cd(cwin);
+	add_audio_cd(cwin);
 }
 
 /* Handler for the 'Prev' item in the pragha menu */

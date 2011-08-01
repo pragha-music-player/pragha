@@ -22,7 +22,7 @@ gchar *main_menu_xml = "<ui>							\
 	<menubar name=\"Menubar\">						\
 		<menu action=\"FileMenu\">					\
 			<menuitem action=\"Add files\"/>			\
-			<menuitem action=\"Play audio CD\"/>			\
+			<menuitem action=\"Add Audio CD\"/>			\
 			<separator/>						\
 			<menuitem action=\"Prev\"/>				\
 			<menuitem action=\"Play_pause\"/>			\
@@ -112,6 +112,7 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 gchar *cp_null_context_menu_xml = "<ui>		    				\
 	<popup>					    				\
 	<menuitem action=\"Add files\"/>					\
+	<menuitem action=\"Add Audio CD\"/>					\
 	<separator/>				    				\
 	<menuitem action=\"Add the library\"/>	    				\
 	<separator/>				    				\
@@ -170,7 +171,7 @@ gchar *systray_menu_xml = "<ui>				\
 		<menuitem action=\"About\"/>		\
 		<separator/>				\
 		<menuitem action=\"Add files\"/>	\
-		<menuitem action=\"Play audio CD\"/>	\
+		<menuitem action=\"Add Audio CD\"/>	\
 		<separator/>				\
 		<menuitem action=\"Prev\"/>		\
 		<menuitem action=\"Play_Pause\"/>	\
@@ -191,8 +192,8 @@ GtkActionEntry main_aentries[] = {
 	{"HelpMenu", NULL, N_("_Help")},
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Play audio CD", GTK_STOCK_CDROM, N_("_Play audio CD"),
-	 NULL, "Play a audio CD", G_CALLBACK(play_audio_cd_action)},
+	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev track"),
 	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
 	{"Play_pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
@@ -283,6 +284,8 @@ GtkToggleActionEntry toggles_entries[] = {
 GtkActionEntry cp_null_context_aentries[] = {
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
+	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
 	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
@@ -372,8 +375,8 @@ GtkActionEntry systray_menu_aentries[] = {
 	 NULL, NULL, G_CALLBACK(about_action)},
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
 	 NULL, NULL, G_CALLBACK(open_file_action)},
-	{"Play audio CD", GTK_STOCK_CDROM, N_("_Play audio CD"),
-	 NULL, "Play a audio CD", G_CALLBACK(play_audio_cd_action)},
+	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev Track"),
 	 NULL, "Prev Track", G_CALLBACK(prev_action)},
 	{"Play_Pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
