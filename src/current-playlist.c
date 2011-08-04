@@ -176,7 +176,6 @@ void requeue_track_refs (struct con_win *cwin)
 			ch_queue_no = g_strdup_printf("%d", ++i);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, ch_queue_no, -1);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, TRUE, -1);
-
 			g_free(ch_queue_no);
 		}
 		gtk_tree_path_free(lpath);
@@ -845,6 +844,7 @@ void update_current_state(GtkTreePath *path,
 	}
 
 	/* Mark the track as dirty */
+
 	current_playlist_set_dirty_track(path, cwin);
 	if (cwin->cstate->unplayed_tracks)
 		cwin->cstate->unplayed_tracks--;
@@ -1951,7 +1951,7 @@ void play_prev_track(struct con_win *cwin)
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path(path, cwin);
 	backend_start(mobj, cwin);
- 
+
 	update_current_state(path, PLAYLIST_PREV, cwin);
 	gtk_tree_path_free(path);
 }
@@ -2186,6 +2186,15 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
 					gtk_widget_show(GTK_WIDGET(item_widget));
 
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to playlist");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
 					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 				}
@@ -2196,6 +2205,15 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
 					gtk_widget_hide(GTK_WIDGET(item_widget));
+
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to playlist");
+					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
 					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
@@ -2226,6 +2244,15 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Enqueue");
 			gtk_widget_hide(GTK_WIDGET(item_widget));
+
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
+
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
+
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to playlist");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
@@ -2440,6 +2467,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		default:
 			break;
 	}
+
 	if (is_row)
 		gtk_tree_model_get_iter (model, &dest_iter, dest_path);
 
@@ -2525,7 +2553,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(model);
-		
+
 		if (is_row)
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
 
@@ -2598,9 +2626,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				g_critical("Invalid location filename");
 			else {
 				if (is_row)
-					insert_current_playlist(mobj, pos, &dest_iter, cwin);
+					insert_current_playlist (mobj, pos, &dest_iter, cwin);
 				else
-					append_current_playlist(mobj, cwin);
+					append_current_playlist (mobj, cwin);
 			}
 		}
 		g_free(filename);
