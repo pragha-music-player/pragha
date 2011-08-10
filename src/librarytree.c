@@ -275,7 +275,8 @@ static void get_location_ids(GtkTreePath *path,
 /* Add all the tracks under the given path to the current playlist */
 
 static void add_row_current_playlist(GtkTreePath *path,
-				     GtkTreeModel *model,
+				     GtkTreeModel *row_model,
+				     GtkTreeModel *playlist_model,
 				     struct con_win *cwin)
 {
 	GtkTreeIter t_iter, r_iter;
@@ -286,25 +287,25 @@ static void add_row_current_playlist(GtkTreePath *path,
 
 	/* If this path is a track, just append it to the current playlist */
 
-	gtk_tree_model_get_iter(model, &r_iter, path);
-	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
+	gtk_tree_model_get_iter(row_model, &r_iter, path);
+	gtk_tree_model_get(row_model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+		gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
 		mobj = new_musicobject_from_db(location_id, cwin);
 		if (!mobj)
 			g_warning("Unable to retrieve details "
 				  "for location_id : %d",
 				  location_id);
 		else
-			append_current_playlist(mobj, cwin);
+			append_current_playlist_on_model(playlist_model, mobj, cwin);
 	}
 
 	/* For all other node types do a recursive add */
 
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
-		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
+	while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
+		gtk_tree_model_get(row_model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-			gtk_tree_model_get(model, &t_iter,
+			gtk_tree_model_get(row_model, &t_iter,
 					   L_LOCATION_ID, &location_id, -1);
 			mobj = new_musicobject_from_db(location_id, cwin);
 			if (!mobj)
@@ -312,11 +313,11 @@ static void add_row_current_playlist(GtkTreePath *path,
 					  "for location_id : %d",
 					  location_id);
 			else
-				append_current_playlist(mobj, cwin);
+				append_current_playlist_on_model(playlist_model, mobj, cwin);
 		}
 		else {
-			path = gtk_tree_model_get_path(model, &t_iter);
-			add_row_current_playlist(path, model, cwin);
+			path = gtk_tree_model_get_path(row_model, &t_iter);
+			add_row_current_playlist(path, row_model, playlist_model, cwin);
 			gtk_tree_path_free(path);
 		}
 	}
@@ -450,7 +451,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 				   struct con_win *cwin)
 {
 	GtkTreeIter iter;
-	GtkTreeModel *filter_model;
+	GtkTreeModel *filter_model, *playlist_model;
 	enum node_type node_type;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
@@ -473,7 +474,16 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		break;
 	case NODE_TRACK:
 	case NODE_BASENAME:
-		add_row_current_playlist(path, filter_model, cwin);
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		g_object_ref(playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
+		add_row_current_playlist(path, filter_model, playlist_model, cwin);
+
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+		g_object_unref(playlist_model);
 		break;
 	default:
 		break;
@@ -1026,7 +1036,7 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 
 void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model;
+	GtkTreeModel *model, *playlist_model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
@@ -1035,14 +1045,18 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-
 		clear_current_playlist(action, cwin);
+
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		g_object_ref(playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			add_row_current_playlist(path, model, cwin);
+			add_row_current_playlist(path, model, playlist_model, cwin);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1053,6 +1067,10 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 				if (gtk_main_iteration_do(FALSE))
 					return;
 		}
+
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+		g_object_unref(playlist_model);
 		
 		g_list_free(list);
 	}
@@ -1060,7 +1078,7 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model;
+	GtkTreeModel *model, *playlist_model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
@@ -1071,11 +1089,16 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	if (list) {
 		clear_current_playlist(action, cwin);
 
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		g_object_ref(playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			add_row_current_playlist(path, model, cwin);
+			add_row_current_playlist(path, model, playlist_model, cwin);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1086,6 +1109,10 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 				if (gtk_main_iteration_do(FALSE))
 					return;
 		}
+
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+		g_object_unref(playlist_model);
 		
 		g_list_free(list);
 	}
@@ -1096,9 +1123,10 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 {
 	library_tree_add_to_playlist(cwin);
 }
+
 void library_tree_add_to_playlist(struct con_win *cwin)
 {
-	GtkTreeModel *model;
+	GtkTreeModel *model, *playlist_model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
@@ -1107,12 +1135,16 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		g_object_ref(playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			add_row_current_playlist(path, model, cwin);
+			add_row_current_playlist(path, model, playlist_model, cwin);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1123,7 +1155,11 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 				if (gtk_main_iteration_do(FALSE))
 					return;
 		}
-		
+
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+		g_object_unref(playlist_model);
+
 		g_list_free(list);
 	}
 }
