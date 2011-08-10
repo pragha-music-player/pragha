@@ -216,6 +216,7 @@ exit:
 
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 {
+	GtkTreeModel *model;
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
@@ -223,9 +224,14 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin);
+
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	exec_sqlite_query(query, cwin, &result);
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	g_object_ref(model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -235,9 +241,15 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		append_current_playlist(mobj, cwin);
+		append_current_playlist_on_model(model, mobj, cwin);
+
 		g_free(file);
 	}
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	g_object_unref(model);
+
+	update_status_bar(cwin);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);
