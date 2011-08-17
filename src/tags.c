@@ -144,6 +144,8 @@ gboolean save_tags_to_file(gchar *file, struct tags *ntag,
 		g_warning("Unable to save tags for: %s\n", file);
 		ret = FALSE;
 	}
+
+	taglib_tag_free_strings();
 exit:
 	taglib_file_free(tfile);
 
@@ -823,9 +825,9 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 		gtk_entry_set_text(GTK_ENTRY(entry_album), otag->album);
 	if (otag->genre)
 		gtk_entry_set_text(GTK_ENTRY(entry_genre), otag->genre);
-	if (otag->track_no)
+	if (otag->track_no > 0)
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)otag->track_no);
-	if (otag->year)
+	if (otag->year > 0)
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
 	if (otag->comment)
 		gtk_text_buffer_set_text (buffer, otag->comment, -1);
