@@ -91,7 +91,7 @@ Note: http://liblastfm.sourceforge.net now is libclastfm due to incompatibility 
 V0.94.1
 News:
 	Implement a dialog to skip tracks if fails playback.
-	
+
 Bugs fixed:
 	Compile with Gcc 4.6, with all that this implies.
 	Use _tree_row_references to edit track.
@@ -160,7 +160,7 @@ V0.97.0
 News:
 	Return the playback status icon on current playlist. Thanks to Brett Kleinschmidt.
 	Add a popup menu on file entry of tag editor, to open folder and copy selection to title tag, artist tag, etc.
-	Add option to hint current_playlist and library view. Thanks to Brett Kleinschmidt.
+	Add option to hint current_playlist. Thanks to Brett Kleinschmidt.
 	Add option to activate instant filter or search only when press enter.
 	Add option to sort Albums in library view by release-year. Thanks to Fabian Köster.
 
@@ -193,10 +193,32 @@ Bugs fixed:
 	Select and set cursor on new song when drop a tack on current playlist.
 	Fix somes memory leaks and occasional cleanup.
 
+V0.98
+News:
+	A new menu "Add to playlist" that replaces "Save selection" on current playlist.
+	More speed when Clear, Remove, and Crop tracks on current playlist.
+	More speed to add tracks to the current playlist from popup menu.
+	More speed to add playlists to the current playlist.
+
+Others Changes:
+	Change "Play Audio CD" menu item to "Add Audio CD".
+	Only sensitive the options clear and save playlist in the menu of current playlist when there is no selection.
+	Minor code cleanup to coordinate with subversion code.
+
+Updates Translations:
+	Update French tranlations thanks to raphaelh.
+	Changed many strings to translate. Please help to update your native language.
+
+Bugs fixed:
+	Use cddb_query to search audio cd info. Fix poor results of cddb.
+	Fix possible memory leak when save tags.
+	Fix warning when to year < 0 on tag editor.
+	D'Oh!. Fix add recent files.
+
 ======================================================
 OTHERS REALESES:
 ======================================================
-
+V0.8.3
 News:
 	Move to trash instead remove tracks in library view.
 	Add dialog to Skip, Skip all, or delete all tracks if fails move to trash.
