@@ -181,31 +181,41 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
 }
 
-void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
+void *do_lastfm_get_album_art (gpointer data)
 {
 	GError *error = NULL;
 	GdkPixbuf *album_art = NULL, *scaled_album_art = NULL, *pix_frame = NULL, *scaled_frame;
+	gint x, y;
+	GdkDisplay *display;
+	GdkCursor *cursor;
+	GdkWindow *window;
+
+	struct con_win *cwin = data;
 	
 	LASTFM_ALBUM_INFO *album = NULL;
 
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
+	gdk_threads_enter ();
+	cursor = gdk_cursor_new(GDK_WATCH);
 
-	if (!cwin->cpref->show_album_art)
-		return;
+	display = gdk_display_get_default();
+	window = gdk_display_get_window_at_pointer(display, &x, &y);
 
-	if (cwin->clastfm->session_id == NULL) {
-		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return;
-	}
+	gdk_window_set_cursor(window, cursor);
+	gdk_display_sync(display);
+	gdk_cursor_unref(cursor);
+	gdk_threads_leave ();
 
 	album = LASTFM_album_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, cwin->cstate->curr_mobj->tags->album);
 
 	if(!album) {
+		gdk_threads_enter ();
 		set_status_message(_("Album art not found on Last.fm."), cwin);
-		return;
+		gdk_window_set_cursor(window, NULL);
+		gdk_threads_leave ();
+		return NULL;
 	}
 
+	gdk_threads_enter ();
 	if(album->image)
 		album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
 
@@ -219,7 +229,6 @@ void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
 							cwin->cpref->album_art_size,
 							cwin->cpref->album_art_size,
 							GDK_INTERP_BILINEAR);
-
 		if (cwin->album_art) {
 			gtk_image_clear(GTK_IMAGE(cwin->album_art));
 			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
@@ -230,6 +239,7 @@ void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
 					  GTK_WIDGET(cwin->album_art));
 			gtk_widget_show_all(cwin->album_art_frame);
 		}
+
 		g_object_unref(G_OBJECT(album_art));
 		g_object_unref(G_OBJECT(scaled_album_art));
 		g_object_unref(G_OBJECT(scaled_frame));
@@ -239,12 +249,34 @@ void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
 		set_status_message(_("Album art not found on Last.fm."), cwin);
 	}
 
+	gdk_window_set_cursor(window, NULL);
+	gdk_threads_leave ();
+
 	LASTFM_free_album_info(album);
+
+	return NULL;
+}
+
+void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->cpref->show_album_art)
+		return;
+
+	if (cwin->clastfm->session_id == NULL) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+
+	pthread_create(&tid, NULL, do_lastfm_get_album_art, cwin);
 }
 
 /* Handler for 'Artist info' action in the Tools menu */
-
-void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
+void *do_lastfm_get_artist_info (gpointer data)
 {
 	GtkWidget *dialog;
 	GtkTextBuffer *buffer;
@@ -253,25 +285,36 @@ void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
 	gchar *value = NULL, *playcount = NULL, *wiki = NULL;
 	gchar *summary_helper = NULL, *summary = NULL;
 	GtkWidget *header, *view, *frame, *scrolled;
-	gint i, result;
+	gint i, result, x, y;
+	GdkDisplay *display;
+	GdkCursor *cursor;
+	GdkWindow *window;
 
 	LASTFM_ARTIST_INFO *artist = NULL;
 
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
+	struct con_win *cwin = data;
 
-	CDEBUG(DBG_LASTFM, "Get Artist info Action");
+	gdk_threads_enter ();
+	cursor = gdk_cursor_new(GDK_WATCH);
 
-	if (cwin->clastfm->session_id == NULL) {
-		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return;
-	}
+	display = gdk_display_get_default();
+	window = gdk_display_get_window_at_pointer(display, &x, &y);
+
+	gdk_window_set_cursor(window, cursor);
+	gdk_display_sync(display);
+
+	gdk_cursor_unref(cursor);
+	gdk_threads_leave ();
 
 	artist = LASTFM_artist_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, ISO_639_1);
 
+	gdk_threads_enter ();
+
 	if(!artist) {
 		set_status_message(_("Artist information not found on Last.fm."), cwin);
-		return;
+		gdk_window_set_cursor(window, NULL);
+		gdk_threads_leave ();
+		return NULL;
 	}
 
 	view = gtk_text_view_new ();
@@ -345,6 +388,8 @@ void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 	gtk_widget_show_all(dialog);
 
+	gdk_window_set_cursor(window, NULL);
+
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch (result) {
 		case GTK_RESPONSE_HELP:
@@ -357,9 +402,30 @@ void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
 		default:
 			break;
 	}
+
 	gtk_widget_destroy(dialog);
+	gdk_threads_leave ();
 
 	LASTFM_free_artist_info(artist);
+
+	return NULL;
+}
+
+void lastfm_artist_info_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	CDEBUG(DBG_LASTFM, "Get Artist info Action");
+
+	if (cwin->clastfm->session_id == NULL) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+	pthread_create(&tid, NULL, do_lastfm_get_artist_info, cwin);
+
 }
 
 void *do_lastfm_love (gpointer data)

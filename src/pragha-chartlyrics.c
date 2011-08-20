@@ -18,6 +18,7 @@
 #include <stdlib.h>
 
 #include "pragha.h"
+#include <pthread.h>
 #include "chartlyrics_helper.h"
 
 #define LARGE_BUFFER	1024
@@ -154,26 +155,44 @@ Lyric *chartlyrics_get_info(const char *song, const char *artist)
 	return l;
 }
 
-void chartlyric_dialog (struct con_win *cwin)
+void *do_chartlyric_dialog (gpointer data)
 {
 	GtkWidget *dialog;
+	GtkWidget *header, *view, *frame, *scrolled;
 	GtkTextBuffer *buffer;
 	gchar *title_header = NULL;
-	GtkWidget *header, *view, *frame, *scrolled;
-	gint result;
+	gint result, x, y;
+	GdkDisplay *display;
+	GdkCursor *cursor;
+	GdkWindow *window;
 
 	Lyric *lyric_info;
 
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
+	struct con_win *cwin = data;
+
+	gdk_threads_enter ();
+	cursor = gdk_cursor_new(GDK_WATCH);
+
+	display = gdk_display_get_default();
+	window = gdk_display_get_window_at_pointer(display, &x, &y);
+
+	gdk_window_set_cursor(window, cursor);
+	gdk_display_sync(display);
+
+	gdk_cursor_unref(cursor);
+	gdk_threads_leave ();
 
 	lyric_info = chartlyrics_get_info (cwin->cstate->curr_mobj->tags->title, cwin->cstate->curr_mobj->tags->artist);
 
 	if(!lyric_info) {
+		gdk_threads_enter ();
 		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
-		return;
+		gdk_window_set_cursor(window, NULL);
+		gdk_threads_leave ();
+		return NULL;
 	}
 
+	gdk_threads_enter ();
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
@@ -227,6 +246,25 @@ void chartlyric_dialog (struct con_win *cwin)
 		default:
 			break;
 	}
+
+	gdk_window_set_cursor(window, NULL);
+
 	gtk_widget_destroy(dialog);
+	gdk_threads_leave ();
+
 	free_lyric(lyric_info);
+
+	return NULL;
+}
+
+void chartlyric_dialog (struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
+	pthread_create(&tid, NULL, do_chartlyric_dialog, cwin);
 }
