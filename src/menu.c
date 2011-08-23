@@ -320,6 +320,10 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.M3U");
 
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.pls");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.PLS");
+
+
 	all_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(all_filter), _("All files"));
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(all_filter), "*.*");

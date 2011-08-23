@@ -630,6 +630,37 @@ exit:
 	gtk_widget_destroy(dialog);
 }
 
+static GSList *
+pragha_pl_parser_parse_pls (const gchar *file)
+{
+	GKeyFile *plskeyfile;
+	GError *error = NULL;
+	GSList *list = NULL;
+	guint i, nentries;
+	gchar key[128], *file_entry = NULL;
+
+	plskeyfile = g_key_file_new();
+
+	if (!g_key_file_load_from_file(plskeyfile, file, G_KEY_FILE_NONE, &error)) {
+		g_critical("Unable to load pls playlist, err: %s", error->message);
+	}
+	else {
+		nentries = g_key_file_get_integer (plskeyfile, "playlist", "NumberOfEntries", NULL);
+		if (nentries > 0) {
+			for (i = 1; i <= nentries; i++) {
+				g_snprintf (key, 128, "File%d", i);
+				file_entry = g_key_file_get_string(plskeyfile, "playlist", key, NULL);
+				if(file_entry)
+					continue;
+				list = g_slist_append (list, file_entry);
+			}
+		}
+	}
+	g_key_file_free (plskeyfile);
+
+	return list;
+}
+
 /* Load a M3U playlist, and add tracks to current playlist */
 
 static GSList *
@@ -722,7 +753,7 @@ pragha_pl_parser_parse (enum playlist_type format, const gchar *filename)
 		list = pragha_pl_parser_parse_m3u (filename);
 		break;
 	case PL_FORMAT_PLS:
-		//list = pragha_pl_parser_parse_pls (filename);
+		list = pragha_pl_parser_parse_pls (filename);
 		break;
 	case PL_FORMAT_ASX:
 		//list = pragha_pl_parser_parse_asx (filename);
