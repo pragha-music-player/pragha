@@ -110,8 +110,8 @@ void handle_selected_file(gpointer data, gpointer udata)
 		g_free(data);
 		return;
 	}
-	else if (is_m3u_playlist(data)) {
-		open_m3u_playlist(data, cwin);
+	else if (pragha_pl_parser_guess_format_from_extension(data) != PL_FORMAT_UNKNOWN) {
+		pragha_pl_parser_open_from_file_by_extension(data, cwin);
 	}
 	else{
 		mobj = new_musicobject_from_file(data);
@@ -318,6 +318,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	#endif
 
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.M3U");
 
 	all_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(all_filter), _("All files"));

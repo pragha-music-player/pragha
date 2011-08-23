@@ -365,6 +365,16 @@ enum file_type {
 	FILE_CDDA
 };
 
+/* Playlist type formats */
+
+enum playlist_type {
+	PL_FORMAT_UNKNOWN,
+	PL_FORMAT_M3U,
+	PL_FORMAT_PLS,
+	PL_FORMAT_ASX,
+	PL_FORMAT_XSPF
+};
+
 /* Track sources for last.fm submission */
 
 enum track_source {
@@ -583,7 +593,7 @@ struct con_mpris2 {
 	gchar *saved_title;
 	gdouble volume;
 	enum player_state state;
-	GError **property_error;			/* for returning errors in propget/propput */
+	GError **property_error;					/* for returning errors in propget/propput */
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
@@ -899,7 +909,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
-void open_m3u_playlist(gchar *file, struct con_win *cwin);
+void pragha_pl_parser_open_from_file_by_extension(gchar *file, struct con_win *cwin);
 gboolean dnd_playlist_tree_begin(GtkWidget *widget,
 				    GdkDragContext *context,
 				    struct con_win *cwin);
@@ -1150,6 +1160,7 @@ gint dir_file_count(gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(gchar *str);
 enum file_type get_file_type(gchar *file);
 gchar* get_mime_type(gchar *file);
+enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
 gboolean is_image_file(gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);

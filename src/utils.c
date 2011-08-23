@@ -253,7 +253,8 @@ static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
 /* Accepts only absolute filename */
 /* NB: Disregarding 'uncertain' flag for now. */
 
-enum file_type get_file_type(gchar *file)
+enum file_type
+get_file_type(gchar *file)
 {
 	gint ret = -1;
 	gchar *result = NULL;
@@ -292,7 +293,7 @@ enum file_type get_file_type(gchar *file)
 	return ret;
 }
 
-gchar* get_mime_type(gchar *file)
+gchar* get_mime_type (gchar *file)
 {
 	gboolean uncertain;
 	gchar *result = NULL;
@@ -300,6 +301,27 @@ gchar* get_mime_type(gchar *file)
 	result = g_content_type_guess((const gchar *)file, NULL, 0, &uncertain);
 
 	return result;
+}
+
+enum playlist_type
+pragha_pl_parser_guess_format_from_extension (const gchar *filename)
+{
+	if ( g_str_has_suffix (filename, ".m3u") || g_str_has_suffix (filename, ".M3U") )
+		return PL_FORMAT_M3U;
+
+	if ( g_str_has_suffix (filename, ".pls") || g_str_has_suffix (filename, ".PLS") )
+		return PL_FORMAT_PLS;
+
+	if ( g_str_has_suffix (filename, ".xspf") || g_str_has_suffix (filename, ".XSPF") )
+		return PL_FORMAT_XSPF;
+
+	if ( g_str_has_suffix (filename, ".asx") || g_str_has_suffix (filename, ".ASX") )
+		return PL_FORMAT_ASX;
+
+	if ( g_str_has_suffix (filename, ".wax") || g_str_has_suffix (filename, ".WAX") )
+		return PL_FORMAT_XSPF;
+
+	return PL_FORMAT_UNKNOWN;
 }
 
 /* Return true if given file is an image */
