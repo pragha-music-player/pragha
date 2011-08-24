@@ -1010,10 +1010,15 @@ void init_playlist_view(struct con_win *cwin)
 	struct db_result result;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	GdkCursor *cursor;
 
 	cwin->cstate->view_change = TRUE;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
@@ -1051,6 +1056,8 @@ void init_playlist_view(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 	cwin->cstate->view_change = FALSE;
 }

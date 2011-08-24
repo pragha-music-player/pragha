@@ -161,25 +161,19 @@ void *do_chartlyric_dialog (gpointer data)
 	GtkWidget *header, *view, *frame, *scrolled;
 	GtkTextBuffer *buffer;
 	gchar *title_header = NULL;
-	gint result, x, y;
-	GdkDisplay *display;
+	gint result;
 	GdkCursor *cursor;
-	GdkWindow *window;
 
 	Lyric *lyric_info;
 
 	struct con_win *cwin = data;
 
 	gdk_threads_enter ();
+
 	cursor = gdk_cursor_new(GDK_WATCH);
-
-	display = gdk_display_get_default();
-	window = gdk_display_get_window_at_pointer(display, &x, &y);
-
-	gdk_window_set_cursor(window, cursor);
-	gdk_display_sync(display);
-
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
 	gdk_cursor_unref(cursor);
+
 	gdk_threads_leave ();
 
 	lyric_info = chartlyrics_get_info (cwin->cstate->curr_mobj->tags->title, cwin->cstate->curr_mobj->tags->artist);
@@ -187,7 +181,7 @@ void *do_chartlyric_dialog (gpointer data)
 	if(!lyric_info) {
 		gdk_threads_enter ();
 		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
-		gdk_window_set_cursor(window, NULL);
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
 		return NULL;
 	}
@@ -236,6 +230,8 @@ void *do_chartlyric_dialog (gpointer data)
 
 	gtk_widget_show_all(dialog);
 
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch (result) {
 		case GTK_RESPONSE_HELP:
@@ -246,8 +242,6 @@ void *do_chartlyric_dialog (gpointer data)
 		default:
 			break;
 	}
-
-	gdk_window_set_cursor(window, NULL);
 
 	gtk_widget_destroy(dialog);
 	gdk_threads_leave ();

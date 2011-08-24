@@ -836,6 +836,11 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	struct db_result result;
 	struct musicobject *mobj;
 	GtkTreeModel *model;
+	GdkCursor *cursor;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	clear_current_playlist(action, cwin);
 
@@ -881,7 +886,10 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 	g_object_unref(model);
 
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
 	update_status_bar(cwin);
+
 	mpris_update_tracklist_changed(cwin);
 }
 

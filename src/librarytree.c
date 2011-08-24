@@ -453,6 +453,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model, *playlist_model;
 	enum node_type node_type;
+	GdkCursor *cursor;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
@@ -474,6 +475,10 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		break;
 	case NODE_TRACK:
 	case NODE_BASENAME:
+		cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_cursor_unref(cursor);
+
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
@@ -484,6 +489,8 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
+
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 		update_status_bar(cwin);
 		break;
@@ -1042,11 +1049,16 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
+	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
+		cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_cursor_unref(cursor);
+
 		clear_current_playlist(action, cwin);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1073,6 +1085,8 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
+
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 		update_status_bar(cwin);
 		
@@ -1086,11 +1100,16 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
+	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
+		cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_cursor_unref(cursor);
+
 		clear_current_playlist(action, cwin);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1117,6 +1136,8 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
+
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 		update_status_bar(cwin);
 
@@ -1136,11 +1157,16 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
+	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
+		cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_cursor_unref(cursor);
+
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
@@ -1165,6 +1191,8 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
+
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 		update_status_bar(cwin);
 
@@ -1434,6 +1462,7 @@ void init_library_view(struct con_win *cwin)
 	struct db_result result;
 	GtkTreeModel *model, *filter_model;
 	gchar *order_str = NULL;
+	GdkCursor *cursor;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -1485,12 +1514,16 @@ void init_library_view(struct con_win *cwin)
 		break;
 	}
 
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
-	g_object_ref(filter_model); 
+	g_object_ref(filter_model);
+
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 
@@ -1533,16 +1566,19 @@ void init_library_view(struct con_win *cwin)
 	}
 	sqlite3_free_table(result.resultp);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), TRUE);
-	g_object_unref(filter_model);
-
-	/* Refresh tag completion entries too */
+	/* Refresh tag completion entries, sensitive, set model and filter */
 
 	refresh_tag_completion_entries(cwin);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), TRUE);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	g_object_unref(filter_model);
+
 	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 	cwin->cstate->view_change = FALSE;
 }
