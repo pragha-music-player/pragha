@@ -221,6 +221,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
 	struct musicobject *mobj;
+	GdkCursor *cursor;
 
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin);
@@ -229,7 +230,12 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 				playlist_id);
 	exec_sqlite_query(query, cwin, &result);
 
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
 	g_object_ref(model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
@@ -251,6 +257,8 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 	g_object_unref(model);
 
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
 	update_status_bar(cwin);
 
 	sqlite3_free_table(result.resultp);
@@ -265,6 +273,7 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 	GtkTreeIter r_iter;
 	GtkTreePath *r_path;
 	GtkTreeModel *model;
+	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 
