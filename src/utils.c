@@ -531,37 +531,6 @@ exit:
 	return ret;
 }
 
-/* Returns TRUE if the given filename has m3u as extension */
-
-gboolean is_m3u_playlist(gchar *file)
-{
-	gboolean ret = FALSE;
-	gchar **tokens;
-	gchar *base;
-	gint len = 0;
-
-	base = g_path_get_basename(file);
-	if (!base)
-		return FALSE;
-
-	tokens = g_strsplit(base, ".", 0);
-	if (tokens)
-		len = g_strv_length(tokens);
-
-	if (!len)
-		goto exit;
-
-	if (!g_ascii_strncasecmp(tokens[len - 1], "m3u", 3))
-		ret = TRUE;
-
-exit:
-	g_free(base);
-	if (tokens)
-		g_strfreev(tokens);
-
-	return ret;
-}
-
 /* callback used to open default browser when URLs got clicked */
 void open_url(struct con_win *cwin, const gchar *url)
 {
