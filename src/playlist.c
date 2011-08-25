@@ -273,7 +273,6 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 	GtkTreeIter r_iter;
 	GtkTreePath *r_path;
 	GtkTreeModel *model;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 
@@ -535,25 +534,25 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	GError *err = NULL;
-	gchar *playlist;
-	gint resp, cnt, depth;
-	gchar *filename = NULL;
+	gint resp, cnt;
+	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	cnt = (gtk_tree_selection_count_selected_rows(selection));
 
-	/* If root node ('Playlist'), just return */
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	path = list->data;
 
-	if (cnt == 1) {
-		list = gtk_tree_selection_get_selected_rows(selection, NULL);
-		path = list->data;
-		depth = gtk_tree_path_get_depth(path);
+	/* If only is 'Playlist' node, just return, else get playlistname. */
+	if ((cnt == 1) && (gtk_tree_path_get_depth(path) == 1)) {
 		gtk_tree_path_free(path);
 		g_list_free(list);
-
-		if (depth == 1)
-			return;
+		return;
+	}
+	else {
+		gtk_tree_model_get_iter(model, &iter, path);
+		gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlistpath, -1);
 	}
 
 	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
@@ -565,6 +564,10 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
 						       TRUE);
+
+	playlistm3u = g_strdup_printf("%s.m3u", playlistpath);
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), playlistm3u);
+
 	resp = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	switch (resp) {
@@ -635,6 +638,8 @@ exit_list:
 	if (list)
 		g_list_free(list);
 exit:
+	g_free(playlistm3u);
+	g_free(playlistpath);
 	g_free(filename);
 	gtk_widget_destroy(dialog);
 }
