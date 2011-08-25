@@ -116,6 +116,121 @@ exit_failure:
 	return NULL;
 }
 
+static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gchar *str = NULL;
+	struct musicobject *mobj = NULL;
+	GIOStatus status;
+	gsize bytes = 0;
+	GError *err = NULL;
+	gint ret = 0;
+	gboolean next;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	next = gtk_tree_model_get_iter_first(model, &iter);
+	while (next) {
+		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
+		if (mobj && mobj->file_type != FILE_CDDA) {
+			/* Format: "#EXTINF:seconds, title" */
+			str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
+					      mobj->tags->length,
+					      mobj->tags->title,
+					      mobj->file);
+
+			status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
+			if (status != G_IO_STATUS_NORMAL) {
+				g_critical("Unable to write to M3U playlist: %s", filename);
+				ret = -1;
+				goto exit;
+			}
+		}
+
+		/* Have to give control to GTK periodically ... */
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				return 0;
+			}
+		}
+	next = gtk_tree_model_iter_next(model, &iter);
+	}
+
+exit:
+	if (err) {
+		g_error_free(err);
+		err = NULL;
+	}
+	return ret;
+}
+
+static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list, *i;
+	gchar *str = NULL;
+	struct musicobject *mobj = NULL;
+	GIOStatus status;
+	gsize bytes = 0;
+	GError *err = NULL;
+	gint ret = 0;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	if (list) {
+		/* Export all selected tracks to the given file */
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter,
+					   P_MOBJ_PTR, &mobj, -1);
+			if (mobj && mobj->file_type != FILE_CDDA) {
+				/* Format: "#EXTINF:seconds, title" */
+				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
+						      mobj->tags->length,
+						      mobj->tags->title,
+						      mobj->file);
+
+				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
+				if (status != G_IO_STATUS_NORMAL) {
+					g_critical("Unable to write to M3U playlist: %s", filename);
+					ret = -1;
+					goto exit_list;
+				}
+			}
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					g_list_free(list);
+					return 0;
+				}
+			}
+		}
+	}
+
+exit_list:
+	if (list)
+		g_list_free(list);
+	if (err) {
+		g_error_free(err);
+		err = NULL;
+	}
+	return ret;
+}
+
 static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
 			      struct con_win *cwin)
 {
@@ -522,7 +637,81 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	init_playlist_view(cwin);
 }
 
-/* Export to a M3U file */
+/* Export selection/current playlist to a M3U file */
+
+void export_playlist (gint choice, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	gchar *filename = NULL, *playlistm3u = NULL;
+	GIOChannel *chan = NULL;
+	GError *err = NULL;
+	gint resp;
+
+	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_FILE_CHOOSER_ACTION_SAVE,
+					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					     NULL);
+
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
+						       TRUE);
+
+	playlistm3u = g_strdup_printf("%s.m3u", _("Playlists"));
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), playlistm3u);
+
+	resp = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	switch (resp) {
+	case GTK_RESPONSE_ACCEPT:
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		break;
+	default:
+		goto exit;
+	}
+
+	if (!filename)
+		goto exit;
+
+	chan = create_m3u_playlist(filename, cwin);
+	if (!chan) {
+		g_warning("Unable to create M3U playlist file: %s", filename);
+		goto exit;
+	}
+
+	switch(choice) {
+	case SAVE_COMPLETE:
+		if (save_complete_m3u_playlist(chan, filename, cwin) < 0) {
+			g_warning("Unable to save M3U playlist: %s", filename);
+			goto exit;
+		}
+		break;
+	case SAVE_SELECTED:
+		if (save_selected_to_m3u_playlist(chan, filename, cwin) < 0) {
+			g_warning("Unable to save M3U playlist: %s", filename);
+			goto exit;
+		}
+		break;
+	}
+
+	if (chan) {
+		if (g_io_channel_shutdown(chan, TRUE, &err) != G_IO_STATUS_NORMAL) {
+			g_critical("Unable to save M3U playlist: %s", filename);
+			g_error_free(err);
+			err = NULL;
+		} else {
+			CDEBUG(DBG_INFO, "Saved M3U playlist: %s", filename);
+		}
+		g_io_channel_unref(chan);
+	}
+
+exit:
+	g_free(playlistm3u);
+	g_free(filename);
+	gtk_widget_destroy(dialog);
+}
+
+/* Export saved playlist to a M3U file */
 
 void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 {
@@ -590,7 +779,6 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
-
 		/* Export all the playlists to the given file */
 
 		for (i=list; i != NULL; i = i->next) {

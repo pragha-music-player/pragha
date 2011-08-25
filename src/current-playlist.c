@@ -647,6 +647,9 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 			     GTK_STOCK_OK,
 			     GTK_RESPONSE_ACCEPT,
 			     NULL);
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
+
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_new, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_add, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox2), entry, TRUE, TRUE, 2);
@@ -659,7 +662,6 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
-
 		/* Get playlist name */
 		/* Store a copy because the dialog box is destroyed on return */
 
@@ -671,7 +673,10 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 			playlist = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo_add));
 			*choice = APPEND_PLAYLIST;
 		}
-
+		break;
+	case GTK_RESPONSE_HELP:
+		playlist = g_strdup(_("New playlist"));
+		*choice = EXPORT_PLAYLIST;
 		break;
 	case GTK_RESPONSE_CANCEL:
 		break;
@@ -1909,6 +1914,9 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 		case APPEND_PLAYLIST:
 			append_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
 			break;
+		case EXPORT_PLAYLIST:
+			export_playlist (SAVE_SELECTED, cwin);
+			break;
 		default:
 			break;
 
@@ -1943,6 +1951,9 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 			break;
 		case APPEND_PLAYLIST:
 			append_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
+			break;
+		case EXPORT_PLAYLIST:
+			export_playlist (SAVE_COMPLETE, cwin);
 			break;
 		default:
 			break;

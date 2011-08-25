@@ -342,6 +342,7 @@ enum library_view {
 enum playlist_mgmt {
 	NEW_PLAYLIST,
 	APPEND_PLAYLIST,
+	EXPORT_PLAYLIST,
 	SAVE_COMPLETE,
 	SAVE_SELECTED
 };
@@ -908,6 +909,7 @@ void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
+void export_playlist (gint choice, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 void pragha_pl_parser_open_from_file_by_extension(gchar *file, struct con_win *cwin);
 gboolean dnd_playlist_tree_begin(GtkWidget *widget,
