@@ -951,6 +951,7 @@ void init_current_playlist_columns(struct con_win *cwin);
 void requeue_track_refs (struct con_win *cwin);
 void enqueue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
+void toggle_queue_selected_current_playlist (struct con_win *cwin);
 int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void remove_current_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);

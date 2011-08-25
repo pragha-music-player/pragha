@@ -63,12 +63,40 @@ void jump_select_row_on_current_playlist (GtkTreeView *jump_tree,
 	}
 }
 
+int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cwin)
+{
+	GtkTreeSelection *selection;
+	GList *list;
+
+	if (event->state != 0
+			&& ((event->state & GDK_CONTROL_MASK)
+			|| (event->state & GDK_MOD1_MASK)
+			|| (event->state & GDK_MOD3_MASK)
+			|| (event->state & GDK_MOD4_MASK)
+			|| (event->state & GDK_MOD5_MASK))) {
+		return FALSE;
+	}
+	else if(event->keyval == GDK_q || event->keyval == GDK_Q) {
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
+		list = gtk_tree_selection_get_selected_rows (selection, NULL);
+		if (list) {
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
+			gtk_tree_path_free (list->data);
+			g_list_free (list);
+
+			toggle_queue_selected_current_playlist (cwin);
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void jump_row_activated_cb (GtkTreeView *jump_tree,
 			       GtkTreePath *jump_path,
 			       GtkTreeViewColumn *column,
 			       GtkWidget *dialog)
 {
-	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
 }
 
 gchar *
@@ -355,8 +383,8 @@ dialog_jump_to_track (struct con_win *cwin)
 					     GTK_RESPONSE_CANCEL,
 					     NULL);
 
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Add to playback queue"), GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_JUMP_TO, GTK_RESPONSE_APPLY);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_ACCEPT);
 
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 600, 500);
 
@@ -369,6 +397,8 @@ dialog_jump_to_track (struct con_win *cwin)
 	
 	g_signal_connect (jump_treeview, "row-activated",
 			G_CALLBACK(jump_row_activated_cb), dialog);
+	g_signal_connect (jump_treeview, "key_press_event",
+			  G_CALLBACK (jump_key_press), cwin);
 
 	gtk_widget_show_all (dialog);
 
@@ -385,14 +415,7 @@ dialog_jump_to_track (struct con_win *cwin)
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
-		/* Activate row selected on current playlist to play track. */
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->current_playlist));
-		list = gtk_tree_selection_get_selected_rows (selection, NULL);
-		if (list) {
-			gtk_tree_view_row_activated (GTK_TREE_VIEW (cwin->current_playlist), list->data, NULL);
-			gtk_tree_path_free (list->data);
-			g_list_free (list);
-		}
+		toggle_queue_selected_current_playlist (cwin);
 		break;
 	case GTK_RESPONSE_APPLY:
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(jump_treeview));

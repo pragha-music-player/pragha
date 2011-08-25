@@ -1103,6 +1103,39 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	g_list_free (list);
 }
 
+/* Toglle queue state of selection on current playlist. */
+
+void toggle_queue_selected_current_playlist (struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeRowReference *ref;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	gboolean is_queue = FALSE;
+	GList *list;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	while (list) {
+		path = list->data;
+		if (gtk_tree_model_get_iter(model, &iter, path)) {
+			gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
+			if(is_queue)
+				delete_queue_track_refs(path, cwin);
+			else {
+				ref = gtk_tree_row_reference_new(model, path);
+				cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+			}
+		}
+		gtk_tree_path_free(path);
+		list = list->next;
+	}
+	requeue_track_refs(cwin);
+	g_list_free (list);
+}
+
 /* Based on Totem Code */
 int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
 {
