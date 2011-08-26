@@ -1209,6 +1209,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin);
 void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
+void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_artist_info_action(GtkAction *action, struct con_win *cwin);

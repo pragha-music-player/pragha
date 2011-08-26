@@ -71,10 +71,11 @@ gchar *main_menu_xml = "<ui>							\
 				<menuitem action=\"Love track\"/>		\
 				<menuitem action=\"Unlove track\"/>		\
 				<separator/>					\
-				<menuitem action=\"Add favorites\"/>		\
-				<separator/>					\
 				<menuitem action=\"Artist info\"/>		\
 				<menuitem action=\"Get album art\"/>		\
+				<separator/>					\
+				<menuitem action=\"Import a XSPF playlist\"/>	\
+				<menuitem action=\"Add favorites\"/>		\
 				<menuitem action=\"Add similar\"/>		\
 				<separator/>					\
 			</menu>							\
@@ -237,12 +238,14 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Love track", G_CALLBACK(lastfm_track_love_action)},
 	{"Unlove track", NULL, N_("Unlove track"),
 	 NULL, "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
-	{"Add favorites", NULL, N_("Add favorites"),
-	 NULL, "Add favorites", G_CALLBACK(lastfm_add_favorites_action)},
 	{"Artist info", GTK_STOCK_INFO, N_("Artist _info"),
 	 NULL, "Artist info", G_CALLBACK(lastfm_artist_info_action)},
 	{"Get album art", NULL, N_("Get album art"),
 	 NULL, "Get album art art", G_CALLBACK(lastfm_get_album_art_action)},
+	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
+	 NULL, "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
+	{"Add favorites", NULL, N_("Add favorites"),
+	 NULL, "Add favorites", G_CALLBACK(lastfm_add_favorites_action)},
 	{"Add similar", NULL, N_("Add similar"),
 	 NULL, "Add similar", G_CALLBACK(lastfm_get_similar_action)},
 	#endif

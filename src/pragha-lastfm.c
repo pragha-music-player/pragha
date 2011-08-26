@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <pragha.h>
+#include "chartlyrics_helper.h"
 
 #define WAIT_UPDATE 5
 
@@ -70,6 +71,73 @@ bad:
 
 	return location_id;
 }
+
+void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkFileFilter *media_filter;
+	XMLNode *xml = NULL, *xi, *xc, *xt;
+	gchar *contents, *summary;
+	gint try = 0, added = 0;
+	GFile *file;
+	gsize size;
+
+	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
+				      GTK_WINDOW(cwin->mainwindow),
+				      GTK_FILE_CHOOSER_ACTION_OPEN,
+				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+				      NULL);
+
+	media_filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
+	gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter), "application/xspf+xml");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), GTK_FILE_FILTER(media_filter));
+
+	if(gtk_dialog_run (GTK_DIALOG (dialog)) != GTK_RESPONSE_ACCEPT) {
+		gtk_widget_destroy (dialog);
+		return;
+	}
+
+	file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(dialog));
+
+	if (!g_file_load_contents (file, NULL, &contents, &size, NULL, NULL)) {
+		goto out;
+    	}
+
+	if (g_utf8_validate (contents, -1, NULL) == FALSE) {
+		gchar *fixed;
+		fixed = g_convert (contents, -1, "UTF-8", "ISO8859-1", NULL, NULL, NULL);
+		if (fixed != NULL) {
+			g_free (contents);
+			contents = fixed;
+		}
+	}
+
+	xml = tinycxml_parse(contents);
+
+	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
+	for(;xi;xi= xi->next) {
+		try++;
+		xt = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
+		xc = xmlnode_get(xi,CCA {"track","creator",NULL},NULL,NULL);
+
+		if (xt && xc && try_add_track_from_db (xc->content, xt->content, cwin))
+			added++;
+	}
+
+	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
+
+	set_status_message(summary, cwin);
+
+	gtk_widget_destroy (dialog);
+	xmlnode_free(xml);
+	g_free (contents);
+	g_free(summary);
+out:
+	g_object_unref (file);
+}
+
 void *do_lastfm_add_favorites_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
