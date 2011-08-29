@@ -836,8 +836,9 @@ static GSList *
 pragha_pl_parser_parse_xspf (const gchar *filename)
 {
 	XMLNode *xml = NULL, *xi, *xl;
-	gchar *contents;
+	gchar *contents, *f_file;
 	GSList *list = NULL;
+	GError *err = NULL;
 	GFile *file;
 	gsize size;
 
@@ -860,10 +861,21 @@ pragha_pl_parser_parse_xspf (const gchar *filename)
 
 	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
 	for(;xi;xi= xi->next) {
-		xl = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
+		xl = xmlnode_get(xi,CCA {"track","location",NULL},NULL,NULL);
 
-		if (xl && xl->content)
-			list = g_slist_append (list, g_strdup(xl->content));
+		if (xl && xl->content) {
+			f_file = g_filename_from_uri(xl->content, NULL, &err);
+
+			if (!f_file) {
+				g_warning("Unable to get filename from UTF-8 string: %s",
+					  xl->content);
+				g_error_free(err);
+				err = NULL;
+				continue;
+			}
+
+			list = g_slist_append (list, f_file);
+		}
 	}
 
 	xmlnode_free(xml);
@@ -896,7 +908,7 @@ pragha_pl_parser_parse_pls (const gchar *file)
 			for (i = 1; i <= nentries; i++) {
 				g_snprintf (key, 128, "File%d", i);
 				file_entry = g_key_file_get_string(plskeyfile, "playlist", key, NULL);
-				if(file_entry)
+				if (NULL == file_entry)
 					continue;
 				list = g_slist_append (list, file_entry);
 			}
@@ -1032,21 +1044,29 @@ GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *cwin)
 {
 	GSList *list = NULL, *i = NULL;
+	gchar *summary;
+	gint try = 0, added = 0;
 	struct musicobject *mobj;
 
 	list = pragha_pl_parser_parse_from_file_by_extension (file);
 
 	for (i = list; i != NULL; i = i->next) {
+		try++;
 		mobj = new_musicobject_from_file(i->data);
-		if (mobj)
+		if (mobj) {
+			added++;
 			append_current_playlist(mobj, cwin);
-
+		}
 		while(gtk_events_pending()) {
 			if (gtk_main_iteration_do(FALSE))
 				return;
 		}
 		g_free(i->data);
 	}
+	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
+	set_status_message(summary, cwin);
+	g_free(summary);
+
 	g_slist_free(list);
 }
 
