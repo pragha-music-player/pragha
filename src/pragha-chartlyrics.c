@@ -20,6 +20,9 @@
 #include "pragha.h"
 #include <pthread.h>
 
+#include <curl/curl.h>
+#include <curl/easy.h>
+
 #define LARGE_BUFFER	1024
 #define CHARTLYRICS_API_ROOT	"http://api.chartlyrics.com/apiv1.asmx/"
 
@@ -32,6 +35,13 @@ typedef struct {
 	char *url;
 	char *correct_url;
 } Lyric;
+
+const char *HTML_ESCAPE[] = {
+	"&amp;", "&",
+	"&quot;","\"",
+	"&ndash;","-",
+	NULL
+};
 
 Lyric *malloc_lyric(){
 	Lyric *l;
@@ -260,4 +270,89 @@ void chartlyric_dialog (struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
 	pthread_create(&tid, NULL, do_chartlyric_dialog, cwin);
+}
+
+static void *myrealloc(void *ptr, unsigned int size)
+{
+  /* There might be a realloc() out there that doesn't like reallocing
+     NULL pointers, so we take care of it here */
+  if(ptr)
+    return realloc(ptr, size);
+  else
+    return malloc(size);
+}
+
+char *unescape_HTML(char *original){
+	int i;
+	char *cptr;
+	if(original == NULL) return NULL;
+
+	for(i=0;HTML_ESCAPE[i];i+=2){
+		cptr = strstr(original,HTML_ESCAPE[i]);
+		while(cptr){
+			// This may not work on older systems
+			sprintf(cptr,"%s%s",
+				HTML_ESCAPE[i+1],
+				cptr+strlen(HTML_ESCAPE[i]));
+			cptr = strstr(original,HTML_ESCAPE[i]);
+		}
+	}
+	return original;
+}
+
+size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data){
+	size_t realsize = size * nmemb;
+	WebData *mem = data;
+	char *page = NULL;
+
+	/* Realloc the existing size + the new data size + 1 for the null terminator */
+	page = myrealloc(mem->page, mem->size + realsize + 1);
+	if (page) {
+		mem->page = page;
+		memcpy(mem->page+mem->size, ptr, realsize);
+		mem->size += realsize;
+		mem->page[mem->size] = 0;
+		return realsize;
+	}else {
+		perror("write_cb: Could not realloc");
+		return 0;
+	}
+}
+
+int chartlyrics_helper_free_page(WebData *wpage){
+	if(wpage == NULL)return 1;
+	if(wpage->page)	free(wpage->page);
+	free(wpage);
+	return 0;
+}
+	
+WebData *chartlyrics_helper_get_page(CURL *curl, const char *url){
+	WebData *chunk = NULL;
+	
+	if(url == NULL) return NULL;
+
+	chunk = malloc(sizeof(WebData));
+
+	chunk->page	= NULL;
+	chunk->size	= 0;
+
+	/* specify URL to get */
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+
+	/* we pass our 'chunk' struct to the callback function */
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)chunk);
+
+	/* get it! */
+	curl_easy_perform(curl);
+
+	/* cleanup curl stuff */
+	curl_easy_cleanup(curl);
+
+	if(chunk->size == 0){
+		if(chunk->page){
+			free(chunk->page);
+			chunk->page = NULL;
+		}
+	}
+	return chunk;
 }

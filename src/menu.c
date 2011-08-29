@@ -323,6 +323,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.pls");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.PLS");
 
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.xspf");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.XSPF");
+
 	playlist_filter = gtk_file_filter_new();
 	
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
@@ -330,6 +333,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.pls");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.PLS");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.xspf");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.XSPF");
 
 	gtk_file_filter_set_name(GTK_FILE_FILTER(playlist_filter), _("Playlists"));
 
