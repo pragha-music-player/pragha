@@ -231,7 +231,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
 	gpointer storage;
 	gint i=0;
-	GtkFileFilter *media_filter, *all_filter;
+	GtkFileFilter *media_filter, *playlist_filter, *all_filter;
 
 	/* Create a file chooser dialog */
 
@@ -323,15 +323,27 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.pls");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.PLS");
 
+	playlist_filter = gtk_file_filter_new();
+	
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.M3U");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.pls");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.PLS");
+
+	gtk_file_filter_set_name(GTK_FILE_FILTER(playlist_filter), _("Playlists"));
 
 	all_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(all_filter), _("All files"));
-	gtk_file_filter_add_pattern(GTK_FILE_FILTER(all_filter), "*.*");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(all_filter), "*");
 
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser),
 				    GTK_FILE_FILTER(media_filter));
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser),
+				    GTK_FILE_FILTER(playlist_filter));
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser),
 				    GTK_FILE_FILTER(all_filter));
+
 	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(chooser),
 				    GTK_FILE_FILTER(media_filter));
 
