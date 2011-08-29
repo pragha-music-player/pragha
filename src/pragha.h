@@ -60,6 +60,8 @@
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
 
+#include "xml_helper.h"
+
 #ifndef NOTIFY_CHECK_VERSION
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif

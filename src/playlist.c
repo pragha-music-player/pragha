@@ -833,6 +833,50 @@ exit:
 }
 
 static GSList *
+pragha_pl_parser_parse_xspf (const gchar *filename)
+{
+	XMLNode *xml = NULL, *xi, *xl;
+	gchar *contents;
+	GSList *list = NULL;
+	GFile *file;
+	gsize size;
+
+	file = g_file_new_for_path (filename);
+
+	if (!g_file_load_contents (file, NULL, &contents, &size, NULL, NULL)) {
+		goto out;
+    	}
+
+	if (g_utf8_validate (contents, -1, NULL) == FALSE) {
+		gchar *fixed;
+		fixed = g_convert (contents, -1, "UTF-8", "ISO8859-1", NULL, NULL, NULL);
+		if (fixed != NULL) {
+			g_free (contents);
+			contents = fixed;
+		}
+	}
+
+	xml = tinycxml_parse(contents);
+
+	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
+	for(;xi;xi= xi->next) {
+		xl = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
+
+		if (xl && xl->content)
+			list = g_slist_append (list, g_strdup(xl->content));
+	}
+
+	xmlnode_free(xml);
+	g_free (contents);
+
+out:
+	g_object_unref (file);
+	
+	return list;
+}
+
+
+static GSList *
 pragha_pl_parser_parse_pls (const gchar *file)
 {
 	GKeyFile *plskeyfile;
@@ -961,7 +1005,7 @@ pragha_pl_parser_parse (enum playlist_type format, const gchar *filename)
 		//list = pragha_pl_parser_parse_asx (filename);
 		break;
 	case PL_FORMAT_XSPF:
-		//list = pragha_pl_parser_parse_xspf (filename);
+		list = pragha_pl_parser_parse_xspf (filename);
 		break;
 	default:
 	break;

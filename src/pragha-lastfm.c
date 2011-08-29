@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <pragha.h>
-#include "chartlyrics_helper.h"
 
 #define WAIT_UPDATE 5
 

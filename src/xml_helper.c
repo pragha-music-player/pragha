@@ -7,7 +7,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-#include "chartlyrics_helper.h"
+#include "xml_helper.h"
 
 extern int VERBOSE;
 

@@ -19,7 +19,6 @@
 
 #include "pragha.h"
 #include <pthread.h>
-#include "chartlyrics_helper.h"
 
 #define LARGE_BUFFER	1024
 #define CHARTLYRICS_API_ROOT	"http://api.chartlyrics.com/apiv1.asmx/"
