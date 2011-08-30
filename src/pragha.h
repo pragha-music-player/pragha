@@ -186,8 +186,7 @@
 
 #define GROUP_AUDIO    "Audio"
 #define KEY_AUDIO_SINK             "audio_sink"
-#define KEY_AUDIO_ALSA_DEVICE      "audio_alsa_device"
-#define KEY_AUDIO_OSS_DEVICE       "audio_oss_device"
+#define KEY_AUDIO_DEVICE           "audio_device"
 #define KEY_SOFTWARE_MIXER         "software_mixer"
 #define KEY_SOFTWARE_VOLUME	   "software_volume"
 #define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
@@ -432,8 +431,7 @@ struct con_pref {
 	gchar *album_art_pattern;
 	gchar *start_mode;
 	gchar *sidebar_pane;
-	gchar *audio_alsa_device;
-	gchar *audio_oss_device;
+	gchar *audio_device;
 	gchar *audio_cd_device;
 	gint album_art_size;
 	gint window_width;

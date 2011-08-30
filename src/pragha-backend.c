@@ -582,6 +582,7 @@ backend_quit(struct con_win *cwin)
 gint backend_init(struct con_win *cwin)
 {
 	GstBus *bus;
+	gchar *audiosink = NULL;
 
 	gst_init(NULL, NULL);
 
@@ -598,26 +599,46 @@ gint backend_init(struct con_win *cwin)
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
 
-	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)){
+	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
-		cwin->cgst->audio_sink = gst_element_factory_make ("alsasink", "audio-sink");
+
+		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
+			audiosink = g_strdup_printf ("alsasink device=\"%s\"", cwin->cpref->audio_device);
+		}
+		else
+			audiosink = g_strdup("alsasink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
-		cwin->cgst->audio_sink = gst_element_factory_make ("oss4sink", "audio-sink");
+
+		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
+			audiosink = g_strdup_printf ("oss4sink device=\"%s\"", cwin->cpref->audio_device);
+		}
+		else
+			audiosink = g_strdup("oss4sink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
-		cwin->cgst->audio_sink = gst_element_factory_make ("ossink", "audio-sink");
+
+		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
+			audiosink = g_strdup_printf ("osssink device=\"%s\"", cwin->cpref->audio_device);
+		}
+		else
+			audiosink = g_strdup("osssink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
-		cwin->cgst->audio_sink = gst_element_factory_make ("pulsesink", "audio-sink");
+
+		audiosink = g_strdup("pulsesink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, AUTO_SINK)){
 		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
-		cwin->cgst->audio_sink = gst_element_factory_make ("autoaudiosink", "audio-sink");
+
+		audiosink = g_strdup("autoaudiosink");
 	}
+
+	if(audiosink != NULL)
+		cwin->cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
 	if(cwin->cgst->audio_sink == NULL) {
 		CDEBUG(DBG_BACKEND, "Try to use the default audiosink");

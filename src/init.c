@@ -194,7 +194,7 @@ gint init_config(struct con_win *cwin)
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
-	gboolean audio_sink_f, audio_alsa_device_f, audio_oss_device_f, software_mixer_f, use_cddb_f;
+	gboolean audio_sink_f, audio_device_f, software_mixer_f, use_cddb_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
@@ -205,7 +205,7 @@ gint init_config(struct con_win *cwin)
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
-	audio_sink_f = audio_alsa_device_f = audio_oss_device_f = software_mixer_f = use_cddb_f = FALSE;
+	audio_sink_f = audio_device_f = software_mixer_f = use_cddb_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_mpris2_f = instant_filter_f = use_hint_f = FALSE;
@@ -331,26 +331,15 @@ gint init_config(struct con_win *cwin)
 			audio_sink_f = TRUE;
 		}
 
-		cwin->cpref->audio_alsa_device =
+		cwin->cpref->audio_device =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_AUDIO,
-					      KEY_AUDIO_ALSA_DEVICE,
+					      KEY_AUDIO_DEVICE,
 					      &error);
-		if (!cwin->cpref->audio_alsa_device) {
+		if (!cwin->cpref->audio_device) {
 			g_error_free(error);
 			error = NULL;
-			audio_alsa_device_f = TRUE;
-		}
-
-		cwin->cpref->audio_oss_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_OSS_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_oss_device) {
-			g_error_free(error);
-			error = NULL;
-			audio_oss_device_f = TRUE;
+			audio_device_f = TRUE;
 		}
 
 		cwin->cpref->audio_cd_device =
@@ -931,10 +920,8 @@ gint init_config(struct con_win *cwin)
 
 	if (all_f || audio_sink_f)
 		cwin->cpref->audio_sink = g_strdup(DEFAULT_SINK);
-	if (all_f || audio_alsa_device_f)
-		cwin->cpref->audio_alsa_device = g_strdup(ALSA_DEFAULT_DEVICE);
-	if (all_f || audio_oss_device_f)
-		cwin->cpref->audio_oss_device = g_strdup(OSS_DEFAULT_DEVICE);
+	if (all_f || audio_device_f)
+		cwin->cpref->audio_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lw.lastfm_support = FALSE;
