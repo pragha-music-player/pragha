@@ -251,8 +251,9 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 void *do_lastfm_get_album_art (gpointer data)
 {
 	GError *error = NULL;
-	GdkPixbuf *album_art = NULL, *scaled_album_art = NULL, *pix_frame = NULL, *scaled_frame;
+	GdkPixbuf *album_art = NULL;
 	GdkCursor *cursor;
+	gchar *cache_album_art = NULL, *album_art_path = NULL;
 
 	struct con_win *cwin = data;
 	
@@ -281,29 +282,22 @@ void *do_lastfm_get_album_art (gpointer data)
 		album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
 
 	if (album_art) {
-		scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
+		cache_album_art = g_strdup_printf("%s/pragha_album_art",
+						g_get_user_cache_dir());
 
-		pix_frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
-		gdk_pixbuf_copy_area(scaled_album_art, 0 ,0 ,112 ,112, pix_frame, 12, 8);
+		if (g_file_test(cache_album_art, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
+			g_mkdir(cache_album_art, S_IRWXU);
 
-		scaled_frame = gdk_pixbuf_scale_simple (pix_frame,
-							cwin->cpref->album_art_size,
-							cwin->cpref->album_art_size,
-							GDK_INTERP_BILINEAR);
-		if (cwin->album_art) {
-			gtk_image_clear(GTK_IMAGE(cwin->album_art));
-			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
-		}
-		else {
-			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
-			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-					  GTK_WIDGET(cwin->album_art));
-			gtk_widget_show_all(cwin->album_art_frame);
-		}
-		g_object_unref(G_OBJECT(album_art));
-		g_object_unref(G_OBJECT(scaled_album_art));
-		g_object_unref(G_OBJECT(scaled_frame));
-		g_object_unref(G_OBJECT(pix_frame));
+		album_art_path = g_strdup_printf("%s/%s - %s.jpeg", cache_album_art,
+						cwin->cstate->curr_mobj->tags->artist,
+						cwin->cstate->curr_mobj->tags->album);
+
+		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
+
+		update_album_art(cwin->cstate->curr_mobj, cwin);
+
+		g_free(cache_album_art);
+		g_free(album_art_path);
 	}
 	else {
 		set_status_message(_("Album art not found on Last.fm."), cwin);
@@ -325,6 +319,9 @@ void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
 		return;
 
 	if (!cwin->cpref->show_album_art)
+		return;
+
+	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->album);
 		return;
 
 	if (cwin->clastfm->session_id == NULL) {
@@ -643,7 +640,11 @@ gboolean lastfm_now_playing_handler (gpointer data)
 		return FALSE;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
+	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->title);
+		pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
+
+	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->album);
+		pthread_create(&tid, NULL, do_lastfm_get_album_art, cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.

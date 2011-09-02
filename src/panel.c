@@ -278,20 +278,35 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Update album art");
 
 	GError *error = NULL;
-	GdkPixbuf *scaled_album_art, *album_art, *scaled_frame, *frame;
-	gchar *dir;
+	GdkPixbuf *scaled_album_art = NULL, *album_art = NULL, *scaled_frame = NULL, *frame = NULL;
+	gchar *path = NULL;
 
 	if (cwin->cpref->show_album_art) {
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
 		if (mobj && mobj->file_type != FILE_CDDA){
-			dir = g_path_get_dirname(mobj->file);
-			if (cwin->cpref->album_art_pattern){
-				album_art = get_pref_image_dir(dir, cwin);
-				if (!album_art)
-					album_art = get_image_from_dir(dir, cwin);
+			if(cwin->cpref->lw.lastfm_get_album_art) {
+				path = g_strdup_printf("%s/pragha_album_art/%s - %s.jpeg",
+								g_get_user_cache_dir(),
+								mobj->tags->artist,
+								mobj->tags->album);
+
+				album_art = gdk_pixbuf_new_from_file_at_size (path,
+									cwin->cpref->album_art_size,
+									cwin->cpref->album_art_size,
+									&error);
+				g_free(path);
 			}
-			else album_art = get_image_from_dir(dir, cwin);
+			if (album_art == NULL) {
+				path = g_path_get_dirname(mobj->file);
+				if (cwin->cpref->album_art_pattern) {
+					album_art = get_pref_image_dir(path, cwin);
+					if (!album_art)
+						album_art = get_image_from_dir(path, cwin);
+				}
+				else album_art = get_image_from_dir(path, cwin);
+				g_free(path);
+			}
 
 			if (album_art) {
 				scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
@@ -299,7 +314,6 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				g_object_unref(G_OBJECT(scaled_album_art));
 				g_object_unref(G_OBJECT(album_art));
 			}
-			g_free(dir);
 		}
 
 		scaled_frame = gdk_pixbuf_scale_simple (frame,

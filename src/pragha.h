@@ -205,6 +205,7 @@
 #define KEY_LASTFM                 "lastfm"
 #define KEY_LASTFM_USER            "lastfm_user"
 #define KEY_LASTFM_PASS            "lastfm_pass"
+#define KEY_LASTFM_GET_ALBUM_ART   "lastfm_get_album_art"
 #define KEY_USE_CDDB               "use_cddb"
 #define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
@@ -417,11 +418,13 @@ struct pixbuf {
 #ifdef HAVE_LIBCLASTFM
 struct lastfm_pref {
 	gboolean lastfm_support;
+	gboolean lastfm_get_album_art;
 	gchar *lastfm_user;
 	gchar *lastfm_pass;
 	GtkWidget *lastfm_w;
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
+	GtkWidget *lastfm_get_album_art_w;
 };
 #endif
 struct con_pref {

@@ -233,6 +233,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			cwin->cpref->lw.lastfm_pass =
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
+			cwin->cpref->lw.lastfm_get_album_art =
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+							     cwin->cpref->lw.lastfm_get_album_art_w));
 
 			if (cwin->clastfm->session_id == NULL)
 				init_lastfm(cwin);
@@ -378,6 +381,7 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
 	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
+	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_get_album_art_w, is_active);
 
 	if(!is_active && cwin->clastfm->session_id) {
 		CDEBUG(DBG_INFO, "Shutdown LASTFM");
@@ -669,6 +673,9 @@ static void update_preferences(struct con_win *cwin)
 				   cwin->cpref->lw.lastfm_user);
 		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_pass_w),
 				   cwin->cpref->lw.lastfm_pass);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->lw.lastfm_get_album_art_w),
+					     TRUE);
 	}
 #endif
 	if (cwin->cpref->use_cddb)
@@ -1287,6 +1294,10 @@ void save_preferences(struct con_win *cwin)
 					      GROUP_SERVICES,
 					      KEY_LASTFM_PASS,
 					      cwin->cpref->lw.lastfm_pass);
+		g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+				       GROUP_SERVICES,
+				       KEY_LASTFM_GET_ALBUM_ART,
+				       cwin->cpref->lw.lastfm_get_album_art);
 	}
 #endif
 	/* Save use CDDB server option */
@@ -1347,7 +1358,7 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
 #ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_uhbox, *lastfm_ulabel, \
-		  *lastfm_phbox, *lastfm_plabel;
+		  *lastfm_phbox, *lastfm_plabel, *lastfm_get_album_art;
 #endif
 	GtkWidget *use_mpris2, *use_cddb;
 
@@ -1748,6 +1759,7 @@ void preferences_dialog(struct con_win *cwin)
 	lastfm_plabel = gtk_label_new(_("Password"));
 	lastfm_uhbox = gtk_hbox_new(FALSE, 2);
 	lastfm_phbox = gtk_hbox_new(FALSE, 2);
+	lastfm_get_album_art = gtk_check_button_new_with_label(_("Get album art"));
 
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
@@ -1800,6 +1812,12 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
+	gtk_box_pack_start(GTK_BOX(services_vbox),
+			   lastfm_get_album_art,
+			   FALSE,
+			   FALSE,
+			   0);
+
 #endif
 	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   use_cddb,
@@ -1850,6 +1868,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->lw.lastfm_w = lastfm_check;
 	cwin->cpref->lw.lastfm_uname_w = lastfm_uname;
 	cwin->cpref->lw.lastfm_pass_w = lastfm_pass;
+	cwin->cpref->lw.lastfm_get_album_art_w = lastfm_get_album_art;
 	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
 			 G_CALLBACK(toggle_lastfm), cwin);
 #endif

@@ -211,7 +211,7 @@ gint init_config(struct con_win *cwin)
 	use_mpris2_f = instant_filter_f = use_hint_f = FALSE;
 
 	#ifdef HAVE_LIBCLASTFM
-	gboolean lastfm_f = FALSE;
+	gboolean lastfm_f = FALSE, lastfm_get_album_art_f = FALSE;
 	#endif
 
 	all_f = FALSE;
@@ -803,6 +803,16 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 		}
+		cwin->cpref->lw.lastfm_get_album_art =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_SERVICES,
+					       KEY_LASTFM_GET_ALBUM_ART,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			lastfm_get_album_art_f = TRUE;
+		}
 		#endif
 		cwin->cpref->use_cddb =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
@@ -925,6 +935,8 @@ gint init_config(struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lw.lastfm_support = FALSE;
+	if (all_f || lastfm_get_album_art_f)
+		cwin->cpref->lw.lastfm_get_album_art = FALSE;
 	#endif
 	if (all_f || use_cddb_f)
 		cwin->cpref->use_cddb = TRUE;
