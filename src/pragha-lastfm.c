@@ -253,11 +253,19 @@ void *do_lastfm_get_album_art (gpointer data)
 	GError *error = NULL;
 	GdkPixbuf *album_art = NULL;
 	GdkCursor *cursor;
-	gchar *cache_album_art = NULL, *album_art_path = NULL;
+	gchar *album_art_path = NULL;
 
 	struct con_win *cwin = data;
 	
 	LASTFM_ALBUM_INFO *album = NULL;
+
+	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
+					cwin->cpref->cache_album_art_folder,
+					cwin->cstate->curr_mobj->tags->artist,
+					cwin->cstate->curr_mobj->tags->album);
+
+	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
+		goto exists;
 
 	gdk_threads_enter ();
 
@@ -274,7 +282,7 @@ void *do_lastfm_get_album_art (gpointer data)
 		set_status_message(_("Album art not found on Last.fm."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
-		return NULL;
+		goto exists;
 	}
 
 	gdk_threads_enter ();
@@ -282,22 +290,10 @@ void *do_lastfm_get_album_art (gpointer data)
 		album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
 
 	if (album_art) {
-		cache_album_art = g_strdup_printf("%s/pragha_album_art",
-						g_get_user_cache_dir());
-
-		if (g_file_test(cache_album_art, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
-			g_mkdir(cache_album_art, S_IRWXU);
-
-		album_art_path = g_strdup_printf("%s/%s - %s.jpeg", cache_album_art,
-						cwin->cstate->curr_mobj->tags->artist,
-						cwin->cstate->curr_mobj->tags->album);
-
 		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
 
 		update_album_art(cwin->cstate->curr_mobj, cwin);
-
-		g_free(cache_album_art);
-		g_free(album_art_path);
+		g_object_unref(G_OBJECT(album_art));
 	}
 	else {
 		set_status_message(_("Album art not found on Last.fm."), cwin);
@@ -307,6 +303,9 @@ void *do_lastfm_get_album_art (gpointer data)
 	gdk_threads_leave ();
 
 	LASTFM_free_album_info(album);
+
+exists:
+	g_free(album_art_path);
 
 	return NULL;
 }
@@ -603,6 +602,10 @@ gboolean lastfm_scrob_handler(gpointer data)
 void *do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
+	gchar *album_art_path = NULL;
+	GdkPixbuf *album_art = NULL;
+	LASTFM_ALBUM_INFO *album = NULL;
+
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
@@ -620,6 +623,37 @@ void *do_lastfm_now_playing (gpointer data)
 		set_status_message(_("Update current song on Last.fm failed"), cwin);
 		gdk_threads_leave ();
 	}
+
+	if ((cwin->cpref->lw.lastfm_get_album_art == TRUE) && (cwin->cstate->curr_mobj->tags->album != NULL)) {
+		album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
+						cwin->cpref->cache_album_art_folder,
+						cwin->cstate->curr_mobj->tags->artist,
+						cwin->cstate->curr_mobj->tags->album);
+
+		if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
+			goto exists;
+
+		album = LASTFM_album_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, cwin->cstate->curr_mobj->tags->album);
+
+		if(album) {
+			gdk_threads_enter ();
+			if(album->image)
+				album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
+
+			if (album_art) {
+				gdk_pixbuf_save(album_art, album_art_path, "jpeg", NULL, "quality", "100", NULL);
+
+				update_album_art(cwin->cstate->curr_mobj, cwin);
+				g_object_unref(G_OBJECT(album_art));
+			}
+			else {
+				set_status_message(_("Album art not found on Last.fm."), cwin);
+			}
+			gdk_threads_leave ();
+		}
+	}
+exists:
+	g_free(album_art_path);
 	
 	return NULL;
 }
@@ -642,9 +676,6 @@ gboolean lastfm_now_playing_handler (gpointer data)
 
 	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->title);
 		pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
-
-	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->album);
-		pthread_create(&tid, NULL, do_lastfm_get_album_art, cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.

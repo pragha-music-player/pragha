@@ -285,11 +285,12 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
 		if (mobj && mobj->file_type != FILE_CDDA){
+			#ifdef HAVE_LIBCLASTFM
 			if(cwin->cpref->lw.lastfm_get_album_art) {
-				path = g_strdup_printf("%s/pragha_album_art/%s - %s.jpeg",
-								g_get_user_cache_dir(),
-								mobj->tags->artist,
-								mobj->tags->album);
+				path = g_strdup_printf("%s/%s - %s.jpeg",
+							cwin->cpref->cache_album_art_folder,
+							mobj->tags->artist,
+							mobj->tags->album);
 
 				album_art = gdk_pixbuf_new_from_file_at_size (path,
 									cwin->cpref->album_art_size,
@@ -297,6 +298,7 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 									&error);
 				g_free(path);
 			}
+			#endif
 			if (album_art == NULL) {
 				path = g_path_get_dirname(mobj->file);
 				if (cwin->cpref->album_art_pattern) {

@@ -443,6 +443,9 @@ struct con_pref {
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
 	gchar *configrc_file;
+#ifdef HAVE_LIBCLASTFM
+	gchar *cache_album_art_folder;
+#endif
 	gboolean add_recursively_files;
 	gboolean show_album_art;
 	gboolean show_osd;

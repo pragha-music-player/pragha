@@ -212,6 +212,7 @@ gint init_config(struct con_win *cwin)
 
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE, lastfm_get_album_art_f = FALSE;
+	gchar *cache_album_art = NULL;
 	#endif
 
 	all_f = FALSE;
@@ -244,6 +245,17 @@ gint init_config(struct con_win *cwin)
 		}
 		CDEBUG(DBG_INFO, "Created config file");
 	}
+
+	/* Get cache of downloaded albums arts */
+	#ifdef HAVE_LIBCLASTFM
+	cache_album_art = g_strdup_printf("%s/pragha-album-art",
+						g_get_user_cache_dir());
+
+	if (g_file_test(cache_album_art, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
+		g_mkdir(cache_album_art, S_IRWXU);
+	cwin->cpref->cache_album_art_folder = g_strdup(cache_album_art);
+	#endif
+
 
 	/* Load the settings file */
 
@@ -955,7 +967,9 @@ gint init_config(struct con_win *cwin)
 
 	g_free(conrc);
 	g_free(condir);
-
+#ifdef HAVE_LIBCLASTFM
+	g_free(cache_album_art);
+#endif
 	if (err)
 		return -1;
 	else
