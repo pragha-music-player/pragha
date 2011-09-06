@@ -173,7 +173,7 @@ void requeue_track_refs (struct con_win *cwin)
 		ref = list->data;
 		lpath = gtk_tree_row_reference_get_path(ref);
 		if (gtk_tree_model_get_iter(model, &iter, lpath)){
-			ch_queue_no = g_strdup_printf("<small>%d</small>", ++i);
+			ch_queue_no = g_strdup_printf("%d", ++i);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, ch_queue_no, -1);
 			gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, TRUE, -1);
 			g_free(ch_queue_no);

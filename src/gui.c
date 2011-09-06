@@ -518,7 +518,7 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
  
  	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
 			 G_CALLBACK(library_tree_button_press_cb), cwin);
- 
+
 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
 			 G_CALLBACK(library_tree_button_release_cb), cwin);
 

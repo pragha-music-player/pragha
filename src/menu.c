@@ -972,7 +972,7 @@ void about_widget(struct con_win *cwin)
 				"authors", authors,
 				"translator-credits", _("translator-credits"),
 				"comments", "A lightweight GTK+ music player",
-				"copyright", "(C) 2007-2009 Sujith\n(C) 2009-2010 Matias",
+				"copyright", "(C) 2007-2009 Sujith\n(C) 2009-2011 Matias",
 				"license", license,
 				"name", PACKAGE_NAME,
 				"version", PACKAGE_VERSION,
