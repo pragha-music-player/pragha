@@ -76,6 +76,9 @@ backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 {
 	GObject *source;
 
+	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA)
+		return;
+
 	g_object_get (obj, "source", &source, NULL);
 
 	if (source) {
