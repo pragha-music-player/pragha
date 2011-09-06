@@ -193,7 +193,7 @@ Bugs fixed:
 	Select and set cursor on new song when drop a tack on current playlist.
 	Fix somes memory leaks and occasional cleanup.
 
-V0.98
+V0.98.0
 News:
 	A new menu "Add to playlist" that replaces "Save selection" on current playlist.
 	More speed when Clear, Remove, and Crop tracks on current playlist.
@@ -214,6 +214,39 @@ Bugs fixed:
 	Fix possible memory leak when save tags.
 	Fix warning when to year < 0 on tag editor.
 	D'Oh!. Fix add recent files.
+
+V0.99.0
+News:
+	Show a busy mouse icon when running a slow function.
+	Search artist info, album art, and lyrics into a thread.
+	Add structure to read new playlists formats. Until now PLS, XPSF and WAX.
+	Add a button on the save playlist dialogs to export the playlists.
+	Implement "Add to playback queue" in search dialog.
+	Implement "Import a XPSF playlist", useful when exporting playlists in last.fm, that not use the location tag.
+	First attempt to restore the configuration of the audio device.
+	Implement a basic cache for downloaded cover art in "(home)/.cache/pragha-album-art".
+	Add option to search the album art automatically in lastfm.
+
+Others Changes:
+	Preselect the (playlist_name).m3u filename to export dialog.
+	Eliminate the option to play track in search dialog.
+	Set "jump to track" by default in search dialog.
+	Displays a message with the number of songs added when import playlist.
+	Add "Playlists" filter on open file chooser.
+	Improved panel audio settings layout in preferences.
+
+Updates Translations:
+	Update German translation thanks to cwickert.
+	Update Czech translation thanks to anespor.
+	Update Portuguese translation thanks to smarquespt.
+
+Bugs fixed:
+	Fix "All files" filter in open file chooser.
+	Fuse audio_alsa_device and audio_oss_device in audio_device.
+	Only set audio_cd_device when playback a audio cd.
+	Update about dialog year.
+	Update MimeTypes on desktop file.
+
 
 ======================================================
 OTHERS REALESES:
