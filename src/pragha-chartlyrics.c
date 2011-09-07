@@ -15,17 +15,117 @@
  * along with this program.  If not, see <http:www.gnu.org/licenses/>.  * 
  ************************************************************************/
 
-#include <stdlib.h>
-
 #include "pragha.h"
 #include <pthread.h>
-
-#include <curl/curl.h>
-#include <curl/easy.h>
 
 #define LARGE_BUFFER	1024
 #define CHARTLYRICS_API_ROOT	"http://api.chartlyrics.com/apiv1.asmx/"
 
+#ifdef HAVE_LIBGLYR
+void *do_chartlyric_dialog (gpointer data)
+{
+	GtkWidget *dialog;
+	GtkWidget *header, *view, *frame, *scrolled;
+	GtkTextBuffer *buffer;
+	gchar *title_header = NULL;
+	gint result;
+	GdkCursor *cursor;
+	GlyrQuery q;
+	GLYR_ERROR err;
+
+	struct con_win *cwin = data;
+
+	glyr_init();
+
+	gdk_threads_enter ();
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+	gdk_threads_leave ();
+
+	glyr_init_query(&q);
+	glyr_opt_type(&q,GLYR_GET_LYRICS);
+
+	glyr_opt_artist(&q,(char*)cwin->cstate->curr_mobj->tags->artist);
+	glyr_opt_album (&q,(char*)cwin->cstate->curr_mobj->tags->album);
+	glyr_opt_title (&q,(char*)cwin->cstate->curr_mobj->tags->title);
+	
+	GlyrMemCache *head = glyr_get(&q,&err,NULL);
+
+	if(head == NULL) {
+		gdk_threads_enter ();
+		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_threads_leave ();
+		return NULL;
+	}
+
+	gdk_threads_enter ();
+	view = gtk_text_view_new ();
+	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
+	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
+	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
+
+	frame = gtk_frame_new (NULL);
+	scrolled = gtk_scrolled_window_new (NULL, NULL);
+
+	gtk_container_add (GTK_CONTAINER (scrolled), view);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+	gtk_container_set_border_width (GTK_CONTAINER (frame), 8);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
+	gtk_container_add (GTK_CONTAINER (frame), scrolled);
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+
+	gtk_text_buffer_set_text (buffer, head->data, -1);
+
+	dialog = gtk_dialog_new_with_buttons(head->prov,
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_DIALOG_MODAL,
+					     GTK_STOCK_OK,
+					     GTK_RESPONSE_OK,
+					     NULL);
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), _("_Edit"), GTK_RESPONSE_HELP);
+
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
+
+	title_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
+				cwin->cstate->curr_mobj->tags->title, cwin->cstate->curr_mobj->tags->artist);
+	header = sokoke_xfce_header_new (title_header, NULL, cwin);
+	g_free(title_header);
+
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), frame, TRUE, TRUE, 0);
+
+	gtk_widget_show_all(dialog);
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch (result) {
+		case GTK_RESPONSE_HELP:
+			//open_url (cwin, lyric_info->url);
+			break;
+		case GTK_RESPONSE_OK:
+			break;
+		default:
+			break;
+	}
+
+	gtk_widget_destroy(dialog);
+	gdk_threads_leave ();
+
+	glyr_free_list(head);
+	glyr_destroy_query(&q);
+	glyr_cleanup ();
+
+	return NULL;
+}
+#else
 typedef struct {
 	unsigned int id;
 	char checksum[33];
@@ -260,18 +360,6 @@ void *do_chartlyric_dialog (gpointer data)
 	return NULL;
 }
 
-void chartlyric_dialog (struct con_win *cwin)
-{
-	pthread_t tid;
-
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	CDEBUG(DBG_INFO, "Get lyrics Action");
-
-	pthread_create(&tid, NULL, do_chartlyric_dialog, cwin);
-}
-
 static void *myrealloc(void *ptr, unsigned int size)
 {
   /* There might be a realloc() out there that doesn't like reallocing
@@ -355,4 +443,17 @@ WebData *chartlyrics_helper_get_page(CURL *curl, const char *url){
 		}
 	}
 	return chunk;
+}
+#endif
+
+void chartlyric_dialog (struct con_win *cwin)
+{
+	pthread_t tid;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
+	pthread_create(&tid, NULL, do_chartlyric_dialog, cwin);
 }

@@ -31,6 +31,13 @@
 #include <clastfm.h>
 #endif
 
+#ifdef HAVE_LIBGLYR
+#include <glyr/glyr.h>
+#else
+#include <curl/curl.h>
+#include <curl/easy.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

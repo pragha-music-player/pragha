@@ -4,9 +4,9 @@ dnl Pragha - A Lightweight Music Player for GNU/Linux
 dnl
 
 dnl Version information
-m4_define([pragha_version_major], [0])
-m4_define([pragha_version_minor], [99])
-m4_define([pragha_version_micro], [0])
+m4_define([pragha_version_major], [1])
+m4_define([pragha_version_minor], [0])
+m4_define([pragha_version_micro], [RC])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -104,6 +104,13 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
                        [libclastfm],
                        [libclastfm library], [yes])
 
+dnl Check libglyr
+LIBGLYR_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
+                       [libglyr], [0.8.5],
+                       [libglyr],
+                       [libglyr library], [yes])
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
@@ -124,5 +131,6 @@ echo "  Prefix.....................................................: ${prefix}"
 echo "  Cubic volume support (Need gstreamer-plugins-base-devel)...: $GSTREAMER_PLUGINS_BASE_FOUND"
 echo "  Global keyboard shortcuts support..........................: $LIBKEYBINDER_FOUND"
 echo "  Lastfm support (Need http://liblastfm.sourceforge.net 0.4).: $LIBCLASTFM_FOUND"
+echo "  Use libglyr to search lyrics...............................: $LIBGLYR_FOUND"
 echo ""
 

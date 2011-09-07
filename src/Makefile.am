@@ -88,5 +88,8 @@ pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
 pragha_LDFLAGS += $(LIBCLASTFM_LIBS)
 endif
 
-
+if HAVE_LIBGLYR
+pragha_CFLAGS += $(LIBGLYR_CFLAGS)
+pragha_LDFLAGS += $(LIBGLYR_LIBS)
+endif
 
