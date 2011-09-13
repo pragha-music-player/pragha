@@ -27,13 +27,15 @@ void *do_chartlyric_dialog (gpointer data)
 	GtkWidget *dialog;
 	GtkWidget *header, *view, *frame, *scrolled;
 	GtkTextBuffer *buffer;
-	gchar *title_header = NULL;
-	gint result;
+	gchar *title_header = NULL, *artist = NULL, *title = NULL;
 	GdkCursor *cursor;
 	GlyrQuery q;
 	GLYR_ERROR err;
 
 	struct con_win *cwin = data;
+
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
 
 	glyr_init();
 
@@ -44,20 +46,20 @@ void *do_chartlyric_dialog (gpointer data)
 	gdk_threads_leave ();
 
 	glyr_init_query(&q);
-	glyr_opt_type(&q,GLYR_GET_LYRICS);
+	glyr_opt_type(&q, GLYR_GET_LYRICS);
 
-	glyr_opt_artist(&q,(char*)cwin->cstate->curr_mobj->tags->artist);
-	glyr_opt_album (&q,(char*)cwin->cstate->curr_mobj->tags->album);
-	glyr_opt_title (&q,(char*)cwin->cstate->curr_mobj->tags->title);
+	glyr_opt_artist(&q, artist);
+	glyr_opt_title(&q, title);
 	
-	GlyrMemCache *head = glyr_get(&q,&err,NULL);
+	GlyrMemCache *head = glyr_get(&q, &err,NULL);
 
 	if(head == NULL) {
 		gdk_threads_enter ();
-		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
+		set_status_message(_("Error searching Lyric."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
-		return NULL;
+
+		goto bad;
 	}
 
 	gdk_threads_enter ();
@@ -89,12 +91,9 @@ void *do_chartlyric_dialog (gpointer data)
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	gtk_dialog_add_button(GTK_DIALOG(dialog), _("_Edit"), GTK_RESPONSE_HELP);
-
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
-	title_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
-				cwin->cstate->curr_mobj->tags->title, cwin->cstate->curr_mobj->tags->artist);
+	title_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), title, artist);
 	header = sokoke_xfce_header_new (title_header, NULL, cwin);
 	g_free(title_header);
 
@@ -105,23 +104,19 @@ void *do_chartlyric_dialog (gpointer data)
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	switch (result) {
-		case GTK_RESPONSE_HELP:
-			//open_url (cwin, lyric_info->url);
-			break;
-		case GTK_RESPONSE_OK:
-			break;
-		default:
-			break;
-	}
+	gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
 	gdk_threads_leave ();
 
 	glyr_free_list(head);
+
+bad:
 	glyr_destroy_query(&q);
 	glyr_cleanup ();
+
+	g_free(artist);
+	g_free(title);
 
 	return NULL;
 }
@@ -289,7 +284,7 @@ void *do_chartlyric_dialog (gpointer data)
 
 	if(!lyric_info) {
 		gdk_threads_enter ();
-		set_status_message(_("Error searching Lyric on Chartlyrics."), cwin);
+		set_status_message(_("Error searching Lyric."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
 		return NULL;
