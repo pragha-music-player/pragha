@@ -16,6 +16,7 @@ pragha_SOURCES =cdda.c \
 		dbus.c \
 		filetree.c \
 		gui.c \
+		glyr-related.c \
 		init.c \
 		jumptotrack.c \
 		librarytree.c \
@@ -34,7 +35,6 @@ pragha_SOURCES =cdda.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
 		pragha-lastfm.c \
-		pragha-chartlyrics.c \
 		xml_helper.c \
 		xml_helper.h
 
@@ -52,7 +52,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(LIBX11_CFLAGS)						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
-	$(LIBCURL_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -69,7 +68,6 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS) 						\
-	$(LIBCURL_LIBS)							\
 	$(LIBX11_LIBS)
 
 if HAVE_GSTREAMER_PLUGINS_BASE

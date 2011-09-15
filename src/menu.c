@@ -979,12 +979,6 @@ void about_widget(struct con_win *cwin)
 				NULL);
 }
 
-void lyric_action(GtkAction *action, struct con_win *cwin)
-{
-	if (cwin->cstate->state != ST_STOPPED)
-		chartlyric_dialog(cwin);
-}
-
 void home_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";

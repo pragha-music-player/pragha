@@ -61,6 +61,8 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Add the library\"/>	    		\
 			<separator/>						\
 			<menuitem action=\"Search lyric\"/>			\
+			<menuitem action=\"Artist info\"/>			\
+			<menuitem action=\"Get album art\"/>			\
 			<separator/>						\
 			<menuitem action=\"Search in playlist\"/>		\
 			<separator/>						\
@@ -70,9 +72,6 @@ gchar *main_menu_xml = "<ui>							\
 			<menu action=\"Lastfm\">				\
 				<menuitem action=\"Love track\"/>		\
 				<menuitem action=\"Unlove track\"/>		\
-				<separator/>					\
-				<menuitem action=\"Artist info\"/>		\
-				<menuitem action=\"Get album art\"/>		\
 				<separator/>					\
 				<menuitem action=\"Import a XSPF playlist\"/>	\
 				<menuitem action=\"Add favorites\"/>		\
@@ -224,8 +223,12 @@ GtkActionEntry main_aentries[] = {
 	{"Lateral panel", NULL, N_("Lateral _panel")},
 	{"Jump to playing song", GTK_STOCK_JUMP_TO, N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
+	#ifdef HAVE_LIBGLYR
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", G_CALLBACK(lyric_action)},
+	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
+	{"Artist info", GTK_STOCK_INFO, N_("Artist _info"),
+	 NULL, "Artist info", G_CALLBACK(related_get_artist_info_action)},
+	 #endif
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
@@ -238,8 +241,6 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Love track", G_CALLBACK(lastfm_track_love_action)},
 	{"Unlove track", NULL, N_("Unlove track"),
 	 NULL, "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
-	{"Artist info", GTK_STOCK_INFO, N_("Artist _info"),
-	 NULL, "Artist info", G_CALLBACK(lastfm_artist_info_action)},
 	{"Get album art", NULL, N_("Get album art"),
 	 NULL, "Get album art art", G_CALLBACK(lastfm_get_album_art_action)},
 	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),

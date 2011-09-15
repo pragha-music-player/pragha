@@ -33,9 +33,6 @@
 
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
-#else
-#include <curl/curl.h>
-#include <curl/easy.h>
 #endif
 
 #include <stdio.h>
@@ -729,7 +726,6 @@ void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
 void add_all_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
-void lyric_action(GtkAction *action, struct con_win *cwin);
 void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
@@ -1225,7 +1221,6 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
 void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_artist_info_action(GtkAction *action, struct con_win *cwin);
 void lastfm_get_album_art_action(GtkAction *action, struct con_win *cwin);
 void *do_lastfm_love (gpointer data);
 gboolean lastfm_love_handler (gpointer data);
@@ -1235,8 +1230,9 @@ void *do_lastfm_now_playing (gpointer data);
 gboolean lastfm_now_playing_handler (gpointer data);
 void update_lastfm (struct con_win *cwin);
 
-/* Chartlyric */
-void chartlyric_dialog (struct con_win *cwin);
+/* Related info helpers */
+void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
+void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
 /* Others */
 void dialog_jump_to_track (struct con_win *cwin);
