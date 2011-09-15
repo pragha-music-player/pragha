@@ -221,8 +221,6 @@
 #define TAG_YEAR_CHANGED	1<<5
 #define TAG_COMMENT_CHANGED	1<<6
 
-#define ISO_639_1 _("en")
-
 #define PRAGHA_BUTTON_SKIP       _("_Skip")
 #define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
 #define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
@@ -236,6 +234,7 @@ typedef enum {
 enum debug_level {
 	DBG_BACKEND = 1,
 	DBG_INFO,
+	DBG_MPRIS,
 	DBG_MOBJ,
 	DBG_DB,
 	DBG_VERBOSE,
