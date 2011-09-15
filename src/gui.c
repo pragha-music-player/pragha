@@ -34,6 +34,8 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
 		<menu action=\"EditMenu\">					\
+			<menuitem action=\"Add the library\"/>	    		\
+			<separator/>						\
 			<menuitem action=\"Remove\"/>		    		\
 			<menuitem action=\"Crop\"/>		    		\
 			<menuitem action=\"Clear current playlist\"/>		\
@@ -43,6 +45,8 @@ gchar *main_menu_xml = "<ui>							\
 			<separator/>						\
 			<menuitem action=\"Shuffle\"/>				\
 			<menuitem action=\"Repeat\"/>				\
+			<separator/>						\
+			<menuitem action=\"Search in playlist\"/>		\
 			<separator/>						\
 			<menuitem action=\"Preferences\"/>			\
 		</menu>								\
@@ -58,16 +62,9 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Jump to playing song\"/>		\
 		</menu>								\
 		<menu action=\"ToolsMenu\">					\
-			<menuitem action=\"Add the library\"/>	    		\
-			<separator/>						\
 			<menuitem action=\"Search lyric\"/>			\
-			<menuitem action=\"Artist info\"/>			\
-			<menuitem action=\"Get album art\"/>			\
-			<separator/>						\
-			<menuitem action=\"Search in playlist\"/>		\
-			<separator/>						\
-			<menuitem action=\"Rescan library\"/>			\
-			<menuitem action=\"Update library\"/>			\
+			<menuitem action=\"Search artist info\"/>		\
+			<menuitem action=\"Search album art\"/>			\
 			<separator/>						\
 			<menu action=\"Lastfm\">				\
 				<menuitem action=\"Love track\"/>		\
@@ -78,6 +75,9 @@ gchar *main_menu_xml = "<ui>							\
 				<menuitem action=\"Add similar\"/>		\
 				<separator/>					\
 			</menu>							\
+			<separator/>						\
+			<menuitem action=\"Rescan library\"/>			\
+			<menuitem action=\"Update library\"/>			\
 			<separator/>						\
 			<menuitem action=\"Statistics\"/>			\
 		</menu>								\
@@ -226,8 +226,8 @@ GtkActionEntry main_aentries[] = {
 	#ifdef HAVE_LIBGLYR
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
 	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
-	{"Artist info", GTK_STOCK_INFO, N_("Artist _info"),
-	 NULL, "Artist info", G_CALLBACK(related_get_artist_info_action)},
+	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
+	 NULL, "Search artist info", G_CALLBACK(related_get_artist_info_action)},
 	 #endif
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
@@ -241,8 +241,8 @@ GtkActionEntry main_aentries[] = {
 	 NULL, "Love track", G_CALLBACK(lastfm_track_love_action)},
 	{"Unlove track", NULL, N_("Unlove track"),
 	 NULL, "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
-	{"Get album art", NULL, N_("Get album art"),
-	 NULL, "Get album art art", G_CALLBACK(lastfm_get_album_art_action)},
+	{"Search album art", NULL, N_("Search album art"),
+	 NULL, "Search album art", G_CALLBACK(lastfm_get_album_art_action)},
 	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
 	 NULL, "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
 	{"Add favorites", NULL, N_("Add favorites"),
