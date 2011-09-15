@@ -53,7 +53,7 @@ void *do_get_artist_info (gpointer data)
 	gdk_threads_enter ();
 
 	if(head == NULL) {
-		set_status_message(_("Artist information not found"), cwin);
+		set_status_message(_("Artist information not found."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
 		goto bad;

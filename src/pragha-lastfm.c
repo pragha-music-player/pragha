@@ -279,7 +279,7 @@ void *do_lastfm_get_album_art (gpointer data)
 
 	if(!album) {
 		gdk_threads_enter ();
-		set_status_message(_("Album art not found on Last.fm."), cwin);
+		set_status_message(_("Album art not found."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
 		goto exists;
@@ -296,7 +296,7 @@ void *do_lastfm_get_album_art (gpointer data)
 		g_object_unref(G_OBJECT(album_art));
 	}
 	else {
-		set_status_message(_("Album art not found on Last.fm."), cwin);
+		set_status_message(_("Album art not found."), cwin);
 	}
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
@@ -344,7 +344,7 @@ void *do_lastfm_love (gpointer data)
 
 	if (rv != 0) {
 		gdk_threads_enter ();
-		set_status_message(_("Love song on Last.fm failed"), cwin);
+		set_status_message(_("Love song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
 	}
 
@@ -381,7 +381,7 @@ void *do_lastfm_unlove (gpointer data)
 
 	if (rv != 0) {
 		gdk_threads_enter ();
-		set_status_message(_("Unlove song on Last.fm failed"), cwin);
+		set_status_message(_("Unlove song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
 	}
 
@@ -473,7 +473,7 @@ void *do_lastfm_now_playing (gpointer data)
 
 	if (rv != 0) {
 		gdk_threads_enter ();
-		set_status_message(_("Update current song on Last.fm failed"), cwin);
+		set_status_message(_("Update current song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
 	}
 
@@ -500,7 +500,7 @@ void *do_lastfm_now_playing (gpointer data)
 				g_object_unref(G_OBJECT(album_art));
 			}
 			else {
-				set_status_message(_("Album art not found on Last.fm."), cwin);
+				set_status_message(_("Album art not found."), cwin);
 			}
 			gdk_threads_leave ();
 		}
