@@ -373,7 +373,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 			G_CALLBACK(close_button_cb), window);
 	g_signal_connect(window, "destroy",
 			G_CALLBACK(gtk_widget_destroy), window);
-	g_signal_connect(window, "key_press_event",
+	g_signal_connect(window, "key-press-event",
 			G_CALLBACK(open_file_on_keypress), NULL);
 
 	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(cwin->mainwindow));

@@ -366,6 +366,23 @@ void unset_album_art(struct con_win *cwin)
 	}
 }
 
+/* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
+
+gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+{
+	gboolean ret = FALSE;
+
+	if (event->keyval == GDK_Up || event->keyval == GDK_Down){
+		GdkEvent *new_event;
+
+		new_event = gdk_event_copy ((GdkEvent *) event);
+		gtk_widget_grab_focus(cwin->current_playlist);
+		ret = gtk_widget_event (GTK_WIDGET (cwin->current_playlist), new_event);
+		gdk_event_free (new_event);
+	}
+	return ret;
+}
+
 /* Handler for the 'Leave fullscren' button item in Panel */
 
 void
@@ -538,7 +555,6 @@ void keybind_next_handler (const char *keystring, gpointer data)
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_next_track(cwin);
-	gtk_widget_grab_focus(cwin->current_playlist);
 }
 
 void keybind_media_handler (const char *keystring, gpointer data)
