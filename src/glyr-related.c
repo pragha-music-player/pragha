@@ -42,8 +42,6 @@ void *do_get_artist_info (gpointer data)
 
 	gdk_threads_leave ();
 
-	glyr_init();
-
 	glyr_init_query(&q);
 	glyr_opt_type(&q, GLYR_GET_ARTISTBIO);
 
@@ -111,7 +109,6 @@ void *do_get_artist_info (gpointer data)
 	g_free(subtitle_header);
 bad:
 	glyr_destroy_query(&q);
-	glyr_cleanup ();
 
 	return NULL;
 }
@@ -142,8 +139,6 @@ void *do_get_lyrics_dialog (gpointer data)
 
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
 	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
-
-	glyr_init();
 
 	gdk_threads_enter ();
 	cursor = gdk_cursor_new(GDK_WATCH);
@@ -219,7 +214,6 @@ void *do_get_lyrics_dialog (gpointer data)
 
 bad:
 	glyr_destroy_query(&q);
-	glyr_cleanup ();
 
 	g_free(artist);
 	g_free(title);
@@ -238,4 +232,19 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 
 	pthread_create(&tid, NULL, do_get_lyrics_dialog, cwin);
 }
+
+int uninit_glyr_related (struct con_win *cwin)
+{
+	glyr_cleanup ();
+
+	return 0;
+}
+
+int init_glyr_related (struct con_win *cwin)
+{
+	glyr_init();
+
+	return 0;
+}
+
 #endif

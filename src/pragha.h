@@ -1233,6 +1233,9 @@ void update_lastfm (struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
+int uninit_glyr_related (struct con_win *cwin);
+int init_glyr_related (struct con_win *cwin);
+
 /* Others */
 void dialog_jump_to_track (struct con_win *cwin);
 
