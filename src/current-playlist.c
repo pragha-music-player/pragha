@@ -1242,10 +1242,6 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 		/* Now build iterators from the references and delete
 		   them from the store */
 
-		g_object_ref(model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
 		for (i=list; i != NULL; i = i->next) {
 			ref = i->data;
 			path = gtk_tree_row_reference_get_path(ref);
@@ -1270,9 +1266,6 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 			gtk_tree_path_free(path);
 			gtk_tree_row_reference_free(ref);
 		}
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(model);
 
 		g_list_free(list);
 	}
@@ -1320,10 +1313,6 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	/* Delete the referenced nodes */
 
-	g_object_ref(model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
 	for (i=to_delete; i != NULL; i = i->next) {
 		ref = i->data;
 		path = gtk_tree_row_reference_get_path(ref);
@@ -1348,10 +1337,6 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_tree_path_free(path);
 		gtk_tree_row_reference_free(ref);
 	}
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	g_object_unref(model);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 

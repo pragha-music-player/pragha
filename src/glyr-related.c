@@ -18,6 +18,8 @@
 #include "pragha.h"
 #include <pthread.h>
 
+#define ISO_639_1 _("en")
+
 #ifdef HAVE_LIBGLYR
 /* Handler for 'Artist info' action in the Tools menu */
 void *do_get_artist_info (gpointer data)
@@ -46,7 +48,7 @@ void *do_get_artist_info (gpointer data)
 	glyr_opt_type(&q, GLYR_GET_ARTISTBIO);
 
 	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
-	glyr_opt_lang (&q, "auto");
+	glyr_opt_lang (&q, ISO_639_1);
 
 	head = glyr_get(&q, &err, NULL);
 
