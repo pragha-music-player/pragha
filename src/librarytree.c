@@ -105,62 +105,65 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 					L_VISIBILE, TRUE, -1);
 }
 
-/* Helper function for add_folder_file() */
-
-static void add_subpath(const gchar *path, int location_id,
-	struct con_win *cwin, GtkTreeModel *model)
-{
-	static GtkTreeIter iter1, iter2, *p_iter = NULL;
-	GtkTreeIter search_iter;
-			
-	if (!find_child_node(path, &search_iter, p_iter, model)) {
-		add_child_node_by_folder(model, &iter1, p_iter,
-			location_id ? cwin->pixbuf->pixbuf_track : cwin->pixbuf->pixbuf_dir,
-			path, location_id ? NODE_BASENAME : NODE_FOLDER, location_id);
-		p_iter = location_id ? NULL : &iter1;
-	}
-	else {
-		iter2 = search_iter;
-		p_iter = location_id ? NULL : &iter2;
-	}
-}
-
 /* Adds a file and its parent directories to the library tree */
 
-static void add_folder_file(const gchar *path, int location_id,
+static void add_folder_file(gchar *path, int location_id,
 	struct con_win *cwin, GtkTreeModel *model)
 {
-	gchar *filename = NULL, *fullpath = NULL, **subpaths = NULL;	/* To be freed */
-	gchar *prefix = NULL, *filepath = NULL;				/* Do not free */
-	int i = 0;
-		
-	/* Search all library directories for the one that matches the path */
-	while ((prefix = g_slist_nth_data(cwin->cpref->library_dir, i++))) {	
-		if (g_str_has_prefix(path, prefix)) {
-			fullpath = get_display_filename(path, TRUE);
-			filename = get_display_filename(path, FALSE);
+	gchar *prefix = NULL, *filepath = NULL;	/* Do not free */
+	gchar **subpaths = NULL;		/* To be freed */
 
-			if (!cwin->cpref->fuse_folders)
-				add_subpath(prefix, 0, cwin, model);
+	GtkTreeIter iter, iter2, search_iter, *p_iter = NULL;
+	int i = 0 , len = 0;
+
+	/* Search all library directories for the one that matches the path */
+	while ((prefix = g_slist_nth_data(cwin->cpref->library_dir, i++))) {
+		if (g_str_has_prefix(path, prefix)) {
 			break;
 		}
 	}
 
 	/* Point after library directory prefix */
-	filepath = fullpath + strlen(prefix) + 1;
+
+	filepath = path + strlen(prefix) + 1;
 	subpaths = g_strsplit(filepath, G_DIR_SEPARATOR_S, -1);
 
-	/* Add all subdirectories to the tree */
-	for (i = 0; subpaths[i]; i++) {
-		add_subpath(subpaths[i], 0, cwin, model);
+	len = g_strv_length (subpaths);
+	len--;
+
+	/* If not fuse_folders add the prefix */
+	if (!cwin->cpref->fuse_folders) {
+		if (!find_child_node(prefix, &search_iter, NULL, model)) {
+			add_child_node_by_folder(model, &iter, NULL,
+						cwin->pixbuf->pixbuf_dir,
+						prefix,
+						NODE_FOLDER,
+						0);
+			p_iter = &iter;
+		}
+		else {
+			iter2 = search_iter;
+			p_iter = &iter2;
+		}
 	}
 
-	/* Finally add filename */
-	add_subpath(filename, location_id, cwin, model);
+	/* Add all subdirectories and filename to the tree */
+	for (i = 0; subpaths[i]; i++) {
+		if (!find_child_node(subpaths[i], &search_iter, p_iter, model)) {
+			add_child_node_by_folder(model, &iter, p_iter,
+						(i < len) ? cwin->pixbuf->pixbuf_dir : cwin->pixbuf->pixbuf_track,
+						subpaths[i],
+						(i < len) ? NODE_FOLDER : NODE_BASENAME,
+						(i < len) ? 0 : location_id);
+			p_iter = &iter;
+		}
+		else {
+			iter2 = search_iter;
+			p_iter = &iter2;
+		}
+	}
 
 	g_strfreev(subpaths);
-	g_free(filename);
-	g_free(fullpath);
 }
 
 /* Adds an entry to the library tree by tag (genre, artist...) */
@@ -214,15 +217,22 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		}
 
 		/* Find / add child node if it's not already added */
-		if (!find_child_node(node_data, &search_iter, p_iter, model)) {
-			add_child_node_by_tag(model, &iter, p_iter, node_pixbuf,
-				node_data, node_type, node_type == NODE_TRACK ? location_id : 0);
-			p_iter = &iter;
+		if (node_type != NODE_TRACK) {
+			if (!find_child_node(node_data, &search_iter, p_iter, model)) {
+				add_child_node_by_tag(model, &iter, p_iter, node_pixbuf,
+					node_data, node_type, 0);
+				p_iter = &iter;
+			}
+			else {
+				iter2 = search_iter;
+				p_iter = &iter2;
+			}
 		}
 		else {
-			iter2 = search_iter;
-			p_iter = &iter2;
+			add_child_node_by_tag(model, &iter, p_iter, node_pixbuf,
+						node_data, NODE_TRACK, location_id);
 		}
+
 		/* Free node_data if needed */
 		if (need_gfree) {
 			need_gfree = FALSE;
