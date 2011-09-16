@@ -163,7 +163,7 @@ static GVariant* mpris_Root_get_Identity(struct con_win *cwin) {
 }
 
 static GVariant* mpris_Root_get_DesktopEntry(struct con_win *cwin) {
-	GVariant* ret_val = g_variant_new_string(DESKTOPENTRY);
+	GVariant* ret_val = g_variant_new_string("pragha");
 	return ret_val;
 }
 
@@ -328,11 +328,17 @@ static GVariant * handle_get_trackid(struct musicobject *mobj) {
 	return g_variant_new_object_path(o);
 }
 
-static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
-	gchar *artists = g_strdup_printf("['%s']", mobj->tags->artist);
-	gchar *genres = g_strdup_printf("['%s']", mobj->tags->genre);
+void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
+{
+	GVariant *vval = g_variant_new_string(val);
+	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
+
+	g_variant_builder_add (b, "{sv}", tag, vvals);
+}
+
+static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
+{
 	gchar *date = g_strdup_printf("%d", mobj->tags->year);
-	gchar *comments = g_strdup_printf("['%s']", mobj->tags->comment);
 	gchar *url = g_str_has_prefix(mobj->file, "cdda") ?
 		g_strdup(mobj->file) :
 		g_filename_to_uri(mobj->file, NULL, NULL);
@@ -345,18 +351,15 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
 		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
 		g_variant_new_string(mobj->tags->title));
-	g_variant_builder_add (b, "{sv}", "xesam:artist",
-		g_variant_parse(G_VARIANT_TYPE("as"), artists, NULL, NULL, NULL));
+	handle_strings_request(b, "xesam:artist", mobj->tags->artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
 		g_variant_new_string(mobj->tags->album));
-	g_variant_builder_add (b, "{sv}", "xesam:genre",
-		g_variant_parse(G_VARIANT_TYPE("as"), genres, NULL, NULL, NULL));
+	handle_strings_request(b, "xesam:genre", mobj->tags->genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
 		g_variant_new_string (date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
 		g_variant_new_int32(mobj->tags->track_no));
-	g_variant_builder_add (b, "{sv}", "xesam:comment",
-		g_variant_parse(G_VARIANT_TYPE("as"), comments, NULL, NULL, NULL));
+	handle_strings_request(b, "xesam:comment", mobj->tags->comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
 		g_variant_new_int64(mobj->tags->length * 1000000l));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
@@ -365,10 +368,8 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b) {
 		g_variant_new_int32(mobj->tags->channels));
 	g_variant_builder_add (b, "{sv}", "audio-samplerate",
 		g_variant_new_int32(mobj->tags->samplerate));
-	g_free(artists);
-	g_free(genres);
+
 	g_free(date);
-	g_free(comments);
 	g_free(url);
 }
 
@@ -438,64 +439,81 @@ static GVariant* mpris_Player_get_CanControl(struct con_win *cwin) {
 }
 
 /* org.mpris.MediaPlayer2.Playlists */
-static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant* parameters) {
-	gchar* playlist = NULL;
-	gboolean found = FALSE;
+static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant* parameters)
+{
+	gchar *get_playlist = NULL, *test_playlist = NULL, *found_playlist = NULL;
+	gchar **db_playlists = NULL;
+	gint i = 0;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Playlists ActivatePlaylist");
 
-	g_variant_get(parameters, "(o)", &playlist);
-	if(playlist && g_str_has_prefix(playlist, MPRIS_PATH)) {
-		gint i = 0;
-		gchar **playlists = get_playlist_names_db(cwin);
-		while(playlists[i]) {
-			gchar *list = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
-			if(!g_strcmp0(list, playlist)) {
-				backend_stop(NULL, cwin);
-				clear_current_playlist(NULL, cwin);
-				add_playlist_current_playlist(playlists[i], cwin);
-				play_track(cwin);
-				found = TRUE;
-				break;
-			}
-			g_free(list);
-			i++;
-		}
-		g_free(playlists);
-	}
-	if(!found)
-		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation, 
-				DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
+	g_variant_get(parameters, "(o)", &get_playlist);
 
-	g_free(playlist);
+	if(get_playlist && g_str_has_prefix(get_playlist, MPRIS_PATH)) {
+		db_playlists = get_playlist_names_db(cwin);
+		if(db_playlists) {
+			while(db_playlists[i]) {
+				test_playlist = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
+				if(0 == g_strcmp0(test_playlist, get_playlist))
+					found_playlist = g_strdup(db_playlists[i]);
+				g_free(test_playlist);
+				i++;
+			}
+			g_strfreev(db_playlists);
+		}
+	}
+
+	if(found_playlist) {
+		clear_current_playlist(NULL, cwin);
+		add_playlist_current_playlist(found_playlist, cwin);
+
+		backend_stop(NULL, cwin);
+		play_first_current_playlist (cwin);
+
+		g_free(found_playlist);
+	}
+	else {
+		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
+							DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
+	}
+
 	return NULL;
 }
 
-static GVariant* mpris_Playlists_GetPlaylists(struct con_win *cwin, GVariant* parameters) {
+static GVariant* mpris_Playlists_GetPlaylists(struct con_win *cwin, GVariant* parameters)
+{
 	GVariantBuilder *builder;
 	guint start, max;
 	gchar *order;
+	gchar ** lists = NULL;
+	gchar *listpath = NULL;
 	gboolean reverse;
+	gint i = 0, imax = 0;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Playlists GetPlaylists");
 
-	g_variant_get(parameters, "(uusb)", &start, &max, &order, &reverse);
-	gchar ** lists = get_playlist_names_db(cwin);
 	builder = g_variant_builder_new (G_VARIANT_TYPE ("(a(oss))"));
 	g_variant_builder_open(builder, G_VARIANT_TYPE("a(oss)"));
-	gint i = 0;
-	gint imax = max;
-	while(lists[i]) {
-		if(i >= start && imax > 0) {
-			gchar *listpath = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
-			g_variant_builder_add (builder, "(oss)", listpath, lists[i], "");
-			g_free(listpath);
-			imax--;
+
+	lists = get_playlist_names_db(cwin);
+
+	if (lists) {
+		g_variant_get(parameters, "(uusb)", &start, &max, &order, &reverse);
+		imax = max;
+		while(lists[i]) {
+			if(i >= start && imax > 0) {
+				listpath = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
+				g_variant_builder_add (builder, "(oss)", listpath, lists[i], "");
+
+				g_free(listpath);
+				imax--;
+			}
+			i++;
 		}
-		i++;
+		g_strfreev(lists);
 	}
-	g_free(lists);
 	g_variant_builder_close(builder);
+
 	return g_variant_builder_end(builder);
 }
 

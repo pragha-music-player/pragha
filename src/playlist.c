@@ -341,6 +341,9 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin);
 
+	if(playlist_id == 0)
+		goto bad;
+
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	exec_sqlite_query(query, cwin, &result);
@@ -377,6 +380,8 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	update_status_bar(cwin);
 
 	sqlite3_free_table(result.resultp);
+
+bad:
 	g_free(s_playlist);
 }
 
