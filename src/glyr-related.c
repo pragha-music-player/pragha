@@ -422,8 +422,9 @@ int init_glyr_related (struct con_win *cwin)
 
 gboolean update_related_handler (gpointer data)
 {
+#if HAVE_LIBCLASTFM || HAVE_LIBGLYR
 	struct con_win *cwin = data;
-
+#endif
 	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
 
 #ifdef HAVE_LIBCLASTFM

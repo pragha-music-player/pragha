@@ -968,8 +968,9 @@ gint init_config(struct con_win *cwin)
 	/* Init default flags */
 
 	cwin->cgst->emitted_error = FALSE;
+#ifdef HAVE_LIBCLASTFM
 	cwin->clastfm->session_id = NULL;
-
+#endif
 	/* Cleanup */
 
 	g_free(conrc);
@@ -1150,6 +1151,21 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
+
+#ifndef HAVE_LIBGLYR
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
+	gtk_action_set_sensitive(action, FALSE);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
+	gtk_action_set_sensitive(action, FALSE);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search album art");
+	gtk_action_set_sensitive(action, FALSE);
+#endif
+#ifndef HAVE_LIBCLASTFM
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
+	gtk_action_set_sensitive(action, FALSE);
+#endif
 }
 
 void init_pixbufs(struct con_win *cwin)
