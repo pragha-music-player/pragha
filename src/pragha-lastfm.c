@@ -183,9 +183,9 @@ void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
+
 	pthread_create (&tid, NULL, do_lastfm_add_favorites_action, cwin);
 }
-
 
 void *do_lastfm_get_similar_action (gpointer data)
 {
@@ -239,10 +239,6 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
-	if (cwin->clastfm->session_id == NULL) {
-		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return;
-	}
 	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
 }
 
