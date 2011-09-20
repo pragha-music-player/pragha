@@ -73,7 +73,6 @@ gchar *main_menu_xml = "<ui>							\
 				<menuitem action=\"Import a XSPF playlist\"/>	\
 				<menuitem action=\"Add favorites\"/>		\
 				<menuitem action=\"Add similar\"/>		\
-				<separator/>					\
 			</menu>							\
 			<separator/>						\
 			<menuitem action=\"Rescan library\"/>			\
@@ -242,7 +241,7 @@ GtkActionEntry main_aentries[] = {
 	{"Unlove track", NULL, N_("Unlove track"),
 	 NULL, "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
 	{"Search album art", NULL, N_("Search album art"),
-	 NULL, "Search album art", G_CALLBACK(lastfm_get_album_art_action)},
+	 NULL, "Search album art", G_CALLBACK(related_get_album_art_action)},
 	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
 	 NULL, "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
 	{"Add favorites", NULL, N_("Add favorites"),

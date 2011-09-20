@@ -285,8 +285,8 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
 		if (mobj && mobj->file_type != FILE_CDDA){
-			#ifdef HAVE_LIBCLASTFM
-			if(cwin->cpref->lw.lastfm_get_album_art) {
+			#ifdef HAVE_LIBGLYR
+			if(cwin->cpref->get_album_art) {
 				path = g_strdup_printf("%s/%s - %s.jpeg",
 							cwin->cpref->cache_album_art_folder,
 							mobj->tags->artist,

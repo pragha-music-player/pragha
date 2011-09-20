@@ -21,6 +21,176 @@
 #define ISO_639_1 _("en")
 
 #ifdef HAVE_LIBGLYR
+void *do_get_album_art (gpointer data)
+{
+	GError *error = NULL;
+	GdkPixbuf *album_art = NULL;
+	GdkCursor *cursor;
+	gchar *album_art_path = NULL;
+	GlyrQuery q;
+	GLYR_ERROR err;
+
+	GlyrMemCache *head = NULL;
+
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_INFO, "Get album art thread");
+	
+	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
+					cwin->cpref->cache_album_art_folder,
+					cwin->cstate->curr_mobj->tags->artist,
+					cwin->cstate->curr_mobj->tags->album);
+
+	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
+		goto exists;
+
+	gdk_threads_enter ();
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+
+	gdk_threads_leave ();
+
+	glyr_init_query(&q);
+	glyr_opt_type(&q, GLYR_GET_COVERART);
+
+	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
+	glyr_opt_album(&q, cwin->cstate->curr_mobj->tags->album);
+
+	head = glyr_get(&q, &err, NULL);
+
+	if(head == NULL) {
+		g_warning(glyr_strerror(err));
+		gdk_threads_enter ();
+		set_status_message(_("Album art not found."), cwin);
+		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_threads_leave ();
+		goto bad;
+	}
+
+	gdk_threads_enter ();
+	if(head->data)
+		album_art = vgdk_pixbuf_new_from_memory(head->data, head->size);
+
+	if (album_art) {
+		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
+
+		update_album_art(cwin->cstate->curr_mobj, cwin);
+		g_object_unref(G_OBJECT(album_art));
+	}
+	else {
+		set_status_message(_("Album art not found."), cwin);
+	}
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_threads_leave ();
+
+	glyr_free_list(head);
+
+bad:
+	glyr_destroy_query(&q);
+exists:
+	g_free(album_art_path);
+
+	return NULL;
+}
+
+void *do_get_album_art_idle (gpointer data)
+{
+	GError *error = NULL;
+	GdkPixbuf *album_art = NULL;
+	gchar *album_art_path = NULL;
+	GlyrQuery q;
+	GLYR_ERROR err;
+
+	GlyrMemCache *head = NULL;
+
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_INFO, "Get album art idle");
+
+	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
+					cwin->cpref->cache_album_art_folder,
+					cwin->cstate->curr_mobj->tags->artist,
+					cwin->cstate->curr_mobj->tags->album);
+
+	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
+		goto exists;
+
+	glyr_init_query(&q);
+	glyr_opt_type(&q, GLYR_GET_COVERART);
+
+	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
+	glyr_opt_album(&q, cwin->cstate->curr_mobj->tags->album);
+
+	head = glyr_get(&q, &err, NULL);
+
+	if(head == NULL) {
+		g_warning(glyr_strerror(err));
+		goto no_albumart;
+	}
+
+	gdk_threads_enter ();
+	if(head->data)
+		album_art = vgdk_pixbuf_new_from_memory(head->data, head->size);
+
+	if (album_art) {
+		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
+
+		update_album_art(cwin->cstate->curr_mobj, cwin);
+		g_object_unref(G_OBJECT(album_art));
+	}
+	gdk_threads_leave ();
+
+	glyr_free_list(head);
+
+no_albumart:
+	glyr_destroy_query(&q);
+exists:
+	g_free(album_art_path);
+	
+	return NULL;
+}
+
+void related_get_album_art_handler (struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_INFO, "Get album art handler");
+
+	if (cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->cpref->show_album_art)
+		return;
+
+	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
+		return;
+
+	pthread_create(&tid, NULL, do_get_album_art_idle, cwin);
+
+	return;
+}
+
+void related_get_album_art_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_INFO, "Get album art action");
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (!cwin->cpref->show_album_art)
+		return;
+
+	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
+		return;
+
+	pthread_create(&tid, NULL, do_get_album_art, cwin);
+}
+
 /* Handler for 'Artist info' action in the Tools menu */
 void *do_get_artist_info (gpointer data)
 {
@@ -119,10 +289,10 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
 	pthread_t tid;
 
+	CDEBUG(DBG_INFO, "Get Artist info Action");
+
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
-
-	CDEBUG(DBG_LASTFM, "Get Artist info Action");
 
 	pthread_create(&tid, NULL, do_get_artist_info, cwin);
 }
@@ -227,10 +397,10 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
 	pthread_t tid;
 
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
-
-	CDEBUG(DBG_INFO, "Get lyrics Action");
 
 	pthread_create(&tid, NULL, do_get_lyrics_dialog, cwin);
 }
@@ -248,5 +418,43 @@ int init_glyr_related (struct con_win *cwin)
 
 	return 0;
 }
-
 #endif
+
+gboolean update_related_handler (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
+
+#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support)
+		lastfm_now_playing_handler(cwin);
+#endif
+#ifdef HAVE_LIBGLYR
+	if (cwin->cpref->get_album_art)
+		related_get_album_art_handler(cwin);
+#endif
+	return FALSE;
+}
+
+void update_related_state (struct con_win *cwin)
+{
+	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
+
+	if(cwin->related_timeout_id)
+		g_source_remove(cwin->related_timeout_id);
+
+	if(cwin->cstate->state != ST_PLAYING)
+		return;
+
+	#ifdef HAVE_LIBCLASTFM
+	if (cwin->cpref->lw.lastfm_support)
+		time(&cwin->clastfm->playback_started);
+	#endif
+
+	cwin->related_timeout_id = gdk_threads_add_timeout_seconds_full(
+			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
+			update_related_handler, cwin, NULL);
+}
+
+

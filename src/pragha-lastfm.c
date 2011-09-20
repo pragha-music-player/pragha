@@ -19,8 +19,6 @@
 #include <pthread.h>
 #include "pragha.h"
 
-#define WAIT_UPDATE 5
-
 #ifdef HAVE_LIBCLASTFM
 gint find_nocase_artist_db(const gchar *artist, struct con_win *cwin)
 {
@@ -248,89 +246,6 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
 }
 
-void *do_lastfm_get_album_art (gpointer data)
-{
-	GError *error = NULL;
-	GdkPixbuf *album_art = NULL;
-	GdkCursor *cursor;
-	gchar *album_art_path = NULL;
-
-	struct con_win *cwin = data;
-	
-	LASTFM_ALBUM_INFO *album = NULL;
-
-	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
-					cwin->cpref->cache_album_art_folder,
-					cwin->cstate->curr_mobj->tags->artist,
-					cwin->cstate->curr_mobj->tags->album);
-
-	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
-		goto exists;
-
-	gdk_threads_enter ();
-
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
-	gdk_cursor_unref(cursor);
-
-	gdk_threads_leave ();
-
-	album = LASTFM_album_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, cwin->cstate->curr_mobj->tags->album);
-
-	if(!album) {
-		gdk_threads_enter ();
-		set_status_message(_("Album art not found."), cwin);
-		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
-		gdk_threads_leave ();
-		goto exists;
-	}
-
-	gdk_threads_enter ();
-	if(album->image)
-		album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
-
-	if (album_art) {
-		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
-
-		update_album_art(cwin->cstate->curr_mobj, cwin);
-		g_object_unref(G_OBJECT(album_art));
-	}
-	else {
-		set_status_message(_("Album art not found."), cwin);
-	}
-
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
-	gdk_threads_leave ();
-
-	LASTFM_free_album_info(album);
-
-exists:
-	g_free(album_art_path);
-
-	return NULL;
-}
-
-void lastfm_get_album_art_action (GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	if (!cwin->cpref->show_album_art)
-		return;
-
-	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->album);
-		return;
-
-	if (cwin->clastfm->session_id == NULL) {
-		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return;
-	}
-
-	pthread_create(&tid, NULL, do_lastfm_get_album_art, cwin);
-}
-
 void *do_lastfm_love (gpointer data)
 {
 	gint rv;
@@ -455,9 +370,6 @@ gboolean lastfm_scrob_handler(gpointer data)
 void *do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
-	gchar *album_art_path = NULL;
-	GdkPixbuf *album_art = NULL;
-	LASTFM_ALBUM_INFO *album = NULL;
 
 	struct con_win *cwin = data;
 
@@ -477,96 +389,51 @@ void *do_lastfm_now_playing (gpointer data)
 		gdk_threads_leave ();
 	}
 
-	if ((cwin->cpref->lw.lastfm_get_album_art == TRUE) && (cwin->cstate->curr_mobj->tags->album != NULL)) {
-		album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
-						cwin->cpref->cache_album_art_folder,
-						cwin->cstate->curr_mobj->tags->artist,
-						cwin->cstate->curr_mobj->tags->album);
-
-		if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
-			goto exists;
-
-		album = LASTFM_album_get_info (cwin->clastfm->session_id, cwin->cstate->curr_mobj->tags->artist, cwin->cstate->curr_mobj->tags->album);
-
-		if(album) {
-			gdk_threads_enter ();
-			if(album->image)
-				album_art = vgdk_pixbuf_new_from_memory(album->image, album->image_size);
-
-			if (album_art) {
-				gdk_pixbuf_save(album_art, album_art_path, "jpeg", NULL, "quality", "100", NULL);
-
-				update_album_art(cwin->cstate->curr_mobj, cwin);
-				g_object_unref(G_OBJECT(album_art));
-			}
-			else {
-				set_status_message(_("Album art not found."), cwin);
-			}
-			gdk_threads_leave ();
-		}
-	}
-exists:
-	g_free(album_art_path);
-	
 	return NULL;
 }
 
-gboolean lastfm_now_playing_handler (gpointer data)
+void lastfm_now_playing_handler (struct con_win *cwin)
 {
 	pthread_t tid;
-	struct con_win *cwin = data;
 	gint length;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
 
 	if(cwin->cstate->state == ST_STOPPED)
-		return FALSE;
+		return;
 
 	if (cwin->clastfm->session_id == NULL) {
+		gdk_threads_enter ();
 		set_status_message(_("No connection Last.fm has been established."), cwin);
-		return FALSE;
+		gdk_threads_leave ();
+		return;
 	}
 
-	if (NULL == cwin->cstate->curr_mobj->tags->artist || NULL == cwin->cstate->curr_mobj->tags->title);
-		pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
+	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->title == NULL)
+		return;
+
+	if(cwin->cstate->curr_mobj->tags->length < 30)
+		return;
+
+	pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
 	 * and scrob when track is at 50% or 4mins, whichever comes
 	 * first */
 
-	if(cwin->cstate->curr_mobj->tags->length < 30)
-		return FALSE;
-
 	if((cwin->cstate->curr_mobj->tags->length / 2) > (240 - WAIT_UPDATE)) {
 		length = 240 - WAIT_UPDATE;
 	}
 	else {
-		length = (cwin->cstate->curr_mobj->tags->length / 2);
+		length = (cwin->cstate->curr_mobj->tags->length / 2) - WAIT_UPDATE;
 	}
 
-	cwin->clastfm->lastfm_handler_id = gdk_threads_add_timeout_seconds_full(
+	cwin->related_timeout_id = gdk_threads_add_timeout_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, length,
 			lastfm_scrob_handler, cwin, NULL);
 
-	return FALSE;
-}
-
-void update_lastfm (struct con_win *cwin)
-{
-	CDEBUG(DBG_LASTFM, "Update lastfm thread state");
-
-	if(cwin->clastfm->lastfm_handler_id)
-		g_source_remove(cwin->clastfm->lastfm_handler_id);
-
-	if(cwin->cstate->state != ST_PLAYING)
-		return;
-
-	time(&cwin->clastfm->playback_started);
-
-	cwin->clastfm->lastfm_handler_id = gdk_threads_add_timeout_seconds_full(
-			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
-			lastfm_now_playing_handler, cwin, NULL);
+	return;
 }
 
 void *do_init_lastfm (gpointer data)

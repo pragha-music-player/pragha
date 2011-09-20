@@ -306,10 +306,8 @@ backend_stop(GError *error, struct con_win *cwin)
 	unset_track_progress_bar(cwin);
 	unset_album_art(cwin);
 
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support)
-		update_lastfm(cwin);
-	#endif
+	update_related_state (cwin);
+
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
@@ -331,10 +329,8 @@ backend_pause(struct con_win *cwin)
 	}
 	play_button_toggle_state(cwin);
 
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support)
-		update_lastfm(cwin);
-	#endif
+	update_related_state (cwin);
+
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
@@ -356,11 +352,8 @@ backend_resume(struct con_win *cwin)
 	}
 	play_button_toggle_state(cwin);
 
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support) {
-		update_lastfm(cwin);
-	}
-	#endif
+	update_related_state (cwin);
+
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
@@ -499,10 +492,8 @@ backend_play(struct con_win *cwin)
 
 	play_button_toggle_state (cwin);
 
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support)
-		update_lastfm(cwin);
-	#endif
+	update_related_state (cwin);
+
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 
 	cwin->cgst->emitted_error = FALSE;

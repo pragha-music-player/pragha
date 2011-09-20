@@ -58,7 +58,7 @@ void set_status_message (gchar *message, struct con_win *cwin)
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
-GdkPixbuf *vgdk_pixbuf_new_from_memory(unsigned char *data, size_t size) 
+GdkPixbuf *vgdk_pixbuf_new_from_memory(char *data, size_t size)
 {
 	GInputStream *buffer_stream=NULL;
 	GdkPixbuf *buffer_pix=NULL;

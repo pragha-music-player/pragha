@@ -135,6 +135,8 @@
 #define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
 
+#define WAIT_UPDATE 5
+
 #define DBUS_PATH      "/org/pragha/DBus"
 #define DBUS_NAME      "org.pragha.DBus"
 #define DBUS_INTERFACE "org.pragha.DBus"
@@ -209,7 +211,7 @@
 #define KEY_LASTFM                 "lastfm"
 #define KEY_LASTFM_USER            "lastfm_user"
 #define KEY_LASTFM_PASS            "lastfm_pass"
-#define KEY_LASTFM_GET_ALBUM_ART   "lastfm_get_album_art"
+#define KEY_GET_ALBUM_ART          "get_album_art"
 #define KEY_USE_CDDB               "use_cddb"
 #define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
@@ -421,13 +423,11 @@ struct pixbuf {
 #ifdef HAVE_LIBCLASTFM
 struct lastfm_pref {
 	gboolean lastfm_support;
-	gboolean lastfm_get_album_art;
 	gchar *lastfm_user;
 	gchar *lastfm_pass;
 	GtkWidget *lastfm_w;
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
-	GtkWidget *lastfm_get_album_art_w;
 };
 #endif
 struct con_pref {
@@ -449,6 +449,7 @@ struct con_pref {
 #ifdef HAVE_LIBCLASTFM
 	gchar *cache_album_art_folder;
 #endif
+
 	gboolean add_recursively_files;
 	gboolean show_album_art;
 	gboolean show_osd;
@@ -460,6 +461,9 @@ struct con_pref {
 	gboolean repeat;
 	gboolean save_playlist;
 	gboolean software_mixer;
+#ifdef HAVE_LIBGLYR
+	gboolean get_album_art;
+#endif
 	gboolean use_cddb;
 	gboolean use_mpris2;
 	gboolean close_to_tray;
@@ -500,9 +504,13 @@ struct con_pref {
 	GtkWidget *osd_in_systray_w;
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
-	#ifdef HAVE_LIBCLASTFM
+
+#ifdef HAVE_LIBCLASTFM
 	struct lastfm_pref lw;
-	#endif
+#endif
+#ifdef HAVE_LIBGLYR
+	GtkWidget *get_album_art_w;
+#endif
 	GtkWidget *use_cddb_w;
 	GtkWidget *use_mpris2_w;
 };
@@ -588,7 +596,6 @@ struct con_gst {
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
-	gint lastfm_handler_id;
 	time_t playback_started;
 };
 #endif
@@ -657,6 +664,7 @@ struct con_win {
 	GtkUIManager *library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
+	gint related_timeout_id;
 	DBusConnection *con_dbus;
 };
 
@@ -1164,7 +1172,7 @@ void mpris_cleanup(struct con_win *cwin);
 /* Utilities */
 
 void set_status_message (gchar *message, struct con_win *cwin);
-GdkPixbuf *vgdk_pixbuf_new_from_memory (unsigned char *data, size_t size);
+GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
@@ -1221,21 +1229,22 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
 void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_get_album_art_action(GtkAction *action, struct con_win *cwin);
 void *do_lastfm_love (gpointer data);
 gboolean lastfm_love_handler (gpointer data);
 void *do_lastfm_scrob (gpointer data);
 gboolean lastfm_scrob_handler (gpointer data);
 void *do_lastfm_now_playing (gpointer data);
-gboolean lastfm_now_playing_handler (gpointer data);
-void update_lastfm (struct con_win *cwin);
+void lastfm_now_playing_handler (struct con_win *cwin);
 
 /* Related info helpers */
+void related_get_album_art_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
 int uninit_glyr_related (struct con_win *cwin);
 int init_glyr_related (struct con_win *cwin);
+
+void update_related_state (struct con_win *cwin);
 
 /* Others */
 void dialog_jump_to_track (struct con_win *cwin);
