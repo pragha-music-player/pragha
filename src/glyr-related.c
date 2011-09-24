@@ -52,7 +52,7 @@ void *do_get_album_art (gpointer data)
 
 	gdk_threads_leave ();
 
-	glyr_init_query(&q);
+	glyr_query_init(&q);
 	glyr_opt_type(&q, GLYR_GET_COVERART);
 
 	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
@@ -89,7 +89,7 @@ void *do_get_album_art (gpointer data)
 	glyr_free_list(head);
 
 bad:
-	glyr_destroy_query(&q);
+	glyr_query_destroy(&q);
 exists:
 	g_free(album_art_path);
 
@@ -100,7 +100,7 @@ void *do_get_album_art_idle (gpointer data)
 {
 	GError *error = NULL;
 	GdkPixbuf *album_art = NULL;
-	gchar *album_art_path = NULL;
+	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
 	GlyrQuery q;
 	GLYR_ERROR err;
 
@@ -110,19 +110,22 @@ void *do_get_album_art_idle (gpointer data)
 
 	CDEBUG(DBG_INFO, "Get album art idle");
 
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
+
 	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
 					cwin->cpref->cache_album_art_folder,
-					cwin->cstate->curr_mobj->tags->artist,
-					cwin->cstate->curr_mobj->tags->album);
+					artist,
+					album);
 
 	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
 		goto exists;
 
-	glyr_init_query(&q);
+	glyr_query_init(&q);
 	glyr_opt_type(&q, GLYR_GET_COVERART);
 
-	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
-	glyr_opt_album(&q, cwin->cstate->curr_mobj->tags->album);
+	glyr_opt_artist(&q, artist);
+	glyr_opt_album(&q, album);
 
 	head = glyr_get(&q, &err, NULL);
 
@@ -138,7 +141,10 @@ void *do_get_album_art_idle (gpointer data)
 	if (album_art) {
 		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
 
-		update_album_art(cwin->cstate->curr_mobj, cwin);
+		if((0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
+		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album)))
+			update_album_art(cwin->cstate->curr_mobj, cwin);
+
 		g_object_unref(G_OBJECT(album_art));
 	}
 	gdk_threads_leave ();
@@ -146,10 +152,12 @@ void *do_get_album_art_idle (gpointer data)
 	glyr_free_list(head);
 
 no_albumart:
-	glyr_destroy_query(&q);
+	glyr_query_destroy(&q);
 exists:
 	g_free(album_art_path);
-	
+	g_free(artist);
+	g_free(album);
+
 	return NULL;
 }
 
@@ -162,7 +170,7 @@ void related_get_album_art_handler (struct con_win *cwin)
 	if (cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (!cwin->cpref->show_album_art)
+	if (cwin->cpref->show_album_art == FALSE)
 		return;
 
 	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
@@ -182,7 +190,7 @@ void related_get_album_art_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (!cwin->cpref->show_album_art)
+	if (cwin->cpref->show_album_art == FALSE)
 		return;
 
 	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
@@ -214,11 +222,13 @@ void *do_get_artist_info (gpointer data)
 
 	gdk_threads_leave ();
 
-	glyr_init_query(&q);
+	glyr_query_init(&q);
 	glyr_opt_type(&q, GLYR_GET_ARTISTBIO);
 
 	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
+
 	glyr_opt_lang (&q, ISO_639_1);
+	glyr_opt_lang_aware_only (&q, TRUE);
 
 	head = glyr_get(&q, &err, NULL);
 
@@ -280,7 +290,7 @@ void *do_get_artist_info (gpointer data)
 
 	g_free(subtitle_header);
 bad:
-	glyr_destroy_query(&q);
+	glyr_query_destroy(&q);
 
 	return NULL;
 }
@@ -318,7 +328,7 @@ void *do_get_lyrics_dialog (gpointer data)
 	gdk_cursor_unref(cursor);
 	gdk_threads_leave ();
 
-	glyr_init_query(&q);
+	glyr_query_init(&q);
 	glyr_opt_type(&q, GLYR_GET_LYRICS);
 
 	glyr_opt_artist(&q, artist);
@@ -385,7 +395,7 @@ void *do_get_lyrics_dialog (gpointer data)
 	glyr_free_list(head);
 
 bad:
-	glyr_destroy_query(&q);
+	glyr_query_destroy(&q);
 
 	g_free(artist);
 	g_free(title);
