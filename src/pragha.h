@@ -236,11 +236,11 @@ typedef enum {
 enum debug_level {
 	DBG_BACKEND = 1,
 	DBG_INFO,
+	DBG_LASTFM,
 	DBG_MPRIS,
 	DBG_MOBJ,
 	DBG_DB,
 	DBG_VERBOSE,
-	DBG_LASTFM
 };
 
 /* Current playlist movement */
@@ -446,7 +446,7 @@ struct con_pref {
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
 	gchar *configrc_file;
-#ifdef HAVE_LIBCLASTFM
+#ifdef HAVE_LIBGLYR
 	gchar *cache_album_art_folder;
 #endif
 
@@ -596,6 +596,7 @@ struct con_gst {
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
+	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
 };
 #endif

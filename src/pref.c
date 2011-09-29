@@ -234,8 +234,13 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->cpref->lw.lastfm_pass_w)));
 
-			if (cwin->clastfm->session_id == NULL)
-				init_lastfm(cwin);
+			if (cwin->clastfm->session_id != NULL) {
+				LASTFM_dinit(cwin->clastfm->session_id);
+
+				cwin->clastfm->session_id = NULL;
+				cwin->clastfm->status = LASTFM_STATUS_INVALID;
+			}
+			init_lastfm(cwin);
 		}
 #endif
 #ifdef HAVE_LIBGLYR
@@ -386,8 +391,11 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 
 	if(!is_active && cwin->clastfm->session_id) {
 		CDEBUG(DBG_INFO, "Shutdown LASTFM");
+
 		LASTFM_dinit(cwin->clastfm->session_id);
+
 		cwin->clastfm->session_id = NULL;
+		cwin->clastfm->status = LASTFM_STATUS_INVALID;
 	}
 }
 #endif
@@ -427,7 +435,8 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 
 	gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, is_active);
 	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
-	gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
+	if (can_support_actions())
+		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
 }
 
 

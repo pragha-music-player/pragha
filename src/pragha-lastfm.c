@@ -38,7 +38,7 @@ gint find_nocase_artist_db(const gchar *artist, struct con_win *cwin)
 
 gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 {
-	gchar *query, *s_artist, *s_title;
+	gchar *query = NULL, *s_artist = NULL, *s_title = NULL;
 	gint location_id = 0, artist_id = 0;
 	struct db_result result;
 	struct musicobject *mobj = NULL;
@@ -52,16 +52,17 @@ gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 	if(artist_id == 0)
 		goto bad;
 
-	query = g_strdup_printf("SELECT location FROM TRACK WHERE TRACK.title = \"%s\" COLLATE NOCASE AND TRACK.artist = %d;", title, artist_id);
-	exec_sqlite_query(query, cwin, &result);
-	if (!result.no_rows)
-		goto bad;
+	query = g_strdup_printf("SELECT location FROM TRACK WHERE TRACK.title = \"%s\" COLLATE NOCASE AND TRACK.artist = %d;", s_title, artist_id);
 
-	location_id = atoi(result.resultp[result.no_columns]);
+	if(exec_sqlite_query(query, cwin, &result)) {
+		if (result.no_rows) {
+			location_id = atoi(result.resultp[result.no_columns]);
 
-	mobj = new_musicobject_from_db(location_id, cwin);
-
-	append_current_playlist(mobj, cwin);
+			mobj = new_musicobject_from_db(location_id, cwin);
+			append_current_playlist(mobj, cwin);
+		}
+		sqlite3_free_table(result.resultp);
+	}
 bad:
 	g_free(s_artist);
 	g_free(s_title);
@@ -179,7 +180,8 @@ void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
-	if (cwin->clastfm->session_id == NULL) {
+	if ((cwin->clastfm->session_id == NULL) ||
+	    (strlen(cwin->cpref->lw.lastfm_user) == 0)) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -234,10 +236,15 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 {
 	pthread_t tid;
 
+	CDEBUG(DBG_LASTFM, "Get similar action");
+
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	CDEBUG(DBG_LASTFM, "Get similar action");
+	if(cwin->clastfm->session_id == NULL) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
 
 	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
 }
@@ -253,7 +260,7 @@ void *do_lastfm_love (gpointer data)
 		cwin->cstate->curr_mobj->tags->title,
 		cwin->cstate->curr_mobj->tags->artist);
 
-	if (rv != 0) {
+	if (rv != LASTFM_STATUS_OK) {
 		gdk_threads_enter ();
 		set_status_message(_("Love song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
@@ -271,7 +278,7 @@ void lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (cwin->clastfm->session_id == NULL) {
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -290,7 +297,7 @@ void *do_lastfm_unlove (gpointer data)
 		cwin->cstate->curr_mobj->tags->title,
 		cwin->cstate->curr_mobj->tags->artist);
 
-	if (rv != 0) {
+	if (rv != LASTFM_STATUS_OK) {
 		gdk_threads_enter ();
 		set_status_message(_("Unlove song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
@@ -308,7 +315,7 @@ void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (cwin->clastfm->session_id == NULL) {
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -333,7 +340,7 @@ void *do_lastfm_scrob (gpointer data)
 		0, NULL);
 
 	gdk_threads_enter ();
-	if (rv != 0)
+	if (rv != LASTFM_STATUS_OK)
 		set_status_message("Last.fm submission failed", cwin);
 	else
 		set_status_message("Track scrobbled on Last.fm", cwin);
@@ -353,7 +360,7 @@ gboolean lastfm_scrob_handler(gpointer data)
 	if(cwin->cstate->state == ST_STOPPED)
 		return FALSE;
 
-	if (cwin->clastfm->session_id == NULL) {
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return FALSE;
 	}
@@ -379,7 +386,7 @@ void *do_lastfm_now_playing (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0);
 
-	if (rv != 0) {
+	if (rv != LASTFM_STATUS_OK) {
 		gdk_threads_enter ();
 		set_status_message(_("Update current song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
@@ -398,14 +405,16 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (cwin->clastfm->session_id == NULL) {
-		gdk_threads_enter ();
+	if(strlen(cwin->cpref->lw.lastfm_user) == 0)
+		return;
+
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
-		gdk_threads_leave ();
 		return;
 	}
 
-	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->title == NULL)
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 
 	if(cwin->cstate->curr_mobj->tags->length < 30)
@@ -434,19 +443,15 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 
 void *do_init_lastfm (gpointer data)
 {
-	gint rv;
 	struct con_win *cwin = data;
 
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
-	rv = LASTFM_login (cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
+	if((strlen(cwin->cpref->lw.lastfm_user) != 0) && (strlen(cwin->cpref->lw.lastfm_pass) != 0))
+		cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
 
-	if(rv != LASTFM_STATUS_OK) {
-		LASTFM_dinit(cwin->clastfm->session_id);
-		cwin->clastfm->session_id = NULL;
-
-		g_critical("Unable to login on Lastfm");
-	}
+	if(cwin->clastfm->status != LASTFM_STATUS_OK)
+		CDEBUG(DBG_INFO, "Not logged on lastfm");
 
 	return NULL;
 }

@@ -212,10 +212,10 @@ gint init_config(struct con_win *cwin)
 
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
-	gchar *cache_album_art = NULL;
 	#endif
 	#ifdef HAVE_LIBGLYR
 	gboolean get_album_art_f = FALSE;
+	gchar *cache_album_art = NULL;
 	#endif
 	all_f = FALSE;
 
@@ -249,7 +249,7 @@ gint init_config(struct con_win *cwin)
 	}
 
 	/* Get cache of downloaded albums arts */
-	#ifdef HAVE_LIBCLASTFM
+	#ifdef HAVE_LIBGLYR
 	cache_album_art = g_strdup_printf("%s/pragha-album-art",
 						g_get_user_cache_dir());
 
@@ -970,12 +970,13 @@ gint init_config(struct con_win *cwin)
 	cwin->cgst->emitted_error = FALSE;
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm->session_id = NULL;
+	cwin->clastfm->status = LASTFM_STATUS_INVALID;
 #endif
 	/* Cleanup */
 
 	g_free(conrc);
 	g_free(condir);
-#ifdef HAVE_LIBCLASTFM
+#ifdef HAVE_LIBGLYR
 	g_free(cache_album_art);
 #endif
 	if (err)

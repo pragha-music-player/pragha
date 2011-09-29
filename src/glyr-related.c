@@ -58,6 +58,8 @@ void *do_get_album_art (gpointer data)
 	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
 	glyr_opt_album(&q, cwin->cstate->curr_mobj->tags->album);
 
+	glyr_opt_from(&q, "all;-picsearch;-google");
+
 	head = glyr_get(&q, &err, NULL);
 
 	if(head == NULL) {
@@ -127,6 +129,8 @@ void *do_get_album_art_idle (gpointer data)
 	glyr_opt_artist(&q, artist);
 	glyr_opt_album(&q, album);
 
+	glyr_opt_from(&q, "all;-picsearch;-google");
+
 	head = glyr_get(&q, &err, NULL);
 
 	if(head == NULL) {
@@ -173,7 +177,8 @@ void related_get_album_art_handler (struct con_win *cwin)
 	if (cwin->cpref->show_album_art == FALSE)
 		return;
 
-	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
 		return;
 
 	pthread_create(&tid, NULL, do_get_album_art_idle, cwin);
@@ -459,7 +464,7 @@ void update_related_state (struct con_win *cwin)
 		return;
 
 	#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support)
+	if (cwin->clastfm->status == LASTFM_STATUS_OK)
 		time(&cwin->clastfm->playback_started);
 	#endif
 
