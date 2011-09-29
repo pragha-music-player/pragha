@@ -66,7 +66,9 @@ void common_cleanup(struct con_win *cwin)
 #ifdef HAVE_LIBCLASTFM
 	g_free(cwin->cpref->lw.lastfm_user);
 	g_free(cwin->cpref->lw.lastfm_pass);
-	g_free(cwin->cpref->cache_album_art_folder);
+#endif
+#ifdef HAVE_LIBGLYR
+	g_free(cwin->cpref->cache_folder);
 #endif
 	g_free(cwin->cpref->configrc_file);
 	g_free(cwin->cpref->installed_version);

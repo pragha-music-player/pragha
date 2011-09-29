@@ -33,6 +33,7 @@
 
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
+#include <glyr/cache.h>
 #endif
 
 #include <stdio.h>
@@ -447,7 +448,7 @@ struct con_pref {
 	GKeyFile *configrc_keyfile;
 	gchar *configrc_file;
 #ifdef HAVE_LIBGLYR
-	gchar *cache_album_art_folder;
+	gchar *cache_folder;
 #endif
 
 	gboolean add_recursively_files;
@@ -583,6 +584,9 @@ struct con_state {
 struct con_dbase {
 	gchar *db_file;	/* Filename of the DB file (~/.pragha.db) */
 	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
+#ifdef HAVE_LIBGLYR
+	GlyrDatabase *cache_db;
+#endif
 };
 
 struct con_gst {

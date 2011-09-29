@@ -36,8 +36,8 @@ void *do_get_album_art (gpointer data)
 
 	CDEBUG(DBG_INFO, "Get album art thread");
 	
-	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
-					cwin->cpref->cache_album_art_folder,
+	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
+					cwin->cpref->cache_folder,
 					cwin->cstate->curr_mobj->tags->artist,
 					cwin->cstate->curr_mobj->tags->album);
 
@@ -115,8 +115,8 @@ void *do_get_album_art_idle (gpointer data)
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
 	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
 
-	album_art_path = g_strdup_printf("%s/%s - %s.jpeg",
-					cwin->cpref->cache_album_art_folder,
+	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
+					cwin->cpref->cache_folder,
 					artist,
 					album);
 
@@ -235,6 +235,9 @@ void *do_get_artist_info (gpointer data)
 	glyr_opt_lang (&q, ISO_639_1);
 	glyr_opt_lang_aware_only (&q, TRUE);
 
+	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
+	glyr_opt_db_autowrite(&q, TRUE);
+
 	head = glyr_get(&q, &err, NULL);
 
 	gdk_threads_enter ();
@@ -338,8 +341,11 @@ void *do_get_lyrics_dialog (gpointer data)
 
 	glyr_opt_artist(&q, artist);
 	glyr_opt_title(&q, title);
-	
-	GlyrMemCache *head = glyr_get(&q, &err,NULL);
+
+	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
+	glyr_opt_db_autowrite(&q, TRUE);
+
+	GlyrMemCache *head = glyr_get(&q, &err, NULL);
 
 	if(head == NULL) {
 		gdk_threads_enter ();
@@ -422,6 +428,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 
 int uninit_glyr_related (struct con_win *cwin)
 {
+	glyr_db_destroy(cwin->cdbase->cache_db);
 	glyr_cleanup ();
 
 	return 0;
@@ -430,6 +437,8 @@ int uninit_glyr_related (struct con_win *cwin)
 int init_glyr_related (struct con_win *cwin)
 {
 	glyr_init();
+
+	cwin->cdbase->cache_db = glyr_db_init(cwin->cpref->cache_folder);
 
 	return 0;
 }

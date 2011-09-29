@@ -287,8 +287,8 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 		if (mobj && mobj->file_type != FILE_CDDA){
 			#ifdef HAVE_LIBGLYR
 			if(cwin->cpref->get_album_art) {
-				path = g_strdup_printf("%s/%s - %s.jpeg",
-							cwin->cpref->cache_album_art_folder,
+				path = g_strdup_printf("%s/album-%s-%s.jpeg",
+							cwin->cpref->cache_folder,
 							mobj->tags->artist,
 							mobj->tags->album);
 

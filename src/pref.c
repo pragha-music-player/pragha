@@ -433,7 +433,9 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->cpref->show_osd_w));
 
+	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, is_active);
+	#endif
 	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
 	if (can_support_actions())
 		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
