@@ -36,6 +36,30 @@ gint find_nocase_artist_db(const gchar *artist, struct con_win *cwin)
 	return artist_id;
 }
 
+gboolean are_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
+{
+	GtkTreeModel *playlist_model;
+	GtkTreeIter playlist_iter;
+	struct musicobject *omobj = NULL;
+	gboolean ret;
+
+	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
+
+	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
+	while (ret) {
+		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
+
+		if((0 == g_strcmp0(mobj->tags->title, omobj->tags->title)) &&
+		   (0 == g_strcmp0(mobj->tags->artist, omobj->tags->artist)) &&
+		   (0 == g_strcmp0(mobj->tags->album, omobj->tags->album)))
+		   	return TRUE;
+
+		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
+	}
+
+	return FALSE;
+}
+
 gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 {
 	gchar *query = NULL, *s_artist = NULL, *s_title = NULL;
@@ -59,7 +83,13 @@ gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 			location_id = atoi(result.resultp[result.no_columns]);
 
 			mobj = new_musicobject_from_db(location_id, cwin);
-			append_current_playlist(mobj, cwin);
+
+			if(are_in_current_playlist(mobj, cwin) == FALSE)
+				append_current_playlist(mobj, cwin);
+			else {
+				delete_musicobject(mobj);
+				location_id = 0;
+			}
 		}
 		sqlite3_free_table(result.resultp);
 	}
