@@ -202,6 +202,7 @@
 #define KEY_REMEMBER_STATE	   "remember_window_state"
 #define KEY_START_MODE		   "start_mode"
 #define KEY_WINDOW_SIZE            "window_size"
+#define KEY_WINDOW_POSITION        "window_position"
 #define KEY_SIDEBAR_SIZE           "sidebar_size"
 #define KEY_SIDEBAR                "sidebar"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
@@ -443,6 +444,8 @@ struct con_pref {
 	gint album_art_size;
 	gint window_width;
 	gint window_height;
+	gint window_x;
+	gint window_y;
 	gint sidebar_size;
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;

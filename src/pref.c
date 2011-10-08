@@ -708,8 +708,8 @@ void save_preferences(struct con_win *cwin)
 	gchar *data, **libs, **columns, **nodes, *last_rescan_time;
 	gchar *u_file = NULL;
 	gsize length;
-	gint cnt = 0, i = 0, *col_widths, *window_size;
-	gint win_width, win_height, sidebar_size;
+	gint cnt = 0, i = 0, *col_widths, *window_size, *window_position;
+	gint win_width, win_height, win_x, win_y, sidebar_size;
 	GError *error = NULL;
 	GSList *list;
 	GList *cols, *j;
@@ -1205,12 +1205,26 @@ void save_preferences(struct con_win *cwin)
 		window_size[0] = win_width;
 		window_size[1] = win_height;
 
+		window_position = g_new0(gint, 2);
+		gtk_window_get_position(GTK_WINDOW(cwin->mainwindow),
+					&win_x,
+					&win_y);
+		window_position[0] = win_x;
+		window_position[1] = win_y;
+
 		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
 					    GROUP_WINDOW,
 					    KEY_WINDOW_SIZE,
 					    window_size,
 					    2);
+
+		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
+					    GROUP_WINDOW,
+					    KEY_WINDOW_POSITION,
+					    window_position,
+					    2);
 		g_free(window_size);
+		g_free(window_position);
 	}
 
 	/* Save sidebar size */
