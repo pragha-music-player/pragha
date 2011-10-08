@@ -1216,7 +1216,7 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreeRowReference *ref;
-	GtkTreePath *path;
+	GtkTreePath *path, *prev;
 	GtkTreeIter iter;
 	GList *list = NULL, *i = NULL;
 	GSList *mobj_to_delete = NULL;
@@ -1227,6 +1227,16 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
+		/* Select the first row before the last selected */
+
+		gtk_tree_view_get_cursor(GTK_TREE_VIEW(cwin->current_playlist), &prev, NULL);
+		while(gtk_tree_path_prev(prev)) {
+			if(gtk_tree_selection_path_is_selected(selection, prev) == FALSE)
+				break;
+		}
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW(cwin->current_playlist), prev, NULL, FALSE);
+		gtk_tree_path_free (prev);
+
 		/* Get references from the paths and store them in the 'data'
 		   portion of the list elements.
 		   This idea was inspired by code from 'claws-mail' */
