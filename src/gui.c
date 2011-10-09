@@ -1011,12 +1011,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 
 	renderer = gtk_cell_renderer_bubble_new ();
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute (column, renderer, "markup", P_QUEUE);
-	gtk_tree_view_column_add_attribute (column, renderer, "show-bubble", P_BUBBLE);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
+	gtk_tree_view_column_set_attributes(column, renderer, "markup", P_QUEUE, "show-bubble", P_BUBBLE, NULL);
 
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute (column, renderer, "pixbuf", P_STATUS_PIXBUF);
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start(column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(column, renderer, "pixbuf", P_STATUS_PIXBUF, NULL);
 
 	gtk_tree_view_column_set_resizable(column, FALSE);
 	gtk_tree_view_append_column (GTK_TREE_VIEW(current_playlist), column);
