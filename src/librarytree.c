@@ -1346,7 +1346,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	GArray *loc_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL;;
+	gchar *node_data = NULL, **split_album = NULL, *uri = NULL;
 
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
@@ -1383,8 +1383,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				otag.genre = mobj->tags->genre;
 				otag.comment = mobj->tags->comment;
 				otag.year =  mobj->tags->year;
-
-				changed = tag_edit_dialog(&otag, &ntag, mobj->file, cwin);
+				uri = mobj->file;
 			}
 		}
 		else {
@@ -1410,10 +1409,10 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			default:
 				break;
 			}
-		changed = tag_edit_dialog(&otag, &ntag, NULL, cwin);
 		}
 	}
 
+	changed = tag_edit_dialog(&otag, &ntag, uri, cwin);
 	if (!changed)
 		goto exit;
 
