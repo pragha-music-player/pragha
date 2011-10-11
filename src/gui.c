@@ -529,6 +529,8 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 	g_signal_connect (G_OBJECT (library_tree), "key-press-event",
 			  G_CALLBACK(library_tree_key_press), cwin);
 
+	/* Create right click popup menu */
+
 	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
 									   cwin);
 
