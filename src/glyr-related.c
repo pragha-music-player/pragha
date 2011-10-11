@@ -25,8 +25,8 @@ void *do_get_album_art (gpointer data)
 {
 	GError *error = NULL;
 	GdkPixbuf *album_art = NULL;
+	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
 	GdkCursor *cursor;
-	gchar *album_art_path = NULL;
 	GlyrQuery q;
 	GLYR_ERROR err;
 
@@ -35,11 +35,14 @@ void *do_get_album_art (gpointer data)
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_INFO, "Get album art thread");
-	
+
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
+
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
-					cwin->cstate->curr_mobj->tags->artist,
-					cwin->cstate->curr_mobj->tags->album);
+					artist,
+					album);
 
 	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
 		goto exists;
@@ -78,7 +81,10 @@ void *do_get_album_art (gpointer data)
 	if (album_art) {
 		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
 
-		update_album_art(cwin->cstate->curr_mobj, cwin);
+		if((0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
+		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album)))
+			update_album_art(cwin->cstate->curr_mobj, cwin);
+
 		g_object_unref(G_OBJECT(album_art));
 	}
 	else {
@@ -94,6 +100,8 @@ bad:
 	glyr_query_destroy(&q);
 exists:
 	g_free(album_art_path);
+	g_free(artist);
+	g_free(album);
 
 	return NULL;
 }
@@ -198,7 +206,8 @@ void related_get_album_art_action (GtkAction *action, struct con_win *cwin)
 	if (cwin->cpref->show_album_art == FALSE)
 		return;
 
-	if (cwin->cstate->curr_mobj->tags->artist == NULL || cwin->cstate->curr_mobj->tags->album == NULL)
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
 		return;
 
 	pthread_create(&tid, NULL, do_get_album_art, cwin);
