@@ -31,99 +31,110 @@ gboolean cmd_version(const gchar *opt_name, const gchar *val,
 gboolean cmd_play(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PLAY, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_stop(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_STOP, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_pause(const gchar *opt_name, const gchar *val,
 		   struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PAUSE, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_prev(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PREV, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_next(const gchar *opt_name, const gchar *val,
 		  struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_NEXT, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_shuffle(const gchar *opt_name, const gchar *val,
 		     struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHUFFLE, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_repeat(const gchar *opt_name, const gchar *val,
 		    struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_REPEAT, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_inc_volume(const gchar *opt_name, const gchar *val,
 			struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_INC_VOL, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
 			struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_DEC_VOL, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
 		      struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHOW_OSD, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
 gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
 		      struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
-
+		exit(0);
+	}
 	return FALSE;
 }
 
@@ -221,6 +232,16 @@ gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
+	gchar *uri = NULL;
+
+	if(g_path_is_absolute(val)) {
+		uri = g_strdup (val);
+	}
+	else {
+		gchar *dir = g_get_current_dir ();
+		uri = g_build_filename (dir, val, NULL);
+		g_free (dir);
+	}
 
 	msg = dbus_message_new_signal(DBUS_PATH, DBUS_INTERFACE, DBUS_SIG_ADD_FILE);
 	if (!msg) {
@@ -228,7 +249,7 @@ gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
 		ret = FALSE;
 		goto exit;
 	}
-	dbus_message_append_args(msg, DBUS_TYPE_STRING, &val, DBUS_TYPE_INVALID);
+	dbus_message_append_args(msg, DBUS_TYPE_STRING, &uri, DBUS_TYPE_INVALID);
 
 	if (!dbus_connection_send(cwin->con_dbus, msg, NULL)) {
 		g_critical("Unable to send DBUS message");
@@ -240,6 +261,8 @@ gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
 bad:
 	dbus_message_unref(msg);
 exit:
+	g_free(uri);
+
 	return ret;
 }
 
