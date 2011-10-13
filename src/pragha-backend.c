@@ -414,6 +414,15 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
 		gdk_threads_enter();
+
+		#ifdef HAVE_LIBKEYBINDER
+		keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
+		keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);
+		keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
+		keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
+		keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
+		#endif
+
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
@@ -426,6 +435,15 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 
 		response = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
+
+		#ifdef HAVE_LIBKEYBINDER
+		keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, cwin);
+		keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, cwin);
+		keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, cwin);
+		keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, cwin);
+		keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, cwin);
+		#endif
+
 		gdk_threads_leave();
 
 		switch (response) {
