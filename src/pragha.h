@@ -766,9 +766,8 @@ gboolean update_track_progress_bar(gpointer data);
 void __update_track_progress_bar(struct con_win *cwin, gint length);
 void unset_track_progress_bar(struct con_win *cwin);
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
-void track_progress_change_cb(GtkWidget *widget,
-			      GdkEventButton *event,
-			      struct con_win *cwin);
+void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
+gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
@@ -1178,6 +1177,7 @@ void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, g
 void mpris_update_tracklist_changed(struct con_win *cwin);
 void mpris_close(struct con_win *cwin);
 void mpris_cleanup(struct con_win *cwin);
+
 /* Utilities */
 
 void set_status_message (gchar *message, struct con_win *cwin);
