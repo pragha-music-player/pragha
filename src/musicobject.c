@@ -261,6 +261,9 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 
 void delete_musicobject(struct musicobject *mobj)
 {
+	if (!mobj)
+		return;
+
 	CDEBUG(DBG_MOBJ, "Freeing musicobject: %s", mobj->file);
 
 	g_free(mobj->tags->title);

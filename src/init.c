@@ -985,13 +985,6 @@ gint init_config(struct con_win *cwin)
 	if (all_f || use_hint_f)
 		cwin->cpref->use_hint = TRUE;
 
-	/* Init default flags */
-
-	cwin->cgst->emitted_error = FALSE;
-#ifdef HAVE_LIBCLASTFM
-	cwin->clastfm->session_id = NULL;
-	cwin->clastfm->status = LASTFM_STATUS_INVALID;
-#endif
 	/* Cleanup */
 
 	g_free(conrc);
@@ -1086,15 +1079,34 @@ gint init_keybinder(struct con_win *cwin)
 }
 #endif
 
-void init_state(struct con_win *cwin)
+gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
+
+	cwin->cstate->state = ST_STOPPED;
+
+	cwin->cstate->arturl = NULL;
+	cwin->cstate->filter_entry = NULL;
+	cwin->cstate->jump_filter = NULL;
 
 	cwin->cstate->rand = g_rand_new();
 	cwin->cstate->rand_track_refs = NULL;
 	cwin->cstate->queue_track_refs = NULL;
-	cwin->cstate->state = ST_STOPPED;
+
 	cwin->cstate->dragging = FALSE;
+	cwin->cstate->curr_mobj_clear = FALSE;
+
+	cwin->cstate->curr_mobj= NULL;
+
+	/* Init others default flags */
+
+	cwin->cgst->emitted_error = FALSE;
+#ifdef HAVE_LIBCLASTFM
+	cwin->clastfm->session_id = NULL;
+	cwin->clastfm->status = LASTFM_STATUS_INVALID;
+#endif
+
+	return 0;
 }
 
 void init_tag_completion(struct con_win *cwin)

@@ -218,7 +218,8 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	init_state(cwin);
+	if(init_first_state(cwin) == -1)
+		return -1;
 
 	if (!g_thread_supported())
 		g_thread_init(NULL);

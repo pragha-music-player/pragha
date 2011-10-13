@@ -18,6 +18,45 @@
 
 #include "pragha.h"
 
+/* Search the album art on cache and create a pixbuf of that file */
+#ifdef HAVE_LIBGLYR
+static GdkPixbuf* get_image_from_cache(struct con_win *cwin)
+{
+	gchar *album_art_url = NULL;
+	GdkPixbuf *album_art = NULL;
+	GError *error = NULL;
+
+	album_art_url = g_strdup_printf("%s/album-%s-%s.jpeg",
+				cwin->cpref->cache_folder,
+				cwin->cstate->curr_mobj->tags->artist,
+				cwin->cstate->curr_mobj->tags->album);
+
+	if (g_file_test(album_art_url, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE)
+		goto noexists;
+
+	CDEBUG(DBG_INFO, "Image file: %s", album_art_url);
+
+	album_art = gdk_pixbuf_new_from_file_at_size (album_art_url,
+						cwin->cpref->album_art_size,
+						cwin->cpref->album_art_size,
+						&error);
+
+	if (!album_art) {
+		g_critical("Unable to open image file: %s", album_art_url);
+		g_error_free(error);
+	}
+	else {
+		g_free(cwin->cstate->arturl);
+		cwin->cstate->arturl = g_strdup(album_art_url);
+	}
+
+noexists:
+	g_free(album_art_url);
+
+	return album_art;
+}
+#endif
+
 /* Get the first image file from the directory and create a pixbuf of that file */
 
 static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
@@ -51,7 +90,10 @@ static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
 					   ab_file);
 				g_error_free(error);
 			}
-			g_free(ab_file);
+			else {
+				g_free(cwin->cstate->arturl);
+				cwin->cstate->arturl = ab_file;
+			}
 			break;
 		}
 		g_free(ab_file);
@@ -118,7 +160,10 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 					i++;
 					continue;
 				}
-				g_free(ab_file);
+				else {
+					g_free(cwin->cstate->arturl);
+					cwin->cstate->arturl = ab_file;
+				}
 				break;
 			}
 			g_free(ab_file);
@@ -286,18 +331,7 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 
 		if (mobj && mobj->file_type != FILE_CDDA){
 			#ifdef HAVE_LIBGLYR
-			if(cwin->cpref->get_album_art) {
-				path = g_strdup_printf("%s/album-%s-%s.jpeg",
-							cwin->cpref->cache_folder,
-							mobj->tags->artist,
-							mobj->tags->album);
-
-				album_art = gdk_pixbuf_new_from_file_at_size (path,
-									cwin->cpref->album_art_size,
-									cwin->cpref->album_art_size,
-									&error);
-				g_free(path);
-			}
+			album_art = get_image_from_cache(cwin);
 			#endif
 			if (album_art == NULL) {
 				path = g_path_get_dirname(mobj->file);
@@ -364,6 +398,8 @@ void unset_album_art(struct con_win *cwin)
 
 		g_object_unref(G_OBJECT(cover));
 	}
+	g_free(cwin->cstate->arturl);
+	cwin->cstate->arturl = NULL;
 }
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
