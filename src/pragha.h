@@ -573,6 +573,7 @@ struct con_state {
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
+	gchar *arturl;
 	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
@@ -1226,7 +1227,7 @@ gint init_audio(struct con_win *cwin);
 gint init_lastfm(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_keybinder(struct con_win *cwin);
-void init_state(struct con_win *cwin);
+gint init_first_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
