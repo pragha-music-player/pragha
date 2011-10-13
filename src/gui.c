@@ -1751,11 +1751,17 @@ GtkWidget* create_panel(struct con_win *cwin)
 		   TRUE, TRUE, 0);
 
 	if (cwin->cpref->show_album_art) {
-		album_art_frame = gtk_frame_new(NULL);
-		gtk_frame_set_shadow_type (GTK_FRAME(album_art_frame),GTK_SHADOW_NONE);
+		album_art_frame = gtk_event_box_new ();
+
 		gtk_box_pack_end(GTK_BOX(hbox_panel),
 				   GTK_WIDGET(album_art_frame),
 				   FALSE, FALSE, 0);
+
+		g_signal_connect (G_OBJECT (album_art_frame),
+				"button_press_event",
+				G_CALLBACK (album_art_frame_press_callback),
+				cwin);
+
 		cwin->album_art_frame = album_art_frame;
 
 		unset_album_art(cwin);
