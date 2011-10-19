@@ -369,8 +369,8 @@ enum file_type {
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	FILE_MP4,
 #endif
-#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
-	FILE_APE
+#ifdef HAVE_TAGLIB_1_7
+	FILE_APE,
 #endif
 	FILE_CDDA
 };
@@ -689,7 +689,7 @@ extern const gchar *mime_asf[];
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 extern const gchar *mime_mp4[];
 #endif
-#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+#ifdef HAVE_TAGLIB_1_7
 extern const gchar *mime_ape[];
 #endif
 
@@ -813,7 +813,7 @@ gboolean get_asf_info(gchar *file, struct tags *tags);
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 gboolean get_mp4_info(gchar *file, struct tags *tags);
 #endif
-#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+#ifdef HAVE_TAGLIB_1_7
 gboolean get_ape_info(gchar *file, struct tags *tags);
 #endif
 gboolean save_tags_to_file(gchar *file, struct tags *tags,

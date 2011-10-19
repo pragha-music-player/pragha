@@ -183,7 +183,7 @@ static GVariant* mpris_Root_get_SupportedMimeTypes(struct con_win *cwin) {
 		#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 		"'audio/x-m4a', "
 		#endif
-		#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+		#ifdef HAVE_TAGLIB_1_7
 		"'application/x-ape', 'audio/ape', 'audio/x-ape', "
 		#endif
 		"'application/x-flac', 'audio/flac', 'audio/x-wav']", NULL, NULL, NULL);

@@ -84,7 +84,7 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 		}
 		break;
 	#endif
-	#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+	#ifdef HAVE_TAGLIB_1_7
 	case FILE_APE:
 		if (get_ape_info(file, mobj->tags))
 			mobj->file_type = FILE_APE;
