@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [0])
-m4_define([pragha_version_micro], [RC])
+m4_define([pragha_version_micro], [rc1])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -61,14 +61,8 @@ XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
 XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
 XDT_CHECK_PACKAGE([LIBX11], [x11], 1.0.0)
+XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
 
-dnl Check for taglib > 1.7 to add monkeyaudio support
-XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB], [taglib], [1.7.0], [taglib],
-                           [TAGLIB (Ape suport)], [yes])
-if test "x$TAGLIB_FOUND" != "xyes"; then
-    XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
-    AC_DEFINE([USE_OLD_TAGLIB], [1], [Use old TAGLIB version])
-fi
 dnl Check for taglib_c headers.
 TAGLIBC_LIBS=""
 TAGLIBC_CFLAGS=""
@@ -82,6 +76,13 @@ AC_CHECK_LIB([tag_c], [taglib_file_new],
 ], [-lm])
 AC_SUBST([TAGLIBC_CFLAGS])
 AC_SUBST([TAGLIBC_LIBS]) 
+
+dnl Check min taglib to add monkeyaudio support
+TAGLIB_1_7_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
+                       [taglib], [1.7.0],
+                       [taglib],
+                       [taglib library to APE], [yes])
 
 dnl Check gstreamer-plugins-base
 GSTREAMER_PLUGINS_BASE_FOUND="no"
@@ -107,7 +108,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
 dnl Check libglyr
 LIBGLYR_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
-                       [libglyr], [0.8.5],
+                       [libglyr], [0.9.0],
                        [libglyr],
                        [libglyr library], [yes])
 

@@ -32,7 +32,7 @@ const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", NULL};
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
 #endif
-#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+#ifdef HAVE_TAGLIB_1_7
 const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NULL};
 #endif
 
@@ -281,7 +281,7 @@ get_file_type(gchar *file)
 		else if (is_valid_mime(result, mime_mp4))
 			ret = FILE_MP4;
 		#endif
-		#if defined(USE_OLD_TAGLIB) && (USE_OLD_TAGLIB==0)
+		#ifdef HAVE_TAGLIB_1_7
 		else if (is_valid_mime(result, mime_ape))
 			ret = FILE_APE;
 		#endif
