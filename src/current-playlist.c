@@ -2918,9 +2918,10 @@ void init_current_playlist_columns(struct con_win *cwin)
 		g_warning("(%s): No columns in playlist view", __func__);
 
 	/* Always show queue and status pixbuf colum */
-
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->current_playlist), 0);
 	gtk_tree_view_column_set_visible(col, TRUE);
+	gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+	gtk_tree_view_column_set_fixed_width(col, 32);
 }
 
 /* Callback for adding/deleting track_no column */
