@@ -1648,7 +1648,10 @@ GtkWidget* create_panel(struct con_win *cwin)
 
 	gtk_button_set_relief(GTK_BUTTON(shuffle_button), GTK_RELIEF_NONE);
 	gtk_button_set_relief(GTK_BUTTON(repeat_button), GTK_RELIEF_NONE);
+
 	vol_button = gtk_volume_button_new();
+	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
+
 	vol_adjust = gtk_adjustment_new(100, 0, 100, 2, 5, 1);
 	gtk_scale_button_set_adjustment(GTK_SCALE_BUTTON(vol_button),
 					GTK_ADJUSTMENT(vol_adjust));

@@ -1272,6 +1272,32 @@ void init_pixbufs(struct con_win *cwin)
 		g_warning("Unable to load folder png");
 }
 
+#if HAVE_EXO
+static void
+pragha_save_yourself (ExoXsessionClient *client, struct con_win *cwin)
+{
+	if (cwin->cpref->save_playlist)
+		save_current_playlist_state(cwin);
+	save_preferences(cwin);
+}
+
+gint init_session_support(struct con_win *cwin)
+{
+	ExoXsessionClient *client;
+	GdkDisplay        *display;
+	GdkWindow         *leader;
+
+	display = gtk_widget_get_display (cwin->mainwindow);
+	leader = gdk_display_get_default_group (display);
+	client = exo_xsession_client_new_with_group (leader);
+
+	g_signal_connect (G_OBJECT (client), "save-yourself",
+			  G_CALLBACK (pragha_save_yourself), cwin);
+
+	return 0;
+}
+#endif
+
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
@@ -1292,17 +1318,17 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	GdkScreen *screen = gtk_widget_get_screen(cwin->mainwindow);
-	GdkColormap *colormap = gdk_screen_get_rgba_colormap (screen);
-	if (colormap && gdk_screen_is_composited (screen)){
-		gtk_widget_set_default_colormap(colormap);
-	}
-
 	if (cwin->pixbuf->pixbuf_app)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
 				    cwin->pixbuf->pixbuf_app);
 
 	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
+
+	GdkScreen *screen = gtk_widget_get_screen(cwin->mainwindow);
+	GdkColormap *colormap = gdk_screen_get_rgba_colormap (screen);
+	if (colormap && gdk_screen_is_composited (screen)){
+		gtk_widget_set_default_colormap(colormap);
+	}
 
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",
@@ -1389,6 +1415,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	role = g_strdup_printf ("Pragha-%p-%d-%d", cwin->mainwindow, (gint) getpid (), (gint) time (NULL));
 	gtk_window_set_role (GTK_WINDOW (cwin->mainwindow), role);
 	g_free (role);
+
+	#if HAVE_EXO
+	init_session_support(cwin);
+	#endif
 
 	gtk_init_add(_init_gui_state, cwin);
 }

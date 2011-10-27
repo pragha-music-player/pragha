@@ -112,6 +112,13 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                        [libglyr],
                        [libglyr library], [yes])
 
+dnl Check exo
+EXO_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([EXO],
+                       [exo-1], [0.6.0],
+                       [exo-1],
+                       [exo-1 library], [yes])
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
@@ -128,10 +135,11 @@ AC_MSG_RESULT([CFLAGS = $CFLAGS])
 echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
-echo "  Prefix.....................................................: ${prefix}"
-echo "  Cubic volume support (Need gstreamer-plugins-base-devel)...: $GSTREAMER_PLUGINS_BASE_FOUND"
-echo "  Global keyboard shortcuts support..........................: $LIBKEYBINDER_FOUND"
-echo "  Lastfm support (Need http://liblastfm.sourceforge.net 0.4).: $LIBCLASTFM_FOUND"
-echo "  Use libglyr to search lyrics...............................: $LIBGLYR_FOUND"
+echo "  Prefix.................................................................: ${prefix}"
+echo "  Cubic volume support...............(Need gstreamer-plugins-base-devel).: $GSTREAMER_PLUGINS_BASE_FOUND"
+echo "  Global keyboard shortcuts support............(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
+echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.4).: $LIBCLASTFM_FOUND"
+echo "  Better session management support................(Need exo-1 >= 0.6.0).: $EXO_FOUND"
+echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.0).: $LIBGLYR_FOUND"
 echo ""
 
