@@ -1228,6 +1228,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
+gint init_lastfm_idle_timeout(struct con_win *cwin);
 gint init_lastfm(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_keybinder(struct con_win *cwin);

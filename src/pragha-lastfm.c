@@ -471,17 +471,82 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 	return;
 }
 
-void *do_init_lastfm (gpointer data)
+/* When just run Pragha init lastfm with a timeuout of 30 sec. */
+
+gboolean do_init_lastfm_idle_timeout (gpointer data)
 {
 	struct con_win *cwin = data;
 
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
-	if((strlen(cwin->cpref->lw.lastfm_user) != 0) && (strlen(cwin->cpref->lw.lastfm_pass) != 0))
-		cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id, cwin->cpref->lw.lastfm_user, cwin->cpref->lw.lastfm_pass);
+	if (cwin->clastfm->session_id != NULL) {
+		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
+							      cwin->cpref->lw.lastfm_user,
+							      cwin->cpref->lw.lastfm_pass);
 
-	if(cwin->clastfm->status != LASTFM_STATUS_OK)
-		CDEBUG(DBG_INFO, "Not logged on lastfm");
+			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+				CDEBUG(DBG_INFO, "Failure to login on lastfm");
+
+				set_status_message(_("No connection Last.fm has been established."), cwin);
+			}
+
+		}
+	}
+	else {
+		CDEBUG(DBG_INFO, "Failure to init libclastfm");
+
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+	}
+
+	return FALSE;
+}
+
+gint init_lastfm_idle_timeout(struct con_win *cwin)
+{
+	if (cwin->cpref->lw.lastfm_support) {
+		CDEBUG(DBG_INFO, "Initializing LASTFM");
+
+		gdk_threads_add_timeout_seconds_full(
+					G_PRIORITY_DEFAULT_IDLE, 30,
+					do_init_lastfm_idle_timeout, cwin, NULL);
+	}
+	return 0;
+}
+
+/* Init lastfm with a simple thread when change preferences */
+
+void *do_init_lastfm_idle (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+
+	if (cwin->clastfm->session_id != NULL) {
+		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
+							      cwin->cpref->lw.lastfm_user,
+							      cwin->cpref->lw.lastfm_pass);
+
+			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+				CDEBUG(DBG_INFO, "Not logged on lastfm");
+
+				gdk_threads_enter ();
+				set_status_message(_("No connection Last.fm has been established."), cwin);
+				gdk_threads_leave ();
+			}
+
+		}
+	}
+	else {
+		CDEBUG(DBG_INFO, "Failure to init libclastfm");
+
+		gdk_threads_enter ();
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		gdk_threads_leave ();
+	}
 
 	return NULL;
 }
@@ -493,7 +558,7 @@ gint init_lastfm (struct con_win *cwin)
 	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
-		pthread_create (&tid, NULL, do_init_lastfm, cwin);
+		pthread_create (&tid, NULL, do_init_lastfm_idle, cwin);
 	}
 	return 0;
 }
