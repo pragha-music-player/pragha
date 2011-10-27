@@ -36,6 +36,10 @@
 #include <glyr/cache.h>
 #endif
 
+#ifdef HAVE_EXO
+#include <exo/exo.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -53,7 +57,7 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 #include <sqlite3.h>
-#include <glib/gi18n.h>
+//#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>

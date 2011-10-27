@@ -91,3 +91,7 @@ pragha_CFLAGS += $(LIBGLYR_CFLAGS)
 pragha_LDFLAGS += $(LIBGLYR_LIBS)
 endif
 
+if HAVE_EXO
+pragha_CFLAGS += $(EXO_CFLAGS)
+pragha_LDFLAGS += $(EXO_LIBS)
+endif
