@@ -221,28 +221,34 @@ static GVariant* mpris_Player_Stop(struct con_win *cwin, GVariant* parameters) {
 }
 
 static GVariant* mpris_Player_Seek(struct con_win *cwin, GVariant* parameters) {
-	/*gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
+	gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
 	gint seek = cwin->cstate->curr_mobj->tags->length * fraction;
 	gint64 param;
 	g_variant_get(parameters, "(x)", &param);
 	seek += (param / 1000000);
-	fraction += (gdouble)seek / (gdouble)cwin->cstate->curr_mobj->tags->length;
-	seek_playback(cwin, seek, fraction);*/
+
+	if (seek >= cwin->cstate->curr_mobj->tags->length)
+		seek = cwin->cstate->curr_mobj->tags->length;
+
+	backend_seek(seek, cwin);
+
 	return NULL;
 }
 
 static GVariant* mpris_Player_SetPosition(struct con_win *cwin, GVariant* parameters) {
-	/*gint64 param;
+	gint64 param;
 	gchar *path = NULL;
 	g_variant_get(parameters, "(sx)", &path, &param);
 	if(!g_strcmp0(cwin->cstate->curr_mobj->file, path)) {
-		gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
-		gint seek = cwin->cstate->curr_mobj->tags->length * fraction;
-		seek += (param / 1000000);
-		fraction += (gdouble)seek / (gdouble)cwin->cstate->curr_mobj->tags->length;
-		seek_playback(cwin, seek, fraction);
+		gint seek = (param / 1000000);
+
+		if (seek >= cwin->cstate->curr_mobj->tags->length)
+			seek = cwin->cstate->curr_mobj->tags->length;
+
+		backend_seek(seek, cwin);
 	}
-	g_free(path);*/
+	g_free(path);
+
 	return NULL;
 }
 
