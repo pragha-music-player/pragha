@@ -1078,18 +1078,18 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		path = gtk_tree_row_reference_get_path(ref);
 		gtk_tree_row_reference_free(ref);
 
-		if (gtk_tree_model_get_iter(model, &iter, path))
+		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path)))
 			gtk_tree_path_free(path);
 		else
 			continue;
 
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (!mobj) {
+		if (G_UNLIKELY(mobj == NULL)) {
 			g_warning("Invalid mobj pointer");
 			continue;
 		}
 
-		if (mobj == cwin->cstate->curr_mobj) {
+		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
 			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
 			if(cwin->cstate->state != ST_STOPPED)
 				__update_current_song_info(cwin);
@@ -1099,10 +1099,10 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		}
 		update_track_current_playlist(&iter, changed, mobj, cwin);
 
-		if(mobj->file_type != FILE_CDDA) {
+		if(G_LIKELY(mobj->file_type != FILE_CDDA)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
 			location_id = find_location_db(sfile, cwin);
-			if (location_id) {
+			if (G_LIKELY(location_id)) {
 				g_array_append_val(loc_arr, location_id);
 				g_free(sfile);
 				continue;

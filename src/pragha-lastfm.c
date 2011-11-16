@@ -435,7 +435,8 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if(strlen(cwin->cpref->lw.lastfm_user) == 0)
+	if((strlen(cwin->cpref->lw.lastfm_user) == 0) ||
+	   (strlen(cwin->cpref->lw.lastfm_pass) == 0))
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {

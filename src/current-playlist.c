@@ -1264,7 +1264,7 @@ void remove_current_playlist(GtkAction *action, struct con_win *cwin)
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-				if (mobj == cwin->cstate->curr_mobj)
+				if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
 					cwin->cstate->curr_mobj_clear = TRUE;
 				else
 					mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
@@ -1314,7 +1314,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Get a reference to all the nodes that are _not_ selected */
 
 	while (ret) {
-		if (!gtk_tree_selection_iter_is_selected(selection, &iter)) {
+		if (gtk_tree_selection_iter_is_selected(selection, &iter) == FALSE) {
 			path = gtk_tree_model_get_path(model, &iter);
 			ref = gtk_tree_row_reference_new(model, path);
 			to_delete = g_slist_prepend(to_delete, ref);
@@ -1324,6 +1324,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	/* Delete the referenced nodes */
+
+	g_object_ref(model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	for (i=to_delete; i != NULL; i = i->next) {
 		ref = i->data;
@@ -1335,7 +1339,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (gtk_tree_model_get_iter(model, &iter, path)) {
 			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-			if (mobj == cwin->cstate->curr_mobj)
+			if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
 				cwin->cstate->curr_mobj_clear = TRUE;
 			else
 				mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
@@ -1349,6 +1353,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_tree_path_free(path);
 		gtk_tree_row_reference_free(ref);
 	}
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	g_object_unref(model);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 
@@ -1526,7 +1534,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (ret) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-		if (mobj == cwin->cstate->curr_mobj)
+		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
 			cwin->cstate->curr_mobj_clear = TRUE;
 		else
 			to_delete = g_slist_prepend(to_delete, mobj);
