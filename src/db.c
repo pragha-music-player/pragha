@@ -507,6 +507,31 @@ void update_track_db(gint location_id, gint changed,
 
 /* 'playlist' has to be a sanitized string */
 
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_win *cwin)
+{
+	gchar *query;
+	gint playlist_id = 0;
+	struct db_result result;
+
+	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
+				oplaylist);
+
+	if (exec_sqlite_query(query, cwin, &result)) {
+		playlist_id = atoi(result.resultp[result.no_columns]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	if(playlist_id != 0) {
+		query = g_strdup_printf("UPDATE PLAYLIST SET name = '%s' "
+					"WHERE id = '%d';",
+					nplaylist, playlist_id);
+
+		exec_sqlite_query(query, cwin, &result);
+	}
+
+}
+
+
 gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin)
 {
 	gchar *query;

@@ -900,6 +900,7 @@ void update_track_db(gint location_id, gint changed,
 		     gint track_no, gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_win *cwin);
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_win *cwin);
 gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
 gchar** get_playlist_names_db(struct con_win *cwin);
 gint get_playlist_count_db(struct con_win *cwin);
@@ -937,6 +938,7 @@ void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
+void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
