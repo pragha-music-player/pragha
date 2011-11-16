@@ -128,6 +128,7 @@ gchar *playlist_tree_context_menu_xml = "<ui>	\
 	<menuitem action=\"Replace current playlist\"/>	\
 	<menuitem action=\"Replace and play\"/>	\
 	<separator/>				\
+	<menuitem action=\"Rename\"/>		\
 	<menuitem action=\"Delete\"/>		\
 	<menuitem action=\"Export\"/>		\
 	</popup>				\
@@ -347,6 +348,8 @@ GtkActionEntry playlist_tree_context_aentries[] = {
 	 NULL, "Replace current playlist", G_CALLBACK(playlist_tree_replace_playlist)},
 	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
 	 NULL, "Replace and play", G_CALLBACK(playlist_tree_replace_and_play)},
+	{"Rename", NULL, N_("Rename"),
+	 NULL, "Rename", G_CALLBACK(playlist_tree_rename)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
 	 NULL, "Delete", G_CALLBACK(playlist_tree_delete)},
 	{"Export", GTK_STOCK_SAVE, N_("Export"),

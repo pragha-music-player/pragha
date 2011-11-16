@@ -608,6 +608,92 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 	}
 }
 
+/* Build a dialog to get a new playlist name */
+
+gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkWidget *hbox;
+	GtkWidget *label_new, *entry;
+	gchar *playlist = NULL;
+	gint result;
+
+	/* Create dialog window */
+
+	hbox = gtk_hbox_new(TRUE, 2);
+	entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
+
+	label_new = gtk_label_new_with_mnemonic(_("Choose a new playlist name"));
+	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
+
+	dialog = gtk_dialog_new_with_buttons(_("Rename playlist"),
+			     GTK_WINDOW(cwin->mainwindow),
+			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+			     GTK_STOCK_CANCEL,
+			     GTK_RESPONSE_CANCEL,
+			     GTK_STOCK_OK,
+			     GTK_RESPONSE_ACCEPT,
+			     NULL);
+
+	gtk_box_pack_start(GTK_BOX(hbox), label_new, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch(result) {
+	case GTK_RESPONSE_ACCEPT:
+		/* Get playlist name */
+		playlist = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+		break;
+	case GTK_RESPONSE_CANCEL:
+		break;
+	default:
+		break;
+	}
+	gtk_widget_destroy(dialog);
+
+	return playlist;
+}
+
+void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list;
+	gchar *playlist, *s_playlist, *n_playlist;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		path = list->data;
+		if (gtk_tree_path_get_depth(path) > 1) {
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, P_PLAYLIST,
+					   &playlist, -1);
+
+			s_playlist = sanitize_string_sqlite3(playlist);
+			n_playlist = rename_playlist_dialog(s_playlist, cwin);
+
+			update_playlist_name_db(s_playlist, n_playlist, cwin);
+
+			g_free(s_playlist);
+			g_free(n_playlist);
+			g_free(playlist);
+		}
+		gtk_tree_path_free(path);
+	}
+	g_list_free(list);
+
+	init_playlist_view(cwin);
+}
+
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model;
