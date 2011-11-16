@@ -681,7 +681,8 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			s_playlist = sanitize_string_sqlite3(playlist);
 			n_playlist = rename_playlist_dialog(s_playlist, cwin);
 
-			update_playlist_name_db(s_playlist, n_playlist, cwin);
+			if(n_playlist != NULL)
+				update_playlist_name_db(s_playlist, n_playlist, cwin);
 
 			g_free(s_playlist);
 			g_free(n_playlist);
