@@ -389,6 +389,106 @@ void add_audio_cd_action(GtkAction *action, struct con_win *cwin)
 	add_audio_cd(cwin);
 }
 
+/* Build a dialog to get a new playlist name */
+
+static char *
+totem_open_location_set_from_clipboard (GtkWidget *open_location)
+{
+	GtkClipboard *clipboard;
+	gchar *clipboard_content;
+
+	/* Initialize the clipboard and get its content */
+	clipboard = gtk_clipboard_get_for_display (gtk_widget_get_display (GTK_WIDGET (open_location)), GDK_SELECTION_CLIPBOARD);
+	clipboard_content = gtk_clipboard_wait_for_text (clipboard);
+
+	/* Check clipboard for "://". If it exists, return it */
+	if (clipboard_content != NULL && strcmp (clipboard_content, "") != 0)
+	{
+		if (g_strrstr (clipboard_content, "://") != NULL)
+			return clipboard_content;
+	}
+
+	g_free (clipboard_content);
+	return NULL;
+}
+
+gchar* add_location_dialog(struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkWidget *hbox;
+	GtkWidget *label_new, *entry;
+	gchar *uri = NULL;
+	gchar *clipboard_location;
+	gint result;
+
+	/* Create dialog window */
+
+	hbox = gtk_hbox_new(FALSE, 2);
+	entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
+
+	/* Get item from clipboard to fill GtkEntry */
+	clipboard_location = totem_open_location_set_from_clipboard (entry);
+	if (clipboard_location != NULL && strcmp (clipboard_location, "") != 0) {
+		gtk_entry_set_text (GTK_ENTRY(entry), clipboard_location);
+		g_free (clipboard_location);
+	}
+
+	label_new = gtk_label_new_with_mnemonic(_("Add a location"));
+
+	dialog = gtk_dialog_new_with_buttons(_("Add a location"),
+			     GTK_WINDOW(cwin->mainwindow),
+			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+			     GTK_STOCK_CANCEL,
+			     GTK_RESPONSE_CANCEL,
+			     GTK_STOCK_OK,
+			     GTK_RESPONSE_ACCEPT,
+			     NULL);
+
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
+	gtk_box_pack_start(GTK_BOX(hbox), label_new, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
+
+	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch(result) {
+	case GTK_RESPONSE_ACCEPT:
+		/* Get playlist name */
+		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+		break;
+	case GTK_RESPONSE_CANCEL:
+		break;
+	default:
+		break;
+	}
+	gtk_widget_destroy(dialog);
+
+	return uri;
+}
+
+void add_location_action(GtkAction *action, struct con_win *cwin)
+{
+	gchar *uri = NULL;
+	struct musicobject *mobj;
+
+	uri = add_location_dialog(cwin);
+	if(uri != NULL) {
+		mobj = new_musicobject_from_location(cwin, uri);
+
+		append_current_playlist(mobj, cwin);
+
+		g_free(uri);
+	}
+}
+
 /* Handler for the 'Prev' item in the pragha menu */
 
 void prev_action(GtkAction *action, struct con_win *cwin)

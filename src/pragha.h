@@ -376,7 +376,8 @@ enum file_type {
 #ifdef HAVE_TAGLIB_1_7
 	FILE_APE,
 #endif
-	FILE_CDDA
+	FILE_CDDA,
+	FILE_HTTP
 };
 
 /* Playlist type formats */
@@ -724,6 +725,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 /* Menu actions */
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
+void add_location_action(GtkAction *action, struct con_win *cwin);
 void prev_action(GtkAction *action, struct con_win *cwin);
 void play_pause_action(GtkAction *action, struct con_win *cwin);
 void stop_action(GtkAction *action, struct con_win *cwin);
@@ -797,10 +799,9 @@ void __recur_add(gchar *dir_name, struct con_win *cwin);
 /* Musicobject functions */
 
 struct musicobject* new_musicobject_from_file(gchar *file);
-struct musicobject* new_musicobject_from_db(gint location_id,
-					    struct con_win *cwin);
-struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
-					      gint track_no);
+struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
+struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
+struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gchar *uri);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
 void delete_musicobject(struct musicobject *mobj);
 void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin);

@@ -481,6 +481,9 @@ void update_related_state (struct con_win *cwin)
 	if(cwin->cstate->state != ST_PLAYING)
 		return;
 
+	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)
+		return;
+
 	#ifdef HAVE_LIBCLASTFM
 	if (cwin->clastfm->status == LASTFM_STATUS_OK)
 		time(&cwin->clastfm->playback_started);

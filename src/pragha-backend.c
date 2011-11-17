@@ -38,6 +38,9 @@ static gboolean update_gui(gpointer data)
 {
 	struct con_win *cwin = data;
 
+	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)
+		return TRUE;
+
 	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
 
 	if(newsec > 0) {
@@ -464,6 +467,83 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 	g_free (dbg_info);
 }
 
+static void
+backend_parse_buffering (GstMessage *message, struct con_win *cwin)
+{
+	gint percent = 0;
+
+	gst_message_parse_buffering (message, &percent);
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
+
+	if(percent < 100) {
+		if(cwin->cstate->state != ST_PAUSED)
+			backend_pause(cwin);
+	}
+	else {
+		if(cwin->cstate->state == ST_PAUSED)
+			backend_resume(cwin);
+	}
+}
+
+static void
+backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
+{
+	GstTagList *tag_list;
+	struct musicobject *mobj = NULL;
+	struct tags ntag;
+	GtkTreeModel *model;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+	gchar *str = NULL;
+
+	gint changed = 0;
+
+	if(cwin->cstate->curr_mobj->file_type != FILE_HTTP)
+		return;
+
+	CDEBUG(DBG_BACKEND, "Parse message tag");
+
+	memset(&ntag, 0, sizeof(struct tags));
+
+	gst_message_parse_tag(message, &tag_list);
+
+	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
+	{
+		changed |= TAG_TITLE_CHANGED;
+		ntag.title = g_strdup(str);
+		g_free(str);
+	}
+	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
+	{
+		changed |= TAG_ARTIST_CHANGED;
+		ntag.artist = g_strdup(str);
+		g_free(str);
+	}
+
+	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
+	__update_current_song_info(cwin);
+
+	path = current_playlist_get_actual(cwin);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	gtk_tree_model_get_iter(model, &iter, path);
+	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+	if (G_UNLIKELY(mobj == NULL))
+		g_warning("Invalid mobj pointer");
+	else
+		update_track_current_playlist(&iter, changed, mobj, cwin);
+
+	if(ntag.title)
+		g_free(ntag.title);
+	if(ntag.artist)
+		g_free(ntag.artist);
+
+	gtk_tree_path_free(path);
+}
+
+
 void
 backend_start(struct musicobject *mobj, struct con_win *cwin)
 {
@@ -495,13 +575,14 @@ backend_play(struct con_win *cwin)
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", cwin->cstate->curr_mobj->file);
 
-	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
+	if(cwin->cstate->curr_mobj->file_type == FILE_CDDA ||
+	   cwin->cstate->curr_mobj->file_type == FILE_HTTP) {
+		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
+	}
+	else {
 		uri = g_filename_to_uri (cwin->cstate->curr_mobj->file, NULL, NULL);
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", uri, NULL);
 		g_free (uri);
-	}
-	else {
-		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
 	}
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
@@ -568,6 +649,14 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 			gst_message_parse_state_changed (msg, &old, &new, &pending);
 			if (GST_MESSAGE_SRC (msg) == GST_OBJECT (cwin->cgst->pipeline))
 				backend_evaluate_state (old, new, pending, cwin);
+			break;
+		}
+		case GST_MESSAGE_BUFFERING: {
+			backend_parse_buffering (msg, cwin);
+			break;
+		}
+		case GST_MESSAGE_TAG: {
+			backend_parse_message_tag (msg, cwin);
 			break;
 		}
 		case GST_MESSAGE_ERROR: {
