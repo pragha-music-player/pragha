@@ -329,7 +329,9 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 	if (cwin->cpref->show_album_art) {
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
-		if (mobj && mobj->file_type != FILE_CDDA){
+		if (mobj &&
+		   (mobj->file_type != FILE_CDDA) &&
+		   (mobj->file_type != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
 			album_art = get_image_from_cache(cwin);
 			#endif

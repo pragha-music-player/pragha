@@ -224,6 +224,35 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
+struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gchar *uri)
+{
+	struct musicobject *mobj;
+
+	CDEBUG(DBG_MOBJ, "Creating new musicobject to location: %s", uri);
+
+	mobj = g_slice_new0(struct musicobject);
+	mobj->tags = g_slice_new0(struct tags);
+
+	mobj->tags->title = g_strdup("Live stream");
+
+	mobj->tags->artist = g_strdup("");
+	mobj->tags->album = g_strdup("");
+	mobj->tags->genre = g_strdup("");
+	mobj->tags->comment = g_strdup("");
+
+	mobj->tags->track_no = 0;
+	mobj->tags->year = 0;
+	mobj->tags->bitrate = 0;
+	mobj->tags->length = 0;
+	mobj->tags->channels = 0;
+	mobj->tags->samplerate = 0;
+
+	mobj->file = g_strdup(uri);
+	mobj->file_type = FILE_HTTP;
+
+	return mobj;
+}
+
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin)
 {
 	if (!changed)

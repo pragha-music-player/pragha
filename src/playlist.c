@@ -621,10 +621,13 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 	/* Create dialog window */
 
 	hbox = gtk_hbox_new(TRUE, 2);
-	entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
 
 	label_new = gtk_label_new_with_mnemonic(_("Choose a new playlist name"));
+
+	entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+
 	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
 
 	dialog = gtk_dialog_new_with_buttons(_("Rename playlist"),
@@ -635,6 +638,8 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 			     GTK_STOCK_OK,
 			     GTK_RESPONSE_ACCEPT,
 			     NULL);
+
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
 	gtk_box_pack_start(GTK_BOX(hbox), label_new, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
@@ -1263,7 +1268,8 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		gtk_tree_model_get_iter_first(model, &iter);
 		do {
 			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (mobj && mobj->file_type != FILE_CDDA) {
+			if ((mobj && mobj->file_type != FILE_CDDA) &&
+			    (mobj && mobj->file_type != FILE_HTTP)) {
 				file = sanitize_string_sqlite3(mobj->file);
 				add_track_playlist_db(file, playlist_id, cwin);
 				g_free(file);

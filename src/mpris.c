@@ -345,9 +345,9 @@ void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
 static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 {
 	gchar *date = g_strdup_printf("%d", mobj->tags->year);
-	gchar *url = g_str_has_prefix(mobj->file, "cdda") ?
-		g_strdup(mobj->file) :
-		g_filename_to_uri(mobj->file, NULL, NULL);
+
+	gchar *url = (mobj->file_type == FILE_HTTP || mobj->file_type == FILE_CDDA) ?
+			g_strdup(mobj->file) : g_filename_to_uri(mobj->file, NULL, NULL);
 
 	CDEBUG(DBG_MPRIS, "MPRIS handle get metadata");
 
@@ -379,14 +379,16 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 	g_free(url);
 }
 
-static GVariant* mpris_Player_get_Metadata(struct con_win *cwin) {
+static GVariant* mpris_Player_get_Metadata(struct con_win *cwin)
+{
 	GVariantBuilder *b = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
 
 	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
 
 	if (cwin->cstate->state != ST_STOPPED) {
 		handle_get_metadata(cwin->cstate->curr_mobj, b);
-	} else {
+	}
+	else {
 		g_variant_builder_add (b, "{sv}", "mpris:trackid",
 			handle_get_trackid(NULL));
 	}
@@ -851,7 +853,8 @@ on_name_lost (GDBusConnection *connection,
 
 /* pragha callbacks */
 
-void mpris_update_any(struct con_win *cwin) {
+void mpris_update_any(struct con_win *cwin)
+{
 	gboolean change_detected = FALSE;
 	GVariantBuilder *b;
 	gchar *newtitle = NULL;
@@ -920,7 +923,8 @@ void mpris_update_any(struct con_win *cwin) {
 	g_variant_builder_unref(b);
 }
 
-void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj) {
+void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj)
+{
 
 	GVariant * tuples[1];
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -935,7 +939,8 @@ void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj) {
 		g_variant_new_tuple(tuples, 1), NULL);
 }
 
-void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter) {
+void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter)
+{
 	GtkTreeModel *model;
 	GtkTreePath *path = NULL;
 	struct musicobject *prev = NULL;
