@@ -233,7 +233,7 @@ struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gc
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	mobj->tags->title = g_strdup("Live stream");
+	mobj->tags->title = g_strdup(uri);
 
 	mobj->tags->artist = g_strdup("");
 	mobj->tags->album = g_strdup("");
