@@ -471,18 +471,33 @@ static void
 backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 {
 	gint percent = 0;
+	GtkTreePath *path = NULL;
+	gboolean changed = FALSE;
+
+	CDEBUG(DBG_BACKEND, "Buffering...");
 
 	gst_message_parse_buffering (message, &percent);
 
+	if (percent >= 100 && cwin->cstate->state != ST_PLAYING) {
+		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+		cwin->cstate->state = ST_PLAYING;
+		changed = TRUE;
+	}
+	else if (cwin->cstate->state != ST_PAUSED) {
+		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
+		cwin->cstate->state = ST_PAUSED;
+		changed = TRUE;
+	}
+
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
 
-	if(percent < 100) {
-		if(cwin->cstate->state != ST_PAUSED)
-			backend_pause(cwin);
-	}
-	else {
-		if(cwin->cstate->state == ST_PAUSED)
-			backend_resume(cwin);
+	if (changed) {
+		path = current_playlist_get_actual(cwin);
+		if (path) {
+			update_pixbuf_state_on_path(path, NULL, cwin);
+			gtk_tree_path_free(path);
+		}
+		play_button_toggle_state(cwin);
 	}
 }
 
