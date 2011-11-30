@@ -608,7 +608,8 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 
 	store = gtk_tree_store_new(N_PL_COLUMNS,
 				   GDK_TYPE_PIXBUF, /* Pixbuf */
-				   G_TYPE_STRING);  /* Playlist name */
+				   G_TYPE_STRING,   /* Playlist name */
+				   G_TYPE_INT);     /* Node type : Playlist or Radio */
 
 	/* Create the tree view */
 

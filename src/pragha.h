@@ -273,6 +273,8 @@ enum node_type {
 	NODE_ALBUM,
 	NODE_TRACK,
 	NODE_FOLDER,
+	NODE_PLAYLIST,
+	NODE_RADIO,
 	NODE_BASENAME
 };
 
@@ -292,6 +294,7 @@ enum library_columns {
 enum playlist_columns {
 	P_PIXBUF,
 	P_PLAYLIST,
+	P_NODE_TYPE,
 	N_PL_COLUMNS
 };
 
@@ -801,7 +804,7 @@ void __recur_add(gchar *dir_name, struct con_win *cwin);
 struct musicobject* new_musicobject_from_file(gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gchar *uri);
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
 void delete_musicobject(struct musicobject *mobj);
 void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin);
@@ -888,6 +891,7 @@ gint add_new_year_db(guint year, struct con_win *cwin);
 gint add_new_comment_db(gchar *comment, struct con_win *cwin);
 gint add_new_location_db(gchar *location, struct con_win *cwin);
 void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin);
+void add_track_radio_db(gchar *uri, gint radio_id, struct con_win *cwin);
 gint find_artist_db(const gchar *artist, struct con_win *cwin);
 gint find_album_db(const gchar *album, struct con_win *cwin);
 gint find_genre_db(const gchar *genre, struct con_win *cwin);
@@ -895,6 +899,7 @@ gint find_year_db(gint year, struct con_win *cwin);
 gint find_comment_db(const gchar *comment, struct con_win *cwin);
 gint find_location_db(const gchar *location, struct con_win *cwin);
 gint find_playlist_db(const gchar *playlist, struct con_win *cwin);
+gint find_radio_db(const gchar *radio, struct con_win *cwin);
 void delete_location_db(gint location_id, struct con_win *cwin);
 gint delete_location_hdd(gint location_id, struct con_win *cwin);
 void update_track_db(gint location_id, gint changed,
@@ -905,9 +910,15 @@ void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct co
 gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
 gchar** get_playlist_names_db(struct con_win *cwin);
 gint get_playlist_count_db(struct con_win *cwin);
+void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_win *cwin);
+gint add_new_radio_db(const gchar *radio, struct con_win *cwin);
+gchar** get_radio_names_db(struct con_win *cwin);
+gint get_radio_count_db(struct con_win *cwin);
 gint get_tracklist_count_db(struct con_win *cwin);
 void delete_playlist_db(gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
+void delete_radio_db(gchar *radio, struct con_win *cwin);
+void flush_radio_db(gint radio_id, struct con_win *cwin);
 void flush_stale_entries_db(struct con_win *cwin);
 void flush_db(struct con_win *cwin);
 gboolean fraction_update(GtkWidget *pbar);
@@ -925,6 +936,7 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 /* Playlist mgmt functions */
 
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
+void add_radio_current_playlist(gchar *playlist, struct con_win *cwin);
 void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 				    GtkTreePath *path,
 				    GtkTreeViewColumn *column,
@@ -958,6 +970,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		  struct con_win *cwin);
 void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
+void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
 void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */

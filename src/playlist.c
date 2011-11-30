@@ -19,6 +19,7 @@
 #include "pragha.h"
 
 static void add_entry_playlist(gchar *playlist,
+			       int node_type,
 			       GtkTreeIter *root,
 			       GtkTreeModel *model,
 			       struct con_win *cwin)
@@ -29,6 +30,7 @@ static void add_entry_playlist(gchar *playlist,
 			      &iter,
 			      root);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_NODE_TYPE, node_type,
 			   P_PIXBUF, cwin->pixbuf->pixbuf_track,
 			   P_PLAYLIST, playlist,
 			   -1);
@@ -42,11 +44,19 @@ static void add_playlist_row_current_playlist(GtkTreePath *path, struct con_win 
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gchar *playlist;
+	gint node_type;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	if (gtk_tree_model_get_iter(model, &iter, path)) {
 		gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
-		add_playlist_current_playlist(playlist, cwin);
+		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+
+		if(node_type == NODE_PLAYLIST) {
+			add_playlist_current_playlist(playlist, cwin);
+		}
+		else if (node_type == NODE_RADIO) {
+			add_radio_current_playlist(playlist, cwin);
+		}
 		g_free(playlist);
 	}
 }
@@ -385,6 +395,37 @@ bad:
 	g_free(s_playlist);
 }
 
+/* Append the given radio to the current playlist */
+
+void add_radio_current_playlist(gchar *radio, struct con_win *cwin)
+{
+	gchar *s_radio, *query;
+	gint radio_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_radio = sanitize_string_sqlite3(radio);
+	radio_id = find_radio_db(s_radio, cwin);
+
+	if(radio_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
+				radio_id);
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+
+		append_current_playlist(mobj, cwin);
+	}
+
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_radio);
+}
+
 void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 				    GtkTreePath *path,
 				    GtkTreeViewColumn *column,
@@ -516,6 +557,7 @@ void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1)
 				add_playlist_row_current_playlist(path, cwin);
+
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -584,13 +626,13 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
-
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1)
 				add_playlist_row_current_playlist(path, cwin);
+
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -671,7 +713,8 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list;
-	gchar *playlist, *s_playlist, *n_playlist;
+	gchar *playlist = NULL, *s_playlist = NULL, *n_playlist = NULL;
+	gint node_type;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -680,15 +723,25 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 		path = list->data;
 		if (gtk_tree_path_get_depth(path) > 1) {
 			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 			gtk_tree_model_get(model, &iter, P_PLAYLIST,
 					   &playlist, -1);
 
 			s_playlist = sanitize_string_sqlite3(playlist);
-			n_playlist = rename_playlist_dialog(s_playlist, cwin);
 
-			if(n_playlist != NULL)
-				update_playlist_name_db(s_playlist, n_playlist, cwin);
+			if(node_type == NODE_PLAYLIST) {
+				n_playlist = rename_playlist_dialog(s_playlist, cwin);
 
+				if(n_playlist != NULL)
+					update_playlist_name_db(s_playlist, n_playlist, cwin);
+			}
+			else if (node_type == NODE_RADIO) {
+				n_playlist = rename_playlist_dialog(s_playlist, cwin);
+
+				if(n_playlist != NULL)
+					update_radio_name_db(s_playlist, n_playlist, cwin);
+
+			}
 			g_free(s_playlist);
 			g_free(n_playlist);
 			g_free(playlist);
@@ -708,6 +761,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	gchar *playlist, *s_playlist;
+	gint node_type;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -720,10 +774,17 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1) {
 				gtk_tree_model_get_iter(model, &iter, path);
+				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 				gtk_tree_model_get(model, &iter, P_PLAYLIST,
 						   &playlist, -1);
 				s_playlist = sanitize_string_sqlite3(playlist);
-				delete_playlist_db(s_playlist, cwin);
+
+				if(node_type == NODE_PLAYLIST) {
+					delete_playlist_db(s_playlist, cwin);
+				}
+				else if (node_type == NODE_RADIO) {
+					delete_radio_db(s_playlist, cwin);
+				}
 				g_free(s_playlist);
 				g_free(playlist);
 			}
@@ -822,6 +883,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	GError *err = NULL;
 	gint resp, cnt;
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
+	gint node_type;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
@@ -839,6 +901,13 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	else {
 		gtk_tree_model_get_iter(model, &iter, path);
 		gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlistpath, -1);
+
+		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+		if(node_type != NODE_PLAYLIST) {
+			gtk_tree_path_free(path);
+			g_list_free(list);
+			return;
+		}
 	}
 
 	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
@@ -929,7 +998,7 @@ exit:
 	gtk_widget_destroy(dialog);
 }
 
-static GSList *
+GSList *
 pragha_pl_parser_parse_xspf (const gchar *filename)
 {
 	XMLNode *xml = NULL, *xi, *xl;
@@ -985,7 +1054,7 @@ out:
 }
 
 
-static GSList *
+GSList *
 pragha_pl_parser_parse_pls (const gchar *file)
 {
 	GKeyFile *plskeyfile;
@@ -1018,7 +1087,7 @@ pragha_pl_parser_parse_pls (const gchar *file)
 
 /* Load a M3U playlist, and add tracks to current playlist */
 
-static GSList *
+GSList *
 pragha_pl_parser_parse_m3u (const gchar *file)
 {
 	GError *err = NULL;
@@ -1192,7 +1261,8 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 	GtkTreePath *r_path;
 	GList *list = NULL, *l;
 	GArray *playlist_arr;
-	gchar *playlist;
+	gchar *playlist = NULL, *s_radio = NULL;
+	gint node_type;
 
 	switch(info) {
 	case TARGET_PLAYLIST:
@@ -1218,7 +1288,16 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 			if (gtk_tree_path_compare(r_path, l->data)) {
 				gtk_tree_model_get_iter(model, &iter, l->data);
 				gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
-				g_array_append_val(playlist_arr, playlist);
+
+				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+				if(node_type == NODE_PLAYLIST) {
+					g_array_append_val(playlist_arr, playlist);
+				}
+				else if (node_type == NODE_RADIO) {
+					/* TODO: Fix this negradaaa!. */
+					s_radio = g_strdup_printf("Radio:%s", playlist);
+					g_array_append_val(playlist_arr, s_radio);
+				}
 			}
 			gtk_tree_path_free(l->data);
 			l = l->next;
@@ -1367,6 +1446,35 @@ exit:
 	g_free(s_playlist);
 }
 
+void new_radio (gchar *uri, gchar *name, struct con_win *cwin)
+{
+	gchar *s_radio, *file = NULL;
+	gint radio_id = 0;
+
+	if (!name || !strlen(name)) {
+		g_warning("Radio name is NULL");
+		return;
+	}
+
+	s_radio = sanitize_string_sqlite3((gchar *)name);
+
+	if ((radio_id = find_radio_db(s_radio, cwin))) {
+		if (overwrite_existing_playlist(name, cwin))
+			delete_radio_db((gchar *)s_radio, cwin);
+		else
+			goto exit;
+	}
+
+	radio_id = add_new_radio_db(s_radio, cwin);
+
+	file = sanitize_string_sqlite3(uri);
+	add_track_radio_db(file, radio_id, cwin);
+	g_free(file);
+
+exit:
+	g_free(s_radio);
+}
+
 void init_playlist_view(struct con_win *cwin)
 {
 	gint i = 0;
@@ -1403,6 +1511,7 @@ void init_playlist_view(struct con_win *cwin)
 
 	for_each_result_row(result, i) {
 		add_entry_playlist(result.resultp[i],
+				   NODE_PLAYLIST,
 				   &iter, model, cwin);
 
 		/* Have to give control to GTK periodically ... */
@@ -1417,6 +1526,38 @@ void init_playlist_view(struct con_win *cwin)
 		}
 	}
 
+	sqlite3_free_table(result.resultp);
+
+	/* Now ppend the radio to playlist tree */
+
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   P_PLAYLIST, _("Radios"),
+			   -1);
+
+	query = g_strdup_printf("SELECT NAME FROM RADIO");
+
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		add_entry_playlist(result.resultp[i],
+				   NODE_RADIO,
+				   &iter, model, cwin);
+
+		/* Have to give control to GTK periodically ... */
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+	}
 	sqlite3_free_table(result.resultp);
 
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));

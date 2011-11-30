@@ -412,20 +412,37 @@ totem_open_location_set_from_clipboard (GtkWidget *open_location)
 	return NULL;
 }
 
-gchar* add_location_dialog(struct con_win *cwin)
+void add_location_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *hbox;
-	GtkWidget *label_new, *entry;
-	gchar *uri = NULL;
+	GtkWidget *vbox, *hbox1, *hbox2;
+	GtkWidget *label_new, *entry, *label_name, *name_entry;
+	gchar *uri = NULL, *name = NULL;
 	gchar *clipboard_location;
+	struct musicobject *mobj;
 	gint result;
 
 	/* Create dialog window */
+	vbox = gtk_vbox_new(FALSE, 2);
 
-	hbox = gtk_hbox_new(FALSE, 2);
+	hbox1 = gtk_hbox_new(FALSE, 2);
+	label_name = gtk_label_new_with_mnemonic(_("Name"));
+	name_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(name_entry), 255);
+
+	gtk_box_pack_start(GTK_BOX(hbox1), label_name, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox1), name_entry, TRUE, TRUE, 2);
+
+	hbox2 = gtk_hbox_new(FALSE, 2);
+	label_new = gtk_label_new_with_mnemonic(_("Location"));
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
+
+	gtk_box_pack_start(GTK_BOX(hbox2), label_new, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox2), entry, TRUE, TRUE, 2);
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, TRUE, 2);
 
 	/* Get item from clipboard to fill GtkEntry */
 	clipboard_location = totem_open_location_set_from_clipboard (entry);
@@ -433,8 +450,6 @@ gchar* add_location_dialog(struct con_win *cwin)
 		gtk_entry_set_text (GTK_ENTRY(entry), clipboard_location);
 		g_free (clipboard_location);
 	}
-
-	label_new = gtk_label_new_with_mnemonic(_("Add a location"));
 
 	dialog = gtk_dialog_new_with_buttons(_("Add a location"),
 			     GTK_WINDOW(cwin->mainwindow),
@@ -447,10 +462,7 @@ gchar* add_location_dialog(struct con_win *cwin)
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_box_pack_start(GTK_BOX(hbox), label_new, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
-
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
@@ -461,8 +473,19 @@ gchar* add_location_dialog(struct con_win *cwin)
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
-		/* Get playlist name */
 		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+		name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
+		if(uri != NULL) {
+			mobj = new_musicobject_from_location(uri, name, cwin);
+
+			append_current_playlist(mobj, cwin);
+			new_radio(uri, name, cwin);
+
+			init_playlist_view(cwin);
+
+			g_free(uri);
+			g_free(name);
+		}
 		break;
 	case GTK_RESPONSE_CANCEL:
 		break;
@@ -471,22 +494,7 @@ gchar* add_location_dialog(struct con_win *cwin)
 	}
 	gtk_widget_destroy(dialog);
 
-	return uri;
-}
-
-void add_location_action(GtkAction *action, struct con_win *cwin)
-{
-	gchar *uri = NULL;
-	struct musicobject *mobj;
-
-	uri = add_location_dialog(cwin);
-	if(uri != NULL) {
-		mobj = new_musicobject_from_location(cwin, uri);
-
-		append_current_playlist(mobj, cwin);
-
-		g_free(uri);
-	}
+	return;
 }
 
 /* Handler for the 'Prev' item in the pragha menu */

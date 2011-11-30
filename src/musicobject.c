@@ -224,7 +224,7 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
-struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gchar *uri)
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 
@@ -233,7 +233,7 @@ struct musicobject* new_musicobject_from_location(struct con_win *cwin, const gc
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	mobj->tags->title = g_strdup(uri);
+	mobj->tags->title = g_strdup(name);
 
 	mobj->tags->artist = g_strdup("");
 	mobj->tags->album = g_strdup("");
