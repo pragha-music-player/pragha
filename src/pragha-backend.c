@@ -293,9 +293,9 @@ backend_stop(GError *error, struct con_win *cwin)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
-
 	cwin->cstate->state = ST_STOPPED;
+
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -321,9 +321,9 @@ backend_pause(struct con_win *cwin)
 
 	CDEBUG(DBG_BACKEND, "Pause playback");
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
-
 	cwin->cstate->state = ST_PAUSED;
+
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -344,9 +344,9 @@ backend_resume(struct con_win *cwin)
 
 	CDEBUG(DBG_BACKEND, "Resuming playback");
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
-
 	cwin->cstate->state = ST_PLAYING;
+
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -471,33 +471,28 @@ static void
 backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 {
 	gint percent = 0;
-	GtkTreePath *path = NULL;
-	gboolean changed = FALSE;
+	GstState cur_state;
 
-	CDEBUG(DBG_BACKEND, "Buffering...");
+	if(cwin->cstate->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
+		return;
 
 	gst_message_parse_buffering (message, &percent);
-
-	if (percent >= 100 && cwin->cstate->state != ST_PLAYING) {
-		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
-		cwin->cstate->state = ST_PLAYING;
-		changed = TRUE;
-	}
-	else if (cwin->cstate->state != ST_PAUSED) {
-		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
-		cwin->cstate->state = ST_PAUSED;
-		changed = TRUE;
-	}
+	gst_element_get_state (cwin->cgst->pipeline, &cur_state, NULL, 0);
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
 
-	if (changed) {
-		path = current_playlist_get_actual(cwin);
-		if (path) {
-			update_pixbuf_state_on_path(path, NULL, cwin);
-			gtk_tree_path_free(path);
+	if (percent >= 100 && cur_state != GST_STATE_PLAYING) {
+		CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
+		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	}
+	else {
+		if (cur_state != GST_STATE_PAUSED) {
+			CDEBUG(DBG_BACKEND, "Buffering ... temporarily pausing playback");
+			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
 		}
-		play_button_toggle_state(cwin);
+		else {
+			CDEBUG(DBG_BACKEND, "Buffering (already paused) ... %d", percent);
+		}
 	}
 }
 
@@ -600,9 +595,9 @@ backend_play(struct con_win *cwin)
 		g_free (uri);
 	}
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
-
 	cwin->cstate->state = ST_PLAYING;
+
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
 
 	play_button_toggle_state (cwin);
 
