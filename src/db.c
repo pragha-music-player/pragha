@@ -300,6 +300,17 @@ void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin)
 	exec_sqlite_query(query, cwin, NULL);
 }
 
+void add_track_radio_db(gchar *uri, gint radio_id, struct con_win *cwin)
+{
+	gchar *query;
+
+	query = g_strdup_printf("INSERT INTO RADIO_TRACKS (uri, radio) "
+				"VALUES ('%s', %d);",
+				uri,
+				radio_id);
+	exec_sqlite_query(query, cwin, NULL);
+}
+
 /* NB: All of the find_* functions require sanitized strings. */
 
 gint find_artist_db(const gchar *artist, struct con_win *cwin)
@@ -415,6 +426,24 @@ gint find_playlist_db(const gchar *playlist, struct con_win *cwin)
 
 	return playlist_id;
 }
+
+gint find_radio_db(const gchar *radio, struct con_win *cwin)
+{
+	gchar *query;
+	gint radio_id = 0;
+	struct db_result result;
+
+	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
+				radio);
+	if (exec_sqlite_query(query, cwin, &result)) {
+		if (result.no_columns)
+			radio_id = atoi(result.resultp[result.no_columns]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	return radio_id;
+}
+
 void delete_location_db(gint location_id, struct con_win *cwin)
 {
 	gchar *query;
@@ -650,6 +679,119 @@ void flush_playlist_db(gint playlist_id, struct con_win *cwin)
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;",
 				playlist_id);
+	exec_sqlite_query(query, cwin, NULL);
+}
+
+/* 'radio' has to be a sanitized string */
+
+void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_win *cwin)
+{
+	gchar *query;
+	gint radio_id = 0;
+	struct db_result result;
+
+	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
+				oradio);
+
+	if (exec_sqlite_query(query, cwin, &result)) {
+		radio_id = atoi(result.resultp[result.no_columns]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	if(radio_id != 0) {
+		query = g_strdup_printf("UPDATE RADIO SET name = '%s' "
+					"WHERE id = '%d';",
+					nradio, radio_id);
+
+		exec_sqlite_query(query, cwin, &result);
+	}
+
+}
+
+
+gint add_new_radio_db(const gchar *radio, struct con_win *cwin)
+{
+	gchar *query;
+	gint radio_id = 0;
+	struct db_result result;
+
+	query = g_strdup_printf("INSERT INTO RADIO (name) VALUES ('%s')",
+				radio);
+	exec_sqlite_query(query, cwin, NULL);
+
+	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
+				radio);
+	if (exec_sqlite_query(query, cwin, &result)) {
+		radio_id = atoi(result.resultp[result.no_columns]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	return radio_id;
+}
+
+/* Get the names of all the radio stored in the DB.
+   Returned NULL terminated array of strings that has to freed by caller. */
+
+gchar** get_radio_names_db(struct con_win *cwin)
+{
+	gchar *query;
+	struct db_result result;
+	gchar **radio = NULL;
+	gint i, j=0;
+
+	query = g_strdup_printf("SELECT NAME FROM RADIO");
+
+	if (exec_sqlite_query(query, cwin, &result)) {
+		if (result.no_rows) {
+			radio = g_malloc0((result.no_rows+1) * sizeof(gchar *));
+			for_each_result_row(result, i) {
+				radio[j] = g_strdup(result.resultp[i]);
+				j++;
+			}
+			radio[j] = NULL;
+		}
+		sqlite3_free_table(result.resultp);
+	}
+
+	return radio;
+}
+
+/* 'radio' has to be a sanitized string */
+
+void delete_radio_db(gchar *radio, struct con_win *cwin)
+{
+	gint radio_id;
+	gchar *query;
+
+	if (!radio || !strlen(radio)) {
+		g_warning("Radio name is NULL");
+		return;
+	}
+
+	radio_id = find_radio_db(radio, cwin);
+
+	if (!radio_id) {
+		g_warning("Radio doesn't exist");
+		return;
+	}
+
+	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
+				radio_id);
+	exec_sqlite_query(query, cwin, NULL);
+
+	query = g_strdup_printf("DELETE FROM RADIO WHERE ID=%d;",
+				radio_id);
+	exec_sqlite_query(query, cwin, NULL);
+}
+
+/* Flushes all the tracks in a given playlist */
+
+void flush_radio_db(gint radio_id, struct con_win *cwin)
+{
+	gchar *query;
+
+	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
+				radio_id);
 	exec_sqlite_query(query, cwin, NULL);
 }
 
@@ -980,6 +1122,24 @@ gint init_dbase_schema(struct con_win *cwin)
 	/* Create 'PLAYLIST table */
 
 	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS PLAYLIST "
+				"(%s, %s, UNIQUE(name));",
+				"id INTEGER PRIMARY KEY",
+				"name VARCHAR(255)");
+	if (!exec_sqlite_query(query, cwin, NULL))
+		return -1;
+
+	/* Create 'RADIO_TRACKS' table */
+
+	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS RADIO_TRACKS "
+				"(%s, %s);",
+				"uri TEXT",
+				"radio INT");
+	if (!exec_sqlite_query(query, cwin, NULL))
+		return -1;
+
+	/* Create 'RADIO table */
+
+	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS RADIO "
 				"(%s, %s, UNIQUE(name));",
 				"id INTEGER PRIMARY KEY",
 				"name VARCHAR(255)");

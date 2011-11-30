@@ -2675,9 +2675,15 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		       data->data, playlist_arr);
 
 		while(1) {
-			name = g_array_index(playlist_arr, gchar*, i);
+			name = (gchar*)g_array_index(playlist_arr, gchar*, i);
 			if (name) {
-				add_playlist_current_playlist(name, cwin);
+				/* TODO: Fix this negradaaa!. */
+				if(g_str_has_prefix((gchar*)name, "Radio:") == FALSE)
+					add_playlist_current_playlist(name, cwin);
+				else {
+					gchar *radio = name + strlen("Radio:");
+					add_radio_current_playlist((gchar *)radio, cwin);
+				}
 				g_free(name);
 				i++;
 			}
