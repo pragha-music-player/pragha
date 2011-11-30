@@ -537,8 +537,8 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 	path = current_playlist_get_actual(cwin);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
-	gtk_tree_model_get_iter(model, &iter, path);
-	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+	if(gtk_tree_model_get_iter(model, &iter, path))
+		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
 	if (G_UNLIKELY(mobj == NULL))
 		g_warning("Invalid mobj pointer");
@@ -552,7 +552,6 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 
 	gtk_tree_path_free(path);
 }
-
 
 void
 backend_start(struct musicobject *mobj, struct con_win *cwin)
