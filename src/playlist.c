@@ -723,34 +723,28 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 		path = list->data;
 		if (gtk_tree_path_get_depth(path) > 1) {
 			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-			gtk_tree_model_get(model, &iter, P_PLAYLIST,
-					   &playlist, -1);
+			gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
 
 			s_playlist = sanitize_string_sqlite3(playlist);
 
-			if(node_type == NODE_PLAYLIST) {
-				n_playlist = rename_playlist_dialog(s_playlist, cwin);
+			n_playlist = rename_playlist_dialog(s_playlist, cwin);
+			if(n_playlist != NULL) {
+				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
-				if(n_playlist != NULL)
+				if(node_type == NODE_PLAYLIST)
 					update_playlist_name_db(s_playlist, n_playlist, cwin);
-			}
-			else if (node_type == NODE_RADIO) {
-				n_playlist = rename_playlist_dialog(s_playlist, cwin);
-
-				if(n_playlist != NULL)
+				else if (node_type == NODE_RADIO)
 					update_radio_name_db(s_playlist, n_playlist, cwin);
 
+				g_free(n_playlist);
+				init_playlist_view(cwin);
 			}
 			g_free(s_playlist);
-			g_free(n_playlist);
 			g_free(playlist);
 		}
 		gtk_tree_path_free(path);
 	}
 	g_list_free(list);
-
-	init_playlist_view(cwin);
 }
 
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
