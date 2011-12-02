@@ -662,9 +662,9 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 
 	/* Create dialog window */
 
-	hbox = gtk_hbox_new(TRUE, 2);
+	hbox = gtk_hbox_new(FALSE, 2);
 
-	label_new = gtk_label_new_with_mnemonic(_("Choose a new playlist name"));
+	label_new = gtk_label_new_with_mnemonic(_("Choose a new name"));
 
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
@@ -672,7 +672,7 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 
 	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
 
-	dialog = gtk_dialog_new_with_buttons(_("Rename playlist"),
+	dialog = gtk_dialog_new_with_buttons(_("Rename"),
 			     GTK_WINDOW(cwin->mainwindow),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
@@ -683,7 +683,7 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_box_pack_start(GTK_BOX(hbox), label_new, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), label_new, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
 
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);

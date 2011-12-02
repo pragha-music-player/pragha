@@ -415,39 +415,36 @@ totem_open_location_set_from_clipboard (GtkWidget *open_location)
 void add_location_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *vbox, *hbox1, *hbox2;
-	GtkWidget *label_new, *entry, *label_name, *name_entry;
+	GtkWidget *vbox, *hbox;
+	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
 	gchar *uri = NULL, *name = NULL;
 	gchar *clipboard_location;
 	struct musicobject *mobj;
 	gint result;
 
 	/* Create dialog window */
-	vbox = gtk_vbox_new(FALSE, 2);
+	vbox = gtk_vbox_new(TRUE, 2);
 
-	hbox1 = gtk_hbox_new(FALSE, 2);
-	label_name = gtk_label_new_with_mnemonic(_("Name"));
+	label_new = gtk_label_new_with_mnemonic(_("Enter the URL of an internet radio stream"));
+	uri_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(uri_entry), 255);
+
+	hbox = gtk_hbox_new(FALSE, 2);
+	label_name = gtk_label_new_with_mnemonic(_("Give it a name to save"));
 	name_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(name_entry), 255);
 
-	gtk_box_pack_start(GTK_BOX(hbox1), label_name, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox1), name_entry, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), label_name, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), name_entry, TRUE, TRUE, 2);
 
-	hbox2 = gtk_hbox_new(FALSE, 2);
-	label_new = gtk_label_new_with_mnemonic(_("Location"));
-	entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
-
-	gtk_box_pack_start(GTK_BOX(hbox2), label_new, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox2), entry, TRUE, TRUE, 2);
-
-	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), label_new, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), uri_entry, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
 
 	/* Get item from clipboard to fill GtkEntry */
-	clipboard_location = totem_open_location_set_from_clipboard (entry);
+	clipboard_location = totem_open_location_set_from_clipboard (uri_entry);
 	if (clipboard_location != NULL && strcmp (clipboard_location, "") != 0) {
-		gtk_entry_set_text (GTK_ENTRY(entry), clipboard_location);
+		gtk_entry_set_text (GTK_ENTRY(uri_entry), clipboard_location);
 		g_free (clipboard_location);
 	}
 
@@ -466,14 +463,14 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
-	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(uri_entry), TRUE);
 
 	gtk_widget_show_all(dialog);
 
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
-		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(uri_entry)));
 		name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
 		if(uri != NULL) {
 			mobj = new_musicobject_from_location(uri, name, cwin);
