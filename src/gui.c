@@ -58,6 +58,7 @@ gchar *main_menu_xml = "<ui>							\
 				<menuitem action=\"Library\"/>			\
 				<menuitem action=\"Playlists\"/>		\
 			</menu>							\
+			<menuitem action=\"Show controls below\"/>		\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
 			<menuitem action=\"Jump to playing song\"/>		\
@@ -300,6 +301,9 @@ GtkToggleActionEntry toggles_entries[] = {
 	TRUE},
 	{"Playlists", NULL, N_("Playlists"),
 	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
+	FALSE},
+	{"Show controls below", NULL, N_("Show controls below"),
+	 NULL, "Show controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
 	{"Status bar", NULL, N_("Status bar"),
 	 NULL, "Status bar", G_CALLBACK(status_bar_action),

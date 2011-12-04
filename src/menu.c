@@ -731,6 +731,31 @@ status_bar_action (GtkAction *action, struct con_win *cwin)
 		gtk_widget_hide(GTK_WIDGET(cwin->status_bar));
 }
 
+/* Handler for the 'Show_controls_below_action' item in the view menu */
+
+void
+show_controls_below_action (GtkAction *action, struct con_win *cwin)
+{
+	//gboolean order = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	GtkWidget *parent;
+	GList *children, *l;
+	gint i = 0;
+
+	parent = gtk_widget_get_parent (GTK_WIDGET(cwin->status_bar));
+
+	children = gtk_container_get_children (GTK_CONTAINER (parent));
+
+	for (l = children; l; i++, l = l->next) {
+		if(i == 1) {
+			gtk_box_reorder_child(GTK_BOX(parent),
+					      GTK_WIDGET(l->data),
+					      2);
+		}
+	}
+	
+}
+
 void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
