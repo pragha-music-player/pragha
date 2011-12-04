@@ -195,7 +195,7 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f, use_cddb_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean all_f;
 	gboolean use_mpris2_f, instant_filter_f, use_hint_f;
@@ -206,7 +206,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = use_cddb_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_mpris2_f = instant_filter_f = use_hint_f = FALSE;
 
@@ -325,6 +325,17 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			status_bar_f = TRUE;
+		}
+
+		cwin->cpref->controls_below =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_WINDOW,
+					       KEY_CONTROLS_BELOW,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			controls_below_f = TRUE;
 		}
 
 		cwin->cpref->sidebar_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
@@ -955,6 +966,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->close_to_tray = TRUE;
 	if (all_f || status_bar_f)
 		cwin->cpref->status_bar = TRUE;
+	if (all_f || controls_below_f)
+		cwin->cpref->controls_below = FALSE;
 	if (all_f || save_playlist_f)
 		cwin->cpref->save_playlist = TRUE;
 	if (all_f || software_mixer_f)
@@ -1184,6 +1197,9 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Show controls below");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
 
 #ifndef HAVE_LIBGLYR
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");

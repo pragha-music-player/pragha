@@ -211,7 +211,8 @@
 #define KEY_SIDEBAR                "sidebar"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
-#define KEY_STATUS_BAR		   "status_bar"
+#define KEY_STATUS_BAR             "status_bar"
+#define KEY_CONTROLS_BELOW         "controls_below"
 
 #define GROUP_SERVICES   "services"
 #define KEY_LASTFM                 "lastfm"
@@ -481,6 +482,7 @@ struct con_pref {
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean status_bar;
+	gboolean controls_below;
 	gboolean fuse_folders;
 	gboolean sort_by_year;
 	gboolean instant_filter;
@@ -627,7 +629,7 @@ struct con_mpris2 {
 	gchar *saved_title;
 	gdouble volume;
 	enum player_state state;
-	GError **property_error;			/* for returning errors in propget/propput */
+	GError **property_error;					/* for returning errors in propget/propput */
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 

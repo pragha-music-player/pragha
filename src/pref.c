@@ -1271,6 +1271,12 @@ void save_preferences(struct con_win *cwin)
 			       KEY_ALBUM_ART_SIZE,
 			       (int)cwin->cpref->album_art_size);
 
+	/* Save show controls below option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_CONTROLS_BELOW,
+			       cwin->cpref->controls_below);
 
 	/* Save status bar option */
 
