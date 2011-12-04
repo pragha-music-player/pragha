@@ -554,6 +554,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		goto exit;
 
 	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
+
+	/* Update the gui */
+
 	__update_current_song_info(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
@@ -562,6 +565,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
 		gtk_tree_path_free(path);
 	}
+
+	/* Store the new tags */
 
 	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
@@ -577,6 +582,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		file_arr = g_array_append_val(file_arr, tfile);
 
 		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
+
 		init_library_view(cwin);
 
 		g_array_free(loc_arr, TRUE);
@@ -736,7 +742,7 @@ status_bar_action (GtkAction *action, struct con_win *cwin)
 void
 show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
-	//gboolean order = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
 	GtkWidget *parent;
 	GList *children, *l;
