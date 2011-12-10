@@ -2719,38 +2719,6 @@ exit:
 	gtk_drag_finish(context, TRUE, FALSE, time);
 }
 
-/* Search through title, artist, album and filename */
-
-gboolean current_playlist_search_compare(GtkTreeModel *model,
-					 gint column,
-					 const gchar *key,
-					 GtkTreeIter *iter,
-					 gpointer data)
-{
-	gchar *basename;
-	struct musicobject *mobj;
-
-	gtk_tree_model_get(model, iter, P_MOBJ_PTR, &mobj, -1);
-	if(!mobj)
-		return FALSE;
-
-	if (!g_strncasecmp(key, mobj->tags->title, strlen(key)))
-		return FALSE;
-	if (!g_strncasecmp(key, mobj->tags->artist, strlen(key)))
-		return FALSE;
-	if (!g_strncasecmp(key, mobj->tags->album, strlen(key)))
-		return FALSE;
-
-	basename = g_path_get_basename(mobj->file);
-	if (!g_strncasecmp(key, basename, strlen(key))) {
-		g_free(basename);
-		return FALSE;
-	}
-	g_free(basename);
-
-	return TRUE;
-}
-
 /* Save current playlist state on exit */
 
 void save_current_playlist_state(struct con_win *cwin)

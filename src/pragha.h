@@ -1058,11 +1058,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   enum dnd_target info,
 				   guint time,
 				   struct con_win *cwin);
-gboolean current_playlist_search_compare(GtkTreeModel *model,
-					 gint column,
-					 const gchar *key,
-					 GtkTreeIter *iter,
-					 gpointer data);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
