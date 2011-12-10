@@ -1284,12 +1284,8 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(current_playlist));
 	sortable = GTK_TREE_SORTABLE(model);
 
-	/* Set the search function for interactive search */
+	/* Disable interactive search */
 
-	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(current_playlist),
-					    current_playlist_search_compare,
-					    cwin,
-					    NULL);
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(current_playlist), FALSE);
 
 	/* Set the sort functions */
