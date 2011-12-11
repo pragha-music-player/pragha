@@ -994,6 +994,7 @@ GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
 GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
+GtkTreePath* get_first_random_track(struct con_win *cwin);
 GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
 void init_current_playlist_columns(struct con_win *cwin);
