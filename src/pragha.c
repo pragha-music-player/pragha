@@ -155,6 +155,9 @@ gint main(gint argc, gchar *argv[])
 #endif
 	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
 
+	if(init_first_state(cwin) == -1)
+		return -1;
+
 	debug_level = 0;
 
 	setlocale (LC_ALL, "");
@@ -218,9 +221,6 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
-
-	if(init_first_state(cwin) == -1)
-		return -1;
 
 	if (!g_thread_supported())
 		g_thread_init(NULL);
