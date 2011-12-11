@@ -323,7 +323,30 @@ GtkTreePath* get_next_queue_track(struct con_win *cwin)
 	delete_queue_track_refs(path, cwin);
 	requeue_track_refs (cwin);
 
-	return path;	
+	return path;
+}
+
+/* Return path of a first random track */
+
+GtkTreePath* get_first_random_track(struct con_win *cwin)
+{
+	gint rnd;
+	GtkTreePath *path = NULL;
+
+	do {
+		rnd = g_rand_int_range(cwin->cstate->rand,
+				       0,
+				       cwin->cstate->tracks_curr_playlist);
+		path = current_playlist_nth_track(rnd, cwin);
+
+	} while (cwin->cstate->tracks_curr_playlist > 1 && (path == NULL));
+
+	if (!path) {
+		g_printerr("No track at position : %d\n", rnd);
+		return NULL;
+	}
+
+	return path;
 }
 
 /* Return path of next unique random track */
@@ -2131,7 +2154,9 @@ void play_track(struct con_win *cwin)
 			path = get_next_queue_track(cwin);
 		if(!path)
 			path = current_playlist_get_selection(cwin);
-		if(!path){
+		if(!path && cwin->cpref->shuffle)
+			path = get_first_random_track(cwin);
+		if(!path) {
 			play_first_current_playlist(cwin);
 			break;
 		}
