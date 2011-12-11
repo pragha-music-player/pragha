@@ -778,6 +778,7 @@ gboolean update_track_progress_bar(gpointer data);
 void __update_track_progress_bar(struct con_win *cwin, gint length);
 void unset_track_progress_bar(struct con_win *cwin);
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
+void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
 void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
 gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);

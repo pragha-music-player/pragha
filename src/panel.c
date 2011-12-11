@@ -282,6 +282,12 @@ void unset_track_progress_bar(struct con_win *cwin)
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), 0);
 }
 
+void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin)
+{
+	if (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS)
+		edit_tags_playing_action(NULL, cwin);
+}
+
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin)
 {
 	if(cwin->cpref->timer_remaining_mode)
