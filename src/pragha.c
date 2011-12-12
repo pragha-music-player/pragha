@@ -199,6 +199,11 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
+	if (init_threads(cwin) == -1) {
+		g_critical("Unable to init threads");
+		return -1;
+	}
+
 	if (init_notify(cwin) == -1) {
 		g_critical("Unable to initialize libnotify");
 		return -1;
@@ -222,18 +227,14 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-
-	gdk_threads_init();
-
 	gdk_threads_enter();
 
 	init_gui(argc, argv, cwin);
 
+	/* Need init after gui to sync volume with controls */
 	if(backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
-		return -1;	
+		return -1;
 	}
 
 	CDEBUG(DBG_INFO, "Init done. Running ...");

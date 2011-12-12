@@ -66,11 +66,14 @@ void *do_get_album_art (gpointer data)
 	head = glyr_get(&q, &err, NULL);
 
 	if(head == NULL) {
-		g_warning(glyr_strerror(err));
 		gdk_threads_enter ();
 		set_status_message(_("Album art not found."), cwin);
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 		gdk_threads_leave ();
+
+		if (err != GLYRE_OK)
+			g_warning(glyr_strerror(err));
+
 		goto bad;
 	}
 
@@ -142,7 +145,9 @@ void *do_get_album_art_idle (gpointer data)
 	head = glyr_get(&q, &err, NULL);
 
 	if(head == NULL) {
-		g_warning(glyr_strerror(err));
+		if (err != GLYRE_OK)
+			g_warning(glyr_strerror(err));
+
 		goto no_albumart;
 	}
 
@@ -321,6 +326,9 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
+	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
+		return;
+
 	pthread_create(&tid, NULL, do_get_artist_info, cwin);
 }
 
@@ -430,6 +438,10 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
 	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 
 	pthread_create(&tid, NULL, do_get_lyrics_dialog, cwin);

@@ -1067,6 +1067,23 @@ gint init_musicdbase(struct con_win *cwin)
 	return init_dbase_schema(cwin);
 }
 
+gint init_threads(struct con_win *cwin)
+{
+	CDEBUG(DBG_INFO, "Initializing threads");
+
+	#if !GLIB_CHECK_VERSION(2,31,0)
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+	#endif
+	#if GLIB_CHECK_VERSION(2,24,0)
+	g_type_init ();
+	#endif
+
+	gdk_threads_init();
+
+	return 0;
+}
+
 gint init_notify(struct con_win *cwin)
 {
 	if (cwin->cpref->show_osd) {
