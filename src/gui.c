@@ -58,7 +58,7 @@ gchar *main_menu_xml = "<ui>							\
 				<menuitem action=\"Library\"/>			\
 				<menuitem action=\"Playlists\"/>		\
 			</menu>							\
-			<menuitem action=\"Show controls below\"/>		\
+			<menuitem action=\"Playback controls below\"/>		\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
 			<menuitem action=\"Jump to playing song\"/>		\
@@ -214,13 +214,13 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
 	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
-	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove from playlist"),
+	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
 	 NULL, "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
 	 "<Control>C", "Crop playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
 	 "<Control>L", "Clear the current playlist", G_CALLBACK(clear_current_playlist)},
-	{"Add to another playlist", NULL, N_("Add to another playlist")},
+	{"Add to another playlist", NULL, N_("Add selection to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE_AS, N_("Save playlist")},
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
@@ -302,8 +302,8 @@ GtkToggleActionEntry toggles_entries[] = {
 	{"Playlists", NULL, N_("Playlists"),
 	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
 	FALSE},
-	{"Show controls below", NULL, N_("Show controls below"),
-	 NULL, "Show controls below", G_CALLBACK(show_controls_below_action),
+	{"Playback controls below", NULL, N_("Playback controls below"),
+	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
 	{"Status bar", NULL, N_("Status bar"),
 	 NULL, "Status bar", G_CALLBACK(status_bar_action),

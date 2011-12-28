@@ -1215,7 +1215,7 @@ void init_menu_actions(struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Show controls below");
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
 
 #ifndef HAVE_LIBGLYR
