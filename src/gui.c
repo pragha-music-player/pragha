@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -64,6 +64,9 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Jump to playing song\"/>		\
 		</menu>								\
 		<menu action=\"ToolsMenu\">					\
+			<separator/>						\
+			<menuitem action=\"Equalizer\"/>			\
+			<separator/>						\
 			<menuitem action=\"Search lyric\"/>			\
 			<menuitem action=\"Search artist info\"/>		\
 			<menuitem action=\"Search album art\"/>			\
@@ -229,6 +232,8 @@ GtkActionEntry main_aentries[] = {
 	{"Lateral panel", NULL, N_("Lateral _panel")},
 	{"Jump to playing song", GTK_STOCK_JUMP_TO, N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
+	{"Equalizer", NULL, N_("E_qualizer"),
+	 NULL, "Equalizer", G_CALLBACK(show_equalizer_action)},
 	#ifdef HAVE_LIBGLYR
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
 	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
