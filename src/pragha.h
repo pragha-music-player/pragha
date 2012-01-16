@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -462,7 +462,6 @@ struct con_pref {
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
 #endif
-
 	gboolean add_recursively_files;
 	gboolean show_album_art;
 	gboolean show_osd;
@@ -675,6 +674,7 @@ struct con_win {
 	GtkTreeStore *library_store;
 	GOptionContext *cmd_context;
 	GtkStatusIcon *status_icon;
+	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *cp_context_menu;
