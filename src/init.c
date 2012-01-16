@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -1135,6 +1135,7 @@ gint init_first_state(struct con_win *cwin)
 	cwin->clastfm->session_id = NULL;
 	cwin->clastfm->status = LASTFM_STATUS_INVALID;
 #endif
+	cwin->osd_notify = NULL;
 
 	return 0;
 }

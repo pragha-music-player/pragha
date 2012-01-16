@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -102,16 +102,9 @@ can_support_actions( void )
 	return supported;
 }
 
-static void
-notify_closed_cb (NotifyNotification *osd)
-{
-	g_object_unref (G_OBJECT(osd));
-}
-
 void show_osd(struct con_win *cwin)
 {
 	GError *error = NULL;
-	NotifyNotification *osd;
 	gchar *summary, *body, *length;
 
 	/* Check if OSD is enabled in preferences */
@@ -134,41 +127,47 @@ void show_osd(struct con_win *cwin)
 
 	/* Create notification instance */
 	#if NOTIFY_CHECK_VERSION (0, 7, 0)
-		osd = notify_notification_new((const gchar *) summary, body, NULL);
+		if (cwin->osd_notify == NULL) {
+			cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL);
+
+			if(can_support_actions() &&
+			   cwin->cpref->actions_in_osd == TRUE) {
+				notify_notification_add_action(
+					cwin->osd_notify, "media-prev", _("Prev Track"),
+					NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
+					NULL);
+				notify_notification_add_action(
+					cwin->osd_notify, "media-next", _("Next Track" ),
+					NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
+					NULL);
+			}
+		}
+		else {
+			notify_notification_update (cwin->osd_notify, (const gchar *) summary, body, NULL);
+
+			if(cwin->cpref->actions_in_osd == FALSE)
+				notify_notification_clear_actions (cwin->osd_notify);
+		}
 	#else
 	if(cwin->cpref->osd_in_systray && gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
-		osd = notify_notification_new_with_status_icon((const gchar *) summary,
+		cwin->osd_notify = notify_notification_new_with_status_icon((const gchar *) summary,
 								body, NULL,
 								GTK_STATUS_ICON(cwin->status_icon));
 	}
 	else {
-		osd = notify_notification_new((const gchar *) summary, body, NULL, NULL);
+		cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL, NULL);
 	}
 	#endif
 
-	notify_notification_set_timeout(osd, OSD_TIMEOUT);
+	notify_notification_set_timeout(cwin->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
 	if (cwin->cpref->show_album_art && cwin->album_art && cwin->cpref->albumart_in_osd &&
 	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
-			notify_notification_set_icon_from_pixbuf(osd, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
-
-	if(can_support_actions( ) && cwin->cpref->actions_in_osd){
-		notify_notification_add_action(
-			osd, "media-prev", _("Prev Track"),
-			NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
-			NULL);
-		notify_notification_add_action(
-			osd, "media-next", _("Next Track" ),
-			NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
-			NULL);
-	}
-
-	g_signal_connect(osd, "closed",
-			G_CALLBACK (notify_closed_cb), NULL);
+			notify_notification_set_icon_from_pixbuf(cwin->osd_notify, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
 
 	/* Show OSD */
-	if (!notify_notification_show(osd, &error)) {
+	if (!notify_notification_show(cwin->osd_notify, &error)) {
 		g_warning("Unable to show OSD notification: %s", error->message);
 		g_error_free (error);
 	}
