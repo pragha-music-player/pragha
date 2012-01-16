@@ -36,7 +36,8 @@ pragha_SOURCES =cdda.c \
 		gtkcellrendererbubble.h \
 		pragha-lastfm.c \
 		xml_helper.c \
-		xml_helper.h
+		xml_helper.h \
+		equalizer.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\

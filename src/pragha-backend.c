@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2010-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2010-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -689,6 +689,41 @@ backend_quit(struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }
 
+
+void
+backend_init_equalizer_preset(struct con_win *cwin)
+{
+	gdouble *saved_bands;
+	GError *error = NULL;
+
+	if(cwin->cgst->equalizer == NULL)
+		return;
+
+	saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
+						 GROUP_AUDIO,
+						 KEY_EQ_10_BANDS,
+						 NULL,
+						 &error);
+	if (saved_bands != NULL) {
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band0", saved_bands[0], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band1", saved_bands[1], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band2", saved_bands[2], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band3", saved_bands[3], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band4", saved_bands[4], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band5", saved_bands[5], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band6", saved_bands[6], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band7", saved_bands[7], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band8", saved_bands[8], NULL);
+		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band9", saved_bands[9], NULL);
+
+		g_free(saved_bands);
+	}
+	else {
+		g_error_free(error);
+		error = NULL;
+	}
+}
+
 gint backend_init(struct con_win *cwin)
 {
 	GstBus *bus;
@@ -747,13 +782,27 @@ gint backend_init(struct con_win *cwin)
 		audiosink = g_strdup("autoaudiosink");
 	}
 
-	if(audiosink != NULL)
-		cwin->cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
+	cwin->cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
-	if(cwin->cgst->audio_sink == NULL) {
-		CDEBUG(DBG_BACKEND, "Try to use the default audiosink");
+	if (cwin->cgst->audio_sink != NULL) {
+		/* Test a 10 band equalizer */
+		cwin->cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
+		if (cwin->cgst->equalizer != NULL) {
+			GstElement *bin = gst_bin_new("audiobin");
+			GstPad* audiopad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+
+			gst_bin_add_many (GST_BIN(bin), cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
+			gst_element_link_many (cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
+
+			gst_element_add_pad (GST_ELEMENT(bin), gst_ghost_pad_new("sink", audiopad));
+		
+			gst_object_unref (audiopad);
+
+			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
+		}
 	}
 	else {
+		cwin->cgst->equalizer = NULL;
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
 	}
 
@@ -763,6 +812,7 @@ gint backend_init(struct con_win *cwin)
 
 	backend_set_soft_volume(cwin);
 	emit_volume_changed_idle(cwin);
+	backend_init_equalizer_preset(cwin);
 
 	cwin->cgst->emitted_error = FALSE;
 
