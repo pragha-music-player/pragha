@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (C) 2009-2010 matias <mati86dl@gmail.com>                  *
+ * Copyright (C) 2011-2012 matias <mati86dl@gmail.com>                  *
  * Copyright (C) 2011      hakan  <smultimeter@gmail.com>               *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -190,33 +190,51 @@ static GVariant* mpris_Root_get_SupportedMimeTypes(struct con_win *cwin) {
 }
 
 /* org.mpris.MediaPlayer2.Player */
-static GVariant* mpris_Player_Play(struct con_win *cwin, GVariant* parameters) {
-	play_track(cwin);
+static GVariant* mpris_Player_Play(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		play_track(cwin);
+
 	return NULL;
 }
 
-static GVariant* mpris_Player_Next(struct con_win *cwin, GVariant* parameters) {
-	play_next_track(cwin);
+static GVariant* mpris_Player_Next(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		play_next_track(cwin);
+
 	return NULL;
 }
 
-static GVariant* mpris_Player_Previous(struct con_win *cwin, GVariant* parameters) {
-	play_prev_track(cwin);
+static GVariant* mpris_Player_Previous(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		play_prev_track(cwin);
+
 	return NULL;
 }
 
-static GVariant* mpris_Player_Pause(struct con_win *cwin, GVariant* parameters) {
-	backend_pause(cwin);
+static GVariant* mpris_Player_Pause(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		backend_pause(cwin);
+
 	return NULL;
 }
 
-static GVariant* mpris_Player_PlayPause(struct con_win *cwin, GVariant* parameters) {
-	play_pause_resume(cwin);
+static GVariant* mpris_Player_PlayPause(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		play_pause_resume(cwin);
+
 	return NULL;
 }
 
-static GVariant* mpris_Player_Stop(struct con_win *cwin, GVariant* parameters) {
-	backend_stop(NULL, cwin);
+static GVariant* mpris_Player_Stop(struct con_win *cwin, GVariant* parameters)
+{
+	if(cwin->cgst->emitted_error == FALSE)
+		backend_stop(NULL, cwin);
+
 	return NULL;
 }
 

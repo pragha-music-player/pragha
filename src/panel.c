@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -521,7 +521,9 @@ void shuffle_button (struct con_win *cwin)
 void keybind_play_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	play_pause_resume(cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		play_pause_resume(cwin);
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)
@@ -587,7 +589,9 @@ void play_pause_resume(struct con_win *cwin)
 void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	backend_stop(NULL, cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		backend_stop(NULL, cwin);
 }
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
@@ -598,7 +602,9 @@ void stop_button_handler(GtkButton *button, struct con_win *cwin)
 void keybind_prev_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	play_prev_track(cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		play_prev_track(cwin);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
@@ -609,7 +615,9 @@ void prev_button_handler(GtkButton *button, struct con_win *cwin)
 void keybind_next_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
-	play_next_track(cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		play_next_track(cwin);
 }
 
 void next_button_handler(GtkButton *button, struct con_win *cwin)
@@ -620,6 +628,7 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 void keybind_media_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
+
 	toogle_main_window (cwin, FALSE);
 }
 
