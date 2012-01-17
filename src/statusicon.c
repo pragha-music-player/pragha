@@ -64,7 +64,9 @@ notify_Prev_Callback (NotifyNotification *osd,
         g_assert (strcmp (action, "media-prev") == 0);
 
 	notify_notification_close (osd, NULL);
-	play_prev_track(cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		play_prev_track(cwin);
 }
 
 static void
@@ -76,7 +78,9 @@ notify_Next_Callback (NotifyNotification *osd,
         g_assert (strcmp (action, "media-next") == 0);
 
 	notify_notification_close (osd, NULL);
-	play_next_track(cwin);
+
+	if(cwin->cgst->emitted_error == FALSE)
+		play_next_track(cwin);
 }
 
 
@@ -232,29 +236,28 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 	return;
 }
 
-void systray_play(GtkAction *action, struct con_win *cwin)
+void systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
-	play_pause_resume(cwin);
+	if(cwin->cgst->emitted_error == FALSE)
+		play_pause_resume(cwin);
 }
 
-void systray_stop(GtkAction *action, struct con_win *cwin)
+void systray_stop_action(GtkAction *action, struct con_win *cwin)
 {
-	backend_stop(NULL, cwin);
+	if(cwin->cgst->emitted_error == FALSE)
+		backend_stop(NULL, cwin);
 }
 
-void systray_pause(GtkAction *action, struct con_win *cwin)
+void systray_prev_action(GtkAction *action, struct con_win *cwin)
 {
-	pause_resume_track(cwin);
+	if(cwin->cgst->emitted_error == FALSE)
+		play_prev_track(cwin);
 }
 
-void systray_prev(GtkAction *action, struct con_win *cwin)
+void systray_next_action(GtkAction *action, struct con_win *cwin)
 {
-	play_prev_track(cwin);
-}
-
-void systray_next(GtkAction *action, struct con_win *cwin)
-{
-	play_next_track(cwin);
+	if(cwin->cgst->emitted_error == FALSE)
+		play_next_track(cwin);
 }
 
 void systray_quit(GtkAction *action, struct con_win *cwin)

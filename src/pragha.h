@@ -1144,11 +1144,10 @@ gboolean status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct c
 gboolean status_get_tooltip_cb (GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,GtkTooltip *tooltip, struct con_win *cwin);
 void create_status_icon (struct con_win *cwin);
 void systray_display_popup_menu (struct con_win *cwin);
-void systray_play(GtkAction *action, struct con_win *cwin);
-void systray_stop(GtkAction *action, struct con_win *cwin);
-void systray_pause(GtkAction *action, struct con_win *cwin);
-void systray_prev(GtkAction *action, struct con_win *cwin);
-void systray_next(GtkAction *action, struct con_win *cwin);
+void systray_play_pause_action(GtkAction *action, struct con_win *cwin);
+void systray_stop_action(GtkAction *action, struct con_win *cwin);
+void systray_prev_action(GtkAction *action, struct con_win *cwin);
+void systray_next_action(GtkAction *action, struct con_win *cwin);
 void systray_quit(GtkAction *action, struct con_win *cwin);
 
 void about_widget(struct con_win *cwin);
