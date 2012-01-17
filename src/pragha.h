@@ -201,6 +201,8 @@
 #define KEY_SOFTWARE_MIXER         "software_mixer"
 #define KEY_SOFTWARE_VOLUME	   "software_volume"
 #define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
+#define KEY_EQ_10_BANDS            "equealizer_10_bands"
+#define KEY_EQ_PRESET              "equalizer_preset"
 
 #define GROUP_WINDOW   "Window"
 #define KEY_REMEMBER_STATE	   "remember_window_state"
@@ -605,6 +607,7 @@ struct con_dbase {
 struct con_gst {
 	GstElement *pipeline;
 	GstElement *audio_sink;
+	GstElement *equalizer;
 	int timer;
 	gdouble curr_vol;
 	gboolean emitted_error;
@@ -750,6 +753,7 @@ void playlists_pane_action (GtkAction *action, struct con_win *cwin);
 void status_bar_action (GtkAction *action, struct con_win *cwin);
 void show_controls_below_action (GtkAction *action, struct con_win *cwin);
 void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
+void show_equalizer_action(GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
 void add_all_action(GtkAction *action, struct con_win *cwin);
