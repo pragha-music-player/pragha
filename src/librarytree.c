@@ -77,9 +77,9 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 		/* Find position of the last directory that is a child of p_iter */
 		while (gtk_tree_model_iter_nth_child(model, &l_iter, p_iter, i++)) {
 			gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
-			gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
 			if (l_node_type != NODE_FOLDER)
 				break;
+			gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
 			if (g_ascii_strcasecmp(data, node_data) < 0)
 				pos++;
 			g_free(data);

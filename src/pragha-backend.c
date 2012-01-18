@@ -804,6 +804,7 @@ gint backend_init(struct con_win *cwin)
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 
 	gst_object_unref(bus);
+	g_free(audiosink);
 
 	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
 

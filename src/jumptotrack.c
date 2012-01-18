@@ -130,9 +130,9 @@ search_and_set_layout (gchar *full_string, struct con_win *cwin)
 			g_free (prev_string);
 			g_free (mach_string);
 			g_free (last_string);
-			g_free (needle);
-			g_free (haystack);
 		}
+		g_free (needle);
+		g_free (haystack);
 	}
 
 	return display_string;

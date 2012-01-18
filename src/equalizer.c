@@ -256,15 +256,18 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 {
 	gdouble *tmp_array;
 	GtkWidget *eq_combobox, *vscale;
+	gchar *presset = NULL;
 
 	tmp_array = g_new (gdouble, 10);
 
 	eq_combobox = g_object_get_data(data, "eq_combobox");
 
+	presset = gtk_combo_box_get_active_text (GTK_COMBO_BOX(eq_combobox));
+
 	g_key_file_set_string(cwin->cpref->configrc_keyfile,
 			      GROUP_AUDIO,
 			      KEY_EQ_PRESET,
-			      gtk_combo_box_get_active_text (GTK_COMBO_BOX(eq_combobox)));
+			      presset);
 
 	vscale = g_object_get_data(data, "band0");
 	tmp_array[0] = gtk_range_get_value(GTK_RANGE(vscale));
@@ -293,6 +296,7 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 				    tmp_array,
 				    10);
 	g_free(tmp_array);
+	g_free(presset);
 }
 
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
