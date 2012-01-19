@@ -72,7 +72,7 @@ static gboolean overwrite_existing_playlist(const gchar *playlist,
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
-				"Do you want to overwrite the playlist: %s ?",
+				_("Do you want to overwrite the playlist: %s ?"),
 				playlist);
 
 	ret = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -130,7 +130,7 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *str = NULL;
+	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	struct musicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
@@ -138,17 +138,27 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 	gint ret = 0;
 	gboolean next;
 
+	base_m3u = get_display_filename(filename, TRUE);
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	next = gtk_tree_model_get_iter_first(model, &iter);
 	while (next) {
 		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
 		if (mobj && mobj->file_type != FILE_CDDA) {
+
+			base = get_display_filename(mobj->file, TRUE);
+
+			if (g_ascii_strcasecmp(base_m3u, base) == 0)
+				uri = get_display_filename(mobj->file, FALSE);
+			else
+				uri = g_strdup(mobj->file);
+
 			/* Format: "#EXTINF:seconds, title" */
 			str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
 					      mobj->tags->length,
 					      mobj->tags->title,
-					      mobj->file);
+					      uri);
 
 			status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
 			if (status != G_IO_STATUS_NORMAL) {
@@ -156,6 +166,8 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 				ret = -1;
 				goto exit;
 			}
+			g_free(base);
+			g_free(uri);
 		}
 
 		/* Have to give control to GTK periodically ... */
@@ -170,6 +182,7 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 	}
 
 exit:
+	g_free(base_m3u);
 	if (err) {
 		g_error_free(err);
 		err = NULL;
@@ -184,12 +197,14 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list, *i;
-	gchar *str = NULL;
+	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	struct musicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
 	gint ret = 0;
+
+	base_m3u = get_display_filename(filename, TRUE);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -203,11 +218,19 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 			gtk_tree_model_get(model, &iter,
 					   P_MOBJ_PTR, &mobj, -1);
 			if (mobj && mobj->file_type != FILE_CDDA) {
+
+				base = get_display_filename(mobj->file, TRUE);
+
+				if (g_ascii_strcasecmp(base_m3u, base) == 0)
+					uri = get_display_filename(mobj->file, FALSE);
+				else
+					uri = g_strdup(mobj->file);
+
 				/* Format: "#EXTINF:seconds, title" */
 				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
 						      mobj->tags->length,
 						      mobj->tags->title,
-						      mobj->file);
+						      uri);
 
 				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
 				if (status != G_IO_STATUS_NORMAL) {
@@ -215,6 +238,8 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 					ret = -1;
 					goto exit_list;
 				}
+				g_free(base);
+				g_free(uri);
 			}
 			gtk_tree_path_free(path);
 
@@ -232,6 +257,7 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 	}
 
 exit_list:
+	g_free(base_m3u);
 	if (list)
 		g_list_free(list);
 	if (err) {
@@ -245,7 +271,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 			      struct con_win *cwin)
 {
 	GError *err = NULL;
-	gchar *query, *str, *title, *f_file, *file = NULL, *s_playlist;
+	gchar *query, *str, *title, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	gint playlist_id, location_id, i = 0, ret = 0;
 	gsize bytes = 0;
 	struct db_result result;
@@ -260,6 +286,8 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 		g_free(s_playlist);
 		return -1;
 	}
+
+	base_m3u = get_display_filename(filename, TRUE);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -278,41 +306,40 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 			continue;
 		}
 
+		base = get_display_filename(mobj->file, TRUE);
+
+		if (g_ascii_strcasecmp(base_m3u, base) == 0)
+			uri = get_display_filename(mobj->file, FALSE);
+		else
+			uri = g_strdup(mobj->file);
+
 		/* If title tag is absent, just store the filename */
 
 		if (mobj->tags->title)
 			title = mobj->tags->title;
 		else
-			title = file;
-
-		f_file = g_filename_to_utf8(result.resultp[i], -1, NULL,
-					    NULL, &err);
-		if (!f_file) {
-			g_warning("Unable to convert filename to UTF-8 string: %s\n",
-				  result.resultp[i]);
-			g_free(file);
-			ret = -1;
-			goto exit;
-		}
+			title = uri;
 
 		/* Format: "#EXTINF:seconds, title" */
 
 		str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-				      mobj->tags->length, title, f_file);
+				      mobj->tags->length, title, uri);
 
 		status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
 		if (status != G_IO_STATUS_NORMAL) {
 			g_critical("Unable to write to M3U playlist: %s", filename);
-			g_free(f_file);
+			g_free(uri);
 			g_free(file);
 			g_free(str);
+			g_free(base);
 			ret = -1;
 			goto exit;
 		}
 
 		g_free(str);
 		g_free(file);
-		g_free(f_file);
+		g_free(uri);
+		g_free(base);
 
 		if (mobj) {
 			delete_musicobject(mobj);
@@ -322,6 +349,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 
 exit:
 	g_free(s_playlist);
+	g_free(base_m3u);
 	if (mobj)
 		delete_musicobject(mobj);
 	if (err) {
@@ -996,7 +1024,7 @@ GSList *
 pragha_pl_parser_parse_xspf (const gchar *filename)
 {
 	XMLNode *xml = NULL, *xi, *xl;
-	gchar *contents, *f_file;
+	gchar *contents, *f_file, *uri, *base;
 	GSList *list = NULL;
 	GError *err = NULL;
 	GFile *file;
@@ -1017,6 +1045,8 @@ pragha_pl_parser_parse_xspf (const gchar *filename)
 		}
 	}
 
+	base = get_display_filename(filename, TRUE);
+
 	xml = tinycxml_parse(contents);
 
 	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
@@ -1034,12 +1064,19 @@ pragha_pl_parser_parse_xspf (const gchar *filename)
 				continue;
 			}
 
-			list = g_slist_append (list, f_file);
+			if (g_path_is_absolute(f_file))
+				uri = g_strdup(f_file);
+			else {
+				uri = g_build_filename (base, f_file, NULL);
+			}
+			list = g_slist_append (list, uri);
+			g_free(f_file);
 		}
 	}
 
 	xmlnode_free(xml);
-	g_free (contents);
+	g_free(contents);
+	g_free(base);
 
 out:
 	g_object_unref (file);
@@ -1055,7 +1092,9 @@ pragha_pl_parser_parse_pls (const gchar *file)
 	GError *error = NULL;
 	GSList *list = NULL;
 	guint i, nentries;
-	gchar key[128], *file_entry = NULL;
+	gchar key[128], *file_entry = NULL, *uri = NULL, *base = NULL;
+
+	base = get_display_filename(file, TRUE);
 
 	plskeyfile = g_key_file_new();
 
@@ -1070,11 +1109,19 @@ pragha_pl_parser_parse_pls (const gchar *file)
 				file_entry = g_key_file_get_string(plskeyfile, "playlist", key, NULL);
 				if (NULL == file_entry)
 					continue;
-				list = g_slist_append (list, file_entry);
+
+				if (g_path_is_absolute(file_entry))
+					uri = g_strdup(file_entry);
+				else {
+					uri = g_build_filename (base, file_entry, NULL);
+				}
+				list = g_slist_append (list, uri);
+				g_free(file_entry);
 			}
 		}
 	}
 	g_key_file_free (plskeyfile);
+	g_free(base);
 
 	return list;
 }
@@ -1088,7 +1135,7 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 	GIOChannel *chan = NULL;
 	gint fd;
 	gsize len, term;
-	gchar *str, *filename, *f_file;
+	gchar *str, *filename, *f_file, *uri, *base;
 	GSList *list = NULL;
 
 	fd = g_open(file, O_RDONLY, 0);
@@ -1103,6 +1150,8 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 		g_critical("Unable to open an IO channel for file: %s", file);
 		goto exit_close;
 	}
+
+	base = get_display_filename(file, TRUE);
 
 	while (g_io_channel_read_line(chan, &str, &len, &term, &err) ==
 	       G_IO_STATUS_NORMAL) {
@@ -1128,7 +1177,12 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 			goto continue_read;
 		}
 
-		list = g_slist_append (list, f_file);
+		if (g_path_is_absolute(f_file))
+			uri = g_strdup(f_file);
+		else {
+			uri = g_build_filename (base, f_file, NULL);
+		}
+		list = g_slist_append (list, uri);
 
 		while(gtk_events_pending()) {
 			if (gtk_main_iteration_do(FALSE)) {
@@ -1139,12 +1193,15 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 			}
 		}
 
+		g_free(f_file);
 	continue_read:
 		g_free(filename);
 		g_free(str);
 	}
 
 	CDEBUG(DBG_INFO, "Loaded M3U playlist: %s", file);
+
+	g_free(base);
 
 exit_chan:
 	if (g_io_channel_shutdown(chan, TRUE, &err) != G_IO_STATUS_NORMAL) {
