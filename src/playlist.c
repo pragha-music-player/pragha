@@ -775,6 +775,38 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	g_list_free(list);
 }
 
+static gboolean delete_existing_item_dialog(const gchar *item,
+					    struct con_win *cwin)
+{
+	gboolean choice = FALSE;
+	gint ret;
+	GtkWidget *dialog;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+				GTK_DIALOG_MODAL,
+				GTK_MESSAGE_QUESTION,
+				GTK_BUTTONS_YES_NO,
+				_("Do you want to delete the item: %s ?"),
+				item);
+
+	ret = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	switch(ret) {
+	case GTK_RESPONSE_YES:
+		choice = TRUE;
+		break;
+	case GTK_RESPONSE_NO:
+		choice = FALSE;
+		break;
+	default:
+		break;
+	}
+
+	gtk_widget_destroy(dialog);
+
+	return choice;
+}
+
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model;
@@ -784,12 +816,12 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	gchar *playlist, *s_playlist;
 	gint node_type;
+	gboolean removed = FALSE;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-
 		/* Delete selected playlists */
 
 		for (i=list; i != NULL; i = i->next) {
@@ -799,22 +831,28 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 				gtk_tree_model_get(model, &iter, P_PLAYLIST,
 						   &playlist, -1);
-				s_playlist = sanitize_string_sqlite3(playlist);
 
-				if(node_type == NODE_PLAYLIST) {
-					delete_playlist_db(s_playlist, cwin);
+				if(delete_existing_item_dialog(playlist, cwin)) {
+					s_playlist = sanitize_string_sqlite3(playlist);
+
+					if(node_type == NODE_PLAYLIST) {
+						delete_playlist_db(s_playlist, cwin);
+					}
+					else if (node_type == NODE_RADIO) {
+						delete_radio_db(s_playlist, cwin);
+					}
+					g_free(s_playlist);
+					removed = TRUE;
 				}
-				else if (node_type == NODE_RADIO) {
-					delete_radio_db(s_playlist, cwin);
-				}
-				g_free(s_playlist);
 				g_free(playlist);
 			}
 			gtk_tree_path_free(path);
 		}
 		g_list_free(list);
 	}
-	init_playlist_view(cwin);
+
+	if(removed)
+		init_playlist_view(cwin);
 }
 
 /* Export selection/current playlist to a M3U file */
