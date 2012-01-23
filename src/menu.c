@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -694,11 +694,10 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 	}
 	else {
 		state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
-		if (state & GDK_WINDOW_STATE_FULLSCREEN){
+		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
-			gtk_widget_hide(cwin->unfull_button);
-			gtk_widget_show(GTK_WIDGET(menu_bar));
-		}
+		gtk_widget_hide(cwin->unfull_button);
+		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
 }
 
