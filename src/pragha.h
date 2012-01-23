@@ -57,7 +57,6 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 #include <sqlite3.h>
-//#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
@@ -65,6 +64,12 @@
 #include <taglib_config.h>
 #include <cddb/cddb.h>
 #include <gst/gst.h>
+
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
 
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
