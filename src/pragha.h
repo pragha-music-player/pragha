@@ -128,7 +128,6 @@
 #define OSS4_SINK    "oss4"
 #define OSS_SINK     "oss"
 #define PULSE_SINK   "pulse"
-#define AUTO_SINK    "auto"
 
 #define DEFAULT_MIXER "default"
 #define ALSA_MIXER    "alsa"

@@ -469,8 +469,10 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), mhbox);
 
-	if(cwin->cgst->equalizer == NULL)
+	if(cwin->cgst->equalizer == NULL) {
 		gtk_widget_set_sensitive(GTK_WIDGET(hbox), FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(eq_combobox), FALSE);
+	}
 
 	init_eq_preset(cwin, storage);
 

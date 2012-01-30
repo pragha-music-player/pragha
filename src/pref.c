@@ -527,10 +527,6 @@ static void update_preferences(struct con_win *cwin)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->cpref->audio_sink_combo_w),
 						 4);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, AUTO_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
-						 5);
 		else
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->cpref->audio_sink_combo_w),
@@ -1504,8 +1500,6 @@ void preferences_dialog(struct con_win *cwin)
 				  OSS_SINK);
 	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
 				  PULSE_SINK);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
-				  AUTO_SINK);
 
 	gtk_table_attach(GTK_TABLE (audio_table), sink_label,
 			0, 1, 0, 1,

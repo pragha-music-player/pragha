@@ -763,7 +763,7 @@ gint backend_init(struct con_win *cwin)
 
 		audiosink = g_strdup("pulsesink");
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, AUTO_SINK)){
+	else {
 		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
 
 		audiosink = g_strdup("autoaudiosink");
@@ -786,6 +786,9 @@ gint backend_init(struct con_win *cwin)
 			gst_object_unref (audiopad);
 
 			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
+		}
+		else {
+			g_warning("Failed to create the 10bands equalizer gst_element");
 		}
 	}
 	else {
