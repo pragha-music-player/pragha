@@ -28,4 +28,31 @@ TryExec=pragha
 Terminal=false
 StartupNotify=true
 
-MimeType=application/x-ape;audio/ape;audio/x-ape;audio/x-m4a;video/x-ms-asf;audio/x-ms-wma;audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav;
+MimeType=application/x-ape;audio/ape;audio/x-ape;audio/x-m4a;video/x-ms-asf;audio/x-ms-wma;audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpeg3;audio/mp3;application/ogg;application/x-ogg;audio/vorbis;audio/x-vorbis;audio/ogg;audio/x-ogg;audio/x-flac;application/x-flac;audio/flac;audio/x-wav;audio/mpegurl;audio/x-mpegurl;audio/x-scpls;application/xspf+xml;audio/x-ms-wax;
+
+X-Ayatana-Desktop-Shortcuts=Play;Pause;Stop;Previous;Next;
+
+[Play Shortcut Group]
+Name=Play
+Exec=pragha -p
+TargetEnvironment=Unity
+
+[Pause Shortcut Group]
+Name=Pause
+Exec=pragha -t
+TargetEnvironment=Unity
+
+[Stop Shortcut Group]
+Name=Stop
+Exec=pragha -s
+TargetEnvironment=Unity
+
+[Previous Shortcut Group]
+Name=Previous
+Exec=pragha -r
+TargetEnvironment=Unity
+
+[Next Shortcut Group]
+Name=Next
+Exec=pragha -n
+TargetEnvironment=Unity
