@@ -85,9 +85,10 @@ void *do_get_album_art (gpointer data)
 		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
 
 		if((0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
-		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album)))
+		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
 			update_album_art(cwin->cstate->curr_mobj, cwin);
-
+			mpris_update_metadata_changed(cwin);
+		}
 		g_object_unref(G_OBJECT(album_art));
 	}
 	else {
@@ -159,8 +160,10 @@ void *do_get_album_art_idle (gpointer data)
 		gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL);
 
 		if((0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
-		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album)))
+		   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
 			update_album_art(cwin->cstate->curr_mobj, cwin);
+			mpris_update_metadata_changed(cwin);
+		}
 
 		g_object_unref(G_OBJECT(album_art));
 	}

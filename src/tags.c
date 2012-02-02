@@ -1091,15 +1091,18 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
 			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
-			if(cwin->cstate->state != ST_STOPPED)
+			if(cwin->cstate->state != ST_STOPPED) {
 				__update_current_song_info(cwin);
+				mpris_update_metadata_changed(cwin);
+			}
 		}
 		else {
 			update_musicobject(mobj, changed, &ntag, cwin);
 		}
 		update_track_current_playlist(&iter, changed, mobj, cwin);
 
-		if(G_LIKELY(mobj->file_type != FILE_CDDA)) {
+		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
+		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
 			location_id = find_location_db(sfile, cwin);
 			if (G_LIKELY(location_id)) {

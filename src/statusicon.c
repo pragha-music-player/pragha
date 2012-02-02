@@ -145,6 +145,7 @@ void show_osd(struct con_win *cwin)
 					NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
 					NULL);
 			}
+		notify_notification_set_hint (cwin->osd_notify, "transient", g_variant_new_boolean (TRUE));
 		}
 		else {
 			notify_notification_update (cwin->osd_notify, (const gchar *) summary, body, NULL);

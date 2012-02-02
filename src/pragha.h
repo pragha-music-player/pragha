@@ -1198,6 +1198,7 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 
 gint mpris_init(struct con_win *cwin);
 void mpris_update_any(struct con_win *cwin);
+void mpris_update_metadata_changed(struct con_win *cwin);
 void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
 void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter);
 void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, gint bitmask);
