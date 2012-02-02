@@ -405,6 +405,10 @@ static GVariant* mpris_Player_get_Metadata(struct con_win *cwin)
 
 	if (cwin->cstate->state != ST_STOPPED) {
 		handle_get_metadata(cwin->cstate->curr_mobj, b);
+		/* Append the album art url metadata. */
+		if(cwin->cstate->arturl != NULL)
+			g_variant_builder_add (b, "{sv}", "xesam:art",
+				g_variant_new_string(cwin->cstate->arturl));
 	}
 	else {
 		g_variant_builder_add (b, "{sv}", "mpris:trackid",
@@ -938,6 +942,39 @@ void mpris_update_any(struct con_win *cwin)
 			"org.freedesktop.DBus.Properties", "PropertiesChanged",
 			g_variant_new_tuple(tuples, 3) , NULL);
 	}
+	g_variant_builder_unref(b);
+}
+
+void
+mpris_update_metadata_changed(struct con_win *cwin)
+{
+	GVariantBuilder *b;
+
+	if(NULL == cwin->cmpris2->dbus_connection)
+		return; /* better safe than sorry */
+
+	CDEBUG(DBG_MPRIS, "MPRIS update metadata of current track.");
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
+
+	g_variant_builder_add (b, "{sv}", "Metadata", mpris_Player_get_Metadata(cwin));
+
+	GVariant * tuples[] = {
+		g_variant_new_string("org.mpris.MediaPlayer2.Player"),
+		g_variant_builder_end(b),
+		g_variant_parse(G_VARIANT_TYPE("as"), "[]", NULL, NULL, NULL)
+	};
+
+	if(g_variant_is_floating(tuples[0]))
+		g_variant_ref_sink(tuples[0]);
+	if(g_variant_is_floating(tuples[1]))
+		g_variant_ref_sink(tuples[1]);
+	if(g_variant_is_floating(tuples[2]))
+		g_variant_ref_sink(tuples[2]);
+	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
+		"org.freedesktop.DBus.Properties", "PropertiesChanged",
+		g_variant_new_tuple(tuples, 3) , NULL);
+
 	g_variant_builder_unref(b);
 }
 

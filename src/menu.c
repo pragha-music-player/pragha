@@ -464,6 +464,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
 	gtk_entry_set_activates_default (GTK_ENTRY(uri_entry), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(name_entry), TRUE);
 
 	gtk_widget_show_all(dialog);
 
@@ -553,11 +554,13 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
+	/* Update the music object, the gui and them mpris */
+
 	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
 
-	/* Update the gui */
-
 	__update_current_song_info(cwin);
+
+	mpris_update_metadata_changed(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -568,7 +571,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA) {
+	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
+	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
 

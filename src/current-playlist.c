@@ -2453,7 +2453,9 @@ void drag_current_playlist_get_data (GtkWidget *widget,
 				gtk_tree_model_get_iter(model, &iter, path);
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-				if (mobj && mobj->file_type != FILE_CDDA)
+				if (G_LIKELY(mobj &&
+				    mobj->file_type != FILE_CDDA &&
+				    mobj->file_type != FILE_HTTP))
 					uri_list[uri_i++] = g_filename_to_uri(mobj->file, NULL, NULL);
 
 				gtk_tree_path_free(path);

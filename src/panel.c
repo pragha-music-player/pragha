@@ -335,9 +335,9 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 	if (cwin->cpref->show_album_art) {
 		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
 
-		if (mobj &&
-		   (mobj->file_type != FILE_CDDA) &&
-		   (mobj->file_type != FILE_HTTP)) {
+		if (G_LIKELY(mobj &&
+		    mobj->file_type != FILE_CDDA &&
+		    mobj->file_type != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
 			album_art = get_image_from_cache(cwin);
 			#endif
@@ -450,7 +450,6 @@ unfull_button_handler (GtkButton *button, struct con_win *cwin)
 	action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
 
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
-
 }
 
 /* Handler for the 'Shuffle' button item in Panel */
