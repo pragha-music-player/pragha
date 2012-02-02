@@ -590,8 +590,6 @@ backend_play(struct con_win *cwin)
 
 	update_related_state (cwin);
 
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
-
 	cwin->cgst->emitted_error = FALSE;
 }
 
