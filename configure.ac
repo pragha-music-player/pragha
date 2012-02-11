@@ -6,8 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [0])
-m4_define([pragha_version_micro], [rc3])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
 
 dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2009-2011
@@ -45,7 +44,7 @@ AC_PROG_INSTALL()
 AC_PROG_LIBTOOL()
 
 dnl Check for i18n support
-XDT_I18N([cs de es el fr hu ja nl no pl pt pt_BR ru sv tr uk zh_CN])
+XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
 
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
