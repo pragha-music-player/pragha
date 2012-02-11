@@ -247,6 +247,8 @@ void init_eq_preset(struct con_win *cwin, gpointer data)
 		g_free(eq_preset);
 	}
 	else {
+		gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 0);
+
 		g_error_free(error);
 		error = NULL;
 	}

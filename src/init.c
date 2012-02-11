@@ -258,7 +258,6 @@ gint init_config(struct con_win *cwin)
 	cwin->cpref->cache_folder = g_strdup(cache_folder);
 	#endif
 
-
 	/* Load the settings file */
 
 	if (!g_key_file_load_from_file(cwin->cpref->configrc_keyfile,
@@ -1045,8 +1044,8 @@ gint init_musicdbase(struct con_win *cwin)
 	cwin->cdbase->db_file = g_strdup_printf("%s%s", home,
 						"/pragha/pragha.db");
 
-
-	if (g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
+	if (cwin->cpref->installed_version != NULL &&
+	    g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
 		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
 		ret = g_unlink(cwin->cdbase->db_file);
 		if (ret != 0)

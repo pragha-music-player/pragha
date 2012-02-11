@@ -424,7 +424,7 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
 						GTK_BUTTONS_NONE,
-						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
+						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason: </b> %s"),
 						cwin->cstate->curr_mobj->file, error->message);
 
 		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
