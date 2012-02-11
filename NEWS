@@ -1,5 +1,5 @@
 ==============================================================
-Overview of changes in Pragha 0.9* "Good news, or aberration?."
+Overview of changes in Pragha 1.0 "Good news, or aberration?."
 ==============================================================
 
 V0.91
@@ -247,6 +247,130 @@ Bugs fixed:
 	Update about dialog year.
 	Update MimeTypes on desktop file.
 
+V1.0.RC1
+News:
+	Now use libglyr to search lyrics, cover art, and artist info if available. [1]
+	Use the cache of libglyr to save the downloaded artist info and lyrics in a Metadata.db file.
+
+Others Changes:
+	Tiny reorganization of the menu.
+	Change cache folder from pragha-album-art to pragha.
+	Now append "album-" string to covers in cache. Quasi simplified MediaArtStorageSpec, except md5. jah.
+	Adds some debug messages in mpris.c and avoid bad spaces.
+	Select the next row to the last selected when remove tracks in current playlist.
+	Remeber window position when restart pragha. Thanks to carlosjosepita.
+	Allow to use relative paths to add files with command line.
+	Open the image when double click on the cover in the panel.
+
+Updates Translations:
+	Update German translation thanks to cwickert.
+	Update Czech translation thanks to anespor.
+	Update Portuguese translation thanks to smarquespt.
+	Update Portuguese brazilian translation thanks to valtern.
+
+Bugs fixed:
+	Fix show all options when use any commands line option.
+	Allow to use relative paths to add files with command line.
+	D'Oh!. Not can edit multiple files from the library. Since when?.
+	Reduce padding on playlist view, leave this for the GTK+ theme to figure out.
+	Check if are in current playlist before add duplicate songs when search similar songs from lastfm.
+	Not change the model when Remove tracks in current playlist.
+	Fixes bad array of string in mpris metadata when string has apostrophes.
+	Fixes two segmentation faults when use ubuntu soundmenu and pragha has not playlists.
+	Fix bad folder estucture view entries because a bad conversion of filenames to UTF.
+	Fix that not add the duplicated songs when use the library view based on metadata.
+	Not sensitive "Osd in systray" option if libnotify >= 0.7.0
+	Not sensitive the "Add action in OSD" option when the notification daemon no support it.
+	Grab focus on current playlist when press Up or Down and move between controls with Left or Right.
+	Not update the panel when download album art but change the current song.
+	Use key-press-event intead key_press_event.
+	Use more strlen to test NULL strings.
+	Fix pragha freezes when select a playlist with mpris2.
+	Even emit _("Playlists") like current playlist in mpri2.
+	Inhibit global hotkey when parse a error in playback.
+	Better initiation of variables that establish the current status.
+	Fix a segfault when close pragha.
+	Fix a few memory leak.
+
+[1] https://github.com/sahib/glyr:
+Is a very new library, an the author defines it as "GlyR is a searchengine for musicrelated metadata"
+Many thanks to Chris for writing to me, offering his library when asked for a alternative to chartyrics.
+
+V1.0.RC2
+News:
+	Better session managament support when exo-1 >= 0.6 is available.
+	 * Now save current playlist when save session.
+	 * Now save last posicion when save session.
+	 * etc, etc.
+	Rename playlist.
+	Add support to playing streams over a network.
+
+Others Changes:
+	When just run Pragha init lastfm with a timeuout of 30 sec, but with a simple thread when change preferences.
+	Set width of queue/pixbuf column fixed to 32px. Set queue bubble size fixed to 12px.
+
+Bugs fixed:
+	Implement lost Seek an SetPosition on mpris2.
+	Fix main toolbar items use GTK_ICON_SIZE_LARGE_TOOLBAR, volume button uses _SMALL_TOOLBAR.
+	Use some un/likely optimization.
+	Remove unused code.
+
+V1.0.RC3
+News:
+	Add option to show the playback controls below.
+	Can select a name when add radio streams to save on db and append to playlist tree.
+	
+Others Changes:
+	Fix/Change somes strings. Sorry.
+	Init pragha with focus on play button.
+	Add the new stream with the uri/name as title.
+	Better layout of rename and add location dialog.
+	Add a new popup menu with "New playlist" and a list of saved playlist to "Save playlist" like the "Add selection" popup.
+	Also append boths pupups submenus to main menu.
+	Properly set the title in save playlist dialogs.
+	Edit track information when double click on the track label of the panel.
+	When playback is stopped and no has selected any track, play a random track if shuffle has activated.
+
+Bugs fixed:
+	Remove useless warning "Everything is fine" when no found a cover.
+	No search artist information when missing the artist name.
+	No search lyrics when missing the title or artist name.
+	Init the threads conditionally depending on the version of glibc, removing g_thread_init deprecated in 2.31
+	Remove unused code, that remove g_strncasecmp deprecated function.
+	Better buffering streaming. Prevent that it refuse to stop the playback.
+	Better buffering. Not update mpris, lastfm or get album art.
+	D'Oh!. Fix Segmentation fault when the stream update the tags on RC1/2
+	No update playlist view when cancel the rename action.
+
+V1.0
+News:
+	Add a classic 10-band software equalizer.
+
+Others Changes:
+	Save the m3u playlists with relative paths when stored in the same directory that the audio files.
+	Add basic Static Quicklist entries on desktop file to control pragha on unity.
+
+Bugs fixed:
+	Emit album art url on mpris2 when is available.
+	Emit new metadata when edit tag of current track.
+	Fix try to edit some tags of radio stream with taglib.
+	Add playlists mime on desktop file.
+	Use autoaudiosink as default audiosink.
+	Update notifications instead of show one for each song change.
+	Set Next as default button when show a playback error.
+	Do not allow change song from mpris/keybinder/systray when show a playback error.
+	Can open playlists with relative paths.
+	Save radio stream when press enter on name.
+	Fix compilation without exo-1.
+	Comfirm with an dialog before delete any radio/playlist item.
+	Fixes some memory leaks.
+
+Updates Translations:
+	Add Italian translation thanks to Stribianese91.
+	Update German translation thanks to Cwickert.
+	Update Rusian translation thanks to lazy.kent.suse.
+	Update Portuguese translation thanks to smarquespt.
+	Sorry if I lost any translation. Transifex does not show the entire history. Please. Contact me.
 
 ======================================================
 OTHERS REALESES:
