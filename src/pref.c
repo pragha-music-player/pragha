@@ -842,7 +842,9 @@ void save_preferences(struct con_win *cwin)
 		g_free (ref_char);
 	}
 	else {
-		if (g_key_file_has_key(cwin->cpref->configrc_keyfile,
+		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
+					 GROUP_PLAYLIST) &&
+		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
 				       GROUP_PLAYLIST,
 				       KEY_CURRENT_REF,
 				       &error)){
@@ -1351,7 +1353,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save to conrc */
 
-	data = g_key_file_to_data(cwin->cpref->configrc_keyfile, &length, &error);
+	data = g_key_file_to_data(cwin->cpref->configrc_keyfile, &length, NULL);
 	if (!g_file_set_contents(cwin->cpref->configrc_file, data, length, &error))
 		g_critical("Unable to write preferences file : %s",
 			   error->message);

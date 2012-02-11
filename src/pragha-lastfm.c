@@ -62,30 +62,28 @@ gboolean are_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 
 gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 {
-	gchar *query = NULL, *s_artist = NULL, *s_title = NULL;
-	gint location_id = 0, artist_id = 0;
+	gchar *query = NULL;
 	struct db_result result;
 	struct musicobject *mobj = NULL;
+	gint location_id = 0, i;
 
-	CDEBUG(DBG_LASTFM, "Try to add: %s - %s", artist, title);
-
-	s_artist = sanitize_string_sqlite3(artist);
-	s_title = sanitize_string_sqlite3(title);
-
-	artist_id = find_nocase_artist_db(s_artist, cwin);
-	if(artist_id == 0)
-		goto bad;
-
-	query = g_strdup_printf("SELECT location FROM TRACK WHERE TRACK.title = \"%s\" COLLATE NOCASE AND TRACK.artist = %d;", s_title, artist_id);
+	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
+				"FROM TRACK, ARTIST, LOCATION "
+				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
+				"AND TRACK.title = \"%s\" COLLATE NOCASE "
+				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
+				title, artist);
 
 	if(exec_sqlite_query(query, cwin, &result)) {
-		if (result.no_rows) {
-			location_id = atoi(result.resultp[result.no_columns]);
+		for_each_result_row(result, i) {
+			location_id = atoi(result.resultp[i+2]);
 
 			mobj = new_musicobject_from_db(location_id, cwin);
 
-			if(are_in_current_playlist(mobj, cwin) == FALSE)
+			if(are_in_current_playlist(mobj, cwin) == FALSE) {
 				append_current_playlist(mobj, cwin);
+				break;
+			}
 			else {
 				delete_musicobject(mobj);
 				location_id = 0;
@@ -93,10 +91,7 @@ gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-bad:
-	g_free(s_artist);
-	g_free(s_title);
-
+	
 	return location_id;
 }
 
