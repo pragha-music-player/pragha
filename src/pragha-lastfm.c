@@ -82,12 +82,12 @@ gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
 
 			if(are_in_current_playlist(mobj, cwin) == FALSE) {
 				append_current_playlist(mobj, cwin);
-				break;
 			}
 			else {
 				delete_musicobject(mobj);
 				location_id = 0;
 			}
+			break;
 		}
 		sqlite3_free_table(result.resultp);
 	}
@@ -165,14 +165,16 @@ void *do_lastfm_add_favorites_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
-	gint i = 1, try = 0, added = 0;
+	gint rpages = 0, cpage = 0, try = 0, added = 0;
 	gchar *summary = NULL;
 
 	struct con_win *cwin = data;
 
-	while (LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
-			cwin->cpref->lw.lastfm_user,
-			i, &results)) {
+	do {
+		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
+						     cwin->cpref->lw.lastfm_user,
+						     cpage,
+						     &results);
 		gdk_threads_enter();
 		for(li=results; li; li=li->next) {
 			track = li->data;
@@ -181,9 +183,10 @@ void *do_lastfm_add_favorites_action (gpointer data)
 				added++;
 		}
 		gdk_threads_leave();
-		i++;
+
 		LASTFM_free_track_info_list (results);
-	}
+		cpage++;
+	} while(rpages != 0);
 
 	if(try > 0)
 		summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."), added, try);
