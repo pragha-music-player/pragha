@@ -424,7 +424,7 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
 						GTK_BUTTONS_NONE,
-						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason: </b> %s"),
+						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
 						cwin->cstate->curr_mobj->file, error->message);
 
 		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
@@ -466,8 +466,6 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 	gst_message_parse_buffering (message, &percent);
 	gst_element_get_state (cwin->cgst->pipeline, &cur_state, NULL, 0);
 
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
-
 	if (percent >= 100 && cur_state != GST_STATE_PLAYING) {
 		CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
 		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
@@ -481,6 +479,10 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 			CDEBUG(DBG_BACKEND, "Buffering (already paused) ... %d", percent);
 		}
 	}
+
+	gdk_threads_enter();
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
+	gdk_threads_leave();
 }
 
 static void
@@ -667,11 +669,12 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 void
 backend_quit(struct con_win *cwin)
 {
-	if (cwin->cgst->pipeline != NULL) {
-		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
-		gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
-		cwin->cgst->pipeline = NULL;
-	}
+	backend_stop(NULL, cwin);
+
+	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
+	gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
+	cwin->cgst->pipeline = NULL;
+
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }
 

@@ -26,9 +26,6 @@ void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	if ((cwin->cstate->state == ST_STOPPED) && (cwin->cstate->curr_mobj_clear))
-		delete_musicobject(cwin->cstate->curr_mobj);
-
 	backend_quit(cwin);
 
 	save_preferences(cwin);
