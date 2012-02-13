@@ -201,6 +201,8 @@ void init_eq_preset(struct con_win *cwin, gpointer data)
 		else if (!g_ascii_strcasecmp(eq_preset, "Techno"))
 			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 18);
 		else {
+			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 19);
+
 			saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
 								 GROUP_AUDIO,
 								 KEY_EQ_10_BANDS,
