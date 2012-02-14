@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -946,6 +946,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gint resp, cnt;
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
 	gint node_type;
+	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
@@ -1004,6 +1005,10 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 		goto exit;
 	}
 
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -1051,6 +1056,8 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 exit_list:
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
 	if (list)
 		g_list_free(list);
 exit:
@@ -1304,6 +1311,11 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 	gchar *summary;
 	gint try = 0, added = 0;
 	struct musicobject *mobj;
+	GdkCursor *cursor;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	list = pragha_pl_parser_parse_from_file_by_extension (file);
 
@@ -1320,6 +1332,9 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 		}
 		g_free(i->data);
 	}
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	set_status_message(summary, cwin);
 	g_free(summary);
