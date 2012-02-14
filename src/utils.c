@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -37,6 +37,120 @@ const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NUL
 #endif
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
+
+/* Test if the song is already in the playlist.*/
+
+gboolean
+already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
+{
+	GtkTreeModel *playlist_model;
+	GtkTreeIter playlist_iter;
+	struct musicobject *omobj = NULL;
+	gboolean ret;
+
+	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
+
+	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
+	while (ret) {
+		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
+
+		if(0 == g_strcmp0(mobj->file, omobj->file))
+		   	return TRUE;
+
+		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
+	}
+
+	return FALSE;
+}
+
+/* Find a song with the artist and title independently of the album and adds it to the playlist */
+
+gint
+append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin)
+{
+	gchar *query = NULL;
+	struct db_result result;
+	struct musicobject *mobj = NULL;
+	gint location_id = 0, i;
+
+	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
+				"FROM TRACK, ARTIST, LOCATION "
+				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
+				"AND TRACK.title = \"%s\" COLLATE NOCASE "
+				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
+				title, artist);
+
+	if(exec_sqlite_query(query, cwin, &result)) {
+		for_each_result_row(result, i) {
+			location_id = atoi(result.resultp[i+2]);
+
+			mobj = new_musicobject_from_db(location_id, cwin);
+
+			if(already_in_current_playlist(mobj, cwin) == FALSE) {
+				append_current_playlist(mobj, cwin);
+			}
+			else {
+				delete_musicobject(mobj);
+				location_id = 0;
+			}
+			break;
+		}
+		sqlite3_free_table(result.resultp);
+	}
+	return location_id;
+}
+
+/* Get the musicobject of seleceted track on current playlist */
+
+struct musicobject *
+get_selected_musicobject(struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GList *list;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list != NULL) {
+		path = list->data;
+		if (gtk_tree_model_get_iter(model, &iter, path)) {
+			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+			if (!mobj)
+				g_warning("Invalid mobj pointer");
+		}
+		gtk_tree_path_free(path);
+		g_list_free(list);
+	}
+	return mobj;
+}
+
+/* Set and remove the watch cursor to suggest background work.*/
+
+void
+set_watch_cursor_on_thread(struct con_win *cwin)
+{
+	GdkCursor *cursor;
+
+	gdk_threads_enter ();
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+	gdk_threads_leave ();
+}
+
+void
+remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin)
+{
+	gdk_threads_enter ();
+	if(message != NULL)
+		set_status_message(message, cwin);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_threads_leave ();
+}
 
 /* Set a message on status bar, and restore it at 5 seconds */
 

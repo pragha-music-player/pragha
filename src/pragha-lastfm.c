@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2011-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -20,80 +20,146 @@
 #include "pragha.h"
 
 #ifdef HAVE_LIBCLASTFM
-gint find_nocase_artist_db(const gchar *artist, struct con_win *cwin)
+
+/* Functions related to current playlist. */
+
+void *do_lastfm_current_playlist_love (gpointer data)
 {
-	gint artist_id = 0;
-	gchar *query;
-	struct db_result result;
-
-	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s' COLLATE NOCASE;", artist);
-	if (exec_sqlite_query(query, cwin, &result)) {
-		if(result.no_rows)
-			artist_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return artist_id;
-}
-
-gboolean are_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
-{
-	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter;
-	struct musicobject *omobj = NULL;
-	gboolean ret;
-
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
-
-	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
-	while (ret) {
-		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
-
-		if((0 == g_strcmp0(mobj->tags->title, omobj->tags->title)) &&
-		   (0 == g_strcmp0(mobj->tags->artist, omobj->tags->artist)) &&
-		   (0 == g_strcmp0(mobj->tags->album, omobj->tags->album)))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
-	}
-
-	return FALSE;
-}
-
-gint try_add_track_from_db(gchar *artist, gchar *title, struct con_win *cwin)
-{
-	gchar *query = NULL;
-	struct db_result result;
+	gint rv;
 	struct musicobject *mobj = NULL;
-	gint location_id = 0, i;
 
-	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
-				"FROM TRACK, ARTIST, LOCATION "
-				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = \"%s\" COLLATE NOCASE "
-				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
-				title, artist);
+	struct con_win *cwin = data;
 
-	if(exec_sqlite_query(query, cwin, &result)) {
-		for_each_result_row(result, i) {
-			location_id = atoi(result.resultp[i+2]);
+	CDEBUG(DBG_LASTFM, "Love thread of current playlist");
 
-			mobj = new_musicobject_from_db(location_id, cwin);
+	mobj = get_selected_musicobject(cwin);
 
-			if(are_in_current_playlist(mobj, cwin) == FALSE) {
-				append_current_playlist(mobj, cwin);
-			}
-			else {
-				delete_musicobject(mobj);
-				location_id = 0;
-			}
-			break;
-		}
-		sqlite3_free_table(result.resultp);
+	rv = LASTFM_track_love (cwin->clastfm->session_id,
+				mobj->tags->title,
+				mobj->tags->artist);
+
+	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
+		set_status_message(_("Love song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
-	
-	return location_id;
+
+	return NULL;
 }
+
+void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_LASTFM, "Love handler to current playlist");
+
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+
+	pthread_create(&tid, NULL, do_lastfm_current_playlist_love, cwin);
+}
+
+void *do_lastfm_current_playlist_unlove (gpointer data)
+{
+	gint rv;
+	struct musicobject *mobj = NULL;
+
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_LASTFM, "Unlove thread on current playlist");
+
+	mobj = get_selected_musicobject(cwin);
+
+	rv = LASTFM_track_love (cwin->clastfm->session_id,
+				mobj->tags->title,
+				mobj->tags->artist);
+
+	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
+		set_status_message(_("Unlove song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
+	}
+
+	return NULL;
+}
+
+void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_LASTFM, "Unlove Handler to current playlist");
+
+	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+
+	pthread_create(&tid, NULL, do_lastfm_current_playlist_unlove, cwin);
+}
+
+void *do_lastfm_get_similar_current_playlist_action (gpointer data)
+{
+	LFMList *results = NULL, *li;
+	LASTFM_TRACK_INFO *track = NULL;
+	gint rv, added, try;
+	gchar *summary = NULL;
+	struct musicobject *mobj = NULL;
+
+	struct con_win *cwin = data;
+
+	mobj = get_selected_musicobject(cwin);
+
+	set_watch_cursor_on_thread(cwin);
+
+	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
+				      mobj->tags->title,
+				      mobj->tags->artist,
+				      50, &results);
+
+	if(rv != LASTFM_STATUS_OK) {
+		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
+		return NULL;
+	}
+
+	gdk_threads_enter();
+	for(li=results, added=0, try=0 ; li; li=li->next) {
+		track = li->data;
+		try++;
+		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
+			added++;
+	}
+	gdk_threads_leave();
+
+	if(try > 0)
+		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
+	else
+		summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
+
+	remove_watch_cursor_on_thread(summary, cwin);
+
+	LASTFM_free_track_info_list (results);
+	g_free(summary);
+
+	return NULL;
+}
+
+void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin)
+{
+	pthread_t tid;
+
+	CDEBUG(DBG_LASTFM, "Get similar action to current playlist");
+
+	if(cwin->clastfm->session_id == NULL) {
+		set_status_message(_("No connection Last.fm has been established."), cwin);
+		return;
+	}
+
+	pthread_create (&tid, NULL, do_lastfm_get_similar_current_playlist_action, cwin);
+}
+
+/* Functions that respond to menu options. */
 
 void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 {
@@ -145,7 +211,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		xt = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
 		xc = xmlnode_get(xi,CCA {"track","creator",NULL},NULL,NULL);
 
-		if (xt && xc && try_add_track_from_db (xc->content, xt->content, cwin))
+		if (xt && xc && append_track_with_artist_and_title (xc->content, xt->content, cwin))
 			added++;
 	}
 
@@ -170,6 +236,8 @@ void *do_lastfm_add_favorites_action (gpointer data)
 
 	struct con_win *cwin = data;
 
+	set_watch_cursor_on_thread(cwin);
+
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
 						     cwin->cpref->lw.lastfm_user,
@@ -179,7 +247,7 @@ void *do_lastfm_add_favorites_action (gpointer data)
 		for(li=results; li; li=li->next) {
 			track = li->data;
 			try++;
-			if (try_add_track_from_db (track->artist, track->name, cwin))
+			if (append_track_with_artist_and_title (track->artist, track->name, cwin))
 				added++;
 		}
 		gdk_threads_leave();
@@ -193,9 +261,7 @@ void *do_lastfm_add_favorites_action (gpointer data)
 	else
 		summary = g_strdup_printf(_("You had no favorite songs on Last.fm."));
 
-	gdk_threads_enter();
-	set_status_message(summary, cwin);
-	gdk_threads_leave();
+	remove_watch_cursor_on_thread(summary, cwin);
 
 	g_free(summary);
 
@@ -226,33 +292,33 @@ void *do_lastfm_get_similar_action (gpointer data)
 
 	struct con_win *cwin = data;
 
+	set_watch_cursor_on_thread(cwin);
+
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
 			cwin->cstate->curr_mobj->tags->title,
 			cwin->cstate->curr_mobj->tags->artist,
 			50, &results);
 
-	gdk_threads_enter();
-
 	if(rv != LASTFM_STATUS_OK) {
-		set_status_message("Error searching similar songs on Last.fm.", cwin);
-		gdk_threads_leave();
+		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
 		return NULL;
 	}
 
+	gdk_threads_enter();
 	for(li=results, added=0, try=0 ; li; li=li->next) {
 		track = li->data;
 		try++;
-		if (try_add_track_from_db (track->artist, track->name, cwin))
+		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
 			added++;
 	}
+	gdk_threads_leave();
+
 	if(try > 0)
 		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
 	else
 		summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
 
-	set_status_message(summary, cwin);
-
-	gdk_threads_leave();
+	remove_watch_cursor_on_thread(summary, cwin);
 
 	LASTFM_free_track_info_list (results);
 	g_free(summary);

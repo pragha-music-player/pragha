@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -2267,6 +2267,9 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/ToolsMenu");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), (n_select == 1));
+
 			if (gtk_tree_model_get_iter(model, &iter, path)){
 				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
 
@@ -2276,18 +2279,6 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Dequeue track");
 					gtk_widget_show(GTK_WIDGET(item_widget));
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove from playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to another playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 				}
 				else{
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue track");
@@ -2296,19 +2287,18 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Dequeue track");
 					gtk_widget_hide(GTK_WIDGET(item_widget));
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove from playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to another playlist");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
-
-					item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
-					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 				}
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Remove from playlist");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Crop playlist");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to another playlist");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 			}
 			else{
 				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue track");
@@ -2328,7 +2318,7 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 			gtk_tree_path_free(path);
 		}
-		else{
+		else {
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Queue track");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 			gtk_widget_show(GTK_WIDGET(item_widget));
@@ -2343,6 +2333,9 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to another playlist");
+			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
+
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/ToolsMenu");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");

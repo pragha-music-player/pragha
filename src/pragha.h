@@ -1208,6 +1208,11 @@ void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
 
+gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
+gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);
+struct musicobject *get_selected_musicobject(struct con_win *cwin);
+void set_watch_cursor_on_thread(struct con_win *cwin);
+void remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin);
 void set_status_message (gchar *message, struct con_win *cwin);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
@@ -1263,6 +1268,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Lastfm Helper */
 
+void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
+void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
+void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin);
 void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
 void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
@@ -1276,6 +1284,10 @@ void *do_lastfm_now_playing (gpointer data);
 void lastfm_now_playing_handler (struct con_win *cwin);
 
 /* Related info helpers */
+
+void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);
+void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin);
+void related_get_album_art_current_playlist_action (GtkAction *action, struct con_win *cwin);
 void related_get_album_art_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
