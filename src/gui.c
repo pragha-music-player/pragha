@@ -109,6 +109,17 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Add to another playlist\"/>				\
 	<menuitem action=\"Save playlist\"/>					\
 	<separator/>				    				\
+	<menu action=\"ToolsMenu\">						\
+		<menuitem action=\"Search lyric\"/>				\
+		<menuitem action=\"Search artist info\"/>			\
+		<menuitem action=\"Search album art\"/>				\
+		<separator/>							\
+		<menuitem action=\"Love track\"/>				\
+		<menuitem action=\"Unlove track\"/>				\
+		<separator/>							\
+		<menuitem action=\"Add similar\"/>				\
+	</menu>									\
+	<separator/>				    				\
 	<menuitem action=\"Edit tags\"/>					\
 	</popup>				    				\
 	</ui>";
@@ -350,6 +361,38 @@ GtkActionEntry cp_context_aentries[] = {
 	 NULL, "Clear the current playlist", G_CALLBACK(clear_current_playlist)},
 	{"Add to another playlist", GTK_STOCK_SAVE_AS, N_("Add to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
+	{"ToolsMenu", NULL, N_("_Tools")},
+	#ifdef HAVE_LIBGLYR
+	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
+	 NULL, "Search lyric", G_CALLBACK(related_get_lyric_current_playlist_action)},
+	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
+	 NULL, "Search artist info", G_CALLBACK(related_get_artist_info_current_playlist_action)},
+	{"Search album art", NULL, N_("Search album art"),
+	 NULL, "Search album art", G_CALLBACK(related_get_album_art_current_playlist_action)},
+	#else
+	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
+	 NULL, "Search lyric", NULL},
+	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
+	 NULL, "Search artist info", NULL},
+	{"Search album art", NULL, N_("Search album art"),
+	 NULL, "Search album art", NULL},
+	#endif
+	{"Lastfm", NULL, N_("_Lastfm")},
+	#ifdef HAVE_LIBCLASTFM
+	{"Love track", NULL, N_("Love track"),
+	 NULL, "Love track", G_CALLBACK(lastfm_track_current_playlist_love_action)},
+	{"Unlove track", NULL, N_("Unlove track"),
+	 NULL, "Unlove track", G_CALLBACK(lastfm_track_current_playlist_unlove_action)},
+	{"Add similar", NULL, N_("Add similar"),
+	 NULL, "Add similar", G_CALLBACK(lastfm_get_similar_current_playlist_action)},
+	#else
+	{"Love track", NULL, N_("Love track"),
+	 NULL, "Love track", NULL},
+	{"Unlove track", NULL, N_("Unlove track"),
+	 NULL, "Unlove track", NULL},
+	{"Add similar", NULL, N_("Add similar"),
+	 NULL, "Add similar", NULL},
+	#endif
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
 	 NULL, "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)}
 };
