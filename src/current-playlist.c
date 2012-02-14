@@ -1332,6 +1332,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
 	GSList *to_delete = NULL, *mobj_to_delete = NULL, *i = NULL;
+	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1340,6 +1341,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	ret = gtk_tree_model_get_iter_first(model, &iter);
 
@@ -1389,6 +1394,8 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 	g_object_unref(model);
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 
@@ -1554,8 +1561,13 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	gboolean ret;
 	GSList *to_delete = NULL;
+	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
 
 	clear_rand_track_refs(cwin);
 	clear_queue_track_refs(cwin);
@@ -1574,9 +1586,11 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 		ret = gtk_tree_model_iter_next(model, &iter);
 	}
 
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
-
 	gtk_list_store_clear(GTK_LIST_STORE(model));
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
 
 	cwin->cstate->tracks_curr_playlist = 0;
 	cwin->cstate->unplayed_tracks = 0;

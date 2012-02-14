@@ -170,6 +170,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	gint try = 0, added = 0;
 	GFile *file;
 	gsize size;
+	GdkCursor *cursor;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
 				      GTK_WINDOW(cwin->mainwindow),
@@ -203,6 +204,10 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		}
 	}
 
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_cursor_unref(cursor);
+
 	xml = tinycxml_parse(contents);
 
 	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
@@ -214,6 +219,8 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		if (xt && xc && append_track_with_artist_and_title (xc->content, xt->content, cwin))
 			added++;
 	}
+
+	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
