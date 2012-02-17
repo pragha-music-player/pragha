@@ -27,7 +27,7 @@
 void show_generic_related_info_dialog (gchar *window_title, gchar *title_header, gchar *head, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *header, *view, *frame, *scrolled;
+	GtkWidget *header, *view, *scrolled;
 	GtkTextBuffer *buffer;
 
 	gdk_threads_enter ();
@@ -38,16 +38,15 @@ void show_generic_related_info_dialog (gchar *window_title, gchar *title_header,
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
 
-	frame = gtk_frame_new (NULL);
 	scrolled = gtk_scrolled_window_new (NULL, NULL);
 
 	gtk_container_add (GTK_CONTAINER (scrolled), view);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 8);
-	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
-	gtk_container_add (GTK_CONTAINER (frame), scrolled);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled), GTK_SHADOW_IN);
+
+	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 
@@ -65,7 +64,7 @@ void show_generic_related_info_dialog (gchar *window_title, gchar *title_header,
 	header = sokoke_xfce_header_new (title_header, NULL, cwin);
 
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), frame, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), scrolled, TRUE, TRUE, 0);
 
 	gtk_widget_show_all(dialog);
 
