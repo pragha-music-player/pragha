@@ -16,21 +16,41 @@
 /*************************************************************************/
 
 #include "pragha.h"
-#include <pthread.h>
 
 #define ISO_639_1 _("en")
 
 #ifdef HAVE_LIBGLYR
 
-/* Some generics functions to avoid dubplicate code. */
-
-void show_generic_related_info_dialog (gchar *window_title, gchar *title_header, gchar *head, struct con_win *cwin)
+typedef struct
 {
-	GtkWidget *dialog;
-	GtkWidget *header, *view, *scrolled;
-	GtkTextBuffer *buffer;
+	struct con_win	*cwin;
+	GlyrQuery	query;
+	GlyrMemCache	*head;
+}
+glyr_struct;
 
-	gdk_threads_enter ();
+gboolean
+show_generic_related_text_info_dialog (gpointer data)
+{
+	GtkWidget *dialog, *header, *view, *scrolled;
+	GtkTextBuffer *buffer;
+	gchar *artist = NULL, *title = NULL, *provider = NULL;
+	gchar *title_header = NULL, *subtitle_header = NULL;
+
+	glyr_struct *glyr_info = data;
+
+	artist = g_strdup(glyr_info->query.artist);
+	title = g_strdup(glyr_info->query.title);
+	provider = g_strdup(glyr_info->head->prov);
+
+	if(glyr_info->head->type == GLYR_TYPE_LYRICS) {
+		title_header =  g_strdup_printf(_("Lyric thanks to %s"), provider);
+		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), title, artist);
+	}
+	else {
+		title_header =  g_strdup_printf(_("Artist info"));
+		subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), artist, provider);
+	}
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -38,44 +58,195 @@ void show_generic_related_info_dialog (gchar *window_title, gchar *title_header,
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
 
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+	gtk_text_buffer_set_text (buffer, glyr_info->head->data, -1);
+
 	scrolled = gtk_scrolled_window_new (NULL, NULL);
 
 	gtk_container_add (GTK_CONTAINER (scrolled), view);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 
 	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
-	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-
-	gtk_text_buffer_set_text (buffer, head, -1);
-
-	dialog = gtk_dialog_new_with_buttons(window_title,
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_DIALOG_MODAL,
+	dialog = gtk_dialog_new_with_buttons(title_header,
+					     GTK_WINDOW(glyr_info->cwin->mainwindow),
+					     GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
 					     NULL);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
-	header = sokoke_xfce_header_new (title_header, NULL, cwin);
+	header = sokoke_xfce_header_new (subtitle_header, NULL, glyr_info->cwin);
 
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), scrolled, TRUE, TRUE, 0);
 
 	gtk_widget_show_all(dialog);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
-
 	gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
 
-	gdk_threads_leave ();
+	glyr_free_list(glyr_info->head);
+	glyr_query_destroy(&glyr_info->query);
+	g_slice_free(glyr_struct, glyr_info);
+
+	g_free(title_header);
+	g_free(subtitle_header);
+	g_free(artist);
+	g_free(title);
+	g_free(provider);
+
+	return FALSE;
 }
+
+gpointer
+get_related_text_info_idle_func (gpointer data)
+{
+	GlyrMemCache *head;
+	GLYR_ERROR error;
+
+	glyr_struct *glyr_info = data;
+
+	set_watch_cursor_on_thread(glyr_info->cwin);
+
+	head = glyr_get(&glyr_info->query, &error, NULL);
+
+	if(head != NULL) {
+		glyr_info->head = head;
+		gdk_threads_add_idle(show_generic_related_text_info_dialog, glyr_info);
+
+		remove_watch_cursor_on_thread(NULL, glyr_info->cwin);
+	}
+	else {
+		remove_watch_cursor_on_thread((glyr_info->head->type == GLYR_TYPE_LYRICS) ? _("Error searching Lyric.") : _("Artist information not found."),
+					       glyr_info->cwin);
+		g_warning("Error searching song info: %s", glyr_strerror(error));
+
+		glyr_query_destroy(&glyr_info->query);
+		g_slice_free(glyr_struct, glyr_info);
+	}
+
+	return NULL;
+}
+
+void
+configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gchar *title, struct con_win *cwin)
+{
+	glyr_struct *glyr_info;
+	glyr_info = g_slice_new0 (glyr_struct);
+
+	glyr_query_init(&glyr_info->query);
+
+	glyr_opt_type(&glyr_info->query, type);
+
+	if(type == GLYR_GET_LYRICS) {
+		glyr_opt_artist(&glyr_info->query, artist);
+		glyr_opt_title(&glyr_info->query, title);
+	}
+	else {
+		glyr_opt_artist(&glyr_info->query, artist);
+
+		glyr_opt_lang (&glyr_info->query, ISO_639_1);
+		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
+	}
+
+	glyr_opt_lookup_db(&glyr_info->query, cwin->cdbase->cache_db);
+	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
+
+	glyr_info->cwin = cwin;
+
+	g_thread_create(get_related_text_info_idle_func, glyr_info, FALSE, NULL);
+}
+
+void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
+{
+	gchar *artist = NULL;
+
+	CDEBUG(DBG_INFO, "Get Artist info Action");
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
+		return;
+
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+
+	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+
+	g_free(artist);
+}
+
+void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
+{
+	gchar *artist = NULL, *title = NULL;
+
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
+		return;
+
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
+
+	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
+
+	g_free(artist);
+	g_free(title);
+}
+
+void
+related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	gchar *artist = NULL, *title = NULL;
+	struct musicobject *mobj = NULL;
+
+	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
+
+	mobj = get_selected_musicobject(cwin);
+
+	if ((strlen(mobj->tags->artist) == 0) ||
+	    (strlen(mobj->tags->title) == 0))
+		return;
+
+	artist = g_strdup(mobj->tags->artist);
+	title = g_strdup(mobj->tags->title);
+
+	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
+
+	g_free(artist);
+	g_free(title);
+}
+
+void
+related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	gchar *artist = NULL;
+	struct musicobject *mobj = NULL;
+
+	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
+
+	mobj = get_selected_musicobject(cwin);
+
+	if (strlen(mobj->tags->artist) == 0)
+		return;
+
+	artist = g_strdup(mobj->tags->artist);
+
+	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+
+	g_free(artist);
+}
+
+/* Dowload album art and save it in cache.*/
 
 void
 update_downloaded_album_art(GlyrMemCache *head, gchar *artist, gchar *album, struct con_win *cwin)
@@ -112,280 +283,8 @@ update_downloaded_album_art(GlyrMemCache *head, gchar *artist, gchar *album, str
 	g_free(album_art_path);
 }
 
-/* Functions related to song on current playlist. */
-
-void *do_get_lyrics_current_playlist_dialog (gpointer data)
-{
-	gchar *title_header = NULL;
-	struct musicobject *mobj = NULL;
-	GlyrQuery q;
-	GLYR_ERROR err;
-
-	struct con_win *cwin = data;
-
-	mobj = get_selected_musicobject(cwin);
-
-	if ((strlen(mobj->tags->artist) == 0) ||
-	    (strlen(mobj->tags->title) == 0))
-		return NULL;
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_LYRICS);
-
-	glyr_opt_artist(&q, mobj->tags->artist);
-	glyr_opt_title(&q, mobj->tags->title);
-
-	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
-	glyr_opt_db_autowrite(&q, TRUE);
-
-	GlyrMemCache *head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Error searching Lyric."), cwin);
-		goto bad;
-	}
-
-	title_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
-						   mobj->tags->title,
-						   mobj->tags->artist);
-
-	show_generic_related_info_dialog (head->prov, title_header, head->data, cwin);
-
-	glyr_free_list(head);
-	g_free(title_header);
-
-bad:
-	glyr_query_destroy(&q);
-
-	return NULL;
-}
-
-void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get lyrics of playlist selection Action");
-
-	pthread_create(&tid, NULL, do_get_lyrics_current_playlist_dialog, cwin);
-}
-
-void *do_get_artist_info_current_playlist_dialog (gpointer data)
-{
-	GlyrQuery q;
-	GlyrMemCache *head = NULL;
-	GLYR_ERROR err;
-	gchar *subtitle_header = NULL, *artist = NULL;
-	struct musicobject *mobj = NULL;
-
-	struct con_win *cwin = data;
-
-	mobj = get_selected_musicobject(cwin);
-
-	if (strlen(mobj->tags->artist) == 0)
-		return NULL;
-
-	artist = g_strdup(mobj->tags->artist);
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_ARTISTBIO);
-
-	glyr_opt_artist(&q, artist);
-
-	glyr_opt_lang (&q, ISO_639_1);
-	glyr_opt_lang_aware_only (&q, TRUE);
-
-	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
-	glyr_opt_db_autowrite(&q, TRUE);
-
-	head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Artist information not found."), cwin);
-		goto bad;
-	}
-
-	subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"),
-					     artist,
-					     head->prov);
-
-	show_generic_related_info_dialog (_("Artist info"), subtitle_header, head->data, cwin);
-
-	glyr_free_list(head);
-	g_free(subtitle_header);
-bad:
-	glyr_query_destroy(&q);
-	g_free(artist);
-
-	return NULL;
-}
-
-void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get artist info of playlist selection Action");
-
-	pthread_create(&tid, NULL, do_get_artist_info_current_playlist_dialog, cwin);
-}
-
-void *do_get_album_art_current_playlist (gpointer data)
-{
-	GlyrQuery q;
-	GLYR_ERROR err;
-	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
-	struct musicobject *mobj = NULL;
-
-	struct con_win *cwin = data;
-
-	mobj = get_selected_musicobject(cwin);
-
-	if ((strlen(mobj->tags->artist) == 0) ||
-	    (strlen(mobj->tags->album) == 0))
-		return NULL;
-
-	GlyrMemCache *head = NULL;
-
-	artist = g_strdup(mobj->tags->artist);
-	album = g_strdup(mobj->tags->album);
-
-	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
-					cwin->cpref->cache_folder,
-					artist,
-					album);
-
-	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
-		goto exists;
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_COVERART);
-
-	glyr_opt_artist(&q, artist);
-	glyr_opt_album(&q, album);
-
-	glyr_opt_from(&q, "all;-picsearch;-google");
-
-	head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Album art not found."), cwin);
-		if (err != GLYRE_OK)
-			g_warning(glyr_strerror(err));
-		goto bad;
-	}
-
-	update_downloaded_album_art(head, artist, album, cwin);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	glyr_free_list(head);
-bad:
-	glyr_query_destroy(&q);
-exists:
-	open_url(cwin, album_art_path);
-
-	g_free(album_art_path);
-	g_free(artist);
-	g_free(album);
-
-	return NULL;
-}
-
-void
-related_get_album_art_current_playlist_action (GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get album art of playlist selection action");
-
-	pthread_create(&tid, NULL, do_get_album_art_current_playlist, cwin);
-}
-
-/* Functions related to current song. */
-
-void *do_get_album_art (gpointer data)
-{
-	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
-	GlyrQuery q;
-	GLYR_ERROR err;
-
-	GlyrMemCache *head = NULL;
-
-	struct con_win *cwin = data;
-
-	CDEBUG(DBG_INFO, "Get album art thread");
-
-	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
-	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
-
-	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
-					cwin->cpref->cache_folder,
-					artist,
-					album);
-
-	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
-		goto exists;
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_COVERART);
-
-	glyr_opt_artist(&q, artist);
-	glyr_opt_album(&q, album);
-
-	glyr_opt_from(&q, "all;-picsearch;-google");
-
-	head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Album art not found."), cwin);
-		if (err != GLYRE_OK)
-			g_warning(glyr_strerror(err));
-		goto bad;
-	}
-
-	update_downloaded_album_art(head, artist, album, cwin);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	glyr_free_list(head);
-bad:
-	glyr_query_destroy(&q);
-exists:
-	g_free(album_art_path);
-	g_free(artist);
-	g_free(album);
-
-	return NULL;
-}
-
-
-void related_get_album_art_action (GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get album art action");
-
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	if (cwin->cpref->show_album_art == FALSE)
-		return;
-
-	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
-		return;
-
-	pthread_create(&tid, NULL, do_get_album_art, cwin);
-}
-
-void *do_get_album_art_idle (gpointer data)
+gpointer
+do_get_album_art_idle (gpointer data)
 {
 	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
 	GlyrQuery q;
@@ -440,8 +339,6 @@ exists:
 
 void related_get_album_art_handler (struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_INFO, "Get album art handler");
 
 	if (cwin->cstate->state == ST_STOPPED)
@@ -454,129 +351,9 @@ void related_get_album_art_handler (struct con_win *cwin)
 	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
 		return;
 
-	pthread_create(&tid, NULL, do_get_album_art_idle, cwin);
+	g_thread_create(do_get_album_art_idle, cwin, FALSE, NULL);
 
 	return;
-}
-
-/* Handler for 'Artist info' action in the Tools menu */
-void *do_get_artist_info (gpointer data)
-{
-	GlyrQuery q;
-	GLYR_ERROR err;
-	gchar *subtitle_header = NULL;
-
-	GlyrMemCache *head = NULL;
-
-	struct con_win *cwin = data;
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_ARTISTBIO);
-
-	glyr_opt_artist(&q, cwin->cstate->curr_mobj->tags->artist);
-
-	glyr_opt_lang (&q, ISO_639_1);
-	glyr_opt_lang_aware_only (&q, TRUE);
-
-	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
-	glyr_opt_db_autowrite(&q, TRUE);
-
-	head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Artist information not found."), cwin);
-		goto bad;
-	}
-
-	subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"),
-					     cwin->cstate->curr_mobj->tags->artist,
-					     head->prov);
-
-	show_generic_related_info_dialog (_("Artist info"), subtitle_header, head->data, cwin);
-
-	glyr_free_list(head);
-	g_free(subtitle_header);
-bad:
-	glyr_query_destroy(&q);
-
-	return NULL;
-}
-
-void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get Artist info Action");
-
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
-		return;
-
-	pthread_create(&tid, NULL, do_get_artist_info, cwin);
-}
-
-void *do_get_lyrics_dialog (gpointer data)
-{
-	gchar *title_header = NULL, *artist = NULL, *title = NULL;
-	GlyrQuery q;
-	GLYR_ERROR err;
-
-	struct con_win *cwin = data;
-
-	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
-	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
-
-	set_watch_cursor_on_thread(cwin);
-
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_LYRICS);
-
-	glyr_opt_artist(&q, artist);
-	glyr_opt_title(&q, title);
-
-	glyr_opt_lookup_db(&q, cwin->cdbase->cache_db);
-	glyr_opt_db_autowrite(&q, TRUE);
-
-	GlyrMemCache *head = glyr_get(&q, &err, NULL);
-
-	if(head == NULL) {
-		remove_watch_cursor_on_thread(_("Error searching Lyric."), cwin);
-		goto bad;
-	}
-
-	title_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
-						  title, artist);
-	show_generic_related_info_dialog (head->prov, title_header, head->data, cwin);
-
-	glyr_free_list(head);
-	g_free(title_header);
-bad:
-	glyr_query_destroy(&q);
-
-	g_free(artist);
-	g_free(title);
-
-	return NULL;
-}
-
-void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
-{
-	pthread_t tid;
-
-	CDEBUG(DBG_INFO, "Get lyrics Action");
-
-	if(cwin->cstate->state == ST_STOPPED)
-		return;
-
-	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
-		return;
-
-	pthread_create(&tid, NULL, do_get_lyrics_dialog, cwin);
 }
 
 int uninit_glyr_related (struct con_win *cwin)
