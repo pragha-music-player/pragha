@@ -1287,8 +1287,6 @@ void lastfm_now_playing_handler (struct con_win *cwin);
 
 void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin);
-void related_get_album_art_current_playlist_action (GtkAction *action, struct con_win *cwin);
-void related_get_album_art_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 

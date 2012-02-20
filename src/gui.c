@@ -69,7 +69,6 @@ gchar *main_menu_xml = "<ui>							\
 			<separator/>						\
 			<menuitem action=\"Search lyric\"/>			\
 			<menuitem action=\"Search artist info\"/>		\
-			<menuitem action=\"Search album art\"/>			\
 			<separator/>						\
 			<menu action=\"Lastfm\">				\
 				<menuitem action=\"Love track\"/>		\
@@ -112,7 +111,6 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 	<menu action=\"ToolsMenu\">						\
 		<menuitem action=\"Search lyric\"/>				\
 		<menuitem action=\"Search artist info\"/>			\
-		<menuitem action=\"Search album art\"/>				\
 		<separator/>							\
 		<menuitem action=\"Love track\"/>				\
 		<menuitem action=\"Unlove track\"/>				\
@@ -250,15 +248,11 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
 	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
 	 NULL, "Search artist info", G_CALLBACK(related_get_artist_info_action)},
-	{"Search album art", NULL, N_("Search album art"),
-	 NULL, "Search album art", G_CALLBACK(related_get_album_art_action)},
 	#else
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
 	 "<Control>Y", "Search lyric", NULL},
 	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
 	 NULL, "Search artist info", NULL},
-	{"Search album art", NULL, N_("Search album art"),
-	 NULL, "Search album art", NULL},
 	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
@@ -367,15 +361,11 @@ GtkActionEntry cp_context_aentries[] = {
 	 NULL, "Search lyric", G_CALLBACK(related_get_lyric_current_playlist_action)},
 	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
 	 NULL, "Search artist info", G_CALLBACK(related_get_artist_info_current_playlist_action)},
-	{"Search album art", NULL, N_("Search album art"),
-	 NULL, "Search album art", G_CALLBACK(related_get_album_art_current_playlist_action)},
 	#else
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
 	 NULL, "Search lyric", NULL},
 	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
 	 NULL, "Search artist info", NULL},
-	{"Search album art", NULL, N_("Search album art"),
-	 NULL, "Search album art", NULL},
 	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
