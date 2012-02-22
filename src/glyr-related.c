@@ -44,7 +44,7 @@ show_generic_related_text_info_dialog (gpointer data)
 	provider = g_strdup(glyr_info->head->prov);
 
 	if(glyr_info->head->type == GLYR_TYPE_LYRICS) {
-		title_header =  g_strdup_printf(_("Lyric thanks to %s"), provider);
+		title_header =  g_strdup_printf(_("Lyrics thanks to %s"), provider);
 		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), title, artist);
 	}
 	else {
@@ -122,7 +122,7 @@ get_related_text_info_idle_func (gpointer data)
 		remove_watch_cursor_on_thread(NULL, glyr_info->cwin);
 	}
 	else {
-		remove_watch_cursor_on_thread((glyr_info->head->type == GLYR_TYPE_LYRICS) ? _("Error searching Lyric.") : _("Artist information not found."),
+		remove_watch_cursor_on_thread((glyr_info->query.type == GLYR_GET_LYRICS) ? _("Lyrics not found.") : _("Artist information not found."),
 					       glyr_info->cwin);
 		g_warning("Error searching song info: %s", glyr_strerror(error));
 
