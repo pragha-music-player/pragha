@@ -16,10 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <string.h>
-#include <fcntl.h>
 #include "pragha.h"
-#include <pthread.h>
 
 const gchar *mime_flac[] = {"audio/x-flac", NULL};
 const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
@@ -37,6 +34,61 @@ const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NUL
 #endif
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
+
+/* Functions to check the network manager status. */
+
+NMState
+dbus_check_nm_status (DBusConnection *connection)
+{
+	DBusMessage *message, *reply;
+	DBusError error;
+	dbus_uint32_t state;
+	
+	message = dbus_message_new_method_call (NM_DBUS_SERVICE, NM_DBUS_PATH,
+						NM_DBUS_INTERFACE, "state");
+	if (!message)
+		return NM_STATE_UNKNOWN;
+
+	dbus_error_init (&error);
+	reply = dbus_connection_send_with_reply_and_block (connection, message,
+							   -1, &error);
+	dbus_message_unref (message);
+	if (!reply)
+		return NM_STATE_UNKNOWN;
+
+	if (!dbus_message_get_args (reply, NULL, DBUS_TYPE_UINT32, &state,
+				    DBUS_TYPE_INVALID))
+		return NM_STATE_UNKNOWN;
+
+	return state;
+}
+
+gboolean
+nm_is_online ()
+{
+	DBusConnection *connection;
+	DBusError error;
+	NMState state;
+
+	dbus_error_init (&error);
+	connection = dbus_bus_get (DBUS_BUS_SYSTEM, &error);
+	if (connection == NULL) {
+		g_critical("Error connecting to DBUS_BUS_SYSTEM to get nm status: %s", error.message);
+		dbus_error_free (&error);
+		return FALSE;
+	}
+
+	state = dbus_check_nm_status (connection);
+
+	dbus_connection_unref(connection);
+
+	if (state == NM_STATE_CONNECTED_LOCAL ||
+	    state == NM_STATE_CONNECTED_SITE ||
+	    state == NM_STATE_CONNECTED_GLOBAL)
+		return TRUE;
+
+	return FALSE;
+}
 
 /* Test if the song is already in the playlist.*/
 

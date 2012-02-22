@@ -161,11 +161,29 @@
 #define DBUS_SIG_DEC_VOL  "dec_vol"
 #define DBUS_SIG_TOGGLE_VIEW      "toggle_view"
 #define DBUS_SIG_SHOW_OSD "show_osd"
-#define DBUS_SIG_SHOW_OSD "show_osd"
 #define DBUS_SIG_ADD_FILE "add_files"
 
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 #define DBUS_EVENT_UPDATE_STATE   "update_state"
+
+/* Defines to get network manager status. */
+
+#define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"
+#define NM_DBUS_PATH		"/org/freedesktop/NetworkManager"
+#define NM_DBUS_INTERFACE	"org.freedesktop.NetworkManager"
+
+typedef enum {
+        NM_STATE_UNKNOWN          = 0,
+        NM_STATE_ASLEEP           = 10,
+        NM_STATE_DISCONNECTED     = 20,
+        NM_STATE_DISCONNECTING    = 30,
+        NM_STATE_CONNECTING       = 40,
+        NM_STATE_CONNECTED_LOCAL  = 50,
+        NM_STATE_CONNECTED_SITE   = 60,
+        NM_STATE_CONNECTED_GLOBAL = 70
+} NMState;
+
+/* Defines to key preferences. */
 
 #define GROUP_GENERAL  "General"
 #define KEY_INSTALLED_VERSION      "installed_version"
@@ -1207,7 +1225,8 @@ void mpris_close(struct con_win *cwin);
 void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
-
+NMState dbus_check_nm_status (DBusConnection *connection);
+gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);
 struct musicobject *get_selected_musicobject(struct con_win *cwin);

@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -191,9 +191,10 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm_idle_timeout(cwin) == -1) {
-		g_critical("Unable to initialize Lastfm");
-	}
+	if(nm_is_online () == TRUE)
+		init_lastfm(cwin);
+	else
+		init_lastfm_idle_timeout(cwin);
 	#endif
 
 	if (init_threads(cwin) == -1) {
