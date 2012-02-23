@@ -399,6 +399,8 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 
 static GVariant* mpris_Player_get_Metadata(struct con_win *cwin)
 {
+	gchar *artUrl_uri = NULL;
+
 	GVariantBuilder *b = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
 
 	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
@@ -406,9 +408,12 @@ static GVariant* mpris_Player_get_Metadata(struct con_win *cwin)
 	if (cwin->cstate->state != ST_STOPPED) {
 		handle_get_metadata(cwin->cstate->curr_mobj, b);
 		/* Append the album art url metadata. */
-		if(cwin->cstate->arturl != NULL)
-			g_variant_builder_add (b, "{sv}", "xesam:art",
-				g_variant_new_string(cwin->cstate->arturl));
+		if(cwin->cstate->arturl != NULL) {
+			artUrl_uri = g_filename_to_uri(cwin->cstate->arturl, NULL, NULL);
+			g_variant_builder_add (b, "{sv}", "mpris:artUrl",
+				g_variant_new_string(artUrl_uri));
+			g_free(artUrl_uri);
+		}
 	}
 	else {
 		g_variant_builder_add (b, "{sv}", "mpris:trackid",
