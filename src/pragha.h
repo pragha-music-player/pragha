@@ -1295,12 +1295,9 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
 void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
-void *do_lastfm_love (gpointer data);
-gboolean lastfm_love_handler (gpointer data);
-void *do_lastfm_scrob (gpointer data);
-gboolean lastfm_scrob_handler (gpointer data);
-void *do_lastfm_now_playing (gpointer data);
 void lastfm_now_playing_handler (struct con_win *cwin);
+gint just_init_lastfm (struct con_win *cwin);
+gint init_lastfm_idle(struct con_win *cwin);
 
 /* Related info helpers */
 
@@ -1315,6 +1312,7 @@ int init_glyr_related (struct con_win *cwin);
 void update_related_state (struct con_win *cwin);
 
 /* Others */
+
 void dialog_jump_to_track (struct con_win *cwin);
 
 void common_cleanup(struct con_win *cwin);
@@ -1323,7 +1321,5 @@ void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
 void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
 GtkUIManager* create_systray_menu(struct con_win *cwin);
-
-void update_lastfm(struct con_win *cwin);
 
 #endif /* PRAGHA_H */

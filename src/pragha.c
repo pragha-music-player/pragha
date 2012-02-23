@@ -190,13 +190,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	#ifdef HAVE_LIBCLASTFM
-	if(nm_is_online () == TRUE)
-		init_lastfm(cwin);
-	else
-		init_lastfm_idle_timeout(cwin);
-	#endif
-
 	if (init_threads(cwin) == -1) {
 		g_critical("Unable to init threads");
 		return -1;
@@ -211,6 +204,12 @@ gint main(gint argc, gchar *argv[])
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
 		return -1;
+	}
+	#endif
+
+	#ifdef HAVE_LIBCLASTFM
+	if (init_lastfm_idle(cwin) == -1) {
+		g_critical("Unable to initialize lastfm");
 	}
 	#endif
 
