@@ -570,6 +570,7 @@ struct db_result {
  * @unique_instance: If current invocation of app is unique
  * @stop_scan: Flag to stop rescan process
  * @view_change: If library view change is in progress
+ * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
  * @state: State of the player { ST_STOPPED, ... }
  * @cmd: Thread Command {CMD_PLAYBACK_STOP, ... }
@@ -596,6 +597,7 @@ struct con_state {
 	gboolean unique_instance;
 	gboolean stop_scan;
 	gboolean view_change;
+	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gint seek_len;
 	gint tracks_curr_playlist;

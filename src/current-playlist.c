@@ -32,6 +32,9 @@ void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_w
 	GdkPixbuf *pixbuf = NULL;
 	GtkIconTheme *icon_theme;
 
+	if(cwin->cstate->playlist_change)
+		return;
+
 	if (error) {
 		icon_theme = gtk_icon_theme_get_default ();
 		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
@@ -83,6 +86,9 @@ static gint get_total_playtime(struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	gboolean ret;
 
+	if(cwin->cstate->playlist_change)
+		return 0;
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	ret = gtk_tree_model_get_iter_first(model, &iter);
 
@@ -102,6 +108,9 @@ void update_status_bar(struct con_win *cwin)
 {
 	gint total_playtime = 0;
 	gchar *str, *tot_str;
+
+	if(cwin->cstate->playlist_change)
+		return;
 
 	total_playtime = get_total_playtime(cwin);
 	tot_str = convert_length_str(total_playtime);
@@ -294,6 +303,9 @@ static GtkTreePath* current_playlist_nth_track(gint n, struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	gint pos = 0;
+
+	if(cwin->cstate->playlist_change)
+		return NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -968,6 +980,9 @@ GtkTreePath* current_playlist_get_selection(struct con_win *cwin)
 	gint cnt_selected = 0;
 	GList *list;
 
+	if(cwin->cstate->playlist_change)
+		return NULL;
+
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 	cnt_selected = gtk_tree_selection_count_selected_rows(selection);
 
@@ -998,6 +1013,9 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	gboolean rand_unplayed = FALSE, seq_last = FALSE;
 	GtkTreeRowReference *ref;
 
+	if(cwin->cstate->playlist_change)
+		return NULL;
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	/* Check if tree is empty */
@@ -1007,7 +1025,6 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 
 	if(cwin->cstate->queue_track_refs){
 		path = get_next_queue_track(cwin);
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		ref = gtk_tree_row_reference_new(model, path);
 		reset_rand_track_refs(ref, cwin);
 		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
@@ -1047,6 +1064,9 @@ GtkTreePath* current_playlist_get_prev(struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	gboolean seq_first = FALSE;
 
+	if(cwin->cstate->playlist_change)
+		return NULL;
+
 	switch (cwin->cpref->shuffle) {
 	case TRUE:
 		path = get_prev_random_track(cwin);
@@ -1083,6 +1103,10 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin)
 void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
+
+	if(cwin->cstate->playlist_change)
+		return;
+
 	path = current_playlist_get_actual(cwin);
 
 	jump_to_path_on_current_playlist (path, cwin);
@@ -1363,6 +1387,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Delete the referenced nodes */
 
 	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
@@ -1386,6 +1411,14 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 			cwin->cstate->tracks_curr_playlist--;
 			if (!played)
 				cwin->cstate->unplayed_tracks--;
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE))
+					return;
+			}
 		}
 		gtk_tree_path_free(path);
 		gtk_tree_row_reference_free(ref);
@@ -1393,6 +1426,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
@@ -1420,9 +1454,9 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 		return;
 
 	length = convert_length_str(mobj->tags->length);
-	bitrate = g_strdup_printf("%d", mobj->tags->bitrate);
-	channels = g_strdup_printf("%d", mobj->tags->channels);
-	samplerate = g_strdup_printf("%d", mobj->tags->samplerate);
+	bitrate = g_strdup_printf("%d kbps", mobj->tags->bitrate);
+	channels = g_strdup_printf("%d %s", mobj->tags->channels, _("Channels"));
+	samplerate = g_strdup_printf("%d Hz", mobj->tags->samplerate);
 	folder = get_display_filename(mobj->file, TRUE);
 	filename = get_display_name(mobj);
 
@@ -2021,6 +2055,10 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* If current playlist is empty, return immediately. */
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	if(cwin->cstate->playlist_change)
+		return;
+
 	if (!gtk_tree_model_get_iter_first(model, &iter)) {
 		g_warning("Current playlist is empty");
 		return;
@@ -2059,6 +2097,9 @@ void play_first_current_playlist(struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	struct musicobject *mobj;
+
+	if(cwin->cstate->playlist_change)
+		return;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -2167,6 +2208,8 @@ void play_track(struct con_win *cwin)
 		backend_resume(cwin);
 		break;
 	case ST_STOPPED:
+		if(cwin->cstate->playlist_change)
+			break;
 		if(cwin->cstate->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if(!path)
@@ -2610,6 +2653,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			gtk_tree_row_reference_free(ref);
 		}
 		g_list_free(list);
+
 		goto exit;
 	}
 
@@ -2632,6 +2676,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		       data->data, loc_arr);
 
 		g_object_ref(model);
+		cwin->cstate->playlist_change = TRUE;
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 		
@@ -2657,6 +2702,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+		cwin->cstate->playlist_change = FALSE;
 		g_object_unref(model);
 
 		if (is_row)
@@ -2797,6 +2843,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	gdk_cursor_unref(cursor);
 
 	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
@@ -2820,6 +2867,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
 	update_status_bar(cwin);

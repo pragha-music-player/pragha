@@ -371,6 +371,9 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 	/* Stop to set ready and clear all info */
 	backend_stop(error, cwin);
 
+	if(cwin->cstate->playlist_change)
+		return;
+
 	/* Get the next track to be played */
 	path = current_playlist_get_next (cwin);
 
@@ -466,12 +469,14 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 	gst_message_parse_buffering (message, &percent);
 	gst_element_get_state (cwin->cgst->pipeline, &cur_state, NULL, 0);
 
-	if (percent >= 100 && cur_state != GST_STATE_PLAYING) {
-		CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
-		gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	if (percent >= 100) {
+		if(cwin->cstate->state == ST_PLAYING && cur_state != GST_STATE_PLAYING) {
+			CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
+			gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+		}
 	}
 	else {
-		if (cur_state != GST_STATE_PAUSED) {
+		if (cwin->cstate->state == ST_PLAYING && cur_state == GST_STATE_PLAYING) {
 			CDEBUG(DBG_BACKEND, "Buffering ... temporarily pausing playback");
 			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
 		}

@@ -395,6 +395,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
@@ -413,6 +414,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
