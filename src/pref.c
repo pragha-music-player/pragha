@@ -240,7 +240,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				cwin->clastfm->session_id = NULL;
 				cwin->clastfm->status = LASTFM_STATUS_INVALID;
 			}
-			init_lastfm(cwin);
+			just_init_lastfm(cwin);
 		}
 #endif
 #ifdef HAVE_LIBGLYR
