@@ -248,24 +248,29 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 
 /* Dowload album art and save it in cache.*/
 
-void
-update_downloaded_album_art(GlyrMemCache *head, gchar *artist, gchar *album, struct con_win *cwin)
+gboolean
+update_downloaded_album_art (gpointer data)
 {
+	gchar *artist = NULL, *album = NULL, *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
-	gchar *album_art_path = NULL;
 	GError *error = NULL;
+
+	glyr_struct *glyr_info = data;
+	struct con_win *cwin = glyr_info->cwin;
+
+	artist = g_strdup(glyr_info->query.artist);
+	album = g_strdup(glyr_info->query.album);
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
 					artist,
 					album);
-	gdk_threads_enter ();
-	if(head->data)
-		album_art = vgdk_pixbuf_new_from_memory(head->data, head->size);
+	if(glyr_info->head->data)
+		album_art = vgdk_pixbuf_new_from_memory(glyr_info->head->data, glyr_info->head->size);
 
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
-			if((cwin->cstate->state == ST_STOPPED) &&
+			if((cwin->cstate->state != ST_STOPPED) &&
 			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
 			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
 				update_album_art(cwin->cstate->curr_mobj, cwin);
@@ -273,28 +278,61 @@ update_downloaded_album_art(GlyrMemCache *head, gchar *artist, gchar *album, str
 			}
 		}
 		else {
-			g_warning("Failed to save albumart file: %s: %s\n", album_art_path, error->message);
+			g_warning("Failed to save albumart file %s: %s\n", album_art_path, error->message);
 			g_error_free(error);
 		}
 		g_object_unref(G_OBJECT(album_art));
 	}
-	gdk_threads_leave ();
 
+	glyr_free_list(glyr_info->head);
+	glyr_query_destroy(&glyr_info->query);
+	g_slice_free(glyr_struct, glyr_info);
+
+	g_free(artist);
+	g_free(album);
 	g_free(album_art_path);
+
+	return FALSE;
 }
 
 gpointer
-do_get_album_art_idle (gpointer data)
+get_album_art_idle_func (gpointer data)
 {
-	gchar *album_art_path = NULL, *artist = NULL, *album = NULL;
-	GlyrQuery q;
-	GLYR_ERROR err;
+	GlyrMemCache *head;
+	GLYR_ERROR error;
 
-	GlyrMemCache *head = NULL;
+	glyr_struct *glyr_info = data;
 
-	struct con_win *cwin = data;
+	head = glyr_get(&glyr_info->query, &error, NULL);
 
-	CDEBUG(DBG_INFO, "Get album art idle");
+	if(head != NULL) {
+		glyr_info->head = head;
+		gdk_threads_add_idle(update_downloaded_album_art, glyr_info);
+	}
+	else {
+		if (error != GLYRE_OK)
+			g_warning("Error searching album art: %s", glyr_strerror(error));
+
+		glyr_query_destroy(&glyr_info->query);
+		g_slice_free(glyr_struct, glyr_info);
+	}
+
+	return NULL;
+}
+
+void related_get_album_art_handler (struct con_win *cwin)
+{
+	glyr_struct *glyr_info;
+	gchar *artist, *album, *album_art_path;
+
+	CDEBUG(DBG_INFO, "Get album art handler");
+
+	if (cwin->cstate->state == ST_STOPPED)
+		return;
+
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
+		return;
 
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
 	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
@@ -307,51 +345,23 @@ do_get_album_art_idle (gpointer data)
 	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
 		goto exists;
 
-	glyr_query_init(&q);
-	glyr_opt_type(&q, GLYR_GET_COVERART);
+	glyr_info = g_slice_new0 (glyr_struct);
 
-	glyr_opt_artist(&q, artist);
-	glyr_opt_album(&q, album);
+	glyr_query_init(&glyr_info->query);
 
-	glyr_opt_from(&q, "all;-picsearch;-google");
+	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
 
-	head = glyr_get(&q, &err, NULL);
+	glyr_opt_artist(&glyr_info->query, artist);
+	glyr_opt_album(&glyr_info->query, album);
 
-	if(head == NULL) {
-		if (err != GLYRE_OK)
-			g_warning(glyr_strerror(err));
-		goto no_albumart;
-	}
+	glyr_info->cwin = cwin;
 
-	update_downloaded_album_art(head, artist, album, cwin);
+	g_thread_create(get_album_art_idle_func, glyr_info, FALSE, NULL);
 
-	glyr_free_list(head);
-
-no_albumart:
-	glyr_query_destroy(&q);
 exists:
 	g_free(album_art_path);
 	g_free(artist);
 	g_free(album);
-
-	return NULL;
-}
-
-void related_get_album_art_handler (struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Get album art handler");
-
-	if (cwin->cstate->state == ST_STOPPED)
-		return;
-
-	if (cwin->cpref->show_album_art == FALSE)
-		return;
-
-	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
-		return;
-
-	g_thread_create(do_get_album_art_idle, cwin, FALSE, NULL);
 
 	return;
 }
