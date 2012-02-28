@@ -140,6 +140,8 @@ append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *
 
 			if(already_in_current_playlist(mobj, cwin) == FALSE) {
 				append_current_playlist(mobj, cwin);
+				/* FIXME: Inappropriate when you add a lot of songs.. */
+				select_last_path_of_current_playlist(cwin);
 			}
 			else {
 				delete_musicobject(mobj);

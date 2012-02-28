@@ -819,7 +819,6 @@ void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
-void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin);
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin);
 void play_button_toggle_state(struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
@@ -1007,6 +1006,7 @@ void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
+void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_pixbuf_state_on_path(GtkTreePath *path, GError *error, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_state(GtkTreePath *path,

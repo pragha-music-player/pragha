@@ -502,6 +502,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
+		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
 		break;
 	default:
@@ -1204,6 +1205,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 
 		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
+		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
 
 		g_list_free(list);
