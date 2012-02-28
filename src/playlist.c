@@ -1468,6 +1468,13 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 				add_track_playlist_db(file, playlist_id, cwin);
 				g_free(file);
 			}
+			else if(G_LIKELY(mobj &&
+				mobj->file_type == FILE_HTTP)) {
+				/* TODO: Fix this negradaaa!. */
+				file = g_strdup_printf("Radio:%s", mobj->file);
+				add_track_playlist_db(file, playlist_id, cwin);
+				g_free(file);
+			}
 		} while(gtk_tree_model_iter_next(model, &iter));
 		query = g_strdup_printf("END;");
 		exec_sqlite_query(query, cwin, NULL);
@@ -1498,7 +1505,13 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 							      cwin);
 					g_free(file);
 				}
-
+				else if(G_LIKELY(mobj &&
+					mobj->file_type == FILE_HTTP)) {
+					/* TODO: Fix this negradaaa!. */
+					file = g_strdup_printf("Radio:%s", mobj->file);
+					add_track_playlist_db(file, playlist_id, cwin);
+					g_free(file);
+				}
 				gtk_tree_path_free(path);
 			}
 			g_list_free(list);
