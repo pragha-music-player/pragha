@@ -692,14 +692,19 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	else
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save selection"));
 
-	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
-
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_new, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox1), radio_add, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox2), entry, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox2), combo_add, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox1, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 2);
+
+	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	gtk_widget_grab_focus(GTK_WIDGET(entry));
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
 	gtk_widget_show_all(dialog);
 
