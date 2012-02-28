@@ -419,6 +419,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
+	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
 
 	sqlite3_free_table(result.resultp);
@@ -451,6 +452,9 @@ void add_radio_current_playlist(gchar *radio, struct con_win *cwin)
 
 		append_current_playlist(mobj, cwin);
 	}
+
+	select_last_path_of_current_playlist(cwin);
+	update_status_bar(cwin);
 
 	sqlite3_free_table(result.resultp);
 
@@ -1336,6 +1340,8 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 	}
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+
+	select_last_path_of_current_playlist(cwin);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	set_status_message(summary, cwin);

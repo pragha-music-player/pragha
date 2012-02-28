@@ -775,6 +775,23 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 	}
 }
 
+/* Select last path. useful when change the model. */
+
+void select_last_path_of_current_playlist(struct con_win *cwin)
+{
+	gchar *ref = NULL;
+	GtkTreePath *path = NULL;
+
+	ref = g_strdup_printf("%d", cwin->cstate->tracks_curr_playlist - 1);
+
+	path = gtk_tree_path_new_from_string(ref);
+
+	jump_to_path_on_current_playlist (path, cwin);
+
+	gtk_tree_path_free(path);
+	g_free(ref);
+}
+
 /* Get a new playlist name that is not reserved */
 
 static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice)
@@ -1893,7 +1910,6 @@ void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, 
 
 	cwin->cstate->tracks_curr_playlist++;
 	cwin->cstate->unplayed_tracks++;
-	update_status_bar(cwin);
 
 	/* Have to give control to GTK periodically ... */
 	/* If gtk_main_quit has been called, return -
@@ -2707,7 +2723,8 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 		if (is_row)
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
-
+		else
+			select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
 		break;
 	case TARGET_PLAYLIST:
@@ -2735,7 +2752,8 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			else
 				break;
 		};
-
+		select_last_path_of_current_playlist(cwin);
+		update_status_bar(cwin);
 		g_array_free(playlist_arr, TRUE);
 		break;
 	case TARGET_URI_LIST:
@@ -2750,6 +2768,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 						__recur_add(filename, cwin);
 					else
 						__non_recur_add(filename, TRUE, cwin);
+					select_last_path_of_current_playlist(cwin);
 				}
 				else {
 					mobj = new_musicobject_from_file(filename);
@@ -2758,12 +2777,15 @@ void dnd_current_playlist_received(GtkWidget *widget,
 					else {
 						if (is_row)
 							insert_current_playlist (mobj, pos, &dest_iter, cwin);
-						else
+						else {
 							append_current_playlist (mobj, cwin);
+							select_last_path_of_current_playlist(cwin);
+						}
 					}
 				}
 				g_free(filename);
 			}
+			update_status_bar(cwin);
 			g_strfreev(uris);
 		}
 		break;
@@ -2776,6 +2798,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				__recur_add(filename, cwin);
 			else
 				__non_recur_add(filename, TRUE, cwin);
+			select_last_path_of_current_playlist(cwin);
 		}
 		else {
 			mobj = new_musicobject_from_file(filename);
@@ -2784,10 +2807,13 @@ void dnd_current_playlist_received(GtkWidget *widget,
 			else {
 				if (is_row)
 					insert_current_playlist (mobj, pos, &dest_iter, cwin);
-				else
+				else {
 					append_current_playlist (mobj, cwin);
+					select_last_path_of_current_playlist(cwin);
+				}
 			}
 		}
+		update_status_bar(cwin);
 		g_free(filename);
 		break;
 	default:
@@ -2795,9 +2821,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		break;
 	}
 
-exit:
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
+exit:
 	gtk_tree_path_free(dest_path);
 	gtk_drag_finish(context, TRUE, FALSE, time);
 }

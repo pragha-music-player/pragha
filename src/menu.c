@@ -207,6 +207,8 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free(files);
 	}
+	select_last_path_of_current_playlist(cwin);
+	update_status_bar(cwin);
 
 	gtk_widget_destroy(window);
 }
@@ -1053,6 +1055,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
 
+	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
 
 	mpris_update_tracklist_changed(cwin);
