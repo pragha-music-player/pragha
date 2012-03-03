@@ -288,6 +288,34 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 	}
 }
 
+void init_tag_struct(struct tags *mtags)
+{
+	/*FIXME: Find that is what prohibits use NULL.*/
+
+	mtags->title = g_strdup("");
+	mtags->artist = g_strdup("");
+	mtags->album = g_strdup("");
+	mtags->comment = g_strdup("");
+	mtags->genre = g_strdup("");
+	mtags->comment = g_strdup("");
+	mtags->track_no = 0;
+	mtags->year = 0;
+	mtags->bitrate = 0;
+	mtags->length = 0;
+	mtags->channels = 0;
+	mtags->samplerate = 0;
+}
+
+void free_tag_struct(struct tags *mtags)
+{
+	g_free(mtags->title);
+	g_free(mtags->artist);
+	g_free(mtags->album);
+	g_free(mtags->genre);
+	g_free(mtags->comment);
+
+}
+
 void delete_musicobject(struct musicobject *mobj)
 {
 	if (!mobj)
@@ -295,12 +323,9 @@ void delete_musicobject(struct musicobject *mobj)
 
 	CDEBUG(DBG_MOBJ, "Freeing musicobject: %s", mobj->file);
 
-	g_free(mobj->tags->title);
-	g_free(mobj->tags->artist);
-	g_free(mobj->tags->album);
-	g_free(mobj->tags->genre);
-	g_free(mobj->tags->comment);
 	g_free(mobj->file);
+	free_tag_struct(mobj->tags);
+
 	g_slice_free(struct tags, mobj->tags);
 	g_slice_free(struct musicobject, mobj);
 }

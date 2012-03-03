@@ -98,6 +98,7 @@ void common_cleanup(struct con_win *cwin)
 	if (cwin->clastfm->session_id)
 		LASTFM_dinit(cwin->clastfm->session_id);
 
+	g_slice_free(struct tags, cwin->clastfm->ntags);
 	g_slice_free(struct con_lastfm, cwin->clastfm);
 #endif
 
@@ -149,6 +150,7 @@ gint main(gint argc, gchar *argv[])
 	cwin->cgst = g_slice_new0(struct con_gst);
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
+	cwin->clastfm->ntags = g_slice_new0(struct tags);
 #endif
 	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
 

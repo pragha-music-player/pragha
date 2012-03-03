@@ -550,7 +550,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		otag.comment = cwin->cstate->curr_mobj->tags->comment;
 		otag.year =  cwin->cstate->curr_mobj->tags->year;
 
-		changed = tag_edit_dialog(&otag, &ntag, cwin->cstate->curr_mobj->file, cwin);
+		changed = tag_edit_dialog(&otag, 0, &ntag, cwin->cstate->curr_mobj->file, cwin);
 	}
 
 	if (!changed)

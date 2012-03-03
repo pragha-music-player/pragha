@@ -21,6 +21,112 @@
 
 #ifdef HAVE_LIBCLASTFM
 
+/* Set correction basedm on lastfm now playing segestion.. */
+
+void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
+{
+	struct tags otag, ntag;
+	GArray *loc_arr = NULL, *file_arr = NULL;
+	gchar *sfile = NULL, *tfile = NULL;
+	gint location_id, changed = 0, prechanged = 0;
+	GtkTreeModel *model;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+
+	if(cwin->cstate->state == ST_STOPPED)
+		return;
+
+	memset(&otag, 0, sizeof(struct tags));
+	memset(&ntag, 0, sizeof(struct tags));
+
+	if (cwin->cstate->curr_mobj && cwin->clastfm->ntags) {
+		otag.track_no = cwin->cstate->curr_mobj->tags->track_no;
+
+		if(cwin->clastfm->ntags->title &&
+		   g_ascii_strcasecmp(cwin->clastfm->ntags->title, cwin->cstate->curr_mobj->tags->title)) {
+			otag.title = cwin->clastfm->ntags->title;
+			prechanged |= TAG_TITLE_CHANGED;
+		}
+		else {
+			otag.title = cwin->cstate->curr_mobj->tags->title;
+		}
+		if(cwin->clastfm->ntags->artist &&
+		   g_ascii_strcasecmp(cwin->clastfm->ntags->artist, cwin->cstate->curr_mobj->tags->artist)) {
+			otag.artist = cwin->clastfm->ntags->artist;
+			prechanged |= TAG_ARTIST_CHANGED;
+		}
+		else {
+			otag.artist = cwin->cstate->curr_mobj->tags->artist;
+		}
+		if(cwin->clastfm->ntags->album &&
+		   g_ascii_strcasecmp(cwin->clastfm->ntags->album, cwin->cstate->curr_mobj->tags->album)) {
+			otag.album = cwin->clastfm->ntags->album;
+			prechanged |= TAG_ALBUM_CHANGED;
+		}
+		else {
+			otag.album = cwin->cstate->curr_mobj->tags->album;
+		}
+		otag.genre = cwin->cstate->curr_mobj->tags->genre;
+		otag.comment = cwin->cstate->curr_mobj->tags->comment;
+		otag.year =  cwin->cstate->curr_mobj->tags->year;
+
+		changed = tag_edit_dialog(&otag, prechanged, &ntag, cwin->cstate->curr_mobj->file, cwin);
+	}
+
+	if (!changed)
+		goto exit;
+
+	/* Update the music object, the gui and them mpris */
+
+	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag , cwin);
+
+	__update_current_song_info(cwin);
+
+	mpris_update_metadata_changed(cwin);
+
+	if ((path = current_playlist_get_actual(cwin)) != NULL) {
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		if (gtk_tree_model_get_iter(model, &iter, path))
+			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
+		gtk_tree_path_free(path);
+	}
+
+	/* Store the new tags */
+
+	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
+	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
+		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+
+		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
+		location_id = find_location_db(sfile, cwin);
+
+		if (location_id)
+			g_array_append_val(loc_arr, location_id);
+
+		tfile = g_strdup(cwin->cstate->curr_mobj->file);
+		file_arr = g_array_append_val(file_arr, tfile);
+
+		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
+
+		init_library_view(cwin);
+
+		g_array_free(loc_arr, TRUE);
+		g_array_free(file_arr, TRUE);
+
+		g_free(sfile);
+		g_free(tfile);
+	}
+
+exit:
+	gtk_widget_hide(cwin->ntag_lastfm_button);
+	g_free(ntag.title);
+	g_free(ntag.artist);
+	g_free(ntag.album);
+	g_free(ntag.genre);
+	g_free(ntag.comment);
+}
+
 /* Functions related to current playlist. */
 
 void *do_lastfm_current_playlist_love (gpointer data)
@@ -474,24 +580,77 @@ gboolean lastfm_scrob_handler(gpointer data)
 void *do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
+	gchar *file, *title, *album, *artist;
+	LFMList *list = NULL;
+	gboolean changed = FALSE;
+	LASTFM_TRACK_INFO *ntrack;
 
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
 
+	file = g_strdup(cwin->cstate->curr_mobj->file);
+	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
+	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
-		cwin->cstate->curr_mobj->tags->title,
-		cwin->cstate->curr_mobj->tags->album,
-		cwin->cstate->curr_mobj->tags->artist,
+		title, album, artist,
 		cwin->cstate->curr_mobj->tags->length,
 		cwin->cstate->curr_mobj->tags->track_no,
-		0);
+		0, &list);
 
 	if (rv != LASTFM_STATUS_OK) {
 		gdk_threads_enter ();
 		set_status_message(_("Update current song on Last.fm failed."), cwin);
 		gdk_threads_leave ();
 	}
+	else {
+		ntrack = list->data;
+		free_tag_struct(cwin->clastfm->ntags);
+
+		if(ntrack->name && g_ascii_strcasecmp(ntrack->name, title)) {
+			cwin->clastfm->ntags->title = g_strdup(ntrack->name);
+			changed = TRUE;
+		}
+		else {
+			cwin->clastfm->ntags->title = g_strdup(title);
+		}
+		if(ntrack->artist && g_ascii_strcasecmp(ntrack->artist, artist)) {
+			cwin->clastfm->ntags->artist = g_strdup(ntrack->artist);
+			changed = TRUE;
+		}
+		else {
+			cwin->clastfm->ntags->artist = g_strdup(artist);
+		}
+		if(ntrack->album && g_ascii_strcasecmp(ntrack->album, album)) {
+			cwin->clastfm->ntags->album = g_strdup(ntrack->album);
+			changed = TRUE;
+		}
+		else {
+			cwin->clastfm->ntags->album = g_strdup(album);
+		}
+		cwin->clastfm->ntags->genre = g_strdup("");
+		cwin->clastfm->ntags->comment = g_strdup("");
+		cwin->clastfm->ntags->track_no = 0;
+		cwin->clastfm->ntags->year = 0;
+		cwin->clastfm->ntags->bitrate = 0;
+		cwin->clastfm->ntags->length = 0;
+		cwin->clastfm->ntags->channels = 0;
+		cwin->clastfm->ntags->samplerate = 0;
+
+		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
+			gdk_threads_enter ();
+			gtk_widget_show(cwin->ntag_lastfm_button);
+			gdk_threads_leave ();
+		}
+	}
+
+	LASTFM_free_track_info_list(list);
+	g_free(file);
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 
 	return NULL;
 }
@@ -610,6 +769,10 @@ gboolean do_init_lastfm_idle(gpointer data)
 
 gint init_lastfm_idle(struct con_win *cwin)
 {
+	init_tag_struct(cwin->clastfm->ntags);
+
+	/* Test internet and launch threads.*/
+
 	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
@@ -620,6 +783,7 @@ gint init_lastfm_idle(struct con_win *cwin)
 					G_PRIORITY_DEFAULT_IDLE, 30,
 					do_init_lastfm_idle, cwin, NULL);
 	}
+
 	return 0;
 }
 #endif

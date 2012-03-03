@@ -1466,11 +1466,17 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 			gtk_widget_show_all(cwin->mainwindow);
 			gtk_widget_hide(cwin->unfull_button);
+			#ifdef HAVE_LIBCLASTFM
+			gtk_widget_hide(cwin->ntag_lastfm_button);
+			#endif
 		}
 	}
 	else {
 		gtk_widget_show_all(cwin->mainwindow);
 		gtk_widget_hide(cwin->unfull_button);
+		#ifdef HAVE_LIBCLASTFM
+		gtk_widget_hide(cwin->ntag_lastfm_button);
+		#endif
 	}
 
 	init_menu_actions(cwin);

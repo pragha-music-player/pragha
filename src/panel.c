@@ -260,6 +260,10 @@ void unset_current_song_info(struct con_win *cwin)
 	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label),"<small>00:00</small>");
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), 0);
+
+	#ifdef HAVE_LIBCLASTFM
+	gtk_widget_hide(cwin->ntag_lastfm_button);
+	#endif
 }
 
 void __update_track_progress_bar(struct con_win *cwin, gint length)
