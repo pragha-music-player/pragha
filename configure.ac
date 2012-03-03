@@ -100,7 +100,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
 dnl Check libclastfm
 LIBCLASTFM_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
-                       [libclastfm], [0.4],
+                       [libclastfm], [0.5],
                        [libclastfm],
                        [libclastfm library], [yes])
 

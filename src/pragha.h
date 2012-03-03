@@ -465,6 +465,7 @@ struct lastfm_pref {
 	GtkWidget *lastfm_pass_w;
 };
 #endif
+
 struct con_pref {
 	enum library_view cur_library_view;
 	gchar *installed_version;
@@ -641,6 +642,7 @@ struct con_gst {
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	enum LASTFM_STATUS_CODES status;
+	struct tags *ntags;
 	time_t playback_started;
 };
 #endif
@@ -655,7 +657,7 @@ struct con_mpris2 {
 	gchar *saved_title;
 	gdouble volume;
 	enum player_state state;
-	GError **property_error;					/* for returning errors in propget/propput */
+	GError **property_error;			/* for returning errors in propget/propput */
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
@@ -694,6 +696,9 @@ struct con_win {
 	GtkWidget *track_length_label;
 	GtkWidget *track_time_label;
 	GtkWidget *now_playing_label;
+	#ifdef HAVE_LIBCLASTFM
+	GtkWidget *ntag_lastfm_button;
+	#endif
 	GtkWidget *library_tree;
 	GtkWidget *playlist_tree;
 	GtkWidget *jump_tree;
@@ -755,6 +760,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
+
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
 void add_location_action(GtkAction *action, struct con_win *cwin);
@@ -791,6 +797,7 @@ void about_action(GtkAction *action, struct con_win *cwin);
 void rescan_library_handler(struct con_win *cwin);
 
 /* Global Hotkeys handlers */
+
 void keybind_prev_handler (const char *keystring, gpointer data);
 void keybind_play_handler (const char *keystring, gpointer data);
 void keybind_stop_handler (const char *keystring, gpointer data);
@@ -798,6 +805,7 @@ void keybind_next_handler (const char *keystring, gpointer data);
 void keybind_media_handler (const char *keystring, gpointer data);
 
 /* Panel actions */
+
 gboolean update_current_song_info(gpointer data);
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
@@ -837,6 +845,8 @@ struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cw
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
 struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
+void init_tag_struct(struct tags *mtags);
+void free_tag_struct(struct tags *mtags);
 void delete_musicobject(struct musicobject *mobj);
 void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin);
 
@@ -859,7 +869,7 @@ gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
 void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin);
-gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
+gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
@@ -1005,6 +1015,7 @@ void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
 void init_playlist_view(struct con_win *cwin);
 
 /* Current playlist */
+
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_pixbuf_state_on_path(GtkTreePath *path, GError *error, struct con_win *cwin);
@@ -1227,6 +1238,7 @@ void mpris_close(struct con_win *cwin);
 void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
+
 NMState dbus_check_nm_status (DBusConnection *connection);
 gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
@@ -1278,8 +1290,6 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
-gint init_lastfm_idle_timeout(struct con_win *cwin);
-gint init_lastfm(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_keybinder(struct con_win *cwin);
@@ -1289,6 +1299,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Lastfm Helper */
 
+void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);

@@ -1831,21 +1831,47 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
 	GtkWidget *track_progress_bar;
 	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
-	GtkWidget *new_vbox,*new_hbox;
+	GtkWidget *pack_vbox, *playing_hbox, *time_hbox;
 	GtkWidget *track_length_event_box, *track_playing_event_box;
 
-	now_playing_label = gtk_label_new(NULL);
-	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
-	gtk_label_set_markup(GTK_LABEL(now_playing_label),_("<b>Not playing</b>"));
-	gtk_misc_set_alignment (GTK_MISC(now_playing_label) , 0, 1);
+	#ifdef HAVE_LIBCLASTFM
+	GtkWidget *ntag_lastfm_button;
+	#endif
+
+	playing_hbox = gtk_hbox_new(FALSE, 2);
 
 	track_playing_event_box = gtk_event_box_new();
 	g_signal_connect (GTK_OBJECT(track_playing_event_box), "button-press-event",
 			G_CALLBACK(edit_tags_playing_event), cwin);
+
+	now_playing_label = gtk_label_new(NULL);
+	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
+	gtk_label_set_markup(GTK_LABEL(now_playing_label),_("<b>Not playing</b>"));
+	gtk_misc_set_alignment (GTK_MISC(now_playing_label), 0, 1);
+
 	gtk_container_add(GTK_CONTAINER(track_playing_event_box), now_playing_label);
 
-	new_vbox = gtk_vbox_new(FALSE, 2);
-	new_hbox = gtk_hbox_new(FALSE, 1);
+	#ifdef HAVE_LIBCLASTFM
+	ntag_lastfm_button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(ntag_lastfm_button), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(ntag_lastfm_button),
+			     gtk_image_new_from_stock(GTK_STOCK_SPELL_CHECK,
+						      GTK_ICON_SIZE_MENU));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button), _("Last.fm suggested a tag correction"));
+	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
+			 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
+	#endif
+
+	gtk_box_pack_start(GTK_BOX(playing_hbox),
+			   GTK_WIDGET(track_playing_event_box),
+			   TRUE, TRUE, 0);
+	#ifdef HAVE_LIBCLASTFM
+	gtk_box_pack_start(GTK_BOX(playing_hbox),
+			   GTK_WIDGET(ntag_lastfm_button),
+			   FALSE, FALSE, 0);
+	#endif
+
+	time_hbox = gtk_hbox_new(FALSE, 2);
 
 	/* Setup track progress */
 
@@ -1882,28 +1908,33 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 
 	cwin->track_progress_bar = 	track_progress_bar;
 	cwin->now_playing_label = 	now_playing_label;
+	#ifdef HAVE_LIBCLASTFM
+	cwin->ntag_lastfm_button =	ntag_lastfm_button;
+	#endif
 	cwin->track_time_label =	track_time_label;
 	cwin->track_length_label = 	track_length_label;
 
-	gtk_box_pack_start(GTK_BOX(new_hbox),
+	gtk_box_pack_start(GTK_BOX(time_hbox),
 			   GTK_WIDGET(track_time_align),
 			   FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(new_hbox),
+	gtk_box_pack_start(GTK_BOX(time_hbox),
  			   GTK_WIDGET(track_progress_align),
  			   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(new_hbox),
+	gtk_box_pack_start(GTK_BOX(time_hbox),
 			   GTK_WIDGET(track_length_event_box),
 			   FALSE, FALSE, 3);
 
-	gtk_box_pack_start(GTK_BOX(new_vbox),
-			   GTK_WIDGET(track_playing_event_box),
+	pack_vbox = gtk_vbox_new(FALSE, 1);
+
+	gtk_box_pack_start(GTK_BOX(pack_vbox),
+			   GTK_WIDGET(playing_hbox),
 			   FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(new_vbox),
-			   GTK_WIDGET(new_hbox),
+	gtk_box_pack_start(GTK_BOX(pack_vbox),
+			   GTK_WIDGET(time_hbox),
 			   FALSE, FALSE, 0);
 
 	vbox_align = gtk_alignment_new(0.5, 0.5, 1, 0);
-	gtk_container_add(GTK_CONTAINER(vbox_align), new_vbox);
+	gtk_container_add(GTK_CONTAINER(vbox_align), pack_vbox);
 
 	return vbox_align;
 }

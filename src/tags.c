@@ -532,7 +532,7 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_widget_show (item);
 }
 
-gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
+gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -832,6 +832,21 @@ gint tag_edit_dialog(struct tags *otag, struct tags *ntag, gchar *file,
 	if (otag->comment)
 		gtk_text_buffer_set_text (buffer, otag->comment, -1);
 
+	if(prechanged & TAG_TNO_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_tno), TRUE);
+	if(prechanged & TAG_TITLE_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_title), TRUE);
+	if(prechanged & TAG_ARTIST_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_artist), TRUE);
+	if(prechanged & TAG_ALBUM_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_album), TRUE);
+	if(prechanged & TAG_GENRE_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_genre), TRUE);
+	if(prechanged & TAG_YEAR_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_year), TRUE);
+	if(prechanged & TAG_COMMENT_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_comment), TRUE);
+
 	if (file) {
 		gtk_entry_set_text(GTK_ENTRY(entry_file), file);
 		gtk_editable_set_position(GTK_EDITABLE(entry_file), strlen(file));
@@ -1058,7 +1073,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	/* Get new tags edited */
 
-	changed = tag_edit_dialog(&otag, &ntag, (mobj != NULL) ?  mobj->file : NULL, cwin);
+	changed = tag_edit_dialog(&otag, 0, &ntag, (mobj != NULL) ?  mobj->file : NULL, cwin);
 
 	if (!changed)
 		goto exit;

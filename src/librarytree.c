@@ -1414,7 +1414,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	changed = tag_edit_dialog(&otag, &ntag, uri, cwin);
+	changed = tag_edit_dialog(&otag, 0, &ntag, uri, cwin);
 	if (!changed)
 		goto exit;
 
