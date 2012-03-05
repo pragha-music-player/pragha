@@ -743,13 +743,17 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	gint cx, cy;
+	gint cx, cy, cnt_selected;
 
 	GdkRectangle vrect;
 	GdkRectangle crect;
 
 	if (path) {
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+		cnt_selected = gtk_tree_selection_count_selected_rows(selection);
+
+		if (cnt_selected > 1)
+			return;
 
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
@@ -1392,9 +1396,9 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
 	gdk_cursor_unref(cursor);
 
-	ret = gtk_tree_model_get_iter_first(model, &iter);
-
 	/* Get a reference to all the nodes that are _not_ selected */
+
+	ret = gtk_tree_model_get_iter_first(model, &iter);
 
 	while (ret) {
 		if (gtk_tree_selection_iter_is_selected(selection, &iter) == FALSE) {
