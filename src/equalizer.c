@@ -303,6 +303,22 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 	g_free(presset);
 }
 
+gboolean eq_band_get_tooltip (GtkWidget        *vscale,
+				 gint              x,
+				 gint              y,
+				 gboolean          keyboard_mode,
+				 GtkTooltip       *tooltip,
+				 gpointer data)
+{
+	gchar *text = NULL;
+
+	text = g_strdup_printf("%.1lf", gtk_range_get_value(GTK_RANGE(vscale)));
+	gtk_tooltip_set_text (tooltip, text);
+	g_free(text);
+
+	return TRUE;
+}
+
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -317,6 +333,10 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 		gtk_range_set_inverted(GTK_RANGE(vscales[i]), TRUE);
 		gtk_scale_set_draw_value (GTK_SCALE(vscales[i]), FALSE);
+		g_object_set (G_OBJECT(vscales[i]), "has-tooltip", TRUE, NULL);
+		g_signal_connect(G_OBJECT(vscales[i]), "query-tooltip",
+				 G_CALLBACK(eq_band_get_tooltip),
+				 NULL);
 	}
 
 	mhbox = gtk_hbox_new(FALSE, 0);
