@@ -684,9 +684,10 @@ static void update_preferences(struct con_win *cwin)
 	}
 #endif
 #ifdef HAVE_LIBGLYR
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-				     cwin->cpref->get_album_art_w),
-				     TRUE);
+	if(cwin->cpref->get_album_art)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->get_album_art_w),
+					     TRUE);
 #endif
 	if (cwin->cpref->use_cddb)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
