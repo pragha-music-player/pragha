@@ -350,6 +350,7 @@ void related_get_album_art_handler (struct con_win *cwin)
 	glyr_query_init(&glyr_info->query);
 
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
+	glyr_opt_from(&glyr_info->query, "lastfm");
 
 	glyr_opt_artist(&glyr_info->query, artist);
 	glyr_opt_album(&glyr_info->query, album);
