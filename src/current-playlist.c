@@ -1231,7 +1231,7 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 	/* Special case some shortcuts 
 	if (event->state != 0) {
 		if ((event->state & GDK_CONTROL_MASK)
-		    && event->keyval == GDK_a) {
+		    && event->keyval == GDK_KEY_a) {
 			gtk_tree_selection_select_all
 				(playlist->priv->selection);
 			return TRUE;
@@ -1247,11 +1247,11 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 			|| (event->state & GDK_MOD4_MASK)
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
-	if (event->keyval == GDK_Delete){
+	if (event->keyval == GDK_KEY_Delete){
 		remove_from_playlist(NULL, cwin);
 		return TRUE;
 	}
-	else if(event->keyval == GDK_q || event->keyval == GDK_Q){
+	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q){
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 		n_select = gtk_tree_selection_count_selected_rows(selection);
 
