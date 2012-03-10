@@ -1553,12 +1553,6 @@ void init_library_view(struct con_win *cwin)
 			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
 				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
 				cwin, model);
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
-			}
 		}	
 	}
 	else {
@@ -1567,12 +1561,6 @@ void init_library_view(struct con_win *cwin)
 		exec_sqlite_query(query, cwin, &result);
 		for_each_result_row(result, i) {
 			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model);
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
-			}
 		}
 	}
 	sqlite3_free_table(result.resultp);
