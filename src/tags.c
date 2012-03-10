@@ -611,7 +611,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_DIRECTORY);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_JUMP_TO);
 
-	gtk_entry_set_editable (GTK_ENTRY(entry_file), FALSE);
+	gtk_editable_set_editable (GTK_EDITABLE(entry_file), FALSE);
 
 	/* Create checkboxes */
 
