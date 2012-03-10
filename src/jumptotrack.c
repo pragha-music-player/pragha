@@ -76,7 +76,7 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cw
 			|| (event->state & GDK_MOD5_MASK))) {
 		return FALSE;
 	}
-	else if(event->keyval == GDK_q || event->keyval == GDK_Q) {
+	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q) {
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {

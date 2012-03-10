@@ -217,7 +217,7 @@ open_file_on_keypress(GtkWidget *dialog,
                         GdkEventKey *event,
                         gpointer data)
 {
-    if (event->keyval == GDK_Escape) {
+    if (event->keyval == GDK_KEY_Escape) {
         gtk_widget_destroy(dialog);
         return TRUE;
     }

@@ -436,7 +436,7 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 {
 	gboolean ret = FALSE;
 
-	if (event->keyval == GDK_Up || event->keyval == GDK_Down){
+	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down){
 		GdkEvent *new_event;
 
 		new_event = gdk_event_copy ((GdkEvent *) event);

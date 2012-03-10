@@ -1371,7 +1371,7 @@ int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 			|| (event->state & GDK_MOD4_MASK)
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
-	if (event->keyval == GDK_Delete){
+	if (event->keyval == GDK_KEY_Delete){
 		library_remove_cb(NULL, cwin);
 		return TRUE;
 	}
