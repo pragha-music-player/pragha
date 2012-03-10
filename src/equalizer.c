@@ -266,7 +266,7 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 
 	eq_combobox = g_object_get_data(data, "eq_combobox");
 
-	presset = gtk_combo_box_get_active_text (GTK_COMBO_BOX(eq_combobox));
+	presset = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(eq_combobox));
 
 	g_key_file_set_string(cwin->cpref->configrc_keyfile,
 			      GROUP_AUDIO,
@@ -437,28 +437,28 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	/* Append list of default presets */
 
-	eq_combobox = gtk_combo_box_new_text ();
+	eq_combobox = gtk_combo_box_text_new ();
 
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), _("Disabled"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Classical");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Club");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Dance");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Full Bass");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Full Bass and Treble");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Full Treble");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Laptop Speakers and Headphones");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Large Hall");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Live");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Party");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Pop");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Reggae");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Rock");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Ska");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Smiley Face Curve");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Soft");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Soft Rock");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), "Techno");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(eq_combobox), _("Custom"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _("Disabled"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Classical");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Club");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Dance");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Bass");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Bass and Treble");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Treble");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Laptop Speakers and Headphones");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Large Hall");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Live");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Party");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Pop");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Reggae");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Rock");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Ska");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Smiley Face Curve");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Soft");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Soft Rock");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Techno");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _("Custom"));
 
 	/* Set useful data */
 

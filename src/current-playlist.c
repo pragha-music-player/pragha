@@ -660,14 +660,14 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	vbox2 = gtk_vbox_new(TRUE, 2);
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
-	combo_add = gtk_combo_box_new_text();
+	combo_add = gtk_combo_box_text_new();
 	radio_new = gtk_radio_button_new_with_label(NULL, _("Save as a new playlist"));
 	radio_add = gtk_radio_button_new_with_label_from_widget(
 		GTK_RADIO_BUTTON(radio_new), _("Append to an existing playlist"));
 
 	if (playlists) {
 		while (playlists[i]) {
-			gtk_combo_box_append_text(GTK_COMBO_BOX(combo_add),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_add),
 						  playlists[i]);
 			i++;
 		}
@@ -719,7 +719,7 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 			*choice = NEW_PLAYLIST;
 		}
 		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_add))) {
-			playlist = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo_add));
+			playlist = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_add));
 			*choice = APPEND_PLAYLIST;
 		}
 		break;

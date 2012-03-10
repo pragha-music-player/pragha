@@ -42,7 +42,7 @@ void toogle_main_window (struct con_win *cwin, gboolean ignoreActivity)
 {
 	gint x = 0, y = 0;
 
-	if (GTK_WIDGET_VISIBLE (cwin->mainwindow)) {
+	if (gtk_widget_get_visible (cwin->mainwindow)) {
 		if (ignoreActivity || gtk_window_is_active (GTK_WINDOW(cwin->mainwindow))){
 			gtk_window_get_position (GTK_WINDOW(cwin->mainwindow), &x, &y);
 			gtk_widget_hide (GTK_WIDGET(cwin->mainwindow));
