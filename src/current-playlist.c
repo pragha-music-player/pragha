@@ -705,7 +705,7 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
 	gtk_widget_show_all(dialog);
 
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1393,7 +1393,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		return;
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	/* Get a reference to all the nodes that are _not_ selected */
@@ -1455,7 +1455,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 
@@ -1598,7 +1598,7 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), properties_table);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
 
 	gtk_widget_show_all(dialog);
 	gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1626,7 +1626,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	clear_rand_track_refs(cwin);
@@ -1648,7 +1648,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
 
@@ -2561,7 +2561,7 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 
 	if (gtk_drag_get_source_widget(context) == cwin->library_tree) {
 		CDEBUG(DBG_VERBOSE, "DnD: library_tree");
-		target = GDK_POINTER_TO_ATOM(g_list_nth_data(context->targets,
+		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
 							     TARGET_LOCATION_ID));
 		gtk_drag_get_data(widget,
 				  context,
@@ -2571,7 +2571,7 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 	}
 	else if (gtk_drag_get_source_widget(context) == cwin->playlist_tree) {
 		CDEBUG(DBG_VERBOSE, "DnD: playlist_tree");
-		target = GDK_POINTER_TO_ATOM(g_list_nth_data(context->targets,
+		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
 							     TARGET_PLAYLIST));
 		gtk_drag_get_data(widget,
 				  context,
@@ -2685,20 +2685,20 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Show busy mouse icon */
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	/* Append new tracks to playlist */
 
 	switch(info) {
 	case TARGET_LOCATION_ID:
-		loc_arr = *(GArray **)data->data;
+		loc_arr = *(GArray **)gtk_selection_data_get_data(data);
 		if (!loc_arr)
 			g_warning("No selections to process in DnD");
 
 		CDEBUG(DBG_VERBOSE, "Target: LOCATION_ID, "
 		       "selection: %p, loc_arr: %p",
-		       data->data, loc_arr);
+		       gtk_selection_data_get_data(data), loc_arr);
 
 		g_object_ref(model);
 		cwin->cstate->playlist_change = TRUE;
@@ -2737,13 +2737,13 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		update_status_bar(cwin);
 		break;
 	case TARGET_PLAYLIST:
-		playlist_arr = *(GArray **)data->data;
+		playlist_arr = *(GArray **)gtk_selection_data_get_data(data);
 		if (!playlist_arr)
 			g_warning("No selections to process in DnD");
 
 		CDEBUG(DBG_VERBOSE, "Target: PLAYLIST, "
 		       "selection: %p, playlist_arr: %p",
-		       data->data, playlist_arr);
+		       gtk_selection_data_get_data(data), playlist_arr);
 
 		while(1) {
 			name = (gchar*)g_array_index(playlist_arr, gchar*, i);
@@ -2830,7 +2830,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		break;
 	}
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 exit:
 	gtk_tree_path_free(dest_path);
@@ -2874,7 +2874,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	g_object_ref(model);
@@ -2912,7 +2912,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	update_status_bar(cwin);
 	mpris_update_tracklist_changed(cwin);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);

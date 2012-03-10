@@ -1165,7 +1165,7 @@ void save_preferences(struct con_win *cwin)
 			       KEY_REMEMBER_STATE,
 			       cwin->cpref->remember_window_state);
 
-	state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
+	state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 
 	if(cwin->cpref->remember_window_state) {
 		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
@@ -1874,8 +1874,8 @@ void preferences_dialog(struct con_win *cwin)
 
 	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
 
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), pref_notebook, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
 
 	/* Store references */
 

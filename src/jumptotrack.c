@@ -393,7 +393,7 @@ dialog_jump_to_track (struct con_win *cwin)
 	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
 	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
 
-	gtk_container_add (GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
+	gtk_container_add (GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
 	
 	g_signal_connect (jump_treeview, "row-activated",
 			G_CALLBACK(jump_row_activated_cb), dialog);
