@@ -162,8 +162,7 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 	gtk_widget_set_size_request(progress_bar,
 				    PROGRESS_BAR_WIDTH,
 				    -1);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(GTK_DIALOG(
-						 library_dialog)->action_area),
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(library_dialog))),
 				  GTK_BUTTONBOX_SPREAD);
 
 	/* Setup signal handlers */
@@ -175,7 +174,7 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 
 	/* Add the progress bar to the dialog box's vbox and show everything */
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(library_dialog)->vbox), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(library_dialog))), hbox);
 	gtk_widget_show_all(library_dialog);
 
 	return progress_bar;
@@ -461,7 +460,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
 
@@ -699,7 +698,7 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
-		state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
+		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
 		gtk_widget_hide(cwin->unfull_button);
@@ -1004,7 +1003,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	GdkCursor *cursor;
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	clear_current_playlist(action, cwin);
@@ -1053,7 +1052,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);

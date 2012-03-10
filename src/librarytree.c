@@ -486,7 +486,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_TRACK:
 	case NODE_BASENAME:
 		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -500,7 +500,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
@@ -668,7 +668,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 		/* No selections */
 
 		if (!list) {
-			gtk_selection_data_set(data, data->type, 8, NULL, 0);
+			gtk_selection_data_set(data, gtk_selection_data_get_data_type(data), 8, NULL, 0);
 			break;
 		}
 
@@ -684,13 +684,13 @@ void dnd_library_tree_get(GtkWidget *widget,
 		}
 
 		gtk_selection_data_set(data,
-				       data->type,
+				       gtk_selection_data_get_data_type(data),
 				       8,
 				       (guchar *)&loc_arr,
 				       sizeof(GArray *));
 
 		CDEBUG(DBG_VERBOSE, "Fill DnD data, selection: %p, loc_arr: %p",
-		       data->data, loc_arr);
+		       gtk_selection_data_get_data(data), loc_arr);
 
 		/* Cleanup */
 
@@ -1067,7 +1067,7 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 
 	if (list) {
 		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
 		clear_current_playlist(action, cwin);
@@ -1097,7 +1097,7 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 		update_status_bar(cwin);
 		
@@ -1118,7 +1118,7 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 
 	if (list) {
 		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
 		clear_current_playlist(action, cwin);
@@ -1148,7 +1148,7 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 		update_status_bar(cwin);
 
@@ -1175,7 +1175,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 
 	if (list) {
 		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1203,7 +1203,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
@@ -1290,7 +1290,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 						_("Really want to move the files to trash?"));
 
 		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
-		gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), toggle_unlink, TRUE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), toggle_unlink, TRUE, TRUE, 0);
 
 		gtk_widget_show_all(dialog);
 		result = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1526,7 +1526,7 @@ void init_library_view(struct con_win *cwin)
 	}
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
@@ -1577,7 +1577,7 @@ void init_library_view(struct con_win *cwin)
 
 	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	cwin->cstate->view_change = FALSE;
 }

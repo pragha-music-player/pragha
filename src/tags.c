@@ -813,7 +813,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 
 	/* Add to the dialog's main vbox */
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), tag_table);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table);
 
 	/* Fill in initial entries */
 
