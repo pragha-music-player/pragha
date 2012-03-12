@@ -318,11 +318,14 @@ void track_progress_change_cb(GtkWidget *widget,
 	if (!cwin->cstate->curr_mobj || cwin->cstate->curr_mobj->tags->length == 0)
 		return;
 
-	seek = (cwin->cstate->curr_mobj->tags->length * event->x) / widget->allocation.width;
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(widget, &allocation);
+
+	seek = (cwin->cstate->curr_mobj->tags->length * event->x) / allocation.width;
 	if (seek >= cwin->cstate->curr_mobj->tags->length)
 		seek = cwin->cstate->curr_mobj->tags->length;
 
-	fraction = (gdouble) event->x / widget->allocation.width;
+	fraction = (gdouble) event->x / allocation.width;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
 
 	backend_seek(seek, cwin);
@@ -433,7 +436,7 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 {
 	gboolean ret = FALSE;
 
-	if (event->keyval == GDK_Up || event->keyval == GDK_Down){
+	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down){
 		GdkEvent *new_event;
 
 		new_event = gdk_event_copy ((GdkEvent *) event);

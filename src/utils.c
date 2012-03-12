@@ -191,7 +191,7 @@ set_watch_cursor_on_thread(struct con_win *cwin)
 
 	gdk_threads_enter ();
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 	gdk_threads_leave ();
 }
@@ -202,7 +202,7 @@ remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin)
 	gdk_threads_enter ();
 	if(message != NULL)
 		set_status_message(message, cwin);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 	gdk_threads_leave ();
 }
 
@@ -262,7 +262,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct c
 
 	gtk_widget_modify_bg(xfce_heading,
 				GTK_STATE_NORMAL,
-				&entry->style->base[GTK_STATE_NORMAL]);
+				&gtk_widget_get_style(entry)->base[GTK_STATE_NORMAL]);
 
 	hbox = gtk_hbox_new(FALSE, 12);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
@@ -275,7 +275,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct c
 	label = gtk_label_new(NULL);
 	gtk_widget_modify_fg(label,
 				GTK_STATE_NORMAL,
-				&entry->style->text[GTK_STATE_NORMAL]);
+				&gtk_widget_get_style(entry)->text[GTK_STATE_NORMAL]);
         markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
 	g_free(markup);
@@ -754,15 +754,18 @@ menu_position(GtkMenu *menu,
 
         gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
 
-        gdk_window_get_origin (widget->window, &menu_xpos, &menu_ypos);
+        gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 
-        menu_xpos += widget->allocation.x;
-        menu_ypos += widget->allocation.y;
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(widget, &allocation);
+
+        menu_xpos += allocation.x;
+        menu_ypos += allocation.y;
 
 	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
-		menu_ypos -= requisition.height + widget->style->ythickness;
+		menu_ypos -= requisition.height + gtk_widget_get_style(widget)->ythickness;
 	else
-		menu_ypos += widget->allocation.height + widget->style->ythickness;
+		menu_ypos += allocation.height + gtk_widget_get_style(widget)->ythickness;
 
         *x = menu_xpos;
         *y = menu_ypos - 5;

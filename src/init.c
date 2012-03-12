@@ -62,31 +62,13 @@ GOptionEntry cmd_entries[] = {
 	{NULL}
 };
 
-static gboolean _init_gui_state(gpointer data)
+static void _init_gui_state(struct con_win *cwin)
 {
-	struct con_win *cwin = data;
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
 	init_playlist_view(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
 	init_tag_completion(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
 	init_library_view(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
-
-	return TRUE;
 }
 
 gint init_dbus(struct con_win *cwin)
@@ -1010,10 +992,8 @@ gint init_config(struct con_win *cwin)
 		return 0;
 }
 
-static gboolean rescand_icompatible_db(gpointer data)
+static void rescand_icompatible_db(struct con_win *cwin)
 {
-	struct con_win *cwin = data;
-
 	GtkWidget *dialog;
 	gint result;
 
@@ -1029,8 +1009,6 @@ static gboolean rescand_icompatible_db(gpointer data)
 
 	if( result == GTK_RESPONSE_YES)
 		rescan_library_handler(cwin);
-
-	return TRUE;
 }
 
 gint init_musicdbase(struct con_win *cwin)
@@ -1050,7 +1028,7 @@ gint init_musicdbase(struct con_win *cwin)
 		ret = g_unlink(cwin->cdbase->db_file);
 		if (ret != 0)
 			g_warning("%s", strerror(ret));
-		gtk_init_add(rescand_icompatible_db, cwin);
+		rescand_icompatible_db(cwin);
 	}
 
 	/* Create the database file */
@@ -1496,5 +1474,5 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	init_session_support(cwin);
 	#endif
 
-	gtk_init_add(_init_gui_state, cwin);
+	_init_gui_state(cwin);
 }
