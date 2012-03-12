@@ -389,7 +389,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	exec_sqlite_query(query, cwin, &result);
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -417,7 +417,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
@@ -722,7 +722,7 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(hbox), label_new, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
 
 	gtk_widget_show_all(dialog);
 
@@ -1012,7 +1012,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
@@ -1062,7 +1062,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 exit_list:
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	if (list)
 		g_list_free(list);
@@ -1320,7 +1320,7 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 	GdkCursor *cursor;
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	list = pragha_pl_parser_parse_from_file_by_extension (file);
@@ -1339,7 +1339,7 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 		g_free(i->data);
 	}
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	select_last_path_of_current_playlist(cwin);
 
@@ -1386,7 +1386,7 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 		/* No selections */
 
 		if (!list) {
-			gtk_selection_data_set(data, data->type, 8, NULL, 0);
+			gtk_selection_data_set(data, gtk_selection_data_get_data_type(data), 8, NULL, 0);
 			break;
 		}
 
@@ -1418,14 +1418,14 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 		}
 
 		gtk_selection_data_set(data,
-				       data->type,
+				       gtk_selection_data_get_data_type(data),
 				       8,
 				       (guchar *)&playlist_arr,
 				       sizeof(GArray *));
 
 		CDEBUG(DBG_VERBOSE, "Fill DnD data, "
 		       "selection: %p, playlist_arr: %p",
-		       data->data, playlist_arr);
+		       gtk_selection_data_get_data(data), playlist_arr);
 
 		/* Cleanup */
 
@@ -1785,7 +1785,7 @@ void init_playlist_view(struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
@@ -1858,7 +1858,7 @@ void init_playlist_view(struct con_win *cwin)
 
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	complete_add_to_playlist_submenu (cwin);
 	complete_save_playlist_submenu (cwin);
