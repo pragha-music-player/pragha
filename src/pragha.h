@@ -73,12 +73,36 @@
 
 #include "cdda.h"
 #include "gtkcellrendererbubble.h"
-
 #include "xml_helper.h"
+
+/* Some definitions to solve different versions of the libraries. */
 
 #ifndef NOTIFY_CHECK_VERSION
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
+
+#if !GTK_CHECK_VERSION (2, 22, 0)
+#define gdk_drag_context_list_targets(context)        ((context)->targets)
+#endif
+
+#if !GTK_CHECK_VERSION (2, 22, 0)
+#define GDK_KEY_a GDK_a
+#define GDK_KEY_q GDK_q
+#define GDK_KEY_Up GDK_Up
+#define GDK_KEY_Down GDK_Down
+#define GDK_KEY_Delete GDK_Delete
+#define GDK_KEY_Escape GDK_Escape
+#endif
+
+#if (!GTK_CHECK_VERSION(2, 23, 0) || GTK_CHECK_VERSION(2, 90, 0)) && !GTK_CHECK_VERSION(2, 91, 1)
+#define GtkComboBoxText GtkComboBox
+#define GTK_COMBO_BOX_TEXT(X) GTK_COMBO_BOX(X)
+#define gtk_combo_box_text_new gtk_combo_box_new_text
+#define gtk_combo_box_text_append_text(X,Y) gtk_combo_box_append_text(X,Y)
+#define gtk_combo_box_text_get_active_text(X) gtk_combo_box_get_active_text(X)
+#endif
+
+/* Some default preferences. */
 
 #define MIN_WINDOW_WIDTH           640
 #define MIN_WINDOW_HEIGHT          480

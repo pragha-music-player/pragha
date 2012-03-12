@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [0])
-m4_define([pragha_version_micro], [1])
+m4_define([pragha_version_micro], [2.git])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -50,16 +50,16 @@ XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-0.10], [0.10])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.16.3])
-XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.22.0])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.24])
+XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.20.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([DBUS], [dbus-1], [0.74])
-XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.74])
+XDT_CHECK_PACKAGE([DBUS], [dbus-1], [1.1])
+XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.84])
 XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
-XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.78])
-XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.78])
-XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.2.1])
-XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.18])
+XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
+XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
+XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
+XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.19.2])
 XDT_CHECK_PACKAGE([LIBX11], [x11], 1.0.0)
 XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
 
