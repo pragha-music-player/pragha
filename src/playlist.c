@@ -1788,6 +1788,10 @@ void init_playlist_view(struct con_win *cwin)
 	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
+	g_object_ref(model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->playlist_tree), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_tree), NULL);
+
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
 	gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1811,15 +1815,8 @@ void init_playlist_view(struct con_win *cwin)
 				   &iter, model, cwin);
 
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-		}
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
 	}
 
 	sqlite3_free_table(result.resultp);
@@ -1844,21 +1841,18 @@ void init_playlist_view(struct con_win *cwin)
 				   &iter, model, cwin);
 
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-		}
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
 	}
 	sqlite3_free_table(result.resultp);
 
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->playlist_tree), TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_tree), model);
+	g_object_unref(model);
 
 	complete_add_to_playlist_submenu (cwin);
 	complete_save_playlist_submenu (cwin);
