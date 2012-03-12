@@ -64,11 +64,22 @@ GOptionEntry cmd_entries[] = {
 
 static void _init_gui_state(struct con_win *cwin)
 {
+	GdkCursor *cursor;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
+	gdk_cursor_unref(cursor);
+
 	init_playlist_view(cwin);
+
 	init_tag_completion(cwin);
+
 	init_library_view(cwin);
+
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);
+
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 }
 
 gint init_dbus(struct con_win *cwin)
