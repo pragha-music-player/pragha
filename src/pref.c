@@ -54,7 +54,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		break;
 	case GTK_RESPONSE_OK:
 		/* Audio preferences */
-		audio_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cwin->cpref->audio_sink_combo_w));
+		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->cpref->audio_sink_combo_w));
 		if(audio_sink) {
 			g_free(cwin->cpref->audio_sink);
 			cwin->cpref->audio_sink = audio_sink;
@@ -125,7 +125,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		/* General preferences */
 
-		window_state_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w));
+		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->cpref->window_state_combo_w));
 
 		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
 			cwin->cpref->remember_window_state = FALSE;
@@ -483,7 +483,7 @@ static void change_audio_sink(GtkComboBox *combo, gpointer udata)
 	struct con_win *cwin = (struct con_win *)udata;
 	gchar *audio_sink;
 
-	audio_sink = gtk_combo_box_get_active_text(GTK_COMBO_BOX(
+	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(
 					      cwin->cpref->audio_sink_combo_w));
 
 	if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
@@ -1165,7 +1165,7 @@ void save_preferences(struct con_win *cwin)
 			       KEY_REMEMBER_STATE,
 			       cwin->cpref->remember_window_state);
 
-	state = gdk_window_get_state (GTK_WIDGET (cwin->mainwindow)->window);
+	state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 
 	if(cwin->cpref->remember_window_state) {
 		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
@@ -1371,7 +1371,7 @@ int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 			|| (event->state & GDK_MOD4_MASK)
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
-	if (event->keyval == GDK_Delete){
+	if (event->keyval == GDK_KEY_Delete){
 		library_remove_cb(NULL, cwin);
 		return TRUE;
 	}
@@ -1489,19 +1489,19 @@ void preferences_dialog(struct con_win *cwin)
 	sink_label = gtk_label_new(_("Audio sink"));
 	gtk_misc_set_alignment(GTK_MISC (sink_label), 0, 0);
 
-	audio_sink_combo = gtk_combo_box_new_text();
+	audio_sink_combo = gtk_combo_box_text_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_sink_combo),
 				    _("Restart Required"));
 
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  DEFAULT_SINK);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  ALSA_SINK);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  OSS4_SINK);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  OSS_SINK);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(audio_sink_combo),
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  PULSE_SINK);
 
 	gtk_table_attach(GTK_TABLE (audio_table), sink_label,
@@ -1719,12 +1719,12 @@ void preferences_dialog(struct con_win *cwin)
 
 	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
 
-	window_state_combo = gtk_combo_box_new_text ();
+	window_state_combo = gtk_combo_box_text_new ();
 
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Remember last window state"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start normal"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start fullscreen"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(window_state_combo), _("Start in system tray"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start normal"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start fullscreen"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start in system tray"));
 
 	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
 
@@ -1874,8 +1874,8 @@ void preferences_dialog(struct con_win *cwin)
 
 	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
 
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), pref_notebook, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
 
 	/* Store references */
 

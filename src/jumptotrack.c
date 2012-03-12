@@ -76,7 +76,7 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cw
 			|| (event->state & GDK_MOD5_MASK))) {
 		return FALSE;
 	}
-	else if(event->keyval == GDK_q || event->keyval == GDK_Q) {
+	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q) {
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
@@ -393,7 +393,7 @@ dialog_jump_to_track (struct con_win *cwin)
 	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
 	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
 
-	gtk_container_add (GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
+	gtk_container_add (GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
 	
 	g_signal_connect (jump_treeview, "row-activated",
 			G_CALLBACK(jump_row_activated_cb), dialog);
