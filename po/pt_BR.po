@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=glib&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-05 21:59-0300\n"
+"POT-Creation-Date: 2012-03-11 22:56-0300\n"
 "PO-Revision-Date: 2012-01-06 22:16-0300\n"
 "Last-Translator: Matias De lellis <mati86dl@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -198,11 +198,11 @@ msgstr "_Repetir"
 msgid "_Fullscreen"
 msgstr "_Tela cheia"
 
-#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1423
+#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1424
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:348
+#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:345
 #: ../src/playlist.c:886 ../src/playlist.c:1798
 msgid "Playlists"
 msgstr "Listas de reprodução"
@@ -564,15 +564,15 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Nome da arte do álbum"
 
-#: ../src/pref.c:130 ../src/pref.c:1724
+#: ../src/pref.c:130 ../src/pref.c:1725
 msgid "Start normal"
 msgstr "Iniciar normal"
 
-#: ../src/pref.c:135 ../src/pref.c:1725
+#: ../src/pref.c:135 ../src/pref.c:1726
 msgid "Start fullscreen"
 msgstr "Abrir tela cheia"
 
-#: ../src/pref.c:140 ../src/pref.c:1726
+#: ../src/pref.c:140 ../src/pref.c:1727
 msgid "Start in system tray"
 msgstr "Iniciar na bandeja"
 
@@ -583,205 +583,205 @@ msgstr "Selecione uma pasta para adicionar à biblioteca"
 
 #. The main preferences dialog
 #. Add to dialog
-#: ../src/pref.c:1410 ../src/pref.c:1874
+#: ../src/pref.c:1411 ../src/pref.c:1875
 msgid "Preferences of Pragha"
 msgstr "Preferências do Pragha"
 
 #. Labels
-#: ../src/pref.c:1421
+#: ../src/pref.c:1422
 msgid "Audio"
 msgstr "Áudio"
 
-#: ../src/pref.c:1422
+#: ../src/pref.c:1423
 msgid "Appearance"
 msgstr "Aparência"
 
-#: ../src/pref.c:1424
+#: ../src/pref.c:1425
 msgid "General"
 msgstr "Geral"
 
-#: ../src/pref.c:1425
+#: ../src/pref.c:1426
 msgid "Notifications"
 msgstr "Notificações"
 
-#: ../src/pref.c:1426
+#: ../src/pref.c:1427
 msgid "Internet Services"
 msgstr "Serviços de Internet"
 
 #. Audio Sink
-#: ../src/pref.c:1488
+#: ../src/pref.c:1489
 msgid "Audio sink"
 msgstr "Sistema de Som"
 
-#: ../src/pref.c:1493 ../src/pref.c:1522 ../src/pref.c:1536
+#: ../src/pref.c:1494 ../src/pref.c:1523 ../src/pref.c:1537
 msgid "Restart Required"
 msgstr "Necessário Reiniciar"
 
 #. Audio Device
-#: ../src/pref.c:1517
+#: ../src/pref.c:1518
 msgid "Audio Device"
 msgstr "Dispositivo de Som"
 
 #. Software mixer
-#: ../src/pref.c:1535
+#: ../src/pref.c:1536
 msgid "Use software mixer"
 msgstr "Usar controle do programa"
 
 #. Audio CD device
-#: ../src/pref.c:1554
+#: ../src/pref.c:1555
 msgid "Audio CD Device"
 msgstr "Dispositivo do CD de Áudio"
 
 #. Appearance Widgets
-#: ../src/pref.c:1580
+#: ../src/pref.c:1581
 msgid "Highlight rows on current playlist"
 msgstr "Destacar linhas na lista de reprodução atual"
 
-#: ../src/pref.c:1582
+#: ../src/pref.c:1583
 msgid "Show Album art in Panel"
 msgstr "Mostrar arte do álbum no painel"
 
-#: ../src/pref.c:1585
+#: ../src/pref.c:1586
 msgid "Size of Album art"
 msgstr "Tamanho da arte do álbum"
 
-#: ../src/pref.c:1603
+#: ../src/pref.c:1604
 msgid "Album art file pattern"
 msgstr "Nome da arte do álbum"
 
-#: ../src/pref.c:1648
+#: ../src/pref.c:1649
 msgid "Folders"
 msgstr "Pasta"
 
-#: ../src/pref.c:1693
+#: ../src/pref.c:1694
 msgid "Merge folders in the folders estructure view"
 msgstr "Mesclar pastas na visão de estrutura de pastas"
 
-#: ../src/pref.c:1694
+#: ../src/pref.c:1695
 msgid "Sort albums by release year"
 msgstr "Mostrar álbuns por ano de lançamento"
 
 #. General Widgets
-#: ../src/pref.c:1719
+#: ../src/pref.c:1720
 msgid "Refine the search while writing"
 msgstr "Buscar automaticamente enquanto se escreve"
 
-#: ../src/pref.c:1723
+#: ../src/pref.c:1724
 msgid "Remember last window state"
 msgstr "Lembrar do estado da última janela"
 
-#: ../src/pref.c:1728
+#: ../src/pref.c:1729
 msgid "Restore last playlist"
 msgstr "Restaurar a última lista de reprodução"
 
-#: ../src/pref.c:1730
+#: ../src/pref.c:1731
 msgid "Minimize Pragha when close the window"
 msgstr "Minimizar o Pragha ao fechar a janela"
 
-#: ../src/pref.c:1731
+#: ../src/pref.c:1732
 msgid "Add files recursively"
 msgstr "Adicionar arquivos recursivamente"
 
 #. Notification OSD
-#: ../src/pref.c:1763
+#: ../src/pref.c:1764
 msgid "Show OSD for track change"
 msgstr "Mostrar OSD para mudanças de faixa"
 
-#: ../src/pref.c:1764
+#: ../src/pref.c:1765
 msgid "Associate notifications to system tray"
 msgstr "Associar as notificações à bandeja do sistema"
 
-#: ../src/pref.c:1765
+#: ../src/pref.c:1766
 msgid "Show Album art in notifications"
 msgstr "Mostrar arte do álbum nas notificações"
 
-#: ../src/pref.c:1766
+#: ../src/pref.c:1767
 msgid "Add actions to change track to notifications"
 msgstr "Adicionar ações de mudança de faixa às notificações"
 
-#: ../src/pref.c:1791
+#: ../src/pref.c:1792
 msgid "Last.fm Support"
 msgstr "Suporte ao Last.fm"
 
-#: ../src/pref.c:1795
+#: ../src/pref.c:1796
 msgid "Username"
 msgstr "Usuário"
 
-#: ../src/pref.c:1796
+#: ../src/pref.c:1797
 msgid "Password"
 msgstr "Senha"
 
-#: ../src/pref.c:1806
+#: ../src/pref.c:1807
 msgid "Get album art"
 msgstr "Buscar capa"
 
 #. Services CDDB
-#: ../src/pref.c:1810
+#: ../src/pref.c:1811
 msgid "Connect to CDDB server"
 msgstr "Conectar ao servidor CDDB"
 
 #. Services MPRIS2
-#: ../src/pref.c:1814
+#: ../src/pref.c:1815
 msgid "Allow remote control with MPRIS2 interface"
 msgstr "Permitir controle remoto por meio da interface MPRIS2"
 
-#: ../src/menu.c:136
+#: ../src/menu.c:133
 msgid "Update Library"
 msgstr "Atualizar Biblioteca"
 
-#: ../src/menu.c:136
+#: ../src/menu.c:133
 msgid "Rescan Library"
 msgstr "Varrer Biblioteca"
 
-#: ../src/menu.c:243
+#: ../src/menu.c:240
 msgid "Select a file to play"
 msgstr "Selecione um arquivo para reproduzir"
 
-#: ../src/menu.c:264
+#: ../src/menu.c:261
 msgid "Add recursively files"
 msgstr "Adicionar arquivos recursivamente"
 
-#: ../src/menu.c:285 ../src/pragha-lastfm.c:289
+#: ../src/menu.c:282 ../src/pragha-lastfm.c:289
 msgid "Supported media"
 msgstr "Mídias suportados"
 
-#: ../src/menu.c:351
+#: ../src/menu.c:348
 msgid "All files"
 msgstr "Todos os arquivos"
 
-#: ../src/menu.c:430
+#: ../src/menu.c:427
 msgid "Enter the URL of an internet radio stream"
 msgstr ""
 
-#: ../src/menu.c:435
+#: ../src/menu.c:432
 msgid "Give it a name to save"
 msgstr ""
 
-#: ../src/menu.c:453
+#: ../src/menu.c:450
 msgid "Add a location"
 msgstr ""
 
-#: ../src/menu.c:855 ../src/menu.c:989
+#: ../src/menu.c:852 ../src/menu.c:986
 msgid "Library scan complete"
 msgstr "Varredura da biblioteca completa"
 
-#: ../src/menu.c:1094
+#: ../src/menu.c:1091
 msgid "Total Tracks:"
 msgstr "Total de Faixas:"
 
-#: ../src/menu.c:1096
+#: ../src/menu.c:1093
 msgid "Total Artists:"
 msgstr "Total de Artistas:"
 
-#: ../src/menu.c:1098
+#: ../src/menu.c:1095
 msgid "Total Albums:"
 msgstr "Total de Álbuns:"
 
-#: ../src/menu.c:1100
+#: ../src/menu.c:1097
 msgid "Statistics"
 msgstr "Estatísticas"
 
-#: ../src/menu.c:1117
+#: ../src/menu.c:1114
 msgid "translator-credits"
 msgstr "translator-credits"
 

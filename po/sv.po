@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Swedish\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=glib&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-05 21:59-0300\n"
+"POT-Creation-Date: 2012-03-11 22:56-0300\n"
 "PO-Revision-Date: 2011-06-30 13:17-0300\n"
 "Last-Translator: Matias <mati86dl@gmail.com>\n"
 "Language-Team: Swedish team <LL@li.org>\n"
@@ -209,11 +209,11 @@ msgstr "_Upprepa"
 msgid "_Fullscreen"
 msgstr "_Helskärmsläge"
 
-#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1423
+#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1424
 msgid "Library"
 msgstr "Bibliotek"
 
-#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:348
+#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:345
 #: ../src/playlist.c:886 ../src/playlist.c:1798
 msgid "Playlists"
 msgstr "Spellistor"
@@ -582,15 +582,15 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Albumomslagsmönster"
 
-#: ../src/pref.c:130 ../src/pref.c:1724
+#: ../src/pref.c:130 ../src/pref.c:1725
 msgid "Start normal"
 msgstr "Starta normalt"
 
-#: ../src/pref.c:135 ../src/pref.c:1725
+#: ../src/pref.c:135 ../src/pref.c:1726
 msgid "Start fullscreen"
 msgstr "_Helskärmsläge"
 
-#: ../src/pref.c:140 ../src/pref.c:1726
+#: ../src/pref.c:140 ../src/pref.c:1727
 msgid "Start in system tray"
 msgstr "Starta i aktivitetsfältet"
 
@@ -601,207 +601,207 @@ msgstr "Välj en mapp att lägga till i biblioteket"
 
 #. The main preferences dialog
 #. Add to dialog
-#: ../src/pref.c:1410 ../src/pref.c:1874
+#: ../src/pref.c:1411 ../src/pref.c:1875
 msgid "Preferences of Pragha"
 msgstr "Inställningar"
 
 #. Labels
-#: ../src/pref.c:1421
+#: ../src/pref.c:1422
 msgid "Audio"
 msgstr "Ljud"
 
-#: ../src/pref.c:1422
+#: ../src/pref.c:1423
 msgid "Appearance"
 msgstr ""
 
-#: ../src/pref.c:1424
+#: ../src/pref.c:1425
 msgid "General"
 msgstr "Allmänt"
 
-#: ../src/pref.c:1425
+#: ../src/pref.c:1426
 msgid "Notifications"
 msgstr "Notifieringar"
 
-#: ../src/pref.c:1426
+#: ../src/pref.c:1427
 msgid "Internet Services"
 msgstr "Internettjänster"
 
 #. Audio Sink
-#: ../src/pref.c:1488
+#: ../src/pref.c:1489
 msgid "Audio sink"
 msgstr "Ljudmotor"
 
-#: ../src/pref.c:1493 ../src/pref.c:1522 ../src/pref.c:1536
+#: ../src/pref.c:1494 ../src/pref.c:1523 ../src/pref.c:1537
 msgid "Restart Required"
 msgstr "Omstart krävs"
 
 #. Audio Device
-#: ../src/pref.c:1517
+#: ../src/pref.c:1518
 msgid "Audio Device"
 msgstr "Portabel musikspelare"
 
 #. Software mixer
-#: ../src/pref.c:1535
+#: ../src/pref.c:1536
 msgid "Use software mixer"
 msgstr "Använd mjukvarumixer"
 
 #. Audio CD device
-#: ../src/pref.c:1554
+#: ../src/pref.c:1555
 msgid "Audio CD Device"
 msgstr "CD-enhet"
 
 #. Appearance Widgets
-#: ../src/pref.c:1580
+#: ../src/pref.c:1581
 msgid "Highlight rows on current playlist"
 msgstr ""
 
-#: ../src/pref.c:1582
+#: ../src/pref.c:1583
 msgid "Show Album art in Panel"
 msgstr "Visa albumomslag i panelen"
 
-#: ../src/pref.c:1585
+#: ../src/pref.c:1586
 msgid "Size of Album art"
 msgstr "Storlek för albumomslag"
 
-#: ../src/pref.c:1603
+#: ../src/pref.c:1604
 msgid "Album art file pattern"
 msgstr "Filmönster för albumomslag"
 
-#: ../src/pref.c:1648
+#: ../src/pref.c:1649
 msgid "Folders"
 msgstr "Mappar"
 
-#: ../src/pref.c:1693
+#: ../src/pref.c:1694
 msgid "Merge folders in the folders estructure view"
 msgstr ""
 
-#: ../src/pref.c:1694
+#: ../src/pref.c:1695
 #, fuzzy
 msgid "Sort albums by release year"
 msgstr "Storlek för albumomslag"
 
 #. General Widgets
-#: ../src/pref.c:1719
+#: ../src/pref.c:1720
 msgid "Refine the search while writing"
 msgstr ""
 
-#: ../src/pref.c:1723
+#: ../src/pref.c:1724
 msgid "Remember last window state"
 msgstr "Kom ihåg föregående fönsterläge"
 
-#: ../src/pref.c:1728
+#: ../src/pref.c:1729
 msgid "Restore last playlist"
 msgstr "Återställ sista spellistan"
 
-#: ../src/pref.c:1730
+#: ../src/pref.c:1731
 msgid "Minimize Pragha when close the window"
 msgstr "Minimera Pragha när fönstret stängs ner"
 
-#: ../src/pref.c:1731
+#: ../src/pref.c:1732
 msgid "Add files recursively"
 msgstr "Lägg till filer rekursivt"
 
 #. Notification OSD
-#: ../src/pref.c:1763
+#: ../src/pref.c:1764
 msgid "Show OSD for track change"
 msgstr "Visa OSD-notifiering vid spårbyte"
 
-#: ../src/pref.c:1764
+#: ../src/pref.c:1765
 msgid "Associate notifications to system tray"
 msgstr "Bind notifieringar till aktivitetsfältet"
 
-#: ../src/pref.c:1765
+#: ../src/pref.c:1766
 msgid "Show Album art in notifications"
 msgstr "Visa albumomslag i notifieringsytan"
 
-#: ../src/pref.c:1766
+#: ../src/pref.c:1767
 msgid "Add actions to change track to notifications"
 msgstr ""
 
-#: ../src/pref.c:1791
+#: ../src/pref.c:1792
 msgid "Last.fm Support"
 msgstr "Last.fm-stöd"
 
-#: ../src/pref.c:1795
+#: ../src/pref.c:1796
 msgid "Username"
 msgstr "Användarnamn"
 
-#: ../src/pref.c:1796
+#: ../src/pref.c:1797
 msgid "Password"
 msgstr "Lösenord"
 
-#: ../src/pref.c:1806
+#: ../src/pref.c:1807
 #, fuzzy
 msgid "Get album art"
 msgstr "Storlek för albumomslag"
 
 #. Services CDDB
-#: ../src/pref.c:1810
+#: ../src/pref.c:1811
 msgid "Connect to CDDB server"
 msgstr "Anslut till CDDB server"
 
 #. Services MPRIS2
-#: ../src/pref.c:1814
+#: ../src/pref.c:1815
 msgid "Allow remote control with MPRIS2 interface"
 msgstr ""
 
-#: ../src/menu.c:136
+#: ../src/menu.c:133
 msgid "Update Library"
 msgstr "Uppdatera bibliotek"
 
-#: ../src/menu.c:136
+#: ../src/menu.c:133
 msgid "Rescan Library"
 msgstr "Sök av biblioteket igen"
 
-#: ../src/menu.c:243
+#: ../src/menu.c:240
 msgid "Select a file to play"
 msgstr "Välj fil att spela upp"
 
-#: ../src/menu.c:264
+#: ../src/menu.c:261
 msgid "Add recursively files"
 msgstr "Lägg till filer rekursivt"
 
-#: ../src/menu.c:285 ../src/pragha-lastfm.c:289
+#: ../src/menu.c:282 ../src/pragha-lastfm.c:289
 msgid "Supported media"
 msgstr "Tillgängliga mediaformat"
 
-#: ../src/menu.c:351
+#: ../src/menu.c:348
 msgid "All files"
 msgstr "Alla filer"
 
-#: ../src/menu.c:430
+#: ../src/menu.c:427
 msgid "Enter the URL of an internet radio stream"
 msgstr ""
 
-#: ../src/menu.c:435
+#: ../src/menu.c:432
 msgid "Give it a name to save"
 msgstr ""
 
-#: ../src/menu.c:453
+#: ../src/menu.c:450
 msgid "Add a location"
 msgstr ""
 
-#: ../src/menu.c:855 ../src/menu.c:989
+#: ../src/menu.c:852 ../src/menu.c:986
 msgid "Library scan complete"
 msgstr "Biblioteksavsökning färdig"
 
-#: ../src/menu.c:1094
+#: ../src/menu.c:1091
 msgid "Total Tracks:"
 msgstr "Antal spår:"
 
-#: ../src/menu.c:1096
+#: ../src/menu.c:1093
 msgid "Total Artists:"
 msgstr "Antal artister:"
 
-#: ../src/menu.c:1098
+#: ../src/menu.c:1095
 msgid "Total Albums:"
 msgstr "Antal album:"
 
-#: ../src/menu.c:1100
+#: ../src/menu.c:1097
 msgid "Statistics"
 msgstr "Statistik"
 
-#: ../src/menu.c:1117
+#: ../src/menu.c:1114
 msgid "translator-credits"
 msgstr "Översättare"
 

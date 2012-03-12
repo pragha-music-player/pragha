@@ -18,9 +18,6 @@
 
 #include "pragha.h"
 
-gulong signal_search_click;
-gulong signal_search_key;
-
 static GtkWidget *library_dialog;
 
 static gchar *license = "This program is free software: "

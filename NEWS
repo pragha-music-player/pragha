@@ -1,251 +1,130 @@
 ==============================================================
-Overview of changes in Pragha 1.0 "Good news, or aberration?."
+Overview of changes in Pragha 1.0.1 since 1.0
 ==============================================================
 
-V0.91
+V1.0.1
 News:
-	Ported to use gstreamer.
-
-Benefit? :)
- * Add support for new formats: So far wma and m4a. Please checks support to m4a. I no have any m4a file to test. ;)
- * Add a new pulseaudio backend.
- * Now it's free!. Can be packaged for fedora for example, since not depend directly of libmad.
-
-Regressions: :(
- * Lastfm not working. Soon fix it using https://github.com/felipec/libscrobbler. Adding librefm and love support.
- * Lost Mod file support. Sorry.. but someone used it? In fact very easy to add support for this. Maybe fix it later.
-
-Then, everything else should work. :)
-
-V0.92
-News:
-	Use cubic volume if available (Need gstreamer-plugins-base-devel).
-	Sink volume with audio backend changes.
-	"Restore" replace and play option.
+	Add Get lyrics, Get artist info to the selection on current playlist.
+	Add Love, Unlove, and Get similar options to the selection on current playlist.
+	Add an icon in the panel to suggest tag corrections of lastfm when update now_playing. [1]
 
 Others Changes:
-	Depend on external libkeybinder (Optional).
+	Add tootips to show equalizer bands values.
+	Select last track when append new songs.
+	Also append radios when restore session.
+	Append Hz, kbps, and Channels string to file properties dialog.
+	Check status of network manager when launch pragha. If is online, init lastfm, otherwise wait 30 seconds.
+	Remove search album art option in menu. Any objection..? I never use it.
+	Only search covers art in lastfm temporarily. Returns better results.
 
 Bugs fixed:
-	Disable "Add actions.." options if the notifier does not support it.
+	Fix search album art option is always enabled.
+	Not jump to the next song when have selected several songs.
+	Grab focus on entry name when save playlist and save when press enter.
+	D'Oh!. Use mpris:artUrl instead xesam:art, and emit a full uri format.
+	Add a playlist_change flag to avoid errors when remove the model to gain speed.
+	Also set busy cursor when add similar song, clear/crop current playlist, or import/export playlist.
+	Always show "Custom" presset on equalizer on error.
+	Fix frizee when buffering internet radios.
+	Inform stop playback to mpris2 when close pragha.
+	Save preferences changes when pressing enter.
+	Update some years copyright.
+	Never add duplicate songs.
+	D'Oh!. Fix never add songs of the lasts page of favorites songs.
+	Fix some warnings when first init.
+	Set disable when first usage of equlizaser.
+	Better function to search song on db with only the artist and title info.
+	Use more generic functions to remove some duplicate code.
+	Romove some unused code.
 
 Updates Translations:
-	Add Hungiran translatiton.
-	Update others translation.
-
-V0.93
-News:
-	Add MPRIS2 control support and emit a dbus signal named 'update_state' thanks to Hakan Erduman.
-	Added a DBus message to toggle the visibility of the player thanks to Hakan Erduman.
-	Restore lastfm scrobbling support thanks to http://liblastfm.sourceforge.net/.
-	* Use Scrobbling API 2.0.
-	* Now is correctly identified like Pragha.
-
-Bugs fixed:
-	Fix regression on generation of recently-used data introduced in 241.
-	Support to libnotify 0.7. (Hate it with all my heart.)
-	Again, change notifications according to the standard. (xfce4-notifyd follows strictly)
-
-Updates Translations:
-	Updated Czech translation thank to Alois.
-
-Note: Temporarily disables search lyrics, by license change of http://www.lyricsplugin.com.
-
-V0.93.1:
-Any change on pragha. But use liblastfm 0.4, that does not depend on libopenssl, incompatible with the GPL
-So fix Issee 22. :)
-
-V0.94.0
-Special thanks to Vikram Ambrose and Hakan Erduman for answering all my questions.
-News:
-	Add various demonstration features over Lastfm sevices.
-		* Love track.
-		* Unlove track.
-		* Add favorites.
-		* Artist info.
-		* Get album art.
-		* Add similar.
-	Complete MPRIS2 track list interface.
-	Add option to init MPRIS2 in preferences.
-	Restore Search Lyrics with a dialog using Chartlyrics.com.
-	Add a new popup menu when current playlist is emply.
-
-Others Changes:
-	Now depend on external libclastfm >= 0.4 (Optional).
-
-Updates Translations:
-	Add Turkisk translation thanks to Hakan.
-	Update Czech translation thanks to Anespor.
-
-Bugs fixed:
-	Much more faster when you start with many songs, or add the complete library.
-	Fix bad editing of current playlist items when it is sorted (Issue 21).
-	Fix Segfault after clear playlist and play (Issue 23 and 24).
-	No erase user info when no connect to lastfm.
-	Never init pragha witch -p,-s,-t, -r, -n, -t... command options.
-	Better update album art.
-	Drop unused vars.
-
-Note: http://liblastfm.sourceforge.net now is libclastfm due to incompatibility with the official library.
-
-V0.94.1
-News:
-	Implement a dialog to skip tracks if fails playback.
-
-Bugs fixed:
-	Compile with Gcc 4.6, with all that this implies.
-	Use _tree_row_references to edit track.
-	Get the files to change quickly, to prevent when finished the song and change the selection.
-	Always check the current song to prevent when finished and change the song.
-
-V0.95.0
-News:
-	Add support for MonkeyAudio songs.
-	Now difference between oss4 and oss3.
-	Adds another option to use the default sink.
-
-Bugs fixed:
-	Wait 5 seconds to update the current song on lastfm.
-	=> Fix crash when rapidly changing songs.
-	=> Uses less network when rapidly changing songs.
-	Fix never init Mpris2 interface when init.
-	Start pragha with file arguments.
-	Better debugs messages on playbin constructs.
-	Fix Typos.
-
-V0.95.0.1
-	Prepend interfece string to PropertiesChanged signal.
-
-V0.96.0
-News:
-	Init Lastfm into (More smooth) thread.
-	Implement Lastfm get similar and add favorites into (More smooth) thread.
-	Better (More smooth) insert tracks from file manager.
-	Better (Much more faster) insert tracks from library tree.
-
-Others Changes:
-	Returns the icon in current playlist to show errors.
-	Use Structure Folder view by default.
-	Emit volumes changes on mpris2.
-	Use folder-music to folder structure view.
-	Set cursor when jump to current track.
-	Betters debug messages on lastfm and chartlyrics and comment everything necessary on the status bar.
-	Add recent files info on a idle func.
-
-Updates Translations:
-	Add a new translation to Simplified Chinese thanks to ifree.
-	Add a new translation to Greek thanks to koleoptero.
-	Update Dutch translation thanks to tuxmachine.
-	Update Ukrainian thanslation thanks to Sergiy_Gavrylov.
-
-Bugs fixed:
-	Remove lastfm connected flag. Use seesion_id instead.
-	Insensitive tree views when change the model.
-	Artist and Comment are array on mpris2 metadata.
-	Fix potential memory leak on mpris2.
-	Change the condition to refresh the saved_title (Fix Metadata emision).
-	Fix lastfm start every time that enter in preferences unnecessarily.
-	Fix calcule midle song lenght minus 5 seconds.
-	Fix add recurive folder with command line.
-	Test realloc on chartlyrics.
-	Remove some unuseles gtk_widget_show/hide_all.
-
-V0.96.0.1
-	Recontra D'Oh!. Fixs gdk_threads_enter()/gdk_threads_leave() usage.
-
-V0.96.1
-	Wooow.. Search, jump and play on current playlist dialog implemened.
-
-V0.97.0
-News:
-	Return the playback status icon on current playlist. Thanks to Brett Kleinschmidt.
-	Add a popup menu on file entry of tag editor, to open folder and copy selection to title tag, artist tag, etc.
-	Add option to hint current_playlist. Thanks to Brett Kleinschmidt.
-	Add option to activate instant filter or search only when press enter.
-	Add option to sort Albums in library view by release-year. Thanks to Fabian Köster.
-
-Others Changes:
-	Save changes when press enter on tag editor.
-	Init gdk_threads and use it to update progress of reproduction.
-	Highlight matches on jump dialog.
-	Minor reformat of jump dialog.
-
-Updates Translations:
-	Updated Czech translation thanks to Alois Nespor.
-
-Bugs fixed:
-	Remove curl/types.h deprecated header.
-	Immediately update the progress when seek track.
-	No restart the lastfm thread when seek track.
-	No send dbus update signal when seek track.
-	No send dbus update signal when set use sofware volume.
-	Fix pragha ignore audio cd device settings.
-	Always free the path when edit tracks of current playlist.
-	Fix no update current playlist song when change the tags from menu.
-	First update music objects and window, and later the files.
-	Directly compares the pointers to find current tack when edit tags.
-	Use gdk_threads_enter/leave to add files with dbus.
-	Use gdk_threads_enter/leave to show playback error dialog.
-	Show track_no and year only if are positive.
-	Improve the speed of the library view.
-	Update progress bar only when track position > 0.
-	Only jump to tack droped when change the model, and scroll to the same position.
-	Select and set cursor on new song when drop a tack on current playlist.
-	Fix somes memory leaks and occasional cleanup.
-
-V0.98.0
-News:
-	A new menu "Add to playlist" that replaces "Save selection" on current playlist.
-	More speed when Clear, Remove, and Crop tracks on current playlist.
-	More speed to add tracks to the current playlist from popup menu.
-	More speed to add playlists to the current playlist.
-
-Others Changes:
-	Change "Play Audio CD" menu item to "Add Audio CD".
-	Only sensitive the options clear and save playlist in the menu of current playlist when there is no selection.
-	Minor code cleanup to coordinate with subversion code.
-
-Updates Translations:
-	Update French tranlations thanks to raphaelh.
-	Changed many strings to translate. Please help to update your native language.
-
-Bugs fixed:
-	Use cddb_query to search audio cd info. Fix poor results of cddb.
-	Fix possible memory leak when save tags.
-	Fix warning when to year < 0 on tag editor.
-	D'Oh!. Fix add recent files.
-
-V0.99.0
-News:
-	Show a busy mouse icon when running a slow function.
-	Search artist info, album art, and lyrics into a thread.
-	Add structure to read new playlists formats. Until now PLS, XPSF and WAX.
-	Add a button on the save playlist dialogs to export the playlists.
-	Implement "Add to playback queue" in search dialog.
-	Implement "Import a XPSF playlist", useful when exporting playlists in last.fm, that not use the location tag.
-	First attempt to restore the configuration of the audio device.
-	Implement a basic cache for downloaded cover art in "(home)/.cache/pragha-album-art".
-	Add option to search the album art automatically in lastfm.
-
-Others Changes:
-	Preselect the (playlist_name).m3u filename to export dialog.
-	Eliminate the option to play track in search dialog.
-	Set "jump to track" by default in search dialog.
-	Displays a message with the number of songs added when import playlist.
-	Add "Playlists" filter on open file chooser.
-	Improved panel audio settings layout in preferences.
-
-Updates Translations:
-	Update German translation thanks to cwickert.
-	Update Czech translation thanks to anespor.
+	Fix Bad space on message of error playback dialog.
+	Update German translation thanks to Cwickert.
 	Update Portuguese translation thanks to smarquespt.
+	Update Italian translation thanks to bersil.
+	Update Rusian translation thanks to lazy.kent.suse.
+
+[1] Note: For this, depend now on libclastfm >= 0.5. Sorry packagers.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.0 "Good news, or aberration?."
+News:
+	Add a classic 10-band software equalizer.
+
+Others Changes:
+	Save the m3u playlists with relative paths when stored in the same directory that the audio files.
+	Add basic Static Quicklist entries on desktop file to control pragha on unity.
 
 Bugs fixed:
-	Fix "All files" filter in open file chooser.
-	Fuse audio_alsa_device and audio_oss_device in audio_device.
-	Only set audio_cd_device when playback a audio cd.
-	Update about dialog year.
-	Update MimeTypes on desktop file.
+	Emit album art url on mpris2 when is available.
+	Emit new metadata when edit tag of current track.
+	Fix try to edit some tags of radio stream with taglib.
+	Add playlists mime on desktop file.
+	Use autoaudiosink as default audiosink.
+	Update notifications instead of show one for each song change.
+	Set Next as default button when show a playback error.
+	Do not allow change song from mpris/keybinder/systray when show a playback error.
+	Can open playlists with relative paths.
+	Save radio stream when press enter on name.
+	Fix compilation without exo-1.
+	Comfirm with an dialog before delete any radio/playlist item.
+	Fixes some memory leaks.
+
+Updates Translations:
+	Add Italian translation thanks to Stribianese91.
+	Update German translation thanks to Cwickert.
+	Update Rusian translation thanks to lazy.kent.suse.
+	Update Portuguese translation thanks to smarquespt.
+	Sorry if I lost any translation. Transifex does not show the entire history. Please. Contact me.
+
+V1.0.RC3
+News:
+	Add option to show the playback controls below.
+	Can select a name when add radio streams to save on db and append to playlist tree.
+	
+Others Changes:
+	Fix/Change somes strings. Sorry.
+	Init pragha with focus on play button.
+	Add the new stream with the uri/name as title.
+	Better layout of rename and add location dialog.
+	Add a new popup menu with "New playlist" and a list of saved playlist to "Save playlist" like the "Add selection" popup.
+	Also append boths pupups submenus to main menu.
+	Properly set the title in save playlist dialogs.
+	Edit track information when double click on the track label of the panel.
+	When playback is stopped and no has selected any track, play a random track if shuffle has activated.
+
+Bugs fixed:
+	Remove useless warning "Everything is fine" when no found a cover.
+	No search artist information when missing the artist name.
+	No search lyrics when missing the title or artist name.
+	Init the threads conditionally depending on the version of glibc, removing g_thread_init deprecated in 2.31
+	Remove unused code, that remove g_strncasecmp deprecated function.
+	Better buffering streaming. Prevent that it refuse to stop the playback.
+	Better buffering. Not update mpris, lastfm or get album art.
+	D'Oh!. Fix Segmentation fault when the stream update the tags on RC1/2
+	No update playlist view when cancel the rename action.
+
+V1.0.RC2
+News:
+	Better session managament support when exo-1 >= 0.6 is available.
+	 * Now save current playlist when save session.
+	 * Now save last posicion when save session.
+	 * etc, etc.
+	Rename playlist.
+	Add support to playing streams over a network.
+
+Others Changes:
+	When just run Pragha init lastfm with a timeuout of 30 sec, but with a simple thread when change preferences.
+	Set width of queue/pixbuf column fixed to 32px. Set queue bubble size fixed to 12px.
+
+Bugs fixed:
+	Implement lost Seek an SetPosition on mpris2.
+	Fix main toolbar items use GTK_ICON_SIZE_LARGE_TOOLBAR, volume button uses _SMALL_TOOLBAR.
+	Use some un/likely optimization.
+	Remove unused code.
 
 V1.0.RC1
 News:
@@ -296,85 +175,254 @@ Bugs fixed:
 Is a very new library, an the author defines it as "GlyR is a searchengine for musicrelated metadata"
 Many thanks to Chris for writing to me, offering his library when asked for a alternative to chartyrics.
 
-V1.0.RC2
+V0.99.0
 News:
-	Better session managament support when exo-1 >= 0.6 is available.
-	 * Now save current playlist when save session.
-	 * Now save last posicion when save session.
-	 * etc, etc.
-	Rename playlist.
-	Add support to playing streams over a network.
+	Show a busy mouse icon when running a slow function.
+	Search artist info, album art, and lyrics into a thread.
+	Add structure to read new playlists formats. Until now PLS, XPSF and WAX.
+	Add a button on the save playlist dialogs to export the playlists.
+	Implement "Add to playback queue" in search dialog.
+	Implement "Import a XPSF playlist", useful when exporting playlists in last.fm, that not use the location tag.
+	First attempt to restore the configuration of the audio device.
+	Implement a basic cache for downloaded cover art in "(home)/.cache/pragha-album-art".
+	Add option to search the album art automatically in lastfm.
 
 Others Changes:
-	When just run Pragha init lastfm with a timeuout of 30 sec, but with a simple thread when change preferences.
-	Set width of queue/pixbuf column fixed to 32px. Set queue bubble size fixed to 12px.
-
-Bugs fixed:
-	Implement lost Seek an SetPosition on mpris2.
-	Fix main toolbar items use GTK_ICON_SIZE_LARGE_TOOLBAR, volume button uses _SMALL_TOOLBAR.
-	Use some un/likely optimization.
-	Remove unused code.
-
-V1.0.RC3
-News:
-	Add option to show the playback controls below.
-	Can select a name when add radio streams to save on db and append to playlist tree.
-	
-Others Changes:
-	Fix/Change somes strings. Sorry.
-	Init pragha with focus on play button.
-	Add the new stream with the uri/name as title.
-	Better layout of rename and add location dialog.
-	Add a new popup menu with "New playlist" and a list of saved playlist to "Save playlist" like the "Add selection" popup.
-	Also append boths pupups submenus to main menu.
-	Properly set the title in save playlist dialogs.
-	Edit track information when double click on the track label of the panel.
-	When playback is stopped and no has selected any track, play a random track if shuffle has activated.
-
-Bugs fixed:
-	Remove useless warning "Everything is fine" when no found a cover.
-	No search artist information when missing the artist name.
-	No search lyrics when missing the title or artist name.
-	Init the threads conditionally depending on the version of glibc, removing g_thread_init deprecated in 2.31
-	Remove unused code, that remove g_strncasecmp deprecated function.
-	Better buffering streaming. Prevent that it refuse to stop the playback.
-	Better buffering. Not update mpris, lastfm or get album art.
-	D'Oh!. Fix Segmentation fault when the stream update the tags on RC1/2
-	No update playlist view when cancel the rename action.
-
-V1.0
-News:
-	Add a classic 10-band software equalizer.
-
-Others Changes:
-	Save the m3u playlists with relative paths when stored in the same directory that the audio files.
-	Add basic Static Quicklist entries on desktop file to control pragha on unity.
-
-Bugs fixed:
-	Emit album art url on mpris2 when is available.
-	Emit new metadata when edit tag of current track.
-	Fix try to edit some tags of radio stream with taglib.
-	Add playlists mime on desktop file.
-	Use autoaudiosink as default audiosink.
-	Update notifications instead of show one for each song change.
-	Set Next as default button when show a playback error.
-	Do not allow change song from mpris/keybinder/systray when show a playback error.
-	Can open playlists with relative paths.
-	Save radio stream when press enter on name.
-	Fix compilation without exo-1.
-	Comfirm with an dialog before delete any radio/playlist item.
-	Fixes some memory leaks.
+	Preselect the (playlist_name).m3u filename to export dialog.
+	Eliminate the option to play track in search dialog.
+	Set "jump to track" by default in search dialog.
+	Displays a message with the number of songs added when import playlist.
+	Add "Playlists" filter on open file chooser.
+	Improved panel audio settings layout in preferences.
 
 Updates Translations:
-	Add Italian translation thanks to Stribianese91.
-	Update German translation thanks to Cwickert.
-	Update Rusian translation thanks to lazy.kent.suse.
+	Update German translation thanks to cwickert.
+	Update Czech translation thanks to anespor.
 	Update Portuguese translation thanks to smarquespt.
-	Sorry if I lost any translation. Transifex does not show the entire history. Please. Contact me.
 
-======================================================
-OTHERS REALESES:
-======================================================
+Bugs fixed:
+	Fix "All files" filter in open file chooser.
+	Fuse audio_alsa_device and audio_oss_device in audio_device.
+	Only set audio_cd_device when playback a audio cd.
+	Update about dialog year.
+	Update MimeTypes on desktop file.
+
+V0.98.0
+News:
+	A new menu "Add to playlist" that replaces "Save selection" on current playlist.
+	More speed when Clear, Remove, and Crop tracks on current playlist.
+	More speed to add tracks to the current playlist from popup menu.
+	More speed to add playlists to the current playlist.
+
+Others Changes:
+	Change "Play Audio CD" menu item to "Add Audio CD".
+	Only sensitive the options clear and save playlist in the menu of current playlist when there is no selection.
+	Minor code cleanup to coordinate with subversion code.
+
+Updates Translations:
+	Update French tranlations thanks to raphaelh.
+	Changed many strings to translate. Please help to update your native language.
+
+Bugs fixed:
+	Use cddb_query to search audio cd info. Fix poor results of cddb.
+	Fix possible memory leak when save tags.
+	Fix warning when to year < 0 on tag editor.
+	D'Oh!. Fix add recent files.
+
+V0.97.0
+News:
+	Return the playback status icon on current playlist. Thanks to Brett Kleinschmidt.
+	Add a popup menu on file entry of tag editor, to open folder and copy selection to title tag, artist tag, etc.
+	Add option to hint current_playlist. Thanks to Brett Kleinschmidt.
+	Add option to activate instant filter or search only when press enter.
+	Add option to sort Albums in library view by release-year. Thanks to Fabian Köster.
+
+Others Changes:
+	Save changes when press enter on tag editor.
+	Init gdk_threads and use it to update progress of reproduction.
+	Highlight matches on jump dialog.
+	Minor reformat of jump dialog.
+
+Updates Translations:
+	Updated Czech translation thanks to Alois Nespor.
+
+Bugs fixed:
+	Remove curl/types.h deprecated header.
+	Immediately update the progress when seek track.
+	No restart the lastfm thread when seek track.
+	No send dbus update signal when seek track.
+	No send dbus update signal when set use sofware volume.
+	Fix pragha ignore audio cd device settings.
+	Always free the path when edit tracks of current playlist.
+	Fix no update current playlist song when change the tags from menu.
+	First update music objects and window, and later the files.
+	Directly compares the pointers to find current tack when edit tags.
+	Use gdk_threads_enter/leave to add files with dbus.
+	Use gdk_threads_enter/leave to show playback error dialog.
+	Show track_no and year only if are positive.
+	Improve the speed of the library view.
+	Update progress bar only when track position > 0.
+	Only jump to tack droped when change the model, and scroll to the same position.
+	Select and set cursor on new song when drop a tack on current playlist.
+	Fix somes memory leaks and occasional cleanup.
+
+V0.96.1
+	Wooow.. Search, jump and play on current playlist dialog implemened.
+
+V0.96.0.1
+	Recontra D'Oh!. Fixs gdk_threads_enter()/gdk_threads_leave() usage.
+
+V0.96.0
+News:
+	Init Lastfm into (More smooth) thread.
+	Implement Lastfm get similar and add favorites into (More smooth) thread.
+	Better (More smooth) insert tracks from file manager.
+	Better (Much more faster) insert tracks from library tree.
+
+Others Changes:
+	Returns the icon in current playlist to show errors.
+	Use Structure Folder view by default.
+	Emit volumes changes on mpris2.
+	Use folder-music to folder structure view.
+	Set cursor when jump to current track.
+	Betters debug messages on lastfm and chartlyrics and comment everything necessary on the status bar.
+	Add recent files info on a idle func.
+
+Updates Translations:
+	Add a new translation to Simplified Chinese thanks to ifree.
+	Add a new translation to Greek thanks to koleoptero.
+	Update Dutch translation thanks to tuxmachine.
+	Update Ukrainian thanslation thanks to Sergiy_Gavrylov.
+
+Bugs fixed:
+	Remove lastfm connected flag. Use seesion_id instead.
+	Insensitive tree views when change the model.
+	Artist and Comment are array on mpris2 metadata.
+	Fix potential memory leak on mpris2.
+	Change the condition to refresh the saved_title (Fix Metadata emision).
+	Fix lastfm start every time that enter in preferences unnecessarily.
+	Fix calcule midle song lenght minus 5 seconds.
+	Fix add recurive folder with command line.
+	Test realloc on chartlyrics.
+	Remove some unuseles gtk_widget_show/hide_all.
+
+V0.95.0.1
+	Prepend interfece string to PropertiesChanged signal.
+
+V0.95.0
+News:
+	Add support for MonkeyAudio songs.
+	Now difference between oss4 and oss3.
+	Adds another option to use the default sink.
+
+Bugs fixed:
+	Wait 5 seconds to update the current song on lastfm.
+	=> Fix crash when rapidly changing songs.
+	=> Uses less network when rapidly changing songs.
+	Fix never init Mpris2 interface when init.
+	Start pragha with file arguments.
+	Better debugs messages on playbin constructs.
+	Fix Typos.
+
+V0.94.1
+News:
+	Implement a dialog to skip tracks if fails playback.
+
+Bugs fixed:
+	Compile with Gcc 4.6, with all that this implies.
+	Use _tree_row_references to edit track.
+	Get the files to change quickly, to prevent when finished the song and change the selection.
+	Always check the current song to prevent when finished and change the song.
+
+V0.94.0
+Special thanks to Vikram Ambrose and Hakan Erduman for answering all my questions.
+News:
+	Add various demonstration features over Lastfm sevices.
+		* Love track.
+		* Unlove track.
+		* Add favorites.
+		* Artist info.
+		* Get album art.
+		* Add similar.
+	Complete MPRIS2 track list interface.
+	Add option to init MPRIS2 in preferences.
+	Restore Search Lyrics with a dialog using Chartlyrics.com.
+	Add a new popup menu when current playlist is emply.
+
+Others Changes:
+	Now depend on external libclastfm >= 0.4 (Optional).
+
+Updates Translations:
+	Add Turkisk translation thanks to Hakan.
+	Update Czech translation thanks to Anespor.
+
+Bugs fixed:
+	Much more faster when you start with many songs, or add the complete library.
+	Fix bad editing of current playlist items when it is sorted (Issue 21).
+	Fix Segfault after clear playlist and play (Issue 23 and 24).
+	No erase user info when no connect to lastfm.
+	Never init pragha witch -p,-s,-t, -r, -n, -t... command options.
+	Better update album art.
+	Drop unused vars.
+
+Note: http://liblastfm.sourceforge.net now is libclastfm due to incompatibility with the official library.
+
+V0.93.1:
+Any change on pragha. But use liblastfm 0.4, that does not depend on libopenssl, incompatible with the GPL
+So fix Issee 22. :)
+
+V0.93
+News:
+	Add MPRIS2 control support and emit a dbus signal named 'update_state' thanks to Hakan Erduman.
+	Added a DBus message to toggle the visibility of the player thanks to Hakan Erduman.
+	Restore lastfm scrobbling support thanks to http://liblastfm.sourceforge.net/.
+	* Use Scrobbling API 2.0.
+	* Now is correctly identified like Pragha.
+
+Bugs fixed:
+	Fix regression on generation of recently-used data introduced in 241.
+	Support to libnotify 0.7. (Hate it with all my heart.)
+	Again, change notifications according to the standard. (xfce4-notifyd follows strictly)
+
+Updates Translations:
+	Updated Czech translation thank to Alois.
+
+Note: Temporarily disables search lyrics, by license change of http://www.lyricsplugin.com.
+
+V0.92
+News:
+	Use cubic volume if available (Need gstreamer-plugins-base-devel).
+	Sink volume with audio backend changes.
+	"Restore" replace and play option.
+
+Others Changes:
+	Depend on external libkeybinder (Optional).
+
+Bugs fixed:
+	Disable "Add actions.." options if the notifier does not support it.
+
+Updates Translations:
+	Add Hungiran translatiton.
+	Update others translation.
+
+V0.91
+News:
+	Ported to use gstreamer.
+
+Benefit? :)
+ * Add support for new formats: So far wma and m4a. Please checks support to m4a. I no have any m4a file to test. ;)
+ * Add a new pulseaudio backend.
+ * Now it's free!. Can be packaged for fedora for example, since not depend directly of libmad.
+
+Regressions: :(
+ * Lastfm not working. Soon fix it using https://github.com/felipec/libscrobbler. Adding librefm and love support.
+ * Lost Mod file support. Sorry.. but someone used it? In fact very easy to add support for this. Maybe fix it later.
+
+Then, everything else should work. :)
+
+==========================================================
+OTHERS REALESES BASED ON ORIGINAL CONSONANCE AUDIO ENGINE:
+==========================================================
 V0.8.3
 News:
 	Move to trash instead remove tracks in library view.
