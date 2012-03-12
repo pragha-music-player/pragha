@@ -6,10 +6,11 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [0])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
+m4_define([pragha_version_micro], [1])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2009-2011
+AC_COPYRIGHT([Copyright (c) 2009-2012
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 
@@ -107,7 +108,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
 dnl Check libglyr
 LIBGLYR_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
-                       [libglyr], [0.9.0],
+                       [libglyr], [0.9.4],
                        [libglyr],
                        [libglyr library], [yes])
 
@@ -137,8 +138,8 @@ echo ""
 echo "  Prefix.................................................................: ${prefix}"
 echo "  Cubic volume support...............(Need gstreamer-plugins-base-devel).: $GSTREAMER_PLUGINS_BASE_FOUND"
 echo "  Global keyboard shortcuts support............(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
-echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.4).: $LIBCLASTFM_FOUND"
+echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "  Better session management support................(Need exo-1 >= 0.6.0).: $EXO_FOUND"
-echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.0).: $LIBGLYR_FOUND"
+echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
 echo ""
 
