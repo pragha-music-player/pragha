@@ -152,8 +152,6 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 
 	/* Set various properties */
 
-	gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(progress_bar),
-					 GTK_PROGRESS_LEFT_TO_RIGHT);
 	gtk_widget_set_size_request(progress_bar,
 				    PROGRESS_BAR_WIDTH,
 				    -1);

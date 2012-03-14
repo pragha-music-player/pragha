@@ -35,6 +35,14 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 ],[	debug=false
 	CFLAGS="$CFLAGS -DNDEBUG -O3 -Werror"
 ])
+
+dnl experimental support for gtk3
+AC_ARG_WITH([gtk3],
+            [AS_HELP_STRING([--with-gtk3],
+              [enable experimental support for gtk3])],
+            [CFLAGS="$CFLAGS -Wno-deprecated-declarations"],
+            [with_gtk3=no])
+
 AC_SUBST(CFLAGS)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -51,7 +59,9 @@ dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-0.10], [0.10])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.24])
-XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.20.0])
+AS_IF([test "x$with_gtk3" != xno],
+	[XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.0.0])],
+	[XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.20.0])])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([DBUS], [dbus-1], [1.1])
 XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.84])
