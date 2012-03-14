@@ -311,7 +311,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	}
 
 	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), cursor);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
 	xml = tinycxml_parse(contents);
@@ -326,7 +326,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 			added++;
 	}
 
-	gdk_window_set_cursor(GDK_WINDOW(cwin->mainwindow->window), NULL);
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
