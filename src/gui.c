@@ -1623,7 +1623,11 @@ GtkWidget* create_panel(struct con_win *cwin)
 	GtkWidget *play_button, *stop_button, *prev_button, *next_button;
 	GtkWidget *unfull_button, *sep, *shuffle_button, *repeat_button, *vol_button;
 	GtkWidget *album_art_frame = NULL;
+#if GTK_CHECK_VERSION (3, 0, 0)
+	GtkAdjustment *vol_adjust;
+#else
 	GtkObject *vol_adjust;
+#endif
 
 	hbox_panel = gtk_hbox_new(FALSE, 5);
 	left_controls = gtk_hbox_new(FALSE, 1);
@@ -1829,7 +1833,7 @@ GtkWidget* create_panel(struct con_win *cwin)
 GtkWidget* create_playing_box(struct con_win *cwin)
 {
 	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
-	GtkWidget *track_progress_bar;
+	GtkWidget *track_progress_bar, *track_progress_event_box;
 	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
 	GtkWidget *pack_vbox, *playing_hbox, *time_hbox;
 	GtkWidget *track_length_event_box, *track_playing_event_box;
@@ -1841,7 +1845,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	playing_hbox = gtk_hbox_new(FALSE, 2);
 
 	track_playing_event_box = gtk_event_box_new();
-	g_signal_connect (GTK_OBJECT(track_playing_event_box), "button-press-event",
+	g_signal_connect (G_OBJECT(track_playing_event_box), "button-press-event",
 			G_CALLBACK(edit_tags_playing_event), cwin);
 
 	now_playing_label = gtk_label_new(NULL);
@@ -1876,17 +1880,17 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	/* Setup track progress */
 
 	track_progress_align = gtk_alignment_new(0, 0.5, 1, 0);
+	track_progress_event_box = gtk_event_box_new();
 	track_progress_bar = gtk_progress_bar_new();
 
         gtk_widget_set_size_request(GTK_WIDGET(track_progress_bar),
                                       -1,
                                       12);
 
-	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_bar);
+	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_event_box);
+	gtk_container_add(GTK_CONTAINER(track_progress_event_box), track_progress_bar);
 
-	gtk_widget_set_events(track_progress_bar, GDK_BUTTON_PRESS_MASK);
-
-	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
+	g_signal_connect(G_OBJECT(track_progress_event_box), "button-press-event",
 			 G_CALLBACK(track_progress_change_cb), cwin);
 
 	track_time_label = gtk_label_new(NULL);
@@ -1902,7 +1906,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
 
 	track_length_event_box = gtk_event_box_new();
-	g_signal_connect (GTK_OBJECT(track_length_event_box), "button-press-event",
+	g_signal_connect (G_OBJECT(track_length_event_box), "button-press-event",
 			G_CALLBACK(timer_remaining_mode_change), cwin);
 	gtk_container_add(GTK_CONTAINER(track_length_event_box), track_length_align);
 
