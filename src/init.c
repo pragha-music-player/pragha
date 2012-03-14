@@ -1378,11 +1378,15 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+	//XXX remove this?
+#else
 	GdkScreen *screen = gtk_widget_get_screen(cwin->mainwindow);
 	GdkColormap *colormap = gdk_screen_get_rgba_colormap (screen);
 	if (colormap && gdk_screen_is_composited (screen)){
 		gtk_widget_set_default_colormap(colormap);
 	}
+#endif
 
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "window-state-event",
