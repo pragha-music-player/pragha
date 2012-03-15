@@ -161,6 +161,7 @@ render (GtkCellRenderer      *cell,
       cairo_save (cr);
 #else
       cairo_t *cr = gdk_cairo_create (GDK_DRAWABLE (window));
+      g_assert (cr);
 #endif
       
       style = gtk_widget_get_style(widget);
