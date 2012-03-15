@@ -740,34 +740,18 @@ gint backend_init(struct con_win *cwin)
 
 	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
-
-		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
-			audiosink = g_strdup_printf ("alsasink device=\"%s\"", cwin->cpref->audio_device);
-		}
-		else
-			audiosink = g_strdup("alsasink");
+		audiosink = g_strdup("alsasink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
-
-		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
-			audiosink = g_strdup_printf ("oss4sink device=\"%s\"", cwin->cpref->audio_device);
-		}
-		else
-			audiosink = g_strdup("oss4sink");
+		audiosink = g_strdup("oss4sink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
-
-		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0') {
-			audiosink = g_strdup_printf ("osssink device=\"%s\"", cwin->cpref->audio_device);
-		}
-		else
-			audiosink = g_strdup("osssink");
+		audiosink = g_strdup("osssink");
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
-
 		audiosink = g_strdup("pulsesink");
 	}
 	else {
@@ -779,7 +763,11 @@ gint backend_init(struct con_win *cwin)
 	cwin->cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
 	if (cwin->cgst->audio_sink != NULL) {
-		/* Test a 10 band equalizer */
+		/* Set the audio device to use. */
+		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
+			g_object_set(G_OBJECT(cwin->cgst->audio_sink), "device", cwin->cpref->audio_device, NULL);
+
+		/* Test 10bands equalizer and test it. */
 		cwin->cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
 		if (cwin->cgst->equalizer != NULL) {
 			GstElement *bin = gst_bin_new("audiobin");
@@ -795,10 +783,14 @@ gint backend_init(struct con_win *cwin)
 			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
 		}
 		else {
-			g_warning("Failed to create the 10bands equalizer gst_element");
+			g_warning("Failed to create the 10bands equalizer element. Not use it.");
+
+			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
 		}
 	}
 	else {
+		g_warning("Failed to create audio-sink element. Use default sink, without equalizer. ");
+
 		cwin->cgst->equalizer = NULL;
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
 	}
