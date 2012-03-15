@@ -546,6 +546,10 @@ static void update_preferences(struct con_win *cwin)
 			update_audio_device_default(cwin);
 	}
 
+	if (cwin->cpref->audio_device)
+		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->audio_device_w),
+				   cwin->cpref->audio_device);
+
 	if (cwin->cpref->audio_cd_device)
 		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->audio_cd_device_w),
 				   cwin->cpref->audio_cd_device);
