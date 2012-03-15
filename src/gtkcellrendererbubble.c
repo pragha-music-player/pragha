@@ -202,6 +202,8 @@ render (GtkCellRenderer      *cell,
       gdk_cairo_set_source_color (cr, &style->light [GTK_STATE_SELECTED]);
       cairo_stroke (cr);
 
+      cairo_pattern_destroy(pattern);
+
 #if GTK_CHECK_VERSION (3, 0, 0)
       cairo_restore (cr);
 #else
