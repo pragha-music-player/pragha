@@ -8,7 +8,6 @@ AUTOMAKE_OPTIONS =							\
 
 man_MANS = data/pragha.1
 
-docdir= $(pkgdatadir)/doc
 doc_DATA = ChangeLog FAQ NEWS README
 
 imagedir = $(datadir)/pixmaps/pragha
@@ -36,10 +35,6 @@ EXTRA_DIST = 		\
 
 distclean-local:
 	rm -rf *.cache *~
-
-rpm: dist
-	rpmbuild -ta $(PACKAGE)-$(VERSION).tar.gz
-	@rm -f $(PACKAGE)-$(VERSION).tar.gz
 
 gtk_update_icon_cache = gtk-update-icon-cache -f -t $(datadir)/icons/hicolor
 
