@@ -29,11 +29,11 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 	   yes)	debug=true ;
 		CFLAGS="$CFLAGS -DDEBUG -D_DEBUG -g -ggdb -O0 -fno-inline -fno-inline-functions" ;;
 	    no)	debug=false ;
-		CFLAGS="$CFLAGS -DNDEBUG -O3 -Werror" ;;
+		CFLAGS="$CFLAGS -DNDEBUG" ;;
 	     *)	AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
 	esac
 ],[	debug=false
-	CFLAGS="$CFLAGS -DNDEBUG -O3 -Werror"
+	CFLAGS="$CFLAGS -DNDEBUG"
 ])
 
 dnl experimental support for gtk3
