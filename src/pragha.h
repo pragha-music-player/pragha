@@ -19,6 +19,8 @@
 #ifndef PRAGHA_H
 #define PRAGHA_H
 
+#include "cdda.h" //should be before config.h, libcdio issue
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -71,7 +73,6 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "cdda.h"
 #include "gtkcellrendererbubble.h"
 #include "xml_helper.h"
 
