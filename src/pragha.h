@@ -1021,6 +1021,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
+GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 void pragha_pl_parser_open_from_file_by_extension(gchar *file, struct con_win *cwin);
 gboolean dnd_playlist_tree_begin(GtkWidget *widget,
 				    GdkDragContext *context,
@@ -1031,6 +1032,7 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 			   guint info,
 			   guint time,
 			   struct con_win *cwin);
+void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin);
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin);
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
