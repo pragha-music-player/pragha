@@ -68,7 +68,31 @@ static void add_new_track_db(gint location_id,
 	exec_sqlite_query(query, cwin, NULL);
 }
 
-static void add_entry_db(gchar *file, struct con_win *cwin)
+static void import_playlist_from_file_db(gchar *file, struct con_win *cwin)
+{
+	gchar *s_playlist, *name = NULL;
+	gint playlist_id = 0;
+	GSList *list = NULL;
+
+	name = get_display_filename(file, FALSE);
+
+	s_playlist = sanitize_string_sqlite3(name);
+
+	if (find_playlist_db(s_playlist, cwin))
+		goto bad;
+
+	playlist_id = add_new_playlist_db(s_playlist, cwin);
+
+	list = pragha_pl_parser_parse_from_file_by_extension (file);
+	if(list)
+		append_files_to_playlist(list, playlist_id, cwin);
+
+bad:
+	g_free(s_playlist);
+	g_free(name);
+}
+
+static void add_new_musicobject_from_file_db(gchar *file, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
@@ -138,6 +162,16 @@ static void add_entry_db(gchar *file, struct con_win *cwin)
 		g_free(scomment);
 
 		delete_musicobject(mobj);
+	}
+}
+
+static void add_entry_db(gchar *file, struct con_win *cwin)
+{
+	if (pragha_pl_parser_guess_format_from_extension(file) != PL_FORMAT_UNKNOWN) {
+		import_playlist_from_file_db(file, cwin);
+	}
+	else {
+		add_new_musicobject_from_file_db(file, cwin);
 	}
 }
 
