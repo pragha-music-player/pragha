@@ -116,11 +116,7 @@ void common_cleanup(struct con_win *cwin)
 		notify_uninit();
 
 #ifdef HAVE_LIBKEYBINDER
-	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
-	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);
-	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
-	keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
-	keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
+	cleanup_keybinder(cwin);
 #endif
 
 	g_option_context_free(cwin->cmd_context);
