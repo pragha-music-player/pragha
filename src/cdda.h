@@ -23,7 +23,9 @@
 
 #include <cdio/cdda.h>
 #include <cdio/cd_types.h>
+#ifdef __CDIO_CONFIG_H__
 #include <cdio/cdio_unconfig.h>
+#endif
 
 struct con_cdda_decoder {
 	gchar cdda_buf[CDIO_CD_FRAMESIZE_RAW];
