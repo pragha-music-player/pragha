@@ -50,7 +50,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(DBUS_CFLAGS) 							\
 	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
-	$(LIBX11_CFLAGS)						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
@@ -68,8 +67,7 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 	$(LIBNOTIFY_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS) 						\
-	$(LIBX11_LIBS)
+	$(LIBCDDB_LIBS)
 
 if HAVE_GSTREAMER_PLUGINS_BASE
 pragha_CFLAGS += $(GSTREAMER_BASE_CFLAGS)
