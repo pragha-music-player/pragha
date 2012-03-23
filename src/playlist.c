@@ -1507,7 +1507,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 				    mobj->file_type != FILE_CDDA &&
 				    mobj->file_type != FILE_HTTP)) {
 				    	file = g_strdup(mobj->file);
-					files = g_slist_prepend(files, mobj->file);
+					files = g_slist_prepend(files, file);
 				}
 				else if(G_LIKELY(mobj &&
 					mobj->file_type == FILE_HTTP)) {

@@ -616,6 +616,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 				       event->button, event->time);
 			ret = TRUE;
+			break;
 		}
 		case 1: {
 			if (widget == cwin->combo_order){
@@ -624,6 +625,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 						0, gtk_get_current_event_time());
 				ret = TRUE;
 			}
+			break;
 		}
 		default:
 			ret = FALSE;

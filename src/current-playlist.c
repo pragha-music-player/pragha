@@ -2474,6 +2474,7 @@ gboolean header_right_click_cb(GtkWidget *widget,
 		gtk_menu_popup(GTK_MENU(cwin->header_context_menu),
 			       NULL, NULL, NULL, NULL, event->button, event->time);
 		ret = TRUE;
+		break;
 	}
 	default:
 		ret = FALSE;
