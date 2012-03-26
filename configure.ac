@@ -69,7 +69,6 @@ XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
-XDT_CHECK_PACKAGE([LIBCURL], [libcurl], [7.19.2])
 XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
 
 dnl Check for taglib_c headers.
