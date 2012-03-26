@@ -435,7 +435,7 @@ static GVariant* mpris_Player_get_Position(struct con_win *cwin) {
 	if (cwin->cstate->state == ST_STOPPED)
 		return g_variant_new_int64(0);
 	else
-		return g_variant_new_int64(backend_get_current_position(cwin));
+		return g_variant_new_int64(backend_get_current_position(cwin) / 1000);
 }
 
 static GVariant* mpris_Player_get_MinimumRate(struct con_win *cwin) {
