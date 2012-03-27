@@ -62,14 +62,9 @@ GOptionEntry cmd_entries[] = {
 	{NULL}
 };
 
-static void _init_gui_state(struct con_win *cwin)
+#if GTK_CHECK_VERSION (3, 0, 0)
+static void init_gui_state(struct con_win *cwin)
 {
-	GdkCursor *cursor;
-
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-
 	init_playlist_view(cwin);
 
 	init_tag_completion(cwin);
@@ -78,9 +73,32 @@ static void _init_gui_state(struct con_win *cwin)
 
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);
-
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 }
+#else
+static gboolean _init_gui_state(gpointer data)
+{
+	struct con_win *cwin = data;
+
+	if (gtk_main_iteration_do(FALSE))
+		return TRUE;
+	init_playlist_view(cwin);
+
+	if (gtk_main_iteration_do(FALSE))
+		return TRUE;
+	init_tag_completion(cwin);
+
+	if (gtk_main_iteration_do(FALSE))
+		return TRUE;
+	init_library_view(cwin);
+
+	if (gtk_main_iteration_do(FALSE))
+		return TRUE;
+	if (cwin->cpref->save_playlist)
+		init_current_playlist_view(cwin);
+
+	return TRUE;
+}
+#endif
 
 gint init_dbus(struct con_win *cwin)
 {
@@ -1003,6 +1021,7 @@ gint init_config(struct con_win *cwin)
 		return 0;
 }
 
+#if GTK_CHECK_VERSION (3, 0, 0)
 static void rescand_icompatible_db(struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -1021,6 +1040,30 @@ static void rescand_icompatible_db(struct con_win *cwin)
 	if( result == GTK_RESPONSE_YES)
 		rescan_library_handler(cwin);
 }
+#else
+static gboolean rescand_icompatible_db(gpointer data)
+{
+	struct con_win *cwin = data;
+
+	GtkWidget *dialog;
+	gint result;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+					GTK_DIALOG_MODAL,
+					GTK_MESSAGE_WARNING,
+					GTK_BUTTONS_YES_NO,
+					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
+					"Want to upgrade the collection?."));
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if( result == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+
+	return TRUE;
+}
+#endif
 
 gint init_musicdbase(struct con_win *cwin)
 {
@@ -1039,7 +1082,11 @@ gint init_musicdbase(struct con_win *cwin)
 		ret = g_unlink(cwin->cdbase->db_file);
 		if (ret != 0)
 			g_warning("%s", strerror(ret));
+		#if GTK_CHECK_VERSION (3, 0, 0)
 		rescand_icompatible_db(cwin);
+		#else
+		gtk_init_add(rescand_icompatible_db, cwin);
+		#endif
 	}
 
 	/* Create the database file */
@@ -1489,5 +1536,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	init_session_support(cwin);
 	#endif
 
-	_init_gui_state(cwin);
+	#if GTK_CHECK_VERSION (3, 0, 0)
+	init_gui_state(cwin);
+	#else
+	gtk_init_add(_init_gui_state, cwin);
+	#endif
 }
