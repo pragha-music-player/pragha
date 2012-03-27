@@ -1557,8 +1557,19 @@ void init_library_view(struct con_win *cwin)
 				cwin, model);
 
 			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
 			while(gtk_events_pending())
 				gtk_main_iteration_do(FALSE);
+			#else
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					sqlite3_free_table(result.resultp);
+					return;
+				}
+			}
+			#endif
 		}
 	}
 	else {
@@ -1569,8 +1580,19 @@ void init_library_view(struct con_win *cwin)
 			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model);
 
 			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
 			while(gtk_events_pending())
 				gtk_main_iteration_do(FALSE);
+			#else
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					sqlite3_free_table(result.resultp);
+					return;
+				}
+			}
+			#endif
 		}
 	}
 	sqlite3_free_table(result.resultp);

@@ -1818,8 +1818,19 @@ void init_playlist_view(struct con_win *cwin)
 				   &iter, model, cwin);
 
 		/* Have to give control to GTK periodically ... */
+		#if GTK_CHECK_VERSION (3, 0, 0)
 		while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
+		#else
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+		#endif
 	}
 
 	sqlite3_free_table(result.resultp);
@@ -1844,8 +1855,19 @@ void init_playlist_view(struct con_win *cwin)
 				   &iter, model, cwin);
 
 		/* Have to give control to GTK periodically ... */
+		#if GTK_CHECK_VERSION (3, 0, 0)
 		while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
+		#else
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+		#endif
 	}
 	sqlite3_free_table(result.resultp);
 
