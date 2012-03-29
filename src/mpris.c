@@ -249,6 +249,7 @@ static GVariant* mpris_Player_Seek(struct con_win *cwin, GVariant* parameters) {
 		seek = cwin->cstate->curr_mobj->tags->length;
 
 	backend_seek(seek, cwin);
+	mpris_update_seeked(cwin, seek);
 
 	return NULL;
 }
@@ -266,10 +267,22 @@ static GVariant* mpris_Player_SetPosition(struct con_win *cwin, GVariant* parame
 			seek = cwin->cstate->curr_mobj->tags->length;
 
 		backend_seek(seek, cwin);
+		mpris_update_seeked(cwin, seek);
 	}
 	g_free(path);
 
 	return NULL;
+}
+
+void mpris_update_seeked(struct con_win *cwin, gint position) {
+	if(NULL == cwin->cmpris2->dbus_connection)
+		return; /* better safe than sorry */
+
+	CDEBUG(DBG_MPRIS, "MPRIS emit seeked signal..");
+
+	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
+		"org.mpris.MediaPlayer2.Player", "Seeked",
+		 g_variant_new ("(x)", position * 1000000l), NULL);
 }
 
 static GVariant* mpris_Player_OpenUri(struct con_win *cwin, GVariant* parameters) {
@@ -1141,8 +1154,7 @@ void mpris_cleanup(struct con_win *cwin)
 	g_slice_free(struct con_mpris2, cwin->cmpris2);
 }
 
-// still todo: 
-// * emit Player.Seeked signal when user seeks in track or playback starts not from begin
+// still todo:
 // * emit Playlists.PlaylistChanged signal when playlist rename is implemented
 // * provide an Icon for a playlist when e.g. 'smart playlists' are implemented
 // * emit couple of TrackList signals when drag'n drop reordering
