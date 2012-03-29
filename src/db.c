@@ -68,28 +68,35 @@ static void add_new_track_db(gint location_id,
 	exec_sqlite_query(query, cwin, NULL);
 }
 
-static void import_playlist_from_file_db(gchar *file, struct con_win *cwin)
+static void import_playlist_from_file_db(gchar *playlist_file, struct con_win *cwin)
 {
-	gchar *s_playlist, *name = NULL;
+	gchar *s_playlist, *playlist = NULL, *s_file;
 	gint playlist_id = 0;
-	GSList *list = NULL;
+	GSList *list = NULL, *i = NULL;
 
-	name = get_display_filename(file, FALSE);
+	playlist = get_display_filename(playlist_file, FALSE);
 
-	s_playlist = sanitize_string_sqlite3(name);
+	s_playlist = sanitize_string_sqlite3(playlist);
 
 	if (find_playlist_db(s_playlist, cwin))
 		goto bad;
 
 	playlist_id = add_new_playlist_db(s_playlist, cwin);
 
-	list = pragha_pl_parser_parse_from_file_by_extension (file);
-	if(list)
-		append_files_to_playlist(list, playlist_id, cwin);
+	list = pragha_pl_parser_parse_from_file_by_extension (playlist_file);
+	if(list) {
+		for (i=list; i != NULL; i = i->next) {
+			s_file = sanitize_string_sqlite3(i->data);
+			add_track_playlist_db(s_file, playlist_id, cwin);
+			g_free(s_file);
+			g_free(i->data);
+		}
+		g_slist_free(list);
+	}
 
 bad:
 	g_free(s_playlist);
-	g_free(name);
+	g_free(playlist);
 }
 
 static void add_new_musicobject_from_file_db(gchar *file, struct con_win *cwin)
@@ -1066,6 +1073,12 @@ void delete_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
 gint init_dbase_schema(struct con_win *cwin)
 {
 	gchar *query;
+
+	/* Set PRAGMA synchronous = OFF */
+
+	query = g_strdup_printf("PRAGMA synchronous=OFF");
+	if (!exec_sqlite_query(query, cwin, NULL))
+		return -1;
 
 	/* Create 'TRACKS' table */
 
