@@ -1442,8 +1442,11 @@ void dnd_playlist_tree_get(GtkWidget *widget,
 
 void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 {
-	gchar *file, *s_file;
+	gchar *file, *s_file, *query;
 	GSList *i = NULL;
+
+	query = g_strdup_printf("BEGIN;");
+	exec_sqlite_query(query, cwin, NULL);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
@@ -1452,6 +1455,9 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 		g_free(s_file);
 		g_free(file);
 	}
+
+	query = g_strdup_printf("END;");
+	exec_sqlite_query(query, cwin, NULL);
 
 	g_slist_free(list);
 }
