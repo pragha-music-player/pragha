@@ -256,8 +256,10 @@ static GVariant* mpris_Player_Seek(struct con_win *cwin, GVariant* parameters) {
 static GVariant* mpris_Player_SetPosition(struct con_win *cwin, GVariant* parameters) {
 	gint64 param;
 	gchar *path = NULL;
-	g_variant_get(parameters, "(sx)", &path, &param);
-	if(!g_strcmp0(cwin->cstate->curr_mobj->file, path)) {
+	struct musicobject *mobj = NULL;
+
+	g_variant_get(parameters, "(ox)", &path, &param);
+	if (handle_path_request(cwin, path, &mobj, NULL) && cwin->cstate->curr_mobj == mobj) {
 		gint seek = (param / 1000000);
 
 		if (seek >= cwin->cstate->curr_mobj->tags->length)
