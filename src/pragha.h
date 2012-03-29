@@ -685,6 +685,12 @@ struct con_mpris2 {
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
+struct con_gnome_media_keys {
+	guint watch_id;
+	guint handler_id;
+	GDBusProxy *proxy;
+};
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
@@ -695,6 +701,7 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	struct con_mpris2 *cmpris2;
+	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
@@ -1315,6 +1322,11 @@ gint init_notify(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
+
+/* gnome media keys */
+
+void init_gnome_media_keys(struct con_win *cwin);
+void cleanup_gnome_media_keys(struct con_win *cwin);
 
 /* keybinder */
 
