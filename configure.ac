@@ -58,7 +58,7 @@ XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-0.10], [0.10])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-0.10], [0.10])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.24])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.26])
 AS_IF([test "x$with_gtk3" != xno],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.0.0])],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.20.0])])
