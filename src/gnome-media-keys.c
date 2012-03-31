@@ -165,7 +165,7 @@ static void name_vanished_cb(GDBusConnection *connection,
     }
 }
 
-void init_gnome_media_keys(struct con_win *cwin)
+gint init_gnome_media_keys(struct con_win *cwin)
 {
     cwin->cgnome_media_keys = g_slice_new0(struct con_gnome_media_keys);
     struct con_gnome_media_keys *gmk = cwin->cgnome_media_keys;
@@ -180,6 +180,8 @@ void init_gnome_media_keys(struct con_win *cwin)
 
     gmk->handler_id = g_signal_connect(G_OBJECT(cwin->mainwindow), "focus-in-event",
                                        G_CALLBACK(on_window_focus_in_event), cwin);
+
+    return 0;
 }
 
 void cleanup_gnome_media_keys(struct con_win *cwin)

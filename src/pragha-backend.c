@@ -169,7 +169,7 @@ backend_get_volume(struct con_win *cwin)
 }
 
 gboolean
-emit_volume_changed_idle (struct con_win *cwin)
+update_volume_notify_cb (struct con_win *cwin)
 {
 	cwin->cgst->curr_vol = backend_get_volume(cwin);
 
@@ -188,7 +188,7 @@ emit_volume_changed_idle (struct con_win *cwin)
 void
 volume_notify_cb (GObject *element, GstObject *prop_object, GParamSpec *pspec, struct con_win *cwin)
 {
-	g_idle_add ((GSourceFunc) emit_volume_changed_idle, cwin);
+	g_idle_add ((GSourceFunc) update_volume_notify_cb, cwin);
 }
 
 void
@@ -718,12 +718,12 @@ backend_init_equalizer_preset(struct con_win *cwin)
 	}
 }
 
-gint backend_init(struct con_win *cwin)
+gint backend_init(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GstBus *bus;
 	gchar *audiosink = NULL;
 
-	gst_init(NULL, NULL);
+	gst_init(&argc, &argv);
 
 	cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
 
@@ -800,7 +800,6 @@ gint backend_init(struct con_win *cwin)
 	gst_bus_add_watch(bus, (GstBusFunc) backend_gstreamer_bus_call, cwin);
 
 	backend_set_soft_volume(cwin);
-	emit_volume_changed_idle(cwin);
 	backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
