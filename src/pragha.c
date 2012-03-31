@@ -116,11 +116,9 @@ void common_cleanup(struct con_win *cwin)
 		notify_uninit();
 
 #ifdef HAVE_LIBKEYBINDER
-	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
-	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);
-	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
-	keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
-	keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
+	cleanup_keybinder(cwin);
+#elif GLIB_CHECK_VERSION(2,26,0)
+	cleanup_gnome_media_keys(cwin);
 #endif
 
 	g_option_context_free(cwin->cmd_context);
@@ -202,13 +200,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	#ifdef HAVE_LIBKEYBINDER
-	if (init_keybinder(cwin) == -1) {
-		g_critical("Unable to initialize keybinder");
-		return -1;
-	}
-	#endif
-
 	#ifdef HAVE_LIBCLASTFM
 	if (init_lastfm_idle(cwin) == -1) {
 		g_critical("Unable to initialize lastfm");
@@ -235,6 +226,16 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize gstreamer");
 		return -1;
 	}
+
+	/* Init media keys when we ready to play */
+	#ifdef HAVE_LIBKEYBINDER
+	if (init_keybinder(cwin) == -1) {
+		g_critical("Unable to initialize keybinder");
+		return -1;
+	}
+	#elif GLIB_CHECK_VERSION(2,26,0)
+	init_gnome_media_keys(cwin);
+	#endif
 
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 	gtk_main();

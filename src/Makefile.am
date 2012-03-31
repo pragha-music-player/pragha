@@ -22,6 +22,7 @@ pragha_SOURCES =cdda.c \
 		librarytree.c \
 		menu.c \
 		mpris.c \
+		gnome-media-keys.c \
 		musicobject.c \
 		panel.c \
 		playlist.c \
@@ -76,6 +77,7 @@ pragha_LDFLAGS += $(GSTREAMER_BASE_LIBS)				\
 endif
 
 if HAVE_LIBKEYBINDER
+pragha_SOURCES += keybinder.c
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
 pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
 endif
