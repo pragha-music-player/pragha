@@ -117,7 +117,7 @@ void common_cleanup(struct con_win *cwin)
 
 #ifdef HAVE_LIBKEYBINDER
 	cleanup_keybinder(cwin);
-#else
+#elif GLIB_CHECK_VERSION(2,26,0)
 	cleanup_gnome_media_keys(cwin);
 #endif
 
@@ -233,7 +233,7 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
-	#else
+	#elif GLIB_CHECK_VERSION(2,26,0)
 	init_gnome_media_keys(cwin);
 	#endif
 
