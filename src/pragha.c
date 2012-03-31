@@ -162,6 +162,12 @@ gint main(gint argc, gchar *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
+
+	if (init_threads(cwin) == -1) {
+		g_critical("Unable to init threads");
+		return -1;
+	}
+
 	if (init_dbus(cwin) == -1) {
 		g_critical("Unable to init dbus connection");
 		return -1;
@@ -190,11 +196,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (init_threads(cwin) == -1) {
-		g_critical("Unable to init threads");
-		return -1;
-	}
-
 	if (init_notify(cwin) == -1) {
 		g_critical("Unable to initialize libnotify");
 		return -1;
@@ -212,6 +213,20 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
+	if (mpris_init(cwin) == -1) {
+		g_critical("Unable to initialize MPRIS");
+		return -1;
+	}
+
+	if(backend_init(argc, argv, cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
+		return -1;
+	}
+
+	/* Init the gui after bancked to sink volume. */
+	init_gui(argc, argv, cwin);
+
+	/* Init_gnome_media_keys requires constructed main window. */
 	#ifdef HAVE_LIBKEYBINDER
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
@@ -224,19 +239,9 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	if (mpris_init(cwin) == -1) {
-		g_critical("Unable to initialize MPRIS");
-		return -1;
-	}
-
-	if(backend_init(argc, argv, cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
-		return -1;
-	}
+	CDEBUG(DBG_INFO, "Init done. Running ...");
 
 	gdk_threads_enter();
-	init_gui(argc, argv, cwin);
-	CDEBUG(DBG_INFO, "Init done. Running ...");
 	gtk_main();
 	gdk_threads_leave();
 
