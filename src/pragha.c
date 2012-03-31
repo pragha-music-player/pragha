@@ -212,34 +212,32 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	if (mpris_init(cwin) == -1) {
-		g_critical("Unable to initialize MPRIS");
-		return -1;
-	}
-
-	gdk_threads_enter();
-
-	init_gui(argc, argv, cwin);
-
-	/* Need init after gui to sync volume with controls */
-	if(backend_init(cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
-		return -1;
-	}
-
-	/* Init media keys when we ready to play */
 	#ifdef HAVE_LIBKEYBINDER
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
 	#elif GLIB_CHECK_VERSION(2,26,0)
-	init_gnome_media_keys(cwin);
+	if (init_gnome_media_keys(cwin) == -1) {
+		g_critical("Unable to initialize gnome media keys");
+		return -1;
+	}
 	#endif
 
+	if (mpris_init(cwin) == -1) {
+		g_critical("Unable to initialize MPRIS");
+		return -1;
+	}
+
+	if(backend_init(argc, argv, cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
+		return -1;
+	}
+
+	gdk_threads_enter();
+	init_gui(argc, argv, cwin);
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 	gtk_main();
-
 	gdk_threads_leave();
 
 	return 0;

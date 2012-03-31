@@ -1178,6 +1178,7 @@ gint64 backend_get_current_length(struct con_win *cwin);
 gint64 backend_get_current_position(struct con_win *cwin);
 void backend_set_soft_volume(struct con_win *cwin);
 gdouble backend_get_volume (struct con_win *cwin);
+gboolean update_volume_notify_cb (struct con_win *cwin);
 void backend_set_volume (gdouble volume, struct con_win *cwin);
 void backend_update_volume (struct con_win *cwin);
 gboolean backend_is_playing(struct con_win *cwin);
@@ -1188,7 +1189,7 @@ void backend_play (struct con_win *cwin);
 void backend_stop (GError *error, struct con_win *cwin);
 void backend_start(struct musicobject *mobj, struct con_win *cwin);
 void backend_quit (struct con_win *cwin);
-gint backend_init (struct con_win *cwin);
+gint backend_init(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Audio functions */
 
@@ -1329,7 +1330,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* gnome media keys */
 
-void init_gnome_media_keys(struct con_win *cwin);
+gint init_gnome_media_keys(struct con_win *cwin);
 void cleanup_gnome_media_keys(struct con_win *cwin);
 
 /* keybinder */
