@@ -685,6 +685,14 @@ struct con_mpris2 {
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
+#if GLIB_CHECK_VERSION(2,26,0)
+struct con_gnome_media_keys {
+	guint watch_id;
+	guint handler_id;
+	GDBusProxy *proxy;
+};
+#endif
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
@@ -695,6 +703,9 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	struct con_mpris2 *cmpris2;
+	#if GLIB_CHECK_VERSION(2,26,0)
+	struct con_gnome_media_keys *cgnome_media_keys;
+	#endif
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
@@ -819,14 +830,6 @@ void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
 void rescan_library_handler(struct con_win *cwin);
-
-/* Global Hotkeys handlers */
-
-void keybind_prev_handler (const char *keystring, gpointer data);
-void keybind_play_handler (const char *keystring, gpointer data);
-void keybind_stop_handler (const char *keystring, gpointer data);
-void keybind_next_handler (const char *keystring, gpointer data);
-void keybind_media_handler (const char *keystring, gpointer data);
 
 /* Panel actions */
 
@@ -1320,10 +1323,19 @@ gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
-gint init_keybinder(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
+
+/* gnome media keys */
+
+void init_gnome_media_keys(struct con_win *cwin);
+void cleanup_gnome_media_keys(struct con_win *cwin);
+
+/* keybinder */
+
+gint init_keybinder(struct con_win *cwin);
+void cleanup_keybinder(struct con_win *cwin);
 
 /* Lastfm Helper */
 
