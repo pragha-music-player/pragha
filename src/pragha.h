@@ -685,11 +685,13 @@ struct con_mpris2 {
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
+#if GLIB_CHECK_VERSION(2,26,0)
 struct con_gnome_media_keys {
 	guint watch_id;
 	guint handler_id;
 	GDBusProxy *proxy;
 };
+#endif
 
 struct con_win {
 	struct pixbuf *pixbuf;
@@ -701,7 +703,9 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	struct con_mpris2 *cmpris2;
+	#if GLIB_CHECK_VERSION(2,26,0)
 	struct con_gnome_media_keys *cgnome_media_keys;
+	#endif
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;
