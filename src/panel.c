@@ -525,14 +525,6 @@ void shuffle_button (struct con_win *cwin)
 	}
 }
 
-void keybind_play_handler (const char *keystring, gpointer data)
-{
-	struct con_win *cwin = data;
-
-	if(cwin->cgst->emitted_error == FALSE)
-		play_pause_resume(cwin);
-}
-
 void play_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_pause_resume(cwin);
@@ -595,25 +587,9 @@ void play_pause_resume(struct con_win *cwin)
 	}
 }
 
-void keybind_stop_handler (const char *keystring, gpointer data)
-{
-	struct con_win *cwin = data;
-
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_stop(NULL, cwin);
-}
-
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	backend_stop(NULL, cwin);
-}
-
-void keybind_prev_handler (const char *keystring, gpointer data)
-{
-	struct con_win *cwin = data;
-
-	if(cwin->cgst->emitted_error == FALSE)
-		play_prev_track(cwin);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
@@ -621,24 +597,9 @@ void prev_button_handler(GtkButton *button, struct con_win *cwin)
 	play_prev_track(cwin);
 }
 
-void keybind_next_handler (const char *keystring, gpointer data)
-{
-	struct con_win *cwin = data;
-
-	if(cwin->cgst->emitted_error == FALSE)
-		play_next_track(cwin);
-}
-
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	play_next_track(cwin);
-}
-
-void keybind_media_handler (const char *keystring, gpointer data)
-{
-	struct con_win *cwin = data;
-
-	toogle_main_window (cwin, FALSE);
 }
 
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
