@@ -389,6 +389,32 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 	gtk_tree_path_free (path);
 }
 
+/* Signal handler for parse the error dialog response. */
+
+static void backend_error_dialog_response(GtkDialog *dialog,
+					  gint response,
+					  GError *error)
+{
+	struct con_win *cwin;
+
+	cwin = g_object_get_data (G_OBJECT(dialog), "cwin");
+
+	switch (response) {
+		case GTK_RESPONSE_APPLY: {
+			backend_advance_playback (error, cwin);
+			break;
+		}
+		case GTK_RESPONSE_ACCEPT:
+		case GTK_RESPONSE_DELETE_EVENT:
+		default: {
+			backend_stop (error, cwin);
+			break;
+		}
+	}
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+	g_error_free (error);
+}
+
 static void
 backend_parse_error (GstMessage *message, struct con_win *cwin)
 {
@@ -396,7 +422,6 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 	gboolean emit = TRUE;
 	GError *error = NULL;
 	gchar *dbg_info = NULL;
-	gint response;
 
 	gst_message_parse_error (message, &error, &dbg_info);
 
@@ -421,8 +446,6 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 
 		cwin->cgst->emitted_error = TRUE;
 
-		gdk_threads_enter();
-
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
@@ -435,25 +458,15 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 
 		gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
 
-		response = gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (dialog);
+		g_object_set_data (G_OBJECT(dialog), "cwin", cwin);
 
-		gdk_threads_leave();
-
-		switch (response) {
-			case GTK_RESPONSE_APPLY: {
-				backend_advance_playback (error, cwin);
-				break;
-			}
-			case GTK_RESPONSE_ACCEPT:
-			case GTK_RESPONSE_DELETE_EVENT:
-			default: {
-				backend_stop (error, cwin);
-				break;
-			}
-		}
+		g_signal_connect(G_OBJECT(dialog), "response",
+				 G_CALLBACK(backend_error_dialog_response), error);
+		gtk_widget_show_all(dialog);
 	}
-	g_error_free (error);
+	else {
+		g_error_free (error);
+	}
 	g_free (dbg_info);
 }
 
