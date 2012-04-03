@@ -18,6 +18,7 @@
 
 #include "pragha.h"
 
+#if GLIB_CHECK_VERSION(2,26,0)
 static const gchar MPRIS_NAME[] = "org.mpris.MediaPlayer2.pragha";
 static const gchar MPRIS_PATH[] = "/org/mpris/MediaPlayer2";
 static const gchar mpris2xml[] = 
@@ -1153,6 +1154,7 @@ void mpris_cleanup(struct con_win *cwin)
 	mpris_close(cwin);
 	g_slice_free(struct con_mpris2, cwin->cmpris2);
 }
+#endif
 
 // still todo:
 // * emit Playlists.PlaylistChanged signal when playlist rename is implemented
