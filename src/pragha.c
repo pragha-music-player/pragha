@@ -166,7 +166,6 @@ gint main(gint argc, gchar *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-
 	if (init_threads(cwin) == -1) {
 		g_critical("Unable to init threads");
 		return -1;
@@ -224,7 +223,7 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	if(backend_init(argc, argv, cwin) == -1) {
+	if(backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
 		return -1;
 	}

@@ -733,12 +733,12 @@ backend_init_equalizer_preset(struct con_win *cwin)
 	}
 }
 
-gint backend_init(gint argc, gchar **argv, struct con_win *cwin)
+gint backend_init(struct con_win *cwin)
 {
 	GstBus *bus;
 	gchar *audiosink = NULL;
 
-	gst_init(&argc, &argv);
+	gst_init(NULL, NULL);
 
 	cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
 

@@ -1189,7 +1189,7 @@ void backend_play (struct con_win *cwin);
 void backend_stop (GError *error, struct con_win *cwin);
 void backend_start(struct musicobject *mobj, struct con_win *cwin);
 void backend_quit (struct con_win *cwin);
-gint backend_init(gint argc, gchar **argv, struct con_win *cwin);
+gint backend_init(struct con_win *cwin);
 
 /* Audio functions */
 
