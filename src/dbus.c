@@ -255,8 +255,10 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 		g_critical("Unable to send DBUS message");
 		goto exit;
 	}
+	#if GLIB_CHECK_VERSION(2,26,0)
 	if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE))
 		mpris_update_any(cwin);
+	#endif
 
 	dbus_connection_flush(cwin->con_dbus);
 exit:

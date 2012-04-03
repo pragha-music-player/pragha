@@ -329,7 +329,10 @@ void track_progress_change_cb(GtkWidget *widget,
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
 
 	backend_seek(seek, cwin);
+
+	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_seeked(cwin, seek);
+	#endif
 }
 
 void update_album_art(struct musicobject *mobj, struct con_win *cwin)

@@ -554,7 +554,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	__update_current_song_info(cwin);
 
+	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_metadata_changed(cwin);
+	#endif
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1050,7 +1052,9 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
 
+	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_tracklist_changed(cwin);
+	#endif
 }
 
 /* Handler for 'Statistics' action in the Tools menu */
