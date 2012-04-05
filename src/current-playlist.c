@@ -1155,6 +1155,7 @@ void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (l) {
 		path = l->data;
 		delete_queue_track_refs(path, cwin);
+		gtk_tree_path_free(path);
 		l = l->next;
 	}
 	requeue_track_refs(cwin);
