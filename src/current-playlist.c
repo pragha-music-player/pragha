@@ -1146,15 +1146,16 @@ void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	GList *list;
+	GList *list, *l;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
-	while(list) {
-		path = list->data;
+	l = list;
+	while (l) {
+		path = l->data;
 		delete_queue_track_refs(path, cwin);
-		list = list->next;
+		l = l->next;
 	}
 	requeue_track_refs(cwin);
 	g_list_free (list);
