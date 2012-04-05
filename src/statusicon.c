@@ -63,8 +63,6 @@ notify_Prev_Callback (NotifyNotification *osd,
         g_assert (action != NULL);
         g_assert (strcmp (action, "media-prev") == 0);
 
-	notify_notification_close (osd, NULL);
-
 	if(cwin->cgst->emitted_error == FALSE)
 		play_prev_track(cwin);
 }
@@ -76,8 +74,6 @@ notify_Next_Callback (NotifyNotification *osd,
 {
         g_assert (action != NULL);
         g_assert (strcmp (action, "media-next") == 0);
-
-	notify_notification_close (osd, NULL);
 
 	if(cwin->cgst->emitted_error == FALSE)
 		play_next_track(cwin);
