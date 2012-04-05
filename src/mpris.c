@@ -283,7 +283,7 @@ void mpris_update_seeked(struct con_win *cwin, gint position) {
 
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.Player", "Seeked",
-		 g_variant_new ("(x)", position * 1000000l), NULL);
+		 g_variant_new ("(x)", (gint64)(position * 1000000)), NULL);
 }
 
 static GVariant* mpris_Player_OpenUri(struct con_win *cwin, GVariant* parameters) {
@@ -401,7 +401,7 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 		g_variant_new_int32(mobj->tags->track_no));
 	handle_strings_request(b, "xesam:comment", mobj->tags->comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
-		g_variant_new_int64(mobj->tags->length * 1000000l));
+		g_variant_new_int64((gint64)(mobj->tags->length * 1000000)));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
 		g_variant_new_int32(mobj->tags->bitrate));
 	g_variant_builder_add (b, "{sv}", "audio-channels",
