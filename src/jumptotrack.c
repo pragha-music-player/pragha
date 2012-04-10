@@ -329,8 +329,6 @@ dialog_jump_to_track (struct con_win *cwin)
 	GList *list;
 	GtkTreeSelection *selection;
 	gint result;
-
-	vbox = gtk_vbox_new (FALSE, 5);
 	
 	jump_store = gtk_list_store_new (2, G_TYPE_UINT, G_TYPE_STRING);
 	jump_treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL(jump_store));
@@ -390,10 +388,10 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	/* Add to the dialog's main vbox */
 
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
 	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
 	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
-
-	gtk_container_add (GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
 	
 	g_signal_connect (jump_treeview, "row-activated",
 			G_CALLBACK(jump_row_activated_cb), dialog);
