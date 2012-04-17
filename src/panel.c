@@ -687,6 +687,7 @@ void album_art_toggle_state(struct con_win *cwin)
 	if (cwin->cpref->show_album_art) {
 		if (!cwin->album_art_frame) {
 			cwin->album_art_frame = gtk_event_box_new ();
+			gtk_event_box_set_visible_window(GTK_EVENT_BOX(cwin->album_art_frame), FALSE);
 
 			gtk_box_pack_end(GTK_BOX(cwin->hbox_panel),
 					   GTK_WIDGET(cwin->album_art_frame),
