@@ -224,7 +224,7 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
-struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin)
+struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 
@@ -247,7 +247,20 @@ struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar 
 	mobj->tags->channels = 0;
 	mobj->tags->samplerate = 0;
 
+#ifdef HAVE_PLPARSER
+	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
+	if(list) {
+		mobj->file = g_strdup(list->data);
+		g_slist_foreach (list, (GFunc)g_free, NULL);
+	}
+	else {
+		mobj->file = g_strdup(uri);
+	}
+	g_slist_free(list);
+#else
 	mobj->file = g_strdup(uri);
+#endif
+	
 	mobj->file_type = FILE_HTTP;
 
 	return mobj;

@@ -42,6 +42,10 @@
 #include <exo/exo.h>
 #endif
 
+#ifdef HAVE_PLPARSER
+#include <totem-pl-parser.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -870,7 +874,7 @@ void __recur_add(gchar *dir_name, struct con_win *cwin);
 struct musicobject* new_musicobject_from_file(gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
+struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
 void init_tag_struct(struct tags *mtags);
 void free_tag_struct(struct tags *mtags);
@@ -1024,6 +1028,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
+GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(gchar *file, struct con_win *cwin);
 gboolean dnd_playlist_tree_begin(GtkWidget *widget,
 				    GdkDragContext *context,

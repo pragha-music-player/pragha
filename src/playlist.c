@@ -1073,6 +1073,37 @@ exit:
 	gtk_widget_destroy(dialog);
 }
 
+#ifdef HAVE_PLPARSER
+static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,
+				gpointer metadata, GSList **plitems)
+{
+	if (uri != NULL) {
+		*plitems = g_slist_append(*plitems, g_strdup(uri));
+	}
+}
+
+GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri)
+{
+	static TotemPlParser *pl_parser = NULL;
+	GSList *plitems = NULL;
+
+	pl_parser = totem_pl_parser_new ();
+	g_object_set(pl_parser, "recurse", TRUE, NULL);
+
+	g_signal_connect(G_OBJECT(pl_parser), "entry-parsed",
+				G_CALLBACK(_on_pl_entry_parsed), &plitems);
+
+	if (totem_pl_parser_parse(pl_parser, uri, FALSE) !=
+	    TOTEM_PL_PARSER_RESULT_SUCCESS) {
+		/* An error happens while parsing */
+		goto bad;
+	}
+	g_object_unref (pl_parser);
+
+bad:
+	return plitems;
+}
+#else
 GSList *
 pragha_pl_parser_parse_xspf (const gchar *filename)
 {
@@ -1136,7 +1167,6 @@ out:
 	
 	return list;
 }
-
 
 GSList *
 pragha_pl_parser_parse_pls (const gchar *file)
@@ -1310,6 +1340,7 @@ GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 
 	return list;
 }
+#endif
 
 void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *cwin)
 {
@@ -1323,7 +1354,13 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
+#ifdef HAVE_PLPARSER
+	gchar *uri = g_filename_to_uri (file, NULL, NULL);
+	list = pragha_totem_pl_parser_parse_from_uri(uri);
+	g_free (uri);
+#else
 	list = pragha_pl_parser_parse_from_file_by_extension (file);
+#endif
 
 	for (i = list; i != NULL; i = i->next) {
 		try++;
