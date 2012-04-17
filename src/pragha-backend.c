@@ -38,9 +38,6 @@ static gboolean update_gui(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)
-		return TRUE;
-
 	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
 
 	if(newsec > 0) {
