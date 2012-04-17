@@ -96,3 +96,9 @@ if HAVE_EXO
 pragha_CFLAGS += $(EXO_CFLAGS)
 pragha_LDFLAGS += $(EXO_LIBS)
 endif
+
+if HAVE_PLPARSER
+pragha_CFLAGS += $(PLPARSER_CFLAGS)
+pragha_LDFLAGS += $(PLPARSER_LIBS)
+endif
+

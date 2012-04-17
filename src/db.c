@@ -83,7 +83,14 @@ static void import_playlist_from_file_db(gchar *playlist_file, struct con_win *c
 
 	playlist_id = add_new_playlist_db(s_playlist, cwin);
 
+#ifdef HAVE_PLPARSER
+	gchar *uri = g_filename_to_uri (playlist_file, NULL, NULL);
+	list = pragha_totem_pl_parser_parse_from_uri(uri);
+	g_free (uri);
+#else
 	list = pragha_pl_parser_parse_from_file_by_extension (playlist_file);
+#endif
+
 	if(list) {
 		for (i=list; i != NULL; i = i->next) {
 			s_file = sanitize_string_sqlite3(i->data);
