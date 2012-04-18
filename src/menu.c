@@ -311,6 +311,16 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 					      mime_ape[i++]);
 	#endif
 
+	#ifdef HAVE_PLPARSER
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_playlist[i++]);
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_dual[i++]);
+	#else
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.M3U");
 
@@ -322,9 +332,20 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.wax");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.WAX");
+	#endif
 
 	playlist_filter = gtk_file_filter_new();
-	
+
+	#ifdef HAVE_PLPARSER
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
+					      mime_playlist[i++]);
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
+					      mime_playlist[i++]);
+	#else
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.M3U");
 
@@ -336,6 +357,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.wax");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.WAX");
+	#endif
 
 	gtk_file_filter_set_name(GTK_FILE_FILTER(playlist_filter), _("Playlists"));
 
