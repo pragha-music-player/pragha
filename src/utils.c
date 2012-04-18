@@ -35,6 +35,48 @@ const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NUL
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
 
+/* Next based on http://git.gnome.org/browse/totem-pl-parser/tree/plparse/totem-pl-parser.c */
+#ifdef HAVE_PLPARSER
+const gchar *mime_playlist[] = {"audio/x-mpegurl",
+					  "video/vnd.mpegurl",
+					  "audio/playlist",
+					  "audio/x-scpls",
+					  "application/x-smil",
+					  "application/smil",
+					  "application/vnd.ms-wpl",
+					  "video/x-ms-wvx",
+					  "audio/x-ms-wax",
+					  "application/xspf+xml",
+					  "text/uri-list",
+					  "text/x-google-video-pointer",
+					  "text/google-video-pointer",
+					  "audio/x-iriver-pla",
+					  "application/atom+xml",
+					  "application/rss+xml",
+					  "text/x-opml+xml",
+					  "audio/x-amzxml",
+					  NULL};
+
+/* These ones are "dual" types, might be a video, might be a parser. */
+const gchar *mime_dual[] = {"audio/x-real-audio",
+				    "audio/x-pn-realaudio",
+				    "application/ram",
+				    "application/vnd.rn-realmedia",
+				    "audio/x-pn-realaudio-plugin",
+				    "audio/vnd.rn-realaudio",
+				    "audio/x-realaudio",
+				    "audio/x-ms-asx",
+				    "video/x-ms-asf",
+				    "video/x-ms-wmv",
+				    "audio/x-ms-wma",
+				    "video/quicktime",
+				    "video/mp4",
+				    "application/x-quicktime-media-link",
+				    "application/x-quicktimeplayer",
+				    "application/xml",
+				    NULL};
+#endif
+
 /* Functions to check the network manager status. */
 
 NMState
