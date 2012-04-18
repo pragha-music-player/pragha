@@ -31,7 +31,7 @@ static void on_media_player_key_pressed(struct con_win *cwin,
         return;
 
     if (strcmp("Play", key) == 0)
-        play_track(cwin);
+        play_pause_resume(cwin);
     else if (strcmp("Pause", key) == 0)
         backend_pause(cwin);
     else if (strcmp("Stop", key) == 0)
