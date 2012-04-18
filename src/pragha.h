@@ -777,6 +777,11 @@ extern const gchar *mime_ape[];
 
 extern const gchar *mime_image[];
 
+#ifdef HAVE_PLPARSER
+extern const gchar *mime_playlist[];
+extern const gchar *mime_dual[];
+#endif
+
 /*Open file function*/
 
 void handle_selected_file(gpointer data, gpointer udata);
