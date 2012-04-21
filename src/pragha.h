@@ -800,7 +800,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 /* Debugging */
 
 #define CDEBUG(_lvl, _fmt, ...)			\
-	if (_lvl <= debug_level)		\
+	if (G_UNLIKELY(_lvl <= debug_level))	\
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
