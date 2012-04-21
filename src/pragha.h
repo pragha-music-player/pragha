@@ -64,7 +64,6 @@
 #include <gtk/gtk.h>
 #include <sqlite3.h>
 #include <gdk/gdkkeysyms.h>
-#include <gdk/gdkx.h>
 #include <tag_c.h>
 #include <taglib_config.h>
 #include <cddb/cddb.h>
@@ -800,7 +799,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 /* Debugging */
 
 #define CDEBUG(_lvl, _fmt, ...)			\
-	if (_lvl <= debug_level)		\
+	if (G_UNLIKELY(_lvl <= debug_level))	\
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
