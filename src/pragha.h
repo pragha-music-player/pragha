@@ -64,7 +64,6 @@
 #include <gtk/gtk.h>
 #include <sqlite3.h>
 #include <gdk/gdkkeysyms.h>
-#include <gdk/gdkx.h>
 #include <tag_c.h>
 #include <taglib_config.h>
 #include <cddb/cddb.h>
