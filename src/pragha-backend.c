@@ -558,6 +558,8 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 		g_free(ntag.artist);
 
 	gtk_tree_path_free(path);
+
+	gst_tag_list_free(tag_list);
 }
 
 void
