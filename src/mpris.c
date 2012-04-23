@@ -953,12 +953,7 @@ void mpris_update_any(struct con_win *cwin)
 			g_variant_builder_end(b),
 			g_variant_parse(G_VARIANT_TYPE("as"), "[]", NULL, NULL, NULL)
 		};
-		if(g_variant_is_floating(tuples[0]))
-			g_variant_ref_sink(tuples[0]);
-		if(g_variant_is_floating(tuples[1]))
-			g_variant_ref_sink(tuples[1]);
-		if(g_variant_is_floating(tuples[2]))
-			g_variant_ref_sink(tuples[2]);
+
 		g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 			"org.freedesktop.DBus.Properties", "PropertiesChanged",
 			g_variant_new_tuple(tuples, 3) , NULL);
@@ -986,12 +981,6 @@ mpris_update_metadata_changed(struct con_win *cwin)
 		g_variant_parse(G_VARIANT_TYPE("as"), "[]", NULL, NULL, NULL)
 	};
 
-	if(g_variant_is_floating(tuples[0]))
-		g_variant_ref_sink(tuples[0]);
-	if(g_variant_is_floating(tuples[1]))
-		g_variant_ref_sink(tuples[1]);
-	if(g_variant_is_floating(tuples[2]))
-		g_variant_ref_sink(tuples[2]);
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 		"org.freedesktop.DBus.Properties", "PropertiesChanged",
 		g_variant_new_tuple(tuples, 3) , NULL);
