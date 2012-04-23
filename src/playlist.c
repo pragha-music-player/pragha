@@ -1077,8 +1077,16 @@ exit:
 static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,
 				gpointer metadata, GSList **plitems)
 {
+	gchar *filename = NULL;
+
 	if (uri != NULL) {
-		*plitems = g_slist_append(*plitems, g_strdup(uri));
+		/* Convert the uri into a filename to taglib.*/
+		if (g_str_has_prefix (uri, "file:"))
+			filename = g_filename_from_uri (uri, NULL, NULL);
+		else
+			filename = g_strdup(uri);
+
+		*plitems = g_slist_append(*plitems, filename);
 	}
 }
 
@@ -1086,6 +1094,7 @@ GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri)
 {
 	static TotemPlParser *pl_parser = NULL;
 	GSList *plitems = NULL;
+	gchar *base;
 
 	pl_parser = totem_pl_parser_new ();
 	g_object_set(pl_parser, "recurse", TRUE, NULL);
@@ -1093,14 +1102,18 @@ GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri)
 	g_signal_connect(G_OBJECT(pl_parser), "entry-parsed",
 				G_CALLBACK(_on_pl_entry_parsed), &plitems);
 
-	if (totem_pl_parser_parse(pl_parser, uri, FALSE) !=
-	    TOTEM_PL_PARSER_RESULT_SUCCESS) {
+	base = get_display_filename(uri, TRUE);
+
+	if (totem_pl_parser_parse_with_base(pl_parser, uri, base, FALSE)
+	    != TOTEM_PL_PARSER_RESULT_SUCCESS) {
 		/* An error happens while parsing */
 		goto bad;
 	}
 	g_object_unref (pl_parser);
 
 bad:
+	g_free(base);
+
 	return plitems;
 }
 #else
