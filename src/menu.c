@@ -317,7 +317,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_playlist[i++]);
 	i = 0;
-	while (mime_playlist[i])
+	while (mime_dual[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_dual[i++]);
 	#else
@@ -342,9 +342,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
 					      mime_playlist[i++]);
 	i = 0;
-	while (mime_playlist[i])
+	while (mime_dual[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
-					      mime_playlist[i++]);
+					      mime_dual[i++]);
 	#else
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
 	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.M3U");
