@@ -860,6 +860,8 @@ void rescan_library_handler(struct con_win *cwin)
 	}
 
 	init_library_view(cwin);
+	init_playlist_view(cwin);
+
 	gtk_widget_destroy(library_dialog);
 
 	if (!cwin->cstate->stop_scan) {
@@ -994,6 +996,8 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->lib_delete = NULL;
 exit:
 	init_library_view(cwin);
+	init_playlist_view(cwin);
+
 	gtk_widget_destroy(library_dialog);
 
 	if (!cwin->cstate->stop_scan) {
