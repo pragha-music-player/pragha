@@ -178,6 +178,10 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 	g_option_group_add_entries(group, cmd_entries);
 	g_option_context_set_main_group(context, group);
 	g_option_context_add_group(context, gtk_get_option_group(TRUE));
+	#ifdef HAVE_LIBXFCE4UI
+	g_option_context_add_group (context, xfce_sm_client_get_option_group (argc, argv));
+	#endif
+
 	if (!g_option_context_parse(context, &argc, &argv, &error)) {
 		gchar *txt;
 
@@ -1356,9 +1360,16 @@ void init_pixbufs(struct con_win *cwin)
 		g_warning("Unable to load folder png");
 }
 
-#if HAVE_EXO
+#if HAVE_LIBXFCE4UI
 static void
-pragha_save_yourself (ExoXsessionClient *client, struct con_win *cwin)
+pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
+{
+	common_cleanup(cwin);
+	gtk_main_quit();
+}
+
+void
+pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
 	if (cwin->cpref->save_playlist)
 		save_current_playlist_state(cwin);
@@ -1367,16 +1378,23 @@ pragha_save_yourself (ExoXsessionClient *client, struct con_win *cwin)
 
 gint init_session_support(struct con_win *cwin)
 {
-	ExoXsessionClient *client;
-	GdkDisplay        *display;
-	GdkWindow         *leader;
+	XfceSMClient *client;
+	GError *error = NULL;
+ 
+	client =  xfce_sm_client_get ();
+	xfce_sm_client_set_priority (client, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
+	xfce_sm_client_set_restart_style (client, XFCE_SM_CLIENT_RESTART_NORMAL);
+	xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
 
-	display = gtk_widget_get_display (cwin->mainwindow);
-	leader = gdk_display_get_default_group (display);
-	client = exo_xsession_client_new_with_group (leader);
+	g_signal_connect (G_OBJECT (client), "quit",
+			  G_CALLBACK (pragha_session_quit), cwin);
+	g_signal_connect (G_OBJECT (client), "save-state",
+			  G_CALLBACK (pragha_session_save_state), cwin);
 
-	g_signal_connect (G_OBJECT (client), "save-yourself",
-			  G_CALLBACK (pragha_save_yourself), cwin);
+	if(!xfce_sm_client_connect (client, &error)) {
+		g_warning ("Failed to connect to session manager: %s", error->message);
+		g_error_free (error);
+	}
 
 	return 0;
 }
@@ -1400,7 +1418,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *hbox_panel, *hbox_main, *status_bar, *menu_bar;
-	gchar *role;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1524,13 +1541,13 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
 
+	#if HAVE_LIBXFCE4UI
+	init_session_support(cwin);
+	#else
 	/* set a unique role on each window (for session management) */
-	role = g_strdup_printf ("Pragha-%p-%d-%d", cwin->mainwindow, (gint) getpid (), (gint) time (NULL));
+	gchar *role = g_strdup_printf ("Pragha-%p-%d-%d", cwin->mainwindow, (gint) getpid (), (gint) time (NULL));
 	gtk_window_set_role (GTK_WINDOW (cwin->mainwindow), role);
 	g_free (role);
-
-	#if HAVE_EXO
-	init_session_support(cwin);
 	#endif
 
 	#if GTK_CHECK_VERSION (3, 0, 0)

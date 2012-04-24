@@ -2850,8 +2850,12 @@ exit:
 void save_current_playlist_state(struct con_win *cwin)
 {
 	GtkTreeModel *model;
+	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	gint playlist_id = 0;
+	gchar *ref_char = NULL;
+
+	/* Save last playlist. */
 
 	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin);
 	if (!playlist_id)
@@ -2865,6 +2869,33 @@ void save_current_playlist_state(struct con_win *cwin)
 		return;
 
 	save_playlist(playlist_id, SAVE_COMPLETE, cwin);
+
+	/* Save reference to current song. */
+
+	path = current_playlist_get_actual(cwin);
+	if(path) {
+		ref_char = gtk_tree_path_to_string (path);
+		gtk_tree_path_free(path);
+
+		g_key_file_set_string(cwin->cpref->configrc_keyfile,
+					GROUP_PLAYLIST,
+					KEY_CURRENT_REF,
+					ref_char);
+		g_free (ref_char);
+	}
+	else {
+		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
+					 GROUP_PLAYLIST) &&
+		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
+				       GROUP_PLAYLIST,
+				       KEY_CURRENT_REF,
+				       NULL)){
+			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+					      GROUP_PLAYLIST,
+					      KEY_CURRENT_REF,
+					      NULL);
+		}
+	}
 }
 
 /* Init current playlist on application bringup,

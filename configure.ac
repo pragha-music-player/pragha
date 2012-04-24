@@ -120,12 +120,12 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                        [libglyr],
                        [libglyr library], [yes])
 
-dnl Check exo
-EXO_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([EXO],
-                       [exo-1], [0.6.0],
-                       [exo-1],
-                       [exo-1 library], [yes])
+dnl Check libxfce4ui
+LIBXFCE4UI_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
+                       [libxfce4ui-1], [4.8.0],
+                       [libxfce4ui-1],
+                       [libxfce4ui-1 library], [yes])
 
 PLPARSER_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
@@ -153,7 +153,7 @@ echo "  Prefix.................................................................:
 echo "  Cubic volume support...............(Need gstreamer-plugins-base-devel).: $GSTREAMER_PLUGINS_BASE_FOUND"
 echo "  Global keyboard shortcuts support............(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
 echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "  Better session management support................(Need exo-1 >= 0.6.0).: $EXO_FOUND"
+echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"
 echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
 echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
