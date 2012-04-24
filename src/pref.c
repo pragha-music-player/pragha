@@ -719,8 +719,6 @@ void save_preferences(struct con_win *cwin)
 	GSList *list;
 	GList *cols, *j;
 	GtkTreeViewColumn *col;
-	gchar *ref_char = NULL;
-	GtkTreePath *path = NULL;
 	GdkWindowState state;
 
 	/* General options*/
@@ -835,34 +833,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_SAVE_PLAYLIST,
 			       cwin->cpref->save_playlist);
-
-	/* Save reference to current play */
-
-	path = current_playlist_get_actual(cwin);
-
-	if(path){
-		ref_char = gtk_tree_path_to_string (path);
-		gtk_tree_path_free(path);
-
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					GROUP_PLAYLIST,
-					KEY_CURRENT_REF,
-					ref_char);
-		g_free (ref_char);
-	}
-	else {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_PLAYLIST) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_PLAYLIST,
-				       KEY_CURRENT_REF,
-				       &error)){
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_PLAYLIST,
-					      KEY_CURRENT_REF,
-					      &error);
-		}
-	}
 
 	/* Shuffle and repeat options */
 

@@ -28,8 +28,6 @@ void common_cleanup(struct con_win *cwin)
 
 	backend_quit(cwin);
 
-	save_preferences(cwin);
-
 	g_object_unref(cwin->library_store);
 	g_object_unref(cwin->pixbuf->image_play);
 	g_object_unref(cwin->pixbuf->image_pause);
@@ -132,7 +130,9 @@ void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 {
 	if (cwin->cpref->save_playlist)
 		save_current_playlist_state(cwin);
+	save_preferences(cwin);
 	common_cleanup(cwin);
+
 	gtk_main_quit();
 
 	CDEBUG(DBG_INFO, "Halt.");

@@ -38,8 +38,8 @@
 #include <glyr/cache.h>
 #endif
 
-#ifdef HAVE_EXO
-#include <exo/exo.h>
+#ifdef HAVE_LIBXFCE4UI
+#include <libxfce4ui/libxfce4ui.h>
 #endif
 
 #ifdef HAVE_PLPARSER
