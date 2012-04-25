@@ -729,6 +729,7 @@ gboolean do_just_init_lastfm(gpointer data)
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 	}
+	update_menubar_playback_state (cwin);
 
 	return FALSE;
 }
@@ -765,6 +766,8 @@ gboolean do_init_lastfm_idle(gpointer data)
 	else {
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 	}
+
+	update_menubar_playback_state (cwin);
 
 	return FALSE;
 }
