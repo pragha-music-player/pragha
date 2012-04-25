@@ -300,11 +300,8 @@ backend_stop(GError *error, struct con_win *cwin)
 		gtk_tree_path_free(path);
 	}
 
-	play_button_toggle_state(cwin);
-
-	unset_current_song_info(cwin);
-	unset_track_progress_bar(cwin);
-	unset_album_art(cwin);
+	update_panel_playback_state(cwin);
+	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
 
@@ -327,7 +324,8 @@ backend_pause(struct con_win *cwin)
 		update_pixbuf_state_on_path(path, NULL, cwin);
 		gtk_tree_path_free(path);
 	}
-	play_button_toggle_state(cwin);
+	update_panel_playback_state(cwin);
+	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
 
@@ -350,7 +348,8 @@ backend_resume(struct con_win *cwin)
 		update_pixbuf_state_on_path(path, NULL, cwin);
 		gtk_tree_path_free(path);
 	}
-	play_button_toggle_state(cwin);
+	update_panel_playback_state(cwin);
+	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
 
@@ -607,7 +606,8 @@ backend_play(struct con_win *cwin)
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
 
-	play_button_toggle_state (cwin);
+	update_panel_playback_state (cwin);
+	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
 

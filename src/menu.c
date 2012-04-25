@@ -32,6 +32,61 @@ static gchar *license = "This program is free software: "
 	"You should have received a copy of the GNU General Public License\n"
 	"along with this program.  If not, see <http://www.gnu.org/licenses/>.";
 
+/* Sentitive menubar actions depending on the playback status. */
+
+void update_menubar_playback_state (struct con_win *cwin)
+{
+	GtkAction *action;
+
+	gboolean playing = (cwin->cstate->state != ST_STOPPED);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Prev");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Stop");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Next");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Edit tags");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Jump to playing song");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	#ifdef HAVE_LIBGLYR
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search lyric");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search artist info");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+	#endif
+
+	#ifdef HAVE_LIBCLASTFM
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Unlove track");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add similar");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
+	#endif
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Stop");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Next");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+}
+
 /* Signal handler for deleting rescan dialog box */
 
 static gboolean rescan_dialog_delete_cb(GtkWidget *widget,

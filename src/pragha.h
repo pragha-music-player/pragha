@@ -803,7 +803,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
-
+void update_menubar_playback_state (struct con_win *cwin);
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
 void add_location_action(GtkAction *action, struct con_win *cwin);
@@ -863,7 +863,7 @@ void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin);
-void play_button_toggle_state(struct con_win *cwin);
+void update_panel_playback_state(struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
 void resize_album_art_frame(struct con_win *cwin);
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);

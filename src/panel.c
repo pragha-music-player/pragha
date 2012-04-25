@@ -667,15 +667,27 @@ void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *c
 	backend_update_volume(cwin);
 }
 
-void play_button_toggle_state(struct con_win *cwin)
+void update_panel_playback_state(struct con_win *cwin)
 {
+	gboolean playing = (cwin->cstate->state != ST_STOPPED);
+
+	gtk_widget_set_sensitive(cwin->prev_button, playing);
+
 	if (cwin->cstate->state == ST_PLAYING)
 		gtk_button_set_image(GTK_BUTTON(cwin->play_button),
 				     cwin->pixbuf->image_pause);
-	else if ((cwin->cstate->state == ST_PAUSED) ||
-		 (cwin->cstate->state == ST_STOPPED))
+	else
 		gtk_button_set_image(GTK_BUTTON(cwin->play_button),
 				     cwin->pixbuf->image_play);
+
+	gtk_widget_set_sensitive(cwin->stop_button, playing);
+	gtk_widget_set_sensitive(cwin->next_button, playing);
+
+	if (playing == FALSE) {
+		unset_current_song_info(cwin);
+		unset_track_progress_bar(cwin);
+		unset_album_art(cwin);
+	}
 }
 
 /* Toggle appearance of album art widget */

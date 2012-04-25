@@ -1669,9 +1669,6 @@ GtkWidget* create_panel(struct con_win *cwin)
 			     gtk_image_new_from_stock(GTK_STOCK_MEDIA_NEXT,
 						      GTK_ICON_SIZE_LARGE_TOOLBAR));
 
-	gtk_button_set_image(GTK_BUTTON(play_button),
-			     cwin->pixbuf->image_play);
-
 	gtk_box_pack_start(GTK_BOX(left_controls),
 			   GTK_WIDGET(prev_button),
 			   FALSE, FALSE, 0);
@@ -1820,9 +1817,10 @@ GtkWidget* create_panel(struct con_win *cwin)
 				cwin);
 
 		cwin->album_art_frame = album_art_frame;
-
-		unset_album_art(cwin);
 	}
+
+	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
+	update_panel_playback_state(cwin);
 
 	gtk_box_pack_end(GTK_BOX(hbox_panel),
 			 GTK_WIDGET(left_controls_align),
