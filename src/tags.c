@@ -578,6 +578,14 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	gtk_misc_set_alignment(GTK_MISC (label_comment), 1, 0);
 	gtk_misc_set_alignment(GTK_MISC (label_file), 1, 0.5);
 
+	gtk_label_set_attribute_bold(GTK_LABEL(label_title));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_artist));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_album));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_genre));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_tno));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_comment));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_file));
+
 	/* Create entry fields */
 
 	entry_title = gtk_entry_new();
