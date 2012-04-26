@@ -20,6 +20,36 @@
 #include "pragha.h"
 
 #ifdef HAVE_LIBCLASTFM
+void update_menubar_lastfm_state (struct con_win *cwin)
+{
+	GtkAction *action;
+
+	gboolean playing = cwin->cstate->state != ST_STOPPED;
+	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
+	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
+	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lw.lastfm_user) != 0);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Unlove track");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add favorites");
+	gtk_action_set_sensitive (GTK_ACTION (action), has_user);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add similar");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing && lfm_inited);
+
+	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Love track");
+	gtk_action_set_sensitive (GTK_ACTION (action), logged);
+
+	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Unlove track");
+	gtk_action_set_sensitive (GTK_ACTION (action), logged);
+
+	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Add similar");
+	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
+}
 
 /* Set correction basedm on lastfm now playing segestion.. */
 
@@ -729,7 +759,7 @@ gboolean do_just_init_lastfm(gpointer data)
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 	}
-	update_menubar_playback_state (cwin);
+	update_menubar_lastfm_state (cwin);
 
 	return FALSE;
 }
@@ -767,7 +797,7 @@ gboolean do_init_lastfm_idle(gpointer data)
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 	}
 
-	update_menubar_playback_state (cwin);
+	update_menubar_lastfm_state (cwin);
 
 	return FALSE;
 }

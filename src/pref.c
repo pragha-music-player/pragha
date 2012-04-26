@@ -399,6 +399,8 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 		cwin->clastfm->session_id = NULL;
 		cwin->clastfm->status = LASTFM_STATUS_INVALID;
 	}
+	/* Insensitive lastfm menus. */
+	update_menubar_lastfm_state (cwin);
 }
 #endif
 

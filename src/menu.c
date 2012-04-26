@@ -64,14 +64,7 @@ void update_menubar_playback_state (struct con_win *cwin)
 	#endif
 
 	#ifdef HAVE_LIBCLASTFM
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Unlove track");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add similar");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && (cwin->clastfm->status == LASTFM_STATUS_OK));
+	update_menubar_lastfm_state (cwin);
 	#endif
 
 	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
