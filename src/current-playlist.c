@@ -1513,6 +1513,13 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 	gtk_misc_set_alignment(GTK_MISC (label_folder), 1, 0);
 	gtk_misc_set_alignment(GTK_MISC (label_filename), 1, 0);
 
+	gtk_label_set_attribute_bold(label_length);
+	gtk_label_set_attribute_bold(label_bitrate);
+	gtk_label_set_attribute_bold(label_channels);
+	gtk_label_set_attribute_bold(label_samplerate);
+	gtk_label_set_attribute_bold(label_folder);
+	gtk_label_set_attribute_bold(label_filename);
+
 	/* Create info labels */
 
 	info_length = gtk_label_new(length);
