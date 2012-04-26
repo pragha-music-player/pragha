@@ -1349,6 +1349,7 @@ void cleanup_keybinder(struct con_win *cwin);
 
 /* Lastfm Helper */
 
+void update_menubar_lastfm_state (struct con_win *cwin);
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
