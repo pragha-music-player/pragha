@@ -1257,7 +1257,6 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 					if (gtk_main_iteration_do(FALSE))
 						return;
 			}
-			g_list_free(list);
 
 			query = g_strdup_printf("END;");
 			exec_sqlite_query(query, cwin, NULL);
@@ -1265,6 +1264,8 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			flush_stale_entries_db(cwin);
 			init_library_view(cwin);
 		}
+
+		g_list_free(list);
 	}
 }
 
@@ -1320,7 +1321,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 					if (gtk_main_iteration_do(FALSE))
 						return;
 			}
-			g_list_free(list);
+
 			if (loc_arr)
 				g_array_free(loc_arr, TRUE);
 
@@ -1331,6 +1332,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 			init_library_view(cwin);
 		}
 
+		g_list_free(list);
 	}
 }
 

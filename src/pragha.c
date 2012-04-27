@@ -32,6 +32,9 @@ void common_cleanup(struct con_win *cwin)
 	g_object_unref(cwin->pixbuf->image_play);
 	g_object_unref(cwin->pixbuf->image_pause);
 
+	g_object_unref(cwin->pixbuf->pixbuf_playing);
+	g_object_unref(cwin->pixbuf->pixbuf_paused);
+
 	if (cwin->pixbuf->pixbuf_app)
 		g_object_unref(cwin->pixbuf->pixbuf_app);
 	if (cwin->pixbuf->pixbuf_dir)

@@ -1215,9 +1215,6 @@ void init_states_pixbuf(struct con_win *cwin)
 
 	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icon_theme, "stock_media-play",16, 0,NULL);
 	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icon_theme, "stock_media-pause", 16, 0, NULL);
-
-	g_object_ref(cwin->pixbuf->pixbuf_playing);
-	g_object_ref(cwin->pixbuf->pixbuf_paused);
 }
 
 void init_toggle_buttons(struct con_win *cwin)
