@@ -1020,6 +1020,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	if (mobj)
 		delete_musicobject(mobj);
 	g_free(uri);
+	g_object_unref(storage);
 
 	return changed;
 }
