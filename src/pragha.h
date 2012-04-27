@@ -1288,7 +1288,7 @@ struct musicobject *get_selected_musicobject(struct con_win *cwin);
 void set_watch_cursor_on_thread(struct con_win *cwin);
 void remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin);
 void set_status_message (gchar *message, struct con_win *cwin);
-void gtk_label_set_attribute_bold(GtkWidget *label);
+void gtk_label_set_attribute_bold(GtkLabel *label);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);

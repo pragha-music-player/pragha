@@ -268,14 +268,14 @@ void set_status_message (gchar *message, struct con_win *cwin)
 
 /* Set bold atribute to label. */
 
-void gtk_label_set_attribute_bold(GtkWidget *label)
+void gtk_label_set_attribute_bold(GtkLabel *label)
 {
 	PangoAttrList *Bold = pango_attr_list_new();
 	PangoAttribute *Attribute = NULL;
 	Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
 	pango_attr_list_insert(Bold, Attribute);
 
-	gtk_label_set_attributes(GTK_LABEL(label), Bold);
+	gtk_label_set_attributes(label, Bold);
 
 	pango_attr_list_unref(Bold);
 }
