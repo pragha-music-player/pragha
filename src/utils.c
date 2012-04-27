@@ -276,6 +276,8 @@ void gtk_label_set_attribute_bold(GtkWidget *label)
 	pango_attr_list_insert(Bold, Attribute);
 
 	gtk_label_set_attributes(GTK_LABEL(label), Bold);
+
+	pango_attr_list_unref(Bold);
 }
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
