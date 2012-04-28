@@ -1071,7 +1071,7 @@ void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, g
 		g_variant_builder_end(&b), NULL);
 }
 
-void mpris_update_tracklist_changed(struct con_win *cwin) {
+void mpris_update_tracklist_replaced(struct con_win *cwin) {
 	GVariantBuilder b;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1098,7 +1098,7 @@ void mpris_update_tracklist_changed(struct con_win *cwin) {
 	g_variant_builder_close(&b);
 	g_variant_builder_add_value(&b, handle_get_trackid(cwin->cstate->curr_mobj));
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
-		"org.mpris.MediaPlayer2.TrackList", "TrackListChanged",
+		"org.mpris.MediaPlayer2.TrackList", "TrackListReplaced",
 		g_variant_builder_end(&b), NULL);
 }
 

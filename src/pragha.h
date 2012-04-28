@@ -1274,7 +1274,7 @@ void mpris_update_metadata_changed(struct con_win *cwin);
 void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
 void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter);
 void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, gint bitmask);
-void mpris_update_tracklist_changed(struct con_win *cwin);
+void mpris_update_tracklist_replaced(struct con_win *cwin);
 void mpris_close(struct con_win *cwin);
 void mpris_cleanup(struct con_win *cwin);
 

@@ -1127,7 +1127,7 @@ void add_all_action(GtkAction *action, struct con_win *cwin)
 	update_status_bar(cwin);
 
 	#if GLIB_CHECK_VERSION(2,26,0)
-	mpris_update_tracklist_changed(cwin);
+	mpris_update_tracklist_replaced(cwin);
 	#endif
 }
 
