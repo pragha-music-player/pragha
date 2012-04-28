@@ -1075,6 +1075,7 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 	GVariantBuilder b;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	gboolean iter_valid;
 	struct musicobject *mobj = NULL;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -1087,13 +1088,13 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	
-	if (!gtk_tree_model_get_iter_first(model, &iter))
-		return;
+	iter_valid = gtk_tree_model_get_iter_first(model, &iter);
 
-	do {
+	while (iter_valid) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 		g_variant_builder_add_value(&b, handle_get_trackid(mobj));
-	} while(gtk_tree_model_iter_next(model, &iter));
+		iter_valid = gtk_tree_model_iter_next(model, &iter);
+	}
 	
 	g_variant_builder_close(&b);
 	g_variant_builder_add_value(&b, handle_get_trackid(cwin->cstate->curr_mobj));
