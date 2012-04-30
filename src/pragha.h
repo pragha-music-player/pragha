@@ -1296,7 +1296,7 @@ gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(gchar *str);
 enum file_type get_file_type(gchar *file);
-gchar* get_mime_type(gchar *file);
+gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
 gboolean is_image_file(gchar *file);
 gchar* convert_length_str(gint length);
