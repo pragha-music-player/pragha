@@ -1259,16 +1259,10 @@ void init_menu_actions(struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search album art");
-	gtk_action_set_sensitive(action, FALSE);
-
 	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search lyric");
 	gtk_action_set_sensitive(action, FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search album art");
 	gtk_action_set_sensitive(action, FALSE);
 #endif
 #ifndef HAVE_LIBCLASTFM

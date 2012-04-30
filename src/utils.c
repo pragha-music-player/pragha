@@ -517,12 +517,12 @@ get_file_type(gchar *file)
 	return ret;
 }
 
-gchar* get_mime_type (gchar *file)
+gchar* get_mime_type (const gchar *file)
 {
 	gboolean uncertain;
 	gchar *result = NULL;
 
-	result = g_content_type_guess((const gchar *)file, NULL, 0, &uncertain);
+	result = g_content_type_guess(file, NULL, 0, &uncertain);
 
 	return result;
 }
