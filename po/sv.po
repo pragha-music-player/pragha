@@ -1,23 +1,22 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+# Translators:
 msgid ""
 msgstr ""
-"Project-Id-Version: Swedish\n"
+"Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=glib&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-11 22:56-0300\n"
-"PO-Revision-Date: 2011-06-30 13:17-0300\n"
-"Last-Translator: Matias <mati86dl@gmail.com>\n"
-"Language-Team: Swedish team <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2012-05-03 12:11-0300\n"
+"PO-Revision-Date: 2012-04-24 13:11+0000\n"
+"Last-Translator: matias <mati86dl@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Swedish\n"
-"X-Poedit-SourceCharset: utf-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: ../src/gui.c:204
 msgid "_File"
@@ -72,9 +71,8 @@ msgid "Next track"
 msgstr "Nästa spår"
 
 #: ../src/gui.c:223 ../src/gui.c:386 ../src/gui.c:460
-#, fuzzy
 msgid "Edit track information"
-msgstr "Spår Information"
+msgstr ""
 
 #: ../src/gui.c:225 ../src/gui.c:332 ../src/gui.c:462
 msgid "_Quit"
@@ -85,23 +83,20 @@ msgid "_Add the library"
 msgstr "_Lägg till hela biblioteket"
 
 #: ../src/gui.c:229
-#, fuzzy
 msgid "Remove selection from playlist"
-msgstr "Spara spellista"
+msgstr ""
 
 #: ../src/gui.c:231 ../src/gui.c:352
-#, fuzzy
 msgid "Crop playlist"
-msgstr "Rensa spellista"
+msgstr ""
 
 #: ../src/gui.c:233 ../src/gui.c:354
 msgid "Clear playlist"
 msgstr "Rensa spellista"
 
 #: ../src/gui.c:235
-#, fuzzy
 msgid "Add selection to another playlist"
-msgstr "_Lägg till i spellista"
+msgstr ""
 
 #: ../src/gui.c:236 ../src/gui.c:357 ../src/current-playlist.c:691
 msgid "Save playlist"
@@ -132,34 +127,28 @@ msgid "Search _lyric"
 msgstr "Sök _låttext"
 
 #: ../src/gui.c:249 ../src/gui.c:254 ../src/gui.c:362 ../src/gui.c:367
-#, fuzzy
 msgid "Search _artist info"
-msgstr "Artist"
+msgstr ""
 
 #: ../src/gui.c:257 ../src/gui.c:370
-#, fuzzy
 msgid "_Lastfm"
-msgstr "Last.fm"
+msgstr ""
 
 #: ../src/gui.c:259 ../src/gui.c:270 ../src/gui.c:372 ../src/gui.c:379
-#, fuzzy
 msgid "Love track"
-msgstr "Föregående spår"
+msgstr ""
 
 #: ../src/gui.c:261 ../src/gui.c:272 ../src/gui.c:374 ../src/gui.c:381
-#, fuzzy
 msgid "Unlove track"
-msgstr "Föregående spår"
+msgstr ""
 
-#: ../src/gui.c:263 ../src/gui.c:274 ../src/pragha-lastfm.c:281
-#, fuzzy
+#: ../src/gui.c:263 ../src/gui.c:274 ../src/pragha-lastfm.c:313
 msgid "Import a XSPF playlist"
-msgstr "Återställ sista spellistan"
+msgstr ""
 
 #: ../src/gui.c:265 ../src/gui.c:276
-#, fuzzy
 msgid "Add favorites"
-msgstr "_Lägg till filer"
+msgstr ""
 
 #: ../src/gui.c:267 ../src/gui.c:278 ../src/gui.c:376 ../src/gui.c:383
 msgid "Add similar"
@@ -209,12 +198,12 @@ msgstr "_Upprepa"
 msgid "_Fullscreen"
 msgstr "_Helskärmsläge"
 
-#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1424
+#: ../src/gui.c:309 ../src/gui.c:337 ../src/gui.c:749 ../src/pref.c:1407
 msgid "Library"
 msgstr "Bibliotek"
 
-#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:345
-#: ../src/playlist.c:886 ../src/playlist.c:1798
+#: ../src/gui.c:312 ../src/gui.c:340 ../src/gui.c:767 ../src/menu.c:410
+#: ../src/playlist.c:886 ../src/playlist.c:1861
 msgid "Playlists"
 msgstr "Spellistor"
 
@@ -235,34 +224,28 @@ msgid "Remove to playback queue"
 msgstr "Ta bort från spellistans kö"
 
 #: ../src/gui.c:350
-#, fuzzy
 msgid "Remove from playlist"
-msgstr "Spara spellista"
+msgstr ""
 
 #: ../src/gui.c:356
-#, fuzzy
 msgid "Add to another playlist"
-msgstr "_Lägg till i spellista"
+msgstr ""
 
 #: ../src/gui.c:391 ../src/gui.c:406
-#, fuzzy
 msgid "_Add to current playlist"
-msgstr "_Lägg till i spellista"
+msgstr ""
 
 #: ../src/gui.c:393 ../src/gui.c:408
-#, fuzzy
 msgid "_Replace current playlist"
-msgstr "_Ersätt spellista"
+msgstr ""
 
 #: ../src/gui.c:395 ../src/gui.c:410
-#, fuzzy
 msgid "Replace and _play"
-msgstr "_Ersätt spellista"
+msgstr ""
 
 #: ../src/gui.c:397 ../src/playlist.c:711
-#, fuzzy
 msgid "Rename"
-msgstr "Filnamn"
+msgstr ""
 
 #: ../src/gui.c:399
 msgid "Delete"
@@ -273,7 +256,7 @@ msgid "Export"
 msgstr "Exportera"
 
 #. The main edit dialog
-#: ../src/gui.c:412 ../src/tags.c:803
+#: ../src/gui.c:412 ../src/tags.c:811
 msgid "Edit tags"
 msgstr "Redigera taggar"
 
@@ -293,48 +276,48 @@ msgstr "_Fäll ut bibliotek"
 msgid "_Collapse library"
 msgstr "_Fäll ihop bibliotek"
 
-#: ../src/gui.c:425 ../src/librarytree.c:1482
+#: ../src/gui.c:425 ../src/librarytree.c:1486
 msgid "Folders structure"
 msgstr "Mappstruktur"
 
-#: ../src/gui.c:427 ../src/gui.c:886 ../src/gui.c:1051 ../src/pragha.h:101
-#: ../src/librarytree.c:1485 ../src/statusicon.c:201 ../src/tags.c:510
+#: ../src/gui.c:427 ../src/gui.c:886 ../src/gui.c:1051 ../src/pragha.h:128
+#: ../src/librarytree.c:1489 ../src/statusicon.c:197 ../src/tags.c:510
 #: ../src/tags.c:564
 msgid "Artist"
 msgstr "Artist"
 
-#: ../src/gui.c:429 ../src/gui.c:887 ../src/gui.c:1052 ../src/pragha.h:102
-#: ../src/librarytree.c:1489 ../src/statusicon.c:202 ../src/tags.c:513
+#: ../src/gui.c:429 ../src/gui.c:887 ../src/gui.c:1052 ../src/pragha.h:129
+#: ../src/librarytree.c:1493 ../src/statusicon.c:198 ../src/tags.c:513
 #: ../src/tags.c:565
 msgid "Album"
 msgstr "Album"
 
-#: ../src/gui.c:431 ../src/gui.c:888 ../src/gui.c:1053 ../src/pragha.h:103
-#: ../src/librarytree.c:1496 ../src/tags.c:516 ../src/tags.c:566
+#: ../src/gui.c:431 ../src/gui.c:888 ../src/gui.c:1053 ../src/pragha.h:130
+#: ../src/librarytree.c:1500 ../src/tags.c:516 ../src/tags.c:566
 msgid "Genre"
 msgstr "Genre"
 
-#: ../src/gui.c:433 ../src/librarytree.c:1500
+#: ../src/gui.c:433 ../src/librarytree.c:1504
 msgid "Artist / Album"
 msgstr "Artist / Album"
 
-#: ../src/gui.c:435 ../src/librarytree.c:1511
+#: ../src/gui.c:435 ../src/librarytree.c:1515
 msgid "Genre / Album"
 msgstr "Genre / Album"
 
-#: ../src/gui.c:437 ../src/librarytree.c:1507
+#: ../src/gui.c:437 ../src/librarytree.c:1511
 msgid "Genre / Artist"
 msgstr "Genre / Artist"
 
-#: ../src/gui.c:439 ../src/librarytree.c:1518
+#: ../src/gui.c:439 ../src/librarytree.c:1522
 msgid "Genre / Artist / Album"
 msgstr "Genre / Artist / Album"
 
-#: ../src/gui.c:452 ../src/statusicon.c:140
+#: ../src/gui.c:452 ../src/statusicon.c:136
 msgid "Prev Track"
 msgstr "Föregående spår"
 
-#: ../src/gui.c:458 ../src/gui.c:1788 ../src/statusicon.c:144
+#: ../src/gui.c:458 ../src/gui.c:1789 ../src/statusicon.c:140
 msgid "Next Track"
 msgstr "Nästa spår"
 
@@ -348,33 +331,33 @@ msgid "Track"
 msgstr "Spår"
 
 #. Create labels
-#: ../src/gui.c:885 ../src/gui.c:1050 ../src/pragha.h:100
-#: ../src/statusicon.c:200 ../src/tags.c:507 ../src/tags.c:563
+#: ../src/gui.c:885 ../src/gui.c:1050 ../src/pragha.h:127
+#: ../src/statusicon.c:196 ../src/tags.c:507 ../src/tags.c:563
 msgid "Title"
 msgstr "Titel"
 
-#: ../src/gui.c:889 ../src/gui.c:1054 ../src/pragha.h:104
-#: ../src/current-playlist.c:1500
+#: ../src/gui.c:889 ../src/gui.c:1054 ../src/pragha.h:131
+#: ../src/current-playlist.c:1503
 msgid "Bitrate"
 msgstr "Bitrate"
 
-#: ../src/gui.c:890 ../src/gui.c:1055 ../src/pragha.h:105 ../src/tags.c:568
+#: ../src/gui.c:890 ../src/gui.c:1055 ../src/pragha.h:132 ../src/tags.c:568
 msgid "Year"
 msgstr "År"
 
-#: ../src/gui.c:891 ../src/gui.c:1056 ../src/pragha.h:106 ../src/tags.c:519
+#: ../src/gui.c:891 ../src/gui.c:1056 ../src/pragha.h:133 ../src/tags.c:519
 #: ../src/tags.c:569
 msgid "Comment"
 msgstr "Kommentar"
 
 #. Create labels
-#: ../src/gui.c:892 ../src/gui.c:1057 ../src/pragha.h:107
-#: ../src/current-playlist.c:1499 ../src/statusicon.c:203
+#: ../src/gui.c:892 ../src/gui.c:1057 ../src/pragha.h:134
+#: ../src/current-playlist.c:1502 ../src/statusicon.c:199
 msgid "Length"
 msgstr "Längd"
 
-#: ../src/gui.c:893 ../src/gui.c:1058 ../src/pragha.h:108
-#: ../src/current-playlist.c:1504
+#: ../src/gui.c:893 ../src/gui.c:1058 ../src/pragha.h:135
+#: ../src/current-playlist.c:1507
 msgid "Filename"
 msgstr "Filnamn"
 
@@ -383,67 +366,65 @@ msgid "Clear sort"
 msgstr "Rensa sortering"
 
 #. Tooltips
-#: ../src/gui.c:1786
+#: ../src/gui.c:1787
 msgid "Play / Pause Track"
 msgstr "Spela upp / Pausa Spår"
 
-#: ../src/gui.c:1787
+#: ../src/gui.c:1788
 msgid "Previous Track"
 msgstr "Föregående Spår"
 
-#: ../src/gui.c:1789
+#: ../src/gui.c:1790
 msgid "Stop playback"
 msgstr "Stoppa uppspelningen"
 
-#: ../src/gui.c:1791
+#: ../src/gui.c:1792
 msgid "Leave Fullscreen"
 msgstr "Lämna _helskärmsläge"
 
-#: ../src/gui.c:1792
+#: ../src/gui.c:1793
 msgid "Play songs in a random order"
 msgstr "Spela upp i slumpmässig ordning"
 
-#: ../src/gui.c:1793
+#: ../src/gui.c:1794
 msgid "Repeat playback list at the end"
 msgstr "Upprepa spellistan då den nått slutet"
 
-#: ../src/gui.c:1849 ../src/panel.c:258 ../src/statusicon.c:197
+#: ../src/gui.c:1858 ../src/panel.c:258 ../src/statusicon.c:193
 msgid "<b>Not playing</b>"
 msgstr "<b>Spelar inte</b>"
 
-#: ../src/gui.c:1860
+#: ../src/gui.c:1869
 msgid "Last.fm suggested a tag correction"
 msgstr ""
 
-#: ../src/gui.c:2103
+#: ../src/gui.c:2127
 msgid "Options of the library"
 msgstr "Bibliotekets variabler"
 
-#: ../src/pragha.h:99 ../src/tags.c:567
+#: ../src/pragha.h:126 ../src/tags.c:567
 msgid "Track No"
 msgstr "Spårnummer"
 
-#: ../src/pragha.h:140
+#: ../src/pragha.h:167
 msgid "Scanning"
 msgstr ""
 
-#: ../src/pragha.h:141
-#, fuzzy
+#: ../src/pragha.h:168
 msgid "Stopped"
-msgstr "Stopp"
+msgstr ""
 
-#: ../src/pragha.h:257
+#: ../src/pragha.h:284
 msgid "_Skip"
 msgstr ""
 
-#: ../src/pragha.h:258
+#: ../src/pragha.h:285
 msgid "S_kip All"
 msgstr ""
 
-#: ../src/pragha.h:259
-#, fuzzy
+#: ../src/pragha.h:286
 msgid "Delete _All"
-msgstr "Ta bort"
+msgstr ""
 
 #: ../src/panel.c:235
 #, c-format
@@ -480,34 +461,33 @@ msgstr "Sammanfoga till en existerande spellista"
 msgid "Save selection"
 msgstr "Spara urval"
 
-#: ../src/current-playlist.c:727 ../src/playlist.c:1637 ../src/playlist.c:1670
-#: ../src/playlist.c:1704 ../src/playlist.c:1745
-#, fuzzy
+#: ../src/current-playlist.c:727 ../src/playlist.c:1696 ../src/playlist.c:1729
+#: ../src/playlist.c:1763 ../src/playlist.c:1804
 msgid "New playlist"
-msgstr "Spara spellista"
+msgstr ""
 
 #: ../src/current-playlist.c:820
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b>är ett reserverat spellistenamn"
 
-#: ../src/current-playlist.c:1484 ../src/current-playlist.c:1501
+#: ../src/current-playlist.c:1487 ../src/current-playlist.c:1504
 msgid "Channels"
 msgstr "Kanaler"
 
-#: ../src/current-playlist.c:1502
+#: ../src/current-playlist.c:1505
 msgid "Samplerate"
 msgstr "Samplerate"
 
-#: ../src/current-playlist.c:1503
+#: ../src/current-playlist.c:1506
 msgid "Folder"
 msgstr "Sökväg"
 
 #. The main edit dialog
-#: ../src/current-playlist.c:1594 ../src/tags.c:853
+#: ../src/current-playlist.c:1604 ../src/tags.c:861
 msgid "Details"
 msgstr "Egenskaper"
 
-#: ../src/librarytree.c:197 ../src/statusicon.c:127
+#: ../src/librarytree.c:197 ../src/statusicon.c:123
 msgid "Unknown Artist"
 msgstr "Okänd artist"
 
@@ -515,7 +495,7 @@ msgstr "Okänd artist"
 msgid "Unknown"
 msgstr "Okända"
 
-#: ../src/librarytree.c:204 ../src/librarytree.c:208 ../src/statusicon.c:129
+#: ../src/librarytree.c:204 ../src/librarytree.c:208 ../src/statusicon.c:125
 msgid "Unknown Album"
 msgstr "Okänt album"
 
@@ -532,7 +512,7 @@ msgstr ""
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr ""
 
-#: ../src/librarytree.c:1233
+#: ../src/librarytree.c:1235
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
@@ -542,23 +522,22 @@ msgstr ""
 "\n"
 "Varning: Hela biblioteket måste sökas av igen."
 
-#: ../src/librarytree.c:1290
+#: ../src/librarytree.c:1293
 msgid "Really want to move the files to trash?"
 msgstr ""
 
-#: ../src/librarytree.c:1292
+#: ../src/librarytree.c:1295
 msgid "Delete immediately instead of move to trash"
 msgstr ""
 
-#: ../src/statusicon.c:125
+#: ../src/statusicon.c:121
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 msgstr ""
 
 #: ../src/tags.c:500
-#, fuzzy
 msgid "Selection to"
-msgstr "Spara urval"
+msgstr ""
 
 #: ../src/tags.c:529
 msgid "Open folder"
@@ -582,238 +561,235 @@ msgstr ""
 msgid "Album art pattern"
 msgstr "Albumomslagsmönster"
 
-#: ../src/pref.c:130 ../src/pref.c:1725
+#: ../src/pref.c:130 ../src/pref.c:1708
 msgid "Start normal"
 msgstr "Starta normalt"
 
-#: ../src/pref.c:135 ../src/pref.c:1726
+#: ../src/pref.c:135 ../src/pref.c:1709
 msgid "Start fullscreen"
 msgstr "_Helskärmsläge"
 
-#: ../src/pref.c:140 ../src/pref.c:1727
+#: ../src/pref.c:140 ../src/pref.c:1710
 msgid "Start in system tray"
 msgstr "Starta i aktivitetsfältet"
 
 #. Create a folder chooser dialog
-#: ../src/pref.c:290
+#: ../src/pref.c:292
 msgid "Select a folder to add to library"
 msgstr "Välj en mapp att lägga till i biblioteket"
 
 #. The main preferences dialog
 #. Add to dialog
-#: ../src/pref.c:1411 ../src/pref.c:1875
+#: ../src/pref.c:1394 ../src/pref.c:1861
 msgid "Preferences of Pragha"
 msgstr "Inställningar"
 
 #. Labels
-#: ../src/pref.c:1422
+#: ../src/pref.c:1405
 msgid "Audio"
 msgstr "Ljud"
 
-#: ../src/pref.c:1423
+#: ../src/pref.c:1406
 msgid "Appearance"
 msgstr ""
 
-#: ../src/pref.c:1425
+#: ../src/pref.c:1408
 msgid "General"
 msgstr "Allmänt"
 
-#: ../src/pref.c:1426
+#: ../src/pref.c:1409
 msgid "Notifications"
 msgstr "Notifieringar"
 
-#: ../src/pref.c:1427
+#: ../src/pref.c:1410
 msgid "Internet Services"
 msgstr "Internettjänster"
 
 #. Audio Sink
-#: ../src/pref.c:1489
+#: ../src/pref.c:1472
 msgid "Audio sink"
 msgstr "Ljudmotor"
 
-#: ../src/pref.c:1494 ../src/pref.c:1523 ../src/pref.c:1537
+#: ../src/pref.c:1477 ../src/pref.c:1506 ../src/pref.c:1520
 msgid "Restart Required"
 msgstr "Omstart krävs"
 
 #. Audio Device
-#: ../src/pref.c:1518
+#: ../src/pref.c:1501
 msgid "Audio Device"
 msgstr "Portabel musikspelare"
 
 #. Software mixer
-#: ../src/pref.c:1536
+#: ../src/pref.c:1519
 msgid "Use software mixer"
 msgstr "Använd mjukvarumixer"
 
 #. Audio CD device
-#: ../src/pref.c:1555
+#: ../src/pref.c:1538
 msgid "Audio CD Device"
 msgstr "CD-enhet"
 
 #. Appearance Widgets
-#: ../src/pref.c:1581
+#: ../src/pref.c:1564
 msgid "Highlight rows on current playlist"
 msgstr ""
 
-#: ../src/pref.c:1583
+#: ../src/pref.c:1566
 msgid "Show Album art in Panel"
 msgstr "Visa albumomslag i panelen"
 
-#: ../src/pref.c:1586
+#: ../src/pref.c:1569
 msgid "Size of Album art"
 msgstr "Storlek för albumomslag"
 
-#: ../src/pref.c:1604
+#: ../src/pref.c:1587
 msgid "Album art file pattern"
 msgstr "Filmönster för albumomslag"
 
-#: ../src/pref.c:1649
+#: ../src/pref.c:1632
 msgid "Folders"
 msgstr "Mappar"
 
-#: ../src/pref.c:1694
+#: ../src/pref.c:1677
 msgid "Merge folders in the folders estructure view"
 msgstr ""
 
-#: ../src/pref.c:1695
-#, fuzzy
+#: ../src/pref.c:1678
 msgid "Sort albums by release year"
-msgstr "Storlek för albumomslag"
+msgstr ""
 
 #. General Widgets
-#: ../src/pref.c:1720
+#: ../src/pref.c:1703
 msgid "Refine the search while writing"
 msgstr ""
 
-#: ../src/pref.c:1724
+#: ../src/pref.c:1707
 msgid "Remember last window state"
 msgstr "Kom ihåg föregående fönsterläge"
 
-#: ../src/pref.c:1729
+#: ../src/pref.c:1712
 msgid "Restore last playlist"
 msgstr "Återställ sista spellistan"
 
-#: ../src/pref.c:1731
+#: ../src/pref.c:1714
 msgid "Minimize Pragha when close the window"
 msgstr "Minimera Pragha när fönstret stängs ner"
 
-#: ../src/pref.c:1732
+#: ../src/pref.c:1715
 msgid "Add files recursively"
 msgstr "Lägg till filer rekursivt"
 
 #. Notification OSD
-#: ../src/pref.c:1764
+#: ../src/pref.c:1747
 msgid "Show OSD for track change"
 msgstr "Visa OSD-notifiering vid spårbyte"
 
-#: ../src/pref.c:1765
+#: ../src/pref.c:1748
 msgid "Associate notifications to system tray"
 msgstr "Bind notifieringar till aktivitetsfältet"
 
-#: ../src/pref.c:1766
+#: ../src/pref.c:1749
 msgid "Show Album art in notifications"
 msgstr "Visa albumomslag i notifieringsytan"
 
-#: ../src/pref.c:1767
+#: ../src/pref.c:1750
 msgid "Add actions to change track to notifications"
 msgstr ""
 
-#: ../src/pref.c:1792
+#: ../src/pref.c:1775
 msgid "Last.fm Support"
 msgstr "Last.fm-stöd"
 
-#: ../src/pref.c:1796
+#: ../src/pref.c:1779
 msgid "Username"
 msgstr "Användarnamn"
 
-#: ../src/pref.c:1797
+#: ../src/pref.c:1780
 msgid "Password"
 msgstr "Lösenord"
 
-#: ../src/pref.c:1807
-#, fuzzy
+#: ../src/pref.c:1790
 msgid "Get album art"
-msgstr "Storlek för albumomslag"
+msgstr ""
 
 #. Services CDDB
-#: ../src/pref.c:1811
+#: ../src/pref.c:1794
 msgid "Connect to CDDB server"
 msgstr "Anslut till CDDB server"
 
-#. Services MPRIS2
-#: ../src/pref.c:1815
+#: ../src/pref.c:1798
 msgid "Allow remote control with MPRIS2 interface"
 msgstr ""
 
-#: ../src/menu.c:133
+#: ../src/menu.c:181
 msgid "Update Library"
 msgstr "Uppdatera bibliotek"
 
-#: ../src/menu.c:133
+#: ../src/menu.c:181
 msgid "Rescan Library"
 msgstr "Sök av biblioteket igen"
 
-#: ../src/menu.c:240
+#: ../src/menu.c:283
 msgid "Select a file to play"
 msgstr "Välj fil att spela upp"
 
-#: ../src/menu.c:261
+#: ../src/menu.c:304
 msgid "Add recursively files"
 msgstr "Lägg till filer rekursivt"
 
-#: ../src/menu.c:282 ../src/pragha-lastfm.c:289
+#: ../src/menu.c:325 ../src/pragha-lastfm.c:321
 msgid "Supported media"
 msgstr "Tillgängliga mediaformat"
 
-#: ../src/menu.c:348
+#: ../src/menu.c:413
 msgid "All files"
 msgstr "Alla filer"
 
-#: ../src/menu.c:427
+#: ../src/menu.c:492
 msgid "Enter the URL of an internet radio stream"
 msgstr ""
 
-#: ../src/menu.c:432
+#: ../src/menu.c:497
 msgid "Give it a name to save"
 msgstr ""
 
-#: ../src/menu.c:450
+#: ../src/menu.c:515
 msgid "Add a location"
 msgstr ""
 
-#: ../src/menu.c:852 ../src/menu.c:986
+#: ../src/menu.c:921 ../src/menu.c:1057
 msgid "Library scan complete"
 msgstr "Biblioteksavsökning färdig"
 
-#: ../src/menu.c:1091
+#: ../src/menu.c:1164
 msgid "Total Tracks:"
 msgstr "Antal spår:"
 
-#: ../src/menu.c:1093
+#: ../src/menu.c:1166
 msgid "Total Artists:"
 msgstr "Antal artister:"
 
-#: ../src/menu.c:1095
+#: ../src/menu.c:1168
 msgid "Total Albums:"
 msgstr "Antal album:"
 
-#: ../src/menu.c:1097
+#: ../src/menu.c:1170
 msgid "Statistics"
 msgstr "Statistik"
 
-#: ../src/menu.c:1114
+#: ../src/menu.c:1187
 msgid "translator-credits"
 msgstr "Översättare"
 
-#: ../src/utils.c:531
+#: ../src/utils.c:587
 msgid "days"
 msgstr "dagar"
 
-#: ../src/utils.c:531
+#: ../src/utils.c:587
 msgid "day"
 msgstr "dag"
 
-#: ../src/utils.c:731
+#: ../src/utils.c:787
 msgid "Unable to open the browser"
 msgstr "Kunde inte öppna webbläsaren"
 
@@ -823,9 +799,8 @@ msgid "Do you want to overwrite the playlist: %s ?"
 msgstr ""
 
 #: ../src/playlist.c:703
-#, fuzzy
 msgid "Choose a new name"
-msgstr "Spara som ny spellista"
+msgstr ""
 
 #: ../src/playlist.c:797
 #, c-format
@@ -836,53 +811,53 @@ msgstr ""
 msgid "Export playlist to file"
 msgstr "Exportera spellista till fil"
 
-#: ../src/playlist.c:1346 ../src/pragha-lastfm.c:331
+#: ../src/playlist.c:1396 ../src/pragha-lastfm.c:363
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
 msgstr ""
 
-#: ../src/playlist.c:1834
+#: ../src/playlist.c:1901
 msgid "Radios"
 msgstr ""
 
-#: ../src/pragha-lastfm.c:149 ../src/pragha-lastfm.c:472
+#: ../src/pragha-lastfm.c:181 ../src/pragha-lastfm.c:504
 msgid "Love song on Last.fm failed."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:163 ../src/pragha-lastfm.c:201
-#: ../src/pragha-lastfm.c:261 ../src/pragha-lastfm.c:392
-#: ../src/pragha-lastfm.c:452 ../src/pragha-lastfm.c:489
-#: ../src/pragha-lastfm.c:526 ../src/pragha-lastfm.c:571
-#: ../src/pragha-lastfm.c:673 ../src/pragha-lastfm.c:722
-#: ../src/pragha-lastfm.c:728
+#: ../src/pragha-lastfm.c:195 ../src/pragha-lastfm.c:233
+#: ../src/pragha-lastfm.c:293 ../src/pragha-lastfm.c:424
+#: ../src/pragha-lastfm.c:484 ../src/pragha-lastfm.c:521
+#: ../src/pragha-lastfm.c:558 ../src/pragha-lastfm.c:603
+#: ../src/pragha-lastfm.c:705 ../src/pragha-lastfm.c:754
+#: ../src/pragha-lastfm.c:760
 msgid "No connection Last.fm has been established."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:187 ../src/pragha-lastfm.c:509
+#: ../src/pragha-lastfm.c:219 ../src/pragha-lastfm.c:541
 msgid "Unlove song on Last.fm failed."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:242 ../src/pragha-lastfm.c:430
+#: ../src/pragha-lastfm.c:274 ../src/pragha-lastfm.c:462
 #, c-format
 msgid "Added %d songs of %d sugested from Last.fm."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:244 ../src/pragha-lastfm.c:432
+#: ../src/pragha-lastfm.c:276 ../src/pragha-lastfm.c:464
 #, c-format
 msgid "Last.fm not suggest any similar song."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:373
+#: ../src/pragha-lastfm.c:405
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:375
+#: ../src/pragha-lastfm.c:407
 #, c-format
 msgid "You had no favorite songs on Last.fm."
 msgstr ""
 
-#: ../src/pragha-lastfm.c:605
+#: ../src/pragha-lastfm.c:637
 msgid "Update current song on Last.fm failed."
 msgstr ""
 
@@ -896,92 +871,27 @@ msgid "Lyrics thanks to %s"
 msgstr ""
 
 #: ../src/glyr-related.c:51
-#, fuzzy, c-format
+#, c-format
 msgid "Artist info"
-msgstr "Artist"
+msgstr ""
 
 #: ../src/glyr-related.c:52
-#, fuzzy, c-format
+#, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr "%s <small><span weight=\"light\">från</span></small> %s"
+msgstr ""
 
 #: ../src/glyr-related.c:125
-#, fuzzy
 msgid "Lyrics not found."
-msgstr "Albumomslagsmönster"
+msgstr ""
 
 #: ../src/glyr-related.c:125
 msgid "Artist information not found."
 msgstr ""
 
-#: ../src/pragha-backend.c:430
+#: ../src/pragha-backend.c:449
 #, c-format
 msgid ""
 "<b>Error playing current track.</b>\n"
 "(%s)\n"
 "<b>Reason:</b> %s"
 msgstr ""
-
-#, fuzzy
-#~ msgid "Search album art"
-#~ msgstr "Storlek för albumomslag"
-
-#, fuzzy
-#~ msgid "Edit track information),"
-#~ msgstr "Spår Information"
-
-#~ msgid "Remove"
-#~ msgstr "Ta bort"
-
-#~ msgid "Crop"
-#~ msgstr "Beskär"
-
-#, fuzzy
-#~ msgid "Clear current playlist"
-#~ msgstr "Spara hela spellistan"
-
-#, fuzzy
-#~ msgid "Save current playlist"
-#~ msgstr "Spara hela spellistan"
-
-#, fuzzy
-#~ msgid "Similar artists:"
-#~ msgstr "Antal artister:"
-
-#~ msgid "_Play audio CD"
-#~ msgstr "_Spela en ljud-CD"
-
-#, fuzzy
-#~ msgid "Use lastfm artist art"
-#~ msgstr "Artist"
-
-#~ msgid ""
-#~ "<small><span weight=\"light\">by</span></small> %s <small><span weight="
-#~ "\"light\">in</span></small> %s (%s)"
-#~ msgstr ""
-#~ "<small><span weight=\"light\">med</span></small> %s <small><span weight="
-#~ "\"light\">från</span></small> %s (%s)"
-
-#~ msgid "Delete from HDD"
-#~ msgstr "Ta bort från hårddisken"
-
-#~ msgid ""
-#~ "Are you sure you want to delete current file from HDD?\n"
-#~ "\n"
-#~ "Warning: Once deleted, the file cannot be recovered."
-#~ msgstr ""
-#~ "Är du säker på att du vill ta bort filen från hårddisken?\n"
-#~ "\n"
-#~ "Varning: Väl borttagen kan filen inte återställas."
-
-#~ msgid "_Properties"
-#~ msgstr "_Egenskaper"
-
-#~ msgid "Properties"
-#~ msgstr "Egenskaper"
-
-#~ msgid "Preferences"
-#~ msgstr "Inställningar"
-
-#~ msgid "Folder / File"
-#~ msgstr "Mapp / Fil"
