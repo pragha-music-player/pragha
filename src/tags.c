@@ -34,14 +34,14 @@ static gboolean get_info_taglib(gchar *file, struct tags *tags)
 
 	tag = taglib_file_tag(tfile);
 	if (!tag) {
-		g_warning("Unable to locate tag");
+		g_warning("Unable to locate tag in file %s", file);
 		ret = FALSE;
 		goto exit;
 	}
 
 	audio_prop = taglib_file_audioproperties(tfile);
 	if (!audio_prop) {
-		g_warning("Unable to locate audio properties");
+		g_warning("Unable to locate audio properties in file %s", file);
 		ret = FALSE;
 		goto exit;
 	}
@@ -118,7 +118,7 @@ gboolean save_tags_to_file(gchar *file, struct tags *ntag,
 
 	tag = taglib_file_tag(tfile);
 	if (!tag) {
-		g_warning("Unable to locate tag");
+		g_warning("Unable to locate tag in file %s", file);
 		ret = FALSE;
 		goto exit;
 	}
