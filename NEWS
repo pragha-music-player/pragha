@@ -1,5 +1,49 @@
 ==============================================================
-Overview of changes in Pragha 1.0.1 since 1.0
+Overview of changes in Pragha 1.0.2 since 1.0.1
+==============================================================
+
+V1.0.2
+News:
+	EXPERIMENTAL support to gtk3 thanks to Pavel Vasin.
+	Add support for gnome media keys thanks to Pavel Vasin.
+	Use totem-pl-parser to open playlists when is available.
+	* With this can open internet radios playlist.
+	* Support many more formats
+	Imports playlists when update the library
+
+Others Changes:
+	Use the same minimum requeriemientos that Xfce 4.10. A tiny caprice. =)
+	* Need gtk+-2.0 >= 2.20, glib-2.0 >= 2.24, dbus-1 >= 1.1 and dbus-glib-1 >= 0.84.
+	Use libxfce4ui instad libexo-1 to session management.
+	* Better behavior and less dependence.
+	In/Sensitive menus acording playback and lastfm status.
+	Allow displaying length and progress of remote files
+	Many changes in the start of gtk, gstreamer and glib threads.
+	Use PRAGMA synchronous=OFF on db.
+	Remove old check dependency of libcurl.
+	Remove unused dependency on xlib.
+
+Bugs fixed:
+	No close the notify when activate actions. Only update this.
+	Fix bad current track position in mpris2, and emit Player.Seeked signal. See github issue #12
+	Fix expand playlists and radios tree view when update it.
+	Fix compilation with libcdio 0.84 and bad pragha about dialog. See github issue #4.
+	Fix some issues in github opened by ssuominengentoo.
+	* Issue 8: Stop setting docdir= $(pkgdatadir)/doc in Makefile.am since it breaks --docdir switch.
+	* Issue 7: Stop forcing -O3 optimization.
+	* Issue 6: Release tarballs should not set -Werror.
+	* Issue 5: Multiple issues in the pragha.desktop file
+	D'Oh!. Add audio device in preferences.
+	Fixed many memory leaks and some optimizations thanks to Pavel Vasin.
+	Use g_object_set to set audio device. Fix select of audio device.
+
+Updates Translations:
+	Update Rusian translation thanks to lazy.kent.suse.
+	Update some tranlations in transifex.
+	* Excuse the translators, who lost their names, but thank you very much!.
+
+==============================================================
+OTHERS REALESES:
 ==============================================================
 
 V1.0.1
@@ -45,10 +89,6 @@ Updates Translations:
 	Update Rusian translation thanks to lazy.kent.suse.
 
 [1] Note: For this, depend now on libclastfm >= 0.5. Sorry packagers.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.0 "Good news, or aberration?."
 News:
