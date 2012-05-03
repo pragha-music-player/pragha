@@ -550,7 +550,7 @@ pragha_pl_parser_guess_format_from_extension (const gchar *filename)
 
 /* Return true if given file is an image */
 
-gboolean is_image_file(gchar *file)
+gboolean is_image_file(const gchar *file)
 {
 	gboolean uncertain = FALSE, ret = FALSE;
 	gchar *result = NULL;
@@ -560,7 +560,7 @@ gboolean is_image_file(gchar *file)
 
 	/* Type: JPG, PNG */
 
-	result = g_content_type_guess((const gchar*)file, NULL, 0, &uncertain);
+	result = g_content_type_guess(file, NULL, 0, &uncertain);
 
 	if (!result)
 		return FALSE;
