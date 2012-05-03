@@ -1281,7 +1281,7 @@ gchar* sanitize_string_sqlite3(gchar *str);
 enum file_type get_file_type(gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
-gboolean is_image_file(gchar *file);
+gboolean is_image_file(const gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);
