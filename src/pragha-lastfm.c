@@ -112,9 +112,7 @@ void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	__update_current_song_info(cwin);
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_metadata_changed(cwin);
-	#endif
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));

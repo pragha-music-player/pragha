@@ -252,7 +252,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->use_cddb_w));
 
-#if GLIB_CHECK_VERSION(2,26,0)
 		cwin->cpref->use_mpris2 =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->use_mpris2_w));
@@ -263,7 +262,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			if(NULL == cwin->cmpris2->dbus_connection)
 				mpris_init(cwin);
 		}
-#endif
 
 		save_preferences(cwin);
 
@@ -701,12 +699,10 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->use_cddb_w),
 					     TRUE);
-#if GLIB_CHECK_VERSION(2,26,0)
 	if (cwin->cpref->use_mpris2)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->use_mpris2_w),
 					     TRUE);
-#endif
 }
 
 void save_preferences(struct con_win *cwin)
@@ -1325,12 +1321,11 @@ void save_preferences(struct con_win *cwin)
 			       cwin->cpref->use_cddb);
 
 	/* Save allow MPRIS2 server option */
-#if GLIB_CHECK_VERSION(2,26,0)
+
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_SERVICES,
 			       KEY_ALLOW_MPRIS2,
 			       cwin->cpref->use_mpris2);
-#endif
 
 	/* Save to conrc */
 
@@ -1380,10 +1375,7 @@ void preferences_dialog(struct con_win *cwin)
 #ifdef HAVE_LIBGLYR
 	GtkWidget *get_album_art;
 #endif
-	GtkWidget *use_cddb;
-#if GLIB_CHECK_VERSION(2,26,0)
-	GtkWidget *use_mpris2;
-#endif
+	GtkWidget *use_cddb, *use_mpris2;
 
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
@@ -1794,9 +1786,9 @@ void preferences_dialog(struct con_win *cwin)
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 	
 	/* Services MPRIS2 */
-#if GLIB_CHECK_VERSION(2,26,0)
+
 	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
-#endif
+
 #ifdef HAVE_LIBCLASTFM
 	gtk_box_pack_start(GTK_BOX(lastfm_uhbox),
 			   lastfm_ulabel,
@@ -1848,13 +1840,11 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
-#if GLIB_CHECK_VERSION(2,26,0)
 	gtk_box_pack_start(GTK_BOX(services_vbox),
 			   use_mpris2,
 			   FALSE,
 			   FALSE,
 			   0);
-#endif
 
 	/* Add to dialog */
 
@@ -1901,9 +1891,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->get_album_art_w = get_album_art;
 #endif
 	cwin->cpref->use_cddb_w = use_cddb;
-#if GLIB_CHECK_VERSION(2,26,0)
 	cwin->cpref->use_mpris2_w = use_mpris2;
-#endif
 
 	/* Setup signal handlers */
 

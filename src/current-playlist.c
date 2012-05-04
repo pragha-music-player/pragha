@@ -1713,9 +1713,7 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 	}
 
 	/* inform mpris2 */
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_mobj_changed(cwin, mobj, changed);
-	#endif
 
 	g_free(ch_track_no);
 	g_free(ch_year);
@@ -1786,9 +1784,7 @@ void insert_current_playlist_on_model(GtkTreeModel *model, struct musicobject *m
 			return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_mobj_added(cwin, mobj, &iter);
-	#endif
 
 	g_free(ch_length);
 	g_free(ch_track_no);
@@ -1865,9 +1861,7 @@ void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition d
 			return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_mobj_added(cwin, mobj, &iter);
-	#endif
 
 	g_free(ch_length);
 	g_free(ch_track_no);
@@ -1945,9 +1939,7 @@ void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, 
 	}
 
 	/* inform mpris2 */
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_mobj_added(cwin, mobj, &iter);
-	#endif
 
 	if(path)
 		*path = gtk_tree_model_get_path(model, &iter);
@@ -2957,9 +2949,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 
 	update_status_bar(cwin);
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_tracklist_replaced(cwin);
-	#endif
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 

@@ -536,9 +536,7 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 
 	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
 	__update_current_song_info(cwin);
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_metadata_changed(cwin);
-	#endif
 
 	path = current_playlist_get_actual(cwin);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));

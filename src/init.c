@@ -213,34 +213,28 @@ gint init_config(struct con_win *cwin)
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
-	gboolean audio_sink_f, audio_device_f, software_mixer_f, use_cddb_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
+	gboolean audio_sink_f, audio_device_f, software_mixer_f;
+	gboolean remember_window_state_f, start_mode_f, instant_filter_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
+	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
-	gboolean instant_filter_f, use_hint_f;
-	#if GLIB_CHECK_VERSION(2,26,0)
-	gboolean use_mpris2_f;
-	#endif
+
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
-	audio_sink_f = audio_device_f = software_mixer_f = use_cddb_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
+	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
+	remember_window_state_f = start_mode_f = 	instant_filter_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
-	instant_filter_f = use_hint_f = FALSE;
-
+	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
 	#endif
 	#ifdef HAVE_LIBGLYR
 	gboolean get_album_art_f = FALSE;
 	gchar *cache_folder = NULL;
-	#endif
-	#if GLIB_CHECK_VERSION(2,26,0)
-	use_mpris2_f = FALSE;
 	#endif
 
 	all_f = FALSE;
@@ -892,7 +886,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			use_cddb_f = TRUE;
 		}
-		#if GLIB_CHECK_VERSION(2,26,0)
 		cwin->cpref->use_mpris2 =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
@@ -903,7 +896,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			use_mpris2_f = TRUE;
 		}
-		#endif
 	}
 
 	/* Fill up with failsafe defaults */
@@ -1017,10 +1009,8 @@ gint init_config(struct con_win *cwin)
 	#endif
 	if (all_f || use_cddb_f)
 		cwin->cpref->use_cddb = TRUE;
-	#if GLIB_CHECK_VERSION(2,26,0)
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
-	#endif
 	if (all_f || instant_filter_f)
 		cwin->cpref->instant_filter = TRUE;
 	if (all_f || use_hint_f)

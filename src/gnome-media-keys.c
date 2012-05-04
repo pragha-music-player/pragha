@@ -20,8 +20,6 @@
 
 #include "pragha.h"
 
-#if GLIB_CHECK_VERSION(2,26,0)
-
 #define PLAYER_NAME "Pragha"
 
 static void on_media_player_key_pressed(struct con_win *cwin,
@@ -198,5 +196,3 @@ void cleanup_gnome_media_keys(struct con_win *cwin)
 
     g_slice_free(struct con_gnome_media_keys, gmk);
 }
-
-#endif //GLIB_CHECK_VERSION
