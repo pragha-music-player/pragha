@@ -84,19 +84,6 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
-#if !GTK_CHECK_VERSION (2, 22, 0)
-#define gdk_drag_context_list_targets(context)        ((context)->targets)
-#endif
-
-#if !GTK_CHECK_VERSION (2, 22, 0)
-#define GDK_KEY_a GDK_a
-#define GDK_KEY_q GDK_q
-#define GDK_KEY_Up GDK_Up
-#define GDK_KEY_Down GDK_Down
-#define GDK_KEY_Delete GDK_Delete
-#define GDK_KEY_Escape GDK_Escape
-#endif
-
 #if (!GTK_CHECK_VERSION(2, 23, 0) || GTK_CHECK_VERSION(2, 90, 0)) && !GTK_CHECK_VERSION(2, 91, 1)
 #define GtkComboBoxText GtkComboBox
 #define GTK_COMBO_BOX_TEXT(X) GTK_COMBO_BOX(X)
@@ -688,13 +675,11 @@ struct con_mpris2 {
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
-#if GLIB_CHECK_VERSION(2,26,0)
 struct con_gnome_media_keys {
 	guint watch_id;
 	guint handler_id;
 	GDBusProxy *proxy;
 };
-#endif
 
 struct con_win {
 	struct pixbuf *pixbuf;
@@ -706,9 +691,7 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	struct con_mpris2 *cmpris2;
-	#if GLIB_CHECK_VERSION(2,26,0)
 	struct con_gnome_media_keys *cgnome_media_keys;
-	#endif
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
 	GtkWidget *album_art_frame;

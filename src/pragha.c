@@ -111,18 +111,15 @@ void common_cleanup(struct con_win *cwin)
 			      NULL);
 	dbus_connection_unref(cwin->con_dbus);
 
-#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_cleanup(cwin);
-#endif
 
 	if (notify_is_initted())
 		notify_uninit();
 
 #ifdef HAVE_LIBKEYBINDER
 	cleanup_keybinder(cwin);
-#elif GLIB_CHECK_VERSION(2,26,0)
-	cleanup_gnome_media_keys(cwin);
 #endif
+	cleanup_gnome_media_keys(cwin);
 
 	g_option_context_free(cwin->cmd_context);
 
@@ -155,9 +152,7 @@ gint main(gint argc, gchar *argv[])
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 	cwin->clastfm->ntags = g_slice_new0(struct tags);
 #endif
-#if GLIB_CHECK_VERSION(2,26,0)
 	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
-#endif
 
 	if(init_first_state(cwin) == -1)
 		return -1;
@@ -219,12 +214,10 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
-	#endif
 
 	if(backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
@@ -241,12 +234,12 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
-	#elif GLIB_CHECK_VERSION(2,26,0)
+	#endif
+
 	if (init_gnome_media_keys(cwin) == -1) {
 		g_critical("Unable to initialize gnome media keys");
 		return -1;
 	}
-	#endif
 
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 

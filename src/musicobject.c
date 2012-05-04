@@ -349,9 +349,8 @@ void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin)
 		return;
 
 	CDEBUG(DBG_MOBJ, "Test freeing musicobject: %s", mobj->file);
-	#if GLIB_CHECK_VERSION(2,26,0)
+
 	mpris_update_mobj_remove(cwin, mobj);
-	#endif
 
 	if (mobj == cwin->cstate->curr_mobj)
 		cwin->cstate->curr_mobj_clear = TRUE;

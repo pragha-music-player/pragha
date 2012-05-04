@@ -274,9 +274,7 @@ update_downloaded_album_art (gpointer data)
 			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
 			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
 				update_album_art(cwin->cstate->curr_mobj, cwin);
-				#if GLIB_CHECK_VERSION(2,26,0)
 				mpris_update_metadata_changed(cwin);
-				#endif
 			}
 		}
 		else {
