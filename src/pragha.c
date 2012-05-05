@@ -118,8 +118,9 @@ void common_cleanup(struct con_win *cwin)
 
 #ifdef HAVE_LIBKEYBINDER
 	cleanup_keybinder(cwin);
-#endif
+#else
 	cleanup_gnome_media_keys(cwin);
+#endif
 
 	g_option_context_free(cwin->cmd_context);
 
@@ -234,12 +235,12 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
-	#endif
-
+	#else
 	if (init_gnome_media_keys(cwin) == -1) {
 		g_critical("Unable to initialize gnome media keys");
 		return -1;
 	}
+	#endif
 
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 
