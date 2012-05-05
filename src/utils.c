@@ -79,28 +79,24 @@ const gchar *mime_dual[] = {"audio/x-real-audio",
 
 /* Functions to check the network manager status. */
 
-NMState
-dbus_check_nm_status (DBusConnection *connection)
+static NMState
+dbus_check_nm_status (GDBusProxy *proxy)
 {
-	DBusMessage *message, *reply;
-	DBusError error;
-	dbus_uint32_t state;
-	
-	message = dbus_message_new_method_call (NM_DBUS_SERVICE, NM_DBUS_PATH,
-						NM_DBUS_INTERFACE, "state");
-	if (!message)
+	GVariant *tuple = g_dbus_proxy_call_sync(proxy,
+						  "state",
+						  NULL,
+						  G_DBUS_CALL_FLAGS_NONE,
+						  -1,
+						  NULL,
+						  NULL);
+
+	if (!tuple)
 		return NM_STATE_UNKNOWN;
 
-	dbus_error_init (&error);
-	reply = dbus_connection_send_with_reply_and_block (connection, message,
-							   -1, &error);
-	dbus_message_unref (message);
-	if (!reply)
-		return NM_STATE_UNKNOWN;
+	guint32 state;
+	g_variant_get(tuple, "(u)", &state);
 
-	if (!dbus_message_get_args (reply, NULL, DBUS_TYPE_UINT32, &state,
-				    DBUS_TYPE_INVALID))
-		return NM_STATE_UNKNOWN;
+	g_variant_unref(tuple);
 
 	return state;
 }
@@ -108,21 +104,21 @@ dbus_check_nm_status (DBusConnection *connection)
 gboolean
 nm_is_online ()
 {
-	DBusConnection *connection;
-	DBusError error;
-	NMState state;
+	GDBusProxy *proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
+							  G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+							  NULL,
+							  NM_DBUS_SERVICE,
+							  NM_DBUS_PATH,
+							  NM_DBUS_INTERFACE,
+							  NULL,
+							  NULL);
 
-	dbus_error_init (&error);
-	connection = dbus_bus_get (DBUS_BUS_SYSTEM, &error);
-	if (connection == NULL) {
-		g_critical("Error connecting to DBUS_BUS_SYSTEM to get nm status: %s", error.message);
-		dbus_error_free (&error);
+	if (!proxy)
 		return FALSE;
-	}
 
-	state = dbus_check_nm_status (connection);
+	NMState state = dbus_check_nm_status (proxy);
 
-	dbus_connection_unref(connection);
+	g_object_unref(proxy);
 
 	if (state == NM_STATE_CONNECTED_LOCAL ||
 	    state == NM_STATE_CONNECTED_SITE ||
