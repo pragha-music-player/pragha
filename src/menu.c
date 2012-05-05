@@ -166,6 +166,13 @@ void handle_selected_file(gpointer data, gpointer udata)
 							data, NULL);
 		}
 	}
+
+	/* Have to give control to GTK periodically ... */
+	/* If gtk_main_quit has been called, return -
+	   since main loop is no more. */
+
+	while(gtk_events_pending())
+		if (gtk_main_iteration_do(FALSE));
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
@@ -232,25 +239,33 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
+	GdkCursor *cursor;
+	GSList *files = NULL;
+
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
 	struct con_win *cwin = g_object_get_data(data, "cwin");
 
 	cwin->cpref->add_recursively_files = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
-
-	GSList *files;
+	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
+
+	gtk_widget_destroy(window);
+
 	if (files) {
-		cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
+		cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
+		gdk_cursor_unref(cursor);
+
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free(files);
+
+		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 	}
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
-
-	gtk_widget_destroy(window);
 }
 
 static gboolean
