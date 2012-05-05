@@ -1263,7 +1263,6 @@ void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
 
-NMState dbus_check_nm_status (DBusConnection *connection);
 gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);
