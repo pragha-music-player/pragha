@@ -649,8 +649,46 @@ static GVariant* mpris_TrackList_GetTracksMetadata(struct con_win *cwin, GVarian
 }
 
 static GVariant* mpris_TrackList_AddTrack(struct con_win *cwin, GVariant* parameters) {
-	g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-		DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
+	gchar *uri;
+	gchar *after_track; //TODO use this
+	gboolean set_as_current; //TODO use this
+
+	g_variant_get(parameters, "(sob)", &uri, &after_track, &set_as_current);
+
+	gchar *file = g_filename_from_uri(uri, NULL, NULL);
+
+	if (!file) {
+		g_warning("Invalid uri: %s", uri);
+		goto exit;
+	}
+
+	gdk_threads_enter();
+
+	if (is_dir_and_accessible(file, cwin)) {
+		if(cwin->cpref->add_recursively_files)
+			__recur_add(file, cwin);
+		else
+			__non_recur_add(file, TRUE, cwin);
+	}
+	else if (is_playable_file(file)) {
+		struct musicobject *mobj = new_musicobject_from_file(file);
+		if (mobj)
+			append_current_playlist(mobj, cwin);
+		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
+	}
+	else {
+		g_warning("Unable to add file %s", file);
+	}
+	select_last_path_of_current_playlist(cwin);
+	update_status_bar(cwin);
+
+	gdk_threads_leave();
+
+	g_free(file);
+exit:
+	g_free(uri);
+	g_free(after_track);
+
 	return NULL;
 }
 
