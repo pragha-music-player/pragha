@@ -340,7 +340,8 @@ static GVariant* mpris_Player_get_LoopStatus(struct con_win *cwin) {
 
 static void mpris_Player_put_LoopStatus(struct con_win *cwin, GVariant *value) {
 	const gchar *new_loop = g_variant_get_string(value, NULL);
-	cwin->cpref->repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
+	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), repeat);
 }
 
 static GVariant* mpris_Player_get_Rate(struct con_win *cwin) {
