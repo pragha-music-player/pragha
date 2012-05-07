@@ -180,6 +180,9 @@
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 #define DBUS_EVENT_UPDATE_STATE   "update_state"
 
+#define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
+#define MPRIS_PATH "/org/mpris/MediaPlayer2"
+
 /* Defines to get network manager status. */
 
 #define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"

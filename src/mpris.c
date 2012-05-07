@@ -18,8 +18,6 @@
 
 #include "pragha.h"
 
-static const gchar MPRIS_NAME[] = "org.mpris.MediaPlayer2.pragha";
-static const gchar MPRIS_PATH[] = "/org/mpris/MediaPlayer2";
 static const gchar mpris2xml[] = 
 "<node>"
 "        <interface name='org.mpris.MediaPlayer2'>"
