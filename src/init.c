@@ -58,7 +58,7 @@ GOptionEntry cmd_entries[] = {
 	{"audio_mixer", 'm', 0, G_OPTION_ARG_STRING,
 	 &audio_mixer, "Mixer Element (For ALSA: Master, PCM, etc.., For OSS: /dev/mixer, etc...)", NULL},
 	{G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME, G_OPTION_ARG_CALLBACK,
-	 cmd_add_file, "", "[URI1 [URI2...]]"},
+	 cmd_add_file, "", "[FILE1 [FILE2...]]"},
 	{NULL}
 };
 
