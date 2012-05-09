@@ -122,8 +122,6 @@ void common_cleanup(struct con_win *cwin)
 	cleanup_gnome_media_keys(cwin);
 #endif
 
-	g_option_context_free(cwin->cmd_context);
-
 	g_slice_free(struct con_win, cwin);
 }
 

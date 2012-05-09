@@ -194,9 +194,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 		return -1;
 	}
 	
-	/* Store reference */
-
-	cwin->cmd_context = context;
+	g_option_context_free(context);
 	return 0;
 }
 
