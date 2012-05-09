@@ -728,7 +728,6 @@ struct con_win {
 	GtkWidget *jump_tree;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
-	GOptionContext *cmd_context;
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
