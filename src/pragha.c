@@ -71,6 +71,8 @@ void common_cleanup(struct con_win *cwin)
 	g_free(cwin->cpref->configrc_file);
 	g_free(cwin->cpref->installed_version);
 	g_free(cwin->cpref->album_art_pattern);
+	g_free(cwin->cpref->audio_sink);
+	g_free(cwin->cpref->audio_device);
 	g_free(cwin->cpref->audio_cd_device);
 	g_free(cwin->cpref->start_mode);
 	g_free(cwin->cpref->sidebar_pane);
