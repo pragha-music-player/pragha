@@ -1265,6 +1265,9 @@ void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
 
+gsize levenshtein_strcmp(const gchar * s, const gchar * t);
+gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
+gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
 gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);

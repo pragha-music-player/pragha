@@ -77,6 +77,106 @@ const gchar *mime_dual[] = {"audio/x-real-audio",
 				    NULL};
 #endif
 
+/* Compare two strings and returns the levenshtein distance.
+ * Based on glyr code. Thanks to cpahl. */
+
+gsize levenshtein_strcmp(const gchar * s, const gchar * t)
+{
+    int n = (s) ? g_utf8_strlen(s,-1)+1 : 0;
+    int m = (t) ? g_utf8_strlen(t,-1)+1 : 0;
+
+    // NOTE: Be sure to call g_utf8_validate(), might fail otherwise
+    // It's advisable to call g_utf8_normalize() too.
+
+    // Nothing to compute really..
+    if (n < 2) return m;
+    if (m < 2) return n;
+
+    // String matrix
+    int d[n][m];
+    int i,j;
+
+    // Init first row|column to 0...n|m
+    for (i=0; i<n; i++) d[i][0] = i;
+    for (j=0; j<m; j++) d[0][j] = j;
+
+    for (i=1; i<n; i++)
+    {
+        // Current char in string s
+        gunichar cats = g_utf8_get_char(g_utf8_offset_to_pointer(s,i-1));
+
+        for (j=1; j<m; j++)
+        {
+            // Do -1 only once
+            int jm1 = j-1,
+                im1 = i-1;
+
+            gunichar tats = g_utf8_get_char(g_utf8_offset_to_pointer(t,jm1));
+
+            // a = above cell, b = left cell, c = left above celli
+            int a = d[im1][j] + 1,
+                b = d[i][jm1] + 1,
+                c = d[im1][jm1] + (tats != cats);
+    
+            // Now compute the minimum of a,b,c and set MIN(a,b,c) to cell d[i][j]
+            d[i][j] = (a < b) ? MIN(a,c) : MIN(b,c);
+        }
+    }
+
+    // The result is stored in the very right down cell
+    return d[n-1][m-1];
+}
+
+gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t)
+{
+    gsize rc = 100;
+
+    if(g_utf8_validate(s,-1,NULL) == FALSE ||
+       g_utf8_validate(t,-1,NULL) == FALSE)
+     return rc;
+
+    gchar * s_norm = g_utf8_normalize(s,-1,G_NORMALIZE_ALL_COMPOSE);
+    gchar * t_norm = g_utf8_normalize(t,-1,G_NORMALIZE_ALL_COMPOSE);
+
+    rc = levenshtein_strcmp(s_norm,t_norm);
+
+    g_free(s_norm);
+    g_free(t_norm);
+
+    return rc;
+}
+
+/* Searches the string haystack for the first occurrence of the string needle
+ * considering a maximum levenshtein distance. */
+
+gchar *
+g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
+{
+	gint needle_len = 0, haystack_len = 0, count = 0;
+	gchar *needle_buf = NULL, *rv = NULL;
+ 
+ 	haystack_len = g_utf8_strlen(haystack, -1);
+	needle_len = g_utf8_strlen(needle, -1);
+
+	needle_buf = g_malloc0(needle_len + 1);
+
+	do {
+		g_utf8_strncpy(needle_buf, haystack, needle_len);
+
+		if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
+			rv = (gchar*)haystack;
+			break;
+		}
+
+		haystack = g_utf8_next_char(haystack);
+
+	} while(needle_len + count++ < haystack_len);
+
+	g_free(needle_buf);
+
+	return rv;
+}
+
 /* Functions to check the network manager status. */
 
 static NMState
