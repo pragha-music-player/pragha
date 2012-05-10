@@ -100,52 +100,42 @@ void jump_row_activated_cb (GtkTreeView *jump_tree,
 }
 
 gchar *
-search_and_set_layout (gchar *haystack, gchar *needle)
+search_and_set_layout (gchar *full_string, struct con_win *cwin)
 {
-	gchar *needled = NULL, *haystackd = NULL, *found = NULL;
+	gchar *display_string = NULL;
+	gchar *needle = NULL, *haystack = NULL;
+	gchar *found = NULL;
 	gchar *prev_string = NULL, *mach_string = NULL, *last_string = NULL;
-	gchar *layout = NULL;
-	gint needle_clen, found_clen, haystack_clen;
-	gint needle_len, found_len, haystack_len;
+	gint needle_len, found_len, full_string_len;
 
-	needled = g_utf8_strdown (needle, -1);
-	haystackd = g_utf8_strdown (haystack, -1);
+	if (cwin->cstate->jump_filter == NULL)
+		display_string = g_markup_printf_escaped ("%s", full_string);
+	else {
+		needle = g_utf8_casefold (cwin->cstate->jump_filter, -1);
+		haystack = g_utf8_casefold (full_string, -1);
 
-	needle_len = g_utf8_strlen (needled, -1);
-	haystack_len = g_utf8_strlen (haystackd, -1);
+		found = g_strrstr (haystack, needle);
 
-	if(g_utf8_strlen (needled, -1) < 3)
-		found = g_strrstr (haystackd, needled);
-	else
-		found = g_strstr_lv (haystackd, needled, 1);
+		if (found != NULL) {
+			needle_len = strlen (needle);
+			found_len = strlen (found);
+			full_string_len = strlen (full_string);
 
-	if (found != NULL) {
-		found_len = g_utf8_strlen (found, -1);
+			prev_string = g_strndup (full_string, full_string_len - found_len);
+			mach_string = g_strndup (full_string + full_string_len - found_len, needle_len);
+			last_string = g_strdup (full_string + full_string_len - found_len + needle_len);
 
-		found_clen = strlen (found);
-		needle_clen = strlen (needled);
-		haystack_clen = strlen (haystackd);
+			display_string = g_markup_printf_escaped ("%s<b>%s</b>%s", prev_string, mach_string, last_string);
 
-		prev_string = g_malloc0(haystack_clen - found_clen + 1);
-		g_utf8_strncpy(prev_string, haystack, haystack_len - found_len);
-
-		mach_string = g_malloc0(needle_clen + 1);
-		g_utf8_strncpy(mach_string, g_utf8_offset_to_pointer(haystack, haystack_len - found_len), needle_len);
-
-		last_string = g_malloc0(found_clen - needle_clen + 1);
-		g_utf8_strncpy(last_string, g_utf8_offset_to_pointer(haystack, haystack_len - found_len + needle_len), found_len - needle_len);
-
-		layout = g_markup_printf_escaped ("%s<b>%s</b>%s", prev_string, mach_string, last_string);
-
-		g_free (prev_string);
-		g_free (mach_string);
-		g_free (last_string);
+			g_free (prev_string);
+			g_free (mach_string);
+			g_free (last_string);
+		}
+		g_free (needle);
+		g_free (haystack);
 	}
 
-	g_free (needled);
-	g_free (haystackd);
-
-	return layout;
+	return display_string;
 }
 
 gboolean do_jump_refilter(struct con_win *cwin)
@@ -154,8 +144,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	GtkTreeIter playlist_iter, jump_iter;
 	struct musicobject *mobj = NULL;
 	GtkListStore *jump_store;
-	gchar *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL;
-	gchar *track_data_markup = NULL, *track_data = NULL, *needle_filter = NULL;
+	gchar *track_data_markup = NULL, *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL, *track_data = NULL;
 	gboolean ret;
 	gint track_i = 0;
 
@@ -166,9 +155,6 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	gtk_list_store_clear (GTK_LIST_STORE(jump_store));
 
 	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
-
-	if(cwin->cstate->jump_filter != NULL)
-		needle_filter = g_utf8_strdown (cwin->cstate->jump_filter, -1);
 
 	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
 	while (ret) {
@@ -182,9 +168,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 		track_data = g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
-		track_data_markup = (needle_filter != NULL) ?
-					   search_and_set_layout (track_data, needle_filter) :
-					   g_markup_printf_escaped ("%s", track_data);
+		track_data_markup = search_and_set_layout (track_data, cwin);
 
 		if (track_data_markup != NULL) {
 			gtk_list_store_append (jump_store, &jump_iter);
@@ -206,8 +190,6 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	g_object_unref(jump_store);
 
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(cwin->jump_tree));
-
-	g_free(needle_filter);
 
 	return FALSE;
 }
