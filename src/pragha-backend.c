@@ -17,8 +17,12 @@
 
 #include "pragha.h"
 
-#if HAVE_GSTREAMER_PLUGINS_BASE
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
+#if GST_CHECK_VERSION (1, 0, 0)
+#include <gst/audio/streamvolume.h>
+#else
 #include <gst/interfaces/streamvolume.h>
+#endif //GST_CHECK_VERSION
 #define convert_volume(from, to, val) gst_stream_volume_convert_volume((from), (to), (val))
 #define VOLUME_FORMAT_LINEAR GST_STREAM_VOLUME_FORMAT_LINEAR
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
@@ -99,7 +103,11 @@ backend_get_current_length(struct con_win *cwin)
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
+#if GST_CHECK_VERSION (1, 0, 0)
+	result = gst_element_query_duration(cwin->cgst->pipeline, format, &song_length);
+#else
 	result = gst_element_query_duration(cwin->cgst->pipeline, &format, &song_length);
+#endif
 
 	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
@@ -114,7 +122,12 @@ backend_get_current_position(struct con_win *cwin)
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
+#if GST_CHECK_VERSION (1, 0, 0)
+	result = gst_element_query_position(cwin->cgst->pipeline, format, &song_position);
+#else
 	result = gst_element_query_position(cwin->cgst->pipeline, &format, &song_position);
+#endif
+
 	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
 
@@ -156,7 +169,7 @@ backend_get_volume(struct con_win *cwin)
 
 	g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
 
-#if HAVE_GSTREAMER_PLUGINS_BASE
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
 #endif
 
@@ -195,7 +208,7 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 	 * we still get another one anyway. */
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
-#if HAVE_GSTREAMER_PLUGINS_BASE
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, volume);
 #endif
 	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
@@ -222,7 +235,7 @@ backend_update_volume(struct con_win *cwin)
 	 * we still get another one anyway. */
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
-#if HAVE_GSTREAMER_PLUGINS_BASE
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, cwin->cgst->curr_vol);
 #else
 	volume = cwin->cgst->curr_vol;
@@ -731,7 +744,11 @@ gint backend_init(struct con_win *cwin)
 
 	gst_init(NULL, NULL);
 
+#if GST_CHECK_VERSION (1, 0, 0)
+	cwin->cgst->pipeline = gst_element_factory_make("playbin", "playbin");
+#else
 	cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
+#endif
 
 	if (cwin->cgst->pipeline == NULL)
 		return -1;
