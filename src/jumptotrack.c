@@ -185,6 +185,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 						1, track_data_markup,
 						-1);
 		}
+
 		g_free (ch_title);
 		g_free (ch_artist);
 		g_free (ch_album);
@@ -201,7 +202,17 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 	g_free(needle_filter);
 
+	cwin->cstate->timeout_id = 0;
+
 	return FALSE;
+}
+
+void queue_jump_refilter (struct con_win *cwin)
+{
+	if(cwin->cstate->timeout_id)
+		g_source_remove(cwin->cstate->timeout_id);
+
+	cwin->cstate->timeout_id = g_timeout_add(500, (GSourceFunc)do_jump_refilter, cwin);
 }
 
 gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
@@ -215,26 +226,20 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 	if (!cwin->cpref->instant_filter)
 		return FALSE;
 
-	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
-
 	if (cwin->cstate->jump_filter != NULL) {
 		g_free (cwin->cstate->jump_filter);
 		cwin->cstate->jump_filter = NULL;
 	}
 
-	if (cwin->cstate->timeout_id){
-		g_source_remove (cwin->cstate->timeout_id );
-		cwin->cstate->timeout_id = 0;
-	}
+	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		u_str = g_utf8_strdown (text, -1);
 		cwin->cstate->jump_filter = u_str;
-		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc) do_jump_refilter, cwin );
 	}
-	else {
-		do_jump_refilter (cwin);
-	}
+
+	queue_jump_refilter(cwin);
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
