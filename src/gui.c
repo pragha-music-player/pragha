@@ -678,6 +678,7 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 	library_tree = create_library_tree(cwin);
 
 	gtk_container_add(GTK_CONTAINER(library_tree_scroll), library_tree);
+	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
 
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   order_selector,

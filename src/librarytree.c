@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2010 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
 /*									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -916,6 +916,9 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 void clear_library_search(struct con_win *cwin)
 {
 	GtkTreeModel *model, *filter_model;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	gint i = 0;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
@@ -923,6 +926,12 @@ void clear_library_search(struct con_win *cwin)
 	gtk_tree_model_foreach(model, set_all_visible, cwin);
 
 	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
+
+	while (gtk_tree_model_iter_nth_child(model, &iter, NULL, i++)) {
+		path = gtk_tree_model_get_path(model, &iter);
+		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
+		gtk_tree_path_free(path);
+	}
 }
 
 /********************************/
