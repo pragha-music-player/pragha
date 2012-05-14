@@ -13,12 +13,10 @@ dnl Initialize autoconf
 AC_COPYRIGHT([Copyright (c) 2009-2012
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
-
+AC_CONFIG_HEADERS([config.h])
 
 dnl  Initialize automake
-
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
-AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE()
 
 dnl *********************
