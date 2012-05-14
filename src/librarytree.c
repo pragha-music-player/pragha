@@ -515,9 +515,12 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				     struct con_win *cwin)
 {
 	GtkWidget *popup_menu;
+	GtkTreeModel *model;
 	GtkTreePath *path;
+	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
+	enum node_type node_type;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
@@ -538,16 +541,32 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
-			library_tree_add_to_playlist(cwin);
+
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+
+			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
+				playlist_tree_add_to_playlist(cwin);
+			else
+				library_tree_add_to_playlist(cwin);
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
-	
-			popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
-							       "/popup");
+
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+
+			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
+				popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+									 "/popup");
+			else
+				popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
+									 "/popup");
 	
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 				       event->button, event->time);
