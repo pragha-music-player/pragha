@@ -792,18 +792,7 @@ library_pane_action (GtkAction *action, struct con_win *cwin)
 	gboolean ret;
 	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), ret);
-}
-
-/* Handler for the 'File panel' item in the Edit menu */
-
-void
-playlists_pane_action (GtkAction *action, struct con_win *cwin)
-{
-	gboolean ret;
-	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_playlists), ret);
+	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), ret);
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */

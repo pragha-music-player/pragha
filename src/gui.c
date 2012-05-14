@@ -54,14 +54,11 @@ gchar *main_menu_xml = "<ui>							\
 		<menu action=\"ViewMenu\">					\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
-			<menu action=\"Lateral panel\">				\
-				<menuitem action=\"Library\"/>			\
-				<menuitem action=\"Playlists\"/>		\
-			</menu>							\
-			<menuitem action=\"Playback controls below\"/>		\
+			<menuitem action=\"Lateral panel\"/>		\
+			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
-			<menuitem action=\"Jump to playing song\"/>		\
+			<menuitem action=\"Jump to playing song\"/>	\
 		</menu>								\
 		<menu action=\"ToolsMenu\">					\
 			<separator/>						\
@@ -130,8 +127,7 @@ gchar *cp_null_context_menu_xml = "<ui>		    				\
 	<separator/>				    				\
 	<menuitem action=\"Add the library\"/>	    				\
 	<separator/>				    				\
-	<menuitem action=\"Library\"/>						\
-	<menuitem action=\"Playlists\"/>					\
+	<menuitem action=\"Lateral panel\"/>				\
 	<separator/>				    				\
 	<menuitem action=\"Quit\"/>						\
 	</popup>				    				\
@@ -238,7 +234,6 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Preferences", GTK_STOCK_PREFERENCES, N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Lateral panel", NULL, N_("Lateral _panel")},
 	{"Jump to playing song", GTK_STOCK_JUMP_TO, N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
@@ -306,11 +301,8 @@ GtkToggleActionEntry toggles_entries[] = {
 	{"Fullscreen", NULL, N_("_Fullscreen"),
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
-	{"Library", NULL, N_("Library"),
-	 NULL, "Library", G_CALLBACK(library_pane_action),
-	TRUE},
-	{"Playlists", NULL, N_("Playlists"),
-	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
+	{"Lateral panel", NULL, N_("Lateral _panel"),
+	 NULL, "Lateral panel", G_CALLBACK(library_pane_action),
 	FALSE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
@@ -334,11 +326,8 @@ GtkActionEntry cp_null_context_aentries[] = {
 };
 
 GtkToggleActionEntry cp_null_toggles_entries[] = {
-	{"Library", NULL, N_("Library"),
-	 NULL, "Library", G_CALLBACK(library_pane_action),
-	TRUE},
-	{"Playlists", NULL, N_("Playlists"),
-	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
+	{"Lateral panel", NULL, N_("Lateral _panel"),
+	 NULL, "Lateral panel", G_CALLBACK(library_pane_action),
 	FALSE}
 };
 
@@ -705,8 +694,7 @@ static GtkWidget* create_playlist_tree(struct con_win *cwin)
 /* Left pane (Browse mode) */
 /***************************/
 
-static GtkUIManager* create_library_page_context_menu(GtkWidget *library_page,
-						      struct con_win *cwin)
+static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2045,16 +2033,15 @@ GtkWidget * create_combo_order(struct con_win *cwin)
 	gtk_container_add (GTK_CONTAINER(button),
 			   hbox);
 
+	/* Create library page context menu */
+	cwin->library_page_context_menu = create_library_page_context_menu(cwin);
+
 	g_signal_connect(G_OBJECT(button),
 			 "button-press-event",
 			 G_CALLBACK(library_page_right_click_cb),
 			 cwin);
 
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("Options of the library"));
-
-	/* Create library page context menu */
-
-	cwin->library_page_context_menu = create_library_page_context_menu(cwin->toggle_lib, cwin);
 
 	cwin->combo_order = button;
 	cwin->combo_order_label = label_order;

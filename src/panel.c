@@ -603,62 +603,6 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 	play_next_track(cwin);
 }
 
-void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin)
-{
-	GtkAction *action_lib, *null_action_lib, *action_playlists, *null_action_playlists;
-
-	action_lib = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Library");
-	null_action_lib = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Library");
-
-	action_playlists = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel/Playlists");
-	null_action_playlists = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Playlists");
-
-	g_signal_handlers_block_by_func (action_lib, library_pane_action, cwin);
-	g_signal_handlers_block_by_func (null_action_lib, library_pane_action, cwin);
-	g_signal_handlers_block_by_func (cwin->toggle_lib, toggled_cb, cwin);
-
-	g_signal_handlers_block_by_func (action_playlists, playlists_pane_action, cwin);
-	g_signal_handlers_block_by_func (null_action_playlists, playlists_pane_action, cwin);
-	g_signal_handlers_block_by_func (cwin->toggle_playlists, toggled_cb, cwin);
-
-	if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_lib)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle))) {
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), TRUE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), TRUE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists) ,FALSE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists) ,FALSE);
-		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_playlists), FALSE);
-		gtk_widget_show (GTK_WIDGET(cwin->browse_mode));
-		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 0);
-		gtk_widget_grab_focus(cwin->library_tree);
-	}
-	else if ((GTK_TOGGLE_BUTTON(toggle) == GTK_TOGGLE_BUTTON(cwin->toggle_playlists)) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle))) {
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists), TRUE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists), TRUE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), FALSE);
-		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
-		gtk_widget_show (GTK_WIDGET(cwin->browse_mode));
-		gtk_notebook_set_current_page(GTK_NOTEBOOK(cwin->browse_mode), 1);
-		gtk_widget_grab_focus(cwin->playlist_tree);
-	}
-	else {
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_lib), FALSE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_lib), FALSE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_playlists), FALSE);
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (null_action_playlists), FALSE);
-		gtk_widget_hide (GTK_WIDGET(cwin->browse_mode));
-		gtk_widget_grab_focus(cwin->current_playlist);
-	}
-
-	g_signal_handlers_unblock_by_func (action_lib, library_pane_action, cwin);
-	g_signal_handlers_unblock_by_func (null_action_lib, library_pane_action, cwin);
-	g_signal_handlers_unblock_by_func (cwin->toggle_lib, toggled_cb, cwin);
-
-	g_signal_handlers_unblock_by_func (action_playlists, playlists_pane_action, cwin);
-	g_signal_handlers_unblock_by_func (null_action_playlists, playlists_pane_action, cwin);
-	g_signal_handlers_unblock_by_func (cwin->toggle_playlists, toggled_cb, cwin);
-}
-
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
 	cwin->cgst->curr_vol = value / 100;
