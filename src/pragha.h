@@ -986,17 +986,9 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 /* Playlist mgmt functions */
 
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
+void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 void add_radio_current_playlist(gchar *playlist, struct con_win *cwin);
-void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
-				    GtkTreePath *path,
-				    GtkTreeViewColumn *column,
-				    struct con_win *cwin);
-gboolean playlist_tree_button_press_cb(GtkWidget *widget,
-				      GdkEventButton *event,
-				      struct con_win *cwin);
-gboolean playlist_tree_button_release_cb(GtkWidget *widget,
-				      GdkEventButton *event,
-				      struct con_win *cwin);
+void add_radio_current_playlist_on_model(GtkTreeModel *model, gchar *radio, struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);

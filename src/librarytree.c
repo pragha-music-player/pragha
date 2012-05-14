@@ -293,14 +293,18 @@ static void add_row_current_playlist(GtkTreePath *path,
 	enum node_type node_type = 0;
 	gint location_id;
 	struct musicobject *mobj = NULL;
+	gchar *data = NULL;
 	gint j = 0;
 
 	/* If this path is a track, just append it to the current playlist */
 
 	gtk_tree_model_get_iter(row_model, &r_iter, path);
+
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_TYPE, &node_type, -1);
+	gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
+	gtk_tree_model_get(row_model, &r_iter, L_NODE_DATA, &data, -1);
+
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
 		mobj = new_musicobject_from_db(location_id, cwin);
 		if (!mobj)
 			g_warning("Unable to retrieve details "
@@ -308,6 +312,12 @@ static void add_row_current_playlist(GtkTreePath *path,
 				  location_id);
 		else
 			append_current_playlist_on_model(playlist_model, mobj, cwin);
+	}
+	else if (node_type == NODE_PLAYLIST) {
+		add_playlist_current_playlist_on_model(playlist_model, data, cwin);
+	}
+	else if (node_type == NODE_RADIO) {
+		add_radio_current_playlist_on_model(playlist_model, data, cwin);
 	}
 
 	/* For all other node types do a recursive add */
@@ -331,6 +341,8 @@ static void add_row_current_playlist(GtkTreePath *path,
 			gtk_tree_path_free(path);
 		}
 	}
+
+	g_free(data);
 }
 
 static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
@@ -485,6 +497,8 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		break;
 	case NODE_TRACK:
 	case NODE_BASENAME:
+	case NODE_PLAYLIST:
+	case NODE_RADIO:
 		cursor = gdk_cursor_new(GDK_WATCH);
 		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
