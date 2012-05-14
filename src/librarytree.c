@@ -108,12 +108,12 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 /* Adds a file and its parent directories to the library tree */
 
 static void add_folder_file(gchar *path, int location_id,
-	struct con_win *cwin, GtkTreeModel *model, GtkTreeIter *parent_iter)
+	struct con_win *cwin, GtkTreeModel *model, GtkTreeIter *p_iter)
 {
 	gchar *prefix = NULL, *filepath = NULL;	/* Do not free */
 	gchar **subpaths = NULL;		/* To be freed */
 
-	GtkTreeIter iter, iter2, search_iter, *p_iter = NULL;
+	GtkTreeIter iter, iter2, search_iter;
 	int i = 0 , len = 0;
 
 	/* Search all library directories for the one that matches the path */
@@ -133,8 +133,8 @@ static void add_folder_file(gchar *path, int location_id,
 
 	/* If not fuse_folders add the prefix */
 	if (!cwin->cpref->fuse_folders) {
-		if (!find_child_node(prefix, &search_iter, parent_iter, model)) {
-			add_child_node_by_folder(model, &iter, parent_iter,
+		if (!find_child_node(prefix, &search_iter, p_iter, model)) {
+			add_child_node_by_folder(model, &iter, p_iter,
 						cwin->pixbuf->pixbuf_dir,
 						prefix,
 						NODE_FOLDER,
@@ -145,9 +145,6 @@ static void add_folder_file(gchar *path, int location_id,
 			iter2 = search_iter;
 			p_iter = &iter2;
 		}
-	}
-	else {
-		p_iter = parent_iter;
 	}
 
 	/* Add all subdirectories and filename to the tree */
