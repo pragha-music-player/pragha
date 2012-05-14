@@ -2058,7 +2058,7 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
-			init_playlist_view(cwin);
+			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
 			append_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
@@ -2100,7 +2100,7 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
-			init_playlist_view(cwin);
+			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
 			append_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
@@ -2576,7 +2576,7 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 				  time);
 		return TRUE;
 	}
-	else if (gtk_drag_get_source_widget(context) == cwin->playlist_tree) {
+	/*else if (gtk_drag_get_source_widget(context) == cwin->playlist_tree) {
 		CDEBUG(DBG_VERBOSE, "DnD: playlist_tree");
 		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
 							     TARGET_PLAYLIST));
@@ -2585,7 +2585,7 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 				  target,
 				  time);
 		return TRUE;
-	}
+	}*/
 
 	return FALSE;
 }
