@@ -146,6 +146,9 @@ static void add_folder_file(gchar *path, int location_id,
 			p_iter = &iter2;
 		}
 	}
+	else {
+		p_iter = parent_iter;
+	}
 
 	/* Add all subdirectories and filename to the tree */
 	for (i = 0; subpaths[i]; i++) {
