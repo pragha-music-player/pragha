@@ -108,7 +108,7 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 /* Adds a file and its parent directories to the library tree */
 
 static void add_folder_file(gchar *path, int location_id,
-	struct con_win *cwin, GtkTreeModel *model)
+	struct con_win *cwin, GtkTreeModel *model, GtkTreeIter *parent_iter)
 {
 	gchar *prefix = NULL, *filepath = NULL;	/* Do not free */
 	gchar **subpaths = NULL;		/* To be freed */
@@ -133,8 +133,8 @@ static void add_folder_file(gchar *path, int location_id,
 
 	/* If not fuse_folders add the prefix */
 	if (!cwin->cpref->fuse_folders) {
-		if (!find_child_node(prefix, &search_iter, NULL, model)) {
-			add_child_node_by_folder(model, &iter, NULL,
+		if (!find_child_node(prefix, &search_iter, parent_iter, model)) {
+			add_child_node_by_folder(model, &iter, parent_iter,
 						cwin->pixbuf->pixbuf_dir,
 						prefix,
 						NODE_FOLDER,
@@ -170,9 +170,9 @@ static void add_folder_file(gchar *path, int location_id,
 
 static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 	gchar *album, gchar *year, gchar *artist, gchar *track, struct con_win *cwin,
-	GtkTreeModel *model)
+	GtkTreeModel *model, GtkTreeIter *p_iter)
 {
-	GtkTreeIter iter, iter2, search_iter, *p_iter = NULL;
+	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL, *node = NULL;
 	GdkPixbuf *node_pixbuf = NULL;
 	enum node_type node_type = 0;
@@ -1466,6 +1466,25 @@ exit:
 	g_list_free(list);
 }
 
+static void add_entry_playlist(gchar *playlist,
+			       int node_type,
+			       GtkTreeIter *root,
+			       GtkTreeModel *model,
+			       struct con_win *cwin)
+{
+	GtkTreeIter iter;
+
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      root);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_NODE_TYPE, node_type,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_track,
+			   P_PLAYLIST, playlist,
+			   -1);
+}
+
+
 /********/
 /* Init */
 /********/
@@ -1476,10 +1495,101 @@ void init_library_view(struct con_win *cwin)
 	gchar *query;
 	struct db_result result;
 	GtkTreeModel *model, *filter_model;
+	GtkTreeIter iter;
 	gchar *order_str = NULL;
 	GdkCursor *cursor;
 
 	cwin->cstate->view_change = TRUE;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
+	gdk_cursor_unref(cursor);
+
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
+
+	g_object_ref(filter_model);
+
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
+	gtk_tree_store_clear(GTK_TREE_STORE(model));
+
+	/* Playlists.*/
+
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   P_PLAYLIST, _("Playlists"),
+			   -1);
+
+	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
+				SAVE_PLAYLIST_STATE);
+
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		add_entry_playlist(result.resultp[i],
+				   NODE_PLAYLIST,
+				   &iter, model, cwin);
+
+		/* Have to give control to GTK periodically ... */
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+		#else
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+		#endif
+	}
+	sqlite3_free_table(result.resultp);
+
+	/* Radios. */
+
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   P_PLAYLIST, _("Radios"),
+			   -1);
+
+	query = g_strdup_printf("SELECT NAME FROM RADIO");
+
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		add_entry_playlist(result.resultp[i],
+				   NODE_RADIO,
+				   &iter, model, cwin);
+
+		/* Have to give control to GTK periodically ... */
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+		#else
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE)) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+		#endif
+	}
+	sqlite3_free_table(result.resultp);
+
+	/* Library. */
 
 	switch(cwin->cpref->cur_library_view) {
 	case FOLDERS:
@@ -1529,20 +1639,13 @@ void init_library_view(struct con_win *cwin)
 		break;
 	}
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
-
-	g_object_ref(filter_model);
-
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
-
-	gtk_tree_store_clear(GTK_TREE_STORE(model));
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   P_PLAYLIST, _("Library"),
+			   -1);
 
 	if (cwin->cpref->cur_library_view != FOLDERS) {
 		/* Common query for all tag based library views */
@@ -1556,7 +1659,7 @@ void init_library_view(struct con_win *cwin)
 		for_each_result_row(result, i) {
 			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
 				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
-				cwin, model);
+				cwin, model, &iter);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
@@ -1579,7 +1682,7 @@ void init_library_view(struct con_win *cwin)
 		query = g_strdup("SELECT name, id FROM LOCATION ORDER BY name DESC");
 		exec_sqlite_query(query, cwin, &result);
 		for_each_result_row(result, i) {
-			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model);
+			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model, &iter);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
