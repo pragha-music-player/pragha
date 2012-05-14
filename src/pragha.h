@@ -714,7 +714,6 @@ struct con_win {
 	GtkWidget *browse_mode;
 	GtkWidget *paned;
 	GtkWidget *toggle_lib;
-	GtkWidget *toggle_playlists;
 	GtkWidget *combo_order;
 	GtkWidget *combo_order_label;
 	GtkWidget *track_length_label;

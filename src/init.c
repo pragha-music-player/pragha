@@ -1209,13 +1209,6 @@ void init_toggle_buttons(struct con_win *cwin)
 {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
-
-	if (!g_ascii_strcasecmp(cwin->cpref->sidebar_pane, PANE_LIBRARY))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib), TRUE);
-	else if (!g_ascii_strcasecmp(cwin->cpref->sidebar_pane, PANE_PLAYLISTS))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_playlists), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib), FALSE);
 }
 
 void init_menu_actions(struct con_win *cwin)
@@ -1233,6 +1226,12 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
+	/*if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
+	else
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);*/
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);

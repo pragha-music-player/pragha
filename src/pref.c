@@ -1213,7 +1213,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save last sidebar pane used */
 
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))) {
+	/*if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->toggle_lib))) {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_WINDOW,
 				      KEY_SIDEBAR,
@@ -1230,7 +1230,7 @@ void save_preferences(struct con_win *cwin)
 				      GROUP_WINDOW,
 				      KEY_SIDEBAR,
 				      PANE_NONE);
-	}
+	}*/
 
 	/* Save show album art option */
 
