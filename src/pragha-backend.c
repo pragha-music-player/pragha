@@ -19,6 +19,9 @@
 
 #if HAVE_GSTREAMER_PLUGINS_BASE
 #include <gst/interfaces/streamvolume.h>
+#define convert_volume(from, to, val) gst_stream_volume_convert_volume((from), (to), (val))
+#define VOLUME_FORMAT_LINEAR GST_STREAM_VOLUME_FORMAT_LINEAR
+#define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
 #endif
 
 typedef enum {
@@ -151,15 +154,10 @@ backend_get_volume(struct con_win *cwin)
 {
 	gdouble volume;
 
-#if HAVE_GSTREAMER_PLUGINS_BASE
-	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME)) {
-		volume = gst_stream_volume_get_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
-						    GST_STREAM_VOLUME_FORMAT_CUBIC);
-	} else {
-		g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
-	}
-#else
 	g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
+
+#if HAVE_GSTREAMER_PLUGINS_BASE
+	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
 #endif
 
 	return volume;
@@ -198,14 +196,10 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 #if HAVE_GSTREAMER_PLUGINS_BASE
-	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME))
-		gst_stream_volume_set_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
-					      GST_STREAM_VOLUME_FORMAT_CUBIC, volume);
-	else
-		g_object_set (cwin->cgst->pipeline, "volume", volume, NULL);
-#else
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
+	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, volume);
 #endif
+	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
+
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
@@ -220,6 +214,8 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 void
 backend_update_volume(struct con_win *cwin)
 {
+	gdouble volume;
+
 	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
 
 	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
@@ -227,14 +223,12 @@ backend_update_volume(struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 #if HAVE_GSTREAMER_PLUGINS_BASE
-	if (gst_element_implements_interface (cwin->cgst->pipeline, GST_TYPE_STREAM_VOLUME))
-		gst_stream_volume_set_volume (GST_STREAM_VOLUME (cwin->cgst->pipeline),
-					      GST_STREAM_VOLUME_FORMAT_CUBIC, cwin->cgst->curr_vol);
-	else
-		g_object_set (cwin->cgst->pipeline, "volume", cwin->cgst->curr_vol, NULL);
+	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, cwin->cgst->curr_vol);
 #else
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", cwin->cgst->curr_vol, NULL);
+	volume = cwin->cgst->curr_vol;
 #endif
+	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
+
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
