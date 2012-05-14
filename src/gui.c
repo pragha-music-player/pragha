@@ -735,55 +735,6 @@ static GtkUIManager* create_library_page_context_menu(GtkWidget *library_page,
 	return context_menu;
 }
 
-static GtkWidget * create_toggles_buttons(struct con_win *cwin)
-{
-	GtkWidget *vbox_btns;
-	GtkWidget *w, *l;
-
-	vbox_btns = gtk_vbox_new(FALSE, 0);
-	
-	w = gtk_toggle_button_new_with_mnemonic( NULL );
-	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),TRUE);
-		
-	l = gtk_label_new_with_mnemonic(_("Library"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
-
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
-	cwin->toggle_lib=w;
-
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "toggled", G_CALLBACK( toggled_cb ), cwin );
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "button-press-event",
-			G_CALLBACK(library_page_right_click_cb), cwin);
-
-	/* Create library page context menu */
-	cwin->library_page_context_menu = create_library_page_context_menu(cwin->toggle_lib, cwin);
-
-	w = gtk_toggle_button_new_with_mnemonic( NULL );
-	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),FALSE);
-
-	l = gtk_label_new_with_mnemonic(_("Playlists"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
-	cwin->toggle_playlists=w;
-
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "toggled",
-			G_CALLBACK( toggled_cb ), cwin );
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "button-press-event",
-			G_CALLBACK(library_page_right_click_cb), cwin);
-
-	l = gtk_label_new_with_mnemonic(_("Pragha Music Player"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
-
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), l, TRUE, TRUE, 0 );
-
-	return vbox_btns;
-}
-
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *browse_mode;
@@ -1556,31 +1507,6 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 GtkWidget* create_main_region(struct con_win *cwin)
 {
-	GtkWidget *hbox;
-	GtkWidget *toggles_note;
-	GtkWidget *paned_region;
-
-	hbox = gtk_hbox_new(FALSE, 0);
-
-	toggles_note = create_toggles_buttons(cwin);
-	paned_region = create_paned_region(cwin);
-
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   toggles_note,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   paned_region,
-			   TRUE,
-			   TRUE,
-			   0);
-
-	return hbox;
-}
-
-GtkWidget* create_paned_region(struct con_win *cwin)
-{
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
 	GtkWidget *current_playlist;
@@ -2125,6 +2051,10 @@ GtkWidget * create_combo_order(struct con_win *cwin)
 			 cwin);
 
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("Options of the library"));
+
+	/* Create library page context menu */
+
+	cwin->library_page_context_menu = create_library_page_context_menu(cwin->toggle_lib, cwin);
 
 	cwin->combo_order = button;
 	cwin->combo_order_label = label_order;
