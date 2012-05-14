@@ -558,7 +558,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			append_current_playlist(mobj, cwin);
 			new_radio(uri, name, cwin);
 
-			init_playlist_view(cwin);
+			init_library_view(cwin);
 
 			g_free(uri);
 			g_free(name);
@@ -910,7 +910,6 @@ void rescan_library_handler(struct con_win *cwin)
 	}
 
 	init_library_view(cwin);
-	init_playlist_view(cwin);
 
 	gtk_widget_destroy(library_dialog);
 
@@ -1046,7 +1045,6 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->lib_delete = NULL;
 exit:
 	init_library_view(cwin);
-	init_playlist_view(cwin);
 
 	gtk_widget_destroy(library_dialog);
 

@@ -331,15 +331,6 @@ enum library_columns {
 	N_L_COLUMNS
 };
 
-/* Columns in Playlist view */
-
-enum playlist_columns {
-	P_PIXBUF,
-	P_PLAYLIST,
-	P_NODE_TYPE,
-	N_PL_COLUMNS
-};
-
 /* Columns in current playlist view */
 
 enum curplaylist_columns {
@@ -489,7 +480,6 @@ struct con_pref {
 	gchar *audio_sink;
 	gchar *album_art_pattern;
 	gchar *start_mode;
-	gchar *sidebar_pane;
 	gchar *audio_device;
 	gchar *audio_cd_device;
 	gint album_art_size;
@@ -522,6 +512,7 @@ struct con_pref {
 	gboolean use_mpris2;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
+	gboolean lateral_panel;
 	gboolean status_bar;
 	gboolean controls_below;
 	gboolean fuse_folders;
@@ -723,7 +714,6 @@ struct con_win {
 	GtkWidget *ntag_lastfm_button;
 	#endif
 	GtkWidget *library_tree;
-	GtkWidget *playlist_tree;
 	GtkWidget *jump_tree;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;

@@ -67,8 +67,6 @@ static void init_gui_state(struct con_win *cwin)
 {
 	update_volume_notify_cb(cwin);
 
-	init_playlist_view(cwin);
-
 	init_tag_completion(cwin);
 
 	init_library_view(cwin);
@@ -82,10 +80,6 @@ static gboolean _init_gui_state(gpointer data)
 	struct con_win *cwin = data;
 
 	update_volume_notify_cb(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
-		return TRUE;
-	init_playlist_view(cwin);
 
 	if (gtk_main_iteration_do(FALSE))
 		return TRUE;
@@ -212,7 +206,7 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, instant_filter_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, sidebar_pane_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, instant_filter_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -224,7 +218,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = 	instant_filter_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = sidebar_pane_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = 	instant_filter_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -355,25 +349,26 @@ gint init_config(struct con_win *cwin)
 			controls_below_f = TRUE;
 		}
 
-		cwin->cpref->sidebar_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-								   GROUP_WINDOW,
-								   KEY_SIDEBAR_SIZE,
-								   &error);
+		cwin->cpref->sidebar_size =
+			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
+						GROUP_WINDOW,
+						KEY_SIDEBAR_SIZE,
+						&error);
 		if (error) {
 			g_error_free(error);
 			error = NULL;
 			sidebar_size_f = TRUE;
 		}
 
-		cwin->cpref->sidebar_pane =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
+		cwin->cpref->lateral_panel =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					      GROUP_WINDOW,
 					      KEY_SIDEBAR,
 					      &error);
 		if (error) {
 			g_error_free(error);
 			error = NULL;
-			sidebar_pane_f = TRUE;
+			lateral_panel_f = TRUE;
 		}
 
 		/* Retrieve Audio preferences */
@@ -908,8 +903,8 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
-	if (all_f || sidebar_pane_f)
-		cwin->cpref->sidebar_pane = g_strdup(PANE_LIBRARY);
+	if (all_f || lateral_panel_f)
+		cwin->cpref->lateral_panel = TRUE;
 	if (all_f || libs_f)
 		cwin->cpref->library_dir = NULL;
 	if (all_f || lib_add_f)
@@ -1228,10 +1223,7 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
-	/*if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
-	else
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);*/
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->lateral_panel);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
@@ -1514,6 +1506,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	init_menu_actions(cwin);
 	init_toggle_buttons(cwin);
 	update_menubar_playback_state (cwin);
+
+	complete_add_to_playlist_submenu (cwin);
+	complete_save_playlist_submenu (cwin);
+	complete_main_save_playlist_submenu(cwin);
+	complete_main_add_to_playlist_submenu (cwin);
 
 	if (cwin->album_art_frame)
 		resize_album_art_frame(cwin);

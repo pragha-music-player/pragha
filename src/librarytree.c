@@ -609,8 +609,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), widget, NULL);
 	}
 
-	if ((gtk_notebook_get_current_page(GTK_NOTEBOOK(cwin->browse_mode)) == 0) &&
-		(!cwin->cstate->view_change)){
+	if (!cwin->cstate->view_change) {
 		switch(event->button) {
 		case 3: {
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
@@ -1478,12 +1477,11 @@ static void add_entry_playlist(gchar *playlist,
 			      &iter,
 			      root);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_NODE_TYPE, node_type,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_track,
-			   P_PLAYLIST, playlist,
+			   L_NODE_TYPE, node_type,
+			   L_PIXBUF, cwin->pixbuf->pixbuf_track,
+			   L_NODE_DATA, playlist,
 			   -1);
 }
-
 
 /********/
 /* Init */
@@ -1522,8 +1520,8 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, _("Playlists"),
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, _("Playlists"),
 			   -1);
 
 	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
@@ -1559,8 +1557,8 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, _("Radios"),
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, _("Radios"),
 			   -1);
 
 	query = g_strdup_printf("SELECT NAME FROM RADIO");
@@ -1643,8 +1641,8 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, _("Library"),
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, _("Library"),
 			   -1);
 
 	if (cwin->cpref->cur_library_view != FOLDERS) {
