@@ -367,8 +367,7 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 					       gpointer data);
 
 enum dnd_target {
-	TARGET_LOCATION_ID,
-	TARGET_PLAYLIST,
+	TARGET_REF_LIBRARY,
 	TARGET_URI_LIST,
 	TARGET_PLAIN_TEXT
 };

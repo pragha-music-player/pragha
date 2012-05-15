@@ -242,6 +242,52 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 	}
 }
 
+/* Append to the given array the ref of
+   all the nodes under the given path */
+
+static void get_ref_array(GtkTreePath *path,
+				  GArray *ref_arr,
+				  GtkTreeModel *model,
+				  struct con_win *cwin)
+{
+	GtkTreeIter t_iter, r_iter;
+	//GtkTreeRowReference *ref;
+	enum node_type node_type = 0;
+	gint j = 0;
+
+	gtk_tree_model_get_iter(model, &r_iter, path);
+
+	/* If this path is a track/radio/playlist, just append it to the array */
+
+	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
+
+	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
+	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
+		//ref = gtk_tree_row_reference_new(model, path);
+		//g_array_append_val(ref_arr, ref);
+		g_array_append_val(ref_arr, path);
+	}
+
+	/* For all other node types do a recursive add */
+
+	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
+
+		path = gtk_tree_model_get_path(model, &t_iter);
+
+		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
+		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
+			//ref = gtk_tree_row_reference_new(model, path);
+			//g_array_append_val(ref_arr, ref);
+			g_array_append_val(ref_arr, path);
+		}
+		else {
+			get_ref_array(path, ref_arr, model, cwin);
+		}
+		//gtk_tree_path_free(path);
+	}
+}
+
 /* Append to the given array the location ids of
    all the nodes under the given path */
 
@@ -691,10 +737,10 @@ void dnd_library_tree_get(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GList *list = NULL, *l;
-	GArray *loc_arr;
+	GArray *ref_arr;
 
 	switch(info) {
-	case TARGET_LOCATION_ID:
+	case TARGET_REF_LIBRARY:
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 							cwin->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -708,28 +754,25 @@ void dnd_library_tree_get(GtkWidget *widget,
 
 		/* Form an array of location ids */
 
-		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		l = list;
+		//ref_arr = g_array_new(TRUE, TRUE, sizeof(GtkTreeRowReference *));
+		ref_arr = g_array_new(TRUE, TRUE, sizeof(GtkTreePath *));
 
+		l = list;
 		while(l) {
-			get_location_ids(l->data, loc_arr, model, cwin);
-			gtk_tree_path_free(l->data);
+			get_ref_array(l->data, ref_arr, model, cwin);
+			//gtk_tree_path_free(l->data);
 			l = l->next;
 		}
 
 		gtk_selection_data_set(data,
 				       gtk_selection_data_get_data_type(data),
 				       8,
-				       (guchar *)&loc_arr,
+				       (guchar *)&ref_arr,
 				       sizeof(GArray *));
 
-		CDEBUG(DBG_VERBOSE, "Fill DnD data, selection: %p, loc_arr: %p",
-		       gtk_selection_data_get_data(data), loc_arr);
-
 		/* Cleanup */
-
+ 
 		g_list_free(list);
-
 		break;
 	default:
 		g_warning("Unknown DND type");

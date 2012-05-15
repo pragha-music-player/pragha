@@ -453,8 +453,7 @@ GtkActionEntry systray_menu_aentries[] = {
 };
 
 GtkTargetEntry tentries[] = {
-	{"LOCATION_ID", GTK_TARGET_SAME_APP, TARGET_LOCATION_ID},
-	{"PLAYLIST", GTK_TARGET_SAME_APP, TARGET_PLAYLIST},
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
 };
