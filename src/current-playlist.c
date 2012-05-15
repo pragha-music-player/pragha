@@ -2569,23 +2569,13 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 	if (gtk_drag_get_source_widget(context) == cwin->library_tree) {
 		CDEBUG(DBG_VERBOSE, "DnD: library_tree");
 		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
-							     TARGET_LOCATION_ID));
+							     TARGET_REF_LIBRARY));
 		gtk_drag_get_data(widget,
 				  context,
 				  target,
 				  time);
 		return TRUE;
 	}
-	/*else if (gtk_drag_get_source_widget(context) == cwin->playlist_tree) {
-		CDEBUG(DBG_VERBOSE, "DnD: playlist_tree");
-		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
-							     TARGET_PLAYLIST));
-		gtk_drag_get_data(widget,
-				  context,
-				  target,
-				  time);
-		return TRUE;
-	}*/
 
 	return FALSE;
 }
@@ -2602,15 +2592,15 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	GtkTreeModel *model;
+	GtkTreeModel *model, *library_model;
 	GtkTreeRowReference *ref;
 	GtkTreePath *dest_path = NULL, *path = NULL;
 	GtkTreeIter dest_iter, iter;
 	GtkTreeViewDropPosition pos = 0;
 	GList *list = NULL, *l;
 	struct musicobject *mobj = NULL;
-	GArray *loc_arr, *playlist_arr;
-	gint i = 0, elem = 0;
+	GArray *ref_arr;
+	gint i = 0, location_id = 0;
 	gchar *name = NULL;
 	gchar **uris = NULL;
 	gchar *filename = NULL;
@@ -2618,6 +2608,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GdkCursor *cursor;
+	enum node_type node_type;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -2698,39 +2689,49 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Append new tracks to playlist */
 
 	switch(info) {
-	case TARGET_LOCATION_ID:
-		loc_arr = *(GArray **)gtk_selection_data_get_data(data);
-		if (!loc_arr)
+	case TARGET_REF_LIBRARY:
+		ref_arr = *(GArray **)gtk_selection_data_get_data(data);
+		if (!ref_arr)
 			g_warning("No selections to process in DnD");
-
-		CDEBUG(DBG_VERBOSE, "Target: LOCATION_ID, "
-		       "selection: %p, loc_arr: %p",
-		       gtk_selection_data_get_data(data), loc_arr);
 
 		g_object_ref(model);
 		cwin->cstate->playlist_change = TRUE;
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-		
+
+		library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 		do {
-			elem = g_array_index(loc_arr, gint, i);
-			if (elem) {
-				mobj = new_musicobject_from_db(elem, cwin);
-				if (!mobj)
-					g_critical("Invalid location ID");
-				else {
-					if (is_row) {
-						insert_current_playlist_on_model (model, mobj, pos, &dest_iter, cwin);
-					}
-					else {
+			/*ref = g_array_index(ref_arr, GtkTreeRowReference *, i);
+			if (ref) {
+				path = gtk_tree_row_reference_get_path(ref);*/
+			path = g_array_index(ref_arr, GtkTreePath *, i);
+			if (path) {
+				gtk_tree_model_get_iter(library_model, &iter, path);
+				gtk_tree_model_get(library_model, &iter, L_NODE_TYPE, &node_type, -1);
+				gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
+				gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
+
+				if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
+					mobj = new_musicobject_from_db(location_id, cwin);
+					if (!mobj)
+						g_warning("Unable to retrieve details "
+							  "for location_id : %d",
+							  location_id);
+					else
 						append_current_playlist_on_model(model, mobj, cwin);
-					}
 				}
+				else if (node_type == NODE_PLAYLIST) {
+					add_playlist_current_playlist_on_model(model, name, cwin);
+				}
+				else if (node_type == NODE_RADIO) {
+					add_radio_current_playlist_on_model(model, name, cwin);
+				}
+				//gtk_tree_row_reference_free(ref);
+				//gtk_tree_path_free(path);
 			}
 			i++;
-		} while (elem != 0);
-
-		g_array_free(loc_arr, TRUE);
+		} while (path != NULL);
+		g_array_free(ref_arr, TRUE);
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
@@ -2742,35 +2743,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		else
 			select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
-		break;
-	case TARGET_PLAYLIST:
-		playlist_arr = *(GArray **)gtk_selection_data_get_data(data);
-		if (!playlist_arr)
-			g_warning("No selections to process in DnD");
-
-		CDEBUG(DBG_VERBOSE, "Target: PLAYLIST, "
-		       "selection: %p, playlist_arr: %p",
-		       gtk_selection_data_get_data(data), playlist_arr);
-
-		while(1) {
-			name = (gchar*)g_array_index(playlist_arr, gchar*, i);
-			if (name) {
-				/* TODO: Fix this negradaaa!. */
-				if(g_str_has_prefix((gchar*)name, "Radio:") == FALSE)
-					add_playlist_current_playlist(name, cwin);
-				else {
-					gchar *radio = name + strlen("Radio:");
-					add_radio_current_playlist((gchar *)radio, cwin);
-				}
-				g_free(name);
-				i++;
-			}
-			else
-				break;
-		};
-		select_last_path_of_current_playlist(cwin);
-		update_status_bar(cwin);
-		g_array_free(playlist_arr, TRUE);
 		break;
 	case TARGET_URI_LIST:
 		CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
