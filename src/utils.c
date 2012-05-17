@@ -182,14 +182,14 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	do {
 		g_utf8_strncpy(needle_buf, haystack, needle_len);
 
-		if (needle_len <= 3) {
-			if(g_ascii_strcasecmp(needle_buf, needle) == 0) {
+		if (needle_len > 3 && lv_distance != 0) {
+			if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
 				rv = (gchar*)haystack;
 				break;
 			}
 		}
 		else {
-			if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
+			if(g_ascii_strcasecmp(needle_buf, needle) == 0) {
 				rv = (gchar*)haystack;
 				break;
 			}

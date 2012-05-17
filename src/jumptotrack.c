@@ -100,7 +100,7 @@ void jump_row_activated_cb (GtkTreeView *jump_tree,
 }
 
 gchar *
-search_and_set_layout (gchar *haystack, gchar *needle)
+search_and_set_layout (gchar *haystack, gchar *needle, gboolean precise)
 {
 	gchar *needled = NULL, *haystackd = NULL, *found = NULL;
 	gchar *prev_string = NULL, *mach_string = NULL, *last_string = NULL;
@@ -114,7 +114,8 @@ search_and_set_layout (gchar *haystack, gchar *needle)
 	needle_len = g_utf8_strlen (needled, -1);
 	haystack_len = g_utf8_strlen (haystackd, -1);
 
-	found = g_strstr_lv (haystackd, needled, 1);
+
+	found = g_strstr_lv (haystackd, needled, precise ? 0 : 1);
 
 	if (found != NULL) {
 		found_len = g_utf8_strlen (found, -1);
@@ -175,7 +176,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 		track_data = g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
 		track_data_markup = (needle_filter != NULL) ?
-					   search_and_set_layout (track_data, needle_filter) :
+					   search_and_set_layout (track_data, needle_filter, !cwin->cpref->aproximate_search) :
 					   g_markup_printf_escaped ("%s", track_data);
 
 		if (track_data_markup != NULL) {
