@@ -214,6 +214,7 @@ typedef enum {
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
 #define KEY_INSTANT_FILTER         "instant_filter"
+#define KEY_APROXIMATE_SEARCH      "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
@@ -527,6 +528,7 @@ struct con_pref {
 	gboolean fuse_folders;
 	gboolean sort_by_year;
 	gboolean instant_filter;
+	gboolean aproximate_search;
 	gboolean use_hint;
 	GSList *library_dir;
 	GSList *playlist_columns;
@@ -550,6 +552,7 @@ struct con_pref {
 	GtkWidget *sort_by_year_w;
 
 	GtkWidget *instant_filter_w;
+	GtkWidget *aproximate_search_w;
 	GtkWidget *window_state_combo_w;
 	GtkWidget *restore_playlist_w;
 	GtkWidget *close_to_tray_w;
