@@ -283,56 +283,6 @@ simple_jump_search_activate_handler (GtkEntry *entry,
 	return FALSE;
 }
 
-static void
-filter_icon_pressed_cb (GtkEntry       *entry,
-		gint            position,
-		GdkEventButton *event,
-		struct con_win *cwin)
-{
-	if (position == GTK_ENTRY_ICON_SECONDARY) {
-		gtk_entry_set_text (entry, "");
-		gtk_widget_grab_focus (GTK_WIDGET(entry));
-
-		if (cwin->cstate->jump_filter != NULL) {
-			g_free (cwin->cstate->jump_filter);
-			cwin->cstate->jump_filter = NULL;
-		}
-		if (!cwin->cpref->instant_filter)
-			do_jump_refilter (cwin);
-	}
-}
-
-/* Search (simple) */
-
-GtkWidget* create_jump_search_bar (struct con_win *cwin)
-{
-	GtkWidget *search_entry;
-
-	search_entry = gtk_entry_new ();
-
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
-
-	/* Signal handlers */
-
-	g_signal_connect (G_OBJECT(search_entry),
-			"icon-press",
-			G_CALLBACK (filter_icon_pressed_cb),
-			cwin);
-	g_signal_connect (G_OBJECT(search_entry),
-			 "changed",
-			 G_CALLBACK(simple_jump_search_keyrelease_handler),
-			 cwin);
-	g_signal_connect (G_OBJECT(search_entry),
-			 "activate",
-			 G_CALLBACK(simple_jump_search_activate_handler),
-			 cwin);
-
-	return search_entry;
-}
-
 void
 dialog_jump_to_track (struct con_win *cwin)
 {
@@ -369,7 +319,12 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
 
-	search_entry = create_jump_search_bar (cwin);
+	search_entry = pragha_search_entry_new(cwin);
+
+	g_signal_connect (G_OBJECT(search_entry), "changed",
+			 G_CALLBACK(simple_jump_search_keyrelease_handler), cwin);
+	g_signal_connect (G_OBJECT(search_entry), "activate",
+			 G_CALLBACK(simple_jump_search_activate_handler), cwin);
 
 	scrollwin = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER(scrollwin), jump_treeview);

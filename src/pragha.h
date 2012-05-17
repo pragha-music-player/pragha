@@ -1278,7 +1278,6 @@ void remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin);
 void set_status_message (gchar *message, struct con_win *cwin);
 void gtk_label_set_attribute_bold(GtkLabel *label);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
-gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
@@ -1297,6 +1296,11 @@ gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
+
+/* Some widgets. */
+
+gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
+GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 /* GUI */
 
