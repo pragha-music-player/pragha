@@ -873,32 +873,32 @@ menu_position(GtkMenu *menu,
 		gboolean *push_in,
 		gpointer user_data)
 {
-        GtkWidget *widget;
-        GtkRequisition requisition;
-        gint menu_xpos;
-        gint menu_ypos;
+	GtkWidget *widget;
+	GtkRequisition requisition;
+	gint menu_xpos;
+	gint menu_ypos;
 
-        widget = GTK_WIDGET (user_data);
+	widget = GTK_WIDGET (user_data);
 
-        gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
 
-        gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
+	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
 
-        menu_xpos += allocation.x;
-        menu_ypos += allocation.y;
+	menu_xpos += allocation.x;
+	menu_ypos += allocation.y;
 
 	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
 		menu_ypos -= requisition.height + gtk_widget_get_style(widget)->ythickness;
 	else
 		menu_ypos += allocation.height + gtk_widget_get_style(widget)->ythickness;
 
-        *x = menu_xpos;
-        *y = menu_ypos - 5;
+	*x = menu_xpos;
+	*y = menu_ypos - 5;
 
-        *push_in = TRUE;
+	*push_in = TRUE;
 }
 
 /* Return TRUE if the previous installed version is

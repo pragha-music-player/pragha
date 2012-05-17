@@ -19,7 +19,53 @@
 
 /* Generic search entry, valid to library tree, and jump dialog. */
 
+void
+search_entry_instant_option_toggled(GtkCheckMenuItem *item, struct con_win *cwin)
+{
+	cwin->cpref->instant_filter = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
+}
+
+/*void
+search_entry_aproximate_option_toggled(GtkCheckMenuItem *item, struct con_win *cwin)
+{
+	cwin->cpref->aproximate_search = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
+}*/
+
 static void
+seach_entry_populate_popup (GtkEntry *entry, struct con_win *cwin)
+{
+	GtkWidget *popup_menu, *item;
+
+	popup_menu = gtk_menu_new ();
+
+	/* Instant search. */
+
+	item = gtk_check_menu_item_new_with_label (_("Refine the search while writing"));
+	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
+
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), cwin->cpref->instant_filter);
+	g_signal_connect (G_OBJECT (item), "toggled",
+				G_CALLBACK (search_entry_instant_option_toggled), cwin);
+	gtk_widget_show (item);
+
+	/* Aproximate search. */
+
+	item = gtk_check_menu_item_new_with_label (_("Search approximate words"));
+	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
+
+	/*gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), cwin->cpref->aproximate_search);
+	g_signal_connect (G_OBJECT (item), "toggled",
+				G_CALLBACK (search_entry_aproximate_option_toggled), cwin);*/
+	gtk_widget_show (item);
+
+	gtk_menu_attach_to_widget(GTK_MENU(popup_menu), GTK_WIDGET(entry), NULL);
+
+	gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
+			(GtkMenuPositionFunc) menu_position, entry,
+			0, gtk_get_current_event_time());
+}
+
+void
 pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
 					     gint            position,
 					     GdkEventButton *event,
@@ -30,8 +76,9 @@ pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
 		gtk_widget_grab_focus(GTK_WIDGET(entry));
 
 		if (!cwin->cpref->instant_filter)
-			g_signal_emit_by_name (G_OBJECT(entry),
-								 "activate", cwin);
+			g_signal_emit_by_name(G_OBJECT(entry), "activate", cwin);
+	} else {
+		seach_entry_populate_popup(entry, cwin);
 	}
 }
 
