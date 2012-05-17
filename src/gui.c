@@ -302,7 +302,7 @@ GtkToggleActionEntry toggles_entries[] = {
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
 	{"Lateral panel", NULL, N_("Lateral _panel"),
-	 NULL, "Lateral panel", G_CALLBACK(library_pane_action),
+	 "F9", "Lateral panel", G_CALLBACK(library_pane_action),
 	FALSE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
