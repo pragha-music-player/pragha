@@ -2580,6 +2580,213 @@ gboolean dnd_current_playlist_drop(GtkWidget *widget,
 	return FALSE;
 }
 
+/* Reorder playlist with DnD. */
+
+void
+dnd_current_playlist_reorder(GtkTreeModel *model,
+					GtkTreeIter *dest_iter,
+					GtkTreeViewDropPosition pos,
+					struct con_win *cwin)
+{
+	GtkTreeRowReference *ref;
+	GtkTreePath *path = NULL;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	GList *list = NULL, *l;
+
+	CDEBUG(DBG_VERBOSE, "Dnd: Reorder");
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	/* Clear sort */
+	clear_sort_current_playlist(NULL, cwin);
+
+	/* No selections */
+	if (!list)
+		goto exit;
+
+	/* Store references to the selected paths */
+	l = list;
+	while(l) {
+		path = l->data;
+		ref = gtk_tree_row_reference_new(model, path);
+		l->data = ref;
+		gtk_tree_path_free(path);
+		l = l->next;
+	}
+
+	for (l=list; l != NULL; l = l->next) {
+		ref = l->data;
+		path = gtk_tree_row_reference_get_path(ref);
+		gtk_tree_model_get_iter(model, &iter, path);
+
+		if (pos == GTK_TREE_VIEW_DROP_BEFORE)
+			gtk_list_store_move_before(GTK_LIST_STORE(model), &iter, dest_iter);
+		else if (pos == GTK_TREE_VIEW_DROP_AFTER)
+			gtk_list_store_move_after(GTK_LIST_STORE(model), &iter, dest_iter);
+
+			gtk_tree_path_free(path);
+			gtk_tree_row_reference_free(ref);
+	}
+
+exit:
+	g_list_free(list);
+}
+
+void
+dnd_current_playlist_received_from_library(GtkTreeModel *model,
+							GtkTreeIter *dest_iter,
+							GtkTreeViewDropPosition pos,
+							GtkSelectionData *data,
+							struct con_win *cwin)
+{
+	GtkTreeModel *library_model;
+	GArray *ref_arr;
+	GtkTreePath *path = NULL;
+	gint i = 0, location_id = 0;
+	GtkTreeIter iter;
+	gchar *name= NULL;
+	enum node_type node_type;
+	struct musicobject *mobj = NULL;
+
+	CDEBUG(DBG_VERBOSE, "Dnd: Library");
+
+	ref_arr = *(GArray **)gtk_selection_data_get_data(data);
+	if (!ref_arr)
+		g_warning("No selections to process in DnD");
+
+	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
+	library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	do {
+		/*ref = g_array_index(ref_arr, GtkTreeRowReference *, i);
+		if (ref) {
+			path = gtk_tree_row_reference_get_path(ref);*/
+		path = g_array_index(ref_arr, GtkTreePath *, i);
+		if (path) {
+			gtk_tree_model_get_iter(library_model, &iter, path);
+			gtk_tree_model_get(library_model, &iter, L_NODE_TYPE, &node_type, -1);
+			gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
+			gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
+
+			if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
+				mobj = new_musicobject_from_db(location_id, cwin);
+				if (!mobj)
+					g_warning("Unable to retrieve details "
+						  "for location_id : %d",
+						  location_id);
+				else
+					append_current_playlist_on_model(model, mobj, cwin);
+			}
+			else if (node_type == NODE_PLAYLIST) {
+				add_playlist_current_playlist_on_model(model, name, cwin);
+			}
+			else if (node_type == NODE_RADIO) {
+				add_radio_current_playlist_on_model(model, name, cwin);
+			}
+			//gtk_tree_row_reference_free(ref);
+			gtk_tree_path_free(path);
+		}
+		i++;
+	} while (path != NULL);
+	g_array_free(ref_arr, TRUE);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
+	g_object_unref(model);
+
+	update_status_bar(cwin);
+}
+
+void
+dnd_current_playlist_received_uri_list(GtkTreeModel *model,
+							GtkTreeIter *dest_iter,
+							GtkTreeViewDropPosition pos,
+							GtkSelectionData *data,
+							struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	gchar **uris = NULL, *filename = NULL;
+	gint i = 0;
+
+	CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
+
+	uris = gtk_selection_data_get_uris(data);
+
+	if(uris){
+		for(i = 0; uris[i] != NULL; i++) {
+			filename = g_filename_from_uri(uris[i], NULL, NULL);
+			if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
+				if(cwin->cpref->add_recursively_files)
+					__recur_add(filename, cwin);
+				else
+					__non_recur_add(filename, TRUE, cwin);
+				select_last_path_of_current_playlist(cwin);
+			}
+			else {
+				mobj = new_musicobject_from_file(filename);
+				if (!mobj)
+					g_critical("Invalid location filename");
+				else {
+					if (dest_iter)
+						insert_current_playlist (mobj, pos, dest_iter, cwin);
+					else {
+						append_current_playlist (mobj, cwin);
+						select_last_path_of_current_playlist(cwin);
+					}
+				}
+			}
+			g_free(filename);
+		}
+		update_status_bar(cwin);
+		g_strfreev(uris);
+	}
+
+}
+
+void
+dnd_current_playlist_received_plain_text(GtkTreeModel *model,
+							GtkTreeIter *dest_iter,
+							GtkTreeViewDropPosition pos,
+							GtkSelectionData *data,
+							struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	gchar *filename = NULL;
+
+	CDEBUG(DBG_VERBOSE, "Target: PLAIN_TEXT");
+
+	filename = (gchar*)gtk_selection_data_get_text(data);
+
+	if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
+		if(cwin->cpref->add_recursively_files)
+			__recur_add(filename, cwin);
+		else
+			__non_recur_add(filename, TRUE, cwin);
+		select_last_path_of_current_playlist(cwin);
+	}
+	else {
+		mobj = new_musicobject_from_file(filename);
+		if (!mobj)
+			g_critical("Invalid location filename");
+		else {
+			if (dest_iter)
+				insert_current_playlist (mobj, pos, dest_iter, cwin);
+			else {
+				append_current_playlist (mobj, cwin);
+				select_last_path_of_current_playlist(cwin);
+			}
+		}
+	}
+	update_status_bar(cwin);
+	g_free(filename);
+}
+
 /* Callback for DnD signal 'drag-data-received' */
 
 void dnd_current_playlist_received(GtkWidget *widget,
@@ -2591,24 +2798,14 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   guint time,
 				   struct con_win *cwin)
 {
-	GtkTreeSelection *selection;
-	GtkTreeModel *model, *library_model;
-	GtkTreeRowReference *ref;
-	GtkTreePath *dest_path = NULL, *path = NULL;
-	GtkTreeIter dest_iter, iter;
+	GtkTreeModel *model;
+	GtkTreePath *dest_path = NULL;
+	GtkTreeIter dest_iter;
 	GtkTreeViewDropPosition pos = 0;
-	GList *list = NULL, *l;
-	struct musicobject *mobj = NULL;
-	GArray *ref_arr;
-	gint i = 0, location_id = 0;
-	gchar *name = NULL;
-	gchar **uris = NULL;
-	gchar *filename = NULL;
 	gboolean is_row;
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GdkCursor *cursor;
-	enum node_type node_type;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -2639,44 +2836,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Reorder within current playlist */
 
 	if (gtk_drag_get_source_widget(context) == cwin->current_playlist) {
-		CDEBUG(DBG_VERBOSE, "Dnd: Reorder");
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-		list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-		/* Clear sort */
-		clear_sort_current_playlist(NULL, cwin);
-
-		/* No selections */
-		if (!list)
-			goto exit;
-
-		/* Store references to the selected paths */
-		l = list;
-		while(l) {
-			path = l->data;
-			ref = gtk_tree_row_reference_new(model, path);
-			l->data = ref;
-			gtk_tree_path_free(path);
-			l = l->next;
-		}
-
-		for (l=list; l != NULL; l = l->next) {
-			ref = l->data;
-			path = gtk_tree_row_reference_get_path(ref);
-			gtk_tree_model_get_iter(model, &iter, path);
-
-			if (pos == GTK_TREE_VIEW_DROP_BEFORE)
-				gtk_list_store_move_before(GTK_LIST_STORE(model), &iter,
-							   (is_row) ? &dest_iter : NULL);
-			else if (pos == GTK_TREE_VIEW_DROP_AFTER)
-				gtk_list_store_move_after(GTK_LIST_STORE(model),
-							  &iter, &dest_iter);
-
-			gtk_tree_path_free(path);
-			gtk_tree_row_reference_free(ref);
-		}
-		g_list_free(list);
-
+		dnd_current_playlist_reorder(model, &dest_iter, pos, cwin);
 		goto exit;
 	}
 
@@ -2690,124 +2850,25 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
-		ref_arr = *(GArray **)gtk_selection_data_get_data(data);
-		if (!ref_arr)
-			g_warning("No selections to process in DnD");
-
-		g_object_ref(model);
-		cwin->cstate->playlist_change = TRUE;
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-		library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-		do {
-			/*ref = g_array_index(ref_arr, GtkTreeRowReference *, i);
-			if (ref) {
-				path = gtk_tree_row_reference_get_path(ref);*/
-			path = g_array_index(ref_arr, GtkTreePath *, i);
-			if (path) {
-				gtk_tree_model_get_iter(library_model, &iter, path);
-				gtk_tree_model_get(library_model, &iter, L_NODE_TYPE, &node_type, -1);
-				gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
-				gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
-
-				if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-					mobj = new_musicobject_from_db(location_id, cwin);
-					if (!mobj)
-						g_warning("Unable to retrieve details "
-							  "for location_id : %d",
-							  location_id);
-					else
-						append_current_playlist_on_model(model, mobj, cwin);
-				}
-				else if (node_type == NODE_PLAYLIST) {
-					add_playlist_current_playlist_on_model(model, name, cwin);
-				}
-				else if (node_type == NODE_RADIO) {
-					add_radio_current_playlist_on_model(model, name, cwin);
-				}
-				//gtk_tree_row_reference_free(ref);
-				//gtk_tree_path_free(path);
-			}
-			i++;
-		} while (path != NULL);
-		g_array_free(ref_arr, TRUE);
-
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		cwin->cstate->playlist_change = FALSE;
-		g_object_unref(model);
-
+		dnd_current_playlist_received_from_library(model, &dest_iter, pos, data, cwin);
 		if (is_row)
 			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
 		else
 			select_last_path_of_current_playlist(cwin);
-		update_status_bar(cwin);
 		break;
 	case TARGET_URI_LIST:
-		CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
-
-		uris = gtk_selection_data_get_uris(data);
-		if(uris){
-			for(i = 0; uris[i] != NULL; i++) {
-				filename = g_filename_from_uri(uris[i], NULL, NULL);
-				if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-					if(cwin->cpref->add_recursively_files)
-						__recur_add(filename, cwin);
-					else
-						__non_recur_add(filename, TRUE, cwin);
-					select_last_path_of_current_playlist(cwin);
-				}
-				else {
-					mobj = new_musicobject_from_file(filename);
-					if (!mobj)
-						g_critical("Invalid location filename");
-					else {
-						if (is_row)
-							insert_current_playlist (mobj, pos, &dest_iter, cwin);
-						else {
-							append_current_playlist (mobj, cwin);
-							select_last_path_of_current_playlist(cwin);
-						}
-					}
-				}
-				g_free(filename);
-			}
-			update_status_bar(cwin);
-			g_strfreev(uris);
-		}
+		dnd_current_playlist_received_uri_list(model, &dest_iter, pos, data, cwin);
+		select_last_path_of_current_playlist(cwin);
 		break;
 	case TARGET_PLAIN_TEXT:
-		CDEBUG(DBG_VERBOSE, "Target: PLAIN_TEXT");
-
-		filename = (gchar*)gtk_selection_data_get_text(data);
-		if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-			if(cwin->cpref->add_recursively_files)
-				__recur_add(filename, cwin);
-			else
-				__non_recur_add(filename, TRUE, cwin);
-			select_last_path_of_current_playlist(cwin);
-		}
-		else {
-			mobj = new_musicobject_from_file(filename);
-			if (!mobj)
-				g_critical("Invalid location filename");
-			else {
-				if (is_row)
-					insert_current_playlist (mobj, pos, &dest_iter, cwin);
-				else {
-					append_current_playlist (mobj, cwin);
-					select_last_path_of_current_playlist(cwin);
-				}
-			}
-		}
-		update_status_bar(cwin);
-		g_free(filename);
+		dnd_current_playlist_received_plain_text(model, &dest_iter, pos, data, cwin);
 		break;
 	default:
 		g_warning("Unknown DND type");
 		break;
 	}
+
+	/* Remove busy mouse icon */
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
