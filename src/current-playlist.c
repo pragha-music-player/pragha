@@ -1793,6 +1793,19 @@ void insert_current_playlist_on_model(GtkTreeModel *model, struct musicobject *m
 	g_free(ch_filename);
 }
 
+/* Insert a list of mobj to current playlist. */
+
+void insert_mobj_list_current_playlist_on_model(GtkTreeModel *model, GList *list, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin)
+{
+	struct musicobject *mobj;
+	GList *l;
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = l->data;
+		insert_current_playlist_on_model(model, mobj, droppos, pos, cwin);
+	}
+}
+
 /* Insert a track to the current playlist */
 
 void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin)
@@ -1949,6 +1962,19 @@ void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, 
 	g_free(ch_year);
 	g_free(ch_bitrate);
 	g_free(ch_filename);
+}
+
+/* Append a list of mobj to the current playlist */
+
+void append_mobj_list_current_playlist_on_model(GtkTreeModel *model, GList *list, struct con_win *cwin)
+{
+	struct musicobject *mobj;
+	GList *l;
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = l->data;
+		append_current_playlist_on_model(model, mobj, cwin);
+	}
 }
 
 /* Append a track to the current playlist */
@@ -2634,11 +2660,8 @@ exit:
 	g_list_free(list);
 }
 
-void
-dnd_current_playlist_received_from_library(GtkTreeModel *model,
-							GtkTreeIter *dest_iter,
-							GtkTreeViewDropPosition pos,
-							GtkSelectionData *data,
+GList *
+dnd_current_playlist_received_from_library(GtkSelectionData *data,
 							struct con_win *cwin)
 {
 	GtkTreeModel *library_model;
@@ -2646,9 +2669,10 @@ dnd_current_playlist_received_from_library(GtkTreeModel *model,
 	GtkTreePath *path = NULL;
 	gint i = 0, location_id = 0;
 	GtkTreeIter iter;
-	gchar *name= NULL;
+	gchar *name = NULL, *query;
 	enum node_type node_type;
 	struct musicobject *mobj = NULL;
+	GList *list = NULL;
 
 	CDEBUG(DBG_VERBOSE, "Dnd: Library");
 
@@ -2656,12 +2680,15 @@ dnd_current_playlist_received_from_library(GtkTreeModel *model,
 	if (!ref_arr)
 		g_warning("No selections to process in DnD");
 
-	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
 	library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+
+	/* Dnd from the library, so will read everything from database. */
+
+	query = g_strdup_printf("BEGIN;");
+	exec_sqlite_query(query, cwin, NULL);
+
+	/* Get the mobjs from the path of the library. */
+
 	do {
 		/*ref = g_array_index(ref_arr, GtkTreeRowReference *, i);
 		if (ref) {
@@ -2675,43 +2702,44 @@ dnd_current_playlist_received_from_library(GtkTreeModel *model,
 
 			if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 				mobj = new_musicobject_from_db(location_id, cwin);
-				if (!mobj)
-					g_warning("Unable to retrieve details "
-						  "for location_id : %d",
-						  location_id);
-				else
-					append_current_playlist_on_model(model, mobj, cwin);
+				list = g_list_append(list, mobj);
 			}
 			else if (node_type == NODE_PLAYLIST) {
-				add_playlist_current_playlist_on_model(model, name, cwin);
+				list = append_playlist_to_mobj_list(name, list, cwin);
 			}
 			else if (node_type == NODE_RADIO) {
-				add_radio_current_playlist_on_model(model, name, cwin);
+				list = append_radio_to_mobj_list(name, list, cwin);
 			}
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE))
+					return NULL;
+			}
+
 			//gtk_tree_row_reference_free(ref);
 			gtk_tree_path_free(path);
 		}
 		i++;
 	} while (path != NULL);
-	g_array_free(ref_arr, TRUE);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
-	g_object_unref(model);
+	query = g_strdup_printf("END;");
+	exec_sqlite_query(query, cwin, NULL);
 
-	update_status_bar(cwin);
+	g_array_free(ref_arr, FALSE);
+
+	return list;
 }
 
-void
-dnd_current_playlist_received_uri_list(GtkTreeModel *model,
-							GtkTreeIter *dest_iter,
-							GtkTreeViewDropPosition pos,
-							GtkSelectionData *data,
-							struct con_win *cwin)
+GList *
+dnd_current_playlist_received_uri_list(GtkSelectionData *data,
+						   struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	gchar **uris = NULL, *filename = NULL;
+	GList *list = NULL;
 	gint i = 0;
 
 	CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
@@ -2722,69 +2750,66 @@ dnd_current_playlist_received_uri_list(GtkTreeModel *model,
 		for(i = 0; uris[i] != NULL; i++) {
 			filename = g_filename_from_uri(uris[i], NULL, NULL);
 			if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-				if(cwin->cpref->add_recursively_files)
-					__recur_add(filename, cwin);
-				else
-					__non_recur_add(filename, TRUE, cwin);
-				select_last_path_of_current_playlist(cwin);
+				list = append_mobj_list_from_folder(list, filename, cwin);
 			}
 			else {
 				mobj = new_musicobject_from_file(filename);
 				if (!mobj)
 					g_critical("Invalid location filename");
 				else {
-					if (dest_iter)
-						insert_current_playlist (mobj, pos, dest_iter, cwin);
-					else {
-						append_current_playlist (mobj, cwin);
-						select_last_path_of_current_playlist(cwin);
-					}
+					list = g_list_append(list, mobj);
 				}
 			}
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE))
+					return NULL;
+			}
+
 			g_free(filename);
 		}
-		update_status_bar(cwin);
 		g_strfreev(uris);
 	}
 
+	return list;
 }
 
-void
-dnd_current_playlist_received_plain_text(GtkTreeModel *model,
-							GtkTreeIter *dest_iter,
-							GtkTreeViewDropPosition pos,
-							GtkSelectionData *data,
+GList *
+dnd_current_playlist_received_plain_text(GtkSelectionData *data,
 							struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	gchar *filename = NULL;
+	GList *list = NULL;
 
 	CDEBUG(DBG_VERBOSE, "Target: PLAIN_TEXT");
 
 	filename = (gchar*)gtk_selection_data_get_text(data);
 
-	if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-		if(cwin->cpref->add_recursively_files)
-			__recur_add(filename, cwin);
-		else
-			__non_recur_add(filename, TRUE, cwin);
-		select_last_path_of_current_playlist(cwin);
+	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
+		list = append_mobj_list_from_folder(list, filename, cwin);
 	}
 	else {
 		mobj = new_musicobject_from_file(filename);
 		if (!mobj)
 			g_critical("Invalid location filename");
 		else {
-			if (dest_iter)
-				insert_current_playlist (mobj, pos, dest_iter, cwin);
-			else {
-				append_current_playlist (mobj, cwin);
-				select_last_path_of_current_playlist(cwin);
-			}
+			list = g_list_append(list, mobj);
+		}
+		/* Have to give control to GTK periodically ... */
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE))
+				return NULL;
 		}
 	}
-	update_status_bar(cwin);
 	g_free(filename);
+
+	return list;
 }
 
 /* Callback for DnD signal 'drag-data-received' */
@@ -2806,6 +2831,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GdkCursor *cursor;
+	GList *list = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -2846,27 +2872,46 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 	gdk_cursor_unref(cursor);
 
-	/* Append new tracks to playlist */
+	/* Get new tracks to append on playlist */
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
-		dnd_current_playlist_received_from_library(model, &dest_iter, pos, data, cwin);
-		if (is_row)
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
-		else
-			select_last_path_of_current_playlist(cwin);
+		list = dnd_current_playlist_received_from_library(data, cwin);
 		break;
 	case TARGET_URI_LIST:
-		dnd_current_playlist_received_uri_list(model, &dest_iter, pos, data, cwin);
-		select_last_path_of_current_playlist(cwin);
+		list = dnd_current_playlist_received_uri_list(data, cwin);
 		break;
 	case TARGET_PLAIN_TEXT:
-		dnd_current_playlist_received_plain_text(model, &dest_iter, pos, data, cwin);
+		list = dnd_current_playlist_received_plain_text(data, cwin);
 		break;
 	default:
 		g_warning("Unknown DND type");
 		break;
 	}
+
+	/* Insert mobj list to current playlist. */
+
+	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
+	if (is_row)
+		insert_mobj_list_current_playlist_on_model(model, list, pos, &dest_iter, cwin);
+	else
+		append_mobj_list_current_playlist_on_model(model, list, cwin);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
+	g_object_unref(model);
+
+	update_status_bar(cwin);
+
+	if (is_row)
+		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
+	else
+		select_last_path_of_current_playlist(cwin);
 
 	/* Remove busy mouse icon */
 

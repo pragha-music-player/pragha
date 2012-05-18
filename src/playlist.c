@@ -410,6 +410,46 @@ bad:
 	g_free(s_playlist);
 }
 
+/* Append the given playlist to the mobj list. */
+
+GList *
+append_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
+{
+	gchar *s_playlist, *query, *file;
+	gint playlist_id, location_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_playlist = sanitize_string_sqlite3(playlist);
+	playlist_id = find_playlist_db(s_playlist, cwin);
+
+	if(playlist_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
+				playlist_id);
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		file = sanitize_string_sqlite3(result.resultp[i]);
+
+		if ((location_id = find_location_db(file, cwin)))
+			mobj = new_musicobject_from_db(location_id, cwin);
+		else
+			mobj = new_musicobject_from_file(result.resultp[i]);
+
+		list = g_list_append(list, mobj);
+
+		g_free(file);
+	}
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_playlist);
+
+	return list;
+}
+
 /* Append the given playlist to the current playlist model. */
 
 void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin)
@@ -479,6 +519,39 @@ void add_radio_current_playlist(gchar *radio, struct con_win *cwin)
 
 bad:
 	g_free(s_radio);
+}
+
+/* Append the given radio to the mobj list. */
+
+GList *
+append_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
+{
+	gchar *s_radio, *query;
+	gint radio_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_radio = sanitize_string_sqlite3(radio);
+	radio_id = find_radio_db(s_radio, cwin);
+
+	if(radio_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
+				radio_id);
+
+	exec_sqlite_query(query, cwin, &result);
+	for_each_result_row(result, i) {
+		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+
+		list = g_list_append(list, mobj);
+	}
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_radio);
+
+	return list;
 }
 
 /* Append the given radio to the current playlist model */
