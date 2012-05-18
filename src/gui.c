@@ -35,8 +35,6 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
 		<menu action=\"EditMenu\">					\
-			<menuitem action=\"Add the library\"/>	    		\
-			<separator/>						\
 			<menuitem action=\"Remove from playlist\"/>		\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
@@ -124,8 +122,6 @@ gchar *cp_null_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Add files\"/>					\
 	<menuitem action=\"Add Audio CD\"/>					\
 	<menuitem action=\"Add location\"/>					\
-	<separator/>				    				\
-	<menuitem action=\"Add the library\"/>	    				\
 	<separator/>				    				\
 	<menuitem action=\"Lateral panel\"/>				\
 	<separator/>				    				\
@@ -220,8 +216,6 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
-	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
-	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
 	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
 	 NULL, "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
@@ -319,8 +313,6 @@ GtkActionEntry cp_null_context_aentries[] = {
 	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
 	 NULL, "Add a no local stream", G_CALLBACK(add_location_action)},
-	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
-	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}
 };
