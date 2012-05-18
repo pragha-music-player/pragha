@@ -802,7 +802,6 @@ void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void show_equalizer_action(GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
-void add_all_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
 void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
