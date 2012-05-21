@@ -410,10 +410,10 @@ bad:
 	g_free(s_playlist);
 }
 
-/* Append the given playlist to the mobj list. */
+/* Prepend the given playlist to the mobj list. */
 
 GList *
-append_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
+prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
@@ -438,7 +438,7 @@ append_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		list = g_list_append(list, mobj);
+		list = g_list_prepend(list, mobj);
 
 		g_free(file);
 	}
@@ -521,10 +521,10 @@ bad:
 	g_free(s_radio);
 }
 
-/* Append the given radio to the mobj list. */
+/* Prepend the given radio to the mobj list. */
 
 GList *
-append_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
+prepend_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
 {
 	gchar *s_radio, *query;
 	gint radio_id, i = 0;
@@ -544,7 +544,7 @@ append_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
 
-		list = g_list_append(list, mobj);
+		list = g_list_prepend(list, mobj);
 	}
 	sqlite3_free_table(result.resultp);
 

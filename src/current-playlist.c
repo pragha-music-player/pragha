@@ -2697,18 +2697,27 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 		if (path) {
 			gtk_tree_model_get_iter(library_model, &iter, path);
 			gtk_tree_model_get(library_model, &iter, L_NODE_TYPE, &node_type, -1);
-			gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
-			gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
 
-			if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-				mobj = new_musicobject_from_db(location_id, cwin);
-				list = g_list_append(list, mobj);
-			}
-			else if (node_type == NODE_PLAYLIST) {
-				list = append_playlist_to_mobj_list(name, list, cwin);
-			}
-			else if (node_type == NODE_RADIO) {
-				list = append_radio_to_mobj_list(name, list, cwin);
+			switch (node_type)
+			{
+				case NODE_BASENAME:
+				case NODE_TRACK:
+					gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
+					mobj = new_musicobject_from_db(location_id, cwin);
+					list = g_list_prepend(list, mobj);
+					break;
+				case NODE_PLAYLIST:
+					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
+					list = prepend_playlist_to_mobj_list(name, list, cwin);
+					g_free(name);
+					break;
+				case NODE_RADIO:
+					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
+					list = prepend_radio_to_mobj_list(name, list, cwin);
+					g_free(name);
+					break;
+				default:
+					break;
 			}
 
 			/* Have to give control to GTK periodically ... */

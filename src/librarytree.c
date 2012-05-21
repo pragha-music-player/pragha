@@ -265,7 +265,7 @@ static void get_ref_array(GtkTreePath *path,
 	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 		//ref = gtk_tree_row_reference_new(model, path);
 		//g_array_append_val(ref_arr, ref);
-		g_array_append_val(ref_arr, path);
+		g_array_prepend_val(ref_arr, path);
 	}
 
 	/* For all other node types do a recursive add */
@@ -279,7 +279,7 @@ static void get_ref_array(GtkTreePath *path,
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 			//ref = gtk_tree_row_reference_new(model, path);
 			//g_array_append_val(ref_arr, ref);
-			g_array_append_val(ref_arr, path);
+			g_array_prepend_val(ref_arr, path);
 		}
 		else {
 			get_ref_array(path, ref_arr, model, cwin);

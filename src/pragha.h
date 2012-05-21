@@ -985,10 +985,10 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 /* Playlist mgmt functions */
 
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
-GList *append_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
+GList *prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
 void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 void add_radio_current_playlist(gchar *playlist, struct con_win *cwin);
-GList *append_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
+GList *prepend_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
 void add_radio_current_playlist_on_model(GtkTreeModel *model, gchar *radio, struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
