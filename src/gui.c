@@ -35,8 +35,6 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
 		<menu action=\"EditMenu\">					\
-			<menuitem action=\"Add the library\"/>	    		\
-			<separator/>						\
 			<menuitem action=\"Remove from playlist\"/>		\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
@@ -54,14 +52,11 @@ gchar *main_menu_xml = "<ui>							\
 		<menu action=\"ViewMenu\">					\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
-			<menu action=\"Lateral panel\">				\
-				<menuitem action=\"Library\"/>			\
-				<menuitem action=\"Playlists\"/>		\
-			</menu>							\
-			<menuitem action=\"Playback controls below\"/>		\
+			<menuitem action=\"Lateral panel\"/>		\
+			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
-			<menuitem action=\"Jump to playing song\"/>		\
+			<menuitem action=\"Jump to playing song\"/>	\
 		</menu>								\
 		<menu action=\"ToolsMenu\">					\
 			<separator/>						\
@@ -128,10 +123,7 @@ gchar *cp_null_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Add Audio CD\"/>					\
 	<menuitem action=\"Add location\"/>					\
 	<separator/>				    				\
-	<menuitem action=\"Add the library\"/>	    				\
-	<separator/>				    				\
-	<menuitem action=\"Library\"/>						\
-	<menuitem action=\"Playlists\"/>					\
+	<menuitem action=\"Lateral panel\"/>				\
 	<separator/>				    				\
 	<menuitem action=\"Quit\"/>						\
 	</popup>				    				\
@@ -224,8 +216,6 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
-	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
-	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
 	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
 	 NULL, "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
@@ -238,7 +228,6 @@ GtkActionEntry main_aentries[] = {
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Preferences", GTK_STOCK_PREFERENCES, N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Lateral panel", NULL, N_("Lateral _panel")},
 	{"Jump to playing song", GTK_STOCK_JUMP_TO, N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
@@ -306,11 +295,8 @@ GtkToggleActionEntry toggles_entries[] = {
 	{"Fullscreen", NULL, N_("_Fullscreen"),
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
-	{"Library", NULL, N_("Library"),
-	 NULL, "Library", G_CALLBACK(library_pane_action),
-	TRUE},
-	{"Playlists", NULL, N_("Playlists"),
-	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
+	{"Lateral panel", NULL, N_("Lateral _panel"),
+	 "F9", "Lateral panel", G_CALLBACK(library_pane_action),
 	FALSE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
@@ -327,18 +313,13 @@ GtkActionEntry cp_null_context_aentries[] = {
 	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
 	 NULL, "Add a no local stream", G_CALLBACK(add_location_action)},
-	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
-	 NULL, "Add all the library", G_CALLBACK(add_all_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}
 };
 
 GtkToggleActionEntry cp_null_toggles_entries[] = {
-	{"Library", NULL, N_("Library"),
-	 NULL, "Library", G_CALLBACK(library_pane_action),
-	TRUE},
-	{"Playlists", NULL, N_("Playlists"),
-	 NULL, "Playlists", G_CALLBACK(playlists_pane_action),
+	{"Lateral panel", NULL, N_("Lateral _panel"),
+	 NULL, "Lateral panel", G_CALLBACK(library_pane_action),
 	FALSE}
 };
 
@@ -464,8 +445,7 @@ GtkActionEntry systray_menu_aentries[] = {
 };
 
 GtkTargetEntry tentries[] = {
-	{"LOCATION_ID", GTK_TARGET_SAME_APP, TARGET_LOCATION_ID},
-	{"PLAYLIST", GTK_TARGET_SAME_APP, TARGET_PLAYLIST},
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
 };
@@ -605,8 +585,7 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 /* Playlist Tree */
 /*****************/
 
-static GtkUIManager* create_playlist_tree_context_menu(GtkWidget *playlist_tree,
-						       struct con_win *cwin)
+static GtkUIManager* create_playlist_tree_context_menu(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -635,78 +614,11 @@ static GtkUIManager* create_playlist_tree_context_menu(GtkWidget *playlist_tree,
 	return context_menu;
 }
 
-static GtkWidget* create_playlist_tree(struct con_win *cwin)
-{
-	GtkWidget *playlist_tree;
-	GtkTreeStore *store;
-	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
-	GtkTreeSelection *selection;
-
-	/* Create the tree store */
-
-	store = gtk_tree_store_new(N_PL_COLUMNS,
-				   GDK_TYPE_PIXBUF, /* Pixbuf */
-				   G_TYPE_STRING,   /* Playlist name */
-				   G_TYPE_INT);     /* Node type : Playlist or Radio */
-
-	/* Create the tree view */
-
-	playlist_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(playlist_tree), FALSE);
-	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(playlist_tree), TRUE);
-
-	/* Selection mode is multiple */
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(playlist_tree));
-	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
-
-	/* Create column and cell renderers */
-
-	column = gtk_tree_view_column_new();
-
-	renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(column, renderer,
-					    "pixbuf", P_PIXBUF,
-					    NULL);
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_set_attributes(column, renderer,
-					    "text", P_PLAYLIST,
-					    NULL);
-	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-
-	gtk_tree_view_append_column(GTK_TREE_VIEW(playlist_tree), column);
-
-	/* Create right click popup menu */
-
-	cwin->playlist_tree_context_menu = create_playlist_tree_context_menu(playlist_tree,
-									     cwin);
-
-	/* Signal handler for right-clicking */
-
-	g_signal_connect(G_OBJECT(playlist_tree), "row-activated",
-			 G_CALLBACK(playlist_tree_row_activated_cb), cwin);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(playlist_tree)), "button-press-event",
-			 G_CALLBACK(playlist_tree_button_press_cb), cwin);
-	g_signal_connect(G_OBJECT(GTK_WIDGET(playlist_tree)), "button-release-event",
-			 G_CALLBACK(playlist_tree_button_release_cb), cwin);
-
-	g_object_unref(store);
-
-	cwin->playlist_tree = playlist_tree;
-
-	return playlist_tree;
-}
-
 /***************************/
 /* Left pane (Browse mode) */
 /***************************/
 
-static GtkUIManager* create_library_page_context_menu(GtkWidget *library_page,
-						      struct con_win *cwin)
+static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -735,77 +647,29 @@ static GtkUIManager* create_library_page_context_menu(GtkWidget *library_page,
 	return context_menu;
 }
 
-static GtkWidget * create_toggles_buttons(struct con_win *cwin)
-{
-	GtkWidget *vbox_btns;
-	GtkWidget *w, *l;
-
-	vbox_btns = gtk_vbox_new(FALSE, 0);
-	
-	w = gtk_toggle_button_new_with_mnemonic( NULL );
-	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),TRUE);
-		
-	l = gtk_label_new_with_mnemonic(_("Library"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
-
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
-	cwin->toggle_lib=w;
-
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "toggled", G_CALLBACK( toggled_cb ), cwin );
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_lib)), "button-press-event",
-			G_CALLBACK(library_page_right_click_cb), cwin);
-
-	/* Create library page context menu */
-	cwin->library_page_context_menu = create_library_page_context_menu(cwin->toggle_lib, cwin);
-
-	w = gtk_toggle_button_new_with_mnemonic( NULL );
-	gtk_button_set_relief( GTK_BUTTON( w ), GTK_RELIEF_NONE );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(w),FALSE);
-
-	l = gtk_label_new_with_mnemonic(_("Playlists"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_container_add(GTK_CONTAINER(w),GTK_WIDGET(l));
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), w, FALSE, FALSE, 0 );
-	cwin->toggle_playlists=w;
-
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "toggled",
-			G_CALLBACK( toggled_cb ), cwin );
-	g_signal_connect(G_OBJECT(GTK_TOGGLE_BUTTON(cwin->toggle_playlists)), "button-press-event",
-			G_CALLBACK(library_page_right_click_cb), cwin);
-
-	l = gtk_label_new_with_mnemonic(_("Pragha Music Player"));
-	gtk_label_set_angle(GTK_LABEL(l), 90);
-	gtk_misc_set_alignment (GTK_MISC(l),0.5,1);
-
-	gtk_box_pack_start( GTK_BOX( vbox_btns ), l, TRUE, TRUE, 0 );
-
-	return vbox_btns;
-}
-
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
-	GtkWidget *browse_mode;
 	GtkWidget *vbox_lib;
-	GtkWidget *library_tree, *playlist_tree;
-	GtkWidget *playlists_tree_scroll, *library_tree_scroll;
+	GtkWidget *library_tree;
+	GtkWidget *library_tree_scroll;
 	GtkWidget *order_selector, *search_bar;
 
-	browse_mode = gtk_notebook_new();
+	vbox_lib = gtk_vbox_new(FALSE, 2);
 
-	vbox_lib = gtk_vbox_new(FALSE, 0);
+	search_bar = create_search_bar(cwin);
+	order_selector = create_combo_order (cwin);
+
 	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
 				       GTK_POLICY_AUTOMATIC,
 				       GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 					GTK_SHADOW_IN);
-	search_bar = create_search_bar(cwin);
-	order_selector = create_combo_order (cwin);
+
 	library_tree = create_library_tree(cwin);
 
 	gtk_container_add(GTK_CONTAINER(library_tree_scroll), library_tree);
+	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
 
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   order_selector,
@@ -816,45 +680,16 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   search_bar,
 			   FALSE,
 			   FALSE,
-			   2);
-
+			   0);
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   library_tree_scroll,
 			   TRUE,
 			   TRUE,
 			   0);
 
-	playlists_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(playlists_tree_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(playlists_tree_scroll),
-					GTK_SHADOW_IN);
-	playlist_tree = create_playlist_tree(cwin);
-	gtk_container_add(GTK_CONTAINER(playlists_tree_scroll), playlist_tree);
+	cwin->browse_mode = vbox_lib;
 
-	/* Append the notebook page widgets */
-
-	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 vbox_lib,
-				 NULL);
-	gtk_notebook_append_page(GTK_NOTEBOOK(browse_mode),
-				 playlists_tree_scroll,
-				 NULL);
-
-	cwin->browse_mode = browse_mode;
-
-	gtk_notebook_set_show_tabs (GTK_NOTEBOOK(browse_mode), FALSE);
-	gtk_notebook_set_show_border (GTK_NOTEBOOK(browse_mode), FALSE);
-
-	/* Signal handler for right-clicking on a page */
-
-	g_signal_connect(G_OBJECT(GTK_NOTEBOOK(browse_mode)), "button-press-event",
-			 G_CALLBACK(library_page_right_click_cb), cwin);
-
-	gtk_notebook_popup_disable(GTK_NOTEBOOK(browse_mode));
-
-	return browse_mode;
+	return vbox_lib;
 }
 
 /*********************************/
@@ -1444,7 +1279,7 @@ static void init_dnd(struct con_win *cwin)
 
 	/* Source: Playlist View */
 
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->playlist_tree),
+	/*gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->playlist_tree),
 					       GDK_BUTTON1_MASK,
 					       tentries,
 					       G_N_ELEMENTS(tentries),
@@ -1457,7 +1292,7 @@ static void init_dnd(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(cwin->playlist_tree),
 			 "drag-data-get",
 			 G_CALLBACK(dnd_playlist_tree_get),
-			 cwin);
+			 cwin);*/
 
 	/* Source/Dest: Current Playlist */
 
@@ -1555,31 +1390,6 @@ GtkUIManager* create_menu(struct con_win *cwin)
 }
 
 GtkWidget* create_main_region(struct con_win *cwin)
-{
-	GtkWidget *hbox;
-	GtkWidget *toggles_note;
-	GtkWidget *paned_region;
-
-	hbox = gtk_hbox_new(FALSE, 0);
-
-	toggles_note = create_toggles_buttons(cwin);
-	paned_region = create_paned_region(cwin);
-
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   toggles_note,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   paned_region,
-			   TRUE,
-			   TRUE,
-			   0);
-
-	return hbox;
-}
-
-GtkWidget* create_paned_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
@@ -2118,6 +1928,14 @@ GtkWidget * create_combo_order(struct con_win *cwin)
 			   0);
 	gtk_container_add (GTK_CONTAINER(button),
 			   hbox);
+
+	/* Create library page context menu */
+
+	cwin->library_page_context_menu = create_library_page_context_menu(cwin);
+
+	/* Create right click popup menu */
+
+	cwin->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
 
 	g_signal_connect(G_OBJECT(button),
 			 "button-press-event",

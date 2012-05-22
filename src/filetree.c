@@ -112,3 +112,53 @@ void __recur_add(gchar *dir_name, struct con_win *cwin)
 
 	g_dir_close(dir);
 }
+
+GList *
+append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	GDir *dir;
+	const gchar *next_file = NULL;
+	gchar *ab_file;
+	GError *error = NULL;
+
+	dir = g_dir_open(dir_name, 0, &error);
+	if (!dir) {
+		g_critical("Unable to open library : %s", dir_name);
+		return list;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+
+		if (cwin->cpref->add_recursively_files &&
+		    g_file_test(ab_file, G_FILE_TEST_IS_DIR))
+			list = append_mobj_list_from_folder(list, ab_file, cwin);
+		else {
+			if (is_playable_file(ab_file)) {
+				mobj = new_musicobject_from_file(ab_file);
+				if (mobj) {
+					list = g_list_append(list, mobj);
+					CDEBUG(DBG_VERBOSE,
+					       "Play file from file_tree: %s",
+					       ab_file);
+				}
+			}
+		}
+		/* Have to give control to GTK periodically ... */
+		/* If gtk_main_quit has been called, return -
+		   since main loop is no more. */
+		while(gtk_events_pending()) {
+			if (gtk_main_iteration_do(FALSE))
+				return NULL;
+		}
+
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+
+	g_dir_close(dir);
+
+	return list;
+}

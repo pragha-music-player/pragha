@@ -558,7 +558,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			append_current_playlist(mobj, cwin);
 			new_radio(uri, name, cwin);
 
-			init_playlist_view(cwin);
+			init_library_view(cwin);
 
 			g_free(uri);
 			g_free(name);
@@ -792,18 +792,7 @@ library_pane_action (GtkAction *action, struct con_win *cwin)
 	gboolean ret;
 	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_lib), ret);
-}
-
-/* Handler for the 'File panel' item in the Edit menu */
-
-void
-playlists_pane_action (GtkAction *action, struct con_win *cwin)
-{
-	gboolean ret;
-	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(cwin->toggle_playlists), ret);
+	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), ret);
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */
@@ -921,7 +910,6 @@ void rescan_library_handler(struct con_win *cwin)
 	}
 
 	init_library_view(cwin);
-	init_playlist_view(cwin);
 
 	gtk_widget_destroy(library_dialog);
 
@@ -1057,7 +1045,6 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->lib_delete = NULL;
 exit:
 	init_library_view(cwin);
-	init_playlist_view(cwin);
 
 	gtk_widget_destroy(library_dialog);
 
@@ -1071,75 +1058,6 @@ exit:
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
-}
-
-/* Handler for 'Add All' action in the Tools menu */
-
-void add_all_action(GtkAction *action, struct con_win *cwin)
-{
-	gint i = 0, location_id = 0, cnt = 0;
-	gchar *query;
-	struct db_result result;
-	struct musicobject *mobj;
-	GtkTreeModel *model;
-	GdkCursor *cursor;
-
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-
-	clear_current_playlist(action, cwin);
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-	/* Query and insert entries */
-	/* NB: Optimization */
-
-	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		for_each_result_row(result, i) {
-			location_id = atoi(result.resultp[i]);
-			mobj = new_musicobject_from_db(location_id, cwin);
-
-			if (!mobj)
-				g_warning("Unable to retrieve details for"
-					  " location_id : %d",
-					  location_id);
-			else
-				append_current_playlist_on_model(model, mobj, cwin);
-
-			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			if (cnt++ % 50)
-				continue;
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
-			}
-		}
-		sqlite3_free_table(result.resultp);
-	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
-	g_object_unref(model);
-
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
-
-	mpris_update_tracklist_replaced(cwin);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */
