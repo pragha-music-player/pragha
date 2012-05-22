@@ -57,7 +57,7 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		append_current_playlist(mobj, cwin);
+		append_current_playlist(NULL, mobj, cwin);
 
 		while(gtk_events_pending()) {
 			if (gtk_main_iteration_do(FALSE))

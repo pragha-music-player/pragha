@@ -298,7 +298,8 @@ static GVariant* mpris_Player_OpenUri(struct con_win *cwin, GVariant* parameters
 			struct musicobject *mobj = new_musicobject_from_file(path);
 			if(mobj) {
 				GtkTreePath *tree_path;
-				append_current_playlist_ex(mobj, cwin, &tree_path);
+				append_current_playlist_ex(NULL, mobj, cwin, &tree_path);
+				update_status_bar(cwin);
 
 				// Dangerous: reusing double-click-handler here.
 				current_playlist_row_activated_cb(
@@ -517,7 +518,7 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 	if(found_playlist) {
 		gdk_threads_enter();
 		clear_current_playlist(NULL, cwin);
-		add_playlist_current_playlist(found_playlist, cwin);
+		add_playlist_current_playlist(NULL, found_playlist, cwin);
 		gdk_threads_leave();
 
 		backend_stop(NULL, cwin);
@@ -673,7 +674,7 @@ static GVariant* mpris_TrackList_AddTrack(struct con_win *cwin, GVariant* parame
 	else if (is_playable_file(file)) {
 		struct musicobject *mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(mobj, cwin);
+			append_current_playlist(NULL, mobj, cwin);
 		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
 	}
 	else {
