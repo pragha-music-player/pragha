@@ -38,7 +38,8 @@ pragha_SOURCES =cdda.c \
 		pragha-lastfm.c \
 		xml_helper.c \
 		xml_helper.h \
-		equalizer.c
+		equalizer.c \
+		widgets.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\

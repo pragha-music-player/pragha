@@ -214,6 +214,7 @@ typedef enum {
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
 #define KEY_INSTANT_FILTER         "instant_filter"
+#define KEY_APROXIMATE_SEARCH      "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
@@ -517,6 +518,7 @@ struct con_pref {
 	gboolean fuse_folders;
 	gboolean sort_by_year;
 	gboolean instant_filter;
+	gboolean aproximate_search;
 	gboolean use_hint;
 	GSList *library_dir;
 	GSList *playlist_columns;
@@ -540,6 +542,7 @@ struct con_pref {
 	GtkWidget *sort_by_year_w;
 
 	GtkWidget *instant_filter_w;
+	GtkWidget *aproximate_search_w;
 	GtkWidget *window_state_combo_w;
 	GtkWidget *restore_playlist_w;
 	GtkWidget *close_to_tray_w;
@@ -1250,6 +1253,10 @@ void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
 
+gchar *e2_utf8_ndup (const gchar *str, glong num);
+gsize levenshtein_strcmp(const gchar * s, const gchar * t);
+gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
+gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
 gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);
@@ -1259,7 +1266,6 @@ void remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin);
 void set_status_message (gchar *message, struct con_win *cwin);
 void gtk_label_set_attribute_bold(GtkLabel *label);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
-gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
@@ -1278,6 +1284,11 @@ gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
+
+/* Some widgets. */
+
+gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon, struct con_win *cwin);
+GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 /* GUI */
 

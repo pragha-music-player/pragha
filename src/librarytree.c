@@ -815,7 +815,8 @@ static void filter_tree_expand_func(GtkTreeView *view,
 	if (cwin->cstate->filter_entry &&
 	    (node_type != NODE_TRACK) &&
 	    (node_type != NODE_BASENAME) &&
-	    g_strrstr(u_str, cwin->cstate->filter_entry))
+	    g_strstr_lv(u_str, cwin->cstate->filter_entry,
+	    		    cwin->cpref->aproximate_search ? 1 : 0))
 		gtk_tree_view_collapse_row(view, path);
 
 	g_free(u_str);
@@ -840,7 +841,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	if (cwin->cstate->filter_entry) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
-		if (g_strrstr(u_str, cwin->cstate->filter_entry)) {
+		if (g_strstr_lv(u_str, cwin->cstate->filter_entry,
+				    cwin->cpref->aproximate_search ? 1 : 0)) {
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_VISIBILE, TRUE, -1);
 			t_path = gtk_tree_model_get_path(model, iter);
@@ -871,8 +873,9 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 
 					gchar *u_str = g_utf8_strdown(t_node_data, -1);
 
-					if (visible && g_strrstr(u_str,
-								 cwin->cstate->filter_entry))
+					if (visible &&
+					    g_strstr_lv(u_str, cwin->cstate->filter_entry,
+							    cwin->cpref->aproximate_search ? 1 : 0))
 						t_flag = TRUE;
 
 					g_free(u_str);
@@ -902,8 +905,6 @@ gboolean do_refilter(struct con_win *cwin )
 {
 	GtkTreeModel *filter_model;
 
-	cwin->cstate->timeout_id = 0;
-
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
 				filter_tree_func,
@@ -919,7 +920,17 @@ gboolean do_refilter(struct con_win *cwin )
 		filter_tree_expand_func,
 		cwin);
 
+	cwin->cstate->timeout_id = 0;
+
 	return FALSE;
+}
+
+void queue_refilter (struct con_win *cwin)
+{
+	if(cwin->cstate->timeout_id)
+		g_source_remove(cwin->cstate->timeout_id);
+
+	cwin->cstate->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, cwin);
 }
 
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
@@ -931,29 +942,26 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	if (!cwin->cpref->instant_filter)
 		return FALSE;
 
-	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
-
 	if (cwin->cstate->filter_entry != NULL) {
 		g_free (cwin->cstate->filter_entry);
 		cwin->cstate->filter_entry = NULL;
 	}
 
-	if (cwin->cstate->timeout_id) {
-		g_source_remove (cwin->cstate->timeout_id);
-		cwin->cstate->timeout_id = 0;
-	}
+	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		cwin->cstate->filter_entry = g_utf8_strdown (text, -1);
 
-		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc)do_refilter, cwin);
+		queue_refilter(cwin);
 	}
 	else {
 		clear_library_search (cwin);
 	}
+
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
-				has_text); 
+				has_text);
 	g_free (text);
 
 	return FALSE;

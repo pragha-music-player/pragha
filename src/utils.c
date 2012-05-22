@@ -77,6 +77,132 @@ const gchar *mime_dual[] = {"audio/x-real-audio",
 				    NULL};
 #endif
 
+/**
+@brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
+@param str the string to be duplicated
+@param num maximum no. of characters in @a str to be processed
+@return the duplicated string
+* Based on emelfm2 code.
+*/
+gchar *e2_utf8_ndup (const gchar *str, glong num)
+{
+	glong size = g_utf8_strlen (str, -1);
+	if (num > size)
+		num = size;
+	gchar *end = g_utf8_offset_to_pointer (str, num);
+	glong byte_size = end - str + 1;
+	gchar *utf8 = g_malloc (byte_size);
+	return g_utf8_strncpy (utf8, str, num);
+}
+
+/* Compare two strings and returns the levenshtein distance.
+ * Based on glyr code. Thanks to cpahl. */
+
+gsize levenshtein_strcmp(const gchar * s, const gchar * t)
+{
+    int n = (s) ? g_utf8_strlen(s,-1)+1 : 0;
+    int m = (t) ? g_utf8_strlen(t,-1)+1 : 0;
+
+    // NOTE: Be sure to call g_utf8_validate(), might fail otherwise
+    // It's advisable to call g_utf8_normalize() too.
+
+    // Nothing to compute really..
+    if (n < 2) return m;
+    if (m < 2) return n;
+
+    // String matrix
+    int d[n][m];
+    int i,j;
+
+    // Init first row|column to 0...n|m
+    for (i=0; i<n; i++) d[i][0] = i;
+    for (j=0; j<m; j++) d[0][j] = j;
+
+    for (i=1; i<n; i++)
+    {
+        // Current char in string s
+        gunichar cats = g_utf8_get_char(g_utf8_offset_to_pointer(s,i-1));
+
+        for (j=1; j<m; j++)
+        {
+            // Do -1 only once
+            int jm1 = j-1,
+                im1 = i-1;
+
+            gunichar tats = g_utf8_get_char(g_utf8_offset_to_pointer(t,jm1));
+
+            // a = above cell, b = left cell, c = left above celli
+            int a = d[im1][j] + 1,
+                b = d[i][jm1] + 1,
+                c = d[im1][jm1] + (tats != cats);
+    
+            // Now compute the minimum of a,b,c and set MIN(a,b,c) to cell d[i][j]
+            d[i][j] = (a < b) ? MIN(a,c) : MIN(b,c);
+        }
+    }
+
+    // The result is stored in the very right down cell
+    return d[n-1][m-1];
+}
+
+gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t)
+{
+	gsize rc = 100;
+
+	if(g_utf8_validate(s,-1,NULL) == FALSE ||
+	   g_utf8_validate(t,-1,NULL) == FALSE)
+		return rc;
+
+	gchar * s_norm = g_utf8_normalize(s, -1 ,G_NORMALIZE_ALL_COMPOSE);
+	gchar * t_norm = g_utf8_normalize(t, -1, G_NORMALIZE_ALL_COMPOSE);
+
+	rc = levenshtein_strcmp(s_norm, t_norm);
+
+	g_free(s_norm);
+	g_free(t_norm);
+
+	return rc;
+}
+
+/* Searches the string haystack for the first occurrence of the string needle
+ * considering a maximum levenshtein distance. */
+
+gchar *
+g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
+{
+	gint needle_len = 0, haystack_len = 0, count = 0;
+	gchar *needle_buf = NULL, *rv = NULL;
+ 
+ 	haystack_len = g_utf8_strlen(haystack, -1);
+	needle_len = g_utf8_strlen(needle, -1);
+
+	/* UTF-8 bytes are 4 bytes length in the worst case */
+	needle_buf = g_malloc0(needle_len * 4 + 1);
+
+	do {
+		g_utf8_strncpy(needle_buf, haystack, needle_len);
+
+		if (needle_len > 3 && lv_distance != 0) {
+			if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
+				rv = (gchar*)haystack;
+				break;
+			}
+		}
+		else {
+			if(g_ascii_strcasecmp(needle_buf, needle) == 0) {
+				rv = (gchar*)haystack;
+				break;
+			}
+		}
+		haystack = g_utf8_next_char(haystack);
+
+	} while(needle_len + count++ < haystack_len);
+
+	g_free(needle_buf);
+
+	return rv;
+}
+
 /* Functions to check the network manager status. */
 
 static NMState
@@ -295,56 +421,6 @@ GdkPixbuf *vgdk_pixbuf_new_from_memory(char *data, size_t size)
 		g_error_free (err);	
 	}
 	return buffer_pix;
-}
-
-/* Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan */
-gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct con_win *cwin)
-{
-	GtkWidget* entry;
-	GtkWidget* xfce_heading;
-	GtkWidget* hbox;
-	GtkWidget* vbox;
-	GtkWidget* image;
-	GtkWidget* label;
-	GtkWidget* separator;
-	gchar* markup;
-
-	entry = gtk_entry_new();
-	xfce_heading = gtk_event_box_new();
-
-	gtk_widget_modify_bg(xfce_heading,
-				GTK_STATE_NORMAL,
-				&gtk_widget_get_style(entry)->base[GTK_STATE_NORMAL]);
-
-	hbox = gtk_hbox_new(FALSE, 12);
-	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
-
-        if (icon)
-            image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
-        else
-            image = gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_DIALOG);
-
-	label = gtk_label_new(NULL);
-	gtk_widget_modify_fg(label,
-				GTK_STATE_NORMAL,
-				&gtk_widget_get_style(entry)->text[GTK_STATE_NORMAL]);
-        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	gtk_widget_destroy (entry);
-
-	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-
-	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
-
-	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
-
-	separator = gtk_hseparator_new ();
-	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
-
-	return vbox;
 }
 
 /* Accepts only absolute filename */
@@ -797,32 +873,32 @@ menu_position(GtkMenu *menu,
 		gboolean *push_in,
 		gpointer user_data)
 {
-        GtkWidget *widget;
-        GtkRequisition requisition;
-        gint menu_xpos;
-        gint menu_ypos;
+	GtkWidget *widget;
+	GtkRequisition requisition;
+	gint menu_xpos;
+	gint menu_ypos;
 
-        widget = GTK_WIDGET (user_data);
+	widget = GTK_WIDGET (user_data);
 
-        gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
 
-        gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
+	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
 
-        menu_xpos += allocation.x;
-        menu_ypos += allocation.y;
+	menu_xpos += allocation.x;
+	menu_ypos += allocation.y;
 
 	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
 		menu_ypos -= requisition.height + gtk_widget_get_style(widget)->ythickness;
 	else
 		menu_ypos += allocation.height + gtk_widget_get_style(widget)->ythickness;
 
-        *x = menu_xpos;
-        *y = menu_ypos - 5;
+	*x = menu_xpos;
+	*y = menu_ypos - 5;
 
-        *push_in = TRUE;
+	*push_in = TRUE;
 }
 
 /* Return TRUE if the previous installed version is

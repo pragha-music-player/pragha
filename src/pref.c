@@ -150,6 +150,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->instant_filter_w));
 
+		cwin->cpref->aproximate_search =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->cpref->aproximate_search_w));
+
 		cwin->cpref->save_playlist =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->restore_playlist_w));
@@ -586,6 +590,11 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->cpref->instant_filter_w),
 					     TRUE);
 
+	if (cwin->cpref->aproximate_search)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->aproximate_search_w),
+					     TRUE);
+
 	if (cwin->cpref->save_playlist)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->restore_playlist_w),
@@ -796,6 +805,13 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_INSTANT_FILTER,
 			       cwin->cpref->instant_filter);
+
+	/* Save aproximate search option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_APROXIMATE_SEARCH,
+			       cwin->cpref->aproximate_search);
 
 	/* Save use hint option */
 
@@ -1352,7 +1368,7 @@ void preferences_dialog(struct con_win *cwin)
 		  *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *hbox_library, *fuse_folders, *sort_by_year;
-	GtkWidget *instant_filter, *window_state_combo, *restore_playlist, *close_to_tray, *add_recursively;
+	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *close_to_tray, *add_recursively;
 	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
 #ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_uhbox, *lastfm_ulabel, \
@@ -1680,6 +1696,8 @@ void preferences_dialog(struct con_win *cwin)
 
 	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
 
+	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
+
 	window_state_combo = gtk_combo_box_text_new ();
 
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
@@ -1696,6 +1714,11 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   instant_filter,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   aproximate_search,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1856,6 +1879,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->sort_by_year_w = sort_by_year;
 
 	cwin->cpref->instant_filter_w = instant_filter;
+	cwin->cpref->aproximate_search_w = aproximate_search;
 	cwin->cpref->window_state_combo_w = window_state_combo;
 	cwin->cpref->restore_playlist_w = restore_playlist;
 	cwin->cpref->close_to_tray_w = close_to_tray;
