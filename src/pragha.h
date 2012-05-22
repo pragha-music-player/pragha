@@ -331,15 +331,6 @@ enum library_columns {
 	N_L_COLUMNS
 };
 
-/* Columns in Playlist view */
-
-enum playlist_columns {
-	P_PIXBUF,
-	P_PLAYLIST,
-	P_NODE_TYPE,
-	N_PL_COLUMNS
-};
-
 /* Columns in current playlist view */
 
 enum curplaylist_columns {
@@ -376,8 +367,7 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 					       gpointer data);
 
 enum dnd_target {
-	TARGET_LOCATION_ID,
-	TARGET_PLAYLIST,
+	TARGET_REF_LIBRARY,
 	TARGET_URI_LIST,
 	TARGET_PLAIN_TEXT
 };
@@ -489,7 +479,6 @@ struct con_pref {
 	gchar *audio_sink;
 	gchar *album_art_pattern;
 	gchar *start_mode;
-	gchar *sidebar_pane;
 	gchar *audio_device;
 	gchar *audio_cd_device;
 	gint album_art_size;
@@ -522,6 +511,7 @@ struct con_pref {
 	gboolean use_mpris2;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
+	gboolean lateral_panel;
 	gboolean status_bar;
 	gboolean controls_below;
 	gboolean fuse_folders;
@@ -714,7 +704,6 @@ struct con_win {
 	GtkWidget *browse_mode;
 	GtkWidget *paned;
 	GtkWidget *toggle_lib;
-	GtkWidget *toggle_playlists;
 	GtkWidget *combo_order;
 	GtkWidget *combo_order_label;
 	GtkWidget *track_length_label;
@@ -724,7 +713,6 @@ struct con_win {
 	GtkWidget *ntag_lastfm_button;
 	#endif
 	GtkWidget *library_tree;
-	GtkWidget *playlist_tree;
 	GtkWidget *jump_tree;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
@@ -814,7 +802,6 @@ void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void show_equalizer_action(GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
-void add_all_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
 void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
@@ -857,6 +844,7 @@ void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 
 void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin);
 void __recur_add(gchar *dir_name, struct con_win *cwin);
+GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin);
 
 /* Musicobject functions */
 
@@ -997,17 +985,11 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 /* Playlist mgmt functions */
 
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
+GList *prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
+void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 void add_radio_current_playlist(gchar *playlist, struct con_win *cwin);
-void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
-				    GtkTreePath *path,
-				    GtkTreeViewColumn *column,
-				    struct con_win *cwin);
-gboolean playlist_tree_button_press_cb(GtkWidget *widget,
-				      GdkEventButton *event,
-				      struct con_win *cwin);
-gboolean playlist_tree_button_release_cb(GtkWidget *widget,
-				      GdkEventButton *event,
-				      struct con_win *cwin);
+GList *prepend_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
+void add_radio_current_playlist_on_model(GtkTreeModel *model, gchar *radio, struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);
@@ -1035,7 +1017,10 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		  struct con_win *cwin);
 void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
 void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
-void init_playlist_view(struct con_win *cwin);
+void complete_add_to_playlist_submenu (struct con_win *cwin);
+void complete_save_playlist_submenu (struct con_win *cwin);
+void complete_main_save_playlist_submenu (struct con_win *cwin);
+void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 /* Current playlist */
 

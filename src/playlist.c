@@ -18,24 +18,6 @@
 
 #include "pragha.h"
 
-static void add_entry_playlist(gchar *playlist,
-			       int node_type,
-			       GtkTreeIter *root,
-			       GtkTreeModel *model,
-			       struct con_win *cwin)
-{
-	GtkTreeIter iter;
-
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      root);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_NODE_TYPE, node_type,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_track,
-			   P_PLAYLIST, playlist,
-			   -1);
-}
-
 /* Add all the tracks under the given path to the current playlist */
 /* NB: Optimization */
 
@@ -46,9 +28,9 @@ static void add_playlist_row_current_playlist(GtkTreePath *path, struct con_win 
 	gchar *playlist;
 	gint node_type;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	if (gtk_tree_model_get_iter(model, &iter, path)) {
-		gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
+		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 		if(node_type == NODE_PLAYLIST) {
@@ -428,6 +410,83 @@ bad:
 	g_free(s_playlist);
 }
 
+/* Prepend the given playlist to the mobj list. */
+
+GList *
+prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
+{
+	gchar *s_playlist, *query, *file;
+	gint playlist_id, location_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_playlist = sanitize_string_sqlite3(playlist);
+	playlist_id = find_playlist_db(s_playlist, cwin);
+
+	if(playlist_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
+				playlist_id);
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		file = sanitize_string_sqlite3(result.resultp[i]);
+
+		if ((location_id = find_location_db(file, cwin)))
+			mobj = new_musicobject_from_db(location_id, cwin);
+		else
+			mobj = new_musicobject_from_file(result.resultp[i]);
+
+		list = g_list_prepend(list, mobj);
+
+		g_free(file);
+	}
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_playlist);
+
+	return list;
+}
+
+/* Append the given playlist to the current playlist model. */
+
+void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin)
+{
+	gchar *s_playlist, *query, *file;
+	gint playlist_id, location_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_playlist = sanitize_string_sqlite3(playlist);
+	playlist_id = find_playlist_db(s_playlist, cwin);
+
+	if(playlist_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
+				playlist_id);
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		file = sanitize_string_sqlite3(result.resultp[i]);
+
+		if ((location_id = find_location_db(file, cwin)))
+			mobj = new_musicobject_from_db(location_id, cwin);
+		else
+			mobj = new_musicobject_from_file(result.resultp[i]);
+
+		append_current_playlist_on_model(model, mobj, cwin);
+
+		g_free(file);
+	}
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_playlist);
+}
+
 /* Append the given radio to the current playlist */
 
 void add_radio_current_playlist(gchar *radio, struct con_win *cwin)
@@ -462,6 +521,70 @@ bad:
 	g_free(s_radio);
 }
 
+/* Prepend the given radio to the mobj list. */
+
+GList *
+prepend_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
+{
+	gchar *s_radio, *query;
+	gint radio_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_radio = sanitize_string_sqlite3(radio);
+	radio_id = find_radio_db(s_radio, cwin);
+
+	if(radio_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
+				radio_id);
+
+	exec_sqlite_query(query, cwin, &result);
+	for_each_result_row(result, i) {
+		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+
+		list = g_list_prepend(list, mobj);
+	}
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_radio);
+
+	return list;
+}
+
+/* Append the given radio to the current playlist model */
+
+void add_radio_current_playlist_on_model(GtkTreeModel *model, gchar *radio, struct con_win *cwin)
+{
+	gchar *s_radio, *query;
+	gint radio_id, i = 0;
+	struct db_result result;
+	struct musicobject *mobj;
+
+	s_radio = sanitize_string_sqlite3(radio);
+	radio_id = find_radio_db(s_radio, cwin);
+
+	if(radio_id == 0)
+		goto bad;
+
+	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
+				radio_id);
+	exec_sqlite_query(query, cwin, &result);
+
+	for_each_result_row(result, i) {
+		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+
+		append_current_playlist_on_model(model, mobj, cwin);
+	}
+
+	sqlite3_free_table(result.resultp);
+
+bad:
+	g_free(s_radio);
+}
+
 void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 				    GtkTreePath *path,
 				    GtkTreeViewColumn *column,
@@ -471,18 +594,18 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 	GtkTreePath *r_path;
 	GtkTreeModel *model;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 
 	gtk_tree_model_get_iter_first(model, &r_iter);
 	r_path = gtk_tree_model_get_path(model, &r_iter);
 
 	if (!gtk_tree_path_compare(path, r_path)) {
-		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->playlist_tree),
+		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->library_tree),
 						path))
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->playlist_tree),
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->library_tree),
 						 path, FALSE);
 		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->playlist_tree),
+			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->library_tree),
 						   path);
 	}
 	else {
@@ -492,98 +615,13 @@ void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
 	gtk_tree_path_free(r_path);
 }
 
-gboolean playlist_tree_button_press_cb(GtkWidget *widget,
-				      GdkEventButton *event,
-				      struct con_win *cwin)
-{
-	GtkWidget *popup_menu;
-	GtkTreePath *path;
-	GtkTreeSelection *selection;
-	gboolean many_selected = FALSE;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
-
-	if(gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
-		switch(event->button) {
-		case 1:
-			if (gtk_tree_selection_path_is_selected(selection, path)
-			    && !(event->state & GDK_CONTROL_MASK)
-			    && !(event->state & GDK_SHIFT_MASK)) {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_false, cwin, NULL);
-			}
-			else {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
-			}
-			break;
-		case 2:
-			if (!gtk_tree_selection_path_is_selected(selection, path)){
-				gtk_tree_selection_unselect_all(selection);
-				gtk_tree_selection_select_path(selection, path);
-			}
-			playlist_tree_add_to_playlist(cwin);
-			break;
-		case 3:
-			if (!(gtk_tree_selection_path_is_selected(selection, path))){
-				gtk_tree_selection_unselect_all(selection);
-				gtk_tree_selection_select_path(selection, path);
-			}
-
-			popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
-								"/popup");
-			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
-					event->button, event->time);
-
-			/* If more than one track is selected, don't propagate event */
-
-			if (gtk_tree_selection_count_selected_rows(selection) > 1)
-				many_selected = TRUE;
-			else
-				many_selected = FALSE;
-			break;
-		default:
-			many_selected = FALSE;
-			break;
-		}
-	gtk_tree_path_free(path);
-	}
-	else gtk_tree_selection_unselect_all(selection);
-
-	return many_selected;
-}
-
-gboolean playlist_tree_button_release_cb(GtkWidget *widget,
-				     GdkEventButton *event,
-				     struct con_win *cwin)
-{
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
-	
-	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->cstate->dragging == TRUE) || (event->button!=1)){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
-		cwin->cstate->dragging = FALSE;
-		return FALSE;
-	}
-
-	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
-
-	if (path){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
-		gtk_tree_selection_unselect_all(selection);
-		gtk_tree_selection_select_path(selection, path);
-		gtk_tree_path_free(path);
-	}
-	return FALSE;
-}
-
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -618,7 +656,7 @@ void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GList *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -658,7 +696,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 	GtkTreePath *path;
 	GList *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -752,14 +790,14 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	gchar *playlist = NULL, *s_playlist = NULL, *n_playlist = NULL;
 	gint node_type;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
 		path = list->data;
 		if (gtk_tree_path_get_depth(path) > 1) {
 			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
+			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
 			s_playlist = sanitize_string_sqlite3(playlist);
 
@@ -773,7 +811,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 					update_radio_name_db(s_playlist, n_playlist, cwin);
 
 				g_free(n_playlist);
-				init_playlist_view(cwin);
+				init_library_view(cwin);
 			}
 			g_free(s_playlist);
 			g_free(playlist);
@@ -826,7 +864,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	gint node_type;
 	gboolean removed = FALSE;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -837,7 +875,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 			if (gtk_tree_path_get_depth(path) > 1) {
 				gtk_tree_model_get_iter(model, &iter, path);
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-				gtk_tree_model_get(model, &iter, P_PLAYLIST,
+				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
@@ -860,7 +898,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	}
 
 	if(removed)
-		init_playlist_view(cwin);
+		init_library_view(cwin);
 }
 
 /* Export selection/current playlist to a M3U file */
@@ -954,8 +992,8 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gint node_type;
 	GdkCursor *cursor;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	cnt = (gtk_tree_selection_count_selected_rows(selection));
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
@@ -969,7 +1007,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 	else {
 		gtk_tree_model_get_iter(model, &iter, path);
-		gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlistpath, -1);
+		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlistpath, -1);
 
 		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 		if(node_type != NODE_PLAYLIST) {
@@ -1024,7 +1062,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1) {
 				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter, P_PLAYLIST,
+				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 				if (save_m3u_playlist(chan, playlist,
 						      filename, cwin) < 0) {
@@ -1400,94 +1438,6 @@ void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *
 	g_slist_free(list);
 }
 
-/*******/
-/* DnD */
-/*******/
-gboolean dnd_playlist_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin)
-{
-	cwin->cstate->dragging = TRUE;
-	return FALSE;
-}
-
-/* Callback for DnD signal 'drag-data-get' */
-void dnd_playlist_tree_get(GtkWidget *widget,
-			   GdkDragContext *context,
-			   GtkSelectionData *data,
-			   guint info,
-			   guint time,
-			   struct con_win *cwin)
-{
-	GtkTreeSelection *selection;
-	GtkTreeModel *model;
-	GtkTreeIter iter, r_iter;
-	GtkTreePath *r_path;
-	GList *list = NULL, *l;
-	GArray *playlist_arr;
-	gchar *playlist = NULL, *s_radio = NULL;
-	gint node_type;
-
-	switch(info) {
-	case TARGET_PLAYLIST:
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->playlist_tree));
-		list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-		/* No selections */
-
-		if (!list) {
-			gtk_selection_data_set(data, gtk_selection_data_get_data_type(data), 8, NULL, 0);
-			break;
-		}
-
-		gtk_tree_model_get_iter_first(model, &r_iter);
-		r_path = gtk_tree_model_get_path(model, &r_iter);
-
-		/* Form an array of playlist names */
-
-		playlist_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
-		l = list;
-
-		while(l) {
-			if (gtk_tree_path_compare(r_path, l->data)) {
-				gtk_tree_model_get_iter(model, &iter, l->data);
-				gtk_tree_model_get(model, &iter, P_PLAYLIST, &playlist, -1);
-
-				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-				if(node_type == NODE_PLAYLIST) {
-					g_array_append_val(playlist_arr, playlist);
-				}
-				else if (node_type == NODE_RADIO) {
-					/* TODO: Fix this negradaaa!. */
-					s_radio = g_strdup_printf("Radio:%s", playlist);
-					g_array_append_val(playlist_arr, s_radio);
-				}
-			}
-			gtk_tree_path_free(l->data);
-			l = l->next;
-		}
-
-		gtk_selection_data_set(data,
-				       gtk_selection_data_get_data_type(data),
-				       8,
-				       (guchar *)&playlist_arr,
-				       sizeof(GArray *));
-
-		CDEBUG(DBG_VERBOSE, "Fill DnD data, "
-		       "selection: %p, playlist_arr: %p",
-		       gtk_selection_data_get_data(data), playlist_arr);
-
-		/* Cleanup */
-
-		gtk_tree_path_free(r_path);
-		g_list_free(list);
-
-		break;
-	default:
-		g_warning("Unknown DND type");
-	}
-}
-
 /* Appennd a tracks list to a playlist using the given type */
 
 void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
@@ -1828,117 +1778,4 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 
 	gtk_widget_show_all (submenu);
 	sqlite3_free_table (result.resultp);
-}
-
-void init_playlist_view(struct con_win *cwin)
-{
-	gint i = 0;
-	gchar *query;
-	struct db_result result;
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	GdkCursor *cursor;
-
-	cwin->cstate->view_change = TRUE;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_tree));
-
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-
-	g_object_ref(model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->playlist_tree), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_tree), NULL);
-
-	gtk_tree_store_clear(GTK_TREE_STORE(model));
-
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, _("Playlists"),
-			   -1);
-
-	/* Query and insert entries */
-
-	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
-				SAVE_PLAYLIST_STATE);
-
-	exec_sqlite_query(query, cwin, &result);
-
-	for_each_result_row(result, i) {
-		add_entry_playlist(result.resultp[i],
-				   NODE_PLAYLIST,
-				   &iter, model, cwin);
-
-		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-		#else
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-		}
-		#endif
-	}
-
-	sqlite3_free_table(result.resultp);
-
-	/* Now ppend the radio to playlist tree */
-
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   P_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   P_PLAYLIST, _("Radios"),
-			   -1);
-
-	query = g_strdup_printf("SELECT NAME FROM RADIO");
-
-	exec_sqlite_query(query, cwin, &result);
-
-	for_each_result_row(result, i) {
-		add_entry_playlist(result.resultp[i],
-				   NODE_RADIO,
-				   &iter, model, cwin);
-
-		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-		#else
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-		}
-		#endif
-	}
-	sqlite3_free_table(result.resultp);
-
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->playlist_tree), TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_tree), model);
-	g_object_unref(model);
-
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->playlist_tree));
-
-	complete_add_to_playlist_submenu (cwin);
-	complete_save_playlist_submenu (cwin);
-	complete_main_save_playlist_submenu(cwin);
-	complete_main_add_to_playlist_submenu (cwin);
-
-	cwin->cstate->view_change = FALSE;
 }
