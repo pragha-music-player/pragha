@@ -100,42 +100,45 @@ void jump_row_activated_cb (GtkTreeView *jump_tree,
 }
 
 gchar *
-search_and_set_layout (gchar *full_string, struct con_win *cwin)
+search_and_set_layout (gchar *haystack, gchar *needle, gboolean precise)
 {
-	gchar *display_string = NULL;
-	gchar *needle = NULL, *haystack = NULL;
-	gchar *found = NULL;
+	gchar *needled = NULL, *haystackd = NULL, *found = NULL;
 	gchar *prev_string = NULL, *mach_string = NULL, *last_string = NULL;
-	gint needle_len, found_len, full_string_len;
+	gint prev_string_len, mach_string_len, last_string_len;
+	gint needle_len, found_len, haystack_len;
+	gchar *layout = NULL;
 
-	if (cwin->cstate->jump_filter == NULL)
-		display_string = g_markup_printf_escaped ("%s", full_string);
-	else {
-		needle = g_utf8_casefold (cwin->cstate->jump_filter, -1);
-		haystack = g_utf8_casefold (full_string, -1);
+	needled = g_utf8_strdown (needle, -1);
+	haystackd = g_utf8_strdown (haystack, -1);
 
-		found = g_strrstr (haystack, needle);
+	needle_len = g_utf8_strlen (needled, -1);
+	haystack_len = g_utf8_strlen (haystackd, -1);
 
-		if (found != NULL) {
-			needle_len = strlen (needle);
-			found_len = strlen (found);
-			full_string_len = strlen (full_string);
 
-			prev_string = g_strndup (full_string, full_string_len - found_len);
-			mach_string = g_strndup (full_string + full_string_len - found_len, needle_len);
-			last_string = g_strdup (full_string + full_string_len - found_len + needle_len);
+	found = g_strstr_lv (haystackd, needled, precise ? 0 : 1);
 
-			display_string = g_markup_printf_escaped ("%s<b>%s</b>%s", prev_string, mach_string, last_string);
+	if (found != NULL) {
+		found_len = g_utf8_strlen (found, -1);
 
-			g_free (prev_string);
-			g_free (mach_string);
-			g_free (last_string);
-		}
-		g_free (needle);
-		g_free (haystack);
+		prev_string_len = haystack_len - found_len;
+		mach_string_len = needle_len;
+		last_string_len = found_len - needle_len;
+
+		prev_string = e2_utf8_ndup(haystack, prev_string_len);
+		mach_string = e2_utf8_ndup(g_utf8_offset_to_pointer(haystack, prev_string_len), mach_string_len);
+		last_string = e2_utf8_ndup(g_utf8_offset_to_pointer(haystack, prev_string_len + mach_string_len), last_string_len);
+
+		layout = g_markup_printf_escaped ("%s<b>%s</b>%s", prev_string, mach_string, last_string);
+
+		g_free (prev_string);
+		g_free (mach_string);
+		g_free (last_string);
 	}
 
-	return display_string;
+	g_free (needled);
+	g_free (haystackd);
+
+	return layout;
 }
 
 gboolean do_jump_refilter(struct con_win *cwin)
@@ -144,7 +147,8 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	GtkTreeIter playlist_iter, jump_iter;
 	struct musicobject *mobj = NULL;
 	GtkListStore *jump_store;
-	gchar *track_data_markup = NULL, *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL, *track_data = NULL;
+	gchar *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL;
+	gchar *track_data_markup = NULL, *track_data = NULL, *needle_filter = NULL;
 	gboolean ret;
 	gint track_i = 0;
 
@@ -155,6 +159,9 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	gtk_list_store_clear (GTK_LIST_STORE(jump_store));
 
 	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
+
+	if(cwin->cstate->jump_filter != NULL)
+		needle_filter = g_utf8_strdown (cwin->cstate->jump_filter, -1);
 
 	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
 	while (ret) {
@@ -168,7 +175,9 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 		track_data = g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
-		track_data_markup = search_and_set_layout (track_data, cwin);
+		track_data_markup = (needle_filter != NULL) ?
+					   search_and_set_layout (track_data, needle_filter, !cwin->cpref->aproximate_search) :
+					   g_markup_printf_escaped ("%s", track_data);
 
 		if (track_data_markup != NULL) {
 			gtk_list_store_append (jump_store, &jump_iter);
@@ -177,6 +186,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 						1, track_data_markup,
 						-1);
 		}
+
 		g_free (ch_title);
 		g_free (ch_artist);
 		g_free (ch_album);
@@ -191,7 +201,19 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(cwin->jump_tree));
 
+	g_free(needle_filter);
+
+	cwin->cstate->timeout_id = 0;
+
 	return FALSE;
+}
+
+void queue_jump_refilter (struct con_win *cwin)
+{
+	if(cwin->cstate->timeout_id)
+		g_source_remove(cwin->cstate->timeout_id);
+
+	cwin->cstate->timeout_id = g_timeout_add(500, (GSourceFunc)do_jump_refilter, cwin);
 }
 
 gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
@@ -205,26 +227,20 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 	if (!cwin->cpref->instant_filter)
 		return FALSE;
 
-	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
-
 	if (cwin->cstate->jump_filter != NULL) {
 		g_free (cwin->cstate->jump_filter);
 		cwin->cstate->jump_filter = NULL;
 	}
 
-	if (cwin->cstate->timeout_id){
-		g_source_remove (cwin->cstate->timeout_id );
-		cwin->cstate->timeout_id = 0;
-	}
+	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
+
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		u_str = g_utf8_strdown (text, -1);
 		cwin->cstate->jump_filter = u_str;
-		cwin->cstate->timeout_id = g_timeout_add (300, (GSourceFunc) do_jump_refilter, cwin );
 	}
-	else {
-		do_jump_refilter (cwin);
-	}
+
+	queue_jump_refilter(cwin);
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
@@ -268,56 +284,6 @@ simple_jump_search_activate_handler (GtkEntry *entry,
 	return FALSE;
 }
 
-static void
-filter_icon_pressed_cb (GtkEntry       *entry,
-		gint            position,
-		GdkEventButton *event,
-		struct con_win *cwin)
-{
-	if (position == GTK_ENTRY_ICON_SECONDARY) {
-		gtk_entry_set_text (entry, "");
-		gtk_widget_grab_focus (GTK_WIDGET(entry));
-
-		if (cwin->cstate->jump_filter != NULL) {
-			g_free (cwin->cstate->jump_filter);
-			cwin->cstate->jump_filter = NULL;
-		}
-		if (!cwin->cpref->instant_filter)
-			do_jump_refilter (cwin);
-	}
-}
-
-/* Search (simple) */
-
-GtkWidget* create_jump_search_bar (struct con_win *cwin)
-{
-	GtkWidget *search_entry;
-
-	search_entry = gtk_entry_new ();
-
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
-
-	/* Signal handlers */
-
-	g_signal_connect (G_OBJECT(search_entry),
-			"icon-press",
-			G_CALLBACK (filter_icon_pressed_cb),
-			cwin);
-	g_signal_connect (G_OBJECT(search_entry),
-			 "changed",
-			 G_CALLBACK(simple_jump_search_keyrelease_handler),
-			 cwin);
-	g_signal_connect (G_OBJECT(search_entry),
-			 "activate",
-			 G_CALLBACK(simple_jump_search_activate_handler),
-			 cwin);
-
-	return search_entry;
-}
-
 void
 dialog_jump_to_track (struct con_win *cwin)
 {
@@ -354,7 +320,12 @@ dialog_jump_to_track (struct con_win *cwin)
 
 	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
 
-	search_entry = create_jump_search_bar (cwin);
+	search_entry = pragha_search_entry_new(cwin);
+
+	g_signal_connect (G_OBJECT(search_entry), "changed",
+			 G_CALLBACK(simple_jump_search_keyrelease_handler), cwin);
+	g_signal_connect (G_OBJECT(search_entry), "activate",
+			 G_CALLBACK(simple_jump_search_activate_handler), cwin);
 
 	scrollwin = gtk_scrolled_window_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER(scrollwin), jump_treeview);

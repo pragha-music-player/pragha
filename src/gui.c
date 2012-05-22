@@ -650,13 +650,11 @@ static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *vbox_lib;
-	GtkWidget *library_tree;
-	GtkWidget *library_tree_scroll;
-	GtkWidget *order_selector, *search_bar;
+	GtkWidget *library_tree, *library_tree_scroll;
+	GtkWidget *order_selector, *search_entry;
 
 	vbox_lib = gtk_vbox_new(FALSE, 2);
 
-	search_bar = create_search_bar(cwin);
 	order_selector = create_combo_order (cwin);
 
 	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -665,6 +663,17 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 				       GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 					GTK_SHADOW_IN);
+
+	search_entry = pragha_search_entry_new(cwin);
+
+	g_signal_connect (G_OBJECT(search_entry), "changed",
+			 G_CALLBACK(simple_library_search_keyrelease_handler), cwin);
+	g_signal_connect (G_OBJECT(search_entry), "activate",
+			 G_CALLBACK(simple_library_search_activate_handler), cwin);
+
+	cwin->search_entry = search_entry;
+
+	order_selector = create_combo_order (cwin);
 
 	library_tree = create_library_tree(cwin);
 
@@ -677,7 +686,7 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   FALSE,
 			   0);
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
-			   search_bar,
+			   search_entry,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1780,54 +1789,6 @@ GtkWidget* create_status_bar(struct con_win *cwin)
 	cwin->status_bar = status_bar;
 
 	return status_bar;
-}
-
-static void
-icon_pressed_cb (GtkEntry       *entry,
-		gint            position,
-		GdkEventButton *event,
-		struct con_win *cwin)
-{
-	if (position == GTK_ENTRY_ICON_SECONDARY) {
-		gtk_entry_set_text (entry, "");
-		gtk_widget_grab_focus(GTK_WIDGET(entry));
-
-		if (!cwin->cpref->instant_filter)
-			clear_library_search (cwin);
-	}
-}
-
-/* Search (simple) */
-
-GtkWidget* create_search_bar(struct con_win *cwin)
-{
-	GtkWidget *search_entry;
-
-	search_entry = gtk_entry_new ();
-
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
-
-	/* Signal handlers */
-
-	g_signal_connect (G_OBJECT(search_entry),
-			"icon-press",
-			G_CALLBACK (icon_pressed_cb),
-			cwin);
-	g_signal_connect(G_OBJECT(search_entry),
-			 "changed",
-			 G_CALLBACK(simple_library_search_keyrelease_handler),
-			 cwin);
-	g_signal_connect(G_OBJECT(search_entry),
-			 "activate",
-			 G_CALLBACK(simple_library_search_activate_handler),
-			 cwin);
-
-	cwin->search_entry = search_entry;
-
-	return search_entry;
 }
 
 void create_status_icon(struct con_win *cwin)
