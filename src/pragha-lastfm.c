@@ -266,6 +266,8 @@ void *do_lastfm_get_similar_current_playlist_action (gpointer data)
 		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
 			added++;
 	}
+	if(added > 0)
+		select_last_path_of_current_playlist(cwin);
 	gdk_threads_leave();
 
 	if(try > 0)
@@ -355,6 +357,8 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		if (xt && xc && append_track_with_artist_and_title (xc->content, xt->content, cwin))
 			added++;
 	}
+	if(added > 0)
+		select_last_path_of_current_playlist(cwin);
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
@@ -393,6 +397,8 @@ void *do_lastfm_add_favorites_action (gpointer data)
 			if (append_track_with_artist_and_title (track->artist, track->name, cwin))
 				added++;
 		}
+		if(added > 0)
+			select_last_path_of_current_playlist(cwin);
 		gdk_threads_leave();
 
 		LASTFM_free_track_info_list (results);
@@ -454,6 +460,8 @@ void *do_lastfm_get_similar_action (gpointer data)
 		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
 			added++;
 	}
+	if(added > 0)
+		select_last_path_of_current_playlist(cwin);
 	gdk_threads_leave();
 
 	if(try > 0)

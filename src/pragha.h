@@ -987,12 +987,10 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 
 /* Playlist mgmt functions */
 
-void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
+void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 GList *prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
-void add_playlist_current_playlist_on_model(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
-void add_radio_current_playlist(gchar *playlist, struct con_win *cwin);
+void add_radio_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 GList *prepend_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
-void add_radio_current_playlist_on_model(GtkTreeModel *model, gchar *radio, struct con_win *cwin);
 void playlist_tree_replace_playlist(GtkAction *action, struct con_win *cwin);
 void playlist_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_add_to_playlist(struct con_win *cwin);
@@ -1059,10 +1057,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(struct musicobject *mobj, struct con_win *cwin);
 void clear_current_playlist(GtkAction *action, struct con_win *cwin);
 void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin);
-void insert_current_playlist(struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin);
-void append_current_playlist(struct musicobject *mobj, struct con_win *cwin);
-void append_current_playlist_ex(struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
-void append_current_playlist_on_model(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);
+void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin);
+void append_current_playlist(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);
+void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);

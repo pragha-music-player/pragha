@@ -116,7 +116,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	else if (is_playable_file(file)) {
 		mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(mobj, cwin);
+			append_current_playlist(NULL, mobj, cwin);
 		CDEBUG(DBG_INFO, "Add file from command line: %s", file);
 	}
 	else {

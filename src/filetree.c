@@ -39,7 +39,7 @@ void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin)
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (mobj)
-					append_current_playlist(mobj, cwin);
+					append_current_playlist(NULL, mobj, cwin);
 				CDEBUG(DBG_VERBOSE, "Play file from file_tree: %s",
 				       ab_file);
 			}
@@ -91,7 +91,7 @@ void __recur_add(gchar *dir_name, struct con_win *cwin)
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (mobj) {
-					append_current_playlist(mobj, cwin);
+					append_current_playlist(NULL, mobj, cwin);
 					CDEBUG(DBG_VERBOSE,
 					       "Play file from file_tree: %s",
 					       ab_file);

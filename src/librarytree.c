@@ -357,13 +357,13 @@ static void add_row_current_playlist(GtkTreePath *path,
 				  "for location_id : %d",
 				  location_id);
 		else
-			append_current_playlist_on_model(playlist_model, mobj, cwin);
+			append_current_playlist(playlist_model, mobj, cwin);
 	}
 	else if (node_type == NODE_PLAYLIST) {
-		add_playlist_current_playlist_on_model(playlist_model, data, cwin);
+		add_playlist_current_playlist(playlist_model, data, cwin);
 	}
 	else if (node_type == NODE_RADIO) {
-		add_radio_current_playlist_on_model(playlist_model, data, cwin);
+		add_radio_current_playlist(playlist_model, data, cwin);
 	}
 
 	/* For all other node types do a recursive add */
@@ -379,7 +379,7 @@ static void add_row_current_playlist(GtkTreePath *path,
 					  "for location_id : %d",
 					  location_id);
 			else
-				append_current_playlist_on_model(playlist_model, mobj, cwin);
+				append_current_playlist(playlist_model, mobj, cwin);
 		}
 		else {
 			path = gtk_tree_model_get_path(row_model, &t_iter);

@@ -161,7 +161,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	else{
 		mobj = new_musicobject_from_file(data);
 		if (mobj) {
-			append_current_playlist(mobj, cwin);
+			append_current_playlist(NULL, mobj, cwin);
 			g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) add_recent_file,
 							data, NULL);
 		}
@@ -555,7 +555,9 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 		if(uri != NULL) {
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
-			append_current_playlist(mobj, cwin);
+			append_current_playlist(NULL, mobj, cwin);
+			update_status_bar(cwin);
+
 			new_radio(uri, name, cwin);
 
 			init_library_view(cwin);
