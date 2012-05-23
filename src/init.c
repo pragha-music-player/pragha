@@ -1161,7 +1161,10 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->dragging = FALSE;
 	cwin->cstate->curr_mobj_clear = FALSE;
 
-	cwin->cstate->curr_mobj= NULL;
+	cwin->cstate->curr_mobj = NULL;
+
+	cwin->cstate->view_change = TRUE;
+	cwin->cstate->playlist_change = TRUE;
 
 	/* Init others default flags */
 
@@ -1169,6 +1172,7 @@ gint init_first_state(struct con_win *cwin)
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm->session_id = NULL;
 	cwin->clastfm->status = LASTFM_STATUS_INVALID;
+	init_tag_struct(cwin->clastfm->ntags);
 #endif
 	cwin->osd_notify = NULL;
 
