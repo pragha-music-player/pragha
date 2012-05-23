@@ -2557,9 +2557,6 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 	/* Get the mobjs from the path of the library. */
 
 	do {
-		/*ref = g_array_index(ref_arr, GtkTreeRowReference *, i);
-		if (ref) {
-			path = gtk_tree_row_reference_get_path(ref);*/
 		path = g_array_index(ref_arr, GtkTreePath *, i);
 		if (path) {
 			gtk_tree_model_get_iter(library_model, &iter, path);
@@ -2595,7 +2592,6 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 					return NULL;
 			}
 
-			//gtk_tree_row_reference_free(ref);
 			gtk_tree_path_free(path);
 		}
 		i++;
@@ -2792,6 +2788,8 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Remove busy mouse icon */
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+
+	g_list_free(list);
 
 exit:
 	gtk_tree_path_free(dest_path);
