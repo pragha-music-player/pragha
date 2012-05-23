@@ -1874,11 +1874,8 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 	cwin->cstate->unplayed_tracks++;
 
 	/* Have to give control to GTK periodically ... */
-	/* If gtk_main_quit has been called, return -
-	   since main loop is no more. */
 	while(gtk_events_pending()) {
-		if (gtk_main_iteration_do(FALSE))
-			return;
+		gtk_main_iteration_do(FALSE);
 	}
 
 	/* inform mpris2 */
