@@ -56,12 +56,23 @@ void toogle_main_window (struct con_win *cwin, gboolean ignoreActivity)
 }
 
 static void
+notify_closed_cb (NotifyNotification *osd,
+			struct con_win *cwin)
+{
+	g_object_unref (G_OBJECT(osd));
+
+	if (cwin->osd_notify == osd) {
+		cwin->osd_notify = NULL;
+	}
+}
+
+static void
 notify_Prev_Callback (NotifyNotification *osd,
                 const char *action,
                 struct con_win *cwin)
 {
-        g_assert (action != NULL);
-        g_assert (strcmp (action, "media-prev") == 0);
+	g_assert (action != NULL);
+	g_assert (strcmp (action, "media-prev") == 0);
 
 	if(cwin->cgst->emitted_error == FALSE)
 		play_prev_track(cwin);
@@ -72,8 +83,8 @@ notify_Next_Callback (NotifyNotification *osd,
                 const char *action,
                 struct con_win *cwin)
 {
-        g_assert (action != NULL);
-        g_assert (strcmp (action, "media-next") == 0);
+	g_assert (action != NULL);
+	g_assert (strcmp (action, "media-next") == 0);
 
 	if(cwin->cgst->emitted_error == FALSE)
 		play_next_track(cwin);
@@ -114,7 +125,7 @@ void show_osd(struct con_win *cwin)
 	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
 		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
-		summary = g_strdup(g_path_get_basename(cwin->cstate->curr_mobj->file));
+		summary = g_path_get_basename(cwin->cstate->curr_mobj->file);
 
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
 
@@ -127,28 +138,29 @@ void show_osd(struct con_win *cwin)
 
 	/* Create notification instance */
 	#if NOTIFY_CHECK_VERSION (0, 7, 0)
-		if (cwin->osd_notify == NULL) {
-			cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL);
+	if (cwin->osd_notify == NULL) {
+		cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL);
 
-			if(can_support_actions() &&
-			   cwin->cpref->actions_in_osd == TRUE) {
-				notify_notification_add_action(
-					cwin->osd_notify, "media-prev", _("Prev Track"),
-					NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
-					NULL);
-				notify_notification_add_action(
-					cwin->osd_notify, "media-next", _("Next Track" ),
-					NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
-					NULL);
-			}
+		if(can_support_actions() &&
+		   cwin->cpref->actions_in_osd == TRUE) {
+			notify_notification_add_action(
+				cwin->osd_notify, "media-prev", _("Prev Track"),
+				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
+				NULL);
+			notify_notification_add_action(
+				cwin->osd_notify, "media-next", _("Next Track" ),
+				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
+				NULL);
+		}
 		notify_notification_set_hint (cwin->osd_notify, "transient", g_variant_new_boolean (TRUE));
-		}
-		else {
-			notify_notification_update (cwin->osd_notify, (const gchar *) summary, body, NULL);
+		g_signal_connect(cwin->osd_notify, "closed", G_CALLBACK (notify_closed_cb), cwin);
+	}
+	else {
+		notify_notification_update (cwin->osd_notify, (const gchar *) summary, body, NULL);
 
-			if(cwin->cpref->actions_in_osd == FALSE)
-				notify_notification_clear_actions (cwin->osd_notify);
-		}
+		if(cwin->cpref->actions_in_osd == FALSE)
+			notify_notification_clear_actions (cwin->osd_notify);
+	}
 	#else
 	if(cwin->cpref->osd_in_systray && gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
 		cwin->osd_notify = notify_notification_new_with_status_icon((const gchar *) summary,
