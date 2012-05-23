@@ -647,6 +647,8 @@ void *do_lastfm_now_playing (gpointer data)
 		ntrack = list->data;
 		free_tag_struct(cwin->clastfm->ntags);
 
+		init_tag_struct(cwin->clastfm->ntags);
+
 		if(ntrack->name && g_ascii_strcasecmp(ntrack->name, title)) {
 			cwin->clastfm->ntags->title = g_strdup(ntrack->name);
 			changed = TRUE;
@@ -668,14 +670,6 @@ void *do_lastfm_now_playing (gpointer data)
 		else {
 			cwin->clastfm->ntags->album = g_strdup(album);
 		}
-		cwin->clastfm->ntags->genre = g_strdup("");
-		cwin->clastfm->ntags->comment = g_strdup("");
-		cwin->clastfm->ntags->track_no = 0;
-		cwin->clastfm->ntags->year = 0;
-		cwin->clastfm->ntags->bitrate = 0;
-		cwin->clastfm->ntags->length = 0;
-		cwin->clastfm->ntags->channels = 0;
-		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
 			gdk_threads_enter ();

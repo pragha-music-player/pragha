@@ -31,6 +31,9 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
+
+	init_tag_struct(mobj->tags);
+
 	mobj->file = g_strdup(file);
 
 	switch(type) {
@@ -187,6 +190,8 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
+	init_tag_struct(mobj->tags);
+
 	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
@@ -219,6 +224,7 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	mobj->tags->channels = (channels > 0) ? channels : 0;
 	mobj->tags->length = (end - start) / CDIO_CD_FRAMES_PER_SEC;
 	mobj->file = g_strdup_printf("cdda://%d", track_no);
+
 	mobj->file_type = FILE_CDDA;
 
 	return mobj;
@@ -233,19 +239,9 @@ struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name,
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
+	init_tag_struct(mobj->tags);
+
 	mobj->tags->title = g_strdup(name);
-
-	mobj->tags->artist = g_strdup("");
-	mobj->tags->album = g_strdup("");
-	mobj->tags->genre = g_strdup("");
-	mobj->tags->comment = g_strdup("");
-
-	mobj->tags->track_no = 0;
-	mobj->tags->year = 0;
-	mobj->tags->bitrate = 0;
-	mobj->tags->length = 0;
-	mobj->tags->channels = 0;
-	mobj->tags->samplerate = 0;
 
 #ifdef HAVE_PLPARSER
 	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
@@ -303,14 +299,11 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 
 void init_tag_struct(struct tags *mtags)
 {
-	/*FIXME: Find that is what prohibits use NULL.*/
-
-	mtags->title = g_strdup("");
-	mtags->artist = g_strdup("");
-	mtags->album = g_strdup("");
-	mtags->comment = g_strdup("");
-	mtags->genre = g_strdup("");
-	mtags->comment = g_strdup("");
+	mtags->title = NULL;
+	mtags->artist = NULL;
+	mtags->album = NULL;
+	mtags->genre = NULL;
+	mtags->comment = NULL;
 	mtags->track_no = 0;
 	mtags->year = 0;
 	mtags->bitrate = 0;
@@ -326,7 +319,6 @@ void free_tag_struct(struct tags *mtags)
 	g_free(mtags->album);
 	g_free(mtags->genre);
 	g_free(mtags->comment);
-
 }
 
 void delete_musicobject(struct musicobject *mobj)
