@@ -242,17 +242,17 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 	}
 }
 
-/* Append to the given array the ref of
+/* Append to the given array the path of
    all the nodes under the given path */
 
-static void get_ref_array(GtkTreePath *path,
+static void get_path_array(GtkTreePath *path,
 				  GArray *ref_arr,
 				  GtkTreeModel *model,
 				  struct con_win *cwin)
 {
 	GtkTreeIter t_iter, r_iter;
-	//GtkTreeRowReference *ref;
 	enum node_type node_type = 0;
+	GtkTreePath *cpath;
 	gint j = 0;
 
 	gtk_tree_model_get_iter(model, &r_iter, path);
@@ -263,9 +263,8 @@ static void get_ref_array(GtkTreePath *path,
 
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-		//ref = gtk_tree_row_reference_new(model, path);
-		//g_array_append_val(ref_arr, ref);
-		g_array_prepend_val(ref_arr, path);
+		cpath = gtk_tree_path_copy(path);
+		g_array_prepend_val(ref_arr, cpath);
 	}
 
 	/* For all other node types do a recursive add */
@@ -277,14 +276,13 @@ static void get_ref_array(GtkTreePath *path,
 
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-			//ref = gtk_tree_row_reference_new(model, path);
-			//g_array_append_val(ref_arr, ref);
-			g_array_prepend_val(ref_arr, path);
+			cpath = gtk_tree_path_copy(path);
+			g_array_prepend_val(ref_arr, cpath);
 		}
 		else {
-			get_ref_array(path, ref_arr, model, cwin);
+			get_path_array(path, ref_arr, model, cwin);
 		}
-		//gtk_tree_path_free(path);
+		gtk_tree_path_free(path);
 	}
 }
 
@@ -745,35 +743,27 @@ void dnd_library_tree_get(GtkWidget *widget,
 							cwin->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
-		/* No selections */
-
 		if (!list) {
 			gtk_selection_data_set(data, gtk_selection_data_get_data_type(data), 8, NULL, 0);
 			break;
 		}
 
-		/* Form an array of location ids */
-
-		//ref_arr = g_array_new(TRUE, TRUE, sizeof(GtkTreeRowReference *));
 		ref_arr = g_array_new(TRUE, TRUE, sizeof(GtkTreePath *));
 
 		l = list;
 		while(l) {
-			get_ref_array(l->data, ref_arr, model, cwin);
-			//gtk_tree_path_free(l->data);
+			get_path_array(l->data, ref_arr, model, cwin);
+			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
+		g_list_free(list);
 
 		gtk_selection_data_set(data,
 				       gtk_selection_data_get_data_type(data),
 				       8,
 				       (guchar *)&ref_arr,
 				       sizeof(GArray *));
-
-		/* Cleanup */
- 
-		g_list_free(list);
-		break;
+ 		break;
 	default:
 		g_warning("Unknown DND type");
 	}
