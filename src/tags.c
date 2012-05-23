@@ -903,7 +903,6 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	gtk_entry_set_activates_default (GTK_ENTRY(entry_tno), TRUE);
 	gtk_entry_set_activates_default (GTK_ENTRY(entry_year), TRUE);
 
-
 	/* Connect to set clear check when click the icon. */
 
 	g_signal_connect (G_OBJECT(entry_title),
@@ -966,7 +965,6 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 			track_properties(mobj, cwin);
 		}
 	}
-
 
 	switch (result)
 	{

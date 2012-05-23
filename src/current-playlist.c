@@ -1280,18 +1280,11 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 
 /* Idle function to free musicobject when clear and crop current playlist */
 
-gboolean idle_delete_mobj_list (GSList *to_delete)
+void delete_mobj_list_foreach (gpointer data, gpointer user_data)
 {
-	struct musicobject *mobj = NULL;
-	GSList *i = NULL;
+	struct musicobject *mobj = data;
 
-	for (i=to_delete; i != NULL; i = i->next) {
-		mobj = i->data;
-		delete_musicobject(mobj);
-	}
-	g_slist_free(to_delete);
-
-	return FALSE;
+	delete_musicobject(mobj);
 }
 
 /* Remove selected rows from current playlist */
@@ -1367,7 +1360,8 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 		g_list_free(list);
 	}
 
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
+	g_slist_foreach(mobj_to_delete, delete_mobj_list_foreach, NULL);
+	g_slist_free(mobj_to_delete);
 
 	requeue_track_refs (cwin);
 	update_status_bar(cwin);
@@ -1460,10 +1454,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
+	g_slist_foreach(to_delete, delete_mobj_list_foreach, NULL);
+	g_slist_free(to_delete);
 
 	requeue_track_refs (cwin);
-	g_slist_free(to_delete);
 	update_status_bar(cwin);
 }
 
@@ -1660,7 +1654,8 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
+	g_slist_foreach(to_delete, delete_mobj_list_foreach, NULL);
+	g_slist_free(to_delete);
 
 	cwin->cstate->tracks_curr_playlist = 0;
 	cwin->cstate->unplayed_tracks = 0;
