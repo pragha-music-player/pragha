@@ -107,7 +107,7 @@ bad:
 	g_free(mobj->file);
 	g_slice_free(struct tags, mobj->tags);
 	g_slice_free(struct musicobject, mobj);
-	mobj = NULL;
+
 	return NULL;
 }
 
