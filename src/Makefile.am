@@ -39,6 +39,7 @@ pragha_SOURCES =cdda.c \
 		xml_helper.c \
 		xml_helper.h \
 		equalizer.c \
+		gudev-devices.c \
 		widgets.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
@@ -109,3 +110,7 @@ pragha_CFLAGS += $(PLPARSER_CFLAGS)
 pragha_LDFLAGS += $(PLPARSER_LIBS)
 endif
 
+if HAVE_GUDEV
+pragha_CFLAGS += $(GUDEV_CFLAGS)
+pragha_LDFLAGS += $(GUDEV_LIBS)
+endif

@@ -223,6 +223,10 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize gstreamer");
 		return -1;
 	}
+	if(init_gudev_subsystem(cwin) == -1) {
+		g_critical("Unable to initialize gudev");
+		return -1;
+	}
 
 	/* Init the gui after bancked to sink volume. */
 	gdk_threads_enter();

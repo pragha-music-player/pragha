@@ -161,6 +161,14 @@ XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
                        [totem-plparser],
                        [totem-plparser library], [yes])
 
+XDT_CHECK_PACKAGE([], [gudev-1.0], [145])
+
+GUDEV_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
+                       [gudev-1.0], [145],
+                       [gudev-1.0],
+                       [gudev-1.0 library], [yes])
+
 AC_OUTPUT([
 Makefile
 po/Makefile.in
@@ -186,5 +194,6 @@ echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).:
 echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"
 echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
 echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
+echo "  Management removable devices........................(gudev-1.0 >= 145).: $GUDEV_FOUND"
 echo ""
 
