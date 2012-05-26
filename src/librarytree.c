@@ -194,8 +194,7 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		else if (!g_ascii_strcasecmp(P_ARTIST_STR, node)) {
 			node_type = NODE_ARTIST;
 			node_pixbuf = cwin->pixbuf->pixbuf_artist;
-			node_data = strlen(artist) ? artist : g_strdup(_("Unknown Artist"));
-			if (!strlen(artist)) need_gfree = TRUE;
+			node_data = strlen(artist) ? artist : _("Unknown Artist");
 		}
 		else if (!g_ascii_strcasecmp(P_ALBUM_STR, node)) {
 			node_type = NODE_ALBUM;
@@ -205,15 +204,13 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 				need_gfree = TRUE;
 			}
 			else {
-				node_data = strlen(album) ? album : g_strdup(_("Unknown Album"));
-				if (!strlen(album)) need_gfree = TRUE;
+				node_data = strlen(album) ? album : _("Unknown Album");
 			}
 		}
 		else if (!g_ascii_strcasecmp(P_GENRE_STR, node)) {
 			node_type = NODE_GENRE;
 			node_pixbuf = cwin->pixbuf->pixbuf_genre;
-			node_data = strlen(genre) ? genre : g_strdup(_("Unknown Genre"));
-			if (!strlen(genre)) need_gfree = TRUE;
+			node_data = strlen(genre) ? genre : _("Unknown Genre");
 		}
 
 		/* Find / add child node if it's not already added */
