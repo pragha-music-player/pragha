@@ -957,7 +957,7 @@ void mpris_update_any(struct con_win *cwin)
 		GVariant * tuples[] = {
 			g_variant_new_string("org.mpris.MediaPlayer2.Player"),
 			g_variant_builder_end(&b),
-			g_variant_parse(G_VARIANT_TYPE("as"), "[]", NULL, NULL, NULL)
+			g_variant_new_strv(NULL, 0)
 		};
 
 		g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
@@ -987,7 +987,7 @@ mpris_update_metadata_changed(struct con_win *cwin)
 	GVariant * tuples[] = {
 		g_variant_new_string("org.mpris.MediaPlayer2.Player"),
 		g_variant_builder_end(&b),
-		g_variant_parse(G_VARIANT_TYPE("as"), "[]", NULL, NULL, NULL)
+		g_variant_new_strv(NULL, 0)
 	};
 
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
