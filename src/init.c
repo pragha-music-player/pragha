@@ -1216,8 +1216,8 @@ void init_states_pixbuf(struct con_win *cwin)
 	GtkIconTheme *icon_theme;
 	icon_theme = gtk_icon_theme_get_default ();
 
-	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icon_theme, "stock_media-play",16, 0,NULL);
-	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icon_theme, "stock_media-pause", 16, 0, NULL);
+	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icon_theme, "media-playback-start", 16, 0, NULL);
+	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icon_theme, "media-playback-pause", 16, 0, NULL);
 }
 
 void init_toggle_buttons(struct con_win *cwin)
@@ -1312,7 +1312,7 @@ void init_pixbufs(struct con_win *cwin)
 		g_warning("Unable to load album png");
 
 	cwin->pixbuf->pixbuf_track = gtk_icon_theme_load_icon(icontheme,
-							     "gnome-mime-audio",
+							     "audio-x-generic",
 							     16,
 							     0,
 							     NULL);
@@ -1342,7 +1342,7 @@ void init_pixbufs(struct con_win *cwin)
 							    NULL);
 	if (!cwin->pixbuf->pixbuf_dir)
 		cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-										"gtk-directory",
+										"folder",
 										16,
 										0,
 										NULL);

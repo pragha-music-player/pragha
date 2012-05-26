@@ -38,9 +38,9 @@ void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_w
 	if (error) {
 		icon_theme = gtk_icon_theme_get_default ();
 		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-remove",16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
 		else
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "gtk-dialog-warning",16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
 	}
 	else {
 		switch (cwin->cstate->state)
