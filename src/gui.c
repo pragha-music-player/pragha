@@ -901,7 +901,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
 
-	state_pixbuf = gtk_image_new_from_icon_name ("stock_volume-max", GTK_ICON_SIZE_MENU);
+	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high", GTK_ICON_SIZE_MENU);
 
 	/* Column : Queue Bubble and Status Pixbuf */
 
