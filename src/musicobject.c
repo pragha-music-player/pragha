@@ -68,6 +68,7 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 			g_critical("OGG Info failed");
 			goto bad;
 		}
+		break;
 	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 	case FILE_ASF:
 		if (get_asf_info(file, mobj->tags))
@@ -76,6 +77,7 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 			g_critical("ASF Info failed");
 			goto bad;
 		}
+		break;
 	#endif
 	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	case FILE_MP4:
