@@ -18,6 +18,11 @@
 
 #include "pragha.h"
 
+typedef struct directory_pressed_data {
+	struct con_win *cwin;
+	gchar *file;
+} directory_pressed_data_t;
+
 static gboolean get_info_taglib(gchar *file, struct tags *tags)
 {
 	gboolean ret = FALSE;
@@ -358,11 +363,11 @@ static void
 directory_pressed (GtkEntry       *entry,
 		gint            position,
 		GdkEventButton *event,
-		gchar *file)
+		directory_pressed_data_t *data)
 {
-	if (position == GTK_ENTRY_ICON_SECONDARY && file) {
-		gchar *uri = get_display_filename(file, TRUE);
-		open_url(NULL, uri);
+	if (position == GTK_ENTRY_ICON_SECONDARY && data->file) {
+		gchar *uri = get_display_filename(data->file, TRUE);
+		open_url(data->cwin, uri);
 		g_free(uri);
 	}
 }
@@ -863,6 +868,10 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	else
 		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
 
+	directory_pressed_data_t directory_pressed_data;
+	directory_pressed_data.cwin = cwin;
+	directory_pressed_data.file = file;
+
 	/* Connect to check the save changes when change the entry. */
 
 	g_signal_connect(G_OBJECT(entry_title),
@@ -924,7 +933,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	g_signal_connect (G_OBJECT(entry_file),
 			"icon-press",
 			G_CALLBACK (directory_pressed),
-			file);
+			&directory_pressed_data);
 
 	/* Genereate storage of gtk_entry and cwin,
 	 *  and add popup menu to copy selection to tags. */
