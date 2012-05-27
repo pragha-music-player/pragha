@@ -122,7 +122,8 @@ void show_osd(struct con_win *cwin)
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	if( g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1))
+	if((cwin->cstate->curr_mobj->tags->title != NULL) &&
+	   (g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, -1)))
 		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
 		summary = g_path_get_basename(cwin->cstate->curr_mobj->file);
