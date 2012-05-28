@@ -123,6 +123,8 @@ static void add_folder_file(gchar *path, int location_id,
 		}
 	}
 
+	g_assert(prefix != NULL);
+
 	/* Point after library directory prefix */
 
 	filepath = path + strlen(prefix) + 1;
