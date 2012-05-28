@@ -262,8 +262,11 @@ gint init_config(struct con_win *cwin)
 			g_critical("Unable to create config file, err: %s",
 				   strerror(errno));
 			err = TRUE;
+		} else {
+			CDEBUG(DBG_INFO, "Created config file");
 		}
-		CDEBUG(DBG_INFO, "Created config file");
+
+		cwin->cstate->first_run = TRUE;
 	}
 
 	/* Get cache of downloaded albums arts */
