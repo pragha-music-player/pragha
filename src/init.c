@@ -76,6 +76,11 @@ static void init_gui_state(struct con_win *cwin)
 
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);
+
+	if (info_bar_import_music_will_be_useful(cwin)) {
+		GtkWidget* info_bar = create_info_bar_import_music(cwin);
+		mainwindow_add_widget_to_info_box(cwin, info_bar);
+	}
 }
 #else
 static gboolean _init_gui_state(gpointer data)
@@ -96,6 +101,11 @@ static gboolean _init_gui_state(gpointer data)
 		return TRUE;
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);
+
+	if (info_bar_import_music_will_be_useful(cwin)) {
+		GtkWidget* info_bar = create_info_bar_import_music(cwin);
+		mainwindow_add_widget_to_info_box(cwin, info_bar);
+	}
 
 	return TRUE;
 }

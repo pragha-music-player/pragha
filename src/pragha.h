@@ -1310,6 +1310,10 @@ gboolean dialog_audio_init(gpointer data);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 
+/* Info bar import music */
+gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
+GtkWidget* create_info_bar_import_music(struct con_win *cwin);
+
 /* Init */
 
 gint init_dbus(struct con_win *cwin);
