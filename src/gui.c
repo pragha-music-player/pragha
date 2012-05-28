@@ -1898,3 +1898,8 @@ GtkWidget * create_combo_order(struct con_win *cwin)
 
 	return button;
 }
+
+void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget)
+{
+	gtk_container_add(GTK_CONTAINER(cwin->info_box), widget);
+}

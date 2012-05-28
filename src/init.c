@@ -1505,6 +1505,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	menu = create_menu(cwin);
 	hbox_main = create_main_region(cwin);
 	hbox_panel = create_panel(cwin);
+	cwin->info_box = gtk_vbox_new(FALSE, 0);
 	status_bar = create_status_bar(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
@@ -1512,6 +1513,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(menu_bar),
+			   FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox),
+			   GTK_WIDGET(cwin->info_box),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_panel),

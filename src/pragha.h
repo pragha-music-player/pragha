@@ -690,6 +690,7 @@ struct con_win {
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GtkWidget *hbox_panel;
+	GtkWidget *info_box;
 	GtkWidget *album_art_frame;
 	GtkWidget *album_art;
 	GtkWidget *track_progress_bar;
@@ -1306,6 +1307,7 @@ GtkWidget* create_combo_order(struct con_win *cwin);
 void create_status_icon(struct con_win *cwin);
 gboolean dialog_audio_init(gpointer data);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
+void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 
 /* Init */
 
