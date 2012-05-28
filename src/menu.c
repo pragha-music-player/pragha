@@ -828,7 +828,8 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 					      2);
 		}
 	}
-	
+
+	g_list_free(children);
 }
 
 void
