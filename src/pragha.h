@@ -610,6 +610,7 @@ struct con_state {
 	gboolean view_change;
 	gboolean playlist_change;
 	gboolean curr_mobj_clear;
+	gboolean first_run;
 	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
