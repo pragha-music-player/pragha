@@ -849,6 +849,7 @@ void update_current_state(GtkTreePath *path,
 	CDEBUG(DBG_VERBOSE, "Update the state from current playlist");
 
 	/* Update view */
+
 	update_pixbuf_state_on_path (path, NULL, cwin);
 	jump_to_path_on_current_playlist (path, cwin);
 
@@ -1278,15 +1279,6 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 	return FALSE;
 }
 
-/* Idle function to free musicobject when clear and crop current playlist */
-
-void delete_mobj_list_foreach (gpointer data, gpointer user_data)
-{
-	struct musicobject *mobj = data;
-
-	delete_musicobject(mobj);
-}
-
 /* Remove selected rows from current playlist */
 
 void remove_from_playlist(GtkAction *action, struct con_win *cwin)
@@ -1297,7 +1289,6 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path, *next;
 	GtkTreeIter iter;
 	GList *list = NULL, *i = NULL;
-	GSList *mobj_to_delete = NULL;
 	struct musicobject *mobj = NULL;
 	gboolean played = FALSE;
 
@@ -1342,10 +1333,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-				if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
-					cwin->cstate->curr_mobj_clear = TRUE;
-				else
-					mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
+				test_delete_musicobject(mobj, cwin);
 
 				gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
 				gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
@@ -1359,9 +1347,6 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 
 		g_list_free(list);
 	}
-
-	g_slist_foreach(mobj_to_delete, delete_mobj_list_foreach, NULL);
-	g_slist_free(mobj_to_delete);
 
 	requeue_track_refs (cwin);
 	update_status_bar(cwin);
@@ -1378,7 +1363,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
-	GSList *to_delete = NULL, *mobj_to_delete = NULL, *i = NULL;
+	GSList *to_delete = NULL, *i = NULL;
 	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1424,10 +1409,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (gtk_tree_model_get_iter(model, &iter, path)) {
 			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-			if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
-				cwin->cstate->curr_mobj_clear = TRUE;
-			else
-				mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
+			test_delete_musicobject(mobj, cwin);
 
 			gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
 			gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
@@ -1453,9 +1435,6 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	g_object_unref(model);
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	g_slist_foreach(to_delete, delete_mobj_list_foreach, NULL);
-	g_slist_free(to_delete);
 
 	requeue_track_refs (cwin);
 	update_status_bar(cwin);
@@ -1624,7 +1603,6 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
 	gboolean ret;
-	GSList *to_delete = NULL;
 	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1642,10 +1620,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (ret) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
-			cwin->cstate->curr_mobj_clear = TRUE;
-		else
-			to_delete = g_slist_prepend(to_delete, mobj);
+		test_delete_musicobject(mobj, cwin);
 
 		ret = gtk_tree_model_iter_next(model, &iter);
 	}
@@ -1653,9 +1628,6 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	g_slist_foreach(to_delete, delete_mobj_list_foreach, NULL);
-	g_slist_free(to_delete);
 
 	cwin->cstate->tracks_curr_playlist = 0;
 	cwin->cstate->unplayed_tracks = 0;
