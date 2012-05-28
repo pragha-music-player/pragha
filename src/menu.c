@@ -817,23 +817,11 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	GtkWidget *parent;
-	GList *children, *l;
-	gint i = 0;
+	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->hbox_panel));
 
-	parent = gtk_widget_get_parent (GTK_WIDGET(cwin->status_bar));
+	gint position = cwin->cpref->controls_below ? 2 : 1;
 
-	children = gtk_container_get_children (GTK_CONTAINER (parent));
-
-	for (l = children; l; i++, l = l->next) {
-		if(i == 1) {
-			gtk_box_reorder_child(GTK_BOX(parent),
-					      GTK_WIDGET(l->data),
-					      2);
-		}
-	}
-
-	g_list_free(children);
+	gtk_box_reorder_child(GTK_BOX(parent), cwin->hbox_panel, position);
 }
 
 void
