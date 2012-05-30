@@ -1286,23 +1286,6 @@ static void init_dnd(struct con_win *cwin)
 			 G_CALLBACK(dnd_library_tree_get),
 			 cwin);
 
-	/* Source: Playlist View */
-
-	/*gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->playlist_tree),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->playlist_tree)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_playlist_tree_begin),
-			 cwin);
-	g_signal_connect(G_OBJECT(cwin->playlist_tree),
-			 "drag-data-get",
-			 G_CALLBACK(dnd_playlist_tree_get),
-			 cwin);*/
-
 	/* Source/Dest: Current Playlist */
 
 	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->current_playlist),

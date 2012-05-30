@@ -1598,76 +1598,78 @@ void init_library_view(struct con_win *cwin)
 
 	/* Playlists.*/
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   L_NODE_DATA, _("Playlists"),
-			   -1);
-
-	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
+	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
 				SAVE_PLAYLIST_STATE);
-
 	exec_sqlite_query(query, cwin, &result);
 
-	for_each_result_row(result, i) {
-		add_entry_playlist(result.resultp[i],
-				   NODE_PLAYLIST,
-				   &iter, model, cwin);
+	if (result.no_rows) {
+		gtk_tree_store_append(GTK_TREE_STORE(model),
+				      &iter,
+				      NULL);
+		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+				   L_NODE_DATA, _("Playlists"),
+				   -1);
 
-		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-		#else
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
+		for_each_result_row(result, i) {
+			add_entry_playlist(result.resultp[i],
+					   NODE_PLAYLIST,
+					   &iter, model, cwin);
+
+			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			while(gtk_events_pending())
+				gtk_main_iteration_do(FALSE);
+			#else
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					sqlite3_free_table(result.resultp);
+					return;
+				}
 			}
+			#endif
 		}
-		#endif
+		sqlite3_free_table(result.resultp);
 	}
-	sqlite3_free_table(result.resultp);
 
 	/* Radios. */
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
-			   L_NODE_DATA, _("Radios"),
-			   -1);
-
-	query = g_strdup_printf("SELECT NAME FROM RADIO");
-
+	query = g_strdup_printf("SELECT NAME FROM RADIO ORDER BY NAME");
 	exec_sqlite_query(query, cwin, &result);
 
-	for_each_result_row(result, i) {
-		add_entry_playlist(result.resultp[i],
-				   NODE_RADIO,
-				   &iter, model, cwin);
+	if(result.no_rows) {
+		gtk_tree_store_append(GTK_TREE_STORE(model),
+				      &iter,
+				      NULL);
+		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+				   L_NODE_DATA, _("Radios"),
+				   -1);
 
-		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-		#else
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
+		for_each_result_row(result, i) {
+			add_entry_playlist(result.resultp[i],
+					   NODE_RADIO,
+					   &iter, model, cwin);
+
+			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			while(gtk_events_pending())
+				gtk_main_iteration_do(FALSE);
+			#else
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					sqlite3_free_table(result.resultp);
+					return;
+				}
 			}
+			#endif
 		}
-		#endif
+		sqlite3_free_table(result.resultp);
 	}
-	sqlite3_free_table(result.resultp);
 
 	/* Library. */
 
