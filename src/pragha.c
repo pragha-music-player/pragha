@@ -79,9 +79,10 @@ void common_cleanup(struct con_win *cwin)
 	free_str_list(cwin->cpref->library_dir);
 	free_str_list(cwin->cpref->lib_add);
 	free_str_list(cwin->cpref->lib_delete);
-	free_str_list(cwin->cpref->library_tree_nodes);
 	free_str_list(cwin->cpref->playlist_columns);
 	g_slist_free(cwin->cpref->playlist_column_widths);
+	g_slist_free(cwin->cpref->library_tree_nodes);
+
 	g_slice_free(struct con_pref, cwin->cpref);
 
 	g_rand_free(cwin->cstate->rand);

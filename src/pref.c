@@ -1053,7 +1053,30 @@ void save_preferences(struct con_win *cwin)
 		nodes = g_new0(gchar *, cnt);
 
 		for (i=0; i<cnt; i++) {
-			nodes[i] = (gchar*)list->data;
+			switch (GPOINTER_TO_INT(list->data)) {
+				case NODE_TRACK:
+					nodes[i] = P_TITLE_STR;
+					break;
+				case NODE_ARTIST:
+					nodes[i] = P_ARTIST_STR;
+					break;
+				case NODE_ALBUM:
+					nodes[i] = P_ALBUM_STR;
+					break;
+				case NODE_GENRE:
+					nodes[i] = P_GENRE_STR;
+					break;
+				case NODE_FOLDER:
+					nodes[i] = P_FOLDER_STR;
+					break;
+				case NODE_BASENAME:
+					nodes[i] = P_BASENAME_STR;
+					break;
+				case NODE_PLAYLIST:
+				case NODE_RADIO:
+					g_warning("Save library tree oreder: Bad node type.");
+				break;
+			}
 			list = list->next;
 		}
 
