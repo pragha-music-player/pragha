@@ -168,13 +168,13 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 		track_i++;
 
-		ch_title = ((mobj->tags->title != NULL) && strlen(mobj->tags->title)) ?
+		ch_title = (mobj->tags->title != NULL) ?
 		             g_strdup(mobj->tags->title) :
 		             get_display_filename (mobj->file, FALSE);
-		ch_artist = ((mobj->tags->artist != NULL) && strlen(mobj->tags->artist)) ?
+		ch_artist = (mobj->tags->artist != NULL) ?
 			     g_strdup(mobj->tags->artist) :
 			     g_strdup(_("Unknown Artist"));
-		ch_album = ((mobj->tags->album != NULL) && strlen(mobj->tags->album)) ?
+		ch_album = (mobj->tags->album != NULL) ?
 			     g_strdup(mobj->tags->album) :
 			     g_strdup(_("Unknown Album"));
 

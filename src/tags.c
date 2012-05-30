@@ -862,7 +862,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 
 	if (file) {
 		gtk_entry_set_text(GTK_ENTRY(entry_file), file);
-		gtk_editable_set_position(GTK_EDITABLE(entry_file), strlen(file));
+		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(file, -1));
 		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
 	}
 	else
