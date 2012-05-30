@@ -1631,8 +1631,8 @@ void init_library_view(struct con_win *cwin)
 			}
 			#endif
 		}
-		sqlite3_free_table(result.resultp);
 	}
+	sqlite3_free_table(result.resultp);
 
 	/* Radios. */
 
@@ -1668,8 +1668,8 @@ void init_library_view(struct con_win *cwin)
 			}
 			#endif
 		}
-		sqlite3_free_table(result.resultp);
 	}
+	sqlite3_free_table(result.resultp);
 
 	/* Library. */
 
