@@ -577,7 +577,8 @@ void *do_lastfm_scrob (gpointer data)
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
 		cwin->cstate->curr_mobj->tags->title,
-		cwin->cstate->curr_mobj->tags->album,
+		cwin->cstate->curr_mobj->tags->album ?
+		cwin->cstate->curr_mobj->tags->album : "",
 		cwin->cstate->curr_mobj->tags->artist,
 		cwin->clastfm->playback_started,
 		cwin->cstate->curr_mobj->tags->length,
@@ -590,7 +591,6 @@ void *do_lastfm_scrob (gpointer data)
 	else
 		set_status_message("Track scrobbled on Last.fm", cwin);
 	gdk_threads_leave ();
-
 
 	return NULL;
 }
@@ -629,7 +629,10 @@ void *do_lastfm_now_playing (gpointer data)
 
 	file = g_strdup(cwin->cstate->curr_mobj->file);
 	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
-	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
+	album = cwin->cstate->curr_mobj->tags->album ?
+		g_strdup(cwin->cstate->curr_mobj->tags->album) :
+		g_strdup("");
+
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
