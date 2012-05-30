@@ -1661,7 +1661,8 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE,
-					(mobj->tags->title && strlen(mobj->tags->title)) ? mobj->tags->title : ch_filename, -1);
+					(mobj->tags->title) ?
+					mobj->tags->title : ch_filename, -1);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ARTIST, mobj->tags->artist,-1);
@@ -1745,7 +1746,7 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 			   P_BUBBLE, FALSE,
 			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
+			   P_TITLE, (mobj->tags->title != NULL) ?
 					mobj->tags->title : ch_filename,
 			   P_ARTIST, mobj->tags->artist,
 			   P_ALBUM, mobj->tags->album,
@@ -1822,7 +1823,7 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 			   P_BUBBLE, FALSE,
 			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
+			   P_TITLE, (mobj->tags->title != NULL) ?
 					mobj->tags->title : ch_filename,
 			   P_ARTIST, mobj->tags->artist,
 			   P_ALBUM, mobj->tags->album,
