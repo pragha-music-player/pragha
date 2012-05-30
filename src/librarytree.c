@@ -175,7 +175,7 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 	GtkTreeModel *model, GtkTreeIter *p_iter)
 {
 	GtkTreeIter iter, iter2, search_iter;
-	gchar *node_data = NULL, *node = NULL;
+	gchar *node_data = NULL;
 	GdkPixbuf *node_pixbuf = NULL;
 	enum node_type node_type = 0;
 	gint node_level = 0, tot_levels = 0;
@@ -185,34 +185,37 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 	tot_levels = g_slist_length(cwin->cpref->library_tree_nodes);
 	while (node_level < tot_levels) {
 		/* Set data to be added to the tree node depending on the type of node */
-		node = g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level);
-
-		if (!g_ascii_strcasecmp(P_TITLE_STR, node)) {
-			node_type = NODE_TRACK;
-			node_pixbuf = cwin->pixbuf->pixbuf_track;
-			node_data = g_utf8_strlen(track, 1) ? track : get_display_filename(location, FALSE);
-			if (!g_utf8_strlen(track, 1)) need_gfree = TRUE;
-		}
-		else if (!g_ascii_strcasecmp(P_ARTIST_STR, node)) {
-			node_type = NODE_ARTIST;
-			node_pixbuf = cwin->pixbuf->pixbuf_artist;
-			node_data = g_utf8_strlen(artist, 1) ? artist : _("Unknown Artist");
-		}
-		else if (!g_ascii_strcasecmp(P_ALBUM_STR, node)) {
-			node_type = NODE_ALBUM;
-			node_pixbuf = cwin->pixbuf->pixbuf_album;
-			if (cwin->cpref->sort_by_year) {
-				node_data = g_strconcat ((g_utf8_strlen(year, 1) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 1) ? album : _("Unknown Album"), NULL);
-				need_gfree = TRUE;
-			}
-			else {
-				node_data = g_utf8_strlen(album, 1) ? album : _("Unknown Album");
-			}
-		}
-		else if (!g_ascii_strcasecmp(P_GENRE_STR, node)) {
-			node_type = NODE_GENRE;
-			node_pixbuf = cwin->pixbuf->pixbuf_genre;
-			node_data = g_utf8_strlen(genre, 1) ? genre : _("Unknown Genre");
+		node_type = GPOINTER_TO_INT(g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level));
+		switch (node_type) {
+			case NODE_TRACK:
+				node_pixbuf = cwin->pixbuf->pixbuf_track;
+				node_data = g_utf8_strlen(track, 1) ? track : get_display_filename(location, FALSE);
+				if (!g_utf8_strlen(track, 1)) need_gfree = TRUE;
+				break;
+			case NODE_ARTIST:
+				node_pixbuf = cwin->pixbuf->pixbuf_artist;
+				node_data = g_utf8_strlen(artist, 1) ? artist : _("Unknown Artist");
+				break;
+			case NODE_ALBUM:
+				node_pixbuf = cwin->pixbuf->pixbuf_album;
+				if (cwin->cpref->sort_by_year) {
+					node_data = g_strconcat ((g_utf8_strlen(year, 1) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 1) ? album : _("Unknown Album"), NULL);
+					need_gfree = TRUE;
+				}
+				else {
+					node_data = g_utf8_strlen(album, 1) ? album : _("Unknown Album");
+				}
+				break;
+			case NODE_GENRE:
+				node_pixbuf = cwin->pixbuf->pixbuf_genre;
+				node_data = g_utf8_strlen(genre, 1) ? genre : _("Unknown Genre");
+				break;
+			case NODE_FOLDER:
+			case NODE_PLAYLIST:
+			case NODE_RADIO:
+			case NODE_BASENAME:
+				g_warning("add_by_tag: Bad node type.");
+				break;
 		}
 
 		/* Find / add child node if it's not already added */
@@ -1013,13 +1016,16 @@ void clear_library_search(struct con_win *cwin)
 
 void folders_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_FOLDER_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_BASENAME_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_FOLDER));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_BASENAME));
+
 	cwin->cpref->cur_library_view = FOLDERS;
 
 	init_library_view(cwin);
@@ -1027,27 +1033,33 @@ void folders_library_tree(GtkAction *action, struct con_win *cwin)
 
 void artist_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ARTIST_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
-	cwin->cpref->cur_library_view = ARTIST;
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ARTIST));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
+       	cwin->cpref->cur_library_view = ARTIST;
 
 	init_library_view(cwin);
 }
 
 void album_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ALBUM_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ALBUM));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = ALBUM;
 
 	init_library_view(cwin);
@@ -1055,13 +1067,16 @@ void album_library_tree(GtkAction *action, struct con_win *cwin)
 
 void genre_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_GENRE_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_GENRE));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = GENRE;
 
 	init_library_view(cwin);
@@ -1069,15 +1084,19 @@ void genre_library_tree(GtkAction *action, struct con_win *cwin)
 
 void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ARTIST_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ALBUM_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ARTIST));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ALBUM));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = ARTIST_ALBUM;
 
 	init_library_view(cwin);
@@ -1085,15 +1104,19 @@ void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 
 void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_GENRE_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ALBUM_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_GENRE));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ALBUM));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = GENRE_ALBUM;
 
 	init_library_view(cwin);
@@ -1101,15 +1124,19 @@ void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
 
 void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_GENRE_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ARTIST_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_GENRE));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ARTIST));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = GENRE_ARTIST;
 
 	init_library_view(cwin);
@@ -1117,17 +1144,22 @@ void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
 
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 {
-	free_str_list(cwin->cpref->library_tree_nodes);
+	g_slist_free (cwin->cpref->library_tree_nodes);
 	cwin->cpref->library_tree_nodes = NULL;
 
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_GENRE_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ARTIST_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_ALBUM_STR));
-	cwin->cpref->library_tree_nodes = g_slist_append(cwin->cpref->library_tree_nodes,
-							 g_strdup(P_TITLE_STR));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_GENRE));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ARTIST));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_ALBUM));
+	cwin->cpref->library_tree_nodes =
+		g_slist_append(cwin->cpref->library_tree_nodes,
+			       GINT_TO_POINTER(NODE_TRACK));
+
 	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM;
 
 	init_library_view(cwin);

@@ -493,9 +493,30 @@ gint init_config(struct con_win *cwin)
 						   &error);
 		if (nodes) {
 			for (i=0; i<cnt; i++) {
-				cwin->cpref->library_tree_nodes =
-					g_slist_append(cwin->cpref->library_tree_nodes,
-						       g_strdup(nodes[i]));
+				if (!g_ascii_strcasecmp(P_TITLE_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_TRACK));
+				else if (!g_ascii_strcasecmp(P_ARTIST_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_ARTIST));
+				else if (!g_ascii_strcasecmp(P_ALBUM_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_ALBUM));
+				else if (!g_ascii_strcasecmp(P_GENRE_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_GENRE));
+				else if (!g_ascii_strcasecmp(P_ALBUM_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_BASENAME));
+				else if (!g_ascii_strcasecmp(P_GENRE_STR, nodes[i]))
+					cwin->cpref->library_tree_nodes =
+						g_slist_append(cwin->cpref->library_tree_nodes,
+							       GINT_TO_POINTER(NODE_FOLDER));
 			}
 			g_strfreev(nodes);
 		}
@@ -943,13 +964,13 @@ gint init_config(struct con_win *cwin)
 	if (all_f || nodes_f) {
 		cwin->cpref->library_tree_nodes =
 			g_slist_append(cwin->cpref->library_tree_nodes,
-				       g_strdup(P_ARTIST_STR));
+				       GINT_TO_POINTER(NODE_ARTIST));
 		cwin->cpref->library_tree_nodes =
 			g_slist_append(cwin->cpref->library_tree_nodes,
-				       g_strdup(P_ALBUM_STR));
+				       GINT_TO_POINTER(NODE_ALBUM));
 		cwin->cpref->library_tree_nodes =
 			g_slist_append(cwin->cpref->library_tree_nodes,
-				       g_strdup(P_TITLE_STR));
+				       GINT_TO_POINTER(NODE_TRACK));
 	}
 	if (all_f || fuse_folders_f)
 		cwin->cpref->fuse_folders = FALSE;
