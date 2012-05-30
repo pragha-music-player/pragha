@@ -191,7 +191,7 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 			node_type = NODE_TRACK;
 			node_pixbuf = cwin->pixbuf->pixbuf_track;
 			node_data = g_utf8_strlen(track, 1) ? track : get_display_filename(location, FALSE);
-			if (!track) need_gfree = TRUE;
+			if (g_utf8_strlen(track, 1)) need_gfree = TRUE;
 		}
 		else if (!g_ascii_strcasecmp(P_ARTIST_STR, node)) {
 			node_type = NODE_ARTIST;

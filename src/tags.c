@@ -28,6 +28,9 @@ static gboolean get_info_taglib(gchar *file, struct tags *tags)
 	gboolean ret = FALSE;
 	TagLib_File *tfile;
 	TagLib_Tag *tag;
+
+	const gchar *tmp_tag = NULL;
+
 	const TagLib_AudioProperties *audio_prop;
 
 	tfile = taglib_file_new(file);
@@ -51,17 +54,33 @@ static gboolean get_info_taglib(gchar *file, struct tags *tags)
 		goto exit;
 	}
 
-	tags->title = g_strdup(taglib_tag_title(tag));
-	tags->artist = g_strdup(taglib_tag_artist(tag));
-	tags->album = g_strdup(taglib_tag_album(tag));
-	tags->genre = g_strdup(taglib_tag_genre(tag));
-	tags->comment = g_strdup(taglib_tag_comment(tag));
+	tmp_tag = taglib_tag_title(tag);
+	if(g_utf8_strlen(tmp_tag, 1))
+		tags->title = g_strdup(tmp_tag);
+
+	tmp_tag = taglib_tag_artist(tag);
+	if(g_utf8_strlen(tmp_tag, 1))
+		tags->artist = g_strdup(tmp_tag);
+
+	tmp_tag = taglib_tag_album(tag);
+	if(g_utf8_strlen(tmp_tag, 1))
+		tags->album = g_strdup(tmp_tag);
+
+	tmp_tag = taglib_tag_genre(tag);
+	if(g_utf8_strlen(tmp_tag, 1))
+		tags->genre = g_strdup(tmp_tag);
+
+	tmp_tag = taglib_tag_comment(tag);
+	if(g_utf8_strlen(tmp_tag, 1))
+		tags->comment = g_strdup(tmp_tag);
+
 	tags->track_no = taglib_tag_track(tag);
 	tags->year = taglib_tag_year(tag);
 	tags->bitrate = taglib_audioproperties_bitrate(audio_prop);
 	tags->length = taglib_audioproperties_length(audio_prop);
 	tags->channels = taglib_audioproperties_channels(audio_prop);
 	tags->samplerate = taglib_audioproperties_samplerate(audio_prop);
+
 	ret = TRUE;
 exit:
 	taglib_tag_free_strings();
