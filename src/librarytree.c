@@ -263,7 +263,7 @@ static void get_path_array(GtkTreePath *path,
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 		cpath = gtk_tree_path_copy(path);
-		ref_arr = g_array_append_val(ref_arr, cpath);
+		ref_arr = g_array_prepend_val(ref_arr, cpath);
 	}
 
 	/* For all other node types do a recursive add */
@@ -276,7 +276,7 @@ static void get_path_array(GtkTreePath *path,
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 			cpath = gtk_tree_path_copy(path);
-			ref_arr = g_array_append_val(ref_arr, cpath);
+			ref_arr = g_array_prepend_val(ref_arr, cpath);
 		}
 		else {
 			get_path_array(path, ref_arr, model, cwin);
