@@ -191,7 +191,7 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 			node_type = NODE_TRACK;
 			node_pixbuf = cwin->pixbuf->pixbuf_track;
 			node_data = g_utf8_strlen(track, 1) ? track : get_display_filename(location, FALSE);
-			if (g_utf8_strlen(track, 1)) need_gfree = TRUE;
+			if (!g_utf8_strlen(track, 1)) need_gfree = TRUE;
 		}
 		else if (!g_ascii_strcasecmp(P_ARTIST_STR, node)) {
 			node_type = NODE_ARTIST;
@@ -263,7 +263,7 @@ static void get_path_array(GtkTreePath *path,
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 		cpath = gtk_tree_path_copy(path);
-		g_array_prepend_val(ref_arr, cpath);
+		ref_arr = g_array_append_val(ref_arr, cpath);
 	}
 
 	/* For all other node types do a recursive add */
@@ -276,7 +276,7 @@ static void get_path_array(GtkTreePath *path,
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 			cpath = gtk_tree_path_copy(path);
-			g_array_prepend_val(ref_arr, cpath);
+			ref_arr = g_array_append_val(ref_arr, cpath);
 		}
 		else {
 			get_path_array(path, ref_arr, model, cwin);
