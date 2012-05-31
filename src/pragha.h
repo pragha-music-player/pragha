@@ -1018,6 +1018,7 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		  struct con_win *cwin);
 void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
 void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
+void update_menu_playlist_changes(struct con_win *cwin);
 void complete_add_to_playlist_submenu (struct con_win *cwin);
 void complete_save_playlist_submenu (struct con_win *cwin);
 void complete_main_save_playlist_submenu (struct con_win *cwin);
