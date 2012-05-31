@@ -297,7 +297,7 @@ GtkToggleActionEntry toggles_entries[] = {
 	FALSE},
 	{"Lateral panel", NULL, N_("Lateral _panel"),
 	 "F9", "Lateral panel", G_CALLBACK(library_pane_action),
-	FALSE},
+	TRUE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
