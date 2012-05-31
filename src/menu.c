@@ -791,10 +791,9 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 library_pane_action (GtkAction *action, struct con_win *cwin)
 {
-	gboolean ret;
-	ret = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	cwin->cpref->lateral_panel = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), ret);
+	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), cwin->cpref->lateral_panel);
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */
