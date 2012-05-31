@@ -607,6 +607,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	gtk_label_set_attribute_bold(GTK_LABEL(label_album));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_genre));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_tno));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_year));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_comment));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_file));
 
