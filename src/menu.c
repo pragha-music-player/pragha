@@ -900,6 +900,7 @@ void rescan_library_handler(struct con_win *cwin)
 		list = list->next;
 	}
 
+	update_menu_playlist_changes(cwin);
 	init_library_view(cwin);
 
 	gtk_widget_destroy(library_dialog);
@@ -1035,6 +1036,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cwin->cpref->lib_add = NULL;
 	cwin->cpref->lib_delete = NULL;
 exit:
+	update_menu_playlist_changes(cwin);
 	init_library_view(cwin);
 
 	gtk_widget_destroy(library_dialog);

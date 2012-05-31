@@ -1546,12 +1546,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	init_menu_actions(cwin);
 	init_toggle_buttons(cwin);
-	update_menubar_playback_state (cwin);
+	update_menu_playlist_changes(cwin);
 
-	complete_add_to_playlist_submenu (cwin);
-	complete_save_playlist_submenu (cwin);
-	complete_main_save_playlist_submenu(cwin);
-	complete_main_add_to_playlist_submenu (cwin);
+	update_menubar_playback_state (cwin);
 
 	if (cwin->album_art_frame)
 		resize_album_art_frame(cwin);

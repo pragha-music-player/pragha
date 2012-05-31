@@ -740,12 +740,15 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
-				if(node_type == NODE_PLAYLIST)
+				if(node_type == NODE_PLAYLIST) {
 					update_playlist_name_db(s_playlist, n_playlist, cwin);
+					update_menu_playlist_changes(cwin);
+				}
 				else if (node_type == NODE_RADIO)
 					update_radio_name_db(s_playlist, n_playlist, cwin);
 
 				g_free(n_playlist);
+
 				init_library_view(cwin);
 			}
 			g_free(s_playlist);
@@ -818,6 +821,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db(s_playlist, cwin);
+						update_menu_playlist_changes(cwin);
 					}
 					else if (node_type == NODE_RADIO) {
 						delete_radio_db(s_playlist, cwin);
@@ -1565,6 +1569,14 @@ void save_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
 	playlist = gtk_menu_item_get_label (menuitem);
 
 	new_playlist(playlist, SAVE_COMPLETE, cwin);
+}
+
+void update_menu_playlist_changes(struct con_win *cwin)
+{
+	complete_add_to_playlist_submenu (cwin);
+	complete_save_playlist_submenu (cwin);
+	complete_main_save_playlist_submenu(cwin);
+	complete_main_add_to_playlist_submenu (cwin);
 }
 
 void complete_add_to_playlist_submenu (struct con_win *cwin)

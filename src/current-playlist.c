@@ -1916,6 +1916,7 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
+			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
@@ -1958,6 +1959,7 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
+			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
