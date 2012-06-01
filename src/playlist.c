@@ -1655,7 +1655,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/EditMenu/Save playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
@@ -1696,7 +1696,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/EditMenu/Add to another playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Add to another playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
