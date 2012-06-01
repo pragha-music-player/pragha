@@ -470,7 +470,7 @@ shuffle_button_handler (GtkToggleButton *button, struct con_win *cwin)
 
 	cwin->cpref->shuffle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/EditMenu/Shuffle");
+	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 
 	g_signal_handlers_block_by_func (action_shuffle, shuffle_action, cwin);
 
@@ -486,7 +486,7 @@ void
 repeat_button_handler (GtkToggleButton *button, struct con_win *cwin)
 {
 	GtkAction *action_repeat;
-	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/EditMenu/Repeat");
+	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 
 	cwin->cpref->repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 

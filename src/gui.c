@@ -20,21 +20,25 @@
 
 gchar *main_menu_xml = "<ui>							\
 	<menubar name=\"Menubar\">						\
-		<menu action=\"FileMenu\">					\
-			<menuitem action=\"Add files\"/>			\
-			<menuitem action=\"Add Audio CD\"/>			\
-			<menuitem action=\"Add location\"/>			\
+		<menu action=\"PlaybackMenu\">					\
 			<separator/>						\
 			<menuitem action=\"Prev\"/>				\
 			<menuitem action=\"Play_pause\"/>			\
 			<menuitem action=\"Stop\"/>				\
 			<menuitem action=\"Next\"/>				\
 			<separator/>						\
+			<menuitem action=\"Shuffle\"/>				\
+			<menuitem action=\"Repeat\"/>				\
+			<separator/>						\
 			<menuitem action=\"Edit tags\"/>			\
 			<separator/>						\
 			<menuitem action=\"Quit\"/>				\
 		</menu>								\
-		<menu action=\"EditMenu\">					\
+		<menu action=\"PlaylistMenu\">					\
+			<menuitem action=\"Add files\"/>			\
+			<menuitem action=\"Add Audio CD\"/>			\
+			<menuitem action=\"Add location\"/>			\
+			<separator/>				    		\
 			<menuitem action=\"Remove from playlist\"/>		\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
@@ -42,12 +46,7 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Add to another playlist\"/>		\
 			<menuitem action=\"Save playlist\"/>			\
 			<separator/>						\
-			<menuitem action=\"Shuffle\"/>				\
-			<menuitem action=\"Repeat\"/>				\
-			<separator/>						\
 			<menuitem action=\"Search in playlist\"/>		\
-			<separator/>						\
-			<menuitem action=\"Preferences\"/>			\
 		</menu>								\
 		<menu action=\"ViewMenu\">					\
 			<menuitem action=\"Fullscreen\"/>			\
@@ -78,6 +77,8 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Update library\"/>			\
 			<separator/>						\
 			<menuitem action=\"Statistics\"/>			\
+			<separator/>						\
+			<menuitem action=\"Preferences\"/>			\
 		</menu>								\
 		<menu action=\"HelpMenu\">					\
 			<menuitem action=\"Home\"/>				\
@@ -193,8 +194,8 @@ gchar *systray_menu_xml = "<ui>				\
 	</ui>";
 
 GtkActionEntry main_aentries[] = {
-	{"FileMenu", NULL, N_("_File")},
-	{"EditMenu", NULL, N_("_Edit")},
+	{"PlaybackMenu", NULL, N_("_Playback")},
+	{"PlaylistMenu", NULL, N_("Play_list")},
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},

@@ -40,16 +40,16 @@ void update_menubar_playback_state (struct con_win *cwin)
 
 	gboolean playing = (cwin->cstate->state != ST_STOPPED);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Prev");
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Stop");
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Next");
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/FileMenu/Edit tags");
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Jump to playing song");
