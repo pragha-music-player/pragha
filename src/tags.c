@@ -55,23 +55,23 @@ static gboolean get_info_taglib(gchar *file, struct tags *tags)
 	}
 
 	tmp_tag = taglib_tag_title(tag);
-	if(g_utf8_strlen(tmp_tag, 1))
+	if(g_utf8_strlen(tmp_tag, 4))
 		tags->title = g_strdup(tmp_tag);
 
 	tmp_tag = taglib_tag_artist(tag);
-	if(g_utf8_strlen(tmp_tag, 1))
+	if(g_utf8_strlen(tmp_tag, 4))
 		tags->artist = g_strdup(tmp_tag);
 
 	tmp_tag = taglib_tag_album(tag);
-	if(g_utf8_strlen(tmp_tag, 1))
+	if(g_utf8_strlen(tmp_tag, 4))
 		tags->album = g_strdup(tmp_tag);
 
 	tmp_tag = taglib_tag_genre(tag);
-	if(g_utf8_strlen(tmp_tag, 1))
+	if(g_utf8_strlen(tmp_tag, 4))
 		tags->genre = g_strdup(tmp_tag);
 
 	tmp_tag = taglib_tag_comment(tag);
-	if(g_utf8_strlen(tmp_tag, 1))
+	if(g_utf8_strlen(tmp_tag, 4))
 		tags->comment = g_strdup(tmp_tag);
 
 	tags->track_no = taglib_tag_track(tag);

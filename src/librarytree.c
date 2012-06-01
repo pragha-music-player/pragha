@@ -189,26 +189,26 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		switch (node_type) {
 			case NODE_TRACK:
 				node_pixbuf = cwin->pixbuf->pixbuf_track;
-				node_data = g_utf8_strlen(track, 1) ? track : get_display_filename(location, FALSE);
-				if (!g_utf8_strlen(track, 1)) need_gfree = TRUE;
+				node_data = g_utf8_strlen(track, 4) ? track : get_display_filename(location, FALSE);
+				if (!g_utf8_strlen(track, 4)) need_gfree = TRUE;
 				break;
 			case NODE_ARTIST:
 				node_pixbuf = cwin->pixbuf->pixbuf_artist;
-				node_data = g_utf8_strlen(artist, 1) ? artist : _("Unknown Artist");
+				node_data = g_utf8_strlen(artist, 4) ? artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
 				node_pixbuf = cwin->pixbuf->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
-					node_data = g_strconcat ((g_utf8_strlen(year, 1) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 1) ? album : _("Unknown Album"), NULL);
+					node_data = g_strconcat ((g_utf8_strlen(year, 4) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 4) ? album : _("Unknown Album"), NULL);
 					need_gfree = TRUE;
 				}
 				else {
-					node_data = g_utf8_strlen(album, 1) ? album : _("Unknown Album");
+					node_data = g_utf8_strlen(album, 4) ? album : _("Unknown Album");
 				}
 				break;
 			case NODE_GENRE:
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
-				node_data = g_utf8_strlen(genre, 1) ? genre : _("Unknown Genre");
+				node_data = g_utf8_strlen(genre, 4) ? genre : _("Unknown Genre");
 				break;
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:

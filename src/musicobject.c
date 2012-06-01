@@ -159,29 +159,29 @@ AND LOCATION.id = \"%d\";", location_id, location_id);
 
 		init_tag_struct(mobj->tags);
 
-		if(g_utf8_strlen(result.resultp[i+11], 1))
+		if(g_utf8_strlen(result.resultp[i+11], 4))
 			mobj->tags->title = g_strdup(result.resultp[i+11]);
-		if(g_utf8_strlen(result.resultp[i+10], 1))
+		if(g_utf8_strlen(result.resultp[i+10], 4))
 			mobj->tags->artist = g_strdup(result.resultp[i+10]);
-		if(g_utf8_strlen(result.resultp[i+9], 1))
+		if(g_utf8_strlen(result.resultp[i+9], 4))
 			mobj->tags->album = g_strdup(result.resultp[i+9]);
-		if(g_utf8_strlen(result.resultp[i+8], 1))
+		if(g_utf8_strlen(result.resultp[i+8], 4))
 			mobj->tags->genre = g_strdup(result.resultp[i+8]);
-		if(g_utf8_strlen(result.resultp[i+7], 1))
+		if(g_utf8_strlen(result.resultp[i+7], 4))
 			mobj->tags->track_no = atoi(result.resultp[i+7]);
-		if(g_utf8_strlen(result.resultp[i+6], 1))
+		if(g_utf8_strlen(result.resultp[i+6], 4))
 			mobj->tags->year = atoi(result.resultp[i+6]);
-		if(g_utf8_strlen(result.resultp[i+5], 1))
+		if(g_utf8_strlen(result.resultp[i+5], 4))
 			mobj->tags->comment = g_strdup(result.resultp[i+5]);
-		if(g_utf8_strlen(result.resultp[i+4], 1))
+		if(g_utf8_strlen(result.resultp[i+4], 4))
 			mobj->tags->bitrate = atoi(result.resultp[i+4]);
-		if(g_utf8_strlen(result.resultp[i+3], 1))
+		if(g_utf8_strlen(result.resultp[i+3], 4))
 			mobj->tags->length = atoi(result.resultp[i+3]);
-		if(g_utf8_strlen(result.resultp[i+2], 1))
+		if(g_utf8_strlen(result.resultp[i+2], 4))
 			mobj->tags->channels = atoi(result.resultp[i+2]);
-		if(g_utf8_strlen(result.resultp[i+1], 1))
+		if(g_utf8_strlen(result.resultp[i+1], 4))
 			mobj->tags->samplerate = atoi(result.resultp[i+1]);
-		if(g_utf8_strlen(result.resultp[i], 1))
+		if(g_utf8_strlen(result.resultp[i], 4))
 			mobj->file_type = atoi(result.resultp[i]);
 
 		sqlite3_free_table(result.resultp);
