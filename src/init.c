@@ -969,7 +969,7 @@ gint init_config(struct con_win *cwin)
 	if (all_f || recursively_f)
 		cwin->cpref->add_recursively_files = FALSE;
 	if (all_f || last_folder_f)
-		cwin->cstate->last_folder = (gchar*)g_get_home_dir();
+		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || album_f)
 		cwin->cpref->show_album_art = TRUE;
 	if (all_f || album_art_size_f)
