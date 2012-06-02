@@ -1332,7 +1332,7 @@ GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 }
 #endif
 
-void pragha_pl_parser_open_from_file_by_extension (gchar *file, struct con_win *cwin)
+void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con_win *cwin)
 {
 	GSList *list = NULL, *i = NULL;
 	gchar *summary;

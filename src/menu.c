@@ -107,7 +107,7 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 
 /* Generate and add the recently-used data */
 
-void add_recent_file (gchar *filename)
+void add_recent_file (const gchar *filename)
 {
 	GtkRecentData recent_data;
 	gchar *uri = NULL;
