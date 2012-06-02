@@ -23,7 +23,7 @@ typedef struct directory_pressed_data {
 	gchar *file;
 } directory_pressed_data_t;
 
-static gboolean get_info_taglib(gchar *file, struct tags *tags)
+static gboolean get_info_taglib(const gchar *file, struct tags *tags)
 {
 	gboolean ret = FALSE;
 	TagLib_File *tfile;
@@ -89,37 +89,37 @@ exit:
 	return ret;
 }
 
-gboolean get_wav_info(gchar *file, struct tags *tags)
+gboolean get_wav_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_mp3_info(gchar *file, struct tags *tags)
+gboolean get_mp3_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_flac_info(gchar *file, struct tags *tags)
+gboolean get_flac_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_ogg_info(gchar *file, struct tags *tags)
+gboolean get_ogg_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_asf_info(gchar *file, struct tags *tags)
+gboolean get_asf_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_mp4_info(gchar *file, struct tags *tags)
+gboolean get_mp4_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }
 
-gboolean get_ape_info(gchar *file, struct tags *tags)
+gboolean get_ape_info(const gchar *file, struct tags *tags)
 {
 	return get_info_taglib(file, tags);
 }

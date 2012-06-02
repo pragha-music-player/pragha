@@ -18,7 +18,7 @@
 
 #include "pragha.h"
 
-void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin)
+void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GDir *dir;
@@ -59,7 +59,7 @@ void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin)
 	g_dir_close(dir);
 }
 
-void __recur_add(gchar *dir_name, struct con_win *cwin)
+void __recur_add(const gchar *dir_name, struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GDir *dir;

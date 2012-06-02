@@ -548,7 +548,7 @@ static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
 /* NB: Disregarding 'uncertain' flag for now. */
 
 enum file_type
-get_file_type(gchar *file)
+get_file_type(const gchar *file)
 {
 	gint ret = -1;
 	gchar *result = NULL;

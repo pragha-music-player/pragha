@@ -845,13 +845,13 @@ void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 
 /* File tree functions */
 
-void __non_recur_add(gchar *dir_name, gboolean init, struct con_win *cwin);
-void __recur_add(gchar *dir_name, struct con_win *cwin);
+void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin);
+void __recur_add(const gchar *dir_name, struct con_win *cwin);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin);
 
 /* Musicobject functions */
 
-struct musicobject* new_musicobject_from_file(gchar *file);
+struct musicobject* new_musicobject_from_file(const gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
 struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin);
@@ -863,18 +863,18 @@ void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin);
 
 /* Tag functions */
 
-gboolean get_wav_info(gchar *file, struct tags *tags);
-gboolean get_mp3_info(gchar *file, struct tags *tags);
-gboolean get_flac_info(gchar *file, struct tags *tags);
-gboolean get_ogg_info(gchar *file, struct tags *tags);
+gboolean get_wav_info(const gchar *file, struct tags *tags);
+gboolean get_mp3_info(const gchar *file, struct tags *tags);
+gboolean get_flac_info(const gchar *file, struct tags *tags);
+gboolean get_ogg_info(const gchar *file, struct tags *tags);
 #if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
-gboolean get_asf_info(gchar *file, struct tags *tags);
+gboolean get_asf_info(const gchar *file, struct tags *tags);
 #endif
 #if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
-gboolean get_mp4_info(gchar *file, struct tags *tags);
+gboolean get_mp4_info(const gchar *file, struct tags *tags);
 #endif
 #ifdef HAVE_TAGLIB_1_7
-gboolean get_ape_info(gchar *file, struct tags *tags);
+gboolean get_ape_info(const gchar *file, struct tags *tags);
 #endif
 gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
@@ -1001,7 +1001,7 @@ void export_playlist (gint choice, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwi);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
-void pragha_pl_parser_open_from_file_by_extension(gchar *file, struct con_win *cwin);
+void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
 gboolean dnd_playlist_tree_begin(GtkWidget *widget,
 				    GdkDragContext *context,
 				    struct con_win *cwin);
@@ -1268,7 +1268,7 @@ gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
 gint dir_file_count(gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(gchar *str);
-enum file_type get_file_type(gchar *file);
+enum file_type get_file_type(const gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
 gboolean is_image_file(const gchar *file);

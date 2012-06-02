@@ -18,7 +18,7 @@
 
 #include "pragha.h"
 
-struct musicobject* new_musicobject_from_file(gchar *file)
+struct musicobject* new_musicobject_from_file(const gchar *file)
 {
 	enum file_type type;
 	struct musicobject *mobj;
