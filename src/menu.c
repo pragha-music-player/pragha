@@ -248,6 +248,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	struct con_win *cwin = g_object_get_data(data, "cwin");
 
 	cwin->cpref->add_recursively_files = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	g_free (cwin->cstate->last_folder);
 	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
