@@ -131,7 +131,6 @@ void add_recent_file (gchar *filename)
 	g_free (recent_data.mime_type);
 	g_free (recent_data.app_name);
 	g_free (recent_data.app_exec);
-	g_free (filename);
 	g_free (uri);
 }
 
@@ -150,8 +149,6 @@ void handle_selected_file(gpointer data, gpointer udata)
 			__recur_add(data, cwin);
 		else
 			__non_recur_add(data, TRUE, cwin);
-		g_free(data);
-		return;
 	}
 	else if (pragha_pl_parser_guess_format_from_extension(data) != PL_FORMAT_UNKNOWN) {
 		pragha_pl_parser_open_from_file_by_extension(data, cwin);
@@ -163,6 +160,8 @@ void handle_selected_file(gpointer data, gpointer udata)
 			add_recent_file(data);
 		}
 	}
+
+	g_free(data);
 
 	/* Have to give control to GTK periodically ... */
 	/* If gtk_main_quit has been called, return -
