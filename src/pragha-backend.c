@@ -741,6 +741,7 @@ gint backend_init(struct con_win *cwin)
 {
 	GstBus *bus;
 	gchar *audiosink = NULL;
+	gboolean can_set_device = TRUE;
 
 	gst_init(NULL, NULL);
 
@@ -779,7 +780,7 @@ gint backend_init(struct con_win *cwin)
 	}
 	else {
 		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
-
+		can_set_device = FALSE;
 		audiosink = g_strdup("autoaudiosink");
 	}
 
@@ -787,7 +788,7 @@ gint backend_init(struct con_win *cwin)
 
 	if (cwin->cgst->audio_sink != NULL) {
 		/* Set the audio device to use. */
-		if (cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
+		if (can_set_device && cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
 			g_object_set(G_OBJECT(cwin->cgst->audio_sink), "device", cwin->cpref->audio_device, NULL);
 
 		/* Test 10bands equalizer and test it. */
