@@ -57,7 +57,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
+pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
@@ -74,38 +74,38 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 ## for gstreamer 0.10
 if HAVE_GSTREAMER_INTERFACES
 pragha_CFLAGS += $(GSTREAMER_INTERFACES_CFLAGS)
-pragha_LDFLAGS += $(GSTREAMER_INTERFACES_LIBS)
+pragha_LDADD += $(GSTREAMER_INTERFACES_LIBS)
 endif
 
 ## for gstreamer 1.0
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-pragha_LDFLAGS += $(GSTREAMER_AUDIO_LIBS)
+pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBKEYBINDER
 pragha_SOURCES += keybinder.c
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
-pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
+pragha_LDADD += $(LIBKEYBINDER_LIBS)
 endif
 
 if HAVE_LIBCLASTFM
 pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
-pragha_LDFLAGS += $(LIBCLASTFM_LIBS)
+pragha_LDADD += $(LIBCLASTFM_LIBS)
 endif
 
 if HAVE_LIBGLYR
 pragha_CFLAGS += $(LIBGLYR_CFLAGS)
-pragha_LDFLAGS += $(LIBGLYR_LIBS)
+pragha_LDADD += $(LIBGLYR_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
 pragha_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-pragha_LDFLAGS += $(LIBXFCE4UI_LIBS)
+pragha_LDADD += $(LIBXFCE4UI_LIBS)
 endif
 
 if HAVE_PLPARSER
 pragha_CFLAGS += $(PLPARSER_CFLAGS)
-pragha_LDFLAGS += $(PLPARSER_LIBS)
+pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
