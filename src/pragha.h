@@ -1251,6 +1251,7 @@ void mpris_cleanup(struct con_win *cwin);
 
 /* Utilities */
 
+void pragha_log_to_file (const gchar* log_domain, GLogLevelFlags log_level, const gchar* message, gpointer user_data);
 gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
