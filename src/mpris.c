@@ -365,14 +365,9 @@ static GVariant * handle_get_trackid(struct musicobject *mobj) {
 	return g_variant_new_object_path(o);
 }
 
-GVariant *g_variant_new_string2 (const gchar *string)
-{
-	return g_variant_new_string(string != NULL ? string : "");
-}
-
 void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
 {
-	GVariant *vval = g_variant_new_string2(val);
+	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
 
 	g_variant_builder_add (b, "{sv}", tag, vvals);
@@ -392,19 +387,16 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 	g_variant_builder_add (b, "{sv}", "xesam:url",
 		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
-		g_variant_new_string2(mobj->tags->title));
-	handle_strings_request(b, "xesam:artist",
-		mobj->tags->artist);
+		g_variant_new_string(mobj->tags->title));
+	handle_strings_request(b, "xesam:artist", mobj->tags->artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
-		g_variant_new_string2(mobj->tags->album));
-	handle_strings_request(b, "xesam:genre",
-		mobj->tags->genre);
+		g_variant_new_string(mobj->tags->album));
+	handle_strings_request(b, "xesam:genre", mobj->tags->genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
 		g_variant_new_string (date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
 		g_variant_new_int32(mobj->tags->track_no));
-	handle_strings_request(b, "xesam:comment",
-		mobj->tags->comment);
+	handle_strings_request(b, "xesam:comment", mobj->tags->comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
 		g_variant_new_int64((gint64)(mobj->tags->length * 1000000)));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
@@ -433,7 +425,7 @@ static GVariant* mpris_Player_get_Metadata(struct con_win *cwin)
 		if(cwin->cstate->arturl != NULL) {
 			artUrl_uri = g_filename_to_uri(cwin->cstate->arturl, NULL, NULL);
 			g_variant_builder_add (&b, "{sv}", "mpris:artUrl",
-				g_variant_new_string2(artUrl_uri));
+				g_variant_new_string(artUrl_uri));
 			g_free(artUrl_uri);
 		}
 	}

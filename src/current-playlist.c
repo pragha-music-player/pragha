@@ -1279,6 +1279,22 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 	return FALSE;
 }
 
+/* Idle function to free musicobject when clear and crop current playlist */
+
+gboolean idle_delete_mobj_list (GSList *to_delete)
+{
+	struct musicobject *mobj = NULL;
+	GSList *i = NULL;
+
+	for (i=to_delete; i != NULL; i = i->next) {
+		mobj = i->data;
+		delete_musicobject(mobj);
+	}
+	g_slist_free(to_delete);
+
+	return FALSE;
+}
+
 /* Remove selected rows from current playlist */
 
 void remove_from_playlist(GtkAction *action, struct con_win *cwin)
@@ -1289,6 +1305,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path, *next;
 	GtkTreeIter iter;
 	GList *list = NULL, *i = NULL;
+	GSList *mobj_to_delete = NULL;
 	struct musicobject *mobj = NULL;
 	gboolean played = FALSE;
 
@@ -1333,7 +1350,10 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-				test_delete_musicobject(mobj, cwin);
+				if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
+					cwin->cstate->curr_mobj_clear = TRUE;
+				else
+					mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
 
 				gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
 				gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
@@ -1347,6 +1367,8 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 
 		g_list_free(list);
 	}
+
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 
 	requeue_track_refs (cwin);
 	update_status_bar(cwin);
@@ -1363,7 +1385,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
-	GSList *to_delete = NULL, *i = NULL;
+	GSList *to_delete = NULL, *mobj_to_delete = NULL, *i = NULL;
 	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1409,7 +1431,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (gtk_tree_model_get_iter(model, &iter, path)) {
 			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-			test_delete_musicobject(mobj, cwin);
+			if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
+				cwin->cstate->curr_mobj_clear = TRUE;
+			else
+				mobj_to_delete = g_slist_prepend(mobj_to_delete, mobj);
 
 			gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
 			gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
@@ -1436,7 +1461,10 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
+
 	requeue_track_refs (cwin);
+	g_slist_free(to_delete);
 	update_status_bar(cwin);
 }
 
@@ -1603,6 +1631,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
 	gboolean ret;
+	GSList *to_delete = NULL;
 	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1620,7 +1649,10 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (ret) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-		test_delete_musicobject(mobj, cwin);
+		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
+			cwin->cstate->curr_mobj_clear = TRUE;
+		else
+			to_delete = g_slist_prepend(to_delete, mobj);
 
 		ret = gtk_tree_model_iter_next(model, &iter);
 	}
@@ -1628,6 +1660,8 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
 
 	cwin->cstate->tracks_curr_playlist = 0;
 	cwin->cstate->unplayed_tracks = 0;
@@ -1661,8 +1695,7 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE,
-					(mobj->tags->title) ?
-					mobj->tags->title : ch_filename, -1);
+					(mobj->tags->title && strlen(mobj->tags->title)) ? mobj->tags->title : ch_filename, -1);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ARTIST, mobj->tags->artist,-1);
@@ -1746,7 +1779,7 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 			   P_BUBBLE, FALSE,
 			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (mobj->tags->title != NULL) ?
+			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
 			   P_ARTIST, mobj->tags->artist,
 			   P_ALBUM, mobj->tags->album,
@@ -1823,7 +1856,7 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 			   P_BUBBLE, FALSE,
 			   P_STATUS_PIXBUF, NULL,
 			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (mobj->tags->title != NULL) ?
+			   P_TITLE, (mobj->tags->title && strlen(mobj->tags->title)) ?
 					mobj->tags->title : ch_filename,
 			   P_ARTIST, mobj->tags->artist,
 			   P_ALBUM, mobj->tags->album,

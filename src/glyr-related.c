@@ -171,7 +171,7 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if (cwin->cstate->curr_mobj->tags->artist == NULL)
+	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
 		return;
 
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
@@ -190,8 +190,8 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	if(cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if ((cwin->cstate->curr_mobj->tags->artist == NULL) ||
-	    (cwin->cstate->curr_mobj->tags->title == NULL))
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
@@ -213,8 +213,8 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 
 	mobj = get_selected_musicobject(cwin);
 
-	if ((mobj->tags->artist == NULL) ||
-	    (mobj->tags->title == NULL))
+	if ((strlen(mobj->tags->artist) == 0) ||
+	    (strlen(mobj->tags->title) == 0))
 		return;
 
 	artist = g_strdup(mobj->tags->artist);
@@ -236,7 +236,7 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 
 	mobj = get_selected_musicobject(cwin);
 
-	if (mobj->tags->artist == NULL)
+	if (strlen(mobj->tags->artist) == 0)
 		return;
 
 	artist = g_strdup(mobj->tags->artist);
@@ -330,8 +330,8 @@ void related_get_album_art_handler (struct con_win *cwin)
 	if (cwin->cstate->state == ST_STOPPED)
 		return;
 
-	if ((cwin->cstate->curr_mobj->tags->artist == NULL) ||
-	    (cwin->cstate->curr_mobj->tags->album == NULL))
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
 		return;
 
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);

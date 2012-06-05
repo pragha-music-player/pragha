@@ -577,8 +577,7 @@ void *do_lastfm_scrob (gpointer data)
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
 		cwin->cstate->curr_mobj->tags->title,
-		cwin->cstate->curr_mobj->tags->album ?
-		cwin->cstate->curr_mobj->tags->album : "",
+		cwin->cstate->curr_mobj->tags->album,
 		cwin->cstate->curr_mobj->tags->artist,
 		cwin->clastfm->playback_started,
 		cwin->cstate->curr_mobj->tags->length,
@@ -629,10 +628,7 @@ void *do_lastfm_now_playing (gpointer data)
 
 	file = g_strdup(cwin->cstate->curr_mobj->file);
 	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
-	album = cwin->cstate->curr_mobj->tags->album ?
-		g_strdup(cwin->cstate->curr_mobj->tags->album) :
-		g_strdup("");
-
+	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
 	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
@@ -649,8 +645,6 @@ void *do_lastfm_now_playing (gpointer data)
 	else {
 		ntrack = list->data;
 		free_tag_struct(cwin->clastfm->ntags);
-
-		init_tag_struct(cwin->clastfm->ntags);
 
 		if(ntrack->name && g_ascii_strcasecmp(ntrack->name, title)) {
 			cwin->clastfm->ntags->title = g_strdup(ntrack->name);
@@ -673,6 +667,14 @@ void *do_lastfm_now_playing (gpointer data)
 		else {
 			cwin->clastfm->ntags->album = g_strdup(album);
 		}
+		cwin->clastfm->ntags->genre = g_strdup("");
+		cwin->clastfm->ntags->comment = g_strdup("");
+		cwin->clastfm->ntags->track_no = 0;
+		cwin->clastfm->ntags->year = 0;
+		cwin->clastfm->ntags->bitrate = 0;
+		cwin->clastfm->ntags->length = 0;
+		cwin->clastfm->ntags->channels = 0;
+		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
 			gdk_threads_enter ();
@@ -709,8 +711,8 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	if ((cwin->cstate->curr_mobj->tags->artist == NULL) ||
-	    (cwin->cstate->curr_mobj->tags->title == NULL))
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 
 	if(cwin->cstate->curr_mobj->tags->length < 30)
