@@ -77,6 +77,48 @@ const gchar *mime_dual[] = {"audio/x-real-audio",
 				    NULL};
 #endif
 
+/* Function to save debug on file. */
+
+void
+pragha_log_to_file (const gchar* log_domain,
+		    GLogLevelFlags log_level,
+		    const gchar* message,
+		    gpointer user_data)
+{
+	FILE* logfile = fopen ((const char*)user_data, "a");
+	gchar* level_name = "";
+
+	switch (log_level)
+	{
+	/* skip irrelevant flags */
+	case G_LOG_LEVEL_MASK:
+	case G_LOG_FLAG_FATAL:
+	case G_LOG_FLAG_RECURSION:
+	case G_LOG_LEVEL_ERROR:
+		level_name = "ERROR";
+		break;
+	case G_LOG_LEVEL_CRITICAL:
+		level_name = "CRITICAL";
+		break;
+	case G_LOG_LEVEL_WARNING:
+		level_name = "WARNING";
+		break;
+	case G_LOG_LEVEL_MESSAGE:
+		level_name = "MESSAGE";
+		break;
+	case G_LOG_LEVEL_INFO:
+		level_name = "INFO";
+		break;
+	case G_LOG_LEVEL_DEBUG:
+		level_name = "DEBUG";
+		break;
+	}
+
+	fprintf (logfile, "%s %s: %s\n",
+	log_domain ? log_domain : "Pragha", level_name, message);
+	fclose (logfile);
+}
+
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
 @param str the string to be duplicated

@@ -21,12 +21,15 @@
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;
 static gchar *audio_mixer = NULL;
+static gchar* logfile = NULL;
 
 GOptionEntry cmd_entries[] = {
 	{"version", 'v', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_version, "Version", NULL},
 	{"debug", 'e', 0, G_OPTION_ARG_INT,
 	 &debug_level, "Enable Debug ( Levels: 1,2,3,4 )", NULL},
+	{ "log-file", 'l', 0, G_OPTION_ARG_FILENAME,
+	&logfile, "Redirects console warnings to the specified FILENAME", N_("FILENAME")},
 	{"play", 'p', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
 	 cmd_play, "Play", NULL},
 	{"stop", 's', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
@@ -187,7 +190,10 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 		g_error_free(error);
 		return -1;
 	}
-	
+
+	if (logfile)
+		g_log_set_default_handler (pragha_log_to_file, (gpointer)logfile);
+
 	g_option_context_free(context);
 	return 0;
 }
