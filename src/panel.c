@@ -225,22 +225,22 @@ void __update_current_song_info(struct con_win *cwin)
 		return;
 	}
 
-	if(cwin->cstate->curr_mobj->tags->title != NULL)
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, 4))
 		str_title = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
 		str_title = get_display_filename(cwin->cstate->curr_mobj->file, FALSE);
 
-	if((cwin->cstate->curr_mobj->tags->artist != NULL) &&
-	   (cwin->cstate->curr_mobj->tags->album != NULL))
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, 4)
+	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
 						str_title ,
 						cwin->cstate->curr_mobj->tags->artist,
 						cwin->cstate->curr_mobj->tags->album);
-	else if(cwin->cstate->curr_mobj->tags->artist != NULL)
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
 						str_title ,
 						cwin->cstate->curr_mobj->tags->artist);
-	else if(cwin->cstate->curr_mobj->tags->album != NULL)
+	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
 						str_title ,
 						cwin->cstate->curr_mobj->tags->album);

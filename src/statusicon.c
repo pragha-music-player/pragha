@@ -122,7 +122,7 @@ void show_osd(struct con_win *cwin)
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	if(cwin->cstate->curr_mobj->tags->title != NULL)
+	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, 4))
 		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
 	else
 		summary = g_path_get_basename(cwin->cstate->curr_mobj->file);
@@ -130,9 +130,9 @@ void show_osd(struct con_win *cwin)
 	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
 
 	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
-			(cwin->cstate->curr_mobj->tags->artist) ?
+			(cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
 			cwin->cstate->curr_mobj->tags->artist : _("Unknown Artist"),
-			(cwin->cstate->curr_mobj->tags->album) ?
+			(cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?
 			cwin->cstate->curr_mobj->tags->album : _("Unknown Album"),
 			length);
 

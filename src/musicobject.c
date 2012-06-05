@@ -31,9 +31,6 @@ struct musicobject* new_musicobject_from_file(const gchar *file)
 
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
-
-	init_tag_struct(mobj->tags);
-
 	mobj->file = g_strdup(file);
 
 	switch(type) {
@@ -156,33 +153,18 @@ AND LOCATION.id = \"%d\";", location_id, location_id);
 		mobj->tags = g_slice_new0(struct tags);
 
 		mobj->file = g_strdup(result.resultp[i+12]);
-
-		init_tag_struct(mobj->tags);
-
-		if(g_utf8_strlen(result.resultp[i+11], 4))
-			mobj->tags->title = g_strdup(result.resultp[i+11]);
-		if(g_utf8_strlen(result.resultp[i+10], 4))
-			mobj->tags->artist = g_strdup(result.resultp[i+10]);
-		if(g_utf8_strlen(result.resultp[i+9], 4))
-			mobj->tags->album = g_strdup(result.resultp[i+9]);
-		if(g_utf8_strlen(result.resultp[i+8], 4))
-			mobj->tags->genre = g_strdup(result.resultp[i+8]);
-		if(g_utf8_strlen(result.resultp[i+7], 4))
-			mobj->tags->track_no = atoi(result.resultp[i+7]);
-		if(g_utf8_strlen(result.resultp[i+6], 4))
-			mobj->tags->year = atoi(result.resultp[i+6]);
-		if(g_utf8_strlen(result.resultp[i+5], 4))
-			mobj->tags->comment = g_strdup(result.resultp[i+5]);
-		if(g_utf8_strlen(result.resultp[i+4], 4))
-			mobj->tags->bitrate = atoi(result.resultp[i+4]);
-		if(g_utf8_strlen(result.resultp[i+3], 4))
-			mobj->tags->length = atoi(result.resultp[i+3]);
-		if(g_utf8_strlen(result.resultp[i+2], 4))
-			mobj->tags->channels = atoi(result.resultp[i+2]);
-		if(g_utf8_strlen(result.resultp[i+1], 4))
-			mobj->tags->samplerate = atoi(result.resultp[i+1]);
-		if(g_utf8_strlen(result.resultp[i], 4))
-			mobj->file_type = atoi(result.resultp[i]);
+		mobj->tags->title = g_strdup(result.resultp[i+11]);
+		mobj->tags->artist = g_strdup(result.resultp[i+10]);
+		mobj->tags->album = g_strdup(result.resultp[i+9]);
+		mobj->tags->genre = g_strdup(result.resultp[i+8]);
+		mobj->tags->track_no = atoi(result.resultp[i+7]);
+		mobj->tags->year = atoi(result.resultp[i+6]);
+		mobj->tags->comment = g_strdup(result.resultp[i+5]);
+		mobj->tags->bitrate = atoi(result.resultp[i+4]);
+		mobj->tags->length = atoi(result.resultp[i+3]);
+		mobj->tags->channels = atoi(result.resultp[i+2]);
+		mobj->tags->samplerate = atoi(result.resultp[i+1]);
+		mobj->file_type = atoi(result.resultp[i]);
 
 		sqlite3_free_table(result.resultp);
 
@@ -206,8 +188,6 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
-
-	init_tag_struct(mobj->tags);
 
 	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
@@ -256,9 +236,19 @@ struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name,
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	init_tag_struct(mobj->tags);
-
 	mobj->tags->title = g_strdup(name);
+
+	mobj->tags->artist = g_strdup("");
+	mobj->tags->album = g_strdup("");
+	mobj->tags->genre = g_strdup("");
+	mobj->tags->comment = g_strdup("");
+
+	mobj->tags->track_no = 0;
+	mobj->tags->year = 0;
+	mobj->tags->bitrate = 0;
+	mobj->tags->length = 0;
+	mobj->tags->channels = 0;
+	mobj->tags->samplerate = 0;
 
 #ifdef HAVE_PLPARSER
 	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
@@ -316,11 +306,17 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 
 void init_tag_struct(struct tags *mtags)
 {
-	mtags->title = NULL;
-	mtags->artist = NULL;
-	mtags->album = NULL;
-	mtags->genre = NULL;
-	mtags->comment = NULL;
+	/* FIXME: Find that is what prohibits use NULL.
+	 * For Sqlite all nulls are different, so it is impossible to sort them
+	 * correctly!. (Fucking compatibility with Oracle, PostgreSQL, and DB2).
+	 * See here: http://www.sqlite.org/nulls.html*/
+
+	mtags->title = g_strdup("");
+	mtags->artist = g_strdup("");
+	mtags->album = g_strdup("");
+	mtags->comment = g_strdup("");
+	mtags->genre = g_strdup("");
+	mtags->comment = g_strdup("");
 	mtags->track_no = 0;
 	mtags->year = 0;
 	mtags->bitrate = 0;
