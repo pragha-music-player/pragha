@@ -447,7 +447,6 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
 }
 
-
 static void update_audio_device_alsa(struct con_win *cwin)
 {
 	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);

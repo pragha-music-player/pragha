@@ -169,7 +169,7 @@ static void add_entry_tag_completion(gchar *entry, GtkTreeModel *model)
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, entry, -1);
 }
 
-static gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
+gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	gint result;
@@ -179,8 +179,7 @@ static gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
-				"Do you want to set the track number of ALL of the "
-				"selected tracks to: %d ?",
+				_("Do you want to set the track number of ALL of the selected tracks to: %d ?"),
 				tno);
 
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -200,7 +199,7 @@ static gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
 	return ret;
 }
 
-static gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
+gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	gint result;
@@ -210,8 +209,7 @@ static gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
-				"Do you want to set the title tag of ALL of the "
-				"selected tracks to: %s ?",
+				_("Do you want to set the title tag of ALL of the selected tracks to: %s ?"),
 				title);
 
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -248,22 +246,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 
 	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
 
-	/* Check if user is trying to set the same track no for multiple tracks */
-	if (changed & TAG_TNO_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_tno_multiple_tracks(ntag->track_no, cwin))
-				return;
-		}
-	}
-
-	/* Check if user is trying to set the same title/track no for
-	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_title_multiple_tracks(ntag->title, cwin))
-				return;
-		}
-
 		stitle = sanitize_string_sqlite3(ntag->title);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
@@ -1033,6 +1016,123 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	return changed;
 }
 
+void copy_tags_selection_current_playlist(struct musicobject *omobj, gint changed, struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreeRowReference *ref;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+	GList *list, *i;
+	GArray *loc_arr = NULL, *file_arr = NULL;
+	gint location_id, j = 0;
+	gchar *sfile = NULL, *tfile;
+
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (!confirm_tno_multiple_tracks(omobj->tags->track_no, cwin))
+			return;
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (!confirm_title_multiple_tracks(omobj->tags->title, cwin))
+			return;
+	}
+
+	clear_sort_current_playlist_cb(NULL, cwin);
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	/* Get references from the paths and store them in the 'data'
+	   portion of the list elements.
+	   This idea was inspired by code from 'claws-mail' */
+
+	for (i = list; i != NULL; i = i->next) {
+		path = i->data;
+		ref = gtk_tree_row_reference_new(model, path);
+		i->data = ref;
+		gtk_tree_path_free(path);
+	}
+
+	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+
+	/* Now build iterators from the references and edit
+	   them from the store */
+
+	for (i = list; i != NULL; i = i->next) {
+		mobj = NULL;
+
+		ref = i->data;
+		path = gtk_tree_row_reference_get_path(ref);
+		gtk_tree_row_reference_free(ref);
+
+		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path)))
+			gtk_tree_path_free(path);
+		else
+			continue;
+
+		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if (G_UNLIKELY(mobj == NULL)) {
+			g_warning("Invalid mobj pointer");
+			continue;
+		}
+
+		if (mobj == omobj)
+			continue;
+
+		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
+			update_musicobject(cwin->cstate->curr_mobj, changed, omobj->tags, cwin);
+			if(cwin->cstate->state != ST_STOPPED) {
+				__update_current_song_info(cwin);
+				mpris_update_metadata_changed(cwin);
+			}
+		}
+		else {
+			update_musicobject(mobj, changed, omobj->tags, cwin);
+		}
+		update_track_current_playlist(&iter, changed, mobj, cwin);
+
+		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
+		    mobj->file_type != FILE_HTTP)) {
+			sfile = sanitize_string_sqlite3(mobj->file);
+			location_id = find_location_db(sfile, cwin);
+			if (G_LIKELY(location_id)) {
+				g_array_append_val(loc_arr, location_id);
+				g_free(sfile);
+				continue;
+			}
+			tfile = g_strdup(mobj->file);
+			file_arr = g_array_append_val(file_arr, tfile);
+			g_free(sfile);
+		}
+	}
+
+	tag_update(loc_arr, file_arr, changed, omobj->tags, cwin);
+
+	if (changed && (loc_arr || file_arr))
+		init_library_view(cwin);
+
+	/* Cleanup */
+	if (loc_arr)
+		g_array_free(loc_arr, TRUE);
+	if (file_arr) {
+		gchar *elem = NULL;
+		for (j = 0; j < file_arr->len; j++) {
+			elem = g_array_index(file_arr, gchar *, j);
+			g_free(elem);
+		}
+		g_array_free(file_arr, TRUE);
+	}
+
+	g_list_free(list);
+}
+
 /* Edit tags for selected track(s) */
 
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
@@ -1094,6 +1194,23 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	if (!changed)
 		goto exit;
+
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (sel > 1) {
+			if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
+				goto exit;
+		}
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (sel > 1) {
+			if (!confirm_title_multiple_tracks(ntag.title, cwin))
+				goto exit;
+		}
+	}
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
