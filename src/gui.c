@@ -323,7 +323,7 @@ GtkActionEntry cp_null_context_aentries[] = {
 GtkToggleActionEntry cp_null_toggles_entries[] = {
 	{"Lateral panel", NULL, N_("Lateral _panel"),
 	 NULL, "Lateral panel", G_CALLBACK(library_pane_action),
-	FALSE}
+	TRUE}
 };
 
 GtkActionEntry cp_context_aentries[] = {
