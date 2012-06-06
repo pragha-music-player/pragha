@@ -783,14 +783,28 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 	}
 }
 
-/* Handler for the 'Library panel' item in the Edit menu */
+/* Handler for the 'Library panel' item in the Edit menu and emply pĺaylist menu */
 
 void
 library_pane_action (GtkAction *action, struct con_win *cwin)
 {
+	GtkAction *maction, *paction;
+
 	cwin->cpref->lateral_panel = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
 	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), cwin->cpref->lateral_panel);
+
+	paction = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Lateral panel");
+
+	g_signal_handlers_block_by_func (paction, library_pane_action, cwin);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(paction), cwin->cpref->lateral_panel);
+	g_signal_handlers_unblock_by_func (paction, library_pane_action, cwin);
+
+	maction = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
+
+	g_signal_handlers_block_by_func (maction, library_pane_action, cwin);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(maction), cwin->cpref->lateral_panel);
+	g_signal_handlers_unblock_by_func (maction, library_pane_action, cwin);
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */
