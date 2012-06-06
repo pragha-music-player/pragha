@@ -2202,6 +2202,106 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }
 
+void
+copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	gint changed = 0;
+
+	mobj = g_object_get_data (G_OBJECT(action), "mobj");
+	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
+
+	copy_tags_selection_current_playlist(mobj, changed, cwin);
+}
+
+void
+personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
+				  GtkTreeViewColumn *column,
+				  GtkTreeIter *iter,
+				  struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GList *list = NULL;
+	gint icolumn = 0;
+	GtkAction *action = NULL;
+	gchar *label = NULL;
+	struct musicobject *mobj = NULL;
+	gint change = 0;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	gtk_tree_model_get(model, iter, P_MOBJ_PTR, &mobj, -1);
+
+	/* Get the column clicked and set menu. */
+
+	list = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->current_playlist));
+	icolumn = g_list_index(list, column);
+
+	switch (icolumn) {
+		case 1: {
+			change = TAG_TNO_CHANGED;
+			label = g_strdup_printf(_("Copy \"%i\" to selected track numbers"),
+						mobj->tags->track_no);
+			break;
+			}
+		case 2: {
+			change = TAG_TITLE_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected titles"),
+						mobj->tags->title);
+			break;
+			}
+		case 3: {
+			change = TAG_ARTIST_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected artists"),
+						mobj->tags->artist);
+			break;
+			}
+		case 4: {
+			change = TAG_ALBUM_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
+						mobj->tags->album);
+			break;
+		}
+		case 5: {
+			change = TAG_GENRE_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected genres"),
+						mobj->tags->genre);
+			break;
+		}
+		case 7: {
+			change = TAG_YEAR_CHANGED;
+			label = g_strdup_printf(_("Copy \"%i\" to selected years"),
+						mobj->tags->year);
+			break;
+		}
+		case 8: {
+			change = TAG_COMMENT_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected comments"),
+						mobj->tags->comment);
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+
+	if (change) {
+		action = gtk_ui_manager_get_action(cwin->cp_context_menu,
+						   "/popup/Copy tag to selection");
+
+		g_object_set_data(G_OBJECT(action), "mobj", mobj);
+		g_object_set_data(G_OBJECT(action), "change", GINT_TO_POINTER(change));
+
+		gtk_action_set_label(GTK_ACTION(action), label);
+		gtk_widget_show (GTK_WIDGET(item_widget));
+	}
+	else {
+		gtk_widget_hide (GTK_WIDGET(item_widget));
+	}
+
+	g_list_free(list);
+	g_free(label);
+}
+
 /* Handler for current playlist click */
 
 gboolean current_playlist_button_press_cb(GtkWidget *widget,
@@ -2213,6 +2313,7 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 	gint n_select = 0;
 	GtkTreePath *path;
 	GtkTreeModel *model;
+	GtkTreeViewColumn *column;
 	GtkTreeIter iter;
 	gboolean ret = FALSE, is_queue = FALSE;
 
@@ -2240,7 +2341,7 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 			ret = FALSE;
 			break;
 		}
-		if(gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
+		if(gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, &column, NULL, NULL)) {
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
@@ -2277,6 +2378,13 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 
 				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Add to another playlist");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Copy tag to selection");
+
+				if(n_select > 1)
+					personalize_copy_tag_to_seleccion(item_widget, column, &iter, cwin);
+				else
+					gtk_widget_hide (GTK_WIDGET(item_widget));
 
 				item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);

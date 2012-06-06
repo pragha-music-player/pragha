@@ -114,6 +114,8 @@ gchar *cp_context_menu_xml = "<ui>		    				\
 		<menuitem action=\"Add similar\"/>				\
 	</menu>									\
 	<separator/>				    				\
+	<menuitem action=\"Copy tag to selection\"/>				\
+	<separator/>				    				\
 	<menuitem action=\"Edit tags\"/>					\
 	</popup>				    				\
 	</ui>";
@@ -365,6 +367,8 @@ GtkActionEntry cp_context_aentries[] = {
 	{"Add similar", NULL, N_("Add similar"),
 	 NULL, "Add similar", NULL},
 	#endif
+	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
+	 NULL, "Copy tag to selection", G_CALLBACK(copy_tags_to_selection_action)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
 	 NULL, "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)}
 };

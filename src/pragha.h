@@ -878,11 +878,14 @@ gboolean get_ape_info(const gchar *file, struct tags *tags);
 #endif
 gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
+gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
+gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
 void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin);
 gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
+void copy_tags_selection_current_playlist(struct musicobject *omobj, gint changes, struct con_win *cwin);
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
 
 
@@ -1076,6 +1079,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreePath *path,
 				       GtkTreeViewColumn *column,
 				       struct con_win *cwin);
+void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 gboolean current_playlist_button_press_cb(GtkWidget *widget,
 					 GdkEventButton *event,
 					 struct con_win *cwin);

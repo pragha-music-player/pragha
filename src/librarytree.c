@@ -1532,6 +1532,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	}
 
 	changed = tag_edit_dialog(&otag, 0, &ntag, uri, cwin);
+
 	if (!changed)
 		goto exit;
 
@@ -1548,6 +1549,23 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		if (!loc_arr) {
 			g_array_free(loc_arr, TRUE);
 			continue;
+		}
+
+		/* Check if user is trying to set the same track no for multiple tracks */
+		if (changed & TAG_TNO_CHANGED) {
+			if (loc_arr->len > 1) {
+				if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
+					goto exit;
+			}
+		}
+
+		/* Check if user is trying to set the same title/track no for
+		   multiple tracks */
+		if (changed & TAG_TITLE_CHANGED) {
+			if (loc_arr->len > 1) {
+				if (!confirm_title_multiple_tracks(ntag.title, cwin))
+					goto exit;
+			}
 		}
 
 		tag_update(loc_arr, NULL, changed, &ntag, cwin);
