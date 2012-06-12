@@ -157,6 +157,17 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 	</popup>					\
 	</ui>";
 
+gchar *header_library_tree_context_menu_xml = "<ui>	\
+	<popup>						\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>		\
+	<separator/>					\
+	<menuitem action=\"Rescan library\"/>		\
+	<menuitem action=\"Update library\"/>		\
+	</popup>					\
+	</ui>";
+
 gchar *library_page_context_menu_xml = "<ui>			\
 	<popup>							\
 	<menuitem action=\"Expand library\"/>			\
@@ -403,6 +414,19 @@ GtkActionEntry library_tree_context_aentries[] = {
 	 NULL, "Delete from library", G_CALLBACK(library_tree_delete_db)}
 };
 
+GtkActionEntry header_library_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 NULL, "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 NULL, "Replace current playlist", G_CALLBACK(library_tree_replace_playlist)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 NULL, "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
+	 NULL, "Rescan library", G_CALLBACK(rescan_library_action)},
+	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
+	 NULL, "Update library", G_CALLBACK(update_library_action)}
+};
+
 GtkActionEntry library_page_context_aentries[] = {
 	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
 	 NULL, "Expand the library", G_CALLBACK(expand_all_action)},
@@ -481,6 +505,36 @@ static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
 	gtk_action_group_add_actions(context_actions,
 				     library_tree_context_aentries,
 				     G_N_ELEMENTS(library_tree_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
+}
+
+static GtkUIManager* create_header_library_tree_context_menu(GtkWidget *library_tree,
+						      struct con_win *cwin)
+{
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Header Library Tree Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       header_library_tree_context_menu_xml,
+					       -1, &error)) {
+		g_critical("(%s): Unable to create header library tree context menu, err : %s",
+			   __func__, error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     header_library_tree_context_aentries,
+				     G_N_ELEMENTS(header_library_tree_context_aentries),
 				     (gpointer)cwin);
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
 				   gtk_ui_manager_get_accel_group(context_menu));
@@ -569,6 +623,9 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 
 	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
 									   cwin);
+
+	cwin->header_library_tree_context_menu = create_header_library_tree_context_menu(library_tree,
+											 cwin);
 
 	/* Signal handler for right-clicking and selection */
  

@@ -729,6 +729,7 @@ struct con_win {
 	GtkUIManager *cp_null_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
+	GtkUIManager *header_library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
 	gint related_timeout_id;
