@@ -29,7 +29,6 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <dbus/dbus-glib-lowlevel.h>
 #include <gtk/gtk.h>
 #include <tag_c.h>
 
@@ -90,7 +89,6 @@ struct _PraghaApplication {
 	PraghaPreferences *preferences;
 	PraghaDatabase    *cdbase;
 	PraghaArtCache    *art_cache;
-	DBusConnection    *con_dbus;
 
 	PraghaScanner     *scanner;
 
