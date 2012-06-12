@@ -167,15 +167,13 @@ void               pragha_application_set_notify             (PraghaApplication 
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 
+gint handle_command_line (PraghaApplication *pragha, GApplicationCommandLine *command_line, gint argc, gchar **args);
+
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha);
 GtkWidget* create_info_bar_import_music(PraghaApplication *pragha);
 GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
-
-/* Init */
-
-gint init_options(PraghaApplication *pragha, int argc, char **argv);
 
 /* Pragha app */
 
