@@ -1301,6 +1301,7 @@ GtkUIManager* create_menu(struct con_win *cwin);
 GtkWidget* create_main_region(struct con_win *cwin);
 GtkWidget* create_panel(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
+GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
 GtkWidget* create_status_bar(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
