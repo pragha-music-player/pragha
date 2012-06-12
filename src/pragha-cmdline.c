@@ -1,6 +1,7 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2011 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2012-2013 Pavel Vasin                                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -31,259 +32,164 @@
 #endif
 
 #include <stdlib.h>
-#include "pragha-dbus.h"
 #include "pragha-debug.h"
+#include "pragha-playback.h"
 #include "pragha.h"
 
-static gchar *audio_backend = NULL;
-static gchar *audio_device = NULL;
-static gchar *audio_mixer = NULL;
-static gchar *logfile = NULL;
+static struct PraghaCmdLineOptions {
+	gchar *audio_backend;
+	gchar *audio_device;
+	gchar *audio_mixer;
+	gchar *logfile;
+	gboolean play;
+	gboolean stop;
+	gboolean pause;
+	gboolean prev;
+	gboolean next;
+	gboolean shuffle;
+	gboolean repeat;
+	gboolean inc_volume;
+	gboolean dec_volume;
+	gboolean show_osd;
+	gboolean toggle_view;
+	gboolean current_state;
+	gchar **files;
+} cmdline_options;
 
-static gboolean
-cmd_version (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
+static void
+clear_cmdline_options ()
 {
-	g_print("pragha %s\n", PACKAGE_VERSION);
-
-	exit(0);
+	g_free (cmdline_options.audio_backend);
+	g_free (cmdline_options.audio_device);
+	g_free (cmdline_options.audio_mixer);
+	g_free (cmdline_options.logfile);
+	g_strfreev (cmdline_options.files);
+	memset (&cmdline_options, 0, sizeof(cmdline_options));
 }
 
 static gboolean
-cmd_play (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
+cmd_version (const gchar *opt_name, const gchar *val, gpointer arg_data, GError **error)
 {
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PLAY, pragha);
-		exit(0);
-	}
-	return FALSE;
+	g_print ("%s %s\n", PACKAGE, VERSION);
+
+	exit (0);
 }
 
-static gboolean
-cmd_stop (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
+static void
+cmd_current_state (PraghaApplication *pragha, GApplicationCommandLine *command_line)
 {
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_STOP, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
+	const char *playing_str = "Playing";
+	const char *paused_str = "Paused";
+	const char *stopped_str = "Stopped";
 
-static gboolean
-cmd_pause (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PAUSE, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
+	PraghaBackend *backend = pragha_application_get_backend (pragha);
 
-static gboolean
-cmd_prev (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PREV, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		const char *state = (pragha_backend_get_state (backend) == ST_PLAYING) ? playing_str : paused_str;
 
-static gboolean
-cmd_next (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_NEXT, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
+		PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 
-static gboolean
-cmd_shuffle (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_SHUFFLE, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
+		const char *file = pragha_musicobject_get_file (mobj);
+		const char *title = pragha_musicobject_get_title (mobj);
+		const char *artist = pragha_musicobject_get_artist (mobj);
+		const char *album = pragha_musicobject_get_album (mobj);
+		const char *genre = pragha_musicobject_get_genre (mobj);
+		guint year = pragha_musicobject_get_year (mobj);
+		guint track_no = pragha_musicobject_get_track_no (mobj);
+		const char *comment = pragha_musicobject_get_comment (mobj);
+		gint length = pragha_musicobject_get_length (mobj);
+		gint bitrate = pragha_musicobject_get_bitrate (mobj);
+		gint channels = pragha_musicobject_get_channels (mobj);
+		gint samplerate = pragha_musicobject_get_samplerate (mobj);
 
-static gboolean
-cmd_repeat (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_REPEAT, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
-
-static gboolean
-cmd_inc_volume (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_INC_VOL, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
-
-static gboolean
-cmd_dec_volume (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_DEC_VOL, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
-
-static gboolean
-cmd_show_osd (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_SHOW_OSD, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
-
-static gboolean
-cmd_toggle_view (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	if (!pragha->unique_instance) {
-		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, pragha);
-		exit(0);
-	}
-	return FALSE;
-}
-
-static gboolean
-cmd_current_state (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
-{
-	gboolean ret = TRUE;
-	DBusMessage *msg = NULL;
-	DBusMessage *reply_msg = NULL;
-	DBusError d_error;
-	const char *state, *file, *title, *artist, *album, *genre, *comment;
-	gint year, track_no, length, bitrate, channels, samplerate;
-
-	year = track_no = length = bitrate = channels = samplerate = 0;
-
-	if (pragha->unique_instance) {
-		ret = FALSE;
-		goto exit;
-	}
-
-	dbus_error_init(&d_error);
-
-	msg = dbus_message_new_method_call(DBUS_NAME,
-					   DBUS_PATH,
-					   DBUS_INTERFACE,
-					   DBUS_METHOD_CURRENT_STATE);
-	if (!msg) {
-		g_critical("Unable to allocate memory for DBUS message");
-		ret = FALSE;
-		goto exit;
-	}
-
-	reply_msg = dbus_connection_send_with_reply_and_block(pragha->con_dbus, msg,
-							      -1, &d_error);
-	if (!reply_msg) {
-		g_critical("Unable to send DBUS message");
-		dbus_error_free(&d_error);
-		ret = FALSE;
-		goto bad;
-	}
-
-	if (!dbus_message_get_args(reply_msg, &d_error,
-				   DBUS_TYPE_STRING, &state,
-				   DBUS_TYPE_INVALID)) {
-		g_critical("Unable to get player state");
-		dbus_error_free(&d_error);
-		ret = FALSE;
-		goto bad;
-	}
-
-	if (g_ascii_strcasecmp(state, "Stopped")) {
-		dbus_message_get_args(reply_msg, &d_error,
-				      DBUS_TYPE_STRING, &state,
-				      DBUS_TYPE_STRING, &file,
-				      DBUS_TYPE_STRING, &title,
-				      DBUS_TYPE_STRING, &artist,
-				      DBUS_TYPE_STRING, &album,
-				      DBUS_TYPE_STRING, &genre,
-				      DBUS_TYPE_INT32, &year,
-				      DBUS_TYPE_INT32, &track_no,
-				      DBUS_TYPE_STRING, &comment,
-				      DBUS_TYPE_INT32, &length,
-				      DBUS_TYPE_INT32, &bitrate,
-				      DBUS_TYPE_INT32, &channels,
-				      DBUS_TYPE_INT32, &samplerate,
-				      DBUS_TYPE_INVALID);
-		if (!dbus_message_get_args(reply_msg, &d_error,
-					   DBUS_TYPE_STRING, &state,
-					   DBUS_TYPE_INVALID)) {
-			g_critical("Unable to get player state details");
-			dbus_error_free(&d_error);
-			ret = FALSE;
-			goto bad;
-		}
-
-		g_print("state: %s\nfile: %s\ntitle: %s\nartist: %s\n"
+		g_application_command_line_print (command_line, "state: %s\nfile: %s\ntitle: %s\nartist: %s\n"
 			"album: %s\ngenre: %s\nyear: %d\ntrack_no: %d\ncomment: %s\n"
 			"length: %d\nbitrate: %d\nchannels: %d\nsamplerate: %d\n",
 			state, file, title, artist, album, genre, year,
 			track_no, comment, length, bitrate, channels, samplerate);
 	} else {
-		g_print("state: %s\n", state);
+		g_application_command_line_print (command_line, "state: %s\n", stopped_str);
 	}
-bad:
-	dbus_message_unref(msg);
-exit:
-	if (!ret)
-		exit(0);
-	else
-		return ret;
 }
 
-static gboolean
-cmd_add_file (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
+static void
+cmd_add_files (PraghaApplication *pragha, GApplicationCommandLine *command_line)
 {
-	gboolean ret = TRUE;
-	DBusMessage *msg = NULL;
-	gchar *uri = NULL;
+	gchar **file_names = cmdline_options.files;
+	GPtrArray *files = g_ptr_array_new_with_free_func (g_object_unref);
 
-	if(g_path_is_absolute(val)) {
-		uri = g_strdup (val);
-	}
-	else {
-		gchar *dir = g_get_current_dir ();
-		uri = g_build_filename (dir, val, NULL);
-		g_free (dir);
-	}
-
-	msg = dbus_message_new_signal(DBUS_PATH, DBUS_INTERFACE, DBUS_SIG_ADD_FILE);
-	if (!msg) {
-		g_critical("Unable to allocate memory for DBUS message");
-		ret = FALSE;
-		goto exit;
-	}
-	dbus_message_append_args(msg, DBUS_TYPE_STRING, &uri, DBUS_TYPE_INVALID);
-
-	if (!dbus_connection_send(pragha->con_dbus, msg, NULL)) {
-		g_critical("Unable to send DBUS message");
-		ret = FALSE;
-		goto bad;
+	while (*file_names) {
+#if GLIB_CHECK_VERSION (2, 36, 0)
+		GFile *file = g_application_command_line_create_file_for_arg (command_line, *file_names);
+#else
+		const gchar *cwd = g_application_command_line_get_cwd (command_line);
+		gchar *filename = g_build_filename (cwd, *file_names, NULL);
+		GFile *file = g_file_new_for_path (filename);
+		g_free (filename);
+#endif
+		g_ptr_array_add (files, file);
+		file_names++;
 	}
 
-	dbus_connection_flush(pragha->con_dbus);
-bad:
-	dbus_message_unref(msg);
-exit:
-	g_free(uri);
+	if (files->len > 0)
+		g_application_open (G_APPLICATION (pragha), (GFile **) files->pdata, files->len, "");
 
-	return ret;
+	g_ptr_array_unref (files);
+}
+
+static void
+process_options (PraghaApplication *pragha, GApplicationCommandLine *command_line)
+{
+	if (!command_line)
+		return;
+
+	if (cmdline_options.logfile) {
+		g_log_set_default_handler (pragha_log_to_file, cmdline_options.logfile);
+	}
+	if (cmdline_options.play) {
+		pragha_playback_play_pause_resume (pragha);
+	}
+	if (cmdline_options.stop) {
+		pragha_playback_stop (pragha);
+	}
+	if (cmdline_options.pause) {
+		pragha_playback_play_pause_resume (pragha);
+	}
+	if (cmdline_options.prev) {
+		pragha_playback_prev_track (pragha);
+	}
+	if (cmdline_options.next) {
+		pragha_playback_next_track (pragha);
+	}
+	if (cmdline_options.shuffle) {
+		gboolean shuffle = pragha_preferences_get_shuffle (pragha->preferences);
+		pragha_preferences_set_shuffle (pragha->preferences, !shuffle);
+	}
+	if (cmdline_options.repeat) {
+		gboolean repeat = pragha_preferences_get_repeat (pragha->preferences);
+		pragha_preferences_set_repeat (pragha->preferences, !repeat);
+	}
+	if (cmdline_options.inc_volume) {
+		pragha_backend_set_delta_volume (pragha->backend, +0.05);
+	}
+	if (cmdline_options.dec_volume) {
+		pragha_backend_set_delta_volume (pragha->backend, -0.05);
+	}
+	if (cmdline_options.show_osd) {
+		if (pragha->notify)
+			pragha_notify_show_osd (pragha->notify);
+		else
+			g_warning ("Notifications are disabled");
+	}
+	if (cmdline_options.toggle_view) {
+		pragha_window_toggle_state (pragha, TRUE);
+	}
+	if (cmdline_options.current_state) {
+		cmd_current_state (pragha, command_line);
+	}
+	if (cmdline_options.files) {
+		cmd_add_files (pragha, command_line);
+	}
 }
 
 static const GOptionEntry cmd_entries[] = {
@@ -292,75 +198,77 @@ static const GOptionEntry cmd_entries[] = {
 	{"debug", 'e', 0, G_OPTION_ARG_INT,
 	 &debug_level, "Enable Debug ( Levels: 1,2,3,4 )", NULL},
 	{ "log-file", 'l', 0, G_OPTION_ARG_FILENAME,
-	&logfile, "Redirects console warnings to the specified FILENAME", N_("FILENAME")},
-	{"play", 'p', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_play, "Play", NULL},
-	{"stop", 's', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_stop, "Stop", NULL},
-	{"pause", 't', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_pause, "Play/Pause/Resume", NULL},
-	{"prev", 'r', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_prev, "Prev", NULL},
-	{"next", 'n', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_next, "Next", NULL},
-	{"shuffle", 'f', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_shuffle, "Shuffle", NULL},
-	{"repeat", 'u', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_repeat, "Repeat", NULL},
-	{"inc_vol", 'i', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_inc_volume, "Increase volume by 1", NULL},
-	{"dec_vol", 'd', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_dec_volume, "Decrease volume by 1", NULL},
-	{"show_osd", 'o', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_show_osd, "Show OSD notification", NULL},
-	{"toggle_view", 'x', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_toggle_view, "Toggle player visibility", NULL},
-	{"current_state", 'c', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
-	 cmd_current_state, "Get current player state", NULL},
+	 &cmdline_options.logfile, "Redirects console warnings to the specified FILENAME", N_("FILENAME")},
+	{"play", 'p', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.play, "Play", NULL},
+	{"stop", 's', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.stop, "Stop", NULL},
+	{"pause", 't', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.pause, "Play/Pause/Resume", NULL},
+	{"prev", 'r', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.prev, "Prev", NULL},
+	{"next", 'n', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.next, "Next", NULL},
+	{"shuffle", 'f', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.shuffle, "Shuffle", NULL},
+	{"repeat", 'u', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.repeat, "Repeat", NULL},
+	{"inc_vol", 'i', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.inc_volume, "Increase volume by 1", NULL},
+	{"dec_vol", 'd', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.dec_volume, "Decrease volume by 1", NULL},
+	{"show_osd", 'o', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.show_osd, "Show OSD notification", NULL},
+	{"toggle_view", 'x', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.toggle_view, "Toggle player visibility", NULL},
+	{"current_state", 'c', 0, G_OPTION_ARG_NONE,
+	 &cmdline_options.current_state, "Get current player state", NULL},
 	{"audio_backend", 'a', 0, G_OPTION_ARG_STRING,
-	 &audio_backend, "Audio backend (valid options: alsa/oss)", NULL},
+	 &cmdline_options.audio_backend, "Audio backend (valid options: alsa/oss)", NULL},
 	{"audio_device", 'g', 0, G_OPTION_ARG_STRING,
-	 &audio_device, "Audio Device (For ALSA: hw:0,0 etc.., For OSS: /dev/dsp etc..)", NULL},
+	 &cmdline_options.audio_device, "Audio Device (For ALSA: hw:0,0 etc.., For OSS: /dev/dsp etc..)", NULL},
 	{"audio_mixer", 'm', 0, G_OPTION_ARG_STRING,
-	 &audio_mixer, "Mixer Element (For ALSA: Master, PCM, etc.., For OSS: /dev/mixer, etc...)", NULL},
-	{G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME, G_OPTION_ARG_CALLBACK,
-	 cmd_add_file, "", "[FILE1 [FILE2...]]"},
+	 &cmdline_options.audio_mixer, "Mixer Element (For ALSA: Master, PCM, etc.., For OSS: /dev/mixer, etc...)", NULL},
+	{G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY,
+	 &cmdline_options.files, "", "[FILE1 [FILE2...]]"},
 	{NULL}
 };
 
 gint
-init_options (PraghaApplication *pragha, int argc, char **argv)
+handle_command_line (PraghaApplication *pragha, GApplicationCommandLine *command_line, gint argc, gchar **args)
 {
+	gint i;
+	int ret = 0;
 	GError *error = NULL;
-	GOptionContext *context;
-	GOptionGroup *group;
 
-	CDEBUG(DBG_INFO, "Initializing Command line options");
+	/* We have to make an extra copy of the array, since g_option_context_parse()
+	 * assumes that it can remove strings from the array without freeing them.
+	 */
+	gchar **argv = g_new (gchar*, argc + 1);
+	for (i = 0; i <= argc; i++)
+		argv[i] = args[i];
 
-	context = g_option_context_new("- A lightweight music player");
-	group = g_option_group_new("General", "General", "General Options", pragha, NULL);
-	g_option_group_add_entries(group, cmd_entries);
-	g_option_context_set_main_group(context, group);
-	g_option_context_add_group(context, gtk_get_option_group(TRUE));
+	GOptionContext *context = g_option_context_new ("- A lightweight music player");
+	GOptionGroup *group = g_option_group_new ("General", "General", "General Options", NULL, NULL);
+	g_option_group_add_entries (group, cmd_entries);
+	g_option_context_set_main_group (context, group);
 	#ifdef HAVE_LIBXFCE4UI
 	g_option_context_add_group (context, xfce_sm_client_get_option_group (argc, argv));
 	#endif
 
-	if (!g_option_context_parse(context, &argc, &argv, &error)) {
-		gchar *txt;
+	g_option_context_parse (context, &argc, &argv, &error);
 
-		g_message("Unable to parse options. Some options need another instance of pragha running.");
-		txt = g_option_context_get_help(context, TRUE, NULL);
-		g_print("%s", txt);
-		g_free(txt);
-		g_option_context_free(context);
-		g_error_free(error);
-		return -1;
+	if (error) {
+		g_print ("%s\n%s\n", error->message, _("Use --help to see a full list of available command line options."));
+		g_error_free (error);
+		ret = -1;
 	}
 
-	if (logfile)
-		g_log_set_default_handler (pragha_log_to_file, (gpointer)logfile);
+	process_options (pragha, command_line);
+	clear_cmdline_options ();
 
-	g_option_context_free(context);
-	return 0;
+	g_option_context_free (context);
+	g_free (argv);
+
+	return ret;
 }

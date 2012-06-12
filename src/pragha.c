@@ -630,33 +630,36 @@ static int
 pragha_application_command_line (GApplication *application, GApplicationCommandLine *command_line)
 {
 	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
-
-	gchar **args = NULL, **argv = NULL;
+	int ret = 0;
 	gint argc;
-	gint i;
 
-	args = g_application_command_line_get_arguments (command_line, &argc);
+	gchar **argv = g_application_command_line_get_arguments (command_line, &argc);
 
 	if (argc <= 1) {
 		pragha_application_activate (application);
 		goto exit;
 	}
 
-	/* We have to make an extra copy of the array, since g_option_context_parse()
-	 * assumes that it can remove strings from the array without freeing them.
-	 */
-	argv = g_new (gchar*, argc + 1);
-	for (i = 0; i <= argc; i++)
-		argv[i] = args[i];
-
-	if (init_options(pragha, argc, argv) == -1)
-		return -1;
+	ret = handle_command_line (pragha, command_line, argc, argv);
 
 exit:
-	g_free (argv);
-	g_strfreev (args);
+	g_strfreev (argv);
 
-	return 0;
+	return ret;
+}
+
+//it's used for --help and --version
+static gboolean
+pragha_application_local_command_line (GApplication *application, gchar ***arguments, int *exit_status)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	gchar **argv = *arguments;
+	gint argc = g_strv_length (argv);
+
+	*exit_status = handle_command_line (pragha, NULL, argc, argv);
+
+	return FALSE;
 }
 
 //TODO consider use of GApplication::shutdown to save preferences and playlist
@@ -683,6 +686,7 @@ pragha_application_class_init (PraghaApplicationClass *class)
 	application_class->activate = pragha_application_activate;
 	application_class->open = pragha_application_open;
 	application_class->command_line = pragha_application_command_line;
+	application_class->local_command_line = pragha_application_local_command_line;
 }
 
 static void
