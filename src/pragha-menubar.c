@@ -799,7 +799,7 @@ void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha)
 
 static void quit_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_application_quit ();
+	pragha_application_quit (pragha);
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
