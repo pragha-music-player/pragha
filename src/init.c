@@ -320,8 +320,8 @@ gint init_config(struct con_win *cwin)
 						       &cnt,
 						       &error);
 		if (win_size) {
-			cwin->cpref->window_width = MAX(win_size[0], MIN_WINDOW_WIDTH);
-			cwin->cpref->window_height = MAX(win_size[1], MIN_WINDOW_HEIGHT);
+			cwin->cpref->window_width = win_size[0];
+			cwin->cpref->window_height = win_size[1];
 			g_free(win_size);
 		}
 		else {
@@ -1501,6 +1501,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_window_move(GTK_WINDOW(cwin->mainwindow),
 				cwin->cpref->window_x,
 				cwin->cpref->window_y);
+	}
+	else {
+		gtk_window_set_position(GTK_WINDOW(cwin->mainwindow),
+					GTK_WIN_POS_CENTER);
 	}
 
 	/* Systray */
