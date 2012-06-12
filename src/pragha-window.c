@@ -55,7 +55,7 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, PraghaApplication *pragh
 			gtk_window_iconify (GTK_WINDOW(pragha_application_get_window(pragha)));
 	}
 	else {
-		pragha_application_quit ();
+		pragha_application_quit (pragha);
 	}
 	return TRUE;
 }

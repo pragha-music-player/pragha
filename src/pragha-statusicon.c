@@ -237,7 +237,7 @@ systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 static void
 systray_quit (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	pragha_application_quit ();
+	pragha_application_quit (status_icon->pragha);
 }
 
 static void
