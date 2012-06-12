@@ -68,8 +68,6 @@ AS_IF([test "x$with_gtk3" != xno],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.0.0])],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.24.0])])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([DBUS], [dbus-1], [1.1])
-XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.84])
 XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])

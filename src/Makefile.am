@@ -1,7 +1,6 @@
 bin_PROGRAMS = pragha
 
 AM_CPPFLAGS =								\
-	-DDBUS_API_SUBJECT_TO_CHANGE					\
 	-DG_LOG_DOMAIN=\"pragha\"					\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
@@ -25,8 +24,6 @@ pragha_SOURCES = \
 		pragha-cmdline.c \
 		pragha-database.c \
 		pragha-database.h \
-		pragha-dbus.c \
-		pragha-dbus.h \
 		pragha-debug.c \
 		pragha-debug.h \
 		pragha-equalizer-dialog.c \
@@ -104,8 +101,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
-	$(DBUS_CFLAGS) 							\
-	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
@@ -118,8 +113,6 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
-	$(DBUS_LIBS) 							\
-	$(DBUS_GLIB_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\

@@ -38,14 +38,12 @@
 #include "pragha-statusicon.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
-#include "pragha-dbus.h"
 #include "pragha-window.h"
 #include "pragha-notify.h"
 #include "pragha-preferences-dialog.h"
 #include "pragha-glyr.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha-dbus.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -412,10 +410,6 @@ pragha_application_dispose (GObject *object)
 		pragha_scanner_free (pragha->scanner);
 		pragha->scanner = NULL;
 	}
-	if (pragha->con_dbus) {
-		dbus_handlers_free (pragha);
-		pragha->con_dbus = NULL;
-	}
 	if (pragha->notify) {
 		pragha_notify_free (pragha->notify);
 		pragha->notify = NULL;
@@ -463,16 +457,6 @@ pragha_application_startup (GApplication *application)
 	/* Allocate memory for simple structures */
 
 	pragha->mpris2 = pragha_mpris_new();
-
-	pragha->con_dbus = pragha_init_dbus(pragha);
-	if (!pragha->con_dbus) {
-		g_critical("Unable to init dbus connection");
-		return NULL;
-	}
-	if (pragha_init_dbus_handlers(pragha) == -1) {
-		g_critical("Unable to initialize DBUS filter handlers");
-		return NULL;
-	}
 
 	pragha->preferences = pragha_preferences_get();
 
