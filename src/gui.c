@@ -1768,6 +1768,17 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	return vbox_align;
 }
 
+GtkWidget* create_info_box(struct con_win *cwin)
+{
+	GtkWidget *info_box;
+
+	info_box = gtk_vbox_new(FALSE, 0);
+
+	cwin->info_box = info_box;
+
+	return info_box;
+}
+
 GtkWidget* create_status_bar(struct con_win *cwin)
 {
 	GtkWidget *status_bar;

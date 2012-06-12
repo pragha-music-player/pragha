@@ -829,7 +829,7 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 
 	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->hbox_panel));
 
-	gint position = cwin->cpref->controls_below ? 3 : 2;
+	gint position = cwin->cpref->controls_below ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), cwin->hbox_panel, position);
 }

@@ -1447,7 +1447,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *hbox_panel, *hbox_main, *status_bar, *menu_bar;
+	GtkWidget *vbox, *hbox_panel, *info_box, *hbox_main, *status_bar, *menu_bar;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1520,9 +1520,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Create hboxen */
 
 	menu = create_menu(cwin);
-	hbox_main = create_main_region(cwin);
 	hbox_panel = create_panel(cwin);
-	cwin->info_box = gtk_vbox_new(FALSE, 0);
+	info_box = create_info_box(cwin);
+	hbox_main = create_main_region(cwin);
 	status_bar = create_status_bar(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
@@ -1532,11 +1532,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(menu_bar),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(cwin->info_box),
-			   FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_panel),
 			   FALSE,FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox),
+			   GTK_WIDGET(info_box),
+			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_main),
 			   TRUE,TRUE, 0);
