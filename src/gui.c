@@ -375,11 +375,11 @@ GtkActionEntry cp_context_aentries[] = {
 
 GtkActionEntry playlist_tree_context_aentries[] = {
 	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 NULL, "Add to current playlist", G_CALLBACK(playlist_tree_add_to_playlist_action)},
+	 NULL, "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 NULL, "Replace current playlist", G_CALLBACK(playlist_tree_replace_playlist)},
+	 NULL, "Replace current playlist", G_CALLBACK(library_tree_replace_playlist)},
 	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 NULL, "Replace and play", G_CALLBACK(playlist_tree_replace_and_play)},
+	 NULL, "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
 	{"Rename", NULL, N_("Rename"),
 	 NULL, "Rename", G_CALLBACK(playlist_tree_rename)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
