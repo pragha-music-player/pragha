@@ -574,13 +574,14 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin)
 {
-	GtkWidget *popup_menu;
+	GtkWidget *popup_menu, *item_widget;
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
+	gint n_select = 0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
@@ -621,13 +622,33 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
-			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
+			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
 				popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
-									 "/popup");
+									"/popup");
+
+				n_select = gtk_tree_selection_count_selected_rows(selection);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+									"/popup/Rename");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
+							  n_select == 1 && gtk_tree_path_get_depth(path) > 1);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+									"/popup/Delete");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
+							  gtk_tree_path_get_depth(path) > 1);
+
+				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+									"/popup/Export");
+				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
+							  n_select == 1 &&
+							  gtk_tree_path_get_depth(path) > 1 &&
+							  node_type == NODE_PLAYLIST);
+			}
 			else
 				popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
 									 "/popup");
-	
+
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 				       event->button, event->time);
 	
@@ -1659,6 +1680,7 @@ void init_library_view(struct con_win *cwin)
 		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
 				   L_NODE_DATA, _("Playlists"),
+				   L_NODE_TYPE, NODE_PLAYLIST,
 				   -1);
 
 		for_each_result_row(result, i) {
@@ -1696,6 +1718,7 @@ void init_library_view(struct con_win *cwin)
 		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
 				   L_NODE_DATA, _("Radios"),
+				   L_NODE_TYPE, NODE_RADIO,
 				   -1);
 
 		for_each_result_row(result, i) {
