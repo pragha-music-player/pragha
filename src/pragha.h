@@ -122,10 +122,6 @@ struct _PraghaApplication {
 #ifdef HAVE_LIBKEYBINDER
 	gboolean           keybinder;
 #endif
-
-	/* Flags */
-
-	gboolean           unique_instance;
 };
 
 /* Functions to access private members */

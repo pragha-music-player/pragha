@@ -474,10 +474,6 @@ pragha_application_startup (GApplication *application)
 		return NULL;
 	}
 
-	/* Allow only one instance */
-	if (!pragha->unique_instance)
-		return pragha;
-
 	pragha->preferences = pragha_preferences_get();
 
 	pragha->cdbase = pragha_database_get();

@@ -305,11 +305,6 @@ pragha_init_dbus(PraghaApplication *pragha)
 		return NULL;
 	}
 
-	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-		pragha->unique_instance = TRUE;
-	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
-		pragha->unique_instance = FALSE;
-
 	dbus_connection_setup_with_g_main(conn, NULL);
 
 	return conn;
