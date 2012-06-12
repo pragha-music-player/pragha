@@ -592,9 +592,9 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			    && !(event->state & GDK_CONTROL_MASK)
 			    && !(event->state & GDK_SHIFT_MASK)) {
 				gtk_tree_selection_set_select_function(selection, &tree_selection_func_false, cwin, NULL);
-				}
+			}
 			else {
-					gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
+				gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
 			}
 			break;
 		case 2:
@@ -622,11 +622,11 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
+			n_select = gtk_tree_selection_count_selected_rows(selection);
+
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
 				popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
 									"/popup");
-
-				n_select = gtk_tree_selection_count_selected_rows(selection);
 
 				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
 									"/popup/Rename");
@@ -645,16 +645,21 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 							  gtk_tree_path_get_depth(path) > 1 &&
 							  node_type == NODE_PLAYLIST);
 			}
-			else
-				popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
-									 "/popup");
+			else {
+				if (gtk_tree_path_get_depth(path) > 1)
+					popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
+									       "/popup");
+				else
+					popup_menu = gtk_ui_manager_get_widget(cwin->header_library_tree_context_menu,
+									       "/popup");
+			}
 
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 				       event->button, event->time);
 	
 			/* If more than one track is selected, don't propagate event */
 	
-			if (gtk_tree_selection_count_selected_rows(selection) > 1)
+			if (n_select > 1)
 				many_selected = TRUE;
 			else
 				many_selected = FALSE;
