@@ -314,16 +314,16 @@ static GVariant* mpris_Player_OpenUri(struct con_win *cwin, GVariant* parameters
 			}
 			g_free(uri);
 		} else {
-			g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-					DBUS_ERROR_FILE_NOT_FOUND, "This file does not play here.");
+			g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+					G_DBUS_ERROR, G_DBUS_ERROR_FILE_NOT_FOUND, "This file does not play here.");
 		}
 		g_free(path);
 	} else {
 		failed = TRUE;
 	}
 	if(failed)
-		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-				DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
+		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
 	return NULL;
 }
 
@@ -350,8 +350,8 @@ static GVariant* mpris_Player_get_Rate(struct con_win *cwin) {
 }
 
 static void mpris_Player_put_Rate(struct con_win *cwin, GVariant *value) {
-	g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-		DBUS_ERROR_NOT_SUPPORTED, "This is not alsaplayer.");
+	g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "This is not alsaplayer.");
 }
 
 static GVariant* mpris_Player_get_Shuffle(struct con_win *cwin) {
@@ -530,8 +530,8 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 		g_free(found_playlist);
 	}
 	else {
-		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-							DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
+		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 	}
 
 	return NULL;
@@ -697,8 +697,8 @@ exit:
 }
 
 static GVariant* mpris_TrackList_RemoveTrack(struct con_win *cwin, GVariant* parameters) {
-	g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation,
-		DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
+	g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
 	return NULL;
 }
 
@@ -715,8 +715,8 @@ static GVariant* mpris_TrackList_GoTo(struct con_win *cwin, GVariant* parameters
 		current_playlist_row_activated_cb(
 			GTK_TREE_VIEW(cwin->current_playlist), tree_path, NULL, cwin);
 	} else
-		g_dbus_method_invocation_return_dbus_error(cwin->cmpris2->method_invocation, 
-				DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
+		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 	return NULL;
 }
 
