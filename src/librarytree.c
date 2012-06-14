@@ -257,6 +257,8 @@ static void get_path_array(GtkTreePath *path,
 	GtkTreePath *cpath;
 	gint j = 0;
 
+	cwin->cstate->view_change = TRUE;
+
 	gtk_tree_model_get_iter(model, &r_iter, path);
 
 	/* If this path is a track/radio/playlist, just append it to the array */
@@ -286,6 +288,8 @@ static void get_path_array(GtkTreePath *path,
 		}
 		gtk_tree_path_free(path);
 	}
+
+	cwin->cstate->view_change = FALSE;
 }
 
 /* Append to the given array the location ids of
@@ -300,6 +304,8 @@ static void get_location_ids(GtkTreePath *path,
 	enum node_type node_type = 0;
 	gint location_id;
 	gint j = 0;
+
+	cwin->cstate->view_change = TRUE;
 
 	gtk_tree_model_get_iter(model, &r_iter, path);
 
@@ -326,6 +332,8 @@ static void get_location_ids(GtkTreePath *path,
 			gtk_tree_path_free(path);
 		}
 	}
+
+	cwin->cstate->view_change = FALSE;
 }
 
 /* Add all the tracks under the given path to the current playlist */

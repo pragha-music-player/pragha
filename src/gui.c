@@ -717,6 +717,13 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 
 	vbox_lib = gtk_vbox_new(FALSE, 2);
 
+	search_entry = pragha_search_entry_new(cwin);
+
+	g_signal_connect (G_OBJECT(search_entry), "changed",
+			 G_CALLBACK(simple_library_search_keyrelease_handler), cwin);
+	g_signal_connect (G_OBJECT(search_entry), "activate",
+			 G_CALLBACK(simple_library_search_activate_handler), cwin);
+
 	order_selector = create_combo_order (cwin);
 
 	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -725,22 +732,11 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 				       GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
 					GTK_SHADOW_IN);
-
-	search_entry = pragha_search_entry_new(cwin);
-
-	g_signal_connect (G_OBJECT(search_entry), "changed",
-			 G_CALLBACK(simple_library_search_keyrelease_handler), cwin);
-	g_signal_connect (G_OBJECT(search_entry), "activate",
-			 G_CALLBACK(simple_library_search_activate_handler), cwin);
-
-	cwin->search_entry = search_entry;
-
-	order_selector = create_combo_order (cwin);
+	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
 
 	library_tree = create_library_tree(cwin);
 
 	gtk_container_add(GTK_CONTAINER(library_tree_scroll), library_tree);
-	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
 
 	gtk_box_pack_start(GTK_BOX(vbox_lib),
 			   order_selector,
@@ -759,6 +755,7 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   0);
 
 	cwin->browse_mode = vbox_lib;
+	cwin->search_entry = search_entry;
 
 	return vbox_lib;
 }
