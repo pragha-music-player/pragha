@@ -2651,6 +2651,8 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	CDEBUG(DBG_VERBOSE, "Dnd: Library");
 
+	cwin->cstate->view_change = TRUE;
+
 	ref_arr = *(GArray **)gtk_selection_data_get_data(data);
 	if (!ref_arr)
 		g_warning("No selections to process in DnD");
@@ -2707,6 +2709,8 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	query = g_strdup_printf("END;");
 	exec_sqlite_query(query, cwin, NULL);
+
+	cwin->cstate->view_change = FALSE;
 
 	g_array_free(ref_arr, FALSE);
 
