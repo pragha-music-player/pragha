@@ -1063,6 +1063,78 @@ exit:
 	}
 }
 
+/* Handler for 'Add All' action in the Tools menu */
+
+void add_libary_action(GtkAction *action, struct con_win *cwin)
+{
+	gint i = 0, location_id = 0, cnt = 0;
+	gchar *query;
+	struct db_result result;
+	struct musicobject *mobj;
+	GtkTreeModel *model;
+	GdkCursor *cursor;
+
+	cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
+	gdk_cursor_unref(cursor);
+
+	clear_current_playlist(action, cwin);
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
+	/* Query and insert entries */
+	/* NB: Optimization */
+
+	query = g_strdup_printf("SELECT id FROM LOCATION;");
+	if (exec_sqlite_query(query, cwin, &result)) {
+		for_each_result_row(result, i) {
+			location_id = atoi(result.resultp[i]);
+			mobj = new_musicobject_from_db(location_id, cwin);
+
+			if (!mobj)
+				g_warning("Unable to retrieve details for"
+					  " location_id : %d",
+					  location_id);
+			else
+				append_current_playlist(model, mobj, cwin);
+
+			/* Have to give control to GTK periodically ... */
+			/* If gtk_main_quit has been called, return -
+			   since main loop is no more. */
+
+			if (cnt++ % 50)
+				continue;
+
+			while(gtk_events_pending()) {
+				if (gtk_main_iteration_do(FALSE)) {
+					sqlite3_free_table(result.resultp);
+					return;
+				}
+			}
+		}
+		sqlite3_free_table(result.resultp);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
+	g_object_unref(model);
+
+	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+
+	select_last_path_of_current_playlist(cwin);
+	update_status_bar(cwin);
+
+	#if GLIB_CHECK_VERSION(2,26,0)
+	mpris_update_tracklist_replaced(cwin);
+	#endif
+}
+
+
 /* Handler for 'Statistics' action in the Tools menu */
 
 void statistics_action(GtkAction *action, struct con_win *cwin)

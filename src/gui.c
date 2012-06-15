@@ -126,7 +126,9 @@ gchar *cp_null_context_menu_xml = "<ui>		    				\
 	<menuitem action=\"Add Audio CD\"/>					\
 	<menuitem action=\"Add location\"/>					\
 	<separator/>				    				\
-	<menuitem action=\"Lateral panel\"/>				\
+	<menuitem action=\"Add the library\"/>					\
+	<separator/>				    				\
+	<menuitem action=\"Lateral panel\"/>					\
 	<separator/>				    				\
 	<menuitem action=\"Quit\"/>						\
 	</popup>				    				\
@@ -327,6 +329,8 @@ GtkActionEntry cp_null_context_aentries[] = {
 	 NULL, "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
 	 NULL, "Add a no local stream", G_CALLBACK(add_location_action)},
+	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
+	NULL, "Add all the library", G_CALLBACK(add_libary_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}
 };
