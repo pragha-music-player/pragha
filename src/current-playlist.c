@@ -2427,6 +2427,9 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/ToolsMenu");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
+			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Copy tag to selection");
+			gtk_widget_hide (GTK_WIDGET(item_widget));
+
 			item_widget = gtk_ui_manager_get_widget(cwin->cp_context_menu, "/popup/Edit tags");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
