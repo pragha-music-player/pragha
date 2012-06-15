@@ -782,6 +782,7 @@ void handle_selected_file(gpointer data, gpointer udata);
 		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Menu actions */
+
 void update_menubar_playback_state (struct con_win *cwin);
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
@@ -808,6 +809,7 @@ void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void show_equalizer_action(GtkAction *action, struct con_win *cwin);
 void rescan_library_action(GtkAction *action, struct con_win *cwin);
 void update_library_action(GtkAction *action, struct con_win *cwin);
+void add_libary_action(GtkAction *action, struct con_win *cwin);
 void statistics_action(GtkAction *action, struct con_win *cwin);
 void home_action(GtkAction *action, struct con_win *cwin);
 void community_action(GtkAction *action, struct con_win *cwin);
@@ -1310,6 +1312,7 @@ gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 
 /* Info bar import music */
+
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
 GtkWidget* create_info_bar_import_music(struct con_win *cwin);
 
