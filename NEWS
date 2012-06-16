@@ -1,5 +1,73 @@
 ==============================================================
-Overview of changes in Pragha 1.0.2 since 1.0.1
+Overview of changes in Pragha 1.1.0 since 1.0.2
+==============================================================
+
+V1.1.0
+News:
+	Suggest import XDG_MUSIC_DIR to library on first start thanks to Pavel Vasin.
+	Merge playlist and radios on unique library view pane.
+	Add option to make aproximate searchs using a levenshtein distance.
+	Add a new menu option to copy tags of selection in current playlist.
+	mpris: partially implement AddTrack thanks to Pavel Vasin.
+	Add support for gstreamer 1.0 thanks to Pavel Vasin.
+	F9 to show/hide the sidepane.
+	Add --log-file/ -l command line option to log debug to a file.
+
+Others Changes:
+	Depend on gtk 2.22 and glib 2.26
+	* Remove some hackings to prevent deprecations.
+	* This to remove dbus-glib-1 soon maked as obsolted.
+	* Until now: Only migrate utils to gdbus thanks to Pavel Vasin.
+	Follow fdo Icon Naming Specification thanks to Pavel Vasin.
+	Reorganization of the main menu (Love and hate here;).
+	* File menu change to Playback and adds the random and repeat options.
+	* Edit menu change to Playlist, and adds the options to add files, audio CD and locations.
+	* Preferences are now found in tools.
+	The initial window size and cols width is set dynamically according to the screen size.
+
+Bugs fixed:
+	Don't use gnome media keys if keybinder available.
+	Remove unnecessary execution permissions.
+	Utils: remove another redundant cast.
+	Fix xdt-autogen warning.
+	Close the dialog "Open files"immediately, and do not block gui when adding many files.
+	Fix cmdline description.
+	mpris: fix setting Shuffle property.
+	mpris: fix setting LoopStatus property.
+	Don't store unused reference to GOptionContext.
+	Free some strings at exit.
+	backend: a bit simplify volume code.
+	Build: don't use deprecated AM_CONFIG_HEADER.
+	Now anything that you drop to the playlist remain where it was dropped.
+	Use more generic function to avoid duplicate code.
+	Unref notify osd when close it. Remove unnecessary g_strdup.
+	mpris: fix yet another memory leak.
+	mpris: save a few bytes.
+	tags: fix rarely crash in edit dialog.
+	menu: simplify show_controls_below_action().
+	librarytree: assert prefix found.
+	librarytree: Use the numerated node_type directly.
+	Also set bold the year label on tag edit dialog.
+	init: fix potential memory corruption.
+	menu: fix memory leak on opening files.
+	menu: don't delay add_recent_file.
+	menu: fix another memory leak on opening files.
+	Ensure some functions don't modify their args.
+	Fix passing libraries in wrong order to the linker. See issue #29
+	Free struct con_gst at exit.
+	backend: fix gobject runtime warning.
+	Center the main window if no have saved a potition.
+	Insensitive correctly some options of radio and playlists menus.
+	Fix disable libxfce4ui on configure.ac.
+
+Updates Translations:
+	Update Rusian translation thanks to Lazy_Kent.
+	Update Czech translation thanks to anespor.
+	Update some others tranlations in transifex.
+	* Excuse the translators, who lost their names, but thank you very much!.
+
+==============================================================
+OTHERS REALESES:
 ==============================================================
 
 V1.0.2
@@ -41,10 +109,6 @@ Updates Translations:
 	Update Rusian translation thanks to lazy.kent.suse.
 	Update some tranlations in transifex.
 	* Excuse the translators, who lost their names, but thank you very much!.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.0.1
 News:
