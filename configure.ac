@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [1])
-m4_define([pragha_version_micro], [git])
+m4_define([pragha_version_micro], [0])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -152,8 +152,8 @@ dnl Check libxfce4ui
 LIBXFCE4UI_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
                        [libxfce4ui-1], [4.8.0],
-                       [libxfce4ui-1],
-                       [libxfce4ui-1 library], [yes])
+                       [libxfce4ui],
+                       [libxfce4ui library], [yes])
 
 PLPARSER_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
