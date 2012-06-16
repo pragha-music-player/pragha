@@ -234,6 +234,12 @@ static GVariant* mpris_Player_Stop(struct con_win *cwin, GVariant* parameters)
 }
 
 static GVariant* mpris_Player_Seek(struct con_win *cwin, GVariant* parameters) {
+	if (!cwin->cstate->curr_mobj) {
+		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+				G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "Nothing to seek");
+		return NULL;
+	}
+
 	gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
 	gint seek = cwin->cstate->curr_mobj->tags->length * fraction;
 	gint64 param;
