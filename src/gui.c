@@ -1509,8 +1509,8 @@ GtkWidget* create_panel(struct con_win *cwin)
 		gtk_image_new_from_stock(GTK_STOCK_MEDIA_PLAY,
 					 GTK_ICON_SIZE_LARGE_TOOLBAR);
 
-	g_object_ref(cwin->pixbuf->image_play);
-	g_object_ref(cwin->pixbuf->image_pause);
+	g_object_ref_sink (cwin->pixbuf->image_play);
+	g_object_ref_sink (cwin->pixbuf->image_pause);
 
 	/* Setup Left control buttons */
 
