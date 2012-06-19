@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=glib&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-06-14 23:01-0300\n"
+"POT-Creation-Date: 2012-06-19 18:59-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -926,15 +926,15 @@ msgstr ""
 msgid "Artist information not found."
 msgstr ""
 
+#: ../src/info-bar-import-music.c:62
+#, c-format
+msgid "Would you like to import %s to library?"
+msgstr ""
+
 #: ../src/pragha-backend.c:456
 #, c-format
 msgid ""
 "<b>Error playing current track.</b>\n"
 "(%s)\n"
 "<b>Reason:</b> %s"
-msgstr ""
-
-#: ../src/info-bar-import-music.c:62
-#, c-format
-msgid "Would you like to import %s to library?"
 msgstr ""

@@ -2,6 +2,19 @@
 Overview of changes in Pragha 1.1.0 since 1.0.2
 ==============================================================
 
+V1.1.0.1
+
+Bugs fixed:
+	Fix crash when try to crop playlist with accelerator!.
+	* And probably many other crashs.
+	gui: take ownership of images in the right way.
+	fix build on i586. See github issue #31
+	mpris: fix crash in Player.Seek
+	mpris: don't use constants from libdbus.
+
+Updates Translations:
+	Update german translation thanks to cwickert.
+
 V1.1.0
 News:
 	Suggest import XDG_MUSIC_DIR to library on first start thanks to Pavel Vasin.
