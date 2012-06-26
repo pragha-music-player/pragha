@@ -251,6 +251,7 @@ typedef enum {
 #define KEY_WINDOW_POSITION        "window_position"
 #define KEY_SIDEBAR_SIZE           "sidebar_size"
 #define KEY_SIDEBAR                "sidebar"
+#define KEY_DOUBLE_PLAYLIST        "double_playlist"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR             "status_bar"

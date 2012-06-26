@@ -1256,6 +1256,13 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SIDEBAR,
 			       cwin->cpref->lateral_panel);
 
+	/* Save last double playlist state */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_WINDOW,
+			       KEY_DOUBLE_PLAYLIST,
+			       cwin->cpref->double_playlist);
+
 	/* Save show album art option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,

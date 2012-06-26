@@ -222,7 +222,7 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, double_playlist_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -234,7 +234,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = double_playlist_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -389,6 +389,18 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			lateral_panel_f = TRUE;
 		}
+
+		cwin->cpref->double_playlist =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					      GROUP_WINDOW,
+					      KEY_DOUBLE_PLAYLIST,
+					      &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			double_playlist_f = TRUE;
+		}
+
 
 		/* Retrieve Audio preferences */
 
@@ -958,6 +970,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
 	if (all_f || lateral_panel_f)
 		cwin->cpref->lateral_panel = TRUE;
+	if (all_f || double_playlist_f)
+		cwin->cpref->double_playlist = FALSE;
 	if (all_f || libs_f)
 		cwin->cpref->library_dir = NULL;
 	if (all_f || lib_add_f)
@@ -1284,6 +1298,9 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->lateral_panel);
+
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Double playlist");
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->double_playlist);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
