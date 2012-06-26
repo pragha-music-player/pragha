@@ -51,6 +51,8 @@ void common_cleanup(struct con_win *cwin)
 
 	g_slice_free(struct pixbuf, cwin->pixbuf);
 
+	g_slice_free(struct con_playlist, cwin->cplaylist);
+
 	if (cwin->album_art)
 		gtk_widget_destroy(cwin->album_art);
 
@@ -146,6 +148,7 @@ gint main(gint argc, gchar *argv[])
 
 	cwin = g_slice_new0(struct con_win);
 	cwin->pixbuf = g_slice_new0(struct pixbuf);
+	cwin->cplaylist = g_slice_new0(struct con_playlist);
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
 	cwin->cdbase = g_slice_new0(struct con_dbase);

@@ -546,7 +546,7 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 	mpris_update_metadata_changed(cwin);
 
 	path = current_playlist_get_actual(cwin);
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 
 	if(gtk_tree_model_get_iter(model, &iter, path))
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);

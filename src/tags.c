@@ -1044,7 +1044,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 
 	clear_sort_current_playlist_cb(NULL, cwin);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	/* Get references from the paths and store them in the 'data'
@@ -1152,7 +1152,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 	sel = gtk_tree_selection_count_selected_rows(selection);
 
 	if (!sel)

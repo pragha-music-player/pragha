@@ -442,8 +442,8 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 		GdkEvent *new_event;
 
 		new_event = gdk_event_copy ((GdkEvent *) event);
-		gtk_widget_grab_focus(cwin->current_playlist);
-		ret = gtk_widget_event (GTK_WIDGET (cwin->current_playlist), new_event);
+		gtk_widget_grab_focus(cwin->cplaylist->wplaylist);
+		ret = gtk_widget_event (GTK_WIDGET (cwin->cplaylist->wplaylist), new_event);
 		gdk_event_free (new_event);
 	}
 	return ret;
@@ -570,7 +570,7 @@ void play_pause_resume(struct con_win *cwin)
 		}
 
 		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 			ref = gtk_tree_row_reference_new(model, path);
 			reset_rand_track_refs(ref, cwin);
 			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;

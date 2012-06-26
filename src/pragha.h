@@ -678,8 +678,14 @@ struct con_gnome_media_keys {
 	GDBusProxy *proxy;
 };
 
+struct con_playlist {
+	GtkWidget *container;
+	GtkWidget *wplaylist;
+};
+
 struct con_win {
 	struct pixbuf *pixbuf;
+	struct con_playlist *cplaylist;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
@@ -703,7 +709,6 @@ struct con_win {
 	GtkWidget *shuffle_button;
 	GtkWidget *repeat_button;
 	GtkWidget *vol_button;
-	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
 	GtkWidget *search_entry;
 	GtkWidget *browse_mode;

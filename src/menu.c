@@ -641,7 +641,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	mpris_update_metadata_changed(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
 		gtk_tree_path_free(path);
@@ -1080,12 +1080,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	clear_current_playlist(action, cwin);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
 
 	g_object_ref(model);
 	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), NULL);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
@@ -1119,8 +1119,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), TRUE);
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
