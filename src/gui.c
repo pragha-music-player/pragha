@@ -1448,7 +1448,8 @@ GtkWidget* create_main_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
-	GtkWidget *current_playlist;
+	GtkWidget *current_playlist, *current_playlist2;
+	GtkWidget *playlists_pane;
 
 	/* A two paned container */
 
@@ -1458,22 +1459,29 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	browse_mode = create_browse_mode_view(cwin);
 
-	/* Right pane contains the current playlist */
+	/* Right pane contains the two dual playlist */
 
 	current_playlist = create_current_playlist_view(cwin);
+	current_playlist2 = create_current_playlist_view(cwin);
 
 	/* DnD */
 
 	init_dnd(cwin);
 
-	/* Set initial sizes */
+	/* Pack the dual playlist. */
 
-	gtk_widget_set_size_request(GTK_WIDGET(browse_mode), cwin->cpref->sidebar_size, -1);
+	playlists_pane = gtk_hpaned_new();
+	gtk_paned_pack1 (GTK_PANED (playlists_pane), current_playlist, FALSE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (playlists_pane), current_playlist2, FALSE, FALSE);
 
 	/* Pack everything into the hpane */
 
-	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (hpane), current_playlist, TRUE, FALSE);
+	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (hpane), playlists_pane, TRUE, FALSE);
+
+	/* Set initial sizes */
+
+	gtk_paned_set_position (GTK_PANED (hpane), cwin->cpref->sidebar_size);
 
 	cwin->paned = hpane;
 
