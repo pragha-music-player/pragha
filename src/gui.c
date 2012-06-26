@@ -52,6 +52,7 @@ gchar *main_menu_xml = "<ui>							\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
 			<menuitem action=\"Lateral panel\"/>		\
+			<menuitem action=\"Double playlist\"/>			\
 			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
@@ -313,6 +314,9 @@ GtkToggleActionEntry toggles_entries[] = {
 	FALSE},
 	{"Lateral panel", NULL, N_("Lateral _panel"),
 	 "F9", "Lateral panel", G_CALLBACK(library_pane_action),
+	TRUE},
+	{"Double playlist", NULL, N_("_Double playlist"),
+	 "F12", "Double plylist", G_CALLBACK(double_playlist_action),
 	TRUE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
