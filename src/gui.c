@@ -1910,12 +1910,7 @@ gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 		}
 	}
 	else{
-		if (cwin->cpref->save_playlist)
-			save_current_playlist_state(cwin);
-		save_preferences(cwin);
-		common_cleanup(cwin);
-
-		gtk_main_quit();
+		exit_pragha(widget, cwin);
 	}
 	return TRUE;
 }
