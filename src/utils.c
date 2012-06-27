@@ -324,7 +324,7 @@ already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 gint
-append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin)
+append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin)
 {
 	gchar *query = NULL;
 	struct db_result result;
@@ -401,7 +401,7 @@ set_watch_cursor_on_thread(struct con_win *cwin)
 }
 
 void
-remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin)
+remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
 {
 	gdk_threads_enter ();
 	if(message != NULL)
@@ -421,7 +421,7 @@ gboolean restore_status_bar(gpointer data)
 	return FALSE;
 }
 
-void set_status_message (gchar *message, struct con_win *cwin)
+void set_status_message (const gchar *message, struct con_win *cwin)
 {
 	g_timeout_add_seconds(5, restore_status_bar, cwin);
 
@@ -444,7 +444,7 @@ void gtk_label_set_attribute_bold(GtkLabel *label)
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
-GdkPixbuf *vgdk_pixbuf_new_from_memory(char *data, size_t size)
+GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
 {
 	GInputStream *buffer_stream=NULL;
 	GdkPixbuf *buffer_pix=NULL;
@@ -479,7 +479,7 @@ gboolean is_playable_file(const gchar *file)
 
 /* Accepts only absolute path */
 
-gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin)
+gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin)
 {
 	gint ret;
 
@@ -494,7 +494,7 @@ gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin)
 	return ret;
 }
 
-gint dir_file_count(gchar *dir_name, gint call_recur)
+gint dir_file_count(const gchar *dir_name, gint call_recur)
 {
 	static gint file_count = 0;
 	GDir *dir;
@@ -529,9 +529,9 @@ gint dir_file_count(gchar *dir_name, gint call_recur)
 	return file_count;
 }
 
-static gint no_single_quote(gchar *str)
+static gint no_single_quote(const gchar *str)
 {
-	gchar *tmp = str;
+	const gchar *tmp = str;
 	gint i = 0;
 
 	if (!str)
@@ -548,11 +548,11 @@ static gint no_single_quote(gchar *str)
 
 /* Replace ' by '' */
 
-gchar* sanitize_string_sqlite3(gchar *str)
+gchar* sanitize_string_sqlite3(const gchar *str)
 {
 	gint cn, i=0;
 	gchar *ch;
-	gchar *tmp;
+	const gchar *tmp;
 
 	if (!str)
 		return NULL;
@@ -573,7 +573,7 @@ gchar* sanitize_string_sqlite3(gchar *str)
 	return ch;
 }
 
-static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
+static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
 {
 	gint i=0;
 
@@ -813,7 +813,7 @@ void free_str_list(GSList *list)
 
 /* Compare two UTF-8 strings */
 
-gint compare_utf8_str(gchar *str1, gchar *str2)
+gint compare_utf8_str(const gchar *str1, const gchar *str2)
 {
 	gchar *key1, *key2;
 	gint ret = 0;
