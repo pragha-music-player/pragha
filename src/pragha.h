@@ -612,7 +612,6 @@ struct con_state {
 	gchar *filter_entry;
 	gchar *jump_filter;
 	gchar *arturl;
-	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
@@ -675,6 +674,7 @@ struct con_playlist {
 	gboolean playlist_change;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
+	GRand *rand;
 };
 
 struct con_win {
@@ -1044,6 +1044,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 /* Current playlist */
 
+void free_current_playlist(struct con_playlist* cplaylist);
 struct con_playlist *new_current_playlist(struct con_win *cwin);
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);

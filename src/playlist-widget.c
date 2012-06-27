@@ -1079,6 +1079,13 @@ create_current_playlist_view(struct con_win *cwin)
 	return current_playlist;
 }
 
+void
+free_current_playlist(struct con_playlist* cplaylist)
+{
+	g_rand_free(cplaylist->rand);
+	g_slice_free(struct con_playlist, cplaylist);
+}
+
 struct con_playlist*
 new_current_playlist(struct con_win *cwin)
 {

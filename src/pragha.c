@@ -51,8 +51,8 @@ void common_cleanup(struct con_win *cwin)
 
 	g_slice_free(struct pixbuf, cwin->pixbuf);
 
-	g_slice_free(struct con_playlist, cwin->cplaylist0);
-	g_slice_free(struct con_playlist, cwin->cplaylist1);
+	free_current_playlist(cwin->cplaylist0);
+	free_current_playlist(cwin->cplaylist1);
 
 	if (cwin->album_art)
 		gtk_widget_destroy(cwin->album_art);
@@ -89,7 +89,6 @@ void common_cleanup(struct con_win *cwin)
 
 	g_slice_free(struct con_pref, cwin->cpref);
 
-	g_rand_free(cwin->cstate->rand);
 	g_free(cwin->cstate->last_folder);
 
 	g_slice_free(struct con_state, cwin->cstate);

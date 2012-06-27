@@ -352,7 +352,7 @@ GtkTreePath* get_first_random_track(struct con_win *cwin)
 	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	do {
-		rnd = g_rand_int_range(cwin->cstate->rand,
+		rnd = g_rand_int_range(cplaylist->rand,
 				       0,
 				       cplaylist->tracks_curr_playlist);
 		path = current_playlist_nth_track(rnd, cwin);
@@ -383,7 +383,7 @@ static GtkTreePath* get_next_unplayed_random_track(struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	while (played && cplaylist->unplayed_tracks) {
-		rnd = g_rand_int_range(cwin->cstate->rand,
+		rnd = g_rand_int_range(cplaylist->rand,
 				       0,
 				       cplaylist->tracks_curr_playlist);
 		path = current_playlist_nth_track(rnd, cwin);
@@ -416,7 +416,7 @@ static GtkTreePath* get_next_random_track(struct con_win *cwin)
 
 	rpath = gtk_tree_row_reference_get_path(cwin->cstate->curr_rand_ref);
 	do {
-		rnd = g_rand_int_range(cwin->cstate->rand,
+		rnd = g_rand_int_range(cplaylist->rand,
 				       0,
 				       cplaylist->tracks_curr_playlist);
 		path = current_playlist_nth_track(rnd, cwin);
