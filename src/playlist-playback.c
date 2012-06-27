@@ -748,7 +748,7 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 	GdkRectangle crect;
 	struct con_playlist *cplaylist;
 
-	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+	cplaylist = cwin->cstate->ref_to_playlist ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	if (path) {
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->wplaylist));
@@ -783,6 +783,7 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 		}
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cplaylist->wplaylist),
 					 path, NULL, FALSE);
+		gtk_widget_grab_focus (cplaylist->wplaylist);
 	}
 }
 
@@ -800,7 +801,10 @@ void select_last_path_of_current_playlist(struct con_win *cwin)
 
 	path = gtk_tree_path_new_from_string(ref);
 
-	jump_to_path_on_current_playlist (path, cwin);
+	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->wplaylist),
+				     path, NULL, TRUE, 1.0, 0.0);
+
+	gtk_widget_grab_focus (cplaylist->wplaylist);
 
 	gtk_tree_path_free(path);
 	g_free(ref);
@@ -2978,8 +2982,10 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	update_status_bar(cwin);
 
-	if (is_row)
+	if (is_row) {
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cplaylist->wplaylist), dest_path, NULL, TRUE, row_align, 0.0);
+		gtk_widget_grab_focus (cplaylist->wplaylist);
+	}
 	else
 		select_last_path_of_current_playlist(cwin);
 
