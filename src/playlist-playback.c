@@ -2392,7 +2392,14 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 	gboolean ret = FALSE, is_queue = FALSE;
 	struct con_playlist *cplaylist;
 
-	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+	if(GTK_WIDGET(widget) == GTK_WIDGET(cwin->cplaylist0->wplaylist)) {
+		cwin->playlist_used = 0;
+		cplaylist = cwin->cplaylist0;
+	}
+	else {
+		cwin->playlist_used = 1;
+		cplaylist = cwin->cplaylist1;
+	}
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->wplaylist));
@@ -2532,8 +2539,18 @@ gboolean current_playlist_button_release_cb(GtkWidget *widget,
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+	struct con_playlist *cplaylist;
+
+	if(GTK_WIDGET(widget) == GTK_WIDGET(cwin->cplaylist0->wplaylist)) {
+		cwin->playlist_used = 0;
+		cplaylist = cwin->cplaylist0;
+	}
+	else {
+		cwin->playlist_used = 1;
+		cplaylist = cwin->cplaylist1;
+	}
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->wplaylist));
 
 	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->cstate->dragging == TRUE) || (event->button!=1)){
 		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
