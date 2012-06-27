@@ -164,11 +164,8 @@ void handle_selected_file(gpointer data, gpointer udata)
 	g_free(data);
 
 	/* Have to give control to GTK periodically ... */
-	/* If gtk_main_quit has been called, return -
-	   since main loop is no more. */
-
 	while(gtk_events_pending())
-		if (gtk_main_iteration_do(FALSE));
+		gtk_main_iteration_do(FALSE);
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
