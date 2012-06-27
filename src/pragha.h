@@ -1052,6 +1052,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 /* Current playlist */
 
+struct con_playlist *new_current_playlist(struct con_win *cwin);
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_pixbuf_state_on_path(GtkTreePath *path, GError *error, struct con_win *cwin);
@@ -1072,7 +1073,7 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
 GtkTreePath* get_first_random_track(struct con_win *cwin);
 GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
-void init_current_playlist_columns(struct con_win *cwin);
+void init_current_playlist_columns(GtkWidget *current_playlist, struct con_win *cwin);
 void requeue_track_refs (struct con_win *cwin);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);

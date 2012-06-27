@@ -149,8 +149,6 @@ gint main(gint argc, gchar *argv[])
 
 	cwin = g_slice_new0(struct con_win);
 	cwin->pixbuf = g_slice_new0(struct pixbuf);
-	cwin->cplaylist0 = g_slice_new0(struct con_playlist);
-	cwin->cplaylist1 = g_slice_new0(struct con_playlist);
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
 	cwin->cdbase = g_slice_new0(struct con_dbase);

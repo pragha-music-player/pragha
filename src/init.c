@@ -1218,8 +1218,6 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->curr_mobj = NULL;
 
 	cwin->cstate->view_change = TRUE;
-	cwin->cplaylist0->playlist_change = TRUE;
-	cwin->cplaylist1->playlist_change = TRUE;
 
 	/* Init others default flags */
 
