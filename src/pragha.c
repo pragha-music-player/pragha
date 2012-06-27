@@ -22,7 +22,7 @@
 gint debug_level;
 
 /* FIXME: Cleanup track refs */
-void common_cleanup(struct con_win *cwin)
+static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
@@ -133,7 +133,6 @@ void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 	if (cwin->cpref->save_playlist)
 		save_current_playlist_state(cwin);
 	save_preferences(cwin);
-	common_cleanup(cwin);
 
 	gtk_main_quit();
 
@@ -247,6 +246,7 @@ gint main(gint argc, gchar *argv[])
 
 	gtk_main();
 	gdk_threads_leave();
+	common_cleanup(cwin);
 
 	return 0;
 }

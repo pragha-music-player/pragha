@@ -1372,7 +1372,6 @@ void update_related_state (struct con_win *cwin);
 
 void dialog_jump_to_track (struct con_win *cwin);
 
-void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
