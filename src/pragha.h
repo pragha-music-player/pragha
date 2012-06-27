@@ -687,7 +687,8 @@ struct con_playlist {
 
 struct con_win {
 	struct pixbuf *pixbuf;
-	struct con_playlist *cplaylist;
+	struct con_playlist *cplaylist0;
+	struct con_playlist *cplaylist1;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
@@ -740,6 +741,7 @@ struct con_win {
 	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
 	gint related_timeout_id;
+	gint playlist_used;
 	DBusConnection *con_dbus;
 };
 
@@ -776,6 +778,8 @@ void handle_selected_file(gpointer data, gpointer udata);
 #define for_each_result_row(result, i)					\
 	for (i=result.no_columns; i<((result.no_rows+1)*(result.no_columns)); \
 	     i+=result.no_columns)
+
+#define CURRENT_PLAYLIST cwin->playlist_used ?  cwin->cplaylist1->wplaylist : cwin->cplaylist0->wplaylist
 
 #define SCALE_UP_VOL(vol) volume_convert(vol, cwin->cmixer->min_vol,	\
 					 cwin->cmixer->max_vol, 0, 100)

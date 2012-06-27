@@ -122,7 +122,7 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	next = gtk_tree_model_get_iter_first(model, &iter);
 	while (next) {
@@ -189,8 +189,8 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -374,12 +374,12 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	gdk_cursor_unref(cursor);
 
 	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	g_object_ref(model);
 	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), NULL);
+	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -394,8 +394,8 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		g_free(file);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
@@ -466,7 +466,7 @@ void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_wi
 		goto bad;
 
 	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
@@ -1340,7 +1340,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	GSList *files = NULL;
 	gchar *file = NULL;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	switch(type) {
 	case SAVE_COMPLETE:
@@ -1363,7 +1363,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		break;
 	case SAVE_SELECTED:
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->cplaylist->wplaylist));
+							CURRENT_PLAYLIST));
 		list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 		if (list) {

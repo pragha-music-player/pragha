@@ -42,21 +42,21 @@ void jump_select_row_on_current_playlist (GtkTreeView *jump_tree,
 	g_free (path_string);
 
 	if (path) {
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 		gtk_tree_selection_unselect_all (selection);
 		gtk_tree_selection_select_path (GTK_TREE_SELECTION (selection), path);
 
-		gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(cwin->cplaylist->wplaylist), &vrect);
-		gtk_tree_view_get_cell_area (GTK_TREE_VIEW(cwin->cplaylist->wplaylist), path, NULL, &crect);
+		gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(CURRENT_PLAYLIST), &vrect);
+		gtk_tree_view_get_cell_area (GTK_TREE_VIEW(CURRENT_PLAYLIST), path, NULL, &crect);
 
-		gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(cwin->cplaylist->wplaylist), crect.x, crect.y, &cx, &cy);
+		gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(CURRENT_PLAYLIST), crect.x, crect.y, &cx, &cy);
 
 		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->cplaylist->wplaylist),
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(CURRENT_PLAYLIST),
 							path, NULL, TRUE, 0.5, 0.0);
 		}
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW(cwin->cplaylist->wplaylist),
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW(CURRENT_PLAYLIST),
 						path, NULL, FALSE);
 
 		gtk_tree_path_free (path);
@@ -157,7 +157,7 @@ gboolean do_jump_refilter(struct con_win *cwin)
 	gtk_tree_view_set_model (GTK_TREE_VIEW(cwin->jump_tree), NULL);
 	gtk_list_store_clear (GTK_LIST_STORE(jump_store));
 
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	if(cwin->cstate->jump_filter != NULL)
 		needle_filter = g_utf8_strdown (cwin->cstate->jump_filter, -1);
@@ -405,6 +405,6 @@ dialog_jump_to_track (struct con_win *cwin)
 	default:
 		break;
 	}
-	gtk_widget_grab_focus (cwin->cplaylist->wplaylist);
+	gtk_widget_grab_focus (CURRENT_PLAYLIST);
 	gtk_widget_destroy (dialog);
 }

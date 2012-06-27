@@ -306,7 +306,7 @@ already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 	struct musicobject *omobj = NULL;
 	gboolean ret;
 
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
 	while (ret) {
@@ -370,7 +370,7 @@ get_selected_musicobject(struct con_win *cwin)
 	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list != NULL) {

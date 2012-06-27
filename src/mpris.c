@@ -306,7 +306,7 @@ static GVariant* mpris_Player_OpenUri(struct con_win *cwin, GVariant* parameters
 
 				// Dangerous: reusing double-click-handler here.
 				current_playlist_row_activated_cb(
-					GTK_TREE_VIEW(cwin->cplaylist->wplaylist), tree_path, NULL, cwin);
+					GTK_TREE_VIEW(CURRENT_PLAYLIST), tree_path, NULL, cwin);
 
 				gtk_tree_path_free(tree_path);
 			} else {
@@ -713,7 +713,7 @@ static GVariant* mpris_TrackList_GoTo(struct con_win *cwin, GVariant* parameters
 	if(handle_path_request(cwin, path, &mobj, &tree_path)) {
 		// Dangerous: reusing double-click handler here.
 		current_playlist_row_activated_cb(
-			GTK_TREE_VIEW(cwin->cplaylist->wplaylist), tree_path, NULL, cwin);
+			GTK_TREE_VIEW(CURRENT_PLAYLIST), tree_path, NULL, cwin);
 	} else
 		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
@@ -731,7 +731,7 @@ static GVariant* mpris_TrackList_get_Tracks(struct con_win *cwin) {
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
 	// TODO: remove tree access
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		goto bad;
@@ -1060,7 +1060,7 @@ void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, Gtk
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	if(NULL == model)
 		return;
 
@@ -1127,7 +1127,7 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	
 	iter_valid = gtk_tree_model_get_iter_first(model, &iter);
 

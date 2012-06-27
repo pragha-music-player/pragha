@@ -641,7 +641,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	mpris_update_metadata_changed(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
 		gtk_tree_path_free(path);
@@ -814,7 +814,10 @@ double_playlist_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->double_playlist = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	gtk_widget_set_visible (GTK_WIDGET(cwin->cplaylist->container), cwin->cpref->double_playlist);
+	gtk_widget_set_visible (GTK_WIDGET(cwin->cplaylist1->container), cwin->cpref->double_playlist);
+
+	/* ONLY A TEST!!! */
+	cwin->playlist_used = cwin->cpref->double_playlist ? 1 : 0;
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */
@@ -1090,12 +1093,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	clear_current_playlist(action, cwin);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	g_object_ref(model);
 	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), NULL);
+	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
@@ -1129,8 +1132,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->wplaylist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->wplaylist), TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 

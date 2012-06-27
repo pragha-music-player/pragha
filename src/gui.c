@@ -1298,9 +1298,14 @@ static GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist), cwin->cpref->use_hint);
 
-	cwin->cplaylist->container = current_playlist_scroll;
-	cwin->cplaylist->wplaylist = current_playlist;
-
+	if(cwin->playlist_used) {
+		cwin->cplaylist1->container = current_playlist_scroll;
+		cwin->cplaylist1->wplaylist = current_playlist;
+	}
+	else {
+		cwin->cplaylist0->container = current_playlist_scroll;
+		cwin->cplaylist0->wplaylist = current_playlist;
+	}
 	/* Set initial column visibility */
 
 	init_current_playlist_columns(cwin);
@@ -1356,30 +1361,30 @@ static void init_dnd(struct con_win *cwin)
 
 	/* Source/Dest: Current Playlist */
 
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->cplaylist->wplaylist),
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(CURRENT_PLAYLIST),
 					       GDK_BUTTON1_MASK,
 					       tentries,
 					       G_N_ELEMENTS(tentries),
 					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(cwin->cplaylist->wplaylist),
+	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(CURRENT_PLAYLIST),
 					     tentries,
 					     G_N_ELEMENTS(tentries),
 					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->cplaylist->wplaylist)),
+	g_signal_connect(G_OBJECT(GTK_WIDGET(CURRENT_PLAYLIST)),
 			 "drag-begin",
 			 G_CALLBACK(dnd_current_playlist_begin),
 			 cwin);
-	g_signal_connect (G_OBJECT(cwin->cplaylist->wplaylist),
+	g_signal_connect (G_OBJECT(CURRENT_PLAYLIST),
 			 "drag-data-get",
 			 G_CALLBACK (drag_current_playlist_get_data),
 			 cwin);
-	g_signal_connect(G_OBJECT(cwin->cplaylist->wplaylist),
+	g_signal_connect(G_OBJECT(CURRENT_PLAYLIST),
 			 "drag-drop",
 			 G_CALLBACK(dnd_current_playlist_drop),
 			 cwin);
-	g_signal_connect(G_OBJECT(cwin->cplaylist->wplaylist),
+	g_signal_connect(G_OBJECT(CURRENT_PLAYLIST),
 			 "drag-data-received",
 			 G_CALLBACK(dnd_current_playlist_received),
 			 cwin);
@@ -1466,7 +1471,9 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Right pane contains the two dual playlist */
 
+	cwin->playlist_used = 0;
 	current_playlist = create_current_playlist_view(cwin);
+	cwin->playlist_used = 1;
 	current_playlist2 = create_current_playlist_view(cwin);
 
 	/* DnD */

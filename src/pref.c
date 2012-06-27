@@ -412,7 +412,7 @@ static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 {
 	cwin->cpref->use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->cplaylist->wplaylist), cwin->cpref->use_hint);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(CURRENT_PLAYLIST), cwin->cpref->use_hint);
 }
 
 /* Toggle album art pattern */
@@ -880,7 +880,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save column widths */
 
-	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->cplaylist->wplaylist));
+	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	cnt = g_list_length(cols);
 	if (cols) {
 		col_widths = g_new0(gint, cnt);
