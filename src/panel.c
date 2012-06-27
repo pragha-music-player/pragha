@@ -564,7 +564,7 @@ void play_pause_resume(struct con_win *cwin)
 	case ST_STOPPED:
 		if(cplaylist->playlist_change)
 			break;
-		if(cwin->cstate->queue_track_refs)
+		if(cplaylist->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if (!path)
 			path = current_playlist_get_selection(cwin);

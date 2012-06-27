@@ -177,9 +177,12 @@ void requeue_track_refs (struct con_win *cwin)
 	gchar *ch_queue_no=NULL;
 	GtkTreeIter iter;
 	gint i=0;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
-	list = cwin->cstate->queue_track_refs;
+	list = cplaylist->queue_track_refs;
 
 	while (list) {
 		ref = list->data;
@@ -204,16 +207,19 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 	GtkTreeModel *model;
 	GtkTreePath *lpath;
 	GtkTreeIter iter;
+	struct con_playlist *cplaylist;
 
-	if (cwin->cstate->queue_track_refs) {
-		list = cwin->cstate->queue_track_refs;
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (cplaylist->queue_track_refs) {
+		list = cplaylist->queue_track_refs;
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 		while (list) {
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
 			if (!gtk_tree_path_compare(path, lpath)) {
 				gtk_tree_row_reference_free(ref);
-				cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, ref);
+				cplaylist->queue_track_refs = g_slist_remove_all(cplaylist->queue_track_refs, ref);
 			}
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
@@ -232,9 +238,12 @@ void delete_rand_track_refs(GtkTreePath *path, struct con_win *cwin)
 	GList *list;
 	GtkTreeRowReference *ref;
 	GtkTreePath *lpath;
+	struct con_playlist *cplaylist;
 
-	if (cwin->cstate->rand_track_refs) {
-		list = cwin->cstate->rand_track_refs;
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (cplaylist->rand_track_refs) {
+		list = cplaylist->rand_track_refs;
 		while (list) {
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
@@ -242,8 +251,8 @@ void delete_rand_track_refs(GtkTreePath *path, struct con_win *cwin)
 				if (is_current_rand_ref(ref, cwin))
 					cwin->cstate->curr_rand_ref = NULL;
 				gtk_tree_row_reference_free(ref);
-				cwin->cstate->rand_track_refs =
-					g_list_remove(cwin->cstate->rand_track_refs,
+				cplaylist->rand_track_refs =
+					g_list_remove(cplaylist->rand_track_refs,
 						      ref);
 				gtk_tree_path_free(lpath);
 				break;
@@ -261,11 +270,14 @@ static GtkTreeRowReference* get_rand_ref_next(GtkTreeRowReference *ref,
 {
 	GtkTreeRowReference *ret_ref = NULL;
 	GList *list;
+	struct con_playlist *cplaylist;
 
-	if (!cwin->cstate->rand_track_refs)
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (!cplaylist->rand_track_refs)
 		return NULL;
 
-	list = cwin->cstate->rand_track_refs;
+	list = cplaylist->rand_track_refs;
 	while (list) {
 		if (ref == list->data) {
 			ret_ref = list->next->data;
@@ -283,11 +295,14 @@ static GtkTreeRowReference* get_rand_ref_prev(GtkTreeRowReference *ref,
 {
 	GtkTreeRowReference *ret_ref = NULL;
 	GList *list;
+	struct con_playlist *cplaylist;
 
-	if (!cwin->cstate->rand_track_refs)
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (!cplaylist->rand_track_refs)
 		return NULL;
 
-	list = cwin->cstate->rand_track_refs;
+	list = cplaylist->rand_track_refs;
 	while (list) {
 		if (ref == list->data) {
 			ret_ref = list->prev->data;
@@ -332,8 +347,11 @@ static GtkTreePath* current_playlist_nth_track(gint n, struct con_win *cwin)
 GtkTreePath* get_next_queue_track(struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
+	struct con_playlist *cplaylist;
 
-	path = gtk_tree_row_reference_get_path(cwin->cstate->queue_track_refs->data);
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	path = gtk_tree_row_reference_get_path(cplaylist->queue_track_refs->data);
 
 	delete_queue_track_refs(path, cwin);
 	requeue_track_refs (cwin);
@@ -478,8 +496,11 @@ static GtkTreePath* get_next_random_ref_track(struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
 	GList *i, *j;
+	struct con_playlist *cplaylist;
 
-	i = g_list_find(cwin->cstate->rand_track_refs, cwin->cstate->curr_rand_ref);
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	i = g_list_find(cplaylist->rand_track_refs, cwin->cstate->curr_rand_ref);
 	if (i) {
 		j = g_list_next(i);
 		if (j)
@@ -495,11 +516,14 @@ static GtkTreePath* get_prev_random_track(struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
 	GList *i, *j;
+	struct con_playlist *cplaylist;
 
-	if (!cwin->cstate->rand_track_refs)
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (!cplaylist->rand_track_refs)
 		return NULL;
 
-	i = g_list_find(cwin->cstate->rand_track_refs, cwin->cstate->curr_rand_ref);
+	i = g_list_find(cplaylist->rand_track_refs, cwin->cstate->curr_rand_ref);
 	if (i) {
 		j = g_list_previous(i);
 		if (j)
@@ -536,7 +560,11 @@ static GtkTreePath* get_prev_sequential_track(struct con_win *cwin)
 
 static void append_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin)
 {
-	cwin->cstate->rand_track_refs = g_list_append(cwin->cstate->rand_track_refs,
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	cplaylist->rand_track_refs = g_list_append(cplaylist->rand_track_refs,
 						      ref);
 }
 
@@ -545,15 +573,18 @@ static void append_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwi
 static void clear_rand_track_refs(struct con_win *cwin)
 {
 	GList *list;
+	struct con_playlist *cplaylist;
 
-	if (cwin->cstate->rand_track_refs) {
-		list = cwin->cstate->rand_track_refs;
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (cplaylist->rand_track_refs) {
+		list = cplaylist->rand_track_refs;
 		while (list) {
 			gtk_tree_row_reference_free(list->data);
 			list = list->next;
 		}
-		g_list_free(cwin->cstate->rand_track_refs);
-		cwin->cstate->rand_track_refs = NULL;
+		g_list_free(cplaylist->rand_track_refs);
+		cplaylist->rand_track_refs = NULL;
 	}
 
 	cwin->cstate->curr_rand_ref = NULL;
@@ -564,18 +595,21 @@ static void clear_rand_track_refs(struct con_win *cwin)
 static void clear_queue_track_refs(struct con_win *cwin)
 {
 	GSList *list = NULL;
+	struct con_playlist *cplaylist;
 
-	if (cwin->cstate->queue_track_refs) {
-		list = cwin->cstate->queue_track_refs;
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if (cplaylist->queue_track_refs) {
+		list = cplaylist->queue_track_refs;
 		while (list) {
 			gtk_tree_row_reference_free(list->data);
 			list = list->next;
 		}
-		g_slist_free(cwin->cstate->queue_track_refs);
-		cwin->cstate->queue_track_refs = NULL;
+		g_slist_free(cplaylist->queue_track_refs);
+		cplaylist->queue_track_refs = NULL;
 	}
 
-	cwin->cstate->queue_track_refs = NULL;
+	cplaylist->queue_track_refs = NULL;
 }
 
 /* Mark a track in current playlist as dirty */
@@ -857,7 +891,7 @@ void update_current_state(GtkTreePath *path,
 			case PLAYLIST_NEXT:
 				if (cwin->cstate->curr_rand_ref) {
 					if (cwin->cstate->curr_rand_ref !=
-					    (g_list_last(cwin->cstate->rand_track_refs)->data)) {
+					    (g_list_last(cplaylist->rand_track_refs)->data)) {
 						cwin->cstate->curr_rand_ref =
 							get_rand_ref_next(cwin->cstate->curr_rand_ref,
 									  cwin);
@@ -868,8 +902,8 @@ void update_current_state(GtkTreePath *path,
 			/* Append a new ref of the track to the track references */
 			case PLAYLIST_CURR:
 				rand_ref = gtk_tree_row_reference_new(model, path);
-				cwin->cstate->rand_track_refs =
-					g_list_append(cwin->cstate->rand_track_refs,
+				cplaylist->rand_track_refs =
+					g_list_append(cplaylist->rand_track_refs,
 						      rand_ref);
 				cwin->cstate->curr_rand_ref = rand_ref;
 				break;
@@ -1014,7 +1048,7 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return NULL;
 
-	if(cwin->cstate->queue_track_refs){
+	if(cplaylist->queue_track_refs){
 		path = get_next_queue_track(cwin);
 		ref = gtk_tree_row_reference_new(model, path);
 		reset_rand_track_refs(ref, cwin);
@@ -1023,7 +1057,7 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	else{
 		switch (cwin->cpref->shuffle) {
 			case TRUE:
-				last = g_list_last(cwin->cstate->rand_track_refs);
+				last = g_list_last(cplaylist->rand_track_refs);
 				if ((!cwin->cstate->curr_rand_ref) || (last && (cwin->cstate->curr_rand_ref == last->data))){
 					path = get_next_unplayed_random_track(cwin);
 					if (!path)
@@ -1139,6 +1173,9 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeRowReference *ref;
 	GList *list, *l;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1147,7 +1184,7 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	while (l) {
 		path = l->data;
 		ref = gtk_tree_row_reference_new(model, path);
-		cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+		cplaylist->queue_track_refs = g_slist_append(cplaylist->queue_track_refs, ref);
 		gtk_tree_path_free(path);
 		l = l->next;
 	}
@@ -1166,6 +1203,9 @@ void toggle_queue_selected_current_playlist (struct con_win *cwin)
 	GtkTreeIter iter;
 	gboolean is_queue = FALSE;
 	GList *list;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1178,7 +1218,7 @@ void toggle_queue_selected_current_playlist (struct con_win *cwin)
 				delete_queue_track_refs(path, cwin);
 			else {
 				ref = gtk_tree_row_reference_new(model, path);
-				cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+				cplaylist->queue_track_refs = g_slist_append(cplaylist->queue_track_refs, ref);
 			}
 		}
 		gtk_tree_path_free(path);
@@ -1198,6 +1238,9 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 	GList *list;
 	gint n_select = 0;
 	gboolean is_queue = FALSE;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	/* Special case some shortcuts 
 	if (event->state != 0) {
@@ -1234,7 +1277,7 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 					delete_queue_track_refs(list->data, cwin);
 				else{
 					ref = gtk_tree_row_reference_new(model, list->data);
-					cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+					cplaylist->queue_track_refs = g_slist_append(cplaylist->queue_track_refs, ref);
 				}
 				requeue_track_refs(cwin);
 			}
@@ -2119,7 +2162,7 @@ void play_track(struct con_win *cwin)
 	case ST_STOPPED:
 		if(cplaylist->playlist_change)
 			break;
-		if(cwin->cstate->queue_track_refs)
+		if(cplaylist->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if(!path)
 			path = current_playlist_get_selection(cwin);

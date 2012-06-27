@@ -612,8 +612,6 @@ struct con_state {
 	gchar *filter_entry;
 	gchar *jump_filter;
 	gchar *arturl;
-	GList *rand_track_refs;
-	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
 	cdrom_drive_t *cdda_drive;
@@ -675,6 +673,8 @@ struct con_playlist {
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
 	GRand *rand;
+	GList *rand_track_refs;
+	GSList *queue_track_refs;
 };
 
 struct con_win {

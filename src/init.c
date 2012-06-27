@@ -1208,9 +1208,6 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->filter_entry = NULL;
 	cwin->cstate->jump_filter = NULL;
 
-	cwin->cstate->rand_track_refs = NULL;
-	cwin->cstate->queue_track_refs = NULL;
-
 	cwin->cstate->dragging = FALSE;
 	cwin->cstate->curr_mobj_clear = FALSE;
 
