@@ -293,6 +293,45 @@ static GtkUIManager* create_cp_null_context_menu(GtkWidget *current_playlist,
 	return context_menu;
 }
 
+GtkTargetEntry pentries[] = {
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
+	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
+	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
+};
+
+static void init_playlist_dnd(struct con_playlist *cplaylist, struct con_win *cwin)
+{
+	/* Source/Dest: Current Playlist */
+
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cplaylist->wplaylist),
+					       GDK_BUTTON1_MASK,
+					       pentries,
+					       G_N_ELEMENTS(pentries),
+					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
+
+	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(cplaylist->wplaylist),
+					     pentries,
+					     G_N_ELEMENTS(pentries),
+					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cplaylist->wplaylist)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_current_playlist_begin),
+			 cwin);
+	g_signal_connect (G_OBJECT(cplaylist->wplaylist),
+			 "drag-data-get",
+			 G_CALLBACK (drag_current_playlist_get_data),
+			 cwin);
+	g_signal_connect(G_OBJECT(cplaylist->wplaylist),
+			 "drag-drop",
+			 G_CALLBACK(dnd_current_playlist_drop),
+			 cwin);
+	g_signal_connect(G_OBJECT(cplaylist->wplaylist),
+			 "drag-data-received",
+			 G_CALLBACK(dnd_current_playlist_received),
+			 cwin);
+}
+
 /* Initialize columns of current playlist */
 
 void init_current_playlist_columns(GtkWidget *current_playlist, struct con_win *cwin)
@@ -1097,6 +1136,8 @@ new_current_playlist(struct con_win *cwin)
 	cplaylist->wplaylist = create_current_playlist_view(cwin);
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->container), cplaylist->wplaylist);
+
+	init_playlist_dnd(cplaylist, cwin);
 
 	cplaylist->rand = g_rand_new();
 	cplaylist->playlist_change = TRUE;

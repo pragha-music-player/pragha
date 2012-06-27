@@ -373,12 +373,6 @@ GtkActionEntry systray_menu_aentries[] = {
 	 "", "Quit", G_CALLBACK(systray_quit)}
 };
 
-GtkTargetEntry tentries[] = {
-	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
-	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
-	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
-};
-
 /****************/
 /* Library tree */
 /****************/
@@ -609,6 +603,33 @@ static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
 	return context_menu;
 }
 
+GtkTargetEntry lentries[] = {
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
+	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
+	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
+};
+
+
+static void init_library_dnd(struct con_win *cwin)
+{
+	/* Source: Library View */
+
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->library_tree),
+					       GDK_BUTTON1_MASK,
+					       lentries,
+					       G_N_ELEMENTS(lentries),
+					       GDK_ACTION_COPY);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_library_tree_begin),
+			 cwin);
+	g_signal_connect(G_OBJECT(cwin->library_tree),
+			 "drag-data-get",
+			 G_CALLBACK(dnd_library_tree_get),
+			 cwin);
+}
+
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *vbox_lib;
@@ -657,6 +678,8 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 	cwin->browse_mode = vbox_lib;
 	cwin->search_entry = search_entry;
 
+	init_library_dnd(cwin);
+
 	return vbox_lib;
 }
 
@@ -683,56 +706,6 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 					       gpointer data)
 {
 	return FALSE;
-}
-
-static void init_dnd(struct con_win *cwin)
-{
-	/* Source: Library View */
-
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->library_tree),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_library_tree_begin),
-			 cwin);
-	g_signal_connect(G_OBJECT(cwin->library_tree),
-			 "drag-data-get",
-			 G_CALLBACK(dnd_library_tree_get),
-			 cwin);
-
-	/* Source/Dest: Current Playlist */
-
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(CURRENT_PLAYLIST),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
-
-	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(CURRENT_PLAYLIST),
-					     tentries,
-					     G_N_ELEMENTS(tentries),
-					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(CURRENT_PLAYLIST)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_current_playlist_begin),
-			 cwin);
-	g_signal_connect (G_OBJECT(CURRENT_PLAYLIST),
-			 "drag-data-get",
-			 G_CALLBACK (drag_current_playlist_get_data),
-			 cwin);
-	g_signal_connect(G_OBJECT(CURRENT_PLAYLIST),
-			 "drag-drop",
-			 G_CALLBACK(dnd_current_playlist_drop),
-			 cwin);
-	g_signal_connect(G_OBJECT(CURRENT_PLAYLIST),
-			 "drag-data-received",
-			 G_CALLBACK(dnd_current_playlist_received),
-			 cwin);
 }
 
 GtkUIManager* create_systray_menu(struct con_win *cwin)
@@ -824,10 +797,6 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	cwin->playlist_used = 1;
 	cwin->cplaylist1 = new_current_playlist(cwin);
 	gtk_paned_pack2 (GTK_PANED (playlists_pane), cwin->cplaylist1->container, FALSE, FALSE);
-
-	/* DnD */
-
-	init_dnd(cwin);
 
 	/* Pack everything into the hpane */
 
