@@ -1098,8 +1098,8 @@ new_current_playlist(struct con_win *cwin)
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->container), cplaylist->wplaylist);
 
+	cplaylist->rand = g_rand_new();
 	cplaylist->playlist_change = TRUE;
-	cplaylist->rand = NULL;
 
 	return cplaylist;
 }
