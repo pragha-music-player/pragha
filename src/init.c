@@ -1394,7 +1394,6 @@ void init_pixbufs(struct con_win *cwin)
 static void
 pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
 {
-	common_cleanup(cwin);
 	gtk_main_quit();
 }
 
