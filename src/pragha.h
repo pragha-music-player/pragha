@@ -607,8 +607,6 @@ struct con_state {
 	gboolean view_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
-	gint tracks_curr_playlist;
-	gint unplayed_tracks;
 	gint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
@@ -675,6 +673,8 @@ struct con_playlist {
 	GtkWidget *container;
 	GtkWidget *wplaylist;
 	gboolean playlist_change;
+	gint tracks_curr_playlist;
+	gint unplayed_tracks;
 };
 
 struct con_win {

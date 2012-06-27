@@ -502,13 +502,16 @@ repeat_button_handler (GtkToggleButton *button, struct con_win *cwin)
 void shuffle_button (struct con_win *cwin)
 {
 	GtkTreeRowReference *ref;
+	struct con_playlist *cplaylist;
 
-	if(cwin->cstate->tracks_curr_playlist){
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	if(cplaylist->tracks_curr_playlist){
 		current_playlist_clear_dirty_all(cwin);
 
  		if (!cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle off");
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+			cplaylist->unplayed_tracks = cplaylist->tracks_curr_playlist;
 			if (cwin->cstate->curr_rand_ref)
 				cwin->cstate->curr_seq_ref =
 					gtk_tree_row_reference_copy(cwin->cstate->curr_rand_ref);
@@ -519,7 +522,7 @@ void shuffle_button (struct con_win *cwin)
 			CDEBUG(DBG_INFO, "Turning shuffle on");
 			if (cwin->cstate->curr_seq_ref) {
 				ref = gtk_tree_row_reference_copy(cwin->cstate->curr_seq_ref);
-				cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist - 1;
+				cplaylist->unplayed_tracks = cplaylist->tracks_curr_playlist - 1;
 				reset_rand_track_refs(ref, cwin);
 			}
 		}
@@ -537,6 +540,9 @@ void play_pause_resume(struct con_win *cwin)
 	GtkTreePath *path=NULL;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	/* New action is based on the current state */
 
@@ -556,7 +562,7 @@ void play_pause_resume(struct con_win *cwin)
 		backend_resume(cwin);
 		break;
 	case ST_STOPPED:
-		if(CURRENT_PLAYLIST_CHANGE)
+		if(cplaylist->playlist_change)
 			break;
 		if(cwin->cstate->queue_track_refs)
 			path = get_next_queue_track(cwin);
@@ -573,7 +579,7 @@ void play_pause_resume(struct con_win *cwin)
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 			ref = gtk_tree_row_reference_new(model, path);
 			reset_rand_track_refs(ref, cwin);
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+			cplaylist->unplayed_tracks = cplaylist->tracks_curr_playlist;
 		}
 
 		mobj = current_playlist_mobj_at_path(path, cwin);
