@@ -2894,7 +2894,14 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GList *list = NULL;
 	struct con_playlist *cplaylist;
 
-	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+	if(GTK_WIDGET(widget) == GTK_WIDGET(cwin->cplaylist0->wplaylist)) {
+		cwin->playlist_used = 0;
+		cplaylist = cwin->cplaylist0;
+	}
+	else {
+		cwin->playlist_used = 1;
+		cplaylist = cwin->cplaylist1;
+	}
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 
@@ -2924,7 +2931,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	/* Reorder within current playlist */
 
-	if (gtk_drag_get_source_widget(context) == GTK_WIDGET(CURRENT_PLAYLIST)) {
+	if (gtk_drag_get_source_widget(context) == GTK_WIDGET(cplaylist->wplaylist)) {
 		dnd_current_playlist_reorder(model, &dest_iter, pos, cwin);
 		goto exit;
 	}
@@ -2955,8 +2962,8 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Insert mobj list to current playlist. */
 
 	g_object_ref(model);
-	SET_CURRENT_PLAYLIST_CHANGE(cwin);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
+	cplaylist->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 	if (is_row)
@@ -2965,8 +2972,8 @@ void dnd_current_playlist_received(GtkWidget *widget,
 		append_mobj_list_current_playlist(model, list, cwin);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
-	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
+	cplaylist->playlist_change = FALSE;
 	g_object_unref(model);
 
 	update_status_bar(cwin);
