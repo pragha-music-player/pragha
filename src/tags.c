@@ -235,7 +235,8 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	gboolean ret = FALSE;
 	gchar *query = NULL, *stitle = NULL, *sartist = NULL, *scomment= NULL;
 	gchar *salbum = NULL, *sgenre = NULL, *file = NULL;
-	gint i = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	guint i = 0;
 	struct db_result result;
 
 	if (!changed)
@@ -1026,7 +1027,8 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL, *file_arr = NULL;
-	gint location_id, j = 0;
+	gint location_id;
+	guint j = 0;
 	gchar *sfile = NULL, *tfile;
 
 	/* Check if user is trying to set the same track no for multiple tracks */
@@ -1146,7 +1148,8 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL, *file_arr = NULL;
-	gint sel = 0, location_id, changed = 0, j = 0;
+	gint sel = 0, location_id, changed = 0;
+	guint j = 0;
 	gchar *sfile = NULL, *tfile;
 
 	memset(&otag, 0, sizeof(struct tags));
