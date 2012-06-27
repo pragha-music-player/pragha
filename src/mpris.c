@@ -540,12 +540,12 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 static GVariant* mpris_Playlists_GetPlaylists(struct con_win *cwin, GVariant* parameters)
 {
 	GVariantBuilder builder;
-	guint start, max;
+	guint i = 0, start, max;
 	gchar *order;
 	gchar ** lists = NULL;
 	gchar *listpath = NULL;
 	gboolean reverse;
-	gint i = 0, imax = 0;
+	gint imax = 0;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Playlists GetPlaylists");
 

@@ -439,7 +439,8 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	GtkWidget *question_dialog;
 	gchar *query = NULL, *filename = NULL;
 	gchar *primary, *secondary;
-	gint response, i, location_id = 0;
+	gint response, location_id = 0;
+	guint i;
 	gboolean deleted = FALSE;
 	struct db_result result;
 
