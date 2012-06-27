@@ -584,16 +584,11 @@ struct db_result {
  * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
  * @state: State of the player { ST_STOPPED, ... }
- * @cmd: Thread Command {CMD_PLAYBACK_STOP, ... }
- * @seek_len: New seek length to pass to playback thread
  * @tracks_curr_playlist: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
- * @newsec: Arg for idle func invoked from playback thread
- * @seek_fraction: New seek fraction to pass to playback thread
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
  * @rand: To generate random numbers
- * @c_cond: Cond Between playback thread and main process
  * @rand_track_refs: List of references maintained in Shuffle mode
  * @curr_rand_ref: Currently playing track in Shuffle mode
  * @curr_seq_ref: Currently playing track in non-Shuffle mode
@@ -611,12 +606,9 @@ struct con_state {
 	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
-	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
-	gint newsec;
 	gint timeout_id;
-	gdouble seek_fraction;
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
