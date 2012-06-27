@@ -610,7 +610,6 @@ struct con_state {
 	gboolean unique_instance;
 	gboolean stop_scan;
 	gboolean view_change;
-	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
 	gint seek_len;
@@ -683,6 +682,7 @@ struct con_gnome_media_keys {
 struct con_playlist {
 	GtkWidget *container;
 	GtkWidget *wplaylist;
+	gboolean playlist_change;
 };
 
 struct con_win {
@@ -780,6 +780,15 @@ void handle_selected_file(gpointer data, gpointer udata);
 	     i+=result.no_columns)
 
 #define CURRENT_PLAYLIST cwin->playlist_used ?  cwin->cplaylist1->wplaylist : cwin->cplaylist0->wplaylist
+
+#define CURRENT_PLAYLIST_CHANGE cwin->playlist_used ? \
+	cwin->cplaylist1->playlist_change : cwin->cplaylist0->playlist_change
+
+#define SET_CURRENT_PLAYLIST_CHANGE(cwin) cwin->playlist_used ? \
+	(cwin->cplaylist1->playlist_change = TRUE) : (cwin->cplaylist0->playlist_change = TRUE)
+
+#define REMOVE_CURRENT_PLAYLIST_CHANGE(cwin) cwin->playlist_used ? \
+	(cwin->cplaylist1->playlist_change = FALSE) : (cwin->cplaylist0->playlist_change = FALSE)
 
 #define SCALE_UP_VOL(vol) volume_convert(vol, cwin->cmixer->min_vol,	\
 					 cwin->cmixer->max_vol, 0, 100)

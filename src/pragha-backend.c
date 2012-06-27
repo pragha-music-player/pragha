@@ -374,7 +374,7 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 	/* Stop to set ready and clear all info */
 	backend_stop(error, cwin);
 
-	if(cwin->cstate->playlist_change)
+	if(CURRENT_PLAYLIST_CHANGE)
 		return;
 
 	/* Get the next track to be played */

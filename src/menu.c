@@ -1096,7 +1096,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
 
 	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
+	SET_CURRENT_PLAYLIST_CHANGE(cwin);
 	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
 
@@ -1134,7 +1134,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
-	cwin->cstate->playlist_change = FALSE;
+	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
 	g_object_unref(model);
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);

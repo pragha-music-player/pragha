@@ -556,7 +556,7 @@ void play_pause_resume(struct con_win *cwin)
 		backend_resume(cwin);
 		break;
 	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
+		if(CURRENT_PLAYLIST_CHANGE)
 			break;
 		if(cwin->cstate->queue_track_refs)
 			path = get_next_queue_track(cwin);
