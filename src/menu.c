@@ -817,7 +817,8 @@ double_playlist_action (GtkAction *action, struct con_win *cwin)
 	gtk_widget_set_visible (GTK_WIDGET(cwin->cplaylist1->container), cwin->cpref->double_playlist);
 
 	/* ONLY A TEST!!! */
-	cwin->playlist_used = cwin->cpref->double_playlist ? 1 : 0;
+	if (!cwin->cpref->double_playlist)
+		cwin->playlist_used = 0;
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */

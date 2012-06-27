@@ -608,6 +608,7 @@ struct con_state {
 	gboolean curr_mobj_clear;
 	gboolean first_run;
 	gint timeout_id;
+	gint ref_to_playlist;
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
