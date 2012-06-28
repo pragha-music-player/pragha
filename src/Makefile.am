@@ -48,8 +48,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GIO_CFLAGS) 							\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
-	$(TAGLIB_CFLAGS) 						\
-	$(TAGLIBC_CFLAGS) 						\
+	$(TAGLIB_C_CFLAGS) 						\
 	$(DBUS_CFLAGS) 							\
 	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
@@ -63,8 +62,7 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
-	$(TAGLIB_LIBS)							\
-	$(TAGLIBC_LIBS)							\
+	$(TAGLIB_C_LIBS)						\
 	$(DBUS_LIBS) 							\
 	$(DBUS_GLIB_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\

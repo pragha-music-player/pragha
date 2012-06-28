@@ -88,21 +88,7 @@ XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
-XDT_CHECK_PACKAGE([TAGLIB], [taglib], [1.4])
-
-dnl Check for taglib_c headers.
-TAGLIBC_LIBS=""
-TAGLIBC_CFLAGS=""
-AC_CHECK_LIB([tag_c], [taglib_file_new],
-[
- AC_CHECK_HEADER([taglib/tag_c.h],
- [
-  TAGLIBC_LIBS="-ltag_c"
-  AC_DEFINE([HAVE_TAGLIBC], [1], [Define to 1 if tag_c is found])
-  ])
-], [-lm])
-AC_SUBST([TAGLIBC_CFLAGS])
-AC_SUBST([TAGLIBC_LIBS]) 
+XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
 dnl Check min taglib to add monkeyaudio support
 TAGLIB_1_7_FOUND="no"
