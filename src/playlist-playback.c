@@ -1459,8 +1459,8 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Delete the referenced nodes */
 
 	g_object_ref(model);
-	SET_CURRENT_PLAYLIST_CHANGE(cwin);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
+	cplaylist->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 	for (i=to_delete; i != NULL; i = i->next) {
@@ -1497,8 +1497,8 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
-	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
+	cplaylist->playlist_change = FALSE;
 	g_object_unref(model);
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
@@ -1978,10 +1978,13 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	gchar *playlist;
 	enum playlist_mgmt choice = 0;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	/* If current playlist is empty, return immediately. */
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 	if (!gtk_tree_model_get_iter_first(model, &iter)) {
 		g_warning("Current playlist is empty");
 		return;
@@ -1991,7 +1994,7 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	   return immediately. */
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-						CURRENT_PLAYLIST));
+						cplaylist->wplaylist));
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
@@ -3121,7 +3124,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	gdk_cursor_unref(cursor);
 
 	g_object_ref(model);
-	SET_CURRENT_PLAYLIST_CHANGE(cwin);
+	cplaylist->playlist_change = TRUE;
 	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
@@ -3148,7 +3151,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
-	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
+	cplaylist->playlist_change = FALSE;
 	g_object_unref(model);
 
 	update_status_bar(cwin);

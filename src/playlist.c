@@ -186,11 +186,14 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 	gsize bytes = 0;
 	GError *err = NULL;
 	gint ret = 0;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->wplaylist));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 	if (list) {
@@ -358,6 +361,9 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	struct db_result result;
 	struct musicobject *mobj;
 	GdkCursor *cursor;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin);
@@ -374,12 +380,12 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	gdk_cursor_unref(cursor);
 
 	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 
 	g_object_ref(model);
-	SET_CURRENT_PLAYLIST_CHANGE(cwin);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
+	cplaylist->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -394,9 +400,9 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		g_free(file);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
-	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
+	cplaylist->playlist_change = FALSE;
 	g_object_unref(model);
 
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);

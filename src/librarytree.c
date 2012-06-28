@@ -530,6 +530,9 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	GtkTreeModel *filter_model, *playlist_model;
 	enum node_type node_type;
 	GdkCursor *cursor;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
@@ -557,15 +560,15 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 		add_row_current_playlist(path, filter_model, playlist_model, cwin);
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
 		g_object_unref(playlist_model);
 
 		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
@@ -1210,6 +1213,9 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GList *list, *i;
 	GdkCursor *cursor;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1221,10 +1227,10 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 
 		clear_current_playlist(action, cwin);
 
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 		/* Add all the rows to the current playlist */
 
@@ -1242,8 +1248,8 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 					return;
 		}
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
 		g_object_unref(playlist_model);
 
 		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
@@ -1261,6 +1267,9 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GList *list, *i;
 	GdkCursor *cursor;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1272,10 +1281,10 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 
 		clear_current_playlist(action, cwin);
 
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 		/* Add all the rows to the current playlist */
 
@@ -1293,8 +1302,8 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 					return;
 		}
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
 		g_object_unref(playlist_model);
 
 		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
@@ -1318,6 +1327,9 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 	GtkTreePath *path;
 	GList *list, *i;
 	GdkCursor *cursor;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1327,10 +1339,10 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
 		gdk_cursor_unref(cursor);
 
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), NULL);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
 		/* Add all the rows to the current playlist */
 
@@ -1348,8 +1360,8 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 					return;
 		}
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(CURRENT_PLAYLIST), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), playlist_model);
+		gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
 		g_object_unref(playlist_model);
 
 		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);

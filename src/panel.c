@@ -437,13 +437,16 @@ void unset_album_art(struct con_win *cwin)
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
 {
 	gboolean ret = FALSE;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down){
 		GdkEvent *new_event;
 
 		new_event = gdk_event_copy ((GdkEvent *) event);
-		gtk_widget_grab_focus(CURRENT_PLAYLIST);
-		ret = gtk_widget_event (GTK_WIDGET (CURRENT_PLAYLIST), new_event);
+		gtk_widget_grab_focus(cplaylist->wplaylist);
+		ret = gtk_widget_event (GTK_WIDGET (cplaylist->wplaylist), new_event);
 		gdk_event_free (new_event);
 	}
 	return ret;
@@ -576,7 +579,7 @@ void play_pause_resume(struct con_win *cwin)
 		}
 
 		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 			ref = gtk_tree_row_reference_new(model, path);
 			reset_rand_track_refs(ref, cwin);
 			cplaylist->unplayed_tracks = cplaylist->tracks_curr_playlist;

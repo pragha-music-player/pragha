@@ -28,6 +28,9 @@ void jump_select_row_on_current_playlist (GtkTreeView *jump_tree,
 	GtkTreePath *path=NULL;
 	GtkTreeSelection *selection;
 	gint cx, cy;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	GdkRectangle vrect;
 	GdkRectangle crect;
@@ -42,21 +45,21 @@ void jump_select_row_on_current_playlist (GtkTreeView *jump_tree,
 	g_free (path_string);
 
 	if (path) {
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(CURRENT_PLAYLIST));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cplaylist->wplaylist));
 
 		gtk_tree_selection_unselect_all (selection);
 		gtk_tree_selection_select_path (GTK_TREE_SELECTION (selection), path);
 
-		gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(CURRENT_PLAYLIST), &vrect);
-		gtk_tree_view_get_cell_area (GTK_TREE_VIEW(CURRENT_PLAYLIST), path, NULL, &crect);
+		gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(cplaylist->wplaylist), &vrect);
+		gtk_tree_view_get_cell_area (GTK_TREE_VIEW(cplaylist->wplaylist), path, NULL, &crect);
 
-		gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(CURRENT_PLAYLIST), crect.x, crect.y, &cx, &cy);
+		gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(cplaylist->wplaylist), crect.x, crect.y, &cx, &cy);
 
 		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(CURRENT_PLAYLIST),
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cplaylist->wplaylist),
 							path, NULL, TRUE, 0.5, 0.0);
 		}
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW(CURRENT_PLAYLIST),
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW(cplaylist->wplaylist),
 						path, NULL, FALSE);
 
 		gtk_tree_path_free (path);

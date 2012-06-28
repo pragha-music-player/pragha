@@ -412,7 +412,9 @@ static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 {
 	cwin->cpref->use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(CURRENT_PLAYLIST), cwin->cpref->use_hint);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->cplaylist0->wplaylist), cwin->cpref->use_hint);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->cplaylist1->wplaylist), cwin->cpref->use_hint);
+
 }
 
 /* Toggle album art pattern */
