@@ -82,16 +82,13 @@ static gchar* get_display_name(struct musicobject *mobj)
 	return name;
 }
 
-static gint get_total_playtime(struct con_win *cwin)
+static gint get_total_playtime(struct con_playlist *cplaylist, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gint total_playtime = 0;
 	struct musicobject *mobj = NULL;
 	gboolean ret;
-	struct con_playlist *cplaylist;
-
-	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
 
 	if(cplaylist->playlist_change)
 		return 0;
@@ -113,27 +110,40 @@ static gint get_total_playtime(struct con_win *cwin)
 
 void update_status_bar(struct con_win *cwin)
 {
-	gint total_playtime = 0;
-	gchar *str, *tot_str;
-	struct con_playlist *cplaylist;
+	gint playtime0 = 0, playtime1 = 0;
+	gchar *str, *splaytime0 = NULL, *splaytime1 = NULL;
 
-	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+	if(cwin->cpref->double_playlist) {
+		playtime0 = get_total_playtime(cwin->cplaylist0, cwin);
+		splaytime0 = convert_length_str(playtime0);
 
-	if(cplaylist->playlist_change)
-		return;
+		playtime1 = get_total_playtime(cwin->cplaylist1, cwin);
+		splaytime1 = convert_length_str(playtime1);
 
-	total_playtime = get_total_playtime(cwin);
-	tot_str = convert_length_str(total_playtime);
-	str = g_strdup_printf("%i %s - %s",
-				cplaylist->tracks_curr_playlist,
-				(cplaylist->tracks_curr_playlist>1)?_("Tracks"):_("Track"),
-				tot_str);
+		str = g_strdup_printf("%i %s - %s / %i %s - %s",
+					cwin->cplaylist0->tracks_curr_playlist,
+					(cwin->cplaylist0->tracks_curr_playlist > 1) ? _("Tracks") : _("Track"),
+					splaytime0,
+					cwin->cplaylist1->tracks_curr_playlist,
+					(cwin->cplaylist1->tracks_curr_playlist > 1) ? _("Tracks") : _("Track"),
+					splaytime1);
 
-	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
+	}
+	else {
+		playtime0 = get_total_playtime(cwin->cplaylist0, cwin);
+		splaytime0 = convert_length_str(playtime0);
+		str = g_strdup_printf("%i %s - %s",
+					cwin->cplaylist0->tracks_curr_playlist,
+					(cwin->cplaylist0->tracks_curr_playlist > 1) ? _("Tracks") : _("Track"),
+					splaytime0);
+	}
+
+	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", str);
 
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), str);
 
-	g_free(tot_str);
+	g_free(splaytime0);
+	g_free(splaytime1);
 	g_free(str);
 }
 
