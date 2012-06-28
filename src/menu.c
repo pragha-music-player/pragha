@@ -819,6 +819,8 @@ double_playlist_action (GtkAction *action, struct con_win *cwin)
 	/* ONLY A TEST!!! */
 	if (!cwin->cpref->double_playlist)
 		cwin->playlist_used = 0;
+
+	update_status_bar(cwin);
 }
 
 /* Handler for the 'Status bar' item in the Edit menu */
