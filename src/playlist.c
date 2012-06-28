@@ -1339,8 +1339,11 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	GList *list, *i;
 	GSList *files = NULL;
 	gchar *file = NULL;
+	struct con_playlist *cplaylist;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
+	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 
 	switch(type) {
 	case SAVE_COMPLETE:
@@ -1362,8 +1365,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		} while(gtk_tree_model_iter_next(model, &iter));
 		break;
 	case SAVE_SELECTED:
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							CURRENT_PLAYLIST));
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->wplaylist));
 		list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
 		if (list) {
@@ -1523,7 +1525,8 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 
 	exec_sqlite_query (query, cwin, &result);
 
@@ -1556,7 +1559,8 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 
 	exec_sqlite_query (query, cwin, &result);
 
@@ -1597,7 +1601,8 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 
 	exec_sqlite_query (query, cwin, &result);
 
@@ -1638,7 +1643,8 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 
 	exec_sqlite_query (query, cwin, &result);
 

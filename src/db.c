@@ -639,8 +639,8 @@ gchar** get_playlist_names_db(struct con_win *cwin)
 	gchar **playlists = NULL;
 	gint i, j=0;
 
-	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
-				SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 	if (exec_sqlite_query(query, cwin, &result)) {
 		if (result.no_rows) {
 			playlists = g_malloc0((result.no_rows+1) * sizeof(gchar *));
@@ -664,8 +664,8 @@ gint get_playlist_count_db(struct con_win *cwin)
 	struct db_result result;
 	gint n_playlists = 0;
 
-	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST WHERE NAME != \"%s\";",
-				SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\";",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 	if (exec_sqlite_query(query, cwin, &result)) {
 		n_playlists = atoi(result.resultp[1]);
 		sqlite3_free_table(result.resultp);
@@ -674,23 +674,6 @@ gint get_playlist_count_db(struct con_win *cwin)
 	return n_playlists;
 }
 
-/* Get the number of all trackslist tracks currently in the DB. */
-
-gint get_tracklist_count_db(struct con_win *cwin)
-{
-	gchar *query;
-	struct db_result result;
-	/* this ID should be cached during open */
-	gint playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin);
-	gint n_playlists = 0;
-	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;", playlist_id);
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_playlists = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return n_playlists;
-}
 /* 'playlist' has to be a sanitized string */
 
 void delete_playlist_db(gchar *playlist, struct con_win *cwin)

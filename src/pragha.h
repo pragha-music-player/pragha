@@ -153,7 +153,8 @@
 
 #define PROGRESS_BAR_TEXT           _("Scanning")
 #define TRACK_PROGRESS_BAR_STOPPED  _("Stopped")
-#define SAVE_PLAYLIST_STATE         "con_playlist"
+#define SAVED_PLAYLIST_STATE_0      "con_playlist"
+#define SAVED_PLAYLIST_STATE_1      "con_playlist1"
 
 #define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
@@ -220,6 +221,7 @@ typedef enum {
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
 #define KEY_CURRENT_REF		   "current_ref"
+#define KEY_CURRENT_PLAYLIST	   "current_playlist"
 #define KEY_SHUFFLE                "shuffle"
 #define KEY_REPEAT                 "repeat"
 #define KEY_PLAYLIST_COLUMNS       "playlist_columns"
@@ -988,7 +990,6 @@ void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_win *cw
 gint add_new_radio_db(const gchar *radio, struct con_win *cwin);
 gchar** get_radio_names_db(struct con_win *cwin);
 gint get_radio_count_db(struct con_win *cwin);
-gint get_tracklist_count_db(struct con_win *cwin);
 void delete_playlist_db(gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
 void delete_radio_db(gchar *radio, struct con_win *cwin);
@@ -1130,7 +1131,9 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   enum dnd_target info,
 				   guint time,
 				   struct con_win *cwin);
-void save_current_playlist_state(struct con_win *cwin);
+void save_first_playlist_state(struct con_win *cwin);
+void save_second_playlist_state(struct con_win *cwin);
+void save_current_playback_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
 				     struct con_win *cwin);

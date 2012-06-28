@@ -819,7 +819,9 @@ static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, e
 
 	do {
 		playlist = get_playlist_dialog(&sel, type, cwin);
-		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
+		if (playlist &&
+		    !g_ascii_strcasecmp(playlist, SAVED_PLAYLIST_STATE_0) &&
+		    !g_ascii_strcasecmp(playlist, SAVED_PLAYLIST_STATE_1)) {
 			GtkWidget *dialog;
 			dialog = gtk_message_dialog_new_with_markup(
 				GTK_WINDOW(cwin->mainwindow),
@@ -3019,30 +3021,48 @@ exit:
 
 /* Save current playlist state on exit */
 
-void save_current_playlist_state(struct con_win *cwin)
+void save_first_playlist_state(struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 	gint playlist_id = 0;
-	gchar *ref_char = NULL;
 
 	/* Save last playlist. */
 
-	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin);
+	playlist_id = find_playlist_db(SAVED_PLAYLIST_STATE_0, cwin);
 	if (!playlist_id)
-		playlist_id = add_new_playlist_db(SAVE_PLAYLIST_STATE,
+		playlist_id = add_new_playlist_db(SAVED_PLAYLIST_STATE_0,
 						  cwin);
 	else
 		flush_playlist_db(playlist_id, cwin);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(CURRENT_PLAYLIST));
-	if (!gtk_tree_model_get_iter_first(model, &iter))
-		return;
-
+	cwin->playlist_used = 0;
 	save_playlist(playlist_id, SAVE_COMPLETE, cwin);
+}
 
-	/* Save reference to current song. */
+void save_second_playlist_state(struct con_win *cwin)
+{
+	gint playlist_id = 0;
+
+	/* Save last playlist. */
+
+	playlist_id = find_playlist_db(SAVED_PLAYLIST_STATE_1, cwin);
+	if (!playlist_id)
+		playlist_id = add_new_playlist_db(SAVED_PLAYLIST_STATE_1,
+						  cwin);
+	else
+		flush_playlist_db(playlist_id, cwin);
+
+	if (cwin->cpref->double_playlist) {
+		cwin->playlist_used = 1;
+		save_playlist(playlist_id, SAVE_COMPLETE, cwin);
+	}
+}
+
+/* Save reference to current song. */
+
+void save_current_playback_state(struct con_win *cwin)
+{
+	GtkTreePath *path = NULL;
+	gchar *ref_char = NULL;
 
 	path = current_playlist_get_actual(cwin);
 	if(path) {
@@ -3068,6 +3088,13 @@ void save_current_playlist_state(struct con_win *cwin)
 					      NULL);
 		}
 	}
+
+	ref_char = g_strdup_printf("%d", cwin->cstate->ref_to_playlist);
+	g_key_file_set_string(cwin->cpref->configrc_keyfile,
+				GROUP_PLAYLIST,
+				KEY_CURRENT_PLAYLIST,
+				ref_char);
+	g_free(ref_char);
 }
 
 /* Init current playlist on application bringup,
@@ -3075,15 +3102,17 @@ void save_current_playlist_state(struct con_win *cwin)
 
 void init_playlist_current_playlist(struct con_win *cwin)
 {
-	gchar *s_playlist, *query, *file;
+	gchar *query, *file;
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
 	struct musicobject *mobj;
 	GtkTreeModel *model;
 	GdkCursor *cursor;
 	struct con_playlist *cplaylist;
+	const gchar *s_playlist;
 
 	cplaylist = cwin->playlist_used ? cwin->cplaylist1 : cwin->cplaylist0;
+	s_playlist = cwin->playlist_used ? SAVED_PLAYLIST_STATE_1 : SAVED_PLAYLIST_STATE_0;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 
@@ -3093,10 +3122,9 @@ void init_playlist_current_playlist(struct con_win *cwin)
 
 	g_object_ref(model);
 	SET_CURRENT_PLAYLIST_CHANGE(cwin);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), NULL);
 
-	s_playlist = sanitize_string_sqlite3(SAVE_PLAYLIST_STATE);
 	playlist_id = find_playlist_db(s_playlist, cwin);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
@@ -3119,7 +3147,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->wplaylist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(CURRENT_PLAYLIST), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->wplaylist), TRUE);
 	REMOVE_CURRENT_PLAYLIST_CHANGE(cwin);
 	g_object_unref(model);
 
@@ -3130,7 +3158,6 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 
 	sqlite3_free_table(result.resultp);
-	g_free(s_playlist);
 }
 
 void init_current_playlist_view(struct con_win *cwin)
@@ -3139,7 +3166,33 @@ void init_current_playlist_view(struct con_win *cwin)
 	GError *error = NULL;
 	GtkTreePath *path=NULL;
 
+	/* Restore both playlist. */
+
+	cwin->playlist_used = 0;
 	init_playlist_current_playlist(cwin);
+
+	if (cwin->cpref->double_playlist) {
+		cwin->playlist_used = 1;
+		init_playlist_current_playlist(cwin);
+	}
+
+	/* Set last playlist used. */
+
+	ref = g_key_file_get_string(cwin->cpref->configrc_keyfile,
+				    GROUP_PLAYLIST,
+				    KEY_CURRENT_PLAYLIST,
+				    &error);
+	if (!ref) {
+		g_error_free(error);
+		error = NULL;
+		return;
+	}
+	else {
+		cwin->cstate->ref_to_playlist = cwin->playlist_used = atoi(ref);
+		g_free(ref);
+	}
+
+	/* Select last track played. */
 
 	ref = g_key_file_get_string(cwin->cpref->configrc_keyfile,
 				    GROUP_PLAYLIST,
@@ -3150,10 +3203,11 @@ void init_current_playlist_view(struct con_win *cwin)
 		error = NULL;
 		return;
 	}
+	else {
+		path = gtk_tree_path_new_from_string(ref);
+		jump_to_path_on_current_playlist (path, cwin);
 
-	path = gtk_tree_path_new_from_string(ref);
-	jump_to_path_on_current_playlist (path, cwin);
-
-	gtk_tree_path_free(path);
-	g_free(ref);
+		gtk_tree_path_free(path);
+		g_free(ref);
+	}
 }

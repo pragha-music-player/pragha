@@ -1682,8 +1682,8 @@ void init_library_view(struct con_win *cwin)
 
 	/* Playlists.*/
 
-	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
-				SAVE_PLAYLIST_STATE);
+	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" AND NAME != \"%s\" ORDER BY NAME;",
+				SAVED_PLAYLIST_STATE_0, SAVED_PLAYLIST_STATE_1);
 	exec_sqlite_query(query, cwin, &result);
 
 	if (result.no_rows) {

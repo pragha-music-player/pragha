@@ -1413,8 +1413,11 @@ pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
 void
 pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
-	if (cwin->cpref->save_playlist)
-		save_current_playlist_state(cwin);
+	if (cwin->cpref->save_playlist) {
+		save_first_playlist_state(cwin);
+		save_second_playlist_state(cwin);
+		save_current_playback_state(cwin);
+	}
 	save_preferences(cwin);
 }
 
