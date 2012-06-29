@@ -23,6 +23,31 @@
 /* General functions */
 /*********************/
 
+/* Update the header icon to indicate the playlist that is playing. */
+
+void update_playlist_headers_playback(struct con_win *cwin)
+{
+	GtkTreeViewColumn *col;
+	GtkWidget *header_image;
+	struct con_playlist *cplaylist;
+
+	cplaylist = cwin->cplaylist0;
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->wplaylist), 0);
+	header_image = gtk_tree_view_column_get_widget(col);
+	if(cwin->cstate->ref_to_playlist == 0)
+		gtk_image_set_from_icon_name(GTK_IMAGE(header_image), "audio-volume-high", GTK_ICON_SIZE_MENU);
+	else
+		gtk_image_set_from_icon_name(GTK_IMAGE(header_image), "audio-volume-muted", GTK_ICON_SIZE_MENU);
+		
+	cplaylist = cwin->cplaylist1;
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->wplaylist), 0);
+	header_image = gtk_tree_view_column_get_widget(col);
+	if(cwin->cstate->ref_to_playlist == 1)
+		gtk_image_set_from_icon_name(GTK_IMAGE(header_image), "audio-volume-high", GTK_ICON_SIZE_MENU);
+	else
+		gtk_image_set_from_icon_name(GTK_IMAGE(header_image), "audio-volume-muted", GTK_ICON_SIZE_MENU);
+}
+
 /* Update playback state pixbuf */
 
 void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_win *cwin)
@@ -998,6 +1023,7 @@ void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin)
 	append_rand_track_refs(ref, cwin);
 	cwin->cstate->curr_rand_ref = ref;
 	cwin->cstate->ref_to_playlist = cwin->playlist_used;
+	update_playlist_headers_playback(cwin);
 	path = gtk_tree_row_reference_get_path(ref);
 	current_playlist_set_dirty_track(path, cwin);
 	gtk_tree_path_free(path);
@@ -2275,6 +2301,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 		cwin->cstate->ref_to_playlist = cwin->playlist_used = 1;
 		cplaylist = cwin->cplaylist1;
 	}
+	update_playlist_headers_playback(cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->wplaylist));
 	gtk_tree_model_get_iter(model, &iter, path);
@@ -3202,6 +3229,7 @@ void init_current_playlist_view(struct con_win *cwin)
 	}
 	else {
 		cwin->cstate->ref_to_playlist = cwin->playlist_used = atoi(ref);
+		update_playlist_headers_playback(cwin);
 		g_free(ref);
 	}
 
