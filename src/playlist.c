@@ -1409,11 +1409,11 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3((gchar *)playlist);
+	s_playlist = sanitize_string_sqlite3(playlist);
 
 	if ((playlist_id = find_playlist_db(s_playlist, cwin))) {
 		if (overwrite_existing_playlist(playlist, cwin))
-			delete_playlist_db((gchar *)s_playlist, cwin);
+			delete_playlist_db(s_playlist, cwin);
 		else
 			goto exit;
 	}
@@ -1435,7 +1435,7 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3((gchar *)playlist);
+	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin);
 
 	if (!playlist_id) {
@@ -1459,11 +1459,11 @@ void new_radio (gchar *uri, gchar *name, struct con_win *cwin)
 		return;
 	}
 
-	s_radio = sanitize_string_sqlite3((gchar *)name);
+	s_radio = sanitize_string_sqlite3(name);
 
 	if ((radio_id = find_radio_db(s_radio, cwin))) {
 		if (overwrite_existing_playlist(name, cwin))
-			delete_radio_db((gchar *)s_radio, cwin);
+			delete_radio_db(s_radio, cwin);
 		else
 			goto exit;
 	}

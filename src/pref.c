@@ -632,7 +632,7 @@ static void update_preferences(struct con_win *cwin)
 
 		for (i=0; i < cnt; i++) {
 			/* Convert to UTF-8 before adding to the model */
-			gchar *u_file = g_filename_to_utf8((gchar*)list->data, -1,
+			gchar *u_file = g_filename_to_utf8(list->data, -1,
 							   NULL, NULL, &error);
 			if (!u_file) {
 				g_warning("Unable to convert file to UTF-8");
@@ -866,7 +866,7 @@ void save_preferences(struct con_win *cwin)
 		columns = g_new0(gchar *, cnt);
 
 		for (i=0; i<cnt; i++) {
-			columns[i] = (gchar*)list->data;
+			columns[i] = list->data;
 			list = list->next;
 		}
 
@@ -911,7 +911,7 @@ void save_preferences(struct con_win *cwin)
 		libs = g_new0(gchar *, cnt);
 
 		for (i = 0; i < cnt; i++) {
-			u_file = g_filename_to_utf8((gchar *)list->data, -1,
+			u_file = g_filename_to_utf8(list->data, -1,
 						    NULL, NULL, &error);
 			if (!u_file) {
 				g_warning("Unable to convert file to UTF-8: %s",
@@ -958,7 +958,7 @@ void save_preferences(struct con_win *cwin)
 		libs = g_new0(gchar *, cnt);
 
 		for (i=0; i<cnt; i++) {
-			u_file = g_filename_to_utf8((gchar *)list->data, -1,
+			u_file = g_filename_to_utf8(list->data, -1,
 						    NULL, NULL, &error);
 			if (!u_file) {
 				g_warning("Unable to convert "
@@ -1004,7 +1004,7 @@ void save_preferences(struct con_win *cwin)
 		libs = g_new0(gchar *, cnt);
 
 		for (i=0; i<cnt; i++) {
-			u_file = g_filename_to_utf8((gchar *)list->data, -1,
+			u_file = g_filename_to_utf8(list->data, -1,
 						    NULL, NULL, &error);
 			if (!u_file) {
 				g_warning("Unable to convert "
