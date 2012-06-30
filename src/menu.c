@@ -112,8 +112,6 @@ void add_recent_file (const gchar *filename)
 	GtkRecentData recent_data;
 	gchar *uri = NULL;
 
-	uri = g_filename_to_uri(filename, NULL, NULL);
-
 	recent_data.mime_type = get_mime_type(filename);
 	if (recent_data.mime_type == NULL)
 		return;
@@ -125,6 +123,7 @@ void add_recent_file (const gchar *filename)
 	recent_data.groups = NULL;
 	recent_data.is_private = FALSE;
 
+	uri = g_filename_to_uri(filename, NULL, NULL);
 	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &recent_data);
 
 	g_free (recent_data.display_name);
