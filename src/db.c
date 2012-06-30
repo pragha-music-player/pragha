@@ -68,7 +68,7 @@ static void add_new_track_db(gint location_id,
 	exec_sqlite_query(query, cwin, NULL);
 }
 
-static void import_playlist_from_file_db(gchar *playlist_file, struct con_win *cwin)
+static void import_playlist_from_file_db(const gchar *playlist_file, struct con_win *cwin)
 {
 	gchar *s_playlist, *playlist = NULL, *s_file;
 	gint playlist_id = 0;
@@ -106,7 +106,7 @@ bad:
 	g_free(playlist);
 }
 
-static void add_new_musicobject_from_file_db(gchar *file, struct con_win *cwin)
+static void add_new_musicobject_from_file_db(const gchar *file, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
@@ -179,7 +179,7 @@ static void add_new_musicobject_from_file_db(gchar *file, struct con_win *cwin)
 	}
 }
 
-static void add_entry_db(gchar *file, struct con_win *cwin)
+static void add_entry_db(const gchar *file, struct con_win *cwin)
 {
 	if (pragha_pl_parser_guess_format_from_extension(file) != PL_FORMAT_UNKNOWN) {
 		import_playlist_from_file_db(file, cwin);
@@ -189,7 +189,7 @@ static void add_entry_db(gchar *file, struct con_win *cwin)
 	}
 }
 
-static void delete_track_db(gchar *file, struct con_win *cwin)
+static void delete_track_db(const gchar *file, struct con_win *cwin)
 {
 	gchar *query, *sfile;
 	gint location_id;
@@ -217,7 +217,7 @@ bad:
 
 /* NB: All of the add_* functions require sanitized strings */
 
-gint add_new_artist_db(gchar *artist, struct con_win *cwin)
+gint add_new_artist_db(const gchar *artist, struct con_win *cwin)
 {
 	gchar *query;
 	gint artist_id = 0;
@@ -237,7 +237,7 @@ gint add_new_artist_db(gchar *artist, struct con_win *cwin)
 	return artist_id;
 }
 
-gint add_new_album_db(gchar *album, struct con_win *cwin)
+gint add_new_album_db(const gchar *album, struct con_win *cwin)
 {
 	gchar *query;
 	gint album_id = 0;
@@ -257,7 +257,7 @@ gint add_new_album_db(gchar *album, struct con_win *cwin)
 	return album_id;
 }
 
-gint add_new_genre_db(gchar *genre, struct con_win *cwin)
+gint add_new_genre_db(const gchar *genre, struct con_win *cwin)
 {
 	gchar *query;
 	gint genre_id = 0;
@@ -297,7 +297,7 @@ gint add_new_year_db(guint year, struct con_win *cwin)
 	return year_id;
 }
 
-gint add_new_comment_db(gchar *comment, struct con_win *cwin)
+gint add_new_comment_db(const gchar *comment, struct con_win *cwin)
 {
 	gchar *query;
 	gint comment_id = 0;
@@ -317,7 +317,7 @@ gint add_new_comment_db(gchar *comment, struct con_win *cwin)
 	return comment_id;
 }
 
-gint add_new_location_db(gchar *location, struct con_win *cwin)
+gint add_new_location_db(const gchar *location, struct con_win *cwin)
 {
 	gchar *query;
 	gint location_id = 0;
@@ -337,7 +337,7 @@ gint add_new_location_db(gchar *location, struct con_win *cwin)
 	return location_id;
 }
 
-void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin)
+void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_win *cwin)
 {
 	gchar *query;
 
@@ -348,7 +348,7 @@ void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin)
 	exec_sqlite_query(query, cwin, NULL);
 }
 
-void add_track_radio_db(gchar *uri, gint radio_id, struct con_win *cwin)
+void add_track_radio_db(const gchar *uri, gint radio_id, struct con_win *cwin)
 {
 	gchar *query;
 
@@ -531,7 +531,7 @@ gint delete_location_hdd(gint location_id, struct con_win *cwin)
 /* Arg. title has to be sanitized */
 
 void update_track_db(gint location_id, gint changed,
-		     gint track_no, gchar *title,
+		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_win *cwin)
 {
@@ -693,7 +693,7 @@ gint get_tracklist_count_db(struct con_win *cwin)
 }
 /* 'playlist' has to be a sanitized string */
 
-void delete_playlist_db(gchar *playlist, struct con_win *cwin)
+void delete_playlist_db(const gchar *playlist, struct con_win *cwin)
 {
 	gint playlist_id;
 	gchar *query;
@@ -806,7 +806,7 @@ gchar** get_radio_names_db(struct con_win *cwin)
 
 /* 'radio' has to be a sanitized string */
 
-void delete_radio_db(gchar *radio, struct con_win *cwin)
+void delete_radio_db(const gchar *radio, struct con_win *cwin)
 {
 	gint radio_id;
 	gchar *query;
@@ -913,7 +913,7 @@ gboolean fraction_update(GtkWidget *pbar)
 	return TRUE;
 }
 
-void rescan_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin)
 {
 	static gint files_scanned = 0;
@@ -970,7 +970,7 @@ exit:
 	}
 }
 
-void update_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin)
 {
 	static gint files_scanned = 0;
@@ -1044,7 +1044,7 @@ exit:
 /* Delete all tracks falling under the given directory.
    Also, flush the database of unused albums, artists, etc. */
 
-void delete_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin)
 {
 	gchar *query, *sdir_name;

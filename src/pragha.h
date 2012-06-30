@@ -944,14 +944,14 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
-gint add_new_artist_db(gchar *artist, struct con_win *cwin);
-gint add_new_album_db(gchar *album, struct con_win *cwin);
-gint add_new_genre_db(gchar *genre, struct con_win *cwin);
+gint add_new_artist_db(const gchar *artist, struct con_win *cwin);
+gint add_new_album_db(const gchar *album, struct con_win *cwin);
+gint add_new_genre_db(const gchar *genre, struct con_win *cwin);
 gint add_new_year_db(guint year, struct con_win *cwin);
-gint add_new_comment_db(gchar *comment, struct con_win *cwin);
-gint add_new_location_db(gchar *location, struct con_win *cwin);
-void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin);
-void add_track_radio_db(gchar *uri, gint radio_id, struct con_win *cwin);
+gint add_new_comment_db(const gchar *comment, struct con_win *cwin);
+gint add_new_location_db(const gchar *location, struct con_win *cwin);
+void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_win *cwin);
+void add_track_radio_db(const gchar *uri, gint radio_id, struct con_win *cwin);
 gint find_artist_db(const gchar *artist, struct con_win *cwin);
 gint find_album_db(const gchar *album, struct con_win *cwin);
 gint find_genre_db(const gchar *genre, struct con_win *cwin);
@@ -963,7 +963,7 @@ gint find_radio_db(const gchar *radio, struct con_win *cwin);
 void delete_location_db(gint location_id, struct con_win *cwin);
 gint delete_location_hdd(gint location_id, struct con_win *cwin);
 void update_track_db(gint location_id, gint changed,
-		     gint track_no, gchar *title,
+		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_win *cwin);
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_win *cwin);
@@ -975,18 +975,18 @@ gint add_new_radio_db(const gchar *radio, struct con_win *cwin);
 gchar** get_radio_names_db(struct con_win *cwin);
 gint get_radio_count_db(struct con_win *cwin);
 gint get_tracklist_count_db(struct con_win *cwin);
-void delete_playlist_db(gchar *playlist, struct con_win *cwin);
+void delete_playlist_db(const gchar *playlist, struct con_win *cwin);
 void flush_playlist_db(gint playlist_id, struct con_win *cwin);
-void delete_radio_db(gchar *radio, struct con_win *cwin);
+void delete_radio_db(const gchar *radio, struct con_win *cwin);
 void flush_radio_db(gint radio_id, struct con_win *cwin);
 void flush_stale_entries_db(struct con_win *cwin);
 void flush_db(struct con_win *cwin);
 gboolean fraction_update(GtkWidget *pbar);
-void rescan_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
-void update_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
-void delete_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
+void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 gint init_dbase_schema(struct con_win *cwin);
 gint drop_dbase_schema(struct con_win *cwin);
