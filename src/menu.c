@@ -1126,9 +1126,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_tracklist_replaced(cwin);
-	#endif
 }
 
 
