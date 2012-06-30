@@ -990,6 +990,9 @@ void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 gint init_dbase_schema(struct con_win *cwin);
 gint drop_dbase_schema(struct con_win *cwin);
+gint db_get_artist_count(struct con_win *cwin);
+gint db_get_album_count(struct con_win *cwin);
+gint db_get_track_count(struct con_win *cwin);
 gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 			   struct db_result *result);
 
