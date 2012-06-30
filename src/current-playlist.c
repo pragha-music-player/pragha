@@ -2996,7 +2996,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
 		/* TODO: Fix this negradaaa!. */
-		if(g_str_has_prefix((gchar*)file, "Radio:") == FALSE) {
+		if(g_str_has_prefix(file, "Radio:") == FALSE) {
 			if ((location_id = find_location_db(file, cwin)))
 				mobj = new_musicobject_from_db(location_id, cwin);
 			else

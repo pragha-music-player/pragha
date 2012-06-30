@@ -893,7 +893,7 @@ void rescan_library_handler(struct con_win *cwin)
 	cwin->cstate->stop_scan = FALSE;
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
@@ -961,7 +961,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->lib_delete);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
@@ -983,7 +983,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->lib_add);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
@@ -1006,7 +1006,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->library_dir);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 
 		/* Don't rescan if lib is present in lib_add,
 		   we just rescanned it above */

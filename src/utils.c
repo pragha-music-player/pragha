@@ -226,13 +226,13 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 
 		if (needle_len > 3 && lv_distance != 0) {
 			if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
-				rv = (gchar*)haystack;
+				rv = haystack;
 				break;
 			}
 		}
 		else {
 			if(g_ascii_strcasecmp(needle_buf, needle) == 0) {
-				rv = (gchar*)haystack;
+				rv = haystack;
 				break;
 			}
 		}
@@ -471,7 +471,7 @@ gboolean is_playable_file(const gchar *file)
 		return FALSE;
 
 	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
-	    (get_file_type((gchar*)file) != -1))
+	    (get_file_type(file) != -1))
 		return TRUE;
 	else
 		return FALSE;
