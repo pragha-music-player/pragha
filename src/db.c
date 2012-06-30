@@ -1239,6 +1239,36 @@ gint drop_dbase_schema(struct con_win *cwin)
 	return ret;
 }
 
+static gint db_get_table_count(struct con_win *cwin, const gchar *table)
+{
+	gchar *query;
+	struct db_result result;
+	gint ret = 0;
+
+	query = g_strdup_printf("SELECT COUNT() FROM %s;", table);
+	if (exec_sqlite_query(query, cwin, &result)) {
+		ret = atoi(result.resultp[1]);
+		sqlite3_free_table(result.resultp);
+	}
+
+	return ret;
+}
+
+gint db_get_artist_count(struct con_win *cwin)
+{
+	return db_get_table_count (cwin, "ARTIST");
+}
+
+gint db_get_album_count(struct con_win *cwin)
+{
+	return db_get_table_count (cwin, "ALBUM");
+}
+
+gint db_get_track_count(struct con_win *cwin)
+{
+	return db_get_table_count (cwin, "TRACK");
+}
+
 gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 			   struct db_result *result)
 {

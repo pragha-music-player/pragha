@@ -1133,26 +1133,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 void statistics_action(GtkAction *action, struct con_win *cwin)
 {
-	gchar *query;
-	gint n_artists = 0, n_albums = 0, n_tracks = 0;
-	struct db_result result;
+	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	query = g_strdup_printf("SELECT COUNT() FROM ARTIST;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_artists = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
-	query = g_strdup_printf("SELECT COUNT() FROM ALBUM;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_albums = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
-	query = g_strdup_printf("SELECT COUNT() FROM TRACK;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_tracks = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
+	n_artists = db_get_artist_count(cwin);
+	n_albums = db_get_album_count(cwin);
+	n_tracks = db_get_track_count(cwin);
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_DESTROY_WITH_PARENT,
