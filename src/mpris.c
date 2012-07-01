@@ -350,7 +350,7 @@ static GVariant* mpris_Player_get_Rate(struct con_win *cwin) {
 }
 
 static void mpris_Player_put_Rate(struct con_win *cwin, GVariant *value) {
-	g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
+	g_set_error (cwin->cmpris2->property_error,
 		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "This is not alsaplayer.");
 }
 
