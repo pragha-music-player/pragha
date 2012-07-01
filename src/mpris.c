@@ -719,6 +719,9 @@ static GVariant* mpris_TrackList_GoTo(struct con_win *cwin, GVariant* parameters
 	} else
 		g_dbus_method_invocation_return_error_literal (cwin->cmpris2->method_invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
+
+	g_free (path);
+
 	return NULL;
 }
 
