@@ -121,7 +121,7 @@ static const gchar mpris2xml[] =
 	if(g_quark_try_string(interface_name)==cwin->cmpris2->interface_quarks[x]) {
 #define MAP_METHOD(x,y) \
 	if(!g_strcmp0(#y, method_name)) { \
-		g_dbus_method_invocation_return_value (invocation, mpris_##x##_##y(invocation, parameters, cwin)); return; }
+		mpris_##x##_##y(invocation, parameters, cwin); return; }
 #define PROPGET(x,y) \
 	if(!g_strcmp0(#y, property_name)) \
 		return mpris_##x##_get_##y(error, cwin);
@@ -131,16 +131,16 @@ static const gchar mpris2xml[] =
 #define END_INTERFACE }
 
 /* org.mpris.MediaPlayer2 */
-static GVariant* mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gtk_window_present(GTK_WINDOW(cwin->mainwindow));
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Root_Quit (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Root_Quit (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	exit_pragha(NULL, cwin);
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static GVariant* mpris_Root_get_CanQuit (GError **error, struct con_win *cwin)
@@ -194,60 +194,60 @@ static GVariant* mpris_Root_get_SupportedMimeTypes (GError **error, struct con_w
 }
 
 /* org.mpris.MediaPlayer2.Player */
-static GVariant* mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		play_track(cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		play_next_track(cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		play_prev_track(cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		backend_pause(cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		play_pause_resume(cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if(cwin->cgst->emitted_error == FALSE)
 		backend_stop(NULL, cwin);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if (!cwin->cstate->curr_mobj) {
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "Nothing to seek");
-		return NULL;
+		g_dbus_method_invocation_return_value (invocation, NULL);
 	}
 
 	gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
@@ -262,10 +262,10 @@ static GVariant* mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant*
 	backend_seek(seek, cwin);
 	mpris_update_seeked(cwin, seek);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gint64 param;
 	gchar *path = NULL;
@@ -283,7 +283,7 @@ static GVariant* mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GV
 	}
 	g_free(path);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 void mpris_update_seeked(struct con_win *cwin, gint position) {
@@ -297,7 +297,7 @@ void mpris_update_seeked(struct con_win *cwin, gint position) {
 		 g_variant_new ("(x)", (gint64)(position * 1000000)), NULL);
 }
 
-static GVariant* mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gchar *uri = NULL;
 	g_variant_get(parameters, "(s)", &uri);
@@ -336,7 +336,7 @@ static GVariant* mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVaria
 	if(failed)
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win *cwin)
@@ -523,7 +523,7 @@ static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cw
 }
 
 /* org.mpris.MediaPlayer2.Playlists */
-static GVariant* mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gchar *get_playlist = NULL, *test_playlist = NULL, *found_playlist = NULL;
 	gchar **db_playlists = NULL;
@@ -565,10 +565,10 @@ static GVariant* mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invoca
 
 	g_free (get_playlist);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	GVariantBuilder builder;
 	guint i = 0, start, max;
@@ -602,7 +602,7 @@ static GVariant* mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation
 	}
 	g_variant_builder_close(&builder);
 
-	return g_variant_builder_end(&builder);
+	g_dbus_method_invocation_return_value (invocation, g_variant_builder_end (&builder));
 }
 
 static GVariant* mpris_Playlists_get_ActivePlaylist (GError **error, struct con_win *cwin)
@@ -654,7 +654,7 @@ gboolean handle_path_request(struct con_win *cwin, const gchar *dbus_path,
 }
 
 /* org.mpris.MediaPlayer2.TrackList */
-static GVariant* mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	/* In: (ao) out: aa{sv} */
 
@@ -684,10 +684,10 @@ static GVariant* mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invoc
 	}
 	g_variant_builder_close(&b);
 
-	return g_variant_builder_end(&b);
+	g_dbus_method_invocation_return_value (invocation, g_variant_builder_end (&b));
 }
 
-static GVariant* mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gchar *uri;
 	gchar *after_track; //TODO use this
@@ -729,17 +729,17 @@ exit:
 	g_free(uri);
 	g_free(after_track);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	g_dbus_method_invocation_return_error_literal (invocation,
 		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
+static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gchar *path = NULL;
 	GtkTreePath *tree_path = NULL;
@@ -759,7 +759,7 @@ static GVariant* mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVaria
 	gtk_tree_path_free (tree_path);
 	g_free (path);
 
-	return NULL;
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
