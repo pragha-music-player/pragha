@@ -534,6 +534,8 @@ static GVariant* mpris_Playlists_ActivatePlaylist(struct con_win *cwin, GVariant
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 	}
 
+	g_free (get_playlist);
+
 	return NULL;
 }
 
