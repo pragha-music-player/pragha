@@ -668,7 +668,6 @@ struct con_mpris2 {
 	gchar *saved_title;
 	gdouble volume;
 	enum player_state state;
-	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
 struct con_gnome_media_keys {
