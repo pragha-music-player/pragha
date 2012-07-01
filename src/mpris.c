@@ -247,7 +247,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	if (!cwin->cstate->curr_mobj) {
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "Nothing to seek");
-		g_dbus_method_invocation_return_value (invocation, NULL);
+		return;
 	}
 
 	gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
@@ -326,8 +326,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			}
 			g_free(uri);
 		} else {
-			g_dbus_method_invocation_return_error_literal (invocation,
-					G_DBUS_ERROR, G_DBUS_ERROR_FILE_NOT_FOUND, "This file does not play here.");
+			failed = TRUE;
 		}
 		g_free(path);
 	} else {
@@ -336,7 +335,8 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 	if(failed)
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
-	g_dbus_method_invocation_return_value (invocation, NULL);
+	else
+		g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win *cwin)
@@ -557,6 +557,8 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 		play_first_current_playlist (cwin);
 
 		g_free(found_playlist);
+
+		g_dbus_method_invocation_return_value (invocation, NULL);
 	}
 	else {
 		g_dbus_method_invocation_return_error_literal (invocation,
@@ -564,8 +566,6 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	g_free (get_playlist);
-
-	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
@@ -736,7 +736,6 @@ static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVar
 {
 	g_dbus_method_invocation_return_error_literal (invocation,
 		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
-	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
@@ -752,14 +751,13 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 		// Dangerous: reusing double-click handler here.
 		current_playlist_row_activated_cb(
 			GTK_TREE_VIEW(cwin->current_playlist), tree_path, NULL, cwin);
+		g_dbus_method_invocation_return_value (invocation, NULL);
 	} else
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 
 	gtk_tree_path_free (tree_path);
 	g_free (path);
-
-	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
