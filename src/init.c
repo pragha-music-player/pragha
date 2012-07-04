@@ -1251,15 +1251,6 @@ void init_tag_completion(struct con_win *cwin)
 	g_object_unref(genre_tag_model);
 }
 
-void init_states_pixbuf(struct con_win *cwin)
-{
-	GtkIconTheme *icon_theme;
-	icon_theme = gtk_icon_theme_get_default ();
-
-	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icon_theme, "media-playback-start", 16, 0, NULL);
-	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icon_theme, "media-playback-pause", 16, 0, NULL);
-}
-
 void init_toggle_buttons(struct con_win *cwin)
 {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
@@ -1388,6 +1379,9 @@ void init_pixbufs(struct con_win *cwin)
 										NULL);
 	if (!cwin->pixbuf->pixbuf_dir)
 		g_warning("Unable to load folder png");
+
+	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icontheme, "media-playback-start", 16, 0, NULL);
+	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icontheme, "media-playback-pause", 16, 0, NULL);
 }
 
 #if HAVE_LIBXFCE4UI
@@ -1456,7 +1450,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
 
 	init_pixbufs(cwin);
-	init_states_pixbuf(cwin);
 
 	/* Main window */
 
