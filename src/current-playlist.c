@@ -1948,12 +1948,12 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
+			new_playlist(playlist, SAVE_SELECTED, cwin);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist((const gchar *)playlist, SAVE_SELECTED, cwin);
+			append_playlist(playlist, SAVE_SELECTED, cwin);
 			break;
 		case EXPORT_PLAYLIST:
 			export_playlist (SAVE_SELECTED, cwin);
@@ -1991,12 +1991,12 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
+			new_playlist(playlist, SAVE_COMPLETE, cwin);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist((const gchar *)playlist, SAVE_COMPLETE, cwin);
+			append_playlist(playlist, SAVE_COMPLETE, cwin);
 			break;
 		case EXPORT_PLAYLIST:
 			export_playlist (SAVE_COMPLETE, cwin);
