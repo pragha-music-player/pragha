@@ -139,7 +139,7 @@ void show_osd(struct con_win *cwin)
 	/* Create notification instance */
 	#if NOTIFY_CHECK_VERSION (0, 7, 0)
 	if (cwin->osd_notify == NULL) {
-		cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL);
+		cwin->osd_notify = notify_notification_new(summary, body, NULL);
 
 		if(can_support_actions() &&
 		   cwin->cpref->actions_in_osd == TRUE) {
@@ -156,19 +156,19 @@ void show_osd(struct con_win *cwin)
 		g_signal_connect(cwin->osd_notify, "closed", G_CALLBACK (notify_closed_cb), cwin);
 	}
 	else {
-		notify_notification_update (cwin->osd_notify, (const gchar *) summary, body, NULL);
+		notify_notification_update (cwin->osd_notify, summary, body, NULL);
 
 		if(cwin->cpref->actions_in_osd == FALSE)
 			notify_notification_clear_actions (cwin->osd_notify);
 	}
 	#else
 	if(cwin->cpref->osd_in_systray && gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
-		cwin->osd_notify = notify_notification_new_with_status_icon((const gchar *) summary,
+		cwin->osd_notify = notify_notification_new_with_status_icon(summary,
 								body, NULL,
 								GTK_STATUS_ICON(cwin->status_icon));
 	}
 	else {
-		cwin->osd_notify = notify_notification_new((const gchar *) summary, body, NULL, NULL);
+		cwin->osd_notify = notify_notification_new(summary, body, NULL, NULL);
 	}
 	#endif
 
