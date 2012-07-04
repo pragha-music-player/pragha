@@ -1152,11 +1152,6 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 
 void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
-void free_library_dir(struct con_win *cwin);
-void free_library_add_dir(struct con_win *cwin);
-void free_library_delete_dir(struct con_win *cwin);
-void free_playlist_columns(struct con_win *cwin);
-void free_library_tree_nodes(struct con_win *cwin);
 
 /* Gstreamer */
 
