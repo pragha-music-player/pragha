@@ -2237,9 +2237,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 
 	backend_start(mobj, cwin);
 
-	clear_rand_track_refs(cwin);
-	current_playlist_clear_dirty_all(cwin);
-	cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+	trim_down_rand_track_refs(cwin);
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }
 
