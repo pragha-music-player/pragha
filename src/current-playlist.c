@@ -251,6 +251,46 @@ void delete_rand_track_refs(GtkTreePath *path, struct con_win *cwin)
 	}
 }
 
+static void current_playlist_unset_dirty_track(GtkTreePath *path, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, FALSE, -1);
+}
+
+void trim_down_rand_track_refs(struct con_win *cwin)
+{
+	GList *list;
+	GtkTreeRowReference *ref;
+	GtkTreePath *lpath;
+
+	if (cwin->cstate->rand_track_refs) {
+		list = g_list_find(cwin->cstate->rand_track_refs, cwin->cstate->curr_rand_ref);
+
+		if (list) {
+			list = g_list_next(list);
+			while (list) {
+				ref = list->data;
+				lpath = gtk_tree_row_reference_get_path(ref);
+
+				current_playlist_unset_dirty_track(lpath, cwin);
+				cwin->cstate->unplayed_tracks++;
+
+				cwin->cstate->rand_track_refs =
+					g_list_remove(cwin->cstate->rand_track_refs,
+						      ref);
+				gtk_tree_row_reference_free(ref);
+				gtk_tree_path_free(lpath);
+				list = list->next;
+			}
+		}
+	}
+}
+
 /* Return the next node after the given ref */
 
 static GtkTreeRowReference* get_rand_ref_next(GtkTreeRowReference *ref,
@@ -332,6 +372,10 @@ GtkTreePath* get_next_queue_track(struct con_win *cwin)
 
 	path = gtk_tree_row_reference_get_path(cwin->cstate->queue_track_refs->data);
 
+	/* Remove old next song. */
+	trim_down_rand_track_refs(cwin);
+
+	/*Remove the queue reference and update gui. */
 	delete_queue_track_refs(path, cwin);
 	requeue_track_refs (cwin);
 
@@ -1038,7 +1082,6 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	GList *last;
 	GtkTreeIter iter;
 	gboolean rand_unplayed = FALSE, seq_last = FALSE;
-	GtkTreeRowReference *ref;
 
 	if(cwin->cstate->playlist_change)
 		return NULL;
@@ -1052,15 +1095,13 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 
 	if(cwin->cstate->queue_track_refs){
 		path = get_next_queue_track(cwin);
-		ref = gtk_tree_row_reference_new(model, path);
-		reset_rand_track_refs(ref, cwin);
-		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
 	}
-	else{
+	else {
 		switch (cwin->cpref->shuffle) {
 			case TRUE:
 				last = g_list_last(cwin->cstate->rand_track_refs);
-				if ((!cwin->cstate->curr_rand_ref) || (last && (cwin->cstate->curr_rand_ref == last->data))){
+				if ((!cwin->cstate->curr_rand_ref) ||
+				    (last && (cwin->cstate->curr_rand_ref == last->data))){
 					path = get_next_unplayed_random_track(cwin);
 					if (!path)
 						rand_unplayed = TRUE;
