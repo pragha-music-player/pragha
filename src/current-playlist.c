@@ -209,8 +209,8 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
 			if (!gtk_tree_path_compare(path, lpath)) {
-				gtk_tree_row_reference_free(ref);
 				cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, ref);
+				gtk_tree_row_reference_free(ref);
 			}
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
@@ -238,10 +238,10 @@ void delete_rand_track_refs(GtkTreePath *path, struct con_win *cwin)
 			if (!gtk_tree_path_compare(path, lpath)) {
 				if (is_current_rand_ref(ref, cwin))
 					cwin->cstate->curr_rand_ref = NULL;
-				gtk_tree_row_reference_free(ref);
 				cwin->cstate->rand_track_refs =
 					g_list_remove(cwin->cstate->rand_track_refs,
 						      ref);
+				gtk_tree_row_reference_free(ref);
 				gtk_tree_path_free(lpath);
 				break;
 			}
