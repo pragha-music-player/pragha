@@ -1093,7 +1093,7 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return NULL;
 
-	if(cwin->cstate->queue_track_refs){
+	if(cwin->cstate->queue_track_refs) {
 		path = get_next_queue_track(cwin);
 	}
 	else {
@@ -2229,6 +2229,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	GtkTreeRowReference *ref;
 	struct musicobject *mobj;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -2237,7 +2238,17 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 
 	backend_start(mobj, cwin);
 
-	trim_down_rand_track_refs(cwin);
+	if (cwin->cpref->shuffle) {
+		if (cwin->cstate->state == ST_STOPPED) {
+			ref = gtk_tree_row_reference_new(model, path);
+			reset_rand_track_refs(ref, cwin);
+			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+		}
+		else {
+			trim_down_rand_track_refs(cwin);
+		}
+	}
+
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }
 
