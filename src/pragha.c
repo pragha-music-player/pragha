@@ -29,30 +29,7 @@ static void common_cleanup(struct con_win *cwin)
 	backend_free (cwin);
 	gui_free (cwin);
 	state_free (cwin->cstate);
-#ifdef HAVE_LIBCLASTFM
-	g_free(cwin->cpref->lw.lastfm_user);
-	g_free(cwin->cpref->lw.lastfm_pass);
-#endif
-#ifdef HAVE_LIBGLYR
-	g_free(cwin->cpref->cache_folder);
-#endif
-	g_free(cwin->cpref->configrc_file);
-	g_free(cwin->cpref->installed_version);
-	g_free(cwin->cpref->album_art_pattern);
-	g_free(cwin->cpref->audio_sink);
-	g_free(cwin->cpref->audio_device);
-	g_free(cwin->cpref->audio_cd_device);
-	g_free(cwin->cpref->start_mode);
-	g_key_file_free(cwin->cpref->configrc_keyfile);
-	free_str_list(cwin->cpref->library_dir);
-	free_str_list(cwin->cpref->lib_add);
-	free_str_list(cwin->cpref->lib_delete);
-	free_str_list(cwin->cpref->playlist_columns);
-	g_slist_free(cwin->cpref->playlist_column_widths);
-	g_slist_free(cwin->cpref->library_tree_nodes);
-
-	g_slice_free(struct con_pref, cwin->cpref);
-
+	preferences_free (cwin->cpref);
 #ifdef HAVE_LIBGLYR
 	uninit_glyr_related (cwin);
 #endif

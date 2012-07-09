@@ -1145,6 +1145,7 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 
 void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
+void preferences_free(struct con_pref *cpref);
 
 /* Gstreamer */
 
