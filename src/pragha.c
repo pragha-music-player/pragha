@@ -27,32 +27,7 @@ static void common_cleanup(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Cleaning up");
 
 	backend_free (cwin);
-
-	g_object_unref(cwin->library_store);
-	g_object_unref(cwin->pixbuf->image_play);
-	g_object_unref(cwin->pixbuf->image_pause);
-
-	g_object_unref(cwin->pixbuf->pixbuf_playing);
-	g_object_unref(cwin->pixbuf->pixbuf_paused);
-
-	if (cwin->pixbuf->pixbuf_app)
-		g_object_unref(cwin->pixbuf->pixbuf_app);
-	if (cwin->pixbuf->pixbuf_dir)
-		g_object_unref(cwin->pixbuf->pixbuf_dir);
-	if (cwin->pixbuf->pixbuf_artist)
-		g_object_unref(cwin->pixbuf->pixbuf_artist);
-	if (cwin->pixbuf->pixbuf_album)
-		g_object_unref(cwin->pixbuf->pixbuf_album);
-	if (cwin->pixbuf->pixbuf_track)
-		g_object_unref(cwin->pixbuf->pixbuf_track);
-	if (cwin->pixbuf->pixbuf_genre)
-		g_object_unref(cwin->pixbuf->pixbuf_genre);
-
-	g_slice_free(struct pixbuf, cwin->pixbuf);
-
-	if (cwin->album_art)
-		gtk_widget_destroy(cwin->album_art);
-
+	gui_free (cwin);
 	state_free (cwin->cstate);
 #ifdef HAVE_LIBCLASTFM
 	g_free(cwin->cpref->lw.lastfm_user);

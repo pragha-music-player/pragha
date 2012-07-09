@@ -1300,6 +1300,7 @@ void create_status_icon(struct con_win *cwin);
 gboolean dialog_audio_init(gpointer data);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
+void gui_free(struct con_win *cwin);
 
 /* Info bar import music */
 
