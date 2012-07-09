@@ -220,7 +220,7 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			gtk_tree_path_free(lpath);
 			list = list->next;
 		}
-		if (!dref) {
+		if (dref) {
 			cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, dref);
 			gtk_tree_row_reference_free(dref);
 		}
