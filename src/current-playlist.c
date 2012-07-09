@@ -210,10 +210,8 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
 
-			if (!gtk_tree_path_compare(path, lpath)) {
-				g_warn_if_fail(dref == NULL);
+			if (!gtk_tree_path_compare(path, lpath))
 				dref = ref;
-			}
 
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
@@ -223,7 +221,7 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			list = list->next;
 		}
 		if (dref) {
-			cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, dref);
+			cwin->cstate->queue_track_refs = g_slist_remove(cwin->cstate->queue_track_refs, dref);
 			gtk_tree_row_reference_free(dref);
 		}
 	}
@@ -1224,6 +1222,8 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeRowReference *ref;
 	GList *list, *l;
+	gboolean is_queue = FALSE;
+	GtkTreeIter iter;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1231,8 +1231,13 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	l= list;
 	while (l) {
 		path = l->data;
-		ref = gtk_tree_row_reference_new(model, path);
-		cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+		if (gtk_tree_model_get_iter(model, &iter, path)) {
+			gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
+			if(!is_queue) {
+				ref = gtk_tree_row_reference_new(model, path);
+				cwin->cstate->queue_track_refs = g_slist_append(cwin->cstate->queue_track_refs, ref);
+			}
+		}
 		gtk_tree_path_free(path);
 		l = l->next;
 	}
