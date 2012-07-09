@@ -1317,6 +1317,7 @@ gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
+void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 

@@ -54,14 +54,7 @@ static void common_cleanup(struct con_win *cwin)
 	if (cwin->album_art)
 		gtk_widget_destroy(cwin->album_art);
 
-	if (cwin->cstate->cdda_drive)
-		cdio_cddap_close(cwin->cstate->cdda_drive);
-	if (cwin->cstate->cddb_disc)
-		cddb_disc_destroy(cwin->cstate->cddb_disc);
-	if (cwin->cstate->cddb_conn) {
-		cddb_destroy(cwin->cstate->cddb_conn);
-		libcddb_shutdown();
-	}
+	state_free (cwin->cstate);
 #ifdef HAVE_LIBCLASTFM
 	g_free(cwin->cpref->lw.lastfm_user);
 	g_free(cwin->cpref->lw.lastfm_pass);
@@ -85,11 +78,6 @@ static void common_cleanup(struct con_win *cwin)
 	g_slist_free(cwin->cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cwin->cpref);
-
-	g_rand_free(cwin->cstate->rand);
-	g_free(cwin->cstate->last_folder);
-
-	g_slice_free(struct con_state, cwin->cstate);
 
 #ifdef HAVE_LIBGLYR
 	uninit_glyr_related (cwin);
