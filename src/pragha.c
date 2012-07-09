@@ -114,8 +114,7 @@ static void common_cleanup(struct con_win *cwin)
 			      NULL);
 	dbus_connection_unref(cwin->con_dbus);
 
-	mpris_cleanup(cwin);
-
+	mpris_free (cwin->cmpris2);
 	if (notify_is_initted())
 		notify_uninit();
 #ifdef HAVE_LIBKEYBINDER

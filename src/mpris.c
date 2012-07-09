@@ -1207,25 +1207,25 @@ gint mpris_init(struct con_win *cwin)
 	return (cwin->cmpris2->owner_id) ? 0 : -1;
 }
 
-void mpris_close(struct con_win *cwin)
+void mpris_close (struct con_mpris2 *cmpris2)
 {
-	if(NULL != cwin->cmpris2->dbus_connection)
-		g_bus_unown_name(cwin->cmpris2->owner_id);
+	if(NULL != cmpris2->dbus_connection)
+		g_bus_unown_name (cmpris2->owner_id);
 
-	if(NULL != cwin->cmpris2->introspection_data) {
-		g_dbus_node_info_unref(cwin->cmpris2->introspection_data);
-		cwin->cmpris2->introspection_data = NULL;
+	if(NULL != cmpris2->introspection_data) {
+		g_dbus_node_info_unref (cmpris2->introspection_data);
+		cmpris2->introspection_data = NULL;
 	}
-	if(NULL != cwin->cmpris2->dbus_connection) {
-		g_object_unref(G_OBJECT(cwin->cmpris2->dbus_connection));
-		cwin->cmpris2->dbus_connection = NULL;
+	if(NULL != cmpris2->dbus_connection) {
+		g_object_unref (G_OBJECT (cmpris2->dbus_connection));
+		cmpris2->dbus_connection = NULL;
 	}
 }
 
-void mpris_cleanup(struct con_win *cwin)
+void mpris_free (struct con_mpris2 *cmpris2)
 {
-	mpris_close(cwin);
-	g_slice_free(struct con_mpris2, cwin->cmpris2);
+	mpris_close (cmpris2);
+	g_slice_free (struct con_mpris2, cmpris2);
 }
 
 // still todo:

@@ -261,7 +261,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						     cwin->cpref->use_mpris2_w));
 		if(!cwin->cpref->use_mpris2) {
 			if(NULL != cwin->cmpris2->dbus_connection)
-				mpris_close(cwin);
+				mpris_close(cwin->cmpris2);
 		} else {
 			if(NULL == cwin->cmpris2->dbus_connection)
 				mpris_init(cwin);
