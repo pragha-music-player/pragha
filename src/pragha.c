@@ -26,8 +26,7 @@ static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	backend_quit(cwin);
-	g_slice_free(struct con_gst, cwin->cgst);
+	backend_free (cwin);
 
 	g_object_unref(cwin->library_store);
 	g_object_unref(cwin->pixbuf->image_play);
