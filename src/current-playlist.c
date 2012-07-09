@@ -210,8 +210,10 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
 
-			if (!gtk_tree_path_compare(path, lpath))
+			if (!gtk_tree_path_compare(path, lpath)) {
+				g_warn_if_fail(dref == NULL);
 				dref = ref;
+			}
 
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
