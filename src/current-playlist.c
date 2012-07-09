@@ -2229,7 +2229,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
 	struct musicobject *mobj;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -2238,8 +2237,8 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 
 	if (cwin->cpref->shuffle) {
 		if (cwin->cstate->state == ST_STOPPED) {
-			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin);
+			clear_rand_track_refs(cwin);
+			current_playlist_clear_dirty_all(cwin);
 			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
 		}
 		else {
