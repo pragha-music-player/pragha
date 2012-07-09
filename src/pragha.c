@@ -118,13 +118,11 @@ static void common_cleanup(struct con_win *cwin)
 
 	if (notify_is_initted())
 		notify_uninit();
-
 #ifdef HAVE_LIBKEYBINDER
-	cleanup_keybinder(cwin);
+	keybinder_free ();
 #else
 	cleanup_gnome_media_keys(cwin);
 #endif
-
 	g_slice_free(struct con_win, cwin);
 }
 

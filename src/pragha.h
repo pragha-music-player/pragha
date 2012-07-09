@@ -1326,7 +1326,7 @@ void cleanup_gnome_media_keys(struct con_win *cwin);
 /* keybinder */
 
 gint init_keybinder(struct con_win *cwin);
-void cleanup_keybinder(struct con_win *cwin);
+void keybinder_free();
 
 /* Lastfm Helper */
 
