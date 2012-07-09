@@ -102,15 +102,7 @@ static void common_cleanup(struct con_win *cwin)
 	g_slice_free(struct tags, cwin->clastfm->ntags);
 	g_slice_free(struct con_lastfm, cwin->clastfm);
 #endif
-
-	dbus_connection_remove_filter(cwin->con_dbus,
-				      dbus_filter_handler,
-				      cwin);
-	dbus_bus_remove_match(cwin->con_dbus,
-			      "type='signal',path='/org/pragha/DBus'",
-			      NULL);
-	dbus_connection_unref(cwin->con_dbus);
-
+	dbus_handlers_free (cwin);
 	mpris_free (cwin->cmpris2);
 	if (notify_is_initted())
 		notify_uninit();
