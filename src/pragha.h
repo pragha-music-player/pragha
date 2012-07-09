@@ -1229,6 +1229,7 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 				      DBusMessage *msg,
 				      gpointer data);
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
+void dbus_handlers_free(struct con_win *cwin);
 
 /* MPRIS functions */
 
