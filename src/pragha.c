@@ -94,10 +94,7 @@ static void common_cleanup(struct con_win *cwin)
 #ifdef HAVE_LIBGLYR
 	uninit_glyr_related (cwin);
 #endif
-	g_free(cwin->cdbase->db_file);
-	sqlite3_close(cwin->cdbase->db);
-	g_slice_free(struct con_dbase, cwin->cdbase);
-
+	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	if (cwin->clastfm->session_id)
 		LASTFM_dinit(cwin->clastfm->session_id);
