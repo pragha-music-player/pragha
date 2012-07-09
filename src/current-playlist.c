@@ -197,7 +197,7 @@ void requeue_track_refs (struct con_win *cwin)
 void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 {
 	GSList *list = NULL;
-	GtkTreeRowReference *ref;
+	GtkTreeRowReference *dref = NULL, *ref;
 	GtkTreeModel *model;
 	GtkTreePath *lpath;
 	GtkTreeIter iter;
@@ -205,19 +205,24 @@ void delete_queue_track_refs(GtkTreePath *path, struct con_win *cwin)
 	if (cwin->cstate->queue_track_refs) {
 		list = cwin->cstate->queue_track_refs;
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
 		while (list) {
 			ref = list->data;
 			lpath = gtk_tree_row_reference_get_path(ref);
-			if (!gtk_tree_path_compare(path, lpath)) {
-				cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, ref);
-				gtk_tree_row_reference_free(ref);
-			}
+
+			if (!gtk_tree_path_compare(path, lpath))
+				dref = ref;
+
 			if (gtk_tree_model_get_iter(model, &iter, lpath)){
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_QUEUE, NULL, -1);
 				gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_BUBBLE, FALSE, -1);
 			}
 			gtk_tree_path_free(lpath);
 			list = list->next;
+		}
+		if (!dref) {
+			cwin->cstate->queue_track_refs = g_slist_remove_all(cwin->cstate->queue_track_refs, dref);
+			gtk_tree_row_reference_free(dref);
 		}
 	}
 }
@@ -1013,12 +1018,16 @@ void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin)
 {
 	GtkTreePath *path;
 
+	/* All songs can be played. */
 	current_playlist_clear_dirty_all(cwin);
 	clear_rand_track_refs(cwin);
+
+	/* Set the current song as played. */
 	append_rand_track_refs(ref, cwin);
 	cwin->cstate->curr_rand_ref = ref;
 	path = gtk_tree_row_reference_get_path(ref);
 	current_playlist_set_dirty_track(path, cwin);
+
 	gtk_tree_path_free(path);
 }
 
