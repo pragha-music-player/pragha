@@ -2236,8 +2236,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-	backend_start(mobj, cwin);
-
 	if (cwin->cpref->shuffle) {
 		if (cwin->cstate->state == ST_STOPPED) {
 			ref = gtk_tree_row_reference_new(model, path);
@@ -2248,6 +2246,8 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 			trim_down_rand_track_refs(cwin);
 		}
 	}
+
+	backend_start(mobj, cwin);
 
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }
