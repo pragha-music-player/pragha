@@ -84,11 +84,7 @@ static void common_cleanup(struct con_win *cwin)
 #endif
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->clastfm->session_id)
-		LASTFM_dinit(cwin->clastfm->session_id);
-
-	g_slice_free(struct tags, cwin->clastfm->ntags);
-	g_slice_free(struct con_lastfm, cwin->clastfm);
+	lastfm_free (cwin->clastfm);
 #endif
 	dbus_handlers_free (cwin);
 	mpris_free (cwin->cmpris2);

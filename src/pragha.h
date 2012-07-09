@@ -1333,6 +1333,7 @@ void keybinder_free();
 
 /* Lastfm Helper */
 
+#ifdef HAVE_LIBCLASTFM
 void update_menubar_lastfm_state (struct con_win *cwin);
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
@@ -1346,6 +1347,8 @@ void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_now_playing_handler (struct con_win *cwin);
 gint just_init_lastfm (struct con_win *cwin);
 gint init_lastfm_idle(struct con_win *cwin);
+void lastfm_free(struct con_lastfm *clastfm);
+#endif
 
 /* Related info helpers */
 
