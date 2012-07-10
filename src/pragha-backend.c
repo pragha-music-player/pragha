@@ -691,13 +691,14 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 }
 
 void
-backend_quit(struct con_win *cwin)
+backend_free(struct con_win *cwin)
 {
 	backend_stop(NULL, cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
 	gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
-	cwin->cgst->pipeline = NULL;
+	g_slice_free(struct con_gst, cwin->cgst);
+	cwin->cgst = NULL;
 
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }

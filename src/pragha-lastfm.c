@@ -826,4 +826,13 @@ gint init_lastfm_idle(struct con_win *cwin)
 
 	return 0;
 }
+
+void lastfm_free(struct con_lastfm *clastfm)
+{
+	if (clastfm->session_id)
+		LASTFM_dinit(clastfm->session_id);
+
+	g_slice_free(struct tags, clastfm->ntags);
+	g_slice_free(struct con_lastfm, clastfm);
+}
 #endif

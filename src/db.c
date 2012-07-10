@@ -1319,3 +1319,10 @@ gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
 
 	return ret;
 }
+
+void db_free (struct con_dbase *cdbase)
+{
+	g_free(cdbase->db_file);
+	sqlite3_close(cdbase->db);
+	g_slice_free(struct con_dbase, cdbase);
+}
