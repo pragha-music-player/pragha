@@ -378,7 +378,8 @@ GtkTreePath* get_next_queue_track(struct con_win *cwin)
 	path = gtk_tree_row_reference_get_path(cwin->cstate->queue_track_refs->data);
 
 	/* Remove old next song. */
-	trim_down_rand_track_refs(cwin);
+	if (cwin->cpref->shuffle)
+		trim_down_rand_track_refs(cwin);
 
 	/*Remove the queue reference and update gui. */
 	delete_queue_track_refs(path, cwin);
