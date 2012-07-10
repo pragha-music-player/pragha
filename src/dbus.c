@@ -263,3 +263,14 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 exit:
 	dbus_message_unref(msg);
 }
+
+void dbus_handlers_free (struct con_win *cwin)
+{
+	dbus_connection_remove_filter(cwin->con_dbus,
+				      dbus_filter_handler,
+				      cwin);
+	dbus_bus_remove_match(cwin->con_dbus,
+			      "type='signal',path='/org/pragha/DBus'",
+			      NULL);
+	dbus_connection_unref(cwin->con_dbus);
+}

@@ -1219,6 +1219,23 @@ gint init_first_state(struct con_win *cwin)
 	return 0;
 }
 
+void state_free (struct con_state *cstate)
+{
+	if (cstate->cdda_drive)
+		cdio_cddap_close(cstate->cdda_drive);
+	if (cstate->cddb_disc)
+		cddb_disc_destroy(cstate->cddb_disc);
+	if (cstate->cddb_conn) {
+		cddb_destroy(cstate->cddb_conn);
+		libcddb_shutdown();
+	}
+
+	g_rand_free(cstate->rand);
+	g_free(cstate->last_folder);
+
+	g_slice_free(struct con_state, cstate);
+}
+
 void init_tag_completion(struct con_win *cwin)
 {
 	GtkListStore *artist_tag_model, *album_tag_model, *genre_tag_model;

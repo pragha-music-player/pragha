@@ -70,7 +70,7 @@ gint init_keybinder(struct con_win *cwin)
 	return 0;
 }
 
-void cleanup_keybinder(struct con_win *cwin)
+void keybinder_free()
 {
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);

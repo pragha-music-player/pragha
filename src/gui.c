@@ -1967,3 +1967,38 @@ void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget)
 {
 	gtk_container_add(GTK_CONTAINER(cwin->info_box), widget);
 }
+
+static void pixbufs_free (struct pixbuf *pixbuf)
+{
+	g_object_unref(pixbuf->image_play);
+	g_object_unref(pixbuf->image_pause);
+
+	g_object_unref(pixbuf->pixbuf_playing);
+	g_object_unref(pixbuf->pixbuf_paused);
+
+	if (pixbuf->pixbuf_app)
+		g_object_unref(pixbuf->pixbuf_app);
+	if (pixbuf->pixbuf_dir)
+		g_object_unref(pixbuf->pixbuf_dir);
+	if (pixbuf->pixbuf_artist)
+		g_object_unref(pixbuf->pixbuf_artist);
+	if (pixbuf->pixbuf_album)
+		g_object_unref(pixbuf->pixbuf_album);
+	if (pixbuf->pixbuf_track)
+		g_object_unref(pixbuf->pixbuf_track);
+	if (pixbuf->pixbuf_genre)
+		g_object_unref(pixbuf->pixbuf_genre);
+
+	g_slice_free(struct pixbuf, pixbuf);
+}
+
+void gui_free (struct con_win *cwin)
+{
+	g_object_unref(cwin->library_store);
+
+	pixbufs_free(cwin->pixbuf);
+	cwin->pixbuf = NULL;
+
+	if (cwin->album_art)
+		gtk_widget_destroy(cwin->album_art);
+}

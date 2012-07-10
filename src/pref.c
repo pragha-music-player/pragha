@@ -261,7 +261,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						     cwin->cpref->use_mpris2_w));
 		if(!cwin->cpref->use_mpris2) {
 			if(NULL != cwin->cmpris2->dbus_connection)
-				mpris_close(cwin);
+				mpris_close(cwin->cmpris2);
 		} else {
 			if(NULL == cwin->cmpris2->dbus_connection)
 				mpris_init(cwin);
@@ -1953,4 +1953,31 @@ void preferences_dialog(struct con_win *cwin)
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
 #endif
 	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art_w), cwin);
+}
+
+void preferences_free (struct con_pref *cpref)
+{
+#ifdef HAVE_LIBCLASTFM
+	g_free(cpref->lw.lastfm_user);
+	g_free(cpref->lw.lastfm_pass);
+#endif
+#ifdef HAVE_LIBGLYR
+	g_free(cpref->cache_folder);
+#endif
+	g_free(cpref->configrc_file);
+	g_free(cpref->installed_version);
+	g_free(cpref->album_art_pattern);
+	g_free(cpref->audio_sink);
+	g_free(cpref->audio_device);
+	g_free(cpref->audio_cd_device);
+	g_free(cpref->start_mode);
+	g_key_file_free(cpref->configrc_keyfile);
+	free_str_list(cpref->library_dir);
+	free_str_list(cpref->lib_add);
+	free_str_list(cpref->lib_delete);
+	free_str_list(cpref->playlist_columns);
+	g_slist_free(cpref->playlist_column_widths);
+	g_slist_free(cpref->library_tree_nodes);
+
+	g_slice_free(struct con_pref, cpref);
 }

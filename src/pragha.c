@@ -26,105 +26,26 @@ static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	backend_quit(cwin);
-	g_slice_free(struct con_gst, cwin->cgst);
-
-	g_object_unref(cwin->library_store);
-	g_object_unref(cwin->pixbuf->image_play);
-	g_object_unref(cwin->pixbuf->image_pause);
-
-	g_object_unref(cwin->pixbuf->pixbuf_playing);
-	g_object_unref(cwin->pixbuf->pixbuf_paused);
-
-	if (cwin->pixbuf->pixbuf_app)
-		g_object_unref(cwin->pixbuf->pixbuf_app);
-	if (cwin->pixbuf->pixbuf_dir)
-		g_object_unref(cwin->pixbuf->pixbuf_dir);
-	if (cwin->pixbuf->pixbuf_artist)
-		g_object_unref(cwin->pixbuf->pixbuf_artist);
-	if (cwin->pixbuf->pixbuf_album)
-		g_object_unref(cwin->pixbuf->pixbuf_album);
-	if (cwin->pixbuf->pixbuf_track)
-		g_object_unref(cwin->pixbuf->pixbuf_track);
-	if (cwin->pixbuf->pixbuf_genre)
-		g_object_unref(cwin->pixbuf->pixbuf_genre);
-
-	g_slice_free(struct pixbuf, cwin->pixbuf);
-
-	if (cwin->album_art)
-		gtk_widget_destroy(cwin->album_art);
-
-	if (cwin->cstate->cdda_drive)
-		cdio_cddap_close(cwin->cstate->cdda_drive);
-	if (cwin->cstate->cddb_disc)
-		cddb_disc_destroy(cwin->cstate->cddb_disc);
-	if (cwin->cstate->cddb_conn) {
-		cddb_destroy(cwin->cstate->cddb_conn);
-		libcddb_shutdown();
-	}
-#ifdef HAVE_LIBCLASTFM
-	g_free(cwin->cpref->lw.lastfm_user);
-	g_free(cwin->cpref->lw.lastfm_pass);
-#endif
-#ifdef HAVE_LIBGLYR
-	g_free(cwin->cpref->cache_folder);
-#endif
-	g_free(cwin->cpref->configrc_file);
-	g_free(cwin->cpref->installed_version);
-	g_free(cwin->cpref->album_art_pattern);
-	g_free(cwin->cpref->audio_sink);
-	g_free(cwin->cpref->audio_device);
-	g_free(cwin->cpref->audio_cd_device);
-	g_free(cwin->cpref->start_mode);
-	g_key_file_free(cwin->cpref->configrc_keyfile);
-	free_str_list(cwin->cpref->library_dir);
-	free_str_list(cwin->cpref->lib_add);
-	free_str_list(cwin->cpref->lib_delete);
-	free_str_list(cwin->cpref->playlist_columns);
-	g_slist_free(cwin->cpref->playlist_column_widths);
-	g_slist_free(cwin->cpref->library_tree_nodes);
-
-	g_slice_free(struct con_pref, cwin->cpref);
-
-	g_rand_free(cwin->cstate->rand);
-	g_free(cwin->cstate->last_folder);
-
-	g_slice_free(struct con_state, cwin->cstate);
-
+	backend_free (cwin);
+	gui_free (cwin);
+	state_free (cwin->cstate);
+	preferences_free (cwin->cpref);
 #ifdef HAVE_LIBGLYR
 	uninit_glyr_related (cwin);
 #endif
-	g_free(cwin->cdbase->db_file);
-	sqlite3_close(cwin->cdbase->db);
-	g_slice_free(struct con_dbase, cwin->cdbase);
-
+	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->clastfm->session_id)
-		LASTFM_dinit(cwin->clastfm->session_id);
-
-	g_slice_free(struct tags, cwin->clastfm->ntags);
-	g_slice_free(struct con_lastfm, cwin->clastfm);
+	lastfm_free (cwin->clastfm);
 #endif
-
-	dbus_connection_remove_filter(cwin->con_dbus,
-				      dbus_filter_handler,
-				      cwin);
-	dbus_bus_remove_match(cwin->con_dbus,
-			      "type='signal',path='/org/pragha/DBus'",
-			      NULL);
-	dbus_connection_unref(cwin->con_dbus);
-
-	mpris_cleanup(cwin);
-
+	dbus_handlers_free (cwin);
+	mpris_free (cwin->cmpris2);
 	if (notify_is_initted())
 		notify_uninit();
-
 #ifdef HAVE_LIBKEYBINDER
-	cleanup_keybinder(cwin);
+	keybinder_free ();
 #else
 	cleanup_gnome_media_keys(cwin);
 #endif
-
 	g_slice_free(struct con_win, cwin);
 }
 
