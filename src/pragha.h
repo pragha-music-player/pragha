@@ -1167,16 +1167,6 @@ void backend_start(struct musicobject *mobj, struct con_win *cwin);
 void backend_free (struct con_win *cwin);
 gint backend_init(struct con_win *cwin);
 
-/* Audio functions */
-
-void set_alsa_mixer(struct con_win *cwin, gchar *mixer_elem);
-void set_oss_mixer(struct con_win *cwin, gchar *mixer_elem);
-void set_soft_mixer(struct con_win *cwin);
-void soft_volume_apply(gchar *buffer, gint buflen, struct con_win *cwin);
-GSList* alsa_pcm_devices(struct con_win *cwin);
-gint open_audio_device(gint samplerate, gint channels,
-		       gboolean resume, struct con_win *cwin);
-
 /* Systray functions */
 
 gboolean can_support_actions(void);
