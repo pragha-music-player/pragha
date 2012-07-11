@@ -1409,6 +1409,58 @@ int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 }
 
 static GtkWidget*
+pref_create_desktop_page(struct con_win *cwin)
+{
+	GtkWidget *table;
+	GtkWidget *show_icon_tray, *close_to_tray;
+	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
+	guint row = 0;
+
+	table = hig_workarea_create( );
+
+	hig_workarea_add_section_title(table, &row, _("Desktop"));
+
+	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
+	hig_workarea_add_wide_control(table, &row, show_icon_tray);
+
+	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
+	hig_workarea_add_wide_control(table, &row, close_to_tray);
+
+	hig_workarea_add_section_title(table, &row, _("Notifications"));
+
+	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
+	hig_workarea_add_wide_control(table, &row, show_osd);
+
+	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
+	hig_workarea_add_wide_control(table, &row, osd_in_systray);
+
+	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
+	hig_workarea_add_wide_control(table, &row, albumart_in_osd);
+
+	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
+	hig_workarea_add_wide_control(table, &row, actions_in_osd);
+
+	/* Setup signal handlers */
+
+	g_signal_connect(G_OBJECT(show_icon_tray), "toggled",
+			 G_CALLBACK(toggle_show_icon_tray), cwin);
+	g_signal_connect(G_OBJECT(show_osd), "toggled",
+			 G_CALLBACK(toggle_show_osd), cwin);
+
+
+	/* Store references. */
+
+	cwin->cpref->show_icon_tray_w = show_icon_tray;
+	cwin->cpref->close_to_tray_w = close_to_tray;
+	cwin->cpref->show_osd_w = show_osd;
+	cwin->cpref->osd_in_systray_w = osd_in_systray;
+	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
+	cwin->cpref->actions_in_osd_w = actions_in_osd;
+
+	return table;
+}
+
+static GtkWidget*
 pref_create_services_page(struct con_win *cwin)
 {
 	GtkWidget *table;
@@ -1484,8 +1536,8 @@ void preferences_dialog(struct con_win *cwin)
 {
 	GtkWidget *dialog, *header, *pref_notebook, *alignment;
 
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *notification_vbox, *services_vbox;
-	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_notification, *label_services;
+	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
+	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
 
 	GtkWidget *audio_table, *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, \
 		  *soft_mixer, *audio_cd_device_label, *separator, *audio_cd_device_entry;
@@ -1493,8 +1545,7 @@ void preferences_dialog(struct con_win *cwin)
 		  *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *hbox_library, *fuse_folders, *sort_by_year;
-	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *show_icon_tray, *close_to_tray, *add_recursively;
-	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
+	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
 
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
@@ -1517,7 +1568,7 @@ void preferences_dialog(struct con_win *cwin)
 	label_appearance = gtk_label_new(_("Appearance"));
 	label_library = gtk_label_new(_("Library"));
 	label_general = gtk_label_new(_("General"));
-	label_notification = gtk_label_new(_("Notifications"));
+	label_desktop = gtk_label_new(_("Desktop"));
 	label_services = gtk_label_new(_("Services"));
 
 	/* Boxes */
@@ -1526,7 +1577,6 @@ void preferences_dialog(struct con_win *cwin)
 	appearance_vbox = gtk_vbox_new(FALSE, 2);
 	library_vbox = gtk_vbox_new(FALSE, 2);
 	general_vbox = gtk_vbox_new(FALSE, 2);
-	notification_vbox = gtk_vbox_new(FALSE, 2);
 
 	/* Notebook, pages et al. */
 
@@ -1558,11 +1608,9 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
 	gtk_container_add(GTK_CONTAINER(alignment), general_vbox);
 
-	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
-				 label_notification);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), notification_vbox);
+	desktop_vbox = pref_create_desktop_page(cwin);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), desktop_vbox,
+				 label_desktop);
 
 	services_vbox = pref_create_services_page(cwin);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox,
@@ -1821,8 +1869,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
 
-	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
-	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
 	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
 
 	/* Pack general items */
@@ -1848,45 +1894,7 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   show_icon_tray,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   close_to_tray,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   add_recursively,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	/* Notification OSD */
-
-	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
-	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
-	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
-
-	gtk_box_pack_start(GTK_BOX(notification_vbox),
-			   show_osd,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(notification_vbox),
-			   osd_in_systray,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(notification_vbox),
-			   albumart_in_osd,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(notification_vbox),
-			   actions_in_osd,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1918,14 +1926,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->aproximate_search_w = aproximate_search;
 	cwin->cpref->window_state_combo_w = window_state_combo;
 	cwin->cpref->restore_playlist_w = restore_playlist;
-	cwin->cpref->show_icon_tray_w = show_icon_tray;
-	cwin->cpref->close_to_tray_w = close_to_tray;
 	cwin->cpref->add_recursively_w = add_recursively;
-
-	cwin->cpref->show_osd_w = show_osd;
-	cwin->cpref->osd_in_systray_w = osd_in_systray;
-	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
-	cwin->cpref->actions_in_osd_w = actions_in_osd;
 
 	/* Setup signal handlers */
 
@@ -1936,10 +1937,6 @@ void preferences_dialog(struct con_win *cwin)
 			 G_CALLBACK(toggle_use_hint), cwin);
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
-	g_signal_connect(G_OBJECT(show_icon_tray), "toggled",
-			 G_CALLBACK(toggle_show_icon_tray), cwin);
-	g_signal_connect(G_OBJECT(show_osd), "toggled",
-			 G_CALLBACK(toggle_show_osd), cwin);
 	g_signal_connect(G_OBJECT(library_add), "clicked",
 			 G_CALLBACK(library_add_cb), cwin);
 	g_signal_connect(G_OBJECT(library_remove), "clicked",
