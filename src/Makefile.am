@@ -16,6 +16,8 @@ pragha_SOURCES =cdda.c \
 		dbus.c \
 		filetree.c \
 		gui.c \
+		hig.c \
+		hig.h \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
