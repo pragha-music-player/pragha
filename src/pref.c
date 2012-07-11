@@ -1480,6 +1480,56 @@ pref_create_audio_page(struct con_win *cwin)
 }
 
 static GtkWidget*
+pref_create_appearance_page(struct con_win *cwin)
+{
+	GtkWidget *table;
+	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
+
+	guint row = 0;
+
+	table = hig_workarea_create( );
+
+	hig_workarea_add_section_title(table, &row, _("Playlist"));
+
+	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
+	hig_workarea_add_wide_control(table, &row, use_hint);
+
+	hig_workarea_add_section_title(table, &row, _("Controls"));
+
+	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
+	hig_workarea_add_wide_control(table, &row, album_art);
+
+	album_art_size_label = gtk_label_new(_("Size of Album art"));
+	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
+
+	hig_workarea_add_row_w (table, &row, album_art_size_label, album_art_size, NULL);
+
+	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
+	album_art_pattern = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
+				 ALBUM_ART_PATTERN_LEN);
+	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
+
+	hig_workarea_add_row_w (table, &row, album_art_pattern_label, album_art_pattern, NULL);
+
+	/* Store references */
+
+	cwin->cpref->use_hint_w = use_hint;
+	cwin->cpref->album_art_w = album_art;
+	cwin->cpref->album_art_size_w = album_art_size;
+	cwin->cpref->album_art_pattern_w = album_art_pattern;
+
+	/* Setup signal handlers */
+
+	g_signal_connect(G_OBJECT(use_hint), "toggled",
+			 G_CALLBACK(toggle_use_hint), cwin);
+	g_signal_connect(G_OBJECT(album_art), "toggled",
+			 G_CALLBACK(toggle_album_art), cwin);
+
+	return table;
+}
+
+static GtkWidget*
 pref_create_desktop_page(struct con_win *cwin)
 {
 	GtkWidget *table;
@@ -1609,8 +1659,6 @@ void preferences_dialog(struct con_win *cwin)
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
 	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
 
-	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *hbox_album_art_pattern, *album_art_size, *album_art_size_label, \
-		  *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *hbox_library, *fuse_folders, *sort_by_year;
 	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
@@ -1655,11 +1703,9 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), audio_vbox,
 				 label_audio);
 
-	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
+	appearance_vbox = pref_create_appearance_page(cwin);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox,
 				 label_appearance);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), appearance_vbox);
 
 	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
@@ -1680,68 +1726,6 @@ void preferences_dialog(struct con_win *cwin)
 	services_vbox = pref_create_services_page(cwin);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox,
 				 label_services);
-
-	/* Appearance Widgets */
-
-	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
-
-	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
-
-	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
-	album_art_size_label = gtk_label_new(_("Size of Album art"));
-
-	hbox_album_art_size = gtk_hbox_new(FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox_album_art_size),
-			   album_art_size_label,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_end(GTK_BOX(hbox_album_art_size),
-			 album_art_size,
-			 TRUE,
-			 TRUE,
-			 0);
-
-	album_art_pattern = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
-				 ALBUM_ART_PATTERN_LEN);
-	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
-	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
-
-	hbox_album_art_pattern = gtk_hbox_new(FALSE, 2);
-
-	gtk_box_pack_start(GTK_BOX(hbox_album_art_pattern),
-			   album_art_pattern_label,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_end(GTK_BOX(hbox_album_art_pattern),
-			 album_art_pattern,
-			 TRUE,
-			 TRUE,
-			 0);
-	/* Pack appearance widgets */
-	
-	gtk_box_pack_start(GTK_BOX(appearance_vbox),
-			   use_hint,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(appearance_vbox),
-			   album_art,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(appearance_vbox),
-			   hbox_album_art_size,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(appearance_vbox),
-			   hbox_album_art_pattern,
-			   FALSE,
-			   FALSE,
-			   0);
 
  	/* Library List */
 
@@ -1819,7 +1803,6 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   0);
 
-
 	/* General Widgets */
 
 	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
@@ -1874,11 +1857,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->cpref->use_hint_w = use_hint;
-	cwin->cpref->album_art_w = album_art;
-	cwin->cpref->album_art_size_w = album_art_size;
-	cwin->cpref->album_art_pattern_w = album_art_pattern;
-
 	cwin->cpref->library_view_w = library_view;
 	cwin->cpref->fuse_folders_w = fuse_folders;
 	cwin->cpref->sort_by_year_w = sort_by_year;
@@ -1894,10 +1872,6 @@ void preferences_dialog(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(dialog), "response",
 			 G_CALLBACK(pref_dialog_cb), cwin);
 
-	g_signal_connect(G_OBJECT(use_hint), "toggled",
-			 G_CALLBACK(toggle_use_hint), cwin);
-	g_signal_connect(G_OBJECT(album_art), "toggled",
-			 G_CALLBACK(toggle_album_art), cwin);
 	g_signal_connect(G_OBJECT(library_add), "clicked",
 			 G_CALLBACK(library_add_cb), cwin);
 	g_signal_connect(G_OBJECT(library_remove), "clicked",
