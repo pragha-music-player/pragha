@@ -1191,6 +1191,7 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->state = ST_STOPPED;
 
 	cwin->cstate->arturl = NULL;
+	cwin->cstate->update_album_art = TRUE;
 	cwin->cstate->filter_entry = NULL;
 	cwin->cstate->jump_filter = NULL;
 

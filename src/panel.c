@@ -373,25 +373,21 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 	GdkPixbuf *album_art = NULL;
 	gchar *path = NULL;
 
-	if (cwin->cpref->show_album_art) {
-		if (G_LIKELY(mobj &&
-		    mobj->file_type != FILE_CDDA &&
-		    mobj->file_type != FILE_HTTP)) {
-			#ifdef HAVE_LIBGLYR
-			album_art = get_image_from_cache(cwin);
-			#endif
-			if (album_art == NULL) {
-				path = g_path_get_dirname(mobj->file);
-				if (cwin->cpref->album_art_pattern) {
-					album_art = get_pref_image_dir(path, cwin);
-					if (!album_art)
-						album_art = get_image_from_dir(path, cwin);
-				}
-				else album_art = get_image_from_dir(path, cwin);
-				g_free(path);
-			}
-			set_pixbuf_album_art(album_art, cwin);
+	if (G_LIKELY(mobj &&
+	    mobj->file_type != FILE_CDDA &&
+	    mobj->file_type != FILE_HTTP)) {
+		#ifdef HAVE_LIBGLYR
+		album_art = get_image_from_cache(cwin);
+		#endif
+		if (album_art == NULL) {
+			path = g_path_get_dirname(mobj->file);
+			if (cwin->cpref->album_art_pattern)
+				album_art = get_pref_image_dir(path, cwin);
+			if (!album_art)
+				album_art = get_image_from_dir(path, cwin);
+			g_free(path);
 		}
+		set_pixbuf_album_art(album_art, cwin);
 	}
 }
 
@@ -432,6 +428,7 @@ void unset_album_art(struct con_win *cwin)
 		}
 
 		g_object_unref(G_OBJECT(cover));
+		cwin->cstate->update_album_art = TRUE;
 	}
 	g_free(cwin->cstate->arturl);
 	cwin->cstate->arturl = NULL;

@@ -560,16 +560,15 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 
 	gst_message_parse_tag(message, &tag_list);
 
-	if (cwin->cpref->show_album_art) {
+	if (cwin->cpref->show_album_art &&
+	   cwin->cstate->update_album_art) {
 		album_art = gst_tag_list_get_album_art(tag_list);
 		if (album_art) {
 			set_pixbuf_album_art(album_art, cwin);
+			cwin->cstate->update_album_art = FALSE;
 		}
-		else {
-			#ifdef HAVE_LIBGLYR
-			CDEBUG(DBG_BACKEND, "FIXME: Need download albumart..");
-			#endif
-		}
+		g_free(cwin->cstate->arturl);
+		cwin->cstate->arturl = NULL;
 	}
 
 	if(cwin->cstate->curr_mobj->file_type != FILE_HTTP)

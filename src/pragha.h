@@ -605,6 +605,7 @@ struct con_state {
 	gboolean view_change;
 	gboolean playlist_change;
 	gboolean curr_mobj_clear;
+	gboolean update_album_art;
 	gboolean first_run;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;

@@ -397,7 +397,8 @@ gboolean update_related_handler (gpointer data)
 		lastfm_now_playing_handler(cwin);
 #endif
 #ifdef HAVE_LIBGLYR
-	if (cwin->cpref->get_album_art)
+	if (cwin->cpref->show_album_art &&
+	   cwin->cstate->update_album_art)
 		related_get_album_art_handler(cwin);
 #endif
 	return FALSE;

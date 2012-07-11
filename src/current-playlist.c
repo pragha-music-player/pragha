@@ -910,7 +910,9 @@ void update_current_state(GtkTreePath *path,
 
 	/* Update album art */
 
-	update_album_art(cwin->cstate->curr_mobj, cwin);
+	if (cwin->cpref->show_album_art &&
+	   cwin->cstate->update_album_art)
+		update_album_art(cwin->cstate->curr_mobj, cwin);
 
 	/* Show OSD */
 
