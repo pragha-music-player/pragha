@@ -553,7 +553,9 @@ struct con_pref {
 	GtkWidget *add_recursively_w;
 
 	GtkWidget *show_osd_w;
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	GtkWidget *osd_in_systray_w;
+#endif
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
 

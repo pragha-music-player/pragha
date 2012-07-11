@@ -208,9 +208,11 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		else
 			cwin->cpref->show_osd = FALSE;
 
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 		cwin->cpref->osd_in_systray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->osd_in_systray_w));
+#endif
 
 		cwin->cpref->albumart_in_osd =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -687,17 +689,12 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->show_osd_w),
 					     TRUE);
-	#if NOTIFY_CHECK_VERSION (0, 7, 0)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->osd_in_systray_w),
-					     FALSE);
-		gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, FALSE);
-	#else
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	if (cwin->cpref->osd_in_systray)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->osd_in_systray_w),
 					     TRUE);
-	#endif
+#endif
 	if (cwin->cpref->albumart_in_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->albumart_in_osd_w),
@@ -1673,7 +1670,11 @@ pref_create_desktop_page(struct con_win *cwin)
 {
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
-	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
+	GtkWidget *show_osd, *albumart_in_osd, *actions_in_osd;
+	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
+	GtkWidget *osd_in_systray;
+	#endif
+
 	guint row = 0;
 
 	table = hig_workarea_create( );
@@ -1691,8 +1692,10 @@ pref_create_desktop_page(struct con_win *cwin)
 	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
 	hig_workarea_add_wide_control(table, &row, show_osd);
 
+	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
 	hig_workarea_add_wide_control(table, &row, osd_in_systray);
+	#endif
 
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
 	hig_workarea_add_wide_control(table, &row, albumart_in_osd);
@@ -1712,7 +1715,9 @@ pref_create_desktop_page(struct con_win *cwin)
 	cwin->cpref->show_icon_tray_w = show_icon_tray;
 	cwin->cpref->close_to_tray_w = close_to_tray;
 	cwin->cpref->show_osd_w = show_osd;
+	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	cwin->cpref->osd_in_systray_w = osd_in_systray;
+	#endif
 	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
 	cwin->cpref->actions_in_osd_w = actions_in_osd;
 
