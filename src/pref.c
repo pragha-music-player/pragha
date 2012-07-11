@@ -1530,6 +1530,52 @@ pref_create_appearance_page(struct con_win *cwin)
 }
 
 static GtkWidget*
+pref_create_general_page(struct con_win *cwin)
+{
+	GtkWidget *table;
+	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
+	guint row = 0;
+
+	table = hig_workarea_create( );
+
+	hig_workarea_add_section_title(table, &row, _("Search"));
+
+	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
+	hig_workarea_add_wide_control(table, &row, instant_filter);
+
+	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
+	hig_workarea_add_wide_control(table, &row, aproximate_search);
+
+	hig_workarea_add_section_title(table, &row, _("When starting pragha"));
+
+	window_state_combo = gtk_combo_box_text_new ();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start normal"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start fullscreen"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start in system tray"));
+	hig_workarea_add_wide_control(table, &row, window_state_combo);
+
+	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
+	hig_workarea_add_wide_control(table, &row, restore_playlist);
+
+	hig_workarea_add_section_title(table, &row, _("When adding folders"));
+	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
+
+	hig_workarea_add_wide_control(table, &row, add_recursively);
+
+	/* Store references */
+
+	cwin->cpref->instant_filter_w = instant_filter;
+	cwin->cpref->aproximate_search_w = aproximate_search;
+	cwin->cpref->window_state_combo_w = window_state_combo;
+	cwin->cpref->restore_playlist_w = restore_playlist;
+	cwin->cpref->add_recursively_w = add_recursively;
+
+	return table;
+}
+
+
+static GtkWidget*
 pref_create_desktop_page(struct con_win *cwin)
 {
 	GtkWidget *table;
@@ -1661,7 +1707,6 @@ void preferences_dialog(struct con_win *cwin)
 
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *hbox_library, *fuse_folders, *sort_by_year;
-	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
 
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
@@ -1713,11 +1758,9 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
 	gtk_container_add(GTK_CONTAINER(alignment), library_vbox);
 
-	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
+	general_vbox = pref_create_general_page(cwin);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox,
 				 label_general);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), general_vbox);
 
 	desktop_vbox = pref_create_desktop_page(cwin);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), desktop_vbox,
@@ -1803,51 +1846,6 @@ void preferences_dialog(struct con_win *cwin)
 			   FALSE,
 			   0);
 
-	/* General Widgets */
-
-	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
-
-	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
-
-	window_state_combo = gtk_combo_box_text_new ();
-
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start normal"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start fullscreen"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start in system tray"));
-
-	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
-
-	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
-
-	/* Pack general items */
-
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   instant_filter,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   aproximate_search,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   window_state_combo,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   restore_playlist,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(general_vbox),
-			   add_recursively,
-			   FALSE,
-			   FALSE,
-			   0);
-
 	/* Add to dialog */
 
 	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
@@ -1860,12 +1858,6 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->library_view_w = library_view;
 	cwin->cpref->fuse_folders_w = fuse_folders;
 	cwin->cpref->sort_by_year_w = sort_by_year;
-
-	cwin->cpref->instant_filter_w = instant_filter;
-	cwin->cpref->aproximate_search_w = aproximate_search;
-	cwin->cpref->window_state_combo_w = window_state_combo;
-	cwin->cpref->restore_playlist_w = restore_playlist;
-	cwin->cpref->add_recursively_w = add_recursively;
 
 	/* Setup signal handlers */
 
