@@ -218,7 +218,7 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
-	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, close_to_tray_f;
+	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
@@ -230,7 +230,7 @@ gint init_config(struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = close_to_tray_f = FALSE;
+	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
@@ -688,6 +688,17 @@ gint init_config(struct con_win *cwin)
 			save_playlist_f = TRUE;
 		}
 
+		cwin->cpref->show_icon_tray =
+			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+					       GROUP_GENERAL,
+					       KEY_SHOW_ICON_TRAY,
+					       &error);
+		if (error) {
+			g_error_free(error);
+			error = NULL;
+			show_icon_tray_f = TRUE;
+		}
+
 		cwin->cpref->close_to_tray =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -1026,6 +1037,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
+	if (all_f || show_icon_tray_f)
+		cwin->cpref->show_icon_tray = TRUE;
 	if (all_f || close_to_tray_f)
 		cwin->cpref->close_to_tray = TRUE;
 	if (all_f || status_bar_f)

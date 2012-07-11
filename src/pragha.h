@@ -208,6 +208,7 @@ typedef enum {
 #define KEY_ADD_RECURSIVELY_FILES  "add_recursively_files"
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
+#define KEY_SHOW_ICON_TRAY	   "show_icon_tray"
 #define KEY_CLOSE_TO_TRAY	   "close_to_tray"
 #define KEY_SHOW_OSD               "show_osd"
 #define KEY_OSD_IN_TRAY            "osd_in_tray"
@@ -510,6 +511,7 @@ struct con_pref {
 #endif
 	gboolean use_cddb;
 	gboolean use_mpris2;
+	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean lateral_panel;
@@ -545,6 +547,7 @@ struct con_pref {
 	GtkWidget *aproximate_search_w;
 	GtkWidget *window_state_combo_w;
 	GtkWidget *restore_playlist_w;
+	GtkWidget *show_icon_tray_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
 

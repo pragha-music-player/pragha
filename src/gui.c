@@ -1866,6 +1866,8 @@ void create_status_icon(struct con_win *cwin)
 			G_CALLBACK(status_get_tooltip_cb),
 			cwin);
 
+	gtk_status_icon_set_visible(status_icon, cwin->cpref->show_icon_tray);
+
 	/* Systray right click menu */
 
 	systray_menu = create_systray_menu(cwin);
@@ -1900,16 +1902,14 @@ gboolean dialog_audio_init(gpointer data)
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if(cwin->cpref->close_to_tray){
-		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))){
+	if(cwin->cpref->close_to_tray) {
+		if(cwin->cpref->show_icon_tray &&
+		   gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
 			toogle_main_window(cwin, FALSE);
-		}
-		else{
-			g_warning("(%s): No embedded status_icon.", __func__);
+		else
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
-		}
 	}
-	else{
+	else {
 		exit_pragha(widget, cwin);
 	}
 	return TRUE;
