@@ -1480,6 +1480,99 @@ pref_create_audio_page(struct con_win *cwin)
 }
 
 static GtkWidget*
+pref_create_library_page(struct con_win *cwin)
+{
+	GtkWidget *table;
+	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
+		  *hbox_library, *fuse_folders, *sort_by_year;
+	GtkListStore *library_store;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+
+	guint row = 0;
+
+	table = hig_workarea_create( );
+
+	hig_workarea_add_section_title(table, &row, _("Library"));
+
+
+ 	/* Library List */
+
+	hbox_library = gtk_hbox_new(FALSE, 6);
+
+	library_store = gtk_list_store_new(1, G_TYPE_STRING);
+	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(_("Folders"),
+							  renderer,
+							  "text",
+							  0,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
+
+	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_view_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_view_scroll),
+					GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(library_view_scroll), library_view);
+
+	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
+	library_bbox = gtk_vbutton_box_new();
+	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
+	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
+
+	gtk_box_pack_start(GTK_BOX(library_bbox),
+			   library_add,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(library_bbox),
+			   library_remove,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	gtk_container_add(GTK_CONTAINER(library_bbox_align), library_bbox);
+
+	gtk_box_pack_start(GTK_BOX(hbox_library),
+			   library_view_scroll,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox_library),
+			   library_bbox_align,
+			   FALSE,
+			   FALSE,
+			   0);
+	hig_workarea_add_wide_tall_control(table, &row, hbox_library);
+
+	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
+	hig_workarea_add_wide_control(table, &row, fuse_folders);
+
+	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
+	hig_workarea_add_wide_control(table, &row, sort_by_year);
+
+	/* Store references */
+
+	cwin->cpref->library_view_w = library_view;
+	cwin->cpref->fuse_folders_w = fuse_folders;
+	cwin->cpref->sort_by_year_w = sort_by_year;
+
+	g_signal_connect(G_OBJECT(library_add), "clicked",
+			 G_CALLBACK(library_add_cb), cwin);
+	g_signal_connect(G_OBJECT(library_remove), "clicked",
+			 G_CALLBACK(library_remove_cb), cwin);
+	g_signal_connect (G_OBJECT (library_view), "key_press_event",
+			  G_CALLBACK(library_view_key_press), cwin);
+
+	return table;
+}
+
+static GtkWidget*
 pref_create_appearance_page(struct con_win *cwin)
 {
 	GtkWidget *table;
@@ -1700,17 +1793,10 @@ pref_create_services_page(struct con_win *cwin)
 
 void preferences_dialog(struct con_win *cwin)
 {
-	GtkWidget *dialog, *header, *pref_notebook, *alignment;
+	GtkWidget *dialog, *header, *pref_notebook;
 
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
 	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
-
-	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
-		  *hbox_library, *fuse_folders, *sort_by_year;
-
-	GtkListStore *library_store;
-	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
 
 	/* The main preferences dialog */
 
@@ -1752,11 +1838,9 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox,
 				 label_appearance);
 
-	alignment = gtk_alignment_new(0.5, 0.5, 1, 1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), alignment,
+	library_vbox = pref_create_library_page(cwin);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox,
 				 label_library);
-	gtk_alignment_set_padding(GTK_ALIGNMENT(alignment), 6, 6, 12, 6);
-	gtk_container_add(GTK_CONTAINER(alignment), library_vbox);
 
 	general_vbox = pref_create_general_page(cwin);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox,
@@ -1770,82 +1854,6 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox,
 				 label_services);
 
- 	/* Library List */
-
-	hbox_library = gtk_hbox_new(FALSE, 6);
-
-	library_store = gtk_list_store_new(1, G_TYPE_STRING);
-	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
-
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("Folders"),
-							  renderer,
-							  "text",
-							  0,
-							  NULL);
-	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
-
-	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_view_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_view_scroll),
-					GTK_SHADOW_IN);
-	gtk_container_add(GTK_CONTAINER(library_view_scroll), library_view);
-
-	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
-	library_bbox = gtk_vbutton_box_new();
-	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
-	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
-
-	gtk_box_pack_start(GTK_BOX(library_bbox),
-			   library_add,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(library_bbox),
-			   library_remove,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	gtk_container_add(GTK_CONTAINER(library_bbox_align), library_bbox);
-
-	gtk_box_pack_start(GTK_BOX(hbox_library),
-			   library_view_scroll,
-			   TRUE,
-			   TRUE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(hbox_library),
-			   library_bbox_align,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
-
-	/* Pack all library items */
-
-	gtk_box_pack_start(GTK_BOX(library_vbox),
-			   hbox_library,
-			   TRUE,
-			   TRUE,
-			   2);
-
-	gtk_box_pack_start(GTK_BOX(library_vbox),
-			   fuse_folders,
-			   FALSE,
-			   FALSE,
-			   0);
-
-	gtk_box_pack_start(GTK_BOX(library_vbox),
-			   sort_by_year,
-			   FALSE,
-			   FALSE,
-			   0);
-
 	/* Add to dialog */
 
 	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
@@ -1853,23 +1861,10 @@ void preferences_dialog(struct con_win *cwin)
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
 
-	/* Store references */
-
-	cwin->cpref->library_view_w = library_view;
-	cwin->cpref->fuse_folders_w = fuse_folders;
-	cwin->cpref->sort_by_year_w = sort_by_year;
-
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(dialog), "response",
 			 G_CALLBACK(pref_dialog_cb), cwin);
-
-	g_signal_connect(G_OBJECT(library_add), "clicked",
-			 G_CALLBACK(library_add_cb), cwin);
-	g_signal_connect(G_OBJECT(library_remove), "clicked",
-			 G_CALLBACK(library_remove_cb), cwin);
-	g_signal_connect (G_OBJECT (library_view), "key_press_event",
-			  G_CALLBACK(library_view_key_press), cwin);
 
 	update_preferences(cwin);
 
