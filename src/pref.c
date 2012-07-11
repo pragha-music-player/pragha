@@ -158,6 +158,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->restore_playlist_w));
 
+		cwin->cpref->show_icon_tray =
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						  cwin->cpref->show_icon_tray_w));
+
 		cwin->cpref->close_to_tray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->close_to_tray_w));
@@ -430,6 +434,21 @@ static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
 	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
 }
 
+/* Toggle show status icon. */
+
+static void toggle_show_icon_tray(GtkToggleButton *button, struct con_win *cwin)
+{
+	gboolean is_active;
+
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						 cwin->cpref->show_icon_tray_w));
+
+	if (!is_active)
+		gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, FALSE);
+
+	gtk_status_icon_set_visible(cwin->status_icon, is_active);
+}
+
 /* Toggle album art pattern */
 
 static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
@@ -597,6 +616,11 @@ static void update_preferences(struct con_win *cwin)
 	if (cwin->cpref->save_playlist)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->restore_playlist_w),
+					     TRUE);
+
+	if (cwin->cpref->show_icon_tray)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					     cwin->cpref->show_icon_tray_w),
 					     TRUE);
 
 	if (cwin->cpref->close_to_tray)
@@ -790,6 +814,13 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_TIMER_REMAINING_MODE,
 			       cwin->cpref->timer_remaining_mode);
+
+	/* Save show status icon option */
+
+	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
+			       GROUP_GENERAL,
+			       KEY_SHOW_ICON_TRAY,
+			       cwin->cpref->show_icon_tray);
 
 	/* Save close to tray option */
 
@@ -1390,7 +1421,7 @@ void preferences_dialog(struct con_win *cwin)
 		  *hbox_album_art_size, *album_art_pattern;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
 		  *hbox_library, *fuse_folders, *sort_by_year;
-	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *close_to_tray, *add_recursively;
+	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *show_icon_tray, *close_to_tray, *add_recursively;
 	GtkWidget *show_osd, *osd_in_systray, *albumart_in_osd, *actions_in_osd;
 #ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_uhbox, *lastfm_ulabel, \
@@ -1729,6 +1760,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
 
+	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
 	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
 	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
 
@@ -1751,6 +1783,11 @@ void preferences_dialog(struct con_win *cwin)
 			   0);
 	gtk_box_pack_start(GTK_BOX(general_vbox),
 			   restore_playlist,
+			   FALSE,
+			   FALSE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(general_vbox),
+			   show_icon_tray,
 			   FALSE,
 			   FALSE,
 			   0);
@@ -1904,6 +1941,7 @@ void preferences_dialog(struct con_win *cwin)
 	cwin->cpref->aproximate_search_w = aproximate_search;
 	cwin->cpref->window_state_combo_w = window_state_combo;
 	cwin->cpref->restore_playlist_w = restore_playlist;
+	cwin->cpref->show_icon_tray_w = show_icon_tray;
 	cwin->cpref->close_to_tray_w = close_to_tray;
 	cwin->cpref->add_recursively_w = add_recursively;
 
@@ -1927,14 +1965,17 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Setup signal handlers */
 
+	g_signal_connect(G_OBJECT(dialog), "response",
+			 G_CALLBACK(pref_dialog_cb), cwin);
+
 	g_signal_connect(G_OBJECT(use_hint), "toggled",
 			 G_CALLBACK(toggle_use_hint), cwin);
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
+	g_signal_connect(G_OBJECT(show_icon_tray), "toggled",
+			 G_CALLBACK(toggle_show_icon_tray), cwin);
 	g_signal_connect(G_OBJECT(show_osd), "toggled",
 			 G_CALLBACK(toggle_show_osd), cwin);
-	g_signal_connect(G_OBJECT(dialog), "response",
-			 G_CALLBACK(pref_dialog_cb), cwin);
 	g_signal_connect(G_OBJECT(library_add), "clicked",
 			 G_CALLBACK(library_add_cb), cwin);
 	g_signal_connect(G_OBJECT(library_remove), "clicked",
