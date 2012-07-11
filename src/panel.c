@@ -333,17 +333,47 @@ void track_progress_change_cb(GtkWidget *widget,
 	mpris_update_seeked(cwin, seek);
 }
 
+void set_pixbuf_album_art(GdkPixbuf *album_art, struct con_win *cwin)
+{
+	GError *error = NULL;
+	GdkPixbuf *scaled_album_art = NULL, *scaled_frame = NULL, *frame = NULL;
+
+	frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
+
+	if (album_art) {
+		scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
+		gdk_pixbuf_copy_area(scaled_album_art, 0 ,0 ,112 ,112, frame, 12, 8);
+		g_object_unref(G_OBJECT(scaled_album_art));
+	}
+
+	scaled_frame = gdk_pixbuf_scale_simple (frame,
+						cwin->cpref->album_art_size,
+						cwin->cpref->album_art_size,
+						GDK_INTERP_BILINEAR);
+
+	if (cwin->album_art) {
+		gtk_image_clear(GTK_IMAGE(cwin->album_art));
+		gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
+	}
+	else {
+		cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
+		gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
+				  GTK_WIDGET(cwin->album_art));
+		gtk_widget_show_all(cwin->album_art_frame);
+	}
+
+	g_object_unref(G_OBJECT(scaled_frame));
+	g_object_unref(G_OBJECT(frame));
+}
+
 void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
-	GError *error = NULL;
-	GdkPixbuf *scaled_album_art = NULL, *album_art = NULL, *scaled_frame = NULL, *frame = NULL;
+	GdkPixbuf *album_art = NULL;
 	gchar *path = NULL;
 
 	if (cwin->cpref->show_album_art) {
-		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
-
 		if (G_LIKELY(mobj &&
 		    mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
@@ -360,33 +390,8 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				else album_art = get_image_from_dir(path, cwin);
 				g_free(path);
 			}
-
-			if (album_art) {
-				scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
-				gdk_pixbuf_copy_area(scaled_album_art, 0 ,0 ,112 ,112, frame, 12, 8);
-				g_object_unref(G_OBJECT(scaled_album_art));
-				g_object_unref(G_OBJECT(album_art));
-			}
+			set_pixbuf_album_art(album_art, cwin);
 		}
-
-		scaled_frame = gdk_pixbuf_scale_simple (frame,
-							cwin->cpref->album_art_size,
-							cwin->cpref->album_art_size,
-							GDK_INTERP_BILINEAR);
-
-		if (cwin->album_art) {
-			gtk_image_clear(GTK_IMAGE(cwin->album_art));
-			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
-		}
-		else {
-			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
-			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-					  GTK_WIDGET(cwin->album_art));
-			gtk_widget_show_all(cwin->album_art_frame);
-		}
-
-		g_object_unref(G_OBJECT(scaled_frame));
-		g_object_unref(G_OBJECT(frame));
 	}
 }
 

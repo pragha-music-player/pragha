@@ -506,6 +506,42 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 	gdk_threads_leave();
 }
 
+static GdkPixbuf *
+gst_tag_list_get_album_art (const GstTagList *taglist)
+{
+	GstBuffer *buf;
+	GdkPixbufLoader *loader;
+	GdkPixbuf *pixbuf;
+	GError *error = NULL;
+	const GValue *val = NULL;
+
+	/* FIXME: Check image type and media type for embedded images. */
+	val = gst_tag_list_get_value_index (taglist, GST_TAG_IMAGE, 0);
+	if (val == NULL)
+		return NULL;
+
+	buf = gst_value_get_buffer (val);
+
+	if (buf == NULL)
+		return NULL;
+
+	loader = gdk_pixbuf_loader_new ();
+	if (gdk_pixbuf_loader_write (loader, buf->data, buf->size, &error) == FALSE) {
+		g_error_free (error);
+		g_object_unref (loader);
+		return NULL;
+	}
+
+	pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
+	if (pixbuf != NULL)
+		g_object_ref (pixbuf);
+
+	gdk_pixbuf_loader_close (loader, NULL);
+	g_object_unref (loader);
+
+	return pixbuf;
+}
+
 static void
 backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 {
@@ -516,17 +552,30 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	gchar *str = NULL;
+	GdkPixbuf *album_art = NULL;
 
 	gint changed = 0;
 
-	if(cwin->cstate->curr_mobj->file_type != FILE_HTTP)
-		return;
-
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
-	memset(&ntag, 0, sizeof(struct tags));
-
 	gst_message_parse_tag(message, &tag_list);
+
+	if (cwin->cpref->show_album_art) {
+		album_art = gst_tag_list_get_album_art(tag_list);
+		if (album_art) {
+			set_pixbuf_album_art(album_art, cwin);
+		}
+		else {
+			#ifdef HAVE_LIBGLYR
+			CDEBUG(DBG_BACKEND, "FIXME: Need download albumart..");
+			#endif
+		}
+	}
+
+	if(cwin->cstate->curr_mobj->file_type != FILE_HTTP)
+		goto exit;
+
+	memset(&ntag, 0, sizeof(struct tags));
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
@@ -563,6 +612,7 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 
 	gtk_tree_path_free(path);
 
+exit:
 	gst_tag_list_free(tag_list);
 }
 

@@ -822,6 +822,7 @@ void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con
 void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
 void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
 gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
+void set_pixbuf_album_art(GdkPixbuf *album_art, struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
