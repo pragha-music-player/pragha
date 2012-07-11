@@ -77,6 +77,7 @@
 
 #include "gtkcellrendererbubble.h"
 #include "xml_helper.h"
+#include "hig.h"
 
 /* Some definitions to solve different versions of the libraries. */
 
