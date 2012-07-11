@@ -1492,9 +1492,6 @@ pref_create_library_page(struct con_win *cwin)
 
 	hig_workarea_add_section_title(table, &row, _("Library"));
 
-
- 	/* Library List */
-
 	hbox_library = gtk_hbox_new(FALSE, 6);
 
 	library_store = gtk_list_store_new(1, G_TYPE_STRING);
@@ -1558,6 +1555,8 @@ pref_create_library_page(struct con_win *cwin)
 	cwin->cpref->library_view_w = library_view;
 	cwin->cpref->fuse_folders_w = fuse_folders;
 	cwin->cpref->sort_by_year_w = sort_by_year;
+
+	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(library_add), "clicked",
 			 G_CALLBACK(library_add_cb), cwin);
@@ -1664,7 +1663,6 @@ pref_create_general_page(struct con_win *cwin)
 	return table;
 }
 
-
 static GtkWidget*
 pref_create_desktop_page(struct con_win *cwin)
 {
@@ -1674,7 +1672,6 @@ pref_create_desktop_page(struct con_win *cwin)
 	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	GtkWidget *osd_in_systray;
 	#endif
-
 	guint row = 0;
 
 	table = hig_workarea_create( );
@@ -1786,8 +1783,6 @@ pref_create_services_page(struct con_win *cwin)
 	#endif
 	cwin->cpref->use_cddb_w = use_cddb;
 	cwin->cpref->use_mpris2_w = use_mpris2;
-
-	/*Update Wisgets. */
 
 	#ifdef HAVE_LIBCLASTFM
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
