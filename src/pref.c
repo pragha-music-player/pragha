@@ -1473,6 +1473,8 @@ pref_create_audio_page(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(audio_sink_combo), "changed",
 			 G_CALLBACK(change_audio_sink), cwin);
 
+	hig_workarea_finish(table, &row);
+
 	return table;
 }
 
@@ -1565,6 +1567,8 @@ pref_create_library_page(struct con_win *cwin)
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
 			  G_CALLBACK(library_view_key_press), cwin);
 
+	hig_workarea_finish(table, &row);
+
 	return table;
 }
 
@@ -1573,7 +1577,6 @@ pref_create_appearance_page(struct con_win *cwin)
 {
 	GtkWidget *table;
 	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
-
 	guint row = 0;
 
 	table = hig_workarea_create( );
@@ -1614,6 +1617,8 @@ pref_create_appearance_page(struct con_win *cwin)
 			 G_CALLBACK(toggle_use_hint), cwin);
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
+
+	hig_workarea_finish(table, &row);
 
 	return table;
 }
@@ -1659,6 +1664,8 @@ pref_create_general_page(struct con_win *cwin)
 	cwin->cpref->window_state_combo_w = window_state_combo;
 	cwin->cpref->restore_playlist_w = restore_playlist;
 	cwin->cpref->add_recursively_w = add_recursively;
+
+	hig_workarea_finish(table, &row);
 
 	return table;
 }
@@ -1717,6 +1724,8 @@ pref_create_desktop_page(struct con_win *cwin)
 	#endif
 	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
 	cwin->cpref->actions_in_osd_w = actions_in_osd;
+
+	hig_workarea_finish(table, &row);
 
 	return table;
 }
@@ -1787,6 +1796,8 @@ pref_create_services_page(struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
 	#endif
+
+	hig_workarea_finish(table, &row);
 
 	return table;
 }
