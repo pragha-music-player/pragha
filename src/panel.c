@@ -506,7 +506,7 @@ void shuffle_button (struct con_win *cwin)
 	if(cwin->cstate->tracks_curr_playlist){
 		current_playlist_clear_dirty_all(cwin);
 
- 		if (!cwin->cpref->shuffle) {
+		if (!cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle off");
 			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
 			if (cwin->cstate->curr_rand_ref)

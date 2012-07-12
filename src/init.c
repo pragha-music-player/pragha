@@ -631,7 +631,7 @@ gint init_config(struct con_win *cwin)
 			lib_delete_f = TRUE;
 		}
 
-		cwin->cpref->fuse_folders = 
+		cwin->cpref->fuse_folders =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_LIBRARY,
 					       KEY_FUSE_FOLDERS,
@@ -642,7 +642,7 @@ gint init_config(struct con_win *cwin)
 			fuse_folders_f = TRUE;
 		}
 
-		cwin->cpref->sort_by_year = 
+		cwin->cpref->sort_by_year =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_LIBRARY,
 					       KEY_SORT_BY_YEAR,

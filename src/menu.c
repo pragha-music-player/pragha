@@ -138,7 +138,7 @@ void add_recent_file (const gchar *filename)
 void handle_selected_file(gpointer data, gpointer udata)
 {
 	struct musicobject *mobj;
-	struct con_win *cwin = (struct con_win*)udata;
+	struct con_win *cwin = udata;
 
 	if (!data)
 		return;

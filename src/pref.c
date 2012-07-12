@@ -506,7 +506,7 @@ static void update_audio_device_default(struct con_win *cwin)
 
 static void change_audio_sink(GtkComboBox *combo, gpointer udata)
 {
-	struct con_win *cwin = (struct con_win *)udata;
+	struct con_win *cwin = udata;
 	gchar *audio_sink;
 
 	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(
@@ -591,8 +591,8 @@ static void update_preferences(struct con_win *cwin)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 0);
 	else{
 		if(cwin->cpref->start_mode){
-			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))		
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 1);		
+			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 1);
 			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
 				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 2);
 			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
