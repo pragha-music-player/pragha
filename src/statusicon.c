@@ -197,7 +197,7 @@ gboolean status_get_tooltip_cb (GtkWidget        *widget,
 					gint              y,
 					gboolean          keyboard_mode,
 					GtkTooltip       *tooltip,
-					struct con_win *cwin) 
+					struct con_win *cwin)
 {
 	gchar *markup_text;
 
@@ -205,9 +205,9 @@ gboolean status_get_tooltip_cb (GtkWidget        *widget,
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
 		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
- 			_("Title"), cwin->cstate->curr_mobj->tags->title,
- 			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
- 			_("Album"), cwin->cstate->curr_mobj->tags->album,
+			_("Title"), cwin->cstate->curr_mobj->tags->title,
+			_("Artist"), cwin->cstate->curr_mobj->tags->artist,
+			_("Album"), cwin->cstate->curr_mobj->tags->album,
 			_("Length"), gtk_label_get_text (GTK_LABEL(cwin->track_time_label)),
 			gtk_label_get_text (GTK_LABEL(cwin->track_length_label)));
 	}

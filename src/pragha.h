@@ -999,7 +999,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
-void playlist_tree_export(GtkAction *action, struct con_win *cwi);
+void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);

@@ -893,9 +893,9 @@ void open_url(struct con_win *cwin, const gchar *url)
 	/* No method was found to open the URL */
 	if (!success) {
 		GtkWidget *d;
-		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow), 
+		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, 
+					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 					"%s", _("Unable to open the browser"));
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (d),
 							 "%s", "No methods supported");

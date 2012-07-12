@@ -843,7 +843,7 @@ static void filter_tree_expand_func(GtkTreeView *view,
 	    (node_type != NODE_TRACK) &&
 	    (node_type != NODE_BASENAME) &&
 	    g_strstr_lv(u_str, cwin->cstate->filter_entry,
-	    		    cwin->cpref->aproximate_search ? 1 : 0))
+	    cwin->cpref->aproximate_search ? 1 : 0))
 		gtk_tree_view_collapse_row(view, path);
 
 	g_free(u_str);
@@ -1078,7 +1078,7 @@ void artist_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-       	cwin->cpref->cur_library_view = ARTIST;
+	cwin->cpref->cur_library_view = ARTIST;
 
 	init_library_view(cwin);
 }
