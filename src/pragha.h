@@ -668,11 +668,7 @@ struct con_mpris2 {
 	enum player_state state;
 };
 
-struct con_gnome_media_keys {
-	guint watch_id;
-	guint handler_id;
-	GDBusProxy *proxy;
-};
+struct con_gnome_media_keys;
 
 struct con_win {
 	struct pixbuf *pixbuf;
@@ -1322,7 +1318,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 /* gnome media keys */
 
 gint init_gnome_media_keys(struct con_win *cwin);
-void cleanup_gnome_media_keys(struct con_win *cwin);
+void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
 
 /* keybinder */
 

@@ -44,7 +44,7 @@ static void common_cleanup(struct con_win *cwin)
 #ifdef HAVE_LIBKEYBINDER
 	keybinder_free ();
 #else
-	cleanup_gnome_media_keys(cwin);
+	gnome_media_keys_free (cwin->cgnome_media_keys);
 #endif
 	g_slice_free(struct con_win, cwin);
 }
