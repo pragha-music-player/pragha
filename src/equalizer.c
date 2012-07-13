@@ -509,4 +509,5 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 	save_eq_preset(cwin, storage);
 
 	gtk_widget_destroy(dialog);
+	g_object_unref(storage);
 }
