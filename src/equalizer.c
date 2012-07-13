@@ -17,6 +17,8 @@
 
 #include "pragha.h"
 
+#define NUM_BANDS 10
+
 static const gchar *presets_names[] = {
 	N_("Disabled"),
 	N_("Classical"),
@@ -58,7 +60,7 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer data)
 	gint option = 0;
 	GtkWidget *vscale;
 
-	gdouble value[][10] =
+	gdouble value[][NUM_BANDS] =
 	{
 		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0}, // "Disabled"
 		{  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -7.2, -7.2, -7.2, -9.6}, // "Classical"
@@ -199,7 +201,7 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 	GtkWidget *eq_combobox, *vscale;
 	gint preset;
 
-	tmp_array = g_new (gdouble, 10);
+	tmp_array = g_new (gdouble, NUM_BANDS);
 
 	eq_combobox = g_object_get_data(data, "eq_combobox");
 
@@ -235,7 +237,7 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 				    GROUP_AUDIO,
 				    KEY_EQ_10_BANDS,
 				    tmp_array,
-				    10);
+				    NUM_BANDS);
 	g_free(tmp_array);
 }
 
@@ -271,12 +273,12 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkWidget *mhbox, *hbox, *dbvbox, *label, *eq_combobox;
-	GtkWidget *vscales[10];
+	GtkWidget *vscales[NUM_BANDS];
 	gpointer storage;
 	gint i, result;
 
 	/* Create vertical scales to equalizer */
-	for(i=0 ; i < 10 ; i++) {
+	for (i = 0; i < NUM_BANDS; i++) {
 		vscales[i] = gtk_vscale_new_with_range(-24.0, 12.0, 0.1);
 
 		gtk_range_set_inverted(GTK_RANGE(vscales[i]), TRUE);
@@ -411,7 +413,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	/* Conect the signals */
 
-	for(i=0 ; i < 10 ; i++) {
+	for (i = 0; i < NUM_BANDS; i++) {
 		g_signal_connect(vscales[i], "change-value",
 				 G_CALLBACK(vscales_eq_set_by_user), storage);
 	}
