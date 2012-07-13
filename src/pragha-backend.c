@@ -726,6 +726,22 @@ backend_free(struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }
 
+void
+backend_update_equalizer (struct con_gst *cgst, const gdouble *bands)
+{
+	g_object_set (cgst->equalizer,
+			"band0", bands[0],
+			"band1", bands[1],
+			"band2", bands[2],
+			"band3", bands[3],
+			"band4", bands[4],
+			"band5", bands[5],
+			"band6", bands[6],
+			"band7", bands[7],
+			"band8", bands[8],
+			"band9", bands[9],
+			NULL);
+}
 
 void
 backend_init_equalizer_preset(struct con_win *cwin)
@@ -742,17 +758,7 @@ backend_init_equalizer_preset(struct con_win *cwin)
 						 NULL,
 						 &error);
 	if (saved_bands != NULL) {
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band0", saved_bands[0], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band1", saved_bands[1], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band2", saved_bands[2], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band3", saved_bands[3], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band4", saved_bands[4], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band5", saved_bands[5], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band6", saved_bands[6], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band7", saved_bands[7], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band8", saved_bands[8], NULL);
-		g_object_set(G_OBJECT(cwin->cgst->equalizer), "band9", saved_bands[9], NULL);
-
+		backend_update_equalizer(cwin->cgst, saved_bands);
 		g_free(saved_bands);
 	}
 	else {

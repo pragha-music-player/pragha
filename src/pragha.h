@@ -1162,6 +1162,7 @@ void backend_play (struct con_win *cwin);
 void backend_stop (GError *error, struct con_win *cwin);
 void backend_start(struct musicobject *mobj, struct con_win *cwin);
 void backend_free (struct con_win *cwin);
+void backend_update_equalizer (struct con_gst *cgst, const gdouble *bands);
 gint backend_init(struct con_win *cwin);
 
 /* Systray functions */
