@@ -544,19 +544,19 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
 		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(uri_entry)));
-		name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
 		if(uri != NULL) {
+			name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
 			append_current_playlist(NULL, mobj, cwin);
 			update_status_bar(cwin);
 
-			new_radio(uri, name, cwin);
-
-			init_library_view(cwin);
-
+			if (name) {
+				new_radio(uri, name, cwin);
+				init_library_view(cwin);
+				g_free(name);
+			}
 			g_free(uri);
-			g_free(name);
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:
