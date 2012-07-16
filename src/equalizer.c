@@ -17,6 +17,29 @@
 
 #include "pragha.h"
 
+static const gchar *presets_names[] = {
+	N_("Disabled"),
+	N_("Classical"),
+	N_("Club"),
+	N_("Dance"),
+	N_("Full Bass"),
+	N_("Full Bass and Treble"),
+	N_("Full Treble"),
+	N_("Laptop Speakers and Headphones"),
+	N_("Large Hall"),
+	N_("Live"),
+	N_("Party"),
+	N_("Pop"),
+	N_("Reggae"),
+	N_("Rock"),
+	N_("Ska"),
+	N_("Smiley Face Curve"),
+	N_("Soft"),
+	N_("Soft Rock"),
+	N_("Techno"),
+	N_("Custom")
+};
+
 void
 backend_update_eq(gpointer data)
 {
@@ -154,6 +177,7 @@ void init_eq_preset(struct con_win *cwin, gpointer data)
 	gchar *eq_preset = NULL;
 	gdouble *saved_bands;
 	GError *error = NULL;
+	gint i;
 
 	eq_combobox = g_object_get_data(data, "eq_combobox");
 	
@@ -162,47 +186,14 @@ void init_eq_preset(struct con_win *cwin, gpointer data)
 					  KEY_EQ_PRESET,
 					  &error);
 	if(eq_preset != NULL) {
-		if (!g_ascii_strcasecmp(eq_preset, _("Disabled")))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 0);
-		else if (!g_ascii_strcasecmp(eq_preset, "Classical"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 1);
-		else if (!g_ascii_strcasecmp(eq_preset, "Club"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 2);
-		else if (!g_ascii_strcasecmp(eq_preset, "Dance"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 3);
-		else if (!g_ascii_strcasecmp(eq_preset, "Full Bass"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 4);
-		else if (!g_ascii_strcasecmp(eq_preset, "Full Bass and Treble"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 5);
-		else if (!g_ascii_strcasecmp(eq_preset, "Full Treble"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 6);
-		else if (!g_ascii_strcasecmp(eq_preset, "Laptop Speakers and Headphones"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 7);
-		else if (!g_ascii_strcasecmp(eq_preset, "Large Hall"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 8);
-		else if (!g_ascii_strcasecmp(eq_preset, "Live"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 9);
-		else if (!g_ascii_strcasecmp(eq_preset, "Party"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 10);
-		else if (!g_ascii_strcasecmp(eq_preset, "Pop"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 11);
-		else if (!g_ascii_strcasecmp(eq_preset, "Reggae"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 12);
-		else if (!g_ascii_strcasecmp(eq_preset, "Rock"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 13);
-		else if (!g_ascii_strcasecmp(eq_preset, "Ska"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 14);
-		else if (!g_ascii_strcasecmp(eq_preset, "Smiley Face Curve"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 15);
-		else if (!g_ascii_strcasecmp(eq_preset, "Soft"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 16);
-		else if (!g_ascii_strcasecmp(eq_preset, "Soft Rock"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 17);
-		else if (!g_ascii_strcasecmp(eq_preset, "Techno"))
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 18);
-		else {
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 19);
+		for (i = 0; i < G_N_ELEMENTS(presets_names); i++) {
+			if (g_ascii_strcasecmp(eq_preset, presets_names[i]) == 0) {
+				gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), i);
+				break;
+			}
+		}
 
+		if (g_ascii_strcasecmp(eq_preset, "Custom") == 0) {
 			saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
 								 GROUP_AUDIO,
 								 KEY_EQ_10_BANDS,
@@ -260,18 +251,18 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 {
 	gdouble *tmp_array;
 	GtkWidget *eq_combobox, *vscale;
-	gchar *presset = NULL;
+	gint preset;
 
 	tmp_array = g_new (gdouble, 10);
 
 	eq_combobox = g_object_get_data(data, "eq_combobox");
 
-	presset = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(eq_combobox));
+	preset = gtk_combo_box_get_active (GTK_COMBO_BOX (eq_combobox));
 
 	g_key_file_set_string(cwin->cpref->configrc_keyfile,
 			      GROUP_AUDIO,
 			      KEY_EQ_PRESET,
-			      presset);
+			      presets_names[preset]);
 
 	vscale = g_object_get_data(data, "band0");
 	tmp_array[0] = gtk_range_get_value(GTK_RANGE(vscale));
@@ -300,7 +291,6 @@ void save_eq_preset(struct con_win *cwin, gpointer data)
 				    tmp_array,
 				    10);
 	g_free(tmp_array);
-	g_free(presset);
 }
 
 gboolean eq_band_get_tooltip (GtkWidget        *vscale,
@@ -439,26 +429,8 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	eq_combobox = gtk_combo_box_text_new ();
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _("Disabled"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Classical");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Club");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Dance");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Bass");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Bass and Treble");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Full Treble");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Laptop Speakers and Headphones");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Large Hall");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Live");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Party");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Pop");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Reggae");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Rock");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Ska");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Smiley Face Curve");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Soft");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Soft Rock");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), "Techno");
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _("Custom"));
+	for (i = 0; i < G_N_ELEMENTS(presets_names); i++)
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _(presets_names[i]));
 
 	/* Set useful data */
 
