@@ -1,3 +1,4 @@
+src/equalizer.c
 src/gui.c
 src/pragha.c
 src/pragha.h
