@@ -40,62 +40,10 @@ static const gchar *presets_names[] = {
 	N_("Custom")
 };
 
-void
-backend_update_eq(gpointer data)
-{
-	gdouble gain;
-	GtkWidget *vscale;
-	struct con_win *cwin;
-
-	cwin = g_object_get_data(data, "cwin");
-
-	vscale = g_object_get_data(data, "band0");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band0", gain, NULL);
-
-	vscale = g_object_get_data(data, "band1");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band1", gain, NULL);
-
-	vscale = g_object_get_data(data, "band2");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band2", gain, NULL);
-
-	vscale = g_object_get_data(data, "band3");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band3", gain, NULL);
-
-	vscale = g_object_get_data(data, "band4");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band4", gain, NULL);
-
-	vscale = g_object_get_data(data, "band5");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band5", gain, NULL);
-
-	vscale = g_object_get_data(data, "band6");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band6", gain, NULL);
-
-	vscale = g_object_get_data(data, "band7");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band7", gain, NULL);
-
-	vscale = g_object_get_data(data, "band8");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band8", gain, NULL);
-
-	vscale = g_object_get_data(data, "band9");
-	gain = gtk_range_get_value(GTK_RANGE(vscale));
-	g_object_set(G_OBJECT(cwin->cgst->equalizer), "band9", gain, NULL);
-}
-
 static gboolean
 vscales_eq_set_by_user(GtkRange *range, GtkScrollType scroll, gdouble value, gpointer data)
 {
 	GtkWidget *eq_combobox;
-
-	backend_update_eq(data);
 
 	/* Set "custum" in combo */
 	eq_combobox = g_object_get_data(data, "eq_combobox");
@@ -167,8 +115,6 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer data)
 
 	vscale = g_object_get_data(data, "band9");
 	gtk_range_set_value(GTK_RANGE(vscale), value[option][9]);
-	
-	backend_update_eq(data);
 }
 
 void init_eq_preset(struct con_win *cwin, gpointer data)
@@ -309,6 +255,18 @@ gboolean eq_band_get_tooltip (GtkWidget        *vscale,
 	return TRUE;
 }
 
+static void
+band_bind_to_backend (GtkRange *range, GstElement *equalizer, gint i)
+{
+	gchar *eq_property = g_strdup_printf ("band%i", i);
+	GtkAdjustment *adj = gtk_range_get_adjustment (range);
+	GBindingFlags flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	g_object_bind_property (equalizer, eq_property, adj, "value", flags);
+
+	g_free (eq_property);
+}
+
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -327,6 +285,8 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 		g_signal_connect(G_OBJECT(vscales[i]), "query-tooltip",
 				 G_CALLBACK(eq_band_get_tooltip),
 				 NULL);
+
+		band_bind_to_backend(GTK_RANGE(vscales[i]), cwin->cgst->equalizer, i);
 	}
 
 	mhbox = gtk_hbox_new(FALSE, 0);
