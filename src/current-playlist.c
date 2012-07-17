@@ -2731,7 +2731,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 	/* Dnd from the library, so will read everything from database. */
 
 	query = g_strdup_printf("BEGIN;");
-	exec_sqlite_query(query, cwin, NULL);
+	exec_sqlite_query(query, cwin->cdbase, NULL);
 
 	/* Get the mobjs from the path of the library. */
 
@@ -2777,7 +2777,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 	} while (path != NULL);
 
 	query = g_strdup_printf("END;");
-	exec_sqlite_query(query, cwin, NULL);
+	exec_sqlite_query(query, cwin->cdbase, NULL);
 
 	cwin->cstate->view_change = FALSE;
 
@@ -3057,7 +3057,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	playlist_id = find_playlist_db(s_playlist, cwin);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
