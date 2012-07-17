@@ -413,7 +413,7 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-		delete_location_db(location_id, cwin);
+		delete_location_db(location_id, cwin->cdbase);
 	}
 
 	/* For all other node types do a recursive deletion */
@@ -423,7 +423,7 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
 					   L_LOCATION_ID, &location_id, -1);
-			delete_location_db(location_id, cwin);
+			delete_location_db(location_id, cwin->cdbase);
 		}
 		else {
 			path = gtk_tree_model_get_path(model, &t_iter);
@@ -511,7 +511,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				}
 			}
 			if (deleted) {
-				delete_location_db(location_id, cwin);
+				delete_location_db(location_id, cwin->cdbase);
 			}
 			sqlite3_free_table(result.resultp);
 		}
@@ -1409,7 +1409,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			query = g_strdup_printf("END;");
 			exec_sqlite_query(query, cwin->cdbase, NULL);
 
-			flush_stale_entries_db(cwin);
+			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
 		}
 
@@ -1476,7 +1476,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 			query = g_strdup_printf("END;");
 			exec_sqlite_query(query, cwin->cdbase, NULL);
 
-			flush_stale_entries_db(cwin);
+			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
 		}
 

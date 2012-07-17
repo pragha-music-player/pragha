@@ -701,7 +701,7 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 
 	/* Retrieve list of playlist names from DB */
 
-	playlists = get_playlist_names_db(cwin);
+	playlists = get_playlist_names_db(cwin->cdbase);
 
 	/* Create dialog window */
 
@@ -2989,12 +2989,12 @@ void save_current_playlist_state(struct con_win *cwin)
 
 	/* Save last playlist. */
 
-	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin);
+	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin->cdbase);
 	if (!playlist_id)
 		playlist_id = add_new_playlist_db(SAVE_PLAYLIST_STATE,
-						  cwin);
+						  cwin->cdbase);
 	else
-		flush_playlist_db(playlist_id, cwin);
+		flush_playlist_db(playlist_id, cwin->cdbase);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	if (!gtk_tree_model_get_iter_first(model, &iter))
@@ -3054,7 +3054,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	s_playlist = sanitize_string_sqlite3(SAVE_PLAYLIST_STATE);
-	playlist_id = find_playlist_db(s_playlist, cwin);
+	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	exec_sqlite_query(query, cwin->cdbase, &result);
@@ -3063,7 +3063,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 		file = sanitize_string_sqlite3(result.resultp[i]);
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:") == FALSE) {
-			if ((location_id = find_location_db(file, cwin)))
+			if ((location_id = find_location_db(file, cwin->cdbase)))
 				mobj = new_musicobject_from_db(location_id, cwin);
 			else
 				mobj = new_musicobject_from_file(result.resultp[i]);

@@ -1170,7 +1170,7 @@ gint init_musicdbase(struct con_win *cwin)
 
 	g_free(db_file);
 
-	return init_dbase_schema(cwin);
+	return init_dbase_schema(cwin->cdbase);
 }
 
 gint init_threads(struct con_win *cwin)

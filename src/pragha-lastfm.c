@@ -129,7 +129,7 @@ void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
 
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
-		location_id = find_location_db(sfile, cwin);
+		location_id = find_location_db(sfile, cwin->cdbase);
 
 		if (location_id)
 			g_array_append_val(loc_arr, location_id);
