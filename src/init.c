@@ -1138,18 +1138,18 @@ static gboolean rescand_icompatible_db(gpointer data)
 gint init_musicdbase(struct con_win *cwin)
 {
 	gint ret;
+	gchar *db_file;
 	const gchar *home;
 
 	CDEBUG(DBG_INFO, "Initializing music dbase");
 
 	home = g_get_user_config_dir();
-	cwin->cdbase->db_file = g_strdup_printf("%s%s", home,
-						"/pragha/pragha.db");
+	db_file = g_strdup_printf("%s%s", home, "/pragha/pragha.db");
 
 	if (cwin->cpref->installed_version != NULL &&
 	    g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
 		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
-		ret = g_unlink(cwin->cdbase->db_file);
+		ret = g_unlink(db_file);
 		if (ret != 0)
 			g_warning("%s", strerror(ret));
 		#if GTK_CHECK_VERSION (3, 0, 0)
@@ -1161,13 +1161,14 @@ gint init_musicdbase(struct con_win *cwin)
 
 	/* Create the database file */
 
-	ret = sqlite3_open(cwin->cdbase->db_file, &cwin->cdbase->db);
+	ret = sqlite3_open(db_file, &cwin->cdbase->db);
 	if (ret) {
-		g_critical("Unable to open/create DB file : %s",
-			   cwin->cdbase->db_file);
-		g_free(cwin->cdbase->db_file);
+		g_critical("Unable to open/create DB file : %s", db_file);
+		g_free(db_file);
 		return -1;
 	}
+
+	g_free(db_file);
 
 	return init_dbase_schema(cwin);
 }
