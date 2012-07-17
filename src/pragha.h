@@ -631,7 +631,6 @@ struct con_state {
 };
 
 struct con_dbase {
-	gchar *db_file;	/* Filename of the DB file (~/.pragha.db) */
 	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
 #ifdef HAVE_LIBGLYR
 	GlyrDatabase *cache_db;
