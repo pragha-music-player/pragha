@@ -651,7 +651,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
 
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
-		location_id = find_location_db(sfile, cwin);
+		location_id = find_location_db(sfile, cwin->cdbase);
 
 		if (location_id)
 			g_array_append_val(loc_arr, location_id);
@@ -860,7 +860,7 @@ void rescan_library_handler(struct con_win *cwin)
 
 	if (!cwin->cpref->library_dir) {
 		g_warning("Library is not set, flushing existing library");
-		flush_db(cwin);
+		flush_db(cwin->cdbase);
 		init_library_view(cwin);
 		return ;
 	}
@@ -869,16 +869,16 @@ void rescan_library_handler(struct con_win *cwin)
 	   initialize schema, otherwise, just flush the library database */
 
 	if (is_incompatible_upgrade(cwin)) {
-		if (drop_dbase_schema(cwin) == -1) {
+		if (drop_dbase_schema(cwin->cdbase) == -1) {
 			g_critical("Unable to drop database schema");
 			return;
 		}
-		if (init_dbase_schema(cwin) == -1) {
+		if (init_dbase_schema(cwin->cdbase) == -1) {
 			g_critical("Unable to init database schema");
 			return;
 		}
 	} else {
-		flush_db(cwin);
+		flush_db(cwin->cdbase);
 	}
 
 	/* Create the dialog */
@@ -966,7 +966,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		delete_db(lib, no_files, progress_bar, 1, cwin);
+		delete_db(lib, no_files, progress_bar, 1, cwin->cdbase);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
@@ -1136,9 +1136,9 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	n_artists = db_get_artist_count(cwin);
-	n_albums = db_get_album_count(cwin);
-	n_tracks = db_get_track_count(cwin);
+	n_artists = db_get_artist_count(cwin->cdbase);
+	n_albums = db_get_album_count(cwin->cdbase);
+	n_tracks = db_get_track_count(cwin->cdbase);
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_DESTROY_WITH_PARENT,

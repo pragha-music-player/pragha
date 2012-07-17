@@ -252,32 +252,32 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		sartist = sanitize_string_sqlite3(ntag->artist);
-		artist_id = find_artist_db(sartist, cwin);
+		artist_id = find_artist_db(sartist, cwin->cdbase);
 		if (!artist_id)
-			artist_id = add_new_artist_db(sartist, cwin);
+			artist_id = add_new_artist_db(sartist, cwin->cdbase);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
 		salbum = sanitize_string_sqlite3(ntag->album);
-		album_id = find_album_db(salbum, cwin);
+		album_id = find_album_db(salbum, cwin->cdbase);
 		if (!album_id)
-			album_id = add_new_album_db(salbum, cwin);
+			album_id = add_new_album_db(salbum, cwin->cdbase);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
 		sgenre = sanitize_string_sqlite3(ntag->genre);
-		genre_id = find_genre_db(sgenre, cwin);
+		genre_id = find_genre_db(sgenre, cwin->cdbase);
 		if (!genre_id)
-			genre_id = add_new_genre_db(sgenre, cwin);
+			genre_id = add_new_genre_db(sgenre, cwin->cdbase);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		year_id = find_year_db(ntag->year, cwin);
+		year_id = find_year_db(ntag->year, cwin->cdbase);
 		if (!year_id)
-			year_id = add_new_year_db(ntag->year, cwin);
+			year_id = add_new_year_db(ntag->year, cwin->cdbase);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
 		scomment = sanitize_string_sqlite3(ntag->comment);
-		comment_id = find_comment_db(scomment, cwin);
+		comment_id = find_comment_db(scomment, cwin->cdbase);
 		if (!comment_id)
-			comment_id = add_new_comment_db(scomment, cwin);
+			comment_id = add_new_comment_db(scomment, cwin->cdbase);
 	}
 
 	/* This is so fscking horrible. */
@@ -304,7 +304,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 							genre_id,
 							year_id,
 							comment_id,
-							cwin);
+							cwin->cdbase);
 					ret = FALSE;
 				}
 			}
@@ -951,7 +951,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 			else {
 				uri = sanitize_string_sqlite3(file);
 
-				if ((location_id = find_location_db(uri, cwin)))
+				if ((location_id = find_location_db(uri, cwin->cdbase)))
 					mobj = new_musicobject_from_db(location_id, cwin);
 				else
 					mobj = new_musicobject_from_file(file);
@@ -1103,7 +1103,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
-			location_id = find_location_db(sfile, cwin);
+			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id)) {
 				g_array_append_val(loc_arr, location_id);
 				g_free(sfile);
@@ -1256,7 +1256,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
-			location_id = find_location_db(sfile, cwin);
+			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id)) {
 				g_array_append_val(loc_arr, location_id);
 				g_free(sfile);

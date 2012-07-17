@@ -935,55 +935,55 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
-gint add_new_artist_db(const gchar *artist, struct con_win *cwin);
-gint add_new_album_db(const gchar *album, struct con_win *cwin);
-gint add_new_genre_db(const gchar *genre, struct con_win *cwin);
-gint add_new_year_db(guint year, struct con_win *cwin);
-gint add_new_comment_db(const gchar *comment, struct con_win *cwin);
-gint add_new_location_db(const gchar *location, struct con_win *cwin);
-void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_win *cwin);
-void add_track_radio_db(const gchar *uri, gint radio_id, struct con_win *cwin);
-gint find_artist_db(const gchar *artist, struct con_win *cwin);
-gint find_album_db(const gchar *album, struct con_win *cwin);
-gint find_genre_db(const gchar *genre, struct con_win *cwin);
-gint find_year_db(gint year, struct con_win *cwin);
-gint find_comment_db(const gchar *comment, struct con_win *cwin);
-gint find_location_db(const gchar *location, struct con_win *cwin);
-gint find_playlist_db(const gchar *playlist, struct con_win *cwin);
-gint find_radio_db(const gchar *radio, struct con_win *cwin);
-void delete_location_db(gint location_id, struct con_win *cwin);
-gint delete_location_hdd(gint location_id, struct con_win *cwin);
+gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase);
+gint add_new_album_db(const gchar *album, struct con_dbase *cdbase);
+gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase);
+gint add_new_year_db(guint year, struct con_dbase *cdbase);
+gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase);
+gint add_new_location_db(const gchar *location, struct con_dbase *cdbase);
+void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_dbase *cdbase);
+void add_track_radio_db(const gchar *uri, gint radio_id, struct con_dbase *cdbase);
+gint find_artist_db(const gchar *artist, struct con_dbase *cdbase);
+gint find_album_db(const gchar *album, struct con_dbase *cdbase);
+gint find_genre_db(const gchar *genre, struct con_dbase *cdbase);
+gint find_year_db(gint year, struct con_dbase *cdbase);
+gint find_comment_db(const gchar *comment, struct con_dbase *cdbase);
+gint find_location_db(const gchar *location, struct con_dbase *cdbase);
+gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+gint find_radio_db(const gchar *radio, struct con_dbase *cdbase);
+void delete_location_db(gint location_id, struct con_dbase *cdbase);
+gint delete_location_hdd(gint location_id, struct con_dbase *cdbase);
 void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     struct con_win *cwin);
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_win *cwin);
-gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
-gchar** get_playlist_names_db(struct con_win *cwin);
-gint get_playlist_count_db(struct con_win *cwin);
-void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_win *cwin);
-gint add_new_radio_db(const gchar *radio, struct con_win *cwin);
-gchar** get_radio_names_db(struct con_win *cwin);
+		     struct con_dbase *cdbase);
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase);
+gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+gchar** get_playlist_names_db(struct con_dbase *cdbase);
+gint get_playlist_count_db(struct con_dbase *cdbase);
+void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *cdbase);
+gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase);
+gchar** get_radio_names_db(struct con_dbase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
-gint get_tracklist_count_db(struct con_win *cwin);
-void delete_playlist_db(const gchar *playlist, struct con_win *cwin);
-void flush_playlist_db(gint playlist_id, struct con_win *cwin);
-void delete_radio_db(const gchar *radio, struct con_win *cwin);
-void flush_radio_db(gint radio_id, struct con_win *cwin);
-void flush_stale_entries_db(struct con_win *cwin);
-void flush_db(struct con_win *cwin);
+gint get_tracklist_count_db(struct con_dbase *cdbase);
+void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+void flush_playlist_db(gint playlist_id, struct con_dbase *cdbase);
+void delete_radio_db(const gchar *radio, struct con_dbase *cdbase);
+void flush_radio_db(gint radio_id, struct con_dbase *cdbase);
+void flush_stale_entries_db(struct con_dbase *cdbase);
+void flush_db(struct con_dbase *cdbase);
 gboolean fraction_update(GtkWidget *pbar);
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
-gint init_dbase_schema(struct con_win *cwin);
-gint drop_dbase_schema(struct con_win *cwin);
-gint db_get_artist_count(struct con_win *cwin);
-gint db_get_album_count(struct con_win *cwin);
-gint db_get_track_count(struct con_win *cwin);
+	       gint call_recur, struct con_dbase *cdbase);
+gint init_dbase_schema(struct con_dbase *cdbase);
+gint drop_dbase_schema(struct con_dbase *cdbase);
+gint db_get_artist_count(struct con_dbase *cdbase);
+gint db_get_album_count(struct con_dbase *cdbase);
+gint db_get_track_count(struct con_dbase *cdbase);
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result);
 void db_free(struct con_dbase *cdbase);
