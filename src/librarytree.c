@@ -453,7 +453,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 			query = g_strdup_printf("SELECT name FROM LOCATION "
 						"WHERE id = '%d';",
 						location_id);
-			if (exec_sqlite_query(query, cwin, &result)) {
+			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 				filename = result.resultp[result.no_columns];
 				if(filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
 					GError *error = NULL;
@@ -1390,7 +1390,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			/* Delete all the rows */
 
 			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin, NULL);
+			exec_sqlite_query(query, cwin->cdbase, NULL);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
@@ -1407,7 +1407,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			}
 
 			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin, NULL);
+			exec_sqlite_query(query, cwin->cdbase, NULL);
 
 			flush_stale_entries_db(cwin);
 			init_library_view(cwin);
@@ -1450,7 +1450,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 
 		if(result == GTK_RESPONSE_YES){
 			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin, NULL);
+			exec_sqlite_query(query, cwin->cdbase, NULL);
 
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
@@ -1474,7 +1474,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				g_array_free(loc_arr, TRUE);
 
 			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin, NULL);
+			exec_sqlite_query(query, cwin->cdbase, NULL);
 
 			flush_stale_entries_db(cwin);
 			init_library_view(cwin);
@@ -1685,7 +1685,7 @@ void init_library_view(struct con_win *cwin)
 
 	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
 				SAVE_PLAYLIST_STATE);
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	if (result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1723,7 +1723,7 @@ void init_library_view(struct con_win *cwin)
 	/* Radios. */
 
 	query = g_strdup_printf("SELECT NAME FROM RADIO ORDER BY NAME");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	if(result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1824,7 +1824,7 @@ void init_library_view(struct con_win *cwin)
 					"ORDER BY %s;", order_str);
 		g_free(order_str);
 			
-		exec_sqlite_query(query, cwin, &result);
+		exec_sqlite_query(query, cwin->cdbase, &result);
 		for_each_result_row(result, i) {
 			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
 				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
@@ -1849,7 +1849,7 @@ void init_library_view(struct con_win *cwin)
 	else {
 		/* Query for folders view */
 		query = g_strdup("SELECT name, id FROM LOCATION ORDER BY name DESC");
-		exec_sqlite_query(query, cwin, &result);
+		exec_sqlite_query(query, cwin->cdbase, &result);
 		for_each_result_row(result, i) {
 			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model, &iter);
 

@@ -290,7 +290,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 				query = g_strdup_printf("SELECT name FROM LOCATION "
 							"WHERE id = '%d';",
 							elem);
-				if (exec_sqlite_query(query, cwin, &result)) {
+				if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 					file = result.resultp[result.no_columns];
 					ret = save_tags_to_file(file, ntag,
 								changed, cwin);
@@ -1309,7 +1309,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(genre_tag_model));
 
 	query = g_strdup_printf("SELECT name FROM ARTIST;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1325,7 +1325,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM ALBUM;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1341,7 +1341,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM GENRE;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {

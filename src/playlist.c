@@ -266,7 +266,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 	playlist_id = find_playlist_db(s_playlist, cwin);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	if (!exec_sqlite_query(query, cwin, &result)) {
+	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
 		g_free(s_playlist);
 		return -1;
 	}
@@ -367,7 +367,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	cursor = gdk_cursor_new(GDK_WATCH);
 	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
@@ -428,7 +428,7 @@ prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin
 
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -470,7 +470,7 @@ void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_wi
 
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
@@ -506,7 +506,7 @@ prepend_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
 
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
 
@@ -1310,7 +1310,7 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 	GSList *i = NULL;
 
 	query = g_strdup_printf("BEGIN;");
-	exec_sqlite_query(query, cwin, NULL);
+	exec_sqlite_query(query, cwin->cdbase, NULL);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
@@ -1321,7 +1321,7 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 	}
 
 	query = g_strdup_printf("END;");
-	exec_sqlite_query(query, cwin, NULL);
+	exec_sqlite_query(query, cwin->cdbase, NULL);
 
 	g_slist_free(list);
 }
@@ -1525,7 +1525,7 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin, &result);
+	exec_sqlite_query (query, cwin->cdbase, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1558,7 +1558,7 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin, &result);
+	exec_sqlite_query (query, cwin->cdbase, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1599,7 +1599,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin, &result);
+	exec_sqlite_query (query, cwin->cdbase, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1640,7 +1640,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin, &result);
+	exec_sqlite_query (query, cwin->cdbase, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);

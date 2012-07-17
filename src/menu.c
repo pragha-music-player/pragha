@@ -896,12 +896,12 @@ void rescan_library_handler(struct con_win *cwin)
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		rescan_db(lib, no_files, progress_bar, 1, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		list = list->next;
 	}
@@ -964,12 +964,12 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		delete_db(lib, no_files, progress_bar, 1, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		if (cwin->cstate->stop_scan)
 			goto exit;
@@ -986,12 +986,12 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		rescan_db(lib, no_files, progress_bar, 1, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		if (cwin->cstate->stop_scan)
 			goto exit;
@@ -1018,12 +1018,12 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		no_files = dir_file_count(lib, 1);
 
 		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		update_db(lib, no_files, progress_bar, 1, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		exec_sqlite_query(query, cwin->cdbase, NULL);
 
 		if (cwin->cstate->stop_scan)
 			goto exit;
@@ -1087,7 +1087,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	/* NB: Optimization */
 
 	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (exec_sqlite_query(query, cwin, &result)) {
+	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i]);
 			mobj = new_musicobject_from_db(location_id, cwin);

@@ -142,7 +142,7 @@ AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = \"%d\";", location_id, location_id);
-	if (!exec_sqlite_query(query, cwin, &result)) {
+	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
 		g_critical("Track with location id : %d not found in DB",
 			   location_id);
 		return NULL;

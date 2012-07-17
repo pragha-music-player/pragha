@@ -338,7 +338,7 @@ append_track_with_artist_and_title(const gchar *artist, const gchar *title, stru
 				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
 				title, artist);
 
-	if(exec_sqlite_query(query, cwin, &result)) {
+	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 
