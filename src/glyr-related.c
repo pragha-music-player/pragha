@@ -154,7 +154,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 	}
 
-	glyr_opt_lookup_db(&glyr_info->query, cwin->cdbase->cache_db);
+	glyr_opt_lookup_db(&glyr_info->query, cwin->cache_db);
 	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
 
 	glyr_info->cwin = cwin;
@@ -369,7 +369,7 @@ exists:
 
 int uninit_glyr_related (struct con_win *cwin)
 {
-	glyr_db_destroy(cwin->cdbase->cache_db);
+	glyr_db_destroy(cwin->cache_db);
 	glyr_cleanup ();
 
 	return 0;
@@ -379,7 +379,7 @@ int init_glyr_related (struct con_win *cwin)
 {
 	glyr_init();
 
-	cwin->cdbase->cache_db = glyr_db_init(cwin->cpref->cache_folder);
+	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
 
 	return 0;
 }
