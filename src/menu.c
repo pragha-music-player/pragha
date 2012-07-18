@@ -900,7 +900,7 @@ void rescan_library_handler(struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
@@ -993,7 +993,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
@@ -1025,7 +1025,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin);
+		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin->cdbase);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
