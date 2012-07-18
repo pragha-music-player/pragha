@@ -18,6 +18,10 @@
 
 #include "pragha.h"
 
+struct con_dbase {
+	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
+};
+
 static void add_new_track_db(gint location_id,
 			     gint artist_id,
 			     gint album_id,
@@ -1322,6 +1326,90 @@ gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 	g_free(query);
 
 	return ret;
+}
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+static void rescand_icompatible_db(struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	gint result;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+					GTK_DIALOG_MODAL,
+					GTK_MESSAGE_WARNING,
+					GTK_BUTTONS_YES_NO,
+					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
+					"Want to upgrade the collection?."));
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if( result == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+}
+#else
+static gboolean rescand_icompatible_db(gpointer data)
+{
+	struct con_win *cwin = data;
+
+	GtkWidget *dialog;
+	gint result;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+					GTK_DIALOG_MODAL,
+					GTK_MESSAGE_WARNING,
+					GTK_BUTTONS_YES_NO,
+					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
+					"Want to upgrade the collection?."));
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if( result == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+
+	return TRUE;
+}
+#endif
+
+gint init_musicdbase(struct con_win *cwin)
+{
+	gint ret;
+	gchar *db_file;
+	const gchar *home;
+
+	CDEBUG(DBG_INFO, "Initializing music dbase");
+
+	cwin->cdbase = g_slice_new0(struct con_dbase);
+
+	home = g_get_user_config_dir();
+	db_file = g_strdup_printf("%s%s", home, "/pragha/pragha.db");
+
+	if (cwin->cpref->installed_version != NULL &&
+	    g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
+		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
+		ret = g_unlink(db_file);
+		if (ret != 0)
+			g_warning("%s", strerror(ret));
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		rescand_icompatible_db(cwin);
+		#else
+		gtk_init_add(rescand_icompatible_db, cwin);
+		#endif
+	}
+
+	/* Create the database file */
+
+	ret = sqlite3_open(db_file, &cwin->cdbase->db);
+	if (ret) {
+		g_critical("Unable to open/create DB file : %s", db_file);
+		g_free(db_file);
+		return -1;
+	}
+
+	g_free(db_file);
+
+	return init_dbase_schema(cwin->cdbase);
 }
 
 void db_free (struct con_dbase *cdbase)
