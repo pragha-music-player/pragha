@@ -630,9 +630,6 @@ struct con_state {
 
 struct con_dbase {
 	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
-#ifdef HAVE_LIBGLYR
-	GlyrDatabase *cache_db;
-#endif
 };
 
 struct con_gst {
@@ -721,6 +718,9 @@ struct con_win {
 	GtkUIManager *header_library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
+#ifdef HAVE_LIBGLYR
+	GlyrDatabase *cache_db;
+#endif
 	gint related_timeout_id;
 	DBusConnection *con_dbus;
 };
