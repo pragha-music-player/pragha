@@ -628,9 +628,7 @@ struct con_state {
 	struct musicobject *curr_mobj;
 };
 
-struct con_dbase {
-	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
-};
+struct con_dbase;
 
 struct con_gst {
 	GstElement *pipeline;
