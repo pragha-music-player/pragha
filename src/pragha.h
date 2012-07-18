@@ -585,7 +585,6 @@ struct db_result {
  * struct con_state - Pertains to the current state of the player
  *
  * @unique_instance: If current invocation of app is unique
- * @stop_scan: Flag to stop rescan process
  * @view_change: If library view change is in progress
  * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
@@ -607,7 +606,6 @@ struct con_state {
 	enum player_state state;
 	gboolean dragging;
 	gboolean unique_instance;
-	gboolean stop_scan;
 	gboolean view_change;
 	gboolean playlist_change;
 	gboolean curr_mobj_clear;
@@ -974,9 +972,14 @@ void flush_stale_entries_db(struct con_dbase *cdbase);
 void flush_db(struct con_dbase *cdbase);
 gboolean fraction_update(GtkWidget *pbar);
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
-void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       GTimeVal last_rescan_time, gint call_recur, struct con_win *cwin);
+	       gint call_recur, GCancellable *cancellable, struct con_win *cwin);
+void update_db (const gchar *dir_name,
+		gint no_files,
+		GtkWidget *pbar,
+		GTimeVal last_rescan_time,
+		gint call_recur,
+		GCancellable *cancellable,
+		struct con_win *cwin);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_dbase *cdbase);
 gint init_dbase_schema(struct con_dbase *cdbase);

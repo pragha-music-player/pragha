@@ -84,9 +84,12 @@ void update_menubar_playback_state (struct con_win *cwin)
 
 static gboolean rescan_dialog_delete_cb(GtkWidget *widget,
 					GdkEvent *event,
-					struct con_win *cwin)
+					gpointer user_data)
 {
-	cwin->cstate->stop_scan = TRUE;
+	GCancellable *cancellable = user_data;
+
+	g_cancellable_cancel (cancellable);
+
 	return TRUE;
 }
 
@@ -94,15 +97,12 @@ static gboolean rescan_dialog_delete_cb(GtkWidget *widget,
 
 static void rescan_dialog_response_cb(GtkDialog *dialog,
 				      gint response_id,
-				      struct con_win *cwin)
+				      gpointer user_data)
 {
-	switch(response_id) {
-	case GTK_RESPONSE_CANCEL:
-		cwin->cstate->stop_scan = TRUE;
-		break;
-	default:
-		break;
-	}
+	GCancellable *cancellable = user_data;
+
+	if (response_id == GTK_RESPONSE_CANCEL)
+		g_cancellable_cancel (cancellable);
 }
 
 /* Generate and add the recently-used data */
@@ -169,7 +169,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 
 /* Create a dialog box with a progress bar for rescan/update library */
 
-static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
+static GtkWidget* lib_progress_bar(struct con_win *cwin, int update, gpointer cb_data)
 {
 	GtkWidget *hbox, *spinner, *progress_bar;
 
@@ -208,9 +208,9 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(GTK_WINDOW(library_dialog)), "delete_event",
-			 G_CALLBACK(rescan_dialog_delete_cb), cwin);
+			 G_CALLBACK(rescan_dialog_delete_cb), cb_data);
 	g_signal_connect(G_OBJECT(library_dialog), "response",
-			 G_CALLBACK(rescan_dialog_response_cb), cwin);
+			 G_CALLBACK(rescan_dialog_response_cb), cb_data);
 
 	/* Add the progress bar to the dialog box's vbox and show everything */
 
@@ -851,6 +851,7 @@ void rescan_library_handler(struct con_win *cwin)
 {
 	GtkWidget *msg_dialog;
 	GtkWidget *progress_bar;
+	GCancellable *cancellable;
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
@@ -881,15 +882,16 @@ void rescan_library_handler(struct con_win *cwin)
 		flush_db(cwin->cdbase);
 	}
 
+	cancellable = g_cancellable_new ();
+
 	/* Create the dialog */
 
-	progress_bar = lib_progress_bar(cwin, 0);
+	progress_bar = lib_progress_bar(cwin, 0, cancellable);
 
 	/* Start the scan */
 
 	list = cwin->cpref->library_dir;
 	cnt = g_slist_length(cwin->cpref->library_dir);
-	cwin->cstate->stop_scan = FALSE;
 
 	for (i=0; i<cnt; i++) {
 		lib = list->data;
@@ -898,7 +900,7 @@ void rescan_library_handler(struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		rescan_db(lib, no_files, progress_bar, 1, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
@@ -911,7 +913,7 @@ void rescan_library_handler(struct con_win *cwin)
 
 	gtk_widget_destroy(library_dialog);
 
-	if (!cwin->cstate->stop_scan) {
+	if (!g_cancellable_is_cancelled (cancellable)) {
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
@@ -921,7 +923,9 @@ void rescan_library_handler(struct con_win *cwin)
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
-	
+
+	g_object_unref(cancellable);
+
 	/* Save rescan time */
 
 	g_get_current_time(&cwin->cpref->last_rescan_time);
@@ -941,18 +945,19 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *msg_dialog;
 	GtkWidget *progress_bar;
+	GCancellable *cancellable;
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
 	gchar *query;
 
-	/* Create the dialog */
-
-	progress_bar = lib_progress_bar(cwin, 1);
-
 	/* To track user termination */
 
-	cwin->cstate->stop_scan = FALSE;
+	cancellable = g_cancellable_new ();
+
+	/* Create the dialog */
+
+	progress_bar = lib_progress_bar(cwin, 1, cancellable);
 
 	/* Check if any library has been removed */
 
@@ -971,7 +976,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -988,12 +993,12 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		rescan_db(lib, no_files, progress_bar, 1, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -1020,12 +1025,12 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cwin);
+		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -1047,7 +1052,7 @@ exit:
 
 	gtk_widget_destroy(library_dialog);
 
-	if (!cwin->cstate->stop_scan) {
+	if (!g_cancellable_is_cancelled (cancellable)) {
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
@@ -1057,6 +1062,8 @@ exit:
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
+
+	g_object_unref(cancellable);
 }
 
 /* Handler for 'Add All' action in the Tools menu */

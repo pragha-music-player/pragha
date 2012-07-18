@@ -914,7 +914,7 @@ gboolean fraction_update(GtkWidget *pbar)
 }
 
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin)
+	       gint call_recur, GCancellable *cancellable, struct con_win *cwin)
 {
 	static gint files_scanned = 0;
 	gint progress_timeout = 0;
@@ -928,7 +928,7 @@ void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	if (call_recur)
 		files_scanned = 0;
 
-	if (cwin->cstate->stop_scan)
+	if (g_cancellable_is_cancelled (cancellable))
 		goto exit;
 
 	dir = g_dir_open(dir_name, 0, &error);
@@ -945,11 +945,11 @@ void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			rescan_db(ab_file, no_files, pbar, 0, cwin);
+			rescan_db(ab_file, no_files, pbar, 0, cancellable, cwin);
 		else {
 			files_scanned++;
 			add_entry_db(ab_file, cwin->cdbase);
@@ -970,8 +970,13 @@ exit:
 	}
 }
 
-void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       GTimeVal last_rescan_time, gint call_recur, struct con_win *cwin)
+void update_db (const gchar *dir_name,
+		gint no_files,
+		GtkWidget *pbar,
+		GTimeVal last_rescan_time,
+		gint call_recur,
+		GCancellable *cancellable,
+		struct con_win *cwin)
 {
 	static gint files_scanned = 0;
 	gint progress_timeout = 0;
@@ -986,7 +991,7 @@ void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	if (call_recur)
 		files_scanned = 0;
 
-	if (cwin->cstate->stop_scan)
+	if (g_cancellable_is_cancelled (cancellable))
 		goto exit;
 
 	dir = g_dir_open(dir_name, 0, &error);
@@ -1003,11 +1008,11 @@ void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			update_db(ab_file, no_files, pbar, last_rescan_time, 0, cwin);
+			update_db(ab_file, no_files, pbar, last_rescan_time, 0, cancellable, cwin);
 		else {
 			files_scanned++;
 			s_ab_file = sanitize_string_sqlite3(ab_file);
