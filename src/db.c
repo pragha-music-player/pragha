@@ -971,7 +971,7 @@ exit:
 }
 
 void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin)
+	       GTimeVal last_rescan_time, gint call_recur, struct con_win *cwin)
 {
 	static gint files_scanned = 0;
 	gint progress_timeout = 0;
@@ -1007,7 +1007,7 @@ void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 			goto exit;
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			update_db(ab_file, no_files, pbar, 0, cwin);
+			update_db(ab_file, no_files, pbar, last_rescan_time, 0, cwin);
 		else {
 			files_scanned++;
 			s_ab_file = sanitize_string_sqlite3(ab_file);
@@ -1015,8 +1015,7 @@ void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 				add_entry_db(ab_file,cwin->cdbase);
 			} else {
 				g_stat(ab_file, &sbuf);
-				if (sbuf.st_mtime >
-				    cwin->cpref->last_rescan_time.tv_sec) {
+				if (sbuf.st_mtime > last_rescan_time.tv_sec) {
 					if (find_location_db(s_ab_file, cwin->cdbase))
 						delete_track_db(ab_file, cwin->cdbase);
 					add_entry_db(ab_file,cwin->cdbase);

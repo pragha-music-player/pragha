@@ -976,7 +976,7 @@ gboolean fraction_update(GtkWidget *pbar);
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_win *cwin);
 void update_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
+	       GTimeVal last_rescan_time, gint call_recur, struct con_win *cwin);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, struct con_dbase *cdbase);
 gint init_dbase_schema(struct con_dbase *cdbase);
