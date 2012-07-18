@@ -1020,7 +1020,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		query = g_strdup_printf("BEGIN TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
 
-		update_db(lib, no_files, progress_bar, 1, cwin);
+		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cwin);
 
 		query = g_strdup_printf("END TRANSACTION");
 		exec_sqlite_query(query, cwin->cdbase, NULL);
