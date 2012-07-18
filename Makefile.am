@@ -36,6 +36,9 @@ EXTRA_DIST = 		\
 distclean-local:
 	rm -rf *.cache *~
 
+distuninstallcheck_listfiles = \
+	find . -type f -print | grep -v ./share/icons/hicolor/icon-theme.cache
+
 gtk_update_icon_cache = gtk-update-icon-cache -f -t $(datadir)/icons/hicolor
 
 install-data-hook:
