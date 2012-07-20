@@ -248,8 +248,8 @@ gint init_config(struct con_win *cwin)
 	all_f = FALSE;
 
 	config_dir = g_get_user_config_dir();
-	condir = g_strdup_printf("%s%s", config_dir, "/pragha");
-	conrc = g_strdup_printf("%s%s", config_dir, "/pragha/config");
+	condir = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha", NULL);
+	conrc = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha/config", NULL);
 
 	/* Does .config/pragha exist ? */
 

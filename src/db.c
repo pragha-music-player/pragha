@@ -1383,7 +1383,7 @@ gint init_musicdbase(struct con_win *cwin)
 	cwin->cdbase = g_slice_new0(struct con_dbase);
 
 	home = g_get_user_config_dir();
-	db_file = g_strdup_printf("%s%s", home, "/pragha/pragha.db");
+	db_file = g_build_path(G_DIR_SEPARATOR_S, home, "/pragha/pragha.db", NULL);
 
 	if (cwin->cpref->installed_version != NULL &&
 	    g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
