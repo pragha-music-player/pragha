@@ -313,6 +313,9 @@ backend_stop(GError *error, struct con_win *cwin)
 	update_related_state (cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
+
+	cwin->cgst->is_live = FALSE;
+	cwin->cgst->emitted_error = FALSE;
 }
 
 void
@@ -479,6 +482,9 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 	gint percent = 0;
 	GstState cur_state;
 
+	if (cwin->cgst->is_live)
+		return;
+
 	if(cwin->cstate->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
 		return;
 
@@ -591,6 +597,7 @@ void
 backend_play(struct con_win *cwin)
 {
 	gchar *uri = NULL;
+	GstStateChangeReturn ret;
 
 	if (!cwin->cstate->curr_mobj->file)
 		return;
@@ -609,14 +616,15 @@ backend_play(struct con_win *cwin)
 
 	cwin->cstate->state = ST_PLAYING;
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	ret = gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+
+	if (ret == GST_STATE_CHANGE_NO_PREROLL)
+		cwin->cgst->is_live = TRUE;
 
 	update_panel_playback_state (cwin);
 	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
-
-	cwin->cgst->emitted_error = FALSE;
 }
 
 static void
@@ -682,6 +690,12 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 		}
 		case GST_MESSAGE_ERROR: {
 			backend_parse_error (msg, cwin);
+			break;
+		}
+		case GST_MESSAGE_CLOCK_LOST: {
+			/* Get a new clock */
+			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
+			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PLAYING);
 			break;
 		}
     		default:
@@ -828,6 +842,9 @@ gint backend_init(struct con_win *cwin)
 	backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+
+	cwin->cgst->is_live = FALSE;
+	cwin->cgst->emitted_error = FALSE;
 
 	gst_object_unref(bus);
 	g_free(audiosink);
