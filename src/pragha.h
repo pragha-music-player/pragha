@@ -636,6 +636,7 @@ struct con_gst {
 	GstElement *equalizer;
 	int timer;
 	gdouble curr_vol;
+	gboolean is_live;
 	gboolean emitted_error;
 };
 

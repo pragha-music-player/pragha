@@ -1140,7 +1140,6 @@ gint init_first_state(struct con_win *cwin)
 
 	/* Init others default flags */
 
-	cwin->cgst->emitted_error = FALSE;
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm->session_id = NULL;
 	cwin->clastfm->status = LASTFM_STATUS_INVALID;
