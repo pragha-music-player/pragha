@@ -818,15 +818,18 @@ gint backend_init(struct con_win *cwin)
 		/* Test 10bands equalizer and test it. */
 		cwin->cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
 		if (cwin->cgst->equalizer != NULL) {
-			GstElement *bin = gst_bin_new("audiobin");
-			GstPad* audiopad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+			GstElement *bin;
+			GstPad *pad, *ghost_pad;
 
+			bin = gst_bin_new("audiobin");
 			gst_bin_add_many (GST_BIN(bin), cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
 			gst_element_link_many (cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
 
-			gst_element_add_pad (GST_ELEMENT(bin), gst_ghost_pad_new("sink", audiopad));
-		
-			gst_object_unref (audiopad);
+			pad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+			ghost_pad = gst_ghost_pad_new ("sink", pad);
+			gst_pad_set_active (ghost_pad, TRUE);
+			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
+			gst_object_unref (pad);
 
 			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
 		}
