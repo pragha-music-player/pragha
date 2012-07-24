@@ -139,11 +139,14 @@ backend_seek (guint64 seek, struct con_win *cwin)
 {
 	CDEBUG(DBG_BACKEND, "Seeking playback");
 
+	if(!cwin->cgst->seek_enabled)
+		return;
+
 	gst_element_seek (cwin->cgst->pipeline,
 	       1.0,
 	       GST_FORMAT_TIME,
 	       GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
-	       GST_SEEK_TYPE_SET, seek*(1000*1000*1000),
+	       GST_SEEK_TYPE_SET, seek * GST_SECOND,
 	       GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
 }
 
@@ -636,6 +639,12 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 	switch (new) {
 		case GST_STATE_PLAYING: {
 			if (cwin->cstate->state == ST_PLAYING) {
+				GstQuery *query;
+				query = gst_query_new_seeking (GST_FORMAT_TIME);
+				if (gst_element_query (cwin->cgst->pipeline, query))
+					gst_query_parse_seeking (query, NULL, &cwin->cgst->seek_enabled, NULL, NULL);
+				gst_query_unref (query);
+
 				if(cwin->cgst->timer == 0)
 					cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
 
@@ -844,6 +853,7 @@ gint backend_init(struct con_win *cwin)
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
 
 	cwin->cgst->is_live = FALSE;
+	cwin->cgst->seek_enabled = FALSE;
 	cwin->cgst->emitted_error = FALSE;
 
 	gst_object_unref(bus);

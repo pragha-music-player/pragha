@@ -513,7 +513,7 @@ static GVariant* mpris_Player_get_CanPause (GError **error, struct con_win *cwin
 
 static GVariant* mpris_Player_get_CanSeek (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(TRUE);
+	return g_variant_new_boolean(cwin->cgst->seek_enabled);
 }
 
 static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cwin)
