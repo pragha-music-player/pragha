@@ -637,6 +637,7 @@ struct con_gst {
 	int timer;
 	gdouble curr_vol;
 	gboolean is_live;
+	gboolean seek_enabled;
 	gboolean emitted_error;
 };
 
