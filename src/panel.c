@@ -452,7 +452,7 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 /* Handler for the 'Leave fullscren' button item in Panel */
 
 void
-unfull_button_handler (GtkButton *button, struct con_win *cwin)
+unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_fullscreen;
 
@@ -464,11 +464,11 @@ unfull_button_handler (GtkButton *button, struct con_win *cwin)
 /* Handler for the 'Shuffle' button item in Panel */
 
 void
-shuffle_button_handler (GtkToggleButton *button, struct con_win *cwin)
+shuffle_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_shuffle;
 
-	cwin->cpref->shuffle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	cwin->cpref->shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
 
 	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 
@@ -483,12 +483,12 @@ shuffle_button_handler (GtkToggleButton *button, struct con_win *cwin)
 }
 
 void
-repeat_button_handler (GtkToggleButton *button, struct con_win *cwin)
+repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_repeat;
 	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 
-	cwin->cpref->repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	cwin->cpref->repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
 
 	g_signal_handlers_block_by_func (action_repeat, repeat_action, cwin);
 
@@ -613,17 +613,14 @@ void update_panel_playback_state(struct con_win *cwin)
 {
 	gboolean playing = (cwin->cstate->state != ST_STOPPED);
 
-	gtk_widget_set_sensitive(cwin->prev_button, playing);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->prev_button), playing);
 
-	if (cwin->cstate->state == ST_PLAYING)
-		gtk_button_set_image(GTK_BUTTON(cwin->play_button),
-				     cwin->pixbuf->image_pause);
-	else
-		gtk_button_set_image(GTK_BUTTON(cwin->play_button),
-				     cwin->pixbuf->image_play);
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(cwin->play_button),
+				     (cwin->cstate->state == ST_PLAYING) ?
+				     GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
 
-	gtk_widget_set_sensitive(cwin->stop_button, playing);
-	gtk_widget_set_sensitive(cwin->next_button, playing);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->stop_button), playing);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->next_button), playing);
 
 	if (playing == FALSE) {
 		unset_current_song_info(cwin);
@@ -636,25 +633,26 @@ void update_panel_playback_state(struct con_win *cwin)
 
 void album_art_toggle_state(struct con_win *cwin)
 {
+	GtkWidget *box, *album_art_frame;
+	GtkToolItem *boxitem;
+
 	CDEBUG(DBG_INFO, "Toggle state of album art");
 
 	if (cwin->cpref->show_album_art) {
 		if (!cwin->album_art_frame) {
-			cwin->album_art_frame = gtk_event_box_new ();
-			gtk_event_box_set_visible_window(GTK_EVENT_BOX(cwin->album_art_frame), FALSE);
-
-			gtk_box_pack_end(GTK_BOX(cwin->hbox_panel),
-					   GTK_WIDGET(cwin->album_art_frame),
-					   FALSE, FALSE, 0);
-
-			gtk_box_reorder_child(GTK_BOX(cwin->hbox_panel),
-					      cwin->album_art_frame,
-					      2);
-
-			g_signal_connect (G_OBJECT (cwin->album_art_frame),
+			boxitem = gtk_tool_item_new ();
+			gtk_toolbar_insert (GTK_TOOLBAR(cwin->toolbar), GTK_TOOL_ITEM(boxitem), 4);
+			box = gtr_hbox_new (FALSE, 0);
+			album_art_frame = gtk_event_box_new ();
+			gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
+			g_signal_connect (G_OBJECT (album_art_frame),
 					"button_press_event",
 					G_CALLBACK (album_art_frame_press_callback),
 					cwin);
+			gtk_container_add (GTK_CONTAINER(boxitem), box);
+			gtk_box_pack_start (GTK_BOX(box), album_art_frame, TRUE, TRUE, 2);
+			gtk_widget_show_all(GTK_WIDGET(boxitem));
+			cwin->album_art_frame = album_art_frame;
 		}
 		gtk_widget_show_now(cwin->album_art_frame);
 		resize_album_art_frame(cwin);

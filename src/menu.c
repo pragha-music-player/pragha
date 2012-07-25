@@ -724,7 +724,7 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
 		shuffle_button(cwin);
 
 	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
@@ -740,7 +740,7 @@ void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
 		
 	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 }
@@ -767,14 +767,14 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 
 	if(fullscreen){
 		gtk_window_fullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_show(cwin->unfull_button);
+		gtk_widget_show(GTK_WIDGET(cwin->unfull_button));
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
 		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_hide(cwin->unfull_button);
+		gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
 		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
 }
@@ -823,11 +823,11 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->hbox_panel));
+	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->toolbar));
 
 	gint position = cwin->cpref->controls_below ? 3 : 1;
 
-	gtk_box_reorder_child(GTK_BOX(parent), cwin->hbox_panel, position);
+	gtk_box_reorder_child(GTK_BOX(parent), cwin->toolbar, position);
 }
 
 void
