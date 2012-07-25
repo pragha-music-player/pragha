@@ -807,11 +807,11 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 300);
 
 	/* Add to the dialog's main vbox */
 
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
 
 	/* Fill in initial entries */
 
