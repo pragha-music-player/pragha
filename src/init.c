@@ -1201,8 +1201,8 @@ void init_tag_completion(struct con_win *cwin)
 
 void init_toggle_buttons(struct con_win *cwin)
 {
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
 }
 
 void init_menu_actions(struct con_win *cwin)
@@ -1388,7 +1388,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *hbox_panel, *info_box, *hbox_main, *status_bar, *menu_bar;
+	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1453,14 +1453,14 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Main Vbox */
 
-	vbox = gtk_vbox_new(FALSE, 2);
+	vbox = gtk_vbox_new(FALSE, 0);
 
 	gtk_container_add(GTK_CONTAINER(cwin->mainwindow), vbox);
 
 	/* Create hboxen */
 
 	menu = create_menu(cwin);
-	hbox_panel = create_panel(cwin);
+	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
 	hbox_main = create_main_region(cwin);
 	status_bar = create_status_bar(cwin);
@@ -1472,7 +1472,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(menu_bar),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(hbox_panel),
+			   GTK_WIDGET(toolbar),
 			   FALSE,FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(info_box),
@@ -1497,7 +1497,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			g_warning("(%s): No embedded status_icon.", __func__);
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 			gtk_widget_show_all(cwin->mainwindow);
-			gtk_widget_hide(cwin->unfull_button);
+			gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
 			#ifdef HAVE_LIBCLASTFM
 			gtk_widget_hide(cwin->ntag_lastfm_button);
 			#endif
@@ -1505,7 +1505,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	}
 	else {
 		gtk_widget_show_all(cwin->mainwindow);
-		gtk_widget_hide(cwin->unfull_button);
+		gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
 		#ifdef HAVE_LIBCLASTFM
 		gtk_widget_hide(cwin->ntag_lastfm_button);
 		#endif

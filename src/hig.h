@@ -20,6 +20,11 @@
 *** see section 8.2.2, Visual Design > Window Layout > Dialogs.
 **/
 
+GtkWidget* gtr_hbox_new( gboolean homogenous,
+                         gint spacing );
+GtkWidget* gtr_vbox_new( gboolean homogenous,
+                         gint spacing );
+
 GtkWidget* hig_workarea_create( void );
 
 void       hig_workarea_add_section_divider( GtkWidget * table,

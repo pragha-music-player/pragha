@@ -461,8 +461,6 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_dir;
 	GdkPixbuf *pixbuf_paused;
 	GdkPixbuf *pixbuf_playing;
-	GtkWidget *image_pause;
-	GtkWidget *image_play;
 };
 
 #ifdef HAVE_LIBCLASTFM
@@ -676,18 +674,18 @@ struct con_win {
 	struct con_mpris2 *cmpris2;
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
-	GtkWidget *hbox_panel;
+	GtkWidget *toolbar;
 	GtkWidget *info_box;
 	GtkWidget *album_art_frame;
 	GtkWidget *album_art;
 	GtkWidget *track_progress_bar;
-	GtkWidget *prev_button;
-	GtkWidget *play_button;
-	GtkWidget *stop_button;
-	GtkWidget *next_button;
-	GtkWidget *unfull_button;
-	GtkWidget *shuffle_button;
-	GtkWidget *repeat_button;
+	GtkToolItem *prev_button;
+	GtkToolItem *play_button;
+	GtkToolItem *stop_button;
+	GtkToolItem *next_button;
+	GtkToolItem *unfull_button;
+	GtkToolItem *shuffle_button;
+	GtkToolItem *repeat_button;
 	GtkWidget *vol_button;
 	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
@@ -824,9 +822,9 @@ gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *e
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
-void unfull_button_handler(GtkButton *button, struct con_win *cwin);
-void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin);
-void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin);
+void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
+void shuffle_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
+void repeat_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
@@ -1284,7 +1282,7 @@ GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 GtkUIManager* create_menu(struct con_win *cwin);
 GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_panel(struct con_win *cwin);
+GtkWidget* create_toolbar(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
