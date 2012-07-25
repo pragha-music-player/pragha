@@ -307,7 +307,8 @@ enum playlist_action {
 enum player_state {
 	ST_PLAYING = 1,
 	ST_STOPPED,
-	ST_PAUSED
+	ST_PAUSED,
+	ST_NEXT
 };
 
 /* Node types in library view */
