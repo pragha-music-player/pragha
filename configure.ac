@@ -115,8 +115,11 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
 
 dnl Check global keyboard shortcuts support
 LIBKEYBINDER_FOUND="no"
+AS_IF([test "x$with_gtk3" != xno],
+	[keybinder_version="0.3.0"],
+	[keybinder_version="0.2.0"])
 XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
-                       [keybinder], [0.2.0],
+                       [keybinder], [$keybinder_version],
                        [keybinder],
                        [keybinder library], [yes])
 
