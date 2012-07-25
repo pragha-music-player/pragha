@@ -41,10 +41,9 @@ static void common_cleanup(struct con_win *cwin)
 	mpris_free (cwin->cmpris2);
 	if (notify_is_initted())
 		notify_uninit();
+	gnome_media_keys_free (cwin->cgnome_media_keys);
 #ifdef HAVE_LIBKEYBINDER
 	keybinder_free ();
-#else
-	gnome_media_keys_free (cwin->cgnome_media_keys);
 #endif
 	g_slice_free(struct con_win, cwin);
 }
@@ -150,14 +149,13 @@ gint main(gint argc, gchar *argv[])
 	init_gui(argc, argv, cwin);
 
 	/* Init_gnome_media_keys requires constructed main window. */
+	if (init_gnome_media_keys(cwin) == -1) {
+		g_critical("Unable to initialize gnome media keys");
+		return -1;
+	}
 	#ifdef HAVE_LIBKEYBINDER
 	if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
-		return -1;
-	}
-	#else
-	if (init_gnome_media_keys(cwin) == -1) {
-		g_critical("Unable to initialize gnome media keys");
 		return -1;
 	}
 	#endif
