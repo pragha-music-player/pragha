@@ -167,6 +167,34 @@ static void name_vanished_cb(GDBusConnection *connection,
     }
 }
 
+gboolean gnome_media_keys_will_be_useful()
+{
+    GDBusConnection *bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+
+    if (!bus)
+        return FALSE;
+
+    GVariant *result = g_dbus_connection_call_sync(bus,
+                                                   "org.freedesktop.DBus",
+                                                   "/org/freedesktop/DBus",
+                                                   "org.freedesktop.DBus",
+                                                   "GetNameOwner",
+                                                   g_variant_new ("(s)", "org.gnome.SettingsDaemon"),
+                                                   G_VARIANT_TYPE ("(s)"),
+                                                   G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                                                   -1,
+                                                   NULL,
+                                                   NULL);
+
+    g_object_unref(bus);
+
+    if (!result)
+        return FALSE;
+
+    g_variant_unref(result);
+    return TRUE;
+}
+
 gint init_gnome_media_keys(struct con_win *cwin)
 {
     struct con_gnome_media_keys *gmk = g_slice_new0(struct con_gnome_media_keys);
