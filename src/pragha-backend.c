@@ -555,7 +555,8 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 {
 	gint percent = 0;
 	GstState cur_state;
-
+	gchar *stringlabel;
+	
 	if (cwin->cgst->is_live)
 		return;
 
@@ -583,7 +584,20 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 
 	gdk_threads_enter();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
+	
+	/* display buffer information */
+	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label),
+				  _("<b>Buffering</b>"));
+	gtk_label_set_markup(GTK_LABEL(cwin->track_length_label),"<small>100 %</small>");
+	stringlabel = g_strdup_printf("<small>%d %%</small>",percent);
+	gtk_label_set_markup(GTK_LABEL(cwin->track_time_label), stringlabel);
+	
 	gdk_threads_leave();
+	
+	if (percent >= 100) {
+		__update_current_song_info(cwin);
+	}
+	g_free(stringlabel);
 }
 
 static void
