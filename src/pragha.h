@@ -1317,6 +1317,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* gnome media keys */
 
+gboolean gnome_media_keys_will_be_useful();
 gint init_gnome_media_keys(struct con_win *cwin);
 void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
 
