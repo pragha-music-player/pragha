@@ -116,10 +116,10 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
 dnl Check global keyboard shortcuts support
 LIBKEYBINDER_FOUND="no"
 AS_IF([test "x$with_gtk3" != xno],
-	[keybinder_version="0.3.0"],
-	[keybinder_version="0.2.0"])
+	[keybinder_version="keybinder-3.0"],
+	[keybinder_version="keybinder"])
 XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
-                       [keybinder], [$keybinder_version],
+                       [$keybinder_version], [0.2.0],
                        [keybinder],
                        [keybinder library], [yes])
 
@@ -170,7 +170,7 @@ echo "  Prefix.................................................................:
 AS_IF([test $GSTREAMER_API_VERSION = 1.0],
       [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
       [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
-echo "  Global keyboard shortcuts support............(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
+echo "  Use multimedia key without gnome-media-keys..(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
 echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"
 echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
