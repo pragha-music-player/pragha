@@ -51,7 +51,7 @@ void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_w
 			case ST_PAUSED:
 				pixbuf = cwin->pixbuf->pixbuf_paused;
 				break;
-			/*clear pixbuf when using gapless advance*/
+			/* clear pixbuf when using gapless advance */
 			case ST_NEXT:
 				pixbuf = NULL;
 				break;

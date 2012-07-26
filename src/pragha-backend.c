@@ -399,58 +399,76 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 }
 
 /* playbin2 about-to-finish signal handling for gapless playback */
-void backend_advance_gapless (GstElement *pipeline, struct con_win *cwin)
+void
+backend_advance_gapless (GstElement *pipeline, struct con_win *cwin)
 {
-	
-	CDEBUG(DBG_BACKEND, "playbin2: got about-to-stop-signal");
 	GtkTreePath *path = NULL;
-	/*TODO: add check for playlist changes */
+	gchar *uri = NULL;
 	
-	path= current_playlist_get_next(cwin);
-	 if (!path)
-		return; /*no next song? let the current finish*/
+	CDEBUG(DBG_BACKEND, "playbin2: got about-to-finish-signal");
+	
+	path = current_playlist_get_next(cwin);
+	 
+	if (!path)
+		return; /* no next song? let the current finish */
+	
+	/* TODO: add check for playlist changes */
 	
 	cwin->cstate->curr_mobj = current_playlist_mobj_at_path (path, cwin);
 	cwin->cstate->curr_mobj_clear = FALSE;
-	gchar *uri = NULL;
+	
 	if(cwin->cstate->curr_mobj->file_type == FILE_CDDA ||
 	   cwin->cstate->curr_mobj->file_type == FILE_HTTP) {
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
-		g_free (uri);
 	}
 	else {
 		uri = g_filename_to_uri (cwin->cstate->curr_mobj->file, NULL, NULL);
 		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", uri, NULL);
 		g_free (uri);
 	}
+	
 	gtk_tree_path_free (path);
 }
 
-/*update info/gui on track change*/
-void backend_track_changed(struct con_win *cwin)
+/* update info/gui on track change */
+void
+backend_track_changed(struct con_win *cwin)
 {
-	CDEBUG(DBG_BACKEND, "playbin2: track changed");
 	GtkTreePath *mob_path = NULL;
 	GtkTreePath *list_path = NULL;
 	struct musicobject *mob = NULL;
-	mob_path=current_playlist_path_at_mobj(cwin->cstate->curr_mobj, cwin);
-	list_path=current_playlist_get_actual(cwin);
 	
-	mob=current_playlist_mobj_at_path (list_path, cwin);
-	CDEBUG(DBG_BACKEND, "playbin2: track changed - update gui and playlist");
-	/*clear previous track pixbuf*/
-	if(cwin->cstate->curr_mobj!=mob)
+	CDEBUG(DBG_BACKEND, "playbin2: track changed");
+	
+	mob_path = current_playlist_path_at_mobj (cwin->cstate->curr_mobj, cwin);
+	list_path = current_playlist_get_actual (cwin);
+	mob = current_playlist_mobj_at_path (list_path, cwin);
+		
+	if (cwin->cstate->curr_mobj != mob)
 	{
-		/*update gui and playlist*/
+		CDEBUG(DBG_BACKEND, "playbin2: track changed - update gui and playlist");
+		
+		/* clear previous track */
+		unset_track_progress_bar(cwin);
+		unset_current_song_info(cwin);
 		cwin->cstate->state = ST_NEXT;
-		update_pixbuf_state_on_path(list_path, NULL, cwin);
+		update_pixbuf_state_on_path (list_path, NULL, cwin);
+		
+		/* update gui and playlist */
+		if (cwin->cstate->curr_mobj->file_type == FILE_HTTP){ 
+			
+			/* make sure that we do not set a track length for network streams */
+			cwin->cstate->curr_mobj->tags->length = 0;
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), 1);
+		}
 		cwin->cstate->state = ST_PLAYING;
-		update_current_state(mob_path, PLAYLIST_NEXT, cwin);
-		dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
+		update_current_state (mob_path, PLAYLIST_NEXT, cwin);
+		dbus_send_signal (DBUS_EVENT_UPDATE_STATE, cwin);
 	}
 	gtk_tree_path_free (mob_path);
 	gtk_tree_path_free (list_path);
 }
+
 /* Signal handler for parse the error dialog response. */
 
 static void backend_error_dialog_response(GtkDialog *dialog,
@@ -760,7 +778,7 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PLAYING);
 			break;
 		}
-		/*handle track changes using playbin2 stream changed message*/
+		/* handle track changes using playbin2 stream changed message */
 		case GST_MESSAGE_ELEMENT:{
 			if (strcmp (gst_structure_get_name (msg->structure), "playbin2-stream-changed") == 0)
 				backend_track_changed(cwin);
@@ -842,8 +860,8 @@ gint backend_init(struct con_win *cwin)
 	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "notify::source",
 			  G_CALLBACK (backend_source_notify_cb), cwin);
 	
-	/*add signal handler for playbin2 about-to-finish-signal*/
-	g_signal_connect (G_OBJECT (cwin->cgst->pipeline),"about-to-finish",
+	/* add signal handler for playbin2 about-to-finish-signal */
+	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "about-to-finish",
 			  G_CALLBACK (backend_advance_gapless), cwin);
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
