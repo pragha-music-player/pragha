@@ -1277,6 +1277,18 @@ gint db_get_track_count(struct con_dbase *cdbase)
 	return db_get_table_count (cdbase, "TRACK");
 }
 
+void db_begin_transaction(struct con_dbase *cdbase)
+{
+	gchar *query = g_strdup("BEGIN TRANSACTION");
+	exec_sqlite_query(query, cdbase, NULL);
+}
+
+void db_commit_transaction(struct con_dbase *cdbase)
+{
+	gchar *query = g_strdup("END TRANSACTION");
+	exec_sqlite_query(query, cdbase, NULL);
+}
+
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result)
 {

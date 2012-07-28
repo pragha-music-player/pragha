@@ -855,7 +855,6 @@ void rescan_library_handler(struct con_win *cwin)
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
-	gchar *query;
 
 	/* Check if Library is set */
 
@@ -897,13 +896,11 @@ void rescan_library_handler(struct con_win *cwin)
 		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_begin_transaction(cwin->cdbase);
 
 		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_commit_transaction(cwin->cdbase);
 
 		list = list->next;
 	}
@@ -949,7 +946,6 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
-	gchar *query;
 
 	/* To track user termination */
 
@@ -968,13 +964,11 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_begin_transaction(cwin->cdbase);
 
 		delete_db(lib, no_files, progress_bar, 1, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_commit_transaction(cwin->cdbase);
 
 		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
@@ -990,13 +984,11 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_begin_transaction(cwin->cdbase);
 
 		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_commit_transaction(cwin->cdbase);
 
 		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
@@ -1022,13 +1014,11 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_begin_transaction(cwin->cdbase);
 
 		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin->cdbase, NULL);
+		db_commit_transaction(cwin->cdbase);
 
 		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
