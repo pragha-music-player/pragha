@@ -985,6 +985,8 @@ gint drop_dbase_schema(struct con_dbase *cdbase);
 gint db_get_artist_count(struct con_dbase *cdbase);
 gint db_get_album_count(struct con_dbase *cdbase);
 gint db_get_track_count(struct con_dbase *cdbase);
+void db_begin_transaction(struct con_dbase *cdbase);
+void db_commit_transaction(struct con_dbase *cdbase);
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result);
 void db_free(struct con_dbase *cdbase);
