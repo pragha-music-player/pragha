@@ -1921,28 +1921,6 @@ void create_status_icon(struct con_win *cwin)
 	cwin->systray_menu = systray_menu;
 }
 
-gboolean dialog_audio_init(gpointer data)
-{
-	struct con_win *cwin = data;
-	GtkWidget *dialog;
-
-	gdk_threads_enter();
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_ERROR,
-					GTK_BUTTONS_OK,
-					"%s",
-					"Audio could not be initialized. "
-					"Use preferences to select a proper "
-					"audio backend/device and restart the app.");
-	gtk_window_set_title(GTK_WINDOW(dialog), "Audio initialization error");
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
-	gdk_threads_leave();
-
-	return FALSE;
-}
-
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
 	if(cwin->cpref->close_to_tray) {
