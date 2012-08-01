@@ -159,7 +159,11 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 
 	glyr_info->cwin = cwin;
 
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Glyr get text", get_related_text_info_idle_func, glyr_info);
+	#else
 	g_thread_create(get_related_text_info_idle_func, glyr_info, FALSE, NULL);
+	#endif
 }
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
@@ -357,7 +361,11 @@ void related_get_album_art_handler (struct con_win *cwin)
 
 	glyr_info->cwin = cwin;
 
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Glyr get album", get_album_art_idle_func, glyr_info);
+	#else
 	g_thread_create(get_album_art_idle_func, glyr_info, FALSE, NULL);
+	#endif
 
 exists:
 	g_free(album_art_path);
