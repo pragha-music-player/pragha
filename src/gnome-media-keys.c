@@ -169,30 +169,75 @@ static void name_vanished_cb(GDBusConnection *connection,
 
 gboolean gnome_media_keys_will_be_useful()
 {
-    GDBusConnection *bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+    GDBusConnection *bus = NULL;
+    GVariant *response = NULL;
+    GDBusNodeInfo *node_info = NULL;
+    GDBusInterfaceInfo *interface_info;
+    GDBusMethodInfo *method_info;
+    const gchar *xml_data;
+    gboolean result = TRUE;
+
+    bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 
     if (!bus)
-        return FALSE;
+    {
+        result = FALSE;
+        goto out;
+    }
 
-    GVariant *result = g_dbus_connection_call_sync(bus,
-                                                   "org.freedesktop.DBus",
-                                                   "/org/freedesktop/DBus",
-                                                   "org.freedesktop.DBus",
-                                                   "GetNameOwner",
-                                                   g_variant_new ("(s)", "org.gnome.SettingsDaemon"),
-                                                   G_VARIANT_TYPE ("(s)"),
-                                                   G_DBUS_CALL_FLAGS_NO_AUTO_START,
-                                                   -1,
-                                                   NULL,
-                                                   NULL);
+    response = g_dbus_connection_call_sync(bus,
+                                           "org.gnome.SettingsDaemon",
+                                           "/org/gnome/SettingsDaemon/MediaKeys",
+                                           "org.freedesktop.DBus.Introspectable",
+                                           "Introspect",
+                                           NULL,
+                                           G_VARIANT_TYPE ("(s)"),
+                                           G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                                           -1,
+                                           NULL,
+                                           NULL);
 
-    g_object_unref(bus);
+    if (!response)
+    {
+        result = FALSE;
+        goto out;
+    }
 
-    if (!result)
-        return FALSE;
+    g_variant_get(response, "(&s)", &xml_data);
 
-    g_variant_unref(result);
-    return TRUE;
+    node_info = g_dbus_node_info_new_for_xml(xml_data, NULL);
+
+    if (!node_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    interface_info = g_dbus_node_info_lookup_interface(node_info, "org.gnome.SettingsDaemon.MediaKeys");
+
+    if (!interface_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    method_info = g_dbus_interface_info_lookup_method(interface_info, "GrabMediaPlayerKeys");
+
+    if (!method_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+out:
+    if (bus)
+        g_object_unref(bus);
+    if (response)
+        g_variant_unref(response);
+    if (node_info)
+        g_dbus_node_info_unref(node_info);
+
+    return result;
 }
 
 gint init_gnome_media_keys(struct con_win *cwin)
