@@ -17,11 +17,15 @@
 
 #include "pragha.h"
 
+
+#ifdef HAVE_GUDEV
+
 #include <gudev/gudev.h>
 
 const char * const gudev_subsystems[] = { "block", NULL };
 
-static void uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
+static void
+uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
 {
 	const gchar *id_type;
 	const gchar *media_state;
@@ -45,10 +49,11 @@ static void uevent_cb(GUdevClient *client, const char *action, GUdevDevice *devi
 
 			/* check if we have a blank CD/DVD here */
 
-			if (g_strcmp0 (media_state, "blank") != 0 && audio_tracks > 0)
-				/* FIXME: Add the audio cd but block the gui.
-				 * add_audio_cd(cwin);*/
-				 set_status_message(_("New device detected."), cwin);
+			if (g_strcmp0 (media_state, "blank") != 0 && audio_tracks > 0) {
+				gdk_threads_enter ();
+				set_status_message(_("New device detected."), cwin);
+				gdk_threads_leave ();
+			}
 		}
 	}
 }
@@ -63,3 +68,4 @@ init_gudev_subsystem(struct con_win *cwin)
 
 	return 0;
 }
+#endif	
