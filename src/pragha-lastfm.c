@@ -706,9 +706,7 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	if ((cwin->cstate->curr_mobj->tags->artist == NULL) ||
-	    (cwin->cstate->curr_mobj->tags->title == NULL) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
+	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
 	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 

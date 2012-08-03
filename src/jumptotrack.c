@@ -114,6 +114,7 @@ search_and_set_layout (gchar *haystack, gchar *needle, gboolean precise)
 	needle_len = g_utf8_strlen (needled, -1);
 	haystack_len = g_utf8_strlen (haystackd, -1);
 
+
 	found = g_strstr_lv (haystackd, needled, precise ? 0 : 1);
 
 	if (found != NULL) {
@@ -168,15 +169,9 @@ gboolean do_jump_refilter(struct con_win *cwin)
 
 		track_i++;
 
-		ch_title = ((mobj->tags->title != NULL) && strlen(mobj->tags->title)) ?
-		             g_strdup(mobj->tags->title) :
-		             get_display_filename (mobj->file, FALSE);
-		ch_artist = ((mobj->tags->artist != NULL) && strlen(mobj->tags->artist)) ?
-			     g_strdup(mobj->tags->artist) :
-			     g_strdup(_("Unknown Artist"));
-		ch_album = ((mobj->tags->album != NULL) && strlen(mobj->tags->album)) ?
-			     g_strdup(mobj->tags->album) :
-			     g_strdup(_("Unknown Album"));
+		ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) : get_display_filename (mobj->file, FALSE);
+		ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
+		ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
 
 		track_data = g_strdup_printf ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
