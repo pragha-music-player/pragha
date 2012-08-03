@@ -1353,10 +1353,6 @@ int init_glyr_related (struct con_win *cwin);
 
 void update_related_state (struct con_win *cwin);
 
-/* Management removable devices */
-
-gint init_gudev_subsystem(struct con_win *cwin);
-
 /* Others */
 
 void dialog_jump_to_track (struct con_win *cwin);
