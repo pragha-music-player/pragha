@@ -264,6 +264,67 @@ exit:
 	dbus_message_unref(msg);
 }
 
+gint init_dbus(struct con_win *cwin)
+{
+	DBusConnection *conn = NULL;
+	DBusError error;
+	gint ret = 0;
+
+	CDEBUG(DBG_INFO, "Initializing DBUS");
+
+	dbus_error_init(&error);
+	conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
+	if (!conn) {
+		g_critical("Unable to get a DBUS connection");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	ret = dbus_bus_request_name(conn, DBUS_NAME, 0, &error);
+	if (ret == -1) {
+		g_critical("Unable to request for DBUS service name");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+		cwin->cstate->unique_instance = TRUE;
+	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
+		cwin->cstate->unique_instance = FALSE;
+
+	dbus_connection_setup_with_g_main(conn, NULL);
+	cwin->con_dbus = conn;
+
+	return 0;
+}
+
+gint init_dbus_handlers(struct con_win *cwin)
+{
+	DBusError error;
+
+	dbus_error_init(&error);
+	if (!cwin->con_dbus) {
+		g_critical("No DBUS connection");
+		return -1;
+	}
+
+	dbus_bus_add_match(cwin->con_dbus,
+			   "type='signal',path='/org/pragha/DBus'",
+			   &error);
+	if (dbus_error_is_set(&error)) {
+		g_critical("Unable to register match rule for DBUS");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	if (!dbus_connection_add_filter(cwin->con_dbus, dbus_filter_handler, cwin, NULL)) {
+		g_critical("Unable to allocate memory for DBUS filter");
+		return -1;
+	}
+
+	return 0;
+}
+
 void dbus_handlers_free (struct con_win *cwin)
 {
 	dbus_connection_remove_filter(cwin->con_dbus,
