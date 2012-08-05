@@ -1175,15 +1175,8 @@ gint backend_init(struct con_win *cwin);
 
 gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
-gboolean status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin);
-gboolean status_get_tooltip_cb (GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,GtkTooltip *tooltip, struct con_win *cwin);
 void create_status_icon (struct con_win *cwin);
 void systray_display_popup_menu (struct con_win *cwin);
-void systray_play_pause_action(GtkAction *action, struct con_win *cwin);
-void systray_stop_action(GtkAction *action, struct con_win *cwin);
-void systray_prev_action(GtkAction *action, struct con_win *cwin);
-void systray_next_action(GtkAction *action, struct con_win *cwin);
-void systray_quit(GtkAction *action, struct con_win *cwin);
 
 void about_widget(struct con_win *cwin);
 
@@ -1365,7 +1358,5 @@ void dialog_jump_to_track (struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
-void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
-GtkUIManager* create_systray_menu(struct con_win *cwin);
 
 #endif /* PRAGHA_H */
