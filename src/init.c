@@ -220,8 +220,7 @@ gint init_config(struct con_win *cwin)
 
 	/* Get cache of downloaded albums arts */
 	#ifdef HAVE_LIBGLYR
-	cache_folder = g_strdup_printf("%s/pragha",
-					g_get_user_cache_dir());
+	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
 
 	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
 		g_mkdir(cache_folder, S_IRWXU);
