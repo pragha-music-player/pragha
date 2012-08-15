@@ -85,14 +85,6 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
-#if (!GTK_CHECK_VERSION(2, 23, 0) || GTK_CHECK_VERSION(2, 90, 0)) && !GTK_CHECK_VERSION(2, 91, 1)
-#define GtkComboBoxText GtkComboBox
-#define GTK_COMBO_BOX_TEXT(X) GTK_COMBO_BOX(X)
-#define gtk_combo_box_text_new gtk_combo_box_new_text
-#define gtk_combo_box_text_append_text(X,Y) gtk_combo_box_append_text(X,Y)
-#define gtk_combo_box_text_get_active_text(X) gtk_combo_box_get_active_text(X)
-#endif
-
 /* Some default preferences. */
 
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
