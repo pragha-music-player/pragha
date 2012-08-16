@@ -487,7 +487,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *dialog;
 	GtkWidget *vbox, *hbox;
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
-	gchar *uri = NULL, *name = NULL;
+	const gchar *uri = NULL, *name = NULL;
 	gchar *clipboard_location;
 	struct musicobject *mobj;
 	gint result;
@@ -541,9 +541,13 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
-		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(uri_entry)));
+		if (gtk_entry_get_text_length (GTK_ENTRY(uri_entry)))
+			uri = gtk_entry_get_text(GTK_ENTRY(uri_entry));
+
 		if(uri != NULL) {
-			name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
+			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
+				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
 			append_current_playlist(NULL, mobj, cwin);
@@ -552,9 +556,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			if (name) {
 				new_radio(uri, name, cwin);
 				init_library_view(cwin);
-				g_free(name);
 			}
-			g_free(uri);
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:

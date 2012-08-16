@@ -1447,7 +1447,7 @@ exit:
 	g_free(s_playlist);
 }
 
-void new_radio (gchar *uri, gchar *name, struct con_win *cwin)
+void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
