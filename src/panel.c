@@ -114,7 +114,7 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 	GDir *dir = NULL;
 	const gchar *next_file = NULL;
 	gchar *ab_file = NULL, **pattern;
-	GSList *file_list = NULL, *l;
+	GSList *file_list = NULL;
 	gint i = 0;
 
 	/* Form a list of all files in the given dir */
@@ -173,12 +173,7 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 
 	/* Cleanup */
 
-	l = file_list;
-	while (l) {
-		g_free(l->data);
-		l = l->next;
-	}
-	g_slist_free(file_list);
+	g_slist_free_full(file_list, g_free);
 	g_strfreev(pattern);
 
 	return image;

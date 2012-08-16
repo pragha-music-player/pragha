@@ -805,17 +805,7 @@ gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 
 void free_str_list(GSList *list)
 {
-	gint cnt = 0, i;
-	GSList *l = list;
-
-	cnt = g_slist_length(list);
-
-	for (i=0; i<cnt; i++) {
-		g_free(l->data);
-		l = l->next;
-	}
-
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 }
 
 /* Compare two UTF-8 strings */
