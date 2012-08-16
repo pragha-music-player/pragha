@@ -1369,7 +1369,6 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	gchar *query;
 	gint result;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -1389,8 +1388,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 		if( result == GTK_RESPONSE_YES ){
 			/* Delete all the rows */
 
-			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_begin_transaction(cwin->cdbase);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
@@ -1405,8 +1403,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 						return;
 			}
 
-			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_commit_transaction(cwin->cdbase);
 
 			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
@@ -1424,7 +1421,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	gchar *query;
 	gint result;
 	GArray *loc_arr;
 	gboolean unlink = FALSE;
@@ -1448,8 +1444,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		gtk_widget_destroy(dialog);
 
 		if(result == GTK_RESPONSE_YES){
-			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_begin_transaction(cwin->cdbase);
 
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
@@ -1470,8 +1465,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 			if (loc_arr)
 				g_array_free(loc_arr, TRUE);
 
-			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_commit_transaction(cwin->cdbase);
 
 			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);

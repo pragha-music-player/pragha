@@ -2683,7 +2683,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 	GtkTreePath *path = NULL;
 	gint i = 0, location_id = 0;
 	GtkTreeIter iter;
-	gchar *name = NULL, *query;
+	gchar *name = NULL;
 	enum node_type node_type;
 	struct musicobject *mobj = NULL;
 	GList *list = NULL;
@@ -2700,8 +2700,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	/* Dnd from the library, so will read everything from database. */
 
-	query = g_strdup_printf("BEGIN;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
+	db_begin_transaction(cwin->cdbase);
 
 	/* Get the mobjs from the path of the library. */
 
@@ -2746,8 +2745,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 		i++;
 	} while (path != NULL);
 
-	query = g_strdup_printf("END;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
+	db_commit_transaction(cwin->cdbase);
 
 	cwin->cstate->view_change = FALSE;
 
