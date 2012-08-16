@@ -229,7 +229,7 @@ gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
 	return ret;
 }
 
-void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
+void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin)
 {
 	gboolean ret = FALSE;
@@ -314,7 +314,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	if (file_arr) {
 		gchar *elem;
 		for (i = 0; i < file_arr->len; i++) {
-			elem = g_array_index(file_arr, gchar *, i);
+			elem = g_ptr_array_index(file_arr, i);
 			if (elem)
 				(void)save_tags_to_file(elem, ntag, changed, cwin);
 		}
@@ -1026,9 +1026,9 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	GList *list, *i;
-	GArray *loc_arr = NULL, *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gint location_id;
-	guint j = 0;
 	gchar *sfile = NULL, *tfile;
 
 	/* Check if user is trying to set the same track no for multiple tracks */
@@ -1061,7 +1061,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	}
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+	file_arr = g_ptr_array_new_with_free_func(g_free);
 
 	/* Now build iterators from the references and edit
 	   them from the store */
@@ -1110,7 +1110,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 				continue;
 			}
 			tfile = g_strdup(mobj->file);
-			file_arr = g_array_append_val(file_arr, tfile);
+			g_ptr_array_add(file_arr, tfile);
 			g_free(sfile);
 		}
 	}
@@ -1123,14 +1123,8 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	/* Cleanup */
 	if (loc_arr)
 		g_array_free(loc_arr, TRUE);
-	if (file_arr) {
-		gchar *elem = NULL;
-		for (j = 0; j < file_arr->len; j++) {
-			elem = g_array_index(file_arr, gchar *, j);
-			g_free(elem);
-		}
-		g_array_free(file_arr, TRUE);
-	}
+	if (file_arr)
+		g_ptr_array_free(file_arr, TRUE);
 
 	g_list_free(list);
 }
@@ -1147,9 +1141,9 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	GList *list, *i;
-	GArray *loc_arr = NULL, *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gint sel = 0, location_id, changed = 0;
-	guint j = 0;
 	gchar *sfile = NULL, *tfile;
 
 	memset(&otag, 0, sizeof(struct tags));
@@ -1216,7 +1210,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+	file_arr = g_ptr_array_new_with_free_func(g_free);
 
 	clear_sort_current_playlist_cb(NULL, cwin);
 
@@ -1263,7 +1257,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 				continue;
 			}
 			tfile = g_strdup(mobj->file);
-			file_arr = g_array_append_val(file_arr, tfile);
+			g_ptr_array_add(file_arr, tfile);
 			g_free(sfile);
 		}
 	}
@@ -1276,14 +1270,8 @@ exit:
 	/* Cleanup */
 	if (loc_arr)
 		g_array_free(loc_arr, TRUE);
-	if (file_arr) {
-		gchar *elem = NULL;
-		for (j = 0; j < file_arr->len; j++) {
-			elem = g_array_index(file_arr, gchar *, j);
-			g_free(elem);
-		}
-		g_array_free(file_arr, TRUE);
-	}
+	if (file_arr)
+		g_ptr_array_free(file_arr, TRUE);
 
 	g_free(ntag.title);
 	g_free(ntag.artist);
