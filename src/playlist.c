@@ -1306,11 +1306,10 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 {
-	gchar *file, *s_file, *query;
+	gchar *file, *s_file;
 	GSList *i = NULL;
 
-	query = g_strdup_printf("BEGIN;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
+	db_begin_transaction(cwin->cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
@@ -1320,8 +1319,7 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 		g_free(file);
 	}
 
-	query = g_strdup_printf("END;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
+	db_commit_transaction(cwin->cdbase);
 
 	g_slist_free(list);
 }
