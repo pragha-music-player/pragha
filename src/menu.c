@@ -160,8 +160,6 @@ void handle_selected_file(gpointer data, gpointer udata)
 		}
 	}
 
-	g_free(data);
-
 	/* Have to give control to GTK periodically ... */
 	while(gtk_events_pending())
 		gtk_main_iteration_do(FALSE);
@@ -253,7 +251,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		gdk_cursor_unref(cursor);
 
 		g_slist_foreach(files, handle_selected_file, cwin);
-		g_slist_free(files);
+		g_slist_free_full(files, g_free);
 
 		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
 	}

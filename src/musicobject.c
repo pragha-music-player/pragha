@@ -254,12 +254,11 @@ struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name,
 	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
 	if(list) {
 		mobj->file = g_strdup(list->data);
-		g_slist_foreach (list, (GFunc)g_free, NULL);
+		g_slist_free_full(list, g_free);
 	}
 	else {
 		mobj->file = g_strdup(uri);
 	}
-	g_slist_free(list);
 #else
 	mobj->file = g_strdup(uri);
 #endif

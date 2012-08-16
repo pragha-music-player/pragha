@@ -601,19 +601,10 @@ static void clear_rand_track_refs(struct con_win *cwin)
 
 static void clear_queue_track_refs(struct con_win *cwin)
 {
-	GSList *list = NULL;
-
 	if (cwin->cstate->queue_track_refs) {
-		list = cwin->cstate->queue_track_refs;
-		while (list) {
-			gtk_tree_row_reference_free(list->data);
-			list = list->next;
-		}
-		g_slist_free(cwin->cstate->queue_track_refs);
+		g_slist_free_full(cwin->cstate->queue_track_refs, (GDestroyNotify) gtk_tree_row_reference_free);
 		cwin->cstate->queue_track_refs = NULL;
 	}
-
-	cwin->cstate->queue_track_refs = NULL;
 }
 
 /* Mark a track in current playlist as dirty */
@@ -1341,14 +1332,7 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 
 gboolean idle_delete_mobj_list (GSList *to_delete)
 {
-	struct musicobject *mobj = NULL;
-	GSList *i = NULL;
-
-	for (i=to_delete; i != NULL; i = i->next) {
-		mobj = i->data;
-		delete_musicobject(mobj);
-	}
-	g_slist_free(to_delete);
+	g_slist_free_full(to_delete, (GDestroyNotify) delete_musicobject);
 
 	return FALSE;
 }
