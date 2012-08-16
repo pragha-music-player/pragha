@@ -1395,7 +1395,6 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
 				delete_row_from_db(path, model, cwin);
-				gtk_tree_path_free(path);
 
 				/* Have to give control to GTK periodically ... */
 				/* If gtk_main_quit has been called, return -
@@ -1413,7 +1412,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			init_library_view(cwin);
 		}
 
-		g_list_free(list);
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 	}
 }
 
@@ -1459,8 +1458,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				get_location_ids(path, loc_arr, model, cwin);
 				trash_or_unlink_row(loc_arr, unlink, cwin);
 
-				gtk_tree_path_free(path);
-
 				/* Have to give control to GTK periodically ... */
 				/* If gtk_main_quit has been called, return -
 				   since main loop is no more. */
@@ -1480,7 +1477,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 			init_library_view(cwin);
 		}
 
-		g_list_free(list);
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 	}
 }
 
@@ -1623,13 +1620,8 @@ exit:
 
 	if (mobj)
 		delete_musicobject(mobj);
-
-	for (i=list; i != NULL; i = i->next) {
-		path = i->data;
-		gtk_tree_path_free(path);
-	}
 		
-	g_list_free(list);
+	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
 static void add_entry_playlist(gchar *playlist,
