@@ -864,7 +864,7 @@ gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
-void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
+void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin);
 gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);

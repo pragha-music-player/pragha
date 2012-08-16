@@ -56,7 +56,8 @@ void update_menubar_lastfm_state (struct con_win *cwin)
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
 	struct tags otag, ntag;
-	GArray *loc_arr = NULL, *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0, prechanged = 0;
 	GtkTreeModel *model;
@@ -126,7 +127,7 @@ void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+		file_arr = g_ptr_array_new();
 
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
 		location_id = find_location_db(sfile, cwin->cdbase);
@@ -135,14 +136,14 @@ void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 			g_array_append_val(loc_arr, location_id);
 
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
-		file_arr = g_array_append_val(file_arr, tfile);
+		g_ptr_array_add(file_arr, tfile);
 
 		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
 
 		init_library_view(cwin);
 
 		g_array_free(loc_arr, TRUE);
-		g_array_free(file_arr, TRUE);
+		g_ptr_array_free(file_arr, TRUE);
 
 		g_free(sfile);
 		g_free(tfile);
