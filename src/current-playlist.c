@@ -582,15 +582,8 @@ static void append_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwi
 
 static void clear_rand_track_refs(struct con_win *cwin)
 {
-	GList *list;
-
 	if (cwin->cstate->rand_track_refs) {
-		list = cwin->cstate->rand_track_refs;
-		while (list) {
-			gtk_tree_row_reference_free(list->data);
-			list = list->next;
-		}
-		g_list_free(cwin->cstate->rand_track_refs);
+		g_list_free_full(cwin->cstate->rand_track_refs, (GDestroyNotify) gtk_tree_row_reference_free);
 		cwin->cstate->rand_track_refs = NULL;
 	}
 
@@ -1188,21 +1181,14 @@ void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin)
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *l;
+	GList *list;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
-	l = list;
-	while (l) {
-		path = l->data;
-		delete_queue_track_refs(path, cwin);
-		gtk_tree_path_free(path);
-		l = l->next;
-	}
+	g_list_foreach (list, (GFunc) delete_queue_track_refs, cwin);
 	requeue_track_refs(cwin);
-	g_list_free (list);
+	g_list_free_full (list, (GDestroyNotify) gtk_tree_path_free);
 }
 
 /* Queue selected rows from current playlist */

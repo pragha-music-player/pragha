@@ -138,8 +138,7 @@ can_support_actions( void )
 		for( c=caps; c && !supported; c=c->next )
 			supported = !strcmp( "actions", (char*)c->data );
 
-		g_list_foreach( caps, (GFunc)g_free, NULL );
-		g_list_free( caps );
+		g_list_free_full( caps, g_free );
 	}
 
 	return supported;
