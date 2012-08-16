@@ -838,7 +838,7 @@ GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win
 struct musicobject* new_musicobject_from_file(const gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin);
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
 void init_tag_struct(struct tags *mtags);
 void free_tag_struct(struct tags *mtags);
@@ -1012,7 +1012,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		  struct con_win *cwin);
 void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
-void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
+void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_menu_playlist_changes(struct con_win *cwin);
 void complete_add_to_playlist_submenu (struct con_win *cwin);
 void complete_save_playlist_submenu (struct con_win *cwin);

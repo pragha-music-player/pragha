@@ -227,7 +227,7 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
-struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin)
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 
