@@ -176,6 +176,7 @@
 #define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
 #define MPRIS_PATH "/org/mpris/MediaPlayer2"
 
+#if !GLIB_CHECK_VERSION(2,32,0)
 /* Defines to get network manager status. */
 
 #define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"
@@ -192,6 +193,7 @@ typedef enum {
         NM_STATE_CONNECTED_SITE   = 60,
         NM_STATE_CONNECTED_GLOBAL = 70
 } NMState;
+#endif
 
 /* Defines to key preferences. */
 
@@ -1230,7 +1232,9 @@ gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
 gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
+#if !GLIB_CHECK_VERSION(2,32,0)
 gboolean nm_is_online ();
+#endif
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
 struct musicobject *get_selected_musicobject(struct con_win *cwin);
