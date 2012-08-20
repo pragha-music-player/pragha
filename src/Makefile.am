@@ -27,6 +27,7 @@ pragha_SOURCES =cdda.c \
 		mpris.c \
 		gnome-media-keys.c \
 		musicobject.c \
+		notify.c \
 		panel.c \
 		playlist.c \
 		pragha.c \
