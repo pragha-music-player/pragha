@@ -359,7 +359,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	if(added > 0)
 		select_last_path_of_current_playlist(cwin);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 

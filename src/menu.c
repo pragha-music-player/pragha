@@ -250,7 +250,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 	}
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
@@ -1112,7 +1112,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);

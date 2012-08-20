@@ -414,12 +414,18 @@ set_watch_cursor_on_thread(struct con_win *cwin)
 }
 
 void
+remove_watch_cursor (GtkWidget *window)
+{
+	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
+}
+
+void
 remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
 {
 	gdk_threads_enter ();
 	if(message != NULL)
 		set_status_message(message, cwin);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 	gdk_threads_leave ();
 }
 
