@@ -357,7 +357,6 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
 	struct musicobject *mobj;
-	GdkCursor *cursor;
 
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
@@ -369,9 +368,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 				playlist_id);
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	if(model == NULL)
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -854,7 +851,6 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gint resp, cnt;
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
 	gint node_type;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -913,9 +909,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 		goto exit;
 	}
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
@@ -1263,11 +1257,8 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	gchar *summary;
 	gint try = 0, added = 0;
 	struct musicobject *mobj;
-	GdkCursor *cursor;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 #ifdef HAVE_PLPARSER
 	gchar *uri = g_filename_to_uri (file, NULL, NULL);

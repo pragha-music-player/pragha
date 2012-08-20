@@ -343,9 +343,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	xml = tinycxml_parse(contents);
 

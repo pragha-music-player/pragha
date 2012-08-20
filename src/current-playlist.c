@@ -1414,7 +1414,6 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
 	GSList *to_delete = NULL, *mobj_to_delete = NULL, *i = NULL;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
@@ -1424,9 +1423,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	/* Get a reference to all the nodes that are _not_ selected */
 
@@ -1660,13 +1657,10 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 	struct musicobject *mobj = NULL;
 	gboolean ret;
 	GSList *to_delete = NULL;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	clear_rand_track_refs(cwin);
 	clear_queue_track_refs(cwin);
@@ -2851,7 +2845,6 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	gboolean is_row;
 	GdkRectangle vrect, crect;
 	gdouble row_align;
-	GdkCursor *cursor;
 	GList *list = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
@@ -2889,9 +2882,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	/* Show busy mouse icon */
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	/* Get new tracks to append on playlist */
 
@@ -3008,13 +2999,10 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	struct db_result result;
 	struct musicobject *mobj;
 	GtkTreeModel *model;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	g_object_ref(model);
 	cwin->cstate->playlist_change = TRUE;
