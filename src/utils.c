@@ -245,6 +245,7 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	return rv;
 }
 
+#if !GLIB_CHECK_VERSION(2,32,0)
 /* Functions to check the network manager status. */
 
 static NMState
@@ -295,6 +296,7 @@ nm_is_online ()
 
 	return FALSE;
 }
+#endif
 
 /* Test if the song is already in the playlist.*/
 

@@ -817,7 +817,11 @@ gint init_lastfm_idle(struct con_win *cwin)
 	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
+#if GLIB_CHECK_VERSION(2,32,0)
+		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
+#else
 		if(nm_is_online () == TRUE)
+#endif
 			gdk_threads_add_idle (do_init_lastfm_idle, cwin);
 		else
 			gdk_threads_add_timeout_seconds_full(
