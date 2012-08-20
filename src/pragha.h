@@ -1342,8 +1342,8 @@ void related_get_artist_info_current_playlist_action(GtkAction *action, struct c
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
-int uninit_glyr_related (struct con_win *cwin);
 int init_glyr_related (struct con_win *cwin);
+void glyr_related_free (struct con_win *cwin);
 
 void update_related_state (struct con_win *cwin);
 

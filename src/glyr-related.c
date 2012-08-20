@@ -375,12 +375,10 @@ exists:
 	return;
 }
 
-int uninit_glyr_related (struct con_win *cwin)
+void glyr_related_free (struct con_win *cwin)
 {
 	glyr_db_destroy(cwin->cache_db);
 	glyr_cleanup ();
-
-	return 0;
 }
 
 int init_glyr_related (struct con_win *cwin)

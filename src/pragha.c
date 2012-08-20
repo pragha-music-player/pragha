@@ -31,7 +31,7 @@ static void common_cleanup(struct con_win *cwin)
 	state_free (cwin->cstate);
 	preferences_free (cwin->cpref);
 #ifdef HAVE_LIBGLYR
-	uninit_glyr_related (cwin);
+	glyr_related_free (cwin);
 #endif
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
