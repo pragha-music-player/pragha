@@ -530,7 +530,6 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model, *playlist_model;
 	enum node_type node_type;
-	GdkCursor *cursor;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
@@ -554,9 +553,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_BASENAME:
 	case NODE_PLAYLIST:
 	case NODE_RADIO:
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
@@ -1210,15 +1207,12 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		clear_current_playlist(action, cwin);
 
@@ -1261,15 +1255,12 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		clear_current_playlist(action, cwin);
 
@@ -1318,15 +1309,12 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	GdkCursor *cursor;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
@@ -1648,13 +1636,10 @@ void init_library_view(struct con_win *cwin)
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	gchar *order_str = NULL;
-	GdkCursor *cursor;
 
 	cwin->cstate->view_change = TRUE;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));

@@ -229,7 +229,6 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
-	GdkCursor *cursor;
 	GSList *files = NULL;
 
 	GtkWidget *window = g_object_get_data(data, "window");
@@ -246,9 +245,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(window);
 
 	if (files) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
@@ -1066,11 +1063,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	struct db_result result;
 	struct musicobject *mobj;
 	GtkTreeModel *model;
-	GdkCursor *cursor;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	clear_current_playlist(action, cwin);
 

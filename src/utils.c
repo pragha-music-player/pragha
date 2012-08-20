@@ -398,14 +398,18 @@ get_selected_musicobject(struct con_win *cwin)
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
+set_watch_cursor (GtkWidget *window)
+{
+	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
+	gdk_window_set_cursor (gtk_widget_get_window (window), cursor);
+	gdk_cursor_unref (cursor);
+}
+
+void
 set_watch_cursor_on_thread(struct con_win *cwin)
 {
-	GdkCursor *cursor;
-
 	gdk_threads_enter ();
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 	gdk_threads_leave ();
 }
 
