@@ -1165,8 +1165,6 @@ gint backend_init(struct con_win *cwin);
 
 /* Systray functions */
 
-gboolean can_support_actions(void);
-void show_osd(struct con_win *cwin);
 void create_status_icon (struct con_win *cwin);
 void systray_display_popup_menu (struct con_win *cwin);
 
@@ -1295,7 +1293,6 @@ gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
-gint init_notify(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
 void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
@@ -1311,6 +1308,13 @@ void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
 
 gint init_keybinder(struct con_win *cwin);
 void keybinder_free();
+
+/* notify */
+
+gboolean can_support_actions(void);
+void show_osd(struct con_win *cwin);
+gint init_notify(struct con_win *cwin);
+void notify_free();
 
 /* Lastfm Helper */
 

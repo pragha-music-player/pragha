@@ -1044,16 +1044,6 @@ gint init_threads(struct con_win *cwin)
 	return 0;
 }
 
-gint init_notify(struct con_win *cwin)
-{
-	if (cwin->cpref->show_osd) {
-		if (!notify_init(PACKAGE_NAME))
-			return -1;
-	}
-
-	return 0;
-}
-
 gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");

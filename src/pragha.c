@@ -39,8 +39,7 @@ static void common_cleanup(struct con_win *cwin)
 #endif
 	dbus_handlers_free (cwin);
 	mpris_free (cwin->cmpris2);
-	if (notify_is_initted())
-		notify_uninit();
+	notify_free ();
 
 	if (cwin->cgnome_media_keys)
 		gnome_media_keys_free (cwin->cgnome_media_keys);
