@@ -396,7 +396,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
@@ -958,7 +958,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 exit_list:
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	if (list)
 		g_list_free(list);
@@ -1282,7 +1282,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		g_free(i->data);
 	}
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	select_last_path_of_current_playlist(cwin);
 

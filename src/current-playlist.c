@@ -1484,7 +1484,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, mobj_to_delete, NULL);
 
@@ -1681,7 +1681,7 @@ void clear_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) idle_delete_mobj_list, to_delete, NULL);
 
@@ -2927,7 +2927,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 
 	/* Remove busy mouse icon */
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	g_list_free(list);
 
@@ -3040,7 +3040,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 
 	mpris_update_tracklist_replaced(cwin);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);

@@ -566,7 +566,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 
 		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
@@ -1241,7 +1241,7 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 
 		update_status_bar(cwin);
 		
@@ -1289,7 +1289,7 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 
 		update_status_bar(cwin);
 
@@ -1341,7 +1341,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
 		g_object_unref(playlist_model);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 
 		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
@@ -1854,7 +1854,7 @@ void init_library_view(struct con_win *cwin)
 
 	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	cwin->cstate->view_change = FALSE;
 }
