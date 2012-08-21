@@ -309,7 +309,6 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	gint try = 0, added = 0;
 	GFile *file;
 	gsize size;
-	GdkCursor *cursor;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
 				      GTK_WINDOW(cwin->mainwindow),
