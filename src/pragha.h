@@ -84,14 +84,6 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
-#if (!GTK_CHECK_VERSION(2, 23, 0) || GTK_CHECK_VERSION(2, 90, 0)) && !GTK_CHECK_VERSION(2, 91, 1)
-#define GtkComboBoxText GtkComboBox
-#define GTK_COMBO_BOX_TEXT(X) GTK_COMBO_BOX(X)
-#define gtk_combo_box_text_new gtk_combo_box_new_text
-#define gtk_combo_box_text_append_text(X,Y) gtk_combo_box_append_text(X,Y)
-#define gtk_combo_box_text_get_active_text(X) gtk_combo_box_get_active_text(X)
-#endif
-
 /* Some default preferences. */
 
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
@@ -183,6 +175,7 @@
 #define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
 #define MPRIS_PATH "/org/mpris/MediaPlayer2"
 
+#if !GLIB_CHECK_VERSION(2,32,0)
 /* Defines to get network manager status. */
 
 #define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"
@@ -199,6 +192,7 @@ typedef enum {
         NM_STATE_CONNECTED_SITE   = 60,
         NM_STATE_CONNECTED_GLOBAL = 70
 } NMState;
+#endif
 
 /* Defines to key preferences. */
 
@@ -208,6 +202,7 @@ typedef enum {
 #define KEY_ADD_RECURSIVELY_FILES  "add_recursively_files"
 #define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
+#define KEY_SHOW_ICON_TRAY	   "show_icon_tray"
 #define KEY_CLOSE_TO_TRAY	   "close_to_tray"
 #define KEY_SHOW_OSD               "show_osd"
 #define KEY_OSD_IN_TRAY            "osd_in_tray"
@@ -459,8 +454,6 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_dir;
 	GdkPixbuf *pixbuf_paused;
 	GdkPixbuf *pixbuf_playing;
-	GtkWidget *image_pause;
-	GtkWidget *image_play;
 };
 
 #ifdef HAVE_LIBCLASTFM
@@ -510,6 +503,7 @@ struct con_pref {
 #endif
 	gboolean use_cddb;
 	gboolean use_mpris2;
+	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean lateral_panel;
@@ -545,11 +539,14 @@ struct con_pref {
 	GtkWidget *aproximate_search_w;
 	GtkWidget *window_state_combo_w;
 	GtkWidget *restore_playlist_w;
+	GtkWidget *show_icon_tray_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
 
 	GtkWidget *show_osd_w;
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	GtkWidget *osd_in_systray_w;
+#endif
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
 
@@ -579,21 +576,15 @@ struct db_result {
  * struct con_state - Pertains to the current state of the player
  *
  * @unique_instance: If current invocation of app is unique
- * @stop_scan: Flag to stop rescan process
  * @view_change: If library view change is in progress
  * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
  * @state: State of the player { ST_STOPPED, ... }
- * @cmd: Thread Command {CMD_PLAYBACK_STOP, ... }
- * @seek_len: New seek length to pass to playback thread
  * @tracks_curr_playlist: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
- * @newsec: Arg for idle func invoked from playback thread
- * @seek_fraction: New seek fraction to pass to playback thread
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
  * @rand: To generate random numbers
- * @c_cond: Cond Between playback thread and main process
  * @rand_track_refs: List of references maintained in Shuffle mode
  * @curr_rand_ref: Currently playing track in Shuffle mode
  * @curr_seq_ref: Currently playing track in non-Shuffle mode
@@ -606,17 +597,13 @@ struct con_state {
 	enum player_state state;
 	gboolean dragging;
 	gboolean unique_instance;
-	gboolean stop_scan;
 	gboolean view_change;
 	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
-	gint seek_len;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
-	gint newsec;
 	gint timeout_id;
-	gdouble seek_fraction;
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
@@ -632,13 +619,7 @@ struct con_state {
 	struct musicobject *curr_mobj;
 };
 
-struct con_dbase {
-	gchar *db_file;	/* Filename of the DB file (~/.pragha.db) */
-	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
-#ifdef HAVE_LIBGLYR
-	GlyrDatabase *cache_db;
-#endif
-};
+struct con_dbase;
 
 struct con_gst {
 	GstElement *pipeline;
@@ -646,6 +627,8 @@ struct con_gst {
 	GstElement *equalizer;
 	int timer;
 	gdouble curr_vol;
+	gboolean is_live;
+	gboolean seek_enabled;
 	gboolean emitted_error;
 };
 
@@ -668,15 +651,9 @@ struct con_mpris2 {
 	gchar *saved_title;
 	gdouble volume;
 	enum player_state state;
-	GError **property_error;			/* for returning errors in propget/propput */
-	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
-struct con_gnome_media_keys {
-	guint watch_id;
-	guint handler_id;
-	GDBusProxy *proxy;
-};
+struct con_gnome_media_keys;
 
 struct con_win {
 	struct pixbuf *pixbuf;
@@ -690,18 +667,18 @@ struct con_win {
 	struct con_mpris2 *cmpris2;
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
-	GtkWidget *hbox_panel;
+	GtkWidget *toolbar;
 	GtkWidget *info_box;
 	GtkWidget *album_art_frame;
 	GtkWidget *album_art;
 	GtkWidget *track_progress_bar;
-	GtkWidget *prev_button;
-	GtkWidget *play_button;
-	GtkWidget *stop_button;
-	GtkWidget *next_button;
-	GtkWidget *unfull_button;
-	GtkWidget *shuffle_button;
-	GtkWidget *repeat_button;
+	GtkToolItem *prev_button;
+	GtkToolItem *play_button;
+	GtkToolItem *stop_button;
+	GtkToolItem *next_button;
+	GtkToolItem *unfull_button;
+	GtkToolItem *shuffle_button;
+	GtkToolItem *repeat_button;
 	GtkWidget *vol_button;
 	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
@@ -732,6 +709,9 @@ struct con_win {
 	GtkUIManager *header_library_tree_context_menu;
 	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
+#ifdef HAVE_LIBGLYR
+	GlyrDatabase *cache_db;
+#endif
 	gint related_timeout_id;
 	DBusConnection *con_dbus;
 };
@@ -835,9 +815,9 @@ gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *e
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 void unset_album_art(struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
-void unfull_button_handler(GtkButton *button, struct con_win *cwin);
-void shuffle_button_handler(GtkToggleButton *button, struct con_win *cwin);
-void repeat_button_handler(GtkToggleButton *button, struct con_win *cwin);
+void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
+void shuffle_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
+void repeat_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
@@ -859,7 +839,7 @@ GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win
 struct musicobject* new_musicobject_from_file(const gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin);
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
 void init_tag_struct(struct tags *mtags);
 void free_tag_struct(struct tags *mtags);
@@ -885,7 +865,7 @@ gboolean save_tags_to_file(gchar *file, struct tags *tags,
 			   int changed, struct con_win *cwin);
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
-void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
+void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin);
 gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);
@@ -944,54 +924,65 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
-gint add_new_artist_db(gchar *artist, struct con_win *cwin);
-gint add_new_album_db(gchar *album, struct con_win *cwin);
-gint add_new_genre_db(gchar *genre, struct con_win *cwin);
-gint add_new_year_db(guint year, struct con_win *cwin);
-gint add_new_comment_db(gchar *comment, struct con_win *cwin);
-gint add_new_location_db(gchar *location, struct con_win *cwin);
-void add_track_playlist_db(gchar *file, gint playlist_id, struct con_win *cwin);
-void add_track_radio_db(gchar *uri, gint radio_id, struct con_win *cwin);
-gint find_artist_db(const gchar *artist, struct con_win *cwin);
-gint find_album_db(const gchar *album, struct con_win *cwin);
-gint find_genre_db(const gchar *genre, struct con_win *cwin);
-gint find_year_db(gint year, struct con_win *cwin);
-gint find_comment_db(const gchar *comment, struct con_win *cwin);
-gint find_location_db(const gchar *location, struct con_win *cwin);
-gint find_playlist_db(const gchar *playlist, struct con_win *cwin);
-gint find_radio_db(const gchar *radio, struct con_win *cwin);
-void delete_location_db(gint location_id, struct con_win *cwin);
-gint delete_location_hdd(gint location_id, struct con_win *cwin);
+gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase);
+gint add_new_album_db(const gchar *album, struct con_dbase *cdbase);
+gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase);
+gint add_new_year_db(guint year, struct con_dbase *cdbase);
+gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase);
+gint add_new_location_db(const gchar *location, struct con_dbase *cdbase);
+void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_dbase *cdbase);
+void add_track_radio_db(const gchar *uri, gint radio_id, struct con_dbase *cdbase);
+gint find_artist_db(const gchar *artist, struct con_dbase *cdbase);
+gint find_album_db(const gchar *album, struct con_dbase *cdbase);
+gint find_genre_db(const gchar *genre, struct con_dbase *cdbase);
+gint find_year_db(gint year, struct con_dbase *cdbase);
+gint find_comment_db(const gchar *comment, struct con_dbase *cdbase);
+gint find_location_db(const gchar *location, struct con_dbase *cdbase);
+gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+gint find_radio_db(const gchar *radio, struct con_dbase *cdbase);
+void delete_location_db(gint location_id, struct con_dbase *cdbase);
+gint delete_location_hdd(gint location_id, struct con_dbase *cdbase);
 void update_track_db(gint location_id, gint changed,
-		     gint track_no, gchar *title,
+		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     struct con_win *cwin);
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_win *cwin);
-gint add_new_playlist_db(const gchar *playlist, struct con_win *cwin);
-gchar** get_playlist_names_db(struct con_win *cwin);
-gint get_playlist_count_db(struct con_win *cwin);
-void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_win *cwin);
-gint add_new_radio_db(const gchar *radio, struct con_win *cwin);
-gchar** get_radio_names_db(struct con_win *cwin);
+		     struct con_dbase *cdbase);
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase);
+gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+gchar** get_playlist_names_db(struct con_dbase *cdbase);
+gint get_playlist_count_db(struct con_dbase *cdbase);
+void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *cdbase);
+gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase);
+gchar** get_radio_names_db(struct con_dbase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
-gint get_tracklist_count_db(struct con_win *cwin);
-void delete_playlist_db(gchar *playlist, struct con_win *cwin);
-void flush_playlist_db(gint playlist_id, struct con_win *cwin);
-void delete_radio_db(gchar *radio, struct con_win *cwin);
-void flush_radio_db(gint radio_id, struct con_win *cwin);
-void flush_stale_entries_db(struct con_win *cwin);
-void flush_db(struct con_win *cwin);
+gint get_tracklist_count_db(struct con_dbase *cdbase);
+void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
+void flush_playlist_db(gint playlist_id, struct con_dbase *cdbase);
+void delete_radio_db(const gchar *radio, struct con_dbase *cdbase);
+void flush_radio_db(gint radio_id, struct con_dbase *cdbase);
+void flush_stale_entries_db(struct con_dbase *cdbase);
+void flush_db(struct con_dbase *cdbase);
 gboolean fraction_update(GtkWidget *pbar);
-void rescan_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
-void update_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
-void delete_db(gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_win *cwin);
-gint init_dbase_schema(struct con_win *cwin);
-gint drop_dbase_schema(struct con_win *cwin);
-gboolean exec_sqlite_query(gchar *query, struct con_win *cwin,
+void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
+	       gint call_recur, GCancellable *cancellable, struct con_dbase *cdbase);
+void update_db (const gchar *dir_name,
+		gint no_files,
+		GtkWidget *pbar,
+		GTimeVal last_rescan_time,
+		gint call_recur,
+		GCancellable *cancellable,
+		struct con_dbase *cdbase);
+void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
+	       gint call_recur, struct con_dbase *cdbase);
+gint init_dbase_schema(struct con_dbase *cdbase);
+gint drop_dbase_schema(struct con_dbase *cdbase);
+gint db_get_artist_count(struct con_dbase *cdbase);
+gint db_get_album_count(struct con_dbase *cdbase);
+gint db_get_track_count(struct con_dbase *cdbase);
+void db_begin_transaction(struct con_dbase *cdbase);
+void db_commit_transaction(struct con_dbase *cdbase);
+gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result);
+void db_free(struct con_dbase *cdbase);
 
 /* Playlist mgmt functions */
 
@@ -1003,7 +994,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
-void playlist_tree_export(GtkAction *action, struct con_win *cwi);
+void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
@@ -1022,7 +1013,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		  struct con_win *cwin);
 void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
-void new_radio (gchar *uri, gchar *name, struct con_win *cwin);
+void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin);
 void update_menu_playlist_changes(struct con_win *cwin);
 void complete_add_to_playlist_submenu (struct con_win *cwin);
 void complete_save_playlist_submenu (struct con_win *cwin);
@@ -1151,11 +1142,7 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 
 void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
-void free_library_dir(struct con_win *cwin);
-void free_library_add_dir(struct con_win *cwin);
-void free_library_delete_dir(struct con_win *cwin);
-void free_playlist_columns(struct con_win *cwin);
-void free_library_tree_nodes(struct con_win *cwin);
+void preferences_free(struct con_pref *cpref);
 
 /* Gstreamer */
 
@@ -1174,32 +1161,13 @@ void backend_resume (struct con_win *cwin);
 void backend_play (struct con_win *cwin);
 void backend_stop (GError *error, struct con_win *cwin);
 void backend_start(struct musicobject *mobj, struct con_win *cwin);
-void backend_quit (struct con_win *cwin);
+void backend_free (struct con_win *cwin);
 gint backend_init(struct con_win *cwin);
-
-/* Audio functions */
-
-void set_alsa_mixer(struct con_win *cwin, gchar *mixer_elem);
-void set_oss_mixer(struct con_win *cwin, gchar *mixer_elem);
-void set_soft_mixer(struct con_win *cwin);
-void soft_volume_apply(gchar *buffer, gint buflen, struct con_win *cwin);
-GSList* alsa_pcm_devices(struct con_win *cwin);
-gint open_audio_device(gint samplerate, gint channels,
-		       gboolean resume, struct con_win *cwin);
 
 /* Systray functions */
 
-gboolean can_support_actions(void);
-void show_osd(struct con_win *cwin);
-gboolean status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin);
-gboolean status_get_tooltip_cb (GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,GtkTooltip *tooltip, struct con_win *cwin);
 void create_status_icon (struct con_win *cwin);
 void systray_display_popup_menu (struct con_win *cwin);
-void systray_play_pause_action(GtkAction *action, struct con_win *cwin);
-void systray_stop_action(GtkAction *action, struct con_win *cwin);
-void systray_prev_action(GtkAction *action, struct con_win *cwin);
-void systray_next_action(GtkAction *action, struct con_win *cwin);
-void systray_quit(GtkAction *action, struct con_win *cwin);
 
 void about_widget(struct con_win *cwin);
 
@@ -1240,6 +1208,7 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 				      DBusMessage *msg,
 				      gpointer data);
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
+void dbus_handlers_free(struct con_win *cwin);
 
 /* MPRIS functions */
 
@@ -1252,8 +1221,8 @@ void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
 void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter);
 void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, gint bitmask);
 void mpris_update_tracklist_replaced(struct con_win *cwin);
-void mpris_close(struct con_win *cwin);
-void mpris_cleanup(struct con_win *cwin);
+void mpris_close(struct con_mpris2 *cmpris2);
+void mpris_free(struct con_mpris2 *cmpris2);
 
 /* Utilities */
 
@@ -1262,19 +1231,22 @@ gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
 gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
+#if !GLIB_CHECK_VERSION(2,32,0)
 gboolean nm_is_online ();
+#endif
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
-gint append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin);
+gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
 struct musicobject *get_selected_musicobject(struct con_win *cwin);
+void set_watch_cursor (GtkWidget *window);
 void set_watch_cursor_on_thread(struct con_win *cwin);
-void remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin);
-void set_status_message (gchar *message, struct con_win *cwin);
-void gtk_label_set_attribute_bold(GtkLabel *label);
-GdkPixbuf *vgdk_pixbuf_new_from_memory (char *data, size_t size);
+void remove_watch_cursor (GtkWidget *window);
+void remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin);
+void set_status_message (const gchar *message, struct con_win *cwin);
+GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gboolean is_playable_file(const gchar *file);
-gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin);
-gint dir_file_count(gchar *dir_name, gint call_recur);
-gchar* sanitize_string_sqlite3(gchar *str);
+gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin);
+gint dir_file_count(const gchar *dir_name, gint call_recur);
+gchar* sanitize_string_sqlite3(const gchar *str);
 enum file_type get_file_type(const gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
@@ -1284,7 +1256,7 @@ gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);
 gchar* get_display_filename(const gchar *filename, gboolean get_folder);
 void free_str_list(GSList *list);
-gint compare_utf8_str(gchar *str1, gchar *str2);
+gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
@@ -1299,7 +1271,7 @@ GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 GtkUIManager* create_menu(struct con_win *cwin);
 GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_panel(struct con_win *cwin);
+GtkWidget* create_toolbar(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
@@ -1307,9 +1279,9 @@ GtkWidget* create_status_bar(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
 GtkWidget* create_combo_order(struct con_win *cwin);
 void create_status_icon(struct con_win *cwin);
-gboolean dialog_audio_init(gpointer data);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
+void gui_free(struct con_win *cwin);
 
 /* Info bar import music */
 
@@ -1325,23 +1297,42 @@ gint init_config(struct con_win *cwin);
 gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
-gint init_notify(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
+void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* gnome media keys */
 
+gboolean gnome_media_keys_will_be_useful();
 gint init_gnome_media_keys(struct con_win *cwin);
-void cleanup_gnome_media_keys(struct con_win *cwin);
+void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
 
 /* keybinder */
 
 gint init_keybinder(struct con_win *cwin);
-void cleanup_keybinder(struct con_win *cwin);
+void keybinder_free();
+
+/* notify */
+
+gboolean can_support_actions(void);
+void show_osd(struct con_win *cwin);
+gint init_notify(struct con_win *cwin);
+void notify_free();
+
+/* pragha-hig.c: HIG helpers and pango extention. */
+
+void gtk_label_set_attribute_bold(GtkLabel *label);
+void pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title);
+void pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget);
+void pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget);
+void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
+GtkWidget *pragha_hig_workarea_table_new();
+void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 
 /* Lastfm Helper */
 
+#ifdef HAVE_LIBCLASTFM
 void update_menubar_lastfm_state (struct con_win *cwin);
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
@@ -1355,6 +1346,8 @@ void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_now_playing_handler (struct con_win *cwin);
 gint just_init_lastfm (struct con_win *cwin);
 gint init_lastfm_idle(struct con_win *cwin);
+void lastfm_free(struct con_lastfm *clastfm);
+#endif
 
 /* Related info helpers */
 
@@ -1363,8 +1356,8 @@ void related_get_artist_info_current_playlist_action(GtkAction *action, struct c
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
-int uninit_glyr_related (struct con_win *cwin);
 int init_glyr_related (struct con_win *cwin);
+void glyr_related_free (struct con_win *cwin);
 
 void update_related_state (struct con_win *cwin);
 
@@ -1372,11 +1365,8 @@ void update_related_state (struct con_win *cwin);
 
 void dialog_jump_to_track (struct con_win *cwin);
 
-void common_cleanup(struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
-void systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin);
-GtkUIManager* create_systray_menu(struct con_win *cwin);
 
 #endif /* PRAGHA_H */

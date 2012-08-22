@@ -229,13 +229,14 @@ gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
 	return ret;
 }
 
-void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *ntag,
+void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
 		struct con_win *cwin)
 {
 	gboolean ret = FALSE;
 	gchar *query = NULL, *stitle = NULL, *sartist = NULL, *scomment= NULL;
 	gchar *salbum = NULL, *sgenre = NULL, *file = NULL;
-	gint i = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	guint i = 0;
 	struct db_result result;
 
 	if (!changed)
@@ -251,32 +252,32 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		sartist = sanitize_string_sqlite3(ntag->artist);
-		artist_id = find_artist_db(sartist, cwin);
+		artist_id = find_artist_db(sartist, cwin->cdbase);
 		if (!artist_id)
-			artist_id = add_new_artist_db(sartist, cwin);
+			artist_id = add_new_artist_db(sartist, cwin->cdbase);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
 		salbum = sanitize_string_sqlite3(ntag->album);
-		album_id = find_album_db(salbum, cwin);
+		album_id = find_album_db(salbum, cwin->cdbase);
 		if (!album_id)
-			album_id = add_new_album_db(salbum, cwin);
+			album_id = add_new_album_db(salbum, cwin->cdbase);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
 		sgenre = sanitize_string_sqlite3(ntag->genre);
-		genre_id = find_genre_db(sgenre, cwin);
+		genre_id = find_genre_db(sgenre, cwin->cdbase);
 		if (!genre_id)
-			genre_id = add_new_genre_db(sgenre, cwin);
+			genre_id = add_new_genre_db(sgenre, cwin->cdbase);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		year_id = find_year_db(ntag->year, cwin);
+		year_id = find_year_db(ntag->year, cwin->cdbase);
 		if (!year_id)
-			year_id = add_new_year_db(ntag->year, cwin);
+			year_id = add_new_year_db(ntag->year, cwin->cdbase);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
 		scomment = sanitize_string_sqlite3(ntag->comment);
-		comment_id = find_comment_db(scomment, cwin);
+		comment_id = find_comment_db(scomment, cwin->cdbase);
 		if (!comment_id)
-			comment_id = add_new_comment_db(scomment, cwin);
+			comment_id = add_new_comment_db(scomment, cwin->cdbase);
 	}
 
 	/* This is so fscking horrible. */
@@ -289,7 +290,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 				query = g_strdup_printf("SELECT name FROM LOCATION "
 							"WHERE id = '%d';",
 							elem);
-				if (exec_sqlite_query(query, cwin, &result)) {
+				if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 					file = result.resultp[result.no_columns];
 					ret = save_tags_to_file(file, ntag,
 								changed, cwin);
@@ -303,7 +304,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 							genre_id,
 							year_id,
 							comment_id,
-							cwin);
+							cwin->cdbase);
 					ret = FALSE;
 				}
 			}
@@ -313,7 +314,7 @@ void tag_update(GArray *loc_arr, GArray *file_arr, gint changed, struct tags *nt
 	if (file_arr) {
 		gchar *elem;
 		for (i = 0; i < file_arr->len; i++) {
-			elem = g_array_index(file_arr, gchar *, i);
+			elem = g_ptr_array_index(file_arr, i);
 			if (elem)
 				(void)save_tags_to_file(elem, ntag, changed, cwin);
 		}
@@ -806,11 +807,11 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 300);
 
 	/* Add to the dialog's main vbox */
 
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
 
 	/* Fill in initial entries */
 
@@ -950,7 +951,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 			else {
 				uri = sanitize_string_sqlite3(file);
 
-				if ((location_id = find_location_db(uri, cwin)))
+				if ((location_id = find_location_db(uri, cwin->cdbase)))
 					mobj = new_musicobject_from_db(location_id, cwin);
 				else
 					mobj = new_musicobject_from_file(file);
@@ -1025,8 +1026,9 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	GList *list, *i;
-	GArray *loc_arr = NULL, *file_arr = NULL;
-	gint location_id, j = 0;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
+	gint location_id;
 	gchar *sfile = NULL, *tfile;
 
 	/* Check if user is trying to set the same track no for multiple tracks */
@@ -1059,7 +1061,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	}
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+	file_arr = g_ptr_array_new_with_free_func(g_free);
 
 	/* Now build iterators from the references and edit
 	   them from the store */
@@ -1101,14 +1103,14 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
-			location_id = find_location_db(sfile, cwin);
+			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id)) {
 				g_array_append_val(loc_arr, location_id);
 				g_free(sfile);
 				continue;
 			}
 			tfile = g_strdup(mobj->file);
-			file_arr = g_array_append_val(file_arr, tfile);
+			g_ptr_array_add(file_arr, tfile);
 			g_free(sfile);
 		}
 	}
@@ -1121,14 +1123,8 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	/* Cleanup */
 	if (loc_arr)
 		g_array_free(loc_arr, TRUE);
-	if (file_arr) {
-		gchar *elem = NULL;
-		for (j = 0; j < file_arr->len; j++) {
-			elem = g_array_index(file_arr, gchar *, j);
-			g_free(elem);
-		}
-		g_array_free(file_arr, TRUE);
-	}
+	if (file_arr)
+		g_ptr_array_free(file_arr, TRUE);
 
 	g_list_free(list);
 }
@@ -1145,8 +1141,9 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	GList *list, *i;
-	GArray *loc_arr = NULL, *file_arr = NULL;
-	gint sel = 0, location_id, changed = 0, j = 0;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
+	gint sel = 0, location_id, changed = 0;
 	gchar *sfile = NULL, *tfile;
 
 	memset(&otag, 0, sizeof(struct tags));
@@ -1213,7 +1210,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+	file_arr = g_ptr_array_new_with_free_func(g_free);
 
 	clear_sort_current_playlist_cb(NULL, cwin);
 
@@ -1253,14 +1250,14 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
-			location_id = find_location_db(sfile, cwin);
+			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id)) {
 				g_array_append_val(loc_arr, location_id);
 				g_free(sfile);
 				continue;
 			}
 			tfile = g_strdup(mobj->file);
-			file_arr = g_array_append_val(file_arr, tfile);
+			g_ptr_array_add(file_arr, tfile);
 			g_free(sfile);
 		}
 	}
@@ -1273,14 +1270,8 @@ exit:
 	/* Cleanup */
 	if (loc_arr)
 		g_array_free(loc_arr, TRUE);
-	if (file_arr) {
-		gchar *elem = NULL;
-		for (j = 0; j < file_arr->len; j++) {
-			elem = g_array_index(file_arr, gchar *, j);
-			g_free(elem);
-		}
-		g_array_free(file_arr, TRUE);
-	}
+	if (file_arr)
+		g_ptr_array_free(file_arr, TRUE);
 
 	g_free(ntag.title);
 	g_free(ntag.artist);
@@ -1306,7 +1297,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(genre_tag_model));
 
 	query = g_strdup_printf("SELECT name FROM ARTIST;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1322,7 +1313,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM ALBUM;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1338,7 +1329,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM GENRE;");
-	exec_sqlite_query(query, cwin, &result);
+	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {

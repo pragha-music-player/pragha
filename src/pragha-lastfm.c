@@ -56,7 +56,8 @@ void update_menubar_lastfm_state (struct con_win *cwin)
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
 	struct tags otag, ntag;
-	GArray *loc_arr = NULL, *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0, prechanged = 0;
 	GtkTreeModel *model;
@@ -126,23 +127,23 @@ void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+		file_arr = g_ptr_array_new();
 
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
-		location_id = find_location_db(sfile, cwin);
+		location_id = find_location_db(sfile, cwin->cdbase);
 
 		if (location_id)
 			g_array_append_val(loc_arr, location_id);
 
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
-		file_arr = g_array_append_val(file_arr, tfile);
+		g_ptr_array_add(file_arr, tfile);
 
 		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
 
 		init_library_view(cwin);
 
 		g_array_free(loc_arr, TRUE);
-		g_array_free(file_arr, TRUE);
+		g_ptr_array_free(file_arr, TRUE);
 
 		g_free(sfile);
 		g_free(tfile);
@@ -308,7 +309,6 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	gint try = 0, added = 0;
 	GFile *file;
 	gsize size;
-	GdkCursor *cursor;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
 				      GTK_WINDOW(cwin->mainwindow),
@@ -342,9 +342,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	xml = tinycxml_parse(contents);
 
@@ -360,7 +358,7 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	if(added > 0)
 		select_last_path_of_current_playlist(cwin);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
@@ -816,7 +814,11 @@ gint init_lastfm_idle(struct con_win *cwin)
 	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
+#if GLIB_CHECK_VERSION(2,32,0)
+		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
+#else
 		if(nm_is_online () == TRUE)
+#endif
 			gdk_threads_add_idle (do_init_lastfm_idle, cwin);
 		else
 			gdk_threads_add_timeout_seconds_full(
@@ -825,5 +827,14 @@ gint init_lastfm_idle(struct con_win *cwin)
 	}
 
 	return 0;
+}
+
+void lastfm_free(struct con_lastfm *clastfm)
+{
+	if (clastfm->session_id)
+		LASTFM_dinit(clastfm->session_id);
+
+	g_slice_free(struct tags, clastfm->ntags);
+	g_slice_free(struct con_lastfm, clastfm);
 }
 #endif

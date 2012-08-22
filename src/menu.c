@@ -84,9 +84,12 @@ void update_menubar_playback_state (struct con_win *cwin)
 
 static gboolean rescan_dialog_delete_cb(GtkWidget *widget,
 					GdkEvent *event,
-					struct con_win *cwin)
+					gpointer user_data)
 {
-	cwin->cstate->stop_scan = TRUE;
+	GCancellable *cancellable = user_data;
+
+	g_cancellable_cancel (cancellable);
+
 	return TRUE;
 }
 
@@ -94,15 +97,12 @@ static gboolean rescan_dialog_delete_cb(GtkWidget *widget,
 
 static void rescan_dialog_response_cb(GtkDialog *dialog,
 				      gint response_id,
-				      struct con_win *cwin)
+				      gpointer user_data)
 {
-	switch(response_id) {
-	case GTK_RESPONSE_CANCEL:
-		cwin->cstate->stop_scan = TRUE;
-		break;
-	default:
-		break;
-	}
+	GCancellable *cancellable = user_data;
+
+	if (response_id == GTK_RESPONSE_CANCEL)
+		g_cancellable_cancel (cancellable);
 }
 
 /* Generate and add the recently-used data */
@@ -111,8 +111,6 @@ void add_recent_file (const gchar *filename)
 {
 	GtkRecentData recent_data;
 	gchar *uri = NULL;
-
-	uri = g_filename_to_uri(filename, NULL, NULL);
 
 	recent_data.mime_type = get_mime_type(filename);
 	if (recent_data.mime_type == NULL)
@@ -125,6 +123,7 @@ void add_recent_file (const gchar *filename)
 	recent_data.groups = NULL;
 	recent_data.is_private = FALSE;
 
+	uri = g_filename_to_uri(filename, NULL, NULL);
 	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &recent_data);
 
 	g_free (recent_data.display_name);
@@ -139,7 +138,7 @@ void add_recent_file (const gchar *filename)
 void handle_selected_file(gpointer data, gpointer udata)
 {
 	struct musicobject *mobj;
-	struct con_win *cwin = (struct con_win*)udata;
+	struct con_win *cwin = udata;
 
 	if (!data)
 		return;
@@ -161,19 +160,14 @@ void handle_selected_file(gpointer data, gpointer udata)
 		}
 	}
 
-	g_free(data);
-
 	/* Have to give control to GTK periodically ... */
-	/* If gtk_main_quit has been called, return -
-	   since main loop is no more. */
-
 	while(gtk_events_pending())
-		if (gtk_main_iteration_do(FALSE));
+		gtk_main_iteration_do(FALSE);
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
 
-static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
+static GtkWidget* lib_progress_bar(struct con_win *cwin, int update, gpointer cb_data)
 {
 	GtkWidget *hbox, *spinner, *progress_bar;
 
@@ -212,9 +206,9 @@ static GtkWidget* lib_progress_bar(struct con_win *cwin, int update)
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(GTK_WINDOW(library_dialog)), "delete_event",
-			 G_CALLBACK(rescan_dialog_delete_cb), cwin);
+			 G_CALLBACK(rescan_dialog_delete_cb), cb_data);
 	g_signal_connect(G_OBJECT(library_dialog), "response",
-			 G_CALLBACK(rescan_dialog_response_cb), cwin);
+			 G_CALLBACK(rescan_dialog_response_cb), cb_data);
 
 	/* Add the progress bar to the dialog box's vbox and show everything */
 
@@ -235,7 +229,6 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
-	GdkCursor *cursor;
 	GSList *files = NULL;
 
 	GtkWidget *window = g_object_get_data(data, "window");
@@ -252,14 +245,12 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(window);
 
 	if (files) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
 		g_slist_foreach(files, handle_selected_file, cwin);
-		g_slist_free(files);
+		g_slist_free_full(files, g_free);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+		remove_watch_cursor (cwin->mainwindow);
 	}
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
@@ -493,7 +484,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *dialog;
 	GtkWidget *vbox, *hbox;
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
-	gchar *uri = NULL, *name = NULL;
+	const gchar *uri = NULL, *name = NULL;
 	gchar *clipboard_location;
 	struct musicobject *mobj;
 	gint result;
@@ -547,20 +538,22 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
 	case GTK_RESPONSE_ACCEPT:
-		uri = g_strdup(gtk_entry_get_text(GTK_ENTRY(uri_entry)));
-		name = g_strdup(gtk_entry_get_text(GTK_ENTRY(name_entry)));
+		if (gtk_entry_get_text_length (GTK_ENTRY(uri_entry)))
+			uri = gtk_entry_get_text(GTK_ENTRY(uri_entry));
+
 		if(uri != NULL) {
+			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
+				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
 			append_current_playlist(NULL, mobj, cwin);
 			update_status_bar(cwin);
 
-			new_radio(uri, name, cwin);
-
-			init_library_view(cwin);
-
-			g_free(uri);
-			g_free(name);
+			if (name) {
+				new_radio(uri, name, cwin);
+				init_library_view(cwin);
+			}
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:
@@ -604,7 +597,8 @@ void next_action (GtkAction *action, struct con_win *cwin)
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
 	struct tags otag, ntag;
-	GArray *loc_arr = NULL, *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0;
 	GtkTreeModel *model;
@@ -652,23 +646,23 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_array_new(TRUE, TRUE, sizeof(gchar *));
+		file_arr = g_ptr_array_new();
 
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
-		location_id = find_location_db(sfile, cwin);
+		location_id = find_location_db(sfile, cwin->cdbase);
 
 		if (location_id)
 			g_array_append_val(loc_arr, location_id);
 
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
-		file_arr = g_array_append_val(file_arr, tfile);
+		g_ptr_array_add(file_arr, tfile);
 
 		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
 
 		init_library_view(cwin);
 
 		g_array_free(loc_arr, TRUE);
-		g_array_free(file_arr, TRUE);
+		g_ptr_array_free(file_arr, TRUE);
 
 		g_free(sfile);
 		g_free(tfile);
@@ -728,7 +722,7 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
 		shuffle_button(cwin);
 
 	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
@@ -744,7 +738,7 @@ void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 
 	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
 		
 	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 }
@@ -771,14 +765,14 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 
 	if(fullscreen){
 		gtk_window_fullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_show(cwin->unfull_button);
+		gtk_widget_show(GTK_WIDGET(cwin->unfull_button));
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
 		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_hide(cwin->unfull_button);
+		gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
 		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
 }
@@ -827,11 +821,11 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->hbox_panel));
+	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->toolbar));
 
 	gint position = cwin->cpref->controls_below ? 3 : 1;
 
-	gtk_box_reorder_child(GTK_BOX(parent), cwin->hbox_panel, position);
+	gtk_box_reorder_child(GTK_BOX(parent), cwin->toolbar, position);
 }
 
 void
@@ -855,16 +849,16 @@ void rescan_library_handler(struct con_win *cwin)
 {
 	GtkWidget *msg_dialog;
 	GtkWidget *progress_bar;
+	GCancellable *cancellable;
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
-	gchar *query;
 
 	/* Check if Library is set */
 
 	if (!cwin->cpref->library_dir) {
 		g_warning("Library is not set, flushing existing library");
-		flush_db(cwin);
+		flush_db(cwin->cdbase);
 		init_library_view(cwin);
 		return ;
 	}
@@ -873,39 +867,38 @@ void rescan_library_handler(struct con_win *cwin)
 	   initialize schema, otherwise, just flush the library database */
 
 	if (is_incompatible_upgrade(cwin)) {
-		if (drop_dbase_schema(cwin) == -1) {
+		if (drop_dbase_schema(cwin->cdbase) == -1) {
 			g_critical("Unable to drop database schema");
 			return;
 		}
-		if (init_dbase_schema(cwin) == -1) {
+		if (init_dbase_schema(cwin->cdbase) == -1) {
 			g_critical("Unable to init database schema");
 			return;
 		}
 	} else {
-		flush_db(cwin);
+		flush_db(cwin->cdbase);
 	}
+
+	cancellable = g_cancellable_new ();
 
 	/* Create the dialog */
 
-	progress_bar = lib_progress_bar(cwin, 0);
+	progress_bar = lib_progress_bar(cwin, 0, cancellable);
 
 	/* Start the scan */
 
 	list = cwin->cpref->library_dir;
 	cnt = g_slist_length(cwin->cpref->library_dir);
-	cwin->cstate->stop_scan = FALSE;
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_begin_transaction(cwin->cdbase);
 
-		rescan_db(lib, no_files, progress_bar, 1, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_commit_transaction(cwin->cdbase);
 
 		list = list->next;
 	}
@@ -915,7 +908,7 @@ void rescan_library_handler(struct con_win *cwin)
 
 	gtk_widget_destroy(library_dialog);
 
-	if (!cwin->cstate->stop_scan) {
+	if (!g_cancellable_is_cancelled (cancellable)) {
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
@@ -925,7 +918,9 @@ void rescan_library_handler(struct con_win *cwin)
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
-	
+
+	g_object_unref(cancellable);
+
 	/* Save rescan time */
 
 	g_get_current_time(&cwin->cpref->last_rescan_time);
@@ -945,18 +940,18 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *msg_dialog;
 	GtkWidget *progress_bar;
+	GCancellable *cancellable;
 	gint no_files = 0, i, cnt = 0;
 	GSList *list;
 	gchar *lib;
-	gchar *query;
-
-	/* Create the dialog */
-
-	progress_bar = lib_progress_bar(cwin, 1);
 
 	/* To track user termination */
 
-	cwin->cstate->stop_scan = FALSE;
+	cancellable = g_cancellable_new ();
+
+	/* Create the dialog */
+
+	progress_bar = lib_progress_bar(cwin, 1, cancellable);
 
 	/* Check if any library has been removed */
 
@@ -964,18 +959,16 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->lib_delete);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_begin_transaction(cwin->cdbase);
 
-		delete_db(lib, no_files, progress_bar, 1, cwin);
+		delete_db(lib, no_files, progress_bar, 1, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_commit_transaction(cwin->cdbase);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -986,18 +979,16 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->lib_add);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_begin_transaction(cwin->cdbase);
 
-		rescan_db(lib, no_files, progress_bar, 1, cwin);
+		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_commit_transaction(cwin->cdbase);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -1009,7 +1000,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	cnt = g_slist_length(cwin->cpref->library_dir);
 
 	for (i=0; i<cnt; i++) {
-		lib = (gchar*)list->data;
+		lib = list->data;
 
 		/* Don't rescan if lib is present in lib_add,
 		   we just rescanned it above */
@@ -1021,15 +1012,13 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 
 		no_files = dir_file_count(lib, 1);
 
-		query = g_strdup_printf("BEGIN TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_begin_transaction(cwin->cdbase);
 
-		update_db(lib, no_files, progress_bar, 1, cwin);
+		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin->cdbase);
 
-		query = g_strdup_printf("END TRANSACTION");
-		exec_sqlite_query(query, cwin, NULL);
+		db_commit_transaction(cwin->cdbase);
 
-		if (cwin->cstate->stop_scan)
+		if (g_cancellable_is_cancelled (cancellable))
 			goto exit;
 		list = list->next;
 	}
@@ -1051,7 +1040,7 @@ exit:
 
 	gtk_widget_destroy(library_dialog);
 
-	if (!cwin->cstate->stop_scan) {
+	if (!g_cancellable_is_cancelled (cancellable)) {
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
@@ -1061,6 +1050,8 @@ exit:
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
+
+	g_object_unref(cancellable);
 }
 
 /* Handler for 'Add All' action in the Tools menu */
@@ -1072,11 +1063,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	struct db_result result;
 	struct musicobject *mobj;
 	GtkTreeModel *model;
-	GdkCursor *cursor;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	clear_current_playlist(action, cwin);
 
@@ -1091,7 +1079,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	/* NB: Optimization */
 
 	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (exec_sqlite_query(query, cwin, &result)) {
+	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i]);
 			mobj = new_musicobject_from_db(location_id, cwin);
@@ -1124,14 +1112,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
 
-	#if GLIB_CHECK_VERSION(2,26,0)
 	mpris_update_tracklist_replaced(cwin);
-	#endif
 }
 
 
@@ -1139,26 +1125,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 void statistics_action(GtkAction *action, struct con_win *cwin)
 {
-	gchar *query;
-	gint n_artists = 0, n_albums = 0, n_tracks = 0;
-	struct db_result result;
+	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	query = g_strdup_printf("SELECT COUNT() FROM ARTIST;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_artists = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
-	query = g_strdup_printf("SELECT COUNT() FROM ALBUM;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_albums = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
-	query = g_strdup_printf("SELECT COUNT() FROM TRACK;");
-	if (exec_sqlite_query(query, cwin, &result)) {
-		n_tracks = atoi(result.resultp[1]);
-		sqlite3_free_table(result.resultp);
-	}
+	n_artists = db_get_artist_count(cwin->cdbase);
+	n_albums = db_get_album_count(cwin->cdbase);
+	n_tracks = db_get_track_count(cwin->cdbase);
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_DESTROY_WITH_PARENT,

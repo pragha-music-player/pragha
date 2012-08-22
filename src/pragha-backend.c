@@ -139,11 +139,14 @@ backend_seek (guint64 seek, struct con_win *cwin)
 {
 	CDEBUG(DBG_BACKEND, "Seeking playback");
 
+	if(!cwin->cgst->seek_enabled)
+		return;
+
 	gst_element_seek (cwin->cgst->pipeline,
 	       1.0,
 	       GST_FORMAT_TIME,
 	       GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
-	       GST_SEEK_TYPE_SET, seek*(1000*1000*1000),
+	       GST_SEEK_TYPE_SET, seek * GST_SECOND,
 	       GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
 }
 
@@ -313,6 +316,9 @@ backend_stop(GError *error, struct con_win *cwin)
 	update_related_state (cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
+
+	cwin->cgst->is_live = FALSE;
+	cwin->cgst->emitted_error = FALSE;
 }
 
 void
@@ -479,6 +485,9 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 	gint percent = 0;
 	GstState cur_state;
 
+	if (cwin->cgst->is_live)
+		return;
+
 	if(cwin->cstate->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
 		return;
 
@@ -591,6 +600,7 @@ void
 backend_play(struct con_win *cwin)
 {
 	gchar *uri = NULL;
+	GstStateChangeReturn ret;
 
 	if (!cwin->cstate->curr_mobj->file)
 		return;
@@ -609,14 +619,15 @@ backend_play(struct con_win *cwin)
 
 	cwin->cstate->state = ST_PLAYING;
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	ret = gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+
+	if (ret == GST_STATE_CHANGE_NO_PREROLL)
+		cwin->cgst->is_live = TRUE;
 
 	update_panel_playback_state (cwin);
 	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
-
-	cwin->cgst->emitted_error = FALSE;
 }
 
 static void
@@ -628,6 +639,12 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 	switch (new) {
 		case GST_STATE_PLAYING: {
 			if (cwin->cstate->state == ST_PLAYING) {
+				GstQuery *query;
+				query = gst_query_new_seeking (GST_FORMAT_TIME);
+				if (gst_element_query (cwin->cgst->pipeline, query))
+					gst_query_parse_seeking (query, NULL, &cwin->cgst->seek_enabled, NULL, NULL);
+				gst_query_unref (query);
+
 				if(cwin->cgst->timer == 0)
 					cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
 
@@ -684,6 +701,12 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 			backend_parse_error (msg, cwin);
 			break;
 		}
+		case GST_MESSAGE_CLOCK_LOST: {
+			/* Get a new clock */
+			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
+			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PLAYING);
+			break;
+		}
     		default:
 			break;
 	}
@@ -691,13 +714,14 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 }
 
 void
-backend_quit(struct con_win *cwin)
+backend_free(struct con_win *cwin)
 {
 	backend_stop(NULL, cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
 	gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
-	cwin->cgst->pipeline = NULL;
+	g_slice_free(struct con_gst, cwin->cgst);
+	cwin->cgst = NULL;
 
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 }
@@ -794,15 +818,18 @@ gint backend_init(struct con_win *cwin)
 		/* Test 10bands equalizer and test it. */
 		cwin->cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
 		if (cwin->cgst->equalizer != NULL) {
-			GstElement *bin = gst_bin_new("audiobin");
-			GstPad* audiopad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+			GstElement *bin;
+			GstPad *pad, *ghost_pad;
 
+			bin = gst_bin_new("audiobin");
 			gst_bin_add_many (GST_BIN(bin), cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
 			gst_element_link_many (cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
 
-			gst_element_add_pad (GST_ELEMENT(bin), gst_ghost_pad_new("sink", audiopad));
-		
-			gst_object_unref (audiopad);
+			pad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+			ghost_pad = gst_ghost_pad_new ("sink", pad);
+			gst_pad_set_active (ghost_pad, TRUE);
+			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
+			gst_object_unref (pad);
 
 			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
 		}
@@ -827,6 +854,10 @@ gint backend_init(struct con_win *cwin)
 	backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+
+	cwin->cgst->is_live = FALSE;
+	cwin->cgst->seek_enabled = FALSE;
+	cwin->cgst->emitted_error = FALSE;
 
 	gst_object_unref(bus);
 	g_free(audiosink);
