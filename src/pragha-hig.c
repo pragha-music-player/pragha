@@ -72,6 +72,7 @@ void
 pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control)
 {
 	/*TODO: Add 12px alligment.. */
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
 	gtk_table_attach(GTK_TABLE(table), label, 0, 1, *row, *row + 1, GTK_FILL, GTK_FILL, 0, 0);
 
 	gtk_table_attach(GTK_TABLE(table), control, 1, 2, *row, *row + 1, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0, 0);
