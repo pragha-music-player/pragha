@@ -637,7 +637,7 @@ void album_art_toggle_state(struct con_win *cwin)
 		if (!cwin->album_art_frame) {
 			boxitem = gtk_tool_item_new ();
 			gtk_toolbar_insert (GTK_TOOLBAR(cwin->toolbar), GTK_TOOL_ITEM(boxitem), 4);
-			box = gtr_hbox_new (FALSE, 0);
+			box = gtk_hbox_new (FALSE, 0);
 			album_art_frame = gtk_event_box_new ();
 			gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
 			g_signal_connect (G_OBJECT (album_art_frame),

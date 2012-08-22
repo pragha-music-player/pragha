@@ -16,8 +16,6 @@ pragha_SOURCES =cdda.c \
 		dbus.c \
 		filetree.c \
 		gui.c \
-		hig.c \
-		hig.h \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
@@ -33,6 +31,7 @@ pragha_SOURCES =cdda.c \
 		pragha.c \
 		pragha.h \
 		pragha-backend.c \
+		pragha-hig.c \
 		pref.c \
 		statusicon.c \
 		tags.c \

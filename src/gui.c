@@ -1590,7 +1590,7 @@ create_toolbar(struct con_win *cwin)
 	if (cwin->cpref->show_album_art) {
 		boxitem = gtk_tool_item_new ();
 		gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
-		box = gtr_hbox_new(FALSE, 0);
+		box = gtk_hbox_new(FALSE, 0);
 
 		album_art_frame = gtk_event_box_new ();
 		gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
@@ -1611,7 +1611,7 @@ create_toolbar(struct con_win *cwin)
 
 	playing = create_playing_box(cwin);
 
-	box = gtr_hbox_new (FALSE, 0);
+	box = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(box), playing, TRUE, TRUE, 5);
 	gtk_container_add (GTK_CONTAINER(boxitem), box);
 

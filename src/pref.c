@@ -1413,9 +1413,9 @@ pref_create_audio_page(struct con_win *cwin)
 		  *soft_mixer, *audio_cd_device_label,*audio_cd_device_entry;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Audio"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio"));
 
 	sink_label = gtk_label_new(_("Audio sink"));
 
@@ -1434,7 +1434,7 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  PULSE_SINK);
 
-	hig_workarea_add_row_w (table, &row, sink_label, audio_sink_combo, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, sink_label, audio_sink_combo);
 
 	audio_device_label = gtk_label_new(_("Audio Device"));
 	gtk_misc_set_alignment(GTK_MISC (audio_device_label), 0, 0);
@@ -1443,14 +1443,14 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_device_entry),
 				    _("Restart Required"));
 
-	hig_workarea_add_row_w (table, &row, audio_device_label, audio_device_entry, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, audio_device_label, audio_device_entry);
 
 	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
 
-	hig_workarea_add_wide_control(table, &row, soft_mixer);
+	pragha_hig_workarea_table_add_wide_control(table, &row, soft_mixer);
 
-	hig_workarea_add_section_title(table, &row, _("Audio CD"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
 
 	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
 	gtk_misc_set_alignment(GTK_MISC (audio_cd_device_label), 0, 0);
@@ -1459,7 +1459,7 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry),
 				 AUDIO_CD_DEVICE_ENTRY_LEN);
 
-	hig_workarea_add_row_w (table, &row, audio_cd_device_label, audio_cd_device_entry, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
 
 	/* Store references */
 
@@ -1473,7 +1473,7 @@ pref_create_audio_page(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(audio_sink_combo), "changed",
 			 G_CALLBACK(change_audio_sink), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1490,9 +1490,9 @@ pref_create_library_page(struct con_win *cwin)
 
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Library"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Library"));
 
 	hbox_library = gtk_hbox_new(FALSE, 6);
 
@@ -1544,13 +1544,13 @@ pref_create_library_page(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
-	hig_workarea_add_wide_tall_control(table, &row, hbox_library);
+	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
 	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	hig_workarea_add_wide_control(table, &row, fuse_folders);
+	pragha_hig_workarea_table_add_wide_control(table, &row, fuse_folders);
 
 	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
-	hig_workarea_add_wide_control(table, &row, sort_by_year);
+	pragha_hig_workarea_table_add_wide_control(table, &row, sort_by_year);
 
 	/* Store references */
 
@@ -1567,7 +1567,7 @@ pref_create_library_page(struct con_win *cwin)
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
 			  G_CALLBACK(library_view_key_press), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1579,22 +1579,22 @@ pref_create_appearance_page(struct con_win *cwin)
 	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Playlist"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));
 
 	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
-	hig_workarea_add_wide_control(table, &row, use_hint);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_hint);
 
-	hig_workarea_add_section_title(table, &row, _("Controls"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Controls"));
 
 	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
-	hig_workarea_add_wide_control(table, &row, album_art);
+	pragha_hig_workarea_table_add_wide_control(table, &row, album_art);
 
 	album_art_size_label = gtk_label_new(_("Size of Album art"));
 	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
 
-	hig_workarea_add_row_w (table, &row, album_art_size_label, album_art_size, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, album_art_size_label, album_art_size);
 
 	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
 	album_art_pattern = gtk_entry_new();
@@ -1602,7 +1602,7 @@ pref_create_appearance_page(struct con_win *cwin)
 				 ALBUM_ART_PATTERN_LEN);
 	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
 
-	hig_workarea_add_row_w (table, &row, album_art_pattern_label, album_art_pattern, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, album_art_pattern_label, album_art_pattern);
 
 	/* Store references */
 
@@ -1618,7 +1618,7 @@ pref_create_appearance_page(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1630,32 +1630,32 @@ pref_create_general_page(struct con_win *cwin)
 	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Search"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Search"));
 
 	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
-	hig_workarea_add_wide_control(table, &row, instant_filter);
+	pragha_hig_workarea_table_add_wide_control(table, &row, instant_filter);
 
 	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
-	hig_workarea_add_wide_control(table, &row, aproximate_search);
+	pragha_hig_workarea_table_add_wide_control(table, &row, aproximate_search);
 
-	hig_workarea_add_section_title(table, &row, _("When starting pragha"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("When starting pragha"));
 
 	window_state_combo = gtk_combo_box_text_new ();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start normal"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start fullscreen"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start in system tray"));
-	hig_workarea_add_wide_control(table, &row, window_state_combo);
+	pragha_hig_workarea_table_add_wide_control(table, &row, window_state_combo);
 
 	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
-	hig_workarea_add_wide_control(table, &row, restore_playlist);
+	pragha_hig_workarea_table_add_wide_control(table, &row, restore_playlist);
 
-	hig_workarea_add_section_title(table, &row, _("When adding folders"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("When adding folders"));
 	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
 
-	hig_workarea_add_wide_control(table, &row, add_recursively);
+	pragha_hig_workarea_table_add_wide_control(table, &row, add_recursively);
 
 	/* Store references */
 
@@ -1665,7 +1665,7 @@ pref_create_general_page(struct con_win *cwin)
 	cwin->cpref->restore_playlist_w = restore_playlist;
 	cwin->cpref->add_recursively_w = add_recursively;
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1681,31 +1681,31 @@ pref_create_desktop_page(struct con_win *cwin)
 	#endif
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Desktop"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Desktop"));
 
 	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
-	hig_workarea_add_wide_control(table, &row, show_icon_tray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, show_icon_tray);
 
 	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
-	hig_workarea_add_wide_control(table, &row, close_to_tray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, close_to_tray);
 
-	hig_workarea_add_section_title(table, &row, _("Notifications"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Notifications"));
 
 	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-	hig_workarea_add_wide_control(table, &row, show_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, show_osd);
 
 	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
-	hig_workarea_add_wide_control(table, &row, osd_in_systray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, osd_in_systray);
 	#endif
 
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
-	hig_workarea_add_wide_control(table, &row, albumart_in_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
 
 	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
-	hig_workarea_add_wide_control(table, &row, actions_in_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, actions_in_osd);
 
 	/* Setup signal handlers */
 
@@ -1725,7 +1725,7 @@ pref_create_desktop_page(struct con_win *cwin)
 	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
 	cwin->cpref->actions_in_osd_w = actions_in_osd;
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1743,19 +1743,19 @@ pref_create_services_page(struct con_win *cwin)
 	GtkWidget *use_cddb, *use_mpris2;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
 	#ifdef HAVE_LIBCLASTFM
-	hig_workarea_add_section_title(table, &row, "Last.fm");
+	pragha_hig_workarea_table_add_section_title(table, &row, "Last.fm");
 
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
-	hig_workarea_add_wide_control(table, &row, lastfm_check);
+	pragha_hig_workarea_table_add_wide_control(table, &row, lastfm_check);
 
 	lastfm_ulabel = gtk_label_new(_("Username"));
 	lastfm_uname = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
 
-	hig_workarea_add_row_w (table, &row, lastfm_ulabel, lastfm_uname, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
 
 	lastfm_plabel = gtk_label_new(_("Password"));
 	lastfm_pass = gtk_entry_new();
@@ -1763,20 +1763,20 @@ pref_create_services_page(struct con_win *cwin)
 	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
 	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
 
-	hig_workarea_add_row_w (table, &row, lastfm_plabel, lastfm_pass, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
 	#endif
 
-	hig_workarea_add_section_title(table, &row, _("Others services"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Others services"));
 
 	#ifdef HAVE_LIBGLYR
 	get_album_art = gtk_check_button_new_with_label(_("Get album art"));
-	hig_workarea_add_wide_control(table, &row, get_album_art);
+	pragha_hig_workarea_table_add_wide_control(table, &row, get_album_art);
 	#endif
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-	hig_workarea_add_wide_control(table, &row, use_cddb);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
 
 	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
-	hig_workarea_add_wide_control(table, &row, use_mpris2);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_mpris2);
 
 	/* Store references. */
 
@@ -1797,7 +1797,7 @@ pref_create_services_page(struct con_win *cwin)
 	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
 	#endif
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
