@@ -1243,7 +1243,6 @@ void set_watch_cursor_on_thread(struct con_win *cwin);
 void remove_watch_cursor (GtkWidget *window);
 void remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin);
 void set_status_message (const gchar *message, struct con_win *cwin);
-void gtk_label_set_attribute_bold(GtkLabel *label);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin);
@@ -1321,6 +1320,16 @@ gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 void notify_free();
+
+/* pragha-hig.c: HIG helpers and pango extention. */
+
+void gtk_label_set_attribute_bold(GtkLabel *label);
+void pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title);
+void pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget);
+void pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget);
+void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
+GtkWidget *pragha_hig_workarea_table_new();
+void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 
 /* Lastfm Helper */
 

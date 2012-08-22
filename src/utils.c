@@ -447,20 +447,6 @@ void set_status_message (const gchar *message, struct con_win *cwin)
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
 }
 
-/* Set bold atribute to label. */
-
-void gtk_label_set_attribute_bold(GtkLabel *label)
-{
-	PangoAttrList *Bold = pango_attr_list_new();
-	PangoAttribute *Attribute = NULL;
-	Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-	pango_attr_list_insert(Bold, Attribute);
-
-	gtk_label_set_attributes(label, Bold);
-
-	pango_attr_list_unref(Bold);
-}
-
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
 GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
