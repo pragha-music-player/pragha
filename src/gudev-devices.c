@@ -17,46 +17,212 @@
 
 #include "pragha.h"
 
-
 #ifdef HAVE_GUDEV
 
 #include <gudev/gudev.h>
 
 const char * const gudev_subsystems[] = { "block", NULL };
 
+/* Extentions copy of Thunar-volman code.
+ * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c
+ * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
+
+gchar *
+tvm_notify_decode (const gchar *str)
+{
+	GString     *string;
+	const gchar *p;
+	gchar       *result;
+	gchar        decoded_c;
+
+	if (str == NULL)
+		return NULL;
+
+	if (!g_utf8_validate (str, -1, NULL))
+		return NULL;
+
+	string = g_string_new (NULL);
+
+	for (p = str; p != NULL && *p != '\0'; ++p) {
+		if (*p == '\\' && p[1] == 'x' && g_ascii_isalnum (p[2]) && g_ascii_isalnum (p[3])) {
+			decoded_c = (g_ascii_xdigit_value (p[2]) << 4) | g_ascii_xdigit_value (p[3]);
+			g_string_append_c (string, decoded_c);
+			p = p + 3;
+		}
+		else
+			g_string_append_c (string, *p);
+	}
+
+	result = string->str;
+	g_string_free (string, FALSE);
+
+	return result;
+}
+
+GVolume *
+tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
+                                          const gchar    *kind,
+                                          const gchar    *identifier)
+{
+	GVolume *volume = NULL;
+	GList   *volumes;
+	GList   *lp;
+	gchar   *value;
+
+	g_return_val_if_fail (G_IS_VOLUME_MONITOR (monitor), NULL);
+	g_return_val_if_fail (kind != NULL && *kind != '\0', NULL);
+	g_return_val_if_fail (identifier != NULL && *identifier != '\0', NULL);
+
+	volumes = g_volume_monitor_get_volumes (monitor);
+
+	for (lp = volumes; volume == NULL && lp != NULL; lp = lp->next) {
+		value = g_volume_get_identifier (lp->data, kind);
+		if (value != NULL) {
+			if (g_strcmp0 (value, identifier) == 0)
+				volume = g_object_ref (lp->data);
+		g_free (value);
+		}
+		g_object_unref (lp->data);
+	}
+	g_list_free (volumes);
+
+	return volume;
+}
+
+/* The next funtions allow to handle block devices.
+ * The most of code is inspired in:
+ * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-block-device.c */
+
+static void
+pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
+{
+	const gchar *volume_name;
+	gchar       *decoded_name;
+	gchar       *message;
+	GFile   *mount_point;
+	gchar   *mount_path;
+
+	g_return_if_fail (G_IS_MOUNT (mount));
+	g_return_if_fail (error == NULL || *error == NULL);
+
+	volume_name = g_udev_device_get_property (device, "ID_FS_LABEL_ENC");
+	decoded_name = tvm_notify_decode (volume_name);
+  
+	if (decoded_name != NULL)
+		message = g_strdup_printf (_("The volume \"%s\" was mounted automatically"), decoded_name);
+	else
+		message = g_strdup_printf (_("The inserted volume was mounted automatically"));
+
+	/*gdk_threads_enter ();
+	set_status_message(message, cwin);
+	gdk_threads_leave ();*/
+	g_message(message);
+	mount_point = g_mount_get_root (mount);
+	mount_path = g_file_get_path (mount_point);
+	g_object_unref (mount_point);
+	g_message(mount_path);
+
+	g_free (decoded_name);
+	g_free (message);
+}
+
+static void
+pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, GUdevDevice *device)
+{
+	GMount *mount;
+	GError *error = NULL;
+  
+	g_return_if_fail (G_IS_VOLUME (volume));
+	g_return_if_fail (G_IS_ASYNC_RESULT (result));
+
+	/* finish mounting the volume */
+	if (g_volume_mount_finish (volume, result, &error)) {
+		/* get the moint point of the volume */
+		mount = g_volume_get_mount (volume);
+
+		if (mount != NULL) {
+			pragha_block_device_mounted (device, mount, &error);
+			g_object_unref (mount);
+		}
+	}
+	g_object_unref (volume);
+}
+
+static void
+pragha_block_device_mount (GUdevDevice *device)
+{
+	GVolumeMonitor *monitor;
+	GMountOperation *mount_operation;
+	GVolume         *volume;
+
+	monitor = g_volume_monitor_get ();
+
+	/* determine the GVolume corresponding to the udev device */
+	volume = tvm_g_volume_monitor_get_volume_for_kind (monitor,
+							   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE,
+							   g_udev_device_get_device_file (device));
+
+	/* check if we have a volume */
+	if (volume != NULL) {
+		if (g_volume_can_mount (volume)) {
+			/* try to mount the volume asynchronously */
+			mount_operation = gtk_mount_operation_new (NULL);
+			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
+					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, device);
+			g_object_unref (mount_operation);
+		}
+	}
+	//g_object_unref (monitor);
+}
+
+/* Main devices function that listen udev events. */
+
 static void
 uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
 {
+	const gchar *devtype;
 	const gchar *id_type;
 	const gchar *media_state;
+	const gchar *id_fs_usage;
 	gboolean     is_cdrom;
-	guint64      audio_tracks;
+	gboolean     is_partition;
+	gboolean     is_volume;
+	guint64      audio_tracks = 0;
+	guint64      data_tracks = 0;
 
 	/* collect general device information */
+	devtype = g_udev_device_get_property (device, "DEVTYPE");
 	id_type = g_udev_device_get_property (device, "ID_TYPE");
+	id_fs_usage = g_udev_device_get_property (device, "ID_FS_USAGE");
 
 	/* distinguish device types */
-
 	is_cdrom = (g_strcmp0 (id_type, "cd") == 0);
+	is_partition = (g_strcmp0 (devtype, "partition") == 0);
+	is_volume = (g_strcmp0 (devtype, "disk") == 0) && (g_strcmp0 (id_fs_usage, "filesystem") == 0);
 
 	if(is_cdrom) {
 		/* silently ignore CD drives without media */
 		if (g_udev_device_get_property_as_boolean (device, "ID_CDROM_MEDIA")) {
-			/* collect CD information */
-
 			media_state = g_udev_device_get_property (device, "ID_CDROM_MEDIA_STATE");
-			audio_tracks =  g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO");
+
+			audio_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO");
+			data_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_DATA");
 
 			/* check if we have a blank CD/DVD here */
 
 			if (g_strcmp0 (media_state, "blank") != 0 && audio_tracks > 0) {
 				gdk_threads_enter ();
-				set_status_message(_("New device detected."), cwin);
+				add_audio_cd(cwin);
 				gdk_threads_leave ();
 			}
 		}
 	}
+	else if (is_partition || is_volume || data_tracks) {
+		pragha_block_device_mount(device);
+	}
 }
+
+/* Init gudev subsysten, and listen events. */
 
 gint
 init_gudev_subsystem(struct con_win *cwin)
