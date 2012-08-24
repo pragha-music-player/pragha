@@ -517,36 +517,6 @@ bad:
 	return list;
 }
 
-void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
-				    GtkTreePath *path,
-				    GtkTreeViewColumn *column,
-				    struct con_win *cwin)
-{
-	GtkTreeIter r_iter;
-	GtkTreePath *r_path;
-	GtkTreeModel *model;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-
-	gtk_tree_model_get_iter_first(model, &r_iter);
-	r_path = gtk_tree_model_get_path(model, &r_iter);
-
-	if (!gtk_tree_path_compare(path, r_path)) {
-		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->library_tree),
-						path))
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->library_tree),
-						 path, FALSE);
-		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->library_tree),
-						   path);
-	}
-	else {
-		add_playlist_row_current_playlist(path, cwin);
-	}
-
-	gtk_tree_path_free(r_path);
-}
-
 void playlist_tree_add_to_playlist(struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
