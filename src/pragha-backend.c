@@ -45,7 +45,7 @@ static gboolean update_gui(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
+	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
 
 	if(newsec > 0) {
 		__update_track_progress_bar(cwin, newsec);
@@ -59,7 +59,7 @@ gboolean update_track_progress_bar(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
+	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
 
 	if(newsec > 0)
 		__update_track_progress_bar(cwin, newsec);
@@ -71,7 +71,7 @@ gboolean update_current_song_info(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin));
+	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
 
 	__update_progress_song_info(cwin, newsec);
 
@@ -97,16 +97,16 @@ backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 }
 
 gint64
-backend_get_current_length(struct con_win *cwin)
+backend_get_current_length(struct con_gst *cgst)
 {
 	gint64 song_length;
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	result = gst_element_query_duration(cwin->cgst->pipeline, format, &song_length);
+	result = gst_element_query_duration(cgst->pipeline, format, &song_length);
 #else
-	result = gst_element_query_duration(cwin->cgst->pipeline, &format, &song_length);
+	result = gst_element_query_duration(cgst->pipeline, &format, &song_length);
 #endif
 
 	if (!result || format != GST_FORMAT_TIME)
@@ -116,16 +116,16 @@ backend_get_current_length(struct con_win *cwin)
 }
 
 gint64
-backend_get_current_position(struct con_win *cwin)
+backend_get_current_position(struct con_gst *cgst)
 {
 	gint64 song_position;
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	result = gst_element_query_position(cwin->cgst->pipeline, format, &song_position);
+	result = gst_element_query_position(cgst->pipeline, format, &song_position);
 #else
-	result = gst_element_query_position(cwin->cgst->pipeline, &format, &song_position);
+	result = gst_element_query_position(cgst->pipeline, &format, &song_position);
 #endif
 
 	if (!result || format != GST_FORMAT_TIME)
@@ -135,14 +135,14 @@ backend_get_current_position(struct con_win *cwin)
 }
 
 void
-backend_seek (guint64 seek, struct con_win *cwin)
+backend_seek (struct con_gst *cgst, guint64 seek)
 {
 	CDEBUG(DBG_BACKEND, "Seeking playback");
 
-	if(!cwin->cgst->seek_enabled)
+	if(!cgst->seek_enabled)
 		return;
 
-	gst_element_seek (cwin->cgst->pipeline,
+	gst_element_seek (cgst->pipeline,
 	       1.0,
 	       GST_FORMAT_TIME,
 	       GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
@@ -166,11 +166,11 @@ backend_set_soft_volume(struct con_win *cwin)
 }
 
 gdouble
-backend_get_volume(struct con_win *cwin)
+backend_get_volume(struct con_gst *cgst)
 {
 	gdouble volume;
 
-	g_object_get (G_OBJECT(cwin->cgst->pipeline), "volume", &volume, NULL);
+	g_object_get (cgst->pipeline, "volume", &volume, NULL);
 
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
@@ -182,7 +182,7 @@ backend_get_volume(struct con_win *cwin)
 gboolean
 update_volume_notify_cb (struct con_win *cwin)
 {
-	cwin->cgst->curr_vol = backend_get_volume(cwin);
+	cwin->cgst->curr_vol = backend_get_volume(cwin->cgst);
 
 	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
 	 * we still get another one anyway. */
@@ -255,10 +255,10 @@ backend_update_volume(struct con_win *cwin)
 }
 
 gboolean
-backend_is_playing(struct con_win *cwin)
+backend_is_playing(struct con_gst *cgst)
 {
 	GstState state;
-	gst_element_get_state (GST_ELEMENT(cwin->cgst->pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state (cgst->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
 
 	if (state == GST_STATE_PLAYING)
 		return TRUE;
@@ -266,25 +266,13 @@ backend_is_playing(struct con_win *cwin)
 }
 
 gboolean
-backend_is_paused(struct con_win *cwin)
+backend_is_paused(struct con_gst *cgst)
 {
 	GstState state;
-	gst_element_get_state(GST_ELEMENT(cwin->cgst->pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state(cgst->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
 
 	if (state == GST_STATE_PAUSED)
 		return TRUE;
-	return FALSE;
-}
-
-gboolean
-backend_need_stopped(struct con_win *cwin)
-{
-	GstState state;
-	gst_element_get_state(GST_ELEMENT(cwin->cgst->pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
-
-	if ((state == GST_STATE_PAUSED) || (state == GST_STATE_PLAYING))
-		return TRUE;
-
 	return FALSE;
 }
 
