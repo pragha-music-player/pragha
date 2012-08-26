@@ -313,7 +313,6 @@ void init_tag_struct(struct tags *mtags)
 	mtags->title = g_strdup("");
 	mtags->artist = g_strdup("");
 	mtags->album = g_strdup("");
-	mtags->comment = g_strdup("");
 	mtags->genre = g_strdup("");
 	mtags->comment = g_strdup("");
 	mtags->track_no = 0;
