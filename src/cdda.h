@@ -27,13 +27,4 @@
 #include <cdio/cdio_unconfig.h>
 #endif
 
-struct con_cdda_decoder {
-	gchar cdda_buf[CDIO_CD_FRAMESIZE_RAW];
-	struct lastfm_track *ltrack;
-	gint displayed_seconds;
-	gint start;
-	gint cur;
-	gint end;
-};
-
 #endif /* CDDA_H */
