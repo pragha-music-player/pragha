@@ -671,6 +671,11 @@ struct con_mpris2 {
 	GDBusMethodInvocation *method_invocation;	/* for returning errors during methods */
 };
 
+struct con_udev {
+	guint64 bus_hooked;
+	guint64 device_hooked;
+};
+
 struct con_gnome_media_keys {
 	guint watch_id;
 	guint handler_id;
@@ -683,6 +688,9 @@ struct con_win {
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
 	struct con_gst *cgst;
+	#ifdef HAVE_GUDEV
+	struct con_udev *cudev;
+	#endif
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif

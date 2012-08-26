@@ -172,10 +172,10 @@ pragha_block_device_mount (GUdevDevice *device)
 	g_object_unref (monitor);
 }
 
-/* Main devices function that listen udev events. */
+/* Functions that manage to "add" and "remove" devices events. */
 
 static void
-uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
+pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
 {
 	const gchar *devtype;
 	const gchar *id_type;
@@ -214,6 +214,41 @@ uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct c
 	}
 }
 
+static void
+pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
+{
+	g_message("Device removed... . .\n");
+}
+
+/* Main devices function that listen udev events. */
+
+static void
+gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
+{
+	guint64 busnum;
+	guint64 devnum;
+
+	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+
+	if (g_str_equal(action, "add") &&
+	    cwin->cudev->bus_hooked == 0 &&
+	    cwin->cudev->device_hooked == 0) {
+
+		pragha_gudev_device_added(device, cwin);
+		cwin->cudev->bus_hooked = busnum;
+		cwin->cudev->device_hooked = devnum;
+	}
+	else if (g_str_equal (action, "remove") &&
+		cwin->cudev->bus_hooked == busnum &&
+		cwin->cudev->device_hooked == devnum) {
+
+		pragha_gudev_device_removed(device, cwin);
+		cwin->cudev->bus_hooked = 0;
+		cwin->cudev->device_hooked = 0;
+	}
+}
+
 /* Init gudev subsysten, and listen events. */
 
 gint
@@ -221,8 +256,13 @@ init_gudev_subsystem(struct con_win *cwin)
 {
 	GUdevClient *gudev_client;
 
+	cwin->cudev = g_slice_new0(struct con_udev);
+
+	cwin->cudev->bus_hooked = 0;
+	cwin->cudev->device_hooked = 0;
+
 	gudev_client = g_udev_client_new(gudev_subsystems);
-	g_signal_connect(gudev_client, "uevent", G_CALLBACK(uevent_cb), cwin);
+	g_signal_connect(gudev_client, "uevent", G_CALLBACK(gudev_uevent_cb), cwin);
 
 	return 0;
 }
