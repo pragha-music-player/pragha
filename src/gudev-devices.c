@@ -113,9 +113,6 @@ pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
 	else
 		message = g_strdup_printf (_("The inserted volume was mounted automatically"));
 
-	/*gdk_threads_enter ();
-	set_status_message(message, cwin);
-	gdk_threads_leave ();*/
 	g_message(message);
 	mount_point = g_mount_get_root (mount);
 	mount_path = g_file_get_path (mount_point);
@@ -172,7 +169,7 @@ pragha_block_device_mount (GUdevDevice *device)
 			g_object_unref (mount_operation);
 		}
 	}
-	//g_object_unref (monitor);
+	g_object_unref (monitor);
 }
 
 /* Main devices function that listen udev events. */
@@ -182,7 +179,6 @@ uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct c
 {
 	const gchar *devtype;
 	const gchar *id_type;
-	const gchar *media_state;
 	const gchar *id_fs_usage;
 	gboolean     is_cdrom;
 	gboolean     is_partition;
@@ -203,21 +199,17 @@ uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct c
 	if(is_cdrom) {
 		/* silently ignore CD drives without media */
 		if (g_udev_device_get_property_as_boolean (device, "ID_CDROM_MEDIA")) {
-			media_state = g_udev_device_get_property (device, "ID_CDROM_MEDIA_STATE");
-
 			audio_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_AUDIO");
 			data_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_DATA");
 
-			/* check if we have a blank CD/DVD here */
-
-			if (g_strcmp0 (media_state, "blank") != 0 && audio_tracks > 0) {
+			if (audio_tracks > 0) {
 				gdk_threads_enter ();
 				add_audio_cd(cwin);
 				gdk_threads_leave ();
 			}
 		}
 	}
-	else if (is_partition || is_volume || data_tracks) {
+	if (is_partition || is_volume || data_tracks) {
 		pragha_block_device_mount(device);
 	}
 }
