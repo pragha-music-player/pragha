@@ -1146,16 +1146,16 @@ void preferences_free(struct con_pref *cpref);
 
 /* Gstreamer */
 
-void backend_seek (guint64 seek, struct con_win *cwin);
-gint64 backend_get_current_length(struct con_win *cwin);
-gint64 backend_get_current_position(struct con_win *cwin);
+void backend_seek (struct con_gst *cgst, guint64 seek);
+gint64 backend_get_current_length(struct con_gst *cgst);
+gint64 backend_get_current_position(struct con_gst *cgst);
 void backend_set_soft_volume(struct con_win *cwin);
-gdouble backend_get_volume (struct con_win *cwin);
+gdouble backend_get_volume (struct con_gst *cgst);
 gboolean update_volume_notify_cb (struct con_win *cwin);
 void backend_set_volume (gdouble volume, struct con_win *cwin);
 void backend_update_volume (struct con_win *cwin);
-gboolean backend_is_playing(struct con_win *cwin);
-gboolean backend_is_paused(struct con_win *cwin);
+gboolean backend_is_playing(struct con_gst *cgst);
+gboolean backend_is_paused(struct con_gst *cgst);
 void backend_pause (struct con_win *cwin);
 void backend_resume (struct con_win *cwin);
 void backend_play (struct con_win *cwin);

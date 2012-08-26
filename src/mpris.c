@@ -259,7 +259,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	if (seek >= cwin->cstate->curr_mobj->tags->length)
 		seek = cwin->cstate->curr_mobj->tags->length;
 
-	backend_seek(seek, cwin);
+	backend_seek(cwin->cgst, seek);
 	mpris_update_seeked(cwin, seek);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -278,7 +278,7 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 		if (seek >= cwin->cstate->curr_mobj->tags->length)
 			seek = cwin->cstate->curr_mobj->tags->length;
 
-		backend_seek(seek, cwin);
+		backend_seek(cwin->cgst, seek);
 		mpris_update_seeked(cwin, seek);
 	}
 	g_free(path);
@@ -476,7 +476,7 @@ static GVariant* mpris_Player_get_Position (GError **error, struct con_win *cwin
 	if (cwin->cstate->state == ST_STOPPED)
 		return g_variant_new_int64(0);
 	else
-		return g_variant_new_int64(backend_get_current_position(cwin) / 1000);
+		return g_variant_new_int64(backend_get_current_position(cwin->cgst) / 1000);
 }
 
 static GVariant* mpris_Player_get_MinimumRate (GError **error, struct con_win *cwin)

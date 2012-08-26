@@ -266,7 +266,7 @@ void __update_track_progress_bar(struct con_win *cwin, gint length)
 	gdouble fraction = 0;
 
 	if(cwin->cstate->curr_mobj->tags->length == 0) {
-		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(backend_get_current_length(cwin));
+		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(backend_get_current_length(cwin->cgst));
 	}
 	else {
 		fraction = (gdouble)length / (gdouble)cwin->cstate->curr_mobj->tags->length;
@@ -323,7 +323,7 @@ void track_progress_change_cb(GtkWidget *widget,
 	fraction = (gdouble) event->x / allocation.width;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
 
-	backend_seek(seek, cwin);
+	backend_seek(cwin->cgst, seek);
 
 	mpris_update_seeked(cwin, seek);
 }
