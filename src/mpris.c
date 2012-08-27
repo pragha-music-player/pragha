@@ -462,7 +462,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 
 static GVariant* mpris_Player_get_Volume (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_double(cwin->cgst->curr_vol);
+	return g_variant_new_double(backend_get_volume (cwin->cgst));
 }
 
 static void mpris_Player_put_Volume (GVariant *value, GError **error, struct con_win *cwin)
@@ -982,6 +982,7 @@ void mpris_update_any(struct con_win *cwin)
 	gboolean change_detected = FALSE;
 	GVariantBuilder b;
 	gchar *newtitle = NULL;
+	gdouble curr_vol = backend_get_volume (cwin->cgst);
 
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
@@ -1010,10 +1011,10 @@ void mpris_update_any(struct con_win *cwin)
 		cwin->cmpris2->saved_playbackstatus = cwin->cpref->repeat;
 		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, cwin));
 	}
-	if(cwin->cmpris2->volume != cwin->cgst->curr_vol)
+	if(cwin->cmpris2->volume != curr_vol)
 	{
 		change_detected = TRUE;
-		cwin->cmpris2->volume = cwin->cgst->curr_vol;
+		cwin->cmpris2->volume = curr_vol;
 		g_variant_builder_add (&b, "{sv}", "Volume", mpris_Player_get_Volume (NULL, cwin));
 	}
 	if(g_strcmp0(cwin->cmpris2->saved_title, newtitle))

@@ -626,7 +626,6 @@ struct con_gst {
 	GstElement *audio_sink;
 	GstElement *equalizer;
 	int timer;
-	gdouble curr_vol;
 	gboolean is_live;
 	gboolean seek_enabled;
 	gboolean emitted_error;
@@ -1152,7 +1151,7 @@ void backend_set_soft_volume(struct con_gst *cgst, gboolean value);
 gdouble backend_get_volume (struct con_gst *cgst);
 gboolean update_volume_notify_cb (struct con_win *cwin);
 void backend_set_volume (gdouble volume, struct con_win *cwin);
-void backend_update_volume (struct con_win *cwin);
+void backend_set_delta_volume (struct con_win *cwin, gdouble delta);
 gboolean backend_is_playing(struct con_gst *cgst);
 gboolean backend_is_paused(struct con_gst *cgst);
 void backend_pause (struct con_win *cwin);

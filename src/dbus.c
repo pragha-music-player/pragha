@@ -65,20 +65,12 @@ static void dbus_repeat_handler(struct con_win *cwin)
 
 static void dbus_inc_vol_handler(struct con_win *cwin)
 {
-	cwin->cgst->curr_vol += 0.05;
-
-	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
-
-	backend_update_volume(cwin);
+	backend_set_delta_volume (cwin, +0.05);
 }
 
 static void dbus_dec_vol_handler(struct con_win *cwin)
 {
-	cwin->cgst->curr_vol -= 0.05;
-
-	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
-
-	backend_update_volume(cwin);
+	backend_set_delta_volume (cwin, -0.05);
 }
 
 static void dbus_show_osd_handler(struct con_win *cwin)

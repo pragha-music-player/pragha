@@ -125,20 +125,14 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 
 	switch (event->direction){
 		case GDK_SCROLL_UP:
-			cwin->cgst->curr_vol += 0.02;
+			backend_set_delta_volume (cwin, +0.02);
 			break;
 		case GDK_SCROLL_DOWN:
-			cwin->cgst->curr_vol -= 0.02;
+			backend_set_delta_volume (cwin, -0.02);
 			break;
 		default:
-			return;
+			break;
 	}
-
-	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
-
-	backend_update_volume(cwin);
-
-	return;
 }
 
 static void
