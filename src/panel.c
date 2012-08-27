@@ -607,8 +607,7 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
-	cwin->cgst->curr_vol = value;
-	backend_update_volume(cwin);
+	backend_set_volume (value, cwin);
 }
 
 void update_panel_playback_state(struct con_win *cwin)

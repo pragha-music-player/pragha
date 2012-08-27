@@ -1172,7 +1172,7 @@ void save_preferences(struct con_win *cwin)
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
-				       cwin->cgst->curr_vol);
+				       backend_get_volume (cwin->cgst));
 	}
 
 	/* Save audio CD Device */
