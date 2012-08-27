@@ -75,6 +75,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-backend.h"
 #include "gtkcellrendererbubble.h"
 #include "xml_helper.h"
 
@@ -621,16 +622,6 @@ struct con_state {
 
 struct con_dbase;
 
-struct con_gst {
-	GstElement *pipeline;
-	GstElement *audio_sink;
-	GstElement *equalizer;
-	int timer;
-	gboolean is_live;
-	gboolean seek_enabled;
-	gboolean emitted_error;
-};
-
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
 	LASTFM_SESSION *session_id;
@@ -659,7 +650,7 @@ struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
-	struct con_gst *cgst;
+	PraghaBackend *backend;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif
@@ -1141,27 +1132,6 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
 void preferences_free(struct con_pref *cpref);
-
-/* Gstreamer */
-
-void backend_seek (struct con_gst *cgst, guint64 seek);
-gint64 backend_get_current_length(struct con_gst *cgst);
-gint64 backend_get_current_position(struct con_gst *cgst);
-void backend_set_soft_volume(struct con_gst *cgst, gboolean value);
-gdouble backend_get_volume (struct con_gst *cgst);
-gboolean update_volume_notify_cb (struct con_win *cwin);
-void backend_set_volume (gdouble volume, struct con_win *cwin);
-void backend_set_delta_volume (struct con_win *cwin, gdouble delta);
-gboolean backend_is_playing(struct con_gst *cgst);
-gboolean backend_is_paused(struct con_gst *cgst);
-void backend_pause (struct con_win *cwin);
-void backend_resume (struct con_win *cwin);
-void backend_play (struct con_win *cwin);
-void backend_stop (GError *error, struct con_win *cwin);
-void backend_start(struct musicobject *mobj, struct con_win *cwin);
-void backend_free (struct con_win *cwin);
-void backend_update_equalizer (struct con_gst *cgst, const gdouble *bands);
-gint backend_init(struct con_win *cwin);
 
 /* Systray functions */
 

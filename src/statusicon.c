@@ -125,10 +125,10 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 
 	switch (event->direction){
 		case GDK_SCROLL_UP:
-			backend_set_delta_volume (cwin, +0.02);
+			pragha_backend_set_delta_volume (cwin->backend, +0.02);
 			break;
 		case GDK_SCROLL_DOWN:
-			backend_set_delta_volume (cwin, -0.02);
+			pragha_backend_set_delta_volume (cwin->backend, -0.02);
 			break;
 		default:
 			break;
@@ -138,28 +138,28 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 static void
 systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_pause_resume(cwin);
 }
 
 static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_stop(NULL, cwin);
+	if(cwin->backend->emitted_error == FALSE)
+		pragha_backend_stop (cwin->backend, NULL);
 }
 
 static void
 systray_prev_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_prev_track(cwin);
 }
 
 static void
 systray_next_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_next_track(cwin);
 }
 

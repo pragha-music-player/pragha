@@ -41,11 +41,13 @@ typedef enum {
   GST_PLAY_FLAG_DEINTERLACE   = (1 << 9)
 } GstPlayFlags;
 
+G_DEFINE_TYPE (PraghaBackend, pragha_backend, G_TYPE_OBJECT);
+
 static gboolean update_gui(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
+	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
 
 	if(newsec > 0) {
 		__update_track_progress_bar(cwin, newsec);
@@ -56,7 +58,7 @@ static gboolean update_gui(gpointer data)
 }
 
 static void
-backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
+pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 {
 	GObject *source;
 
@@ -74,16 +76,16 @@ backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 }
 
 gint64
-backend_get_current_length(struct con_gst *cgst)
+pragha_backend_get_current_length (PraghaBackend *backend)
 {
 	gint64 song_length;
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	result = gst_element_query_duration(cgst->pipeline, format, &song_length);
+	result = gst_element_query_duration(backend->pipeline, format, &song_length);
 #else
-	result = gst_element_query_duration(cgst->pipeline, &format, &song_length);
+	result = gst_element_query_duration(backend->pipeline, &format, &song_length);
 #endif
 
 	if (!result || format != GST_FORMAT_TIME)
@@ -93,16 +95,16 @@ backend_get_current_length(struct con_gst *cgst)
 }
 
 gint64
-backend_get_current_position(struct con_gst *cgst)
+pragha_backend_get_current_position (PraghaBackend *backend)
 {
 	gint64 song_position;
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	result = gst_element_query_position(cgst->pipeline, format, &song_position);
+	result = gst_element_query_position(backend->pipeline, format, &song_position);
 #else
-	result = gst_element_query_position(cgst->pipeline, &format, &song_position);
+	result = gst_element_query_position(backend->pipeline, &format, &song_position);
 #endif
 
 	if (!result || format != GST_FORMAT_TIME)
@@ -112,14 +114,14 @@ backend_get_current_position(struct con_gst *cgst)
 }
 
 void
-backend_seek (struct con_gst *cgst, guint64 seek)
+pragha_backend_seek (PraghaBackend *backend, guint64 seek)
 {
 	CDEBUG(DBG_BACKEND, "Seeking playback");
 
-	if(!cgst->seek_enabled)
+	if (!backend->seek_enabled)
 		return;
 
-	gst_element_seek (cgst->pipeline,
+	gst_element_seek (backend->pipeline,
 	       1.0,
 	       GST_FORMAT_TIME,
 	       GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
@@ -128,26 +130,26 @@ backend_seek (struct con_gst *cgst, guint64 seek)
 }
 
 void
-backend_set_soft_volume (struct con_gst *cgst, gboolean value)
+pragha_backend_set_soft_volume (PraghaBackend *backend, gboolean value)
 {
 	GstPlayFlags flags;
 
-	g_object_get (cgst->pipeline, "flags", &flags, NULL);
+	g_object_get (backend->pipeline, "flags", &flags, NULL);
 
 	if (value)
 		flags |= GST_PLAY_FLAG_SOFT_VOLUME;
 	else
 		flags &= ~GST_PLAY_FLAG_SOFT_VOLUME;
 
-	g_object_set (cgst->pipeline, "flags", flags, NULL);
+	g_object_set (backend->pipeline, "flags", flags, NULL);
 }
 
 gdouble
-backend_get_volume(struct con_gst *cgst)
+pragha_backend_get_volume (PraghaBackend *backend)
 {
 	gdouble volume;
 
-	g_object_get (cgst->pipeline, "volume", &volume, NULL);
+	g_object_get (backend->pipeline, "volume", &volume, NULL);
 
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
@@ -159,7 +161,7 @@ backend_get_volume(struct con_gst *cgst)
 gboolean
 update_volume_notify_cb (struct con_win *cwin)
 {
-	gdouble volume = backend_get_volume (cwin->cgst);
+	gdouble volume = pragha_backend_get_volume (cwin->backend);
 
 	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
 	 * we still get another one anyway. */
@@ -180,8 +182,10 @@ volume_notify_cb (GObject *element, GstObject *prop_object, GParamSpec *pspec, s
 }
 
 void
-backend_set_volume(gdouble volume, struct con_win *cwin)
+pragha_backend_set_volume (PraghaBackend *backend, gdouble volume)
 {
+	struct con_win *cwin = backend->cwin;
+
 	volume = CLAMP (volume, 0.0, 1.0);
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
@@ -195,26 +199,26 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
 	 * we still get another one anyway. */
 
-	g_signal_handlers_block_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "volume", volume, NULL);
-	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
+	g_signal_handlers_block_by_func (backend->pipeline, volume_notify_cb, cwin);
+	g_object_set (backend->pipeline, "volume", volume, NULL);
+	g_signal_handlers_unblock_by_func (backend->pipeline, volume_notify_cb, cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
-backend_set_delta_volume (struct con_win *cwin, gdouble delta)
+pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta)
 {
-	gdouble volume = backend_get_volume (cwin->cgst);
+	gdouble volume = pragha_backend_get_volume (backend);
 	volume += delta;
-	backend_set_volume (volume, cwin);
+	pragha_backend_set_volume (backend, volume);
 }
 
 gboolean
-backend_is_playing(struct con_gst *cgst)
+pragha_backend_is_playing (PraghaBackend *backend)
 {
 	GstState state;
-	gst_element_get_state (cgst->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state (backend->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
 
 	if (state == GST_STATE_PLAYING)
 		return TRUE;
@@ -222,10 +226,10 @@ backend_is_playing(struct con_gst *cgst)
 }
 
 gboolean
-backend_is_paused(struct con_gst *cgst)
+pragha_backend_is_paused (PraghaBackend *backend)
 {
 	GstState state;
-	gst_element_get_state(cgst->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state(backend->pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
 
 	if (state == GST_STATE_PAUSED)
 		return TRUE;
@@ -233,8 +237,9 @@ backend_is_paused(struct con_gst *cgst)
 }
 
 void
-backend_stop(GError *error, struct con_win *cwin)
+pragha_backend_stop (PraghaBackend *backend, GError *error)
 {
+	struct con_win *cwin = backend->cwin;
 	GtkTreePath *path = NULL;
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
@@ -246,7 +251,7 @@ backend_stop(GError *error, struct con_win *cwin)
 
 	cwin->cstate->state = ST_STOPPED;
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+	gst_element_set_state(backend->pipeline, GST_STATE_READY);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -261,20 +266,21 @@ backend_stop(GError *error, struct con_win *cwin)
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 
-	cwin->cgst->is_live = FALSE;
-	cwin->cgst->emitted_error = FALSE;
+	backend->is_live = FALSE;
+	backend->emitted_error = FALSE;
 }
 
 void
-backend_pause(struct con_win *cwin)
+pragha_backend_pause (PraghaBackend *backend)
 {
+	struct con_win *cwin = backend->cwin;
 	GtkTreePath *path = NULL;
 
 	CDEBUG(DBG_BACKEND, "Pause playback");
 
 	cwin->cstate->state = ST_PAUSED;
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PAUSED);
+	gst_element_set_state(backend->pipeline, GST_STATE_PAUSED);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -290,15 +296,16 @@ backend_pause(struct con_win *cwin)
 }
 
 void
-backend_resume(struct con_win *cwin)
+pragha_backend_resume (PraghaBackend *backend)
 {
+	struct con_win *cwin = backend->cwin;
 	GtkTreePath *path = NULL;
 
 	CDEBUG(DBG_BACKEND, "Resuming playback");
 
 	cwin->cstate->state = ST_PLAYING;
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	gst_element_set_state(backend->pipeline, GST_STATE_PLAYING);
 
 	path = current_playlist_get_actual(cwin);
 	if (path) {
@@ -314,7 +321,7 @@ backend_resume(struct con_win *cwin)
 }
 
 static void
-backend_advance_playback (GError *error, struct con_win *cwin)
+pragha_backend_advance_playback (GError *error, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
 	struct musicobject *mobj = NULL;
@@ -322,7 +329,7 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
 	/* Stop to set ready and clear all info */
-	backend_stop(error, cwin);
+	pragha_backend_stop(cwin->backend, error);
 
 	if(cwin->cstate->playlist_change)
 		return;
@@ -336,7 +343,7 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path (path, cwin);
-	backend_start (mobj, cwin);
+	pragha_backend_start (cwin->backend, mobj);
 
 	update_current_state (path, PLAYLIST_NEXT, cwin);
 	gtk_tree_path_free (path);
@@ -344,7 +351,7 @@ backend_advance_playback (GError *error, struct con_win *cwin)
 
 /* Signal handler for parse the error dialog response. */
 
-static void backend_error_dialog_response(GtkDialog *dialog,
+static void pragha_backend_error_dialog_response(GtkDialog *dialog,
 					  gint response,
 					  GError *error)
 {
@@ -354,13 +361,13 @@ static void backend_error_dialog_response(GtkDialog *dialog,
 
 	switch (response) {
 		case GTK_RESPONSE_APPLY: {
-			backend_advance_playback (error, cwin);
+			pragha_backend_advance_playback (error, cwin);
 			break;
 		}
 		case GTK_RESPONSE_ACCEPT:
 		case GTK_RESPONSE_DELETE_EVENT:
 		default: {
-			backend_stop (error, cwin);
+			pragha_backend_stop (cwin->backend, error);
 			break;
 		}
 	}
@@ -369,8 +376,9 @@ static void backend_error_dialog_response(GtkDialog *dialog,
 }
 
 static void
-backend_parse_error (GstMessage *message, struct con_win *cwin)
+pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 {
+	struct con_win *cwin = backend->cwin;
 	GtkWidget *dialog;
 	gboolean emit = TRUE;
 	GError *error = NULL;
@@ -381,13 +389,13 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 	/* Gstreamer doc: When an error has occured
 	 * playbin should be set back to READY or NULL state.
 	 */
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
+	gst_element_set_state(backend->pipeline, GST_STATE_NULL);
 
 	/* Next code inspired on rhynthmbox.
 	 * If we've already got an error, ignore 'internal data flow error'
 	 * type messages, as they're too generic to be helpful.
 	 */
-	if (cwin->cgst->emitted_error &&
+	if (backend->emitted_error &&
 		error->domain == GST_STREAM_ERROR &&
 		error->code == GST_STREAM_ERROR_FAILED) {
 		CDEBUG(DBG_BACKEND, "Ignoring generic error \"%s\"", error->message);
@@ -397,7 +405,7 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 	if(emit) {
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
-		cwin->cgst->emitted_error = TRUE;
+		backend->emitted_error = TRUE;
 
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -414,7 +422,7 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 		g_object_set_data (G_OBJECT(dialog), "cwin", cwin);
 
 		g_signal_connect(G_OBJECT(dialog), "response",
-				 G_CALLBACK(backend_error_dialog_response), error);
+				 G_CALLBACK(pragha_backend_error_dialog_response), error);
 		gtk_widget_show_all(dialog);
 	}
 	else {
@@ -424,30 +432,31 @@ backend_parse_error (GstMessage *message, struct con_win *cwin)
 }
 
 static void
-backend_parse_buffering (GstMessage *message, struct con_win *cwin)
+pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 {
+	struct con_win *cwin = backend->cwin;
 	gint percent = 0;
 	GstState cur_state;
 
-	if (cwin->cgst->is_live)
+	if (backend->is_live)
 		return;
 
 	if(cwin->cstate->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
 		return;
 
 	gst_message_parse_buffering (message, &percent);
-	gst_element_get_state (cwin->cgst->pipeline, &cur_state, NULL, 0);
+	gst_element_get_state (backend->pipeline, &cur_state, NULL, 0);
 
 	if (percent >= 100) {
 		if(cwin->cstate->state == ST_PLAYING && cur_state != GST_STATE_PLAYING) {
 			CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
-			gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+			gst_element_set_state(backend->pipeline, GST_STATE_PLAYING);
 		}
 	}
 	else {
 		if (cwin->cstate->state == ST_PLAYING && cur_state == GST_STATE_PLAYING) {
 			CDEBUG(DBG_BACKEND, "Buffering ... temporarily pausing playback");
-			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
+			gst_element_set_state (backend->pipeline, GST_STATE_PAUSED);
 		}
 		else {
 			CDEBUG(DBG_BACKEND, "Buffering (already paused) ... %d", percent);
@@ -460,8 +469,9 @@ backend_parse_buffering (GstMessage *message, struct con_win *cwin)
 }
 
 static void
-backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
+pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 {
+	struct con_win *cwin = backend->cwin;
 	GstTagList *tag_list;
 	struct musicobject *mobj = NULL;
 	struct tags ntag;
@@ -520,8 +530,9 @@ backend_parse_message_tag(GstMessage *message, struct con_win *cwin)
 }
 
 void
-backend_start(struct musicobject *mobj, struct con_win *cwin)
+pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj)
 {
+	struct con_win *cwin = backend->cwin;
 	CDEBUG(DBG_BACKEND, "Starting playback");
 
 	if (!mobj) {
@@ -531,18 +542,19 @@ backend_start(struct musicobject *mobj, struct con_win *cwin)
 
 	if ((cwin->cstate->state == ST_PLAYING) ||
 	    (cwin->cstate->state == ST_PAUSED)) {
-		backend_stop(NULL, cwin);
+		pragha_backend_stop(backend, NULL);
 	}
 
 	cwin->cstate->curr_mobj = mobj;
 	cwin->cstate->curr_mobj_clear = FALSE;
 
-	backend_play(cwin);
+	pragha_backend_play(backend);
 }
 
 void
-backend_play(struct con_win *cwin)
+pragha_backend_play (PraghaBackend *backend)
 {
+	struct con_win *cwin = backend->cwin;
 	gchar *uri = NULL;
 	GstStateChangeReturn ret;
 
@@ -553,20 +565,20 @@ backend_play(struct con_win *cwin)
 
 	if(cwin->cstate->curr_mobj->file_type == FILE_CDDA ||
 	   cwin->cstate->curr_mobj->file_type == FILE_HTTP) {
-		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", cwin->cstate->curr_mobj->file, NULL);
+		g_object_set(backend->pipeline, "uri", cwin->cstate->curr_mobj->file, NULL);
 	}
 	else {
 		uri = g_filename_to_uri (cwin->cstate->curr_mobj->file, NULL, NULL);
-		g_object_set(G_OBJECT(cwin->cgst->pipeline), "uri", uri, NULL);
+		g_object_set(backend->pipeline, "uri", uri, NULL);
 		g_free (uri);
 	}
 
 	cwin->cstate->state = ST_PLAYING;
 
-	ret = gst_element_set_state(cwin->cgst->pipeline, GST_STATE_PLAYING);
+	ret = gst_element_set_state(backend->pipeline, GST_STATE_PLAYING);
 
 	if (ret == GST_STATE_CHANGE_NO_PREROLL)
-		cwin->cgst->is_live = TRUE;
+		backend->is_live = TRUE;
 
 	update_panel_playback_state (cwin);
 	update_menubar_playback_state(cwin);
@@ -575,7 +587,7 @@ backend_play(struct con_win *cwin)
 }
 
 static void
-backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
+pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
 {
 	if (pending != GST_STATE_VOID_PENDING)
 		return;
@@ -585,12 +597,12 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 			if (cwin->cstate->state == ST_PLAYING) {
 				GstQuery *query;
 				query = gst_query_new_seeking (GST_FORMAT_TIME);
-				if (gst_element_query (cwin->cgst->pipeline, query))
-					gst_query_parse_seeking (query, NULL, &cwin->cgst->seek_enabled, NULL, NULL);
+				if (gst_element_query (cwin->backend->pipeline, query))
+					gst_query_parse_seeking (query, NULL, &cwin->backend->seek_enabled, NULL, NULL);
 				gst_query_unref (query);
 
-				if(cwin->cgst->timer == 0)
-					cwin->cgst->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
+				if(cwin->backend->timer == 0)
+					cwin->backend->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
 
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
@@ -598,9 +610,9 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 		}
 		case GST_STATE_PAUSED: {
 			if (cwin->cstate->state == ST_PAUSED) {
-				if(cwin->cgst->timer > 0) {
-					g_source_remove(cwin->cgst->timer);
-					cwin->cgst->timer = 0;
+				if(cwin->backend->timer > 0) {
+					g_source_remove(cwin->backend->timer);
+					cwin->backend->timer = 0;
 				}
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
@@ -608,9 +620,9 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 		}
 		case GST_STATE_READY:
 		case GST_STATE_NULL: {
-			if(cwin->cgst->timer > 0) {
-				g_source_remove(cwin->cgst->timer);
-				cwin->cgst->timer = 0;
+			if(cwin->backend->timer > 0) {
+				g_source_remove(cwin->backend->timer);
+				cwin->backend->timer = 0;
 			}
 			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			break;
@@ -620,35 +632,35 @@ backend_evaluate_state (GstState old, GstState new, GstState pending, struct con
 	}
 }
 
-static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct con_win *cwin)
+static gboolean pragha_backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct con_win *cwin)
 {
 	switch(GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_EOS:
-			backend_advance_playback (NULL, cwin);
+			pragha_backend_advance_playback (NULL, cwin);
 			break;
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState old, new, pending;
 			gst_message_parse_state_changed (msg, &old, &new, &pending);
-			if (GST_MESSAGE_SRC (msg) == GST_OBJECT (cwin->cgst->pipeline))
-				backend_evaluate_state (old, new, pending, cwin);
+			if (GST_MESSAGE_SRC (msg) == GST_OBJECT (cwin->backend->pipeline))
+				pragha_backend_evaluate_state (old, new, pending, cwin);
 			break;
 		}
 		case GST_MESSAGE_BUFFERING: {
-			backend_parse_buffering (msg, cwin);
+			pragha_backend_parse_buffering (cwin->backend, msg);
 			break;
 		}
 		case GST_MESSAGE_TAG: {
-			backend_parse_message_tag (msg, cwin);
+			pragha_backend_parse_message_tag (cwin->backend, msg);
 			break;
 		}
 		case GST_MESSAGE_ERROR: {
-			backend_parse_error (msg, cwin);
+			pragha_backend_parse_error (cwin->backend, msg);
 			break;
 		}
 		case GST_MESSAGE_CLOCK_LOST: {
 			/* Get a new clock */
-			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PAUSED);
-			gst_element_set_state (cwin->cgst->pipeline, GST_STATE_PLAYING);
+			gst_element_set_state (cwin->backend->pipeline, GST_STATE_PAUSED);
+			gst_element_set_state (cwin->backend->pipeline, GST_STATE_PLAYING);
 			break;
 		}
     		default:
@@ -657,23 +669,25 @@ static gboolean backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct 
 	return TRUE;
 }
 
-void
-backend_free(struct con_win *cwin)
+static void
+pragha_backend_finalize (GObject *object)
 {
-	backend_stop(NULL, cwin);
+	PraghaBackend *backend = PRAGHA_BACKEND (object);
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_NULL);
-	gst_object_unref(GST_OBJECT(cwin->cgst->pipeline));
-	g_slice_free(struct con_gst, cwin->cgst);
-	cwin->cgst = NULL;
+	pragha_backend_stop(backend, NULL);
+
+	gst_element_set_state(backend->pipeline, GST_STATE_NULL);
+	gst_object_unref(backend->pipeline);
 
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
+
+	G_OBJECT_CLASS (pragha_backend_parent_class)->finalize (object);
 }
 
 void
-backend_update_equalizer (struct con_gst *cgst, const gdouble *bands)
+pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands)
 {
-	g_object_set (cgst->equalizer,
+	g_object_set (backend->equalizer,
 			"band0", bands[0],
 			"band1", bands[1],
 			"band2", bands[2],
@@ -688,12 +702,12 @@ backend_update_equalizer (struct con_gst *cgst, const gdouble *bands)
 }
 
 static void
-backend_init_equalizer_preset(struct con_win *cwin)
+pragha_backend_init_equalizer_preset (struct con_win *cwin)
 {
 	gdouble *saved_bands;
 	GError *error = NULL;
 
-	if(cwin->cgst->equalizer == NULL)
+	if(cwin->backend->equalizer == NULL)
 		return;
 
 	saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
@@ -702,7 +716,7 @@ backend_init_equalizer_preset(struct con_win *cwin)
 						 NULL,
 						 &error);
 	if (saved_bands != NULL) {
-		backend_update_equalizer(cwin->cgst, saved_bands);
+		pragha_backend_update_equalizer(cwin->backend, saved_bands);
 		g_free(saved_bands);
 	}
 	else {
@@ -711,29 +725,44 @@ backend_init_equalizer_preset(struct con_win *cwin)
 	}
 }
 
-gint backend_init(struct con_win *cwin)
+static void
+pragha_backend_class_init (PraghaBackendClass *klass)
+{
+	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+	gobject_class->finalize = pragha_backend_finalize;
+}
+
+static void
+pragha_backend_init (PraghaBackend *backend)
+{
+	/* FIXME */
+}
+
+gint backend_init (struct con_win *cwin)
 {
 	GstBus *bus;
 	gchar *audiosink = NULL;
 	gboolean can_set_device = TRUE;
-	struct con_gst *cgst = g_slice_new0 (struct con_gst);
-	cwin->cgst = cgst;
+	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
+	backend->cwin = cwin;
+	cwin->backend = backend;
 
 	gst_init(NULL, NULL);
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	cgst->pipeline = gst_element_factory_make("playbin", "playbin");
+	backend->pipeline = gst_element_factory_make("playbin", "playbin");
 #else
-	cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
+	backend->pipeline = gst_element_factory_make("playbin2", "playbin");
 #endif
 
-	if (cgst->pipeline == NULL)
+	if (backend->pipeline == NULL)
 		return -1;
 
-	g_signal_connect (cgst->pipeline, "deep-notify::volume",
+	g_signal_connect (backend->pipeline, "deep-notify::volume",
 			  G_CALLBACK (volume_notify_cb), cwin);
-	g_signal_connect (cgst->pipeline, "notify::source",
-			  G_CALLBACK (backend_source_notify_cb), cwin);
+	g_signal_connect (backend->pipeline, "notify::source",
+			  G_CALLBACK (pragha_backend_source_notify_cb), cwin);
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
@@ -760,56 +789,56 @@ gint backend_init(struct con_win *cwin)
 		audiosink = g_strdup("autoaudiosink");
 	}
 
-	cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
+	backend->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
-	if (cgst->audio_sink != NULL) {
+	if (backend->audio_sink != NULL) {
 		/* Set the audio device to use. */
 		if (can_set_device && cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
-			g_object_set(cgst->audio_sink, "device", cwin->cpref->audio_device, NULL);
+			g_object_set(backend->audio_sink, "device", cwin->cpref->audio_device, NULL);
 
 		/* Test 10bands equalizer and test it. */
-		cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
-		if (cgst->equalizer != NULL) {
+		backend->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
+		if (backend->equalizer != NULL) {
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
 
 			bin = gst_bin_new("audiobin");
-			gst_bin_add_many (GST_BIN(bin), cgst->equalizer, cgst->audio_sink, NULL);
-			gst_element_link_many (cgst->equalizer, cgst->audio_sink, NULL);
+			gst_bin_add_many (GST_BIN(bin), backend->equalizer, backend->audio_sink, NULL);
+			gst_element_link_many (backend->equalizer, backend->audio_sink, NULL);
 
-			pad = gst_element_get_static_pad (cgst->equalizer, "sink");
+			pad = gst_element_get_static_pad (backend->equalizer, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
 			gst_pad_set_active (ghost_pad, TRUE);
 			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
 			gst_object_unref (pad);
 
-			g_object_set(cgst->pipeline, "audio-sink", bin, NULL);
+			g_object_set(backend->pipeline, "audio-sink", bin, NULL);
 		}
 		else {
 			g_warning("Failed to create the 10bands equalizer element. Not use it.");
 
-			g_object_set(cgst->pipeline, "audio-sink", cgst->audio_sink, NULL);
+			g_object_set(backend->pipeline, "audio-sink", backend->audio_sink, NULL);
 		}
 	}
 	else {
 		g_warning("Failed to create audio-sink element. Use default sink, without equalizer. ");
 
-		cgst->equalizer = NULL;
-		g_object_set(cgst->pipeline, "audio-sink", cgst->audio_sink, NULL);
+		backend->equalizer = NULL;
+		g_object_set(backend->pipeline, "audio-sink", backend->audio_sink, NULL);
 	}
 
-	bus = gst_pipeline_get_bus(GST_PIPELINE(cgst->pipeline));
+	bus = gst_pipeline_get_bus(GST_PIPELINE(backend->pipeline));
 
-	gst_bus_add_watch(bus, (GstBusFunc) backend_gstreamer_bus_call, cwin);
+	gst_bus_add_watch(bus, (GstBusFunc) pragha_backend_gstreamer_bus_call, cwin);
 
-	backend_set_soft_volume(cgst, cwin->cpref->software_mixer);
-	backend_init_equalizer_preset(cwin);
+	pragha_backend_set_soft_volume(backend, cwin->cpref->software_mixer);
+	pragha_backend_init_equalizer_preset(cwin);
 
-	gst_element_set_state(cgst->pipeline, GST_STATE_READY);
+	gst_element_set_state(backend->pipeline, GST_STATE_READY);
 
-	cgst->is_live = FALSE;
-	cgst->seek_enabled = FALSE;
-	cgst->emitted_error = FALSE;
+	backend->is_live = FALSE;
+	backend->seek_enabled = FALSE;
+	backend->emitted_error = FALSE;
 
 	gst_object_unref(bus);
 	g_free(audiosink);

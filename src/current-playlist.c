@@ -2054,7 +2054,7 @@ void play_first_current_playlist(struct con_win *cwin)
 	if (gtk_tree_model_get_iter_first(model, &iter)) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-		backend_start(mobj, cwin);
+		pragha_backend_start(cwin->backend, mobj);
 
 		clear_rand_track_refs(cwin);
 		path = gtk_tree_model_get_path(model, &iter);
@@ -2078,11 +2078,11 @@ void play_prev_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	backend_stop(NULL, cwin);
+	pragha_backend_stop(cwin->backend, NULL);
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path(path, cwin);
-	backend_start(mobj, cwin);
+	pragha_backend_start(cwin->backend, mobj);
 
 	update_current_state(path, PLAYLIST_PREV, cwin);
 	gtk_tree_path_free(path);
@@ -2101,7 +2101,7 @@ void play_next_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	backend_stop(NULL, cwin);
+	pragha_backend_stop(cwin->backend, NULL);
 
 	/* Get the next track to be played */
 	path = current_playlist_get_next(cwin);
@@ -2112,7 +2112,7 @@ void play_next_track(struct con_win *cwin)
 
 	/* Start playing new track */
 	mobj = current_playlist_mobj_at_path(path, cwin);
-	backend_start(mobj, cwin);
+	pragha_backend_start(cwin->backend, mobj);
 
 	update_current_state(path, PLAYLIST_NEXT, cwin);
 	gtk_tree_path_free(path);
@@ -2144,14 +2144,14 @@ void play_track(struct con_win *cwin)
 
 		if (path) {
 			mobj = new_musicobject_from_file(cwin->cstate->curr_mobj->file);
-			backend_start(mobj, cwin);
+			pragha_backend_start(cwin->backend, mobj);
 
 			update_current_state(path, PLAYLIST_CURR, cwin);
 			gtk_tree_path_free(path);
 		}
 		break;
 	case ST_PAUSED:
-		backend_resume(cwin);
+		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_STOPPED:
 		if(cwin->cstate->playlist_change)
@@ -2168,7 +2168,7 @@ void play_track(struct con_win *cwin)
 		}
 
 		mobj = current_playlist_mobj_at_path(path, cwin);
-		backend_start(mobj, cwin);
+		pragha_backend_start(cwin->backend, mobj);
 
 		clear_rand_track_refs(cwin);
 		current_playlist_clear_dirty_all(cwin);
@@ -2187,10 +2187,10 @@ void pause_resume_track(struct con_win *cwin)
 {
 	switch(cwin->cstate->state) {
 	case ST_PAUSED:
-		backend_resume(cwin);
+		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_PLAYING:
-		backend_pause(cwin);
+		pragha_backend_pause(cwin->backend);
 		break;
 	default:
 		break;
@@ -2227,7 +2227,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 		}
 	}
 
-	backend_start(mobj, cwin);
+	pragha_backend_start(cwin->backend, mobj);
 
 	update_current_state(path, PLAYLIST_CURR, cwin);
 }

@@ -26,7 +26,7 @@ static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	backend_free (cwin);
+	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
 	preferences_free (cwin->cpref);
@@ -141,7 +141,7 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if(backend_init(cwin) == -1) {
+	if (backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
 		return -1;
 	}

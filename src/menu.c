@@ -584,7 +584,7 @@ void play_pause_action(GtkAction *action, struct con_win *cwin)
 
 void stop_action(GtkAction *action, struct con_win *cwin)
 {
-	backend_stop(NULL, cwin);
+	pragha_backend_stop(cwin->backend, NULL);
 }
 
 /* Handler for the 'Next' item in the pragha menu */

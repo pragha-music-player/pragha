@@ -75,7 +75,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		cwin->cpref->software_mixer =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->soft_mixer_w));
-		backend_set_soft_volume(cwin->cgst, cwin->cpref->software_mixer);
+		pragha_backend_set_soft_volume(cwin->backend, cwin->cpref->software_mixer);
 
 		/* Library Preferences */
 
@@ -1172,7 +1172,7 @@ void save_preferences(struct con_win *cwin)
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
-				       backend_get_volume (cwin->cgst));
+				       pragha_backend_get_volume (cwin->backend));
 	}
 
 	/* Save audio CD Device */

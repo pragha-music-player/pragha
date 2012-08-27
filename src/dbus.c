@@ -25,7 +25,7 @@ static void dbus_play_handler(struct con_win *cwin)
 
 static void dbus_stop_handler(struct con_win *cwin)
 {
-	backend_stop(NULL, cwin);
+	pragha_backend_stop(cwin->backend, NULL);
 }
 
 static void dbus_pause_handler(struct con_win *cwin)
@@ -65,12 +65,12 @@ static void dbus_repeat_handler(struct con_win *cwin)
 
 static void dbus_inc_vol_handler(struct con_win *cwin)
 {
-	backend_set_delta_volume (cwin, +0.05);
+	pragha_backend_set_delta_volume (cwin->backend, +0.05);
 }
 
 static void dbus_dec_vol_handler(struct con_win *cwin)
 {
-	backend_set_delta_volume (cwin, -0.05);
+	pragha_backend_set_delta_volume (cwin->backend, -0.05);
 }
 
 static void dbus_show_osd_handler(struct con_win *cwin)

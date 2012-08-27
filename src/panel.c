@@ -213,7 +213,7 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 
 void update_current_song_info(struct con_win *cwin)
 {
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
+	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
 
 	__update_progress_song_info(cwin, newsec);
 }
@@ -273,7 +273,7 @@ void __update_track_progress_bar(struct con_win *cwin, gint length)
 	gdouble fraction = 0;
 
 	if(cwin->cstate->curr_mobj->tags->length == 0) {
-		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(backend_get_current_length(cwin->cgst));
+		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend));
 	}
 	else {
 		fraction = (gdouble)length / (gdouble)cwin->cstate->curr_mobj->tags->length;
@@ -330,7 +330,7 @@ void track_progress_change_cb(GtkWidget *widget,
 	fraction = (gdouble) event->x / allocation.width;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
 
-	backend_seek(cwin->cgst, seek);
+	pragha_backend_seek(cwin->backend, seek);
 
 	mpris_update_seeked(cwin, seek);
 }
@@ -552,10 +552,10 @@ void play_pause_resume(struct con_win *cwin)
 
 	switch (cwin->cstate->state) {
 	case ST_PLAYING:
-		backend_pause(cwin);
+		pragha_backend_pause(cwin->backend);
 		break;
 	case ST_PAUSED:
-		backend_resume(cwin);
+		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_STOPPED:
 		if(cwin->cstate->playlist_change)
@@ -580,7 +580,7 @@ void play_pause_resume(struct con_win *cwin)
 
 		mobj = current_playlist_mobj_at_path(path, cwin);
 
-		backend_start(mobj, cwin);
+		pragha_backend_start(cwin->backend, mobj);
 		update_current_state(path, PLAYLIST_CURR, cwin);
 
 		gtk_tree_path_free(path);
@@ -592,7 +592,7 @@ void play_pause_resume(struct con_win *cwin)
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	backend_stop(NULL, cwin);
+	pragha_backend_stop (cwin->backend, NULL);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
@@ -607,7 +607,7 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
-	backend_set_volume (value, cwin);
+	pragha_backend_set_volume (cwin->backend, value);
 }
 
 void update_panel_playback_state(struct con_win *cwin)

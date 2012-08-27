@@ -34,15 +34,15 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
 {
     struct con_win *cwin = gmk->cwin;
 
-    if (cwin->cgst->emitted_error)
+    if (cwin->backend->emitted_error)
         return;
 
     if (strcmp("Play", key) == 0)
         play_pause_resume(cwin);
     else if (strcmp("Pause", key) == 0)
-        backend_pause(cwin);
+        pragha_backend_pause(cwin->backend);
     else if (strcmp("Stop", key) == 0)
-        backend_stop(NULL, cwin);
+        pragha_backend_stop(cwin->backend, NULL);
     else if (strcmp("Previous", key) == 0)
         play_prev_track(cwin);
     else if (strcmp("Next", key) == 0)
