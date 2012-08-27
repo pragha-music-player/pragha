@@ -75,7 +75,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		cwin->cpref->software_mixer =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->soft_mixer_w));
-		backend_set_soft_volume(cwin);
+		backend_set_soft_volume(cwin->cgst, cwin->cpref->software_mixer);
 
 		/* Library Preferences */
 
