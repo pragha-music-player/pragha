@@ -166,52 +166,32 @@ pragha_backend_get_volume (PraghaBackend *backend)
 	return volume;
 }
 
-gboolean
-update_volume_notify_cb (struct con_win *cwin)
+static gboolean
+emit_volume_notify_cb (gpointer user_data)
 {
-	gdouble volume = pragha_backend_get_volume (cwin->backend);
+	PraghaBackend *backend = user_data;
 
-	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
-	 * we still get another one anyway. */
-
-	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), volume);
-	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
+	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_VOLUME]);
 
 	return FALSE;
 }
 
 static void
-volume_notify_cb (GObject *element, GstObject *prop_object, GParamSpec *pspec, struct con_win *cwin)
+volume_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
-	g_idle_add ((GSourceFunc) update_volume_notify_cb, cwin);
+	g_idle_add (emit_volume_notify_cb, user_data);
 }
 
 void
 pragha_backend_set_volume (PraghaBackend *backend, gdouble volume)
 {
-	struct con_win *cwin = backend->cwin;
-
 	volume = CLAMP (volume, 0.0, 1.0);
-
-	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), volume);
-	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, volume);
 #endif
 
-	/* ignore the deep-notify we get directly from the sink, as it causes deadlock.
-	 * we still get another one anyway. */
-
-	g_signal_handlers_block_by_func (backend->pipeline, volume_notify_cb, cwin);
 	g_object_set (backend->pipeline, "volume", volume, NULL);
-	g_signal_handlers_unblock_by_func (backend->pipeline, volume_notify_cb, cwin);
-
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
@@ -813,8 +793,9 @@ gint backend_init (struct con_win *cwin)
 	if (backend->pipeline == NULL)
 		return -1;
 
-	g_signal_connect (backend->pipeline, "deep-notify::volume",
-			  G_CALLBACK (volume_notify_cb), cwin);
+	//notify::volume is emitted from gstreamer worker thread
+	g_signal_connect (backend->pipeline, "notify::volume",
+			  G_CALLBACK (volume_notify_cb), backend);
 	g_signal_connect (backend->pipeline, "notify::source",
 			  G_CALLBACK (pragha_backend_source_notify_cb), cwin);
 

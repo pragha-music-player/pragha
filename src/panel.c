@@ -605,11 +605,6 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 	play_next_track(cwin);
 }
 
-void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
-{
-	pragha_backend_set_volume (cwin->backend, value);
-}
-
 void update_panel_playback_state(struct con_win *cwin)
 {
 	gboolean playing = (cwin->cstate->state != ST_STOPPED);

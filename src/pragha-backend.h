@@ -54,7 +54,6 @@ gint64 pragha_backend_get_current_length(PraghaBackend *backend);
 gint64 pragha_backend_get_current_position(PraghaBackend *backend);
 void pragha_backend_set_soft_volume(PraghaBackend *backend, gboolean value);
 gdouble pragha_backend_get_volume (PraghaBackend *backend);
-gboolean update_volume_notify_cb (struct con_win *cwin);
 void pragha_backend_set_volume (PraghaBackend *backend, gdouble volume);
 void pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta);
 gboolean pragha_backend_is_playing(PraghaBackend *backend);

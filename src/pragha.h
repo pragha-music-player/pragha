@@ -633,6 +633,7 @@ struct con_lastfm {
 
 struct con_mpris2 {
 	guint owner_id;
+	guint notify_volume_id;
 	GDBusNodeInfo *introspection_data;
 	GDBusConnection *dbus_connection;
 	GQuark interface_quarks[4];
@@ -811,7 +812,6 @@ void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
-void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin);
 void update_panel_playback_state(struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
 void resize_album_art_frame(struct con_win *cwin);
