@@ -55,29 +55,6 @@ static gboolean update_gui(gpointer data)
 	return TRUE;
 }
 
-gboolean update_track_progress_bar(gpointer data)
-{
-	struct con_win *cwin = data;
-
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
-
-	if(newsec > 0)
-		__update_track_progress_bar(cwin, newsec);
-
-	return FALSE;
-}
-
-gboolean update_current_song_info(gpointer data)
-{
-	struct con_win *cwin = data;
-
-	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
-
-	__update_progress_song_info(cwin, newsec);
-
-	return FALSE;
-}
-
 static void
 backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 {
@@ -196,7 +173,7 @@ update_volume_notify_cb (struct con_win *cwin)
 	return FALSE;
 }
 
-void
+static void
 volume_notify_cb (GObject *element, GstObject *prop_object, GParamSpec *pspec, struct con_win *cwin)
 {
 	g_idle_add ((GSourceFunc) update_volume_notify_cb, cwin);
@@ -731,7 +708,7 @@ backend_update_equalizer (struct con_gst *cgst, const gdouble *bands)
 			NULL);
 }
 
-void
+static void
 backend_init_equalizer_preset(struct con_win *cwin)
 {
 	gdouble *saved_bands;

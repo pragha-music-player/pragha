@@ -801,11 +801,10 @@ void rescan_library_handler(struct con_win *cwin);
 
 /* Panel actions */
 
-gboolean update_current_song_info(gpointer data);
+void update_current_song_info(struct con_win *cwin);
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
 void unset_current_song_info(struct con_win *cwin);
-gboolean update_track_progress_bar(gpointer data);
 void __update_track_progress_bar(struct con_win *cwin, gint length);
 void unset_track_progress_bar(struct con_win *cwin);
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
