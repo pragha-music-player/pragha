@@ -600,7 +600,7 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 
 void vol_button_handler(GtkScaleButton *button, gdouble value, struct con_win *cwin)
 {
-	cwin->cgst->curr_vol = value / 100;
+	cwin->cgst->curr_vol = value;
 	backend_update_volume(cwin);
 }
 

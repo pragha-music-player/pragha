@@ -1536,11 +1536,6 @@ create_toolbar(struct con_win *cwin)
 	GtkWidget *album_art_frame = NULL, *playing;
 	GtkToolItem *unfull_button, *shuffle_button, *repeat_button;
 	GtkWidget *vol_button;
-#if GTK_CHECK_VERSION (3, 0, 0)
-	GtkAdjustment *vol_adjust;
-#else
-	GtkObject *vol_adjust;
-#endif
 
 	toolbar = gtk_toolbar_new ();
 	gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
@@ -1649,9 +1644,6 @@ create_toolbar(struct con_win *cwin)
 	vol_button = gtk_volume_button_new();
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
-	vol_adjust = gtk_adjustment_new(100, 0, 100, 2, 5, 1);
-	gtk_scale_button_set_adjustment(GTK_SCALE_BUTTON(vol_button),
-					GTK_ADJUSTMENT(vol_adjust));
 	g_signal_connect(G_OBJECT(vol_button), "value-changed",
 			 G_CALLBACK(vol_button_handler), cwin);
 	g_signal_connect (G_OBJECT (vol_button), "key-press-event",
