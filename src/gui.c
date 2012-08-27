@@ -1644,8 +1644,7 @@ create_toolbar(struct con_win *cwin)
 	vol_button = gtk_volume_button_new();
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
-	g_signal_connect(G_OBJECT(vol_button), "value-changed",
-			 G_CALLBACK(vol_button_handler), cwin);
+	g_object_bind_property (cwin->backend, "volume", vol_button, "value", G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
 	g_signal_connect (G_OBJECT (vol_button), "key-press-event",
 			  G_CALLBACK(panel_button_key_press), cwin);
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), vol_button);

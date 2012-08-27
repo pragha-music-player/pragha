@@ -136,13 +136,13 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	if (mpris_init(cwin) == -1) {
-		g_critical("Unable to initialize MPRIS");
+	if (backend_init(cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
 		return -1;
 	}
 
-	if (backend_init(cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
+	if (mpris_init(cwin) == -1) {
+		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
 

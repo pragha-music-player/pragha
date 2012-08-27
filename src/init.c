@@ -68,8 +68,6 @@ GOptionEntry cmd_entries[] = {
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
-	update_volume_notify_cb(cwin);
-
 	init_tag_completion(cwin);
 
 	init_library_view(cwin);
@@ -86,8 +84,6 @@ static void init_gui_state(struct con_win *cwin)
 static gboolean _init_gui_state(gpointer data)
 {
 	struct con_win *cwin = data;
-
-	update_volume_notify_cb(cwin);
 
 	if (gtk_main_iteration_do(FALSE))
 		return TRUE;

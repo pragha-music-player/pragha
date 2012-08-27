@@ -1181,6 +1181,13 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 		g_variant_builder_end(&b), NULL);
 }
 
+static void
+volume_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	mpris_update_any (cwin);
+}
+
 gint mpris_init(struct con_win *cwin)
 {
 	if (!cwin->cpref->use_mpris2)
@@ -1205,6 +1212,12 @@ gint mpris_init(struct con_win *cwin)
 				on_name_lost,
 				cwin,
 				NULL);
+
+	//FIXME disconnect in mpris_close
+	if (!cwin->cmpris2->notify_volume_id)
+		cwin->cmpris2->notify_volume_id = g_signal_connect (cwin->backend, "notify::volume",
+                                                                    G_CALLBACK (volume_notify_cb), cwin);
+
 	return (cwin->cmpris2->owner_id) ? 0 : -1;
 }
 
