@@ -1148,7 +1148,7 @@ void preferences_free(struct con_pref *cpref);
 void backend_seek (struct con_gst *cgst, guint64 seek);
 gint64 backend_get_current_length(struct con_gst *cgst);
 gint64 backend_get_current_position(struct con_gst *cgst);
-void backend_set_soft_volume(struct con_win *cwin);
+void backend_set_soft_volume(struct con_gst *cgst, gboolean value);
 gdouble backend_get_volume (struct con_gst *cgst);
 gboolean update_volume_notify_cb (struct con_win *cwin);
 void backend_set_volume (gdouble volume, struct con_win *cwin);

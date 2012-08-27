@@ -128,18 +128,18 @@ backend_seek (struct con_gst *cgst, guint64 seek)
 }
 
 void
-backend_set_soft_volume(struct con_win *cwin)
+backend_set_soft_volume (struct con_gst *cgst, gboolean value)
 {
 	GstPlayFlags flags;
 
-	g_object_get (G_OBJECT(cwin->cgst->pipeline), "flags", &flags, NULL);
+	g_object_get (cgst->pipeline, "flags", &flags, NULL);
 
-	if (cwin->cpref->software_mixer)
+	if (value)
 		flags |= GST_PLAY_FLAG_SOFT_VOLUME;
 	else
 		flags &= ~GST_PLAY_FLAG_SOFT_VOLUME;
 
-	g_object_set (G_OBJECT(cwin->cgst->pipeline), "flags", flags, NULL);
+	g_object_set (cgst->pipeline, "flags", flags, NULL);
 }
 
 gdouble
@@ -334,7 +334,7 @@ backend_resume(struct con_win *cwin)
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
-void
+static void
 backend_advance_playback (GError *error, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
@@ -737,21 +737,23 @@ gint backend_init(struct con_win *cwin)
 	GstBus *bus;
 	gchar *audiosink = NULL;
 	gboolean can_set_device = TRUE;
+	struct con_gst *cgst = g_slice_new0 (struct con_gst);
+	cwin->cgst = cgst;
 
 	gst_init(NULL, NULL);
 
 #if GST_CHECK_VERSION (1, 0, 0)
-	cwin->cgst->pipeline = gst_element_factory_make("playbin", "playbin");
+	cgst->pipeline = gst_element_factory_make("playbin", "playbin");
 #else
-	cwin->cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
+	cgst->pipeline = gst_element_factory_make("playbin2", "playbin");
 #endif
 
-	if (cwin->cgst->pipeline == NULL)
+	if (cgst->pipeline == NULL)
 		return -1;
 
-	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "deep-notify::volume",
+	g_signal_connect (cgst->pipeline, "deep-notify::volume",
 			  G_CALLBACK (volume_notify_cb), cwin);
-	g_signal_connect (G_OBJECT (cwin->cgst->pipeline), "notify::source",
+	g_signal_connect (cgst->pipeline, "notify::source",
 			  G_CALLBACK (backend_source_notify_cb), cwin);
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
@@ -779,56 +781,56 @@ gint backend_init(struct con_win *cwin)
 		audiosink = g_strdup("autoaudiosink");
 	}
 
-	cwin->cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
+	cgst->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
-	if (cwin->cgst->audio_sink != NULL) {
+	if (cgst->audio_sink != NULL) {
 		/* Set the audio device to use. */
 		if (can_set_device && cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
-			g_object_set(G_OBJECT(cwin->cgst->audio_sink), "device", cwin->cpref->audio_device, NULL);
+			g_object_set(cgst->audio_sink, "device", cwin->cpref->audio_device, NULL);
 
 		/* Test 10bands equalizer and test it. */
-		cwin->cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
-		if (cwin->cgst->equalizer != NULL) {
+		cgst->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
+		if (cgst->equalizer != NULL) {
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
 
 			bin = gst_bin_new("audiobin");
-			gst_bin_add_many (GST_BIN(bin), cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
-			gst_element_link_many (cwin->cgst->equalizer, cwin->cgst->audio_sink, NULL);
+			gst_bin_add_many (GST_BIN(bin), cgst->equalizer, cgst->audio_sink, NULL);
+			gst_element_link_many (cgst->equalizer, cgst->audio_sink, NULL);
 
-			pad = gst_element_get_static_pad (cwin->cgst->equalizer, "sink");
+			pad = gst_element_get_static_pad (cgst->equalizer, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
 			gst_pad_set_active (ghost_pad, TRUE);
 			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
 			gst_object_unref (pad);
 
-			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", bin, NULL);
+			g_object_set(cgst->pipeline, "audio-sink", bin, NULL);
 		}
 		else {
 			g_warning("Failed to create the 10bands equalizer element. Not use it.");
 
-			g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
+			g_object_set(cgst->pipeline, "audio-sink", cgst->audio_sink, NULL);
 		}
 	}
 	else {
 		g_warning("Failed to create audio-sink element. Use default sink, without equalizer. ");
 
-		cwin->cgst->equalizer = NULL;
-		g_object_set(G_OBJECT(cwin->cgst->pipeline), "audio-sink", cwin->cgst->audio_sink, NULL);
+		cgst->equalizer = NULL;
+		g_object_set(cgst->pipeline, "audio-sink", cgst->audio_sink, NULL);
 	}
 
-	bus = gst_pipeline_get_bus(GST_PIPELINE(cwin->cgst->pipeline));
+	bus = gst_pipeline_get_bus(GST_PIPELINE(cgst->pipeline));
 
 	gst_bus_add_watch(bus, (GstBusFunc) backend_gstreamer_bus_call, cwin);
 
-	backend_set_soft_volume(cwin);
+	backend_set_soft_volume(cgst, cwin->cpref->software_mixer);
 	backend_init_equalizer_preset(cwin);
 
-	gst_element_set_state(cwin->cgst->pipeline, GST_STATE_READY);
+	gst_element_set_state(cgst->pipeline, GST_STATE_READY);
 
-	cwin->cgst->is_live = FALSE;
-	cwin->cgst->seek_enabled = FALSE;
-	cwin->cgst->emitted_error = FALSE;
+	cgst->is_live = FALSE;
+	cgst->seek_enabled = FALSE;
+	cgst->emitted_error = FALSE;
 
 	gst_object_unref(bus);
 	g_free(audiosink);
