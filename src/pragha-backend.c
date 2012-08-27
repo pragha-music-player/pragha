@@ -41,6 +41,14 @@ typedef enum {
   GST_PLAY_FLAG_DEINTERLACE   = (1 << 9)
 } GstPlayFlags;
 
+enum {
+	PROP_0,
+	PROP_VOLUME,
+	PROP_LAST
+};
+
+static GParamSpec *properties[PROP_LAST];
+
 G_DEFINE_TYPE (PraghaBackend, pragha_backend, G_TYPE_OBJECT);
 
 static gboolean update_gui(gpointer data)
@@ -726,11 +734,57 @@ pragha_backend_init_equalizer_preset (struct con_win *cwin)
 }
 
 static void
+pragha_backend_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
+	PraghaBackend *backend = PRAGHA_BACKEND (object);
+
+	switch (property_id)
+	{
+		case PROP_VOLUME:
+			pragha_backend_set_volume (backend, g_value_get_double (value));
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+    }
+}
+
+static void
+pragha_backend_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
+	PraghaBackend *backend = PRAGHA_BACKEND (object);
+
+	switch (property_id)
+	{
+		case PROP_VOLUME:
+			g_value_set_double (value, pragha_backend_get_volume (backend));
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
 pragha_backend_class_init (PraghaBackendClass *klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
+	gobject_class->set_property = pragha_backend_set_property;
+	gobject_class->get_property = pragha_backend_get_property;
 	gobject_class->finalize = pragha_backend_finalize;
+
+	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Playback volume.",
+                                                       0.0, 1.0, 0.5,
+                                                       G_PARAM_READABLE |
+                                                       G_PARAM_WRITABLE |
+                                                       G_PARAM_STATIC_NAME |
+                                                       G_PARAM_STATIC_NICK |
+                                                       G_PARAM_STATIC_BLURB);
+
+	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 }
 
 static void
