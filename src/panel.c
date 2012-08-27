@@ -211,6 +211,13 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 	g_free(str_length);
 }
 
+void update_current_song_info(struct con_win *cwin)
+{
+	gint newsec = GST_TIME_AS_SECONDS(backend_get_current_position(cwin->cgst));
+
+	__update_progress_song_info(cwin, newsec);
+}
+
 void __update_current_song_info(struct con_win *cwin)
 {
 	gchar *str = NULL, *str_title = NULL;
