@@ -22,7 +22,7 @@ static void keybind_prev_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_prev_track(cwin);
 }
 
@@ -30,7 +30,7 @@ static void keybind_play_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_pause_resume(cwin);
 }
 
@@ -38,15 +38,15 @@ static void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_stop(NULL, cwin);
+	if(cwin->backend->emitted_error == FALSE)
+		pragha_backend_stop(cwin->backend, NULL);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_next_track(cwin);
 }
 

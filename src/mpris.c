@@ -196,7 +196,7 @@ static GVariant* mpris_Root_get_SupportedMimeTypes (GError **error, struct con_w
 /* org.mpris.MediaPlayer2.Player */
 static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -204,7 +204,7 @@ static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_next_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -212,7 +212,7 @@ static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_prev_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -220,15 +220,15 @@ static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* 
 
 static void mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_pause(cwin);
+	if(cwin->backend->emitted_error == FALSE)
+		pragha_backend_pause(cwin->backend);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
+	if(cwin->backend->emitted_error == FALSE)
 		play_pause_resume(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -236,8 +236,8 @@ static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant*
 
 static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_stop(NULL, cwin);
+	if(cwin->backend->emitted_error == FALSE)
+		pragha_backend_stop(cwin->backend, NULL);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
@@ -259,7 +259,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	if (seek >= cwin->cstate->curr_mobj->tags->length)
 		seek = cwin->cstate->curr_mobj->tags->length;
 
-	backend_seek(cwin->cgst, seek);
+	pragha_backend_seek(cwin->backend, seek);
 	mpris_update_seeked(cwin, seek);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -278,7 +278,7 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 		if (seek >= cwin->cstate->curr_mobj->tags->length)
 			seek = cwin->cstate->curr_mobj->tags->length;
 
-		backend_seek(cwin->cgst, seek);
+		pragha_backend_seek(cwin->backend, seek);
 		mpris_update_seeked(cwin, seek);
 	}
 	g_free(path);
@@ -462,13 +462,13 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 
 static GVariant* mpris_Player_get_Volume (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_double(backend_get_volume (cwin->cgst));
+	return g_variant_new_double(pragha_backend_get_volume (cwin->backend));
 }
 
 static void mpris_Player_put_Volume (GVariant *value, GError **error, struct con_win *cwin)
 {
 	gdouble volume = g_variant_get_double(value);
-	backend_set_volume(volume, cwin);
+	pragha_backend_set_volume(cwin->backend, volume);
 }
 
 static GVariant* mpris_Player_get_Position (GError **error, struct con_win *cwin)
@@ -476,7 +476,7 @@ static GVariant* mpris_Player_get_Position (GError **error, struct con_win *cwin
 	if (cwin->cstate->state == ST_STOPPED)
 		return g_variant_new_int64(0);
 	else
-		return g_variant_new_int64(backend_get_current_position(cwin->cgst) / 1000);
+		return g_variant_new_int64(pragha_backend_get_current_position(cwin->backend) / 1000);
 }
 
 static GVariant* mpris_Player_get_MinimumRate (GError **error, struct con_win *cwin)
@@ -513,7 +513,7 @@ static GVariant* mpris_Player_get_CanPause (GError **error, struct con_win *cwin
 
 static GVariant* mpris_Player_get_CanSeek (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(cwin->cgst->seek_enabled);
+	return g_variant_new_boolean(cwin->backend->seek_enabled);
 }
 
 static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cwin)
@@ -553,7 +553,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 		add_playlist_current_playlist(NULL, found_playlist, cwin);
 		gdk_threads_leave();
 
-		backend_stop(NULL, cwin);
+		pragha_backend_stop(cwin->backend, NULL);
 		play_first_current_playlist (cwin);
 
 		g_free(found_playlist);
@@ -982,7 +982,7 @@ void mpris_update_any(struct con_win *cwin)
 	gboolean change_detected = FALSE;
 	GVariantBuilder b;
 	gchar *newtitle = NULL;
-	gdouble curr_vol = backend_get_volume (cwin->cgst);
+	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
 
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
