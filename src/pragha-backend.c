@@ -188,7 +188,7 @@ update_volume_notify_cb (struct con_win *cwin)
 	 * we still get another one anyway. */
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), cwin->cgst->curr_vol);
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
@@ -219,7 +219,7 @@ backend_set_volume(gdouble volume, struct con_win *cwin)
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * volume);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), volume);
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 
 	cwin->cgst->curr_vol = volume;
@@ -248,7 +248,7 @@ backend_update_volume(struct con_win *cwin)
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->cgst->pipeline), volume_notify_cb, cwin);
 
 	g_signal_handlers_block_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), 100 * cwin->cgst->curr_vol);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(cwin->vol_button), cwin->cgst->curr_vol);
 	g_signal_handlers_unblock_by_func (G_OBJECT(cwin->vol_button), vol_button_handler, cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
