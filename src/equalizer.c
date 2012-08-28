@@ -193,6 +193,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *mhbox, *hbox, *dbvbox, *label, *eq_combobox;
 	GtkWidget *vscales[NUM_BANDS];
 	gint i, result;
+	GstElement *equalizer = pragha_backend_get_equalizer (cwin->backend);
 
 	/* Create vertical scales to equalizer */
 	for (i = 0; i < NUM_BANDS; i++) {
@@ -204,7 +205,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 				 G_CALLBACK(eq_band_get_tooltip),
 				 NULL);
 
-		band_bind_to_backend(GTK_RANGE(vscales[i]), cwin->backend->equalizer, i);
+		band_bind_to_backend(GTK_RANGE(vscales[i]), equalizer, i);
 	}
 
 	mhbox = gtk_hbox_new(FALSE, 0);
@@ -326,7 +327,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), mhbox, TRUE, TRUE, 0);
 
-	if(cwin->backend->equalizer == NULL) {
+	if (equalizer == NULL) {
 		gtk_widget_set_sensitive(GTK_WIDGET(hbox), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(eq_combobox), FALSE);
 	}

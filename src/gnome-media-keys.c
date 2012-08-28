@@ -34,7 +34,7 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
 {
     struct con_win *cwin = gmk->cwin;
 
-    if (cwin->backend->emitted_error)
+    if (pragha_backend_emitted_error (cwin->backend))
         return;
 
     if (strcmp("Play", key) == 0)

@@ -196,7 +196,7 @@ static GVariant* mpris_Root_get_SupportedMimeTypes (GError **error, struct con_w
 /* org.mpris.MediaPlayer2.Player */
 static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -204,7 +204,7 @@ static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_next_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -212,7 +212,7 @@ static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_prev_track(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -220,7 +220,7 @@ static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* 
 
 static void mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_backend_pause(cwin->backend);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -228,7 +228,7 @@ static void mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* par
 
 static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_pause_resume(cwin);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -236,7 +236,7 @@ static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant*
 
 static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_backend_stop(cwin->backend, NULL);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -513,7 +513,7 @@ static GVariant* mpris_Player_get_CanPause (GError **error, struct con_win *cwin
 
 static GVariant* mpris_Player_get_CanSeek (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(cwin->backend->seek_enabled);
+	return g_variant_new_boolean (pragha_backend_can_seek (cwin->backend));
 }
 
 static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cwin)
