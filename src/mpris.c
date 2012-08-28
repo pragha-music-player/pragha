@@ -422,7 +422,7 @@ static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
 		g_variant_new_int32(mobj->tags->track_no));
 	handle_strings_request(b, "xesam:comment", mobj->tags->comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
-		g_variant_new_int64((gint64)(mobj->tags->length * 1000000)));
+		g_variant_new_int64((gint64)mobj->tags->length * 1000000));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
 		g_variant_new_int32(mobj->tags->bitrate));
 	g_variant_builder_add (b, "{sv}", "audio-channels",
