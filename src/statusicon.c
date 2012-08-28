@@ -138,28 +138,28 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 static void
 systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_pause_resume(cwin);
 }
 
 static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_backend_stop (cwin->backend, NULL);
 }
 
 static void
 systray_prev_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_prev_track(cwin);
 }
 
 static void
 systray_next_action (GtkAction *action, struct con_win *cwin)
 {
-	if(cwin->backend->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_next_track(cwin);
 }
 

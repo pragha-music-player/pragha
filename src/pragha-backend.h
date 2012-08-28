@@ -32,23 +32,19 @@ struct musicobject;
 #define PRAGHA_IS_BACKEND_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_BACKEND))
 #define PRAGHA_BACKEND_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_BACKEND, PraghaBackendClass))
 
+struct PraghaBackendPrivate;
+typedef struct PraghaBackendPrivate PraghaBackendPrivate;
+
 typedef struct {
 	GObject parent;
-
-	struct con_win *cwin;
-	GstElement *pipeline;
-	GstElement *audio_sink;
-	GstElement *equalizer;
-	int timer;
-	gboolean is_live;
-	gboolean seek_enabled;
-	gboolean emitted_error;
+	PraghaBackendPrivate *priv;
 } PraghaBackend;
 
 typedef struct {
 	GObjectClass parent_class;
 } PraghaBackendClass;
 
+gboolean pragha_backend_can_seek (PraghaBackend *backend);
 void pragha_backend_seek (PraghaBackend *backend, guint64 seek);
 gint64 pragha_backend_get_current_length(PraghaBackend *backend);
 gint64 pragha_backend_get_current_position(PraghaBackend *backend);
@@ -58,11 +54,13 @@ void pragha_backend_set_volume (PraghaBackend *backend, gdouble volume);
 void pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta);
 gboolean pragha_backend_is_playing(PraghaBackend *backend);
 gboolean pragha_backend_is_paused(PraghaBackend *backend);
+gboolean pragha_backend_emitted_error (PraghaBackend *backend);
 void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
 void pragha_backend_stop (PraghaBackend *backend, GError *error);
 void pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj);
+GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
 gint backend_init(struct con_win *cwin);
 
