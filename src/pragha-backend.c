@@ -46,7 +46,7 @@ struct PraghaBackendPrivate {
 	GstElement *pipeline;
 	GstElement *audio_sink;
 	GstElement *equalizer;
-	int timer;
+	guint timer;
 	gboolean is_live;
 	gboolean can_seek;
 	gboolean emitted_error;
@@ -60,20 +60,23 @@ enum {
 	PROP_LAST
 };
 
-static GParamSpec *properties[PROP_LAST];
+static GParamSpec *properties[PROP_LAST] = { 0 };
+
+enum {
+	SIGNAL_TICK,
+	LAST_SIGNAL
+};
+
+static int signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE (PraghaBackend, pragha_backend, G_TYPE_OBJECT);
 
-static gboolean update_gui(gpointer data)
+static gboolean
+emit_tick_cb (gpointer user_data)
 {
-	struct con_win *cwin = data;
+	PraghaBackend *backend = user_data;
 
-	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
-
-	if(newsec > 0) {
-		__update_track_progress_bar(cwin, newsec);
-		__update_progress_song_info(cwin, newsec);
-	}
+	g_signal_emit (backend, signals[SIGNAL_TICK], 0);
 
 	return TRUE;
 }
@@ -635,7 +638,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 				gst_query_unref (query);
 
 				if (priv->timer == 0)
-					priv->timer = gdk_threads_add_timeout_seconds (1, update_gui, cwin);
+					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
 
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
@@ -784,7 +787,7 @@ pragha_backend_set_property (GObject *object, guint property_id, const GValue *v
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 			break;
-    }
+	}
 }
 
 static void
@@ -822,6 +825,12 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                        G_PARAM_STATIC_BLURB);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
+
+	signals[SIGNAL_TICK] = g_signal_new ("tick",
+                                             G_TYPE_FROM_CLASS (gobject_class),
+                                             G_SIGNAL_RUN_LAST,
+                                             G_STRUCT_OFFSET (PraghaBackendClass, tick),
+                                             NULL, NULL, NULL, G_TYPE_NONE, 0);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
