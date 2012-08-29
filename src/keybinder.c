@@ -22,7 +22,7 @@ static void keybind_prev_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_prev_track(cwin);
 }
 
@@ -30,7 +30,7 @@ static void keybind_play_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_pause_resume(cwin);
 }
 
@@ -38,15 +38,15 @@ static void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
-		backend_stop(NULL, cwin);
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+		pragha_backend_stop(cwin->backend, NULL);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if(cwin->cgst->emitted_error == FALSE)
+	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		play_next_track(cwin);
 }
 
@@ -70,7 +70,7 @@ gint init_keybinder(struct con_win *cwin)
 	return 0;
 }
 
-void cleanup_keybinder(struct con_win *cwin)
+void keybinder_free()
 {
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);

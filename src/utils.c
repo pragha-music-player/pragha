@@ -77,6 +77,48 @@ const gchar *mime_dual[] = {"audio/x-real-audio",
 				    NULL};
 #endif
 
+/* Function to save debug on file. */
+
+void
+pragha_log_to_file (const gchar* log_domain,
+		    GLogLevelFlags log_level,
+		    const gchar* message,
+		    gpointer user_data)
+{
+	FILE* logfile = fopen ((const char*)user_data, "a");
+	gchar* level_name = "";
+
+	switch (log_level)
+	{
+	/* skip irrelevant flags */
+	case G_LOG_LEVEL_MASK:
+	case G_LOG_FLAG_FATAL:
+	case G_LOG_FLAG_RECURSION:
+	case G_LOG_LEVEL_ERROR:
+		level_name = "ERROR";
+		break;
+	case G_LOG_LEVEL_CRITICAL:
+		level_name = "CRITICAL";
+		break;
+	case G_LOG_LEVEL_WARNING:
+		level_name = "WARNING";
+		break;
+	case G_LOG_LEVEL_MESSAGE:
+		level_name = "MESSAGE";
+		break;
+	case G_LOG_LEVEL_INFO:
+		level_name = "INFO";
+		break;
+	case G_LOG_LEVEL_DEBUG:
+		level_name = "DEBUG";
+		break;
+	}
+
+	fprintf (logfile, "%s %s: %s\n",
+	log_domain ? log_domain : "Pragha", level_name, message);
+	fclose (logfile);
+}
+
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
 @param str the string to be duplicated
@@ -184,13 +226,13 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 
 		if (needle_len > 3 && lv_distance != 0) {
 			if(levenshtein_safe_strcmp(needle_buf, needle) <= lv_distance) {
-				rv = (gchar*)haystack;
+				rv = haystack;
 				break;
 			}
 		}
 		else {
 			if(g_ascii_strcasecmp(needle_buf, needle) == 0) {
-				rv = (gchar*)haystack;
+				rv = haystack;
 				break;
 			}
 		}
@@ -203,6 +245,7 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	return rv;
 }
 
+#if !GLIB_CHECK_VERSION(2,32,0)
 /* Functions to check the network manager status. */
 
 static NMState
@@ -253,6 +296,7 @@ nm_is_online ()
 
 	return FALSE;
 }
+#endif
 
 /* Test if the song is already in the playlist.*/
 
@@ -282,21 +326,25 @@ already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 gint
-append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *cwin)
+append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin)
 {
 	gchar *query = NULL;
 	struct db_result result;
 	struct musicobject *mobj = NULL;
 	gint location_id = 0, i;
+	gchar *sartist, *stitle;
+
+	sartist = sanitize_string_sqlite3(artist);
+	stitle = sanitize_string_sqlite3(title);
 
 	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
 				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = \"%s\" COLLATE NOCASE "
-				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
-				title, artist);
+				"AND TRACK.title = '%s' COLLATE NOCASE "
+				"AND ARTIST.name = '%s' COLLATE NOCASE;",
+				stitle, sartist);
 
-	if(exec_sqlite_query(query, cwin, &result)) {
+	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 
@@ -313,6 +361,9 @@ append_track_with_artist_and_title(gchar *artist, gchar *title, struct con_win *
 		}
 		sqlite3_free_table(result.resultp);
 	}
+	g_free(sartist);
+	g_free(stitle);
+
 	return location_id;
 }
 
@@ -347,24 +398,34 @@ get_selected_musicobject(struct con_win *cwin)
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
+set_watch_cursor (GtkWidget *window)
+{
+	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
+	gdk_window_set_cursor (gtk_widget_get_window (window), cursor);
+	gdk_cursor_unref (cursor);
+}
+
+void
 set_watch_cursor_on_thread(struct con_win *cwin)
 {
-	GdkCursor *cursor;
-
 	gdk_threads_enter ();
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 	gdk_threads_leave ();
 }
 
 void
-remove_watch_cursor_on_thread(gchar *message, struct con_win *cwin)
+remove_watch_cursor (GtkWidget *window)
+{
+	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
+}
+
+void
+remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
 {
 	gdk_threads_enter ();
 	if(message != NULL)
 		set_status_message(message, cwin);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 	gdk_threads_leave ();
 }
 
@@ -379,30 +440,16 @@ gboolean restore_status_bar(gpointer data)
 	return FALSE;
 }
 
-void set_status_message (gchar *message, struct con_win *cwin)
+void set_status_message (const gchar *message, struct con_win *cwin)
 {
 	g_timeout_add_seconds(5, restore_status_bar, cwin);
 
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
 }
 
-/* Set bold atribute to label. */
-
-void gtk_label_set_attribute_bold(GtkLabel *label)
-{
-	PangoAttrList *Bold = pango_attr_list_new();
-	PangoAttribute *Attribute = NULL;
-	Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-	pango_attr_list_insert(Bold, Attribute);
-
-	gtk_label_set_attributes(label, Bold);
-
-	pango_attr_list_unref(Bold);
-}
-
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
-GdkPixbuf *vgdk_pixbuf_new_from_memory(char *data, size_t size)
+GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
 {
 	GInputStream *buffer_stream=NULL;
 	GdkPixbuf *buffer_pix=NULL;
@@ -429,7 +476,7 @@ gboolean is_playable_file(const gchar *file)
 		return FALSE;
 
 	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
-	    (get_file_type((gchar*)file) != -1))
+	    (get_file_type(file) != -1))
 		return TRUE;
 	else
 		return FALSE;
@@ -437,7 +484,7 @@ gboolean is_playable_file(const gchar *file)
 
 /* Accepts only absolute path */
 
-gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin)
+gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin)
 {
 	gint ret;
 
@@ -452,7 +499,7 @@ gboolean is_dir_and_accessible(gchar *dir, struct con_win *cwin)
 	return ret;
 }
 
-gint dir_file_count(gchar *dir_name, gint call_recur)
+gint dir_file_count(const gchar *dir_name, gint call_recur)
 {
 	static gint file_count = 0;
 	GDir *dir;
@@ -487,9 +534,9 @@ gint dir_file_count(gchar *dir_name, gint call_recur)
 	return file_count;
 }
 
-static gint no_single_quote(gchar *str)
+static gint no_single_quote(const gchar *str)
 {
-	gchar *tmp = str;
+	const gchar *tmp = str;
 	gint i = 0;
 
 	if (!str)
@@ -506,11 +553,11 @@ static gint no_single_quote(gchar *str)
 
 /* Replace ' by '' */
 
-gchar* sanitize_string_sqlite3(gchar *str)
+gchar* sanitize_string_sqlite3(const gchar *str)
 {
 	gint cn, i=0;
 	gchar *ch;
-	gchar *tmp;
+	const gchar *tmp;
 
 	if (!str)
 		return NULL;
@@ -531,7 +578,7 @@ gchar* sanitize_string_sqlite3(gchar *str)
 	return ch;
 }
 
-static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
+static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
 {
 	gint i=0;
 
@@ -548,7 +595,7 @@ static gboolean is_valid_mime(gchar *mime, const gchar **mlist)
 /* NB: Disregarding 'uncertain' flag for now. */
 
 enum file_type
-get_file_type(gchar *file)
+get_file_type(const gchar *file)
 {
 	gint ret = -1;
 	gchar *result = NULL;
@@ -756,22 +803,12 @@ gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 
 void free_str_list(GSList *list)
 {
-	gint cnt = 0, i;
-	GSList *l = list;
-
-	cnt = g_slist_length(list);
-
-	for (i=0; i<cnt; i++) {
-		g_free(l->data);
-		l = l->next;
-	}
-
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 }
 
 /* Compare two UTF-8 strings */
 
-gint compare_utf8_str(gchar *str1, gchar *str2)
+gint compare_utf8_str(const gchar *str1, const gchar *str2)
 {
 	gchar *key1, *key2;
 	gint ret = 0;
@@ -851,9 +888,9 @@ void open_url(struct con_win *cwin, const gchar *url)
 	/* No method was found to open the URL */
 	if (!success) {
 		GtkWidget *d;
-		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow), 
+		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, 
+					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 					"%s", _("Unable to open the browser"));
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (d),
 							 "%s", "No methods supported");

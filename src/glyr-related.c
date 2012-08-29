@@ -154,12 +154,16 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 	}
 
-	glyr_opt_lookup_db(&glyr_info->query, cwin->cdbase->cache_db);
+	glyr_opt_lookup_db(&glyr_info->query, cwin->cache_db);
 	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
 
 	glyr_info->cwin = cwin;
 
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Glyr get text", get_related_text_info_idle_func, glyr_info);
+	#else
 	g_thread_create(get_related_text_info_idle_func, glyr_info, FALSE, NULL);
+	#endif
 }
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
@@ -350,14 +354,18 @@ void related_get_album_art_handler (struct con_win *cwin)
 	glyr_query_init(&glyr_info->query);
 
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
-	glyr_opt_from(&glyr_info->query, "lastfm");
+	glyr_opt_from(&glyr_info->query, "lastfm;musicbrainz");
 
 	glyr_opt_artist(&glyr_info->query, artist);
 	glyr_opt_album(&glyr_info->query, album);
 
 	glyr_info->cwin = cwin;
 
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Glyr get album", get_album_art_idle_func, glyr_info);
+	#else
 	g_thread_create(get_album_art_idle_func, glyr_info, FALSE, NULL);
+	#endif
 
 exists:
 	g_free(album_art_path);
@@ -367,19 +375,17 @@ exists:
 	return;
 }
 
-int uninit_glyr_related (struct con_win *cwin)
+void glyr_related_free (struct con_win *cwin)
 {
-	glyr_db_destroy(cwin->cdbase->cache_db);
+	glyr_db_destroy(cwin->cache_db);
 	glyr_cleanup ();
-
-	return 0;
 }
 
 int init_glyr_related (struct con_win *cwin)
 {
 	glyr_init();
 
-	cwin->cdbase->cache_db = glyr_db_init(cwin->cpref->cache_folder);
+	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
 
 	return 0;
 }

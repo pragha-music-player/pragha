@@ -18,7 +18,7 @@
 
 #include "pragha.h"
 
-struct musicobject* new_musicobject_from_file(gchar *file)
+struct musicobject* new_musicobject_from_file(const gchar *file)
 {
 	enum file_type type;
 	struct musicobject *mobj;
@@ -31,9 +31,6 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
-
-	init_tag_struct(mobj->tags);
-
 	mobj->file = g_strdup(file);
 
 	switch(type) {
@@ -68,6 +65,7 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 			g_critical("OGG Info failed");
 			goto bad;
 		}
+		break;
 	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 	case FILE_ASF:
 		if (get_asf_info(file, mobj->tags))
@@ -76,6 +74,7 @@ struct musicobject* new_musicobject_from_file(gchar *file)
 			g_critical("ASF Info failed");
 			goto bad;
 		}
+		break;
 	#endif
 	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	case FILE_MP4:
@@ -143,7 +142,7 @@ AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = \"%d\";", location_id, location_id);
-	if (!exec_sqlite_query(query, cwin, &result)) {
+	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
 		g_critical("Track with location id : %d not found in DB",
 			   location_id);
 		return NULL;
@@ -190,8 +189,6 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	init_tag_struct(mobj->tags);
-
 	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
@@ -230,7 +227,7 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 	return mobj;
 }
 
-struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin)
+struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	struct musicobject *mobj;
 
@@ -239,20 +236,29 @@ struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name,
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	init_tag_struct(mobj->tags);
-
 	mobj->tags->title = g_strdup(name);
+
+	mobj->tags->artist = g_strdup("");
+	mobj->tags->album = g_strdup("");
+	mobj->tags->genre = g_strdup("");
+	mobj->tags->comment = g_strdup("");
+
+	mobj->tags->track_no = 0;
+	mobj->tags->year = 0;
+	mobj->tags->bitrate = 0;
+	mobj->tags->length = 0;
+	mobj->tags->channels = 0;
+	mobj->tags->samplerate = 0;
 
 #ifdef HAVE_PLPARSER
 	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
 	if(list) {
 		mobj->file = g_strdup(list->data);
-		g_slist_foreach (list, (GFunc)g_free, NULL);
+		g_slist_free_full(list, g_free);
 	}
 	else {
 		mobj->file = g_strdup(uri);
 	}
-	g_slist_free(list);
 #else
 	mobj->file = g_strdup(uri);
 #endif
@@ -299,11 +305,16 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 
 void init_tag_struct(struct tags *mtags)
 {
-	mtags->title = NULL;
-	mtags->artist = NULL;
-	mtags->album = NULL;
-	mtags->genre = NULL;
-	mtags->comment = NULL;
+	/* FIXME: Find that is what prohibits use NULL.
+	 * For Sqlite all nulls are different, so it is impossible to sort them
+	 * correctly!. (Fucking compatibility with Oracle, PostgreSQL, and DB2).
+	 * See here: http://www.sqlite.org/nulls.html*/
+
+	mtags->title = g_strdup("");
+	mtags->artist = g_strdup("");
+	mtags->album = g_strdup("");
+	mtags->genre = g_strdup("");
+	mtags->comment = g_strdup("");
 	mtags->track_no = 0;
 	mtags->year = 0;
 	mtags->bitrate = 0;
@@ -344,7 +355,7 @@ void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin)
 
 	mpris_update_mobj_remove(cwin, mobj);
 
-	if (mobj == cwin->cstate->curr_mobj)
+	if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
 		cwin->cstate->curr_mobj_clear = TRUE;
 	else
 		delete_musicobject(mobj);

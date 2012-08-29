@@ -18,17 +18,20 @@ pragha_SOURCES =cdda.c \
 		gui.c \
 		glyr-related.c \
 		init.c \
+		info-bar-import-music.c \
 		jumptotrack.c \
 		librarytree.c \
 		menu.c \
 		mpris.c \
 		gnome-media-keys.c \
 		musicobject.c \
+		notify.c \
 		panel.c \
 		playlist.c \
 		pragha.c \
 		pragha.h \
 		pragha-backend.c \
+		pragha-hig.c \
 		pref.c \
 		statusicon.c \
 		tags.c \
@@ -48,8 +51,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GIO_CFLAGS) 							\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
-	$(TAGLIB_CFLAGS) 						\
-	$(TAGLIBC_CFLAGS) 						\
+	$(TAGLIB_C_CFLAGS) 						\
 	$(DBUS_CFLAGS) 							\
 	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
@@ -58,13 +60,12 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
+pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
-	$(TAGLIB_LIBS)							\
-	$(TAGLIBC_LIBS)							\
+	$(TAGLIB_C_LIBS)						\
 	$(DBUS_LIBS) 							\
 	$(DBUS_GLIB_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
@@ -75,42 +76,42 @@ pragha_LDFLAGS = $(GSTREAMER_LIBS)					\
 ## for gstreamer 0.10
 if HAVE_GSTREAMER_INTERFACES
 pragha_CFLAGS += $(GSTREAMER_INTERFACES_CFLAGS)
-pragha_LDFLAGS += $(GSTREAMER_INTERFACES_LIBS)
+pragha_LDADD += $(GSTREAMER_INTERFACES_LIBS)
 endif
 
 ## for gstreamer 1.0
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-pragha_LDFLAGS += $(GSTREAMER_AUDIO_LIBS)
+pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBKEYBINDER
 pragha_SOURCES += keybinder.c
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
-pragha_LDFLAGS += $(LIBKEYBINDER_LIBS)
+pragha_LDADD += $(LIBKEYBINDER_LIBS)
 endif
 
 if HAVE_LIBCLASTFM
 pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
-pragha_LDFLAGS += $(LIBCLASTFM_LIBS)
+pragha_LDADD += $(LIBCLASTFM_LIBS)
 endif
 
 if HAVE_LIBGLYR
 pragha_CFLAGS += $(LIBGLYR_CFLAGS)
-pragha_LDFLAGS += $(LIBGLYR_LIBS)
+pragha_LDADD += $(LIBGLYR_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
 pragha_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-pragha_LDFLAGS += $(LIBXFCE4UI_LIBS)
+pragha_LDADD += $(LIBXFCE4UI_LIBS)
 endif
 
 if HAVE_PLPARSER
 pragha_CFLAGS += $(PLPARSER_CFLAGS)
-pragha_LDFLAGS += $(PLPARSER_LIBS)
+pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
 if HAVE_GUDEV
 pragha_CFLAGS += $(GUDEV_CFLAGS)
-pragha_LDFLAGS += $(GUDEV_LIBS)
+pragha_LDADD += $(GUDEV_LIBS)
 endif

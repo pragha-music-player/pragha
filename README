@@ -13,8 +13,8 @@ Well.. Dissonance is the project to continue developing Consonance, and its
 result is Pragha Music Manager. A New reproducer of music.. ;)
 
 Features:
- * Full integration with GTK+2, and since Pragha 1.0.2 add EXPERIMENTAL GTK+3
-   support, but always completely independent of gnome or xfce.
+ * Full integration with GTK+2 and GTK+3 support, but always completely
+   independent of gnome or xfce.
  * Two panel desing inspired on Amarok 1.4. Library and current playlist.
  * Library with multiple views, according tags or folder structure.
  * Search, filtering and queue songs on current playlist.
@@ -26,7 +26,7 @@ Features:
  * Native desktop notifications with libnotify.
 
 Requirements:
- * gtk+-2.0 >= 2.20, glib-2.0 >= 2.24, dbus-1 >= 1.1, dbus-glib-1 >= 0.84.
+ * gtk+-2.0 >= 2.24, glib-2.0 >= 2.28, dbus-1 >= 1.1, dbus-glib-1 >= 0.84.
  * gstreamer-0.10 >= 0.10, gstreamer-base-0.10 >= 0.10.
  * libcdio >= 0.80, libcdio_paranoia >= 0.80, libcddb >= 1.3.0.
  * taglib >= 1.4.
@@ -37,15 +37,11 @@ Optional:
    get related playlists.
  * libglyr >= 0.9.0: Get lyrics and artist bio over many internet services, and
    download missing album cover art from Last.fm.
- * libxfce4ui => 4.8.0: Better session managament support. Save the current
-   playlist, last posicion when save session, etc.
- * libkeybinder >= 0.2.2: Use multimedia keys to control pragha. Without this
-   pragha is compiled to support gnome media keys.
+ * libxfce4ui >= 4.8.0 (Or >= 4.11.0 with gtk+-3.0): Better session managament
+   support. Save the current playlist, last posicion when save session, etc.
+ * libkeybinder >= 0.2.2 (Or keybinder-3.0 with gtk+-3.0) Use multimedia keys to
+   control pragha without gnome media keys.
  * totem-plparser >= 2.26: Support to open many more format and internet radios
    playlist.
  * gstreamer-plugins-base-devel >= 0.10: Use cubic volume to a better control of
    volume.
-
-Note:
-To compile with GTK+3 and gnome media keys use:
- * ./autogen.sh --with-gtk3 --disable-keybinder --disable-libxfce4ui
