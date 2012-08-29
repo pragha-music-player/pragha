@@ -73,11 +73,14 @@ tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
 	g_return_val_if_fail (kind != NULL && *kind != '\0', NULL);
 	g_return_val_if_fail (identifier != NULL && *identifier != '\0', NULL);
 
+	g_message("Kind: %s, Identifier: %s", kind, identifier);
+
 	volumes = g_volume_monitor_get_volumes (monitor);
 
 	for (lp = volumes; volume == NULL && lp != NULL; lp = lp->next) {
 		value = g_volume_get_identifier (lp->data, kind);
 		if (value != NULL) {
+			g_message("Get identifier: %s", value);
 			if (g_strcmp0 (value, identifier) == 0)
 				volume = g_object_ref (lp->data);
 		g_free (value);
@@ -141,17 +144,22 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, GUdevDe
 			pragha_block_device_mounted (device, mount, &error);
 			g_object_unref (mount);
 		}
+		else {
+			g_message("Unable to locate mount point");
+		}
 	}
 	g_object_unref (volume);
 }
 
-static void
+gboolean
 pragha_block_device_mount (GUdevDevice *device)
 {
-	GVolumeMonitor *monitor;
+	GVolumeMonitor  *monitor;
 	GMountOperation *mount_operation;
 	GVolume         *volume;
+	gboolean         mounted;
 
+	mounted = FALSE;
 	monitor = g_volume_monitor_get ();
 
 	/* determine the GVolume corresponding to the udev device */
@@ -166,10 +174,19 @@ pragha_block_device_mount (GUdevDevice *device)
 			mount_operation = gtk_mount_operation_new (NULL);
 			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
 					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, device);
+			mounted = TRUE;
 			g_object_unref (mount_operation);
 		}
+		else {
+			g_message("Unable to mount the device");
+		}
+	}
+	else {
+		g_message("Could not detect the volume corresponding to the device.");
 	}
 	g_object_unref (monitor);
+
+	return mounted;
 }
 
 /* Functions that manage to "add" and "remove" devices events. */
@@ -212,14 +229,15 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
 		}
 	}
 	if (is_partition || is_volume || data_tracks) {
-		busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-		devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 		if(cwin->cudev->bus_hooked == 0 &&
 		   cwin->cudev->device_hooked == 0) {
-			pragha_block_device_mount(device);
 			g_message("Device mountable added... . .\n");
-			cwin->cudev->bus_hooked = busnum;
-			cwin->cudev->device_hooked = devnum;
+			if (pragha_block_device_mount(device)) {
+				busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+				devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+				cwin->cudev->bus_hooked = busnum;
+				cwin->cudev->device_hooked = devnum;
+			}
 		}
 	}
 }
@@ -229,6 +247,7 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
 {
 	guint64      busnum = 0;
 	guint64      devnum = 0;
+
 	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 
