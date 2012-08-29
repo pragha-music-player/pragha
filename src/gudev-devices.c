@@ -183,6 +183,8 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
 	gboolean     is_cdrom;
 	gboolean     is_partition;
 	gboolean     is_volume;
+	guint64      busnum = 0;
+	guint64      devnum = 0;
 	guint64      audio_tracks = 0;
 	guint64      data_tracks = 0;
 
@@ -210,14 +212,33 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
 		}
 	}
 	if (is_partition || is_volume || data_tracks) {
-		pragha_block_device_mount(device);
+		busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+		devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+		if(cwin->cudev->bus_hooked == 0 &&
+		   cwin->cudev->device_hooked == 0) {
+			pragha_block_device_mount(device);
+			g_message("Device mountable added... . .\n");
+			cwin->cudev->bus_hooked = busnum;
+			cwin->cudev->device_hooked = devnum;
+		}
 	}
 }
 
 static void
 pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
 {
-	g_message("Device removed... . .\n");
+	guint64      busnum = 0;
+	guint64      devnum = 0;
+	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+
+	if(cwin->cudev->bus_hooked == busnum &&
+	   cwin->cudev->device_hooked == devnum) {
+		g_message("Device removed... . .\n");
+
+		cwin->cudev->bus_hooked = 0;
+		cwin->cudev->device_hooked = 0;
+	}
 }
 
 /* Main devices function that listen udev events. */
@@ -225,27 +246,11 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
 static void
 gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
 {
-	guint64 busnum;
-	guint64 devnum;
-
-	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
-
-	if (g_str_equal(action, "add") &&
-	    cwin->cudev->bus_hooked == 0 &&
-	    cwin->cudev->device_hooked == 0) {
-
+	if (g_str_equal(action, "add")) {
 		pragha_gudev_device_added(device, cwin);
-		cwin->cudev->bus_hooked = busnum;
-		cwin->cudev->device_hooked = devnum;
 	}
-	else if (g_str_equal (action, "remove") &&
-		cwin->cudev->bus_hooked == busnum &&
-		cwin->cudev->device_hooked == devnum) {
-
+	else if (g_str_equal (action, "remove")) {
 		pragha_gudev_device_removed(device, cwin);
-		cwin->cudev->bus_hooked = 0;
-		cwin->cudev->device_hooked = 0;
 	}
 }
 
