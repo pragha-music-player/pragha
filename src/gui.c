@@ -1528,6 +1528,18 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 }
 
+static void update_gui(PraghaBackend *backend, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
+	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
+
+	if (newsec > 0) {
+		__update_track_progress_bar(cwin, newsec);
+		__update_progress_song_info(cwin, newsec);
+	}
+}
+
 GtkWidget*
 create_toolbar(struct con_win *cwin)
 {
@@ -1653,6 +1665,8 @@ create_toolbar(struct con_win *cwin)
 	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
 
 	update_panel_playback_state(cwin);
+
+	g_signal_connect (cwin->backend, "tick", G_CALLBACK (update_gui), cwin);
 
 	cwin->toolbar = toolbar;
 
