@@ -30,6 +30,53 @@ struct con_udev {
 
 const char * const gudev_subsystems[] = { "block", NULL };
 
+enum
+{
+	PRAGHA_RESPONSE_NONE,
+	PRAGHA_RESPONSE_PLAY,
+	PRAGHA_RESPONSE_BROWSE,
+};
+
+gint
+pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
+			  const gchar *primary_text, const gchar *secondary_text,
+			  const gchar *first_button_text, gint first_button_response)
+{
+	GtkWidget *dialog;
+	GtkWidget *image;
+	gint response = PRAGHA_RESPONSE_NONE;
+
+	dialog = gtk_message_dialog_new (NULL,
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_QUESTION,
+					GTK_BUTTONS_NONE,
+					NULL);
+
+	if (title != NULL)
+		gtk_window_set_title (GTK_WINDOW (dialog), title);
+
+	gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), primary_text);
+
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Ignore"), PRAGHA_RESPONSE_NONE);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), first_button_text, first_button_response);
+
+	if(icon != NULL) {
+		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
+		gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG (dialog), image);
+	}
+	if (secondary_text != NULL)
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dialog), secondary_text);
+
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), PRAGHA_RESPONSE_NONE);
+
+	gtk_widget_show_all(dialog);
+
+	response = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy (dialog);
+
+	return response;
+}
+
 /* Extentions copy of Thunar-volman code.
  * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c
  * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
@@ -80,8 +127,6 @@ tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
 	g_return_val_if_fail (kind != NULL && *kind != '\0', NULL);
 	g_return_val_if_fail (identifier != NULL && *identifier != '\0', NULL);
 
-	g_message("Kind: %s, Identifier: %s", kind, identifier);
-
 	volumes = g_volume_monitor_get_volumes (monitor);
 
 	for (lp = volumes; volume == NULL && lp != NULL; lp = lp->next) {
@@ -90,7 +135,6 @@ tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
 			continue;
 		if (g_strcmp0 (value, identifier) == 0)
 			volume = g_object_ref (lp->data);
-		g_message("Get identifier: %s", value);
 		g_free (value);
 	}
 	g_list_foreach (volumes, (GFunc)g_object_unref, NULL);
@@ -109,8 +153,9 @@ pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
 	const gchar *volume_name;
 	gchar       *decoded_name;
 	gchar       *message;
-	GFile   *mount_point;
-	gchar   *mount_path;
+	GFile       *mount_point;
+	gchar       *mount_path;
+	gint         response;
 
 	g_return_if_fail (G_IS_MOUNT (mount));
 	g_return_if_fail (error == NULL || *error == NULL);
@@ -123,12 +168,21 @@ pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
 	else
 		message = g_strdup_printf (_("The inserted volume was mounted automatically"));
 
-	g_message(message);
-	mount_point = g_mount_get_root (mount);
-	mount_path = g_file_get_path (mount_point);
-	g_object_unref (mount_point);
-	g_message(mount_path);
-
+	response = pragha_gudev_show_dialog (_("Audio/Data CD"), "gnome-fs-executable",
+						message, NULL,
+						_("Open folder"), PRAGHA_RESPONSE_BROWSE);
+	switch (response)
+	{
+		case PRAGHA_RESPONSE_BROWSE:
+			mount_point = g_mount_get_root (mount);
+			mount_path = g_file_get_path (mount_point);
+			open_url(NULL, mount_path);
+			g_object_unref (mount_point);
+			break;
+		case PRAGHA_RESPONSE_NONE:
+		default:
+			break;
+	}
 	g_free (decoded_name);
 	g_free (message);
 }
@@ -210,6 +264,7 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_udev *cudev)
 	guint64      devnum = 0;
 	guint64      audio_tracks = 0;
 	guint64      data_tracks = 0;
+	gint         response;
 
 	/* collect general device information */
 	devtype = g_udev_device_get_property (device, "DEVTYPE");
@@ -228,9 +283,20 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_udev *cudev)
 			data_tracks = g_udev_device_get_property_as_uint64 (device, "ID_CDROM_MEDIA_TRACK_COUNT_DATA");
 
 			if (audio_tracks > 0) {
-				gdk_threads_enter ();
-				add_audio_cd(cudev->cwin);
-				gdk_threads_leave ();
+				response = pragha_gudev_show_dialog (_("Audio/Data CD"), "gnome-dev-cdrom-audio",
+								_("Was inserted an Audio Cd."), NULL,
+								_("Add Audio _CD"), PRAGHA_RESPONSE_PLAY);
+				switch (response)
+				{
+					case PRAGHA_RESPONSE_PLAY:
+						gdk_threads_enter ();
+						add_audio_cd(cudev->cwin);
+						gdk_threads_leave ();
+						break;
+					case PRAGHA_RESPONSE_NONE:
+					default:
+						break;
+				}
 			}
 		}
 	}
@@ -256,6 +322,10 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_udev *cudev)
 	guint64      busnum = 0;
 	guint64      devnum = 0;
 
+	if(cudev->bus_hooked == 0 &&
+	   cudev->device_hooked == 0)
+		return;
+
 	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 
@@ -263,6 +333,7 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_udev *cudev)
 	   cudev->device_hooked == devnum) {
 		g_message("Device removed... . .\n");
 
+		g_object_unref (cudev->device);
 		cudev->bus_hooked = 0;
 		cudev->device_hooked = 0;
 	}
