@@ -21,6 +21,13 @@
 
 #include <gudev/gudev.h>
 
+struct con_udev {
+	struct con_win *cwin;
+	GUdevDevice *device;
+	guint64 bus_hooked;
+	guint64 device_hooked;
+};
+
 const char * const gudev_subsystems[] = { "block", NULL };
 
 /* Extentions copy of Thunar-volman code.
@@ -79,14 +86,14 @@ tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
 
 	for (lp = volumes; volume == NULL && lp != NULL; lp = lp->next) {
 		value = g_volume_get_identifier (lp->data, kind);
-		if (value != NULL) {
-			g_message("Get identifier: %s", value);
-			if (g_strcmp0 (value, identifier) == 0)
-				volume = g_object_ref (lp->data);
+		if (value == NULL)
+			continue;
+		if (g_strcmp0 (value, identifier) == 0)
+			volume = g_object_ref (lp->data);
+		g_message("Get identifier: %s", value);
 		g_free (value);
-		}
-		g_object_unref (lp->data);
 	}
+	g_list_foreach (volumes, (GFunc)g_object_unref, NULL);
 	g_list_free (volumes);
 
 	return volume;
@@ -152,20 +159,21 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, GUdevDe
 }
 
 gboolean
-pragha_block_device_mount (GUdevDevice *device)
+pragha_block_device_mount (gpointer data)
 {
 	GVolumeMonitor  *monitor;
 	GMountOperation *mount_operation;
 	GVolume         *volume;
-	gboolean         mounted;
 
-	mounted = FALSE;
+	struct con_udev *cudev = data;
+
 	monitor = g_volume_monitor_get ();
 
 	/* determine the GVolume corresponding to the udev device */
 	volume = tvm_g_volume_monitor_get_volume_for_kind (monitor,
 							   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE,
-							   g_udev_device_get_device_file (device));
+							   g_udev_device_get_device_file (cudev->device));
+	g_object_unref (monitor);
 
 	/* check if we have a volume */
 	if (volume != NULL) {
@@ -173,8 +181,7 @@ pragha_block_device_mount (GUdevDevice *device)
 			/* try to mount the volume asynchronously */
 			mount_operation = gtk_mount_operation_new (NULL);
 			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
-					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, device);
-			mounted = TRUE;
+					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, cudev->device);
 			g_object_unref (mount_operation);
 		}
 		else {
@@ -184,15 +191,14 @@ pragha_block_device_mount (GUdevDevice *device)
 	else {
 		g_message("Could not detect the volume corresponding to the device.");
 	}
-	g_object_unref (monitor);
 
-	return mounted;
+	return FALSE;
 }
 
 /* Functions that manage to "add" and "remove" devices events. */
 
 static void
-pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
+pragha_gudev_device_added(GUdevDevice *device, struct con_udev *cudev)
 {
 	const gchar *devtype;
 	const gchar *id_type;
@@ -223,27 +229,29 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_win *cwin)
 
 			if (audio_tracks > 0) {
 				gdk_threads_enter ();
-				add_audio_cd(cwin);
+				add_audio_cd(cudev->cwin);
 				gdk_threads_leave ();
 			}
 		}
 	}
 	if (is_partition || is_volume || data_tracks) {
-		if(cwin->cudev->bus_hooked == 0 &&
-		   cwin->cudev->device_hooked == 0) {
+		if(cudev->bus_hooked == 0 &&
+		   cudev->device_hooked == 0) {
+			busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+			devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+
+			cudev->device = g_object_ref (device);
+			cudev->bus_hooked = busnum;
+			cudev->device_hooked = devnum;
+
 			g_message("Device mountable added... . .\n");
-			if (pragha_block_device_mount(device)) {
-				busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-				devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
-				cwin->cudev->bus_hooked = busnum;
-				cwin->cudev->device_hooked = devnum;
-			}
+			g_timeout_add_seconds(5, pragha_block_device_mount, cudev);
 		}
 	}
 }
 
 static void
-pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
+pragha_gudev_device_removed(GUdevDevice *device, struct con_udev *cudev)
 {
 	guint64      busnum = 0;
 	guint64      devnum = 0;
@@ -251,25 +259,25 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_win *cwin)
 	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 
-	if(cwin->cudev->bus_hooked == busnum &&
-	   cwin->cudev->device_hooked == devnum) {
+	if(cudev->bus_hooked == busnum &&
+	   cudev->device_hooked == devnum) {
 		g_message("Device removed... . .\n");
 
-		cwin->cudev->bus_hooked = 0;
-		cwin->cudev->device_hooked = 0;
+		cudev->bus_hooked = 0;
+		cudev->device_hooked = 0;
 	}
 }
 
 /* Main devices function that listen udev events. */
 
 static void
-gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_win *cwin)
+gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, struct con_udev *cudev)
 {
 	if (g_str_equal(action, "add")) {
-		pragha_gudev_device_added(device, cwin);
+		pragha_gudev_device_added(device, cudev);
 	}
 	else if (g_str_equal (action, "remove")) {
-		pragha_gudev_device_removed(device, cwin);
+		pragha_gudev_device_removed(device, cudev);
 	}
 }
 
@@ -279,14 +287,16 @@ gint
 init_gudev_subsystem(struct con_win *cwin)
 {
 	GUdevClient *gudev_client;
+	struct con_udev *cudev;
 
-	cwin->cudev = g_slice_new0(struct con_udev);
+	cudev = g_slice_new0(struct con_udev);
 
-	cwin->cudev->bus_hooked = 0;
-	cwin->cudev->device_hooked = 0;
+	cudev->cwin = cwin;
+	cudev->bus_hooked = 0;
+	cudev->device_hooked = 0;
 
 	gudev_client = g_udev_client_new(gudev_subsystems);
-	g_signal_connect(gudev_client, "uevent", G_CALLBACK(gudev_uevent_cb), cwin);
+	g_signal_connect(gudev_client, "uevent", G_CALLBACK(gudev_uevent_cb), cudev);
 
 	return 0;
 }

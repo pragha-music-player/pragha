@@ -644,13 +644,6 @@ struct con_mpris2 {
 	enum player_state state;
 };
 
-#ifdef HAVE_GUDEV
-struct con_udev {
-	guint64 bus_hooked;
-	guint64 device_hooked;
-};
-#endif
-
 struct con_gnome_media_keys;
 
 struct con_win {
@@ -658,9 +651,6 @@ struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
-	#ifdef HAVE_GUDEV
-	struct con_udev *cudev;
-	#endif
 	PraghaBackend *backend;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
