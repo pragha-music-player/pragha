@@ -16,11 +16,11 @@
 /*************************************************************************/
 
 #include <stdio.h>
-#include <pthread.h>
 #include "pragha.h"
 
 #ifdef HAVE_LIBCLASTFM
-void update_menubar_lastfm_state (struct con_win *cwin)
+void
+update_menubar_lastfm_state (struct con_win *cwin)
 {
 	GtkAction *action;
 
@@ -53,7 +53,8 @@ void update_menubar_lastfm_state (struct con_win *cwin)
 
 /* Set correction basedm on lastfm now playing segestion.. */
 
-void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
+void
+edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
 	struct tags otag, ntag;
 	GArray *loc_arr = NULL;
@@ -160,7 +161,8 @@ exit:
 
 /* Functions related to current playlist. */
 
-void *do_lastfm_current_playlist_love (gpointer data)
+gpointer
+do_lastfm_current_playlist_love (gpointer data)
 {
 	gint rv;
 	struct musicobject *mobj = NULL;
@@ -184,10 +186,9 @@ void *do_lastfm_current_playlist_love (gpointer data)
 	return NULL;
 }
 
-void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Love handler to current playlist");
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -195,10 +196,15 @@ void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_wi
 		return;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_current_playlist_love, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Love CP", do_lastfm_current_playlist_love, cwin);
+	#else
+	g_thread_create(do_lastfm_current_playlist_love, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_current_playlist_unlove (gpointer data)
+gpointer
+do_lastfm_current_playlist_unlove (gpointer data)
 {
 	gint rv;
 	struct musicobject *mobj = NULL;
@@ -224,8 +230,6 @@ void *do_lastfm_current_playlist_unlove (gpointer data)
 
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Unlove Handler to current playlist");
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -233,10 +237,15 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 		return;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_current_playlist_unlove, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Unlove CP", do_lastfm_current_playlist_unlove, cwin);
+	#else
+	g_thread_create(do_lastfm_current_playlist_unlove, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_get_similar_current_playlist_action (gpointer data)
+gpointer
+do_lastfm_get_similar_current_playlist_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
@@ -257,7 +266,7 @@ void *do_lastfm_get_similar_current_playlist_action (gpointer data)
 
 	if(rv != LASTFM_STATUS_OK) {
 		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
+		return FALSE;
 	}
 
 	gdk_threads_enter();
@@ -284,10 +293,9 @@ void *do_lastfm_get_similar_current_playlist_action (gpointer data)
 	return NULL;
 }
 
-void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Get similar action to current playlist");
 
 	if(cwin->clastfm->session_id == NULL) {
@@ -295,12 +303,17 @@ void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_w
 		return;
 	}
 
-	pthread_create (&tid, NULL, do_lastfm_get_similar_current_playlist_action, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Get similar", do_lastfm_get_similar_current_playlist_action, cwin);
+	#else
+	g_thread_create(do_lastfm_get_similar_current_playlist_action, cwin, FALSE, NULL);
+	#endif
 }
 
 /* Functions that respond to menu options. */
 
-void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkFileFilter *media_filter;
@@ -372,7 +385,8 @@ out:
 	g_object_unref (file);
 }
 
-void *do_lastfm_add_favorites_action (gpointer data)
+gpointer
+do_lastfm_add_favorites_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
@@ -415,10 +429,9 @@ void *do_lastfm_add_favorites_action (gpointer data)
 	return NULL;
 }
 
-void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if ((cwin->clastfm->session_id == NULL) ||
@@ -427,10 +440,15 @@ void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	pthread_create (&tid, NULL, do_lastfm_add_favorites_action, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Add favorites", do_lastfm_add_favorites_action, cwin);
+	#else
+	g_thread_create(do_lastfm_add_favorites_action, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_get_similar_action (gpointer data)
+gpointer
+do_lastfm_get_similar_action (gpointer data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
@@ -448,7 +466,7 @@ void *do_lastfm_get_similar_action (gpointer data)
 
 	if(rv != LASTFM_STATUS_OK) {
 		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
+		return FALSE;
 	}
 
 	gdk_threads_enter();
@@ -475,10 +493,9 @@ void *do_lastfm_get_similar_action (gpointer data)
 	return NULL;
 }
 
-void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
 	if(cwin->cstate->state == ST_STOPPED)
@@ -489,10 +506,15 @@ void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	pthread_create (&tid, NULL, do_lastfm_get_similar_action, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Get similar", do_lastfm_get_similar_action, cwin);
+	#else
+	g_thread_create(do_lastfm_get_similar_action, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_love (gpointer data)
+gpointer
+do_lastfm_love (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
@@ -509,13 +531,12 @@ void *do_lastfm_love (gpointer data)
 		gdk_threads_leave ();
 	}
 
-	return NULL;
+	return FALSE;
 }
 
-void lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Love Handler");
 
 	if(cwin->cstate->state == ST_STOPPED)
@@ -526,10 +547,15 @@ void lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_love, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Love", do_lastfm_love, cwin);
+	#else
+	g_thread_create(do_lastfm_love, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_unlove (gpointer data)
+gpointer
+do_lastfm_unlove (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
@@ -549,10 +575,9 @@ void *do_lastfm_unlove (gpointer data)
 	return NULL;
 }
 
-void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
+void
+lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 {
-	pthread_t tid;
-
 	CDEBUG(DBG_LASTFM, "Unlove Handler");
 
 	if(cwin->cstate->state == ST_STOPPED)
@@ -563,10 +588,15 @@ void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_unlove, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Unlove", do_lastfm_unlove, cwin);
+	#else
+	g_thread_create(do_lastfm_unlove, cwin, FALSE, NULL);
+	#endif
 }
 
-void *do_lastfm_scrob (gpointer data)
+gpointer
+do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
@@ -589,12 +619,12 @@ void *do_lastfm_scrob (gpointer data)
 		set_status_message("Track scrobbled on Last.fm", cwin);
 	gdk_threads_leave ();
 
-	return NULL;
+	return FALSE;
 }
 
-gboolean lastfm_scrob_handler(gpointer data)
+gboolean
+lastfm_scrob_handler(gpointer data)
 {
-	pthread_t tid;
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
@@ -607,12 +637,17 @@ gboolean lastfm_scrob_handler(gpointer data)
 		return FALSE;
 	}
 
-	pthread_create(&tid, NULL, do_lastfm_scrob, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Scroble", do_lastfm_scrob, cwin);
+	#else
+	g_thread_create(do_lastfm_scrob, cwin, FALSE, NULL);
+	#endif
 
 	return FALSE;
 }
 
-void *do_lastfm_now_playing (gpointer data)
+gboolean
+do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
 	gchar *file, *title, *album, *artist;
@@ -687,12 +722,12 @@ void *do_lastfm_now_playing (gpointer data)
 	g_free(artist);
 	g_free(album);
 
-	return NULL;
+	return FALSE;
 }
 
-void lastfm_now_playing_handler (struct con_win *cwin)
+void
+lastfm_now_playing_handler (struct con_win *cwin)
 {
-	pthread_t tid;
 	gint length;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
@@ -716,7 +751,7 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->curr_mobj->tags->length < 30)
 		return;
 
-	pthread_create(&tid, NULL, do_lastfm_now_playing, cwin);
+	g_idle_add(do_lastfm_now_playing, cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
@@ -730,7 +765,7 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 		length = (cwin->cstate->curr_mobj->tags->length / 2) - WAIT_UPDATE;
 	}
 
-	cwin->related_timeout_id = gdk_threads_add_timeout_seconds_full(
+	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, length,
 			lastfm_scrob_handler, cwin, NULL);
 
@@ -739,7 +774,8 @@ void lastfm_now_playing_handler (struct con_win *cwin)
 
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
-gboolean do_just_init_lastfm(gpointer data)
+gboolean
+do_just_init_lastfm(gpointer data)
 {
 	struct con_win *cwin = data;
 
@@ -767,11 +803,12 @@ gboolean do_just_init_lastfm(gpointer data)
 	return FALSE;
 }
 
-gint just_init_lastfm (struct con_win *cwin)
+gint
+just_init_lastfm (struct con_win *cwin)
 {
 	if (cwin->cpref->lw.lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
-		gdk_threads_add_idle (do_just_init_lastfm, cwin);
+		g_idle_add (do_just_init_lastfm, cwin);
 	}
 	return 0;
 }
@@ -779,7 +816,8 @@ gint just_init_lastfm (struct con_win *cwin)
 /* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
  * And no show any error. */
 
-gboolean do_init_lastfm_idle(gpointer data)
+gboolean
+do_init_lastfm_idle(gpointer data)
 {
 	struct con_win *cwin = data;
 
@@ -805,7 +843,8 @@ gboolean do_init_lastfm_idle(gpointer data)
 	return FALSE;
 }
 
-gint init_lastfm_idle(struct con_win *cwin)
+gint
+init_lastfm_idle(struct con_win *cwin)
 {
 	init_tag_struct(cwin->clastfm->ntags);
 
@@ -819,9 +858,9 @@ gint init_lastfm_idle(struct con_win *cwin)
 #else
 		if(nm_is_online () == TRUE)
 #endif
-			gdk_threads_add_idle (do_init_lastfm_idle, cwin);
+			g_idle_add (do_init_lastfm_idle, cwin);
 		else
-			gdk_threads_add_timeout_seconds_full(
+			g_timeout_add_seconds_full(
 					G_PRIORITY_DEFAULT_IDLE, 30,
 					do_init_lastfm_idle, cwin, NULL);
 	}
@@ -829,7 +868,8 @@ gint init_lastfm_idle(struct con_win *cwin)
 	return 0;
 }
 
-void lastfm_free(struct con_lastfm *clastfm)
+void
+lastfm_free(struct con_lastfm *clastfm)
 {
 	if (clastfm->session_id)
 		LASTFM_dinit(clastfm->session_id);
