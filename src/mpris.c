@@ -294,7 +294,7 @@ void mpris_update_seeked(struct con_win *cwin, gint position) {
 
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.Player", "Seeked",
-		 g_variant_new ("(x)", (gint64)(position * 1000000)), NULL);
+		 g_variant_new ("(x)", (gint64)position * 1000000), NULL);
 }
 
 static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
