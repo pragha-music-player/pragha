@@ -117,7 +117,7 @@ get_related_text_info_idle_func (gpointer data)
 
 	if(head != NULL) {
 		glyr_info->head = head;
-		gdk_threads_add_idle(show_generic_related_text_info_dialog, glyr_info);
+		g_idle_add(show_generic_related_text_info_dialog, glyr_info);
 
 		remove_watch_cursor_on_thread(NULL, glyr_info->cwin);
 	}
@@ -311,7 +311,7 @@ get_album_art_idle_func (gpointer data)
 
 	if(head != NULL) {
 		glyr_info->head = head;
-		gdk_threads_add_idle(update_downloaded_album_art, glyr_info);
+		g_idle_add(update_downloaded_album_art, glyr_info);
 	}
 	else {
 		if (error != GLYRE_OK)
@@ -427,7 +427,7 @@ void update_related_state (struct con_win *cwin)
 		time(&cwin->clastfm->playback_started);
 	#endif
 
-	cwin->related_timeout_id = gdk_threads_add_timeout_seconds_full(
+	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
 			update_related_handler, cwin, NULL);
 }
