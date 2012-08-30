@@ -494,9 +494,7 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 		}
 	}
 
-	gdk_threads_enter();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
-	gdk_threads_leave();
 }
 
 static void
