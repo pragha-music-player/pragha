@@ -178,7 +178,9 @@ do_lastfm_current_playlist_love (gpointer data)
 				mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
 		set_status_message(_("Love song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
 
 	return NULL;
@@ -218,7 +220,9 @@ do_lastfm_current_playlist_unlove (gpointer data)
 				mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
 		set_status_message(_("Unlove song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
 
 	return NULL;
@@ -265,6 +269,7 @@ do_lastfm_get_similar_current_playlist_action (gpointer data)
 		return FALSE;
 	}
 
+	gdk_threads_enter();
 	for(li=results, added=0, try=0 ; li; li=li->next) {
 		track = li->data;
 		try++;
@@ -273,6 +278,7 @@ do_lastfm_get_similar_current_playlist_action (gpointer data)
 	}
 	if(added > 0)
 		select_last_path_of_current_playlist(cwin);
+	gdk_threads_leave();
 
 	if(try > 0)
 		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
@@ -396,7 +402,7 @@ do_lastfm_add_favorites_action (gpointer data)
 						     cwin->cpref->lw.lastfm_user,
 						     cpage,
 						     &results);
-
+		gdk_threads_enter();
 		for(li=results; li; li=li->next) {
 			track = li->data;
 			try++;
@@ -405,6 +411,7 @@ do_lastfm_add_favorites_action (gpointer data)
 		}
 		if(added > 0)
 			select_last_path_of_current_playlist(cwin);
+		gdk_threads_leave();
 
 		LASTFM_free_track_info_list (results);
 		cpage++;
@@ -462,6 +469,7 @@ do_lastfm_get_similar_action (gpointer data)
 		return FALSE;
 	}
 
+	gdk_threads_enter();
 	for(li=results, added=0, try=0 ; li; li=li->next) {
 		track = li->data;
 		try++;
@@ -470,6 +478,7 @@ do_lastfm_get_similar_action (gpointer data)
 	}
 	if(added > 0)
 		select_last_path_of_current_playlist(cwin);
+	gdk_threads_leave();
 
 	if(try > 0)
 		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
@@ -517,7 +526,9 @@ do_lastfm_love (gpointer data)
 		cwin->cstate->curr_mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
 		set_status_message(_("Love song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
 
 	return FALSE;
@@ -556,7 +567,9 @@ do_lastfm_unlove (gpointer data)
 		cwin->cstate->curr_mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
 		set_status_message(_("Unlove song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
 
 	return NULL;
@@ -599,10 +612,12 @@ do_lastfm_scrob (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, NULL);
 
+	gdk_threads_enter ();
 	if (rv != LASTFM_STATUS_OK)
 		set_status_message("Last.fm submission failed", cwin);
 	else
 		set_status_message("Track scrobbled on Last.fm", cwin);
+	gdk_threads_leave ();
 
 	return FALSE;
 }
@@ -656,7 +671,9 @@ do_lastfm_now_playing (gpointer data)
 		0, &list);
 
 	if (rv != LASTFM_STATUS_OK) {
+		gdk_threads_enter ();
 		set_status_message(_("Update current song on Last.fm failed."), cwin);
+		gdk_threads_leave ();
 	}
 	else {
 		ntrack = list->data;
@@ -693,7 +710,9 @@ do_lastfm_now_playing (gpointer data)
 		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
+			gdk_threads_enter ();
 			gtk_widget_show(cwin->ntag_lastfm_button);
+			gdk_threads_leave ();
 		}
 	}
 

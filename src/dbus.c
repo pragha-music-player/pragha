@@ -98,6 +98,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
+	gdk_threads_enter();
 	if (is_dir_and_accessible(file, cwin)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
@@ -115,6 +116,8 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	}
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
+
+	gdk_threads_leave();
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
