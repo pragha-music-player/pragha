@@ -447,6 +447,13 @@ void set_status_message (const gchar *message, struct con_win *cwin)
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
 }
 
+void set_status_message_on_thread (const gchar *message, struct con_win *cwin)
+{
+	gdk_threads_enter ();
+	set_status_message (message, cwin);
+	gdk_threads_leave ();
+}
+
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
 GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)

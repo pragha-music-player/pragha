@@ -178,9 +178,7 @@ do_lastfm_current_playlist_love (gpointer data)
 				mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
-		gdk_threads_enter ();
-		set_status_message(_("Love song on Last.fm failed."), cwin);
-		gdk_threads_leave ();
+		set_status_message_on_thread(_("Love song on Last.fm failed."), cwin);
 	}
 
 	return NULL;
@@ -220,9 +218,7 @@ do_lastfm_current_playlist_unlove (gpointer data)
 				mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
-		gdk_threads_enter ();
-		set_status_message(_("Unlove song on Last.fm failed."), cwin);
-		gdk_threads_leave ();
+		set_status_message_on_thread(_("Unlove song on Last.fm failed."), cwin);
 	}
 
 	return NULL;
@@ -526,9 +522,7 @@ do_lastfm_love (gpointer data)
 		cwin->cstate->curr_mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
-		gdk_threads_enter ();
-		set_status_message(_("Love song on Last.fm failed."), cwin);
-		gdk_threads_leave ();
+		set_status_message_on_thread(_("Love song on Last.fm failed."), cwin);
 	}
 
 	return FALSE;
@@ -567,9 +561,7 @@ do_lastfm_unlove (gpointer data)
 		cwin->cstate->curr_mobj->tags->artist);
 
 	if (rv != LASTFM_STATUS_OK) {
-		gdk_threads_enter ();
-		set_status_message(_("Unlove song on Last.fm failed."), cwin);
-		gdk_threads_leave ();
+		set_status_message_on_thread(_("Unlove song on Last.fm failed."), cwin);
 	}
 
 	return NULL;
@@ -612,12 +604,10 @@ do_lastfm_scrob (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, NULL);
 
-	gdk_threads_enter ();
 	if (rv != LASTFM_STATUS_OK)
-		set_status_message("Last.fm submission failed", cwin);
+		set_status_message_on_thread("Last.fm submission failed", cwin);
 	else
-		set_status_message("Track scrobbled on Last.fm", cwin);
-	gdk_threads_leave ();
+		set_status_message_on_thread("Track scrobbled on Last.fm", cwin);
 
 	return FALSE;
 }

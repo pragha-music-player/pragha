@@ -1211,6 +1211,7 @@ void set_watch_cursor_on_thread(struct con_win *cwin);
 void remove_watch_cursor (GtkWidget *window);
 void remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin);
 void set_status_message (const gchar *message, struct con_win *cwin);
+void set_status_message_on_thread (const gchar *message, struct con_win *cwin);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin);
