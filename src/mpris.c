@@ -548,10 +548,8 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	if(found_playlist) {
-		gdk_threads_enter();
 		clear_current_playlist(NULL, cwin);
 		add_playlist_current_playlist(NULL, found_playlist, cwin);
-		gdk_threads_leave();
 
 		pragha_backend_stop(cwin->backend, NULL);
 		play_first_current_playlist (cwin);
@@ -702,8 +700,6 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		goto exit;
 	}
 
-	gdk_threads_enter();
-
 	if (is_dir_and_accessible(file, cwin)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
@@ -721,8 +717,6 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	}
 	select_last_path_of_current_playlist(cwin);
 	update_status_bar(cwin);
-
-	gdk_threads_leave();
 
 	g_free(file);
 exit:
