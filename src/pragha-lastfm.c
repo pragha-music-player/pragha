@@ -646,7 +646,7 @@ lastfm_scrob_handler(gpointer data)
 	return FALSE;
 }
 
-gboolean
+static gboolean
 do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
@@ -671,9 +671,7 @@ do_lastfm_now_playing (gpointer data)
 		0, &list);
 
 	if (rv != LASTFM_STATUS_OK) {
-		gdk_threads_enter ();
 		set_status_message(_("Update current song on Last.fm failed."), cwin);
-		gdk_threads_leave ();
 	}
 	else {
 		ntrack = list->data;
@@ -710,9 +708,7 @@ do_lastfm_now_playing (gpointer data)
 		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
-			gdk_threads_enter ();
 			gtk_widget_show(cwin->ntag_lastfm_button);
-			gdk_threads_leave ();
 		}
 	}
 
