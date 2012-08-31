@@ -408,7 +408,9 @@ set_watch_cursor (GtkWidget *window)
 void
 set_watch_cursor_on_thread(struct con_win *cwin)
 {
+	gdk_threads_enter ();
 	set_watch_cursor (cwin->mainwindow);
+	gdk_threads_leave ();
 }
 
 void
@@ -420,9 +422,11 @@ remove_watch_cursor (GtkWidget *window)
 void
 remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
 {
+	gdk_threads_enter ();
 	if(message != NULL)
 		set_status_message(message, cwin);
 	remove_watch_cursor (cwin->mainwindow);
+	gdk_threads_leave ();
 }
 
 /* Set a message on status bar, and restore it at 5 seconds */

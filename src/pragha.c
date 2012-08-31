@@ -147,6 +147,7 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	/* Init the gui after bancked to sink volume. */
+	gdk_threads_enter();
 	init_gui(argc, argv, cwin);
 
 	/* Init_gnome_media_keys requires constructed main window. */
@@ -166,6 +167,7 @@ gint main(gint argc, gchar *argv[])
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 
 	gtk_main();
+	gdk_threads_leave();
 	common_cleanup(cwin);
 
 	return 0;
