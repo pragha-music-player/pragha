@@ -1340,32 +1340,26 @@ gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 	return ret;
 }
 
+static void
+rescand_icompatible_db_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
+{
+	if(response == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void rescand_icompatible_db(struct con_win *cwin)
 {
-	GtkWidget *dialog;
-	gint result;
-
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING,
-					GTK_BUTTONS_YES_NO,
-					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
-					"Want to upgrade the collection?."));
-
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
-
-	if( result == GTK_RESPONSE_YES)
-		rescan_library_handler(cwin);
-}
 #else
 static gboolean rescand_icompatible_db(gpointer data)
 {
 	struct con_win *cwin = data;
-
+#endif
 	GtkWidget *dialog;
-	gint result;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_MODAL,
@@ -1374,15 +1368,13 @@ static gboolean rescand_icompatible_db(gpointer data)
 					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
 					"Want to upgrade the collection?."));
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(rescand_icompatible_db_response), cwin);
 
-	if( result == GTK_RESPONSE_YES)
-		rescan_library_handler(cwin);
-
+#if !GTK_CHECK_VERSION (3, 0, 0)
 	return TRUE;
-}
 #endif
+}
 
 gint init_musicdbase(struct con_win *cwin)
 {
