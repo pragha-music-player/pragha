@@ -22,6 +22,14 @@ const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
 Wildcards are not accepted as of now ( patches welcome :-) ).");
 
+static void
+album_art_pattern_helper_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
+{
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -33,8 +41,11 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 					"%s",
 					album_art_pattern_info);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Album art pattern"));
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(album_art_pattern_helper_response), cwin);
+
+	gtk_widget_show_all (dialog);
 }
 
 /* Handler for the preferences dialog */
@@ -285,30 +296,17 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 }
 
 /* Handler for adding a new library */
-
-static void library_add_cb(GtkButton *button, struct con_win *cwin)
+static void
+library_add_cb_response(GtkDialog *dialog,
+			gint response,
+			struct con_win *cwin)
 {
-	GError *error = NULL;
-	GtkWidget *dialog;
-	gint resp;
 	gchar *u_folder, *folder;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	GError *error = NULL;
 
-	/* Create a folder chooser dialog */
-
-	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-					     NULL);
-
-	/* Show it and get the folder */
-
-	resp = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch (resp) {
+	switch (response) {
 	case GTK_RESPONSE_ACCEPT:
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
 						cwin->cpref->library_view_w));
@@ -344,8 +342,28 @@ static void library_add_cb(GtkButton *button, struct con_win *cwin)
 	default:
 		break;
 	}
-
 	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
+static void library_add_cb(GtkButton *button, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+
+	/* Create a folder chooser dialog */
+
+	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					     NULL);
+
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(library_add_cb_response), cwin);
+
+	gtk_widget_show_all (dialog);
 }
 
 /* Handler for removing a library */
