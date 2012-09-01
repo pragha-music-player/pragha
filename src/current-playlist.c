@@ -1496,6 +1496,14 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 /* Show track properties dialog
    This function is a fscking eyesore. */
 
+static void
+track_properties_response(GtkDialog *dialog,
+			gint response,
+			struct con_win *cwin)
+{
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 void track_properties(struct musicobject *mobj, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -1636,9 +1644,10 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
 
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(track_properties_response), cwin);
+
 	gtk_widget_show_all(dialog);
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
 
 	g_free(length);
 	g_free(bitrate);
