@@ -636,7 +636,7 @@ lastfm_scrob_handler(gpointer data)
 	return FALSE;
 }
 
-static gboolean
+gpointer
 do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
@@ -661,7 +661,7 @@ do_lastfm_now_playing (gpointer data)
 		0, &list);
 
 	if (rv != LASTFM_STATUS_OK) {
-		set_status_message(_("Update current song on Last.fm failed."), cwin);
+		set_status_message_on_thread(_("Update current song on Last.fm failed."), cwin);
 	}
 	else {
 		ntrack = list->data;
@@ -698,7 +698,9 @@ do_lastfm_now_playing (gpointer data)
 		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
+			gdk_threads_enter();
 			gtk_widget_show(cwin->ntag_lastfm_button);
+			gdk_threads_leave();
 		}
 	}
 
@@ -708,7 +710,7 @@ do_lastfm_now_playing (gpointer data)
 	g_free(artist);
 	g_free(album);
 
-	return FALSE;
+	return NULL;
 }
 
 void
@@ -737,7 +739,11 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->curr_mobj->tags->length < 30)
 		return;
 
-	g_idle_add(do_lastfm_now_playing, cwin);
+	#if GLIB_CHECK_VERSION(2,31,0)
+	g_thread_new("Lfm Now playing", do_lastfm_now_playing, cwin);
+	#else
+	g_thread_create(do_lastfm_now_playing, cwin, FALSE, NULL);
+	#endif
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
