@@ -146,7 +146,7 @@ pragha_backend_can_seek (PraghaBackend *backend)
 }
 
 void
-pragha_backend_seek (PraghaBackend *backend, guint64 seek)
+pragha_backend_seek (PraghaBackend *backend, gint64 seek)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 
