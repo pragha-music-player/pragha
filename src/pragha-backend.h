@@ -46,7 +46,7 @@ typedef struct {
 } PraghaBackendClass;
 
 gboolean pragha_backend_can_seek (PraghaBackend *backend);
-void pragha_backend_seek (PraghaBackend *backend, guint64 seek);
+void pragha_backend_seek (PraghaBackend *backend, gint64 seek);
 gint64 pragha_backend_get_current_length(PraghaBackend *backend);
 gint64 pragha_backend_get_current_position(PraghaBackend *backend);
 void pragha_backend_set_soft_volume(PraghaBackend *backend, gboolean value);
