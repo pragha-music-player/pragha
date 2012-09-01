@@ -1371,6 +1371,7 @@ static gboolean rescand_icompatible_db(gpointer data)
 	g_signal_connect(G_OBJECT(dialog), "response",
 			G_CALLBACK(rescand_icompatible_db_response), cwin);
 
+	gtk_widget_show_all (dialog);
 #if !GTK_CHECK_VERSION (3, 0, 0)
 	return TRUE;
 #endif

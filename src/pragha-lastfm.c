@@ -308,33 +308,19 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 
 /* Functions that respond to menu options. */
 
-void
-lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
+static void
+lastfm_import_xspf_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
 {
-	GtkWidget *dialog;
-	GtkFileFilter *media_filter;
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
 	gint try = 0, added = 0;
 	GFile *file;
 	gsize size;
 
-	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
-				      GTK_WINDOW(cwin->mainwindow),
-				      GTK_FILE_CHOOSER_ACTION_OPEN,
-				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-				      NULL);
-
-	media_filter = gtk_file_filter_new();
-	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
-	gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter), "application/xspf+xml");
-	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), GTK_FILE_FILTER(media_filter));
-
-	if(gtk_dialog_run (GTK_DIALOG (dialog)) != GTK_RESPONSE_ACCEPT) {
-		gtk_widget_destroy (dialog);
-		return;
-	}
+	if(response != GTK_RESPONSE_ACCEPT)
+		goto cancel;
 
 	file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(dialog));
 
@@ -373,12 +359,37 @@ lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 
 	set_status_message(summary, cwin);
 
-	gtk_widget_destroy (dialog);
 	xmlnode_free(xml);
 	g_free (contents);
 	g_free(summary);
 out:
 	g_object_unref (file);
+cancel:
+	gtk_widget_destroy (GTK_WIDGET(dialog));
+}
+
+void
+lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkFileFilter *media_filter;
+
+	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
+				      GTK_WINDOW(cwin->mainwindow),
+				      GTK_FILE_CHOOSER_ACTION_OPEN,
+				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+				      NULL);
+
+	media_filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
+	gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter), "application/xspf+xml");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), GTK_FILE_FILTER(media_filter));
+
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(lastfm_import_xspf_response), cwin);
+
+	gtk_widget_show_all (dialog);
 }
 
 gpointer
