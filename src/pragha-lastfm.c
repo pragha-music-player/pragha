@@ -489,14 +489,15 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 }
 
 gpointer
-do_lastfm_get_similar_action (gpointer data)
+do_lastfm_get_similar_action (gpointer user_data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
-	gint rv, added, try;
-	gchar *summary = NULL;
+	GList *list = NULL;
+	gint rv;
+	AddMusicObjectListData *data;
 
-	struct con_win *cwin = data;
+	struct con_win *cwin = user_data;
 
 	set_watch_cursor_on_thread(cwin);
 
@@ -507,29 +508,22 @@ do_lastfm_get_similar_action (gpointer data)
 
 	if(rv != LASTFM_STATUS_OK) {
 		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return FALSE;
+		return NULL;
 	}
 
-	gdk_threads_enter();
-	for(li=results, added=0, try=0 ; li; li=li->next) {
+	for(li=results; li; li=li->next) {
 		track = li->data;
-		try++;
-		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
-			added++;
+		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
 	}
-	if(added > 0)
-		select_last_path_of_current_playlist(cwin);
-	gdk_threads_leave();
 
-	if(try > 0)
-		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
-	else
-		summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
+	data = g_slice_new (AddMusicObjectListData);
+	data->list = list;
+	data->cwin = cwin;
+	g_idle_add (append_mobj_list_current_playlist_idle, data);
 
-	remove_watch_cursor_on_thread(summary, cwin);
+	remove_watch_cursor_on_thread(NULL, cwin);
 
 	LASTFM_free_track_info_list (results);
-	g_free(summary);
 
 	return NULL;
 }
