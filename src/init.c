@@ -1035,8 +1035,6 @@ gint init_threads(struct con_win *cwin)
 	#endif
 	g_type_init ();
 
-	gdk_threads_init();
-
 	return 0;
 }
 

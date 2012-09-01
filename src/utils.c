@@ -325,6 +325,43 @@ already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
 
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
+GList *
+prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
+						const gchar *title,
+						GList *list,
+						struct con_win *cwin)
+{
+	gchar *query = NULL;
+	struct db_result result;
+	struct musicobject *mobj = NULL;
+	gint location_id = 0, i;
+	gchar *sartist, *stitle;
+
+	sartist = sanitize_string_sqlite3(artist);
+	stitle = sanitize_string_sqlite3(title);
+
+	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
+				"FROM TRACK, ARTIST, LOCATION "
+				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
+				"AND TRACK.title = '%s' COLLATE NOCASE "
+				"AND ARTIST.name = '%s' COLLATE NOCASE;",
+				stitle, sartist);
+
+	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
+		for_each_result_row(result, i) {
+			location_id = atoi(result.resultp[i+2]);
+
+			mobj = new_musicobject_from_db(location_id, cwin);
+			list = g_list_prepend(list, mobj);
+		}
+		sqlite3_free_table(result.resultp);
+	}
+	g_free(sartist);
+	g_free(stitle);
+
+	return list;
+}
+
 gint
 append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin)
 {

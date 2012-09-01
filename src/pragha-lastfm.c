@@ -240,16 +240,64 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 	#endif
 }
 
+typedef struct {
+	GList *list;
+	struct con_win *cwin;
+} AddMusicObjectListData;
+
+static gboolean
+append_mobj_list_current_playlist_idle(gpointer user_data)
+{
+	GtkTreeModel *model;
+	struct musicobject *mobj;
+	GList *l;
+
+	AddMusicObjectListData *data = user_data;
+
+	GList *list = data->list;
+	struct con_win *cwin = data->cwin;
+
+	if(list == NULL)
+		goto empty;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+
+	g_object_ref(model);
+	cwin->cstate->playlist_change = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = l->data;
+		append_current_playlist(model, mobj, cwin);
+	}
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
+	cwin->cstate->playlist_change = FALSE;
+	g_object_unref(model);
+
+	update_status_bar(cwin);
+
+	g_list_free(list);
+empty:
+	g_slice_free (AddMusicObjectListData, data);
+
+	return FALSE;
+}
+
 gpointer
-do_lastfm_get_similar_current_playlist_action (gpointer data)
+do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
-	gint rv, added, try;
-	gchar *summary = NULL;
 	struct musicobject *mobj = NULL;
+	GList *list = NULL;
+	gint rv;
 
-	struct con_win *cwin = data;
+	AddMusicObjectListData *data;
+
+	struct con_win *cwin = user_data;
 
 	mobj = get_selected_musicobject(cwin);
 
@@ -262,29 +310,22 @@ do_lastfm_get_similar_current_playlist_action (gpointer data)
 
 	if(rv != LASTFM_STATUS_OK) {
 		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return FALSE;
+		return NULL;
 	}
 
-	gdk_threads_enter();
-	for(li=results, added=0, try=0 ; li; li=li->next) {
+	for(li=results; li; li=li->next) {
 		track = li->data;
-		try++;
-		if (append_track_with_artist_and_title (track->artist, track->name, cwin))
-			added++;
+		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
 	}
-	if(added > 0)
-		select_last_path_of_current_playlist(cwin);
-	gdk_threads_leave();
 
-	if(try > 0)
-		summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."), added, try);
-	else
-		summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
+	data = g_slice_new (AddMusicObjectListData);
+	data->list = list;
+	data->cwin = cwin;
+	g_idle_add (append_mobj_list_current_playlist_idle, data);
 
-	remove_watch_cursor_on_thread(summary, cwin);
+	remove_watch_cursor_on_thread(NULL, cwin);
 
 	LASTFM_free_track_info_list (results);
-	g_free(summary);
 
 	return NULL;
 }
@@ -647,6 +688,16 @@ lastfm_scrob_handler(gpointer data)
 	return FALSE;
 }
 
+static gboolean
+show_lastfm_sugest_corrrection_button (gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
+	gtk_widget_show(cwin->ntag_lastfm_button);
+
+	return FALSE;
+}
+
 gpointer
 do_lastfm_now_playing (gpointer data)
 {
@@ -709,9 +760,7 @@ do_lastfm_now_playing (gpointer data)
 		cwin->clastfm->ntags->samplerate = 0;
 
 		if(changed && !g_ascii_strcasecmp(file, cwin->cstate->curr_mobj->file)) {
-			gdk_threads_enter();
-			gtk_widget_show(cwin->ntag_lastfm_button);
-			gdk_threads_leave();
+			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
 	}
 
