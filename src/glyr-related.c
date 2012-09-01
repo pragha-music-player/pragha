@@ -29,6 +29,18 @@ typedef struct
 }
 glyr_struct;
 
+static void
+generic_text_info_dialog_response(GtkDialog *dialog,
+				gint response,
+				glyr_struct *glyr_info)
+{
+	glyr_free_list(glyr_info->head);
+	glyr_query_destroy(&glyr_info->query);
+	g_slice_free(glyr_struct, glyr_info);
+
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 gboolean
 show_generic_related_text_info_dialog (gpointer data)
 {
@@ -84,15 +96,10 @@ show_generic_related_text_info_dialog (gpointer data)
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), scrolled, TRUE, TRUE, 0);
 
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(generic_text_info_dialog_response), glyr_info);
+
 	gtk_widget_show_all(dialog);
-
-	gtk_dialog_run(GTK_DIALOG(dialog));
-
-	gtk_widget_destroy(dialog);
-
-	glyr_free_list(glyr_info->head);
-	glyr_query_destroy(&glyr_info->query);
-	g_slice_free(glyr_struct, glyr_info);
 
 	g_free(title_header);
 	g_free(subtitle_header);
