@@ -306,8 +306,6 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 
 	update_related_state (cwin);
 
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
-
 	priv->is_live = FALSE;
 	priv->emitted_error = FALSE;
 }
@@ -334,8 +332,6 @@ pragha_backend_pause (PraghaBackend *backend)
 	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
-
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void
@@ -360,8 +356,6 @@ pragha_backend_resume (PraghaBackend *backend)
 	update_menubar_playback_state(cwin);
 
 	update_related_state (cwin);
-
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 static void
