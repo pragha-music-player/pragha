@@ -58,6 +58,7 @@ struct PraghaBackendPrivate {
 enum {
 	PROP_0,
 	PROP_VOLUME,
+	PROP_STATE,
 	PROP_LAST
 };
 
@@ -269,6 +270,13 @@ pragha_backend_get_state (PraghaBackend *backend)
 	return backend->priv->state;
 }
 
+static void
+pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
+{
+	backend->priv->state = state;
+	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
+}
+
 void
 pragha_backend_stop (PraghaBackend *backend, GError *error)
 {
@@ -283,7 +291,7 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	priv->state = ST_STOPPED;
+	pragha_backend_set_state (backend, ST_STOPPED);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
 
@@ -313,7 +321,7 @@ pragha_backend_pause (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Pause playback");
 
-	priv->state = ST_PAUSED;
+	pragha_backend_set_state (backend, ST_PAUSED);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_PAUSED);
 
@@ -339,7 +347,7 @@ pragha_backend_resume (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Resuming playback");
 
-	priv->state = ST_PLAYING;
+	pragha_backend_set_state (backend, ST_PLAYING);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_PLAYING);
 
@@ -612,7 +620,7 @@ pragha_backend_play (PraghaBackend *backend)
 		g_free (uri);
 	}
 
-	priv->state = ST_PLAYING;
+	pragha_backend_set_state (backend, ST_PLAYING);
 
 	ret = gst_element_set_state(priv->pipeline, GST_STATE_PLAYING);
 
@@ -804,6 +812,10 @@ pragha_backend_get_property (GObject *object, guint property_id, GValue *value, 
 			g_value_set_double (value, pragha_backend_get_volume (backend));
 			break;
 
+		case PROP_STATE:
+			g_value_set_int (value, pragha_backend_get_state (backend));
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 			break;
@@ -821,11 +833,13 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 
 	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Playback volume.",
                                                        0.0, 1.0, 0.5,
-                                                       G_PARAM_READABLE |
-                                                       G_PARAM_WRITABLE |
-                                                       G_PARAM_STATIC_NAME |
-                                                       G_PARAM_STATIC_NICK |
-                                                       G_PARAM_STATIC_BLURB);
+                                                       G_PARAM_READWRITE |
+                                                       G_PARAM_STATIC_STRINGS);
+
+	properties[PROP_STATE] = g_param_spec_int ("state", "State", "Playback state.",
+                                                   G_MININT, G_MAXINT, 0,
+                                                   G_PARAM_READABLE |
+                                                   G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
