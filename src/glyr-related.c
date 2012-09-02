@@ -179,7 +179,7 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
@@ -198,7 +198,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
@@ -281,7 +281,7 @@ update_downloaded_album_art (gpointer data)
 
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
-			if((cwin->cstate->state != ST_STOPPED) &&
+			if((cwin->backend->state != ST_STOPPED) &&
 			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
 			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
 				update_album_art(cwin->cstate->curr_mobj, cwin);
@@ -338,7 +338,7 @@ void related_get_album_art_handler (struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
-	if (cwin->cstate->state == ST_STOPPED)
+	if (cwin->backend->state == ST_STOPPED)
 		return;
 
 	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
@@ -423,7 +423,7 @@ void update_related_state (struct con_win *cwin)
 	if(cwin->related_timeout_id)
 		g_source_remove(cwin->related_timeout_id);
 
-	if(cwin->cstate->state != ST_PLAYING)
+	if(cwin->backend->state != ST_PLAYING)
 		return;
 
 	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)

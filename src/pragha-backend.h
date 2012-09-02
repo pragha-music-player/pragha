@@ -25,6 +25,12 @@ G_BEGIN_DECLS
 struct con_win;
 struct musicobject;
 
+enum player_state {
+	ST_PLAYING = 1,
+	ST_STOPPED,
+	ST_PAUSED
+};
+
 #define PRAGHA_TYPE_BACKEND                  (pragha_backend_get_type ())
 #define PRAGHA_BACKEND(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKEND, PraghaBackend))
 #define PRAGHA_IS_BACKEND(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_BACKEND))
@@ -38,6 +44,7 @@ typedef struct PraghaBackendPrivate PraghaBackendPrivate;
 typedef struct {
 	GObject parent;
 	PraghaBackendPrivate *priv;
+	enum player_state state;
 } PraghaBackend;
 
 typedef struct {

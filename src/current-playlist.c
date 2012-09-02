@@ -43,7 +43,7 @@ void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_w
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
 	}
 	else {
-		switch (cwin->cstate->state)
+		switch (cwin->backend->state)
 		{
 			case ST_PLAYING:
 				pixbuf = cwin->pixbuf->pixbuf_playing;
@@ -2101,7 +2101,7 @@ void play_next_track(struct con_win *cwin)
 
 	/* Are we playing right now ? */
 
-	if (cwin->cstate->state == ST_STOPPED)
+	if (cwin->backend->state == ST_STOPPED)
 		return;
 
 	/* Stop currently playing track */
@@ -2139,7 +2139,7 @@ void play_track(struct con_win *cwin)
 	/* Stopped   Start playback	    */
         /************************************/
 
-	switch (cwin->cstate->state) {
+	switch (cwin->backend->state) {
 	case ST_PLAYING:
 		if (cwin->cpref->shuffle && cwin->cstate->curr_rand_ref)
 			path = gtk_tree_row_reference_get_path(cwin->cstate->curr_rand_ref);
@@ -2189,7 +2189,7 @@ void play_track(struct con_win *cwin)
 
 void pause_resume_track(struct con_win *cwin)
 {
-	switch(cwin->cstate->state) {
+	switch(cwin->backend->state) {
 	case ST_PAUSED:
 		pragha_backend_resume(cwin->backend);
 		break;
@@ -2221,7 +2221,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
 	if (cwin->cpref->shuffle) {
-		if (cwin->cstate->state == ST_STOPPED) {
+		if (cwin->backend->state == ST_STOPPED) {
 			clear_rand_track_refs(cwin);
 			current_playlist_clear_dirty_all(cwin);
 			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
