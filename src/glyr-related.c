@@ -382,23 +382,8 @@ exists:
 	return;
 }
 
-void glyr_related_free (struct con_win *cwin)
-{
-	glyr_db_destroy(cwin->cache_db);
-	glyr_cleanup ();
-}
-
-int init_glyr_related (struct con_win *cwin)
-{
-	glyr_init();
-
-	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
-
-	return 0;
-}
-#endif
-
-gboolean update_related_handler (gpointer data)
+static gboolean
+update_related_handler (gpointer data)
 {
 #if HAVE_LIBCLASTFM || HAVE_LIBGLYR
 	struct con_win *cwin = data;
@@ -416,7 +401,8 @@ gboolean update_related_handler (gpointer data)
 	return FALSE;
 }
 
-void update_related_state (struct con_win *cwin)
+static void
+update_related_state (struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
 
@@ -438,3 +424,29 @@ void update_related_state (struct con_win *cwin)
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
 			update_related_handler, cwin, NULL);
 }
+
+static void
+update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	update_related_state (cwin);
+}
+
+void glyr_related_free (struct con_win *cwin)
+{
+	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
+	glyr_db_destroy(cwin->cache_db);
+	glyr_cleanup ();
+}
+
+int init_glyr_related (struct con_win *cwin)
+{
+	glyr_init();
+
+	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
+
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
+
+	return 0;
+}
+#endif
