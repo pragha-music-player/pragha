@@ -301,7 +301,6 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 		gtk_tree_path_free(path);
 	}
 
-	update_panel_playback_state(cwin);
 	update_menubar_playback_state(cwin);
 
 	priv->is_live = FALSE;
@@ -326,7 +325,7 @@ pragha_backend_pause (PraghaBackend *backend)
 		update_pixbuf_state_on_path(path, NULL, cwin);
 		gtk_tree_path_free(path);
 	}
-	update_panel_playback_state(cwin);
+
 	update_menubar_playback_state(cwin);
 }
 
@@ -348,7 +347,7 @@ pragha_backend_resume (PraghaBackend *backend)
 		update_pixbuf_state_on_path(path, NULL, cwin);
 		gtk_tree_path_free(path);
 	}
-	update_panel_playback_state(cwin);
+
 	update_menubar_playback_state(cwin);
 }
 
@@ -615,7 +614,6 @@ pragha_backend_play (PraghaBackend *backend)
 	if (ret == GST_STATE_CHANGE_NO_PREROLL)
 		priv->is_live = TRUE;
 
-	update_panel_playback_state (cwin);
 	update_menubar_playback_state(cwin);
 }
 
