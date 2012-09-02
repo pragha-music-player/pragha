@@ -711,8 +711,6 @@ pragha_backend_finalize (GObject *object)
 	PraghaBackend *backend = PRAGHA_BACKEND (object);
 	PraghaBackendPrivate *priv = backend->priv;
 
-	pragha_backend_stop(backend, NULL);
-
 	gst_element_set_state(priv->pipeline, GST_STATE_NULL);
 	gst_object_unref(priv->pipeline);
 
