@@ -707,7 +707,6 @@ struct con_win {
 	DBusConnection *con_dbus;
 };
 
-extern gulong switch_cb_id;
 extern gint debug_level;
 extern const gchar *mime_mpeg[];
 extern const gchar *mime_wav[];
