@@ -97,7 +97,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
 {
 	gchar *markup_text;
 
-	if (cwin->backend->state == ST_STOPPED)
+	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
 		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",

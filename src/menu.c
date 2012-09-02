@@ -38,7 +38,7 @@ void update_menubar_playback_state (struct con_win *cwin)
 {
 	GtkAction *action;
 
-	gboolean playing = (cwin->backend->state != ST_STOPPED);
+	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
@@ -605,7 +605,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 
-	if(cwin->backend->state == ST_STOPPED)
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
 	memset(&otag, 0, sizeof(struct tags));
