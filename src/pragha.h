@@ -1320,8 +1320,6 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 int init_glyr_related (struct con_win *cwin);
 void glyr_related_free (struct con_win *cwin);
 
-void update_related_state (struct con_win *cwin);
-
 /* Others */
 
 void dialog_jump_to_track (struct con_win *cwin);

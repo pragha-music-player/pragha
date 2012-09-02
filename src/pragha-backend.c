@@ -304,8 +304,6 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 	update_panel_playback_state(cwin);
 	update_menubar_playback_state(cwin);
 
-	update_related_state (cwin);
-
 	priv->is_live = FALSE;
 	priv->emitted_error = FALSE;
 }
@@ -330,8 +328,6 @@ pragha_backend_pause (PraghaBackend *backend)
 	}
 	update_panel_playback_state(cwin);
 	update_menubar_playback_state(cwin);
-
-	update_related_state (cwin);
 }
 
 void
@@ -354,8 +350,6 @@ pragha_backend_resume (PraghaBackend *backend)
 	}
 	update_panel_playback_state(cwin);
 	update_menubar_playback_state(cwin);
-
-	update_related_state (cwin);
 }
 
 static void
@@ -623,8 +617,6 @@ pragha_backend_play (PraghaBackend *backend)
 
 	update_panel_playback_state (cwin);
 	update_menubar_playback_state(cwin);
-
-	update_related_state (cwin);
 }
 
 static void
