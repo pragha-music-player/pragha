@@ -780,7 +780,7 @@ void about_action(GtkAction *action, struct con_win *cwin);
 
 void rescan_library_handler(struct con_win *cwin);
 
-/* Panel actions */
+/* Panel */
 
 void update_current_song_info(struct con_win *cwin);
 void __update_progress_song_info(struct con_win *cwin, gint length);
@@ -802,10 +802,10 @@ void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
-void update_panel_playback_state(struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
 void resize_album_art_frame(struct con_win *cwin);
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
+GtkWidget* create_toolbar(struct con_win *cwin);
 
 /* File tree functions */
 
@@ -1232,7 +1232,6 @@ GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 GtkUIManager* create_menu(struct con_win *cwin);
 GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_toolbar(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
