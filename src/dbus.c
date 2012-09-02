@@ -130,9 +130,9 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	if (cwin->cstate->state != ST_STOPPED) {
+	if (cwin->backend->state != ST_STOPPED) {
 		dbus_message_append_args(reply_msg,
-			 DBUS_TYPE_STRING, (cwin->cstate->state == ST_PLAYING) ? &playing_str : &paused_str,
+			 DBUS_TYPE_STRING, (cwin->backend->state == ST_PLAYING) ? &playing_str : &paused_str,
 			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->file,
 			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->title,
 			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->artist,

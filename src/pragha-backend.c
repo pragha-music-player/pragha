@@ -276,7 +276,7 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	cwin->cstate->state = ST_STOPPED;
+	cwin->backend->state = ST_STOPPED;
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
 
@@ -306,7 +306,7 @@ pragha_backend_pause (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Pause playback");
 
-	cwin->cstate->state = ST_PAUSED;
+	cwin->backend->state = ST_PAUSED;
 
 	gst_element_set_state(priv->pipeline, GST_STATE_PAUSED);
 
@@ -332,7 +332,7 @@ pragha_backend_resume (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Resuming playback");
 
-	cwin->cstate->state = ST_PLAYING;
+	cwin->backend->state = ST_PLAYING;
 
 	gst_element_set_state(priv->pipeline, GST_STATE_PLAYING);
 
@@ -472,20 +472,20 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 	if (priv->is_live)
 		return;
 
-	if(cwin->cstate->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
+	if(cwin->backend->state == ST_STOPPED) /* Prevent that buffering overlaps the stop command playing or pausing the playback */
 		return;
 
 	gst_message_parse_buffering (message, &percent);
 	gst_element_get_state (priv->pipeline, &cur_state, NULL, 0);
 
 	if (percent >= 100) {
-		if(cwin->cstate->state == ST_PLAYING && cur_state != GST_STATE_PLAYING) {
+		if(cwin->backend->state == ST_PLAYING && cur_state != GST_STATE_PLAYING) {
 			CDEBUG(DBG_BACKEND, "Buffering complete ... return to playback");
 			gst_element_set_state(priv->pipeline, GST_STATE_PLAYING);
 		}
 	}
 	else {
-		if (cwin->cstate->state == ST_PLAYING && cur_state == GST_STATE_PLAYING) {
+		if (cwin->backend->state == ST_PLAYING && cur_state == GST_STATE_PLAYING) {
 			CDEBUG(DBG_BACKEND, "Buffering ... temporarily pausing playback");
 			gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
 		}
@@ -571,8 +571,8 @@ pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj)
 		return;
 	}
 
-	if ((cwin->cstate->state == ST_PLAYING) ||
-	    (cwin->cstate->state == ST_PAUSED)) {
+	if ((cwin->backend->state == ST_PLAYING) ||
+	    (cwin->backend->state == ST_PAUSED)) {
 		pragha_backend_stop(backend, NULL);
 	}
 
@@ -605,7 +605,7 @@ pragha_backend_play (PraghaBackend *backend)
 		g_free (uri);
 	}
 
-	cwin->cstate->state = ST_PLAYING;
+	cwin->backend->state = ST_PLAYING;
 
 	ret = gst_element_set_state(priv->pipeline, GST_STATE_PLAYING);
 
@@ -628,7 +628,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 
 	switch (new) {
 		case GST_STATE_PLAYING: {
-			if (cwin->cstate->state == ST_PLAYING) {
+			if (cwin->backend->state == ST_PLAYING) {
 				GstQuery *query;
 				query = gst_query_new_seeking (GST_FORMAT_TIME);
 				if (gst_element_query (priv->pipeline, query))
@@ -643,7 +643,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			break;
 		}
 		case GST_STATE_PAUSED: {
-			if (cwin->cstate->state == ST_PAUSED) {
+			if (cwin->backend->state == ST_PAUSED) {
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -835,6 +835,7 @@ static void
 pragha_backend_init (PraghaBackend *backend)
 {
 	backend->priv = PRAGHA_BACKEND_GET_PRIVATE (backend);
+	backend->state = ST_STOPPED;
 	/* FIXME */
 }
 

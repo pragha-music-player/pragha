@@ -24,7 +24,7 @@ update_menubar_lastfm_state (struct con_win *cwin)
 {
 	GtkAction *action;
 
-	gboolean playing = cwin->cstate->state != ST_STOPPED;
+	gboolean playing = cwin->backend->state != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
 	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lw.lastfm_user) != 0);
@@ -65,7 +65,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	memset(&otag, 0, sizeof(struct tags));
@@ -535,7 +535,7 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->session_id == NULL) {
@@ -574,7 +574,7 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_LASTFM, "Love Handler");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -613,7 +613,7 @@ lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_LASTFM, "Unlove Handler");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -660,7 +660,7 @@ lastfm_scrob_handler(gpointer data)
 
 	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return FALSE;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -769,7 +769,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
 
-	if(cwin->cstate->state == ST_STOPPED)
+	if(cwin->backend->state == ST_STOPPED)
 		return;
 
 	if((strlen(cwin->cpref->lw.lastfm_user) == 0) ||

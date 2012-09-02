@@ -296,14 +296,6 @@ enum playlist_action {
 	PLAYLIST_PREV
 };
 
-/* Player state */
-
-enum player_state {
-	ST_PLAYING = 1,
-	ST_STOPPED,
-	ST_PAUSED
-};
-
 /* Node types in library view */
 
 enum node_type {
@@ -580,7 +572,6 @@ struct db_result {
  * @view_change: If library view change is in progress
  * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
- * @state: State of the player { ST_STOPPED, ... }
  * @tracks_curr_playlist: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @last_folder: Last polder used in file chooser
@@ -595,7 +586,6 @@ struct db_result {
  */
 
 struct con_state {
-	enum player_state state;
 	gboolean dragging;
 	gboolean unique_instance;
 	gboolean view_change;

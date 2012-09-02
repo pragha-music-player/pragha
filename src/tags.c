@@ -1090,7 +1090,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
 			update_musicobject(cwin->cstate->curr_mobj, changed, omobj->tags, cwin);
-			if(cwin->cstate->state != ST_STOPPED) {
+			if(cwin->backend->state != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
@@ -1237,7 +1237,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
 			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
-			if(cwin->cstate->state != ST_STOPPED) {
+			if(cwin->backend->state != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
