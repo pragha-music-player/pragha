@@ -341,7 +341,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 
 static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win *cwin)
 {
-	switch (cwin->backend->state) {
+	switch (pragha_backend_get_state (cwin->backend)) {
 	case ST_PLAYING:	return g_variant_new_string("Playing");
 	case ST_PAUSED:		return g_variant_new_string("Paused");
 	default:		return g_variant_new_string("Stopped");
@@ -443,7 +443,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("a{sv}"));
 
-	if (cwin->backend->state != ST_STOPPED) {
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		handle_get_metadata(cwin->cstate->curr_mobj, &b);
 		/* Append the album art url metadata. */
 		if(cwin->cstate->arturl != NULL) {
@@ -473,7 +473,7 @@ static void mpris_Player_put_Volume (GVariant *value, GError **error, struct con
 
 static GVariant* mpris_Player_get_Position (GError **error, struct con_win *cwin)
 {
-	if (cwin->backend->state == ST_STOPPED)
+	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return g_variant_new_int64(0);
 	else
 		return g_variant_new_int64(pragha_backend_get_current_position(cwin->backend) / 1000);
@@ -983,7 +983,7 @@ void mpris_update_any(struct con_win *cwin)
 
 	CDEBUG(DBG_MPRIS, "MPRIS update any");
 
-	if (cwin->backend->state != ST_STOPPED)
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		newtitle = cwin->cstate->curr_mobj->file;
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
@@ -993,10 +993,10 @@ void mpris_update_any(struct con_win *cwin)
 		cwin->cmpris2->saved_shuffle = cwin->cpref->shuffle;
 		g_variant_builder_add (&b, "{sv}", "Shuffle", mpris_Player_get_Shuffle (NULL, cwin));
 	}
-	if(cwin->cmpris2->state != cwin->backend->state)
+	if(cwin->cmpris2->state != pragha_backend_get_state (cwin->backend))
 	{
 		change_detected = TRUE;
-		cwin->cmpris2->state = cwin->backend->state;
+		cwin->cmpris2->state = pragha_backend_get_state (cwin->backend);
 		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, cwin));
 	}
 	if(cwin->cmpris2->saved_playbackstatus != cwin->cpref->repeat)

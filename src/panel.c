@@ -300,7 +300,7 @@ void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con
 		cwin->cpref->timer_remaining_mode = FALSE;
 	else
 		cwin->cpref->timer_remaining_mode = TRUE;
-	if(cwin->backend->state != ST_STOPPED)
+	if(pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		update_current_song_info(cwin);
 }
 
@@ -314,7 +314,7 @@ void track_progress_change_cb(GtkWidget *widget,
 	if (event->button != 1)
 		return;
 
-	if (cwin->backend->state != ST_PLAYING)
+	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
 		return;
 
 	if (!cwin->cstate->curr_mobj || cwin->cstate->curr_mobj->tags->length == 0)
@@ -397,7 +397,7 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 				GdkEventButton *event,
 				struct con_win *cwin)
 {
-	if (cwin->backend->state != ST_STOPPED &&
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED &&
 	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
 		open_url(cwin, cwin->cstate->arturl);
 
@@ -550,7 +550,7 @@ void play_pause_resume(struct con_win *cwin)
 	/* Stopped   Start playback	    */
         /************************************/
 
-	switch (cwin->backend->state) {
+	switch (pragha_backend_get_state (cwin->backend)) {
 	case ST_PLAYING:
 		pragha_backend_pause(cwin->backend);
 		break;
@@ -607,12 +607,12 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 
 void update_panel_playback_state(struct con_win *cwin)
 {
-	gboolean playing = (cwin->backend->state != ST_STOPPED);
+	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->prev_button), playing);
 
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(cwin->play_button),
-				     (cwin->backend->state == ST_PLAYING) ?
+				     (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ?
 				     GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->stop_button), playing);
@@ -652,7 +652,7 @@ void album_art_toggle_state(struct con_win *cwin)
 		}
 		gtk_widget_show_now(cwin->album_art_frame);
 		resize_album_art_frame(cwin);
-		if (cwin->backend->state != ST_STOPPED)
+		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 			update_album_art(cwin->cstate->curr_mobj, cwin);
 		else unset_album_art(cwin);
 	}

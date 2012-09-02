@@ -44,7 +44,6 @@ typedef struct PraghaBackendPrivate PraghaBackendPrivate;
 typedef struct {
 	GObject parent;
 	PraghaBackendPrivate *priv;
-	enum player_state state;
 } PraghaBackend;
 
 typedef struct {
@@ -63,6 +62,7 @@ void pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta);
 gboolean pragha_backend_is_playing(PraghaBackend *backend);
 gboolean pragha_backend_is_paused(PraghaBackend *backend);
 gboolean pragha_backend_emitted_error (PraghaBackend *backend);
+enum player_state pragha_backend_get_state (PraghaBackend *backend);
 void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
