@@ -1435,8 +1435,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	init_toggle_buttons(cwin);
 	update_menu_playlist_changes(cwin);
 
-	update_menubar_playback_state (cwin);
-
 	if (cwin->album_art_frame)
 		resize_album_art_frame(cwin);
 
