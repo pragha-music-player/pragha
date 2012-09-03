@@ -269,8 +269,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
-		if(already_in_current_playlist(mobj, cwin) == FALSE)
-			append_current_playlist(model, mobj, cwin);
+		append_current_playlist(model, mobj, cwin);
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
