@@ -742,9 +742,8 @@ void handle_selected_file(gpointer data, gpointer udata);
 	if (G_UNLIKELY(_lvl <= debug_level))	\
 		g_debug(_fmt, ##__VA_ARGS__);
 
-/* Menu actions */
+/* Menu */
 
-void update_menubar_playback_state (struct con_win *cwin);
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
 void add_location_action(GtkAction *action, struct con_win *cwin);
@@ -777,8 +776,8 @@ void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
-
 void rescan_library_handler(struct con_win *cwin);
+GtkUIManager* create_menu(struct con_win *cwin);
 
 /* Panel */
 
@@ -1230,7 +1229,6 @@ GtkWidget* pragha_search_entry_new(struct con_win *cwin);
 
 /* GUI */
 
-GtkUIManager* create_menu(struct con_win *cwin);
 GtkWidget* create_main_region(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
