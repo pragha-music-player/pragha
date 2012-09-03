@@ -345,35 +345,6 @@ pragha_backend_resume (PraghaBackend *backend)
 	}
 }
 
-static void
-pragha_backend_advance_playback (GError *error, struct con_win *cwin)
-{
-	GtkTreePath *path = NULL;
-	struct musicobject *mobj = NULL;
-
-	CDEBUG(DBG_BACKEND, "Advancing to next track");
-
-	/* Stop to set ready and clear all info */
-	pragha_backend_stop(cwin->backend, error);
-
-	if(cwin->cstate->playlist_change)
-		return;
-
-	/* Get the next track to be played */
-	path = current_playlist_get_next (cwin);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Start playing new track */
-	mobj = current_playlist_mobj_at_path (path, cwin);
-	pragha_backend_start (cwin->backend, mobj);
-
-	update_current_state (path, PLAYLIST_NEXT, cwin);
-	gtk_tree_path_free (path);
-}
-
 /* Signal handler for parse the error dialog response. */
 
 static void pragha_backend_error_dialog_response(GtkDialog *dialog,
@@ -386,7 +357,7 @@ static void pragha_backend_error_dialog_response(GtkDialog *dialog,
 
 	switch (response) {
 		case GTK_RESPONSE_APPLY: {
-			pragha_backend_advance_playback (error, cwin);
+			pragha_advance_playback (error, cwin);
 			break;
 		}
 		case GTK_RESPONSE_ACCEPT:
@@ -663,7 +634,7 @@ static gboolean pragha_backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, 
 
 	switch(GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_EOS:
-			pragha_backend_advance_playback (NULL, cwin);
+			pragha_advance_playback (NULL, cwin);
 			break;
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState old, new, pending;

@@ -1080,6 +1080,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   struct con_win *cwin);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
+GtkWidget* create_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
 				     struct con_win *cwin);
 void playlist_title_column_change_cb(GtkCheckMenuItem *item,
@@ -1215,6 +1216,7 @@ gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
+void pragha_advance_playback (GError *error, struct con_win *cwin);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
 /* Some widgets. */
