@@ -731,11 +731,6 @@ void handle_selected_file(gpointer data, gpointer udata);
 	for (i=result.no_columns; i<((result.no_rows+1)*(result.no_columns)); \
 	     i+=result.no_columns)
 
-#define SCALE_UP_VOL(vol) volume_convert(vol, cwin->cmixer->min_vol,	\
-					 cwin->cmixer->max_vol, 0, 100)
-#define SCALE_DOWN_VOL(vol) volume_convert(vol, 0, 100, cwin->cmixer->min_vol, \
-					   cwin->cmixer->max_vol)
-
 /* Debugging */
 
 #define CDEBUG(_lvl, _fmt, ...)			\
