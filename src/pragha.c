@@ -28,13 +28,13 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_backend_stop(cwin->backend, NULL);
 
+#ifdef HAVE_LIBGLYR
+	glyr_related_free (cwin);
+#endif
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
 	preferences_free (cwin->cpref);
-#ifdef HAVE_LIBGLYR
-	glyr_related_free (cwin);
-#endif
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	lastfm_free (cwin->clastfm);
@@ -132,16 +132,16 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
+	if (backend_init(cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
+		return -1;
+	}
+
 	#ifdef HAVE_LIBGLYR
 	if (init_glyr_related(cwin) == -1) {
 		g_critical("Unable to initialize libglyr");
 	}
 	#endif
-
-	if (backend_init(cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
-		return -1;
-	}
 
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
