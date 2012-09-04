@@ -1168,7 +1168,6 @@ void dbus_handlers_free(struct con_win *cwin);
 
 gint mpris_init(struct con_win *cwin);
 void mpris_update_seeked(struct con_win *cwin, gint position);
-gboolean handle_path_request(struct con_win *cwin, const gchar *dbus_path, struct musicobject **mobj, GtkTreePath **tree_path);
 void mpris_update_any(struct con_win *cwin);
 void mpris_update_metadata_changed(struct con_win *cwin);
 void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
