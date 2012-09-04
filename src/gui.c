@@ -643,6 +643,13 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	return hpane;
 }
 
+static void
+buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
+{
+	GtkProgressBar *track_progress_bar = user_data;
+	gtk_progress_bar_set_fraction(track_progress_bar, (gdouble)percent/100);
+}
+
 GtkWidget* create_playing_box(struct con_win *cwin)
 {
 	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
@@ -722,6 +729,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
 			 G_CALLBACK(track_progress_change_cb), cwin);
 	#endif
+	g_signal_connect (cwin->backend, "buffering", G_CALLBACK(buffering_cb), track_progress_bar);
 
 	track_time_label = gtk_label_new(NULL);
 	track_length_label = gtk_label_new(NULL);

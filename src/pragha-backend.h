@@ -49,6 +49,7 @@ typedef struct {
 typedef struct {
 	GObjectClass parent_class;
 	void (*tick) (PraghaBackend *backend);
+	void (*buffering) (PraghaBackend *backend, gint percent);
 } PraghaBackendClass;
 
 gboolean pragha_backend_can_seek (PraghaBackend *backend);
