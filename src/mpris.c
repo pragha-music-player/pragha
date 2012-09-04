@@ -130,6 +130,33 @@ static const gchar mpris2xml[] =
 		mpris_##x##_put_##y(value, error, cwin);
 #define END_INTERFACE }
 
+static gboolean
+handle_path_request(struct con_win *cwin, const gchar *dbus_path,
+		struct musicobject **mobj, GtkTreePath **tree_path) {
+	gchar *base = g_strdup_printf("%s/TrackList/", MPRIS_PATH);
+	gboolean found = FALSE;
+	*mobj = NULL;
+	if(g_str_has_prefix(dbus_path, base)) {
+
+		void *request = NULL;
+		sscanf(dbus_path + strlen(base), "%p", &request);
+
+		if(request) {
+			GtkTreePath *path = current_playlist_path_at_mobj(request, cwin);
+			if(path) {
+				found = TRUE;
+				*mobj = request;
+				if(tree_path)
+					*tree_path = path;
+				else
+					gtk_tree_path_free(path);
+			}
+		}
+	}
+	g_free(base);
+	return found;
+}
+
 /* org.mpris.MediaPlayer2 */
 static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
@@ -622,32 +649,6 @@ static GVariant* mpris_Playlists_get_Orderings (GError **error, struct con_win *
 static GVariant* mpris_Playlists_get_PlaylistCount (GError **error, struct con_win *cwin)
 {
 	return g_variant_new_uint32(get_playlist_count_db(cwin->cdbase));
-}
-
-gboolean handle_path_request(struct con_win *cwin, const gchar *dbus_path,
-		struct musicobject **mobj, GtkTreePath **tree_path) {
-	gchar *base = g_strdup_printf("%s/TrackList/", MPRIS_PATH);
-	gboolean found = FALSE;
-	*mobj = NULL;
-	if(g_str_has_prefix(dbus_path, base)) {
-
-		void *request = NULL;
-		sscanf(dbus_path + strlen(base), "%p", &request);
-
-		if(request) {
-			GtkTreePath *path = current_playlist_path_at_mobj(request, cwin);
-			if(path) {
-				found = TRUE;
-				*mobj = request;
-				if(tree_path)
-					*tree_path = path;
-				else
-					gtk_tree_path_free(path);
-			}
-		}
-	}
-	g_free(base);
-	return found;
 }
 
 /* org.mpris.MediaPlayer2.TrackList */
