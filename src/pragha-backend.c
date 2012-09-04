@@ -66,6 +66,7 @@ static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
 	SIGNAL_TICK,
+	SIGNAL_BUFFERING,
 	LAST_SIGNAL
 };
 
@@ -432,7 +433,6 @@ static void
 pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	gint percent = 0;
 	GstState cur_state;
 
@@ -461,7 +461,7 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 		}
 	}
 
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), (gdouble)percent/100);
+	g_signal_emit (backend, signals[SIGNAL_BUFFERING], 0, percent);
 }
 
 static void
@@ -795,6 +795,13 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                              G_SIGNAL_RUN_LAST,
                                              G_STRUCT_OFFSET (PraghaBackendClass, tick),
                                              NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+	signals[SIGNAL_BUFFERING] = g_signal_new ("buffering",
+                                                  G_TYPE_FROM_CLASS (gobject_class),
+                                                  G_SIGNAL_RUN_LAST,
+                                                  G_STRUCT_OFFSET (PraghaBackendClass, buffering),
+                                                  NULL, NULL, NULL, G_TYPE_NONE,
+                                                  1, G_TYPE_INT);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
