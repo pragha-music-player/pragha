@@ -250,14 +250,13 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 		return;
 	}
 
-	gdouble fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar));
-	gint seek = cwin->cstate->curr_mobj->tags->length * fraction;
 	gint64 param;
 	g_variant_get(parameters, "(x)", &param);
-	seek += (param / 1000000);
 
-	if (seek >= cwin->cstate->curr_mobj->tags->length)
-		seek = cwin->cstate->curr_mobj->tags->length;
+	gint64 curr_pos = pragha_backend_get_current_position (cwin->backend) / GST_USECOND;
+	gint64 seek = (curr_pos + param) / GST_MSECOND;
+
+	seek = CLAMP (seek, 0, cwin->cstate->curr_mobj->tags->length);
 
 	pragha_backend_seek(cwin->backend, seek);
 	mpris_update_seeked(cwin, seek);
