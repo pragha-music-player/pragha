@@ -18,7 +18,6 @@
 #include "pragha.h"
 
 #ifdef HAVE_GUDEV
-
 #include <gudev/gudev.h>
 
 struct con_udev {
@@ -28,14 +27,20 @@ struct con_udev {
 	guint64 device_hooked;
 };
 
-const char * const gudev_subsystems[] = { "block", NULL };
-
 enum
 {
 	PRAGHA_RESPONSE_NONE,
 	PRAGHA_RESPONSE_PLAY,
 	PRAGHA_RESPONSE_BROWSE,
 };
+
+const char * const gudev_subsystems[] = { "block", NULL };
+
+/* Headers. */
+
+static void pragha_gudev_clear_hook_device(struct con_udev *cudev);
+
+/* Pragha Gudev code.*/
 
 gint
 pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
@@ -188,7 +193,7 @@ pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
 }
 
 static void
-pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, GUdevDevice *device)
+pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, struct con_udev *cudev)
 {
 	GMount *mount;
 	GError *error = NULL;
@@ -202,13 +207,16 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, GUdevDe
 		mount = g_volume_get_mount (volume);
 
 		if (mount != NULL) {
-			pragha_block_device_mounted (device, mount, &error);
+			pragha_block_device_mounted (cudev->device, mount, &error);
 			g_object_unref (mount);
 		}
-		else {
-			g_message("Unable to locate mount point");
-		}
 	}
+
+	if(error != NULL) {
+		g_message("Mount FAALLL!. %s", error->message);
+		pragha_gudev_clear_hook_device(cudev);
+	}
+
 	g_object_unref (volume);
 }
 
@@ -235,7 +243,7 @@ pragha_block_device_mount (gpointer data)
 			/* try to mount the volume asynchronously */
 			mount_operation = gtk_mount_operation_new (NULL);
 			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
-					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, cudev->device);
+					NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish, cudev);
 			g_object_unref (mount_operation);
 		}
 		else {
@@ -317,6 +325,14 @@ pragha_gudev_device_added(GUdevDevice *device, struct con_udev *cudev)
 }
 
 static void
+pragha_gudev_clear_hook_device(struct con_udev *cudev)
+{
+	g_object_unref (cudev->device);
+	cudev->bus_hooked = 0;
+	cudev->device_hooked = 0;
+}
+
+static void
 pragha_gudev_device_removed(GUdevDevice *device, struct con_udev *cudev)
 {
 	guint64      busnum = 0;
@@ -332,10 +348,7 @@ pragha_gudev_device_removed(GUdevDevice *device, struct con_udev *cudev)
 	if(cudev->bus_hooked == busnum &&
 	   cudev->device_hooked == devnum) {
 		g_message("Device removed... . .\n");
-
-		g_object_unref (cudev->device);
-		cudev->bus_hooked = 0;
-		cudev->device_hooked = 0;
+		pragha_gudev_clear_hook_device (cudev);
 	}
 }
 
