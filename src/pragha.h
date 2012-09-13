@@ -678,6 +678,7 @@ struct con_win {
 	#endif
 	GtkWidget *library_tree;
 	GtkWidget *jump_tree;
+	GtkTreeModel *jump_model_filter;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GtkStatusIcon *status_icon;
