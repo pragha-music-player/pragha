@@ -19,6 +19,20 @@
 #include "pragha.h"
 
 #ifdef HAVE_LIBCLASTFM
+
+enum LASTFM_QUERY_TYPE {
+	LASTFM_NONE = 0,
+	LASTFM_GET_SIMILAR,
+	LASTFM_GET_LOVED
+};
+
+typedef struct {
+	GList *list;
+	guint query_type;
+	guint query_count;
+	struct con_win *cwin;
+} AddMusicObjectListData;
+
 void
 update_menubar_lastfm_state (struct con_win *cwin)
 {
@@ -240,16 +254,13 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 	#endif
 }
 
-typedef struct {
-	GList *list;
-	struct con_win *cwin;
-} AddMusicObjectListData;
-
 static gboolean
 append_mobj_list_current_playlist_idle(gpointer user_data)
 {
 	GtkTreeModel *model;
 	struct musicobject *mobj;
+	gchar *summary = NULL;
+	guint songs_added = 0;
 	GList *l;
 
 	AddMusicObjectListData *data = user_data;
@@ -270,6 +281,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
 		append_current_playlist(model, mobj, cwin);
+		songs_added += 1;
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
@@ -277,11 +289,35 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	cwin->cstate->playlist_change = FALSE;
 	g_object_unref(model);
 
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
-
 	g_list_free(list);
 empty:
+	switch(data->query_type) {
+		case LASTFM_GET_SIMILAR:
+			if(data->query_count > 0)
+				summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."),
+							  songs_added, data->query_count);
+			else
+				summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
+			break;
+		case LASTFM_GET_LOVED:
+			if(data->query_count > 0)
+				summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."),
+							  songs_added, data->query_count);
+			else
+				summary = g_strdup_printf(_("You had no favorite songs on Last.fm."));
+			break;
+		case LASTFM_NONE:
+		default:
+			break;
+	}
+
+	if(songs_added > 0)
+		select_last_path_of_current_playlist(cwin);
+
+	if (summary != NULL) {
+		set_status_message(summary, cwin);
+		g_free(summary);
+	}
 	g_slice_free (AddMusicObjectListData, data);
 
 	return FALSE;
@@ -293,6 +329,7 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
 	struct musicobject *mobj = NULL;
+	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
 
@@ -317,11 +354,15 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 	for(li=results; li; li=li->next) {
 		track = li->data;
 		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
+		query_count += 1;
 	}
 
 	data = g_slice_new (AddMusicObjectListData);
 	data->list = list;
+	data->query_type = LASTFM_GET_SIMILAR;
+	data->query_count = query_count;
 	data->cwin = cwin;
+
 	g_idle_add (append_mobj_list_current_playlist_idle, data);
 
 	remove_watch_cursor_on_thread(NULL, cwin);
@@ -441,6 +482,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	LASTFM_TRACK_INFO *track;
 	gint rpages = 0, cpage = 0;
 	AddMusicObjectListData *data;
+	guint query_count = 0;
 	GList *list = NULL;
 
 	struct con_win *cwin = user_data;
@@ -456,6 +498,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 		for(li=results; li; li=li->next) {
 			track = li->data;
 			list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
+			query_count += 1;
 		}
 		LASTFM_free_track_info_list (results);
 		cpage++;
@@ -463,7 +506,10 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	data = g_slice_new (AddMusicObjectListData);
 	data->list = list;
+	data->query_type = LASTFM_GET_LOVED;
+	data->query_count = query_count;
 	data->cwin = cwin;
+
 	g_idle_add (append_mobj_list_current_playlist_idle, data);
 
 	remove_watch_cursor_on_thread(NULL, cwin);
@@ -494,6 +540,7 @@ do_lastfm_get_similar_action (gpointer user_data)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
+	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
 	AddMusicObjectListData *data;
@@ -515,11 +562,15 @@ do_lastfm_get_similar_action (gpointer user_data)
 	for(li=results; li; li=li->next) {
 		track = li->data;
 		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
+		query_count += 1;
 	}
 
 	data = g_slice_new (AddMusicObjectListData);
 	data->list = list;
+	data->query_type = LASTFM_GET_SIMILAR;
+	data->query_count = query_count;
 	data->cwin = cwin;
+
 	g_idle_add (append_mobj_list_current_playlist_idle, data);
 
 	remove_watch_cursor_on_thread(NULL, cwin);
