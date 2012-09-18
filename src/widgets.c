@@ -131,12 +131,14 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct c
             image = gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_DIALOG);
 
 	label = gtk_label_new(NULL);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 	gtk_widget_modify_fg(label,
 				GTK_STATE_NORMAL,
 				&gtk_widget_get_style(entry)->text[GTK_STATE_NORMAL]);
         markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
 	g_free(markup);
+
 	gtk_widget_destroy (entry);
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
