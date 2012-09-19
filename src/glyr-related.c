@@ -204,18 +204,21 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 	glyr_info = g_slice_new0 (glyr_struct);
 
 	glyr_query_init(&glyr_info->query);
-
 	glyr_opt_type(&glyr_info->query, type);
 
-	if(type == GLYR_GET_LYRICS) {
-		glyr_opt_artist(&glyr_info->query, artist);
-		glyr_opt_title(&glyr_info->query, title);
-	}
-	else {
+	switch (type) {
+	case GLYR_GET_ARTIST_BIO:
 		glyr_opt_artist(&glyr_info->query, artist);
 
 		glyr_opt_lang (&glyr_info->query, ISO_639_1);
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
+		break;
+	case GLYR_GET_LYRICS:
+		glyr_opt_artist(&glyr_info->query, artist);
+		glyr_opt_title(&glyr_info->query, title);
+		break;
+	default:
+		break;
 	}
 
 	glyr_opt_lookup_db(&glyr_info->query, cwin->cache_db);
