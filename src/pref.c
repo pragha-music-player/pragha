@@ -1885,7 +1885,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Add to dialog */
 
-	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
+	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha");
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);

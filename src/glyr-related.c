@@ -74,7 +74,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
-	header = sokoke_xfce_header_new (subtitle_header, NULL, cwin);
+	header = sokoke_xfce_header_new (subtitle_header, NULL);
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), scrolled, TRUE, TRUE, 0);

@@ -104,7 +104,7 @@ GtkWidget* pragha_search_entry_new(struct con_win *cwin)
 /* Create a new haeder widget to use in preferences.
  * Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan. */
 
-gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct con_win *cwin)
+gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 {
 	GtkWidget* entry;
 	GtkWidget* xfce_heading;
@@ -137,12 +137,13 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon, struct c
 				&gtk_widget_get_style(entry)->text[GTK_STATE_NORMAL]);
         markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
+	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
 	g_free(markup);
 
 	gtk_widget_destroy (entry);
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 
 	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
 
