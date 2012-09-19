@@ -29,40 +29,23 @@ typedef struct
 }
 glyr_struct;
 
-static void
-generic_text_info_dialog_response(GtkDialog *dialog,
-				gint response,
-				glyr_struct *glyr_info)
-{
-	glyr_free_list(glyr_info->head);
-	glyr_query_destroy(&glyr_info->query);
-	g_slice_free(glyr_struct, glyr_info);
+/* Use the download info on glyr thread and show a dialog. */
 
+static void
+pragha_text_info_dialog_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
+{
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-gboolean
-show_generic_related_text_info_dialog (gpointer data)
+static void
+pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_header, gchar *subtitle_header)
 {
 	GtkWidget *dialog, *header, *view, *scrolled;
 	GtkTextBuffer *buffer;
-	gchar *artist = NULL, *title = NULL, *provider = NULL;
-	gchar *title_header = NULL, *subtitle_header = NULL;
 
-	glyr_struct *glyr_info = data;
-
-	artist = g_strdup(glyr_info->query.artist);
-	title = g_strdup(glyr_info->query.title);
-	provider = g_strdup(glyr_info->head->prov);
-
-	if(glyr_info->head->type == GLYR_TYPE_LYRICS) {
-		title_header =  g_strdup_printf(_("Lyrics thanks to %s"), provider);
-		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), title, artist);
-	}
-	else {
-		title_header =  g_strdup_printf(_("Artist info"));
-		subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), artist, provider);
-	}
+	struct con_win *cwin = glyr_info->cwin;
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -83,7 +66,7 @@ show_generic_related_text_info_dialog (gpointer data)
 	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
 	dialog = gtk_dialog_new_with_buttons(title_header,
-					     GTK_WINDOW(glyr_info->cwin->mainwindow),
+					     GTK_WINDOW(cwin->mainwindow),
 					     GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
@@ -91,24 +74,96 @@ show_generic_related_text_info_dialog (gpointer data)
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
-	header = sokoke_xfce_header_new (subtitle_header, NULL, glyr_info->cwin);
+	header = sokoke_xfce_header_new (subtitle_header, NULL, cwin);
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), scrolled, TRUE, TRUE, 0);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(generic_text_info_dialog_response), glyr_info);
+			G_CALLBACK(pragha_text_info_dialog_response), cwin);
 
 	gtk_widget_show_all(dialog);
+}
+
+/* Save the downloaded album art in cache, and updates the gui.*/
+
+static void
+pragha_update_downloaded_album_art (glyr_struct *glyr_info)
+{
+	gchar *artist = NULL, *album = NULL, *album_art_path = NULL;
+	GdkPixbuf *album_art = NULL;
+	GError *error = NULL;
+
+	struct con_win *cwin = glyr_info->cwin;
+
+	artist = g_strdup(glyr_info->query.artist);
+	album = g_strdup(glyr_info->query.album);
+
+	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
+					cwin->cpref->cache_folder,
+					artist,
+					album);
+	if(glyr_info->head->data)
+		album_art = vgdk_pixbuf_new_from_memory(glyr_info->head->data, glyr_info->head->size);
+
+	if (album_art) {
+		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
+			if((pragha_backend_get_state (cwin->backend) != ST_STOPPED) &&
+			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
+			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
+				update_album_art(cwin->cstate->curr_mobj, cwin);
+				mpris_update_metadata_changed(cwin);
+			}
+		}
+		else {
+			g_warning("Failed to save albumart file %s: %s\n", album_art_path, error->message);
+			g_error_free(error);
+		}
+		g_object_unref(G_OBJECT(album_art));
+	}
+
+	g_free(artist);
+	g_free(album);
+	g_free(album_art_path);
+}
+
+/* Manages the results of glyr threads. */
+
+gboolean
+glyr_finished_thread_update (gpointer data)
+{
+	glyr_struct *glyr_info = data;
+	gchar *title_header = NULL, *subtitle_header = NULL;
+
+	switch (glyr_info->head->type) {
+	case GLYR_TYPE_COVERART:
+		pragha_update_downloaded_album_art(glyr_info);
+		break;
+	case GLYR_TYPE_LYRICS:
+		title_header =  g_strdup_printf(_("Lyrics thanks to %s"), glyr_info->head->prov);
+		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), glyr_info->query.title, glyr_info->query.artist);
+		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
+		break;
+	case GLYR_TYPE_ARTIST_BIO:
+		title_header =  g_strdup_printf(_("Artist info"));
+		subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), glyr_info->query.artist, glyr_info->head->prov);
+		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
+		break;
+	default:
+		break;
+	}
+
+	glyr_free_list(glyr_info->head);
+	glyr_query_destroy(&glyr_info->query);
+	g_slice_free(glyr_struct, glyr_info);
 
 	g_free(title_header);
 	g_free(subtitle_header);
-	g_free(artist);
-	g_free(title);
-	g_free(provider);
 
 	return FALSE;
 }
+
+/* Get artist bio or lyric on a thread. */
 
 gpointer
 get_related_text_info_idle_func (gpointer data)
@@ -124,7 +179,7 @@ get_related_text_info_idle_func (gpointer data)
 
 	if(head != NULL) {
 		glyr_info->head = head;
-		g_idle_add(show_generic_related_text_info_dialog, glyr_info);
+		g_idle_add(glyr_finished_thread_update, glyr_info);
 
 		remove_watch_cursor_on_thread(NULL, glyr_info->cwin);
 	}
@@ -139,6 +194,8 @@ get_related_text_info_idle_func (gpointer data)
 
 	return NULL;
 }
+
+/* Configure the thrad to get the artist bio or lyric. */
 
 void
 configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gchar *title, struct con_win *cwin)
@@ -172,6 +229,8 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 	g_thread_create(get_related_text_info_idle_func, glyr_info, FALSE, NULL);
 	#endif
 }
+
+/* Handlers to get lyric and artist bio of current song. */
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
@@ -214,6 +273,28 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	g_free(title);
 }
 
+/* Handlers to get lyric and artist bio of current playlist selection. */
+
+void
+related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	gchar *artist = NULL;
+	struct musicobject *mobj = NULL;
+
+	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
+
+	mobj = get_selected_musicobject(cwin);
+
+	if (strlen(mobj->tags->artist) == 0)
+		return;
+
+	artist = g_strdup(mobj->tags->artist);
+
+	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+
+	g_free(artist);
+}
+
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
@@ -237,74 +318,7 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 	g_free(title);
 }
 
-void
-related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	gchar *artist = NULL;
-	struct musicobject *mobj = NULL;
-
-	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
-
-	mobj = get_selected_musicobject(cwin);
-
-	if (strlen(mobj->tags->artist) == 0)
-		return;
-
-	artist = g_strdup(mobj->tags->artist);
-
-	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
-
-	g_free(artist);
-}
-
-/* Dowload album art and save it in cache.*/
-
-gboolean
-update_downloaded_album_art (gpointer data)
-{
-	gchar *artist = NULL, *album = NULL, *album_art_path = NULL;
-	GdkPixbuf *album_art = NULL;
-	GError *error = NULL;
-
-	glyr_struct *glyr_info = data;
-	struct con_win *cwin = glyr_info->cwin;
-
-	artist = g_strdup(glyr_info->query.artist);
-	album = g_strdup(glyr_info->query.album);
-
-	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
-					cwin->cpref->cache_folder,
-					artist,
-					album);
-	if(glyr_info->head->data)
-		album_art = vgdk_pixbuf_new_from_memory(glyr_info->head->data, glyr_info->head->size);
-
-	if (album_art) {
-		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
-			if((pragha_backend_get_state (cwin->backend) != ST_STOPPED) &&
-			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
-			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
-				update_album_art(cwin->cstate->curr_mobj, cwin);
-				mpris_update_metadata_changed(cwin);
-			}
-		}
-		else {
-			g_warning("Failed to save albumart file %s: %s\n", album_art_path, error->message);
-			g_error_free(error);
-		}
-		g_object_unref(G_OBJECT(album_art));
-	}
-
-	glyr_free_list(glyr_info->head);
-	glyr_query_destroy(&glyr_info->query);
-	g_slice_free(glyr_struct, glyr_info);
-
-	g_free(artist);
-	g_free(album);
-	g_free(album_art_path);
-
-	return FALSE;
-}
+/* Download the album art in a thread. */
 
 gpointer
 get_album_art_idle_func (gpointer data)
@@ -318,7 +332,7 @@ get_album_art_idle_func (gpointer data)
 
 	if(head != NULL) {
 		glyr_info->head = head;
-		g_idle_add(update_downloaded_album_art, glyr_info);
+		g_idle_add(glyr_finished_thread_update, glyr_info);
 	}
 	else {
 		if (error != GLYRE_OK)
