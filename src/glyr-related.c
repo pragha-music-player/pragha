@@ -144,7 +144,11 @@ glyr_finished_thread_update (gpointer data)
 		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), glyr_info->query.title, glyr_info->query.artist);
 		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
 		break;
+#if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_TYPE_ARTIST_BIO:
+#else
+	case GLYR_TYPE_ARTISTBIO:
+#endif
 		title_header =  g_strdup_printf(_("Artist info"));
 		subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), glyr_info->query.artist, glyr_info->head->prov);
 		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
@@ -207,7 +211,11 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 	glyr_opt_type(&glyr_info->query, type);
 
 	switch (type) {
+#if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_GET_ARTIST_BIO:
+#else
+	case GLYR_GET_ARTISTBIO:
+#endif
 		glyr_opt_artist(&glyr_info->query, artist);
 
 		glyr_opt_lang (&glyr_info->query, ISO_639_1);
