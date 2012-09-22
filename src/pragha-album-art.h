@@ -19,6 +19,7 @@
 #define PRAGHA_ALBUM_ART_H
 
 #include <glib-object.h>
+#include <gtk/gtkimage.h>
 
 G_BEGIN_DECLS
 
@@ -37,7 +38,7 @@ typedef struct _PraghaAlbumArtPrivate PraghaAlbumArtPrivate;
 
 struct _PraghaAlbumArt
 {
-   GObject parent;
+   GtkImage parent;
 
    /*< private >*/
    PraghaAlbumArtPrivate *priv;
@@ -53,6 +54,8 @@ GType pragha_album_art_get_type (void) G_GNUC_CONST;
 const gchar *pragha_album_art_get_uri (PraghaAlbumArt *albumart);
 void pragha_album_art_set_uri (PraghaAlbumArt *albumart,
                                const char *uri);
+void pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf);
+void pragha_album_art_clear_icon (PraghaAlbumArt *albumart);
 
 G_END_DECLS
 
