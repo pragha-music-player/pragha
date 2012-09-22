@@ -110,9 +110,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);
 
-	if (cwin->cpref->show_album_art && cwin->album_art &&
-	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
-		gtk_tooltip_set_icon (tooltip, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+	gtk_tooltip_set_icon (tooltip, pragha_album_art_get_pixbuf(cwin->albumart));
 
 	return TRUE;
 }

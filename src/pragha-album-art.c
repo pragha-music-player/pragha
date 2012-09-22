@@ -157,6 +157,23 @@ pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf)
 }
 
 /**
+ * album_art_get_pixbuf:
+ *
+ */
+GdkPixbuf *
+pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart)
+{
+   GdkPixbuf *pixbuf = NULL;
+
+   g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), NULL);
+
+   if(gtk_image_get_storage_type(GTK_IMAGE(albumart)) == GTK_IMAGE_PIXBUF)
+      pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(albumart));
+
+   return pixbuf;
+}
+
+/**
  * album_art_clear_icon:
  *
  */

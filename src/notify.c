@@ -138,9 +138,8 @@ show_osd (struct con_win *cwin)
 	notify_notification_set_timeout(cwin->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
-	if (cwin->cpref->show_album_art && cwin->album_art && cwin->cpref->albumart_in_osd &&
-	    (gtk_image_get_storage_type(GTK_IMAGE(cwin->album_art)) == GTK_IMAGE_PIXBUF))
-			notify_notification_set_icon_from_pixbuf(cwin->osd_notify, gtk_image_get_pixbuf(GTK_IMAGE(cwin->album_art)));
+	notify_notification_set_icon_from_pixbuf(cwin->osd_notify,
+						 pragha_album_art_get_pixbuf(cwin->albumart));
 
 	/* Show OSD */
 	if (!notify_notification_show(cwin->osd_notify, &error)) {
