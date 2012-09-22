@@ -336,13 +336,10 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
-	GError *error = NULL;
-	GdkPixbuf *scaled_album_art = NULL, *album_art = NULL, *scaled_frame = NULL, *frame = NULL;
+	GdkPixbuf *album_art = NULL;
 	gchar *path = NULL;
 
 	if (cwin->cpref->show_album_art) {
-		frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
-
 		if (G_LIKELY(mobj &&
 		    mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
@@ -361,31 +358,9 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 			}
 
 			if (album_art) {
-				scaled_album_art = gdk_pixbuf_scale_simple (album_art, 112, 112, GDK_INTERP_BILINEAR);
-				gdk_pixbuf_copy_area(scaled_album_art, 0 ,0 ,112 ,112, frame, 12, 8);
-				g_object_unref(G_OBJECT(scaled_album_art));
 				g_object_unref(G_OBJECT(album_art));
 			}
 		}
-
-		scaled_frame = gdk_pixbuf_scale_simple (frame,
-							cwin->cpref->album_art_size,
-							cwin->cpref->album_art_size,
-							GDK_INTERP_BILINEAR);
-
-		if (cwin->album_art) {
-			gtk_image_clear(GTK_IMAGE(cwin->album_art));
-			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), scaled_frame);
-		}
-		else {
-			cwin->album_art = gtk_image_new_from_pixbuf(scaled_frame);
-			gtk_container_add(GTK_CONTAINER(cwin->album_art_frame),
-					  GTK_WIDGET(cwin->album_art));
-			gtk_widget_show_all(cwin->album_art_frame);
-		}
-
-		g_object_unref(G_OBJECT(scaled_frame));
-		g_object_unref(G_OBJECT(frame));
 	}
 }
 
@@ -399,35 +374,6 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 		open_url(cwin, pragha_album_art_get_uri(cwin->albumart));
 
 	return TRUE;
-}
-
-/* Unset album art */
-
-void unset_album_art(struct con_win *cwin)
-{
-	GError *error = NULL;
-	GdkPixbuf *cover;
-
-	if (cwin->cpref->show_album_art) {
-		cover = gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
-							cwin->cpref->album_art_size,
-							cwin->cpref->album_art_size,
-							&error);
-		if (cwin->album_art) {
-			gtk_image_clear(GTK_IMAGE(cwin->album_art));
-			gtk_image_set_from_pixbuf(GTK_IMAGE(cwin->album_art), cover);
-		}
-		else {
-			cwin->album_art = gtk_image_new_from_pixbuf(cover);
-
-			gtk_container_add (GTK_CONTAINER(cwin->album_art_frame), cwin->album_art);
-
-			gtk_widget_show_all(cwin->album_art_frame);
-		}
-
-		g_object_unref(G_OBJECT(cover));
-	}
-	pragha_album_art_set_uri(cwin->albumart, NULL);
 }
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
@@ -618,7 +564,7 @@ update_panel_playback_state (struct con_win *cwin)
 	if (playing == FALSE) {
 		unset_current_song_info(cwin);
 		unset_track_progress_bar(cwin);
-		unset_album_art(cwin);
+		pragha_album_art_clear_icon(cwin->albumart);
 	}
 }
 
@@ -712,23 +658,8 @@ create_toolbar(struct con_win *cwin)
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(next_button));
 	cwin->next_button = next_button;
 
-	if (cwin->cpref->show_album_art) {
-		boxitem = gtk_tool_item_new ();
-		gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
-		box = gtk_hbox_new(FALSE, 0);
+	/* Setup album art widget */
 
-		album_art_frame = gtk_event_box_new ();
-		gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
-		g_signal_connect (G_OBJECT (album_art_frame),
-				"button_press_event",
-				G_CALLBACK (album_art_frame_press_callback),
-				cwin);
-		gtk_container_add (GTK_CONTAINER(boxitem), box);
-		gtk_box_pack_start (GTK_BOX(box), album_art_frame, TRUE, TRUE, 2);
-	}
-	cwin->album_art_frame = album_art_frame;
-
-	/* HACK TO TEST THE NEW WIDGET.. ¿? */
 	boxitem = gtk_tool_item_new ();
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 	box = gtk_hbox_new(FALSE, 0);
@@ -814,53 +745,4 @@ create_toolbar(struct con_win *cwin)
 	cwin->toolbar = toolbar;
 
 	return toolbar;
-}
-
-/* Toggle appearance of album art widget */
-
-void album_art_toggle_state(struct con_win *cwin)
-{
-	GtkWidget *box, *album_art_frame;
-	GtkToolItem *boxitem;
-
-	CDEBUG(DBG_INFO, "Toggle state of album art");
-
-	if (cwin->cpref->show_album_art) {
-		if (!cwin->album_art_frame) {
-			boxitem = gtk_tool_item_new ();
-			gtk_toolbar_insert (GTK_TOOLBAR(cwin->toolbar), GTK_TOOL_ITEM(boxitem), 4);
-			box = gtk_hbox_new (FALSE, 0);
-			album_art_frame = gtk_event_box_new ();
-			gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
-			g_signal_connect (G_OBJECT (album_art_frame),
-					"button_press_event",
-					G_CALLBACK (album_art_frame_press_callback),
-					cwin);
-			gtk_container_add (GTK_CONTAINER(boxitem), box);
-			gtk_box_pack_start (GTK_BOX(box), album_art_frame, TRUE, TRUE, 2);
-			gtk_widget_show_all(GTK_WIDGET(boxitem));
-			cwin->album_art_frame = album_art_frame;
-		}
-		gtk_widget_show_now(cwin->album_art_frame);
-		resize_album_art_frame(cwin);
-		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-			update_album_art(cwin->cstate->curr_mobj, cwin);
-		else unset_album_art(cwin);
-	}
-	else
-		if (cwin->album_art_frame)
-			gtk_widget_hide(cwin->album_art_frame);
-}
-
-/* Set the initial width of the frame to the default height */
-
-void resize_album_art_frame(struct con_win *cwin)
-{
-	if (cwin->album_art_frame && cwin->cpref->show_album_art){
-
-		gtk_widget_set_size_request(GTK_WIDGET(cwin->album_art_frame),
-					    cwin->cpref->album_art_size+2,
-					    cwin->cpref->album_art_size+2);
-
-	}
 }

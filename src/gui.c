@@ -870,6 +870,5 @@ void gui_free (struct con_win *cwin)
 	pixbufs_free(cwin->pixbuf);
 	cwin->pixbuf = NULL;
 
-	if (cwin->album_art)
-		gtk_widget_destroy(cwin->album_art);
+	gtk_widget_destroy(GTK_WIDGET(cwin->albumart));
 }
