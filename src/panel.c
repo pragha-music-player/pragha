@@ -20,47 +20,30 @@
 
 /* Search the album art on cache and create a pixbuf of that file */
 #ifdef HAVE_LIBGLYR
-static GdkPixbuf* get_image_from_cache(struct con_win *cwin)
+static gchar*
+get_image_uri_from_cache(struct con_win *cwin)
 {
 	gchar *album_art_url = NULL;
-	GdkPixbuf *album_art = NULL;
-	GError *error = NULL;
 
 	album_art_url = g_strdup_printf("%s/album-%s-%s.jpeg",
 				cwin->cpref->cache_folder,
 				cwin->cstate->curr_mobj->tags->artist,
 				cwin->cstate->curr_mobj->tags->album);
 
-	if (g_file_test(album_art_url, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE)
-		goto noexists;
-
-	CDEBUG(DBG_INFO, "Image file: %s", album_art_url);
-
-	album_art = gdk_pixbuf_new_from_file_at_size (album_art_url,
-						cwin->cpref->album_art_size,
-						cwin->cpref->album_art_size,
-						&error);
-
-	if (!album_art) {
-		g_critical("Unable to open image file: %s", album_art_url);
-		g_error_free(error);
-	}
-	else {
-		pragha_album_art_set_uri(cwin->albumart, album_art_url);
+	if (g_file_test(album_art_url, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free(album_art_url);
+		return NULL;
 	}
 
-noexists:
-	g_free(album_art_url);
-
-	return album_art;
+	return album_art_url;
 }
 #endif
 
 /* Get the first image file from the directory and create a pixbuf of that file */
 
-static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
+static gchar*
+get_image_uri_from_dir(gchar *path, struct con_win *cwin)
 {
-	GdkPixbuf *image = NULL;
 	GError *error = NULL;
 	GDir *dir = NULL;
 	const gchar *next_file = NULL;
@@ -78,36 +61,22 @@ static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
 		ab_file = g_strconcat(path, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR) &&
 		    is_image_file(ab_file)) {
-			CDEBUG(DBG_INFO, "Image file: %s", ab_file);
-			image = gdk_pixbuf_new_from_file_at_scale(ab_file,
-								cwin->cpref->album_art_size,
-								cwin->cpref->album_art_size,
-								FALSE,
-							  	&error);
-			if (!image) {
-				g_critical("Unable to open image file: %s",
-					   ab_file);
-				g_error_free(error);
-			}
-			else {
-				pragha_album_art_set_uri(cwin->albumart, ab_file);
-			}
-			break;
+		    	return ab_file;
 		}
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
 	}
 	g_dir_close(dir);
 
-	return image;
+	return NULL;
 }
 
 /* Find out if any of the preferred album art files are present in the given dir.
    Runs through the patterns in sequence */
 
-static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
+static gchar*
+get_pref_image_uri_dir(gchar *path, struct con_win *cwin)
 {
-	GdkPixbuf *image = NULL;
 	GError *error = NULL;
 	GDir *dir = NULL;
 	const gchar *next_file = NULL;
@@ -143,26 +112,8 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 	while (pattern[i]) {
 		if (is_present_str_list(pattern[i], file_list)) {
 			ab_file = g_strconcat(path, "/", pattern[i], NULL);
-			if (is_image_file(ab_file)) {
-				CDEBUG(DBG_INFO, "Image file: %s", ab_file);
-				image = gdk_pixbuf_new_from_file_at_scale(ab_file,
-							  cwin->cpref->album_art_size,
-							  cwin->cpref->album_art_size,
-							  FALSE,
-							  &error);
-				if (!image) {
-					g_critical("Unable to open image file: %s\n",
-						   ab_file);
-					g_error_free(error);
-					g_free(ab_file);
-					i++;
-					continue;
-				}
-				else {
-					pragha_album_art_set_uri(cwin->albumart, ab_file);
-				}
-				break;
-			}
+			if (is_image_file(ab_file))
+				return ab_file;
 			g_free(ab_file);
 		}
 		i++;
@@ -173,7 +124,7 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 	g_slist_free_full(file_list, g_free);
 	g_strfreev(pattern);
 
-	return image;
+	return NULL;
 }
 
 void __update_progress_song_info(struct con_win *cwin, gint length)
@@ -336,29 +287,29 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
-	GdkPixbuf *album_art = NULL;
-	gchar *path = NULL;
+	gchar *album_uri = NULL, *path = NULL;
 
 	if (cwin->cpref->show_album_art) {
 		if (G_LIKELY(mobj &&
 		    mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
-			album_art = get_image_from_cache(cwin);
+			album_uri = get_image_uri_from_cache(cwin);
 			#endif
-			if (album_art == NULL) {
+			if (album_uri == NULL) {
 				path = g_path_get_dirname(mobj->file);
 				if (cwin->cpref->album_art_pattern) {
-					album_art = get_pref_image_dir(path, cwin);
-					if (!album_art)
-						album_art = get_image_from_dir(path, cwin);
+					album_uri = get_pref_image_uri_dir(path, cwin);
+					if (!album_uri)
+						album_uri = get_image_uri_from_dir(path, cwin);
 				}
-				else album_art = get_image_from_dir(path, cwin);
+				else album_uri = get_image_uri_from_dir(path, cwin);
 				g_free(path);
 			}
 
-			if (album_art) {
-				g_object_unref(G_OBJECT(album_art));
+			if (album_uri) {
+				pragha_album_art_set_uri(cwin->albumart, album_uri);
+				g_free(album_uri);
 			}
 		}
 	}
