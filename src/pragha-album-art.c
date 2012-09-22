@@ -24,6 +24,7 @@ struct _PraghaAlbumArtPrivate
 {
    gchar *uri;
    guint size;
+   gboolean visible;
 };
 
 enum
@@ -31,6 +32,7 @@ enum
    PROP_0,
    PROP_URI,
    PROP_SIZE,
+   PROP_VISIBLE,
    LAST_PROP
 };
 
@@ -174,6 +176,37 @@ pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart)
 }
 
 /**
+ * album_art_get_visible:
+ *
+ */
+gboolean
+pragha_album_art_get_visible (PraghaAlbumArt *albumart)
+{
+   g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), FALSE);
+   return albumart->priv->visible;
+}
+
+/**
+ * album_art_set_visible:
+ *
+ */
+void
+pragha_album_art_set_visible (PraghaAlbumArt *albumart,
+                              gboolean visible)
+{
+   PraghaAlbumArtPrivate *priv;
+
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   priv = albumart->priv;
+
+   gtk_widget_set_visible (GTK_WIDGET(albumart), visible);
+   priv->visible = visible;
+
+   g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_VISIBLE]);
+}
+
+/**
  * album_art_clear_icon:
  *
  */
@@ -218,6 +251,10 @@ pragha_album_art_get_property (GObject *object,
       break;
    case PROP_SIZE:
       g_value_set_uint (value, pragha_album_art_get_size(albumart));
+      break;
+   case PROP_VISIBLE:
+      g_value_set_boolean (value, pragha_album_art_get_visible(albumart));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -237,6 +274,9 @@ pragha_album_art_set_property (GObject *object,
       break;
    case PROP_SIZE:
       pragha_album_art_set_size(albumart, g_value_get_uint(value));
+      break;
+   case PROP_VISIBLE:
+      pragha_album_art_set_visible(albumart, g_value_get_boolean(value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -277,9 +317,19 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                         36, 128,
                         48,
                         G_PARAM_READWRITE);
-   g_object_class_install_property(object_class, PROP_SIZE,
+   /**
+    * PraghaAlbumArt:visible:
+    *
+    */
+   gParamSpecs[PROP_VISIBLE] =
+      g_param_spec_boolean("visible",
+                           _("Visible"),
+                           _("The album art visibility state"),
+                           TRUE,
+                           G_PARAM_READWRITE);
+ 
+    g_object_class_install_property(object_class, PROP_SIZE,
                                    gParamSpecs[PROP_SIZE]);
-
 }
 
 static void
