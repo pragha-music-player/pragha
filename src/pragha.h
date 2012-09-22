@@ -599,7 +599,6 @@ struct con_state {
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
-	gchar *arturl;
 	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
