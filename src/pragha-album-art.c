@@ -23,12 +23,14 @@ G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
 struct _PraghaAlbumArtPrivate
 {
    gchar *uri;
+   guint size;
 };
 
 enum
 {
    PROP_0,
    PROP_URI,
+   PROP_SIZE,
    LAST_PROP
 };
 
@@ -57,8 +59,8 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
    priv = albumart->priv;
 
    pixbuf = gdk_pixbuf_new_from_file_at_scale(priv->uri,
-                                             48,
-                                             48,
+                                             pragha_album_art_get_size(albumart),
+                                             pragha_album_art_get_size(albumart),
                                              FALSE,
                                              &error);
    /*TODO: Scale and merge pixbuf on cover.png. */
@@ -107,6 +109,41 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
 }
 
 /**
+ * album_art_get_uri:
+ *
+ */
+guint
+pragha_album_art_get_size (PraghaAlbumArt *albumart)
+{
+   g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), NULL);
+   return albumart->priv->size;
+}
+
+/**
+ * album_art_set_uri:
+ *
+ */
+void
+pragha_album_art_set_size (PraghaAlbumArt *albumart,
+                           guint size)
+{
+   PraghaAlbumArtPrivate *priv;
+
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   priv = albumart->priv;
+
+   priv->size = size;
+
+   if(priv->uri != NULL)
+      pragha_album_art_update_image(albumart);
+   else
+      pragha_album_art_clear_icon(albumart);
+
+   g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_SIZE]);
+}
+
+/**
  * album_art_set_pixbuf:
  *
  */
@@ -132,8 +169,8 @@ pragha_album_art_clear_icon (PraghaAlbumArt *albumart)
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
    pixbuf = gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
-                                             48, /* TODO: Add size properties! */
-                                             48,
+                                             pragha_album_art_get_size(albumart),
+                                             pragha_album_art_get_size(albumart),
                                              &error);
    pragha_album_art_set_pixbuf (albumart, pixbuf);
 }
@@ -162,6 +199,8 @@ pragha_album_art_get_property (GObject *object,
    case PROP_URI:
       g_value_set_string(value, pragha_album_art_get_uri(albumart));
       break;
+   case PROP_SIZE:
+      g_value_set_uint (value, pragha_album_art_get_size(albumart));
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -178,6 +217,9 @@ pragha_album_art_set_property (GObject *object,
    switch (prop_id) {
    case PROP_URI:
       pragha_album_art_set_uri(albumart, g_value_get_string(value));
+      break;
+   case PROP_SIZE:
+      pragha_album_art_set_size(albumart, g_value_get_uint(value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -207,6 +249,20 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                           G_PARAM_READWRITE);
    g_object_class_install_property(object_class, PROP_URI,
                                    gParamSpecs[PROP_URI]);
+   /**
+    * PraghaAlbumArt:size:
+    *
+    */
+   gParamSpecs[PROP_SIZE] =
+      g_param_spec_uint("size",
+                        _("Size"),
+                        _("The album art size"),
+                        36, 128,
+                        48,
+                        G_PARAM_READWRITE);
+   g_object_class_install_property(object_class, PROP_SIZE,
+                                   gParamSpecs[PROP_SIZE]);
+
 }
 
 static void

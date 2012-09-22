@@ -737,6 +737,7 @@ create_toolbar(struct con_win *cwin)
 	gtk_container_add (GTK_CONTAINER(boxitem), box);
 	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(albumart), TRUE, TRUE, 2);
 
+	pragha_album_art_set_size(albumart, cwin->cpref->album_art_size);
 	pragha_album_art_clear_icon(albumart);
 
 	cwin->albumart = albumart;

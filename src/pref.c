@@ -204,6 +204,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		}
 
 		album_art_toggle_state(cwin);
+		pragha_album_art_set_size(cwin->albumart, cwin->cpref->album_art_size);
 
 		/* Notification preferences */
 

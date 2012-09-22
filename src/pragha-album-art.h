@@ -54,6 +54,11 @@ GType pragha_album_art_get_type (void) G_GNUC_CONST;
 const gchar *pragha_album_art_get_uri (PraghaAlbumArt *albumart);
 void pragha_album_art_set_uri (PraghaAlbumArt *albumart,
                                const char *uri);
+guint
+pragha_album_art_get_size (PraghaAlbumArt *albumart);
+void
+pragha_album_art_set_size (PraghaAlbumArt *albumart,
+                           guint size);
 void pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf);
 void pragha_album_art_clear_icon (PraghaAlbumArt *albumart);
 
