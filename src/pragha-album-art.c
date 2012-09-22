@@ -41,6 +41,36 @@ pragha_album_art_new (void)
 }
 
 /**
+ * pragha_album_art_update_image:
+ *
+ */
+
+static void
+pragha_album_art_update_image (PraghaAlbumArt *albumart)
+{
+   PraghaAlbumArtPrivate *priv;
+   GdkPixbuf *pixbuf;
+   GError *error = NULL;
+
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   priv = albumart->priv;
+
+   pixbuf = gdk_pixbuf_new_from_file_at_scale(priv->uri,
+                                             48,
+                                             48,
+                                             FALSE,
+                                             &error);
+   /*TODO: Scale and merge pixbuf on cover.png. */
+   if (pixbuf)
+      pragha_album_art_set_pixbuf(albumart, pixbuf);
+   else {
+      g_critical("Unable to open image file: %s\n", priv->uri);
+      g_error_free(error);
+   }
+}
+
+/**
  * album_art_get_uri:
  *
  */
@@ -67,6 +97,12 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
 
    g_free(priv->uri);
    priv->uri = g_strdup(uri);
+
+   if(priv->uri != NULL)
+      pragha_album_art_update_image(albumart);
+   else
+      pragha_album_art_clear_icon(albumart);
+
    g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_URI]);
 }
 
