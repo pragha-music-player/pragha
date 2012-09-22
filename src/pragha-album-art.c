@@ -18,7 +18,7 @@
 #include <glib/gi18n.h>
 #include "pragha-album-art.h"
 
-G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, G_TYPE_OBJECT)
+G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
 
 struct _PraghaAlbumArtPrivate
 {
@@ -68,6 +68,38 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
    g_free(priv->uri);
    priv->uri = g_strdup(uri);
    g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_URI]);
+}
+
+/**
+ * album_art_set_pixbuf:
+ *
+ */
+void
+pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf)
+{
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   gtk_image_clear(GTK_IMAGE(albumart));
+   gtk_image_set_from_pixbuf(GTK_IMAGE(albumart), pixbuf);
+}
+
+/**
+ * album_art_clear_icon:
+ *
+ */
+void
+pragha_album_art_clear_icon (PraghaAlbumArt *albumart)
+{
+   GdkPixbuf *pixbuf;
+   GError *error = NULL;
+
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   pixbuf = gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
+                                             48, /* TODO: Add size properties! */
+                                             48,
+                                             &error);
+   pragha_album_art_set_pixbuf (albumart, pixbuf);
 }
 
 static void
