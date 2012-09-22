@@ -46,7 +46,7 @@ struct _PraghaAlbumArt
 
 struct _PraghaAlbumArtClass
 {
-   GObjectClass parent_class;
+   GtkImageClass parent_class;
 };
 
 PraghaAlbumArt *pragha_album_art_new (void);
