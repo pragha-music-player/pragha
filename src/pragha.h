@@ -651,8 +651,6 @@ struct con_win {
 	GtkWidget *mainwindow;
 	GtkWidget *toolbar;
 	GtkWidget *info_box;
-	GtkWidget *album_art_frame;
-	GtkWidget *album_art;
 	PraghaAlbumArt *albumart;
 	GtkWidget *track_progress_bar;
 	GtkToolItem *prev_button;
@@ -789,7 +787,6 @@ void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win
 void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
 gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
-void unset_album_art(struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
 void shuffle_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
@@ -799,7 +796,6 @@ void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);
 void next_button_handler(GtkButton *button, struct con_win *cwin);
 void album_art_toggle_state(struct con_win *cwin);
-void resize_album_art_frame(struct con_win *cwin);
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 GtkWidget* create_toolbar(struct con_win *cwin);
 

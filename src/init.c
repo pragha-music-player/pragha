@@ -1434,9 +1434,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	init_toggle_buttons(cwin);
 	update_menu_playlist_changes(cwin);
 
-	if (cwin->album_art_frame)
-		resize_album_art_frame(cwin);
-
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
 
 	#if HAVE_LIBXFCE4UI
