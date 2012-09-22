@@ -1042,7 +1042,6 @@ gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
 
-	cwin->cstate->arturl = NULL;
 	cwin->cstate->filter_entry = NULL;
 	cwin->cstate->jump_filter = NULL;
 

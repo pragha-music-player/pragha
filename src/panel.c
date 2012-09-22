@@ -46,8 +46,7 @@ static GdkPixbuf* get_image_from_cache(struct con_win *cwin)
 		g_error_free(error);
 	}
 	else {
-		g_free(cwin->cstate->arturl);
-		cwin->cstate->arturl = g_strdup(album_art_url);
+		pragha_album_art_set_uri(cwin->albumart, album_art_url);
 	}
 
 noexists:
@@ -91,8 +90,7 @@ static GdkPixbuf* get_image_from_dir(gchar *path, struct con_win *cwin)
 				g_error_free(error);
 			}
 			else {
-				g_free(cwin->cstate->arturl);
-				cwin->cstate->arturl = ab_file;
+				pragha_album_art_set_uri(cwin->albumart, ab_file);
 			}
 			break;
 		}
@@ -161,8 +159,7 @@ static GdkPixbuf* get_pref_image_dir(gchar *path, struct con_win *cwin)
 					continue;
 				}
 				else {
-					g_free(cwin->cstate->arturl);
-					cwin->cstate->arturl = ab_file;
+					pragha_album_art_set_uri(cwin->albumart, ab_file);
 				}
 				break;
 			}
@@ -399,7 +396,7 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 {
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED &&
 	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
-		open_url(cwin, cwin->cstate->arturl);
+		open_url(cwin, pragha_album_art_get_uri(cwin->albumart));
 
 	return TRUE;
 }
@@ -430,8 +427,7 @@ void unset_album_art(struct con_win *cwin)
 
 		g_object_unref(G_OBJECT(cover));
 	}
-	g_free(cwin->cstate->arturl);
-	cwin->cstate->arturl = NULL;
+	pragha_album_art_set_uri(cwin->albumart, NULL);
 }
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
