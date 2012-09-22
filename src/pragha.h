@@ -75,6 +75,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-album-art.h"
 #include "pragha-backend.h"
 #include "gtkcellrendererbubble.h"
 #include "xml_helper.h"
@@ -653,6 +654,7 @@ struct con_win {
 	GtkWidget *info_box;
 	GtkWidget *album_art_frame;
 	GtkWidget *album_art;
+	PraghaAlbumArt *albumart;
 	GtkWidget *track_progress_bar;
 	GtkToolItem *prev_button;
 	GtkToolItem *play_button;

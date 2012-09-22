@@ -731,6 +731,20 @@ create_toolbar(struct con_win *cwin)
 	}
 	cwin->album_art_frame = album_art_frame;
 
+	/* HACK TO TEST THE NEW WIDGET.. ¿? */
+	PraghaAlbumArt *albumart;
+	boxitem = gtk_tool_item_new ();
+	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
+	box = gtk_hbox_new(FALSE, 0);
+
+	albumart = pragha_album_art_new ();
+	gtk_container_add (GTK_CONTAINER(boxitem), box);
+	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(albumart), TRUE, TRUE, 2);
+
+	pragha_album_art_clear_icon(albumart);
+
+	cwin->albumart = albumart;
+
 	/* Setup playing box */
 
 	boxitem = gtk_tool_item_new ();
