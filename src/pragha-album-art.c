@@ -109,13 +109,13 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
 }
 
 /**
- * album_art_get_uri:
+ * album_art_get_size:
  *
  */
 guint
 pragha_album_art_get_size (PraghaAlbumArt *albumart)
 {
-   g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), NULL);
+   g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), 0);
    return albumart->priv->size;
 }
 
