@@ -60,6 +60,7 @@ void
 pragha_album_art_set_size (PraghaAlbumArt *albumart,
                            guint size);
 void pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf);
+GdkPixbuf *pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart);
 void pragha_album_art_clear_icon (PraghaAlbumArt *albumart);
 
 G_END_DECLS
