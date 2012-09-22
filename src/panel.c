@@ -665,6 +665,7 @@ create_toolbar(struct con_win *cwin)
 	GtkWidget *album_art_frame = NULL, *playing;
 	GtkToolItem *unfull_button, *shuffle_button, *repeat_button;
 	GtkWidget *vol_button;
+	PraghaAlbumArt *albumart;
 
 	toolbar = gtk_toolbar_new ();
 	gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
@@ -728,17 +729,26 @@ create_toolbar(struct con_win *cwin)
 	cwin->album_art_frame = album_art_frame;
 
 	/* HACK TO TEST THE NEW WIDGET.. ¿? */
-	PraghaAlbumArt *albumart;
 	boxitem = gtk_tool_item_new ();
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 	box = gtk_hbox_new(FALSE, 0);
 
-	albumart = pragha_album_art_new ();
+	album_art_frame = gtk_event_box_new ();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
+	g_signal_connect (G_OBJECT (album_art_frame),
+			"button_press_event",
+			G_CALLBACK (album_art_frame_press_callback),
+			cwin);
 	gtk_container_add (GTK_CONTAINER(boxitem), box);
-	gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(albumart), TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX(box), album_art_frame, TRUE, TRUE, 2);
+
+	albumart = pragha_album_art_new ();
 
 	pragha_album_art_set_size(albumart, cwin->cpref->album_art_size);
+	pragha_album_art_set_visible(albumart, cwin->cpref->show_album_art);
 	pragha_album_art_clear_icon(albumart);
+
+	gtk_container_add(GTK_CONTAINER(album_art_frame), GTK_WIDGET(albumart));
 
 	cwin->albumart = albumart;
 
