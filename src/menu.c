@@ -255,18 +255,6 @@ update_menubar_playback_state (struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	update_menubar_lastfm_state (cwin);
 	#endif
-
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Stop");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Next");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
 static void

@@ -169,6 +169,32 @@ systray_quit (GtkAction *action, struct con_win *cwin)
 	exit_pragha(NULL, cwin);
 }
 
+static void
+update_systray_menu (struct con_win *cwin)
+{
+	GtkAction *action;
+	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Stop");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Next");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+
+	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
+	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+}
+
+static void
+update_systray_menu_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	update_systray_menu (cwin);
+}
+
 static GtkUIManager*
 create_systray_menu (struct con_win *cwin)
 {
@@ -225,4 +251,7 @@ void create_status_icon (struct con_win *cwin)
 
 	cwin->status_icon = status_icon;
 	cwin->systray_menu = systray_menu;
+
+	update_systray_menu (cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_systray_menu_cb), cwin);
 }
