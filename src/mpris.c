@@ -700,7 +700,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		goto exit;
 	}
 
-	if (is_dir_and_accessible(file, cwin)) {
+	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
 		else

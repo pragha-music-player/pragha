@@ -597,7 +597,7 @@ gboolean is_playable_file(const gchar *file)
 
 /* Accepts only absolute path */
 
-gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin)
+gboolean is_dir_and_accessible(const gchar *dir)
 {
 	gint ret;
 
