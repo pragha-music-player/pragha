@@ -31,6 +31,7 @@ static void common_cleanup(struct con_win *cwin)
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif
+	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
@@ -40,7 +41,6 @@ static void common_cleanup(struct con_win *cwin)
 	lastfm_free (cwin->clastfm);
 #endif
 	dbus_handlers_free (cwin);
-	mpris_free (cwin->cmpris2);
 	notify_free ();
 
 	if (cwin->cgnome_media_keys)
