@@ -1200,7 +1200,7 @@ void set_status_message (const gchar *message, struct con_win *cwin);
 void set_status_message_on_thread (const gchar *message, struct con_win *cwin);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gboolean is_playable_file(const gchar *file);
-gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin);
+gboolean is_dir_and_accessible(const gchar *dir);
 gint dir_file_count(const gchar *dir_name, gint call_recur);
 gchar* sanitize_string_sqlite3(const gchar *str);
 enum file_type get_file_type(const gchar *file);

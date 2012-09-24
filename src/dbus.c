@@ -98,7 +98,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	if (is_dir_and_accessible(file, cwin)) {
+	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
 		else
