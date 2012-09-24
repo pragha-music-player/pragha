@@ -219,7 +219,7 @@ void update_status_bar(struct con_win *cwin)
 	tot_str = convert_length_str(total_playtime);
 	str = g_strdup_printf("%i %s - %s",
 				cwin->cstate->tracks_curr_playlist,
-				(cwin->cstate->tracks_curr_playlist>1)?_("Tracks"):_("Track"),
+				ngettext("Track", "Tracks", cwin->cstate->tracks_curr_playlist),
 				tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
