@@ -622,9 +622,8 @@ struct con_lastfm {
 #endif
 
 struct con_mpris2 {
+	struct con_win *cwin;
 	guint owner_id;
-	guint notify_volume_id;
-	guint notify_state_id;
 	GDBusNodeInfo *introspection_data;
 	GDBusConnection *dbus_connection;
 	GQuark interface_quarks[4];

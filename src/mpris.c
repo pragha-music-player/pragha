@@ -1190,6 +1190,8 @@ gint mpris_init(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing MPRIS");
 	g_type_init();
 
+	cwin->cmpris2->cwin = cwin;
+
 	cwin->cmpris2->saved_shuffle = false;
 	cwin->cmpris2->saved_playbackstatus = false;
 	cwin->cmpris2->saved_title = NULL;
@@ -1207,19 +1209,18 @@ gint mpris_init(struct con_win *cwin)
 				cwin,
 				NULL);
 
-	//FIXME disconnect in mpris_close
-	if (!cwin->cmpris2->notify_volume_id)
-		cwin->cmpris2->notify_volume_id = g_signal_connect (cwin->backend, "notify::volume",
-                                                                    G_CALLBACK (any_notify_cb), cwin);
-	if (!cwin->cmpris2->notify_state_id)
-		cwin->cmpris2->notify_state_id = g_signal_connect (cwin->backend, "notify::state",
-                                                                    G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::volume", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (any_notify_cb), cwin);
 
 	return (cwin->cmpris2->owner_id) ? 0 : -1;
 }
 
 void mpris_close (struct con_mpris2 *cmpris2)
 {
+	struct con_win *cwin = cmpris2->cwin;
+
+	g_signal_handlers_disconnect_by_func (cwin->backend, any_notify_cb, cwin);
+
 	if(NULL != cmpris2->dbus_connection)
 		g_bus_unown_name (cmpris2->owner_id);
 
