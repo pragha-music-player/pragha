@@ -814,7 +814,7 @@ struct musicobject* new_musicobject_from_file(const gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
 struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
-void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin);
+void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag);
 void init_tag_struct(struct tags *mtags);
 void free_tag_struct(struct tags *mtags);
 void delete_musicobject(struct musicobject *mobj);

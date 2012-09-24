@@ -1089,14 +1089,14 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 			continue;
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
-			update_musicobject(cwin->cstate->curr_mobj, changed, omobj->tags, cwin);
+			update_musicobject(cwin->cstate->curr_mobj, changed, omobj->tags);
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
 		}
 		else {
-			update_musicobject(mobj, changed, omobj->tags, cwin);
+			update_musicobject(mobj, changed, omobj->tags);
 		}
 		update_track_current_playlist(&iter, changed, mobj, cwin);
 
@@ -1236,14 +1236,14 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		}
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
-			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag, cwin);
+			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
 		}
 		else {
-			update_musicobject(mobj, changed, &ntag, cwin);
+			update_musicobject(mobj, changed, &ntag);
 		}
 		update_track_current_playlist(&iter, changed, mobj, cwin);
 

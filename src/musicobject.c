@@ -268,7 +268,7 @@ struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar 
 	return mobj;
 }
 
-void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin)
+void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag)
 {
 	if (!changed)
 		return;
