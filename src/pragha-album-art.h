@@ -19,7 +19,7 @@
 #define PRAGHA_ALBUM_ART_H
 
 #include <glib-object.h>
-#include <gtk/gtkimage.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
