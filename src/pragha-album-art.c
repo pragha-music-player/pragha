@@ -325,11 +325,11 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
       g_param_spec_boolean("visible",
                            _("Visible"),
                            _("The album art visibility state"),
-                           TRUE,
+                           FALSE,
                            G_PARAM_READWRITE);
  
-    g_object_class_install_property(object_class, PROP_SIZE,
-                                   gParamSpecs[PROP_SIZE]);
+    g_object_class_install_property(object_class, PROP_VISIBLE,
+                                   gParamSpecs[PROP_VISIBLE]);
 }
 
 static void
