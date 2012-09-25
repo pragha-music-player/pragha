@@ -289,7 +289,7 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 
 	gchar *album_uri = NULL, *path = NULL;
 
-	if (cwin->cpref->show_album_art) {
+	if (pragha_album_art_get_visible(cwin->albumart)) {
 		if (G_LIKELY(mobj &&
 		    mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
@@ -554,6 +554,39 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 }
 
+
+void init_toolbar_preferences_saved(struct con_win *cwin)
+{
+	GError *error = NULL;
+	gboolean show_album_art;
+	gint album_art_size;
+
+	show_album_art =
+		g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
+				       GROUP_WINDOW,
+				       KEY_SHOW_ALBUM_ART,
+				       &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+		show_album_art = TRUE;
+	}
+
+	album_art_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
+						GROUP_WINDOW,
+						KEY_ALBUM_ART_SIZE,
+						&error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+		album_art_size = ALBUM_ART_SIZE;
+	}
+
+	pragha_album_art_set_size(cwin->albumart, album_art_size);
+	pragha_album_art_set_visible(cwin->albumart, show_album_art);
+	pragha_album_art_clear_icon(cwin->albumart);
+}
+
 GtkWidget*
 create_toolbar(struct con_win *cwin)
 {
@@ -626,10 +659,6 @@ create_toolbar(struct con_win *cwin)
 
 	albumart = pragha_album_art_new ();
 
-	pragha_album_art_set_size(albumart, cwin->cpref->album_art_size);
-	pragha_album_art_set_visible(albumart, cwin->cpref->show_album_art);
-	pragha_album_art_clear_icon(albumart);
-
 	gtk_container_add(GTK_CONTAINER(album_art_frame), GTK_WIDGET(albumart));
 
 	cwin->albumart = albumart;
@@ -688,6 +717,7 @@ create_toolbar(struct con_win *cwin)
 
 	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
 
+	init_toolbar_preferences_saved(cwin);
 	update_panel_playback_state(cwin);
 
 	g_signal_connect (cwin->backend, "tick", G_CALLBACK (update_gui), cwin);
