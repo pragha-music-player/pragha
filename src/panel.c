@@ -306,11 +306,8 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				else album_uri = get_image_uri_from_dir(path, cwin);
 				g_free(path);
 			}
-
-			if (album_uri) {
-				pragha_album_art_set_uri(cwin->albumart, album_uri);
-				g_free(album_uri);
-			}
+			pragha_album_art_set_uri(cwin->albumart, album_uri);
+			g_free(album_uri);
 		}
 	}
 }
