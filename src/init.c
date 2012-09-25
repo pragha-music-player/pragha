@@ -157,7 +157,7 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -169,7 +169,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -655,28 +655,6 @@ gint init_config(struct con_win *cwin)
 			recursively_f = TRUE;
 		}
 
-		cwin->cpref->show_album_art =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_SHOW_ALBUM_ART,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_f = TRUE;
-		}
-
-		cwin->cpref->album_art_size =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_ALBUM_ART_SIZE,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_art_size_f = TRUE;
-		}
-
 		cwin->cpref->album_art_pattern =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_GENERAL,
@@ -953,10 +931,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->add_recursively_files = FALSE;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
-	if (all_f || album_f)
-		cwin->cpref->show_album_art = TRUE;
-	if (all_f || album_art_size_f)
-		cwin->cpref->album_art_size = ALBUM_ART_SIZE;
 	if (all_f || timer_remaining_mode_f)
 		cwin->cpref->timer_remaining_mode = FALSE;
 	if (all_f || show_osd_f)

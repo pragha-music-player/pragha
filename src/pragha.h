@@ -469,7 +469,6 @@ struct con_pref {
 	gchar *start_mode;
 	gchar *audio_device;
 	gchar *audio_cd_device;
-	gint album_art_size;
 	gint window_width;
 	gint window_height;
 	gint window_x;
@@ -482,7 +481,6 @@ struct con_pref {
 	gchar *cache_folder;
 #endif
 	gboolean add_recursively_files;
-	gboolean show_album_art;
 	gboolean show_osd;
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;
