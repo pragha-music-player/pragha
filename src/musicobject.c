@@ -236,7 +236,7 @@ struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar 
 	mobj = g_slice_new0(struct musicobject);
 	mobj->tags = g_slice_new0(struct tags);
 
-	mobj->tags->title = g_strdup(name);
+	mobj->tags->title = name ? g_strdup(name) : g_strdup("");
 
 	mobj->tags->artist = g_strdup("");
 	mobj->tags->album = g_strdup("");
