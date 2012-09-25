@@ -1188,7 +1188,6 @@ gint mpris_init(struct con_win *cwin)
 		return 0;
 
 	CDEBUG(DBG_INFO, "Initializing MPRIS");
-	g_type_init();
 
 	cwin->cmpris2->cwin = cwin;
 
