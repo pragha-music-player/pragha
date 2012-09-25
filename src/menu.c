@@ -267,9 +267,6 @@ update_menubar_playback_state (struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	/* HACK TO TEST VISIBILITY OF PRAGHA_ALBUM_ART. */
-	pragha_album_art_set_visible(cwin->albumart, playing);
 }
 
 static void
