@@ -49,6 +49,7 @@ struct PraghaBackendPrivate {
 	guint timer;
 	gboolean is_live;
 	gboolean can_seek;
+	gboolean seeking; //this is hack, we should catch seek by seqnum, but it's currently broken in gstreamer
 	gboolean emitted_error;
 	enum player_state state;
 };
@@ -66,6 +67,7 @@ static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
 	SIGNAL_TICK,
+	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
 	LAST_SIGNAL
 };
@@ -158,12 +160,15 @@ pragha_backend_seek (PraghaBackend *backend, gint64 seek)
 
 	CDEBUG(DBG_BACKEND, "Seeking playback");
 
-	gst_element_seek (priv->pipeline,
-	       1.0,
-	       GST_FORMAT_TIME,
-	       GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
-	       GST_SEEK_TYPE_SET, seek * GST_SECOND,
-	       GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
+	gboolean success = gst_element_seek (priv->pipeline,
+	                                     1.0,
+	                                     GST_FORMAT_TIME,
+	                                     GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_FLUSH,
+	                                     GST_SEEK_TYPE_SET, seek * GST_SECOND,
+	                                     GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
+
+	if (success)
+		priv->seeking = TRUE;
 }
 
 void
@@ -304,6 +309,7 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 
 	priv->is_live = FALSE;
 	priv->emitted_error = FALSE;
+	priv->seeking = FALSE;
 }
 
 void
@@ -659,6 +665,13 @@ static gboolean pragha_backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, 
 			gst_element_set_state (priv->pipeline, GST_STATE_PLAYING);
 			break;
 		}
+		case GST_MESSAGE_ASYNC_DONE: {
+			if (priv->seeking) {
+				priv->seeking = FALSE;
+				g_signal_emit (cwin->backend, signals[SIGNAL_SEEKED], 0);
+			}
+			break;
+		}
     		default:
 			break;
 	}
@@ -794,6 +807,12 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                              G_STRUCT_OFFSET (PraghaBackendClass, tick),
                                              NULL, NULL, NULL, G_TYPE_NONE, 0);
 
+	signals[SIGNAL_SEEKED] = g_signal_new ("seeked",
+                                               G_TYPE_FROM_CLASS (gobject_class),
+                                               G_SIGNAL_RUN_LAST,
+                                               G_STRUCT_OFFSET (PraghaBackendClass, seeked),
+                                               NULL, NULL, NULL, G_TYPE_NONE, 0);
+
 	signals[SIGNAL_BUFFERING] = g_signal_new ("buffering",
                                                   G_TYPE_FROM_CLASS (gobject_class),
                                                   G_SIGNAL_RUN_LAST,
@@ -807,8 +826,13 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 static void
 pragha_backend_init (PraghaBackend *backend)
 {
-	backend->priv = PRAGHA_BACKEND_GET_PRIVATE (backend);
-	backend->priv->state = ST_STOPPED;
+	PraghaBackendPrivate *priv = PRAGHA_BACKEND_GET_PRIVATE (backend);
+	backend->priv = priv;
+	priv->state = ST_STOPPED;
+	priv->is_live = FALSE;
+	priv->can_seek = FALSE;
+	priv->seeking = FALSE;
+	priv->emitted_error = FALSE;
 	/* FIXME */
 }
 
@@ -910,10 +934,6 @@ gint backend_init (struct con_win *cwin)
 	pragha_backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
-
-	priv->is_live = FALSE;
-	priv->can_seek = FALSE;
-	priv->emitted_error = FALSE;
 
 	gst_object_unref(bus);
 	g_free(audiosink);

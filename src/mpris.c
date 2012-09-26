@@ -286,7 +286,6 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	seek = CLAMP (seek, 0, cwin->cstate->curr_mobj->tags->length);
 
 	pragha_backend_seek(cwin->backend, seek);
-	mpris_update_seeked(cwin, seek);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
@@ -305,22 +304,27 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 			seek = cwin->cstate->curr_mobj->tags->length;
 
 		pragha_backend_seek(cwin->backend, seek);
-		mpris_update_seeked(cwin, seek);
 	}
 	g_free(path);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-void mpris_update_seeked(struct con_win *cwin, gint position) {
+static void
+seeked_cb (PraghaBackend *backend, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS emit seeked signal..");
 
+	gint64 position = pragha_backend_get_current_position (cwin->backend);
+
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.Player", "Seeked",
-		 g_variant_new ("(x)", (gint64)position * 1000000), NULL);
+		 g_variant_new ("(x)", GST_TIME_AS_USECONDS (position)), NULL);
 }
 
 static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
@@ -1210,6 +1214,7 @@ gint mpris_init(struct con_win *cwin)
 
 	g_signal_connect (cwin->backend, "notify::volume", G_CALLBACK (any_notify_cb), cwin);
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (cwin->backend, "seeked", G_CALLBACK (seeked_cb), cwin);
 
 	return (cwin->cmpris2->owner_id) ? 0 : -1;
 }
@@ -1218,6 +1223,7 @@ void mpris_close (struct con_mpris2 *cmpris2)
 {
 	struct con_win *cwin = cmpris2->cwin;
 
+	g_signal_handlers_disconnect_by_func (cwin->backend, seeked_cb, cwin);
 	g_signal_handlers_disconnect_by_func (cwin->backend, any_notify_cb, cwin);
 
 	if(NULL != cmpris2->dbus_connection)
