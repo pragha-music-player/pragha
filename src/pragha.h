@@ -1167,7 +1167,6 @@ void dbus_handlers_free(struct con_win *cwin);
 /* MPRIS functions */
 
 gint mpris_init(struct con_win *cwin);
-void mpris_update_seeked(struct con_win *cwin, gint position);
 void mpris_update_any(struct con_win *cwin);
 void mpris_update_metadata_changed(struct con_win *cwin);
 void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj);
