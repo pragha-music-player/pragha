@@ -105,8 +105,7 @@ gboolean get_ape_info(const gchar *file, struct tags *tags)
 	return get_info_taglib(file, tags);
 }
 
-gboolean save_tags_to_file(gchar *file, struct tags *ntag,
-			   int changed, struct con_win *cwin)
+gboolean save_tags_to_file(gchar *file, struct tags *ntag, int changed)
 {
 	gboolean ret = TRUE;
 	TagLib_File *tfile;
@@ -292,8 +291,7 @@ void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags 
 							elem);
 				if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 					file = result.resultp[result.no_columns];
-					ret = save_tags_to_file(file, ntag,
-								changed, cwin);
+					ret = save_tags_to_file(file, ntag, changed);
 					sqlite3_free_table(result.resultp);
 				}
 				if (ret) {
@@ -316,7 +314,7 @@ void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags 
 		for (i = 0; i < file_arr->len; i++) {
 			elem = g_ptr_array_index(file_arr, i);
 			if (elem)
-				(void)save_tags_to_file(elem, ntag, changed, cwin);
+				(void)save_tags_to_file(elem, ntag, changed);
 		}
 	}
 
