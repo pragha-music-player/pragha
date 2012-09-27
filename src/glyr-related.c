@@ -29,6 +29,8 @@ typedef struct
 }
 glyr_struct;
 
+//FIXME_GLYR_CAST: drop discarding const when we switch to enough new glyr, see https://github.com/sahib/glyr/issues/29
+
 /* Use the download info on glyr thread and show a dialog. */
 
 static void
@@ -90,14 +92,15 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
-	gchar *artist = NULL, *album = NULL, *album_art_path = NULL;
+	const gchar *artist = NULL, *album = NULL;
+	gchar *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
 	GError *error = NULL;
 
 	struct con_win *cwin = glyr_info->cwin;
 
-	artist = g_strdup(glyr_info->query.artist);
-	album = g_strdup(glyr_info->query.album);
+	artist = glyr_info->query.artist;
+	album = glyr_info->query.album;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
@@ -122,8 +125,6 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 		g_object_unref(G_OBJECT(album_art));
 	}
 
-	g_free(artist);
-	g_free(album);
 	g_free(album_art_path);
 }
 
@@ -202,7 +203,7 @@ get_related_text_info_idle_func (gpointer data)
 /* Configure the thrad to get the artist bio or lyric. */
 
 static void
-configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gchar *title, struct con_win *cwin)
+configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artist, const gchar *title, struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
 	glyr_info = g_slice_new0 (glyr_struct);
@@ -216,14 +217,14 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 #else
 	case GLYR_GET_ARTISTBIO:
 #endif
-		glyr_opt_artist(&glyr_info->query, artist);
+		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
 
 		glyr_opt_lang (&glyr_info->query, ISO_639_1);
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 		break;
 	case GLYR_GET_LYRICS:
-		glyr_opt_artist(&glyr_info->query, artist);
-		glyr_opt_title(&glyr_info->query, title);
+		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
+		glyr_opt_title(&glyr_info->query, (char*)title); //FIXME_GLYR_CAST
 		break;
 	default:
 		break;
@@ -245,7 +246,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gch
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
-	gchar *artist = NULL;
+	const gchar *artist = NULL;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
@@ -255,16 +256,14 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
 		return;
 
-	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
+	artist = cwin->cstate->curr_mobj->tags->artist;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
-
-	g_free(artist);
 }
 
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
-	gchar *artist = NULL, *title = NULL;
+	const gchar *artist = NULL, *title = NULL;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
@@ -275,13 +274,10 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
 		return;
 
-	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
-	title = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	artist = cwin->cstate->curr_mobj->tags->artist;
+	title = cwin->cstate->curr_mobj->tags->title;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
-
-	g_free(artist);
-	g_free(title);
 }
 
 /* Handlers to get lyric and artist bio of current playlist selection. */
@@ -289,7 +285,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 void
 related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	gchar *artist = NULL;
+	const gchar *artist = NULL;
 	struct musicobject *mobj = NULL;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
@@ -299,17 +295,15 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 	if (strlen(mobj->tags->artist) == 0)
 		return;
 
-	artist = g_strdup(mobj->tags->artist);
+	artist = mobj->tags->artist;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
-
-	g_free(artist);
 }
 
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	gchar *artist = NULL, *title = NULL;
+	const gchar *artist = NULL, *title = NULL;
 	struct musicobject *mobj = NULL;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
@@ -320,13 +314,10 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 	    (strlen(mobj->tags->title) == 0))
 		return;
 
-	artist = g_strdup(mobj->tags->artist);
-	title = g_strdup(mobj->tags->title);
+	artist = mobj->tags->artist;
+	title = mobj->tags->title;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
-
-	g_free(artist);
-	g_free(title);
 }
 
 /* Download the album art in a thread. */
@@ -360,7 +351,8 @@ static void
 related_get_album_art_handler (struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
-	gchar *artist, *album, *album_art_path;
+	const gchar *artist, *album;
+	gchar *album_art_path;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
@@ -371,8 +363,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
 		return;
 
-	artist = g_strdup(cwin->cstate->curr_mobj->tags->artist);
-	album = g_strdup(cwin->cstate->curr_mobj->tags->album);
+	artist = cwin->cstate->curr_mobj->tags->artist;
+	album = cwin->cstate->curr_mobj->tags->album;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
@@ -389,8 +381,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
 	glyr_opt_from(&glyr_info->query, "lastfm;musicbrainz");
 
-	glyr_opt_artist(&glyr_info->query, artist);
-	glyr_opt_album(&glyr_info->query, album);
+	glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
+	glyr_opt_album(&glyr_info->query, (char*)album); //FIXME_GLYR_CAST
 
 	glyr_info->cwin = cwin;
 
@@ -402,10 +394,6 @@ related_get_album_art_handler (struct con_win *cwin)
 
 exists:
 	g_free(album_art_path);
-	g_free(artist);
-	g_free(album);
-
-	return;
 }
 
 static gboolean
