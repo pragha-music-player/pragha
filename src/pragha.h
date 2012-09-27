@@ -834,8 +834,7 @@ gboolean get_mp4_info(const gchar *file, struct tags *tags);
 #ifdef HAVE_TAGLIB_1_7
 gboolean get_ape_info(const gchar *file, struct tags *tags);
 #endif
-gboolean save_tags_to_file(gchar *file, struct tags *tags,
-			   int changed, struct con_win *cwin);
+gboolean save_tags_to_file(gchar *file, struct tags *tags, int changed);
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
 void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
