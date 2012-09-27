@@ -129,7 +129,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 /* Manages the results of glyr threads. */
 
-gboolean
+static gboolean
 glyr_finished_thread_update (gpointer data)
 {
 	glyr_struct *glyr_info = data;
@@ -169,7 +169,7 @@ glyr_finished_thread_update (gpointer data)
 
 /* Get artist bio or lyric on a thread. */
 
-gpointer
+static gpointer
 get_related_text_info_idle_func (gpointer data)
 {
 	GlyrMemCache *head;
@@ -201,7 +201,7 @@ get_related_text_info_idle_func (gpointer data)
 
 /* Configure the thrad to get the artist bio or lyric. */
 
-void
+static void
 configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, gchar *artist, gchar *title, struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
@@ -331,7 +331,7 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 
 /* Download the album art in a thread. */
 
-gpointer
+static gpointer
 get_album_art_idle_func (gpointer data)
 {
 	GlyrMemCache *head;
@@ -356,7 +356,8 @@ get_album_art_idle_func (gpointer data)
 	return NULL;
 }
 
-void related_get_album_art_handler (struct con_win *cwin)
+static void
+related_get_album_art_handler (struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
 	gchar *artist, *album, *album_art_path;
