@@ -996,7 +996,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
-void update_pixbuf_state_on_path(GtkTreePath *path, GError *error, struct con_win *cwin);
+void update_pixbuf_state_on_path(GtkTreePath *path, const GError *error, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_state(GtkTreePath *path,
 			  enum playlist_action action,
