@@ -128,7 +128,7 @@ static GtkToggleActionEntry cp_null_toggles_entries[] = {
 
 /* Update playback state pixbuf */
 
-void update_pixbuf_state_on_path (GtkTreePath *path, GError *error, struct con_win *cwin)
+void update_pixbuf_state_on_path (GtkTreePath *path, const GError *error, struct con_win *cwin)
 {
 	GtkTreeModel *model = NULL;
 	GtkTreeIter iter;
