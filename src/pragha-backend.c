@@ -839,7 +839,7 @@ pragha_backend_init (PraghaBackend *backend)
 gint backend_init (struct con_win *cwin)
 {
 	GstBus *bus;
-	gchar *audiosink = NULL;
+	const gchar *audiosink = NULL;
 	gboolean can_set_device = TRUE;
 	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
 	PraghaBackendPrivate *priv = backend->priv;
@@ -868,24 +868,24 @@ gint backend_init (struct con_win *cwin)
 
 	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
-		audiosink = g_strdup("alsasink");
+		audiosink = "alsasink";
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
-		audiosink = g_strdup("oss4sink");
+		audiosink = "oss4sink";
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
-		audiosink = g_strdup("osssink");
+		audiosink = "osssink";
 	}
 	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
-		audiosink = g_strdup("pulsesink");
+		audiosink = "pulsesink";
 	}
 	else {
 		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
 		can_set_device = FALSE;
-		audiosink = g_strdup("autoaudiosink");
+		audiosink = "autoaudiosink";
 	}
 
 	priv->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
@@ -936,7 +936,6 @@ gint backend_init (struct con_win *cwin)
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
 
 	gst_object_unref(bus);
-	g_free(audiosink);
 
 	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
 
