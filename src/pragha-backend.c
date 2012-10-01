@@ -805,20 +805,25 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                              G_TYPE_FROM_CLASS (gobject_class),
                                              G_SIGNAL_RUN_LAST,
                                              G_STRUCT_OFFSET (PraghaBackendClass, tick),
-                                             NULL, NULL, NULL, G_TYPE_NONE, 0);
+                                             NULL, NULL,
+                                             g_cclosure_marshal_VOID__VOID,
+                                             G_TYPE_NONE, 0);
 
 	signals[SIGNAL_SEEKED] = g_signal_new ("seeked",
                                                G_TYPE_FROM_CLASS (gobject_class),
                                                G_SIGNAL_RUN_LAST,
                                                G_STRUCT_OFFSET (PraghaBackendClass, seeked),
-                                               NULL, NULL, NULL, G_TYPE_NONE, 0);
+                                               NULL, NULL,
+                                               g_cclosure_marshal_VOID__VOID,
+                                               G_TYPE_NONE, 0);
 
 	signals[SIGNAL_BUFFERING] = g_signal_new ("buffering",
                                                   G_TYPE_FROM_CLASS (gobject_class),
                                                   G_SIGNAL_RUN_LAST,
                                                   G_STRUCT_OFFSET (PraghaBackendClass, buffering),
-                                                  NULL, NULL, NULL, G_TYPE_NONE,
-                                                  1, G_TYPE_INT);
+                                                  NULL, NULL,
+                                                  g_cclosure_marshal_VOID__INT,
+                                                  G_TYPE_NONE, 1, G_TYPE_INT);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
