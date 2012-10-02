@@ -512,7 +512,7 @@ update_panel_playback_state (struct con_win *cwin)
 	if (playing == FALSE) {
 		unset_current_song_info(cwin);
 		unset_track_progress_bar(cwin);
-		pragha_album_art_clear_icon(cwin->albumart);
+		pragha_album_art_set_uri(cwin->albumart, NULL);
 	}
 }
 
@@ -581,7 +581,7 @@ void init_toolbar_preferences_saved(struct con_win *cwin)
 
 	pragha_album_art_set_size(cwin->albumart, album_art_size);
 	pragha_album_art_set_visible(cwin->albumart, show_album_art);
-	pragha_album_art_clear_icon(cwin->albumart);
+	pragha_album_art_set_uri(cwin->albumart, NULL);
 }
 
 GtkWidget*
