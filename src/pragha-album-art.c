@@ -60,11 +60,11 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
 
    priv = albumart->priv;
 
-   pixbuf = gdk_pixbuf_new_from_file_at_scale(priv->uri,
-                                             pragha_album_art_get_size(albumart),
-                                             pragha_album_art_get_size(albumart),
-                                             FALSE,
-                                             &error);
+   pixbuf = gdk_pixbuf_new_from_file_at_scale((priv->uri != NULL) ? priv->uri : PIXMAPDIR"/cover.png",
+                                               priv->size,
+                                               priv->size,
+                                               FALSE,
+                                               &error);
    /*TODO: Scale and merge pixbuf on cover.png. */
    if (pixbuf)
       pragha_album_art_set_pixbuf(albumart, pixbuf);
@@ -72,6 +72,7 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
       g_critical("Unable to open image file: %s\n", priv->uri);
       g_error_free(error);
    }
+   g_object_unref(G_OBJECT(pixbuf));
 }
 
 /**
@@ -102,10 +103,7 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
    g_free(priv->uri);
    priv->uri = g_strdup(uri);
 
-   if(priv->uri != NULL)
-      pragha_album_art_update_image(albumart);
-   else
-      pragha_album_art_clear_icon(albumart);
+   pragha_album_art_update_image(albumart);
 
    g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_URI]);
 }
@@ -137,10 +135,7 @@ pragha_album_art_set_size (PraghaAlbumArt *albumart,
 
    priv->size = size;
 
-   if(priv->uri != NULL)
-      pragha_album_art_update_image(albumart);
-   else
-      pragha_album_art_clear_icon(albumart);
+   pragha_album_art_update_image(albumart);
 
    g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_SIZE]);
 }
@@ -204,25 +199,6 @@ pragha_album_art_set_visible (PraghaAlbumArt *albumart,
    priv->visible = visible;
 
    g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_VISIBLE]);
-}
-
-/**
- * album_art_clear_icon:
- *
- */
-void
-pragha_album_art_clear_icon (PraghaAlbumArt *albumart)
-{
-   GdkPixbuf *pixbuf;
-   GError *error = NULL;
-
-   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
-
-   pixbuf = gdk_pixbuf_new_from_file_at_size (PIXMAPDIR"/cover.png",
-                                             pragha_album_art_get_size(albumart),
-                                             pragha_album_art_get_size(albumart),
-                                             &error);
-   pragha_album_art_set_pixbuf (albumart, pixbuf);
 }
 
 static void

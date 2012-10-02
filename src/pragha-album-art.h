@@ -69,7 +69,6 @@ pragha_album_art_set_visible (PraghaAlbumArt *albumart,
                               gboolean visible);
 gboolean
 pragha_album_art_get_visible (PraghaAlbumArt *albumart);
-void pragha_album_art_clear_icon (PraghaAlbumArt *albumart);
 
 G_END_DECLS
 
