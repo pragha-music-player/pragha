@@ -31,6 +31,7 @@ pragha_SOURCES =cdda.c \
 		pragha.c \
 		pragha.h \
 		pragha-backend.c \
+		pragha-album-art.c \
 		pragha-hig.c \
 		pref.c \
 		statusicon.c \
