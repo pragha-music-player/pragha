@@ -476,8 +476,9 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		handle_get_metadata(cwin->cstate->curr_mobj, &b);
 		/* Append the album art url metadata. */
-		if(cwin->cstate->arturl != NULL) {
-			artUrl_uri = g_filename_to_uri(cwin->cstate->arturl, NULL, NULL);
+		/* TODO: Add temp var or convert uri on album art set properties..*/
+		if(pragha_album_art_get_uri(cwin->albumart) != NULL) {
+			artUrl_uri = g_filename_to_uri(pragha_album_art_get_uri(cwin->albumart), NULL, NULL);
 			g_variant_builder_add (&b, "{sv}", "mpris:artUrl",
 				g_variant_new_string(artUrl_uri));
 			g_free(artUrl_uri);

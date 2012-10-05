@@ -57,6 +57,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gboolean ret, osd, test_change;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
+	gboolean show_album_art;
+	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 
@@ -181,15 +183,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->add_recursively_w));
 
-		cwin->cpref->show_album_art =
+		show_album_art =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->cpref->album_art_w));
 
-		cwin->cpref->album_art_size =
+		album_art_size =
 			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
 						cwin->cpref->album_art_size_w));
 
-		if (cwin->cpref->show_album_art) {
+		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w));
 
 			if (album_art_pattern) {
@@ -203,7 +205,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			}
 		}
 
-		album_art_toggle_state(cwin);
+		pragha_album_art_set_size(cwin->albumart, album_art_size);
+		pragha_album_art_set_visible(cwin->albumart, show_album_art);
 
 		/* Notification preferences */
 
@@ -653,13 +656,12 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->cpref->add_recursively_w),
 					     TRUE);
 
-	if (cwin->cpref->show_album_art)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->album_art_w),
-					     TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+				     cwin->cpref->album_art_w),
+				     pragha_album_art_get_visible(cwin->albumart));
 
-	if (cwin->cpref->album_art_size)
-		gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),  (int)cwin->cpref->album_art_size);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),
+				   (int) pragha_album_art_get_size(cwin->albumart));
 
 	if (cwin->cpref->album_art_pattern)
 		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w),
@@ -1307,14 +1309,14 @@ void save_preferences(struct con_win *cwin)
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_SHOW_ALBUM_ART,
-			       cwin->cpref->show_album_art);
+			       pragha_album_art_get_visible(cwin->albumart));
 
 	/* Save album art size */
 
 	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_ALBUM_ART_SIZE,
-			       (int)cwin->cpref->album_art_size);
+			       (int) pragha_album_art_get_size(cwin->albumart));
 
 	/* Save show controls below option */
 
