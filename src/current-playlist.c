@@ -999,6 +999,11 @@ void update_current_state(GtkTreePath *path,
 
 	update_album_art(cwin->cstate->curr_mobj, cwin);
 
+	/* Informs the new cover art in mpris.
+	 * FIXME: Need a better fix. */
+
+	mpris_update_metadata_changed(cwin);
+
 	/* Show OSD */
 
 	show_osd(cwin);
