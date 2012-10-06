@@ -1071,10 +1071,12 @@ pragha_advance_playback (GError *error, struct con_win *cwin)
 		return;
 
 	/* Start playing new track */
+	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
+	update_current_playlist_state(path, cwin);
+
 	mobj = current_playlist_mobj_at_path (path, cwin);
 	pragha_backend_start (cwin->backend, mobj);
 
-	update_current_state (path, PLAYLIST_NEXT, cwin);
 	gtk_tree_path_free (path);
 }
 

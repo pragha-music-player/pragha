@@ -601,6 +601,24 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 					gst_query_parse_seeking (query, NULL, &priv->can_seek, NULL, NULL);
 				gst_query_unref (query);
 
+				/* New song playback. */
+				if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
+					/* Update current song info */
+					__update_current_song_info(cwin);
+					__update_progress_song_info(cwin, 0);
+
+					/* Update current playlist */
+					update_current_playlist_view_new_track(cwin);
+
+					/* Update album art */
+					update_album_art(cwin->cstate->curr_mobj, cwin);
+
+					/* Show osd, and inform new album art. */
+					show_osd(cwin);
+					mpris_update_metadata_changed(cwin);
+				}
+				cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
 
@@ -614,6 +632,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 					g_source_remove(priv->timer);
 					priv->timer = 0;
 				}
+
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
 			break;
@@ -624,6 +643,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 				g_source_remove(priv->timer);
 				priv->timer = 0;
 			}
+
 			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			break;
 		}

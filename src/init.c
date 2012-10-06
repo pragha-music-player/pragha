@@ -1023,6 +1023,8 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->rand_track_refs = NULL;
 	cwin->cstate->queue_track_refs = NULL;
 
+	cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+
 	cwin->cstate->dragging = FALSE;
 	cwin->cstate->curr_mobj_clear = FALSE;
 
