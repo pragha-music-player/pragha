@@ -292,7 +292,8 @@ enum debug_level {
 /* Current playlist movement */
 
 enum playlist_action {
-	PLAYLIST_CURR = 1,
+	PLAYLIST_NONE,
+	PLAYLIST_CURR,
 	PLAYLIST_NEXT,
 	PLAYLIST_PREV
 };
@@ -602,6 +603,7 @@ struct con_state {
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
+	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
@@ -993,9 +995,8 @@ void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_pixbuf_state_on_path(GtkTreePath *path, const GError *error, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
-void update_current_state(GtkTreePath *path,
-			  enum playlist_action action,
-			  struct con_win *cwin);
+void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
+void update_current_playlist_view_new_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  struct con_win *cwin);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,

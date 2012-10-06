@@ -466,11 +466,11 @@ void play_pause_resume(struct con_win *cwin)
 			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
 		}
 
+		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
+		update_current_playlist_state(path, cwin);
+
 		mobj = current_playlist_mobj_at_path(path, cwin);
-
 		pragha_backend_start(cwin->backend, mobj);
-		update_current_state(path, PLAYLIST_CURR, cwin);
-
 		gtk_tree_path_free(path);
 		break;
 	default:
