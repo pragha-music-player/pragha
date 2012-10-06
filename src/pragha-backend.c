@@ -632,50 +632,60 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 	}
 }
 
-static gboolean pragha_backend_gstreamer_bus_call(GstBus *bus, GstMessage *msg, struct con_win *cwin)
+static void
+pragha_backend_message_error (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	pragha_backend_parse_error (cwin->backend, msg);
+}
+
+static void
+pragha_backend_message_eos (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	pragha_advance_playback (NULL, cwin);
+}
+
+static void
+pragha_backend_message_state_changed (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	GstState old, new, pending;
+
+	PraghaBackendPrivate *priv = cwin->backend->priv;
+
+	gst_message_parse_state_changed (msg, &old, &new, &pending);
+	if (GST_MESSAGE_SRC (msg) == GST_OBJECT (priv->pipeline))
+		pragha_backend_evaluate_state (old, new, pending, cwin);
+}
+
+static void
+pragha_backend_message_async_done (GstBus *bus, GstMessage *msg, struct con_win *cwin)
 {
 	PraghaBackendPrivate *priv = cwin->backend->priv;
 
-	switch(GST_MESSAGE_TYPE(msg)) {
-		case GST_MESSAGE_EOS:
-			pragha_advance_playback (NULL, cwin);
-			break;
-		case GST_MESSAGE_STATE_CHANGED: {
-			GstState old, new, pending;
-			gst_message_parse_state_changed (msg, &old, &new, &pending);
-			if (GST_MESSAGE_SRC (msg) == GST_OBJECT (priv->pipeline))
-				pragha_backend_evaluate_state (old, new, pending, cwin);
-			break;
-		}
-		case GST_MESSAGE_BUFFERING: {
-			pragha_backend_parse_buffering (cwin->backend, msg);
-			break;
-		}
-		case GST_MESSAGE_TAG: {
-			pragha_backend_parse_message_tag (cwin->backend, msg);
-			break;
-		}
-		case GST_MESSAGE_ERROR: {
-			pragha_backend_parse_error (cwin->backend, msg);
-			break;
-		}
-		case GST_MESSAGE_CLOCK_LOST: {
-			/* Get a new clock */
-			gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
-			gst_element_set_state (priv->pipeline, GST_STATE_PLAYING);
-			break;
-		}
-		case GST_MESSAGE_ASYNC_DONE: {
-			if (priv->seeking) {
-				priv->seeking = FALSE;
-				g_signal_emit (cwin->backend, signals[SIGNAL_SEEKED], 0);
-			}
-			break;
-		}
-    		default:
-			break;
+	if (priv->seeking) {
+		priv->seeking = FALSE;
+		g_signal_emit (cwin->backend, signals[SIGNAL_SEEKED], 0);
 	}
-	return TRUE;
+}
+
+static void
+pragha_backend_message_buffering (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	pragha_backend_parse_buffering (cwin->backend, msg);
+}
+
+static void
+pragha_backend_message_clock_lost (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	PraghaBackendPrivate *priv = cwin->backend->priv;
+
+	gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
+	gst_element_set_state (priv->pipeline, GST_STATE_PLAYING);
+}
+
+static void
+pragha_backend_message_tag (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+{
+	pragha_backend_parse_message_tag (cwin->backend, msg);
 }
 
 static void
@@ -933,14 +943,20 @@ gint backend_init (struct con_win *cwin)
 
 	bus = gst_pipeline_get_bus(GST_PIPELINE(priv->pipeline));
 
-	gst_bus_add_watch(bus, (GstBusFunc) pragha_backend_gstreamer_bus_call, cwin);
+	gst_bus_add_signal_watch(bus);
+	g_signal_connect(G_OBJECT(bus), "message::error", (GCallback)pragha_backend_message_error, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::eos", (GCallback)pragha_backend_message_eos, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::state-changed", (GCallback)pragha_backend_message_state_changed, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::async-done", (GCallback)pragha_backend_message_async_done, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::buffering", (GCallback)pragha_backend_message_buffering, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::clock-lost", (GCallback)pragha_backend_message_clock_lost, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, cwin);
+	gst_object_unref (bus);
 
 	pragha_backend_set_soft_volume(backend, cwin->cpref->software_mixer);
 	pragha_backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
-
-	gst_object_unref(bus);
 
 	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
 
