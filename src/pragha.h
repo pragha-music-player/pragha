@@ -996,7 +996,7 @@ void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
 void update_current_playlist_view_new_track(struct con_win *cwin);
-void update_current_playlist_view_track(const GError *error, struct con_win *cwin);
+void update_current_playlist_view_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  struct con_win *cwin);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
@@ -1209,7 +1209,7 @@ gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
-void pragha_advance_playback (GError *error, struct con_win *cwin);
+void pragha_advance_playback (struct con_win *cwin);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
 /* Some widgets. */

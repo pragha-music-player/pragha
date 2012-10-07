@@ -1050,7 +1050,7 @@ menu_position(GtkMenu *menu,
 }
 
 void
-pragha_advance_playback (GError *error, struct con_win *cwin)
+pragha_advance_playback (struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
 	struct musicobject *mobj = NULL;
@@ -1058,7 +1058,7 @@ pragha_advance_playback (GError *error, struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
 	/* Stop to set ready and clear all info */
-	pragha_backend_stop(cwin->backend, error);
+	pragha_backend_stop(cwin->backend);
 
 	if(cwin->cstate->playlist_change)
 		return;
