@@ -28,6 +28,11 @@
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
 #endif
 
+static void pragha_backend_evaluate_state(GstState old,
+					  GstState new,
+					  GstState pending,
+					  struct con_win *cwin);
+
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),
   GST_PLAY_FLAG_AUDIO         = (1 << 1),
@@ -294,9 +299,22 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 	priv->target_state = target_state;
 
 	ret = gst_element_set_state(priv->pipeline, target_state);
-	if (target_state == GST_STATE_PLAYING &&
-	    ret == GST_STATE_CHANGE_NO_PREROLL)
-		priv->is_live = TRUE;
+
+	switch (ret) {
+		case GST_STATE_CHANGE_SUCCESS:
+			if (target_state == GST_STATE_READY)
+				pragha_backend_evaluate_state(GST_STATE_RETURN (priv->pipeline),
+							      GST_STATE (priv->pipeline),
+							      GST_STATE_PENDING (priv->pipeline),
+							      priv->cwin);
+			break;
+		case GST_STATE_CHANGE_NO_PREROLL:
+			if (target_state == GST_STATE_PLAYING)
+				priv->is_live = TRUE;
+			break;
+		default:
+			break;
+	}
 
 	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_TARGET_STATE]);
 }
