@@ -264,7 +264,7 @@ static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant*
 static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop(cwin->backend, NULL);
+		pragha_backend_stop(cwin->backend);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
@@ -582,7 +582,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 		clear_current_playlist(NULL, cwin);
 		add_playlist_current_playlist(NULL, found_playlist, cwin);
 
-		pragha_backend_stop(cwin->backend, NULL);
+		pragha_backend_stop(cwin->backend);
 		play_first_current_playlist (cwin);
 
 		g_free(found_playlist);

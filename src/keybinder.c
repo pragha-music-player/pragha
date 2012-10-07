@@ -39,7 +39,7 @@ static void keybind_stop_handler (const char *keystring, gpointer data)
 	struct con_win *cwin = data;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop(cwin->backend, NULL);
+		pragha_backend_stop(cwin->backend);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)

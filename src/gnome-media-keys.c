@@ -42,7 +42,7 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
     else if (strcmp("Pause", key) == 0)
         pragha_backend_pause(cwin->backend);
     else if (strcmp("Stop", key) == 0)
-        pragha_backend_stop(cwin->backend, NULL);
+        pragha_backend_stop(cwin->backend);
     else if (strcmp("Previous", key) == 0)
         play_prev_track(cwin);
     else if (strcmp("Next", key) == 0)

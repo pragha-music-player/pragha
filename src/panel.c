@@ -480,7 +480,7 @@ void play_pause_resume(struct con_win *cwin)
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	pragha_backend_stop (cwin->backend, NULL);
+	pragha_backend_stop (cwin->backend);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)

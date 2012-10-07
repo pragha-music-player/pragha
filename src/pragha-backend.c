@@ -51,6 +51,7 @@ struct PraghaBackendPrivate {
 	gboolean can_seek;
 	gboolean seeking; //this is hack, we should catch seek by seqnum, but it's currently broken in gstreamer
 	gboolean emitted_error;
+	GError *error;
 	GstState target_state;
 	enum player_state state;
 };
@@ -272,6 +273,12 @@ pragha_backend_emitted_error (PraghaBackend *backend)
 	return backend->priv->emitted_error;
 }
 
+GError *
+pragha_backend_get_error (PraghaBackend *backend)
+{
+	return backend->priv->error;
+}
+
 enum player_state
 pragha_backend_get_target_state (PraghaBackend *backend)
 {
@@ -308,7 +315,7 @@ pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
 }
 
 void
-pragha_backend_stop (PraghaBackend *backend, GError *error)
+pragha_backend_stop (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
@@ -320,13 +327,7 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
-	update_current_playlist_view_track(error, cwin);
-
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
-
-	priv->is_live = FALSE;
-	priv->emitted_error = FALSE;
-	priv->seeking = FALSE;
 }
 
 void
@@ -349,26 +350,21 @@ pragha_backend_resume (PraghaBackend *backend)
 
 static void pragha_backend_error_dialog_response(GtkDialog *dialog,
 					  gint response,
-					  GError *error)
+					  struct con_win *cwin)
 {
-	struct con_win *cwin;
-
-	cwin = g_object_get_data (G_OBJECT(dialog), "cwin");
-
 	switch (response) {
 		case GTK_RESPONSE_APPLY: {
-			pragha_advance_playback (error, cwin);
+			pragha_advance_playback (cwin);
 			break;
 		}
 		case GTK_RESPONSE_ACCEPT:
 		case GTK_RESPONSE_DELETE_EVENT:
 		default: {
-			pragha_backend_stop (cwin->backend, error);
+			pragha_backend_stop (cwin->backend);
 			break;
 		}
 	}
 	gtk_widget_destroy(GTK_WIDGET(dialog));
-	g_error_free (error);
 }
 
 static void
@@ -403,6 +399,7 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
 		priv->emitted_error = TRUE;
+		priv->error = error;
 
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -416,10 +413,9 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 
 		gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
 
-		g_object_set_data (G_OBJECT(dialog), "cwin", cwin);
-
 		g_signal_connect(G_OBJECT(dialog), "response",
-				 G_CALLBACK(pragha_backend_error_dialog_response), error);
+				 G_CALLBACK(pragha_backend_error_dialog_response),
+				 cwin);
 		gtk_widget_show_all(dialog);
 	}
 	else {
@@ -537,7 +533,7 @@ pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj)
 
 	if ((priv->state == ST_PLAYING) ||
 	    (priv->state == ST_PAUSED)) {
-		pragha_backend_stop(backend, NULL);
+		pragha_backend_stop(backend);
 	}
 
 	cwin->cstate->curr_mobj = mobj;
@@ -618,7 +614,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 				}
 				else {
 					/* Update current playlist icon */
-					update_current_playlist_view_track(NULL, cwin);
+					update_current_playlist_view_track(cwin);
 				}
 
 				if (priv->timer == 0)
@@ -631,7 +627,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		case GST_STATE_PAUSED: {
 			if (priv->target_state == GST_STATE_PAUSED) {
 				pragha_backend_set_state (cwin->backend, ST_PAUSED);
-				update_current_playlist_view_track(NULL, cwin);
+				update_current_playlist_view_track(cwin);
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -644,13 +640,18 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		case GST_STATE_READY:
 			if (priv->target_state == GST_STATE_READY) {
 				pragha_backend_set_state (cwin->backend, ST_STOPPED);
-				update_current_playlist_view_track(NULL, cwin);
+				update_current_playlist_view_track(cwin);
 			}
 		case GST_STATE_NULL: {
 			if (priv->timer > 0) {
 				g_source_remove(priv->timer);
 				priv->timer = 0;
 			}
+
+			priv->is_live = FALSE;
+			priv->emitted_error = FALSE;
+			g_clear_error(&priv->error);
+			priv->seeking = FALSE;
 
 			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			break;
@@ -669,7 +670,7 @@ pragha_backend_message_error (GstBus *bus, GstMessage *msg, struct con_win *cwin
 static void
 pragha_backend_message_eos (GstBus *bus, GstMessage *msg, struct con_win *cwin)
 {
-	pragha_advance_playback (NULL, cwin);
+	pragha_advance_playback (cwin);
 }
 
 static void
@@ -724,6 +725,8 @@ pragha_backend_finalize (GObject *object)
 
 	gst_element_set_state(priv->pipeline, GST_STATE_NULL);
 	gst_object_unref(priv->pipeline);
+	if(priv->error)
+		g_error_free(priv->error);
 
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 
@@ -886,6 +889,7 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->can_seek = FALSE;
 	priv->seeking = FALSE;
 	priv->emitted_error = FALSE;
+	priv->error = NULL;
 	/* FIXME */
 }
 

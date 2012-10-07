@@ -25,7 +25,7 @@ static void dbus_play_handler(struct con_win *cwin)
 
 static void dbus_stop_handler(struct con_win *cwin)
 {
-	pragha_backend_stop(cwin->backend, NULL);
+	pragha_backend_stop(cwin->backend);
 }
 
 static void dbus_pause_handler(struct con_win *cwin)

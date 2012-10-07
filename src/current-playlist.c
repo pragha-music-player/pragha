@@ -128,18 +128,21 @@ static GtkToggleActionEntry cp_null_toggles_entries[] = {
 
 /* Update playback state pixbuf */
 
-void update_pixbuf_state_on_path (GtkTreePath *path, const GError *error, struct con_win *cwin)
+void current_playlist_update_pixbuf_state_on_path (GtkTreePath *path, struct con_win *cwin)
 {
 	GtkTreeModel *model = NULL;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf = NULL;
 	GtkIconTheme *icon_theme;
+	GError *error = NULL;
 
 	if(cwin->cstate->playlist_change)
 		return;
 
-	if (error) {
+	if(pragha_backend_emitted_error(cwin->backend)) {
 		icon_theme = gtk_icon_theme_get_default ();
+		error = pragha_backend_get_error(cwin->backend);
+
 		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
 		else
@@ -158,6 +161,7 @@ void update_pixbuf_state_on_path (GtkTreePath *path, const GError *error, struct
 				break;
 		}
 	}
+
 	if (path != NULL) {
 		model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
 		if (gtk_tree_model_get_iter (model, &iter, path)) {
@@ -1043,19 +1047,19 @@ void update_current_playlist_view_new_track(struct con_win *cwin)
 	path = current_playlist_get_actual(cwin);
 
 	if(path) {
-		update_pixbuf_state_on_path (path, NULL, cwin);
+		current_playlist_update_pixbuf_state_on_path (path, cwin);
 		jump_to_path_on_current_playlist (path, cwin);
 		gtk_tree_path_free(path);
 	}
 }
 
-void update_current_playlist_view_track(const GError *error, struct con_win *cwin)
+void update_current_playlist_view_track(struct con_win *cwin)
 {
 	GtkTreePath *path;
 	path = current_playlist_get_actual(cwin);
 
 	if(path) {
-		update_pixbuf_state_on_path (path, error, cwin);
+		current_playlist_update_pixbuf_state_on_path (path, cwin);
 		gtk_tree_path_free(path);
 	}
 }
@@ -2186,7 +2190,7 @@ void play_prev_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend, NULL);
+	pragha_backend_stop(cwin->backend);
 
 	/* Start playing new track */
 	cwin->cstate->update_playlist_action = PLAYLIST_PREV;
@@ -2211,7 +2215,7 @@ void play_next_track(struct con_win *cwin)
 		return;
 
 	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend, NULL);
+	pragha_backend_stop(cwin->backend);
 
 	/* Get the next track to be played */
 	path = current_playlist_get_next(cwin);

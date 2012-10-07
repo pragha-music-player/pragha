@@ -144,7 +144,7 @@ static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop (cwin->backend, NULL);
+		pragha_backend_stop (cwin->backend);
 }
 
 static void
