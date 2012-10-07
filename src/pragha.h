@@ -993,10 +993,10 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
-void update_pixbuf_state_on_path(GtkTreePath *path, const GError *error, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
 void update_current_playlist_view_new_track(struct con_win *cwin);
+void update_current_playlist_view_track(const GError *error, struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  struct con_win *cwin);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
