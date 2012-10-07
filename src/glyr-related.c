@@ -17,8 +17,6 @@
 
 #include "pragha.h"
 
-#define ISO_639_1 _("en")
-
 #ifdef HAVE_LIBGLYR
 
 typedef struct
@@ -219,7 +217,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 #endif
 		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
 
-		glyr_opt_lang (&glyr_info->query, ISO_639_1);
+		glyr_opt_lang (&glyr_info->query, "auto");
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 		break;
 	case GLYR_GET_LYRICS:
