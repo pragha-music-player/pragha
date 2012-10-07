@@ -320,6 +320,8 @@ pragha_backend_stop (PraghaBackend *backend, GError *error)
 		cwin->cstate->curr_mobj_clear = FALSE;
 	}
 
+	update_current_playlist_view_track(error, cwin);
+
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
 
 	priv->is_live = FALSE;
@@ -602,7 +604,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 					__update_current_song_info(cwin);
 					__update_progress_song_info(cwin, 0);
 
-					/* Update current playlist */
+					/* Update and jump in current playlist */
 					update_current_playlist_view_new_track(cwin);
 
 					/* Update album art */
@@ -611,8 +613,13 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 					/* Show osd, and inform new album art. */
 					show_osd(cwin);
 					mpris_update_metadata_changed(cwin);
+
+					cwin->cstate->update_playlist_action = PLAYLIST_NONE;
 				}
-				cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+				else {
+					/* Update current playlist icon */
+					update_current_playlist_view_track(NULL, cwin);
+				}
 
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
@@ -624,6 +631,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		case GST_STATE_PAUSED: {
 			if (priv->target_state == GST_STATE_PAUSED) {
 				pragha_backend_set_state (cwin->backend, ST_PAUSED);
+				update_current_playlist_view_track(NULL, cwin);
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -634,8 +642,11 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			break;
 		}
 		case GST_STATE_READY:
+			if (priv->target_state == GST_STATE_READY) {
+				pragha_backend_set_state (cwin->backend, ST_STOPPED);
+				update_current_playlist_view_track(NULL, cwin);
+			}
 		case GST_STATE_NULL: {
-			pragha_backend_set_state (cwin->backend, ST_STOPPED);
 			if (priv->timer > 0) {
 				g_source_remove(priv->timer);
 				priv->timer = 0;

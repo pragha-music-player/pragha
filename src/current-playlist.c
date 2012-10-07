@@ -1045,6 +1045,18 @@ void update_current_playlist_view_new_track(struct con_win *cwin)
 	if(path) {
 		update_pixbuf_state_on_path (path, NULL, cwin);
 		jump_to_path_on_current_playlist (path, cwin);
+		gtk_tree_path_free(path);
+	}
+}
+
+void update_current_playlist_view_track(const GError *error, struct con_win *cwin)
+{
+	GtkTreePath *path;
+	path = current_playlist_get_actual(cwin);
+
+	if(path) {
+		update_pixbuf_state_on_path (path, error, cwin);
+		gtk_tree_path_free(path);
 	}
 }
 
