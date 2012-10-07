@@ -397,11 +397,6 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 
 	gst_message_parse_error (message, &error, &dbg_info);
 
-	/* Gstreamer doc: When an error has occured
-	 * playbin should be set back to READY or NULL state.
-	 */
-	gst_element_set_state(priv->pipeline, GST_STATE_NULL);
-
 	/* Next code inspired on rhynthmbox.
 	 * If we've already got an error, ignore 'internal data flow error'
 	 * type messages, as they're too generic to be helpful.
@@ -659,18 +654,18 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			if (priv->target_state == GST_STATE_READY) {
 				pragha_backend_set_state (cwin->backend, ST_STOPPED);
 				update_current_playlist_view_track(cwin);
+
+				if (priv->timer > 0) {
+					g_source_remove(priv->timer);
+					priv->timer = 0;
+				}
+
+				priv->is_live = FALSE;
+				priv->emitted_error = FALSE;
+				g_clear_error(&priv->error);
+				priv->seeking = FALSE;
 			}
 		case GST_STATE_NULL: {
-			if (priv->timer > 0) {
-				g_source_remove(priv->timer);
-				priv->timer = 0;
-			}
-
-			priv->is_live = FALSE;
-			priv->emitted_error = FALSE;
-			g_clear_error(&priv->error);
-			priv->seeking = FALSE;
-
 			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			break;
 		}
