@@ -494,15 +494,18 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 }
 
 static void
-update_panel_playback_state (struct con_win *cwin)
+update_panel_playback_state_cb (GObject *gobject, gint state, gpointer user_data)
 {
-	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
+	struct con_win *cwin = user_data;
+
+	gboolean playing = (state != ST_STOPPED);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->prev_button), playing);
 
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(cwin->play_button),
-				     (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ?
-				     GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
+				     (state == ST_PLAYING) ?
+				     GTK_STOCK_MEDIA_PAUSE :
+				     GTK_STOCK_MEDIA_PLAY);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->stop_button), playing);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->next_button), playing);
@@ -512,13 +515,6 @@ update_panel_playback_state (struct con_win *cwin)
 		unset_track_progress_bar(cwin);
 		pragha_album_art_set_uri(cwin->albumart, NULL);
 	}
-}
-
-static void
-update_panel_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-	update_panel_playback_state (cwin);
 }
 
 static void
@@ -713,10 +709,9 @@ create_toolbar(struct con_win *cwin)
 	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
 
 	init_toolbar_preferences_saved(cwin);
-	update_panel_playback_state(cwin);
 
 	g_signal_connect (cwin->backend, "tick", G_CALLBACK (update_gui), cwin);
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_panel_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_panel_playback_state_cb), cwin);
 
 	cwin->toolbar = toolbar;
 
