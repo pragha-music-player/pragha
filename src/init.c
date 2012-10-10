@@ -1379,6 +1379,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
 
+	/* Send notifications on gui, OSD and mpris of new songs */
+
+	g_signal_connect(cwin->backend,
+			 "state-change",
+			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
+
 	/* Init window state */
 
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {

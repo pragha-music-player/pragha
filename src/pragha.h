@@ -1278,6 +1278,10 @@ void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *
 GtkWidget *pragha_hig_workarea_table_new();
 void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 
+/* pragha-playback.c: Functions to control playback and notify events. */
+
+void pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin);
+
 /* Lastfm Helper */
 
 #ifdef HAVE_LIBCLASTFM
