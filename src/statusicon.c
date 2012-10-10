@@ -75,7 +75,7 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	{
 		case 1: toogle_main_window (cwin, FALSE);
 			break;
-		case 2:	play_pause_resume(cwin);
+		case 2:	pragha_playback_play_pause_resume(cwin);
 			break;
 		case 3:
 			popup_menu = gtk_ui_manager_get_widget(cwin->systray_menu, "/popup");
@@ -137,28 +137,28 @@ static void
 systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_pause_resume(cwin);
+		pragha_playback_play_pause_resume(cwin);
 }
 
 static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop (cwin->backend);
+		pragha_playback_stop(cwin);
 }
 
 static void
 systray_prev_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_prev_track(cwin);
+		pragha_playback_prev_track(cwin);
 }
 
 static void
 systray_next_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_next_track(cwin);
+		pragha_playback_next_track(cwin);
 }
 
 static void
