@@ -31,7 +31,7 @@
 static void pragha_backend_evaluate_state(GstState old,
 					  GstState new,
 					  GstState pending,
-					  struct con_win *cwin);
+					  PraghaBackend *backend);
 
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),
@@ -307,7 +307,7 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 				pragha_backend_evaluate_state(GST_STATE_RETURN (priv->pipeline),
 							      GST_STATE (priv->pipeline),
 							      GST_STATE_PENDING (priv->pipeline),
-							      priv->cwin);
+							      backend);
 			break;
 		case GST_STATE_CHANGE_NO_PREROLL:
 			if (target_state == GST_STATE_PLAYING)
@@ -595,9 +595,9 @@ pragha_backend_evaluate_if_can_seek(PraghaBackend *backend)
 }
 
 static void
-pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
+pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = cwin->backend->priv;
+	PraghaBackendPrivate *priv = backend->priv;
 	gboolean changed = FALSE;
 
 	if (pending != GST_STATE_VOID_PENDING)
@@ -606,11 +606,11 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 	switch (new) {
 		case GST_STATE_PLAYING: {
 			if (priv->target_state == GST_STATE_PLAYING) {
-				pragha_backend_set_state (cwin->backend, ST_PLAYING);
-				pragha_backend_evaluate_if_can_seek(cwin->backend);
+				pragha_backend_set_state (backend, ST_PLAYING);
+				pragha_backend_evaluate_if_can_seek(backend);
 				changed = TRUE;
 				if (priv->timer == 0)
-					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
+					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);
 
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
@@ -618,7 +618,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		}
 		case GST_STATE_PAUSED: {
 			if (priv->target_state == GST_STATE_PAUSED) {
-				pragha_backend_set_state (cwin->backend, ST_PAUSED);
+				pragha_backend_set_state (backend, ST_PAUSED);
 				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
@@ -631,7 +631,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		}
 		case GST_STATE_READY:
 			if (priv->target_state == GST_STATE_READY) {
-				pragha_backend_set_state (cwin->backend, ST_STOPPED);
+				pragha_backend_set_state (backend, ST_STOPPED);
 				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
@@ -652,63 +652,65 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 	}
 
 	if(changed)
-		g_signal_emit (cwin->backend, signals[SIGNAL_STATE_CHANGE], 0, pragha_backend_get_state(cwin->backend));
+		g_signal_emit (backend, signals[SIGNAL_STATE_CHANGE], 0, priv->state);
 }
 
 static void
-pragha_backend_message_error (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_error (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	pragha_backend_parse_error (cwin->backend, msg);
+	pragha_backend_parse_error (backend, msg);
 }
 
 static void
-pragha_backend_message_eos (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_eos (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	pragha_advance_playback (cwin);
+	PraghaBackendPrivate *priv = backend->priv;
+
+	pragha_advance_playback (priv->cwin);
 }
 
 static void
-pragha_backend_message_state_changed (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_state_changed (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
 	GstState old, new, pending;
 
-	PraghaBackendPrivate *priv = cwin->backend->priv;
+	PraghaBackendPrivate *priv = backend->priv;
 
 	gst_message_parse_state_changed (msg, &old, &new, &pending);
 	if (GST_MESSAGE_SRC (msg) == GST_OBJECT (priv->pipeline))
-		pragha_backend_evaluate_state (old, new, pending, cwin);
+		pragha_backend_evaluate_state (old, new, pending, backend);
 }
 
 static void
-pragha_backend_message_async_done (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_async_done (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = cwin->backend->priv;
+	PraghaBackendPrivate *priv = backend->priv;
 
 	if (priv->seeking) {
 		priv->seeking = FALSE;
-		g_signal_emit (cwin->backend, signals[SIGNAL_SEEKED], 0);
+		g_signal_emit (backend, signals[SIGNAL_SEEKED], 0);
 	}
 }
 
 static void
-pragha_backend_message_buffering (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_buffering (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	pragha_backend_parse_buffering (cwin->backend, msg);
+	pragha_backend_parse_buffering (backend, msg);
 }
 
 static void
-pragha_backend_message_clock_lost (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_clock_lost (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = cwin->backend->priv;
+	PraghaBackendPrivate *priv = backend->priv;
 
 	gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
 	gst_element_set_state (priv->pipeline, GST_STATE_PLAYING);
 }
 
 static void
-pragha_backend_message_tag (GstBus *bus, GstMessage *msg, struct con_win *cwin)
+pragha_backend_message_tag (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	pragha_backend_parse_message_tag (cwin->backend, msg);
+	pragha_backend_parse_message_tag (backend, msg);
 }
 
 static void
@@ -988,13 +990,13 @@ gint backend_init (struct con_win *cwin)
 	bus = gst_pipeline_get_bus(GST_PIPELINE(priv->pipeline));
 
 	gst_bus_add_signal_watch(bus);
-	g_signal_connect(G_OBJECT(bus), "message::error", (GCallback)pragha_backend_message_error, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::eos", (GCallback)pragha_backend_message_eos, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::state-changed", (GCallback)pragha_backend_message_state_changed, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::async-done", (GCallback)pragha_backend_message_async_done, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::buffering", (GCallback)pragha_backend_message_buffering, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::clock-lost", (GCallback)pragha_backend_message_clock_lost, cwin);
-	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, cwin);
+	g_signal_connect(G_OBJECT(bus), "message::error", (GCallback)pragha_backend_message_error, backend);
+	g_signal_connect(G_OBJECT(bus), "message::eos", (GCallback)pragha_backend_message_eos, backend);
+	g_signal_connect(G_OBJECT(bus), "message::state-changed", (GCallback)pragha_backend_message_state_changed, backend);
+	g_signal_connect(G_OBJECT(bus), "message::async-done", (GCallback)pragha_backend_message_async_done, backend);
+	g_signal_connect(G_OBJECT(bus), "message::buffering", (GCallback)pragha_backend_message_buffering, backend);
+	g_signal_connect(G_OBJECT(bus), "message::clock-lost", (GCallback)pragha_backend_message_clock_lost, backend);
+	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
 	gst_object_unref (bus);
 
 	pragha_backend_set_soft_volume(backend, cwin->cpref->software_mixer);
