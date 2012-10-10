@@ -223,11 +223,11 @@ static GtkToggleActionEntry toggles_entries[] = {
 /* Sentitive menubar actions depending on the playback status. */
 
 static void
-update_menubar_playback_state (struct con_win *cwin)
+update_menubar_playback_state_cb (GObject *gobject, gint state, struct con_win *cwin)
 {
 	GtkAction *action;
 
-	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
+	gboolean playing = (state != ST_STOPPED);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
@@ -255,13 +255,6 @@ update_menubar_playback_state (struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	update_menubar_lastfm_state (cwin);
 	#endif
-}
-
-static void
-update_menubar_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-	update_menubar_playback_state (cwin);
 }
 
 /* Signal handler for deleting rescan dialog box */
@@ -1412,9 +1405,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	cwin->bar_context_menu = main_menu;
 
-	update_menubar_playback_state (cwin);
-
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
 	return main_menu;
 }
