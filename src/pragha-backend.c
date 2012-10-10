@@ -74,6 +74,7 @@ enum {
 static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
+	SIGNAL_STATE_CHANGE,
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
@@ -597,6 +598,7 @@ static void
 pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, struct con_win *cwin)
 {
 	PraghaBackendPrivate *priv = cwin->backend->priv;
+	gboolean changed = FALSE;
 
 	if (pending != GST_STATE_VOID_PENDING)
 		return;
@@ -606,7 +608,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			if (priv->target_state == GST_STATE_PLAYING) {
 				pragha_backend_set_state (cwin->backend, ST_PLAYING);
 				pragha_backend_evaluate_if_can_seek(cwin->backend);
-
+				changed = TRUE;
 				/* New song playback. */
 				if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
 					/* Update current song info */
@@ -640,6 +642,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		case GST_STATE_PAUSED: {
 			if (priv->target_state == GST_STATE_PAUSED) {
 				pragha_backend_set_state (cwin->backend, ST_PAUSED);
+				changed = TRUE;
 				update_current_playlist_view_track(cwin);
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
@@ -654,7 +657,7 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			if (priv->target_state == GST_STATE_READY) {
 				pragha_backend_set_state (cwin->backend, ST_STOPPED);
 				update_current_playlist_view_track(cwin);
-
+				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -672,6 +675,9 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		default:
 			break;
 	}
+
+	if(changed)
+		g_signal_emit (cwin->backend, signals[SIGNAL_STATE_CHANGE], 0, pragha_backend_get_state(cwin->backend));
 }
 
 static void
@@ -863,6 +869,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                    G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
+
+	signals[SIGNAL_STATE_CHANGE] = g_signal_new ("state-change",
+                                                     G_TYPE_FROM_CLASS (gobject_class),
+                                                     G_SIGNAL_RUN_LAST,
+                                                     G_STRUCT_OFFSET (PraghaBackendClass, state_change),
+                                                     NULL, NULL,
+                                                     g_cclosure_marshal_VOID__INT,
+                                                     G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_TICK] = g_signal_new ("tick",
                                              G_TYPE_FROM_CLASS (gobject_class),

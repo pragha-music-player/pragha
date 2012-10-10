@@ -48,6 +48,7 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+	void (*state_change) (PraghaBackend *backend, gint state);
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
