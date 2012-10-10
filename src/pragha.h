@@ -1204,7 +1204,6 @@ gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
-void pragha_advance_playback (struct con_win *cwin);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
 /* Some widgets. */
@@ -1281,6 +1280,7 @@ void pragha_playback_prev_track(struct con_win *cwin);
 void pragha_playback_play_pause_resume(struct con_win *cwin);
 void pragha_playback_stop(struct con_win *cwin);
 void pragha_playback_next_track(struct con_win *cwin);
+void pragha_advance_playback (struct con_win *cwin);
 
 /* Lastfm Helper */
 
