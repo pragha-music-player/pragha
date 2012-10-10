@@ -416,14 +416,14 @@ update_related_handler (gpointer data)
 }
 
 static void
-update_related_state (struct con_win *cwin)
+update_related_state_cb (GObject *gobject, gint state, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
 
 	if(cwin->related_timeout_id)
 		g_source_remove(cwin->related_timeout_id);
 
-	if(pragha_backend_get_state (cwin->backend) != ST_PLAYING)
+	if(state != ST_PLAYING)
 		return;
 
 	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)
@@ -439,13 +439,6 @@ update_related_state (struct con_win *cwin)
 			update_related_handler, cwin, NULL);
 }
 
-static void
-update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-	update_related_state (cwin);
-}
-
 void glyr_related_free (struct con_win *cwin)
 {
 	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
@@ -459,7 +452,7 @@ int init_glyr_related (struct con_win *cwin)
 
 	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
 
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_related_state_cb), cwin);
 
 	return 0;
 }
