@@ -1295,7 +1295,11 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 
 		g_list_free(list);
 	}
-	play_first_current_playlist(cwin);
+
+	if(pragha_backend_get_state (cwin->backend) == ST_PLAYING)
+		pragha_playback_next_track(cwin);
+	else
+		pragha_playback_play_pause_resume(cwin);
 }
 
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)

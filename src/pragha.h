@@ -1003,6 +1003,7 @@ GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
 						struct con_win *cwin);
 void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
 void current_playlist_clear_dirty_all(struct con_win *cwin);
+void clear_rand_track_refs(struct con_win *cwin);
 GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
@@ -1028,12 +1029,6 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
-void play_first_current_playlist(struct con_win *cwin);
-void play_prev_track(struct con_win *cwin);
-void play_next_track(struct con_win *cwin);
-void play_track(struct con_win *cwin);
-void pause_resume_track(struct con_win *cwin);
-void play_pause_resume(struct con_win *cwin);
 void shuffle_button(struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
 void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
@@ -1281,6 +1276,11 @@ void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 /* pragha-playback.c: Functions to control playback and notify events. */
 
 void pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin);
+
+void pragha_playback_prev_track(struct con_win *cwin);
+void pragha_playback_play_pause_resume(struct con_win *cwin);
+void pragha_playback_stop(struct con_win *cwin);
+void pragha_playback_next_track(struct con_win *cwin);
 
 /* Lastfm Helper */
 

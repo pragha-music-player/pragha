@@ -747,28 +747,28 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 void prev_action(GtkAction *action, struct con_win *cwin)
 {
-	play_prev_track(cwin);
+	pragha_playback_prev_track(cwin);
 }
 
 /* Handler for the 'Play / Pause' item in the pragha menu */
 
 void play_pause_action(GtkAction *action, struct con_win *cwin)
 {
-	play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(cwin);
 }
 
 /* Handler for the 'Stop' item in the pragha menu */
 
 void stop_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_backend_stop(cwin->backend);
+	pragha_playback_stop(cwin);
 }
 
 /* Handler for the 'Next' item in the pragha menu */
 
 void next_action (GtkAction *action, struct con_win *cwin)
 {
-	play_next_track(cwin);
+	pragha_playback_next_track(cwin);
 }
 
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)

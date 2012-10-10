@@ -23,7 +23,7 @@ static void keybind_prev_handler (const char *keystring, gpointer data)
 	struct con_win *cwin = data;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_prev_track(cwin);
+		pragha_playback_prev_track(cwin);
 }
 
 static void keybind_play_handler (const char *keystring, gpointer data)
@@ -31,7 +31,7 @@ static void keybind_play_handler (const char *keystring, gpointer data)
 	struct con_win *cwin = data;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_pause_resume(cwin);
+		pragha_playback_play_pause_resume(cwin);
 }
 
 static void keybind_stop_handler (const char *keystring, gpointer data)
@@ -39,7 +39,7 @@ static void keybind_stop_handler (const char *keystring, gpointer data)
 	struct con_win *cwin = data;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop(cwin->backend);
+		pragha_playback_stop(cwin);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)
@@ -47,7 +47,7 @@ static void keybind_next_handler (const char *keystring, gpointer data)
 	struct con_win *cwin = data;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_next_track(cwin);
+		pragha_playback_next_track(cwin);
 }
 
 static void keybind_media_handler (const char *keystring, gpointer data)

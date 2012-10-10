@@ -26,7 +26,7 @@ static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	pragha_backend_stop(cwin->backend);
+	pragha_playback_stop(cwin);
 
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);

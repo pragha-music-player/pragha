@@ -418,79 +418,22 @@ void shuffle_button (struct con_win *cwin)
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_pause_resume(cwin);
-}
-
-void play_pause_resume(struct con_win *cwin)
-{
-	struct musicobject *mobj = NULL;
-	GtkTreePath *path=NULL;
-	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
-
-	/* New action is based on the current state */
-
-	/************************************/
-        /* State     Action		    */
-	/* 				    */
-	/* Playing   Pause playback	    */
-	/* Paused    Resume playback	    */
-	/* Stopped   Start playback	    */
-        /************************************/
-
-	switch (pragha_backend_get_state (cwin->backend)) {
-	case ST_PLAYING:
-		pragha_backend_pause(cwin->backend);
-		break;
-	case ST_PAUSED:
-		pragha_backend_resume(cwin->backend);
-		break;
-	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
-			break;
-		if(cwin->cstate->queue_track_refs)
-			path = get_next_queue_track(cwin);
-		if (!path)
-			path = current_playlist_get_selection(cwin);
-		if(!path && cwin->cpref->shuffle)
-			path = get_first_random_track(cwin);
-		if (!path) {
-			play_first_current_playlist(cwin);
-			break;
-		}
-
-		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin);
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-		}
-
-		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
-		update_current_playlist_state(path, cwin);
-
-		mobj = current_playlist_mobj_at_path(path, cwin);
-		pragha_backend_start(cwin->backend, mobj);
-		gtk_tree_path_free(path);
-		break;
-	default:
-		break;
-	}
+	pragha_playback_play_pause_resume(cwin);
 }
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	pragha_backend_stop (cwin->backend);
+	pragha_playback_stop(cwin);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_prev_track(cwin);
+	pragha_playback_prev_track(cwin);
 }
 
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_next_track(cwin);
+	pragha_playback_next_track(cwin);
 }
 
 static void

@@ -17,6 +17,8 @@
 
 #include "pragha.h"
 
+/* Update gui, mpris on new track playback */
+
 void
 pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin)
 {
@@ -40,4 +42,129 @@ pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct 
 		mpris_update_metadata_changed(cwin);
 		cwin->cstate->update_playlist_action = PLAYLIST_NONE;
 	}
+}
+
+/**********************/
+/* Playback functions */
+/**********************/
+
+/* Play prev track in current playlist */
+
+void pragha_playback_prev_track(struct con_win *cwin)
+{
+	GtkTreePath *path;
+	struct musicobject *mobj = NULL;
+
+	/* Get the next (prev) track to be played */
+	path = current_playlist_get_prev(cwin);
+
+	/* No more tracks */
+	if (!path)
+		return;
+
+	/* Stop currently playing track */
+	pragha_backend_stop(cwin->backend);
+
+	/* Start playing new track */
+	cwin->cstate->update_playlist_action = PLAYLIST_PREV;
+	update_current_playlist_state(path, cwin);
+
+	mobj = current_playlist_mobj_at_path(path, cwin);
+	pragha_backend_start(cwin->backend, mobj);
+
+	gtk_tree_path_free(path);
+}
+
+/* Start playback of a new track, or resume playback of current track */
+
+void pragha_playback_play_pause_resume(struct con_win *cwin)
+{
+	struct musicobject *mobj = NULL;
+	GtkTreePath *path=NULL;
+	GtkTreeModel *model;
+	GtkTreeRowReference *ref;
+
+	/* New action is based on the current state */
+
+	/************************************/
+        /* State     Action		    */
+	/* 				    */
+	/* Playing   Pause playback	    */
+	/* Paused    Resume playback	    */
+	/* Stopped   Start playback	    */
+        /************************************/
+
+	switch (pragha_backend_get_state (cwin->backend)) {
+	case ST_PLAYING:
+		pragha_backend_pause(cwin->backend);
+		break;
+	case ST_PAUSED:
+		pragha_backend_resume(cwin->backend);
+		break;
+	case ST_STOPPED:
+		if(cwin->cstate->playlist_change)
+			break;
+		if(cwin->cstate->queue_track_refs)
+			path = get_next_queue_track(cwin);
+		if (!path)
+			path = current_playlist_get_selection(cwin);
+		if(!path && cwin->cpref->shuffle)
+			path = get_first_random_track(cwin);
+
+		if (cwin->cpref->shuffle) {
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+			ref = gtk_tree_row_reference_new(model, path);
+			reset_rand_track_refs(ref, cwin);
+			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+		}
+
+		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
+		update_current_playlist_state(path, cwin);
+
+		mobj = current_playlist_mobj_at_path(path, cwin);
+		pragha_backend_start(cwin->backend, mobj);
+		gtk_tree_path_free(path);
+		break;
+	default:
+		break;
+	}
+}
+
+/* Stop the playback */
+
+void pragha_playback_stop(struct con_win *cwin)
+{
+	pragha_backend_stop(cwin->backend);
+}
+
+/* Play next track in current_playlist */
+
+void pragha_playback_next_track(struct con_win *cwin)
+{
+	GtkTreePath *path;
+	struct musicobject *mobj = NULL;
+
+	/* Are we playing right now ? */
+
+	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+		return;
+
+	/* Stop currently playing track */
+	pragha_backend_stop(cwin->backend);
+
+	/* Get the next track to be played */
+	path = current_playlist_get_next(cwin);
+
+	/* No more tracks */
+	if (!path)
+		return;
+
+	/* Start playing new track */
+	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
+	update_current_playlist_state(path, cwin);
+
+	mobj = current_playlist_mobj_at_path(path, cwin);
+	pragha_backend_start(cwin->backend, mobj);
+
+	gtk_tree_path_free(path);
 }

@@ -38,7 +38,7 @@ notify_Prev_Callback (NotifyNotification *osd,
 	g_assert (strcmp (action, "media-prev") == 0);
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_prev_track(cwin);
+		pragha_playback_prev_track(cwin);
 }
 
 static void
@@ -50,7 +50,7 @@ notify_Next_Callback (NotifyNotification *osd,
 	g_assert (strcmp (action, "media-next") == 0);
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_next_track(cwin);
+		pragha_playback_next_track(cwin);
 }
 
 
