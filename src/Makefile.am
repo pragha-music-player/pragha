@@ -33,6 +33,7 @@ pragha_SOURCES =cdda.c \
 		pragha-backend.c \
 		pragha-album-art.c \
 		pragha-hig.c \
+		pragha-playback.c \
 		pref.c \
 		statusicon.c \
 		tags.c \

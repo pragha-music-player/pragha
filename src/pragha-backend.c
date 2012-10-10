@@ -609,25 +609,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 				pragha_backend_set_state (cwin->backend, ST_PLAYING);
 				pragha_backend_evaluate_if_can_seek(cwin->backend);
 				changed = TRUE;
-				/* New song playback. */
-				if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
-					/* Update current song info */
-					__update_current_song_info(cwin);
-					__update_progress_song_info(cwin, 0);
-
-					/* Update and jump in current playlist */
-					update_current_playlist_view_new_track(cwin);
-
-					/* Update album art */
-					update_album_art(cwin->cstate->curr_mobj, cwin);
-
-					/* Show osd, and inform new album art. */
-					show_osd(cwin);
-					mpris_update_metadata_changed(cwin);
-
-					cwin->cstate->update_playlist_action = PLAYLIST_NONE;
-				}
-
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
 
