@@ -330,7 +330,10 @@ static void
 pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
 {
 	backend->priv->state = state;
+
 	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
+
+	g_signal_emit (backend, signals[SIGNAL_STATE_CHANGE], 0, state);
 }
 
 void
@@ -598,7 +601,6 @@ static void
 pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	gboolean changed = FALSE;
 
 	if (pending != GST_STATE_VOID_PENDING)
 		return;
@@ -606,33 +608,30 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 	switch (new) {
 		case GST_STATE_PLAYING: {
 			if (priv->target_state == GST_STATE_PLAYING) {
-				pragha_backend_set_state (backend, ST_PLAYING);
 				pragha_backend_evaluate_if_can_seek(backend);
-				changed = TRUE;
+
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);
 
+				pragha_backend_set_state (backend, ST_PLAYING);
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
 			break;
 		}
 		case GST_STATE_PAUSED: {
 			if (priv->target_state == GST_STATE_PAUSED) {
-				pragha_backend_set_state (backend, ST_PAUSED);
-				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
 				}
 
+				pragha_backend_set_state (backend, ST_PAUSED);
 				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
 			break;
 		}
 		case GST_STATE_READY:
 			if (priv->target_state == GST_STATE_READY) {
-				pragha_backend_set_state (backend, ST_STOPPED);
-				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -642,6 +641,8 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 				priv->emitted_error = FALSE;
 				g_clear_error(&priv->error);
 				priv->seeking = FALSE;
+
+				pragha_backend_set_state (backend, ST_STOPPED);
 			}
 		case GST_STATE_NULL: {
 			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
@@ -650,9 +651,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 		default:
 			break;
 	}
-
-	if(changed)
-		g_signal_emit (backend, signals[SIGNAL_STATE_CHANGE], 0, priv->state);
 }
 
 static void
