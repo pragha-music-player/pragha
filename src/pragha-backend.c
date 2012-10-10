@@ -627,10 +627,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 
 					cwin->cstate->update_playlist_action = PLAYLIST_NONE;
 				}
-				else {
-					/* Update current playlist icon */
-					update_current_playlist_view_track(cwin);
-				}
 
 				if (priv->timer == 0)
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, cwin->backend);
@@ -643,7 +639,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 			if (priv->target_state == GST_STATE_PAUSED) {
 				pragha_backend_set_state (cwin->backend, ST_PAUSED);
 				changed = TRUE;
-				update_current_playlist_view_track(cwin);
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
 					priv->timer = 0;
@@ -656,7 +651,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, str
 		case GST_STATE_READY:
 			if (priv->target_state == GST_STATE_READY) {
 				pragha_backend_set_state (cwin->backend, ST_STOPPED);
-				update_current_playlist_view_track(cwin);
 				changed = TRUE;
 				if (priv->timer > 0) {
 					g_source_remove(priv->timer);
