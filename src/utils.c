@@ -1049,37 +1049,6 @@ menu_position(GtkMenu *menu,
 	*push_in = TRUE;
 }
 
-void
-pragha_advance_playback (struct con_win *cwin)
-{
-	GtkTreePath *path = NULL;
-	struct musicobject *mobj = NULL;
-
-	CDEBUG(DBG_BACKEND, "Advancing to next track");
-
-	/* Stop to set ready and clear all info */
-	pragha_backend_stop(cwin->backend);
-
-	if(cwin->cstate->playlist_change)
-		return;
-
-	/* Get the next track to be played */
-	path = current_playlist_get_next (cwin);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
-	update_current_playlist_state(path, cwin);
-
-	mobj = current_playlist_mobj_at_path (path, cwin);
-	pragha_backend_start (cwin->backend, mobj);
-
-	gtk_tree_path_free (path);
-}
-
 /* Return TRUE if the previous installed version is
    incompatible with the current one */
 
