@@ -85,15 +85,15 @@ static gboolean _init_gui_state(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
 	init_tag_completion(cwin);
 
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
 	init_library_view(cwin);
 
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
 	if (cwin->cpref->save_playlist)
 		init_current_playlist_view(cwin);

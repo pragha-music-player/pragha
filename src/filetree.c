@@ -47,10 +47,8 @@ void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 		/* Have to give control to GTK periodically ... */
 
 		if (!init) {
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE))
-					return;
-			}
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
 		g_free(ab_file);
@@ -130,13 +128,10 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
 				}
 			}
 		}
+
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return NULL;
-		}
+		if (pragha_process_gtk_events ())
+			return NULL;
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);

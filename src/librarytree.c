@@ -1229,12 +1229,8 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
@@ -1277,12 +1273,8 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
@@ -1329,12 +1321,8 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
@@ -1383,12 +1371,8 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 				delete_row_from_db(path, model, cwin);
 
 				/* Have to give control to GTK periodically ... */
-				/* If gtk_main_quit has been called, return -
-				   since main loop is no more. */
-
-				while(gtk_events_pending())
-					if (gtk_main_iteration_do(FALSE))
-						return;
+				if (pragha_process_gtk_events ())
+					return;
 			}
 
 			db_commit_transaction(cwin->cdbase);
@@ -1442,12 +1426,8 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				trash_or_unlink_row(loc_arr, unlink, cwin);
 
 				/* Have to give control to GTK periodically ... */
-				/* If gtk_main_quit has been called, return -
-				   since main loop is no more. */
-
-				while(gtk_events_pending())
-					if (gtk_main_iteration_do(FALSE))
-						return;
+				if (pragha_process_gtk_events ())
+					return;
 			}
 
 			if (loc_arr)
@@ -1675,16 +1655,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1713,16 +1688,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1803,16 +1773,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1826,16 +1791,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}

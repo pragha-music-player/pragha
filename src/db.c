@@ -958,10 +958,9 @@ void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 			files_scanned++;
 			add_entry_db(ab_file, cdbase);
 		}
-		/* Have to give control to GTK periodically ... */
 
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		/* Have to give control to GTK periodically ... */
+		pragha_process_gtk_events ();
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
@@ -1034,9 +1033,7 @@ void update_db (const gchar *dir_name,
 		}
 
 		/* Have to give control to GTK periodically ... */
-
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		pragha_process_gtk_events ();
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);

@@ -975,6 +975,16 @@ exit:
 	return ret;
 }
 
+gboolean
+pragha_process_gtk_events ()
+{
+	while (gtk_events_pending ()) {
+		if (gtk_main_iteration_do (FALSE))
+			return TRUE;
+	}
+	return FALSE;
+}
+
 /* callback used to open default browser when URLs got clicked */
 void open_url(struct con_win *cwin, const gchar *url)
 {

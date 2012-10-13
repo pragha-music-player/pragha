@@ -1301,11 +1301,9 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	for_each_result_row(result, i) {
 		add_entry_tag_completion(result.resultp[i], artist_tag_model);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
+		if (pragha_process_gtk_events ()) {
+			sqlite3_free_table(result.resultp);
+			return;
 		}
 	}
 	sqlite3_free_table(result.resultp);
@@ -1317,11 +1315,9 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	for_each_result_row(result, i) {
 		add_entry_tag_completion(result.resultp[i], album_tag_model);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
+		if (pragha_process_gtk_events ()) {
+			sqlite3_free_table(result.resultp);
+			return;
 		}
 	}
 	sqlite3_free_table(result.resultp);
@@ -1333,11 +1329,9 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	for_each_result_row(result, i) {
 		add_entry_tag_completion(result.resultp[i], genre_tag_model);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
+		if (pragha_process_gtk_events ()) {
+			sqlite3_free_table(result.resultp);
+			return;
 		}
 	}
 	sqlite3_free_table(result.resultp);
