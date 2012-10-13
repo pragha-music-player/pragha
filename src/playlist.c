@@ -154,13 +154,9 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 		}
 
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				return 0;
-			}
-		}
+		if (pragha_process_gtk_events ())
+			return 0;
+
 	next = gtk_tree_model_iter_next(model, &iter);
 	}
 
@@ -228,14 +224,9 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return 0;
-				}
+			if (pragha_process_gtk_events ()) {
+				g_list_free(list);
+				return 0;
 			}
 		}
 	}
@@ -537,14 +528,9 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				g_list_free(list);
+				return;
 			}
 		}
 		g_list_free(list);
@@ -904,14 +890,9 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				g_list_free(list);
+				return;
 			}
 		}
 	}
@@ -1146,13 +1127,11 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 		}
 		list = g_slist_append (list, uri);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				g_free(filename);
-				g_free(f_file);
-				g_free(str);
-				goto exit_chan;
-			}
+		if (pragha_process_gtk_events ()) {
+			g_free(filename);
+			g_free(f_file);
+			g_free(str);
+			goto exit_chan;
 		}
 
 		g_free(f_file);
@@ -1245,10 +1224,10 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 			added++;
 			append_current_playlist(NULL, mobj, cwin);
 		}
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return;
-		}
+
+		if (pragha_process_gtk_events ())
+			return;
+
 		g_free(i->data);
 	}
 

@@ -345,8 +345,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	}
 
 	/* Have to give control to GTK periodically ... */
-	while(gtk_events_pending())
-		gtk_main_iteration_do(FALSE);
+	pragha_process_gtk_events ();
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
@@ -1276,17 +1275,13 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 				append_current_playlist(model, mobj, cwin);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
 
 			if (cnt++ % 50)
 				continue;
 
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 		}
 		sqlite3_free_table(result.resultp);

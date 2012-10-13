@@ -1573,12 +1573,8 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 				cwin->cstate->unplayed_tracks--;
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE))
-					return;
-			}
+			if (pragha_process_gtk_events ())
+				return;
 		}
 		gtk_tree_path_free(path);
 		gtk_tree_row_reference_free(ref);
@@ -1934,12 +1930,8 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 	cwin->cstate->unplayed_tracks++;
 
 	/* Have to give control to GTK periodically ... */
-	/* If gtk_main_quit has been called, return -
-	   since main loop is no more. */
-	while(gtk_events_pending()) {
-		if (gtk_main_iteration_do(FALSE))
-			return;
-	}
+	if (pragha_process_gtk_events ())
+		return;
 
 	mpris_update_mobj_added(cwin, mobj, &iter);
 
@@ -2836,12 +2828,8 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 			}
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE))
-					return NULL;
-			}
+			if (pragha_process_gtk_events ())
+				return NULL;
 
 			gtk_tree_path_free(path);
 		}
@@ -2886,12 +2874,8 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data,
 			}
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE))
-					return NULL;
-			}
+			if (pragha_process_gtk_events ())
+				return NULL;
 
 			g_free(filename);
 		}
@@ -2924,12 +2908,8 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data,
 			list = g_list_append(list, mobj);
 		}
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return NULL;
-		}
+		if (pragha_process_gtk_events ())
+			return NULL;
 	}
 	g_free(filename);
 
