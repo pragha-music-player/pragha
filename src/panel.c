@@ -42,7 +42,7 @@ get_image_uri_from_cache(struct con_win *cwin)
 /* Get the first image file from the directory and create a pixbuf of that file */
 
 static gchar*
-get_image_uri_from_dir(gchar *path, struct con_win *cwin)
+get_image_uri_from_dir (const gchar *path)
 {
 	GError *error = NULL;
 	GDir *dir = NULL;
@@ -299,9 +299,9 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 				if (cwin->cpref->album_art_pattern) {
 					album_uri = get_pref_image_uri_dir(path, cwin);
 					if (!album_uri)
-						album_uri = get_image_uri_from_dir(path, cwin);
+						album_uri = get_image_uri_from_dir(path);
 				}
-				else album_uri = get_image_uri_from_dir(path, cwin);
+				else album_uri = get_image_uri_from_dir(path);
 				g_free(path);
 			}
 			pragha_album_art_set_uri(cwin->albumart, album_uri);
