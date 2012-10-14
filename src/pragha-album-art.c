@@ -22,7 +22,7 @@ G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
 
 struct _PraghaAlbumArtPrivate
 {
-   gchar *uri;
+   gchar *path;
    guint size;
    gboolean visible;
 };
@@ -30,7 +30,7 @@ struct _PraghaAlbumArtPrivate
 enum
 {
    PROP_0,
-   PROP_URI,
+   PROP_PATH,
    PROP_SIZE,
    PROP_VISIBLE,
    LAST_PROP
@@ -60,7 +60,7 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
 
    priv = albumart->priv;
 
-   pixbuf = gdk_pixbuf_new_from_file_at_scale((priv->uri != NULL) ? priv->uri : PIXMAPDIR"/cover.png",
+   pixbuf = gdk_pixbuf_new_from_file_at_scale((priv->path != NULL) ? priv->path : PIXMAPDIR"/cover.png",
                                                priv->size,
                                                priv->size,
                                                FALSE,
@@ -69,30 +69,30 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
    if (pixbuf)
       pragha_album_art_set_pixbuf(albumart, pixbuf);
    else {
-      g_critical("Unable to open image file: %s\n", priv->uri);
+      g_critical("Unable to open image file: %s\n", priv->path);
       g_error_free(error);
    }
    g_object_unref(G_OBJECT(pixbuf));
 }
 
 /**
- * album_art_get_uri:
+ * album_art_get_path:
  *
  */
 const gchar *
-pragha_album_art_get_uri (PraghaAlbumArt *albumart)
+pragha_album_art_get_path (PraghaAlbumArt *albumart)
 {
    g_return_val_if_fail(PRAGHA_IS_ALBUM_ART(albumart), NULL);
-   return albumart->priv->uri;
+   return albumart->priv->path;
 }
 
 /**
- * album_art_set_uri:
+ * album_art_set_path:
  *
  */
 void
-pragha_album_art_set_uri (PraghaAlbumArt *albumart,
-                          const gchar *uri)
+pragha_album_art_set_path (PraghaAlbumArt *albumart,
+                          const gchar *path)
 {
    PraghaAlbumArtPrivate *priv;
 
@@ -100,12 +100,12 @@ pragha_album_art_set_uri (PraghaAlbumArt *albumart,
 
    priv = albumart->priv;
 
-   g_free(priv->uri);
-   priv->uri = g_strdup(uri);
+   g_free(priv->path);
+   priv->path = g_strdup(path);
 
    pragha_album_art_update_image(albumart);
 
-   g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_URI]);
+   g_object_notify_by_pspec(G_OBJECT(albumart), gParamSpecs[PROP_PATH]);
 }
 
 /**
@@ -120,7 +120,7 @@ pragha_album_art_get_size (PraghaAlbumArt *albumart)
 }
 
 /**
- * album_art_set_uri:
+ * album_art_set_size:
  *
  */
 void
@@ -208,7 +208,7 @@ pragha_album_art_finalize (GObject *object)
 
    priv = PRAGHA_ALBUM_ART(object)->priv;
 
-   g_free(priv->uri);
+   g_free(priv->path);
 
    G_OBJECT_CLASS(pragha_album_art_parent_class)->finalize(object);
 }
@@ -222,8 +222,8 @@ pragha_album_art_get_property (GObject *object,
    PraghaAlbumArt *albumart = PRAGHA_ALBUM_ART(object);
 
    switch (prop_id) {
-   case PROP_URI:
-      g_value_set_string(value, pragha_album_art_get_uri(albumart));
+   case PROP_PATH:
+      g_value_set_string(value, pragha_album_art_get_path(albumart));
       break;
    case PROP_SIZE:
       g_value_set_uint (value, pragha_album_art_get_size(albumart));
@@ -245,8 +245,8 @@ pragha_album_art_set_property (GObject *object,
    PraghaAlbumArt *albumart = PRAGHA_ALBUM_ART(object);
 
    switch (prop_id) {
-   case PROP_URI:
-      pragha_album_art_set_uri(albumart, g_value_get_string(value));
+   case PROP_PATH:
+      pragha_album_art_set_path(albumart, g_value_get_string(value));
       break;
    case PROP_SIZE:
       pragha_album_art_set_size(albumart, g_value_get_uint(value));
@@ -271,17 +271,17 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
    g_type_class_add_private(object_class, sizeof(PraghaAlbumArtPrivate));
 
    /**
-    * PraghaAlbumArt:uri:
+    * PraghaAlbumArt:path:
     *
     */
-   gParamSpecs[PROP_URI] =
-      g_param_spec_string("uri",
-                          _("Uri"),
-                          _("The album art uri"),
+   gParamSpecs[PROP_PATH] =
+      g_param_spec_string("path",
+                          _("Path"),
+                          _("The album art path"),
                           NULL,
                           G_PARAM_READWRITE);
-   g_object_class_install_property(object_class, PROP_URI,
-                                   gParamSpecs[PROP_URI]);
+   g_object_class_install_property(object_class, PROP_PATH,
+                                   gParamSpecs[PROP_PATH]);
    /**
     * PraghaAlbumArt:size:
     *

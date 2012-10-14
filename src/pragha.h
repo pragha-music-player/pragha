@@ -1202,6 +1202,7 @@ gboolean is_image_file(const gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);
+gchar * path_get_dir_as_uri (const gchar *path);
 gchar* get_display_filename(const gchar *filename, gboolean get_folder);
 void free_str_list(GSList *list);
 gint compare_utf8_str(const gchar *str1, const gchar *str2);

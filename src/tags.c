@@ -348,9 +348,9 @@ directory_pressed (GtkEntry       *entry,
 		directory_pressed_data_t *data)
 {
 	if (position == GTK_ENTRY_ICON_SECONDARY && data->file) {
-		gchar *uri = get_display_filename(data->file, TRUE);
-		open_url(data->cwin, uri);
-		g_free(uri);
+		gchar *uri = path_get_dir_as_uri (data->file);
+		open_url (data->cwin, uri);
+		g_free (uri);
 	}
 }
 
@@ -365,7 +365,7 @@ popup_menu_open_folder (GtkMenuItem *menuitem, gpointer storage)
 	struct con_win *cwin = g_object_get_data (storage, "cwin");
 
 	file = gtk_entry_get_text (GTK_ENTRY(entry_file));
-	uri = get_display_filename (file, TRUE);
+	uri = path_get_dir_as_uri (file);
 
 	open_url (cwin, uri);
 	g_free (uri);

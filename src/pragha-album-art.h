@@ -51,9 +51,9 @@ struct _PraghaAlbumArtClass
 
 PraghaAlbumArt *pragha_album_art_new (void);
 GType pragha_album_art_get_type (void) G_GNUC_CONST;
-const gchar *pragha_album_art_get_uri (PraghaAlbumArt *albumart);
-void pragha_album_art_set_uri (PraghaAlbumArt *albumart,
-                               const char *uri);
+const gchar *pragha_album_art_get_path (PraghaAlbumArt *albumart);
+void pragha_album_art_set_path (PraghaAlbumArt *albumart,
+                               const char *path);
 guint
 pragha_album_art_get_size (PraghaAlbumArt *albumart);
 void
