@@ -21,28 +21,28 @@
 /* Search the album art on cache and create a pixbuf of that file */
 #ifdef HAVE_LIBGLYR
 static gchar*
-get_image_uri_from_cache(struct con_win *cwin)
+get_image_path_from_cache (struct con_win *cwin)
 {
-	gchar *album_art_url = NULL;
+	gchar *path = NULL;
 
-	album_art_url = g_strdup_printf("%s/album-%s-%s.jpeg",
+	path = g_strdup_printf("%s/album-%s-%s.jpeg",
 				cwin->cpref->cache_folder,
 				cwin->cstate->curr_mobj->tags->artist,
 				cwin->cstate->curr_mobj->tags->album);
 
-	if (g_file_test(album_art_url, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-		g_free(album_art_url);
+	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free(path);
 		return NULL;
 	}
 
-	return album_art_url;
+	return path;
 }
 #endif
 
 /* Get the first image file from the directory and create a pixbuf of that file */
 
 static gchar*
-get_image_uri_from_dir (const gchar *path)
+get_image_path_from_dir (const gchar *path)
 {
 	GError *error = NULL;
 	GDir *dir = NULL;
@@ -78,7 +78,7 @@ exit:
    Runs through the patterns in sequence */
 
 static gchar*
-get_pref_image_uri_dir(gchar *path, struct con_win *cwin)
+get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
 {
 	GError *error = NULL;
 	GDir *dir = NULL;
@@ -288,27 +288,27 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
-	gchar *album_uri = NULL, *path = NULL;
+	gchar *album_path = NULL, *path = NULL;
 
 	if (pragha_album_art_get_visible(cwin->albumart)) {
 		if (G_LIKELY(mobj &&
 		    mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
-			album_uri = get_image_uri_from_cache(cwin);
+			album_path = get_image_path_from_cache(cwin);
 			#endif
-			if (album_uri == NULL) {
+			if (album_path == NULL) {
 				path = g_path_get_dirname(mobj->file);
 				if (cwin->cpref->album_art_pattern) {
-					album_uri = get_pref_image_uri_dir(path, cwin);
-					if (!album_uri)
-						album_uri = get_image_uri_from_dir(path);
+					album_path = get_pref_image_path_dir(path, cwin);
+					if (!album_path)
+						album_path = get_image_path_from_dir(path);
 				}
-				else album_uri = get_image_uri_from_dir(path);
+				else album_path = get_image_path_from_dir(path);
 				g_free(path);
 			}
-			pragha_album_art_set_uri(cwin->albumart, album_uri);
-			g_free(album_uri);
+			pragha_album_art_set_path(cwin->albumart, album_path);
+			g_free(album_path);
 		}
 	}
 }
@@ -320,7 +320,11 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 {
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED &&
 	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
-		open_url(cwin, pragha_album_art_get_uri(cwin->albumart));
+	{
+		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (cwin->albumart), NULL, NULL);
+		open_url (cwin, uri);
+		g_free (uri);
+	}
 
 	return TRUE;
 }
@@ -513,7 +517,7 @@ update_panel_playback_state (struct con_win *cwin)
 	if (playing == FALSE) {
 		unset_current_song_info(cwin);
 		unset_track_progress_bar(cwin);
-		pragha_album_art_set_uri(cwin->albumart, NULL);
+		pragha_album_art_set_path(cwin->albumart, NULL);
 	}
 }
 
@@ -582,7 +586,7 @@ void init_toolbar_preferences_saved(struct con_win *cwin)
 
 	pragha_album_art_set_size(cwin->albumart, album_art_size);
 	pragha_album_art_set_visible(cwin->albumart, show_album_art);
-	pragha_album_art_set_uri(cwin->albumart, NULL);
+	pragha_album_art_set_path(cwin->albumart, NULL);
 }
 
 GtkWidget*

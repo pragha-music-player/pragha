@@ -889,6 +889,15 @@ GSList* delete_from_str_list(const gchar *str, GSList *list)
 	return list;
 }
 
+gchar *
+path_get_dir_as_uri (const gchar *path)
+{
+	gchar *dir = g_path_get_dirname (path);
+	gchar *uri = g_filename_to_uri (dir, NULL, NULL);
+	g_free (dir);
+	return uri;
+}
+
 /* Returns either the basename of the given filename, or (if the parameter 
  * get_folder is set) the basename of the container folder of filename. In both
  * cases the returned string is encoded in utf-8 format. If GLib can not make
@@ -992,7 +1001,7 @@ void open_url(struct con_win *cwin, const gchar *url)
 	const gchar *argv[3];
 	gchar *methods[] = {"xdg-open","firefox","mozilla","opera","konqueror",NULL};
 	int i = 0;
-			
+
 	/* First try gtk_show_uri() (will fail if gvfs is not installed) */
 	if (!gtk_show_uri (NULL, url,  gtk_get_current_event_time (), NULL)) {
 		success = FALSE;
