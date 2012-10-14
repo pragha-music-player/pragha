@@ -48,6 +48,7 @@ get_image_uri_from_dir (const gchar *path)
 	GDir *dir = NULL;
 	const gchar *next_file = NULL;
 	gchar *ab_file = NULL;
+	gchar *result = NULL;
 
 	dir = g_dir_open(path, 0, &error);
 	if (!dir) {
@@ -61,14 +62,16 @@ get_image_uri_from_dir (const gchar *path)
 		ab_file = g_strconcat(path, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR) &&
 		    is_image_file(ab_file)) {
-		    	return ab_file;
+			result = ab_file;
+			goto exit;
 		}
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
 	}
-	g_dir_close(dir);
 
-	return NULL;
+exit:
+	g_dir_close(dir);
+	return result;
 }
 
 /* Find out if any of the preferred album art files are present in the given dir.
