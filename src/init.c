@@ -220,7 +220,7 @@ gint init_config(struct con_win *cwin)
 
 	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
 		g_mkdir(cache_folder, S_IRWXU);
-	cwin->cpref->cache_folder = g_strdup(cache_folder);
+	cwin->cpref->cache_folder = cache_folder;
 	#endif
 
 	/* Load the settings file */
@@ -990,9 +990,7 @@ gint init_config(struct con_win *cwin)
 
 	g_free(conrc);
 	g_free(condir);
-#ifdef HAVE_LIBGLYR
-	g_free(cache_folder);
-#endif
+
 	if (err)
 		return -1;
 	else
