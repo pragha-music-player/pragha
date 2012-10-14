@@ -244,36 +244,32 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = NULL;
+	const gchar *artist = cwin->cstate->curr_mobj->tags->artist;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if (strlen(cwin->cstate->curr_mobj->tags->artist) == 0)
+	if (strlen(artist) == 0)
 		return;
-
-	artist = cwin->cstate->curr_mobj->tags->artist;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
 }
 
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = NULL, *title = NULL;
+	const gchar *artist = cwin->cstate->curr_mobj->tags->artist;
+	const gchar *title = cwin->cstate->curr_mobj->tags->title;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->title) == 0))
+	if ((strlen(artist) == 0) ||
+	    (strlen(title) == 0))
 		return;
-
-	artist = cwin->cstate->curr_mobj->tags->artist;
-	title = cwin->cstate->curr_mobj->tags->title;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
 }
@@ -283,17 +279,13 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 void
 related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = NULL;
-	struct musicobject *mobj = NULL;
+	struct musicobject *mobj = get_selected_musicobject(cwin);
+	const gchar *artist = mobj->tags->artist;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
 
-	mobj = get_selected_musicobject(cwin);
-
-	if (strlen(mobj->tags->artist) == 0)
+	if (strlen(artist) == 0)
 		return;
-
-	artist = mobj->tags->artist;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
 }
@@ -301,19 +293,15 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = NULL, *title = NULL;
-	struct musicobject *mobj = NULL;
+	struct musicobject *mobj = get_selected_musicobject(cwin);
+	const gchar *artist = mobj->tags->artist;
+	const gchar *title = mobj->tags->title;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
 
-	mobj = get_selected_musicobject(cwin);
-
-	if ((strlen(mobj->tags->artist) == 0) ||
-	    (strlen(mobj->tags->title) == 0))
+	if ((strlen(artist) == 0) ||
+	    (strlen(title) == 0))
 		return;
-
-	artist = mobj->tags->artist;
-	title = mobj->tags->title;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
 }
