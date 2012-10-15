@@ -141,7 +141,7 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 
 	cur_pos = convert_length_str(length);
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
-	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), (const gchar*)str_cur_pos);
+	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), str_cur_pos);
 
 	if(cwin->cstate->curr_mobj->tags->length == 0 || !cwin->cpref->timer_remaining_mode){
 		tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
@@ -151,7 +151,7 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 		tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length - length);
 		str_length = g_markup_printf_escaped ("<small>- %s</small>", tot_length);
 	}
-	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), (const gchar*)str_length);
+	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), str_length);
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (cwin->track_length_label));
 
@@ -199,7 +199,7 @@ void __update_current_song_info(struct con_win *cwin)
 						cwin->cstate->curr_mobj->tags->album);
 	else	str = g_markup_printf_escaped ("%s", str_title);
 
-	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), (const gchar*)str);
+	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), str);
 
 	g_free(str);
 	g_free(str_title);
