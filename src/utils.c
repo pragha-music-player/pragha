@@ -814,7 +814,7 @@ gchar* convert_length_str(gint length)
 	if (length > 86400) {
 		days = length/86400;
 		length = length%86400;
-		g_sprintf(tmp, "%d %s, ", days, (days>1)?_("days"):_("day"));
+		g_sprintf(tmp, "%d %s, ", days, ngettext("day", "days", days));
 		g_strlcat(str, tmp, 24);
 	}
 
