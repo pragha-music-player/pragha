@@ -27,6 +27,8 @@ pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct 
 
 	/* New song playback. */
 	if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
+		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", cwin->cstate->curr_mobj->file);
+
 		/* Update current song info */
 		__update_current_song_info(cwin);
 		__update_progress_song_info(cwin, 0);
@@ -54,6 +56,8 @@ void pragha_playback_prev_track(struct con_win *cwin)
 {
 	GtkTreePath *path;
 	struct musicobject *mobj = NULL;
+
+	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
 	/* Get the next (prev) track to be played */
 	path = current_playlist_get_prev(cwin);
@@ -83,6 +87,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	GtkTreePath *path=NULL;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
+
+	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
 
 	/* New action is based on the current state */
 
@@ -173,6 +179,8 @@ void pragha_advance_playback (struct con_win *cwin)
 
 void pragha_playback_next_track(struct con_win *cwin)
 {
+	CDEBUG(DBG_BACKEND, "Want to advancing to next track");
+
 	/* Are we playing right now ? */
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
