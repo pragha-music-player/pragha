@@ -137,38 +137,6 @@ void pragha_playback_stop(struct con_win *cwin)
 	pragha_backend_stop(cwin->backend);
 }
 
-/* Play next track in current_playlist */
-
-void pragha_playback_next_track(struct con_win *cwin)
-{
-	GtkTreePath *path;
-	struct musicobject *mobj = NULL;
-
-	/* Are we playing right now ? */
-
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
-		return;
-
-	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend);
-
-	/* Get the next track to be played */
-	path = current_playlist_get_next(cwin);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
-	update_current_playlist_state(path, cwin);
-
-	mobj = current_playlist_mobj_at_path(path, cwin);
-	pragha_backend_start(cwin->backend, mobj);
-
-	gtk_tree_path_free(path);
-}
-
 /* Play next song when terminate a song. */
 
 void pragha_advance_playback (struct con_win *cwin)
@@ -199,4 +167,16 @@ void pragha_advance_playback (struct con_win *cwin)
 	pragha_backend_start (cwin->backend, mobj);
 
 	gtk_tree_path_free (path);
+}
+
+/* Play next track in current_playlist */
+
+void pragha_playback_next_track(struct con_win *cwin)
+{
+	/* Are we playing right now ? */
+	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+		return;
+
+	/* Play a new song */
+	pragha_advance_playback(cwin);
 }
