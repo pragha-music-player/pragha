@@ -637,12 +637,12 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 		}
 		case GST_STATE_READY:
 			if (priv->target_state == GST_STATE_READY) {
+				pragha_backend_set_state (backend, ST_STOPPED);
+
 				priv->is_live = FALSE;
 				priv->emitted_error = FALSE;
 				g_clear_error(&priv->error);
 				priv->seeking = FALSE;
-
-				pragha_backend_set_state (backend, ST_STOPPED);
 			}
 		case GST_STATE_NULL: {
 			if (priv->timer > 0) {
