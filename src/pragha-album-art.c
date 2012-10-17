@@ -53,26 +53,39 @@ static void
 pragha_album_art_update_image (PraghaAlbumArt *albumart)
 {
    PraghaAlbumArtPrivate *priv;
-   GdkPixbuf *pixbuf;
+   GdkPixbuf *pixbuf, *album_art, *frame;
    GError *error = NULL;
 
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
    priv = albumart->priv;
 
-   pixbuf = gdk_pixbuf_new_from_file_at_scale((priv->path != NULL) ? priv->path : PIXMAPDIR"/cover.png",
-                                               priv->size,
-                                               priv->size,
-                                               FALSE,
-                                               &error);
-   /*TODO: Scale and merge pixbuf on cover.png. */
-   if (pixbuf)
-      pragha_album_art_set_pixbuf(albumart, pixbuf);
-   else {
-      g_critical("Unable to open image file: %s\n", priv->path);
-      g_error_free(error);
+   frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
+   if(priv->path != NULL) {
+      album_art = gdk_pixbuf_new_from_file_at_scale(priv->path,
+                                                    112,
+                                                    112,
+                                                    FALSE,
+                                                    &error);
+      if (album_art) {
+         gdk_pixbuf_copy_area(album_art, 0 ,0 ,112 ,112, frame, 12, 8);
+         g_object_unref(G_OBJECT(album_art));
+      }
+      else {
+         g_critical("Unable to open image file: %s\n", priv->path);
+         g_error_free(error);
+      }
    }
+
+   pixbuf = gdk_pixbuf_scale_simple (frame,
+                                     priv->size,
+                                     priv->size,
+                                     GDK_INTERP_BILINEAR);
+
+   pragha_album_art_set_pixbuf(albumart, pixbuf);
+
    g_object_unref(G_OBJECT(pixbuf));
+   g_object_unref(G_OBJECT(frame));
 }
 
 /**
