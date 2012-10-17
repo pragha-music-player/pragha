@@ -3492,7 +3492,8 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 void
 update_current_playlist_view_playback_state_cb(PraghaBackend *backend, gint state, struct con_win *cwin)
 {
-	update_current_playlist_view_new_track(cwin);
+	if (cwin->cstate->update_playlist_action == PLAYLIST_NONE)
+		update_current_playlist_view_track(cwin);
 }
 
 GtkWidget* create_current_playlist_view(struct con_win *cwin)

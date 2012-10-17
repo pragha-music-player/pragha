@@ -441,6 +441,9 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 		priv->emitted_error = TRUE;
 		priv->error = error;
 
+		/* Directly add the icon showing the error */
+		update_current_playlist_view_new_track(cwin);
+
 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 						GTK_MESSAGE_QUESTION,
