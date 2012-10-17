@@ -320,6 +320,22 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_TARGET_STATE]);
 }
 
+const gchar *
+pragha_playback_state_get_name(enum player_state state)
+{
+	switch (state) {
+		case ST_PLAYING:
+			return "ST_PLAYING";
+		case ST_STOPPED:
+			return "ST_STOPPED";
+		case ST_PAUSED:
+			return "ST_PAUSED";
+		default:
+			/* This is a memory leak */
+			return g_strdup_printf ("UNKNOWN!(%d)", state);
+	}
+}
+
 enum player_state
 pragha_backend_get_state (PraghaBackend *backend)
 {
@@ -330,6 +346,8 @@ static void
 pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
 {
 	backend->priv->state = state;
+
+	CDEBUG(DBG_BACKEND, "Setting new playback state: %s: ", pragha_playback_state_get_name(state));
 
 	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
 
@@ -610,6 +628,8 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 	if (pending != GST_STATE_VOID_PENDING)
 		return;
 
+	CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
+
 	switch (new) {
 		case GST_STATE_PLAYING: {
 			if (priv->target_state == GST_STATE_PLAYING) {
@@ -619,7 +639,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 					priv->timer = g_timeout_add_seconds (1, emit_tick_cb, backend);
 
 				pragha_backend_set_state (backend, ST_PLAYING);
-				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
 			break;
 		}
@@ -631,7 +650,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 				}
 
 				pragha_backend_set_state (backend, ST_PAUSED);
-				CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			}
 			break;
 		}
@@ -649,7 +667,6 @@ pragha_backend_evaluate_state (GstState old, GstState new, GstState pending, Pra
 				g_source_remove(priv->timer);
 				priv->timer = 0;
 			}
-			CDEBUG(DBG_BACKEND, "Gstreamer inform the state change: %s", gst_element_state_get_name (new));
 			break;
 		}
 		default:
