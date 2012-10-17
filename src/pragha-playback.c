@@ -140,6 +140,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 
 void pragha_playback_stop(struct con_win *cwin)
 {
+	CDEBUG(DBG_BACKEND, "Stopping the current song");
+
 	pragha_backend_stop(cwin->backend);
 }
 
