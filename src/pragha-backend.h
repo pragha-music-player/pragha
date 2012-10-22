@@ -48,6 +48,7 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+	void (*state_change) (PraghaBackend *backend, gint state);
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
@@ -64,11 +65,12 @@ void pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta);
 gboolean pragha_backend_is_playing(PraghaBackend *backend);
 gboolean pragha_backend_is_paused(PraghaBackend *backend);
 gboolean pragha_backend_emitted_error (PraghaBackend *backend);
+GError *pragha_backend_get_error (PraghaBackend *backend);
 enum player_state pragha_backend_get_state (PraghaBackend *backend);
 void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
-void pragha_backend_stop (PraghaBackend *backend, GError *error);
+void pragha_backend_stop (PraghaBackend *backend);
 void pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);

@@ -75,7 +75,7 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	{
 		case 1: toogle_main_window (cwin, FALSE);
 			break;
-		case 2:	play_pause_resume(cwin);
+		case 2:	pragha_playback_play_pause_resume(cwin);
 			break;
 		case 3:
 			popup_menu = gtk_ui_manager_get_widget(cwin->systray_menu, "/popup");
@@ -137,28 +137,28 @@ static void
 systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_pause_resume(cwin);
+		pragha_playback_play_pause_resume(cwin);
 }
 
 static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		pragha_backend_stop (cwin->backend, NULL);
+		pragha_playback_stop(cwin);
 }
 
 static void
 systray_prev_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_prev_track(cwin);
+		pragha_playback_prev_track(cwin);
 }
 
 static void
 systray_next_action (GtkAction *action, struct con_win *cwin)
 {
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
-		play_next_track(cwin);
+		pragha_playback_next_track(cwin);
 }
 
 static void
@@ -168,10 +168,12 @@ systray_quit (GtkAction *action, struct con_win *cwin)
 }
 
 static void
-update_systray_menu (struct con_win *cwin)
+update_systray_menu_cb (GObject *gobject, gint state, gpointer user_data)
 {
 	GtkAction *action;
-	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
+	struct con_win *cwin = user_data;
+
+	gboolean playing = (state != ST_STOPPED);
 
 	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
@@ -184,13 +186,6 @@ update_systray_menu (struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-}
-
-static void
-update_systray_menu_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-	update_systray_menu (cwin);
 }
 
 static GtkUIManager*
@@ -250,6 +245,5 @@ void create_status_icon (struct con_win *cwin)
 	cwin->status_icon = status_icon;
 	cwin->systray_menu = systray_menu;
 
-	update_systray_menu (cwin);
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_systray_menu_cb), cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_systray_menu_cb), cwin);
 }

@@ -1021,6 +1021,8 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->rand_track_refs = NULL;
 	cwin->cstate->queue_track_refs = NULL;
 
+	cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+
 	cwin->cstate->dragging = FALSE;
 	cwin->cstate->curr_mobj_clear = FALSE;
 
@@ -1374,6 +1376,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
+
+	/* Send notifications on gui, OSD and mpris of new songs */
+
+	g_signal_connect(cwin->backend,
+			 "state-change",
+			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
 
 	/* Init window state */
 

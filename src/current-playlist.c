@@ -128,18 +128,21 @@ static GtkToggleActionEntry cp_null_toggles_entries[] = {
 
 /* Update playback state pixbuf */
 
-void update_pixbuf_state_on_path (GtkTreePath *path, const GError *error, struct con_win *cwin)
+void current_playlist_update_pixbuf_state_on_path (GtkTreePath *path, struct con_win *cwin)
 {
 	GtkTreeModel *model = NULL;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf = NULL;
 	GtkIconTheme *icon_theme;
+	GError *error = NULL;
 
 	if(cwin->cstate->playlist_change)
 		return;
 
-	if (error) {
+	if(pragha_backend_emitted_error(cwin->backend)) {
 		icon_theme = gtk_icon_theme_get_default ();
+		error = pragha_backend_get_error(cwin->backend);
+
 		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
 		else
@@ -158,6 +161,7 @@ void update_pixbuf_state_on_path (GtkTreePath *path, const GError *error, struct
 				break;
 		}
 	}
+
 	if (path != NULL) {
 		model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
 		if (gtk_tree_model_get_iter (model, &iter, path)) {
@@ -683,7 +687,7 @@ static void append_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwi
 
 /* Remove all nodes and free the list */
 
-static void clear_rand_track_refs(struct con_win *cwin)
+void clear_rand_track_refs(struct con_win *cwin)
 {
 	if (cwin->cstate->rand_track_refs) {
 		g_list_free_full(cwin->cstate->rand_track_refs, (GDestroyNotify) gtk_tree_row_reference_free);
@@ -974,52 +978,26 @@ static gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, e
 
 /* Update the state on 'Next', 'Prev' or selecting a new track
    from current playlist */
-	
-void update_current_state(GtkTreePath *path,
-			  enum playlist_action action, struct con_win *cwin)
+
+void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 {
 	GtkTreeRowReference *rand_ref;
 	GtkTreeModel *model;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
 	CDEBUG(DBG_VERBOSE, "Update the state from current playlist");
 
-	/* Update view */
+	/* Append the new reference to the list of played track references
+	   to retrace the sequence */
 
-	update_pixbuf_state_on_path (path, NULL, cwin);
-	jump_to_path_on_current_playlist (path, cwin);
-
-	/* Update current song info */
-
-	__update_current_song_info(cwin);
-	__update_progress_song_info(cwin, 0);
-
-	/* Update album art */
-
-	update_album_art(cwin->cstate->curr_mobj, cwin);
-
-	/* Informs the new cover art in mpris.
-	 * FIXME: Need a better fix. */
-
-	mpris_update_metadata_changed(cwin);
-
-	/* Show OSD */
-
-	show_osd(cwin);
-
-	/* Store reference */
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
 	if (!cwin->cpref->shuffle) {
 		gtk_tree_row_reference_free(cwin->cstate->curr_seq_ref);
 		cwin->cstate->curr_seq_ref = gtk_tree_row_reference_new(model, path);
 	}
 
-	/* Append the new reference to the list of played track references
-	   to retrace the sequence */
-
 	if (cwin->cpref->shuffle) {
-		switch (action) {
+		switch (cwin->cstate->update_playlist_action) {
 			/* If 'Prev', get the previous node from the track references */
 			case PLAYLIST_PREV:
 				if (cwin->cstate->curr_rand_ref) {
@@ -1061,6 +1039,29 @@ void update_current_state(GtkTreePath *path,
 	current_playlist_set_dirty_track(path, cwin);
 	if (cwin->cstate->unplayed_tracks)
 		cwin->cstate->unplayed_tracks--;
+}
+
+void update_current_playlist_view_new_track(struct con_win *cwin)
+{
+	GtkTreePath *path;
+	path = current_playlist_get_actual(cwin);
+
+	if(path) {
+		current_playlist_update_pixbuf_state_on_path (path, cwin);
+		jump_to_path_on_current_playlist (path, cwin);
+		gtk_tree_path_free(path);
+	}
+}
+
+void update_current_playlist_view_track(struct con_win *cwin)
+{
+	GtkTreePath *path;
+	path = current_playlist_get_actual(cwin);
+
+	if(path) {
+		current_playlist_update_pixbuf_state_on_path (path, cwin);
+		gtk_tree_path_free(path);
+	}
 }
 
 /* Return musicobject of the given path */
@@ -2115,172 +2116,6 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 }
 
-/**********************/
-/* Playback functions */
-/**********************/
-
-/* Play first track in current playlist */
-
-void play_first_current_playlist(struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
-	struct musicobject *mobj;
-
-	if(cwin->cstate->playlist_change)
-		return;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	/* Check if tree is empty, if not play first track */
-
-	if (gtk_tree_model_get_iter_first(model, &iter)) {
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-		pragha_backend_start(cwin->backend, mobj);
-
-		clear_rand_track_refs(cwin);
-		path = gtk_tree_model_get_path(model, &iter);
-		update_current_state( path, PLAYLIST_CURR, cwin);
-		gtk_tree_path_free(path);
-	}
-}
-
-/* Play prev track in current playlist */
-
-void play_prev_track(struct con_win *cwin)
-{
-	GtkTreePath *path;
-	struct musicobject *mobj = NULL;
-
-	/* Get the next (prev) track to be played */
-	path = current_playlist_get_prev(cwin);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend, NULL);
-
-	/* Start playing new track */
-	mobj = current_playlist_mobj_at_path(path, cwin);
-	pragha_backend_start(cwin->backend, mobj);
-
-	update_current_state(path, PLAYLIST_PREV, cwin);
-	gtk_tree_path_free(path);
-}
-
-/* Play next track in current_playlist */
-
-void play_next_track(struct con_win *cwin)
-{
-	GtkTreePath *path;
-	struct musicobject *mobj = NULL;
-
-	/* Are we playing right now ? */
-
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
-		return;
-
-	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend, NULL);
-
-	/* Get the next track to be played */
-	path = current_playlist_get_next(cwin);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Start playing new track */
-	mobj = current_playlist_mobj_at_path(path, cwin);
-	pragha_backend_start(cwin->backend, mobj);
-
-	update_current_state(path, PLAYLIST_NEXT, cwin);
-	gtk_tree_path_free(path);
-}
-
-/* Start playback of a new track, or resume playback of current track */
-
-void play_track(struct con_win *cwin)
-{
-	struct musicobject *mobj = NULL;
-	GtkTreePath *path = NULL;
-
-	/* New action is based on the current state */
-
-	/************************************/
-        /* State     Action		    */
-	/* 				    */
-	/* Playing   Restart playback	    */
-	/* Paused    Resume playback	    */
-	/* Stopped   Start playback	    */
-        /************************************/
-
-	switch (pragha_backend_get_state (cwin->backend)) {
-	case ST_PLAYING:
-		if (cwin->cpref->shuffle && cwin->cstate->curr_rand_ref)
-			path = gtk_tree_row_reference_get_path(cwin->cstate->curr_rand_ref);
-		else if (!cwin->cpref->shuffle && cwin->cstate->curr_seq_ref)
-			path = gtk_tree_row_reference_get_path(cwin->cstate->curr_seq_ref);
-
-		if (path) {
-			mobj = new_musicobject_from_file(cwin->cstate->curr_mobj->file);
-			pragha_backend_start(cwin->backend, mobj);
-
-			update_current_state(path, PLAYLIST_CURR, cwin);
-			gtk_tree_path_free(path);
-		}
-		break;
-	case ST_PAUSED:
-		pragha_backend_resume(cwin->backend);
-		break;
-	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
-			break;
-		if(cwin->cstate->queue_track_refs)
-			path = get_next_queue_track(cwin);
-		if(!path)
-			path = current_playlist_get_selection(cwin);
-		if(!path && cwin->cpref->shuffle)
-			path = get_first_random_track(cwin);
-		if(!path) {
-			play_first_current_playlist(cwin);
-			break;
-		}
-
-		mobj = current_playlist_mobj_at_path(path, cwin);
-		pragha_backend_start(cwin->backend, mobj);
-
-		clear_rand_track_refs(cwin);
-		current_playlist_clear_dirty_all(cwin);
-		cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-		update_current_state(path, PLAYLIST_CURR, cwin);
-		gtk_tree_path_free(path);
-		break;
-	default:
-		break;
-	}
-}
-
-/* Toggle pause/resume */
-
-void pause_resume_track(struct con_win *cwin)
-{
-	switch(pragha_backend_get_state (cwin->backend)) {
-	case ST_PAUSED:
-		pragha_backend_resume(cwin->backend);
-		break;
-	case ST_PLAYING:
-		pragha_backend_pause(cwin->backend);
-		break;
-	default:
-		break;
-	}
-}
-
 /*******************/
 /* Event Callbacks */
 /*******************/
@@ -2311,9 +2146,14 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 		}
 	}
 
-	pragha_backend_start(cwin->backend, mobj);
+	/* Stop to set ready and clear all info */
+	pragha_backend_stop(cwin->backend);
 
-	update_current_state(path, PLAYLIST_CURR, cwin);
+	/* Start playing new track */
+	cwin->cstate->update_playlist_action = PLAYLIST_CURR;
+	update_current_playlist_state(path, cwin);
+
+	pragha_backend_start(cwin->backend, mobj);
 }
 
 void
@@ -3612,6 +3452,13 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 			 G_CALLBACK(header_right_click_cb), cwin);
 }
 
+void
+update_current_playlist_view_playback_state_cb(PraghaBackend *backend, gint state, struct con_win *cwin)
+{
+	if (cwin->cstate->update_playlist_action == PLAYLIST_NONE)
+		update_current_playlist_view_track(cwin);
+}
+
 GtkWidget* create_current_playlist_view(struct con_win *cwin)
 {
 	GtkWidget *current_playlist_scroll;
@@ -3723,6 +3570,7 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	/* Set initial column visibility */
 
 	init_current_playlist_columns(cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin);
 
 	g_object_unref(store);
 

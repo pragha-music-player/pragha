@@ -292,7 +292,8 @@ enum debug_level {
 /* Current playlist movement */
 
 enum playlist_action {
-	PLAYLIST_CURR = 1,
+	PLAYLIST_NONE,
+	PLAYLIST_CURR,
 	PLAYLIST_NEXT,
 	PLAYLIST_PREV
 };
@@ -602,6 +603,7 @@ struct con_state {
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
+	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
@@ -991,17 +993,17 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_last_path_of_current_playlist(struct con_win *cwin);
-void update_pixbuf_state_on_path(GtkTreePath *path, const GError *error, struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
-void update_current_state(GtkTreePath *path,
-			  enum playlist_action action,
-			  struct con_win *cwin);
+void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
+void update_current_playlist_view_new_track(struct con_win *cwin);
+void update_current_playlist_view_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  struct con_win *cwin);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
 						struct con_win *cwin);
 void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
 void current_playlist_clear_dirty_all(struct con_win *cwin);
+void clear_rand_track_refs(struct con_win *cwin);
 GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
@@ -1027,12 +1029,6 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
-void play_first_current_playlist(struct con_win *cwin);
-void play_prev_track(struct con_win *cwin);
-void play_next_track(struct con_win *cwin);
-void play_track(struct con_win *cwin);
-void pause_resume_track(struct con_win *cwin);
-void play_pause_resume(struct con_win *cwin);
 void shuffle_button(struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
 void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
@@ -1210,7 +1206,6 @@ gboolean validate_album_art_pattern(const gchar *pattern);
 gboolean pragha_process_gtk_events ();
 void open_url( struct con_win *cwin, const gchar *url);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
-void pragha_advance_playback (GError *error, struct con_win *cwin);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
 /* Some widgets. */
@@ -1278,6 +1273,16 @@ void pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *ro
 void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
 GtkWidget *pragha_hig_workarea_table_new();
 void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
+
+/* pragha-playback.c: Functions to control playback and notify events. */
+
+void pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin);
+
+void pragha_playback_prev_track(struct con_win *cwin);
+void pragha_playback_play_pause_resume(struct con_win *cwin);
+void pragha_playback_stop(struct con_win *cwin);
+void pragha_playback_next_track(struct con_win *cwin);
+void pragha_advance_playback (struct con_win *cwin);
 
 /* Lastfm Helper */
 

@@ -20,27 +20,27 @@
 
 static void dbus_play_handler(struct con_win *cwin)
 {
-	play_track(cwin);
+	pragha_playback_play_pause_resume(cwin);
 }
 
 static void dbus_stop_handler(struct con_win *cwin)
 {
-	pragha_backend_stop(cwin->backend, NULL);
+	pragha_playback_stop(cwin);
 }
 
 static void dbus_pause_handler(struct con_win *cwin)
 {
-	play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(cwin);
 }
 
 static void dbus_next_handler(struct con_win *cwin)
 {
-	play_next_track(cwin);
+	pragha_playback_next_track(cwin);
 }
 
 static void dbus_prev_handler(struct con_win *cwin)
 {
-	play_prev_track(cwin);
+	pragha_playback_prev_track(cwin);
 }
 
 static void dbus_shuffle_handler(struct con_win *cwin)
