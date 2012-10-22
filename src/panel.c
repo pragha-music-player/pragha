@@ -425,91 +425,37 @@ void shuffle_button (struct con_win *cwin)
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_pause_resume(cwin);
-}
-
-void play_pause_resume(struct con_win *cwin)
-{
-	struct musicobject *mobj = NULL;
-	GtkTreePath *path=NULL;
-	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
-
-	/* New action is based on the current state */
-
-	/************************************/
-        /* State     Action		    */
-	/* 				    */
-	/* Playing   Pause playback	    */
-	/* Paused    Resume playback	    */
-	/* Stopped   Start playback	    */
-        /************************************/
-
-	switch (pragha_backend_get_state (cwin->backend)) {
-	case ST_PLAYING:
-		pragha_backend_pause(cwin->backend);
-		break;
-	case ST_PAUSED:
-		pragha_backend_resume(cwin->backend);
-		break;
-	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
-			break;
-		if(cwin->cstate->queue_track_refs)
-			path = get_next_queue_track(cwin);
-		if (!path)
-			path = current_playlist_get_selection(cwin);
-		if(!path && cwin->cpref->shuffle)
-			path = get_first_random_track(cwin);
-		if (!path) {
-			play_first_current_playlist(cwin);
-			break;
-		}
-
-		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin);
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-		}
-
-		mobj = current_playlist_mobj_at_path(path, cwin);
-
-		pragha_backend_start(cwin->backend, mobj);
-		update_current_state(path, PLAYLIST_CURR, cwin);
-
-		gtk_tree_path_free(path);
-		break;
-	default:
-		break;
-	}
+	pragha_playback_play_pause_resume(cwin);
 }
 
 void stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	pragha_backend_stop (cwin->backend, NULL);
+	pragha_playback_stop(cwin);
 }
 
 void prev_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_prev_track(cwin);
+	pragha_playback_prev_track(cwin);
 }
 
 void next_button_handler(GtkButton *button, struct con_win *cwin)
 {
-	play_next_track(cwin);
+	pragha_playback_next_track(cwin);
 }
 
 static void
-update_panel_playback_state (struct con_win *cwin)
+update_panel_playback_state_cb (GObject *gobject, gint state, gpointer user_data)
 {
-	gboolean playing = (pragha_backend_get_state (cwin->backend) != ST_STOPPED);
+	struct con_win *cwin = user_data;
+
+	gboolean playing = (state != ST_STOPPED);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->prev_button), playing);
 
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(cwin->play_button),
-				     (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ?
-				     GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
+				     (state == ST_PLAYING) ?
+				     GTK_STOCK_MEDIA_PAUSE :
+				     GTK_STOCK_MEDIA_PLAY);
 
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->stop_button), playing);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->next_button), playing);
@@ -519,13 +465,6 @@ update_panel_playback_state (struct con_win *cwin)
 		unset_track_progress_bar(cwin);
 		pragha_album_art_set_path(cwin->albumart, NULL);
 	}
-}
-
-static void
-update_panel_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-	update_panel_playback_state (cwin);
 }
 
 static void
@@ -720,10 +659,9 @@ create_toolbar(struct con_win *cwin)
 	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
 
 	init_toolbar_preferences_saved(cwin);
-	update_panel_playback_state(cwin);
 
 	g_signal_connect (cwin->backend, "tick", G_CALLBACK (update_gui), cwin);
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_panel_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_panel_playback_state_cb), cwin);
 
 	cwin->toolbar = toolbar;
 

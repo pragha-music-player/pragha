@@ -38,15 +38,15 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
         return;
 
     if (strcmp("Play", key) == 0)
-        play_pause_resume(cwin);
+        pragha_playback_play_pause_resume(cwin);
     else if (strcmp("Pause", key) == 0)
         pragha_backend_pause(cwin->backend);
     else if (strcmp("Stop", key) == 0)
-        pragha_backend_stop(cwin->backend, NULL);
+        pragha_playback_stop(cwin);
     else if (strcmp("Previous", key) == 0)
-        play_prev_track(cwin);
+        pragha_playback_prev_track(cwin);
     else if (strcmp("Next", key) == 0)
-        play_next_track(cwin);
+        pragha_playback_next_track(cwin);
     else if (strcmp("Repeat", key) == 0)
         repeat_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin);
     else if (strcmp("Shuffle", key) == 0)
