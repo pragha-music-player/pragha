@@ -167,7 +167,7 @@ glyr_finished_successfully(glyr_struct *glyr_info)
 void
 glyr_finished_incorrectly(glyr_struct *glyr_info)
 {
-	switch (glyr_info->head->type) {
+	switch (glyr_info->query.type) {
 	case GLYR_TYPE_LYRICS:
 		set_status_message(_("Lyrics not found."), glyr_info->cwin);
 		break;
