@@ -318,13 +318,15 @@ empty:
 		set_status_message(summary, cwin);
 		g_free(summary);
 	}
+	remove_watch_cursor (cwin->mainwindow);
+
 	g_slice_free (AddMusicObjectListData, data);
 
 	return FALSE;
 }
 
 gpointer
-do_lastfm_get_similar_current_playlist_action (gpointer user_data)
+do_lastfm_get_similar(struct musicobject *mobj, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
@@ -337,21 +339,12 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	mobj = get_selected_musicobject(cwin);
-
-	set_watch_cursor_on_thread(cwin);
-
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
 				      mobj->tags->title,
 				      mobj->tags->artist,
 				      50, &results);
 
-	if(rv != LASTFM_STATUS_OK) {
-		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
-	}
-
-	for(li=results; li; li=li->next) {
+	for(li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
 		track = li->data;
 		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
 		query_count += 1;
@@ -363,13 +356,25 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 	data->query_count = query_count;
 	data->cwin = cwin;
 
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
 	LASTFM_free_track_info_list (results);
 
-	return NULL;
+	return data;
+}
+
+gpointer
+do_lastfm_get_similar_current_playlist_action (gpointer user_data)
+{
+	struct musicobject *mobj = NULL;
+
+	AddMusicObjectListData *data;
+
+	struct con_win *cwin = user_data;
+
+	mobj = get_selected_musicobject(cwin);
+
+	data = do_lastfm_get_similar(mobj, cwin);
+
+	return data;
 }
 
 void
@@ -382,11 +387,10 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Get similar", do_lastfm_get_similar_current_playlist_action, cwin);
-	#else
-	g_thread_create(do_lastfm_get_similar_current_playlist_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_get_similar_current_playlist_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 /* Functions that respond to menu options. */
@@ -538,46 +542,13 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 gpointer
 do_lastfm_get_similar_action (gpointer user_data)
 {
-	LFMList *results = NULL, *li;
-	LASTFM_TRACK_INFO *track = NULL;
-	guint query_count = 0;
-	GList *list = NULL;
-	gint rv;
 	AddMusicObjectListData *data;
 
 	struct con_win *cwin = user_data;
 
-	set_watch_cursor_on_thread(cwin);
+	data = do_lastfm_get_similar(cwin->cstate->curr_mobj, cwin);
 
-	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
-			cwin->cstate->curr_mobj->tags->title,
-			cwin->cstate->curr_mobj->tags->artist,
-			50, &results);
-
-	if(rv != LASTFM_STATUS_OK) {
-		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
-	}
-
-	for(li=results; li; li=li->next) {
-		track = li->data;
-		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
-		query_count += 1;
-	}
-
-	data = g_slice_new (AddMusicObjectListData);
-	data->list = list;
-	data->query_type = LASTFM_GET_SIMILAR;
-	data->query_count = query_count;
-	data->cwin = cwin;
-
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	LASTFM_free_track_info_list (results);
-
-	return NULL;
+	return data;
 }
 
 void
@@ -593,11 +564,10 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Get similar", do_lastfm_get_similar_action, cwin);
-	#else
-	g_thread_create(do_lastfm_get_similar_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_get_similar_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 gpointer
