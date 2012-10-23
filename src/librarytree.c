@@ -1288,7 +1288,7 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 		g_list_free(list);
 	}
 
-	if(pragha_backend_get_state (cwin->backend) == ST_PLAYING)
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		pragha_playback_next_track(cwin);
 	else
 		pragha_playback_play_pause_resume(cwin);
