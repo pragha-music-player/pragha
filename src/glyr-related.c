@@ -95,6 +95,9 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	GdkPixbuf *album_art = NULL;
 	GError *error = NULL;
 
+	if(glyr_info->head == NULL)
+		return;
+
 	struct con_win *cwin = glyr_info->cwin;
 
 	artist = glyr_info->query.artist;
@@ -134,6 +137,9 @@ glyr_finished_thread_update (gpointer data)
 	glyr_struct *glyr_info = data;
 	gchar *title_header = NULL, *subtitle_header = NULL;
 
+	if(glyr_info->head == NULL)
+		goto bad;
+
 	switch (glyr_info->head->type) {
 	case GLYR_TYPE_COVERART:
 		pragha_update_downloaded_album_art(glyr_info);
@@ -156,12 +162,14 @@ glyr_finished_thread_update (gpointer data)
 		break;
 	}
 
-	glyr_free_list(glyr_info->head);
-	glyr_query_destroy(&glyr_info->query);
-	g_slice_free(glyr_struct, glyr_info);
-
 	g_free(title_header);
 	g_free(subtitle_header);
+
+	glyr_free_list(glyr_info->head);
+bad:
+	remove_watch_cursor (glyr_info->cwin->mainwindow);
+	glyr_query_destroy(&glyr_info->query);
+	g_slice_free(glyr_struct, glyr_info);
 
 	return FALSE;
 }
@@ -176,26 +184,11 @@ get_related_text_info_idle_func (gpointer data)
 
 	glyr_struct *glyr_info = data;
 
-	set_watch_cursor_on_thread(glyr_info->cwin);
-
 	head = glyr_get(&glyr_info->query, &error, NULL);
 
-	if(head != NULL) {
-		glyr_info->head = head;
-		g_idle_add(glyr_finished_thread_update, glyr_info);
+	glyr_info->head = head;
 
-		remove_watch_cursor_on_thread(NULL, glyr_info->cwin);
-	}
-	else {
-		remove_watch_cursor_on_thread((glyr_info->query.type == GLYR_GET_LYRICS) ? _("Lyrics not found.") : _("Artist information not found."),
-					       glyr_info->cwin);
-		g_warning("Error searching song info: %s", glyr_strerror(error));
-
-		glyr_query_destroy(&glyr_info->query);
-		g_slice_free(glyr_struct, glyr_info);
-	}
-
-	return NULL;
+	return glyr_info;
 }
 
 /* Configure the thrad to get the artist bio or lyric. */
@@ -233,11 +226,8 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 	glyr_info->cwin = cwin;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Glyr get text", get_related_text_info_idle_func, glyr_info);
-	#else
-	g_thread_create(get_related_text_info_idle_func, glyr_info, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(get_related_text_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 
 /* Handlers to get lyric and artist bio of current song. */
@@ -318,19 +308,9 @@ get_album_art_idle_func (gpointer data)
 
 	head = glyr_get(&glyr_info->query, &error, NULL);
 
-	if(head != NULL) {
-		glyr_info->head = head;
-		g_idle_add(glyr_finished_thread_update, glyr_info);
-	}
-	else {
-		if (error != GLYRE_OK)
-			g_warning("Error searching album art: %s", glyr_strerror(error));
+	glyr_info->head = head;
 
-		glyr_query_destroy(&glyr_info->query);
-		g_slice_free(glyr_struct, glyr_info);
-	}
-
-	return NULL;
+	return glyr_info;
 }
 
 static void
@@ -372,11 +352,8 @@ related_get_album_art_handler (struct con_win *cwin)
 
 	glyr_info->cwin = cwin;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Glyr get album", get_album_art_idle_func, glyr_info);
-	#else
-	g_thread_create(get_album_art_idle_func, glyr_info, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(get_album_art_idle_func, glyr_finished_thread_update, glyr_info);
 
 exists:
 	g_free(album_art_path);

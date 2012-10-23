@@ -1284,6 +1284,11 @@ void pragha_playback_stop(struct con_win *cwin);
 void pragha_playback_next_track(struct con_win *cwin);
 void pragha_advance_playback (struct con_win *cwin);
 
+
+/* pragha-simple-async.c: Very simple and generic async API. */
+
+void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+
 /* Lastfm Helper */
 
 #ifdef HAVE_LIBCLASTFM
