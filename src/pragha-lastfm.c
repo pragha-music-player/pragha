@@ -330,14 +330,11 @@ do_lastfm_get_similar(struct musicobject *mobj, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
-	struct musicobject *mobj = NULL;
 	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
 
 	AddMusicObjectListData *data;
-
-	struct con_win *cwin = user_data;
 
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
 				      mobj->tags->title,
@@ -491,8 +488,6 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	set_watch_cursor_on_thread(cwin);
-
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
 						     cwin->cpref->lw.lastfm_user,
@@ -514,11 +509,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	data->query_count = query_count;
 	data->cwin = cwin;
 
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	return NULL;
+	return data;
 }
 
 void
@@ -532,11 +523,10 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Add favorites", do_lastfm_add_favorites_action, cwin);
-	#else
-	g_thread_create(do_lastfm_add_favorites_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_add_favorites_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 gpointer
