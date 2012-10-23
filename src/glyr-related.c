@@ -131,14 +131,10 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 /* Manages the results of glyr threads. */
 
-static gboolean
-glyr_finished_thread_update (gpointer data)
+void
+glyr_finished_successfully(glyr_struct *glyr_info)
 {
-	glyr_struct *glyr_info = data;
 	gchar *title_header = NULL, *subtitle_header = NULL;
-
-	if(glyr_info->head == NULL)
-		goto bad;
 
 	switch (glyr_info->head->type) {
 	case GLYR_TYPE_COVERART:
@@ -166,8 +162,39 @@ glyr_finished_thread_update (gpointer data)
 	g_free(subtitle_header);
 
 	glyr_free_list(glyr_info->head);
-bad:
+}
+
+void
+glyr_finished_incorrectly(glyr_struct *glyr_info)
+{
+	switch (glyr_info->head->type) {
+	case GLYR_TYPE_LYRICS:
+		set_status_message(_("Lyrics not found."), glyr_info->cwin);
+		break;
+#if GLYR_CHECK_VERSION (1, 0, 0)
+	case GLYR_TYPE_ARTIST_BIO:
+#else
+	case GLYR_TYPE_ARTISTBIO:
+#endif
+		set_status_message(_("Artist information not found."), glyr_info->cwin);
+		break;
+	case GLYR_TYPE_COVERART:
+	default:
+		break;
+	}
+}
+
+static gboolean
+glyr_finished_thread_update (gpointer data)
+{
+	glyr_struct *glyr_info = data;
+
 	remove_watch_cursor (glyr_info->cwin->mainwindow);
+	if(glyr_info->head != NULL)
+		glyr_finished_successfully(glyr_info);
+	else
+		glyr_finished_incorrectly(glyr_info);
+
 	glyr_query_destroy(&glyr_info->query);
 	g_slice_free(glyr_struct, glyr_info);
 
@@ -177,7 +204,7 @@ bad:
 /* Get artist bio or lyric on a thread. */
 
 static gpointer
-get_related_text_info_idle_func (gpointer data)
+get_related_info_idle_func (gpointer data)
 {
 	GlyrMemCache *head;
 	GLYR_ERROR error;
@@ -227,7 +254,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 	glyr_info->cwin = cwin;
 
 	set_watch_cursor (cwin->mainwindow);
-	pragha_async_launch(get_related_text_info_idle_func, glyr_finished_thread_update, glyr_info);
+	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 
 /* Handlers to get lyric and artist bio of current song. */
@@ -296,23 +323,6 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
 }
 
-/* Download the album art in a thread. */
-
-static gpointer
-get_album_art_idle_func (gpointer data)
-{
-	GlyrMemCache *head;
-	GLYR_ERROR error;
-
-	glyr_struct *glyr_info = data;
-
-	head = glyr_get(&glyr_info->query, &error, NULL);
-
-	glyr_info->head = head;
-
-	return glyr_info;
-}
-
 static void
 related_get_album_art_handler (struct con_win *cwin)
 {
@@ -353,7 +363,7 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_info->cwin = cwin;
 
 	set_watch_cursor (cwin->mainwindow);
-	pragha_async_launch(get_album_art_idle_func, glyr_finished_thread_update, glyr_info);
+	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 
 exists:
 	g_free(album_art_path);
