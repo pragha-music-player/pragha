@@ -471,51 +471,10 @@ set_watch_cursor (GtkWidget *window)
 	gdk_cursor_unref (cursor);
 }
 
-static gboolean
-set_watch_cursor_cb (gpointer user_data)
-{
-	GtkWidget *window = user_data;
-	set_watch_cursor (window);
-	return FALSE;
-}
-
-void
-set_watch_cursor_on_thread(struct con_win *cwin)
-{
-	g_idle_add (set_watch_cursor_cb, cwin->mainwindow);
-}
-
 void
 remove_watch_cursor (GtkWidget *window)
 {
 	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
-}
-
-typedef struct {
-	const gchar *message;
-	struct con_win *cwin;
-} RemoveWatchCursorData;
-
-static gboolean
-remove_watch_cursor_cb (gpointer user_data)
-{
-	RemoveWatchCursorData *data = user_data;
-
-	if(data->message != NULL)
-		set_status_message(data->message, data->cwin);
-	remove_watch_cursor (data->cwin->mainwindow);
-
-	g_slice_free (RemoveWatchCursorData, data);
-	return FALSE;
-}
-
-void
-remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
-{
-	RemoveWatchCursorData *data = g_slice_new (RemoveWatchCursorData);
-	data->message = message;
-	data->cwin = cwin;
-	g_idle_add (remove_watch_cursor_cb, data);
 }
 
 /* Set a message on status bar, and restore it at 5 seconds */
@@ -534,30 +493,6 @@ void set_status_message (const gchar *message, struct con_win *cwin)
 	g_timeout_add_seconds(5, restore_status_bar, cwin);
 
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
-}
-
-typedef struct {
-	const gchar *message;
-	struct con_win *cwin;
-} SetStatusMessageData;
-
-static gboolean
-set_status_message_cb (gpointer user_data)
-{
-	SetStatusMessageData *data = user_data;
-
-	set_status_message (data->message, data->cwin);
-
-	g_slice_free (SetStatusMessageData, data);
-	return FALSE;
-}
-
-void set_status_message_on_thread (const gchar *message, struct con_win *cwin)
-{
-	SetStatusMessageData *data = g_slice_new (SetStatusMessageData);
-	data->message = message;
-	data->cwin = cwin;
-	g_idle_add (set_status_message_cb, data);
 }
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
