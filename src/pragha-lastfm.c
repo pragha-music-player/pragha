@@ -703,6 +703,7 @@ do_lastfm_now_playing (gpointer data)
 	LFMList *list = NULL;
 	gboolean changed = FALSE;
 	LASTFM_TRACK_INFO *ntrack;
+	AsycMessageData *msg_data = NULL;
 
 	struct con_win *cwin = data;
 
@@ -719,10 +720,7 @@ do_lastfm_now_playing (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, &list);
 
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Update current song on Last.fm failed."), cwin);
-	}
-	else {
+	if (rv == LASTFM_STATUS_OK) {
 		ntrack = list->data;
 		free_tag_struct(cwin->clastfm->ntags);
 
@@ -760,14 +758,18 @@ do_lastfm_now_playing (gpointer data)
 			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
 	}
+	else {
+		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
+	}
 
 	LASTFM_free_track_info_list(list);
+
 	g_free(file);
 	g_free(title);
 	g_free(artist);
 	g_free(album);
 
-	return NULL;
+	return msg_data;
 }
 
 void
@@ -796,11 +798,9 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->curr_mobj->tags->length < 30)
 		return;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Lfm Now playing", do_lastfm_now_playing, cwin);
-	#else
-	g_thread_create(do_lastfm_now_playing, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_now_playing,
+			    set_async_finished_message,
+			    cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
