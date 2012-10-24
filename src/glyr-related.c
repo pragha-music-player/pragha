@@ -362,7 +362,6 @@ related_get_album_art_handler (struct con_win *cwin)
 
 	glyr_info->cwin = cwin;
 
-	set_watch_cursor (cwin->mainwindow);
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 
 exists:
