@@ -24,6 +24,9 @@ set_async_finished_message (gpointer user_data)
 {
 	AsycMessageData *data = user_data;
 
+	if (data == NULL)
+		return FALSE;
+
 	set_status_message (data->message, data->cwin);
 
 	g_slice_free (AsycMessageData, data);
