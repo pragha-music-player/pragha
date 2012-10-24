@@ -1005,7 +1005,10 @@ gint init_threads(struct con_win *cwin)
 	if (!g_thread_supported())
 		g_thread_init(NULL);
 	#endif
+
+	#if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
+	#endif
 
 	return 0;
 }
