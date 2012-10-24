@@ -643,6 +643,7 @@ do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
+	AsycMessageData *msg_data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
@@ -655,12 +656,12 @@ do_lastfm_scrob (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, NULL);
 
-	if (rv != LASTFM_STATUS_OK)
-		set_status_message_on_thread("Last.fm submission failed", cwin);
-	else
-		set_status_message_on_thread("Track scrobbled on Last.fm", cwin);
+	msg_data = async_finished_message_new((rv != LASTFM_STATUS_OK) ?
+					     _("Last.fm submission failed") :
+					     _("Track scrobbled on Last.fm"),
+					     cwin);
 
-	return FALSE;
+	return msg_data;
 }
 
 gboolean
@@ -678,12 +679,9 @@ lastfm_scrob_handler(gpointer data)
 		return FALSE;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Scroble", do_lastfm_scrob, cwin);
-	#else
-	g_thread_create(do_lastfm_scrob, cwin, FALSE, NULL);
-	#endif
-
+	pragha_async_launch(do_lastfm_scrob,
+			    set_async_finished_message,
+			    cwin);
 	return FALSE;
 }
 

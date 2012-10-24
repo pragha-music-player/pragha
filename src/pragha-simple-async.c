@@ -17,12 +17,35 @@
 
 #include "pragha.h"
 
-typedef struct {
-    	gpointer userdata;
-    	gpointer finished_data;
-	GThreadFunc func_w;
-	GSourceFunc func_f;
-} AsyncSimple;
+/* Generic function to set a message when finished the async operation. */
+
+gboolean
+set_async_finished_message (gpointer user_data)
+{
+	AsycMessageData *data = user_data;
+
+	set_status_message (data->message, data->cwin);
+
+	g_slice_free (AsycMessageData, data);
+
+	return FALSE;
+}
+
+AsycMessageData *
+async_finished_message_new(const gchar *message, struct con_win *cwin)
+{
+	AsycMessageData *data;
+	data = g_slice_new (AsycMessageData);
+
+	data->message = message;
+	data->cwin = cwin;
+
+	return data;
+}
+
+/* Launch a asynchronous operation (worker_func), and when finished use another
+ * function (finish_func) in the main loop using the information returned by
+ * the asynchronous operation. */
 
 gboolean
 pragha_async_finished(gpointer data)
