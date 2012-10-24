@@ -1287,6 +1287,20 @@ void pragha_advance_playback (struct con_win *cwin);
 
 /* pragha-simple-async.c: Very simple and generic async API. */
 
+typedef struct {
+	gpointer userdata;
+	gpointer finished_data;
+	GThreadFunc func_w;
+	GSourceFunc func_f;
+} AsyncSimple;
+
+typedef struct {
+	const gchar *message;
+	struct con_win *cwin;
+} AsycMessageData;
+
+gboolean set_async_finished_message (gpointer user_data);
+AsycMessageData *async_finished_message_new(const gchar *message, struct con_win *cwin);
 void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
