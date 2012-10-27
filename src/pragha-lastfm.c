@@ -261,6 +261,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	struct musicobject *mobj;
 	gchar *summary = NULL;
 	guint songs_added = 0;
+	gint prev_tracks = 0;
 	GList *l;
 
 	AddMusicObjectListData *data = user_data;
@@ -270,6 +271,8 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	if(list == NULL)
 		goto empty;
+
+	prev_tracks = cwin->cstate->tracks_curr_playlist;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -312,7 +315,7 @@ empty:
 	}
 
 	if(songs_added > 0)
-		select_last_path_of_current_playlist(cwin);
+		select_numered_path_of_current_playlist(prev_tracks, cwin);
 
 	if (summary != NULL) {
 		set_status_message(summary, cwin);
@@ -398,7 +401,8 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 {
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
-	gint try = 0, added = 0;
+	gint try = 0, added = 0, prev_tracks = 0;
+
 	GFile *file;
 	gsize size;
 
@@ -422,6 +426,8 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 
 	set_watch_cursor (cwin->mainwindow);
 
+	prev_tracks = cwin->cstate->tracks_curr_playlist;
+
 	xml = tinycxml_parse(contents);
 
 	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
@@ -434,7 +440,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 			added++;
 	}
 	if(added > 0)
-		select_last_path_of_current_playlist(cwin);
+		select_numered_path_of_current_playlist(prev_tracks, cwin);
 
 	remove_watch_cursor (cwin->mainwindow);
 
