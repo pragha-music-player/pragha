@@ -1214,7 +1214,7 @@ void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
 	if (list) {
 		set_watch_cursor (cwin->mainwindow);
 
-		current_playlist_clear_action(action, cwin);
+		current_playlist_clear(cwin);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
@@ -1258,7 +1258,7 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 	if (list) {
 		set_watch_cursor (cwin->mainwindow);
 
-		current_playlist_clear_action(action, cwin);
+		current_playlist_clear(cwin);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);

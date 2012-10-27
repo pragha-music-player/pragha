@@ -1242,7 +1242,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	set_watch_cursor (cwin->mainwindow);
 
-	current_playlist_clear_action(action, cwin);
+	current_playlist_clear(cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
