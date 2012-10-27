@@ -1745,9 +1745,8 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 	g_free(filename);
 }
 
-/* Clear all rows from current playlist */
-
-void current_playlist_clear_action(GtkAction *action, struct con_win *cwin)
+void
+current_playlist_clear (struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1783,6 +1782,12 @@ void current_playlist_clear_action(GtkAction *action, struct con_win *cwin)
 	cwin->cstate->unplayed_tracks = 0;
 
 	update_status_bar(cwin);
+}
+
+void
+current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
+{
+	current_playlist_clear (cwin);
 }
 
 /* Update a track to the current playlist */
