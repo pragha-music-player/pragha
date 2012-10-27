@@ -1201,7 +1201,8 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 /* Menu handlers */
 /*****************/
 
-void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
+static void
+library_tree_replace_playlist (struct con_win *cwin)
 {
 	GtkTreeModel *model, *playlist_model;
 	GtkTreeSelection *selection;
@@ -1245,48 +1246,14 @@ void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwi
 	}
 }
 
+void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	library_tree_replace_playlist (cwin);
+}
+
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model, *playlist_model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		set_watch_cursor (cwin->mainwindow);
-
-		current_playlist_clear(cwin);
-
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			add_row_current_playlist(path, model, playlist_model, cwin);
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return;
-		}
-
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(playlist_model);
-
-		remove_watch_cursor (cwin->mainwindow);
-
-		update_status_bar(cwin);
-
-		g_list_free(list);
-	}
+	library_tree_replace_playlist (cwin);
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		pragha_playback_next_track(cwin);
