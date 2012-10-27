@@ -587,7 +587,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
-	gint n_select = 0;
+	gint n_select = 0, prev_tracks = 0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
@@ -613,10 +613,14 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
+			prev_tracks = cwin->cstate->tracks_curr_playlist;
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
 				playlist_tree_add_to_playlist(cwin);
 			else
 				library_tree_add_to_playlist(cwin);
+
+			select_numered_path_of_current_playlist(prev_tracks, cwin);
+
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
@@ -1304,7 +1308,6 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_last_path_of_current_playlist(cwin);
 		update_status_bar(cwin);
 
 		g_list_free(list);
