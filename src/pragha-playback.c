@@ -114,8 +114,13 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 			path = get_next_queue_track(cwin);
 		if (!path)
 			path = current_playlist_get_selection(cwin);
-		if(!path && cwin->cpref->shuffle)
-			path = get_first_random_track(cwin);
+
+		if(!path) {
+			if(cwin->cpref->shuffle)
+				path = get_first_random_track(cwin);
+			else
+				path = gtk_tree_path_new_first();
+		}
 
 		if (cwin->cpref->shuffle) {
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
