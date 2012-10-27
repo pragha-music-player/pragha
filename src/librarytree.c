@@ -1201,7 +1201,7 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 /* Menu handlers */
 /*****************/
 
-void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
+void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model, *playlist_model;
 	GtkTreeSelection *selection;
