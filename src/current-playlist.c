@@ -925,6 +925,8 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 	}
 }
 
+/* Select the song numbered according to the position in the playlist */
+
 void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin)
 {
 	gchar *ref = NULL;
@@ -938,13 +940,6 @@ void select_numered_path_of_current_playlist(gint path_number, struct con_win *c
 
 	gtk_tree_path_free(path);
 	g_free(ref);
-}
-
-/* Select last path. useful when change the model. */
-
-void select_last_path_of_current_playlist(struct con_win *cwin)
-{
-	select_numered_path_of_current_playlist(cwin->cstate->tracks_curr_playlist - 1, cwin);
 }
 
 /* Get a new playlist name that is not reserved */
@@ -2768,6 +2763,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GList *list = NULL;
+	gint prev_tracks = 0;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 
@@ -2805,6 +2801,10 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	/* Show busy mouse icon */
 
 	set_watch_cursor (cwin->mainwindow);
+
+	/* Save the last position to select the songs added */
+
+	prev_tracks = cwin->cstate->tracks_curr_playlist;
 
 	/* Get new tracks to append on playlist */
 
@@ -2845,7 +2845,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	if (is_row)
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->current_playlist), dest_path, NULL, TRUE, row_align, 0.0);
 	else
-		select_last_path_of_current_playlist(cwin);
+		select_numered_path_of_current_playlist(prev_tracks, cwin);
 
 	/* Remove busy mouse icon */
 

@@ -986,7 +986,6 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
 void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin);
-void select_last_path_of_current_playlist(struct con_win *cwin);
 void update_status_bar(struct con_win *cwin);
 void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
 void update_current_playlist_view_new_track(struct con_win *cwin);
