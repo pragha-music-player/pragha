@@ -137,16 +137,9 @@
 #define OSS_SINK     "oss"
 #define PULSE_SINK   "pulse"
 
-#define DEFAULT_MIXER "default"
-#define ALSA_MIXER    "alsa"
-#define OSS_MIXER     "oss"
-#define SOFT_MIXER    "software"
-
 #define ALSA_DEFAULT_DEVICE "default"
 #define OSS_DEFAULT_DEVICE  "/dev/dsp"
 
-#define PROGRESS_BAR_TEXT           _("Scanning")
-#define TRACK_PROGRESS_BAR_STOPPED  _("Stopped")
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
 #define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
