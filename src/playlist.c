@@ -1231,8 +1231,6 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	select_last_path_of_current_playlist(cwin);
-
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	set_status_message(summary, cwin);
 	g_free(summary);
