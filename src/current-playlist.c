@@ -925,14 +925,12 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 	}
 }
 
-/* Select last path. useful when change the model. */
-
-void select_last_path_of_current_playlist(struct con_win *cwin)
+void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin)
 {
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
 
-	ref = g_strdup_printf("%d", cwin->cstate->tracks_curr_playlist - 1);
+	ref = g_strdup_printf("%d", path_number);
 
 	path = gtk_tree_path_new_from_string(ref);
 
@@ -940,6 +938,13 @@ void select_last_path_of_current_playlist(struct con_win *cwin)
 
 	gtk_tree_path_free(path);
 	g_free(ref);
+}
+
+/* Select last path. useful when change the model. */
+
+void select_last_path_of_current_playlist(struct con_win *cwin)
+{
+	select_numered_path_of_current_playlist(cwin->cstate->tracks_curr_playlist - 1, cwin);
 }
 
 /* Get a new playlist name that is not reserved */
