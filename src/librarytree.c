@@ -530,6 +530,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model, *playlist_model;
 	enum node_type node_type;
+	gint prev_tracks = 0;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
@@ -555,6 +556,8 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_RADIO:
 		set_watch_cursor (cwin->mainwindow);
 
+		prev_tracks = cwin->cstate->tracks_curr_playlist;
+
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 		g_object_ref(playlist_model);
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
@@ -568,7 +571,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_last_path_of_current_playlist(cwin);
+		select_numered_path_of_current_playlist(prev_tracks, cwin);
 		update_status_bar(cwin);
 		break;
 	default:
