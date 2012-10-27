@@ -406,6 +406,7 @@ static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
 	GSList *files = NULL;
+	gint prev_tracks = 0;
 
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
@@ -423,13 +424,16 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	if (files) {
 		set_watch_cursor (cwin->mainwindow);
 
+		prev_tracks = cwin->cstate->tracks_curr_playlist;
+
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
 
 		remove_watch_cursor (cwin->mainwindow);
+
+		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		update_status_bar(cwin);
 	}
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
 }
 
 static gboolean
@@ -1286,7 +1290,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	select_last_path_of_current_playlist(cwin);
+	select_numered_path_of_current_playlist(0, cwin);
 	update_status_bar(cwin);
 
 	mpris_update_tracklist_replaced(cwin);
