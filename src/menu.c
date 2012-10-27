@@ -135,7 +135,7 @@ static GtkActionEntry main_aentries[] = {
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
 	 "<Control>C", "Crop playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
-	 "<Control>L", "Clear the current playlist", G_CALLBACK(clear_current_playlist)},
+	 "<Control>L", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
 	{"Add to another playlist", NULL, N_("Add selection to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE_AS, N_("Save playlist")},
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
@@ -1242,7 +1242,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	set_watch_cursor (cwin->mainwindow);
 
-	clear_current_playlist(action, cwin);
+	current_playlist_clear_action(action, cwin);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
 

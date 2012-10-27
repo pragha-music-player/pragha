@@ -70,7 +70,7 @@ static GtkActionEntry cp_context_aentries[] = {
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
 	 "", "Remove no telected tracks of playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
-	 "", "Clear the current playlist", G_CALLBACK(clear_current_playlist)},
+	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
 	{"Add to another playlist", GTK_STOCK_SAVE_AS, N_("Add to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"ToolsMenu", NULL, N_("_Tools")},
@@ -1747,7 +1747,7 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 
 /* Clear all rows from current playlist */
 
-void clear_current_playlist(GtkAction *action, struct con_win *cwin)
+void current_playlist_clear_action(GtkAction *action, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
