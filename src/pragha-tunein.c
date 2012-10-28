@@ -75,7 +75,7 @@ void
 tunein_print_local_radios()
 {
 	char *buffer;
-	WebData *data = NULL;
+	WebData *data = NULL, *ashx_data = NULL;
 	XMLNode *xml = NULL, *xi;
 	CURL *curl;
 	gchar *name, *url;
@@ -100,9 +100,6 @@ tunein_print_local_radios()
 	data = tunein_helper_get_page(curl, buffer);
 	free(buffer);
 
-	/* Done with CURL */
-	curl_global_cleanup();
-
 	if(data == NULL || data->size == 0)
 		return;
 
@@ -113,11 +110,19 @@ tunein_print_local_radios()
 		name = tunein_helper_get_atribute(xi, "text");
 		url = tunein_helper_get_atribute(xi, "URL");
 
-		g_print("%s: %s\n", name, url);
+		ashx_data = tunein_helper_get_page(curl, url);
 
+		if(ashx_data == NULL || ashx_data->size == 0)
+			continue;
+
+		g_print("%s: %s\n", name, ashx_data->page);
+
+		tunein_helper_free_page(ashx_data);
 	}
-
 	xmlnode_free(xml);
+
+	curl_global_cleanup();
+
 	tunein_helper_free_page(data);
 }
 
@@ -183,9 +188,6 @@ WebData *tunein_helper_get_page(CURL *curl, const char *url)
 
 	/* get it! */
 	curl_easy_perform(curl);
-
-	/* cleanup curl stuff */
-	curl_easy_cleanup(curl);
 
 	if(chunk->size == 0) {
 		if(chunk->page) {
