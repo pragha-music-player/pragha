@@ -1167,6 +1167,7 @@ gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
 gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
+gchar *pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin);
 #if !GLIB_CHECK_VERSION(2,32,0)
 gboolean nm_is_online ();
 #endif

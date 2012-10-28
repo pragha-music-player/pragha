@@ -189,7 +189,7 @@ jump_filter_visible_func (GtkTreeModel *model, GtkTreeIter *iter, struct con_win
 
 	haystackd = g_utf8_strdown (haystack, -1);
 
-	if (g_strstr_lv (haystack, needle, cwin->cpref->aproximate_search ? 1 : 0))
+	if (pragha_strstr_lv(haystack, needle, cwin))
 		visible = TRUE;
 
 	g_free(haystack);

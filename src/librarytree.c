@@ -839,8 +839,7 @@ static void filter_tree_expand_func(GtkTreeView *view,
 	if (cwin->cstate->filter_entry &&
 	    (node_type != NODE_TRACK) &&
 	    (node_type != NODE_BASENAME) &&
-	    g_strstr_lv(u_str, cwin->cstate->filter_entry,
-	    cwin->cpref->aproximate_search ? 1 : 0))
+	    pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin))
 		gtk_tree_view_collapse_row(view, path);
 
 	g_free(u_str);
@@ -865,8 +864,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	if (cwin->cstate->filter_entry) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
-		if (g_strstr_lv(u_str, cwin->cstate->filter_entry,
-				    cwin->cpref->aproximate_search ? 1 : 0)) {
+		if (pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin)) {
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_VISIBILE, TRUE, -1);
 			t_path = gtk_tree_model_get_path(model, iter);
@@ -898,8 +896,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					gchar *u_str = g_utf8_strdown(t_node_data, -1);
 
 					if (visible &&
-					    g_strstr_lv(u_str, cwin->cstate->filter_entry,
-							    cwin->cpref->aproximate_search ? 1 : 0))
+					    pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin))
 						t_flag = TRUE;
 
 					g_free(u_str);
