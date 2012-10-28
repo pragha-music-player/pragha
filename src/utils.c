@@ -245,6 +245,16 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	return rv;
 }
 
+/* Searches the string haystack for the first occurrence of the string needle,
+ * considering the aproximate_search option. */
+
+gchar *
+pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin)
+{
+	return g_strstr_lv(haystack, needle,
+			   cwin->cpref->aproximate_search ? 1 : 0);
+}
+
 #if !GLIB_CHECK_VERSION(2,32,0)
 /* Functions to check the network manager status. */
 
