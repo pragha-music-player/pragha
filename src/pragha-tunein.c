@@ -32,7 +32,8 @@ int tunein_helper_free_page(WebData *wpage);
 #define LARGE_BUFFER	1024
 #define TUNEIN_API_ROOT	"http://opml.radiotime.com/"
 
-/* TuneIn responce example:
+/* TuneIn response example:
+ * http://opml.radiotime.com/Browse.ashx?c=local
 <opml version="1">
 	<head>
 		<title>Buenos Aires</title>
