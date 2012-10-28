@@ -58,15 +58,17 @@ int tunein_helper_free_page(WebData *wpage);
 */
 
 
-void
-tunein_helper_print_atribute(XMLNode *xml, const gchar *atribute)
+gchar *
+tunein_helper_get_atribute(XMLNode *xml, const gchar *atribute)
 {
 	XMLNode *xi;
 
 	xi = xmlnode_get(xml,CCA {"outline", NULL}, atribute, NULL);
 
 	if(xi)
-		g_print("%s: %s\n", atribute, xi->content);
+		return xi->content;
+
+	return NULL;
 }
 
 void
@@ -76,6 +78,7 @@ tunein_print_local_radios()
 	WebData *data = NULL;
 	XMLNode *xml = NULL, *xi;
 	CURL *curl;
+	gchar *name, *url;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -106,8 +109,12 @@ tunein_print_local_radios()
 	xml = tinycxml_parse(data->page);
 
 	xi = xmlnode_get(xml, CCA{"opml", "body", "outline", NULL }, NULL, NULL);
-	for(;xi;xi=xi->next){
-		tunein_helper_print_atribute(xi, "text");
+	for(;xi;xi=xi->next) {
+		name = tunein_helper_get_atribute(xi, "text");
+		url = tunein_helper_get_atribute(xi, "URL");
+
+		g_print("%s: %s\n", name, url);
+
 	}
 
 	xmlnode_free(xml);
