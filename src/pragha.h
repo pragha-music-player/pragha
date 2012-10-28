@@ -1336,5 +1336,5 @@ void dialog_jump_to_track (struct con_win *cwin);
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
 void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
-
+void tunein_print_local_radios();
 #endif /* PRAGHA_H */

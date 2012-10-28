@@ -1300,6 +1300,8 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
+	tunein_print_local_radios();
+
 	n_artists = db_get_artist_count(cwin->cdbase);
 	n_albums = db_get_album_count(cwin->cdbase);
 	n_tracks = db_get_track_count(cwin->cdbase);

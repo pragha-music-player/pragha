@@ -35,6 +35,7 @@ pragha_SOURCES =cdda.c \
 		pragha-hig.c \
 		pragha-playback.c \
 		pragha-simple-async.c \
+		pragha-tunein.c \
 		pref.c \
 		statusicon.c \
 		tags.c \
@@ -59,6 +60,7 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
+	$(LIBCURL_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -73,6 +75,7 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(LIBNOTIFY_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
+	$(LIBCURL_LIBS)							\
 	$(LIBCDDB_LIBS)
 
 ## for gstreamer 0.10
