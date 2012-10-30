@@ -697,6 +697,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	gchar *uri;
 	gchar *after_track; //TODO use this
 	gboolean set_as_current; //TODO use this
+	gint prev_tracks = 0;
 
 	g_variant_get(parameters, "(sob)", &uri, &after_track, &set_as_current);
 
@@ -706,6 +707,8 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		g_warning("Invalid uri: %s", uri);
 		goto exit;
 	}
+
+	prev_tracks = cwin->cstate->tracks_curr_playlist;
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
@@ -722,7 +725,8 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	else {
 		g_warning("Unable to add file %s", file);
 	}
-	select_last_path_of_current_playlist(cwin);
+
+	select_numered_path_of_current_playlist(prev_tracks, cwin);
 	update_status_bar(cwin);
 
 	g_free(file);

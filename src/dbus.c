@@ -88,6 +88,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	gchar *file;
 	DBusError error;
  	struct musicobject *mobj = NULL; 
+	gint prev_tracks = 0;
 
 	dbus_error_init(&error);
 	dbus_message_get_args(msg, &error, DBUS_TYPE_STRING, &file, DBUS_TYPE_INVALID);
@@ -97,6 +98,8 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		dbus_error_free(&error);
 		return;
 	}
+
+	prev_tracks = cwin->cstate->tracks_curr_playlist;
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
@@ -113,7 +116,8 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	else {
 		g_warning("Unable to add %s", file);
 	}
-	select_last_path_of_current_playlist(cwin);
+
+	select_numered_path_of_current_playlist(prev_tracks, cwin);
 	update_status_bar(cwin);
 }
 
