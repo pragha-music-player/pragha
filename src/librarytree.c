@@ -914,13 +914,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					g_free(t_node_data);
 				}
 			}
-
-			if (t_flag)
-				gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-						   L_VISIBILE, TRUE, -1);
-			else
-				gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-						   L_VISIBILE, FALSE, -1);
+			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
+						   L_VISIBILE, t_flag, -1);
 			gtk_tree_path_free(t_path);
 		}
 		g_free(u_str);
