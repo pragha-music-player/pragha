@@ -241,6 +241,7 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 				   G_TYPE_STRING,   /* Node */
 				   G_TYPE_INT,      /* Node type : Artist / Album / Track */
 				   G_TYPE_INT,      /* Location id (valid only for Track) */
+				   G_TYPE_BOOLEAN,  /* Flag to save mach when filtering */
 				   G_TYPE_BOOLEAN); /* Row visibility */
 
 

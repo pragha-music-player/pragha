@@ -311,6 +311,7 @@ enum library_columns {
 	L_NODE_DATA,
 	L_NODE_TYPE,
 	L_LOCATION_ID,
+	L_MACH,
 	L_VISIBILE,
 	N_L_COLUMNS
 };
