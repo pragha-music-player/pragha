@@ -859,7 +859,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 				 gpointer data)
 {
 	struct con_win *cwin = data;
-	gchar *node_data = NULL, *t_node_data, *u_str;
+	gchar *node_data = NULL, *t_node_data, *u_str, *t_str = NULL;
 	gboolean visible, t_flag = FALSE;
 	GtkTreePath *t_path;
 	GtkTreeIter t_iter;
@@ -905,12 +905,12 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 							   &visible,
 							   -1);
 
-					gchar *u_str = g_utf8_strdown(t_node_data, -1);
+					t_str = g_utf8_strdown(t_node_data, -1);
 					/* If parent visible due it mach show it */
 					if (visible &&
-					    pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin))
+					    pragha_strstr_lv(t_str, cwin->cstate->filter_entry, cwin))
 						t_flag = TRUE;
-					g_free(u_str);
+					g_free(t_str);
 					g_free(t_node_data);
 				}
 			}
