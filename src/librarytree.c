@@ -860,9 +860,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 {
 	struct con_win *cwin = data;
 	gchar *node_data = NULL, *t_node_data, *u_str, *t_str = NULL;
-	gboolean visible, t_flag = FALSE;
-	GtkTreePath *t_path;
-	GtkTreeIter t_iter;
+	gboolean visible, t_flag = FALSE, valid;
+	GtkTreeIter t_iter, parent;
 
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
@@ -877,48 +876,46 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					   L_VISIBILE, TRUE, -1);
 
 			/* Also set visible the parents */
-			t_path = gtk_tree_path_copy(path);
-			while (gtk_tree_path_up(t_path)) {
-				if (gtk_tree_path_get_depth(t_path) > 0) {
-					gtk_tree_model_get_iter(model, &t_iter, t_path);
-					gtk_tree_store_set(GTK_TREE_STORE(model), &t_iter,
-							   L_VISIBILE, TRUE, -1);
-				}
+			t_iter = *iter;
+			valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
+			while(valid) {
+				gtk_tree_store_set(GTK_TREE_STORE(model), &parent,
+						   L_VISIBILE, TRUE, -1);
+				t_iter = parent;
+				valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
 			}
-			gtk_tree_path_free(t_path);
 		}
 		else {
 			/* Check parents. If it is visible due it mach, also shows.
 			 * This is to show the children of coincidences. */
-			t_path = gtk_tree_path_copy(path);
-			while (!t_flag && gtk_tree_path_up(t_path)) {
-				if (gtk_tree_path_get_depth(t_path) > 0) {
-					gtk_tree_model_get_iter(model, &t_iter,
-								t_path);
-					gtk_tree_model_get(model,
-							   &t_iter,
-							   L_NODE_DATA,
-							   &t_node_data,
+			t_iter = *iter;
+			valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
+			while(valid) {
+				gtk_tree_model_get(model,
+						   &t_iter,
+						   L_NODE_DATA,
+						   &t_node_data,
 							   -1);
-					gtk_tree_model_get(model,
-							   &t_iter,
-							   L_VISIBILE,
-							   &visible,
-							   -1);
+				gtk_tree_model_get(model,
+						   &t_iter,
+						   L_VISIBILE,
+						   &visible,
+						   -1);
 
-					t_str = g_utf8_strdown(t_node_data, -1);
-					/* If parent visible due it mach show it */
-					if (visible &&
-					    pragha_strstr_lv(t_str, cwin->cstate->filter_entry, cwin))
-						t_flag = TRUE;
+				t_str = g_utf8_strdown(t_node_data, -1);
+				/* If parent visible due it mach show it */
+				if (visible &&
+				    pragha_strstr_lv(t_str, cwin->cstate->filter_entry, cwin))
+					t_flag = TRUE;
 
-					g_free(t_str);
-					g_free(t_node_data);
-				}
+				g_free(t_str);
+				g_free(t_node_data);
+
+				t_iter = parent;
+				valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
 			}
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 						   L_VISIBILE, t_flag, -1);
-			gtk_tree_path_free(t_path);
 		}
 		g_free(u_str);
 		g_free(node_data);
