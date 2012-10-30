@@ -877,7 +877,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					   L_VISIBILE, TRUE, -1);
 
 			/* Also set visible the parents */
-			t_path = gtk_tree_model_get_path(model, iter);
+			t_path = gtk_tree_path_copy(path);
 			while (gtk_tree_path_up(t_path)) {
 				if (gtk_tree_path_get_depth(t_path) > 0) {
 					gtk_tree_model_get_iter(model, &t_iter, t_path);
@@ -889,7 +889,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 		} else {
 			/* Check parents. If it is visible due it mach, also shows.
 			 * This is to show the children of coincidences. */
-			t_path = gtk_tree_model_get_path(model, iter);
+			t_path = gtk_tree_path_copy(path);
 			while (gtk_tree_path_up(t_path)) {
 				if (gtk_tree_path_get_depth(t_path) > 0) {
 					gtk_tree_model_get_iter(model, &t_iter,
