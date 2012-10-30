@@ -930,16 +930,25 @@ gboolean do_refilter(struct con_win *cwin )
 {
 	GtkTreeModel *filter_model;
 
+	/* Remove the model of widget. */
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
+	/* Set visibility of rows in the library store. */
 	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
 				filter_tree_func,
 				cwin);
+
+	/* Create the new filter model and filter. */
 	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
 			NULL);
 	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model),
 			L_VISIBILE);
+
+	/* Set the model.*/
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
 	g_object_unref(filter_model);
+
+	/* Expand all and then reduce properly. */
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
 		filter_tree_expand_func,
