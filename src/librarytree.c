@@ -59,6 +59,7 @@ static void add_child_node_by_tag(GtkTreeModel *model, GtkTreeIter *iter,
 		L_NODE_DATA, node_data,
 		L_NODE_TYPE, node_type,
 		L_LOCATION_ID, location_id,
+		L_MACH, FALSE,
 		L_VISIBILE, TRUE, -1);
 }
 
@@ -102,6 +103,7 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 					L_NODE_DATA, node_data,
 					L_NODE_TYPE, node_type,
 					L_LOCATION_ID, location_id,
+					L_MACH, FALSE,
 					L_VISIBILE, TRUE, -1);
 }
 
@@ -820,7 +822,9 @@ static gboolean set_all_visible(GtkTreeModel *model,
 				gpointer data)
 {
 	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_VISIBILE, TRUE, -1);
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
+			   -1);
 	return FALSE;
 }
 
@@ -828,29 +832,23 @@ static void filter_tree_expand_func(GtkTreeView *view,
 				    GtkTreePath *path,
 				    gpointer data)
 {
-	struct con_win *cwin = data;
 	GtkTreeModel *filter_model;
 	GtkTreeIter iter;
-	gchar *node_data = NULL, *u_str = NULL;
 	enum node_type node_type;
+	gboolean node_mach;
 
-	filter_model = gtk_tree_view_get_model(view);
+	filter_model = data;
+
 	gtk_tree_model_get_iter(filter_model, &iter, path);
-	gtk_tree_model_get(filter_model, &iter, L_NODE_DATA, &node_data, -1);
 	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
-
-	u_str = g_utf8_strdown(node_data, -1);
+	gtk_tree_model_get(filter_model, &iter, L_MACH, &node_mach, -1);
 
 	/* Collapse any non-leaf node that matches the seach entry */
 
-	if (cwin->cstate->filter_entry &&
+	if (node_mach &&
 	    (node_type != NODE_TRACK) &&
-	    (node_type != NODE_BASENAME) &&
-	    pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin))
+	    (node_type != NODE_BASENAME))
 		gtk_tree_view_collapse_row(view, path);
-
-	g_free(u_str);
-	g_free(node_data);
 }
 
 static gboolean filter_tree_func(GtkTreeModel *model,
@@ -859,8 +857,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 				 gpointer data)
 {
 	struct con_win *cwin = data;
-	gchar *node_data = NULL, *t_node_data, *u_str, *t_str = NULL;
-	gboolean visible, t_flag = FALSE, valid;
+	gchar *node_data = NULL, *u_str;
+	gboolean visible, t_flag = FALSE, valid, p_mach;
 	GtkTreeIter t_iter, parent;
 
 	/* Mark node and its parents visible if search entry matches.
@@ -873,7 +871,9 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 		if (pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin)) {
 			/* Set visible the match row */
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-					   L_VISIBILE, TRUE, -1);
+					   L_MACH, TRUE,
+					   L_VISIBILE, TRUE,
+					   -1);
 
 			/* Also set visible the parents */
 			t_iter = *iter;
@@ -891,31 +891,22 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 			t_iter = *iter;
 			valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
 			while(valid) {
-				gtk_tree_model_get(model,
-						   &t_iter,
-						   L_NODE_DATA,
-						   &t_node_data,
-							   -1);
-				gtk_tree_model_get(model,
-						   &t_iter,
-						   L_VISIBILE,
-						   &visible,
+				gtk_tree_model_get(model, &parent,
+						   L_MACH, &p_mach,
+						   L_VISIBILE, &visible,
 						   -1);
 
-				t_str = g_utf8_strdown(t_node_data, -1);
 				/* If parent visible due it mach show it */
-				if (visible &&
-				    pragha_strstr_lv(t_str, cwin->cstate->filter_entry, cwin))
+				if (visible && p_mach)
 					t_flag = TRUE;
-
-				g_free(t_str);
-				g_free(t_node_data);
 
 				t_iter = parent;
 				valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
 			}
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-						   L_VISIBILE, t_flag, -1);
+					   L_MACH, FALSE,
+					   L_VISIBILE, t_flag,
+					   -1);
 		}
 		g_free(u_str);
 		g_free(node_data);
@@ -952,7 +943,7 @@ gboolean do_refilter(struct con_win *cwin )
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
 		filter_tree_expand_func,
-		cwin);
+		filter_model);
 
 	cwin->cstate->timeout_id = 0;
 
