@@ -872,8 +872,11 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
 		if (pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin)) {
+			/* Set visible the match row */
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_VISIBILE, TRUE, -1);
+
+			/* Also set visible the parents */
 			t_path = gtk_tree_model_get_path(model, iter);
 			while (gtk_tree_path_up(t_path)) {
 				if (gtk_tree_path_get_depth(t_path) > 0) {
@@ -884,6 +887,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 			}
 			gtk_tree_path_free(t_path);
 		} else {
+			/* Check parents. If it is visible due it mach, also shows.
+			 * This is to show the children of coincidences. */
 			t_path = gtk_tree_model_get_path(model, iter);
 			while (gtk_tree_path_up(t_path)) {
 				if (gtk_tree_path_get_depth(t_path) > 0) {
@@ -901,11 +906,10 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 							   -1);
 
 					gchar *u_str = g_utf8_strdown(t_node_data, -1);
-
+					/* If parent visible due it mach show it */
 					if (visible &&
 					    pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin))
 						t_flag = TRUE;
-
 					g_free(u_str);
 					g_free(t_node_data);
 				}
@@ -917,7 +921,6 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 			else
 				gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 						   L_VISIBILE, FALSE, -1);
-
 			gtk_tree_path_free(t_path);
 		}
 		g_free(u_str);
