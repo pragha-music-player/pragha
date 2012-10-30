@@ -886,11 +886,12 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 				}
 			}
 			gtk_tree_path_free(t_path);
-		} else {
+		}
+		else {
 			/* Check parents. If it is visible due it mach, also shows.
 			 * This is to show the children of coincidences. */
 			t_path = gtk_tree_path_copy(path);
-			while (gtk_tree_path_up(t_path)) {
+			while (!t_flag && gtk_tree_path_up(t_path)) {
 				if (gtk_tree_path_get_depth(t_path) > 0) {
 					gtk_tree_model_get_iter(model, &t_iter,
 								t_path);
@@ -910,6 +911,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					if (visible &&
 					    pragha_strstr_lv(t_str, cwin->cstate->filter_entry, cwin))
 						t_flag = TRUE;
+
 					g_free(t_str);
 					g_free(t_node_data);
 				}
