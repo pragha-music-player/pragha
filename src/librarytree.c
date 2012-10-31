@@ -917,21 +917,19 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	return FALSE;
 }
 
-gboolean do_refilter(struct con_win *cwin )
+static gboolean
+refilter_finished_update_view (gpointer user_data)
 {
 	GtkTreeModel *filter_model;
+	struct con_win *cwin = user_data;
 
-	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	/* Create the new filter model and filter. */
+	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
+			NULL);
+	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model),
+			L_VISIBILE);
 
-	/* Set visibility of rows in the library store. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
-				filter_tree_func,
-				cwin);
-
-	/* Set the model again.*/
+	/* Set the model.*/
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
 	g_object_unref(filter_model);
 
@@ -940,6 +938,30 @@ gboolean do_refilter(struct con_win *cwin )
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
 		filter_tree_expand_func,
 		filter_model);
+
+	return FALSE;
+}
+
+gpointer
+do_thread_refilter (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	/* Set visibility of rows in the library store. */
+	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
+				filter_tree_func,
+				cwin);
+
+	return cwin;
+}
+
+gboolean do_refilter(struct con_win *cwin )
+{
+	/* Remove the model of widget. */
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
+	/* Refilter on a thread and then update the gui. */
+	pragha_async_launch(do_thread_refilter, refilter_finished_update_view, cwin);
 
 	cwin->cstate->timeout_id = 0;
 
