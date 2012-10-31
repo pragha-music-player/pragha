@@ -939,6 +939,9 @@ refilter_finished_update_view (gpointer user_data)
 		filter_tree_expand_func,
 		filter_model);
 
+	/* Remove busy icon*/
+	remove_watch_cursor (cwin->mainwindow);
+
 	return FALSE;
 }
 
@@ -957,6 +960,9 @@ do_thread_refilter (gpointer data)
 
 gboolean do_refilter(struct con_win *cwin )
 {
+	/* Set busy icon*/
+	set_watch_cursor (cwin->mainwindow);
+
 	/* Remove the model of widget. */
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 
@@ -1050,6 +1056,9 @@ clear_library_finished_update_view (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
+	/* Remove busy icon*/
+	remove_watch_cursor (cwin->mainwindow);
+
 	/* Create the new filter model and filter. */
 	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
 						 NULL);
@@ -1085,6 +1094,9 @@ do_thread_clear_library (gpointer data)
 
 void clear_library_search(struct con_win *cwin)
 {
+	/* Set busy icon*/
+	set_watch_cursor (cwin->mainwindow);
+
 	/* Remove the model of widget. */
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 
