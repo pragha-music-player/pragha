@@ -173,29 +173,60 @@ exit:
 	g_free(ntag.comment);
 }
 
-/* Functions related to current playlist. */
+/* Love and unlove music object */
 
 gpointer
-do_lastfm_current_playlist_love (gpointer data)
+do_lastfm_love_mobj (struct musicobject *mobj, struct con_win *cwin)
 {
+	AsycMessageData *msg_data = NULL;
 	gint rv;
-	struct musicobject *mobj = NULL;
 
-	struct con_win *cwin = data;
-
-	CDEBUG(DBG_LASTFM, "Love thread of current playlist");
-
-	mobj = get_selected_musicobject(cwin);
+	CDEBUG(DBG_LASTFM, "Love mobj on thread");
 
 	rv = LASTFM_track_love (cwin->clastfm->session_id,
 				mobj->tags->title,
 				mobj->tags->artist);
 
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Love song on Last.fm failed."), cwin);
-	}
+	if (rv != LASTFM_STATUS_OK)
+		msg_data = async_finished_message_new(_("Love song on Last.fm failed."), cwin);
 
-	return NULL;
+	return msg_data;
+}
+
+gpointer
+do_lastfm_unlove_mobj (struct musicobject *mobj, struct con_win *cwin)
+{
+	AsycMessageData *msg_data = NULL;
+	gint rv;
+
+	CDEBUG(DBG_LASTFM, "Unlove mobj on thread");
+
+	rv = LASTFM_track_unlove(cwin->clastfm->session_id,
+				 mobj->tags->title,
+				 mobj->tags->artist);
+
+	if (rv != LASTFM_STATUS_OK)
+		msg_data = async_finished_message_new(_("Unlove song on Last.fm failed."), cwin);
+
+	return msg_data;
+}
+
+
+/* Functions related to current playlist. */
+
+gpointer
+do_lastfm_current_playlist_love (gpointer data)
+{
+	struct musicobject *mobj = NULL;
+	AsycMessageData *msg_data = NULL;
+
+	struct con_win *cwin = data;
+
+	mobj = get_selected_musicobject(cwin);
+
+	msg_data = do_lastfm_love_mobj(mobj, cwin);
+
+	return msg_data;
 }
 
 void
@@ -208,34 +239,24 @@ lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cw
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Love CP", do_lastfm_current_playlist_love, cwin);
-	#else
-	g_thread_create(do_lastfm_current_playlist_love, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_current_playlist_love,
+			    set_async_finished_message,
+			    cwin);
 }
 
 gpointer
 do_lastfm_current_playlist_unlove (gpointer data)
 {
-	gint rv;
 	struct musicobject *mobj = NULL;
+	AsycMessageData *msg_data = NULL;
 
 	struct con_win *cwin = data;
 
-	CDEBUG(DBG_LASTFM, "Unlove thread on current playlist");
-
 	mobj = get_selected_musicobject(cwin);
 
-	rv = LASTFM_track_love (cwin->clastfm->session_id,
-				mobj->tags->title,
-				mobj->tags->artist);
+	msg_data = do_lastfm_unlove_mobj(mobj, cwin);
 
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Unlove song on Last.fm failed."), cwin);
-	}
-
-	return NULL;
+	return msg_data;
 }
 
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin)
@@ -247,11 +268,9 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Unlove CP", do_lastfm_current_playlist_unlove, cwin);
-	#else
-	g_thread_create(do_lastfm_current_playlist_unlove, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_current_playlist_unlove,
+			    set_async_finished_message,
+			    cwin);
 }
 
 static gboolean
@@ -321,40 +340,30 @@ empty:
 		set_status_message(summary, cwin);
 		g_free(summary);
 	}
+	remove_watch_cursor (cwin->mainwindow);
+
 	g_slice_free (AddMusicObjectListData, data);
 
 	return FALSE;
 }
 
 gpointer
-do_lastfm_get_similar_current_playlist_action (gpointer user_data)
+do_lastfm_get_similar(struct musicobject *mobj, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
-	struct musicobject *mobj = NULL;
 	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
 
 	AddMusicObjectListData *data;
 
-	struct con_win *cwin = user_data;
-
-	mobj = get_selected_musicobject(cwin);
-
-	set_watch_cursor_on_thread(cwin);
-
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
 				      mobj->tags->title,
 				      mobj->tags->artist,
 				      50, &results);
 
-	if(rv != LASTFM_STATUS_OK) {
-		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
-	}
-
-	for(li=results; li; li=li->next) {
+	for(li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
 		track = li->data;
 		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
 		query_count += 1;
@@ -366,13 +375,25 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 	data->query_count = query_count;
 	data->cwin = cwin;
 
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
 	LASTFM_free_track_info_list (results);
 
-	return NULL;
+	return data;
+}
+
+gpointer
+do_lastfm_get_similar_current_playlist_action (gpointer user_data)
+{
+	struct musicobject *mobj = NULL;
+
+	AddMusicObjectListData *data;
+
+	struct con_win *cwin = user_data;
+
+	mobj = get_selected_musicobject(cwin);
+
+	data = do_lastfm_get_similar(mobj, cwin);
+
+	return data;
 }
 
 void
@@ -385,11 +406,10 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Get similar", do_lastfm_get_similar_current_playlist_action, cwin);
-	#else
-	g_thread_create(do_lastfm_get_similar_current_playlist_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_get_similar_current_playlist_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 /* Functions that respond to menu options. */
@@ -493,8 +513,6 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	set_watch_cursor_on_thread(cwin);
-
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
 						     cwin->cpref->lw.lastfm_user,
@@ -516,11 +534,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	data->query_count = query_count;
 	data->cwin = cwin;
 
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	return NULL;
+	return data;
 }
 
 void
@@ -534,56 +548,22 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Add favorites", do_lastfm_add_favorites_action, cwin);
-	#else
-	g_thread_create(do_lastfm_add_favorites_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_add_favorites_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 gpointer
 do_lastfm_get_similar_action (gpointer user_data)
 {
-	LFMList *results = NULL, *li;
-	LASTFM_TRACK_INFO *track = NULL;
-	guint query_count = 0;
-	GList *list = NULL;
-	gint rv;
 	AddMusicObjectListData *data;
 
 	struct con_win *cwin = user_data;
 
-	set_watch_cursor_on_thread(cwin);
+	data = do_lastfm_get_similar(cwin->cstate->curr_mobj, cwin);
 
-	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
-			cwin->cstate->curr_mobj->tags->title,
-			cwin->cstate->curr_mobj->tags->artist,
-			50, &results);
-
-	if(rv != LASTFM_STATUS_OK) {
-		remove_watch_cursor_on_thread("Error searching similar songs on Last.fm.", cwin);
-		return NULL;
-	}
-
-	for(li=results; li; li=li->next) {
-		track = li->data;
-		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
-		query_count += 1;
-	}
-
-	data = g_slice_new (AddMusicObjectListData);
-	data->list = list;
-	data->query_type = LASTFM_GET_SIMILAR;
-	data->query_count = query_count;
-	data->cwin = cwin;
-
-	g_idle_add (append_mobj_list_current_playlist_idle, data);
-
-	remove_watch_cursor_on_thread(NULL, cwin);
-
-	LASTFM_free_track_info_list (results);
-
-	return NULL;
+	return data;
 }
 
 void
@@ -599,30 +579,22 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Get similar", do_lastfm_get_similar_action, cwin);
-	#else
-	g_thread_create(do_lastfm_get_similar_action, cwin, FALSE, NULL);
-	#endif
+	set_watch_cursor (cwin->mainwindow);
+	pragha_async_launch(do_lastfm_get_similar_action,
+			    append_mobj_list_current_playlist_idle,
+			    cwin);
 }
 
 gpointer
-do_lastfm_love (gpointer data)
+do_lastfm_current_song_love (gpointer data)
 {
-	gint rv;
+	AsycMessageData *msg_data = NULL;
+
 	struct con_win *cwin = data;
 
-	CDEBUG(DBG_LASTFM, "Love thread");
+	msg_data = do_lastfm_love_mobj(cwin->cstate->curr_mobj, cwin);
 
-	rv = LASTFM_track_love (cwin->clastfm->session_id,
-		cwin->cstate->curr_mobj->tags->title,
-		cwin->cstate->curr_mobj->tags->artist);
-
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Love song on Last.fm failed."), cwin);
-	}
-
-	return FALSE;
+	return msg_data;
 }
 
 void
@@ -638,30 +610,20 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Love", do_lastfm_love, cwin);
-	#else
-	g_thread_create(do_lastfm_love, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_current_song_love,
+			    set_async_finished_message,
+			    cwin);
 }
 
 gpointer
-do_lastfm_unlove (gpointer data)
+do_lastfm_current_song_unlove (gpointer data)
 {
-	gint rv;
 	struct con_win *cwin = data;
+	AsycMessageData *msg_data = NULL;
 
-	CDEBUG(DBG_LASTFM, "Unlove thread");
+	msg_data = do_lastfm_unlove_mobj(cwin->cstate->curr_mobj, cwin);
 
-	rv = LASTFM_track_love (cwin->clastfm->session_id,
-		cwin->cstate->curr_mobj->tags->title,
-		cwin->cstate->curr_mobj->tags->artist);
-
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Unlove song on Last.fm failed."), cwin);
-	}
-
-	return NULL;
+	return msg_data;
 }
 
 void
@@ -677,11 +639,9 @@ lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Unlove", do_lastfm_unlove, cwin);
-	#else
-	g_thread_create(do_lastfm_unlove, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_current_song_unlove,
+			    set_async_finished_message,
+			    cwin);
 }
 
 gpointer
@@ -689,6 +649,7 @@ do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
+	AsycMessageData *msg_data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
@@ -701,12 +662,12 @@ do_lastfm_scrob (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, NULL);
 
-	if (rv != LASTFM_STATUS_OK)
-		set_status_message_on_thread("Last.fm submission failed", cwin);
-	else
-		set_status_message_on_thread("Track scrobbled on Last.fm", cwin);
+	msg_data = async_finished_message_new((rv != LASTFM_STATUS_OK) ?
+					     _("Last.fm submission failed") :
+					     _("Track scrobbled on Last.fm"),
+					     cwin);
 
-	return FALSE;
+	return msg_data;
 }
 
 gboolean
@@ -724,12 +685,9 @@ lastfm_scrob_handler(gpointer data)
 		return FALSE;
 	}
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Scroble", do_lastfm_scrob, cwin);
-	#else
-	g_thread_create(do_lastfm_scrob, cwin, FALSE, NULL);
-	#endif
-
+	pragha_async_launch(do_lastfm_scrob,
+			    set_async_finished_message,
+			    cwin);
 	return FALSE;
 }
 
@@ -751,6 +709,7 @@ do_lastfm_now_playing (gpointer data)
 	LFMList *list = NULL;
 	gboolean changed = FALSE;
 	LASTFM_TRACK_INFO *ntrack;
+	AsycMessageData *msg_data = NULL;
 
 	struct con_win *cwin = data;
 
@@ -767,10 +726,7 @@ do_lastfm_now_playing (gpointer data)
 		cwin->cstate->curr_mobj->tags->track_no,
 		0, &list);
 
-	if (rv != LASTFM_STATUS_OK) {
-		set_status_message_on_thread(_("Update current song on Last.fm failed."), cwin);
-	}
-	else {
+	if (rv == LASTFM_STATUS_OK) {
 		ntrack = list->data;
 		free_tag_struct(cwin->clastfm->ntags);
 
@@ -808,14 +764,18 @@ do_lastfm_now_playing (gpointer data)
 			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
 	}
+	else {
+		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
+	}
 
 	LASTFM_free_track_info_list(list);
+
 	g_free(file);
 	g_free(title);
 	g_free(artist);
 	g_free(album);
 
-	return NULL;
+	return msg_data;
 }
 
 void
@@ -844,11 +804,9 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(cwin->cstate->curr_mobj->tags->length < 30)
 		return;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Lfm Now playing", do_lastfm_now_playing, cwin);
-	#else
-	g_thread_create(do_lastfm_now_playing, cwin, FALSE, NULL);
-	#endif
+	pragha_async_launch(do_lastfm_now_playing,
+			    set_async_finished_message,
+			    cwin);
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.

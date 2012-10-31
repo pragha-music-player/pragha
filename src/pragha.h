@@ -1177,11 +1177,8 @@ GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, cons
 gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
 struct musicobject *get_selected_musicobject(struct con_win *cwin);
 void set_watch_cursor (GtkWidget *window);
-void set_watch_cursor_on_thread(struct con_win *cwin);
 void remove_watch_cursor (GtkWidget *window);
-void remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin);
 void set_status_message (const gchar *message, struct con_win *cwin);
-void set_status_message_on_thread (const gchar *message, struct con_win *cwin);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
@@ -1279,6 +1276,25 @@ void pragha_playback_play_pause_resume(struct con_win *cwin);
 void pragha_playback_stop(struct con_win *cwin);
 void pragha_playback_next_track(struct con_win *cwin);
 void pragha_advance_playback (struct con_win *cwin);
+
+
+/* pragha-simple-async.c: Very simple and generic async API. */
+
+typedef struct {
+	gpointer userdata;
+	gpointer finished_data;
+	GThreadFunc func_w;
+	GSourceFunc func_f;
+} AsyncSimple;
+
+typedef struct {
+	const gchar *message;
+	struct con_win *cwin;
+} AsycMessageData;
+
+gboolean set_async_finished_message (gpointer user_data);
+AsycMessageData *async_finished_message_new(const gchar *message, struct con_win *cwin);
+void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
 
