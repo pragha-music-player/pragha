@@ -1056,9 +1056,6 @@ clear_library_finished_update_view (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	/* Remove busy icon*/
-	remove_watch_cursor (cwin->mainwindow);
-
 	/* Create the new filter model and filter. */
 	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
 						 NULL);
@@ -1075,6 +1072,9 @@ clear_library_finished_update_view (gpointer user_data)
 		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
 		gtk_tree_path_free(path);
 	}
+
+	/* Remove busy icon*/
+	remove_watch_cursor (cwin->mainwindow);
 
 	return FALSE;
 }
