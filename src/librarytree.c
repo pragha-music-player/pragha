@@ -1040,24 +1040,23 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 	return FALSE;
 }
 
-void clear_library_search(struct con_win *cwin)
+static gboolean
+clear_library_finished_update_view (gpointer user_data)
 {
 	GtkTreeModel *filter_model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	gint i = 0;
 
-	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	struct con_win *cwin = user_data;
 
-	/* Set all nodes visibles. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
-			       set_all_visible,
-			       cwin);
+	/* Create the new filter model and filter. */
+	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
+						 NULL);
+	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model),
+						 L_VISIBILE);
 
-	/* Set the model again. */
+	/* Set the model.*/
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
 	g_object_unref(filter_model);
 
@@ -1067,6 +1066,32 @@ void clear_library_search(struct con_win *cwin)
 		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
 		gtk_tree_path_free(path);
 	}
+
+	return FALSE;
+}
+
+gpointer
+do_thread_clear_library (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	/* Set all nodes visibles. */
+	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
+			       set_all_visible,
+			       cwin);
+
+	return cwin;
+}
+
+void clear_library_search(struct con_win *cwin)
+{
+	/* Remove the model of widget. */
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
+	/* Refilter on a thread and then update the gui. */
+	pragha_async_launch(do_thread_clear_library,
+			    clear_library_finished_update_view,
+			    cwin);
 }
 
 /********************************/
