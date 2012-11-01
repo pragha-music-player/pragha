@@ -25,9 +25,12 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 	GtkTreeIter *p_iter, GtkTreeModel *model)
 {
 	gchar *data = NULL;
-	gint i = 0, cmp;
+	gboolean valid;
+	gint cmp;
 
-	while (gtk_tree_model_iter_nth_child(model, iter, p_iter, i++)) {
+	valid = gtk_tree_model_iter_children(model, iter, p_iter);
+
+	while (valid) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &data, -1);
 		if (data) {
 			cmp = g_ascii_strcasecmp (data, node_data);
@@ -41,6 +44,7 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 			}
 		g_free(data);
 		}
+		valid = gtk_tree_model_iter_next(model, iter);
 	}
 	return FALSE;
 }
@@ -72,11 +76,13 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 {
 	GtkTreeIter l_iter;
 	gchar *data = NULL;
-	gint i = 0, pos = 0, l_node_type;
-       
+	gint pos = 0, l_node_type;
+	gboolean valid;
+
 	if (node_type == NODE_FOLDER) {
 		/* Find position of the last directory that is a child of p_iter */
-		while (gtk_tree_model_iter_nth_child(model, &l_iter, p_iter, i++)) {
+		valid = gtk_tree_model_iter_children(model, &l_iter, p_iter);
+		while (valid) {
 			gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
 			if (l_node_type != NODE_FOLDER)
 				break;
@@ -84,17 +90,22 @@ static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
 			if (g_ascii_strcasecmp(data, node_data) < 0)
 				pos++;
 			g_free(data);
+
+			valid = gtk_tree_model_iter_next(model, &l_iter);
 		}
 	}
 	else {
 		/* Find position of the last file that is a child of p_iter */
-		while (gtk_tree_model_iter_nth_child(model, &l_iter, p_iter, i++)) {
+		valid = gtk_tree_model_iter_children(model, &l_iter, p_iter);
+		while (valid) {
 			gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
 			gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
 
 			if ((l_node_type == NODE_FOLDER) || (g_ascii_strcasecmp(data, node_data) < 0))
 				pos++;
             		g_free(data);
+
+			valid = gtk_tree_model_iter_next(model, &l_iter);
 		}
 	}
 	/* Insert the new file after the last subdirectory/file by order */
@@ -257,7 +268,7 @@ static void get_path_array(GtkTreePath *path,
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
 	GtkTreePath *cpath;
-	gint j = 0;
+	gboolean valid;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -274,12 +285,11 @@ static void get_path_array(GtkTreePath *path,
 	}
 
 	/* For all other node types do a recursive add */
-
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
+	while (valid) {
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 
 		path = gtk_tree_model_get_path(model, &t_iter);
-
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
 			cpath = gtk_tree_path_copy(path);
@@ -289,6 +299,8 @@ static void get_path_array(GtkTreePath *path,
 			get_path_array(path, ref_arr, model, cwin);
 		}
 		gtk_tree_path_free(path);
+
+		valid = gtk_tree_model_iter_next(model, &t_iter);
 	}
 
 	cwin->cstate->view_change = FALSE;
@@ -406,8 +418,8 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
+	gboolean valid;
 	gint location_id;
-	gint j = 0;
 
 	/* If this path is a track, delete it immediately */
 
@@ -420,7 +432,8 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 
 	/* For all other node types do a recursive deletion */
 
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
+	while (valid) {
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
@@ -432,6 +445,8 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 			delete_row_from_db(path, model, cwin);
 			gtk_tree_path_free(path);
 		}
+
+		valid = gtk_tree_model_iter_next(model, &t_iter);
 	}
 }
 
@@ -1036,7 +1051,7 @@ void clear_library_search(struct con_win *cwin)
 	GtkTreeModel *filter_model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	gint i = 0;
+	gboolean valid;
 
 	/* Remove the model of widget. */
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
@@ -1053,10 +1068,14 @@ void clear_library_search(struct con_win *cwin)
 	g_object_unref(filter_model);
 
 	/* Expand the categories. */
-	while (gtk_tree_model_iter_nth_child(filter_model, &iter, NULL, i++)) {
+
+	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
+	while (valid) {
 		path = gtk_tree_model_get_path(filter_model, &iter);
 		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
 		gtk_tree_path_free(path);
+
+		valid = gtk_tree_model_iter_next(filter_model, &iter);
 	}
 }
 
