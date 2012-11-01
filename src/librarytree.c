@@ -851,6 +851,41 @@ static void filter_tree_expand_func(GtkTreeView *view,
 		gtk_tree_view_collapse_row(view, path);
 }
 
+static void
+set_visible_parents_nodes(GtkTreeModel *model, GtkTreeIter *c_iter)
+{
+	GtkTreeIter t_iter, parent;
+
+	t_iter = *c_iter;
+
+	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
+		gtk_tree_store_set(GTK_TREE_STORE(model), &parent,
+				   L_VISIBILE, TRUE,
+				   -1);
+		t_iter = parent;
+	}
+}
+
+static gboolean
+any_parent_node_mach(GtkTreeModel *model, GtkTreeIter *iter)
+{
+	GtkTreeIter t_iter, parent;
+	gboolean p_mach = FALSE;
+
+	t_iter = *iter;
+	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
+		gtk_tree_model_get(model, &parent,
+				   L_MACH, &p_mach,
+				   -1);
+		if (p_mach)
+			return TRUE;
+
+		t_iter = parent;
+	}
+
+	return FALSE;
+}
+
 static gboolean filter_tree_func(GtkTreeModel *model,
 				 GtkTreePath *path,
 				 GtkTreeIter *iter,
@@ -858,8 +893,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 {
 	struct con_win *cwin = data;
 	gchar *node_data = NULL, *u_str;
-	gboolean visible, t_flag = FALSE, valid, p_mach;
-	GtkTreeIter t_iter, parent;
+	gboolean p_mach;
 
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
@@ -876,36 +910,15 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 					   -1);
 
 			/* Also set visible the parents */
-			t_iter = *iter;
-			valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
-			while(valid) {
-				gtk_tree_store_set(GTK_TREE_STORE(model), &parent,
-						   L_VISIBILE, TRUE, -1);
-				t_iter = parent;
-				valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
-			}
+			set_visible_parents_nodes(model, iter);
 		}
 		else {
-			/* Check parents. If it is visible due it mach, also shows.
-			 * This is to show the children of coincidences. */
-			t_iter = *iter;
-			valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
-			while(valid) {
-				gtk_tree_model_get(model, &parent,
-						   L_MACH, &p_mach,
-						   L_VISIBILE, &visible,
-						   -1);
-
-				/* If parent visible due it mach show it */
-				if (visible && p_mach)
-					t_flag = TRUE;
-
-				t_iter = parent;
-				valid = gtk_tree_model_iter_parent(model, &parent, &t_iter);
-			}
+			/* Check parents. If any node is visible due it mach,
+			 * also shows. So, show the children of coincidences. */
+			p_mach = any_parent_node_mach(model, iter);
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_MACH, FALSE,
-					   L_VISIBILE, t_flag,
+					   L_VISIBILE, p_mach,
 					   -1);
 		}
 		g_free(u_str);
