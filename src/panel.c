@@ -444,9 +444,10 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 }
 
 static void
-update_panel_playback_state_cb (GObject *gobject, gint state, gpointer user_data)
+update_panel_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
@@ -661,7 +662,7 @@ create_toolbar(struct con_win *cwin)
 	init_toolbar_preferences_saved(cwin);
 
 	g_signal_connect (cwin->backend, "tick", G_CALLBACK (update_gui), cwin);
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_panel_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_panel_playback_state_cb), cwin);
 
 	cwin->toolbar = toolbar;
 

@@ -3462,9 +3462,11 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 			 G_CALLBACK(header_right_click_cb), cwin);
 }
 
-void
-update_current_playlist_view_playback_state_cb(PraghaBackend *backend, gint state, struct con_win *cwin)
+static void
+update_current_playlist_view_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	struct con_win *cwin = user_data;
+
 	if (cwin->cstate->update_playlist_action == PLAYLIST_NONE)
 		update_current_playlist_view_track(cwin);
 }
@@ -3580,7 +3582,7 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 	/* Set initial column visibility */
 
 	init_current_playlist_columns(cwin);
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin);
 
 	g_object_unref(store);
 

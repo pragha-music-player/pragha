@@ -74,7 +74,6 @@ enum {
 static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
-	SIGNAL_STATE_CHANGE,
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
@@ -350,8 +349,6 @@ pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
 	CDEBUG(DBG_BACKEND, "Setting new playback state: %s: ", pragha_playback_state_get_name(state));
 
 	g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
-
-	g_signal_emit (backend, signals[SIGNAL_STATE_CHANGE], 0, state);
 }
 
 void
@@ -868,14 +865,6 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                    G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
-
-	signals[SIGNAL_STATE_CHANGE] = g_signal_new ("state-change",
-                                                     G_TYPE_FROM_CLASS (gobject_class),
-                                                     G_SIGNAL_RUN_LAST,
-                                                     G_STRUCT_OFFSET (PraghaBackendClass, state_change),
-                                                     NULL, NULL,
-                                                     g_cclosure_marshal_VOID__INT,
-                                                     G_TYPE_NONE, 1, G_TYPE_INT);
 
 	signals[SIGNAL_TICK] = g_signal_new ("tick",
                                              G_TYPE_FROM_CLASS (gobject_class),

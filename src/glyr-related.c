@@ -388,8 +388,11 @@ update_related_handler (gpointer data)
 }
 
 static void
-update_related_state_cb (GObject *gobject, gint state, struct con_win *cwin)
+update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
+
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
 
 	if(cwin->related_timeout_id)
@@ -424,7 +427,7 @@ int init_glyr_related (struct con_win *cwin)
 
 	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
 
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_related_state_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
 
 	return 0;
 }

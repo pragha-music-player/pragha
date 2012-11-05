@@ -20,8 +20,11 @@
 /* Update gui, mpris on new track playback */
 
 void
-pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin)
+pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
+
 	if(state != ST_PLAYING)
 		return;
 

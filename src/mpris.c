@@ -1220,7 +1220,7 @@ gint mpris_init(struct con_win *cwin)
 				NULL);
 
 	g_signal_connect (cwin->backend, "notify::volume", G_CALLBACK (any_notify_cb), cwin);
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (any_notify_cb), cwin);
 	g_signal_connect (cwin->backend, "seeked", G_CALLBACK (seeked_cb), cwin);
 
 	return (cwin->cmpris2->owner_id) ? 0 : -1;
