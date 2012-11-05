@@ -1269,7 +1269,7 @@ void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 
 /* pragha-playback.c: Functions to control playback and notify events. */
 
-void pragha_playback_notificate_new_track(PraghaBackend *backend, gint state, struct con_win *cwin);
+void pragha_playback_notificate_new_track(GObject *gobject, GParamSpec *pspec, gpointer user_data);
 
 void pragha_playback_prev_track(struct con_win *cwin);
 void pragha_playback_play_pause_resume(struct con_win *cwin);

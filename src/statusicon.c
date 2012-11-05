@@ -168,10 +168,11 @@ systray_quit (GtkAction *action, struct con_win *cwin)
 }
 
 static void
-update_systray_menu_cb (GObject *gobject, gint state, gpointer user_data)
+update_systray_menu_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	GtkAction *action;
 	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
@@ -245,5 +246,5 @@ void create_status_icon (struct con_win *cwin)
 	cwin->status_icon = status_icon;
 	cwin->systray_menu = systray_menu;
 
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_systray_menu_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_systray_menu_cb), cwin);
 }

@@ -1383,7 +1383,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Send notifications on gui, OSD and mpris of new songs */
 
 	g_signal_connect(cwin->backend,
-			 "state-change",
+			 "notify::state",
 			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
 
 	/* Init window state */

@@ -223,8 +223,10 @@ static GtkToggleActionEntry toggles_entries[] = {
 /* Sentitive menubar actions depending on the playback status. */
 
 static void
-update_menubar_playback_state_cb (GObject *gobject, gint state, struct con_win *cwin)
+update_menubar_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
 	GtkAction *action;
 
 	gboolean playing = (state != ST_STOPPED);
@@ -1404,7 +1406,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	cwin->bar_context_menu = main_menu;
 
-	g_signal_connect (cwin->backend, "state-change", G_CALLBACK (update_menubar_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
 	return main_menu;
 }
