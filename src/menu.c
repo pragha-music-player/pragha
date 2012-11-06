@@ -426,7 +426,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	if (files) {
 		set_watch_cursor (cwin->mainwindow);
 
-		prev_tracks = cwin->cstate->tracks_curr_playlist;
+		prev_tracks = cwin->cplaylist->no_tracks;
 
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
@@ -817,7 +817,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	mpris_update_metadata_changed(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
 		gtk_tree_path_free(path);
@@ -1250,12 +1250,12 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	current_playlist_clear(cwin);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+	cwin->cplaylist->changing = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
@@ -1285,9 +1285,9 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
+	cwin->cplaylist->changing = FALSE;
 	g_object_unref(model);
 
 	remove_watch_cursor (cwin->mainwindow);

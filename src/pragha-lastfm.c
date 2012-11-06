@@ -131,7 +131,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	mpris_update_metadata_changed(cwin);
 
 	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
 		gtk_tree_path_free(path);
@@ -291,14 +291,14 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	if(list == NULL)
 		goto empty;
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = cwin->cplaylist->no_tracks;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+	cwin->cplaylist->changing = TRUE;
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
@@ -306,9 +306,9 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 		songs_added += 1;
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
+	cwin->cplaylist->changing = FALSE;
 	g_object_unref(model);
 
 	g_list_free(list);
@@ -446,7 +446,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 
 	set_watch_cursor (cwin->mainwindow);
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = cwin->cplaylist->no_tracks;
 
 	xml = tinycxml_parse(contents);
 

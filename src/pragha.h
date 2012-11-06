@@ -564,14 +564,9 @@ struct db_result {
  *
  * @unique_instance: If current invocation of app is unique
  * @view_change: If library view change is in progress
- * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
- * @tracks_curr_playlist: Total no. of tracks in the current playlist
- * @unplayed_tracks: Total no. of tracks that haven't been played
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
- * @rand: To generate random numbers
- * @rand_track_refs: List of references maintained in Shuffle mode
  * @curr_rand_ref: Currently playing track in Shuffle mode
  * @curr_seq_ref: Currently playing track in non-Shuffle mode
  * @cdda_drive: Global handle for the audio cd
@@ -583,18 +578,12 @@ struct con_state {
 	gboolean dragging;
 	gboolean unique_instance;
 	gboolean view_change;
-	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
-	gint tracks_curr_playlist;
-	gint unplayed_tracks;
 	guint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
-	GRand *rand;
-	GList *rand_track_refs;
-	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
 	enum playlist_action update_playlist_action;
@@ -630,11 +619,35 @@ struct con_mpris2 {
 
 struct con_gnome_media_keys;
 
+/**
+ * struct con_playlist - Pertains to the current state of the playlist
+ * @view - The playlist tree view widget
+ * @widget - The parent widget containing the view
+ * @changing: If current platlist change is in progress
+ * @no_tracks: Total no. of tracks in the current playlist
+ * @unplayed_tracks: Total no. of tracks that haven't been played
+ * @rand: To generate random numbers
+ * @rand_track_refs: List of references maintained in Shuffle mode
+ * @queue_track_refs: List of references of queued songs
+ */
+
+struct con_playlist {
+	GtkWidget *view;
+	GtkWidget *widget;
+	gboolean changing;
+	gint no_tracks;
+	gint unplayed_tracks;
+	GRand *rand;
+	GList *rand_track_refs;
+	GSList *queue_track_refs;
+};
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
+	struct con_playlist *cplaylist;
 	PraghaBackend *backend;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
@@ -654,7 +667,6 @@ struct con_win {
 	GtkToolItem *shuffle_button;
 	GtkToolItem *repeat_button;
 	GtkWidget *vol_button;
-	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
 	GtkWidget *search_entry;
 	GtkWidget *browse_mode;
@@ -1005,7 +1017,6 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
 GtkTreePath* get_first_random_track(struct con_win *cwin);
 GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
-void init_current_playlist_columns(struct con_win *cwin);
 void requeue_track_refs (struct con_win *cwin);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
@@ -1096,6 +1107,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+void cplaylist_free(struct con_playlist *cplaylist);
+struct con_playlist *cplaylist_new(struct con_win *cwin);
 
 /* Preferences */
 

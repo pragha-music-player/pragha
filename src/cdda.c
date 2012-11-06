@@ -55,7 +55,7 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 	if (!num_tracks)
 		return;
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = cwin->cplaylist->no_tracks;
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);

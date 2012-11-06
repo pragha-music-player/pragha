@@ -28,6 +28,7 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_playback_stop(cwin);
 
+	cplaylist_free(cwin->cplaylist);
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif
