@@ -114,7 +114,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		if(cwin->cplaylist->changing)
 			break;
 		if(cwin->cplaylist->queue_track_refs)
-			path = get_next_queue_track(cwin);
+			path = get_next_queue_track(cwin->cplaylist);
 		if (!path)
 			path = current_playlist_get_selection(cwin->cplaylist);
 

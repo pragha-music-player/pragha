@@ -478,19 +478,18 @@ static GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist
 
 /* Return path of the next queue track */
 
-GtkTreePath* get_next_queue_track(struct con_win *cwin)
+GtkTreePath* get_next_queue_track(PraghaPlaylist *cplaylist)
 {
 	GtkTreePath *path = NULL;
 
-	path = gtk_tree_row_reference_get_path(cwin->cplaylist->queue_track_refs->data);
+	path = gtk_tree_row_reference_get_path(cplaylist->queue_track_refs->data);
 
 	/* Remove old next song. */
-	if (cwin->cpref->shuffle)
-		trim_down_rand_track_refs(cwin->cplaylist);
+	trim_down_rand_track_refs(cplaylist);
 
 	/*Remove the queue reference and update gui. */
-	delete_queue_track_refs(path, cwin->cplaylist);
-	requeue_track_refs (cwin->cplaylist);
+	delete_queue_track_refs(path, cplaylist);
+	requeue_track_refs (cplaylist);
 
 	return path;
 }
@@ -1194,7 +1193,7 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 		return NULL;
 
 	if(cwin->cplaylist->queue_track_refs) {
-		path = get_next_queue_track(cwin);
+		path = get_next_queue_track(cwin->cplaylist);
 	}
 	else {
 		switch (cwin->cpref->shuffle) {
