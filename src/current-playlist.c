@@ -3216,7 +3216,7 @@ GtkTargetEntry pentries[] = {
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
 };
 
-static void init_playlist_dnd(struct con_playlist *cplaylist, struct con_win *cwin)
+static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 {
 	/* Source/Dest: Current Playlist */
 
@@ -3942,18 +3942,18 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointe
 }
 
 void
-cplaylist_free(struct con_playlist* cplaylist)
+cplaylist_free(PraghaPlaylist* cplaylist)
 {
 	g_rand_free(cplaylist->rand);
-	g_slice_free(struct con_playlist, cplaylist);
+	g_slice_free(PraghaPlaylist, cplaylist);
 }
 
-struct con_playlist*
+PraghaPlaylist*
 cplaylist_new(struct con_win *cwin)
 {
-	struct con_playlist *cplaylist;
+	PraghaPlaylist *cplaylist;
 
-	cplaylist = g_slice_new0(struct con_playlist);
+	cplaylist = g_slice_new0(PraghaPlaylist);
 
 	cplaylist->view = create_current_playlist_view(cwin);
 	cplaylist->widget = create_current_playlist_container(cwin);
