@@ -1007,9 +1007,8 @@ struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
 					   PraghaPlaylist *cplaylist);
-void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
+void reset_rand_track_refs(GtkTreeRowReference *ref, PraghaPlaylist *cplaylist);
 void current_playlist_clear_dirty_all(PraghaPlaylist *cplaylist);
-void clear_rand_track_refs(struct con_win *cwin);
 GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
@@ -1017,7 +1016,6 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
 GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
 GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
-void requeue_track_refs (PraghaPlaylist *cplaylist);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
