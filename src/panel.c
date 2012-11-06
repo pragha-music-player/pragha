@@ -406,16 +406,16 @@ void shuffle_button (struct con_win *cwin)
 		if (!cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle off");
 			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
-			if (cwin->cstate->curr_rand_ref)
-				cwin->cstate->curr_seq_ref =
-					gtk_tree_row_reference_copy(cwin->cstate->curr_rand_ref);
+			if (cwin->cplaylist->curr_rand_ref)
+				cwin->cplaylist->curr_seq_ref =
+					gtk_tree_row_reference_copy(cwin->cplaylist->curr_rand_ref);
 			else
-				cwin->cstate->curr_seq_ref = NULL;
+				cwin->cplaylist->curr_seq_ref = NULL;
 		}
 		else if (cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle on");
-			if (cwin->cstate->curr_seq_ref) {
-				ref = gtk_tree_row_reference_copy(cwin->cstate->curr_seq_ref);
+			if (cwin->cplaylist->curr_seq_ref) {
+				ref = gtk_tree_row_reference_copy(cwin->cplaylist->curr_seq_ref);
 				cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks - 1;
 				reset_rand_track_refs(ref, cwin);
 			}
