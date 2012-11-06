@@ -588,7 +588,7 @@ struct con_state {
 	gboolean first_run;
 	gint tracks_curr_playlist;
 	gint unplayed_tracks;
-	gint timeout_id;
+	guint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
@@ -687,7 +687,7 @@ struct con_win {
 #ifdef HAVE_LIBGLYR
 	GlyrDatabase *cache_db;
 #endif
-	gint related_timeout_id;
+	guint related_timeout_id;
 	DBusConnection *con_dbus;
 };
 
