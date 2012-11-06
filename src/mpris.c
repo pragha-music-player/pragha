@@ -348,7 +348,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 
 				// Dangerous: reusing double-click-handler here.
 				current_playlist_row_activated_cb(
-					GTK_TREE_VIEW(cwin->current_playlist), tree_path, NULL, cwin);
+					GTK_TREE_VIEW(cwin->cplaylist->view), tree_path, NULL, cwin);
 
 				gtk_tree_path_free(tree_path);
 			} else {
@@ -708,7 +708,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		goto exit;
 	}
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = cwin->cplaylist->no_tracks;
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
@@ -755,7 +755,7 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 	if(handle_path_request(cwin, path, &mobj, &tree_path)) {
 		// Dangerous: reusing double-click handler here.
 		current_playlist_row_activated_cb(
-			GTK_TREE_VIEW(cwin->current_playlist), tree_path, NULL, cwin);
+			GTK_TREE_VIEW(cwin->cplaylist->view), tree_path, NULL, cwin);
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	} else
 		g_dbus_method_invocation_return_error_literal (invocation,
@@ -777,7 +777,7 @@ static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwi
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
 	// TODO: remove tree access
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 	
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		goto bad;
@@ -1102,7 +1102,7 @@ void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, Gtk
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 	if(NULL == model)
 		return;
 
@@ -1169,7 +1169,7 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 	
 	iter_valid = gtk_tree_model_get_iter_first(model, &iter);
 

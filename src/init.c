@@ -1020,10 +1020,6 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->filter_entry = NULL;
 	cwin->cstate->jump_filter = NULL;
 
-	cwin->cstate->rand = g_rand_new();
-	cwin->cstate->rand_track_refs = NULL;
-	cwin->cstate->queue_track_refs = NULL;
-
 	cwin->cstate->update_playlist_action = PLAYLIST_NONE;
 
 	cwin->cstate->dragging = FALSE;
@@ -1032,7 +1028,6 @@ gint init_first_state(struct con_win *cwin)
 	cwin->cstate->curr_mobj = NULL;
 
 	cwin->cstate->view_change = TRUE;
-	cwin->cstate->playlist_change = TRUE;
 
 	/* Init others default flags */
 
@@ -1057,7 +1052,6 @@ void state_free (struct con_state *cstate)
 		libcddb_shutdown();
 	}
 
-	g_rand_free(cstate->rand);
 	g_free(cstate->last_folder);
 
 	g_slice_free(struct con_state, cstate);

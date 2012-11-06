@@ -339,8 +339,8 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 		GdkEvent *new_event;
 
 		new_event = gdk_event_copy ((GdkEvent *) event);
-		gtk_widget_grab_focus(cwin->current_playlist);
-		ret = gtk_widget_event (GTK_WIDGET (cwin->current_playlist), new_event);
+		gtk_widget_grab_focus(cwin->cplaylist->view);
+		ret = gtk_widget_event (GTK_WIDGET (cwin->cplaylist->view), new_event);
 		gdk_event_free (new_event);
 	}
 	return ret;
@@ -400,12 +400,12 @@ void shuffle_button (struct con_win *cwin)
 {
 	GtkTreeRowReference *ref;
 
-	if(cwin->cstate->tracks_curr_playlist){
+	if(cwin->cplaylist->no_tracks){
 		current_playlist_clear_dirty_all(cwin);
 
 		if (!cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle off");
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
 			if (cwin->cstate->curr_rand_ref)
 				cwin->cstate->curr_seq_ref =
 					gtk_tree_row_reference_copy(cwin->cstate->curr_rand_ref);
@@ -416,7 +416,7 @@ void shuffle_button (struct con_win *cwin)
 			CDEBUG(DBG_INFO, "Turning shuffle on");
 			if (cwin->cstate->curr_seq_ref) {
 				ref = gtk_tree_row_reference_copy(cwin->cstate->curr_seq_ref);
-				cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist - 1;
+				cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks - 1;
 				reset_rand_track_refs(ref, cwin);
 			}
 		}

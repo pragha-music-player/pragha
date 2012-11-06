@@ -111,9 +111,9 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
+		if(cwin->cplaylist->changing)
 			break;
-		if(cwin->cstate->queue_track_refs)
+		if(cwin->cplaylist->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if (!path)
 			path = current_playlist_get_selection(cwin);
@@ -126,10 +126,10 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		}
 
 		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 			ref = gtk_tree_row_reference_new(model, path);
 			reset_rand_track_refs(ref, cwin);
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
+			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
 		}
 
 		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
@@ -165,7 +165,7 @@ void pragha_advance_playback (struct con_win *cwin)
 	/* Stop to set ready and clear all info */
 	pragha_backend_stop(cwin->backend);
 
-	if(cwin->cstate->playlist_change)
+	if(cwin->cplaylist->changing)
 		return;
 
 	/* Get the next track to be played */
