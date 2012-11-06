@@ -128,7 +128,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		if (cwin->cpref->shuffle) {
 			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin);
+			reset_rand_track_refs(ref, cwin->cplaylist);
 			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
 		}
 

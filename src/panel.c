@@ -417,7 +417,7 @@ void shuffle_button (struct con_win *cwin)
 			if (cwin->cplaylist->curr_seq_ref) {
 				ref = gtk_tree_row_reference_copy(cwin->cplaylist->curr_seq_ref);
 				cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks - 1;
-				reset_rand_track_refs(ref, cwin);
+				reset_rand_track_refs(ref, cwin->cplaylist);
 			}
 		}
 	}
