@@ -142,7 +142,7 @@ handle_path_request(struct con_win *cwin, const gchar *dbus_path,
 		sscanf(dbus_path + strlen(base), "%p", &request);
 
 		if(request) {
-			GtkTreePath *path = current_playlist_path_at_mobj(request, cwin);
+			GtkTreePath *path = current_playlist_path_at_mobj(request, cwin->cplaylist);
 			if(path) {
 				found = TRUE;
 				*mobj = request;
@@ -1112,7 +1112,7 @@ void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, Gtk
 	path = gtk_tree_model_get_path(model, iter);
 
 	if (gtk_tree_path_prev(path)) {
-		prev = current_playlist_mobj_at_path(path, cwin);
+		prev = current_playlist_mobj_at_path(path, cwin->cplaylist);
 	}
 	gtk_tree_path_free(path);
 

@@ -1042,7 +1042,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 			return;
 	}
 
-	clear_sort_current_playlist_cb(NULL, cwin);
+	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1210,7 +1210,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 	file_arr = g_ptr_array_new_with_free_func(g_free);
 
-	clear_sort_current_playlist_cb(NULL, cwin);
+	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
 	/* Now build iterators from the references and edit
 	   them from the store */

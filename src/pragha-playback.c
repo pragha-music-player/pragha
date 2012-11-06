@@ -76,7 +76,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	cwin->cstate->update_playlist_action = PLAYLIST_PREV;
 	update_current_playlist_state(path, cwin);
 
-	mobj = current_playlist_mobj_at_path(path, cwin);
+	mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 	pragha_backend_start(cwin->backend, mobj);
 
 	gtk_tree_path_free(path);
@@ -116,11 +116,11 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		if(cwin->cplaylist->queue_track_refs)
 			path = get_next_queue_track(cwin);
 		if (!path)
-			path = current_playlist_get_selection(cwin);
+			path = current_playlist_get_selection(cwin->cplaylist);
 
 		if(!path) {
 			if(cwin->cpref->shuffle)
-				path = get_first_random_track(cwin);
+				path = get_first_random_track(cwin->cplaylist);
 			else
 				path = gtk_tree_path_new_first();
 		}
@@ -135,7 +135,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
 		update_current_playlist_state(path, cwin);
 
-		mobj = current_playlist_mobj_at_path(path, cwin);
+		mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 		pragha_backend_start(cwin->backend, mobj);
 		gtk_tree_path_free(path);
 		break;
@@ -179,7 +179,7 @@ void pragha_advance_playback (struct con_win *cwin)
 	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
 	update_current_playlist_state(path, cwin);
 
-	mobj = current_playlist_mobj_at_path (path, cwin);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 	pragha_backend_start (cwin->backend, mobj);
 
 	gtk_tree_path_free (path);
