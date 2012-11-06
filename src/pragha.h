@@ -620,7 +620,7 @@ struct con_mpris2 {
 struct con_gnome_media_keys;
 
 /**
- * struct con_playlist - Pertains to the current state of the playlist
+ * PraghaPlaylist - Pertains to the current state of the playlist
  * @view - The playlist tree view widget
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
@@ -631,7 +631,7 @@ struct con_gnome_media_keys;
  * @queue_track_refs: List of references of queued songs
  */
 
-struct con_playlist {
+typedef struct {
 	GtkWidget *view;
 	GtkWidget *widget;
 	gboolean changing;
@@ -640,14 +640,14 @@ struct con_playlist {
 	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
-};
+} PraghaPlaylist;
 
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
-	struct con_playlist *cplaylist;
+	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
@@ -1107,8 +1107,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
-void cplaylist_free(struct con_playlist *cplaylist);
-struct con_playlist *cplaylist_new(struct con_win *cwin);
+void cplaylist_free(PraghaPlaylist *cplaylist);
+PraghaPlaylist *cplaylist_new(struct con_win *cwin);
 
 /* Preferences */
 

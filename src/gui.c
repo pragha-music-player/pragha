@@ -592,7 +592,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
-	struct con_playlist *cplaylist;
+	PraghaPlaylist *cplaylist;
 
 	/* A two paned container */
 
