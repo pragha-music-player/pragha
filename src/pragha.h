@@ -567,8 +567,6 @@ struct db_result {
  * @curr_mobj_clear: Clear curr_mobj flag
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
- * @curr_rand_ref: Currently playing track in Shuffle mode
- * @curr_seq_ref: Currently playing track in non-Shuffle mode
  * @cdda_drive: Global handle for the audio cd
  * @cddb_conn: libcddb connection
  * @curr_mobj: musicobject of currently playing track
@@ -584,8 +582,6 @@ struct con_state {
 	gchar *last_folder;
 	gchar *filter_entry;
 	gchar *jump_filter;
-	GtkTreeRowReference *curr_rand_ref;
-	GtkTreeRowReference *curr_seq_ref;
 	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
@@ -629,6 +625,8 @@ struct con_gnome_media_keys;
  * @rand: To generate random numbers
  * @rand_track_refs: List of references maintained in Shuffle mode
  * @queue_track_refs: List of references of queued songs
+ * @curr_rand_ref: Currently playing track in Shuffle mode
+ * @curr_seq_ref: Currently playing track in non-Shuffle mode
  */
 
 typedef struct {
@@ -640,6 +638,8 @@ typedef struct {
 	GRand *rand;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
+	GtkTreeRowReference *curr_rand_ref;
+	GtkTreeRowReference *curr_seq_ref;
 } PraghaPlaylist;
 
 struct con_win {
