@@ -401,7 +401,7 @@ void shuffle_button (struct con_win *cwin)
 	GtkTreeRowReference *ref;
 
 	if(cwin->cplaylist->no_tracks){
-		current_playlist_clear_dirty_all(cwin);
+		current_playlist_clear_dirty_all(cwin->cplaylist);
 
 		if (!cwin->cpref->shuffle) {
 			CDEBUG(DBG_INFO, "Turning shuffle off");

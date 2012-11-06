@@ -1004,23 +1004,23 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
 void update_current_playlist_view_new_track(struct con_win *cwin);
 void update_current_playlist_view_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
-						  struct con_win *cwin);
+						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
-						struct con_win *cwin);
+					   PraghaPlaylist *cplaylist);
 void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
-void current_playlist_clear_dirty_all(struct con_win *cwin);
+void current_playlist_clear_dirty_all(PraghaPlaylist *cplaylist);
 void clear_rand_track_refs(struct con_win *cwin);
-GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
+GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_get_next(struct con_win *cwin);
 GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
 GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
-GtkTreePath* get_first_random_track(struct con_win *cwin);
+GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
 GtkTreePath* get_next_queue_track(struct con_win *cwin);
 gchar* get_ref_current_track(struct con_win *cwin);
-void requeue_track_refs (struct con_win *cwin);
+void requeue_track_refs (PraghaPlaylist *cplaylist);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
-void toggle_queue_selected_current_playlist (struct con_win *cwin);
+void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
 int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void remove_from_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
@@ -1032,7 +1032,7 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin);
 void append_current_playlist(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);
 void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
-void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
+void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
 void shuffle_button(struct con_win *cwin);
@@ -1059,7 +1059,7 @@ void drag_current_playlist_get_data (GtkWidget *widget,
 				    GtkSelectionData *selection_data,
 				    guint target_type,
 				    guint time,
-				    struct con_win *cwin);
+				    PraghaPlaylist *cplaylist);
 gboolean dnd_current_playlist_drop(GtkWidget *widget,
 				   GdkDragContext *context,
 				   gint x,
@@ -1098,7 +1098,7 @@ void playlist_comment_column_change_cb(GtkCheckMenuItem *item,
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
 					struct con_win *cwin);
 void clear_sort_current_playlist_cb(GtkMenuItem *item,
-					struct con_win *cwin);
+				    PraghaPlaylist *cplaylist);
 gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a,
 		      GtkTreeIter *b, gpointer data);
 gint compare_bitrate(GtkTreeModel *model, GtkTreeIter *a,
