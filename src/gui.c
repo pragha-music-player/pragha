@@ -632,7 +632,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Set initial sizes */
 
-	gtk_widget_set_size_request(GTK_WIDGET(browse_mode), cwin->cpref->sidebar_size, -1);
+	gtk_paned_set_position (GTK_PANED (hpane), cwin->cpref->sidebar_size);
 
 	/* Pack everything into the hpane */
 
