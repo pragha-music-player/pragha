@@ -33,7 +33,7 @@ void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 	}
 }
 
-int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cwin)
+int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, PraghaPlaylist *cplaylist)
 {
 	GtkTreeSelection *selection;
 	GList *list;
@@ -47,14 +47,14 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cw
 		return FALSE;
 	}
 	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q) {
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (jump_tree), list->data, cplaylist);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 
-			toggle_queue_selected_current_playlist (cwin->cplaylist);
+			toggle_queue_selected_current_playlist (cplaylist);
 		}
 		return TRUE;
 	}
@@ -344,7 +344,7 @@ dialog_jump_to_track (struct con_win *cwin)
 	g_signal_connect (jump_treeview, "row-activated",
 			G_CALLBACK(jump_row_activated_cb), dialog);
 	g_signal_connect (jump_treeview, "key_press_event",
-			  G_CALLBACK (jump_key_press), cwin);
+			  G_CALLBACK (jump_key_press), cwin->cplaylist);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
 			G_CALLBACK(jump_to_track_dialog_response), cwin);
