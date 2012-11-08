@@ -449,7 +449,7 @@ static GtkTreeRowReference* get_rand_ref_prev(GtkTreeRowReference *ref,
 
 /* Return path of track at nth position in current playlist */
 
-static GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist)
+GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -918,17 +918,13 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 
 void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin)
 {
-	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
 
-	ref = g_strdup_printf("%d", path_number);
-
-	path = gtk_tree_path_new_from_string(ref);
+	path = current_playlist_nth_track(path_number, cwin->cplaylist);
 
 	jump_to_path_on_current_playlist (path, cwin);
 
 	gtk_tree_path_free(path);
-	g_free(ref);
 }
 
 /* Get a new playlist name that is not reserved */

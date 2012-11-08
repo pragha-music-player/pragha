@@ -23,7 +23,6 @@ void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 {
 	GtkTreeIter iter;
 	GtkTreeModel *jump_store;
-	gchar *path_string = NULL;
 	gint track_i = 0;
 	GtkTreePath *path=NULL;
 	GtkTreeSelection *selection;
@@ -34,12 +33,10 @@ void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 
 	jump_store = gtk_tree_view_get_model (GTK_TREE_VIEW(jump_tree));
 
-	gtk_tree_model_get_iter (jump_store, &iter, jump_path);
-	gtk_tree_model_get (jump_store, &iter, 0, &track_i, -1);
-
-	path_string = g_strdup_printf ("%d", track_i -1);
-	path = gtk_tree_path_new_from_string (path_string);
-	g_free (path_string);
+	if(gtk_tree_model_get_iter (jump_store, &iter, jump_path)) {
+		gtk_tree_model_get (jump_store, &iter, 0, &track_i, -1);
+		path = current_playlist_nth_track(track_i - 1, cplaylist);
+	}
 
 	if (path) {
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cplaylist->view));
