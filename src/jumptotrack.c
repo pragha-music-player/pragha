@@ -19,44 +19,17 @@
 
 void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 					 GtkTreePath *jump_path,
-					 PraghaPlaylist *cplaylist)
+					 struct con_win *cwin)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *jump_store;
 	gint track_i = 0;
-	GtkTreePath *path=NULL;
-	GtkTreeSelection *selection;
-	gint cx, cy;
-
-	GdkRectangle vrect;
-	GdkRectangle crect;
 
 	jump_store = gtk_tree_view_get_model (GTK_TREE_VIEW(jump_tree));
 
 	if(gtk_tree_model_get_iter (jump_store, &iter, jump_path)) {
 		gtk_tree_model_get (jump_store, &iter, 0, &track_i, -1);
-		path = current_playlist_nth_track(track_i - 1, cplaylist);
-	}
-
-	if (path) {
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cplaylist->view));
-
-		gtk_tree_selection_unselect_all (selection);
-		gtk_tree_selection_select_path (GTK_TREE_SELECTION (selection), path);
-
-		gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(cplaylist->view), &vrect);
-		gtk_tree_view_get_cell_area (GTK_TREE_VIEW(cplaylist->view), path, NULL, &crect);
-
-		gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(cplaylist->view), crect.x, crect.y, &cx, &cy);
-
-		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cplaylist->view),
-							path, NULL, TRUE, 0.5, 0.0);
-		}
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW(cplaylist->view),
-						path, NULL, FALSE);
-
-		gtk_tree_path_free (path);
+		select_numered_path_of_current_playlist(track_i - 1, cwin);
 	}
 }
 
@@ -77,7 +50,7 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cw
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 
@@ -262,7 +235,7 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
@@ -272,7 +245,7 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
