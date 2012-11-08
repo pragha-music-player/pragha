@@ -616,7 +616,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		remove_watch_cursor (cwin->mainwindow);
 
 		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
-		update_status_bar(cwin);
+		update_status_bar_playtime(cwin);
 		break;
 	default:
 		break;
@@ -1306,7 +1306,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		if(!cwin->cpref->shuffle)
 			select_numered_path_of_current_playlist(0, FALSE, cwin->cplaylist);
-		update_status_bar(cwin);
+		update_status_bar_playtime(cwin);
 		
 		g_list_free(list);
 	}
@@ -1371,7 +1371,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 		remove_watch_cursor (cwin->mainwindow);
 
-		update_status_bar(cwin);
+		update_status_bar_playtime(cwin);
 
 		g_list_free(list);
 	}

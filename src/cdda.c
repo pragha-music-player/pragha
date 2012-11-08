@@ -64,7 +64,7 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 		if (pragha_process_gtk_events ())
 			return;
 	}
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 	select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 }
 

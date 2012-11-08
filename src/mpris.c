@@ -344,7 +344,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			if(mobj) {
 				GtkTreePath *tree_path;
 				append_current_playlist_ex(NULL, mobj, cwin, &tree_path);
-				update_status_bar(cwin);
+				update_status_bar_playtime(cwin);
 
 				// Dangerous: reusing double-click-handler here.
 				current_playlist_row_activated_cb(
@@ -727,7 +727,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	}
 
 	select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	g_free(file);
 exit:
