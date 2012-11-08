@@ -493,7 +493,7 @@ gboolean restore_status_bar(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	return FALSE;
 }

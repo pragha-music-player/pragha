@@ -389,7 +389,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	sqlite3_free_table(result.resultp);
 
@@ -465,7 +465,7 @@ void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_wi
 		append_current_playlist(model, mobj, cwin);
 	}
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	sqlite3_free_table(result.resultp);
 

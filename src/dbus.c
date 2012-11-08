@@ -118,7 +118,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	}
 
 	select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)

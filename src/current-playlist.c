@@ -211,7 +211,7 @@ static gint get_total_playtime(PraghaPlaylist *cplaylist)
 
 /* Update status bar */
 
-void update_status_bar(struct con_win *cwin)
+void update_status_bar_playtime(struct con_win *cwin)
 {
 	gint total_playtime = 0;
 	gchar *str, *tot_str;
@@ -1465,7 +1465,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	requeue_track_refs (cwin->cplaylist);
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 }
 
 /* Crop selected rows from current playlist */
@@ -1550,7 +1550,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	requeue_track_refs (cwin->cplaylist);
 	g_slist_free(to_delete);
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 }
 
 /* Show track properties dialog
@@ -1753,7 +1753,7 @@ current_playlist_clear (struct con_win *cwin)
 	cwin->cplaylist->no_tracks = 0;
 	cwin->cplaylist->unplayed_tracks = 0;
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 }
 
 void
@@ -2812,7 +2812,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	cwin->cplaylist->changing = FALSE;
 	g_object_unref(model);
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	if (is_row)
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->cplaylist->view), dest_path, NULL, TRUE, row_align, 0.0);
@@ -2930,7 +2930,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	cwin->cplaylist->changing = FALSE;
 	g_object_unref(model);
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	mpris_update_tracklist_replaced(cwin);
 
