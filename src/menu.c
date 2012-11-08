@@ -891,7 +891,7 @@ void search_library_action(GtkAction *action, struct con_win *cwin)
 
 void search_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	dialog_jump_to_track (cwin);
+	pragha_filter_dialog (cwin);
 }
 
 /* Handler for 'Shuffle' option in the Edit menu */

@@ -581,7 +581,6 @@ struct con_state {
 	guint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
-	gchar *jump_filter;
 	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
@@ -681,8 +680,6 @@ struct con_win {
 	GtkWidget *ntag_lastfm_button;
 	#endif
 	GtkWidget *library_tree;
-	GtkWidget *jump_tree;
-	GtkTreeModel *jump_model_filter;
 	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GtkStatusIcon *status_icon;
@@ -1339,7 +1336,7 @@ void glyr_related_free (struct con_win *cwin);
 
 /* Others */
 
-void dialog_jump_to_track (struct con_win *cwin);
+void pragha_filter_dialog (struct con_win *cwin);
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
