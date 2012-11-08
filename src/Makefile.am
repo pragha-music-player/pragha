@@ -19,7 +19,6 @@ pragha_SOURCES =cdda.c \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
-		jumptotrack.c \
 		librarytree.c \
 		menu.c \
 		mpris.c \
@@ -31,6 +30,7 @@ pragha_SOURCES =cdda.c \
 		pragha.c \
 		pragha.h \
 		pragha-backend.c \
+		pragha-filter-dialog.c \
 		pragha-album-art.c \
 		pragha-hig.c \
 		pragha-playback.c \
