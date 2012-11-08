@@ -615,7 +615,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 		update_status_bar(cwin);
 		break;
 	default:
@@ -666,7 +666,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			else
 				library_tree_add_to_playlist(cwin);
 
-			select_numered_path_of_current_playlist(prev_tracks, cwin);
+			select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 
 			break;
 		case 3:
@@ -1305,7 +1305,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 		remove_watch_cursor (cwin->mainwindow);
 
 		if(!cwin->cpref->shuffle)
-			select_numered_path_of_current_playlist(0, cwin);
+			select_numered_path_of_current_playlist(0, FALSE, cwin->cplaylist);
 		update_status_bar(cwin);
 		
 		g_list_free(list);
@@ -1368,7 +1368,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
 		g_object_unref(playlist_model);
 
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 		remove_watch_cursor (cwin->mainwindow);
 
 		update_status_bar(cwin);

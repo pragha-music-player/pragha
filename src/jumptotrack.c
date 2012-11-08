@@ -19,7 +19,7 @@
 
 void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 					 GtkTreePath *jump_path,
-					 struct con_win *cwin)
+					 PraghaPlaylist *cplaylist)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *jump_store;
@@ -29,7 +29,7 @@ void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
 
 	if(gtk_tree_model_get_iter (jump_store, &iter, jump_path)) {
 		gtk_tree_model_get (jump_store, &iter, 0, &track_i, -1);
-		select_numered_path_of_current_playlist(track_i - 1, cwin);
+		select_numered_path_of_current_playlist(track_i - 1, TRUE, cplaylist);
 	}
 }
 
@@ -50,7 +50,7 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, struct con_win *cw
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 
@@ -235,7 +235,7 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
@@ -245,7 +245,7 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin);
+			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
