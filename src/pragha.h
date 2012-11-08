@@ -77,7 +77,9 @@
 
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
+#include "pragha-preferences.h"
 #include "gtkcellrendererbubble.h"
+
 #include "xml_helper.h"
 
 /* Some definitions to solve different versions of the libraries. */
@@ -203,8 +205,8 @@ typedef enum {
 #define KEY_OSD_IN_TRAY            "osd_in_tray"
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
-#define KEY_INSTANT_FILTER         "instant_filter"
-#define KEY_APROXIMATE_SEARCH      "aproximate_search"
+#define KEY_INSTANT_SEARCH         "instant_filter"
+#define KEY_APPROXIMATE_SEARCH     "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
@@ -498,8 +500,6 @@ struct con_pref {
 	gboolean controls_below;
 	gboolean fuse_folders;
 	gboolean sort_by_year;
-	gboolean instant_filter;
-	gboolean aproximate_search;
 	gboolean use_hint;
 	GSList *library_dir;
 	GSList *playlist_columns;
@@ -648,6 +648,7 @@ struct con_win {
 	struct con_dbase *cdbase;
 	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif

@@ -1,0 +1,289 @@
+/*************************************************************************/
+/* Copyright (C) 2012 matias <mati86dl@gmail.com>			 */
+/* 									 */
+/* This program is free software: you can redistribute it and/or modify	 */
+/* it under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation, either version 3 of the License, or	 */
+/* (at your option) any later version.					 */
+/* 									 */
+/* This program is distributed in the hope that it will be useful,	 */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
+/* GNU General Public License for more details.				 */
+/* 									 */
+/* You should have received a copy of the GNU General Public License	 */
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+/*************************************************************************/
+
+#include "pragha-preferences.h"
+#include "pragha.h"
+
+G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)
+
+struct _PraghaPreferencesPrivate
+{
+   GKeyFile  *rc_keyfile;
+   gchar     *rc_uri;
+   gboolean   instant_search;
+   gboolean   approximate_search;
+};
+
+enum
+{
+   PROP_0,
+   PROP_INSTANT_SEARCH,
+   PROP_APPROXIMATE_SEARCH,
+   LAST_PROP
+};
+
+static GParamSpec *gParamSpecs[LAST_PROP];
+
+/**
+ * album_prefernces_get_instant_search:
+ *
+ */
+gboolean
+pragha_preferences_get_instant_search (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->instant_search;
+}
+
+/**
+ * album_prefernces_set_instant_search:
+ *
+ */
+void
+pragha_preferences_set_instant_search (PraghaPreferences *preferences,
+                                       gboolean instant_search)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->instant_search = instant_search;
+}
+
+
+/**
+ * album_prefernces_get_approximate_search:
+ *
+ */
+gboolean
+pragha_preferences_get_approximate_search (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->approximate_search;
+}
+
+/**
+ * album_prefernces_set_approximate_search:
+ *
+ */
+void
+pragha_preferences_set_approximate_search (PraghaPreferences *preferences,
+                                           gboolean approximate_search)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->approximate_search = approximate_search;
+}
+
+static void
+pragha_preferences_finalize (GObject *object)
+{
+   gchar *data = NULL;
+   gsize length;
+   GError *error = NULL;
+
+   PraghaPreferencesPrivate *priv;
+
+   priv = PRAGHA_PREFERENCES(object)->priv;
+
+   /* Store new preferences */
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_INSTANT_SEARCH,
+                          priv->instant_search);
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_APPROXIMATE_SEARCH,
+                          priv->approximate_search);
+
+   /* Save to key file */
+
+   data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
+   if(!g_file_set_contents(priv->rc_uri, data, length, &error))
+      g_critical("Unable to write preferences file : %s", error->message);
+
+   g_free(data);
+   g_key_file_free(priv->rc_keyfile);
+
+   G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
+}
+
+static void
+pragha_preferences_get_property (GObject *object,
+                                 guint prop_id,
+                                 GValue *value,
+                                 GParamSpec *pspec)
+{
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
+
+   switch (prop_id) {
+   case PROP_INSTANT_SEARCH:
+      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
+      break;
+   case PROP_APPROXIMATE_SEARCH:
+      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
+      break;
+   default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
+static void
+pragha_preferences_set_property (GObject *object,
+                                 guint prop_id,
+                                 const GValue *value,
+                                 GParamSpec *pspec)
+{
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
+
+   switch (prop_id) {
+   case PROP_INSTANT_SEARCH:
+      pragha_preferences_set_instant_search(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_APPROXIMATE_SEARCH:
+      pragha_preferences_set_approximate_search(preferences, g_value_get_boolean(value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
+static void
+pragha_preferences_class_init (PraghaPreferencesClass *klass)
+{
+   GObjectClass *object_class;
+
+   object_class = G_OBJECT_CLASS(klass);
+   object_class->finalize = pragha_preferences_finalize;
+   object_class->get_property = pragha_preferences_get_property;
+   object_class->set_property = pragha_preferences_set_property;
+   g_type_class_add_private(object_class, sizeof(PraghaPreferencesPrivate));
+
+   /**
+    * PraghaPreferences:instant_search:
+    *
+    */
+   gParamSpecs[PROP_INSTANT_SEARCH] =
+      g_param_spec_boolean("instant-search",
+                           "InstantSearch",
+                           "Instant Search Preference",
+                           TRUE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_INSTANT_SEARCH,
+                                    gParamSpecs[PROP_INSTANT_SEARCH]);
+
+   /**
+    * PraghaPreferences:approximate_searches:
+    *
+    */
+   gParamSpecs[PROP_APPROXIMATE_SEARCH] =
+      g_param_spec_boolean("approximate-searches",
+                           "ApproximateSearches",
+                           "Approximate Searches Preference",
+                           FALSE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_APPROXIMATE_SEARCH,
+                                    gParamSpecs[PROP_APPROXIMATE_SEARCH]);
+}
+
+static void
+pragha_preferences_init (PraghaPreferences *preferences)
+{
+   gboolean approximate_search, instant_search;
+   const gchar *config_dir;
+   GError *error = NULL;
+
+   preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE(preferences,
+                                                   PRAGHA_TYPE_PREFERENCES,
+                                                   PraghaPreferencesPrivate);
+
+   PraghaPreferencesPrivate *priv = preferences->priv;
+
+   /* Open the preferences storage file */
+
+   config_dir = g_get_user_config_dir();
+
+   priv->rc_keyfile = g_key_file_new();
+   priv->rc_uri = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha/config", NULL);
+
+   if (!g_key_file_load_from_file(priv->rc_keyfile,
+                                  priv->rc_uri,
+                                  G_KEY_FILE_NONE,
+                                  &error)) {
+      g_critical("Unable to load config file (Possible first start), err: %s", error->message);
+      g_error_free(error);
+
+      return;
+   }
+
+   /* Open last preferences */
+
+   approximate_search = g_key_file_get_boolean(priv->rc_keyfile,
+                                               GROUP_GENERAL,
+                                               KEY_APPROXIMATE_SEARCH,
+                                               &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_approximate_search(preferences, approximate_search);
+   }
+
+   instant_search = g_key_file_get_boolean(priv->rc_keyfile,
+                                           GROUP_GENERAL,
+                                           KEY_INSTANT_SEARCH,
+                                           &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_instant_search(preferences, instant_search);
+   }
+}
+
+/**
+ * pragha_preferences_get:
+ *
+ * Queries the global #PraghaPreferences instance, which is shared
+ * by all modules. The function automatically takes a reference
+ * for the caller, so you'll need to call g_object_unref() when
+ * you're done with it.
+ *
+ * Return value: the global #PraghaPreferences instance.
+ **/
+PraghaPreferences*
+pragha_preferences_get (void)
+{
+   static PraghaPreferences *preferences = NULL;
+
+   if (G_UNLIKELY (preferences == NULL)) {
+      preferences = g_object_new(PRAGHA_TYPE_PREFERENCES, NULL);
+      g_object_add_weak_pointer(G_OBJECT (preferences),
+                                (gpointer) &preferences);
+   }
+   else {
+      g_object_ref (G_OBJECT (preferences));
+   }
+
+   return preferences;
+}
