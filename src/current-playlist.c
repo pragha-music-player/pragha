@@ -454,24 +454,14 @@ static GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
-	gint pos = 0;
 
 	if(cplaylist->changing)
 		return NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
-	if (!gtk_tree_model_get_iter_first(model, &iter))
-		return NULL;
-
-	do {
-		if (pos == n) {
-			path = gtk_tree_model_get_path(model, &iter);
-			break;
-		}
-		pos++;
-	}
-	while (gtk_tree_model_iter_next(model, &iter));
+	if(gtk_tree_model_iter_nth_child(model, &iter, NULL, n))
+		path = gtk_tree_model_get_path(model, &iter);
 
 	return path;
 }
