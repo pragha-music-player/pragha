@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011- matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2011-2012 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -17,23 +17,36 @@
 
 #include "pragha.h"
 
-void jump_select_row_on_current_playlist(GtkTreeView *jump_tree,
-					 GtkTreePath *jump_path,
-					 PraghaPlaylist *cplaylist)
+typedef struct {
+	GtkWidget *filter_view;
+	GtkTreeModel *filter_model;
+	gchar *filter_string;
+	guint timeout_id;
+	PraghaPlaylist *cplaylist;
+	struct con_win *cwin;
+} PraghaFilterDialog;
+
+static void
+pragha_filter_dialog_select_row_on_current_playlist(GtkTreeView *fliter_view,
+						    GtkTreePath *filter_path,
+						    PraghaFilterDialog *fdialog)
 {
 	GtkTreeIter iter;
-	GtkTreeModel *jump_store;
+	GtkTreeModel *filter_model;
 	gint track_i = 0;
 
-	jump_store = gtk_tree_view_get_model (GTK_TREE_VIEW(jump_tree));
+	filter_model = gtk_tree_view_get_model (GTK_TREE_VIEW(fliter_view));
 
-	if(gtk_tree_model_get_iter (jump_store, &iter, jump_path)) {
-		gtk_tree_model_get (jump_store, &iter, 0, &track_i, -1);
-		select_numered_path_of_current_playlist(track_i - 1, TRUE, cplaylist);
+	if(gtk_tree_model_get_iter (filter_model, &iter, filter_path)) {
+		gtk_tree_model_get (filter_model, &iter, 0, &track_i, -1);
+		select_numered_path_of_current_playlist(track_i - 1, TRUE, fdialog->cplaylist);
 	}
 }
 
-int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, PraghaPlaylist *cplaylist)
+static int
+pragha_filter_dialog_key_press (GtkWidget *fliter_view,
+				GdkEventKey *event,
+				PraghaFilterDialog *fdialog)
 {
 	GtkTreeSelection *selection;
 	GList *list;
@@ -47,23 +60,23 @@ int jump_key_press (GtkWidget *jump_tree, GdkEventKey *event, PraghaPlaylist *cp
 		return FALSE;
 	}
 	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q) {
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(jump_tree));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(fliter_view));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (jump_tree), list->data, cplaylist);
+			pragha_filter_dialog_select_row_on_current_playlist (GTK_TREE_VIEW (fliter_view), list->data, fdialog);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 
-			toggle_queue_selected_current_playlist (cplaylist);
+			toggle_queue_selected_current_playlist (fdialog->cplaylist);
 		}
 		return TRUE;
 	}
 	return FALSE;
 }
 
-gboolean
-simple_jump_search_activate_handler (GtkEntry *entry,
-				     struct con_win *cwin)
+static gboolean
+simple_filter_search_activate_handler(GtkEntry *entry,
+				    PraghaFilterDialog *fdialog)
 {
 
 	gchar *text = NULL;
@@ -72,18 +85,18 @@ simple_jump_search_activate_handler (GtkEntry *entry,
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
-	if (cwin->cstate->jump_filter != NULL) {
-		g_free (cwin->cstate->jump_filter);
-		cwin->cstate->jump_filter = NULL;
+	if (fdialog->filter_string != NULL) {
+		g_free (fdialog->filter_string);
+		fdialog->filter_string = NULL;
 	}
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		u_str = g_utf8_strdown (text, -1);
-		cwin->cstate->jump_filter = u_str;
+		fdialog->filter_string = u_str;
 	}
 
-	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER(cwin->jump_model_filter));
+	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER(fdialog->filter_model));
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
@@ -95,33 +108,35 @@ simple_jump_search_activate_handler (GtkEntry *entry,
 }
 
 static gboolean
-do_refilter (struct con_win *cwin)
+do_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 {
-	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER(cwin->jump_model_filter));
+	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER(fdialog->filter_model));
 
-	cwin->cstate->timeout_id = 0;
+	fdialog->timeout_id = 0;
 
 	return FALSE;
 }
 
-void queue_jump_refilter (struct con_win *cwin)
+static void
+queue_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 {
-	if(cwin->cstate->timeout_id)
-		g_source_remove(cwin->cstate->timeout_id);
+	if(fdialog->timeout_id)
+		g_source_remove(fdialog->timeout_id);
 
-	cwin->cstate->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, cwin);
+	fdialog->timeout_id = g_timeout_add(500, (GSourceFunc)do_filter_dialog_refilter, fdialog);
 }
 
-gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
-						struct con_win *cwin)
+static gboolean
+simple_filter_search_keyrelease_handler(GtkEntry *entry,
+					PraghaFilterDialog *fdialog)
 {
 	gchar *text = NULL;
 	gchar *u_str = NULL;
 	gboolean has_text;
 
-	if (cwin->cstate->jump_filter != NULL) {
-		g_free (cwin->cstate->jump_filter);
-		cwin->cstate->jump_filter = NULL;
+	if (fdialog->filter_string != NULL) {
+		g_free (fdialog->filter_string);
+		fdialog->filter_string = NULL;
 	}
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
@@ -129,37 +144,37 @@ gboolean simple_jump_search_keyrelease_handler (GtkEntry *entry,
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		u_str = g_utf8_strdown (text, -1);
-		cwin->cstate->jump_filter = u_str;
+		fdialog->filter_string = u_str;
 	}
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
 
-	if (!cwin->cpref->instant_filter)
+	if (!fdialog->cwin->cpref->instant_filter)
 		return FALSE;
 
-	queue_jump_refilter(cwin);
+	queue_filter_dialog_refilter(fdialog);
 
 	return FALSE;
 }
 
 static gboolean
-jump_filter_visible_func (GtkTreeModel *model, GtkTreeIter *iter, struct con_win *cwin)
+filter_model_visible_func (GtkTreeModel *model, GtkTreeIter *iter, PraghaFilterDialog *fdialog)
 {
 	gchar *haystack = NULL, *haystackd = NULL, *needle = NULL;
 	gboolean visible = FALSE;
 
-	if(!cwin->cstate->jump_filter)
+	if(!fdialog->filter_string)
 		return TRUE;
 
 	gtk_tree_model_get(model, iter, 1, &haystack, -1);
 
-	needle = cwin->cstate->jump_filter;
+	needle = fdialog->filter_string;
 
 	haystackd = g_utf8_strdown (haystack, -1);
 
-	if (pragha_strstr_lv(haystack, needle, cwin))
+	if (pragha_strstr_lv(haystack, needle, fdialog->cwin))
 		visible = TRUE;
 
 	g_free(haystack);
@@ -169,17 +184,17 @@ jump_filter_visible_func (GtkTreeModel *model, GtkTreeIter *iter, struct con_win
 }
 
 static void
-dialog_jump_to_track_fill_model (GtkListStore *jump_store, struct con_win *cwin)
+pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter, jump_iter;
+	GtkTreeIter playlist_iter, filter_iter;
 	struct musicobject *mobj = NULL;
 	gchar *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL;
 	gchar *track_data_markup = NULL;
 	gint track_i = 0;
 	gboolean ret;
 
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->cplaylist->view));
+	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cplaylist->view));
 
 	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
 
@@ -195,8 +210,8 @@ dialog_jump_to_track_fill_model (GtkListStore *jump_store, struct con_win *cwin)
 		track_data_markup = g_markup_printf_escaped ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
 		if (track_data_markup != NULL) {
-			gtk_list_store_append (jump_store, &jump_iter);
-			gtk_list_store_set (jump_store, &jump_iter,
+			gtk_list_store_append (filter_model, &filter_iter);
+			gtk_list_store_set (filter_model, &filter_iter,
 						0, track_i,
 						1, track_data_markup,
 						-1);
@@ -211,19 +226,19 @@ dialog_jump_to_track_fill_model (GtkListStore *jump_store, struct con_win *cwin)
 	}
 }
 
-void
-jump_row_activated_cb (GtkTreeView *jump_tree,
-			GtkTreePath *jump_path,
-			GtkTreeViewColumn *column,
-			GtkWidget *dialog)
+static void
+pragha_filter_dialog_activated_cb(GtkTreeView *fliter_view,
+				  GtkTreePath *filter_path,
+				  GtkTreeViewColumn *column,
+				  GtkWidget *dialog)
 {
 	gtk_dialog_response (GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
 }
 
 static void
-jump_to_track_dialog_response (GtkDialog *dialog,
-				gint response,
-				struct con_win *cwin)
+pragha_filter_dialog_response(GtkDialog *dialog,
+			      gint response,
+			      PraghaFilterDialog *fdialog)
 {
 	GList *list;
 	GtkTreeSelection *selection;
@@ -232,20 +247,20 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 	{
 	case GTK_RESPONSE_ACCEPT:
 		/* Get row selected on jump list and select the row on current playlist. */
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(fdialog->filter_view));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			pragha_filter_dialog_select_row_on_current_playlist (GTK_TREE_VIEW (fdialog->filter_view), list->data, fdialog);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
-		toggle_queue_selected_current_playlist (cwin->cplaylist);
+		toggle_queue_selected_current_playlist (fdialog->cplaylist);
 		break;
 	case GTK_RESPONSE_APPLY:
-		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(cwin->jump_tree));
+		selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(fdialog->filter_view));
 		list = gtk_tree_selection_get_selected_rows (selection, NULL);
 		if (list) {
-			jump_select_row_on_current_playlist (GTK_TREE_VIEW (cwin->jump_tree), list->data, cwin->cplaylist);
+			pragha_filter_dialog_select_row_on_current_playlist (GTK_TREE_VIEW (fdialog->filter_view), list->data, fdialog);
 			gtk_tree_path_free (list->data);
 			g_list_free (list);
 		}
@@ -256,21 +271,38 @@ jump_to_track_dialog_response (GtkDialog *dialog,
 		break;
 	}
 
-	gtk_widget_grab_focus (cwin->cplaylist->view);
+	g_free(fdialog->filter_string);
+	g_slice_free(PraghaFilterDialog, fdialog);
+
+	gtk_widget_grab_focus (fdialog->cplaylist->view);
 	gtk_widget_destroy (GTK_WIDGET(dialog));
 }
 
 void
-dialog_jump_to_track (struct con_win *cwin)
+pragha_filter_dialog (struct con_win *cwin)
 {
 	GtkWidget *dialog, *scrollwin, *vbox, *search_entry;
-	GtkWidget *jump_treeview = NULL;
-	GtkListStore *jump_store;
-	GtkTreeModel *jump_filter;
+	GtkWidget *filter_view = NULL;
+	GtkListStore *filter_store;
+	GtkTreeModel *filter_model;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
-	jump_store = gtk_list_store_new (2, G_TYPE_UINT, G_TYPE_STRING);
+	PraghaFilterDialog *fdialog;
+	fdialog = g_slice_new0(PraghaFilterDialog);
+
+	/* Crete the filter entry */
+
+	search_entry = pragha_search_entry_new(cwin);
+
+	g_signal_connect (G_OBJECT(search_entry), "changed",
+			 G_CALLBACK(simple_filter_search_keyrelease_handler), fdialog);
+	g_signal_connect (G_OBJECT(search_entry), "activate",
+			 G_CALLBACK(simple_filter_search_activate_handler), fdialog);
+
+	/* Create the view */
+
+	filter_store = gtk_list_store_new (2, G_TYPE_UINT, G_TYPE_STRING);
 
 	column = gtk_tree_view_column_new ();
 
@@ -284,41 +316,36 @@ dialog_jump_to_track (struct con_win *cwin)
 	gtk_tree_view_column_set_attributes (column, renderer, "markup", 1, NULL);
 	gtk_tree_view_column_set_spacing (column, 4);
 
-	dialog_jump_to_track_fill_model(jump_store, cwin);
+	/* Fill the filter tree view with current playlist */
 
-	jump_filter = gtk_tree_model_filter_new(GTK_TREE_MODEL(jump_store), NULL);
-	g_object_unref(jump_store);
-	cwin->jump_model_filter = jump_filter;
+	pragha_filter_dialog_fill_model(filter_store, cwin->cplaylist);
 
-	jump_treeview = gtk_tree_view_new_with_model(jump_filter);
-	gtk_tree_view_append_column (GTK_TREE_VIEW(jump_treeview), column);
-	g_object_unref(G_OBJECT(jump_filter));
+	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(filter_store), NULL);
+	g_object_unref(filter_store);
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(jump_treeview), TRUE);
-	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW(jump_treeview), FALSE);
-	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(jump_treeview), FALSE);
-
-	cwin->jump_tree = jump_treeview;
-
-	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(jump_filter),
-						(GtkTreeModelFilterVisibleFunc)jump_filter_visible_func,
-						cwin,
+	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(filter_model),
+						(GtkTreeModelFilterVisibleFunc)filter_model_visible_func,
+						fdialog,
 						NULL);
 
-	search_entry = pragha_search_entry_new(cwin);
+	/* Create the tree view */
 
-	g_signal_connect (G_OBJECT(search_entry), "changed",
-			 G_CALLBACK(simple_jump_search_keyrelease_handler), cwin);
-	g_signal_connect (G_OBJECT(search_entry), "activate",
-			 G_CALLBACK(simple_jump_search_activate_handler), cwin);
+	filter_view = gtk_tree_view_new_with_model(filter_model);
+	gtk_tree_view_append_column (GTK_TREE_VIEW(filter_view), column);
+	g_object_unref(G_OBJECT(filter_model));
 
-	scrollwin = gtk_scrolled_window_new (NULL, NULL);
-	gtk_container_add (GTK_CONTAINER(scrollwin), jump_treeview);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrollwin),
-					GTK_POLICY_AUTOMATIC,
-					GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(scrollwin),
-					GTK_SHADOW_IN);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(filter_view), TRUE);
+	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW(filter_view), FALSE);
+	gtk_tree_view_set_enable_search (GTK_TREE_VIEW(filter_view), FALSE);
+
+	/* Store references */
+
+	fdialog->filter_view = filter_view;
+	fdialog->filter_model = filter_model;
+	fdialog->filter_string = NULL;
+	fdialog->timeout_id = 0;
+	fdialog->cplaylist = cwin->cplaylist;
+	fdialog->cwin = cwin;
 
 	/* The search dialog */
 
@@ -339,15 +366,25 @@ dialog_jump_to_track (struct con_win *cwin)
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
 	gtk_box_pack_start (GTK_BOX(vbox), search_entry, FALSE, FALSE, 3);
+
+	scrollwin = gtk_scrolled_window_new (NULL, NULL);
+	gtk_container_add (GTK_CONTAINER(scrollwin), filter_view);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrollwin),
+					GTK_POLICY_AUTOMATIC,
+					GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(scrollwin),
+					GTK_SHADOW_IN);
 	gtk_box_pack_start (GTK_BOX(vbox), scrollwin, TRUE, TRUE, 0);
+
+	/* Connect signals */
 	
-	g_signal_connect (jump_treeview, "row-activated",
-			G_CALLBACK(jump_row_activated_cb), dialog);
-	g_signal_connect (jump_treeview, "key_press_event",
-			  G_CALLBACK (jump_key_press), cwin->cplaylist);
+	g_signal_connect (filter_view, "row-activated",
+			G_CALLBACK(pragha_filter_dialog_activated_cb), dialog);
+	g_signal_connect (filter_view, "key_press_event",
+			  G_CALLBACK (pragha_filter_dialog_key_press), fdialog);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(jump_to_track_dialog_response), cwin);
+			G_CALLBACK(pragha_filter_dialog_response), fdialog);
 
 	gtk_widget_show_all (dialog);
 }
