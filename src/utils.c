@@ -251,8 +251,11 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 gchar *
 pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin)
 {
+	gboolean aproximate_search;
+	aproximate_search = pragha_preferences_get_approximate_search(cwin->preferences);
+
 	return g_strstr_lv(haystack, needle,
-			   cwin->cpref->aproximate_search ? 1 : 0);
+			   aproximate_search ? 1 : 0);
 }
 
 #if !GLIB_CHECK_VERSION(2,32,0)

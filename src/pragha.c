@@ -37,6 +37,7 @@ static void common_cleanup(struct con_win *cwin)
 	gui_free (cwin);
 	state_free (cwin->cstate);
 	preferences_free (cwin->cpref);
+	g_object_unref(G_OBJECT(cwin->preferences));
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	lastfm_free (cwin->clastfm);
@@ -112,6 +113,7 @@ gint main(gint argc, gchar *argv[])
 	if (!cwin->cstate->unique_instance)
 		return 0;
 
+	cwin->preferences = pragha_preferences_get();
 	if (init_config(cwin) == -1) {
 		g_critical("Unable to init configuration");
 		return -1;

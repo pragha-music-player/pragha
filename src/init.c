@@ -157,11 +157,10 @@ gint init_config(struct con_win *cwin)
 	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
-
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
@@ -169,7 +168,7 @@ gint init_config(struct con_win *cwin)
 	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -699,29 +698,6 @@ gint init_config(struct con_win *cwin)
 			g_free(u_file);
 		}
 
-		cwin->cpref->instant_filter =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_INSTANT_FILTER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			instant_filter_f= TRUE;
-		}
-
-		cwin->cpref->aproximate_search =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_APROXIMATE_SEARCH,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			aproximate_search_f= TRUE;
-		}
-
-
 		cwin->cpref->use_hint =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -978,10 +954,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->use_cddb = TRUE;
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
-	if (all_f || instant_filter_f)
-		cwin->cpref->instant_filter = TRUE;
-	if (all_f || aproximate_search_f)
-		cwin->cpref->aproximate_search = FALSE;
 
 	if (all_f || use_hint_f)
 		cwin->cpref->use_hint = TRUE;

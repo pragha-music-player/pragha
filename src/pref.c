@@ -57,7 +57,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gboolean ret, osd, test_change;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
-	gboolean show_album_art;
+	gboolean show_album_art, instant_search, approximate_search;
 	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
@@ -159,13 +159,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		g_free(window_state_sink);
 
-		cwin->cpref->instant_filter =
+		instant_search =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->instant_filter_w));
+		pragha_preferences_set_instant_search(cwin->preferences, instant_search);
 
-		cwin->cpref->aproximate_search =
+		approximate_search =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->cpref->aproximate_search_w));
+		pragha_preferences_set_approximate_search(cwin->preferences, approximate_search);
 
 		cwin->cpref->save_playlist =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -626,12 +628,12 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->cpref->use_hint_w),
 					     TRUE);
 
-	if (cwin->cpref->instant_filter)
+	if (pragha_preferences_get_instant_search(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->instant_filter_w),
 					     TRUE);
 
-	if (cwin->cpref->aproximate_search)
+	if (pragha_preferences_get_approximate_search(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->aproximate_search_w),
 					     TRUE);
@@ -845,20 +847,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_CLOSE_TO_TRAY,
 			       cwin->cpref->close_to_tray);
-
-	/* Save instant filter option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_INSTANT_FILTER,
-			       cwin->cpref->instant_filter);
-
-	/* Save aproximate search option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_APROXIMATE_SEARCH,
-			       cwin->cpref->aproximate_search);
 
 	/* Save use hint option */
 

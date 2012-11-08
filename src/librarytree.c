@@ -1015,7 +1015,7 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	gchar *text = NULL;
 	gboolean has_text;
 	
-	if (!cwin->cpref->instant_filter)
+	if (!pragha_preferences_get_instant_search(cwin->preferences))
 		return FALSE;
 
 	if (cwin->cstate->filter_entry != NULL) {

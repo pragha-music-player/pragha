@@ -23,7 +23,7 @@ typedef struct {
 	gchar *filter_string;
 	guint timeout_id;
 	PraghaPlaylist *cplaylist;
-	struct con_win *cwin;
+	PraghaPreferences *preferences;
 } PraghaFilterDialog;
 
 static void
@@ -151,7 +151,7 @@ simple_filter_search_keyrelease_handler(GtkEntry *entry,
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
 
-	if (!fdialog->cwin->cpref->instant_filter)
+	if (!pragha_preferences_get_instant_search(fdialog->preferences))
 		return FALSE;
 
 	queue_filter_dialog_refilter(fdialog);
@@ -163,7 +163,7 @@ static gboolean
 filter_model_visible_func (GtkTreeModel *model, GtkTreeIter *iter, PraghaFilterDialog *fdialog)
 {
 	gchar *haystack = NULL, *haystackd = NULL, *needle = NULL;
-	gboolean visible = FALSE;
+	gboolean approximate, visible = FALSE;
 
 	if(!fdialog->filter_string)
 		return TRUE;
@@ -174,7 +174,9 @@ filter_model_visible_func (GtkTreeModel *model, GtkTreeIter *iter, PraghaFilterD
 
 	haystackd = g_utf8_strdown (haystack, -1);
 
-	if (pragha_strstr_lv(haystack, needle, fdialog->cwin))
+	approximate = pragha_preferences_get_approximate_search(fdialog->preferences);
+
+	if(g_strstr_lv(haystackd, needle, approximate ? 1 : 0))
 		visible = TRUE;
 
 	g_free(haystack);
@@ -272,6 +274,7 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 	}
 
 	g_free(fdialog->filter_string);
+	g_object_unref(G_OBJECT(fdialog->preferences));
 	g_slice_free(PraghaFilterDialog, fdialog);
 
 	gtk_widget_grab_focus (fdialog->cplaylist->view);
@@ -345,7 +348,7 @@ pragha_filter_dialog (struct con_win *cwin)
 	fdialog->filter_string = NULL;
 	fdialog->timeout_id = 0;
 	fdialog->cplaylist = cwin->cplaylist;
-	fdialog->cwin = cwin;
+	fdialog->preferences = pragha_preferences_get();
 
 	/* The search dialog */
 
