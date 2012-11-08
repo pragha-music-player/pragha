@@ -334,7 +334,7 @@ empty:
 	}
 
 	if(songs_added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 
 	if (summary != NULL) {
 		set_status_message(summary, cwin);
@@ -460,7 +460,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 			added++;
 	}
 	if(added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 
 	remove_watch_cursor (cwin->mainwindow);
 

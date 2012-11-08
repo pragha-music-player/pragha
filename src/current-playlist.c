@@ -870,7 +870,8 @@ static gchar* get_playlist_dialog(enum playlist_mgmt *choice,
 
 /* Function to jump to track on current playlist */
 
-void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
+void
+jump_to_path_on_current_playlist (GtkTreePath *path, gboolean center, PraghaPlaylist *cplaylist)
 {
 	GtkTreeSelection *selection;
 	gint cx, cy, cnt_selected;
@@ -879,7 +880,7 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 	GdkRectangle crect;
 
 	if (path) {
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 		cnt_selected = gtk_tree_selection_count_selected_rows(selection);
 
 		if (cnt_selected > 1)
@@ -888,41 +889,41 @@ void jump_to_path_on_current_playlist (GtkTreePath *path, struct con_win *cwin)
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
 
-		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cwin->cplaylist->view), &vrect);
-		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cwin->cplaylist->view), path, NULL, &crect);
+		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cplaylist->view), &vrect);
+		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cplaylist->view), path, NULL, &crect);
 
-		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cwin->cplaylist->view), crect.x, crect.y, &cx, &cy);
+		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cplaylist->view), crect.x, crect.y, &cx, &cy);
 
-		if (cwin->cpref->shuffle) {
+		if (center) {
 			if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->cplaylist->view),
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
 							     path, NULL, TRUE, 0.5, 0.0);
 			}
 		}
 		else {
 			if (cy < vrect.y) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->cplaylist->view),
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
 							     path, NULL, TRUE, 0.0, 0.0);
 			}
 			else if (cy + crect.height > vrect.y + vrect.height) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cwin->cplaylist->view),
+				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
 							     path, NULL, TRUE, 1.0, 0.0);
 			}
 		}
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cwin->cplaylist->view),
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cplaylist->view),
 					 path, NULL, FALSE);
 	}
 }
 
 /* Select the song numbered according to the position in the playlist */
 
-void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin)
+void select_numered_path_of_current_playlist(gint path_number, gboolean center, PraghaPlaylist *cplaylist)
 {
 	GtkTreePath *path = NULL;
 
-	path = current_playlist_nth_track(path_number, cwin->cplaylist);
+	path = current_playlist_nth_track(path_number, cplaylist);
 
-	jump_to_path_on_current_playlist (path, cwin);
+	jump_to_path_on_current_playlist (path, center, cplaylist);
 
 	gtk_tree_path_free(path);
 }
@@ -1033,7 +1034,7 @@ void update_current_playlist_view_new_track(struct con_win *cwin)
 
 	if(path) {
 		current_playlist_update_pixbuf_state_on_path (path, cwin);
-		jump_to_path_on_current_playlist (path, cwin);
+		jump_to_path_on_current_playlist (path, cwin->cpref->shuffle, cwin->cplaylist);
 		gtk_tree_path_free(path);
 	}
 }
@@ -1251,20 +1252,6 @@ GtkTreePath* current_playlist_get_actual(struct con_win *cwin)
 		path = gtk_tree_row_reference_get_path(cwin->cplaylist->curr_seq_ref);
 
 	return path;
-}
-
-void jump_to_playing_song_handler(GtkButton *button, struct con_win *cwin)
-{
-	GtkTreePath *path = NULL;
-
-	if(cwin->cplaylist->changing)
-		return;
-
-	path = current_playlist_get_actual(cwin);
-
-	jump_to_path_on_current_playlist (path, cwin);
-
-	gtk_tree_path_free(path);
 }
 
 /* Dequeue selected rows from current playlist */
@@ -2830,7 +2817,7 @@ void dnd_current_playlist_received(GtkWidget *widget,
 	if (is_row)
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(cwin->cplaylist->view), dest_path, NULL, TRUE, row_align, 0.0);
 	else
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 
 	/* Remove busy mouse icon */
 
@@ -2972,7 +2959,7 @@ void init_current_playlist_view(struct con_win *cwin)
 	}
 
 	path = gtk_tree_path_new_from_string(ref);
-	jump_to_path_on_current_playlist (path, cwin);
+	jump_to_path_on_current_playlist (path, cwin->cpref->shuffle, cwin->cplaylist);
 
 	gtk_tree_path_free(path);
 	g_free(ref);

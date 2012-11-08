@@ -65,7 +65,7 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 			return;
 	}
 	update_status_bar(cwin);
-	select_numered_path_of_current_playlist(prev_tracks, cwin);
+	select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 }
 
 static cdrom_drive_t* find_audio_cd(struct con_win *cwin)

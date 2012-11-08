@@ -433,7 +433,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 		update_status_bar(cwin);
 	}
 }
@@ -1016,7 +1016,7 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path = NULL;
 	path = current_playlist_get_actual(cwin);
 
-	jump_to_path_on_current_playlist (path, cwin);
+	jump_to_path_on_current_playlist (path, TRUE, cwin->cplaylist);
 
 	gtk_tree_path_free(path);
 }
@@ -1292,7 +1292,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	select_numered_path_of_current_playlist(0, cwin);
+	select_numered_path_of_current_playlist(0, FALSE, cwin->cplaylist);
 	update_status_bar(cwin);
 
 	mpris_update_tracklist_replaced(cwin);

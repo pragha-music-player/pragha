@@ -726,7 +726,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		g_warning("Unable to add file %s", file);
 	}
 
-	select_numered_path_of_current_playlist(prev_tracks, cwin);
+	select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
 	update_status_bar(cwin);
 
 	g_free(file);
