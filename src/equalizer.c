@@ -42,6 +42,10 @@ static const gchar *presets_names[] = {
 	N_("Custom")
 };
 
+static const gchar *label_band_frec[] = {
+	"30 Hz", "60 Hz", "120 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "15 kHz"
+};
+
 static gboolean
 vscales_eq_set_by_user (GtkRange *range, GtkScrollType scroll, gdouble value, gpointer user_data)
 {
@@ -91,7 +95,8 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer user_data)
 		gtk_range_set_value(GTK_RANGE(vscales[i]), value[option][i]);
 }
 
-void init_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vscales)
+static void
+init_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vscales)
 {
 	gchar *eq_preset = NULL;
 	gdouble *saved_bands;
@@ -129,7 +134,8 @@ void init_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vs
 	}
 }
 
-void save_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vscales)
+static void
+save_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vscales)
 {
 	gdouble bands[NUM_BANDS];
 	gint i, preset;
@@ -151,12 +157,13 @@ void save_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vs
 					   NUM_BANDS);
 }
 
-gboolean eq_band_get_tooltip (GtkWidget        *vscale,
-				 gint              x,
-				 gint              y,
-				 gboolean          keyboard_mode,
-				 GtkTooltip       *tooltip,
-				 gpointer data)
+static gboolean
+eq_band_get_tooltip(GtkWidget  *vscale,
+		    gint        x,
+		    gint        y,
+		    gboolean    keyboard_mode,
+		    GtkTooltip *tooltip,
+		    gpointer    data)
 {
 	gchar *text = NULL;
 
@@ -185,9 +192,11 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *mhbox, *hbox, *dbvbox, *label, *eq_combobox;
 	GtkWidget *vscales[NUM_BANDS];
 	gint i, result;
+
 	GstElement *equalizer = pragha_backend_get_equalizer (cwin->backend);
 
-	/* Create vertical scales to equalizer */
+	/* Create vertical scales band to equalizer */
+
 	for (i = 0; i < NUM_BANDS; i++) {
 		vscales[i] = gtk_vscale_new_with_range(-24.0, 12.0, 0.1);
 		gtk_range_set_inverted(GTK_RANGE(vscales[i]), TRUE);
@@ -199,6 +208,8 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 		band_bind_to_backend(GTK_RANGE(vscales[i]), equalizer, i);
 	}
+
+	/* Create the db scale */
 
 	mhbox = gtk_hbox_new(FALSE, 0);
 
@@ -217,70 +228,20 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 	gtk_misc_set_alignment (GTK_MISC(label), 1, 0.5);
 	gtk_box_pack_start(GTK_BOX(dbvbox), label, FALSE, FALSE, 0);
 
-	gtk_box_pack_start(GTK_BOX(mhbox), dbvbox, FALSE, FALSE, 0);
+	/* Create the scales with frequency bands */
 
 	hbox = gtk_hbox_new(FALSE, 0);
+	for (i = 0; i < G_N_ELEMENTS(label_band_frec); i++) {
+		label = gtk_label_new(label_band_frec[i]);
+		gtk_label_set_angle(GTK_LABEL(label), 90);
+		gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
+		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+		gtk_box_pack_start(GTK_BOX(hbox), vscales[i], FALSE, FALSE, 0);
+	}
 
-	label = gtk_label_new("30 Hz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[0], FALSE, FALSE, 0);
+	/* Add the widgets */
 
-	label = gtk_label_new("60 Hz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[1], FALSE, FALSE, 0);
-
-	label = gtk_label_new("120 Hz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[2], FALSE, FALSE, 0);
-
-	label = gtk_label_new("250 Hz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[3], FALSE, FALSE, 0);
-
-	label = gtk_label_new("500 Hz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[4], FALSE, FALSE, 0);
-
-	label = gtk_label_new("1 kHz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[5], FALSE, FALSE, 0);
-
-	label = gtk_label_new("2 kHz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[6], FALSE, FALSE, 0);
-
-	label = gtk_label_new("4 kHz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[7], FALSE, FALSE, 0);
-
-	label = gtk_label_new("8 kHz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[8], FALSE, FALSE, 0);
-
-	label = gtk_label_new("15 kHz");
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vscales[9], FALSE, FALSE, 0);
-
+	gtk_box_pack_start(GTK_BOX(mhbox), dbvbox, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(mhbox), hbox, TRUE, TRUE, 0);
 
 	/* Create the dialog */
