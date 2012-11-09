@@ -95,45 +95,37 @@ void init_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vs
 {
 	gchar *eq_preset = NULL;
 	gdouble *saved_bands;
-	GError *error = NULL;
 	gint i;
 	
-	eq_preset = g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					  GROUP_AUDIO,
-					  KEY_EQ_PRESET,
-					  &error);
-	if(eq_preset != NULL) {
-		for (i = 0; i < G_N_ELEMENTS(presets_names); i++) {
-			if (g_ascii_strcasecmp(eq_preset, presets_names[i]) == 0) {
-				gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), i);
-				break;
-			}
-		}
+	eq_preset = pragha_preferences_get_string(cwin->preferences,
+						  GROUP_AUDIO,
+						  KEY_EQ_PRESET);
 
+	if(eq_preset != NULL) {
 		if (g_ascii_strcasecmp(eq_preset, "Custom") == 0) {
-			saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
-								 GROUP_AUDIO,
-								 KEY_EQ_10_BANDS,
-								 NULL,
-								 &error);
+			saved_bands = pragha_preferences_get_double_list(cwin->preferences,
+									 GROUP_AUDIO,
+									 KEY_EQ_10_BANDS);
 			if (saved_bands != NULL) {
 				for (i = 0; i < NUM_BANDS; i++)
 					gtk_range_set_value(GTK_RANGE(vscales[i]), saved_bands[i]);
 
 				g_free(saved_bands);
 			}
-			else {
-				g_error_free(error);
-				error = NULL;
+			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), G_N_ELEMENTS(presets_names) - 1);
+		}
+		else {
+			for (i = 0; i < G_N_ELEMENTS(presets_names); i++) {
+				if (g_ascii_strcasecmp(eq_preset, presets_names[i]) == 0) {
+					gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), i);
+					break;
+				}
 			}
 		}
 		g_free(eq_preset);
 	}
 	else {
 		gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 0);
-
-		g_error_free(error);
-		error = NULL;
 	}
 }
 
@@ -144,19 +136,19 @@ void save_eq_preset(struct con_win *cwin, GtkWidget *eq_combobox, GtkWidget **vs
 
 	preset = gtk_combo_box_get_active (GTK_COMBO_BOX (eq_combobox));
 
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_EQ_PRESET,
-			      presets_names[preset]);
-
 	for (i = 0; i < NUM_BANDS; i++)
 		bands[i] = gtk_range_get_value(GTK_RANGE(vscales[i]));
 
-	g_key_file_set_double_list (cwin->cpref->configrc_keyfile,
-				    GROUP_AUDIO,
-				    KEY_EQ_10_BANDS,
-				    bands,
-				    NUM_BANDS);
+	pragha_preferences_set_string(cwin->preferences,
+				      GROUP_AUDIO,
+				      KEY_EQ_PRESET,
+				      presets_names[preset]);
+
+	pragha_preferences_set_double_list(cwin->preferences,
+					   GROUP_AUDIO,
+					   KEY_EQ_10_BANDS,
+					   bands,
+					   NUM_BANDS);
 }
 
 gboolean eq_band_get_tooltip (GtkWidget        *vscale,

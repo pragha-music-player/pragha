@@ -778,23 +778,17 @@ pragha_backend_init_equalizer_preset (struct con_win *cwin)
 {
 	PraghaBackendPrivate *priv = cwin->backend->priv;
 	gdouble *saved_bands;
-	GError *error = NULL;
 
 	if (priv->equalizer == NULL)
 		return;
 
-	saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
-						 GROUP_AUDIO,
-						 KEY_EQ_10_BANDS,
-						 NULL,
-						 &error);
+	saved_bands = pragha_preferences_get_double_list(cwin->preferences,
+							 GROUP_AUDIO,
+							 KEY_EQ_10_BANDS);
+
 	if (saved_bands != NULL) {
 		pragha_backend_update_equalizer(cwin->backend, saved_bands);
 		g_free(saved_bands);
-	}
-	else {
-		g_error_free(error);
-		error = NULL;
 	}
 }
 

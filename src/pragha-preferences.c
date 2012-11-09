@@ -39,7 +39,80 @@ enum
 static GParamSpec *gParamSpecs[LAST_PROP];
 
 /**
- * album_prefernces_get_instant_search:
+ * pragha_preferences_get_double_list:
+ *
+ */
+gdouble *
+pragha_preferences_get_double_list (PraghaPreferences *preferences,
+                                    const gchar *group_name,
+                                    const gchar *key)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   return g_key_file_get_double_list(preferences->priv->rc_keyfile,
+                                     group_name,
+                                     key,
+                                     NULL,
+                                     NULL);
+}
+
+/**
+ * pragha_preferences_set_double_list
+ *
+ */
+void
+pragha_preferences_set_double_list (PraghaPreferences *preferences,
+                                    const gchar *group_name,
+                                    const gchar *key,
+                                    gdouble list[],
+                                    gsize length)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   g_key_file_set_double_list(preferences->priv->rc_keyfile,
+                              group_name,
+                              key,
+                              list,
+                              length);
+}
+
+/**
+ * pragha_preferences_get_string:
+ *
+ */
+gchar *
+pragha_preferences_get_string (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   return g_key_file_get_string(preferences->priv->rc_keyfile,
+                                group_name,
+                                key,
+                                NULL);
+}
+
+/**
+ * pragha_preferences_set_string:
+ *
+ */
+void
+pragha_preferences_set_string (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key,
+                               const gchar *string)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   g_key_file_set_string(preferences->priv->rc_keyfile,
+                         group_name,
+                         key,
+                         string);
+}
+
+/**
+ * pragha_preferences_get_instant_search:
  *
  */
 gboolean
@@ -51,7 +124,7 @@ pragha_preferences_get_instant_search (PraghaPreferences *preferences)
 }
 
 /**
- * album_prefernces_set_instant_search:
+ * pragha_preferences_set_instant_search:
  *
  */
 void
@@ -65,7 +138,7 @@ pragha_preferences_set_instant_search (PraghaPreferences *preferences,
 
 
 /**
- * album_prefernces_get_approximate_search:
+ * pragha_preferences_get_approximate_search:
  *
  */
 gboolean
@@ -77,7 +150,7 @@ pragha_preferences_get_approximate_search (PraghaPreferences *preferences)
 }
 
 /**
- * album_prefernces_set_approximate_search:
+ * pragha_preferences_set_approximate_search:
  *
  */
 void

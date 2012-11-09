@@ -50,6 +50,28 @@ struct _PraghaPreferencesClass
 PraghaPreferences* pragha_preferences_get (void);
 GType pragha_preferences_get_type (void) G_GNUC_CONST;
 
+gdouble *
+pragha_preferences_get_double_list (PraghaPreferences *preferences,
+                                    const gchar *group_name,
+                                    const gchar *key);
+void
+pragha_preferences_set_double_list (PraghaPreferences *preferences,
+                                    const gchar *group_name,
+                                    const gchar *key,
+                                    gdouble list[],
+                                    gsize length);
+
+gchar *
+pragha_preferences_get_string (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key);
+
+void
+pragha_preferences_set_string (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key,
+                               const gchar *string);
+
 void
 pragha_preferences_set_approximate_search (PraghaPreferences *prefernces,
                                            gboolean approximate_search);
