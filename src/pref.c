@@ -883,13 +883,6 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SAVE_PLAYLIST,
 			       cwin->cpref->save_playlist);
 
-	/* Repeat options */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_REPEAT,
-			       cwin->cpref->repeat);
-
 	/* Save list of columns visible in current playlist */
 
 	if (cwin->cpref->playlist_columns) {

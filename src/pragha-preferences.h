@@ -90,6 +90,12 @@ pragha_preferences_set_shuffle (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_shuffle (PraghaPreferences *preferences);
 
+void
+pragha_preferences_set_repeat (PraghaPreferences *preferences,
+                               gboolean repeat);
+gboolean
+pragha_preferences_get_repeat (PraghaPreferences *preferences);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

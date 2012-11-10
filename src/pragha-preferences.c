@@ -27,6 +27,7 @@ struct _PraghaPreferencesPrivate
    gboolean   instant_search;
    gboolean   approximate_search;
    gboolean   shuffle;
+   gboolean   repeat;
 };
 
 enum
@@ -35,6 +36,7 @@ enum
    PROP_INSTANT_SEARCH,
    PROP_APPROXIMATE_SEARCH,
    PROP_SHUFFLE,
+   PROP_REPEAT,
    LAST_PROP
 };
 
@@ -189,6 +191,30 @@ pragha_preferences_set_shuffle (PraghaPreferences *preferences,
    preferences->priv->shuffle = shuffle;
 }
 
+/**
+ * pragha_preferences_get_repeat:
+ *
+ */
+gboolean
+pragha_preferences_get_repeat (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->repeat;
+}
+
+/**
+ * pragha_preferences_set_repeat:
+ *
+ */
+void
+pragha_preferences_set_repeat (PraghaPreferences *preferences,
+                               gboolean repeat)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->repeat = repeat;
+}
 
 static void
 pragha_preferences_finalize (GObject *object)
@@ -217,7 +243,10 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_PLAYLIST,
                           KEY_SHUFFLE,
                           priv->shuffle);
-
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_REPEAT,
+                          priv->repeat);
    /* Save to key file */
 
    data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -248,6 +277,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_SHUFFLE:
       g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
       break;
+   case PROP_REPEAT:
+      g_value_set_boolean (value, pragha_preferences_get_repeat(preferences));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -271,7 +303,10 @@ pragha_preferences_set_property (GObject *object,
    case PROP_SHUFFLE:
       pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
       break;
-    default:
+   case PROP_REPEAT:
+      pragha_preferences_set_repeat(preferences, g_value_get_boolean(value));
+      break;
+   default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
 }
@@ -329,12 +364,26 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
     g_object_class_install_property(object_class, PROP_SHUFFLE,
                                     gParamSpecs[PROP_SHUFFLE]);
 
+   /**
+    * PraghaPreferences:repeat:
+    *
+    */
+   gParamSpecs[PROP_REPEAT] =
+      g_param_spec_boolean("repeat",
+                           "Repeat",
+                           "Repeat Preference",
+                           FALSE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_REPEAT,
+                                    gParamSpecs[PROP_REPEAT]);
 }
 
 static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
-   gboolean approximate_search, instant_search, shuffle;
+   gboolean approximate_search, instant_search;
+   gboolean shuffle, repeat;
    const gchar *config_dir;
    GError *error = NULL;
 
@@ -396,8 +445,21 @@ pragha_preferences_init (PraghaPreferences *preferences)
       error = NULL;
    }
    else {
-      pragha_preferences_set_instant_search(preferences, shuffle);
+      pragha_preferences_set_shuffle(preferences, shuffle);
    }
+
+   repeat = g_key_file_get_boolean(priv->rc_keyfile,
+                                   GROUP_PLAYLIST,
+                                   KEY_REPEAT,
+                                   &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_repeat(preferences, repeat);
+   }
+
 }
 
 /**
