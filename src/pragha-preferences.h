@@ -84,6 +84,11 @@ pragha_preferences_set_instant_search (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_instant_search (PraghaPreferences *preferences);
 
+void
+pragha_preferences_set_shuffle (PraghaPreferences *preferences,
+                                gboolean shuffle);
+gboolean
+pragha_preferences_get_shuffle (PraghaPreferences *preferences);
 
 G_END_DECLS
 

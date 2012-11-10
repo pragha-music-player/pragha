@@ -364,15 +364,20 @@ void
 shuffle_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_shuffle;
+	gboolean shuffle;
 
-	cwin->cpref->shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+	CDEBUG(DBG_INFO, "shuffle_button_handlet");
+
+	shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+
+	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
+	current_playlist_set_shuffle(cwin->cplaylist, shuffle);
 
 	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 
 	g_signal_handlers_block_by_func (action_shuffle, shuffle_action, cwin);
 
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), cwin->cpref->shuffle);
-		shuffle_button(cwin);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), shuffle);
 
 	g_signal_handlers_unblock_by_func (action_shuffle, shuffle_action, cwin);
 
@@ -394,33 +399,6 @@ repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
-}
-
-void shuffle_button (struct con_win *cwin)
-{
-	GtkTreeRowReference *ref;
-
-	if(cwin->cplaylist->no_tracks){
-		current_playlist_clear_dirty_all(cwin->cplaylist);
-
-		if (!cwin->cpref->shuffle) {
-			CDEBUG(DBG_INFO, "Turning shuffle off");
-			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
-			if (cwin->cplaylist->curr_rand_ref)
-				cwin->cplaylist->curr_seq_ref =
-					gtk_tree_row_reference_copy(cwin->cplaylist->curr_rand_ref);
-			else
-				cwin->cplaylist->curr_seq_ref = NULL;
-		}
-		else if (cwin->cpref->shuffle) {
-			CDEBUG(DBG_INFO, "Turning shuffle on");
-			if (cwin->cplaylist->curr_seq_ref) {
-				ref = gtk_tree_row_reference_copy(cwin->cplaylist->curr_seq_ref);
-				cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks - 1;
-				reset_rand_track_refs(ref, cwin->cplaylist);
-			}
-		}
-	}
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)

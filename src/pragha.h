@@ -483,7 +483,6 @@ struct con_pref {
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
 	gboolean timer_remaining_mode;
-	gboolean shuffle;
 	gboolean repeat;
 	gboolean save_playlist;
 	gboolean software_mixer;
@@ -619,6 +618,7 @@ struct con_gnome_media_keys;
  * @view - The playlist tree view widget
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
+ * @shuffle: If shuffle is activated.
  * @no_tracks: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @rand: To generate random numbers
@@ -632,6 +632,7 @@ typedef struct {
 	GtkWidget *view;
 	GtkWidget *widget;
 	gboolean changing;
+	gboolean shuffle;
 	gint no_tracks;
 	gint unplayed_tracks;
 	GRand *rand;
@@ -1032,7 +1033,6 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
-void shuffle_button(struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
 void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreePath *path,
@@ -1104,6 +1104,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+void
+current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void cplaylist_free(PraghaPlaylist *cplaylist);
 PraghaPlaylist *cplaylist_new(struct con_win *cwin);
 

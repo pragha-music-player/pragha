@@ -45,7 +45,7 @@ static void dbus_prev_handler(struct con_win *cwin)
 
 static void dbus_shuffle_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->shuffle)
+	if (pragha_preferences_get_shuffle(cwin->preferences))
 		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
 				     cwin->shuffle_button), FALSE);
 	else

@@ -26,6 +26,7 @@ struct _PraghaPreferencesPrivate
    gchar     *rc_uri;
    gboolean   instant_search;
    gboolean   approximate_search;
+   gboolean   shuffle;
 };
 
 enum
@@ -33,6 +34,7 @@ enum
    PROP_0,
    PROP_INSTANT_SEARCH,
    PROP_APPROXIMATE_SEARCH,
+   PROP_SHUFFLE,
    LAST_PROP
 };
 
@@ -162,6 +164,32 @@ pragha_preferences_set_approximate_search (PraghaPreferences *preferences,
    preferences->priv->approximate_search = approximate_search;
 }
 
+/**
+ * pragha_preferences_get_shuffle:
+ *
+ */
+gboolean
+pragha_preferences_get_shuffle (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->shuffle;
+}
+
+/**
+ * pragha_preferences_set_shuffle:
+ *
+ */
+void
+pragha_preferences_set_shuffle (PraghaPreferences *preferences,
+                                gboolean shuffle)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->shuffle = shuffle;
+}
+
+
 static void
 pragha_preferences_finalize (GObject *object)
 {
@@ -184,6 +212,11 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_GENERAL,
                           KEY_APPROXIMATE_SEARCH,
                           priv->approximate_search);
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_SHUFFLE,
+                          priv->shuffle);
 
    /* Save to key file */
 
@@ -212,6 +245,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_APPROXIMATE_SEARCH:
       g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
       break;
+   case PROP_SHUFFLE:
+      g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -231,6 +267,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_APPROXIMATE_SEARCH:
       pragha_preferences_set_approximate_search(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_SHUFFLE:
+      pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -275,12 +314,27 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 
     g_object_class_install_property(object_class, PROP_APPROXIMATE_SEARCH,
                                     gParamSpecs[PROP_APPROXIMATE_SEARCH]);
+
+   /**
+    * PraghaPreferences:shuffle:
+    *
+    */
+   gParamSpecs[PROP_SHUFFLE] =
+      g_param_spec_boolean("shuffle",
+                           "Shuffle",
+                           "Shuffle Preference",
+                           FALSE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_SHUFFLE,
+                                    gParamSpecs[PROP_SHUFFLE]);
+
 }
 
 static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
-   gboolean approximate_search, instant_search;
+   gboolean approximate_search, instant_search, shuffle;
    const gchar *config_dir;
    GError *error = NULL;
 
@@ -331,6 +385,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
    }
    else {
       pragha_preferences_set_instant_search(preferences, instant_search);
+   }
+
+   shuffle = g_key_file_get_boolean(priv->rc_keyfile,
+                                    GROUP_PLAYLIST,
+                                    KEY_SHUFFLE,
+                                    &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_instant_search(preferences, shuffle);
    }
 }
 
