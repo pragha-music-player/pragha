@@ -433,7 +433,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 		update_status_bar_playtime(cwin);
 	}
 }
@@ -816,7 +816,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	mpris_update_metadata_changed(cwin);
 
-	if ((path = current_playlist_get_actual(cwin)) != NULL) {
+	if ((path = current_playlist_get_actual(cwin->cplaylist)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
@@ -1023,9 +1023,9 @@ void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
-	path = current_playlist_get_actual(cwin);
+	path = current_playlist_get_actual(cwin->cplaylist);
 
-	jump_to_path_on_current_playlist (path, TRUE, cwin->cplaylist);
+	jump_to_path_on_current_playlist (cwin->cplaylist, path, TRUE);
 
 	gtk_tree_path_free(path);
 }
@@ -1301,7 +1301,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	select_numered_path_of_current_playlist(0, FALSE, cwin->cplaylist);
+	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
 	update_status_bar_playtime(cwin);
 
 	mpris_update_tracklist_replaced(cwin);
