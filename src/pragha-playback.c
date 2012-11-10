@@ -63,7 +63,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
 	/* Get the next (prev) track to be played */
-	path = current_playlist_get_prev(cwin);
+	path = current_playlist_get_prev(cwin->cplaylist);
 
 	/* No more tracks */
 	if (!path)
@@ -169,7 +169,7 @@ void pragha_advance_playback (struct con_win *cwin)
 		return;
 
 	/* Get the next track to be played */
-	path = current_playlist_get_next (cwin);
+	path = current_playlist_get_next (cwin->cplaylist);
 
 	/* No more tracks */
 	if (!path)

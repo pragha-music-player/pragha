@@ -39,7 +39,7 @@ pragha_filter_dialog_select_row_on_current_playlist(GtkTreeView *fliter_view,
 
 	if(gtk_tree_model_get_iter (filter_model, &iter, filter_path)) {
 		gtk_tree_model_get (filter_model, &iter, 0, &track_i, -1);
-		select_numered_path_of_current_playlist(track_i - 1, TRUE, fdialog->cplaylist);
+		select_numered_path_of_current_playlist(fdialog->cplaylist, track_i - 1, TRUE);
 	}
 }
 

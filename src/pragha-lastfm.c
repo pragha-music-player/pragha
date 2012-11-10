@@ -130,7 +130,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	mpris_update_metadata_changed(cwin);
 
-	if ((path = current_playlist_get_actual(cwin)) != NULL) {
+	if ((path = current_playlist_get_actual(cwin->cplaylist)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
 			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
@@ -334,7 +334,7 @@ empty:
 	}
 
 	if(songs_added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 
 	if (summary != NULL) {
 		set_status_message(summary, cwin);
@@ -460,7 +460,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 			added++;
 	}
 	if(added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, TRUE, cwin->cplaylist);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 
 	remove_watch_cursor (cwin->mainwindow);
 

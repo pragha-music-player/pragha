@@ -538,7 +538,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
-	path = current_playlist_get_actual(cwin);
+	path = current_playlist_get_actual(cwin->cplaylist);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	if(gtk_tree_model_get_iter(model, &iter, path))
