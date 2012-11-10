@@ -1304,7 +1304,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		if(!cwin->cpref->shuffle)
+		if(!cwin->cplaylist->shuffle)
 			select_numered_path_of_current_playlist(0, FALSE, cwin->cplaylist);
 		update_status_bar_playtime(cwin);
 		

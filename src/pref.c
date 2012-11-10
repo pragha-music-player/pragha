@@ -883,12 +883,8 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SAVE_PLAYLIST,
 			       cwin->cpref->save_playlist);
 
-	/* Shuffle and repeat options */
+	/* Repeat options */
 
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_SHUFFLE,
-			       cwin->cpref->shuffle);
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_PLAYLIST,
 			       KEY_REPEAT,

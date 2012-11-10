@@ -402,7 +402,10 @@ static void mpris_Player_put_Rate (GVariant *value, GError **error, struct con_w
 
 static GVariant* mpris_Player_get_Shuffle (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(cwin->cpref->shuffle);
+	gboolean shuffle;
+	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+
+	return g_variant_new_boolean(shuffle);
 }
 
 static void mpris_Player_put_Shuffle (GVariant *value, GError **error, struct con_win *cwin)
@@ -984,7 +987,7 @@ on_name_lost (GDBusConnection *connection,
 
 void mpris_update_any(struct con_win *cwin)
 {
-	gboolean change_detected = FALSE;
+	gboolean change_detected = FALSE, shuffle;
 	GVariantBuilder b;
 	gchar *newtitle = NULL;
 	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
@@ -998,10 +1001,12 @@ void mpris_update_any(struct con_win *cwin)
 		newtitle = cwin->cstate->curr_mobj->file;
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
-	if(cwin->cmpris2->saved_shuffle != cwin->cpref->shuffle)
+
+	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+	if(cwin->cmpris2->saved_shuffle != shuffle)
 	{
 		change_detected = TRUE;
-		cwin->cmpris2->saved_shuffle = cwin->cpref->shuffle;
+		cwin->cmpris2->saved_shuffle = shuffle;
 		g_variant_builder_add (&b, "{sv}", "Shuffle", mpris_Player_get_Shuffle (NULL, cwin));
 	}
 	if(cwin->cmpris2->state != pragha_backend_get_state (cwin->backend))

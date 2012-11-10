@@ -898,14 +898,18 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 
 void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	gboolean shuffle;
+
 	CDEBUG(DBG_INFO, "shuffle_action");
 
-	cwin->cpref->shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
+	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
+	current_playlist_set_shuffle(cwin->cplaylist, shuffle);
+	
 	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
-		shuffle_button(cwin);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), shuffle);
 
 	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 }

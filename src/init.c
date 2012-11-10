@@ -154,7 +154,7 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
-	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
+	gboolean save_playlist_f, repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
 	gboolean remember_window_state_f, start_mode_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
@@ -165,7 +165,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
+	save_playlist_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
 	remember_window_state_f = start_mode_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
@@ -709,17 +709,6 @@ gint init_config(struct con_win *cwin)
 			use_hint_f= TRUE;
 		}
 
-		cwin->cpref->shuffle =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_PLAYLIST,
-					       KEY_SHUFFLE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			shuffle_f = TRUE;
-		}
-
 		cwin->cpref->repeat =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_PLAYLIST,
@@ -933,8 +922,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->save_playlist = TRUE;
 	if (all_f || software_mixer_f)
 		cwin->cpref->software_mixer = TRUE;
-	if (all_f || shuffle_f)
-		cwin->cpref->shuffle = FALSE;
 	if (all_f || repeat_f)
 		cwin->cpref->repeat = FALSE;
 
@@ -1062,16 +1049,23 @@ void init_tag_completion(struct con_win *cwin)
 
 void init_toggle_buttons(struct con_win *cwin)
 {
-	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
+	gboolean shuffle;
+
+	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+
+	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), shuffle);
 	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
 }
 
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
+	gboolean shuffle;
+
+	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Shuffle");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), shuffle);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->repeat);
