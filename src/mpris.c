@@ -380,13 +380,19 @@ static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win
 
 static GVariant* mpris_Player_get_LoopStatus (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_string(cwin->cpref->repeat ? "Playlist" : "None");
+	gboolean repeat;
+
+	repeat = pragha_preferences_get_repeat(cwin->preferences);
+
+	return g_variant_new_string(repeat ? "Playlist" : "None");
 }
 
 static void mpris_Player_put_LoopStatus (GVariant *value, GError **error, struct con_win *cwin)
 {
 	const gchar *new_loop = g_variant_get_string(value, NULL);
+
 	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), repeat);
 }
 
@@ -987,7 +993,7 @@ on_name_lost (GDBusConnection *connection,
 
 void mpris_update_any(struct con_win *cwin)
 {
-	gboolean change_detected = FALSE, shuffle;
+	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
 	gchar *newtitle = NULL;
 	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
@@ -1015,10 +1021,11 @@ void mpris_update_any(struct con_win *cwin)
 		cwin->cmpris2->state = pragha_backend_get_state (cwin->backend);
 		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, cwin));
 	}
-	if(cwin->cmpris2->saved_playbackstatus != cwin->cpref->repeat)
+	repeat = pragha_preferences_get_repeat(cwin->preferences);
+	if(cwin->cmpris2->saved_playbackstatus != repeat)
 	{
 		change_detected = TRUE;
-		cwin->cmpris2->saved_playbackstatus = cwin->cpref->repeat;
+		cwin->cmpris2->saved_playbackstatus = repeat;
 		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, cwin));
 	}
 	if(cwin->cmpris2->volume != curr_vol)

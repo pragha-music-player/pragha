@@ -483,7 +483,6 @@ struct con_pref {
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
 	gboolean timer_remaining_mode;
-	gboolean repeat;
 	gboolean save_playlist;
 	gboolean software_mixer;
 #ifdef HAVE_LIBGLYR
@@ -619,6 +618,7 @@ struct con_gnome_media_keys;
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
  * @shuffle: If shuffle is activated.
+ * @repeat: If repeat is activated.
  * @no_tracks: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @rand: To generate random numbers
@@ -633,6 +633,7 @@ typedef struct {
 	GtkWidget *widget;
 	gboolean changing;
 	gboolean shuffle;
+	gboolean repeat;
 	gint no_tracks;
 	gint unplayed_tracks;
 	GRand *rand;
@@ -1106,6 +1107,8 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
 void
 current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
+void
+current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
 void cplaylist_free(PraghaPlaylist *cplaylist);
 PraghaPlaylist *cplaylist_new(struct con_win *cwin);
 

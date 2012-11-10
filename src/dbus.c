@@ -55,7 +55,7 @@ static void dbus_shuffle_handler(struct con_win *cwin)
 
 static void dbus_repeat_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->repeat)
+	if (pragha_preferences_get_repeat(cwin->preferences))
 		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
 				     cwin->repeat_button), FALSE);
 	else

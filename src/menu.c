@@ -918,13 +918,18 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 
 void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	gboolean repeat;
+
 	CDEBUG(DBG_INFO, "Repeat_action");
 
-	cwin->cpref->repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	pragha_preferences_set_repeat(cwin->preferences, repeat);
+	current_playlist_set_repeat(cwin->cplaylist, repeat);
 
 	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), repeat);
 		
 	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 }

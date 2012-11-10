@@ -1202,10 +1202,10 @@ GtkTreePath* current_playlist_get_next(struct con_win *cwin)
 				break;
 		}
 	}
-	if (rand_unplayed && cwin->cpref->repeat)
+	if (rand_unplayed && cwin->cplaylist->repeat)
 		path = get_next_random_track(cwin->cplaylist);
 
-	if (seq_last && cwin->cpref->repeat)
+	if (seq_last && cwin->cplaylist->repeat)
 		path = current_playlist_nth_track(0, cwin->cplaylist);
 
 	return path;
@@ -1233,7 +1233,7 @@ GtkTreePath* current_playlist_get_prev(struct con_win *cwin)
 		break;
 	}
 
-	if (seq_first && cwin->cpref->repeat)
+	if (seq_first && cwin->cplaylist->repeat)
 		path = current_playlist_nth_track((cwin->cplaylist->no_tracks-1),
 						  cwin->cplaylist);
 
@@ -3942,6 +3942,12 @@ current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
 		else
 			cplaylist->curr_seq_ref = NULL;
 	}
+}
+
+void
+current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat)
+{
+	cplaylist->repeat = repeat;
 }
 
 void

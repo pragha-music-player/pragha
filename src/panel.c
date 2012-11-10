@@ -388,13 +388,15 @@ void
 repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_repeat;
+	gboolean repeat;
+
 	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 
-	cwin->cpref->repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+	repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
 
 	g_signal_handlers_block_by_func (action_repeat, repeat_action, cwin);
 
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), cwin->cpref->repeat);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), repeat);
 
 	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
 
