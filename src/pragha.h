@@ -630,6 +630,8 @@ typedef struct {
 	GtkWidget *view;
 	GtkWidget *widget;
 	GtkWidget *header_context_menu;
+	GtkUIManager *cp_context_menu;
+	GtkUIManager *cp_null_context_menu;
 	GSList *columns;
 	GSList *column_widths;
 	gboolean changing;
@@ -689,8 +691,6 @@ struct con_win {
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
-	GtkUIManager *cp_context_menu;
-	GtkUIManager *cp_null_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
 	GtkUIManager *header_library_tree_context_menu;
@@ -1040,9 +1040,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreeViewColumn *column,
 				       struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
-gboolean current_playlist_button_press_cb(GtkWidget *widget,
-					 GdkEventButton *event,
-					 struct con_win *cwin);
 gboolean current_playlist_button_release_cb(GtkWidget *widget,
 					    GdkEventButton *event,
 					    struct con_win *cwin);

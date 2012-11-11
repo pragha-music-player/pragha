@@ -979,7 +979,7 @@ library_pane_action (GtkAction *action, struct con_win *cwin)
 
 	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), cwin->cpref->lateral_panel);
 
-	paction = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Lateral panel");
+	paction = gtk_ui_manager_get_action(cwin->cplaylist->cp_null_context_menu, "/popup/Lateral panel");
 
 	g_signal_handlers_block_by_func (paction, library_pane_action, cwin);
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(paction), cwin->cpref->lateral_panel);

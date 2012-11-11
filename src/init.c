@@ -1021,23 +1021,23 @@ void init_menu_actions(struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search lyric");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu,"/popup/ToolsMenu/Search lyric");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search artist info");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu,"/popup/ToolsMenu/Search artist info");
 	gtk_action_set_sensitive(action, FALSE);
 #endif
 #ifndef HAVE_LIBCLASTFM
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Love track");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Love track");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Unlove track");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Unlove track");
 	gtk_action_set_sensitive(action, FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Add similar");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Add similar");
 	gtk_action_set_sensitive(action, FALSE);
 #endif
 }
