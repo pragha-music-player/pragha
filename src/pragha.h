@@ -961,6 +961,7 @@ void db_free(struct con_dbase *cdbase);
 
 /* Playlist mgmt functions */
 
+gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice);
 void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 GList *prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
 void add_radio_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
@@ -973,15 +974,6 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
-gboolean dnd_playlist_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-void dnd_playlist_tree_get(GtkWidget *widget,
-			   GdkDragContext *context,
-			   GtkSelectionData *data,
-			   guint info,
-			   guint time,
-			   struct con_win *cwin);
 void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin);
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin);
