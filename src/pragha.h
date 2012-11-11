@@ -629,6 +629,7 @@ struct con_gnome_media_keys;
 typedef struct {
 	GtkWidget *view;
 	GtkWidget *widget;
+	GtkWidget *header_context_menu;
 	GSList *columns;
 	GSList *column_widths;
 	gboolean changing;
@@ -683,7 +684,6 @@ struct con_win {
 	GtkWidget *ntag_lastfm_button;
 	#endif
 	GtkWidget *library_tree;
-	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
@@ -1046,9 +1046,6 @@ gboolean current_playlist_button_press_cb(GtkWidget *widget,
 gboolean current_playlist_button_release_cb(GtkWidget *widget,
 					    GdkEventButton *event,
 					    struct con_win *cwin);
-gboolean header_right_click_cb(GtkWidget *widget,
-			       GdkEventButton *event,
-			       struct con_win *cwin);
 gboolean dnd_current_playlist_begin(GtkWidget *widget,
 				    GdkDragContext *context,
 				    struct con_win *cwin);
@@ -1074,27 +1071,26 @@ void dnd_current_playlist_received(GtkWidget *widget,
 				   struct con_win *cwin);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
-GtkWidget* create_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_title_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_artist_column_change_cb(GtkCheckMenuItem *item,
-				      struct con_win *cwin);
+				      PraghaPlaylist* cplaylist);
 void playlist_album_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_genre_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item,
-				       struct con_win *cwin);
+				       PraghaPlaylist* cplaylist);
 void playlist_year_column_change_cb(GtkCheckMenuItem *item,
-				    struct con_win *cwin);
+				    PraghaPlaylist* cplaylist);
 void playlist_length_column_change_cb(GtkCheckMenuItem *item,
-				      struct con_win *cwin);
+				      PraghaPlaylist* cplaylist);
 void playlist_comment_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
-					struct con_win *cwin);
+					PraghaPlaylist* cplaylist);
 void clear_sort_current_playlist_cb(GtkMenuItem *item,
 				    PraghaPlaylist *cplaylist);
 gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a,

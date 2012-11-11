@@ -721,9 +721,10 @@ static gint compare_playlist_column_name(gconstpointer a, gconstpointer b)
 
 /* Function to add/delete columns from preferences */
 
-static void modify_current_playlist_columns(struct con_win *cwin,
-					    const gchar *col_name,
-					    gboolean state)
+static void
+modify_current_playlist_columns(PraghaPlaylist* cplaylist,
+				const gchar *col_name,
+				gboolean state)
 {
 	gboolean pref_present;
 	GSList *element;
@@ -733,7 +734,7 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 		return;
 	}
 
-	pref_present = is_present_str_list(col_name, cwin->cplaylist->columns);
+	pref_present = is_present_str_list(col_name, cplaylist->columns);
 
 	/* Already in preferences */
 
@@ -744,12 +745,12 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 	/* Remove from preferences */
 
 	else if (pref_present && !state) {
-		element = g_slist_find_custom(cwin->cplaylist->columns,
+		element = g_slist_find_custom(cplaylist->columns,
 				      col_name, compare_playlist_column_name);
 		if (element) {
 			g_free(element->data);
-			cwin->cplaylist->columns =
-				g_slist_delete_link(cwin->cplaylist->columns,
+			cplaylist->columns =
+				g_slist_delete_link(cplaylist->columns,
 						    element);
 		}
 		else
@@ -759,9 +760,9 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 
 	/* Add to preferences */
  
-	else if (!pref_present && state) { 
-		cwin->cplaylist->columns =
-			g_slist_append(cwin->cplaylist->columns,
+	else if (!pref_present && state) {
+		 cplaylist->columns =
+			g_slist_append(cplaylist->columns,
 				       g_strdup(col_name));
 	}
 }
@@ -2410,13 +2411,13 @@ gboolean current_playlist_button_release_cb(GtkWidget *widget,
 
 gboolean header_right_click_cb(GtkWidget *widget,
 			       GdkEventButton *event,
-			       struct con_win *cwin)
+			       PraghaPlaylist *cplaylist)
 {
 	gboolean ret = FALSE;
 
 	switch(event->button) {
 	case 3: {
-		gtk_menu_popup(GTK_MENU(cwin->header_context_menu),
+		gtk_menu_popup(GTK_MENU(cplaylist->header_context_menu),
 			       NULL, NULL, NULL, NULL, event->button, event->time);
 		ret = TRUE;
 		break;
@@ -2967,7 +2968,7 @@ void init_current_playlist_view(struct con_win *cwin)
 
 /* Initialize columns of current playlist */
 
-void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *cwin)
+void init_current_playlist_columns(PraghaPlaylist* cplaylist, struct con_win *cwin)
 {
 	gchar **columns;
 	const gchar *col_name;
@@ -2978,19 +2979,31 @@ void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *c
 	gint *col_widths;
 	gsize cnt = 0, isize;
 
-	list = gtk_tree_view_get_columns(playlist_view);
-
 	columns = pragha_preferences_get_string_list(cwin->preferences,
 						     GROUP_PLAYLIST,
 						     KEY_PLAYLIST_COLUMNS,
 						     &cnt);
 	if (columns) {
 		for (isize=0; isize < cnt; isize++) {
-			cwin->cplaylist->columns =
-				g_slist_append(cwin->cplaylist->columns,
+			cplaylist->columns =
+				g_slist_append(cplaylist->columns,
 					       g_strdup(columns[isize]));
 		}
 		g_strfreev(columns);
+	}
+	else {
+		cplaylist->columns =
+			g_slist_append(cplaylist->columns,
+				       g_strdup(P_TITLE_STR));
+		cplaylist->columns =
+			g_slist_append(cplaylist->columns,
+				       g_strdup(P_ARTIST_STR));
+		cplaylist->columns =
+			g_slist_append(cplaylist->columns,
+				       g_strdup(P_ALBUM_STR));
+		cplaylist->columns =
+			g_slist_append(cplaylist->columns,
+				       g_strdup(P_LENGTH_STR));
 	}
 
 	col_widths = pragha_preferences_get_integer_list(cwin->preferences,
@@ -2999,24 +3012,33 @@ void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *c
 							 &cnt);
 	if (col_widths) {
 		for (isize = 0; isize < cnt; isize++) {
-			cwin->cplaylist->column_widths =
-				g_slist_append(cwin->cplaylist->column_widths,
+			cplaylist->column_widths =
+				g_slist_append(cplaylist->column_widths,
 					       GINT_TO_POINTER(col_widths[isize]));
 		}
 		g_free(col_widths);
 	}
+	else {
+		for (isize=0; isize < 4; isize++) {
+			cplaylist->column_widths =
+				g_slist_append(cplaylist->column_widths,
+				       GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
+		}
+	}
 
 	/* Mark only the columns that are present in
-	   cwin->cplaylist->columns as visible.
+	   cplaylist->columns as visible.
 	   And set their sizes */
+
+	list = gtk_tree_view_get_columns(GTK_TREE_VIEW(cplaylist->view));
 
 	if (list) {
 		for (i=list; i != NULL; i = i->next) {
 			col = i->data;
 			col_name = gtk_tree_view_column_get_title(col);
 			if (is_present_str_list(col_name,
-						cwin->cplaylist->columns)) {
-				j = g_slist_nth(cwin->cplaylist->column_widths,
+						cplaylist->columns)) {
+				j = g_slist_nth(cplaylist->column_widths,
 						k++);
 				gtk_tree_view_column_set_visible(col, TRUE);
 				gtk_tree_view_column_set_sizing(col,
@@ -3037,13 +3059,14 @@ void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *c
 		g_warning("(%s): No columns in playlist view", __func__);
 
 	/* Always show queue and status pixbuf colum */
-	col = gtk_tree_view_get_column(playlist_view, 0);
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view), 0);
 	gtk_tree_view_column_set_visible(col, TRUE);
 	gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_fixed_width(col, 32);
 }
 
-static GtkWidget* create_header_context_menu(struct con_win *cwin)
+static GtkWidget*
+create_header_context_menu(PraghaPlaylist* cplaylist)
 {
 	GtkWidget *menu;
 	GtkWidget *toggle_track,
@@ -3096,51 +3119,51 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 
 	/* Initialize the state of the items */
 
-	if (is_present_str_list(P_TRACK_NO_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_TRACK_NO_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_track), TRUE);
-	if (is_present_str_list(P_TITLE_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_TITLE_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_title), TRUE);
-	if (is_present_str_list(P_ARTIST_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_ARTIST_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_artist), TRUE);
-	if (is_present_str_list(P_ALBUM_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_ALBUM_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_album), TRUE);
-	if (is_present_str_list(P_GENRE_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_GENRE_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_genre), TRUE);
-	if (is_present_str_list(P_BITRATE_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_BITRATE_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_bitrate), TRUE);
-	if (is_present_str_list(P_YEAR_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_YEAR_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_year), TRUE);
-	if (is_present_str_list(P_COMMENT_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_COMMENT_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_comment), TRUE);
-	if (is_present_str_list(P_LENGTH_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_LENGTH_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_length), TRUE);
-	if (is_present_str_list(P_FILENAME_STR, cwin->cplaylist->columns))
+	if (is_present_str_list(P_FILENAME_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_filename), TRUE);
 
 	/* Setup the individual signal handlers */
 
 	g_signal_connect(G_OBJECT(toggle_track), "toggled",
-			 G_CALLBACK(playlist_track_column_change_cb), cwin);
+			 G_CALLBACK(playlist_track_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_title), "toggled",
-			 G_CALLBACK(playlist_title_column_change_cb), cwin);
+			 G_CALLBACK(playlist_title_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_artist), "toggled",
-			 G_CALLBACK(playlist_artist_column_change_cb), cwin);
+			 G_CALLBACK(playlist_artist_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_album), "toggled",
-			 G_CALLBACK(playlist_album_column_change_cb), cwin);
+			 G_CALLBACK(playlist_album_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_genre), "toggled",
-			 G_CALLBACK(playlist_genre_column_change_cb), cwin);
+			 G_CALLBACK(playlist_genre_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_bitrate), "toggled",
-			 G_CALLBACK(playlist_bitrate_column_change_cb), cwin);
+			 G_CALLBACK(playlist_bitrate_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_year), "toggled",
-			 G_CALLBACK(playlist_year_column_change_cb), cwin);
+			 G_CALLBACK(playlist_year_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_comment), "toggled",
-			 G_CALLBACK(playlist_comment_column_change_cb), cwin);
+			 G_CALLBACK(playlist_comment_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_length), "toggled",
-			 G_CALLBACK(playlist_length_column_change_cb), cwin);
+			 G_CALLBACK(playlist_length_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_filename), "toggled",
-			 G_CALLBACK(playlist_filename_column_change_cb), cwin);
+			 G_CALLBACK(playlist_filename_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(action_clear_sort), "activate",
-			 G_CALLBACK(clear_sort_current_playlist_cb), cwin->cplaylist);
+			 G_CALLBACK(clear_sort_current_playlist_cb), cplaylist);
 
 	gtk_widget_show_all(menu);
 
@@ -3250,8 +3273,8 @@ static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 			 cwin);
 }
 
-static void create_current_playlist_columns(GtkWidget *current_playlist,
-					    struct con_win *cwin)
+static void
+create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -3296,7 +3319,7 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_attributes(column, renderer, "pixbuf", P_STATUS_PIXBUF, NULL);
 
 	gtk_tree_view_column_set_resizable(column, FALSE);
-	gtk_tree_view_append_column (GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column (GTK_TREE_VIEW(view), column);
 
 	gtk_tree_view_column_set_widget (column, state_pixbuf);
 	gtk_tree_view_column_set_alignment (column, 0.5);
@@ -3316,12 +3339,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_track);
 	gtk_widget_show(label_track);
 	col_button = gtk_widget_get_ancestor(label_track, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Title */
 
@@ -3336,12 +3359,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_title);
 	gtk_widget_show(label_title);
 	col_button = gtk_widget_get_ancestor(label_title, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Artist */
 
@@ -3356,12 +3379,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_artist);
 	gtk_widget_show(label_artist);
 	col_button = gtk_widget_get_ancestor(label_artist, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Album */
 
@@ -3376,12 +3399,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_album);
 	gtk_widget_show(label_album);
 	col_button = gtk_widget_get_ancestor(label_album, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Genre */
 
@@ -3396,12 +3419,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_genre);
 	gtk_widget_show(label_genre);
 	col_button = gtk_widget_get_ancestor(label_genre, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Bitrate */
 
@@ -3416,12 +3439,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_bitrate);
 	gtk_widget_show(label_bitrate);
 	col_button = gtk_widget_get_ancestor(label_bitrate, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Year */
 
@@ -3436,12 +3459,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_year);
 	gtk_widget_show(label_year);
 	col_button = gtk_widget_get_ancestor(label_year, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Comment */
 
@@ -3456,12 +3479,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_comment);
 	gtk_widget_show(label_comment);
 	col_button = gtk_widget_get_ancestor(label_comment, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Length */
 
@@ -3475,12 +3498,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 							  NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_length);
 	gtk_widget_show(label_length);
 	col_button = gtk_widget_get_ancestor(label_length, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 
 	/* Column : Filename */
 
@@ -3495,12 +3518,12 @@ static void create_current_playlist_columns(GtkWidget *current_playlist,
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(current_playlist), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_column_set_widget(column, label_filename);
 	gtk_widget_show(label_filename);
 	col_button = gtk_widget_get_ancestor(label_filename, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
-			 G_CALLBACK(header_right_click_cb), cwin);
+			 G_CALLBACK(header_right_click_cb), cplaylist);
 }
 
 static void
@@ -3528,7 +3551,7 @@ create_current_playlist_container(struct con_win *cwin)
 	return scroll_window;
 }
 
-GtkWidget* create_current_playlist_view(struct con_win *cwin)
+GtkWidget* create_current_playlist_view(PraghaPlaylist* cplaylist, struct con_win *cwin)
 {
 	GtkWidget *current_playlist;
 	GtkListStore *store;
@@ -3595,7 +3618,7 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	/* Create the columns and cell renderers */
 
-	create_current_playlist_columns(current_playlist, cwin);
+	create_current_playlist_columns(cplaylist, GTK_TREE_VIEW(current_playlist));
 
 	/* Signal handler for double-clicking on a row */
 
@@ -3609,7 +3632,6 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	cwin->cp_context_menu = create_cp_context_menu(current_playlist, cwin);
 	cwin->cp_null_context_menu = create_cp_null_context_menu(current_playlist, cwin);
-	cwin->header_context_menu = create_header_context_menu(cwin);
 
 	/* Signal handler for right-clicking and selection */
 
@@ -3623,9 +3645,8 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist), cwin->cpref->use_hint);
 
-	/* Set initial column visibility */
+	/* Update menu depending playback state */
 
-	init_current_playlist_columns(GTK_TREE_VIEW(current_playlist), cwin);
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin);
 
 	g_object_unref(store);
@@ -3635,14 +3656,14 @@ GtkWidget* create_current_playlist_view(struct con_win *cwin)
 
 /* Callback for adding/deleting track_no column */
 
-void playlist_track_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_TRACK_NO - 3);
 
 	if (!col) {
@@ -3652,19 +3673,19 @@ void playlist_track_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting title column */
 
-void playlist_title_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_title_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_TITLE - 3);
 
 	if (!col) {
@@ -3674,19 +3695,19 @@ void playlist_title_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting artist column */
 
-void playlist_artist_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_ARTIST - 3);
 
 	if (!col) {
@@ -3696,19 +3717,19 @@ void playlist_artist_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting album column */
 
-void playlist_album_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_ALBUM - 3);
 
 	if (!col) {
@@ -3718,19 +3739,19 @@ void playlist_album_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting genre column */
 
-void playlist_genre_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_genre_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_GENRE - 3);
 
 	if (!col) {
@@ -3740,19 +3761,19 @@ void playlist_genre_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwi
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting bitrate column */
 
-void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_BITRATE - 3);
 
 	if (!col) {
@@ -3762,19 +3783,19 @@ void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, struct con_win *c
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting year column */
 
-void playlist_year_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_year_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_YEAR - 3);
 
 	if (!col) {
@@ -3784,19 +3805,19 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting comment column */
 
-void playlist_comment_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_comment_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_COMMENT - 3);
 
 	if (!col) {
@@ -3806,19 +3827,19 @@ void playlist_comment_column_change_cb(GtkCheckMenuItem *item, struct con_win *c
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting length column */
 
-void playlist_length_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_length_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_LENGTH - 3);
 
 	if (!col) {
@@ -3828,19 +3849,19 @@ void playlist_length_column_change_cb(GtkCheckMenuItem *item, struct con_win *cw
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Callback for adding/deleting filename column */
 
-void playlist_filename_column_change_cb(GtkCheckMenuItem *item, struct con_win *cwin)
+void playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	const gchar *col_name;
 	gboolean state;
 	GtkTreeViewColumn *col;
 
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cwin->cplaylist->view),
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
 				       P_FILENAME - 3);
 
 	if (!col) {
@@ -3850,7 +3871,7 @@ void playlist_filename_column_change_cb(GtkCheckMenuItem *item, struct con_win *
 
 	col_name = gtk_tree_view_column_get_title(col);
 	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cwin, col_name, state);
+	modify_current_playlist_columns(cplaylist, col_name, state);
 }
 
 /* Clear sort in the current playlist */
@@ -4055,8 +4076,12 @@ cplaylist_new(struct con_win *cwin)
 
 	cplaylist = g_slice_new0(PraghaPlaylist);
 
-	cplaylist->view = create_current_playlist_view(cwin);
+	cplaylist->view = create_current_playlist_view(cplaylist, cwin);
 	cplaylist->widget = create_current_playlist_container(cwin);
+
+	init_current_playlist_columns(cplaylist, cwin);
+
+	cplaylist->header_context_menu = create_header_context_menu(cplaylist);
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->widget), cplaylist->view);
 

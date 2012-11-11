@@ -154,7 +154,7 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
-	gboolean save_playlist_f, columns_f, col_widths_f;
+	gboolean save_playlist_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
 	gboolean remember_window_state_f, start_mode_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
@@ -165,7 +165,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	save_playlist_f = columns_f = col_widths_f = FALSE;
+	save_playlist_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
 	remember_window_state_f = start_mode_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
@@ -805,20 +805,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->lib_delete = NULL;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
-	if (all_f || columns_f) {
-		cwin->cplaylist->columns =
-			g_slist_append(cwin->cplaylist->columns,
-				       g_strdup(P_TITLE_STR));
-		cwin->cplaylist->columns =
-			g_slist_append(cwin->cplaylist->columns,
-				       g_strdup(P_ARTIST_STR));
-		cwin->cplaylist->columns =
-			g_slist_append(cwin->cplaylist->columns,
-				       g_strdup(P_ALBUM_STR));
-		cwin->cplaylist->columns =
-			g_slist_append(cwin->cplaylist->columns,
-				       g_strdup(P_LENGTH_STR));
-	}
 	if (all_f || nodes_f) {
 		cwin->cpref->library_tree_nodes =
 			g_slist_append(cwin->cpref->library_tree_nodes,
@@ -834,13 +820,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->fuse_folders = FALSE;
 	if (all_f || sort_by_year_f)
 		cwin->cpref->sort_by_year = FALSE;
-	if (all_f || col_widths_f) {
-		for (i=0; i<4; i++) {
-			cwin->cplaylist->column_widths =
-				g_slist_append(cwin->cplaylist->column_widths,
-				       GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
-		}
-	}
 	if (all_f || cur_lib_view_f)
 		cwin->cpref->cur_library_view = FOLDERS;
 	if (all_f || recursively_f)
