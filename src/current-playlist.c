@@ -3644,17 +3644,14 @@ GtkWidget* create_current_playlist_view(PraghaPlaylist* cplaylist, struct con_wi
 	return current_playlist;
 }
 
-/* Callback for adding/deleting track_no column */
-
-void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_column_set_visible(PraghaPlaylist* cplaylist, gint column, gboolean visible)
 {
 	const gchar *col_name;
-	gboolean state;
 	GtkTreeViewColumn *col;
 
-	state = gtk_check_menu_item_get_active(item);
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_TRACK_NO - 3);
+				       column - 3);
 
 	if (!col) {
 		g_warning("Invalid column number");
@@ -3662,206 +3659,108 @@ void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 	}
 
 	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	gtk_tree_view_column_set_visible(col, visible);
+	modify_current_playlist_columns(cplaylist, col_name, visible);
+}
+
+/* Callback for adding/deleting track_no column */
+
+void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+{
+	gboolean state;
+	state = gtk_check_menu_item_get_active(item);
+
+	playlist_column_set_visible(cplaylist, P_TRACK_NO, state);
 }
 
 /* Callback for adding/deleting title column */
 
 void playlist_title_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_TITLE - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_TITLE, state);
 }
 
 /* Callback for adding/deleting artist column */
 
 void playlist_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_ARTIST - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_ARTIST, state);
 }
 
 /* Callback for adding/deleting album column */
 
 void playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_ALBUM - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_ALBUM, state);
 }
 
 /* Callback for adding/deleting genre column */
 
 void playlist_genre_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_GENRE - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_GENRE, state);
 }
 
 /* Callback for adding/deleting bitrate column */
 
 void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_BITRATE - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_BITRATE, state);
 }
 
 /* Callback for adding/deleting year column */
 
 void playlist_year_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_YEAR - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_YEAR, state);
 }
 
 /* Callback for adding/deleting comment column */
 
 void playlist_comment_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_COMMENT - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_COMMENT, state);
 }
 
 /* Callback for adding/deleting length column */
 
 void playlist_length_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_LENGTH - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_LENGTH, state);
 }
 
 /* Callback for adding/deleting filename column */
 
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
-	const gchar *col_name;
 	gboolean state;
-	GtkTreeViewColumn *col;
-
 	state = gtk_check_menu_item_get_active(item);
-	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view),
-				       P_FILENAME - 3);
 
-	if (!col) {
-		g_warning("Invalid column number");
-		return;
-	}
-
-	col_name = gtk_tree_view_column_get_title(col);
-	gtk_tree_view_column_set_visible(col, state);
-	modify_current_playlist_columns(cplaylist, col_name, state);
+	playlist_column_set_visible(cplaylist, P_FILENAME, state);
 }
 
 /* Clear sort in the current playlist */
