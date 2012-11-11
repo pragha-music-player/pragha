@@ -500,8 +500,6 @@ struct con_pref {
 	gboolean sort_by_year;
 	gboolean use_hint;
 	GSList *library_dir;
-	GSList *playlist_columns;
-	GSList *playlist_column_widths;
 	GSList *library_tree_nodes;
 	GSList *lib_delete;
 	GSList *lib_add;
@@ -631,6 +629,8 @@ struct con_gnome_media_keys;
 typedef struct {
 	GtkWidget *view;
 	GtkWidget *widget;
+	GSList *columns;
+	GSList *column_widths;
 	gboolean changing;
 	gboolean shuffle;
 	gboolean repeat;
@@ -1109,6 +1109,8 @@ void
 current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void
 current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
+void
+current_playlist_save_preferences(PraghaPlaylist* cplaylist);
 void cplaylist_free(PraghaPlaylist *cplaylist);
 PraghaPlaylist *cplaylist_new(struct con_win *cwin);
 

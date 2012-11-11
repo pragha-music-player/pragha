@@ -146,8 +146,8 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
-	gint *col_widths, *win_size, *win_position;
-	gchar *conrc, *condir, **libs, **columns, **nodes, *last_rescan_time;
+	gint *win_size, *win_position;
+	gchar *conrc, *condir, **libs, **nodes, *last_rescan_time;
 	gchar *u_file;
 	const gchar *config_dir;
 	gboolean err = FALSE;
@@ -398,44 +398,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			libs_f = TRUE;
-		}
-
-		columns = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						     GROUP_PLAYLIST,
-						     KEY_PLAYLIST_COLUMNS,
-						     &cnt,
-						     &error);
-		if (columns) {
-			for (i=0; i<cnt; i++) {
-				cwin->cpref->playlist_columns =
-					g_slist_append(cwin->cpref->playlist_columns,
-						       g_strdup(columns[i]));
-			}
-			g_strfreev(columns);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			columns_f = TRUE;
-		}
-
-		col_widths = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
-							 GROUP_PLAYLIST,
-							 KEY_PLAYLIST_COLUMN_WIDTHS,
-							 &cnt,
-							 &error);
-		if (col_widths) {
-			for (i = 0; i < cnt; i++) {
-				cwin->cpref->playlist_column_widths =
-					g_slist_append(cwin->cpref->playlist_column_widths,
-						       GINT_TO_POINTER(col_widths[i]));
-			}
-			g_free(col_widths);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			col_widths_f = TRUE;
 		}
 
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
@@ -844,17 +806,17 @@ gint init_config(struct con_win *cwin)
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || columns_f) {
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
+		cwin->cplaylist->columns =
+			g_slist_append(cwin->cplaylist->columns,
 				       g_strdup(P_TITLE_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
+		cwin->cplaylist->columns =
+			g_slist_append(cwin->cplaylist->columns,
 				       g_strdup(P_ARTIST_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
+		cwin->cplaylist->columns =
+			g_slist_append(cwin->cplaylist->columns,
 				       g_strdup(P_ALBUM_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
+		cwin->cplaylist->columns =
+			g_slist_append(cwin->cplaylist->columns,
 				       g_strdup(P_LENGTH_STR));
 	}
 	if (all_f || nodes_f) {
@@ -874,8 +836,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->sort_by_year = FALSE;
 	if (all_f || col_widths_f) {
 		for (i=0; i<4; i++) {
-			cwin->cpref->playlist_column_widths =
-				g_slist_append(cwin->cpref->playlist_column_widths,
+			cwin->cplaylist->column_widths =
+				g_slist_append(cwin->cplaylist->column_widths,
 				       GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
 		}
 	}
