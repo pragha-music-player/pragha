@@ -406,7 +406,7 @@ static void add_row_current_playlist(GtkTreePath *path,
 				  "for location_id : %d",
 				  location_id);
 		else
-			append_current_playlist(playlist_model, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, playlist_model, mobj);
 	}
 	else if (node_type == NODE_PLAYLIST) {
 		add_playlist_current_playlist(playlist_model, data, cwin);
@@ -428,7 +428,7 @@ static void add_row_current_playlist(GtkTreePath *path,
 					  "for location_id : %d",
 					  location_id);
 			else
-				append_current_playlist(playlist_model, mobj, cwin);
+				append_current_playlist(cwin->cplaylist, playlist_model, mobj);
 		}
 		else {
 			path = gtk_tree_model_get_path(row_model, &t_iter);

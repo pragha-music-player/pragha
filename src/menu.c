@@ -334,7 +334,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	else{
 		mobj = new_musicobject_from_file(data);
 		if (mobj) {
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 			add_recent_file(data);
 		}
 	}
@@ -729,7 +729,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 			update_status_bar_playtime(cwin);
 
 			if (name) {
@@ -819,7 +819,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if ((path = current_playlist_get_actual(cwin->cplaylist)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
+			update_track_current_playlist(cwin->cplaylist, &iter, changed, cwin->cstate->curr_mobj);
 		gtk_tree_path_free(path);
 	}
 
@@ -1280,7 +1280,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 					  " location_id : %d",
 					  location_id);
 			else
-				append_current_playlist(model, mobj, cwin);
+				append_current_playlist(cwin->cplaylist, model, mobj);
 
 			/* Have to give control to GTK periodically ... */
 

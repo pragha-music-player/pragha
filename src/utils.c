@@ -430,7 +430,7 @@ append_track_with_artist_and_title(const gchar *artist, const gchar *title, stru
 			mobj = new_musicobject_from_db(location_id, cwin);
 
 			if(already_in_current_playlist(mobj, cwin) == FALSE) {
-				append_current_playlist(NULL, mobj, cwin);
+				append_current_playlist(cwin->cplaylist, NULL, mobj);
 			}
 			else {
 				delete_musicobject(mobj);

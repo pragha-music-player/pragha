@@ -377,7 +377,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		append_current_playlist(model, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, model, mobj);
 
 		g_free(file);
 	}
@@ -462,7 +462,7 @@ void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_wi
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
 
-		append_current_playlist(model, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, model, mobj);
 	}
 
 	update_status_bar_playtime(cwin);
@@ -1220,7 +1220,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		mobj = new_musicobject_from_file(i->data);
 		if (mobj) {
 			added++;
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		}
 
 		if (pragha_process_gtk_events ())
