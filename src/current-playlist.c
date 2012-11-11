@@ -1807,9 +1807,6 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_COMMENT, mobj->tags->comment,-1);
 	}
 
-	/* inform mpris2 */
-	mpris_update_mobj_changed(cwin, mobj, changed);
-
 	g_free(ch_track_no);
 	g_free(ch_year);
 	g_free(ch_filename);
@@ -1895,8 +1892,6 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 	if (pragha_process_gtk_events ())
 		return;
 
-	mpris_update_mobj_added(cwin, mobj, &iter);
-
 	g_free(ch_length);
 	g_free(ch_track_no);
 	g_free(ch_year);
@@ -1963,9 +1958,6 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 
 	cwin->cplaylist->no_tracks++;
 	cwin->cplaylist->unplayed_tracks++;
-
-	/* inform mpris2 */
-	mpris_update_mobj_added(cwin, mobj, &iter);
 
 	if(path)
 		*path = gtk_tree_model_get_path(model, &iter);
@@ -2938,9 +2930,6 @@ void init_playlist_current_playlist(struct con_win *cwin)
 	g_object_unref(model);
 
 	update_status_bar_playtime(cwin);
-
-	mpris_update_tracklist_replaced(cwin);
-
 	remove_watch_cursor (cwin->mainwindow);
 
 	sqlite3_free_table(result.resultp);

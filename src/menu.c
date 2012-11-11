@@ -1303,8 +1303,6 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
 	update_status_bar_playtime(cwin);
-
-	mpris_update_tracklist_replaced(cwin);
 }
 
 
