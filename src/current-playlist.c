@@ -3236,8 +3236,7 @@ create_cp_null_context_menu(GtkWidget *current_playlist,
 
 	return context_menu;
 }
-
-GtkTargetEntry pentries[] = {
+static const GtkTargetEntry pentries[] = {
 	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}

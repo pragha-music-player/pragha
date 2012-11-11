@@ -139,12 +139,6 @@ GtkActionEntry library_page_context_aentries[] = {
 	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
 };
 
-GtkTargetEntry tentries[] = {
-	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
-	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
-	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
-};
-
 /****************/
 /* Library tree */
 /****************/
@@ -225,7 +219,7 @@ int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 	return FALSE;
 }
 
-GtkTargetEntry lentries[] = {
+static const GtkTargetEntry lentries[] = {
 	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
