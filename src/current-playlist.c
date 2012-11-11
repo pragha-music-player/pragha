@@ -2382,25 +2382,26 @@ current_playlist_button_press_cb(GtkWidget *widget,
 	return ret;
 }
 
-gboolean current_playlist_button_release_cb(GtkWidget *widget,
-					    GdkEventButton *event,
-					    struct con_win *cwin)
+static gboolean
+current_playlist_button_release_cb(GtkWidget *widget,
+				   GdkEventButton *event,
+				   PraghaPlaylist *cplaylist)
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 
-	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->cstate->dragging == TRUE) || (event->button!=1)){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
-		cwin->cstate->dragging = FALSE;
+	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cplaylist->dragging == TRUE) || (event->button!=1)){
+		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cplaylist, NULL);
+		cplaylist->dragging = FALSE;
 		return FALSE;
 	}
 
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
+		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cplaylist, NULL);
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(selection, path);
 		gtk_tree_path_free(path);
@@ -2434,22 +2435,24 @@ gboolean header_right_click_cb(GtkWidget *widget,
 /* DnD */
 /*******/
 
-gboolean dnd_current_playlist_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin)
+static gboolean
+dnd_current_playlist_begin(GtkWidget *widget,
+			   GdkDragContext *context,
+			   PraghaPlaylist *cplaylist)
 {
-	cwin->cstate->dragging = TRUE;
+	cplaylist->dragging = TRUE;
 	return FALSE;
 }
 
 /* Callback for DnD signal 'drag-data-get' */
 
-void drag_current_playlist_get_data (GtkWidget *widget,
-				    GdkDragContext *context,
-				    GtkSelectionData *selection_data,
-				    guint target_type,
-				    guint time,
-				    PraghaPlaylist *cplaylist)
+static void
+drag_current_playlist_get_data (GtkWidget *widget,
+				GdkDragContext *context,
+				GtkSelectionData *selection_data,
+				guint target_type,
+				guint time,
+				PraghaPlaylist *cplaylist)
 {
 	g_assert (selection_data != NULL);
 
@@ -2494,12 +2497,13 @@ void drag_current_playlist_get_data (GtkWidget *widget,
 
 }
 
-gboolean dnd_current_playlist_drop(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   guint time,
-				   struct con_win *cwin)
+static gboolean
+dnd_current_playlist_drop(GtkWidget *widget,
+			  GdkDragContext *context,
+			  gint x,
+			  gint y,
+			  guint time,
+			  struct con_win *cwin)
 {
 	GdkAtom target;
 
@@ -2720,14 +2724,15 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data,
 
 /* Callback for DnD signal 'drag-data-received' */
 
-void dnd_current_playlist_received(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   GtkSelectionData *data,
-				   enum dnd_target info,
-				   guint time,
-				   struct con_win *cwin)
+static void
+dnd_current_playlist_received(GtkWidget *widget,
+			     GdkDragContext *context,
+			     gint x,
+			     gint y,
+			     GtkSelectionData *data,
+			     enum dnd_target info,
+			     guint time,
+			     struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreePath *dest_path = NULL;
@@ -3256,7 +3261,7 @@ static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(GTK_WIDGET(cplaylist->view)),
 			 "drag-begin",
 			 G_CALLBACK(dnd_current_playlist_begin),
-			 cwin);
+			 cwin->cplaylist);
 	 g_signal_connect (G_OBJECT(cplaylist->view),
 			 "drag-data-get",
 			 G_CALLBACK (drag_current_playlist_get_data),
@@ -4074,7 +4079,7 @@ cplaylist_new(struct con_win *cwin)
 			 G_CALLBACK(current_playlist_button_press_cb), cplaylist);
 
 	g_signal_connect(G_OBJECT(cplaylist->view), "button-release-event",
-			 G_CALLBACK(current_playlist_button_release_cb), cwin);
+			 G_CALLBACK(current_playlist_button_release_cb), cplaylist);
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->widget), cplaylist->view);
 
@@ -4082,6 +4087,7 @@ cplaylist_new(struct con_win *cwin)
 
 	cplaylist->rand = g_rand_new();
 	cplaylist->changing = TRUE;
+	cplaylist->dragging = FALSE;
 	cplaylist->rand_track_refs = NULL;
 	cplaylist->queue_track_refs = NULL;
 

@@ -635,6 +635,7 @@ typedef struct {
 	GSList *columns;
 	GSList *column_widths;
 	gboolean changing;
+	gboolean dragging;
 	gboolean shuffle;
 	gboolean repeat;
 	gint no_tracks;
@@ -1040,32 +1041,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				       GtkTreeViewColumn *column,
 				       struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
-gboolean current_playlist_button_release_cb(GtkWidget *widget,
-					    GdkEventButton *event,
-					    struct con_win *cwin);
-gboolean dnd_current_playlist_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-void drag_current_playlist_get_data (GtkWidget *widget,
-				    GdkDragContext *context,
-				    GtkSelectionData *selection_data,
-				    guint target_type,
-				    guint time,
-				    PraghaPlaylist *cplaylist);
-gboolean dnd_current_playlist_drop(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   guint time,
-				   struct con_win *cwin);
-void dnd_current_playlist_received(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   GtkSelectionData *data,
-				   enum dnd_target info,
-				   guint time,
-				   struct con_win *cwin);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
