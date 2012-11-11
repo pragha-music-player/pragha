@@ -11,7 +11,6 @@ INCLUDES =								\
 pragha_SOURCES =cdda.c \
 		cdda.h \
 		cmdline.c \
-		current-playlist.c \
 		db.c \
 		dbus.c \
 		filetree.c \
@@ -34,6 +33,7 @@ pragha_SOURCES =cdda.c \
 		pragha-album-art.c \
 		pragha-hig.c \
 		pragha-playback.c \
+		pragha-playlist.c \
 		pragha-preferences.c \
 		pragha-simple-async.c \
 		pref.c \
