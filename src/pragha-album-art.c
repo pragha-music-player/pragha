@@ -15,7 +15,6 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <glib/gi18n.h>
 #include "pragha-album-art.h"
 
 G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
@@ -289,8 +288,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
     */
    gParamSpecs[PROP_PATH] =
       g_param_spec_string("path",
-                          _("Path"),
-                          _("The album art path"),
+                          "Path",
+                          "The album art path",
                           NULL,
                           G_PARAM_READWRITE);
    g_object_class_install_property(object_class, PROP_PATH,
@@ -301,8 +300,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
     */
    gParamSpecs[PROP_SIZE] =
       g_param_spec_uint("size",
-                        _("Size"),
-                        _("The album art size"),
+                        "Size",
+                        "The album art size",
                         36, 128,
                         48,
                         G_PARAM_READWRITE);
@@ -312,8 +311,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
     */
    gParamSpecs[PROP_VISIBLE] =
       g_param_spec_boolean("visible",
-                           _("Visible"),
-                           _("The album art visibility state"),
+                           "Visible",
+                           "The album art visibility state",
                            FALSE,
                            G_PARAM_READWRITE);
  
