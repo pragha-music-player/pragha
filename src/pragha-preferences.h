@@ -120,6 +120,12 @@ pragha_preferences_set_repeat (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_repeat (PraghaPreferences *preferences);
 
+void
+pragha_preferences_set_use_hint (PraghaPreferences *preferences,
+                                 gboolean use_hint);
+gboolean
+pragha_preferences_get_use_hint (PraghaPreferences *preferences);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

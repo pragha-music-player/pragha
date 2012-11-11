@@ -439,9 +439,12 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 
 static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 {
-	cwin->cpref->use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	gboolean use_hint;
+	use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->cplaylist->view), cwin->cpref->use_hint);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->cplaylist->view), use_hint);
+
+	pragha_preferences_set_use_hint(cwin->preferences, use_hint);
 }
 
 /* Toggle album art pattern */
@@ -623,7 +626,7 @@ static void update_preferences(struct con_win *cwin)
 		}
 	}
 
-	if (cwin->cpref->use_hint)
+	if (pragha_preferences_get_use_hint(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->cpref->use_hint_w),
 					     TRUE);
@@ -844,13 +847,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_CLOSE_TO_TRAY,
 			       cwin->cpref->close_to_tray);
-
-	/* Save use hint option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_USE_HINT,
-			       cwin->cpref->use_hint);
 
 	/* Save show OSD option */
 
