@@ -1560,7 +1560,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 static void
 track_properties_response(GtkDialog *dialog,
 			gint response,
-			struct con_win *cwin)
+			gpointer data)
 {
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
@@ -1706,7 +1706,7 @@ void track_properties(struct musicobject *mobj, struct con_win *cwin)
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(track_properties_response), cwin);
+			G_CALLBACK(track_properties_response), NULL);
 
 	gtk_widget_show_all(dialog);
 
@@ -1765,7 +1765,7 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 
 /* Update a track to the current playlist */
 
-void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin)
+void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj)
 {
 	GtkTreeModel *model;
 	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_filename = NULL;
@@ -1775,7 +1775,7 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 
 	CDEBUG(DBG_VERBOSE, "Track Updates: 0x%x", changed);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	ch_filename = get_display_name(mobj);
 
@@ -1812,32 +1812,20 @@ void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct music
 	g_free(ch_filename);
 }
 
-/* Insert a list of mobj to current playlist. */
-
-void insert_mobj_list_current_playlist(GtkTreeModel *model, GList *list,
-						   GtkTreeViewDropPosition droppos, GtkTreeIter *pos,
-						   struct con_win *cwin)
-{
-	struct musicobject *mobj;
-	GList *l;
-
-	for (l = list; l != NULL; l = l->next) {
-		mobj = l->data;
-		insert_current_playlist(model, mobj, droppos, pos, cwin);
-	}
-}
-
 /* Insert a track to the current playlist */
 
-void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
-				     GtkTreeViewDropPosition droppos, GtkTreeIter *pos,
-				     struct con_win *cwin)
+static void
+insert_current_playlist(PraghaPlaylist *cplaylist,
+			GtkTreeModel *model,
+			struct musicobject *mobj,
+			GtkTreeViewDropPosition droppos,
+			GtkTreeIter *pos)
 {
 	GtkTreeIter iter;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	if (!mobj) {
 		g_warning("Dangling entry in current playlist");
@@ -1885,8 +1873,8 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 
 	/* Increment global count of tracks */
 
-	cwin->cplaylist->no_tracks++;
-	cwin->cplaylist->unplayed_tracks++;
+	cplaylist->no_tracks++;
+	cplaylist->unplayed_tracks++;
 
 	/* Have to give control to GTK periodically ... */
 	if (pragha_process_gtk_events ())
@@ -1899,20 +1887,38 @@ void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj,
 	g_free(ch_filename);
 }
 
-/* Append a track to the current playlist */
+/* Insert a list of mobj to current playlist. */
 
-void append_current_playlist(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin)
+static void
+insert_mobj_list_current_playlist(PraghaPlaylist *cplaylist,
+				  GtkTreeModel *model,
+				  GList *list,
+				  GtkTreeViewDropPosition droppos,
+				  GtkTreeIter *pos)
 {
-	append_current_playlist_ex(model, mobj, cwin, NULL);
+	struct musicobject *mobj;
+	GList *l;
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = l->data;
+		insert_current_playlist(cplaylist, model, mobj, droppos, pos);
+	}
 }
 
-void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path)
+/* Append a track to the current playlist */
+
+void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj)
+{
+	append_current_playlist_ex(cplaylist, model, mobj, NULL);
+}
+
+void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	if (model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	if (!mobj) {
 		g_warning("Dangling entry in current playlist");
@@ -1956,8 +1962,8 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 
 	/* Increment global count of tracks */
 
-	cwin->cplaylist->no_tracks++;
-	cwin->cplaylist->unplayed_tracks++;
+	cplaylist->no_tracks++;
+	cplaylist->unplayed_tracks++;
 
 	if(path)
 		*path = gtk_tree_model_get_path(model, &iter);
@@ -1971,14 +1977,15 @@ void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, s
 
 /* Append a list of mobj to the current playlist */
 
-void append_mobj_list_current_playlist(GtkTreeModel *model, GList *list, struct con_win *cwin)
+static void
+append_mobj_list_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, GList *list)
 {
 	struct musicobject *mobj;
 	GList *l;
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
-		append_current_playlist(model, mobj, cwin);
+		append_current_playlist(cplaylist, model, mobj);
 	}
 }
 
@@ -2802,9 +2809,9 @@ dnd_current_playlist_received(GtkWidget *widget,
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	if (is_row)
-		insert_mobj_list_current_playlist(model, list, pos, &dest_iter, cwin);
+		insert_mobj_list_current_playlist(cwin->cplaylist, model, list, pos, &dest_iter);
 	else
-		append_mobj_list_current_playlist(model, list, cwin);
+		append_mobj_list_current_playlist(cwin->cplaylist, model, list);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
@@ -2885,7 +2892,7 @@ void save_current_playlist_state(struct con_win *cwin)
 /* Init current playlist on application bringup,
    restore stored playlist */
 
-void init_playlist_current_playlist(struct con_win *cwin)
+static void init_playlist_current_playlist(struct con_win *cwin)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
@@ -2920,7 +2927,7 @@ void init_playlist_current_playlist(struct con_win *cwin)
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"), cwin);
 		}
-		append_current_playlist(model, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, model, mobj);
 		g_free(file);
 	}
 

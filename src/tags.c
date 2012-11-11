@@ -1096,7 +1096,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		else {
 			update_musicobject(mobj, changed, omobj->tags);
 		}
-		update_track_current_playlist(&iter, changed, mobj, cwin);
+		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
@@ -1243,7 +1243,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		else {
 			update_musicobject(mobj, changed, &ntag);
 		}
-		update_track_current_playlist(&iter, changed, mobj, cwin);
+		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {

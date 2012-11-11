@@ -343,7 +343,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			struct musicobject *mobj = new_musicobject_from_file(path);
 			if(mobj) {
 				GtkTreePath *tree_path;
-				append_current_playlist_ex(NULL, mobj, cwin, &tree_path);
+				append_current_playlist_ex(cwin->cplaylist, NULL, mobj, &tree_path);
 				update_status_bar_playtime(cwin);
 
 				// Dangerous: reusing double-click-handler here.
@@ -728,7 +728,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	else if (is_playable_file(file)) {
 		struct musicobject *mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
 	}
 	else {

@@ -133,7 +133,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if ((path = current_playlist_get_actual(cwin->cplaylist)) != NULL) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
+			update_track_current_playlist(cwin->cplaylist, &iter, changed, cwin->cstate->curr_mobj);
 		gtk_tree_path_free(path);
 	}
 
@@ -302,7 +302,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
-		append_current_playlist(model, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, model, mobj);
 		songs_added += 1;
 	}
 

@@ -547,7 +547,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	if (G_UNLIKELY(mobj == NULL))
 		g_warning("Invalid mobj pointer");
 	else
-		update_track_current_playlist(&iter, changed, mobj, cwin);
+		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 	if(ntag.title)
 		g_free(ntag.title);
