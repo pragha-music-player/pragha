@@ -28,6 +28,7 @@ struct _PraghaPreferencesPrivate
    gboolean   approximate_search;
    gboolean   shuffle;
    gboolean   repeat;
+   gboolean   use_hint;
 };
 
 enum
@@ -37,6 +38,7 @@ enum
    PROP_APPROXIMATE_SEARCH,
    PROP_SHUFFLE,
    PROP_REPEAT,
+   PROP_USE_HINT,
    LAST_PROP
 };
 
@@ -294,6 +296,31 @@ pragha_preferences_set_repeat (PraghaPreferences *preferences,
    preferences->priv->repeat = repeat;
 }
 
+/**
+ * pragha_preferences_get_use_hint:
+ *
+ */
+gboolean
+pragha_preferences_get_use_hint (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->use_hint;
+}
+
+/**
+ * pragha_preferences_set_use_hint:
+ *
+ */
+void
+pragha_preferences_set_use_hint (PraghaPreferences *preferences,
+                                 gboolean use_hint)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->use_hint = use_hint;
+}
+
 static void
 pragha_preferences_finalize (GObject *object)
 {
@@ -325,6 +352,11 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_PLAYLIST,
                           KEY_REPEAT,
                           priv->repeat);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_USE_HINT,
+                          priv->use_hint);
+
    /* Save to key file */
 
    data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -358,6 +390,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_REPEAT:
       g_value_set_boolean (value, pragha_preferences_get_repeat(preferences));
       break;
+   case PROP_USE_HINT:
+      g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -383,6 +418,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_REPEAT:
       pragha_preferences_set_repeat(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_USE_HINT:
+      pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
       break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -455,13 +493,27 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 
     g_object_class_install_property(object_class, PROP_REPEAT,
                                     gParamSpecs[PROP_REPEAT]);
+
+   /**
+    * PraghaPreferences:use_hint:
+    *
+    */
+   gParamSpecs[PROP_USE_HINT] =
+      g_param_spec_boolean("use-hint",
+                           "UseHint",
+                           "Use hint Preference",
+                           FALSE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_USE_HINT,
+                                    gParamSpecs[PROP_USE_HINT]);
 }
 
 static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
-   gboolean shuffle, repeat;
+   gboolean shuffle, repeat, use_hint;
    const gchar *config_dir;
    GError *error = NULL;
 
@@ -538,6 +590,17 @@ pragha_preferences_init (PraghaPreferences *preferences)
       pragha_preferences_set_repeat(preferences, repeat);
    }
 
+   use_hint = g_key_file_get_boolean(priv->rc_keyfile,
+                                     GROUP_GENERAL,
+                                     KEY_USE_HINT,
+                                     &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_use_hint(preferences, use_hint);
+   }
 }
 
 /**

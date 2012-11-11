@@ -3632,7 +3632,8 @@ GtkWidget* create_current_playlist_view(PraghaPlaylist* cplaylist, struct con_wi
 
 	/* Store the treeview in the scrollbar widget */
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist), cwin->cpref->use_hint);
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist),
+				      pragha_preferences_get_use_hint(cwin->preferences));
 
 	/* Update menu depending playback state */
 
