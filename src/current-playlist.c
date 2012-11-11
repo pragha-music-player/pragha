@@ -733,7 +733,7 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 		return;
 	}
 
-	pref_present = is_present_str_list(col_name, cwin->cpref->playlist_columns);
+	pref_present = is_present_str_list(col_name, cwin->cplaylist->columns);
 
 	/* Already in preferences */
 
@@ -744,12 +744,12 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 	/* Remove from preferences */
 
 	else if (pref_present && !state) {
-		element = g_slist_find_custom(cwin->cpref->playlist_columns,
+		element = g_slist_find_custom(cwin->cplaylist->columns,
 				      col_name, compare_playlist_column_name);
 		if (element) {
 			g_free(element->data);
-			cwin->cpref->playlist_columns =
-				g_slist_delete_link(cwin->cpref->playlist_columns,
+			cwin->cplaylist->columns =
+				g_slist_delete_link(cwin->cplaylist->columns,
 						    element);
 		}
 		else
@@ -760,8 +760,8 @@ static void modify_current_playlist_columns(struct con_win *cwin,
 	/* Add to preferences */
  
 	else if (!pref_present && state) { 
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
+		cwin->cplaylist->columns =
+			g_slist_append(cwin->cplaylist->columns,
 				       g_strdup(col_name));
 	}
 }
@@ -2969,16 +2969,45 @@ void init_current_playlist_view(struct con_win *cwin)
 
 void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *cwin)
 {
+	gchar **columns;
 	const gchar *col_name;
 	GtkTreeViewColumn *col;
 	GList *list = NULL, *i;
 	GSList *j;
 	gint k = 0;
+	gint *col_widths;
+	gsize cnt = 0, isize;
 
 	list = gtk_tree_view_get_columns(playlist_view);
 
+	columns = pragha_preferences_get_string_list(cwin->preferences,
+						     GROUP_PLAYLIST,
+						     KEY_PLAYLIST_COLUMNS,
+						     &cnt);
+	if (columns) {
+		for (isize=0; isize < cnt; isize++) {
+			cwin->cplaylist->columns =
+				g_slist_append(cwin->cplaylist->columns,
+					       g_strdup(columns[isize]));
+		}
+		g_strfreev(columns);
+	}
+
+	col_widths = pragha_preferences_get_integer_list(cwin->preferences,
+							 GROUP_PLAYLIST,
+							 KEY_PLAYLIST_COLUMN_WIDTHS,
+							 &cnt);
+	if (col_widths) {
+		for (isize = 0; isize < cnt; isize++) {
+			cwin->cplaylist->column_widths =
+				g_slist_append(cwin->cplaylist->column_widths,
+					       GINT_TO_POINTER(col_widths[isize]));
+		}
+		g_free(col_widths);
+	}
+
 	/* Mark only the columns that are present in
-	   cwin->cpref->playlist_columns as visible.
+	   cwin->cplaylist->columns as visible.
 	   And set their sizes */
 
 	if (list) {
@@ -2986,8 +3015,8 @@ void init_current_playlist_columns(GtkTreeView *playlist_view, struct con_win *c
 			col = i->data;
 			col_name = gtk_tree_view_column_get_title(col);
 			if (is_present_str_list(col_name,
-						cwin->cpref->playlist_columns)) {
-				j = g_slist_nth(cwin->cpref->playlist_column_widths,
+						cwin->cplaylist->columns)) {
+				j = g_slist_nth(cwin->cplaylist->column_widths,
 						k++);
 				gtk_tree_view_column_set_visible(col, TRUE);
 				gtk_tree_view_column_set_sizing(col,
@@ -3067,25 +3096,25 @@ static GtkWidget* create_header_context_menu(struct con_win *cwin)
 
 	/* Initialize the state of the items */
 
-	if (is_present_str_list(P_TRACK_NO_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_TRACK_NO_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_track), TRUE);
-	if (is_present_str_list(P_TITLE_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_TITLE_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_title), TRUE);
-	if (is_present_str_list(P_ARTIST_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_ARTIST_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_artist), TRUE);
-	if (is_present_str_list(P_ALBUM_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_ALBUM_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_album), TRUE);
-	if (is_present_str_list(P_GENRE_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_GENRE_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_genre), TRUE);
-	if (is_present_str_list(P_BITRATE_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_BITRATE_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_bitrate), TRUE);
-	if (is_present_str_list(P_YEAR_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_YEAR_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_year), TRUE);
-	if (is_present_str_list(P_COMMENT_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_COMMENT_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_comment), TRUE);
-	if (is_present_str_list(P_LENGTH_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_LENGTH_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_length), TRUE);
-	if (is_present_str_list(P_FILENAME_STR, cwin->cpref->playlist_columns))
+	if (is_present_str_list(P_FILENAME_STR, cwin->cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_filename), TRUE);
 
 	/* Setup the individual signal handlers */
@@ -3951,9 +3980,71 @@ current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat)
 }
 
 void
+current_playlist_save_preferences(PraghaPlaylist* cplaylist)
+{
+	GtkTreeViewColumn *col;
+	const gchar *col_name;
+	gchar **columns;
+	gint cnt = 0, i = 0, *col_widths;
+	GSList *list;
+	GList *cols, *j;
+	PraghaPreferences *preferences;
+
+	preferences = pragha_preferences_get();
+
+	/* Save list of columns visible in current playlist */
+
+	if (cplaylist->columns) {
+		list = cplaylist->columns;
+		cnt = g_slist_length(cplaylist->columns);
+		columns = g_new0(gchar *, cnt);
+
+		for (i=0; i<cnt; i++) {
+			columns[i] = list->data;
+			list = list->next;
+		}
+
+		pragha_preferences_set_string_list(preferences,
+						   GROUP_PLAYLIST,
+						   KEY_PLAYLIST_COLUMNS,
+						   (const gchar **)columns,
+						   cnt);
+		g_free(columns);
+	}
+
+	/* Save column widths */
+
+	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cplaylist->view));
+	cnt = g_list_length(cols);
+	if (cols) {
+		col_widths = g_new0(gint, cnt);
+		for (j=cols, i=0; j != NULL; j = j->next) {
+			col = j->data;
+			col_name = gtk_tree_view_column_get_title(col);
+			if (is_present_str_list(col_name,
+						cplaylist->columns))
+				col_widths[i++] =
+					gtk_tree_view_column_get_width(col);
+		}
+		pragha_preferences_set_integer_list(preferences,
+						    GROUP_PLAYLIST,
+						    KEY_PLAYLIST_COLUMN_WIDTHS,
+						    col_widths,
+						    i);
+		g_list_free(cols);
+		g_free(col_widths);
+	}
+
+	g_object_unref(G_OBJECT(preferences));
+}
+
+void
 cplaylist_free(PraghaPlaylist* cplaylist)
 {
+	free_str_list(cplaylist->columns);
+	g_slist_free(cplaylist->column_widths);
 	g_rand_free(cplaylist->rand);
+
 	g_slice_free(PraghaPlaylist, cplaylist);
 }
 

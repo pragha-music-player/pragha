@@ -758,16 +758,13 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	const gchar *col_name;
-	gchar *data, **libs, **columns, **nodes, *last_rescan_time;
+	gchar *data, **libs, **nodes, *last_rescan_time;
 	gchar *u_file = NULL;
 	gsize length;
-	gint cnt = 0, i = 0, *col_widths, *window_size, *window_position;
+	gint cnt = 0, i = 0, *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
 	GError *error = NULL;
 	GSList *list;
-	GList *cols, *j;
-	GtkTreeViewColumn *col;
 	GdkWindowState state;
 
 	/* General options*/
@@ -883,48 +880,7 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SAVE_PLAYLIST,
 			       cwin->cpref->save_playlist);
 
-	/* Save list of columns visible in current playlist */
-
-	if (cwin->cpref->playlist_columns) {
-		list = cwin->cpref->playlist_columns;
-		cnt = g_slist_length(cwin->cpref->playlist_columns);
-		columns = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			columns[i] = list->data;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_PLAYLIST,
-					   KEY_PLAYLIST_COLUMNS,
-					   (const gchar **)columns,
-					   cnt);
-		g_free(columns);
-	}
-
-	/* Save column widths */
-
-	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->cplaylist->view));
-	cnt = g_list_length(cols);
-	if (cols) {
-		col_widths = g_new0(gint, cnt);
-		for (j=cols, i=0; j != NULL; j = j->next) {
-			col = j->data;
-			col_name = gtk_tree_view_column_get_title(col);
-			if (is_present_str_list(col_name,
-						cwin->cpref->playlist_columns))
-				col_widths[i++] =
-					gtk_tree_view_column_get_width(col);
-		}
-		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_PLAYLIST,
-					    KEY_PLAYLIST_COLUMN_WIDTHS,
-					    col_widths,
-					    i);
-		g_list_free(cols);
-		g_free(col_widths);
-	}
+	current_playlist_save_preferences(cwin->cplaylist);
 
 	/* Library Options */
 
@@ -1902,8 +1858,6 @@ void preferences_free (struct con_pref *cpref)
 	free_str_list(cpref->library_dir);
 	free_str_list(cpref->lib_add);
 	free_str_list(cpref->lib_delete);
-	free_str_list(cpref->playlist_columns);
-	g_slist_free(cpref->playlist_column_widths);
 	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);

@@ -81,6 +81,45 @@ pragha_preferences_set_double_list (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_integer_list:
+ *
+ */
+gint *
+pragha_preferences_get_integer_list (PraghaPreferences *preferences,
+                                     const gchar *group_name,
+                                     const gchar *key,
+                                     gsize *length)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   return g_key_file_get_integer_list(preferences->priv->rc_keyfile,
+                                      group_name,
+                                      key,
+                                      length,
+                                      NULL);
+}
+
+/**
+ * pragha_preferences_set_integer_list
+ *
+ */
+void
+pragha_preferences_set_integer_list (PraghaPreferences *preferences,
+                                     const gchar *group_name,
+                                     const gchar *key,
+                                     gint list[],
+                                     gsize length)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   g_key_file_set_integer_list(preferences->priv->rc_keyfile,
+                               group_name,
+                               key,
+                               list,
+                               length);
+}
+
+/**
  * pragha_preferences_get_string:
  *
  */
@@ -113,6 +152,45 @@ pragha_preferences_set_string (PraghaPreferences *preferences,
                          group_name,
                          key,
                          string);
+}
+
+/**
+ * pragha_preferences_get_string_list:
+ *
+ */
+gchar **
+pragha_preferences_get_string_list (PraghaPreferences *preferences,
+                                    const gchar *group_name,
+                                    const gchar *key,
+                                    gsize *length)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   return g_key_file_get_string_list(preferences->priv->rc_keyfile,
+                                     group_name,
+                                     key,
+                                     length,
+                                     NULL);
+}
+
+/**
+ * pragha_preferences_set_string_list
+ *
+ */
+void
+pragha_preferences_set_string_list (PraghaPreferences *preferences,
+                                     const gchar *group_name,
+                                     const gchar *key,
+                                     const gchar * const list[],
+                                     gsize length)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   g_key_file_set_string_list(preferences->priv->rc_keyfile,
+                              group_name,
+                              key,
+                              list,
+                              length);
 }
 
 /**
