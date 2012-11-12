@@ -1278,7 +1278,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
