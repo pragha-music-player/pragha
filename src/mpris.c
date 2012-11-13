@@ -717,7 +717,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		goto exit;
 	}
 
-	prev_tracks = cwin->cplaylist->no_tracks;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)

@@ -1062,6 +1062,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+gint
+pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
 void
 current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void

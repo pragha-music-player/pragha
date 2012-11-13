@@ -426,7 +426,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	if (files) {
 		set_watch_cursor (cwin->mainwindow);
 
-		prev_tracks = cwin->cplaylist->no_tracks;
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
