@@ -136,7 +136,7 @@ void current_playlist_update_pixbuf_state_on_path (GtkTreePath *path, struct con
 	GtkIconTheme *icon_theme;
 	GError *error = NULL;
 
-	if(cwin->cplaylist->changing)
+	if(pragha_playlist_is_changing(cwin->cplaylist))
 		return;
 
 	if(pragha_backend_emitted_error(cwin->backend)) {
@@ -216,7 +216,7 @@ void update_status_bar_playtime(struct con_win *cwin)
 	gint total_playtime = 0, no_tracks = 0;
 	gchar *str, *tot_str;
 
-	if(cwin->cplaylist->changing)
+	if(pragha_playlist_is_changing(cwin->cplaylist))
 		return;
 
 	total_playtime = get_total_playtime(cwin->cplaylist);
@@ -1379,8 +1379,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Delete the referenced nodes */
 
 	g_object_ref(model);
-	cwin->cplaylist->changing = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	for (i=to_delete; i != NULL; i = i->next) {
@@ -1413,8 +1412,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
-	cwin->cplaylist->changing = FALSE;
+	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 	g_object_unref(model);
 
 	remove_watch_cursor (cwin->mainwindow);
@@ -1933,7 +1931,7 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
-	if(cwin->cplaylist->changing)
+	if(pragha_playlist_is_changing(cwin->cplaylist))
 		return;
 
 	if (!gtk_tree_model_get_iter_first(model, &iter)) {
@@ -2674,8 +2672,7 @@ dnd_current_playlist_received(GtkWidget *widget,
 	/* Insert mobj list to current playlist. */
 
 	g_object_ref(model);
-	cwin->cplaylist->changing = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	if (is_row)
@@ -2684,8 +2681,7 @@ dnd_current_playlist_received(GtkWidget *widget,
 		append_mobj_list_current_playlist(cwin->cplaylist, model, list);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
-	cwin->cplaylist->changing = FALSE;
+	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 	g_object_unref(model);
 
 	update_status_bar_playtime(cwin);
@@ -2775,8 +2771,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	set_watch_cursor (cwin->mainwindow);
 
 	g_object_ref(model);
-	cwin->cplaylist->changing = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	s_playlist = sanitize_string_sqlite3(SAVE_PLAYLIST_STATE);
@@ -2802,8 +2797,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
-	cwin->cplaylist->changing = FALSE;
+	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 	g_object_unref(model);
 
 	update_status_bar_playtime(cwin);
@@ -3126,11 +3120,11 @@ static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(GTK_WIDGET(cplaylist->view)),
 			 "drag-begin",
 			 G_CALLBACK(dnd_current_playlist_begin),
-			 cwin->cplaylist);
+			 cplaylist);
 	 g_signal_connect (G_OBJECT(cplaylist->view),
 			 "drag-data-get",
 			 G_CALLBACK (drag_current_playlist_get_data),
-			 cwin->cplaylist);
+			 cplaylist);
 	g_signal_connect(G_OBJECT(cplaylist->view),
 			 "drag-drop",
 			 G_CALLBACK(dnd_current_playlist_drop),
@@ -3722,6 +3716,20 @@ gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
 {
 	return cplaylist->no_tracks;
+}
+
+gboolean
+pragha_playlist_is_changing(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->changing;
+}
+
+void
+pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing)
+{
+	cplaylist->changing = changing;
+
+	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->widget), !changing);
 }
 
 gboolean

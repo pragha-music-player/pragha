@@ -296,8 +296,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	g_object_ref(model);
-	cwin->cplaylist->changing = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	for (l = list; l != NULL; l = l->next) {
@@ -307,8 +306,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
-	cwin->cplaylist->changing = FALSE;
+	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 	g_object_unref(model);
 
 	g_list_free(list);
