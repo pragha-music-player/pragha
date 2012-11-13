@@ -707,7 +707,7 @@ gint init_config(struct con_win *cwin)
 
 		/* Retrieve Services Internet preferences */
 		#ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lw.lastfm_support =
+		cwin->cpref->lastfm_support =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
 					       KEY_LASTFM,
@@ -718,7 +718,7 @@ gint init_config(struct con_win *cwin)
 			lastfm_f = TRUE;
 		}
 
-		cwin->cpref->lw.lastfm_user =
+		cwin->cpref->lastfm_user =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_USER,
@@ -728,7 +728,7 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 		}
 
-		cwin->cpref->lw.lastfm_pass =
+		cwin->cpref->lastfm_pass =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_PASS,
@@ -847,7 +847,7 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->audio_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
-		cwin->cpref->lw.lastfm_support = FALSE;
+		cwin->cpref->lastfm_support = FALSE;
 	#endif
 	#ifdef HAVE_LIBGLYR
 	if (all_f || get_album_art_f)
