@@ -447,16 +447,47 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_playing;
 };
 
+typedef struct {
+	GtkWidget *audio_device_w;
+	GtkWidget *audio_cd_device_w;
+	GtkWidget *audio_sink_combo_w;
+	GtkWidget *soft_mixer_w;
+
+	GtkWidget *use_hint_w;
+	GtkWidget *album_art_w;
+	GtkWidget *album_art_size_w;
+	GtkWidget *album_art_pattern_w;
+
+	GtkWidget *library_view_w;
+	GtkWidget *fuse_folders_w;
+	GtkWidget *sort_by_year_w;
+
+	GtkWidget *instant_filter_w;
+	GtkWidget *aproximate_search_w;
+	GtkWidget *window_state_combo_w;
+	GtkWidget *restore_playlist_w;
+	GtkWidget *show_icon_tray_w;
+	GtkWidget *close_to_tray_w;
+	GtkWidget *add_recursively_w;
+
+	GtkWidget *show_osd_w;
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
+	GtkWidget *osd_in_systray_w;
+#endif
+	GtkWidget *albumart_in_osd_w;
+	GtkWidget *actions_in_osd_w;
+
 #ifdef HAVE_LIBCLASTFM
-struct lastfm_pref {
-	gboolean lastfm_support;
-	gchar *lastfm_user;
-	gchar *lastfm_pass;
 	GtkWidget *lastfm_w;
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
-};
 #endif
+#ifdef HAVE_LIBGLYR
+	GtkWidget *get_album_art_w;
+#endif
+	GtkWidget *use_cddb_w;
+	GtkWidget *use_mpris2_w;
+}PreferencesWidgets;
 
 struct con_pref {
 	enum library_view cur_library_view;
@@ -502,44 +533,11 @@ struct con_pref {
 	GSList *library_tree_nodes;
 	GSList *lib_delete;
 	GSList *lib_add;
-
-	GtkWidget *audio_device_w;
-	GtkWidget *audio_cd_device_w;
-	GtkWidget *audio_sink_combo_w;
-	GtkWidget *soft_mixer_w;
-
-	GtkWidget *use_hint_w;
-	GtkWidget *album_art_w;
-	GtkWidget *album_art_size_w;
-	GtkWidget *album_art_pattern_w;
-
-	GtkWidget *library_view_w;
-	GtkWidget *fuse_folders_w;
-	GtkWidget *sort_by_year_w;
-
-	GtkWidget *instant_filter_w;
-	GtkWidget *aproximate_search_w;
-	GtkWidget *window_state_combo_w;
-	GtkWidget *restore_playlist_w;
-	GtkWidget *show_icon_tray_w;
-	GtkWidget *close_to_tray_w;
-	GtkWidget *add_recursively_w;
-
-	GtkWidget *show_osd_w;
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray_w;
-#endif
-	GtkWidget *albumart_in_osd_w;
-	GtkWidget *actions_in_osd_w;
-
 #ifdef HAVE_LIBCLASTFM
-	struct lastfm_pref lw;
+	gboolean lastfm_support;
+	gchar *lastfm_user;
+	gchar *lastfm_pass;
 #endif
-#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art_w;
-#endif
-	GtkWidget *use_cddb_w;
-	GtkWidget *use_mpris2_w;
 };
 
 struct musicobject {
@@ -654,6 +652,7 @@ struct con_win {
 	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
+	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif

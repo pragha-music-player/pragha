@@ -41,7 +41,7 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lw.lastfm_user) != 0);
+	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lastfm_user) != 0);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
@@ -515,7 +515,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
-						     cwin->cpref->lw.lastfm_user,
+						     cwin->cpref->lastfm_user,
 						     cpage,
 						     &results);
 
@@ -543,7 +543,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if ((cwin->clastfm->session_id == NULL) ||
-	    (strlen(cwin->cpref->lw.lastfm_user) == 0)) {
+	    (strlen(cwin->cpref->lastfm_user) == 0)) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -788,8 +788,8 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if((strlen(cwin->cpref->lw.lastfm_user) == 0) ||
-	   (strlen(cwin->cpref->lw.lastfm_pass) == 0))
+	if((strlen(cwin->cpref->lastfm_user) == 0) ||
+	   (strlen(cwin->cpref->lastfm_pass) == 0))
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -837,11 +837,11 @@ do_just_init_lastfm(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+		if((strlen(cwin->cpref->lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lw.lastfm_user,
-							      cwin->cpref->lw.lastfm_pass);
+							      cwin->cpref->lastfm_user,
+							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
@@ -861,7 +861,7 @@ do_just_init_lastfm(gpointer data)
 gint
 just_init_lastfm (struct con_win *cwin)
 {
-	if (cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 		g_idle_add (do_just_init_lastfm, cwin);
 	}
@@ -879,11 +879,11 @@ do_init_lastfm_idle(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+		if((strlen(cwin->cpref->lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lw.lastfm_user,
-							      cwin->cpref->lw.lastfm_pass);
+							      cwin->cpref->lastfm_user,
+							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK)
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
@@ -905,7 +905,7 @@ init_lastfm_idle(struct con_win *cwin)
 
 	/* Test internet and launch threads.*/
 
-	if (cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 #if GLIB_CHECK_VERSION(2,32,0)
