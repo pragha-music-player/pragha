@@ -371,7 +371,7 @@ shuffle_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 	shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
 
 	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
-	current_playlist_set_shuffle(cwin->cplaylist, shuffle);
+	pragha_playlist_set_shuffle(cwin->cplaylist, shuffle);
 
 	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 

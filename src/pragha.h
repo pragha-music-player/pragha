@@ -1064,8 +1064,10 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
 gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
+gboolean
+pragha_playlist_is_shuffle(PraghaPlaylist* cplaylist);
 void
-current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
+pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void
 current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
 void

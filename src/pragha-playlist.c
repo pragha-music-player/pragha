@@ -1982,7 +1982,7 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-	if (cwin->cplaylist->shuffle) {
+	if (pragha_playlist_is_shuffle(cwin->cplaylist)) {
 		if (pragha_backend_get_state (cwin->backend) == ST_STOPPED) {
 			clear_rand_track_refs(cwin->cplaylist);
 			current_playlist_clear_dirty_all(cwin->cplaylist);
@@ -3724,8 +3724,14 @@ pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
 	return cplaylist->no_tracks;
 }
 
+gboolean
+pragha_playlist_is_shuffle(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->shuffle;
+}
+
 void
-current_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
+pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
 {
 	GtkTreeRowReference *ref;
 
