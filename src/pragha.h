@@ -1000,7 +1000,6 @@ GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
 					   PraghaPlaylist *cplaylist);
 void
 pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path);
-void current_playlist_clear_dirty_all(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist);
