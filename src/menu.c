@@ -1262,8 +1262,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	g_object_ref(model);
-	cwin->cplaylist->changing = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	/* Query and insert entries */
@@ -1295,8 +1294,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		sqlite3_free_table(result.resultp);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
-	cwin->cplaylist->changing = FALSE;
+	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 	g_object_unref(model);
 
 	remove_watch_cursor (cwin->mainwindow);

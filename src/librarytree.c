@@ -604,13 +604,13 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+		pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 		add_row_current_playlist(path, filter_model, playlist_model, cwin);
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
+		pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 		g_object_unref(playlist_model);
 
 		remove_watch_cursor (cwin->mainwindow);
@@ -1283,7 +1283,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+		pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 		/* Add all the rows to the current playlist */
@@ -1299,7 +1299,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 		}
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
+		pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 		g_object_unref(playlist_model);
 
 		remove_watch_cursor (cwin->mainwindow);
@@ -1349,7 +1349,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), FALSE);
+		pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 		/* Add all the rows to the current playlist */
@@ -1365,7 +1365,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 		}
 
 		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->cplaylist->widget), TRUE);
+		pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 		g_object_unref(playlist_model);
 
 		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
