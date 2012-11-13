@@ -1249,21 +1249,13 @@ exit:
 
 void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
-	gint i = 0, location_id = 0, cnt = 0;
+	gint i = 0, location_id = 0;
 	gchar *query;
 	struct db_result result;
 	struct musicobject *mobj;
-	GtkTreeModel *model;
+	GList *list = NULL;
 
 	set_watch_cursor (cwin->mainwindow);
-
-	current_playlist_clear(cwin);
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-
-	g_object_ref(model);
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
@@ -1279,12 +1271,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 					  " location_id : %d",
 					  location_id);
 			else
-				append_current_playlist(cwin->cplaylist, model, mobj);
-
-			/* Have to give control to GTK periodically ... */
-
-			if (cnt++ % 50)
-				continue;
+				list = g_list_prepend(list, mobj);
 
 			if (pragha_process_gtk_events ()) {
 				sqlite3_free_table(result.resultp);
@@ -1293,16 +1280,18 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
-	g_object_unref(model);
+
+	pragha_playlist_insert_mobj_list(cwin->cplaylist,
+					 list,
+					 GTK_TREE_VIEW_DROP_AFTER,
+					 NULL);
 
 	remove_watch_cursor (cwin->mainwindow);
-
 	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
 	update_status_bar_playtime(cwin);
-}
 
+	g_list_free(list);
+}
 
 /* Handler for 'Statistics' action in the Tools menu */
 

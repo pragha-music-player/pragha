@@ -2713,7 +2713,6 @@ dnd_current_playlist_received(GtkWidget *widget,
 
 	/* Insert mobj list to current playlist. */
 
-
 	if (is_row)
 		pragha_playlist_insert_mobj_list(cwin->cplaylist, list, pos, &dest_iter);
 	else
