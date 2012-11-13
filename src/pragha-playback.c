@@ -111,7 +111,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	case ST_STOPPED:
 		if(pragha_playlist_is_changing(cwin->cplaylist))
 			break;
-		if(cwin->cplaylist->queue_track_refs)
+		if(pragha_playlist_has_queue(cwin->cplaylist))
 			path = get_next_queue_track(cwin->cplaylist);
 		if (!path)
 			path = current_playlist_get_selection(cwin->cplaylist);
