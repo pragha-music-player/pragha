@@ -291,7 +291,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	if(list == NULL)
 		goto empty;
 
-	prev_tracks = cwin->cplaylist->no_tracks;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
@@ -446,7 +446,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 
 	set_watch_cursor (cwin->mainwindow);
 
-	prev_tracks = cwin->cplaylist->no_tracks;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	xml = tinycxml_parse(contents);
 

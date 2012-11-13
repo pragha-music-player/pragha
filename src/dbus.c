@@ -99,7 +99,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	prev_tracks = cwin->cplaylist->no_tracks;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)

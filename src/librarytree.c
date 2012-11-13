@@ -600,7 +600,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_RADIO:
 		set_watch_cursor (cwin->mainwindow);
 
-		prev_tracks = cwin->cplaylist->no_tracks;
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		g_object_ref(playlist_model);
@@ -660,7 +660,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
-			prev_tracks = cwin->cplaylist->no_tracks;
+			prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
 				playlist_tree_add_to_playlist(cwin);
 			else
@@ -1345,7 +1345,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 
 	if (list) {
 		set_watch_cursor (cwin->mainwindow);
-		prev_tracks = cwin->cplaylist->no_tracks;
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 		g_object_ref(playlist_model);

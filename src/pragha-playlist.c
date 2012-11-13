@@ -213,18 +213,20 @@ static gint get_total_playtime(PraghaPlaylist *cplaylist)
 
 void update_status_bar_playtime(struct con_win *cwin)
 {
-	gint total_playtime = 0;
+	gint total_playtime = 0, no_tracks = 0;
 	gchar *str, *tot_str;
 
 	if(cwin->cplaylist->changing)
 		return;
 
 	total_playtime = get_total_playtime(cwin->cplaylist);
+	no_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+
 	tot_str = convert_length_str(total_playtime);
 	str = g_strdup_printf("%i %s - %s",
-				cwin->cplaylist->no_tracks,
-				ngettext("Track", "Tracks", cwin->cplaylist->no_tracks),
-				tot_str);
+			      no_tracks,
+			      ngettext("Track", "Tracks", no_tracks),
+			      tot_str);
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
@@ -3714,6 +3716,12 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointe
 		return 1;
 	else
 		return 0;
+}
+
+gint
+pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->no_tracks;
 }
 
 void
