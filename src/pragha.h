@@ -1066,6 +1066,8 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
 gboolean
+pragha_playlist_has_queue(PraghaPlaylist* cplaylist);
+gboolean
 pragha_playlist_is_changing(PraghaPlaylist* cplaylist);
 void
 pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);

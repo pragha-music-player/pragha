@@ -3734,6 +3734,15 @@ pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
 }
 
 gboolean
+pragha_playlist_has_queue(PraghaPlaylist* cplaylist)
+{
+	if(cplaylist->queue_track_refs)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+gboolean
 pragha_playlist_is_changing(PraghaPlaylist* cplaylist)
 {
 	return cplaylist->changing;
