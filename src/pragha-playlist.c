@@ -962,7 +962,8 @@ GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
 
 /* Reset random rand_refs and appends given ref */
 
-void reset_rand_track_refs(GtkTreeRowReference *ref, PraghaPlaylist *cplaylist)
+static void
+reset_rand_track_refs(PraghaPlaylist *cplaylist, GtkTreeRowReference *ref)
 {
 	GtkTreePath *path;
 
@@ -977,6 +978,20 @@ void reset_rand_track_refs(GtkTreeRowReference *ref, PraghaPlaylist *cplaylist)
 	current_playlist_set_dirty_track(path, cplaylist);
 
 	gtk_tree_path_free(path);
+}
+
+void
+pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path)
+{
+	GtkTreeModel *model;
+	GtkTreeRowReference *ref;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	ref = gtk_tree_row_reference_new(model, path);
+	reset_rand_track_refs(cplaylist, ref);
+
+	cplaylist->unplayed_tracks = cplaylist->no_tracks;
 }
 
 /* Mark all tracks in current playlist as clean */
@@ -3755,7 +3770,7 @@ pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
 		if (cplaylist->curr_seq_ref) {
 			ref = gtk_tree_row_reference_copy(cplaylist->curr_seq_ref);
 			cplaylist->unplayed_tracks = cplaylist->no_tracks - 1;
-			reset_rand_track_refs(ref, cplaylist);
+			reset_rand_track_refs(cplaylist, ref);
 		}
 	}
 	else {
