@@ -1777,24 +1777,6 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	g_free(ch_filename);
 }
 
-/* Insert a list of mobj to current playlist. */
-
-static void
-insert_mobj_list_current_playlist(PraghaPlaylist *cplaylist,
-				  GtkTreeModel *model,
-				  GList *list,
-				  GtkTreeViewDropPosition droppos,
-				  GtkTreeIter *pos)
-{
-	struct musicobject *mobj;
-	GList *l;
-
-	for (l = list; l != NULL; l = l->next) {
-		mobj = l->data;
-		insert_current_playlist(cplaylist, model, mobj, droppos, pos);
-	}
-}
-
 /* Append a track to the current playlist */
 
 void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj)
@@ -1865,18 +1847,57 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, 
 	g_free(ch_filename);
 }
 
-/* Append a list of mobj to the current playlist */
+/* Insert a list of mobj to the current playlist. */
 
-static void
-append_mobj_list_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, GList *list)
+void
+pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
+				 GList *list,
+				 GtkTreeViewDropPosition droppos,
+				 GtkTreeIter *pos)
 {
+	GtkTreeModel *model;
 	struct musicobject *mobj;
 	GList *l;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	g_object_ref(model);
+	pragha_playlist_set_changing(cplaylist, TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
+
+	for (l = list; l != NULL; l = l->next) {
+		mobj = l->data;
+		insert_current_playlist(cplaylist, model, mobj, droppos, pos);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+	pragha_playlist_set_changing(cplaylist, FALSE);
+	g_object_unref(model);
+
+}
+
+/* Append a list of mobj to the current playlist */
+
+void
+pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
+{
+	GtkTreeModel *model;
+	struct musicobject *mobj;
+	GList *l;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	g_object_ref(model);
+	pragha_playlist_set_changing(cplaylist, TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
 		append_current_playlist(cplaylist, model, mobj);
 	}
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+	pragha_playlist_set_changing(cplaylist, FALSE);
+	g_object_unref(model);
 }
 
 /* Clear sort in the current playlist */
@@ -2692,18 +2713,11 @@ dnd_current_playlist_received(GtkWidget *widget,
 
 	/* Insert mobj list to current playlist. */
 
-	g_object_ref(model);
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	if (is_row)
-		insert_mobj_list_current_playlist(cwin->cplaylist, model, list, pos, &dest_iter);
+		pragha_playlist_insert_mobj_list(cwin->cplaylist, list, pos, &dest_iter);
 	else
-		append_mobj_list_current_playlist(cwin->cplaylist, model, list);
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
-	g_object_unref(model);
+		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	update_status_bar_playtime(cwin);
 

@@ -276,12 +276,9 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 static gboolean
 append_mobj_list_current_playlist_idle(gpointer user_data)
 {
-	GtkTreeModel *model;
-	struct musicobject *mobj;
 	gchar *summary = NULL;
 	guint songs_added = 0;
 	gint prev_tracks = 0;
-	GList *l;
 
 	AddMusicObjectListData *data = user_data;
 
@@ -293,23 +290,12 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+	pragha_playlist_append_mobj_list(cwin->cplaylist,
+					 list);
 
-	g_object_ref(model);
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
-
-	for (l = list; l != NULL; l = l->next) {
-		mobj = l->data;
-		append_current_playlist(cwin->cplaylist, model, mobj);
-		songs_added += 1;
-	}
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
-	g_object_unref(model);
-
+	songs_added = g_list_length(list);
 	g_list_free(list);
+
 empty:
 	switch(data->query_type) {
 		case LASTFM_GET_SIMILAR:
@@ -420,6 +406,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
 	gint try = 0, added = 0, prev_tracks = 0;
+	GList *list = NULL;
 
 	GFile *file;
 	gsize size;
@@ -454,11 +441,16 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 		xt = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
 		xc = xmlnode_get(xi,CCA {"track","creator",NULL},NULL,NULL);
 
-		if (xt && xc && append_track_with_artist_and_title (xc->content, xt->content, cwin))
-			added++;
+		if (xt && xc)
+			list = prepend_song_with_artist_and_title_to_mobj_list(xc->content, xt->content, list, cwin);
 	}
-	if(added > 0)
+
+	added = g_list_length(list);
+	if(added > 0) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 list);
 		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+	}
 
 	remove_watch_cursor (cwin->mainwindow);
 
@@ -467,6 +459,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 	set_status_message(summary, cwin);
 
 	xmlnode_free(xml);
+	g_list_free(list);
 	g_free (contents);
 	g_free(summary);
 out:
