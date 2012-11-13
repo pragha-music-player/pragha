@@ -1021,6 +1021,13 @@ void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj);
 void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj, GtkTreePath **path);
+void
+pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
+				 GList *list,
+				 GtkTreeViewDropPosition droppos,
+				 GtkTreeIter *pos);
+void
+pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
