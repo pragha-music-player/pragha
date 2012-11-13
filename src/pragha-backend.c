@@ -505,11 +505,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	struct musicobject *mobj = NULL;
 	struct tags ntag;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 	gchar *str = NULL;
 
 	gint changed = 0;
@@ -538,23 +534,12 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
-	path = current_playlist_get_actual(cwin->cplaylist);
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-
-	if(gtk_tree_model_get_iter(model, &iter, path))
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-	if (G_UNLIKELY(mobj == NULL))
-		g_warning("Invalid mobj pointer");
-	else
-		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	if(ntag.title)
 		g_free(ntag.title);
 	if(ntag.artist)
 		g_free(ntag.artist);
-
-	gtk_tree_path_free(path);
 
 	gst_tag_list_free(tag_list);
 }

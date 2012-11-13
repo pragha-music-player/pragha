@@ -1702,6 +1702,26 @@ void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter,
 	g_free(ch_filename);
 }
 
+void
+pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, struct musicobject *mobj)
+{
+	GtkTreeModel *model;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+
+	path = current_playlist_get_actual(cplaylist);
+
+	if(!path)
+		return;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+		update_track_current_playlist(cplaylist, &iter, changed, mobj);
+
+	gtk_tree_path_free(path);
+}
+
 /* Insert a track to the current playlist */
 
 static void
