@@ -88,8 +88,6 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GtkTreePath *path=NULL;
-	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
 
 	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
 
@@ -125,12 +123,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 				path = gtk_tree_path_new_first();
 		}
 
-		if (pragha_playlist_is_shuffle(cwin->cplaylist)) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin->cplaylist);
-			cwin->cplaylist->unplayed_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-		}
+		if (pragha_playlist_is_shuffle(cwin->cplaylist))
+			pragha_playlist_set_first_rand_ref(cwin->cplaylist, path);
 
 		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
 		update_current_playlist_state(path, cwin);
