@@ -365,7 +365,27 @@ static void delete_rand_track_refs(GtkTreePath *path, PraghaPlaylist *cplaylist)
 	}
 }
 
-static void current_playlist_unset_dirty_track(GtkTreePath *path, PraghaPlaylist *cplaylist)
+/* Mark a track in current playlist as dirty */
+
+static void
+current_playlist_set_dirty_track(PraghaPlaylist *cplaylist, GtkTreePath *path)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, TRUE, -1);
+
+	if (cplaylist->unplayed_tracks)
+		cplaylist->unplayed_tracks--;
+}
+
+/* Mark a track in current playlist as dirty */
+
+static void
+current_playlist_unset_dirty_track(PraghaPlaylist *cplaylist, GtkTreePath *path)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -374,7 +394,31 @@ static void current_playlist_unset_dirty_track(GtkTreePath *path, PraghaPlaylist
 
 	if (gtk_tree_model_get_iter(model, &iter, path))
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, FALSE, -1);
+
+	cplaylist->unplayed_tracks++;
 }
+
+/* Mark all tracks in current playlist as clean */
+
+static void
+current_playlist_clear_dirty_all(PraghaPlaylist *cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gboolean ret;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	ret = gtk_tree_model_get_iter_first(model, &iter);
+	while(ret) {
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, FALSE, -1);
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+
+	cplaylist->unplayed_tracks = cplaylist->no_tracks;
+}
+
+/* Remove all ref of song next current song */
 
 static void trim_down_rand_track_refs(PraghaPlaylist *cplaylist)
 {
@@ -391,8 +435,7 @@ static void trim_down_rand_track_refs(PraghaPlaylist *cplaylist)
 				ref = list->data;
 				lpath = gtk_tree_row_reference_get_path(ref);
 
-				current_playlist_unset_dirty_track(lpath, cplaylist);
-				cplaylist->unplayed_tracks++;
+				current_playlist_unset_dirty_track(cplaylist, lpath);
 
 				cplaylist->rand_track_refs =
 					g_list_remove(cplaylist->rand_track_refs,
@@ -698,19 +741,6 @@ static void clear_queue_track_refs(PraghaPlaylist *cplaylist)
 	}
 }
 
-/* Mark a track in current playlist as dirty */
-
-static void current_playlist_set_dirty_track(GtkTreePath *path, PraghaPlaylist *cplaylist)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, TRUE, -1);
-}
-
 /* Comparison function for column names */
 
 static gint compare_playlist_column_name(gconstpointer a, gconstpointer b)
@@ -893,9 +923,7 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 
 	/* Mark the track as dirty */
 
-	current_playlist_set_dirty_track(path, cwin->cplaylist);
-	if (cwin->cplaylist->unplayed_tracks)
-		cwin->cplaylist->unplayed_tracks--;
+	current_playlist_set_dirty_track(cwin->cplaylist, path);
 }
 
 void update_current_playlist_view_new_track(struct con_win *cwin)
@@ -974,8 +1002,9 @@ reset_rand_track_refs(PraghaPlaylist *cplaylist, GtkTreeRowReference *ref)
 	/* Set the current song as played. */
 	append_rand_track_refs(ref, cplaylist);
 	cplaylist->curr_rand_ref = ref;
+
 	path = gtk_tree_row_reference_get_path(ref);
-	current_playlist_set_dirty_track(path, cplaylist);
+	current_playlist_set_dirty_track(cplaylist, path);
 
 	gtk_tree_path_free(path);
 }
@@ -990,28 +1019,6 @@ pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path)
 
 	ref = gtk_tree_row_reference_new(model, path);
 	reset_rand_track_refs(cplaylist, ref);
-
-	cplaylist->unplayed_tracks = cplaylist->no_tracks;
-}
-
-/* Mark all tracks in current playlist as clean */
-
-void current_playlist_clear_dirty_all(PraghaPlaylist *cplaylist)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	gboolean ret;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
-
-	ret = gtk_tree_model_get_iter_first(model, &iter);
-	if (!ret)
-		return;
-
-	while(ret) {
-		gtk_list_store_set(GTK_LIST_STORE(model), &iter, P_PLAYED, FALSE, -1);
-		ret = gtk_tree_model_iter_next(model, &iter);
-	}
 }
 
 /* Return the path of the selected track */
@@ -1999,7 +2006,6 @@ void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 		if (pragha_backend_get_state (cwin->backend) == ST_STOPPED) {
 			clear_rand_track_refs(cwin->cplaylist);
 			current_playlist_clear_dirty_all(cwin->cplaylist);
-			cwin->cplaylist->unplayed_tracks = cwin->cplaylist->no_tracks;
 		}
 		else {
 			trim_down_rand_track_refs(cwin->cplaylist);
@@ -3772,19 +3778,16 @@ pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
 	if(!cplaylist->no_tracks)
 		return;
 
-	current_playlist_clear_dirty_all(cplaylist);
-
 	if (shuffle) {
 		CDEBUG(DBG_INFO, "Turning shuffle on");
 		if (cplaylist->curr_seq_ref) {
 			ref = gtk_tree_row_reference_copy(cplaylist->curr_seq_ref);
-			cplaylist->unplayed_tracks = cplaylist->no_tracks - 1;
 			reset_rand_track_refs(cplaylist, ref);
 		}
 	}
 	else {
 		CDEBUG(DBG_INFO, "Turning shuffle off");
-		cplaylist->unplayed_tracks = cplaylist->no_tracks;
+		current_playlist_clear_dirty_all(cplaylist);
 		if (cplaylist->curr_rand_ref)
 			cplaylist->curr_seq_ref =
 				gtk_tree_row_reference_copy(cplaylist->curr_rand_ref);
