@@ -1086,17 +1086,15 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		if (mobj == omobj)
 			continue;
 
+		update_musicobject(mobj, changed, omobj->tags);
+		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
+
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
-			update_musicobject(cwin->cstate->curr_mobj, changed, omobj->tags);
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
 		}
-		else {
-			update_musicobject(mobj, changed, omobj->tags);
-		}
-		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
@@ -1233,17 +1231,15 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 			continue;
 		}
 
+		update_musicobject(mobj, changed, &ntag);
+		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
+
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
-			update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				__update_current_song_info(cwin);
 				mpris_update_metadata_changed(cwin);
 			}
 		}
-		else {
-			update_musicobject(mobj, changed, &ntag);
-		}
-		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
 		    mobj->file_type != FILE_HTTP)) {
