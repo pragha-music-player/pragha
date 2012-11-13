@@ -783,9 +783,6 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
@@ -816,12 +813,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	mpris_update_metadata_changed(cwin);
 
-	if ((path = current_playlist_get_actual(cwin->cplaylist)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(cwin->cplaylist, &iter, changed, cwin->cstate->curr_mobj);
-		gtk_tree_path_free(path);
-	}
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	/* Store the new tags */
 
