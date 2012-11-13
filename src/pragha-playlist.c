@@ -1658,7 +1658,7 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj)
 {
 	GtkTreeModel *model;
-	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_filename = NULL;
+	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_title = NULL;
 
 	if (!changed)
 		return;
@@ -1667,19 +1667,19 @@ void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter,
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
-	ch_filename = get_display_name(mobj);
-
-	if(mobj->tags->track_no > 0)
-		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
-	if(mobj->tags->year > 0)
-		ch_year = g_strdup_printf("%d", mobj->tags->year);
-
 	if (changed & TAG_TNO_CHANGED) {
+		ch_track_no = g_strdup_printf("%d", mobj->tags->track_no);
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TRACK_NO, ch_track_no, -1);
+		g_free(ch_track_no);
 	}
 	if (changed & TAG_TITLE_CHANGED) {
-		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE,
-					(mobj->tags->title && strlen(mobj->tags->title)) ? mobj->tags->title : ch_filename, -1);
+		if(mobj->tags->title && strlen(mobj->tags->title))
+			ch_title = g_strdup(mobj->tags->title);
+		else
+			ch_title = get_display_name(mobj);
+
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE, ch_title, -1);
+		g_free(ch_title);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ARTIST, mobj->tags->artist,-1);
@@ -1691,15 +1691,13 @@ void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter,
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_GENRE, mobj->tags->genre,-1);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
+		ch_year = g_strdup_printf("%d", mobj->tags->year);
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_YEAR, ch_year, -1);
+		g_free(ch_year);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_COMMENT, mobj->tags->comment,-1);
 	}
-
-	g_free(ch_track_no);
-	g_free(ch_year);
-	g_free(ch_filename);
 }
 
 void
