@@ -51,6 +51,7 @@ typedef struct {
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
+	void (*error) (PraghaBackend *backend, const GError *error);
 } PraghaBackendClass;
 
 gboolean pragha_backend_can_seek (PraghaBackend *backend);
