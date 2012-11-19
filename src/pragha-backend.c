@@ -77,6 +77,7 @@ enum {
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
+	SIGNAL_ERROR,
 	LAST_SIGNAL
 };
 
@@ -434,6 +435,8 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 
 	if (emit) {
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
+
+		g_signal_emit (backend, signals[SIGNAL_ERROR], 0, error);
 
 		priv->emitted_error = TRUE;
 		priv->error = error;
@@ -889,6 +892,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                   NULL, NULL,
                                                   g_cclosure_marshal_VOID__INT,
                                                   G_TYPE_NONE, 1, G_TYPE_INT);
+
+	signals[SIGNAL_ERROR] = g_signal_new ("error",
+                                              G_TYPE_FROM_CLASS (gobject_class),
+                                              G_SIGNAL_RUN_LAST,
+                                              G_STRUCT_OFFSET (PraghaBackendClass, error),
+                                              NULL, NULL,
+                                              g_cclosure_marshal_VOID__POINTER,
+                                              G_TYPE_NONE, 1, G_TYPE_POINTER);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
