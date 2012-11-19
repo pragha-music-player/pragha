@@ -384,33 +384,11 @@ pragha_backend_resume (PraghaBackend *backend)
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);
 }
 
-/* Signal handler for parse the error dialog response. */
-
-static void pragha_backend_error_dialog_response(GtkDialog *dialog,
-					  gint response,
-					  struct con_win *cwin)
-{
-	switch (response) {
-		case GTK_RESPONSE_APPLY: {
-			pragha_advance_playback (cwin);
-			break;
-		}
-		case GTK_RESPONSE_ACCEPT:
-		case GTK_RESPONSE_DELETE_EVENT:
-		default: {
-			pragha_backend_stop (cwin->backend);
-			break;
-		}
-	}
-	gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
 static void
 pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
-	GtkWidget *dialog;
 	gboolean emit = TRUE;
 	GError *error = NULL;
 	gchar *dbg_info = NULL;
@@ -443,23 +421,6 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 
 		/* Directly add the icon showing the error */
 		update_current_playlist_view_new_track(cwin);
-
-		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
-						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-						GTK_MESSAGE_QUESTION,
-						GTK_BUTTONS_NONE,
-						_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
-						cwin->cstate->curr_mobj->file, error->message);
-
-		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
-		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
-
-		gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
-
-		g_signal_connect(G_OBJECT(dialog), "response",
-				 G_CALLBACK(pragha_backend_error_dialog_response),
-				 cwin);
-		gtk_widget_show_all(dialog);
 	}
 	else {
 		g_error_free (error);

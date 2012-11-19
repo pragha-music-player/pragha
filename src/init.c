@@ -1419,6 +1419,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
 
+	g_signal_connect(cwin->backend,
+			 "error",
+			 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
+
 	#if HAVE_LIBXFCE4UI
 	init_session_support(cwin);
 	#else
