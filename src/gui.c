@@ -915,3 +915,10 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 			 cwin);
 	gtk_widget_show_all(dialog);
 }
+
+void
+gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	update_current_playlist_view_new_track (cwin);
+}
