@@ -388,7 +388,6 @@ static void
 pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	gboolean emit = TRUE;
 	GError *error = NULL;
 	gchar *dbg_info = NULL;
@@ -414,13 +413,10 @@ pragha_backend_parse_error (PraghaBackend *backend, GstMessage *message)
 	if (emit) {
 		CDEBUG(DBG_BACKEND, "Gstreamer error \"%s\"", error->message);
 
-		g_signal_emit (backend, signals[SIGNAL_ERROR], 0, error);
-
 		priv->emitted_error = TRUE;
 		priv->error = error;
 
-		/* Directly add the icon showing the error */
-		update_current_playlist_view_new_track(cwin);
+		g_signal_emit (backend, signals[SIGNAL_ERROR], 0, error);
 	}
 	else {
 		g_error_free (error);

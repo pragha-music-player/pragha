@@ -1423,6 +1423,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			 "error",
 			 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
 
+	g_signal_connect(cwin->backend,
+			 "error",
+			 G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
+
 	#if HAVE_LIBXFCE4UI
 	init_session_support(cwin);
 	#else
