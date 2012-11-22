@@ -285,7 +285,7 @@ pragha_backend_get_error (PraghaBackend *backend)
 	return backend->priv->error;
 }
 
-enum player_state
+GstState
 pragha_backend_get_target_state (PraghaBackend *backend)
 {
 	return backend->priv->target_state;
