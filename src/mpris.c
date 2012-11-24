@@ -322,7 +322,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 {
 	gchar *uri = NULL, *path = NULL;
 	struct musicobject *mobj = NULL;
-	gboolean failed = TRUE;
+	gboolean happened = FALSE;
 
 	g_variant_get(parameters, "(s)", &uri);
 
@@ -337,18 +337,20 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			if(mobj) {
 				pragha_playlist_append_mobj_and_play(cwin->cplaylist, mobj);
 				update_status_bar_playtime(cwin);
-				failed = FALSE;
+				happened = TRUE;
 			}
-			g_free(path);
 		}
 		g_free(uri);
+		g_free(path);
 	}
 
-	if(failed)
-		g_dbus_method_invocation_return_error_literal (invocation,
-				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
-	else
+	if(happened)
 		g_dbus_method_invocation_return_value (invocation, NULL);
+	else
+		g_dbus_method_invocation_return_error_literal (invocation,
+							       G_DBUS_ERROR,
+							       G_DBUS_ERROR_INVALID_FILE_CONTENT,
+							       "This file does not play here.");
 }
 
 static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win *cwin)
