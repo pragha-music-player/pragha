@@ -762,28 +762,24 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
 {
 	GVariantBuilder builder;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
+	GList *list = NULL, *i;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist get Tracks");
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
-	// TODO: remove tree access
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-	
-	if (!gtk_tree_model_get_iter_first(model, &iter))
-		goto bad;
+	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
 
-	do {
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (mobj) {
+	if(list != NULL) {
+		list = g_list_reverse(list);
+		for (i=list; i != NULL; i = i->next) {
+			mobj = i->data;
 			g_variant_builder_add_value(&builder, handle_get_trackid(mobj));
 		}
-	} while(gtk_tree_model_iter_next(model, &iter));
+		g_list_free(list);
+	}
 
-bad:
 	return g_variant_builder_end(&builder);
 }
 
@@ -1151,12 +1147,11 @@ void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, g
 		g_variant_builder_end(&b), NULL);
 }
 
-void mpris_update_tracklist_replaced(struct con_win *cwin) {
+void mpris_update_tracklist_replaced(struct con_win *cwin)
+{
 	GVariantBuilder b;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	gboolean iter_valid;
 	struct musicobject *mobj = NULL;
+	GList *list = NULL, *i;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
@@ -1166,16 +1161,17 @@ void mpris_update_tracklist_replaced(struct con_win *cwin) {
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-	
-	iter_valid = gtk_tree_model_get_iter_first(model, &iter);
+	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
 
-	while (iter_valid) {
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		g_variant_builder_add_value(&b, handle_get_trackid(mobj));
-		iter_valid = gtk_tree_model_iter_next(model, &iter);
+	if(list != NULL) {
+		list = g_list_reverse(list);
+		for (i=list; i != NULL; i = i->next) {
+			mobj = i->data;
+			g_variant_builder_add_value(&b, handle_get_trackid(mobj));
+		}
+		g_list_free(list);
 	}
-	
+
 	g_variant_builder_close(&b);
 	g_variant_builder_add_value(&b, handle_get_trackid(cwin->cstate->curr_mobj));
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,

@@ -246,54 +246,50 @@ exit_failure:
 
 static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	struct musicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
 	gint ret = 0;
-	gboolean next;
+	GList *list = NULL, *i;
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
 
-	next = gtk_tree_model_get_iter_first(model, &iter);
-	while (next) {
-		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (G_LIKELY(mobj &&
-		    mobj->file_type != FILE_CDDA &&
-		    mobj->file_type != FILE_HTTP)) {
-			base = get_display_filename(mobj->file, TRUE);
+	if(list != NULL) {
+		for (i=list; i != NULL; i = i->next) {
+			mobj = i->data;
+			if(mobj->file_type != FILE_CDDA &&
+			   mobj->file_type != FILE_HTTP) {
+				base = get_display_filename(mobj->file, TRUE);
 
-			if (g_ascii_strcasecmp(base_m3u, base) == 0)
-				uri = get_display_filename(mobj->file, FALSE);
-			else
-				uri = g_strdup(mobj->file);
+				if (g_ascii_strcasecmp(base_m3u, base) == 0)
+					uri = get_display_filename(mobj->file, FALSE);
+				else
+					uri = g_strdup(mobj->file);
 
-			/* Format: "#EXTINF:seconds, title" */
-			str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-					      mobj->tags->length,
-					      mobj->tags->title,
-					      uri);
+				/* Format: "#EXTINF:seconds, title" */
+				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
+						      mobj->tags->length,
+						      mobj->tags->title,
+						      uri);
 
-			status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-			if (status != G_IO_STATUS_NORMAL) {
-				g_critical("Unable to write to M3U playlist: %s", filename);
-				ret = -1;
-				goto exit;
+				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
+				if (status != G_IO_STATUS_NORMAL) {
+					g_critical("Unable to write to M3U playlist: %s", filename);
+					ret = -1;
+					goto exit;
+				}
+				g_free(base);
+				g_free(uri);
 			}
-			g_free(base);
-			g_free(uri);
+			/* Have to give control to GTK periodically ... */
+			if (pragha_process_gtk_events ())
+				return 0;
 		}
-
-		/* Have to give control to GTK periodically ... */
-		if (pragha_process_gtk_events ())
-			return 0;
-
-	next = gtk_tree_model_iter_next(model, &iter);
+		g_list_free(list);
 	}
 
 exit:
@@ -1417,7 +1413,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
-	GList *list, *i;
+	GList *mlist = NULL, *list, *i;
 	GSList *files = NULL;
 	gchar *file = NULL;
 
@@ -1425,22 +1421,24 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 
 	switch(type) {
 	case SAVE_COMPLETE:
-		gtk_tree_model_get_iter_first(model, &iter);
-		do {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (G_LIKELY(mobj &&
-			    mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP)) {
-			    	file = g_strdup(mobj->file);
-				files = g_slist_append(files, file);
+		mlist = pragha_playlist_get_mobj_list(cwin->cplaylist);
+
+		if(mlist != NULL) {
+			for (i=mlist; i != NULL; i = i->next) {
+				mobj = i->data;
+				if (mobj->file_type != FILE_CDDA &&
+				    mobj->file_type != FILE_HTTP) {
+				    	file = g_strdup(mobj->file);
+					files = g_slist_prepend(files, file);
+				}
+				else if(mobj->file_type == FILE_HTTP) {
+					/* TODO: Fix this negradaaa!. */
+					file = g_strdup_printf("Radio:%s", mobj->file);
+					files = g_slist_prepend(files, file);
+				}
 			}
-			else if(G_LIKELY(mobj &&
-				mobj->file_type == FILE_HTTP)) {
-				/* TODO: Fix this negradaaa!. */
-				file = g_strdup_printf("Radio:%s", mobj->file);
-				files = g_slist_append(files, file);
-			}
-		} while(gtk_tree_model_iter_next(model, &iter));
+			g_list_free(mlist);
+		}
 		break;
 	case SAVE_SELECTED:
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(

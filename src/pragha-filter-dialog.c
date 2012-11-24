@@ -188,43 +188,43 @@ filter_model_visible_func (GtkTreeModel *model, GtkTreeIter *iter, PraghaFilterD
 static void
 pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cplaylist)
 {
-	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter, filter_iter;
+	GtkTreeIter filter_iter;
 	struct musicobject *mobj = NULL;
 	gchar *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL;
 	gchar *track_data_markup = NULL;
 	gint track_i = 0;
-	gboolean ret;
+	GList *list = NULL, *i;
 
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cplaylist->view));
+	list = pragha_playlist_get_mobj_list(cplaylist);
 
-	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
+	track_i = pragha_playlist_get_no_tracks(cplaylist);
 
-	while (ret) {
-		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &mobj, -1);
+	if(list != NULL) {
+		for (i=list; i != NULL; i = i->next) {
+			mobj = i->data;
 
-		track_i++;
+			ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) : get_display_filename (mobj->file, FALSE);
+			ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
+			ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
 
-		ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) : get_display_filename (mobj->file, FALSE);
-		ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
-		ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
+			track_data_markup = g_markup_printf_escaped ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
-		track_data_markup = g_markup_printf_escaped ("%s - %s - %s", ch_title, ch_artist, ch_album);
+			if (track_data_markup != NULL) {
+				gtk_list_store_prepend (filter_model, &filter_iter);
+				gtk_list_store_set (filter_model, &filter_iter,
+							0, track_i,
+							1, track_data_markup,
+							-1);
+			}
 
-		if (track_data_markup != NULL) {
-			gtk_list_store_append (filter_model, &filter_iter);
-			gtk_list_store_set (filter_model, &filter_iter,
-						0, track_i,
-						1, track_data_markup,
-						-1);
+			track_i--;
+
+			g_free (ch_title);
+			g_free (ch_artist);
+			g_free (ch_album);
+			g_free (track_data_markup);
 		}
-
-		g_free (ch_title);
-		g_free (ch_artist);
-		g_free (ch_album);
-		g_free (track_data_markup);
-
-		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
+		g_list_free(list);
 	}
 }
 

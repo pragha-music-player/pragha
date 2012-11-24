@@ -1036,6 +1036,7 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
+GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,

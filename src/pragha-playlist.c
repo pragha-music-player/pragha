@@ -2765,6 +2765,31 @@ exit:
 	gtk_drag_finish(context, TRUE, FALSE, time);
 }
 
+/* Get a list of all music objects on current playlist */
+
+GList *
+pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+	GList *list = NULL;
+	gboolean valid;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	valid = gtk_tree_model_get_iter_first(model, &iter);
+	while (valid) {
+		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if (G_LIKELY(mobj))
+			list = g_list_prepend(list, mobj);
+
+		valid = gtk_tree_model_iter_next(model, &iter);
+	}
+	return list;
+}
+
 /* Save current playlist state on exit */
 
 void save_current_playlist_state(struct con_win *cwin)
