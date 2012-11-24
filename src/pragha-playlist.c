@@ -1865,6 +1865,16 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, 
 	g_free(ch_filename);
 }
 
+void
+pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, struct musicobject *mobj)
+{
+	GtkTreePath *path;
+
+	append_current_playlist_ex(cplaylist, NULL, mobj, &path);
+	pragha_playlist_activate_path(cplaylist, path);
+	gtk_tree_path_free(path);
+}
+
 /* Insert a list of mobj to the current playlist. */
 
 void
@@ -2028,10 +2038,11 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 
 /* Handler for row double click / kboard enter */
 
-void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
-				       GtkTreePath *path,
-				       GtkTreeViewColumn *column,
-				       struct con_win *cwin)
+static void
+current_playlist_row_activated_cb(GtkTreeView *current_playlist,
+				  GtkTreePath *path,
+				  GtkTreeViewColumn *column,
+				  struct con_win *cwin)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
@@ -3762,6 +3773,29 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointe
 		return 1;
 	else
 		return 0;
+}
+
+void
+pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path)
+{
+	GtkTreeViewColumn *col;
+	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view), 1);
+	gtk_tree_view_row_activated(GTK_TREE_VIEW(cplaylist->view),
+				   path,
+				   col);
+}
+
+void
+pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, struct musicobject *mobj)
+{
+	GtkTreePath *path = NULL;
+
+	path = current_playlist_path_at_mobj(mobj, cplaylist);
+
+	if(path) {
+		pragha_playlist_activate_path(cplaylist, path);
+		gtk_tree_path_free (path);
+	}
 }
 
 gint

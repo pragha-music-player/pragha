@@ -320,39 +320,30 @@ seeked_cb (PraghaBackend *backend, gpointer user_data)
 
 static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	gchar *uri = NULL;
+	gchar *uri = NULL, *path = NULL;
+	struct musicobject *mobj = NULL;
+	gboolean failed = TRUE;
+
 	g_variant_get(parameters, "(s)", &uri);
-	gboolean failed = FALSE;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Player OpenUri");
 
 	if(uri) {
 		// TODO: Translate "cdda://sr0/Track 01.wav" URIs for new_musicobject_from_cdda()
 		//       If there is such a convention on other players
-		gchar *path = g_filename_from_uri(uri, NULL, NULL);
+		path = g_filename_from_uri(uri, NULL, NULL);
 		if(path && is_playable_file(path)) {
-			struct musicobject *mobj = new_musicobject_from_file(path);
+			mobj = new_musicobject_from_file(path);
 			if(mobj) {
-				GtkTreePath *tree_path;
-				append_current_playlist_ex(cwin->cplaylist, NULL, mobj, &tree_path);
+				pragha_playlist_append_mobj_and_play(cwin->cplaylist, mobj);
 				update_status_bar_playtime(cwin);
-
-				// Dangerous: reusing double-click-handler here.
-				current_playlist_row_activated_cb(
-					GTK_TREE_VIEW(cwin->cplaylist->view), tree_path, NULL, cwin);
-
-				gtk_tree_path_free(tree_path);
-			} else {
-				failed = TRUE;
+				failed = FALSE;
 			}
-			g_free(uri);
-		} else {
-			failed = TRUE;
+			g_free(path);
 		}
-		g_free(path);
-	} else {
-		failed = TRUE;
+		g_free(uri);
 	}
+
 	if(failed)
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_FILE_CONTENT, "This file does not play here.");
@@ -746,7 +737,6 @@ static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVar
 
 static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	GtkTreePath *tree_path = NULL;
 	struct musicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
@@ -756,19 +746,14 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 
 	mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
 
-	tree_path = current_playlist_path_at_mobj(mobj, cwin->cplaylist);
-
-	if (tree_path) {
-		// Dangerous: reusing double-click handler here.
-		current_playlist_row_activated_cb(
-			GTK_TREE_VIEW(cwin->cplaylist->view), tree_path, NULL, cwin);
+	if (mobj) {
+		pragha_playlist_activate_unique_mobj(cwin->cplaylist, mobj);
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	}
 	else
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 
-	gtk_tree_path_free (tree_path);
 	g_free (track_id);
 }
 
