@@ -297,6 +297,7 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 	GstStateChangeReturn ret;
 	PraghaBackendPrivate *priv = backend->priv;
 
+	GstState old_state = priv->target_state;
 	priv->target_state = target_state;
 
 	ret = gst_element_set_state(priv->pipeline, target_state);
@@ -304,7 +305,7 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 	switch (ret) {
 		case GST_STATE_CHANGE_SUCCESS:
 			if (target_state == GST_STATE_READY)
-				pragha_backend_evaluate_state(GST_STATE_RETURN (priv->pipeline),
+				pragha_backend_evaluate_state(old_state,
 							      GST_STATE (priv->pipeline),
 							      GST_STATE_PENDING (priv->pipeline),
 							      backend);
