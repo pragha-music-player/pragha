@@ -130,31 +130,20 @@ static const gchar mpris2xml[] =
 		mpris_##x##_put_##y(value, error, cwin);
 #define END_INTERFACE }
 
-static gboolean
-handle_path_request(struct con_win *cwin, const gchar *dbus_path,
-		struct musicobject **mobj, GtkTreePath **tree_path) {
-	gchar *base = g_strdup_printf("%s/TrackList/", MPRIS_PATH);
-	gboolean found = FALSE;
-	*mobj = NULL;
-	if(g_str_has_prefix(dbus_path, base)) {
+static struct musicobject *
+get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
+{
+	gchar *base = NULL;
+	void *mobj_request = NULL;
 
-		void *request = NULL;
-		sscanf(dbus_path + strlen(base), "%p", &request);
+	base = g_strdup_printf("%s/TrackList/", MPRIS_PATH);
 
-		if(request) {
-			GtkTreePath *path = current_playlist_path_at_mobj(request, cwin->cplaylist);
-			if(path) {
-				found = TRUE;
-				*mobj = request;
-				if(tree_path)
-					*tree_path = path;
-				else
-					gtk_tree_path_free(path);
-			}
-		}
-	}
+	if(g_str_has_prefix(track_id, base))
+		sscanf(track_id + strlen(base), "%p", &mobj_request);
+
 	g_free(base);
-	return found;
+
+	return mobj_request;
 }
 
 /* org.mpris.MediaPlayer2 */
@@ -293,11 +282,13 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gint64 param;
-	gchar *path = NULL;
 	struct musicobject *mobj = NULL;
+	gchar *track_id = NULL;
 
-	g_variant_get(parameters, "(ox)", &path, &param);
-	if (handle_path_request(cwin, path, &mobj, NULL) && cwin->cstate->curr_mobj == mobj) {
+	g_variant_get(parameters, "(ox)", &track_id, &param);
+
+	mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
+	if (mobj != NULL && mobj == cwin->cstate->curr_mobj) {
 		gint seek = (param / 1000000);
 
 		if (seek >= cwin->cstate->curr_mobj->tags->length)
@@ -305,7 +296,7 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 
 		pragha_backend_seek(cwin->backend, seek);
 	}
-	g_free(path);
+	g_free(track_id);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
@@ -675,7 +666,7 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 	GVariant *param1 = g_variant_get_child_value(parameters, 0);
 	gsize i, length;
 	GVariantBuilder b;
-	const gchar *path;
+	const gchar *track_id;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GetTracksMetada");
 
@@ -687,12 +678,13 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 	for(i = 0; i < length; i++) {
 		g_variant_builder_open(&b, G_VARIANT_TYPE("a{sv}"));
 		struct musicobject *mobj= NULL;
-		path = g_variant_get_string(g_variant_get_child_value(param1, i), NULL);
-		if (handle_path_request(cwin, path, &mobj, NULL)) {
+		track_id = g_variant_get_string(g_variant_get_child_value(param1, i), NULL);
+		mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
+		if (mobj) {
 			handle_get_metadata(mobj, &b);
 		} else {
 			g_variant_builder_add (&b, "{sv}", "mpris:trackid",
-			g_variant_new_object_path(path));
+			g_variant_new_object_path(track_id));
 		}
 		g_variant_builder_close(&b);
 	}
@@ -754,24 +746,30 @@ static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVar
 
 static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	gchar *path = NULL;
 	GtkTreePath *tree_path = NULL;
-	g_variant_get(parameters, "(o)", &path);
 	struct musicobject *mobj = NULL;
+	gchar *track_id = NULL;
+
+	g_variant_get(parameters, "(o)", &track_id);
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GoTo");
 
-	if(handle_path_request(cwin, path, &mobj, &tree_path)) {
+	mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
+
+	tree_path = current_playlist_path_at_mobj(mobj, cwin->cplaylist);
+
+	if (tree_path) {
 		// Dangerous: reusing double-click handler here.
 		current_playlist_row_activated_cb(
 			GTK_TREE_VIEW(cwin->cplaylist->view), tree_path, NULL, cwin);
 		g_dbus_method_invocation_return_value (invocation, NULL);
-	} else
+	}
+	else
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS, "Unknown or malformed playlist object path.");
 
 	gtk_tree_path_free (tree_path);
-	g_free (path);
+	g_free (track_id);
 }
 
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
