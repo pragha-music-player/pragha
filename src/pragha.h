@@ -1072,6 +1072,8 @@ void
 pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void
 pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, struct musicobject *mobj);
+void
+pragha_playlist_set_rules_hint(PraghaPlaylist* cplaylist, gboolean use_hint);
 gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
 gboolean

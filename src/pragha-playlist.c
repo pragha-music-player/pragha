@@ -3798,6 +3798,12 @@ pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, struct musicobje
 	}
 }
 
+void
+pragha_playlist_set_rules_hint(PraghaPlaylist* cplaylist, gboolean use_hint)
+{
+	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(cplaylist->view), use_hint);
+}
+
 gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
 {
