@@ -1023,6 +1023,8 @@ void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint change
 void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj);
 void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj, GtkTreePath **path);
 void
+pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, struct musicobject *mobj);
+void
 pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 				 GList *list,
 				 GtkTreeViewDropPosition droppos,
@@ -1033,10 +1035,6 @@ void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
-void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
-				       GtkTreePath *path,
-				       GtkTreeViewColumn *column,
-				       struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
@@ -1070,6 +1068,10 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+void
+pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path);
+void
+pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, struct musicobject *mobj);
 gint
 pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
 gboolean
