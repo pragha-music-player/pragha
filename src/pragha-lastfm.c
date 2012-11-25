@@ -214,7 +214,7 @@ do_lastfm_current_playlist_love (gpointer data)
 
 	struct con_win *cwin = data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	msg_data = do_lastfm_love_mobj(mobj, cwin);
 
@@ -244,7 +244,7 @@ do_lastfm_current_playlist_unlove (gpointer data)
 
 	struct con_win *cwin = data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	msg_data = do_lastfm_unlove_mobj(mobj, cwin);
 
@@ -365,7 +365,7 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	data = do_lastfm_get_similar(mobj, cwin);
 

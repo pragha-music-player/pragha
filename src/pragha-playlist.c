@@ -2821,6 +2821,36 @@ pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist)
 	return mlist;
 }
 
+/* Get the musicobject of seleceted track on current playlist */
+
+struct musicobject *
+pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GList *list;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list != NULL) {
+		path = list->data;
+		if (gtk_tree_model_get_iter(model, &iter, path)) {
+			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+			if (!mobj)
+				g_warning("Invalid mobj pointer");
+		}
+
+		g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
+		g_list_free (list);
+	}
+
+	return mobj;
+}
+
 /* Save current playlist state on exit */
 
 void save_current_playlist_state(struct con_win *cwin)

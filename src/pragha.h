@@ -1037,6 +1037,7 @@ void jump_to_playing_song(struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
+struct musicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
@@ -1172,7 +1173,6 @@ gboolean nm_is_online ();
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
 gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
-struct musicobject *get_selected_musicobject(struct con_win *cwin);
 void set_watch_cursor (GtkWidget *window);
 void remove_watch_cursor (GtkWidget *window);
 void set_status_message (const gchar *message, struct con_win *cwin);

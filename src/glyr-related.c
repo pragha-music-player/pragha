@@ -296,7 +296,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 void
 related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = get_selected_musicobject(cwin);
+	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = mobj->tags->artist;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
@@ -310,7 +310,7 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = get_selected_musicobject(cwin);
+	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = mobj->tags->artist;
 	const gchar *title = mobj->tags->title;
 
