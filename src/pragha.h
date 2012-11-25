@@ -1030,6 +1030,8 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 				 GtkTreeIter *pos);
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
+gboolean
+pragha_playlist_already_has_file(PraghaPlaylist *cplaylist, gchar *file);
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
