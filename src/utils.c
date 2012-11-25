@@ -446,34 +446,6 @@ append_track_with_artist_and_title(const gchar *artist, const gchar *title, stru
 	return location_id;
 }
 
-/* Get the musicobject of seleceted track on current playlist */
-
-struct musicobject *
-get_selected_musicobject(struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GList *list;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list != NULL) {
-		path = list->data;
-		if (gtk_tree_model_get_iter(model, &iter, path)) {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (!mobj)
-				g_warning("Invalid mobj pointer");
-		}
-		gtk_tree_path_free(path);
-		g_list_free(list);
-	}
-	return mobj;
-}
-
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
