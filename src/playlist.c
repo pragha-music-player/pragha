@@ -303,10 +303,6 @@ exit:
 
 static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
 	GList *list, *i;
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	struct musicobject *mobj = NULL;
@@ -317,20 +313,14 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	list = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
 
 	if (list) {
 		/* Export all selected tracks to the given file */
 		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter,
-					   P_MOBJ_PTR, &mobj, -1);
-			if (G_LIKELY(mobj &&
-			    mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP)) {
+			mobj=i->data;
+			if (mobj->file_type != FILE_CDDA &&
+			    mobj->file_type != FILE_HTTP) {
 				base = get_display_filename(mobj->file, TRUE);
 
 				if (g_ascii_strcasecmp(base_m3u, base) == 0)
@@ -353,7 +343,6 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 				g_free(base);
 				g_free(uri);
 			}
-			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
 			if (pragha_process_gtk_events ()) {
@@ -1383,7 +1372,8 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 /* Appennd a tracks list to a playlist using the given type */
 
-void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
+static void
+append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 {
 	gchar *file, *s_file;
 	GSList *i = NULL;
@@ -1399,8 +1389,6 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 	}
 
 	db_commit_transaction(cwin->cdbase);
-
-	g_slist_free(list);
 }
 
 /* Save tracks to a playlist using the given type */
@@ -1408,73 +1396,43 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeSelection *selection;
-	GtkTreeIter iter;
 	struct musicobject *mobj = NULL;
-	GList *mlist = NULL, *list, *i;
+	GList *mlist = NULL, *i;
 	GSList *files = NULL;
 	gchar *file = NULL;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
 
 	switch(type) {
 	case SAVE_COMPLETE:
 		mlist = pragha_playlist_get_mobj_list(cwin->cplaylist);
-
-		if(mlist != NULL) {
-			for (i=mlist; i != NULL; i = i->next) {
-				mobj = i->data;
-				if (mobj->file_type != FILE_CDDA &&
-				    mobj->file_type != FILE_HTTP) {
-				    	file = g_strdup(mobj->file);
-					files = g_slist_prepend(files, file);
-				}
-				else if(mobj->file_type == FILE_HTTP) {
-					/* TODO: Fix this negradaaa!. */
-					file = g_strdup_printf("Radio:%s", mobj->file);
-					files = g_slist_prepend(files, file);
-				}
-			}
-			g_list_free(mlist);
-		}
 		break;
 	case SAVE_SELECTED:
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->cplaylist->view));
-		list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-		if (list) {
-			for (i=list; i != NULL; i = i->next) {
-				path = i->data;
-				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter,
-						   P_MOBJ_PTR, &mobj, -1);
-
-				if (G_LIKELY(mobj &&
-				    mobj->file_type != FILE_CDDA &&
-				    mobj->file_type != FILE_HTTP)) {
-				    	file = g_strdup(mobj->file);
-					files = g_slist_append(files, file);
-				}
-				else if(G_LIKELY(mobj &&
-					mobj->file_type == FILE_HTTP)) {
-					/* TODO: Fix this negradaaa!. */
-					file = g_strdup_printf("Radio:%s", mobj->file);
-					files = g_slist_append(files, file);
-				}
-				gtk_tree_path_free(path);
-			}
-			g_list_free(list);
-		}
+		mlist = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
 		break;
 	default:
 		break;
 	}
 
-	if(files != NULL)
+	if(mlist != NULL) {
+		for (i=mlist; i != NULL; i = i->next) {
+			mobj = i->data;
+			if (mobj->file_type != FILE_CDDA &&
+			    mobj->file_type != FILE_HTTP) {
+			    	file = g_strdup(mobj->file);
+				files = g_slist_prepend(files, file);
+			}
+			else if(mobj->file_type == FILE_HTTP) {
+				/* TODO: Fix this negradaaa!. */
+				file = g_strdup_printf("Radio:%s", mobj->file);
+				files = g_slist_prepend(files, file);
+			}
+		}
+		g_list_free(mlist);
+	}
+
+	if(files != NULL) {
 		append_files_to_playlist(files, playlist_id, cwin);
+		g_slist_free(files);
+	}
 }
 
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,

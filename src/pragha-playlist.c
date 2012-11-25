@@ -2790,6 +2790,37 @@ pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist)
 	return list;
 }
 
+/* Get a list of selected music objects on current playlist */
+
+GList *
+pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+	GList *list = NULL, *mlist = NULL, *i;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+			if (G_LIKELY(mobj))
+				mlist = g_list_prepend(mlist, mobj);
+
+			gtk_tree_path_free(path);
+		}
+		g_list_free (list);
+	}
+	return mlist;
+}
+
 /* Save current playlist state on exit */
 
 void save_current_playlist_state(struct con_win *cwin)
