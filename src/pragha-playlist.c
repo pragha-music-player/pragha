@@ -1928,6 +1928,32 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	g_object_unref(model);
 }
 
+
+/* Test if the song is already in the playlist.*/
+
+gboolean
+pragha_playlist_already_has_file(PraghaPlaylist *cplaylist, gchar *file)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+	gboolean ret;
+
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(cplaylist->view));
+
+	ret = gtk_tree_model_get_iter_first (model, &iter);
+	while (ret) {
+		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if(0 == g_strcmp0(mobj->file, file))
+		   	return TRUE;
+
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+
+	return FALSE;
+}
+
 /* Clear sort in the current playlist */
 
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)

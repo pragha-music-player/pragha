@@ -314,29 +314,6 @@ nm_is_online ()
 /* Test if the song is already in the playlist.*/
 
 gboolean
-already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
-{
-	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter;
-	struct musicobject *omobj = NULL;
-	gboolean ret;
-
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->cplaylist->view));
-
-	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
-	while (ret) {
-		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
-
-		if(0 == g_strcmp0(mobj->file, omobj->file))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
-	}
-
-	return FALSE;
-}
-
-gboolean
 already_has_title_of_artist_in_current_playlist(const gchar *title,
 						const gchar *artist,
 						struct con_win *cwin)
@@ -429,7 +406,7 @@ append_track_with_artist_and_title(const gchar *artist, const gchar *title, stru
 
 			mobj = new_musicobject_from_db(location_id, cwin);
 
-			if(already_in_current_playlist(mobj, cwin) == FALSE) {
+			if(pragha_playlist_already_has_file(cwin->cplaylist, mobj->file) == FALSE) {
 				append_current_playlist(cwin->cplaylist, NULL, mobj);
 			}
 			else {
