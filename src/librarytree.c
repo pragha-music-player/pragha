@@ -1348,7 +1348,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 				return;
 		}
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 list);
+						 mlist);
 
 		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 		remove_watch_cursor (cwin->mainwindow);
