@@ -469,6 +469,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
 	struct musicobject *mobj;
+	GList *list = NULL;
 
 	s_playlist = sanitize_string_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
@@ -476,18 +477,11 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	if(playlist_id == 0)
 		goto bad;
 
+	set_watch_cursor (cwin->mainwindow);
+
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	exec_sqlite_query(query, cwin->cdbase, &result);
-
-	set_watch_cursor (cwin->mainwindow);
-
-	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
-
-	g_object_ref(model);
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_sqlite3(result.resultp[i]);
@@ -497,18 +491,16 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		append_current_playlist(cwin->cplaylist, model, mobj);
+		list = g_list_append(list, mobj);
 
 		g_free(file);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
-	g_object_unref(model);
-
+	if(list) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+		update_status_bar_playtime(cwin);
+	}
 	remove_watch_cursor (cwin->mainwindow);
-
-	update_status_bar_playtime(cwin);
 
 	sqlite3_free_table(result.resultp);
 
