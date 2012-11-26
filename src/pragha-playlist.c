@@ -1954,6 +1954,31 @@ pragha_playlist_already_has_file(PraghaPlaylist *cplaylist, gchar *file)
 	return FALSE;
 }
 
+gboolean
+pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
+					    const gchar *title,
+					    const gchar *artist)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	struct musicobject *mobj = NULL;
+	gboolean ret;
+
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(cplaylist->view));
+	ret = gtk_tree_model_get_iter_first (model, &iter);
+	while (ret) {
+		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if((0 == g_ascii_strcasecmp(mobj->tags->title, title)) &&
+		   (0 == g_ascii_strcasecmp(mobj->tags->artist, artist)))
+		   	return TRUE;
+
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+
+	return FALSE;
+}
+
 /* Clear sort in the current playlist */
 
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)

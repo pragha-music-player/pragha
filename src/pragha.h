@@ -1032,6 +1032,10 @@ void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
 gboolean
 pragha_playlist_already_has_file(PraghaPlaylist *cplaylist, gchar *file);
+gboolean
+pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
+					    const gchar *title,
+					    const gchar *artist);
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);

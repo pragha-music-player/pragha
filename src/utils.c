@@ -311,33 +311,6 @@ nm_is_online ()
 }
 #endif
 
-/* Test if the song is already in the playlist.*/
-
-gboolean
-already_has_title_of_artist_in_current_playlist(const gchar *title,
-						const gchar *artist,
-						struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-	gboolean ret;
-
-	model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->cplaylist->view));
-	ret = gtk_tree_model_get_iter_first (model, &iter);
-	while (ret) {
-		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-		if((0 == g_ascii_strcasecmp(mobj->tags->title, title)) &&
-		   (0 == g_ascii_strcasecmp(mobj->tags->artist, artist)))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(model, &iter);
-	}
-
-	return FALSE;
-}
-
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 GList *
@@ -352,7 +325,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 	gint location_id = 0, i;
 	gchar *sartist, *stitle;
 
-	if(already_has_title_of_artist_in_current_playlist(title, artist, cwin))
+	if(pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
 		return list;
 
 	sartist = sanitize_string_sqlite3(artist);
