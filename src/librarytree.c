@@ -1326,7 +1326,7 @@ void library_tree_add_to_playlist(struct con_win *cwin)
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	GList *mlist, *list, *i;
+	GList *mlist = NULL, *list, *i;
 	gint prev_tracks = 0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
