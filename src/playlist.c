@@ -157,7 +157,8 @@ get_playlist_name(struct con_win *cwin,
 /* Add all the tracks under the given path to the current playlist */
 /* NB: Optimization */
 
-static void add_playlist_row_current_playlist(GtkTreePath *path, struct con_win *cwin)
+GList *
+add_playlist_row_current_playlist(GtkTreePath *path, GList *list, struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -170,13 +171,14 @@ static void add_playlist_row_current_playlist(GtkTreePath *path, struct con_win 
 		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 		if(node_type == NODE_PLAYLIST) {
-			add_playlist_current_playlist(NULL, playlist, cwin);
+			list = add_playlist_to_mobj_list(playlist, list, FALSE, cwin);
 		}
 		else if (node_type == NODE_RADIO) {
-			add_radio_current_playlist(NULL, playlist, cwin);
+			list = add_radio_to_mobj_list(playlist, list, FALSE, cwin);
 		}
 		g_free(playlist);
 	}
+	return list;
 }
 
 static gboolean overwrite_existing_playlist(const gchar *playlist,
@@ -491,7 +493,8 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		list = g_list_append(list, mobj);
+		if(G_LIKELY(mobj))
+			list = g_list_append(list, mobj);
 
 		g_free(file);
 	}
@@ -634,7 +637,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	GList *list, *i;
+	GList *mlist = NULL, *list, *i;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
@@ -645,7 +648,7 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1)
-				add_playlist_row_current_playlist(path, cwin);
+				mlist = add_playlist_row_current_playlist(path, mlist, cwin);
 
 			gtk_tree_path_free(path);
 
@@ -656,6 +659,11 @@ void playlist_tree_add_to_playlist(struct con_win *cwin)
 			}
 		}
 		g_list_free(list);
+	}
+
+	if(mlist) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
+		update_status_bar_playtime(cwin);
 	}
 }
 
