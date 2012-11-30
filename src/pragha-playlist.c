@@ -4010,6 +4010,18 @@ current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat)
 	cplaylist->repeat = repeat;
 }
 
+GtkWidget *
+pragha_playlist_get_view(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->view;
+}
+
+GtkWidget *
+pragha_playlist_get_widget(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->widget;
+}
+
 void
 current_playlist_save_preferences(PraghaPlaylist* cplaylist)
 {

@@ -1096,6 +1096,10 @@ void
 pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void
 current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
+GtkWidget *
+pragha_playlist_get_view(PraghaPlaylist* cplaylist);
+GtkWidget *
+pragha_playlist_get_widget(PraghaPlaylist* cplaylist);
 void
 current_playlist_save_preferences(PraghaPlaylist* cplaylist);
 void cplaylist_free(PraghaPlaylist *cplaylist);

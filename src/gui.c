@@ -607,7 +607,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	/* Pack everything into the hpane */
 
 	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (hpane), cplaylist->widget, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (hpane), pragha_playlist_get_widget(cplaylist), TRUE, FALSE);
 
 	/* Store references*/
 
