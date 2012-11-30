@@ -400,44 +400,34 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 	gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_DATA, &data, -1);
 
-	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		mobj = new_musicobject_from_db(location_id, cwin);
-		if (!mobj)
-			g_warning("Unable to retrieve details "
-				  "for location_id : %d",
-				  location_id);
-		else
-			list = g_list_prepend(list, mobj);
-	}
-	else if (node_type == NODE_PLAYLIST) {
-		list = add_playlist_to_mobj_list(data, list, FALSE, cwin);
-	}
-	else if (node_type == NODE_RADIO) {
-		list = add_radio_to_mobj_list(data, list, FALSE, cwin);
-	}
-
-	/* For all other node types do a recursive add */
-
-	while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
-		gtk_tree_model_get(row_model, &t_iter, L_NODE_TYPE, &node_type, -1);
-		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-			gtk_tree_model_get(row_model, &t_iter,
-					   L_LOCATION_ID, &location_id, -1);
+	switch (node_type) {
+		case NODE_GENRE:
+		case NODE_ARTIST:
+		case NODE_ALBUM:
+		case NODE_FOLDER:
+			/* For all other node types do a recursive add */
+			while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
+				path = gtk_tree_model_get_path(row_model, &t_iter);
+				list = append_library_row_to_mobj_list(path, row_model, list, cwin);
+				gtk_tree_path_free(path);
+			}
+			break;
+		case NODE_TRACK:
+		case NODE_BASENAME:
 			mobj = new_musicobject_from_db(location_id, cwin);
-			if (!mobj)
-				g_warning("Unable to retrieve details "
-					  "for location_id : %d",
-					  location_id);
-			else
+			if(G_LIKELY(mobj))
 				list = g_list_prepend(list, mobj);
-		}
-		else {
-			path = gtk_tree_model_get_path(row_model, &t_iter);
-			
-			list = append_library_row_to_mobj_list(path, row_model, list, cwin);
-			gtk_tree_path_free(path);
-		}
+			break;
+		case NODE_PLAYLIST:
+			list = add_playlist_to_mobj_list(data, list, FALSE, cwin);
+			break;
+		case NODE_RADIO:
+			list = add_radio_to_mobj_list(data, list, FALSE, cwin);
+			break;
+		default:
+			break;
 	}
+
 	g_free(data);
 
 	return list;
