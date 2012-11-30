@@ -573,7 +573,7 @@ void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_wi
 		goto bad;
 
 	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(pragha_playlist_get_view(cwin->cplaylist)));
 
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
