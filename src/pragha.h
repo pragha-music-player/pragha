@@ -1029,7 +1029,9 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
 gboolean
-pragha_playlist_already_has_file(PraghaPlaylist *cplaylist, gchar *file);
+pragha_mobj_list_already_has_title_of_artist(GList *list,
+					     const gchar *title,
+					     const gchar *artist);
 gboolean
 pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 					    const gchar *title,
@@ -1180,7 +1182,6 @@ gboolean nm_is_online ();
 #endif
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
-gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
 void set_watch_cursor (GtkWidget *window);
 void remove_watch_cursor (GtkWidget *window);
 void set_status_message (const gchar *message, struct con_win *cwin);
