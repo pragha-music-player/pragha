@@ -889,7 +889,6 @@ void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
-void library_tree_add_to_playlist(struct con_win *cwin);
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
@@ -965,7 +964,6 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 GList *add_playlist_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
 void add_radio_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
 GList *add_radio_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
-void playlist_tree_add_to_playlist(struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);

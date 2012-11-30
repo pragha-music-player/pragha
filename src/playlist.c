@@ -154,33 +154,6 @@ get_playlist_name(struct con_win *cwin,
 	return playlist;
 }
 
-/* Add all the tracks under the given path to the current playlist */
-/* NB: Optimization */
-
-GList *
-add_playlist_row_current_playlist(GtkTreePath *path, GList *list, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	gchar *playlist;
-	gint node_type;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	if (gtk_tree_model_get_iter(model, &iter, path)) {
-		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
-		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-
-		if(node_type == NODE_PLAYLIST) {
-			list = add_playlist_to_mobj_list(playlist, list, FALSE, cwin);
-		}
-		else if (node_type == NODE_RADIO) {
-			list = add_radio_to_mobj_list(playlist, list, FALSE, cwin);
-		}
-		g_free(playlist);
-	}
-	return list;
-}
-
 static gboolean overwrite_existing_playlist(const gchar *playlist,
 					    struct con_win *cwin)
 {
@@ -631,40 +604,6 @@ bad:
 	g_free(s_radio);
 
 	return list;
-}
-
-void playlist_tree_add_to_playlist(struct con_win *cwin)
-{
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *mlist = NULL, *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-	if (list) {
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			if (gtk_tree_path_get_depth(path) > 1)
-				mlist = add_playlist_row_current_playlist(path, mlist, cwin);
-
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ()) {
-				g_list_free(list);
-				return;
-			}
-		}
-		g_list_free(list);
-	}
-
-	if(mlist) {
-		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
-		update_status_bar_playtime(cwin);
-	}
 }
 
 /* Build a dialog to get a new playlist name */

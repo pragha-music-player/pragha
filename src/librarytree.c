@@ -621,7 +621,9 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
 	gint n_select = 0, prev_tracks = 0;
+	GList *list = NULL;
 
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
@@ -642,18 +644,16 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+			list = append_library_row_to_mobj_list (path, model, list, cwin);
 
-			prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
-				playlist_tree_add_to_playlist(cwin);
-			else
-				library_tree_add_to_playlist(cwin);
+			if(list) {
+				prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-			select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+				pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
+				select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+				update_status_bar_playtime(cwin);
+			}
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
@@ -661,7 +661,6 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
@@ -1307,11 +1306,6 @@ void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 }
 
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	library_tree_add_to_playlist(cwin);
-}
-
-void library_tree_add_to_playlist(struct con_win *cwin)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
