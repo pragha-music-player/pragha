@@ -1086,7 +1086,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		if (mobj == omobj)
 			continue;
 
-		update_musicobject(mobj, changed, omobj->tags);
+		pragha_update_musicobject_change_tag(mobj, changed, omobj->tags);
 		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
@@ -1231,7 +1231,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 			continue;
 		}
 
-		update_musicobject(mobj, changed, &ntag);
+		pragha_update_musicobject_change_tag(mobj, changed, &ntag);
 		update_track_current_playlist(cwin->cplaylist, &iter, changed, mobj);
 
 		if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj)) {
