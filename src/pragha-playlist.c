@@ -2929,24 +2929,16 @@ void save_current_playlist_state(struct con_win *cwin)
 		ref_char = gtk_tree_path_to_string (path);
 		gtk_tree_path_free(path);
 
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					GROUP_PLAYLIST,
-					KEY_CURRENT_REF,
-					ref_char);
+		pragha_preferences_set_string(cwin->preferences,
+					      GROUP_PLAYLIST,
+					      KEY_CURRENT_REF,
+					      ref_char);
 		g_free (ref_char);
 	}
 	else {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_PLAYLIST) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_PLAYLIST,
-				       KEY_CURRENT_REF,
-				       NULL)){
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
+		pragha_preferences_remove_key(cwin->preferences,
 					      GROUP_PLAYLIST,
-					      KEY_CURRENT_REF,
-					      NULL);
-		}
+					      KEY_CURRENT_REF);
 	}
 }
 
@@ -3005,20 +2997,16 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 void init_current_playlist_view(struct con_win *cwin)
 {
 	gchar *ref = NULL;
-	GError *error = NULL;
-	GtkTreePath *path=NULL;
+	GtkTreePath *path = NULL;
 
 	init_playlist_current_playlist(cwin);
 
-	ref = g_key_file_get_string(cwin->cpref->configrc_keyfile,
-				    GROUP_PLAYLIST,
-				    KEY_CURRENT_REF,
-				    &error);
-	if (!ref) {
-		g_error_free(error);
-		error = NULL;
+	ref = pragha_preferences_get_string(cwin->preferences,
+					      GROUP_PLAYLIST,
+					      KEY_CURRENT_REF);
+
+	if (!ref)
 		return;
-	}
 
 	path = gtk_tree_path_new_from_string(ref);
 	jump_to_path_on_current_playlist (cwin->cplaylist, path, cwin->cplaylist->shuffle);
