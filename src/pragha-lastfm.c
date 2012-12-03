@@ -121,7 +121,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Update the music object, the gui and them mpris */
 
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
 
 	__update_current_song_info(cwin);
 

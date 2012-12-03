@@ -530,7 +530,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 		ntag.artist = str;
 	}
 
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
