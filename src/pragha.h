@@ -1076,6 +1076,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+gboolean
+pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey *event);
 void
 pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void

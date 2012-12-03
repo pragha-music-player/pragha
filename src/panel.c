@@ -334,18 +334,12 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
 {
 	gboolean ret = FALSE;
-	GdkEvent *new_event;
-	GtkWidget *view;
 
 	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
 	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
-		view = pragha_playlist_get_view(cwin->cplaylist);
-		gtk_widget_grab_focus(view);
-
-		new_event = gdk_event_copy ((GdkEvent *) event);
-		ret = gtk_widget_event (GTK_WIDGET (view), new_event);
-		gdk_event_free (new_event);
+		ret = pragha_playlist_propagate_event(cwin->cplaylist, event);
 	}
+
 	return ret;
 }
 
