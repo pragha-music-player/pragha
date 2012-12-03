@@ -1014,7 +1014,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(struct musicobject *mobj, struct con_win *cwin);
 void current_playlist_clear(struct con_win *cwin);
 void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
-void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj);
+void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, struct musicobject *mobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj);
 void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj, GtkTreePath **path);
