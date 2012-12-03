@@ -97,6 +97,11 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
                                     gsize length);
 
 void
+pragha_preferences_remove_key (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key);
+
+void
 pragha_preferences_set_approximate_search (PraghaPreferences *prefernces,
                                            gboolean approximate_search);
 gboolean

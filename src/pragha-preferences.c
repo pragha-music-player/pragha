@@ -201,6 +201,28 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_remove_key:
+ *
+ */
+void
+pragha_preferences_remove_key (PraghaPreferences *preferences,
+                               const gchar *group_name,
+                               const gchar *key)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   if (g_key_file_has_group(preferences->priv->rc_keyfile, group_name) &&
+       g_key_file_has_key(preferences->priv->rc_keyfile,
+                          group_name,
+                          key,
+                          NULL))
+      g_key_file_remove_key(preferences->priv->rc_keyfile,
+                            group_name,
+                            key,
+                            NULL);
+}
+
+/**
  * pragha_preferences_get_instant_search:
  *
  */
