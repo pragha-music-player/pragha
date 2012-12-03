@@ -1655,7 +1655,7 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 
 /* Update a track to the current playlist */
 
-void update_track_current_playlist(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj)
+void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj)
 {
 	GtkTreeModel *model;
 	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_title = NULL;
@@ -1715,7 +1715,7 @@ pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, st
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	if (gtk_tree_model_get_iter(model, &iter, path))
-		update_track_current_playlist(cplaylist, &iter, changed, mobj);
+		pragha_playlist_update_change_tag(cplaylist, &iter, changed, mobj);
 
 	gtk_tree_path_free(path);
 }
