@@ -3895,6 +3895,21 @@ gint compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointe
 		return 0;
 }
 
+gboolean
+pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey *event)
+{
+	GdkEvent *new_event;
+	gboolean ret;
+
+	gtk_widget_grab_focus(cplaylist->view);
+
+	new_event = gdk_event_copy ((GdkEvent *) event);
+	ret = gtk_widget_event (GTK_WIDGET (cplaylist->view), new_event);
+	gdk_event_free (new_event);
+
+	return ret;
+}
+
 void
 pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path)
 {
