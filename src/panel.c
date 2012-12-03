@@ -337,7 +337,8 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 	GdkEvent *new_event;
 	GtkWidget *view;
 
-	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down) {
+	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
+	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
 		view = pragha_playlist_get_view(cwin->cplaylist);
 		gtk_widget_grab_focus(view);
 
