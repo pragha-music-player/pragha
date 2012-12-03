@@ -72,7 +72,7 @@ static void init_gui_state(struct con_win *cwin)
 
 	init_library_view(cwin);
 
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -95,7 +95,7 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -154,7 +154,6 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
-	gboolean save_playlist_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
@@ -165,7 +164,6 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	save_playlist_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
@@ -572,17 +570,6 @@ gint init_config(struct con_win *cwin)
 			start_mode_f = TRUE;
 		}
 
-		cwin->cpref->save_playlist =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SAVE_PLAYLIST,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			save_playlist_f = TRUE;
-		}
-
 		cwin->cpref->show_icon_tray =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -837,8 +824,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || controls_below_f)
 		cwin->cpref->controls_below = FALSE;
-	if (all_f || save_playlist_f)
-		cwin->cpref->save_playlist = TRUE;
 	if (all_f || software_mixer_f)
 		cwin->cpref->software_mixer = TRUE;
 	if (all_f || audio_sink_f)
@@ -1085,7 +1070,7 @@ pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
 void
 pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		save_current_playlist_state(cwin);
 	save_preferences(cwin);
 }

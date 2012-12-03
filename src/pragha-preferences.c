@@ -24,11 +24,15 @@ struct _PraghaPreferencesPrivate
 {
    GKeyFile  *rc_keyfile;
    gchar     *rc_uri;
+
+   /* Search preferences. */
    gboolean   instant_search;
    gboolean   approximate_search;
+   /* Playlist preferences. */
    gboolean   shuffle;
    gboolean   repeat;
    gboolean   use_hint;
+   gboolean   restore_playlist;
 };
 
 enum
@@ -39,6 +43,7 @@ enum
    PROP_SHUFFLE,
    PROP_REPEAT,
    PROP_USE_HINT,
+   PROP_RESTORE_PLAYLIST,
    LAST_PROP
 };
 
@@ -321,6 +326,31 @@ pragha_preferences_set_use_hint (PraghaPreferences *preferences,
    preferences->priv->use_hint = use_hint;
 }
 
+/**
+ * pragha_preferences_get_restore_playlist:
+ *
+ */
+gboolean
+pragha_preferences_get_restore_playlist (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->restore_playlist;
+}
+
+/**
+ * pragha_preferences_set_restore_playlist:
+ *
+ */
+void
+pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
+                                         gboolean restore_playlist)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->restore_playlist = restore_playlist;
+}
+
 static void
 pragha_preferences_finalize (GObject *object)
 {
@@ -356,6 +386,10 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_GENERAL,
                           KEY_USE_HINT,
                           priv->use_hint);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_SAVE_PLAYLIST,
+                          priv->restore_playlist);
 
    /* Save to key file */
 
@@ -393,6 +427,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_USE_HINT:
       g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
       break;
+   case PROP_RESTORE_PLAYLIST:
+      g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -421,6 +458,8 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_USE_HINT:
       pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
+   case PROP_RESTORE_PLAYLIST:
+      pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
       break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -507,13 +546,26 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 
     g_object_class_install_property(object_class, PROP_USE_HINT,
                                     gParamSpecs[PROP_USE_HINT]);
+   /**
+    * PraghaPreferences:restore_playlist:
+    *
+    */
+   gParamSpecs[PROP_RESTORE_PLAYLIST] =
+      g_param_spec_boolean("restore-playlist",
+                           "RestorePlaylist",
+                           "Restore Playlist Preference",
+                           FALSE,
+                           G_PARAM_READWRITE);
+
+    g_object_class_install_property(object_class, PROP_RESTORE_PLAYLIST,
+                                    gParamSpecs[PROP_RESTORE_PLAYLIST]);
 }
 
 static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
-   gboolean shuffle, repeat, use_hint;
+   gboolean shuffle, repeat, use_hint, restore_playlist;
    const gchar *config_dir;
    GError *error = NULL;
 
@@ -601,6 +653,19 @@ pragha_preferences_init (PraghaPreferences *preferences)
    else {
       pragha_preferences_set_use_hint(preferences, use_hint);
    }
+
+   restore_playlist = g_key_file_get_boolean(priv->rc_keyfile,
+                                             GROUP_PLAYLIST,
+                                             KEY_SAVE_PLAYLIST,
+                                             &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_restore_playlist(preferences, restore_playlist);
+   }
+
 }
 
 /**

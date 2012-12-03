@@ -126,6 +126,12 @@ pragha_preferences_set_use_hint (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_use_hint (PraghaPreferences *preferences);
 
+void
+pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
+                                         gboolean restore_playlist);
+gboolean
+pragha_preferences_get_restore_playlist (PraghaPreferences *preferences);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */
