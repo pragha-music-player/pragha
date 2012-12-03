@@ -530,42 +530,6 @@ bad:
 	return list;
 }
 
-/* Append the given radio to the current playlist */
-
-void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_win *cwin)
-{
-	gchar *s_radio, *query;
-	gint radio_id, i = 0;
-	struct db_result result;
-	struct musicobject *mobj;
-
-	s_radio = sanitize_string_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cwin->cdbase);
-
-	if(radio_id == 0)
-		goto bad;
-
-	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(pragha_playlist_get_view(cwin->cplaylist)));
-
-	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
-				radio_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
-
-	for_each_result_row(result, i) {
-		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
-
-		append_current_playlist(cwin->cplaylist, model, mobj);
-	}
-
-	update_status_bar_playtime(cwin);
-
-	sqlite3_free_table(result.resultp);
-
-bad:
-	g_free(s_radio);
-}
-
 /* Prepend the given radio to the mobj list. */
 
 GList *
