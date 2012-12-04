@@ -764,9 +764,8 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar *data, **libs, **nodes, *last_rescan_time;
+	gchar **libs, **nodes, *last_rescan_time;
 	gchar *u_file = NULL;
-	gsize length;
 	gint cnt = 0, i = 0, *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
 	GError *error = NULL;
@@ -1321,15 +1320,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_SERVICES,
 			       KEY_ALLOW_MPRIS2,
 			       cwin->cpref->use_mpris2);
-
-	/* Save to conrc */
-
-	data = g_key_file_to_data(cwin->cpref->configrc_keyfile, &length, NULL);
-	if (!g_file_set_contents(cwin->cpref->configrc_file, data, length, &error))
-		g_critical("Unable to write preferences file : %s",
-			   error->message);
-
-	g_free(data);
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
@@ -1839,14 +1829,12 @@ void preferences_free (struct con_pref *cpref)
 #ifdef HAVE_LIBGLYR
 	g_free(cpref->cache_folder);
 #endif
-	g_free(cpref->configrc_file);
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->audio_sink);
 	g_free(cpref->audio_device);
 	g_free(cpref->audio_cd_device);
 	g_free(cpref->start_mode);
-	g_key_file_free(cpref->configrc_keyfile);
 	free_str_list(cpref->library_dir);
 	free_str_list(cpref->lib_add);
 	free_str_list(cpref->lib_delete);

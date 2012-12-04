@@ -588,7 +588,8 @@ pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
    gboolean shuffle, repeat, use_hint, restore_playlist;
-   const gchar *config_dir;
+   const gchar *user_config_dir;
+   gchar *pragha_config_dir = NULL;
    GError *error = NULL;
 
    preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE(preferences,
@@ -597,12 +598,38 @@ pragha_preferences_init (PraghaPreferences *preferences)
 
    PraghaPreferencesPrivate *priv = preferences->priv;
 
+   /* First check preferences folder or create it */
+
+   user_config_dir = g_get_user_config_dir();
+   pragha_config_dir = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha", NULL);
+
+   if (g_file_test(pragha_config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
+      if (g_mkdir(pragha_config_dir, S_IRWXU) == -1) {
+         g_free(pragha_config_dir);
+         g_critical("Unable to create preferences directory, err: %s", strerror(errno));
+         return;
+      }
+      CDEBUG(DBG_INFO, "Created .config/pragha folder");
+      g_free(pragha_config_dir);
+   }
+
+   /* Does /pragha/config exist ? */
+
+   priv->rc_uri = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/config", NULL);
+
+   if (g_file_test(priv->rc_uri, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+      if (g_creat(priv->rc_uri, S_IRWXU) == -1) {
+      	 g_free(priv->rc_uri);
+      	 priv->rc_uri = NULL;
+         g_critical("Unable to create config file, err: %s", strerror(errno));
+         return;
+      }
+      CDEBUG(DBG_INFO, "Created .config/pragha/config file");
+   }
+
    /* Open the preferences storage file */
 
-   config_dir = g_get_user_config_dir();
-
    priv->rc_keyfile = g_key_file_new();
-   priv->rc_uri = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha/config", NULL);
 
    if (!g_key_file_load_from_file(priv->rc_keyfile,
                                   priv->rc_uri,
@@ -610,7 +637,6 @@ pragha_preferences_init (PraghaPreferences *preferences)
                                   &error)) {
       g_critical("Unable to load config file (Possible first start), err: %s", error->message);
       g_error_free(error);
-
       return;
    }
 
@@ -687,7 +713,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
    else {
       pragha_preferences_set_restore_playlist(preferences, restore_playlist);
    }
+}
 
+GKeyFile*
+pragha_preferences_share_key_file(PraghaPreferences *preferences)
+{
+	return preferences->priv->rc_keyfile;
+}
+
+gchar*
+pragha_preferences_share_uri_file(PraghaPreferences *preferences)
+{
+	return preferences->priv->rc_uri;
 }
 
 /**

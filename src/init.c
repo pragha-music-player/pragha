@@ -147,9 +147,8 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar *conrc, *condir, **libs, **nodes, *last_rescan_time;
+	gchar **libs, **nodes, *last_rescan_time;
 	gchar *u_file;
-	const gchar *config_dir;
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
@@ -179,58 +178,13 @@ gint init_config(struct con_win *cwin)
 
 	all_f = FALSE;
 
-	config_dir = g_get_user_config_dir();
-	condir = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha", NULL);
-	conrc = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha/config", NULL);
+	/* Share keyfile with PraghaPreferences */
 
-	/* Does .config/pragha exist ? */
+	cwin->cpref->configrc_keyfile = pragha_preferences_share_key_file(cwin->preferences);
+	cwin->cpref->configrc_file = pragha_preferences_share_uri_file(cwin->preferences);
 
-	if (g_file_test(condir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
-		if (g_mkdir(condir, S_IRWXU) == -1) {
-			g_critical("Unable to create preferences directory, err: %s",
-				   strerror(errno));
-			err = TRUE;
-		}
-		CDEBUG(DBG_INFO, "Created .config/pragha");
-	}
-
-	cwin->cpref->configrc_file = g_strdup(conrc);
-	cwin->cpref->configrc_keyfile = g_key_file_new();
-
-	/* Does conrc exist ? */
-
-	if (g_file_test(conrc, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-		if (g_creat(conrc, S_IRWXU) == -1) {
-			g_critical("Unable to create config file, err: %s",
-				   strerror(errno));
-			err = TRUE;
-		} else {
-			CDEBUG(DBG_INFO, "Created config file");
-		}
-
-		cwin->cstate->first_run = TRUE;
-	}
-
-	/* Get cache of downloaded albums arts */
-	#ifdef HAVE_LIBGLYR
-	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
-
-	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
-		g_mkdir(cache_folder, S_IRWXU);
-	cwin->cpref->cache_folder = cache_folder;
-	#endif
-
-	/* Load the settings file */
-
-	if (!g_key_file_load_from_file(cwin->cpref->configrc_keyfile,
-				       conrc,
-				       G_KEY_FILE_NONE,
-				       &error)) {
-		g_critical("Unable to load config file (Possible first start), err: %s", error->message);
-		g_error_free(error);
-		all_f = TRUE;
-	}
-	else {
+	if (cwin->cpref->configrc_keyfile != NULL &&
+	    cwin->cpref->configrc_file != NULL) {
 		/* Retrieve version */
 
 		cwin->cpref->installed_version =
@@ -239,6 +193,7 @@ gint init_config(struct con_win *cwin)
 					      KEY_INSTALLED_VERSION,
 					      &error);
 		if (!cwin->cpref->installed_version) {
+			cwin->cstate->first_run = TRUE;
 			g_error_free(error);
 			error = NULL;
 		}
@@ -758,6 +713,18 @@ gint init_config(struct con_win *cwin)
 			use_mpris2_f = TRUE;
 		}
 	}
+	else {
+		err = TRUE;
+	}
+
+	/* Get cache of downloaded albums arts */
+	#ifdef HAVE_LIBGLYR
+	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
+
+	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
+		g_mkdir(cache_folder, S_IRWXU);
+	cwin->cpref->cache_folder = cache_folder;
+	#endif
 
 	/* Fill up with failsafe defaults */
 
@@ -842,11 +809,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->use_cddb = TRUE;
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
-
-	/* Cleanup */
-
-	g_free(conrc);
-	g_free(condir);
 
 	if (err)
 		return -1;
