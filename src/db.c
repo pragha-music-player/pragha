@@ -586,6 +586,80 @@ void update_track_db(gint location_id, gint changed,
 	}
 }
 
+void
+pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, struct tags *ntag)
+{
+	gchar *stitle = NULL, *sartist = NULL, *scomment= NULL, *salbum = NULL, *sgenre = NULL;
+	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	guint i = 0, elem = 0;
+
+	if (!changed)
+		return;
+
+	if (!loc_arr)
+		return;
+
+	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
+
+	if (changed & TAG_TITLE_CHANGED) {
+		stitle = sanitize_string_sqlite3(ntag->title);
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		sartist = sanitize_string_sqlite3(ntag->artist);
+		artist_id = find_artist_db(sartist, cdbase);
+		if (!artist_id)
+			artist_id = add_new_artist_db(sartist, cdbase);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		salbum = sanitize_string_sqlite3(ntag->album);
+		album_id = find_album_db(salbum, cdbase);
+		if (!album_id)
+			album_id = add_new_album_db(salbum, cdbase);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		sgenre = sanitize_string_sqlite3(ntag->genre);
+		genre_id = find_genre_db(sgenre, cdbase);
+		if (!genre_id)
+			genre_id = add_new_genre_db(sgenre, cdbase);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		year_id = find_year_db(ntag->year, cdbase);
+		if (!year_id)
+			year_id = add_new_year_db(ntag->year, cdbase);
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		scomment = sanitize_string_sqlite3(ntag->comment);
+		comment_id = find_comment_db(scomment, cdbase);
+		if (!comment_id)
+			comment_id = add_new_comment_db(scomment, cdbase);
+	}
+
+	db_begin_transaction(cdbase);
+	if (loc_arr) {
+		elem = 0;
+		for(i = 0; i < loc_arr->len; i++) {
+			elem = g_array_index(loc_arr, gint, i);
+			if (elem) {
+				update_track_db(elem, changed,
+						ntag->track_no, stitle,
+						artist_id,
+						album_id,
+						genre_id,
+						year_id,
+						comment_id,
+						cdbase);
+			}
+		}
+	}
+	db_commit_transaction(cdbase);
+
+	g_free(stitle);
+	g_free(sartist);
+	g_free(salbum);
+	g_free(sgenre);
+	g_free(scomment);
+}
+
 /* 'playlist' has to be a sanitized string */
 
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase)

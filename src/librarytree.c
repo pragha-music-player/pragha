@@ -1420,10 +1420,9 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		gtk_widget_destroy(dialog);
 
 		if(result == GTK_RESPONSE_YES){
-			db_begin_transaction(cwin->cdbase);
-
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
+			db_begin_transaction(cwin->cdbase);
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
 				get_location_ids(path, loc_arr, model, cwin);
@@ -1433,11 +1432,9 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				if (pragha_process_gtk_events ())
 					return;
 			}
-
-			if (loc_arr)
-				g_array_free(loc_arr, TRUE);
-
 			db_commit_transaction(cwin->cdbase);
+
+			g_array_free(loc_arr, TRUE);
 
 			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
@@ -1462,8 +1459,12 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL, *uri = NULL;
+	gchar *node_data = NULL, **split_album = NULL, *uri = NULL, *file = NULL;
+	gint elem = 0, ielem;
+	gchar *query = NULL;
+	struct db_result result;
 
 	memset(&otag, 0, sizeof(struct tags));
 	memset(&ntag, 0, sizeof(struct tags));
@@ -1536,42 +1537,54 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
+	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+
 	for (i=list; i != NULL; i = i->next) {
 		path = i->data;
-
 		/* Form an array of location ids */
-
-		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		get_location_ids(path, loc_arr, model, cwin);
-
-		if (!loc_arr) {
-			g_array_free(loc_arr, TRUE);
-			continue;
-		}
-
-		/* Check if user is trying to set the same track no for multiple tracks */
-		if (changed & TAG_TNO_CHANGED) {
-			if (loc_arr->len > 1) {
-				if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
-					goto exit;
-			}
-		}
-
-		/* Check if user is trying to set the same title/track no for
-		   multiple tracks */
-		if (changed & TAG_TITLE_CHANGED) {
-			if (loc_arr->len > 1) {
-				if (!confirm_title_multiple_tracks(ntag.title, cwin))
-					goto exit;
-			}
-		}
-
-		tag_update(loc_arr, NULL, changed, &ntag, cwin);
-		g_array_free(loc_arr, TRUE);
 	}
 
-	if (changed)
-		init_library_view(cwin);
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
+				goto exit;
+		}
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_title_multiple_tracks(ntag.title, cwin))
+				goto exit;
+		}
+	}
+
+	/* Updata the db changes */
+	pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+	init_library_view(cwin);
+
+	/* Get a array of files and update it */
+	file_arr = g_ptr_array_new();
+	for(ielem = 0; ielem < loc_arr->len; ielem++) {
+		elem = g_array_index(loc_arr, gint, ielem);
+		if (elem) {
+			query = g_strdup_printf("SELECT name FROM LOCATION "
+						"WHERE id = '%d';",
+						elem);
+
+			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+				file = result.resultp[result.no_columns];
+				g_ptr_array_add(file_arr, file);
+			}
+		}
+	}
+	pragha_update_local_files_change_tag(file_arr, changed, &ntag);
+	g_ptr_array_free(file_arr, TRUE);
+	g_array_free(loc_arr, TRUE);
+
 exit:
 	/* Cleanup */
 

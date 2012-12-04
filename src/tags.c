@@ -228,101 +228,29 @@ gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
 	return ret;
 }
 
-void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
-		struct con_win *cwin)
+void
+pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, struct tags *ntag)
 {
-	gboolean ret = FALSE;
-	gchar *query = NULL, *stitle = NULL, *sartist = NULL, *scomment= NULL;
-	gchar *salbum = NULL, *sgenre = NULL, *file = NULL;
-	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	guint i = 0;
-	struct db_result result;
+	gchar *elem;
 
 	if (!changed)
 		return;
 
-	if (!loc_arr && !file_arr)
+	if (!file_arr)
 		return;
 
 	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
 
-	if (changed & TAG_TITLE_CHANGED) {
-		stitle = sanitize_string_sqlite3(ntag->title);
-	}
-	if (changed & TAG_ARTIST_CHANGED) {
-		sartist = sanitize_string_sqlite3(ntag->artist);
-		artist_id = find_artist_db(sartist, cwin->cdbase);
-		if (!artist_id)
-			artist_id = add_new_artist_db(sartist, cwin->cdbase);
-	}
-	if (changed & TAG_ALBUM_CHANGED) {
-		salbum = sanitize_string_sqlite3(ntag->album);
-		album_id = find_album_db(salbum, cwin->cdbase);
-		if (!album_id)
-			album_id = add_new_album_db(salbum, cwin->cdbase);
-	}
-	if (changed & TAG_GENRE_CHANGED) {
-		sgenre = sanitize_string_sqlite3(ntag->genre);
-		genre_id = find_genre_db(sgenre, cwin->cdbase);
-		if (!genre_id)
-			genre_id = add_new_genre_db(sgenre, cwin->cdbase);
-	}
-	if (changed & TAG_YEAR_CHANGED) {
-		year_id = find_year_db(ntag->year, cwin->cdbase);
-		if (!year_id)
-			year_id = add_new_year_db(ntag->year, cwin->cdbase);
-	}
-	if (changed & TAG_COMMENT_CHANGED) {
-		scomment = sanitize_string_sqlite3(ntag->comment);
-		comment_id = find_comment_db(scomment, cwin->cdbase);
-		if (!comment_id)
-			comment_id = add_new_comment_db(scomment, cwin->cdbase);
-	}
-
 	/* This is so fscking horrible. */
 
-	if (loc_arr) {
-		gint elem = 0;
-		for(i = 0; i < loc_arr->len; i++) {
-			elem = g_array_index(loc_arr, gint, i);
-			if (elem) {
-				query = g_strdup_printf("SELECT name FROM LOCATION "
-							"WHERE id = '%d';",
-							elem);
-				if (exec_sqlite_query(query, cwin->cdbase, &result)) {
-					file = result.resultp[result.no_columns];
-					ret = save_tags_to_file(file, ntag, changed);
-					sqlite3_free_table(result.resultp);
-				}
-				if (ret) {
-					update_track_db(elem, changed,
-							ntag->track_no, stitle,
-							artist_id,
-							album_id,
-							genre_id,
-							year_id,
-							comment_id,
-							cwin->cdbase);
-					ret = FALSE;
-				}
-			}
-		}
-	}
-
 	if (file_arr) {
-		gchar *elem;
 		for (i = 0; i < file_arr->len; i++) {
 			elem = g_ptr_array_index(file_arr, i);
 			if (elem)
 				(void)save_tags_to_file(elem, ntag, changed);
 		}
 	}
-
-	g_free(stitle);
-	g_free(sartist);
-	g_free(salbum);
-	g_free(sgenre);
-	g_free(scomment);
 }
 
 void check_entry(GtkEntry *entry, GtkCheckButton *check)
@@ -1100,27 +1028,28 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
 			location_id = find_location_db(sfile, cwin->cdbase);
-			if (G_LIKELY(location_id)) {
+			if (G_LIKELY(location_id))
 				g_array_append_val(loc_arr, location_id);
-				g_free(sfile);
-				continue;
-			}
+			g_free(sfile);
+
 			tfile = g_strdup(mobj->file);
 			g_ptr_array_add(file_arr, tfile);
-			g_free(sfile);
 		}
 	}
 
-	tag_update(loc_arr, file_arr, changed, omobj->tags, cwin);
-
-	if (changed && (loc_arr || file_arr))
-		init_library_view(cwin);
-
-	/* Cleanup */
-	if (loc_arr)
+	/* Save new tags in db */
+	if(loc_arr->len) {
+		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, omobj->tags);
 		g_array_free(loc_arr, TRUE);
-	if (file_arr)
+
+		init_library_view(cwin);
+	}
+
+	/* Save new tags in files */
+	if(file_arr) {
+		pragha_update_local_files_change_tag(file_arr, changed, omobj->tags);
 		g_ptr_array_free(file_arr, TRUE);
+	}
 
 	g_list_free(list);
 }
@@ -1245,21 +1174,25 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		    mobj->file_type != FILE_HTTP)) {
 			sfile = sanitize_string_sqlite3(mobj->file);
 			location_id = find_location_db(sfile, cwin->cdbase);
-			if (G_LIKELY(location_id)) {
+			if (G_LIKELY(location_id))
 				g_array_append_val(loc_arr, location_id);
-				g_free(sfile);
-				continue;
-			}
+			g_free(sfile);
+
 			tfile = g_strdup(mobj->file);
 			g_ptr_array_add(file_arr, tfile);
-			g_free(sfile);
 		}
 	}
 
-	tag_update(loc_arr, file_arr, changed, &ntag, cwin);
-
-	if (changed && (loc_arr || file_arr))
+	/* Save new tags in db */
+	if(loc_arr->len) {
+		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
 		init_library_view(cwin);
+	}
+
+	/* Save new tags in files */
+	if(file_arr->len)
+		pragha_update_local_files_change_tag(file_arr, changed, &ntag);
+
 exit:
 	/* Cleanup */
 	if (loc_arr)
