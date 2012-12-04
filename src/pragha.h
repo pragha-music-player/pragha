@@ -839,8 +839,7 @@ gboolean get_ape_info(const gchar *file, struct tags *tags);
 gboolean save_tags_to_file(gchar *file, struct tags *tags, int changed);
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
-void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
-		struct con_win *cwin);
+void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, struct tags *ntag);
 gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
@@ -919,6 +918,8 @@ void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_dbase *cdbase);
+void
+pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, struct tags *ntag);
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase);
 gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
 gchar** get_playlist_names_db(struct con_dbase *cdbase);

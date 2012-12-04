@@ -808,37 +808,32 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	/* Update the music object, the gui and them mpris */
 
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	__update_current_song_info(cwin);
 
 	mpris_update_metadata_changed(cwin);
-
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	/* Store the new tags */
 
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_ptr_array_new();
-
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
 		location_id = find_location_db(sfile, cwin->cdbase);
-
-		if (location_id)
+		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
+			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+			init_library_view(cwin);
+		}
+		g_array_free(loc_arr, TRUE);
+		g_free(sfile);
 
+		file_arr = g_ptr_array_new();
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
 		g_ptr_array_add(file_arr, tfile);
-
-		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
-
-		init_library_view(cwin);
-
-		g_array_free(loc_arr, TRUE);
+		pragha_update_local_files_change_tag(file_arr, changed, &ntag);
 		g_ptr_array_free(file_arr, TRUE);
-
-		g_free(sfile);
 		g_free(tfile);
 	}
 
