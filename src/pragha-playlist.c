@@ -1206,7 +1206,7 @@ void pragha_playlist_queue_handler(PraghaPlaylist *cplaylist)
 
 void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 {
-	pragha_playlist_queue_handle(cwin->cplaylist);
+	pragha_playlist_queue_handler(cwin->cplaylist);
 }
 
 /* Toglle queue state of selection on current playlist. */
