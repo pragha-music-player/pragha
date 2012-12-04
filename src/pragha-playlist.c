@@ -1700,6 +1700,41 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	}
 }
 
+/* Get all music objects of references list and update tags */
+
+void
+pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed)
+{
+	struct musicobject *mobj = NULL;
+	GtkTreeModel *model;
+	GtkTreeRowReference *ref;
+	GtkTreePath *path = NULL;
+	GtkTreeIter iter;
+	GList *i;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	for (i = list; i != NULL; i = i->next) {
+		mobj = NULL;
+
+		ref = i->data;
+		path = gtk_tree_row_reference_get_path(ref);
+
+		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path)))
+			gtk_tree_path_free(path);
+		else
+			continue;
+
+		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+
+		if (G_UNLIKELY(mobj == NULL)) {
+			g_warning("Invalid mobj pointer");
+			continue;
+		}
+		pragha_playlist_update_change_tag(cplaylist, &iter, changed, mobj);
+	}
+}
+
 void
 pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, struct musicobject *mobj)
 {
@@ -2126,6 +2161,19 @@ copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin)
 
 	mobj = g_object_get_data (G_OBJECT(action), "mobj");
 	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
+
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (!confirm_tno_multiple_tracks(mobj->tags->track_no, cwin))
+			return;
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (!confirm_title_multiple_tracks(mobj->tags->title, cwin))
+			return;
+	}
 
 	copy_tags_selection_current_playlist(mobj, changed, cwin);
 }
@@ -2865,6 +2913,32 @@ pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist)
 		g_list_free (list);
 	}
 	return mlist;
+}
+
+GList *
+pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreeRowReference *ref;
+	GtkTreePath *path = NULL;
+	GList *list, *i;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	/* Get references from the paths and store them in the 'data'
+	   portion of the list elements.
+	   This idea was inspired by code from 'claws-mail' */
+
+	for (i = list; i != NULL; i = i->next) {
+		path = i->data;
+		ref = gtk_tree_row_reference_new(model, path);
+		i->data = ref;
+		gtk_tree_path_free(path);
+	}
+
+	return list;
 }
 
 /* Get the musicobject of seleceted track on current playlist */
