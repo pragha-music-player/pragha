@@ -1149,22 +1149,30 @@ GtkTreePath* current_playlist_get_actual(PraghaPlaylist *cplaylist)
 
 /* Dequeue selected rows from current playlist */
 
-void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
+void pragha_playlist_dequeue_handler(PraghaPlaylist *cplaylist)
 {
 	GtkTreeSelection *selection;
 	GList *list;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
-	g_list_foreach (list, (GFunc) delete_queue_track_refs, cwin->cplaylist);
-	requeue_track_refs(cwin->cplaylist);
+	g_list_foreach (list, (GFunc) delete_queue_track_refs, cplaylist);
+	requeue_track_refs(cplaylist);
 	g_list_free_full (list, (GDestroyNotify) gtk_tree_path_free);
+}
+
+
+/* Dequeue selected rows from current playlist */
+
+void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
+{
+	pragha_playlist_dequeue_handler(cwin->cplaylist);
 }
 
 /* Queue selected rows from current playlist */
 
-void queue_current_playlist(GtkAction *action, struct con_win *cwin)
+void pragha_playlist_queue_handler(PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1174,7 +1182,7 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 	gboolean is_queue = FALSE;
 	GtkTreeIter iter;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	l= list;
@@ -1184,14 +1192,21 @@ void queue_current_playlist(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
 			if(!is_queue) {
 				ref = gtk_tree_row_reference_new(model, path);
-				cwin->cplaylist->queue_track_refs = g_slist_append(cwin->cplaylist->queue_track_refs, ref);
+				cplaylist->queue_track_refs = g_slist_append(cplaylist->queue_track_refs, ref);
 			}
 		}
 		gtk_tree_path_free(path);
 		l = l->next;
 	}
-	requeue_track_refs(cwin->cplaylist);
+	requeue_track_refs(cplaylist);
 	g_list_free (list);
+}
+
+/* Queue selected rows from current playlist */
+
+void queue_current_playlist(GtkAction *action, struct con_win *cwin)
+{
+	pragha_playlist_queue_handle(cwin->cplaylist);
 }
 
 /* Toglle queue state of selection on current playlist. */
