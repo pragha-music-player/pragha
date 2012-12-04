@@ -1038,7 +1038,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	}
 
 	/* Save new tags in db */
-	if(loc_arr->len) {
+	if(loc_arr) {
 		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, omobj->tags);
 		g_array_free(loc_arr, TRUE);
 
