@@ -493,6 +493,7 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_USE_HINT:
       pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
+      break;
    case PROP_RESTORE_PLAYLIST:
       pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
       break;
