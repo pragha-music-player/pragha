@@ -1282,7 +1282,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 						 mlist);
 		remove_watch_cursor (cwin->mainwindow);
 
-		if(!pragha_playlist_is_shuffle(cwin->cplaylist))
+		if(!pragha_preferences_get_shuffle(cwin->preferences))
 			select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
 		update_status_bar_playtime(cwin);
 		

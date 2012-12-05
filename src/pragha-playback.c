@@ -119,13 +119,13 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 			path = current_playlist_get_selection(cwin->cplaylist);
 
 		if(!path) {
-			if(pragha_playlist_is_shuffle(cwin->cplaylist))
+			if(pragha_preferences_get_shuffle(cwin->preferences))
 				path = get_first_random_track(cwin->cplaylist);
 			else
 				path = gtk_tree_path_new_first();
 		}
 
-		if (pragha_playlist_is_shuffle(cwin->cplaylist))
+		if (pragha_preferences_get_shuffle(cwin->preferences))
 			pragha_playlist_set_first_rand_ref(cwin->cplaylist, path);
 
 		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
