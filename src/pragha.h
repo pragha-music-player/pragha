@@ -443,8 +443,6 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_track;
 	GdkPixbuf *pixbuf_genre;
 	GdkPixbuf *pixbuf_dir;
-	GdkPixbuf *pixbuf_paused;
-	GdkPixbuf *pixbuf_playing;
 };
 
 typedef struct {
@@ -642,6 +640,9 @@ typedef struct {
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
 	GtkTreeRowReference *curr_seq_ref;
+	GdkPixbuf *paused_pixbuf;
+	GdkPixbuf *playing_pixbuf;
+
 } PraghaPlaylist;
 
 struct con_win {
@@ -1013,7 +1014,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(struct musicobject *mobj, struct con_win *cwin);
-void current_playlist_clear(struct con_win *cwin);
+void pragha_playlist_remove_all (PraghaPlaylist *cplaylist, struct con_win *cwin);
 void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj);
 void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);

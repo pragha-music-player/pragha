@@ -1017,9 +1017,6 @@ void init_pixbufs(struct con_win *cwin)
 										NULL);
 	if (!cwin->pixbuf->pixbuf_dir)
 		g_warning("Unable to load folder png");
-
-	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icontheme, "media-playback-start", 16, 0, NULL);
-	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icontheme, "media-playback-pause", 16, 0, NULL);
 }
 
 #if HAVE_LIBXFCE4UI

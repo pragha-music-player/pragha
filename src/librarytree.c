@@ -1264,7 +1264,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 	if (list) {
 		set_watch_cursor (cwin->mainwindow);
 
-		current_playlist_clear(cwin);
+		pragha_playlist_remove_all (cwin->cplaylist, cwin);
 
 		/* Add all the rows to the current playlist */
 
