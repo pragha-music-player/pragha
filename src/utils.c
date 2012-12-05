@@ -321,7 +321,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 {
 	gchar *query = NULL;
 	struct db_result result;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0, i;
 	gchar *sartist, *stitle;
 

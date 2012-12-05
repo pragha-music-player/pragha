@@ -31,7 +31,7 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 
 	/* New song playback. */
 	if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
-		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", cwin->cstate->curr_mobj->file);
+		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", pragha_musicobject_get_file(cwin->cstate->curr_mobj));
 
 		/* Update current song info */
 		__update_current_song_info(cwin);
@@ -60,7 +60,7 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 void pragha_playback_prev_track(struct con_win *cwin)
 {
 	GtkTreePath *path;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
@@ -88,7 +88,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 
 void pragha_playback_play_pause_resume(struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GtkTreePath *path=NULL;
 
 	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
@@ -154,7 +154,7 @@ void pragha_playback_stop(struct con_win *cwin)
 void pragha_advance_playback (struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 

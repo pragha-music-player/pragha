@@ -27,8 +27,8 @@ get_image_path_from_cache (struct con_win *cwin)
 
 	path = g_strdup_printf("%s/album-%s-%s.jpeg",
 				cwin->cpref->cache_folder,
-				cwin->cstate->curr_mobj->tags->artist,
-				cwin->cstate->curr_mobj->tags->album);
+				pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
+				pragha_musicobject_get_album(cwin->cstate->curr_mobj));
 
 	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		g_free(path);
@@ -143,12 +143,12 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), str_cur_pos);
 
-	if(cwin->cstate->curr_mobj->tags->length == 0 || !cwin->cpref->timer_remaining_mode){
-		tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
+	if(pragha_musicobject_get_length(cwin->cstate->curr_mobj) == 0 || !cwin->cpref->timer_remaining_mode){
+		tot_length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj));
 		str_length = g_markup_printf_escaped ("<small>%s</small>", tot_length);
 	}
 	else{
-		tot_length = convert_length_str(cwin->cstate->curr_mobj->tags->length - length);
+		tot_length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj) - length);
 		str_length = g_markup_printf_escaped ("<small>- %s</small>", tot_length);
 	}
 	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), str_length);
@@ -178,25 +178,25 @@ void __update_current_song_info(struct con_win *cwin)
 		return;
 	}
 
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, 4))
-		str_title = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	if(g_utf8_strlen(pragha_musicobject_get_title(cwin->cstate->curr_mobj), 4))
+		str_title = g_strdup(pragha_musicobject_get_title(cwin->cstate->curr_mobj));
 	else
-		str_title = get_display_filename(cwin->cstate->curr_mobj->file, FALSE);
+		str_title = get_display_filename(pragha_musicobject_get_file(cwin->cstate->curr_mobj), FALSE);
 
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, 4)
-	 && g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, 4))
+	if(g_utf8_strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj), 4)
+	 && g_utf8_strlen(pragha_musicobject_get_album(cwin->cstate->curr_mobj), 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"), 
 						str_title ,
-						cwin->cstate->curr_mobj->tags->artist,
-						cwin->cstate->curr_mobj->tags->album);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->artist, 4))
+						pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
+						pragha_musicobject_get_album(cwin->cstate->curr_mobj));
+	else if(g_utf8_strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj), 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), 
 						str_title ,
-						cwin->cstate->curr_mobj->tags->artist);
-	else if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->album, 4))
+						pragha_musicobject_get_artist(cwin->cstate->curr_mobj));
+	else if(g_utf8_strlen(pragha_musicobject_get_album(cwin->cstate->curr_mobj), 4))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"), 
 						str_title ,
-						cwin->cstate->curr_mobj->tags->album);
+						pragha_musicobject_get_album(cwin->cstate->curr_mobj));
 	else	str = g_markup_printf_escaped ("%s", str_title);
 
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), str);
@@ -223,11 +223,11 @@ void __update_track_progress_bar(struct con_win *cwin, gint length)
 {
 	gdouble fraction = 0;
 
-	if(cwin->cstate->curr_mobj->tags->length == 0) {
-		cwin->cstate->curr_mobj->tags->length = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend));
+	if(pragha_musicobject_get_length(cwin->cstate->curr_mobj) == 0) {
+		pragha_musicobject_set_length(cwin->cstate->curr_mobj, GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend)));
 	}
 	else {
-		fraction = (gdouble)length / (gdouble)cwin->cstate->curr_mobj->tags->length;
+		fraction = (gdouble)length / (gdouble)pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar),
 					      fraction);
@@ -268,15 +268,15 @@ void track_progress_change_cb(GtkWidget *widget,
 	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
 		return;
 
-	if (!cwin->cstate->curr_mobj || cwin->cstate->curr_mobj->tags->length == 0)
+	if (!cwin->cstate->curr_mobj || pragha_musicobject_get_length(cwin->cstate->curr_mobj) == 0)
 		return;
 
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
 
-	seek = (cwin->cstate->curr_mobj->tags->length * event->x) / allocation.width;
-	if (seek >= cwin->cstate->curr_mobj->tags->length)
-		seek = cwin->cstate->curr_mobj->tags->length;
+	seek = (pragha_musicobject_get_length(cwin->cstate->curr_mobj) * event->x) / allocation.width;
+	if (seek >= pragha_musicobject_get_length(cwin->cstate->curr_mobj))
+		seek = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
 	fraction = (gdouble) event->x / allocation.width;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->track_progress_bar), fraction);
@@ -284,7 +284,7 @@ void track_progress_change_cb(GtkWidget *widget,
 	pragha_backend_seek(cwin->backend, seek);
 }
 
-void update_album_art(struct musicobject *mobj, struct con_win *cwin)
+void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
@@ -292,13 +292,13 @@ void update_album_art(struct musicobject *mobj, struct con_win *cwin)
 
 	if (pragha_album_art_get_visible(cwin->albumart)) {
 		if (G_LIKELY(mobj &&
-		    mobj->file_type != FILE_CDDA &&
-		    mobj->file_type != FILE_HTTP)) {
+		    pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
 			album_path = get_image_path_from_cache(cwin);
 			#endif
 			if (album_path == NULL) {
-				path = g_path_get_dirname(mobj->file);
+				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
 				if (cwin->cpref->album_art_pattern) {
 					album_path = get_pref_image_path_dir(path, cwin);
 					if (!album_path)

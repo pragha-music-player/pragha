@@ -23,9 +23,10 @@ typedef struct directory_pressed_data {
 	gchar *file;
 } directory_pressed_data_t;
 
-static gboolean get_info_taglib(const gchar *file, struct tags *tags)
+gboolean
+pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
 {
-	gboolean ret = FALSE;
+	gboolean ret = TRUE;
 	TagLib_File *tfile;
 	TagLib_Tag *tag;
 	const TagLib_AudioProperties *audio_prop;
@@ -51,18 +52,20 @@ static gboolean get_info_taglib(const gchar *file, struct tags *tags)
 		goto exit;
 	}
 
-	tags->title = g_strdup(taglib_tag_title(tag));
-	tags->artist = g_strdup(taglib_tag_artist(tag));
-	tags->album = g_strdup(taglib_tag_album(tag));
-	tags->genre = g_strdup(taglib_tag_genre(tag));
-	tags->comment = g_strdup(taglib_tag_comment(tag));
-	tags->track_no = taglib_tag_track(tag);
-	tags->year = taglib_tag_year(tag);
-	tags->bitrate = taglib_audioproperties_bitrate(audio_prop);
-	tags->length = taglib_audioproperties_length(audio_prop);
-	tags->channels = taglib_audioproperties_channels(audio_prop);
-	tags->samplerate = taglib_audioproperties_samplerate(audio_prop);
-	ret = TRUE;
+	g_object_set (mobj,
+	              "title", taglib_tag_title(tag),
+	              "artist", taglib_tag_artist(tag),
+	              "album", taglib_tag_album(tag),
+	              "genre", taglib_tag_genre(tag),
+	              "comment", taglib_tag_comment(tag),
+	              "year", taglib_tag_year(tag),
+	              "track_no", taglib_tag_track(tag),
+	              "length", taglib_audioproperties_length(audio_prop),
+	              "bitrate", taglib_audioproperties_bitrate(audio_prop),
+	              "channels", taglib_audioproperties_channels(audio_prop),
+	              "samplerate", taglib_audioproperties_samplerate(audio_prop),
+	              NULL);
+
 exit:
 	taglib_tag_free_strings();
 	taglib_file_free(tfile);
@@ -70,42 +73,8 @@ exit:
 	return ret;
 }
 
-gboolean get_wav_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_mp3_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_flac_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_ogg_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_asf_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_mp4_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean get_ape_info(const gchar *file, struct tags *tags)
-{
-	return get_info_taglib(file, tags);
-}
-
-gboolean save_tags_to_file(gchar *file, struct tags *ntag, int changed)
+gboolean
+pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed)
 {
 	gboolean ret = TRUE;
 	TagLib_File *tfile;
@@ -128,19 +97,19 @@ gboolean save_tags_to_file(gchar *file, struct tags *ntag, int changed)
 	}
 
 	if (changed & TAG_TNO_CHANGED)
-		taglib_tag_set_track(tag, ntag->track_no);
+		taglib_tag_set_track(tag, pragha_musicobject_get_track_no(mobj));
 	if (changed & TAG_TITLE_CHANGED)
-		taglib_tag_set_title(tag, ntag->title);
+		taglib_tag_set_title(tag, pragha_musicobject_get_title(mobj));
 	if (changed & TAG_ARTIST_CHANGED)
-		taglib_tag_set_artist(tag, ntag->artist);
+		taglib_tag_set_artist(tag, pragha_musicobject_get_artist(mobj));
 	if (changed & TAG_ALBUM_CHANGED)
-		taglib_tag_set_album(tag, ntag->album);
+		taglib_tag_set_album(tag, pragha_musicobject_get_album(mobj));
 	if (changed & TAG_GENRE_CHANGED)
-		taglib_tag_set_genre(tag, ntag->genre);
+		taglib_tag_set_genre(tag, pragha_musicobject_get_genre(mobj));
 	if (changed & TAG_YEAR_CHANGED)
-		taglib_tag_set_year(tag, ntag->year);
+		taglib_tag_set_year(tag, pragha_musicobject_get_year(mobj));
 	if (changed & TAG_COMMENT_CHANGED)
-		taglib_tag_set_comment(tag, ntag->comment);
+		taglib_tag_set_comment(tag, pragha_musicobject_get_comment(mobj));
 
 	CDEBUG(DBG_VERBOSE, "Saving tags for file: %s", file);
 
@@ -229,7 +198,7 @@ gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
 }
 
 void
-pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, struct tags *ntag)
+pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMusicobject *mobj)
 {
 	guint i = 0;
 	gchar *elem;
@@ -248,7 +217,7 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, struct t
 		for (i = 0; i < file_arr->len; i++) {
 			elem = g_ptr_array_index(file_arr, i);
 			if (elem)
-				(void)save_tags_to_file(elem, ntag, changed);
+				(void)pragha_musicobject_save_tags_to_file(elem, mobj, changed);
 		}
 	}
 }
@@ -447,8 +416,7 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_widget_show (item);
 }
 
-gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
-		     struct con_win *cwin)
+gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, gchar *file, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkWidget *tag_table;
@@ -461,8 +429,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	GtkTextIter start, end;
 	gpointer storage;
 
-	gint location_id, result, changed = 0;
-	struct musicobject *mobj = NULL;
+	gint result, changed = 0;
 	gchar *uri = NULL;
 
 	/*Create table*/
@@ -741,20 +708,20 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 
 	/* Fill in initial entries */
 
-	if (otag->title)
-		gtk_entry_set_text(GTK_ENTRY(entry_title), otag->title);
-	if (otag->artist)
-		gtk_entry_set_text(GTK_ENTRY(entry_artist), otag->artist);
-	if (otag->album)
-		gtk_entry_set_text(GTK_ENTRY(entry_album), otag->album);
-	if (otag->genre)
-		gtk_entry_set_text(GTK_ENTRY(entry_genre), otag->genre);
-	if (otag->track_no > 0)
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)otag->track_no);
-	if (otag->year > 0)
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)otag->year);
-	if (otag->comment)
-		gtk_text_buffer_set_text (buffer, otag->comment, -1);
+	if (pragha_musicobject_get_title(omobj))
+		gtk_entry_set_text(GTK_ENTRY(entry_title), pragha_musicobject_get_title(omobj));
+	if (pragha_musicobject_get_artist(omobj))
+		gtk_entry_set_text(GTK_ENTRY(entry_artist), pragha_musicobject_get_artist(omobj));
+	if (pragha_musicobject_get_album(omobj))
+		gtk_entry_set_text(GTK_ENTRY(entry_album), pragha_musicobject_get_album(omobj));
+	if (pragha_musicobject_get_genre(omobj))
+		gtk_entry_set_text(GTK_ENTRY(entry_genre), pragha_musicobject_get_genre(omobj));
+	if (pragha_musicobject_get_track_no(omobj) > 0)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)pragha_musicobject_get_track_no(omobj));
+	if (pragha_musicobject_get_year(omobj) > 0)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)pragha_musicobject_get_year(omobj));
+	if (pragha_musicobject_get_comment(omobj))
+		gtk_text_buffer_set_text (buffer, pragha_musicobject_get_comment(omobj), -1);
 
 	if(prechanged & TAG_TNO_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_tno), TRUE);
@@ -872,17 +839,7 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 		(result != GTK_RESPONSE_DELETE_EVENT)) {
 
 		if(result == GTK_RESPONSE_HELP){
-			if (g_str_has_prefix(file, "cdda://"))
-				mobj = new_musicobject_from_cdda(cwin, otag->track_no);
-			else {
-				uri = sanitize_string_sqlite3(file);
-
-				if ((location_id = find_location_db(uri, cwin->cdbase)))
-					mobj = new_musicobject_from_db(location_id, cwin);
-				else
-					mobj = new_musicobject_from_file(file);
-			}
-			track_properties(mobj, cwin);
+			track_properties(omobj, cwin);
 		}
 	}
 
@@ -890,39 +847,33 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	{
 	case GTK_RESPONSE_OK:
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_tno))) {
-			ntag->track_no =
-				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_tno));
+			pragha_musicobject_set_track_no(nmobj, gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_tno)));
 			changed |= TAG_TNO_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_title))) {
-			ntag->title =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(entry_title)));
+			pragha_musicobject_set_title(nmobj, gtk_entry_get_text(GTK_ENTRY(entry_title)));
 			changed |= TAG_TITLE_CHANGED;
 		}
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_artist))) {
-			ntag->artist =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(entry_artist)));
+			pragha_musicobject_set_artist(nmobj, gtk_entry_get_text(GTK_ENTRY(entry_artist)));
 			changed |= TAG_ARTIST_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_album))) {
-			ntag->album =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(entry_album)));
+			pragha_musicobject_set_album(nmobj, gtk_entry_get_text(GTK_ENTRY(entry_album)));
 			changed |= TAG_ALBUM_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_genre))) {
-			ntag->genre =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(entry_genre)));
+			pragha_musicobject_set_genre(nmobj, gtk_entry_get_text(GTK_ENTRY(entry_genre)));
 			changed |= TAG_GENRE_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_year))) {
-			ntag->year =
-				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year));
+			pragha_musicobject_set_year(nmobj, gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year)));
 			changed |= TAG_YEAR_CHANGED;
 		}
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_comment))) {
 			gtk_text_buffer_get_start_iter (buffer, &start);
 			gtk_text_buffer_get_end_iter (buffer, &end);
-			ntag->comment = g_strdup(gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
+			pragha_musicobject_set_comment(nmobj, (gtk_text_buffer_get_text (buffer, &start, &end, FALSE)));
 			changed |= TAG_COMMENT_CHANGED;
 		}
 		break;
@@ -935,8 +886,6 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 	}
 	gtk_widget_destroy(dialog);
 
-	if (mobj)
-		delete_musicobject(mobj);
 	g_free(uri);
 	g_object_unref(storage);
 
@@ -946,9 +895,9 @@ gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gcha
 /* Save tag change on db and disk. */
 
 void
-pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint changed, struct tags *ntag)
+pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint changed, PraghaMusicobject *nmobj)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gint location_id;
 	gchar *sfile = NULL, *tfile;
 	GArray *loc_arr = NULL;
@@ -961,28 +910,28 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 	for (i = list; i != NULL; i = i->next) {
 		mobj = i->data;
 
-		if (G_LIKELY(mobj->file_type != FILE_CDDA &&
-		    mobj->file_type != FILE_HTTP)) {
-			sfile = sanitize_string_sqlite3(mobj->file);
+		if (G_LIKELY(pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP)) {
+			sfile = sanitize_string_sqlite3(pragha_musicobject_get_file(mobj));
 			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id))
 				g_array_append_val(loc_arr, location_id);
 			g_free(sfile);
 
-			tfile = g_strdup(mobj->file);
+			tfile = g_strdup(pragha_musicobject_get_file(mobj));
 			g_ptr_array_add(file_arr, tfile);
 		}
 	}
 
 	/* Save new tags in db */
 	if(loc_arr->len) {
-		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, ntag);
+		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
 		init_library_view(cwin);
 	}
 
 	/* Save new tags in files */
 	if(file_arr->len)
-		pragha_update_local_files_change_tag(file_arr, changed, ntag);
+		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 
 	g_array_free(loc_arr, TRUE);
 	g_ptr_array_free(file_arr, TRUE);
@@ -991,20 +940,20 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 /* Update tag change to a list of mobj. */
 
 void
-pragha_update_mobj_list_change_tag(GList *list, gint changed, struct tags *tags)
+pragha_update_mobj_list_change_tag(GList *list, gint changed, PraghaMusicobject *nmobj)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GList *i;
 
 	for (i = list; i != NULL; i = i->next) {
 		mobj = i->data;
-		pragha_update_musicobject_change_tag(mobj, changed, tags);
+		pragha_update_musicobject_change_tag(mobj, changed, nmobj);
 	}
 }
 
 /* Copy a tag change to all selected songs. */
 
-void copy_tags_selection_current_playlist(struct musicobject *omobj, gint changed, struct con_win *cwin)
+void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
 	GList *rlist, *mlist;
 
@@ -1016,7 +965,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 
 	/* Update all mobj selected minus which provide the information. */
 	mlist = g_list_remove (mlist, omobj);
-	pragha_update_mobj_list_change_tag(mlist, changed, omobj->tags);
+	pragha_update_mobj_list_change_tag(mlist, changed, omobj);
 
 	/* Update the view. */
 	pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
@@ -1031,7 +980,7 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 	}
 
 	/* Save tag change on db and disk. */
-	pragha_save_mobj_list_change_tags(cwin, mlist, changed, omobj->tags);
+	pragha_save_mobj_list_change_tags(cwin, mlist, changed, omobj);
 
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
 	g_list_free (rlist);
@@ -1043,13 +992,9 @@ void copy_tags_selection_current_playlist(struct musicobject *omobj, gint change
 
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 {
-	struct tags otag, ntag;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *omobj, *nmobj;
 	GList *rlist, *mlist;
 	gint sel = 0, changed = 0;
-
-	memset(&otag, 0, sizeof(struct tags));
-	memset(&ntag, 0, sizeof(struct tags));
 
 	/* Get a list of references and music objects selected. */
 	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
@@ -1060,12 +1005,14 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	/* Setup initial entries */
 	if(sel == 1) {
-		mobj = mlist->data;
-		memcpy(&otag, mobj->tags, sizeof(struct tags));
+		omobj = mlist->data;
+		g_object_ref(omobj);
 	}
 
+	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+
 	/* Get new tags edited */
-	changed = tag_edit_dialog(&otag, 0, &ntag, (mobj != NULL) ?  mobj->file : NULL, cwin);
+	changed = tag_edit_dialog(omobj, 0, nmobj, pragha_musicobject_get_file(omobj), cwin);
 
 	if (!changed)
 		goto exit;
@@ -1073,7 +1020,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Check if user is trying to set the same track no for multiple tracks */
 	if (changed & TAG_TNO_CHANGED) {
 		if (sel > 1) {
-			if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin))
 				goto exit;
 		}
 	}
@@ -1082,7 +1029,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
 		if (sel > 1) {
-			if (!confirm_title_multiple_tracks(ntag.title, cwin))
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin))
 				goto exit;
 		}
 	}
@@ -1090,7 +1037,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
 	/* Update all mobj selected. */
-	pragha_update_mobj_list_change_tag(mlist, changed, &ntag);
+	pragha_update_mobj_list_change_tag(mlist, changed, nmobj);
 
 	/* Update the view. */
 	pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
@@ -1104,18 +1051,14 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	}
 
 	/* Save tag change on db and disk. */
-	pragha_save_mobj_list_change_tags(cwin, mlist, changed, &ntag);
+	pragha_save_mobj_list_change_tags(cwin, mlist, changed, nmobj);
 
 exit:
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_object_unref(omobj);
+	g_object_unref(nmobj);
 	g_list_free (rlist);
 	g_list_free (mlist);
-
-	g_free(ntag.title);
-	g_free(ntag.artist);
-	g_free(ntag.album);
-	g_free(ntag.genre);
-	g_free(ntag.comment);
 }
 
 void refresh_tag_completion_entries(struct con_win *cwin)
