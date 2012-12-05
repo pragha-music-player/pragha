@@ -1242,6 +1242,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	struct musicobject *mobj;
 	GList *list = NULL;
 
+	PraghaMusicobject *musicobject;
+
 	set_watch_cursor (cwin->mainwindow);
 
 	/* Query and insert entries */
@@ -1257,8 +1259,28 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 				g_warning("Unable to retrieve details for"
 					  " location_id : %d",
 					  location_id);
-			else
-				list = g_list_prepend(list, mobj);
+			else {
+				/* Fast memory consumption test.
+				 * A simple view, ading 26142 song, only
+				 * increase 1 mb the use GObjects. */
+				musicobject = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+				                            "file", mobj->file,
+				                            "file-type", mobj->file_type,
+				                            "title", mobj->tags->title,
+				                            "artist", mobj->tags->artist,
+				                            "album", mobj->tags->album,
+				                            "genre", mobj->tags->genre,
+				                            "comment", mobj->tags->comment,
+				                            "year", mobj->tags->year,
+				                            "track_no", mobj->tags->track_no,
+				                            "length", mobj->tags->length,
+				                            "bitrate", mobj->tags->bitrate,
+				                            "channels", mobj->tags->channels,
+				                            "samplerate", mobj->tags->samplerate,
+				                            NULL);
+				delete_musicobject(mobj);
+				/*list = g_list_prepend(list, mobj);*/
+			}
 
 			if (pragha_process_gtk_events ()) {
 				sqlite3_free_table(result.resultp);
