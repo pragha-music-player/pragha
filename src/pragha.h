@@ -77,6 +77,7 @@
 
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
+#include "pragha-musicobject.h"
 #include "pragha-preferences.h"
 #include "gtkcellrendererbubble.h"
 
@@ -399,7 +400,8 @@ enum file_type {
 	FILE_APE,
 #endif
 	FILE_CDDA,
-	FILE_HTTP
+	FILE_HTTP,
+	LAST_FILE_TYPE
 };
 
 /* Playlist type formats */
