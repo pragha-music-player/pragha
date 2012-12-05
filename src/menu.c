@@ -892,7 +892,6 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 	shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
 	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
-	pragha_playlist_set_shuffle(cwin->cplaylist, shuffle);
 	
 	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 
