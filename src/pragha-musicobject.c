@@ -564,8 +564,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The File",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property(object_class, PROP_FILE,
-	                                gParamSpecs[PROP_FILE]);
 
 	/**
 	  * PraghaMusicobject:file_type:
@@ -579,8 +577,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                   LAST_FILE_TYPE,
 		                   0,
 		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_FILE_TYPE,
-	                                 gParamSpecs[PROP_FILE_TYPE]);
 
 	/**
 	  * PraghaMusicobject:title:
@@ -592,8 +588,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Title",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_TITLE,
-	                                 gParamSpecs[PROP_TITLE]);
 
 	/**
 	  * PraghaMusicobject:artist:
@@ -605,8 +599,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Artist",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_ARTIST,
-	                                 gParamSpecs[PROP_ARTIST]);
 
 	/**
 	  * PraghaMusicobject:album:
@@ -618,8 +610,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Album",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_ALBUM,
-	                                 gParamSpecs[PROP_ALBUM]);
 
 	/**
 	  * PraghaMusicobject:genre:
@@ -631,8 +621,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Genre",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_GENRE,
-	                                 gParamSpecs[PROP_GENRE]);
 
 	/**
 	  * PraghaMusicobject:comment:
@@ -644,8 +632,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Comment",
 		                    NULL,
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property(object_class, PROP_COMMENT,
-	                                gParamSpecs[PROP_COMMENT]);
 
 	/**
 	  * PraghaMusicobject:year:
@@ -659,8 +645,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                   G_MAXUINT,
 		                   0,
 		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_YEAR,
-	                                 gParamSpecs[PROP_YEAR]);
 
 	/**
 	  * PraghaMusicobject:track_no:
@@ -674,8 +658,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                   G_MAXUINT,
 		                   0,
 		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_TRACK_NO,
-	                                 gParamSpecs[PROP_TRACK_NO]);
 
 	/**
 	  * PraghaMusicobject:length:
@@ -689,8 +671,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  G_MAXINT,
 		                  0,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_LENGTH,
-	                                 gParamSpecs[PROP_LENGTH]);
 
 	/**
 	  * PraghaMusicobject:bitrate:
@@ -704,8 +684,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  G_MAXINT,
 		                  0,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_BITRATE,
-	                                 gParamSpecs[PROP_BITRATE]);
 
 	/**
 	  * PraghaMusicobject:channels:
@@ -719,8 +697,6 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  G_MAXINT,
 		                  0,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_CHANNELS,
-	                                 gParamSpecs[PROP_CHANNELS]);
 
 	/**
 	  * PraghaMusicobject:samplerate:
@@ -734,8 +710,8 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  G_MAXINT,
 		                  0,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-	g_object_class_install_property (object_class, PROP_SAMPLERATE,
-	                                 gParamSpecs[PROP_SAMPLERATE]);
+
+	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }
 
 static void
