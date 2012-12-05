@@ -293,8 +293,7 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                           NULL,
                           G_PARAM_READWRITE |
                           G_PARAM_STATIC_STRINGS);
-   g_object_class_install_property(object_class, PROP_PATH,
-                                   gParamSpecs[PROP_PATH]);
+
    /**
     * PraghaAlbumArt:size:
     *
@@ -307,6 +306,7 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                         48,
                         G_PARAM_READWRITE |
                         G_PARAM_STATIC_STRINGS);
+
    /**
     * PraghaAlbumArt:visible:
     *
@@ -319,8 +319,7 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
  
-    g_object_class_install_property(object_class, PROP_VISIBLE,
-                                   gParamSpecs[PROP_VISIBLE]);
+   g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }
 
 static void
