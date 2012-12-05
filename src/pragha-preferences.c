@@ -245,6 +245,8 @@ pragha_preferences_set_instant_search (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->instant_search = instant_search;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_INSTANT_SEARCH]);
 }
 
 
@@ -271,6 +273,8 @@ pragha_preferences_set_approximate_search (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->approximate_search = approximate_search;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_APPROXIMATE_SEARCH]);
 }
 
 /**
@@ -296,6 +300,8 @@ pragha_preferences_set_shuffle (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->shuffle = shuffle;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHUFFLE]);
 }
 
 /**
@@ -321,6 +327,8 @@ pragha_preferences_set_repeat (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->repeat = repeat;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_REPEAT]);
 }
 
 /**
@@ -346,6 +354,8 @@ pragha_preferences_set_use_hint (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->use_hint = use_hint;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_HINT]);
 }
 
 /**
@@ -371,6 +381,8 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
    g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
    preferences->priv->restore_playlist = restore_playlist;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_RESTORE_PLAYLIST]);
 }
 
 static void
