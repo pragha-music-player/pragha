@@ -421,6 +421,7 @@ pragha_preferences_finalize (GObject *object)
 
    g_free(data);
    g_key_file_free(priv->rc_keyfile);
+   g_free(priv->rc_filepath);
 
    G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
