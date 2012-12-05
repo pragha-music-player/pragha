@@ -23,7 +23,7 @@ G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)
 struct _PraghaPreferencesPrivate
 {
    GKeyFile  *rc_keyfile;
-   gchar     *rc_uri;
+   gchar     *rc_filepath;
 
    /* Search preferences. */
    gboolean   instant_search;
@@ -416,7 +416,7 @@ pragha_preferences_finalize (GObject *object)
    /* Save to key file */
 
    data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
-   if(!g_file_set_contents(priv->rc_uri, data, length, &error))
+   if(!g_file_set_contents(priv->rc_filepath, data, length, &error))
       g_critical("Unable to write preferences file : %s", error->message);
 
    g_free(data);
@@ -615,12 +615,12 @@ pragha_preferences_init (PraghaPreferences *preferences)
 
    /* Does /pragha/config exist ? */
 
-   priv->rc_uri = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/config", NULL);
+   priv->rc_filepath = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/config", NULL);
 
-   if (g_file_test(priv->rc_uri, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-      if (g_creat(priv->rc_uri, S_IRWXU) == -1) {
-      	 g_free(priv->rc_uri);
-      	 priv->rc_uri = NULL;
+   if (g_file_test(priv->rc_filepath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+      if (g_creat(priv->rc_filepath, S_IRWXU) == -1) {
+         g_free(priv->rc_filepath);
+         priv->rc_filepath = NULL;
          g_critical("Unable to create config file, err: %s", strerror(errno));
          return;
       }
@@ -632,7 +632,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
    priv->rc_keyfile = g_key_file_new();
 
    if (!g_key_file_load_from_file(priv->rc_keyfile,
-                                  priv->rc_uri,
+                                  priv->rc_filepath,
                                   G_KEY_FILE_NONE,
                                   &error)) {
       g_critical("Unable to load config file (Possible first start), err: %s", error->message);
@@ -722,9 +722,9 @@ pragha_preferences_share_key_file(PraghaPreferences *preferences)
 }
 
 gchar*
-pragha_preferences_share_uri_file(PraghaPreferences *preferences)
+pragha_preferences_share_filepath(PraghaPreferences *preferences)
 {
-	return preferences->priv->rc_uri;
+	return preferences->priv->rc_filepath;
 }
 
 /**

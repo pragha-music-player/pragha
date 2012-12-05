@@ -181,7 +181,7 @@ gint init_config(struct con_win *cwin)
 	/* Share keyfile with PraghaPreferences */
 
 	cwin->cpref->configrc_keyfile = pragha_preferences_share_key_file(cwin->preferences);
-	cwin->cpref->configrc_file = pragha_preferences_share_uri_file(cwin->preferences);
+	cwin->cpref->configrc_file = pragha_preferences_share_filepath(cwin->preferences);
 
 	if (cwin->cpref->configrc_keyfile != NULL &&
 	    cwin->cpref->configrc_file != NULL) {

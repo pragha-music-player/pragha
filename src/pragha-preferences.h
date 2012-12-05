@@ -50,7 +50,7 @@ struct _PraghaPreferencesClass
 GKeyFile*
 pragha_preferences_share_key_file(PraghaPreferences *preferences);
 gchar*
-pragha_preferences_share_uri_file(PraghaPreferences *preferences);
+pragha_preferences_share_filepath(PraghaPreferences *preferences);
 
 PraghaPreferences* pragha_preferences_get (void);
 GType pragha_preferences_get_type (void) G_GNUC_CONST;
