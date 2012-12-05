@@ -572,7 +572,6 @@ struct con_state {
 	guint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
-	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
@@ -636,6 +635,7 @@ typedef struct {
 	gint no_tracks;
 	gint unplayed_tracks;
 	GRand *rand;
+	enum playlist_action current_update_action;
 	GList *rand_track_refs;
 	GSList *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
@@ -989,7 +989,10 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 void update_status_bar_playtime(struct con_win *cwin);
-void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
+enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
+void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
+void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
+void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_new_track(struct con_win *cwin);
 void update_current_playlist_view_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,

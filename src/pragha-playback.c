@@ -23,13 +23,14 @@ void
 pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
+
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 
 	if(state != ST_PLAYING)
 		return;
 
 	/* New song playback. */
-	if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
+	if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
 		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", cwin->cstate->curr_mobj->file);
 
 		/* Update current song info */
@@ -45,7 +46,8 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 		/* Show osd, and inform new album art. */
 		show_osd(cwin);
 		mpris_update_metadata_changed(cwin);
-		cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+
+		pragha_playlist_report_finished_action(cwin->cplaylist);
 	}
 }
 
@@ -73,8 +75,8 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	pragha_backend_stop(cwin->backend);
 
 	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_PREV;
-	update_current_playlist_state(path, cwin);
+	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
+	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 	pragha_backend_start(cwin->backend, mobj);
@@ -126,8 +128,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		if (pragha_playlist_is_shuffle(cwin->cplaylist))
 			pragha_playlist_set_first_rand_ref(cwin->cplaylist, path);
 
-		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
-		update_current_playlist_state(path, cwin);
+		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
+		pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 		mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 		pragha_backend_start(cwin->backend, mobj);
@@ -170,8 +172,8 @@ void pragha_advance_playback (struct con_win *cwin)
 		return;
 
 	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
-	update_current_playlist_state(path, cwin);
+	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_NEXT);
+	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 	pragha_backend_start (cwin->backend, mobj);
