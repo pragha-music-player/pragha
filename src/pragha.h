@@ -77,7 +77,9 @@
 
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
+#include "pragha-preferences.h"
 #include "gtkcellrendererbubble.h"
+
 #include "xml_helper.h"
 
 /* Some definitions to solve different versions of the libraries. */
@@ -203,8 +205,8 @@ typedef enum {
 #define KEY_OSD_IN_TRAY            "osd_in_tray"
 #define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
 #define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
-#define KEY_INSTANT_FILTER         "instant_filter"
-#define KEY_APROXIMATE_SEARCH      "aproximate_search"
+#define KEY_INSTANT_SEARCH         "instant_filter"
+#define KEY_APPROXIMATE_SEARCH     "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
 
 #define GROUP_PLAYLIST "Playlist"
@@ -441,73 +443,9 @@ struct pixbuf {
 	GdkPixbuf *pixbuf_track;
 	GdkPixbuf *pixbuf_genre;
 	GdkPixbuf *pixbuf_dir;
-	GdkPixbuf *pixbuf_paused;
-	GdkPixbuf *pixbuf_playing;
 };
 
-#ifdef HAVE_LIBCLASTFM
-struct lastfm_pref {
-	gboolean lastfm_support;
-	gchar *lastfm_user;
-	gchar *lastfm_pass;
-	GtkWidget *lastfm_w;
-	GtkWidget *lastfm_uname_w;
-	GtkWidget *lastfm_pass_w;
-};
-#endif
-
-struct con_pref {
-	enum library_view cur_library_view;
-	gchar *installed_version;
-	gchar *audio_sink;
-	gchar *album_art_pattern;
-	gchar *start_mode;
-	gchar *audio_device;
-	gchar *audio_cd_device;
-	gint window_width;
-	gint window_height;
-	gint window_x;
-	gint window_y;
-	gint sidebar_size;
-	GTimeVal last_rescan_time;
-	GKeyFile *configrc_keyfile;
-	gchar *configrc_file;
-#ifdef HAVE_LIBGLYR
-	gchar *cache_folder;
-#endif
-	gboolean add_recursively_files;
-	gboolean show_osd;
-	gboolean osd_in_systray;
-	gboolean albumart_in_osd;
-	gboolean actions_in_osd;
-	gboolean timer_remaining_mode;
-	gboolean shuffle;
-	gboolean repeat;
-	gboolean save_playlist;
-	gboolean software_mixer;
-#ifdef HAVE_LIBGLYR
-	gboolean get_album_art;
-#endif
-	gboolean use_cddb;
-	gboolean use_mpris2;
-	gboolean show_icon_tray;
-	gboolean close_to_tray;
-	gboolean remember_window_state;
-	gboolean lateral_panel;
-	gboolean status_bar;
-	gboolean controls_below;
-	gboolean fuse_folders;
-	gboolean sort_by_year;
-	gboolean instant_filter;
-	gboolean aproximate_search;
-	gboolean use_hint;
-	GSList *library_dir;
-	GSList *playlist_columns;
-	GSList *playlist_column_widths;
-	GSList *library_tree_nodes;
-	GSList *lib_delete;
-	GSList *lib_add;
-
+typedef struct {
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;
 	GtkWidget *audio_sink_combo_w;
@@ -538,13 +476,66 @@ struct con_pref {
 	GtkWidget *actions_in_osd_w;
 
 #ifdef HAVE_LIBCLASTFM
-	struct lastfm_pref lw;
+	GtkWidget *lastfm_w;
+	GtkWidget *lastfm_uname_w;
+	GtkWidget *lastfm_pass_w;
 #endif
 #ifdef HAVE_LIBGLYR
 	GtkWidget *get_album_art_w;
 #endif
 	GtkWidget *use_cddb_w;
 	GtkWidget *use_mpris2_w;
+}PreferencesWidgets;
+
+struct con_pref {
+	enum library_view cur_library_view;
+	gchar *installed_version;
+	gchar *audio_sink;
+	gchar *album_art_pattern;
+	gchar *start_mode;
+	gchar *audio_device;
+	gchar *audio_cd_device;
+	gint window_width;
+	gint window_height;
+	gint window_x;
+	gint window_y;
+	gint sidebar_size;
+	GTimeVal last_rescan_time;
+	GKeyFile *configrc_keyfile;
+	gchar *configrc_file;
+#ifdef HAVE_LIBGLYR
+	gchar *cache_folder;
+#endif
+	gboolean add_recursively_files;
+	gboolean show_osd;
+	gboolean osd_in_systray;
+	gboolean albumart_in_osd;
+	gboolean actions_in_osd;
+	gboolean timer_remaining_mode;
+	gboolean save_playlist;
+	gboolean software_mixer;
+#ifdef HAVE_LIBGLYR
+	gboolean get_album_art;
+#endif
+	gboolean use_cddb;
+	gboolean use_mpris2;
+	gboolean show_icon_tray;
+	gboolean close_to_tray;
+	gboolean remember_window_state;
+	gboolean lateral_panel;
+	gboolean status_bar;
+	gboolean controls_below;
+	gboolean fuse_folders;
+	gboolean sort_by_year;
+	GSList *library_dir;
+	GSList *library_tree_nodes;
+	GSList *lib_delete;
+	GSList *lib_add;
+#ifdef HAVE_LIBCLASTFM
+	gboolean lastfm_support;
+	gchar *lastfm_user;
+	gchar *lastfm_pass;
+#endif
 };
 
 struct musicobject {
@@ -564,16 +555,9 @@ struct db_result {
  *
  * @unique_instance: If current invocation of app is unique
  * @view_change: If library view change is in progress
- * @playlist_change: If current platlist change is in progress
  * @curr_mobj_clear: Clear curr_mobj flag
- * @tracks_curr_playlist: Total no. of tracks in the current playlist
- * @unplayed_tracks: Total no. of tracks that haven't been played
  * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
- * @rand: To generate random numbers
- * @rand_track_refs: List of references maintained in Shuffle mode
- * @curr_rand_ref: Currently playing track in Shuffle mode
- * @curr_seq_ref: Currently playing track in non-Shuffle mode
  * @cdda_drive: Global handle for the audio cd
  * @cddb_conn: libcddb connection
  * @curr_mobj: musicobject of currently playing track
@@ -583,21 +567,11 @@ struct con_state {
 	gboolean dragging;
 	gboolean unique_instance;
 	gboolean view_change;
-	gboolean playlist_change;
 	gboolean curr_mobj_clear;
 	gboolean first_run;
-	gint tracks_curr_playlist;
-	gint unplayed_tracks;
 	guint timeout_id;
 	gchar *last_folder;
 	gchar *filter_entry;
-	gchar *jump_filter;
-	GRand *rand;
-	GList *rand_track_refs;
-	GSList *queue_track_refs;
-	GtkTreeRowReference *curr_rand_ref;
-	GtkTreeRowReference *curr_seq_ref;
-	enum playlist_action update_playlist_action;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
@@ -630,12 +604,56 @@ struct con_mpris2 {
 
 struct con_gnome_media_keys;
 
+/**
+ * PraghaPlaylist - Pertains to the current state of the playlist
+ * @view - The playlist tree view widget
+ * @widget - The parent widget containing the view
+ * @changing: If current platlist change is in progress
+ * @shuffle: If shuffle is activated.
+ * @repeat: If repeat is activated.
+ * @no_tracks: Total no. of tracks in the current playlist
+ * @unplayed_tracks: Total no. of tracks that haven't been played
+ * @rand: To generate random numbers
+ * @rand_track_refs: List of references maintained in Shuffle mode
+ * @queue_track_refs: List of references of queued songs
+ * @curr_rand_ref: Currently playing track in Shuffle mode
+ * @curr_seq_ref: Currently playing track in non-Shuffle mode
+ */
+
+typedef struct {
+	GtkWidget *view;
+	GtkWidget *widget;
+	GtkWidget *header_context_menu;
+	GtkUIManager *cp_context_menu;
+	GtkUIManager *cp_null_context_menu;
+	GSList *columns;
+	GSList *column_widths;
+	gboolean changing;
+	gboolean dragging;
+	gboolean shuffle;
+	gboolean repeat;
+	gint no_tracks;
+	gint unplayed_tracks;
+	GRand *rand;
+	enum playlist_action current_update_action;
+	GList *rand_track_refs;
+	GSList *queue_track_refs;
+	GtkTreeRowReference *curr_rand_ref;
+	GtkTreeRowReference *curr_seq_ref;
+	GdkPixbuf *paused_pixbuf;
+	GdkPixbuf *playing_pixbuf;
+
+} PraghaPlaylist;
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	struct con_dbase *cdbase;
+	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
+	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif
@@ -654,7 +672,6 @@ struct con_win {
 	GtkToolItem *shuffle_button;
 	GtkToolItem *repeat_button;
 	GtkWidget *vol_button;
-	GtkWidget *current_playlist;
 	GtkWidget *status_bar;
 	GtkWidget *search_entry;
 	GtkWidget *browse_mode;
@@ -669,16 +686,11 @@ struct con_win {
 	GtkWidget *ntag_lastfm_button;
 	#endif
 	GtkWidget *library_tree;
-	GtkWidget *jump_tree;
-	GtkTreeModel *jump_model_filter;
-	GtkWidget *header_context_menu;
 	GtkTreeStore *library_store;
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
-	GtkUIManager *cp_context_menu;
-	GtkUIManager *cp_null_context_menu;
 	GtkUIManager *playlist_tree_context_menu;
 	GtkUIManager *library_tree_context_menu;
 	GtkUIManager *header_library_tree_context_menu;
@@ -804,7 +816,7 @@ struct musicobject* new_musicobject_from_file(const gchar *file);
 struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin);
 struct musicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
 struct musicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
-void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag);
+void pragha_update_musicobject_change_tag(struct musicobject *mobj, gint changed, struct tags *ntag);
 void init_tag_struct(struct tags *mtags);
 void free_tag_struct(struct tags *mtags);
 void delete_musicobject(struct musicobject *mobj);
@@ -828,8 +840,7 @@ gboolean get_ape_info(const gchar *file, struct tags *tags);
 gboolean save_tags_to_file(gchar *file, struct tags *tags, int changed);
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
-void tag_update(GArray *loc_arr, GPtrArray *file_arr, gint changed, struct tags *ntag,
-		struct con_win *cwin);
+void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, struct tags *ntag);
 gint tag_edit_dialog(struct tags *otag, gint prechanged, struct tags *ntag, gchar *file,
 		     struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
@@ -878,7 +889,6 @@ void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
 void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
-void library_tree_add_to_playlist(struct con_win *cwin);
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
@@ -909,6 +919,8 @@ void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
 		     struct con_dbase *cdbase);
+void
+pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, struct tags *ntag);
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase);
 gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
 gchar** get_playlist_names_db(struct con_dbase *cdbase);
@@ -949,11 +961,10 @@ void db_free(struct con_dbase *cdbase);
 
 /* Playlist mgmt functions */
 
+gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice);
 void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
-GList *prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
-void add_radio_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
-GList *prepend_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
-void playlist_tree_add_to_playlist(struct con_win *cwin);
+GList *add_playlist_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
+GList *add_radio_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);
@@ -961,16 +972,6 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
-gboolean dnd_playlist_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-void dnd_playlist_tree_get(GtkWidget *widget,
-			   GdkDragContext *context,
-			   GtkSelectionData *data,
-			   guint info,
-			   guint time,
-			   struct con_win *cwin);
-void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin);
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin);
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
@@ -985,109 +986,94 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 /* Current playlist */
 
-void jump_to_path_on_current_playlist(GtkTreePath *path, struct con_win *cwin);
-void select_numered_path_of_current_playlist(gint path_number, struct con_win *cwin);
-void update_status_bar(struct con_win *cwin);
-void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin);
+void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
+void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
+void update_status_bar_playtime(struct con_win *cwin);
+enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
+void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
+void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
+void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_new_track(struct con_win *cwin);
 void update_current_playlist_view_track(struct con_win *cwin);
 struct musicobject* current_playlist_mobj_at_path(GtkTreePath *path,
-						  struct con_win *cwin);
+						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(struct musicobject *mobj,
-						struct con_win *cwin);
-void reset_rand_track_refs(GtkTreeRowReference *ref, struct con_win *cwin);
-void current_playlist_clear_dirty_all(struct con_win *cwin);
-void clear_rand_track_refs(struct con_win *cwin);
-GtkTreePath* current_playlist_get_selection(struct con_win *cwin);
-GtkTreePath* current_playlist_get_next(struct con_win *cwin);
-GtkTreePath* current_playlist_get_prev(struct con_win *cwin);
-GtkTreePath* current_playlist_get_actual(struct con_win *cwin);
-GtkTreePath* get_first_random_track(struct con_win *cwin);
-GtkTreePath* get_next_queue_track(struct con_win *cwin);
+					   PraghaPlaylist *cplaylist);
+void
+pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path);
+GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
+GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist);
+GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist);
+GtkTreePath* current_playlist_get_actual(PraghaPlaylist *cplaylist);
+GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
+GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist);
+GtkTreePath* get_next_queue_track(PraghaPlaylist *cplaylist);
 gchar* get_ref_current_track(struct con_win *cwin);
-void init_current_playlist_columns(struct con_win *cwin);
-void requeue_track_refs (struct con_win *cwin);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
-void toggle_queue_selected_current_playlist (struct con_win *cwin);
+void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
 int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void remove_from_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(struct musicobject *mobj, struct con_win *cwin);
-void current_playlist_clear(struct con_win *cwin);
+void pragha_playlist_remove_all (PraghaPlaylist *cplaylist, struct con_win *cwin);
 void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
-void update_track_current_playlist(GtkTreeIter *iter, gint changed, struct musicobject *mobj, struct con_win *cwin);
-void insert_current_playlist(GtkTreeModel *model, struct musicobject *mobj, GtkTreeViewDropPosition droppos, GtkTreeIter *pos, struct con_win *cwin);
-void append_current_playlist(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin);
-void append_current_playlist_ex(GtkTreeModel *model, struct musicobject *mobj, struct con_win *cwin, GtkTreePath **path);
-void clear_sort_current_playlist(GtkAction *action, struct con_win *cwin);
+void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, struct musicobject *mobj);
+void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
+void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, struct musicobject *mobj);
+void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj);
+void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, struct musicobject *mobj, GtkTreePath **path);
+void
+pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, struct musicobject *mobj);
+void
+pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
+				 GList *list,
+				 GtkTreeViewDropPosition droppos,
+				 GtkTreeIter *pos);
+void
+pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
+gboolean
+pragha_mobj_list_already_has_title_of_artist(GList *list,
+					     const gchar *title,
+					     const gchar *artist);
+gboolean
+pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
+					    const gchar *title,
+					    const gchar *artist);
+void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, struct con_win *cwin);
 void save_current_playlist(GtkAction *action, struct con_win *cwin);
-void shuffle_button(struct con_win *cwin);
 void jump_to_playing_song(struct con_win *cwin);
-void current_playlist_row_activated_cb(GtkTreeView *current_playlist,
-				       GtkTreePath *path,
-				       GtkTreeViewColumn *column,
-				       struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
-gboolean current_playlist_button_press_cb(GtkWidget *widget,
-					 GdkEventButton *event,
-					 struct con_win *cwin);
-gboolean current_playlist_button_release_cb(GtkWidget *widget,
-					    GdkEventButton *event,
-					    struct con_win *cwin);
-gboolean header_right_click_cb(GtkWidget *widget,
-			       GdkEventButton *event,
-			       struct con_win *cwin);
-gboolean dnd_current_playlist_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-void drag_current_playlist_get_data (GtkWidget *widget,
-				    GdkDragContext *context,
-				    GtkSelectionData *selection_data,
-				    guint target_type,
-				    guint time,
-				    struct con_win *cwin);
-gboolean dnd_current_playlist_drop(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   guint time,
-				   struct con_win *cwin);
-void dnd_current_playlist_received(GtkWidget *widget,
-				   GdkDragContext *context,
-				   gint x,
-				   gint y,
-				   GtkSelectionData *data,
-				   enum dnd_target info,
-				   guint time,
-				   struct con_win *cwin);
+GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
+GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
+GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
+struct musicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
 void save_current_playlist_state(struct con_win *cwin);
 void init_current_playlist_view(struct con_win *cwin);
-GtkWidget* create_current_playlist_view(struct con_win *cwin);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_title_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_artist_column_change_cb(GtkCheckMenuItem *item,
-				      struct con_win *cwin);
+				      PraghaPlaylist* cplaylist);
 void playlist_album_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_genre_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item,
-				       struct con_win *cwin);
+				       PraghaPlaylist* cplaylist);
 void playlist_year_column_change_cb(GtkCheckMenuItem *item,
-				    struct con_win *cwin);
+				    PraghaPlaylist* cplaylist);
 void playlist_length_column_change_cb(GtkCheckMenuItem *item,
-				      struct con_win *cwin);
+				      PraghaPlaylist* cplaylist);
 void playlist_comment_column_change_cb(GtkCheckMenuItem *item,
-				     struct con_win *cwin);
+				     PraghaPlaylist* cplaylist);
 void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
-					struct con_win *cwin);
+					PraghaPlaylist* cplaylist);
 void clear_sort_current_playlist_cb(GtkMenuItem *item,
-					struct con_win *cwin);
+				    PraghaPlaylist *cplaylist);
 gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a,
 		      GtkTreeIter *b, gpointer data);
 gint compare_bitrate(GtkTreeModel *model, GtkTreeIter *a,
@@ -1096,6 +1082,36 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
 		  GtkTreeIter *b, gpointer data);
 gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
 		    GtkTreeIter *b, gpointer data);
+gboolean
+pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey *event);
+void
+pragha_playlist_activate_path(PraghaPlaylist* cplaylist, GtkTreePath *path);
+void
+pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, struct musicobject *mobj);
+void
+pragha_playlist_set_rules_hint(PraghaPlaylist* cplaylist, gboolean use_hint);
+gint
+pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
+gboolean
+pragha_playlist_has_queue(PraghaPlaylist* cplaylist);
+gboolean
+pragha_playlist_is_changing(PraghaPlaylist* cplaylist);
+void
+pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);
+gboolean
+pragha_playlist_is_shuffle(PraghaPlaylist* cplaylist);
+void
+pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
+void
+current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
+GtkWidget *
+pragha_playlist_get_view(PraghaPlaylist* cplaylist);
+GtkWidget *
+pragha_playlist_get_widget(PraghaPlaylist* cplaylist);
+void
+current_playlist_save_preferences(PraghaPlaylist* cplaylist);
+void cplaylist_free(PraghaPlaylist *cplaylist);
+PraghaPlaylist *cplaylist_new(struct con_win *cwin);
 
 /* Preferences */
 
@@ -1174,8 +1190,6 @@ gboolean nm_is_online ();
 #endif
 gboolean already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin);
 GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
-gint append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin);
-struct musicobject *get_selected_musicobject(struct con_win *cwin);
 void set_watch_cursor (GtkWidget *window);
 void remove_watch_cursor (GtkWidget *window);
 void set_status_message (const gchar *message, struct con_win *cwin);
@@ -1329,7 +1343,7 @@ void glyr_related_free (struct con_win *cwin);
 
 /* Others */
 
-void dialog_jump_to_track (struct con_win *cwin);
+void pragha_filter_dialog (struct con_win *cwin);
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 

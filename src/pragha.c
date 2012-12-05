@@ -28,6 +28,7 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_playback_stop(cwin);
 
+	cplaylist_free(cwin->cplaylist);
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif
@@ -35,6 +36,7 @@ static void common_cleanup(struct con_win *cwin)
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
+	g_object_unref(G_OBJECT(cwin->preferences));
 	preferences_free (cwin->cpref);
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
@@ -55,7 +57,7 @@ static void common_cleanup(struct con_win *cwin)
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 {
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		save_current_playlist_state(cwin);
 	save_preferences(cwin);
 
@@ -111,6 +113,9 @@ gint main(gint argc, gchar *argv[])
 	if (!cwin->cstate->unique_instance)
 		return 0;
 
+	cwin->preferences = pragha_preferences_get();
+	/* TODO: Port everiting to PraghaPreferences
+	 *       Search a better condition o errors!!. */
 	if (init_config(cwin) == -1) {
 		g_critical("Unable to init configuration");
 		return -1;

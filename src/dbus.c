@@ -45,7 +45,7 @@ static void dbus_prev_handler(struct con_win *cwin)
 
 static void dbus_shuffle_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->shuffle)
+	if (pragha_preferences_get_shuffle(cwin->preferences))
 		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
 				     cwin->shuffle_button), FALSE);
 	else
@@ -55,7 +55,7 @@ static void dbus_shuffle_handler(struct con_win *cwin)
 
 static void dbus_repeat_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->repeat)
+	if (pragha_preferences_get_repeat(cwin->preferences))
 		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
 				     cwin->repeat_button), FALSE);
 	else
@@ -99,7 +99,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
@@ -110,15 +110,15 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	else if (is_playable_file(file)) {
 		mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		CDEBUG(DBG_INFO, "Add file from command line: %s", file);
 	}
 	else {
 		g_warning("Unable to add %s", file);
 	}
 
-	select_numered_path_of_current_playlist(prev_tracks, cwin);
-	update_status_bar(cwin);
+	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+	update_status_bar_playtime(cwin);
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)

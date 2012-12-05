@@ -334,7 +334,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	else{
 		mobj = new_musicobject_from_file(data);
 		if (mobj) {
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 			add_recent_file(data);
 		}
 	}
@@ -426,15 +426,15 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	if (files) {
 		set_watch_cursor (cwin->mainwindow);
 
-		prev_tracks = cwin->cstate->tracks_curr_playlist;
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 		g_slist_foreach(files, handle_selected_file, cwin);
 		g_slist_free_full(files, g_free);
 
 		remove_watch_cursor (cwin->mainwindow);
 
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
-		update_status_bar(cwin);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+		update_status_bar_playtime(cwin);
 	}
 }
 
@@ -729,8 +729,8 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name, cwin);
 
-			append_current_playlist(NULL, mobj, cwin);
-			update_status_bar(cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			update_status_bar_playtime(cwin);
 
 			if (name) {
 				new_radio(uri, name, cwin);
@@ -783,9 +783,6 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
@@ -810,43 +807,33 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Update the music object, the gui and them mpris */
 
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	__update_current_song_info(cwin);
 
 	mpris_update_metadata_changed(cwin);
-
-	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
-		gtk_tree_path_free(path);
-	}
 
 	/* Store the new tags */
 
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_ptr_array_new();
-
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
 		location_id = find_location_db(sfile, cwin->cdbase);
-
-		if (location_id)
+		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
+			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+			init_library_view(cwin);
+		}
+		g_array_free(loc_arr, TRUE);
+		g_free(sfile);
 
+		file_arr = g_ptr_array_new();
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
 		g_ptr_array_add(file_arr, tfile);
-
-		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
-
-		init_library_view(cwin);
-
-		g_array_free(loc_arr, TRUE);
+		pragha_update_local_files_change_tag(file_arr, changed, &ntag);
 		g_ptr_array_free(file_arr, TRUE);
-
-		g_free(sfile);
 		g_free(tfile);
 	}
 
@@ -891,21 +878,25 @@ void search_library_action(GtkAction *action, struct con_win *cwin)
 
 void search_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	dialog_jump_to_track (cwin);
+	pragha_filter_dialog (cwin);
 }
 
 /* Handler for 'Shuffle' option in the Edit menu */
 
 void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	gboolean shuffle;
+
 	CDEBUG(DBG_INFO, "shuffle_action");
 
-	cwin->cpref->shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
+	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
+	pragha_playlist_set_shuffle(cwin->cplaylist, shuffle);
+	
 	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
-		shuffle_button(cwin);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), shuffle);
 
 	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
 }
@@ -914,13 +905,18 @@ void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
 
 void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 {
+	gboolean repeat;
+
 	CDEBUG(DBG_INFO, "Repeat_action");
 
-	cwin->cpref->repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+
+	pragha_preferences_set_repeat(cwin->preferences, repeat);
+	current_playlist_set_repeat(cwin->cplaylist, repeat);
 
 	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
+		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), repeat);
 		
 	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 }
@@ -970,7 +966,7 @@ library_pane_action (GtkAction *action, struct con_win *cwin)
 
 	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), cwin->cpref->lateral_panel);
 
-	paction = gtk_ui_manager_get_action(cwin->cp_null_context_menu, "/popup/Lateral panel");
+	paction = gtk_ui_manager_get_action(cwin->cplaylist->cp_null_context_menu, "/popup/Lateral panel");
 
 	g_signal_handlers_block_by_func (paction, library_pane_action, cwin);
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(paction), cwin->cpref->lateral_panel);
@@ -1014,9 +1010,9 @@ void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
 	GtkTreePath *path = NULL;
-	path = current_playlist_get_actual(cwin);
+	path = current_playlist_get_actual(cwin->cplaylist);
 
-	jump_to_path_on_current_playlist (path, cwin);
+	jump_to_path_on_current_playlist (cwin->cplaylist, path, TRUE);
 
 	gtk_tree_path_free(path);
 }
@@ -1240,22 +1236,13 @@ exit:
 
 void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
-	gint i = 0, location_id = 0, cnt = 0;
+	gint i = 0, location_id = 0;
 	gchar *query;
 	struct db_result result;
 	struct musicobject *mobj;
-	GtkTreeModel *model;
+	GList *list = NULL;
 
 	set_watch_cursor (cwin->mainwindow);
-
-	current_playlist_clear(cwin);
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
@@ -1271,12 +1258,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 					  " location_id : %d",
 					  location_id);
 			else
-				append_current_playlist(model, mobj, cwin);
-
-			/* Have to give control to GTK periodically ... */
-
-			if (cnt++ % 50)
-				continue;
+				list = g_list_prepend(list, mobj);
 
 			if (pragha_process_gtk_events ()) {
 				sqlite3_free_table(result.resultp);
@@ -1285,19 +1267,18 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
-	g_object_unref(model);
+
+	pragha_playlist_insert_mobj_list(cwin->cplaylist,
+					 list,
+					 GTK_TREE_VIEW_DROP_AFTER,
+					 NULL);
 
 	remove_watch_cursor (cwin->mainwindow);
+	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
+	update_status_bar_playtime(cwin);
 
-	select_numered_path_of_current_playlist(0, cwin);
-	update_status_bar(cwin);
-
-	mpris_update_tracklist_replaced(cwin);
+	g_list_free(list);
 }
-
 
 /* Handler for 'Statistics' action in the Tools menu */
 

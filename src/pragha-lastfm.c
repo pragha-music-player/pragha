@@ -41,7 +41,7 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lw.lastfm_user) != 0);
+	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lastfm_user) != 0);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
@@ -55,13 +55,13 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add similar");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && lfm_inited);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Love track");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), logged);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Unlove track");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Unlove track");
 	gtk_action_set_sensitive (GTK_ACTION (action), logged);
 
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Add similar");
+	action = gtk_ui_manager_get_action(cwin->cplaylist->cp_context_menu, "/popup/ToolsMenu/Add similar");
 	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
 }
 
@@ -75,9 +75,6 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *tfile = NULL;
 	gint location_id, changed = 0, prechanged = 0;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
@@ -124,43 +121,33 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Update the music object, the gui and them mpris */
 
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	__update_current_song_info(cwin);
 
 	mpris_update_metadata_changed(cwin);
-
-	if ((path = current_playlist_get_actual(cwin)) != NULL) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		if (gtk_tree_model_get_iter(model, &iter, path))
-			update_track_current_playlist(&iter, changed, cwin->cstate->curr_mobj, cwin);
-		gtk_tree_path_free(path);
-	}
 
 	/* Store the new tags */
 
 	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
 	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		file_arr = g_ptr_array_new();
-
 		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
 		location_id = find_location_db(sfile, cwin->cdbase);
-
-		if (location_id)
+		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
+			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+			init_library_view(cwin);
+		}
+		g_array_free(loc_arr, TRUE);
+		g_free(sfile);
 
+		file_arr = g_ptr_array_new();
 		tfile = g_strdup(cwin->cstate->curr_mobj->file);
 		g_ptr_array_add(file_arr, tfile);
-
-		tag_update(loc_arr, file_arr, changed, &ntag, cwin);
-
-		init_library_view(cwin);
-
-		g_array_free(loc_arr, TRUE);
+		pragha_update_local_files_change_tag(file_arr, changed, &ntag);
 		g_ptr_array_free(file_arr, TRUE);
-
-		g_free(sfile);
 		g_free(tfile);
 	}
 
@@ -222,7 +209,7 @@ do_lastfm_current_playlist_love (gpointer data)
 
 	struct con_win *cwin = data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	msg_data = do_lastfm_love_mobj(mobj, cwin);
 
@@ -252,7 +239,7 @@ do_lastfm_current_playlist_unlove (gpointer data)
 
 	struct con_win *cwin = data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	msg_data = do_lastfm_unlove_mobj(mobj, cwin);
 
@@ -276,12 +263,9 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 static gboolean
 append_mobj_list_current_playlist_idle(gpointer user_data)
 {
-	GtkTreeModel *model;
-	struct musicobject *mobj;
 	gchar *summary = NULL;
 	guint songs_added = 0;
 	gint prev_tracks = 0;
-	GList *l;
 
 	AddMusicObjectListData *data = user_data;
 
@@ -291,27 +275,14 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	if(list == NULL)
 		goto empty;
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
+	pragha_playlist_append_mobj_list(cwin->cplaylist,
+					 list);
 
-	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-	for (l = list; l != NULL; l = l->next) {
-		mobj = l->data;
-		append_current_playlist(model, mobj, cwin);
-		songs_added += 1;
-	}
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
-	g_object_unref(model);
-
+	songs_added = g_list_length(list);
 	g_list_free(list);
+
 empty:
 	switch(data->query_type) {
 		case LASTFM_GET_SIMILAR:
@@ -334,7 +305,7 @@ empty:
 	}
 
 	if(songs_added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 
 	if (summary != NULL) {
 		set_status_message(summary, cwin);
@@ -389,7 +360,7 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
-	mobj = get_selected_musicobject(cwin);
+	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
 	data = do_lastfm_get_similar(mobj, cwin);
 
@@ -422,6 +393,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
 	gint try = 0, added = 0, prev_tracks = 0;
+	GList *list = NULL;
 
 	GFile *file;
 	gsize size;
@@ -446,7 +418,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 
 	set_watch_cursor (cwin->mainwindow);
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	xml = tinycxml_parse(contents);
 
@@ -456,11 +428,16 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 		xt = xmlnode_get(xi,CCA {"track","title",NULL},NULL,NULL);
 		xc = xmlnode_get(xi,CCA {"track","creator",NULL},NULL,NULL);
 
-		if (xt && xc && append_track_with_artist_and_title (xc->content, xt->content, cwin))
-			added++;
+		if (xt && xc)
+			list = prepend_song_with_artist_and_title_to_mobj_list(xc->content, xt->content, list, cwin);
 	}
-	if(added > 0)
-		select_numered_path_of_current_playlist(prev_tracks, cwin);
+
+	added = g_list_length(list);
+	if(added > 0) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 list);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+	}
 
 	remove_watch_cursor (cwin->mainwindow);
 
@@ -469,6 +446,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 	set_status_message(summary, cwin);
 
 	xmlnode_free(xml);
+	g_list_free(list);
 	g_free (contents);
 	g_free(summary);
 out:
@@ -515,7 +493,7 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
-						     cwin->cpref->lw.lastfm_user,
+						     cwin->cpref->lastfm_user,
 						     cpage,
 						     &results);
 
@@ -543,7 +521,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if ((cwin->clastfm->session_id == NULL) ||
-	    (strlen(cwin->cpref->lw.lastfm_user) == 0)) {
+	    (strlen(cwin->cpref->lastfm_user) == 0)) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -788,8 +766,8 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if((strlen(cwin->cpref->lw.lastfm_user) == 0) ||
-	   (strlen(cwin->cpref->lw.lastfm_pass) == 0))
+	if((strlen(cwin->cpref->lastfm_user) == 0) ||
+	   (strlen(cwin->cpref->lastfm_pass) == 0))
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -837,11 +815,11 @@ do_just_init_lastfm(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+		if((strlen(cwin->cpref->lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lw.lastfm_user,
-							      cwin->cpref->lw.lastfm_pass);
+							      cwin->cpref->lastfm_user,
+							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
@@ -861,7 +839,7 @@ do_just_init_lastfm(gpointer data)
 gint
 just_init_lastfm (struct con_win *cwin)
 {
-	if (cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 		g_idle_add (do_just_init_lastfm, cwin);
 	}
@@ -879,11 +857,11 @@ do_init_lastfm_idle(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lw.lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lw.lastfm_pass) != 0)) {
+		if((strlen(cwin->cpref->lastfm_user) != 0) &&
+		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lw.lastfm_user,
-							      cwin->cpref->lw.lastfm_pass);
+							      cwin->cpref->lastfm_user,
+							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK)
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
@@ -905,7 +883,7 @@ init_lastfm_idle(struct con_win *cwin)
 
 	/* Test internet and launch threads.*/
 
-	if (cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lastfm_support) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 #if GLIB_CHECK_VERSION(2,32,0)

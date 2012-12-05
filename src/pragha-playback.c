@@ -23,13 +23,14 @@ void
 pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
+
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 
 	if(state != ST_PLAYING)
 		return;
 
 	/* New song playback. */
-	if(cwin->cstate->update_playlist_action != PLAYLIST_NONE) {
+	if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
 		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", cwin->cstate->curr_mobj->file);
 
 		/* Update current song info */
@@ -45,7 +46,8 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 		/* Show osd, and inform new album art. */
 		show_osd(cwin);
 		mpris_update_metadata_changed(cwin);
-		cwin->cstate->update_playlist_action = PLAYLIST_NONE;
+
+		pragha_playlist_report_finished_action(cwin->cplaylist);
 	}
 }
 
@@ -63,7 +65,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
 	/* Get the next (prev) track to be played */
-	path = current_playlist_get_prev(cwin);
+	path = current_playlist_get_prev(cwin->cplaylist);
 
 	/* No more tracks */
 	if (!path)
@@ -73,10 +75,10 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	pragha_backend_stop(cwin->backend);
 
 	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_PREV;
-	update_current_playlist_state(path, cwin);
+	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
+	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	mobj = current_playlist_mobj_at_path(path, cwin);
+	mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 	pragha_backend_start(cwin->backend, mobj);
 
 	gtk_tree_path_free(path);
@@ -88,8 +90,6 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 {
 	struct musicobject *mobj = NULL;
 	GtkTreePath *path=NULL;
-	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
 
 	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
 
@@ -111,31 +111,27 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_STOPPED:
-		if(cwin->cstate->playlist_change)
+		if(pragha_playlist_is_changing(cwin->cplaylist))
 			break;
-		if(cwin->cstate->queue_track_refs)
-			path = get_next_queue_track(cwin);
+		if(pragha_playlist_has_queue(cwin->cplaylist))
+			path = get_next_queue_track(cwin->cplaylist);
 		if (!path)
-			path = current_playlist_get_selection(cwin);
+			path = current_playlist_get_selection(cwin->cplaylist);
 
 		if(!path) {
-			if(cwin->cpref->shuffle)
-				path = get_first_random_track(cwin);
+			if(pragha_playlist_is_shuffle(cwin->cplaylist))
+				path = get_first_random_track(cwin->cplaylist);
 			else
 				path = gtk_tree_path_new_first();
 		}
 
-		if (cwin->cpref->shuffle) {
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-			ref = gtk_tree_row_reference_new(model, path);
-			reset_rand_track_refs(ref, cwin);
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-		}
+		if (pragha_playlist_is_shuffle(cwin->cplaylist))
+			pragha_playlist_set_first_rand_ref(cwin->cplaylist, path);
 
-		cwin->cstate->update_playlist_action = PLAYLIST_CURR;
-		update_current_playlist_state(path, cwin);
+		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
+		pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-		mobj = current_playlist_mobj_at_path(path, cwin);
+		mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
 		pragha_backend_start(cwin->backend, mobj);
 		gtk_tree_path_free(path);
 		break;
@@ -165,21 +161,21 @@ void pragha_advance_playback (struct con_win *cwin)
 	/* Stop to set ready and clear all info */
 	pragha_backend_stop(cwin->backend);
 
-	if(cwin->cstate->playlist_change)
+	if(pragha_playlist_is_changing(cwin->cplaylist))
 		return;
 
 	/* Get the next track to be played */
-	path = current_playlist_get_next (cwin);
+	path = current_playlist_get_next (cwin->cplaylist);
 
 	/* No more tracks */
 	if (!path)
 		return;
 
 	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_NEXT;
-	update_current_playlist_state(path, cwin);
+	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_NEXT);
+	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	mobj = current_playlist_mobj_at_path (path, cwin);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 	pragha_backend_start (cwin->backend, mobj);
 
 	gtk_tree_path_free (path);

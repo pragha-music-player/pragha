@@ -251,8 +251,11 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 gchar *
 pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin)
 {
+	gboolean aproximate_search;
+	aproximate_search = pragha_preferences_get_approximate_search(cwin->preferences);
+
 	return g_strstr_lv(haystack, needle,
-			   cwin->cpref->aproximate_search ? 1 : 0);
+			   aproximate_search ? 1 : 0);
 }
 
 #if !GLIB_CHECK_VERSION(2,32,0)
@@ -308,56 +311,6 @@ nm_is_online ()
 }
 #endif
 
-/* Test if the song is already in the playlist.*/
-
-gboolean
-already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
-{
-	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter;
-	struct musicobject *omobj = NULL;
-	gboolean ret;
-
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
-
-	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
-	while (ret) {
-		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
-
-		if(0 == g_strcmp0(mobj->file, omobj->file))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
-	}
-
-	return FALSE;
-}
-
-gboolean
-already_has_title_of_artist_in_current_playlist(const gchar *title,
-						const gchar *artist,
-						struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-	gboolean ret;
-
-	model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
-	ret = gtk_tree_model_get_iter_first (model, &iter);
-	while (ret) {
-		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-		if((0 == g_ascii_strcasecmp(mobj->tags->title, title)) &&
-		   (0 == g_ascii_strcasecmp(mobj->tags->artist, artist)))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(model, &iter);
-	}
-
-	return FALSE;
-}
-
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 GList *
@@ -372,7 +325,8 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 	gint location_id = 0, i;
 	gchar *sartist, *stitle;
 
-	if(already_has_title_of_artist_in_current_playlist(title, artist, cwin))
+	if(pragha_mobj_list_already_has_title_of_artist(list, title, artist) ||
+	   pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
 		return list;
 
 	sartist = sanitize_string_sqlite3(artist);
@@ -401,76 +355,6 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 	return list;
 }
 
-gint
-append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin)
-{
-	gchar *query = NULL;
-	struct db_result result;
-	struct musicobject *mobj = NULL;
-	gint location_id = 0, i;
-	gchar *sartist, *stitle;
-
-	sartist = sanitize_string_sqlite3(artist);
-	stitle = sanitize_string_sqlite3(title);
-
-	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
-				"FROM TRACK, ARTIST, LOCATION "
-				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = '%s' COLLATE NOCASE "
-				"AND ARTIST.name = '%s' COLLATE NOCASE;",
-				stitle, sartist);
-
-	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
-		for_each_result_row(result, i) {
-			location_id = atoi(result.resultp[i+2]);
-
-			mobj = new_musicobject_from_db(location_id, cwin);
-
-			if(already_in_current_playlist(mobj, cwin) == FALSE) {
-				append_current_playlist(NULL, mobj, cwin);
-			}
-			else {
-				delete_musicobject(mobj);
-				location_id = 0;
-			}
-			break;
-		}
-		sqlite3_free_table(result.resultp);
-	}
-	g_free(sartist);
-	g_free(stitle);
-
-	return location_id;
-}
-
-/* Get the musicobject of seleceted track on current playlist */
-
-struct musicobject *
-get_selected_musicobject(struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GList *list;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list != NULL) {
-		path = list->data;
-		if (gtk_tree_model_get_iter(model, &iter, path)) {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (!mobj)
-				g_warning("Invalid mobj pointer");
-		}
-		gtk_tree_path_free(path);
-		g_list_free(list);
-	}
-	return mobj;
-}
-
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
@@ -493,7 +377,7 @@ gboolean restore_status_bar(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	return FALSE;
 }

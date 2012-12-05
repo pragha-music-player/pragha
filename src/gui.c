@@ -139,12 +139,6 @@ GtkActionEntry library_page_context_aentries[] = {
 	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
 };
 
-GtkTargetEntry tentries[] = {
-	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
-	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
-	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
-};
-
 /****************/
 /* Library tree */
 /****************/
@@ -225,6 +219,32 @@ int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 	return FALSE;
 }
 
+static const GtkTargetEntry lentries[] = {
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
+	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
+	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
+};
+
+static void init_library_dnd(struct con_win *cwin)
+{
+	/* Source: Library View */
+
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->library_tree),
+					       GDK_BUTTON1_MASK,
+					       lentries,
+					       G_N_ELEMENTS(lentries),
+					       GDK_ACTION_COPY);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
+			 "drag-begin",
+			 G_CALLBACK(dnd_library_tree_begin),
+			 cwin);
+	g_signal_connect(G_OBJECT(cwin->library_tree),
+			 "drag-data-get",
+			 G_CALLBACK(dnd_library_tree_get),
+			 cwin);
+}
+
 static GtkWidget* create_library_tree(struct con_win *cwin)
 {
 	GtkWidget *library_tree;
@@ -302,8 +322,12 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
 			 G_CALLBACK(library_tree_button_release_cb), cwin);
 
+	/* Save references and configure dnd */
+
 	cwin->library_store = store;
 	cwin->library_tree = library_tree;
+
+	init_library_dnd(cwin);
 
 	g_object_unref(library_filter_tree);
 	
@@ -554,56 +578,6 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 	return FALSE;
 }
 
-static void init_dnd(struct con_win *cwin)
-{
-	/* Source: Library View */
-
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->library_tree),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_library_tree_begin),
-			 cwin);
-	g_signal_connect(G_OBJECT(cwin->library_tree),
-			 "drag-data-get",
-			 G_CALLBACK(dnd_library_tree_get),
-			 cwin);
-
-	/* Source/Dest: Current Playlist */
-
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->current_playlist),
-					       GDK_BUTTON1_MASK,
-					       tentries,
-					       G_N_ELEMENTS(tentries),
-					       GDK_ACTION_COPY | GDK_ACTION_MOVE);
-
-	gtk_tree_view_enable_model_drag_dest(GTK_TREE_VIEW(cwin->current_playlist),
-					     tentries,
-					     G_N_ELEMENTS(tentries),
-					     GDK_ACTION_COPY | GDK_ACTION_MOVE);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->current_playlist)),
-			 "drag-begin",
-			 G_CALLBACK(dnd_current_playlist_begin),
-			 cwin);
-	g_signal_connect (G_OBJECT(cwin->current_playlist),
-			 "drag-data-get",
-			 G_CALLBACK (drag_current_playlist_get_data),
-			 cwin);
-	g_signal_connect(G_OBJECT(cwin->current_playlist),
-			 "drag-drop",
-			 G_CALLBACK(dnd_current_playlist_drop),
-			 cwin);
-	g_signal_connect(G_OBJECT(cwin->current_playlist),
-			 "drag-data-received",
-			 G_CALLBACK(dnd_current_playlist_received),
-			 cwin);
-}
-
 /********************************/
 /* Externally visible functions */
 /********************************/
@@ -612,7 +586,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
 	GtkWidget *browse_mode;
-	GtkWidget *current_playlist;
+	PraghaPlaylist *cplaylist;
 
 	/* A two paned container */
 
@@ -624,11 +598,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Right pane contains the current playlist */
 
-	current_playlist = create_current_playlist_view(cwin);
-
-	/* DnD */
-
-	init_dnd(cwin);
+	cplaylist = cplaylist_new(cwin);
 
 	/* Set initial sizes */
 
@@ -637,8 +607,11 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	/* Pack everything into the hpane */
 
 	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (hpane), current_playlist, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (hpane), pragha_playlist_get_widget(cplaylist), TRUE, FALSE);
 
+	/* Store references*/
+
+	cwin->cplaylist = cplaylist;
 	cwin->paned = hpane;
 
 	return hpane;
@@ -857,9 +830,6 @@ static void pixbufs_free (struct pixbuf *pixbuf)
 		g_object_unref(pixbuf->pixbuf_track);
 	if (pixbuf->pixbuf_genre)
 		g_object_unref(pixbuf->pixbuf_genre);
-
-	g_object_unref(pixbuf->pixbuf_playing);
-	g_object_unref(pixbuf->pixbuf_paused);
 
 	g_slice_free(struct pixbuf, pixbuf);
 }
