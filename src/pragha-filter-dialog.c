@@ -189,7 +189,7 @@ static void
 pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cplaylist)
 {
 	GtkTreeIter filter_iter;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gchar *ch_title = NULL, *ch_artist = NULL, *ch_album = NULL;
 	gchar *track_data_markup = NULL;
 	gint track_i = 0;
@@ -203,9 +203,9 @@ pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cpl
 		for (i=list; i != NULL; i = i->next) {
 			mobj = i->data;
 
-			ch_title = strlen(mobj->tags->title) ? g_strdup(mobj->tags->title) : get_display_filename (mobj->file, FALSE);
-			ch_artist = strlen(mobj->tags->artist) ? g_strdup(mobj->tags->artist) : g_strdup(_("Unknown Artist"));
-			ch_album = strlen(mobj->tags->album) ? g_strdup(mobj->tags->album) : g_strdup(_("Unknown Album"));
+			ch_title = strlen(pragha_musicobject_get_title(mobj)) ? g_strdup(pragha_musicobject_get_title(mobj)) : get_display_filename (pragha_musicobject_get_file(mobj), FALSE);
+			ch_artist = strlen(pragha_musicobject_get_artist(mobj)) ? g_strdup(pragha_musicobject_get_artist(mobj)) : g_strdup(_("Unknown Artist"));
+			ch_album = strlen(pragha_musicobject_get_album(mobj)) ? g_strdup(pragha_musicobject_get_album(mobj)) : g_strdup(_("Unknown Album"));
 
 			track_data_markup = g_markup_printf_escaped ("%s - %s - %s", ch_title, ch_artist, ch_album);
 

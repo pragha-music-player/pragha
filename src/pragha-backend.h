@@ -21,9 +21,10 @@
 
 G_BEGIN_DECLS
 
+#include "pragha-musicobject.h"
+
 //forward declarations
 struct con_win;
-struct musicobject;
 
 enum player_state {
 	ST_PLAYING = 1,
@@ -71,7 +72,7 @@ void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
 void pragha_backend_stop (PraghaBackend *backend);
-void pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj);
+void pragha_backend_start (PraghaBackend *backend, PraghaMusicobject *mobj);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
 gint backend_init(struct con_win *cwin);

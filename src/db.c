@@ -112,18 +112,18 @@ bad:
 
 static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase *cdbase)
 {
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	mobj = new_musicobject_from_file(file);
 	if (mobj) {
 		sfile = sanitize_string_sqlite3(file);
-		stitle = sanitize_string_sqlite3(mobj->tags->title);
-		sartist = sanitize_string_sqlite3(mobj->tags->artist);
-		salbum = sanitize_string_sqlite3(mobj->tags->album);
-		sgenre = sanitize_string_sqlite3(mobj->tags->genre);
-		scomment = sanitize_string_sqlite3(mobj->tags->comment);
+		stitle = sanitize_string_sqlite3(pragha_musicobject_get_title(mobj));
+		sartist = sanitize_string_sqlite3(pragha_musicobject_get_artist(mobj));
+		salbum = sanitize_string_sqlite3(pragha_musicobject_get_album(mobj));
+		sgenre = sanitize_string_sqlite3(pragha_musicobject_get_genre(mobj));
+		scomment = sanitize_string_sqlite3(pragha_musicobject_get_comment(mobj));
 
 		/* Write location */
 
@@ -147,8 +147,8 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 
 		/* Write year */
 
-		if ((year_id = find_year_db(mobj->tags->year, cdbase)) == 0)
-			year_id = add_new_year_db(mobj->tags->year, cdbase);
+		if ((year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase)) == 0)
+			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
 
 		/* Write comment */
 
@@ -163,12 +163,12 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 				 genre_id,
 				 year_id,
 				 comment_id,
-				 mobj->tags->track_no,
-				 mobj->tags->length,
-				 mobj->tags->channels,
-				 mobj->tags->bitrate,
-				 mobj->tags->samplerate,
-				 mobj->file_type,
+				 pragha_musicobject_get_track_no(mobj),
+				 pragha_musicobject_get_length(mobj),
+				 pragha_musicobject_get_channels(mobj),
+				 pragha_musicobject_get_bitrate(mobj),
+				 pragha_musicobject_get_samplerate(mobj),
+				 pragha_musicobject_get_file_type(mobj),
 				 stitle,
 				 cdbase);
 
@@ -179,7 +179,7 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 		g_free(sgenre);
 		g_free(scomment);
 
-		delete_musicobject(mobj);
+		g_object_unref(mobj);
 	}
 }
 
@@ -587,7 +587,7 @@ void update_track_db(gint location_id, gint changed,
 }
 
 void
-pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, struct tags *ntag)
+pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
 	gchar *stitle = NULL, *sartist = NULL, *scomment= NULL, *salbum = NULL, *sgenre = NULL;
 	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
@@ -602,33 +602,33 @@ pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_ar
 	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
 
 	if (changed & TAG_TITLE_CHANGED) {
-		stitle = sanitize_string_sqlite3(ntag->title);
+		stitle = sanitize_string_sqlite3(sanitize_string_sqlite3(pragha_musicobject_get_title(mobj)));
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
-		sartist = sanitize_string_sqlite3(ntag->artist);
+		sartist = sanitize_string_sqlite3(pragha_musicobject_get_artist(mobj));
 		artist_id = find_artist_db(sartist, cdbase);
 		if (!artist_id)
 			artist_id = add_new_artist_db(sartist, cdbase);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
-		salbum = sanitize_string_sqlite3(ntag->album);
+		salbum = sanitize_string_sqlite3(pragha_musicobject_get_album(mobj));
 		album_id = find_album_db(salbum, cdbase);
 		if (!album_id)
 			album_id = add_new_album_db(salbum, cdbase);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
-		sgenre = sanitize_string_sqlite3(ntag->genre);
+		sgenre = sanitize_string_sqlite3(pragha_musicobject_get_genre(mobj));
 		genre_id = find_genre_db(sgenre, cdbase);
 		if (!genre_id)
 			genre_id = add_new_genre_db(sgenre, cdbase);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		year_id = find_year_db(ntag->year, cdbase);
+		year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase);
 		if (!year_id)
-			year_id = add_new_year_db(ntag->year, cdbase);
+			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
-		scomment = sanitize_string_sqlite3(ntag->comment);
+		scomment = sanitize_string_sqlite3(pragha_musicobject_get_comment(mobj));
 		comment_id = find_comment_db(scomment, cdbase);
 		if (!comment_id)
 			comment_id = add_new_comment_db(scomment, cdbase);
@@ -641,7 +641,7 @@ pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_ar
 			elem = g_array_index(loc_arr, gint, i);
 			if (elem) {
 				update_track_db(elem, changed,
-						ntag->track_no, stitle,
+						pragha_musicobject_get_track_no(mobj), stitle,
 						artist_id,
 						album_id,
 						genre_id,

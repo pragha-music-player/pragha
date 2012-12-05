@@ -100,7 +100,7 @@ pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win
 {
 	GObject *source;
 
-	if(cwin->cstate->curr_mobj->file_type != FILE_CDDA)
+	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA)
 		return;
 
 	g_object_get (obj, "source", &source, NULL);
@@ -361,10 +361,7 @@ pragha_backend_stop (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
-	if (cwin->cstate->curr_mobj_clear) {
-		delete_musicobject(cwin->cstate->curr_mobj);
-		cwin->cstate->curr_mobj_clear = FALSE;
-	}
+	g_object_unref(cwin->cstate->curr_mobj);
 
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
 }
@@ -466,47 +463,47 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	struct tags ntag;
+	PraghaMusicobject *nmobj, *omobj;
 	gchar *str = NULL;
 
 	gint changed = 0;
 
-	if(cwin->cstate->curr_mobj->file_type != FILE_HTTP)
+	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)
 		return;
 
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
-	memset(&ntag, 0, sizeof(struct tags));
+	omobj = cwin->cstate->curr_mobj;
+	g_object_ref(omobj);
+
+	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
 	gst_message_parse_tag(message, &tag_list);
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
 		changed |= TAG_TITLE_CHANGED;
-		ntag.title = str;
+		pragha_musicobject_set_title(nmobj, str);
+		g_free(str);
 	}
 	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
 	{
 		changed |= TAG_ARTIST_CHANGED;
-		ntag.artist = str;
+		pragha_musicobject_set_title(nmobj, str);
+		g_free(str);
 	}
 
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
-
-	if(ntag.title)
-		g_free(ntag.title);
-	if(ntag.artist)
-		g_free(ntag.artist);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 	gst_tag_list_free(tag_list);
 }
 
 void
-pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj)
+pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
@@ -523,7 +520,7 @@ pragha_backend_start (PraghaBackend *backend, struct musicobject *mobj)
 	}
 
 	cwin->cstate->curr_mobj = mobj;
-	cwin->cstate->curr_mobj_clear = FALSE;
+	g_object_ref(cwin->cstate->curr_mobj);
 
 	pragha_backend_play(backend);
 }
@@ -535,17 +532,17 @@ pragha_backend_play (PraghaBackend *backend)
 	struct con_win *cwin = priv->cwin;
 	gchar *uri = NULL;
 
-	if (!cwin->cstate->curr_mobj->file)
+	if (!pragha_musicobject_get_file(cwin->cstate->curr_mobj))
 		return;
 
-	CDEBUG(DBG_BACKEND, "Playing: %s", cwin->cstate->curr_mobj->file);
+	CDEBUG(DBG_BACKEND, "Playing: %s", pragha_musicobject_get_file(cwin->cstate->curr_mobj));
 
-	if(cwin->cstate->curr_mobj->file_type == FILE_CDDA ||
-	   cwin->cstate->curr_mobj->file_type == FILE_HTTP) {
-		g_object_set(priv->pipeline, "uri", cwin->cstate->curr_mobj->file, NULL);
+	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_CDDA ||
+	   pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_HTTP) {
+		g_object_set(priv->pipeline, "uri", pragha_musicobject_get_file(cwin->cstate->curr_mobj), NULL);
 	}
 	else {
-		uri = g_filename_to_uri (cwin->cstate->curr_mobj->file, NULL, NULL);
+		uri = g_filename_to_uri (pragha_musicobject_get_file(cwin->cstate->curr_mobj), NULL, NULL);
 		g_object_set(priv->pipeline, "uri", uri, NULL);
 		g_free (uri);
 	}

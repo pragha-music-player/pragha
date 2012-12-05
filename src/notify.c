@@ -85,18 +85,18 @@ show_osd (struct con_win *cwin)
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, 4))
-		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
+	if(g_utf8_strlen(pragha_musicobject_get_title(cwin->cstate->curr_mobj), 4))
+		summary = g_strdup(pragha_musicobject_get_title(cwin->cstate->curr_mobj));
 	else
-		summary = g_path_get_basename(cwin->cstate->curr_mobj->file);
+		summary = g_path_get_basename(pragha_musicobject_get_file(cwin->cstate->curr_mobj));
 
-	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
+	length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj));
 
 	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
-			(cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
-			cwin->cstate->curr_mobj->tags->artist : _("Unknown Artist"),
-			(cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?
-			cwin->cstate->curr_mobj->tags->album : _("Unknown Album"),
+			(pragha_musicobject_get_artist(cwin->cstate->curr_mobj) && strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj))) ?
+			pragha_musicobject_get_artist(cwin->cstate->curr_mobj) : _("Unknown Artist"),
+			(pragha_musicobject_get_album(cwin->cstate->curr_mobj) && strlen(pragha_musicobject_get_album(cwin->cstate->curr_mobj))) ?
+			pragha_musicobject_get_album(cwin->cstate->curr_mobj) : _("Unknown Album"),
 			length);
 
 	/* Create notification instance */
