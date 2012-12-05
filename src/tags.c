@@ -707,7 +707,6 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
 
 	/* Fill in initial entries */
-
 	if (pragha_musicobject_get_title(omobj))
 		gtk_entry_set_text(GTK_ENTRY(entry_title), pragha_musicobject_get_title(omobj));
 	if (pragha_musicobject_get_artist(omobj))
@@ -1003,9 +1002,14 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	if(g_list_length(mlist) == g_list_length(rlist))
 		sel = g_list_length(mlist);
 
+	if(sel == 0)
+		return;
+
 	/* Setup initial entries */
 	if(sel == 1)
 		omobj = mlist->data;
+	else
+		omobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
 	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
@@ -1054,6 +1058,8 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 exit:
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
 	g_object_unref(nmobj);
+	if(sel > 1)
+		g_object_unref(omobj);
 	g_list_free (rlist);
 	g_list_free (mlist);
 }
