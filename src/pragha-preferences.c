@@ -610,8 +610,8 @@ pragha_preferences_init (PraghaPreferences *preferences)
          return;
       }
       CDEBUG(DBG_INFO, "Created .config/pragha folder");
-      g_free(pragha_config_dir);
    }
+   g_free(pragha_config_dir);
 
    /* Does /pragha/config exist ? */
 
