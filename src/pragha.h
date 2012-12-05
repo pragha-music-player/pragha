@@ -979,7 +979,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void track_properties(PraghaMusicobject *mobj, struct con_win *cwin);
-void pragha_playlist_remove_all (PraghaPlaylist *cplaylist, struct con_win *cwin);
+void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
 void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, PraghaMusicobject *mobj);
 void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
