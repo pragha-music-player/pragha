@@ -512,9 +512,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(object_class, PROP_INSTANT_SEARCH,
-                                    gParamSpecs[PROP_INSTANT_SEARCH]);
-
    /**
     * PraghaPreferences:approximate_searches:
     *
@@ -526,9 +523,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            FALSE,
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_property(object_class, PROP_APPROXIMATE_SEARCH,
-                                    gParamSpecs[PROP_APPROXIMATE_SEARCH]);
 
    /**
     * PraghaPreferences:shuffle:
@@ -542,9 +536,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(object_class, PROP_SHUFFLE,
-                                    gParamSpecs[PROP_SHUFFLE]);
-
    /**
     * PraghaPreferences:repeat:
     *
@@ -556,9 +547,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            FALSE,
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_property(object_class, PROP_REPEAT,
-                                    gParamSpecs[PROP_REPEAT]);
 
    /**
     * PraghaPreferences:use_hint:
@@ -572,8 +560,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(object_class, PROP_USE_HINT,
-                                    gParamSpecs[PROP_USE_HINT]);
    /**
     * PraghaPreferences:restore_playlist:
     *
@@ -586,8 +572,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
 
-    g_object_class_install_property(object_class, PROP_RESTORE_PLAYLIST,
-                                    gParamSpecs[PROP_RESTORE_PLAYLIST]);
+   g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }
 
 static void
