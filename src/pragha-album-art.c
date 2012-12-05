@@ -291,7 +291,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                           "Path",
                           "The album art path",
                           NULL,
-                          G_PARAM_READWRITE);
+                          G_PARAM_READWRITE |
+                          G_PARAM_STATIC_STRINGS);
    g_object_class_install_property(object_class, PROP_PATH,
                                    gParamSpecs[PROP_PATH]);
    /**
@@ -304,7 +305,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                         "The album art size",
                         36, 128,
                         48,
-                        G_PARAM_READWRITE);
+                        G_PARAM_READWRITE |
+                        G_PARAM_STATIC_STRINGS);
    /**
     * PraghaAlbumArt:visible:
     *
@@ -314,7 +316,8 @@ pragha_album_art_class_init (PraghaAlbumArtClass *klass)
                            "Visible",
                            "The album art visibility state",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
  
     g_object_class_install_property(object_class, PROP_VISIBLE,
                                    gParamSpecs[PROP_VISIBLE]);
