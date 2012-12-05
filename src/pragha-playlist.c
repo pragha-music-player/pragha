@@ -866,7 +866,26 @@ void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint pat
 /* Update the state on 'Next', 'Prev' or selecting a new track
    from current playlist */
 
-void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
+enum playlist_action
+pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->current_update_action;
+}
+
+void
+pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist)
+{
+	cplaylist->current_update_action = PLAYLIST_NONE;
+}
+
+void
+pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action)
+{
+	cplaylist->current_update_action = action;
+}
+
+void
+pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path)
 {
 	GtkTreeRowReference *rand_ref;
 	GtkTreeModel *model;
@@ -876,21 +895,21 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 	/* Append the new reference to the list of played track references
 	   to retrace the sequence */
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->cplaylist->view));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
-	if (!cwin->cplaylist->shuffle) {
-		gtk_tree_row_reference_free(cwin->cplaylist->curr_seq_ref);
-		cwin->cplaylist->curr_seq_ref = gtk_tree_row_reference_new(model, path);
+	if (!cplaylist->shuffle) {
+		gtk_tree_row_reference_free(cplaylist->curr_seq_ref);
+		cplaylist->curr_seq_ref = gtk_tree_row_reference_new(model, path);
 	}
 
-	if (cwin->cplaylist->shuffle) {
-		switch (cwin->cstate->update_playlist_action) {
+	if (cplaylist->shuffle) {
+		switch (cplaylist->current_update_action) {
 			/* If 'Prev', get the previous node from the track references */
 			case PLAYLIST_PREV:
-				if (cwin->cplaylist->curr_rand_ref) {
-					cwin->cplaylist->curr_rand_ref =
-						get_rand_ref_prev(cwin->cplaylist->curr_rand_ref,
-								  cwin->cplaylist);
+				if (cplaylist->curr_rand_ref) {
+					cplaylist->curr_rand_ref =
+						get_rand_ref_prev(cplaylist->curr_rand_ref,
+								  cplaylist);
 				}
 			break;
 
@@ -898,12 +917,12 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 			/* Do this only if the current track and the
 			   last node don't match */
 			case PLAYLIST_NEXT:
-				if (cwin->cplaylist->curr_rand_ref) {
-					if (cwin->cplaylist->curr_rand_ref !=
-					    (g_list_last(cwin->cplaylist->rand_track_refs)->data)) {
-						cwin->cplaylist->curr_rand_ref =
-							get_rand_ref_next(cwin->cplaylist->curr_rand_ref,
-									  cwin->cplaylist);
+				if (cplaylist->curr_rand_ref) {
+					if (cplaylist->curr_rand_ref !=
+					    (g_list_last(cplaylist->rand_track_refs)->data)) {
+						cplaylist->curr_rand_ref =
+							get_rand_ref_next(cplaylist->curr_rand_ref,
+									  cplaylist);
 						break;
 					}
 				}
@@ -911,10 +930,10 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 			/* Append a new ref of the track to the track references */
 			case PLAYLIST_CURR:
 				rand_ref = gtk_tree_row_reference_new(model, path);
-				cwin->cplaylist->rand_track_refs =
-					g_list_append(cwin->cplaylist->rand_track_refs,
+				cplaylist->rand_track_refs =
+					g_list_append(cplaylist->rand_track_refs,
 						      rand_ref);
-				cwin->cplaylist->curr_rand_ref = rand_ref;
+				cplaylist->curr_rand_ref = rand_ref;
 				break;
 			default:
 				break;
@@ -923,7 +942,7 @@ void update_current_playlist_state(GtkTreePath *path, struct con_win *cwin)
 
 	/* Mark the track as dirty */
 
-	current_playlist_set_dirty_track(cwin->cplaylist, path);
+	current_playlist_set_dirty_track(cplaylist, path);
 }
 
 void update_current_playlist_view_new_track(struct con_win *cwin)
@@ -2175,8 +2194,8 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	pragha_backend_stop(cwin->backend);
 
 	/* Start playing new track */
-	cwin->cstate->update_playlist_action = PLAYLIST_CURR;
-	update_current_playlist_state(path, cwin);
+	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
+	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	pragha_backend_start(cwin->backend, mobj);
 }
@@ -3678,7 +3697,7 @@ update_current_playlist_view_playback_state_cb (GObject *gobject, GParamSpec *ps
 {
 	struct con_win *cwin = user_data;
 
-	if (cwin->cstate->update_playlist_action == PLAYLIST_NONE)
+	if (cwin->cplaylist->current_update_action == PLAYLIST_NONE)
 		update_current_playlist_view_track(cwin);
 }
 
@@ -4243,6 +4262,7 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->dragging = FALSE;
 	cplaylist->rand_track_refs = NULL;
 	cplaylist->queue_track_refs = NULL;
+	cplaylist->current_update_action = PLAYLIST_NONE;
 
 	return cplaylist;
 }
