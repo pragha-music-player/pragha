@@ -509,7 +509,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "InstantSearch",
                            "Instant Search Preference",
                            TRUE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_INSTANT_SEARCH,
                                     gParamSpecs[PROP_INSTANT_SEARCH]);
@@ -523,7 +524,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "ApproximateSearches",
                            "Approximate Searches Preference",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_APPROXIMATE_SEARCH,
                                     gParamSpecs[PROP_APPROXIMATE_SEARCH]);
@@ -537,7 +539,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "Shuffle",
                            "Shuffle Preference",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_SHUFFLE,
                                     gParamSpecs[PROP_SHUFFLE]);
@@ -551,7 +554,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "Repeat",
                            "Repeat Preference",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_REPEAT,
                                     gParamSpecs[PROP_REPEAT]);
@@ -565,7 +569,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "UseHint",
                            "Use hint Preference",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_USE_HINT,
                                     gParamSpecs[PROP_USE_HINT]);
@@ -578,7 +583,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "RestorePlaylist",
                            "Restore Playlist Preference",
                            FALSE,
-                           G_PARAM_READWRITE);
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_property(object_class, PROP_RESTORE_PLAYLIST,
                                     gParamSpecs[PROP_RESTORE_PLAYLIST]);
