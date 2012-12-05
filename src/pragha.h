@@ -607,7 +607,6 @@ struct con_gnome_media_keys;
  * @view - The playlist tree view widget
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
- * @shuffle: If shuffle is activated.
  * @repeat: If repeat is activated.
  * @no_tracks: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
@@ -628,7 +627,6 @@ typedef struct {
 	GSList *column_widths;
 	gboolean changing;
 	gboolean dragging;
-	gboolean shuffle;
 	gboolean repeat;
 	gint no_tracks;
 	gint unplayed_tracks;
@@ -640,7 +638,7 @@ typedef struct {
 	GtkTreeRowReference *curr_seq_ref;
 	GdkPixbuf *paused_pixbuf;
 	GdkPixbuf *playing_pixbuf;
-
+	PraghaPreferences *preferences;
 } PraghaPlaylist;
 
 struct con_win {
@@ -1096,8 +1094,6 @@ gboolean
 pragha_playlist_is_changing(PraghaPlaylist* cplaylist);
 void
 pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);
-gboolean
-pragha_playlist_is_shuffle(PraghaPlaylist* cplaylist);
 void
 pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle);
 void
