@@ -500,6 +500,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 	gst_tag_list_free(tag_list);
+	g_object_unref(omobj);
 }
 
 void
