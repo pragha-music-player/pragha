@@ -992,7 +992,7 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 {
-	PraghaMusicobject *omobj, *nmobj;
+	PraghaMusicobject *omobj = NULL, *nmobj;
 	GList *rlist, *mlist;
 	gint sel = 0, changed = 0;
 
@@ -1004,10 +1004,8 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 		sel = g_list_length(mlist);
 
 	/* Setup initial entries */
-	if(sel == 1) {
+	if(sel == 1)
 		omobj = mlist->data;
-		g_object_ref(omobj);
-	}
 
 	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
@@ -1055,7 +1053,6 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 exit:
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-	g_object_unref(omobj);
 	g_object_unref(nmobj);
 	g_list_free (rlist);
 	g_list_free (mlist);
