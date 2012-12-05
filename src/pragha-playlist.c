@@ -4081,10 +4081,12 @@ pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing)
 	gtk_widget_set_sensitive(GTK_WIDGET(cplaylist->widget), !changing);
 }
 
-void
-pragha_playlist_set_shuffle(PraghaPlaylist* cplaylist, gboolean shuffle)
+static void
+shuffle_changed_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	GtkTreeRowReference *ref;
+	PraghaPlaylist *cplaylist = user_data;
+	gboolean shuffle = pragha_preferences_get_shuffle(cplaylist->preferences);
 
 	if(!cplaylist->no_tracks)
 		return;
@@ -4203,6 +4205,8 @@ cplatlist_init_pixbuf(PraghaPlaylist* cplaylist)
 void
 cplaylist_free(PraghaPlaylist* cplaylist)
 {
+	g_signal_handlers_disconnect_by_func(cplaylist->preferences, shuffle_changed_cb, cplaylist);
+
 	free_str_list(cplaylist->columns);
 	g_slist_free(cplaylist->column_widths);
 	g_rand_free(cplaylist->rand);
@@ -4251,6 +4255,8 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->rand_track_refs = NULL;
 	cplaylist->queue_track_refs = NULL;
 	cplaylist->current_update_action = PLAYLIST_NONE;
+
+	g_signal_connect(cplaylist->preferences, "notify::shuffle", G_CALLBACK (shuffle_changed_cb), cplaylist);
 
 	return cplaylist;
 }
