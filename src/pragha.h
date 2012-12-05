@@ -502,7 +502,6 @@ struct con_pref {
 	gint sidebar_size;
 	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
-	gchar *configrc_file;
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
 #endif
