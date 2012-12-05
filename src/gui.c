@@ -831,9 +831,6 @@ static void pixbufs_free (struct pixbuf *pixbuf)
 	if (pixbuf->pixbuf_genre)
 		g_object_unref(pixbuf->pixbuf_genre);
 
-	g_object_unref(pixbuf->pixbuf_playing);
-	g_object_unref(pixbuf->pixbuf_paused);
-
 	g_slice_free(struct pixbuf, pixbuf);
 }
 
