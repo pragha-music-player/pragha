@@ -572,7 +572,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	if(found_playlist) {
-		pragha_playlist_remove_all (cwin->cplaylist, cwin);
+		pragha_playlist_remove_all (cwin->cplaylist);
 
 		add_playlist_current_playlist(NULL, found_playlist, cwin);
 

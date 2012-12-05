@@ -1323,7 +1323,7 @@ int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_w
 /* Remove selected rows from current playlist */
 
 void
-pragha_playlist_remove_selection(PraghaPlaylist *cplaylist, struct con_win *cwin)
+pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1394,7 +1394,7 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist, struct con_win *cwin
 void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 {
 	set_watch_cursor (cwin->mainwindow);
-	pragha_playlist_remove_selection(cwin->cplaylist, cwin);
+	pragha_playlist_remove_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
 	update_status_bar_playtime(cwin);
@@ -1403,7 +1403,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 /* Crop selected rows from current playlist */
 
 void
-pragha_playlist_crop_selection(PraghaPlaylist *cplaylist, struct con_win *cwin)
+pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1470,7 +1470,7 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist, struct con_win *cwin)
 	pragha_playlist_set_changing(cplaylist, FALSE);
 	g_object_unref(model);
 
-	requeue_track_refs (cwin->cplaylist);
+	requeue_track_refs (cplaylist);
 	g_slist_free(to_delete);
 
 }
@@ -1478,7 +1478,7 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist, struct con_win *cwin)
 void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 {
 	set_watch_cursor (cwin->mainwindow);
-	pragha_playlist_crop_selection(cwin->cplaylist, cwin);
+	pragha_playlist_crop_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
 	update_status_bar_playtime(cwin);
@@ -1649,7 +1649,7 @@ void track_properties(PraghaMusicobject *mobj, struct con_win *cwin)
 }
 
 void
-pragha_playlist_remove_all (PraghaPlaylist *cplaylist, struct con_win *cwin)
+pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1680,7 +1680,7 @@ void
 current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 {
 	set_watch_cursor (cwin->mainwindow);
-	pragha_playlist_remove_all (cwin->cplaylist, cwin);
+	pragha_playlist_remove_all (cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
 	update_status_bar_playtime(cwin);
