@@ -335,14 +335,11 @@ gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_
 {
 	gboolean ret = FALSE;
 
-	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down){
-		GdkEvent *new_event;
-
-		new_event = gdk_event_copy ((GdkEvent *) event);
-		gtk_widget_grab_focus(cwin->current_playlist);
-		ret = gtk_widget_event (GTK_WIDGET (cwin->current_playlist), new_event);
-		gdk_event_free (new_event);
+	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
+	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
+		ret = pragha_playlist_propagate_event(cwin->cplaylist, event);
 	}
+
 	return ret;
 }
 
@@ -364,15 +361,20 @@ void
 shuffle_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_shuffle;
+	gboolean shuffle;
 
-	cwin->cpref->shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+	CDEBUG(DBG_INFO, "shuffle_button_handlet");
+
+	shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+
+	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
+	pragha_playlist_set_shuffle(cwin->cplaylist, shuffle);
 
 	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 
 	g_signal_handlers_block_by_func (action_shuffle, shuffle_action, cwin);
 
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), cwin->cpref->shuffle);
-		shuffle_button(cwin);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), shuffle);
 
 	g_signal_handlers_unblock_by_func (action_shuffle, shuffle_action, cwin);
 
@@ -383,44 +385,19 @@ void
 repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_repeat;
+	gboolean repeat;
+
 	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 
-	cwin->cpref->repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
+	repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
 
 	g_signal_handlers_block_by_func (action_repeat, repeat_action, cwin);
 
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), cwin->cpref->repeat);
+		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), repeat);
 
 	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
 
 	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
-}
-
-void shuffle_button (struct con_win *cwin)
-{
-	GtkTreeRowReference *ref;
-
-	if(cwin->cstate->tracks_curr_playlist){
-		current_playlist_clear_dirty_all(cwin);
-
-		if (!cwin->cpref->shuffle) {
-			CDEBUG(DBG_INFO, "Turning shuffle off");
-			cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist;
-			if (cwin->cstate->curr_rand_ref)
-				cwin->cstate->curr_seq_ref =
-					gtk_tree_row_reference_copy(cwin->cstate->curr_rand_ref);
-			else
-				cwin->cstate->curr_seq_ref = NULL;
-		}
-		else if (cwin->cpref->shuffle) {
-			CDEBUG(DBG_INFO, "Turning shuffle on");
-			if (cwin->cstate->curr_seq_ref) {
-				ref = gtk_tree_row_reference_copy(cwin->cstate->curr_seq_ref);
-				cwin->cstate->unplayed_tracks = cwin->cstate->tracks_curr_playlist - 1;
-				reset_rand_track_refs(ref, cwin);
-			}
-		}
-	}
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)

@@ -55,17 +55,17 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 	if (!num_tracks)
 		return;
 
-	prev_tracks = cwin->cstate->tracks_curr_playlist;
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		append_current_playlist(NULL, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, NULL, mobj);
 
 		if (pragha_process_gtk_events ())
 			return;
 	}
-	update_status_bar(cwin);
-	select_numered_path_of_current_playlist(prev_tracks, cwin);
+	update_status_bar_playtime(cwin);
+	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 }
 
 static cdrom_drive_t* find_audio_cd(struct con_win *cwin)

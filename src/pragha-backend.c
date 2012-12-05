@@ -466,11 +466,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	struct musicobject *mobj = NULL;
 	struct tags ntag;
-	GtkTreeModel *model;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
 	gchar *str = NULL;
 
 	gint changed = 0;
@@ -495,27 +491,16 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 		ntag.artist = str;
 	}
 
-	update_musicobject(cwin->cstate->curr_mobj, changed, &ntag);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
-	path = current_playlist_get_actual(cwin);
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	if(gtk_tree_model_get_iter(model, &iter, path))
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-	if (G_UNLIKELY(mobj == NULL))
-		g_warning("Invalid mobj pointer");
-	else
-		update_track_current_playlist(&iter, changed, mobj, cwin);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
 
 	if(ntag.title)
 		g_free(ntag.title);
 	if(ntag.artist)
 		g_free(ntag.artist);
-
-	gtk_tree_path_free(path);
 
 	gst_tag_list_free(tag_list);
 }
@@ -739,23 +724,17 @@ pragha_backend_init_equalizer_preset (struct con_win *cwin)
 {
 	PraghaBackendPrivate *priv = cwin->backend->priv;
 	gdouble *saved_bands;
-	GError *error = NULL;
 
 	if (priv->equalizer == NULL)
 		return;
 
-	saved_bands = g_key_file_get_double_list(cwin->cpref->configrc_keyfile,
-						 GROUP_AUDIO,
-						 KEY_EQ_10_BANDS,
-						 NULL,
-						 &error);
+	saved_bands = pragha_preferences_get_double_list(cwin->preferences,
+							 GROUP_AUDIO,
+							 KEY_EQ_10_BANDS);
+
 	if (saved_bands != NULL) {
 		pragha_backend_update_equalizer(cwin->backend, saved_bands);
 		g_free(saved_bands);
-	}
-	else {
-		g_error_free(error);
-		error = NULL;
 	}
 }
 

@@ -296,7 +296,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 void
 related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = get_selected_musicobject(cwin);
+	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = mobj->tags->artist;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
@@ -310,7 +310,7 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = get_selected_musicobject(cwin);
+	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = mobj->tags->artist;
 	const gchar *title = mobj->tags->title;
 
@@ -377,7 +377,7 @@ update_related_handler (gpointer data)
 	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
 
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support)
+	if (cwin->cpref->lastfm_support)
 		lastfm_now_playing_handler(cwin);
 #endif
 #ifdef HAVE_LIBGLYR
