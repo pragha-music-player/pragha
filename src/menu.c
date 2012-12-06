@@ -792,7 +792,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		g_object_ref(omobj);
 
 		nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
-		changed = tag_edit_dialog(omobj, 0, nmobj, pragha_musicobject_get_file(omobj), cwin);
+		changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 	}
 
 	if (!changed)
