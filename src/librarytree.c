@@ -1517,7 +1517,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	}
 
 	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
-	changed = tag_edit_dialog(omobj, 0, nmobj, pragha_musicobject_get_file(omobj), cwin);
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;

@@ -803,8 +803,7 @@ gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mo
 gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
 gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin);
 void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMusicobject *mobj);
-gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, gchar *file,
-		     struct con_win *cwin);
+gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changes, struct con_win *cwin);
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);

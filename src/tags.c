@@ -416,7 +416,7 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_widget_show (item);
 }
 
-gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, gchar *file, struct con_win *cwin)
+gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	GtkWidget *tag_table;
@@ -721,6 +721,13 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)pragha_musicobject_get_year(omobj));
 	if (pragha_musicobject_get_comment(omobj))
 		gtk_text_buffer_set_text (buffer, pragha_musicobject_get_comment(omobj), -1);
+	if (pragha_musicobject_get_file(omobj)) {
+		gtk_entry_set_text(GTK_ENTRY(entry_file), pragha_musicobject_get_file(omobj));
+		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(pragha_musicobject_get_file(omobj), -1));
+		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
+	}
+	else
+		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
 
 	if(prechanged & TAG_TNO_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_tno), TRUE);
@@ -737,17 +744,9 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	if(prechanged & TAG_COMMENT_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_comment), TRUE);
 
-	if (file) {
-		gtk_entry_set_text(GTK_ENTRY(entry_file), file);
-		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(file, -1));
-		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
-	}
-	else
-		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
-
 	directory_pressed_data_t directory_pressed_data;
 	directory_pressed_data.cwin = cwin;
-	directory_pressed_data.file = file;
+	directory_pressed_data.file = pragha_musicobject_get_file(omobj);
 
 	/* Connect to check the save changes when change the entry. */
 
@@ -1014,7 +1013,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
 	/* Get new tags edited */
-	changed = tag_edit_dialog(omobj, 0, nmobj, pragha_musicobject_get_file(omobj), cwin);
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
