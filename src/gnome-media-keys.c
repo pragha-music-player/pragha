@@ -48,7 +48,10 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
     else if (strcmp("Next", key) == 0)
         pragha_playback_next_track(cwin);
     else if (strcmp("Repeat", key) == 0)
-        repeat_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin);
+    {
+        gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
+        pragha_preferences_set_repeat(cwin->preferences, !repeat);
+    }
     else if (strcmp("Shuffle", key) == 0)
     {
         gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);

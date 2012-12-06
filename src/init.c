@@ -905,15 +905,6 @@ void init_tag_completion(struct con_win *cwin)
 	g_object_unref(genre_tag_model);
 }
 
-void init_toggle_buttons(struct con_win *cwin)
-{
-	gboolean repeat;
-
-	repeat = pragha_preferences_get_repeat(cwin->preferences);
-
-	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), repeat);
-}
-
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
@@ -1201,7 +1192,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	}
 
 	init_menu_actions(cwin);
-	init_toggle_buttons(cwin);
 	update_menu_playlist_changes(cwin);
 
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));

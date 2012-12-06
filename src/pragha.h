@@ -663,7 +663,6 @@ struct con_win {
 	GtkToolItem *stop_button;
 	GtkToolItem *next_button;
 	GtkToolItem *unfull_button;
-	GtkToolItem *repeat_button;
 	GtkWidget *vol_button;
 	GtkWidget *status_bar;
 	GtkWidget *search_entry;
@@ -750,7 +749,6 @@ void expand_all_action(GtkAction *action, struct con_win *cwin);
 void collapse_all_action(GtkAction *action, struct con_win *cwin);
 void search_library_action(GtkAction *action, struct con_win *cwin);
 void search_playlist_action(GtkAction *action, struct con_win *cwin);
-void repeat_action(GtkToggleAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
 void fullscreen_action (GtkAction *action, struct con_win *cwin);
 void library_pane_action (GtkAction *action, struct con_win *cwin);
@@ -786,7 +784,6 @@ gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *e
 void update_album_art(struct musicobject *mobj, struct con_win *cwin);
 gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
-void repeat_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
 void play_button_handler(GtkButton *button, struct con_win *cwin);
 void stop_button_handler(GtkButton *button, struct con_win *cwin);
 void prev_button_handler(GtkButton *button, struct con_win *cwin);

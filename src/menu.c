@@ -204,7 +204,7 @@ static GtkToggleActionEntry toggles_entries[] = {
 	 "<Control>U", "Shuffle Songs", NULL,
 	 FALSE},
 	{"Repeat", NULL, N_("_Repeat"),
-	 "<Control>R", "Repeat Songs", G_CALLBACK(repeat_action),
+	 "<Control>R", "Repeat Songs", NULL,
 	 FALSE},
 	{"Fullscreen", NULL, N_("_Fullscreen"),
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
@@ -881,25 +881,6 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 	pragha_filter_dialog (cwin);
 }
 
-/* Handler for 'Repeat' option in the Edit menu */
-
-void repeat_action(GtkToggleAction *action, struct con_win *cwin)
-{
-	gboolean repeat;
-
-	CDEBUG(DBG_INFO, "Repeat_action");
-
-	repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	pragha_preferences_set_repeat(cwin->preferences, repeat);
-
-	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
-
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), repeat);
-		
-	g_signal_handlers_unblock_by_func (cwin->repeat_button, repeat_button_handler, cwin);
-}
-
 /* Handler for the 'Preferences' item in the Edit menu */
 
 void pref_action(GtkAction *action, struct con_win *cwin)
@@ -1369,6 +1350,9 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
 	g_object_bind_property (cwin->preferences, "shuffle", action_shuffle, "active", binding_flags);
+
+	GtkAction *action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
+	g_object_bind_property (cwin->preferences, "repeat", action_repeat, "active", binding_flags);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
