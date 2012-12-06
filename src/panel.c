@@ -370,8 +370,6 @@ repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), repeat);
 
 	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
-
-	dbus_send_signal(DBUS_EVENT_UPDATE_STATE, cwin);
 }
 
 void play_button_handler(GtkButton *button, struct con_win *cwin)

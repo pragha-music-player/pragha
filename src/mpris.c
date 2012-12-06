@@ -1214,6 +1214,7 @@ gint mpris_init(struct con_win *cwin)
 				NULL);
 
 	g_signal_connect (cwin->preferences, "notify::shuffle", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (cwin->preferences, "notify::repeat", G_CALLBACK (any_notify_cb), cwin);
 	g_signal_connect (cwin->backend, "notify::volume", G_CALLBACK (any_notify_cb), cwin);
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (any_notify_cb), cwin);
 	g_signal_connect (cwin->backend, "seeked", G_CALLBACK (seeked_cb), cwin);
