@@ -355,29 +355,6 @@ unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
 
-/* Handler for the 'Shuffle' button item in Panel */
-
-void
-shuffle_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
-{
-	GtkAction *action_shuffle;
-	gboolean shuffle;
-
-	CDEBUG(DBG_INFO, "shuffle_button_handlet");
-
-	shuffle = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
-
-	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
-
-	action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
-
-	g_signal_handlers_block_by_func (action_shuffle, shuffle_action, cwin);
-
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_shuffle), shuffle);
-
-	g_signal_handlers_unblock_by_func (action_shuffle, shuffle_action, cwin);
-}
-
 void
 repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
@@ -512,6 +489,7 @@ create_toolbar(struct con_win *cwin)
 	GtkToolItem *unfull_button, *shuffle_button, *repeat_button;
 	GtkWidget *vol_button;
 	PraghaAlbumArt *albumart;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	toolbar = gtk_toolbar_new ();
 	gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
@@ -604,13 +582,11 @@ create_toolbar(struct con_win *cwin)
 
 	shuffle_button = gtk_toggle_tool_button_new();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(shuffle_button), "media-playlist-shuffle");
-	g_signal_connect(G_OBJECT(shuffle_button), "toggled",
-			 G_CALLBACK(shuffle_button_handler), cwin);
 	g_signal_connect(G_OBJECT (shuffle_button), "key-press-event",
 			 G_CALLBACK(panel_button_key_press), cwin);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(shuffle_button));
-	cwin->shuffle_button = shuffle_button;
+	g_object_bind_property (cwin->preferences, "shuffle", shuffle_button, "active", binding_flags);
 
 	repeat_button = gtk_toggle_tool_button_new ();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(repeat_button), "media-playlist-repeat");
