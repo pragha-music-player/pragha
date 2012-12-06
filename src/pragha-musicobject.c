@@ -464,6 +464,9 @@ pragha_musicobject_get_property (GObject *object,
 	case PROP_FILE:
 		g_value_set_string (value, pragha_musicobject_get_file(musicobject));
 		break;
+	case PROP_FILE_TYPE:
+		g_value_set_int(value, pragha_musicobject_get_file_type(musicobject));
+		break;
 	case PROP_TITLE:
 		g_value_set_string (value, pragha_musicobject_get_title(musicobject));
 		break;
@@ -484,6 +487,18 @@ pragha_musicobject_get_property (GObject *object,
 		break;
 	case PROP_TRACK_NO:
 		g_value_set_uint (value, pragha_musicobject_get_track_no(musicobject));
+		break;
+	case PROP_LENGTH:
+		g_value_set_int(value, pragha_musicobject_get_length(musicobject));
+		break;
+	case PROP_BITRATE:
+		g_value_set_int(value, pragha_musicobject_get_bitrate(musicobject));
+		break;
+	case PROP_CHANNELS:
+		g_value_set_int(value, pragha_musicobject_get_channels(musicobject));
+		break;
+	case PROP_SAMPLERATE:
+		g_value_set_int(value, pragha_musicobject_get_samplerate(musicobject));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
