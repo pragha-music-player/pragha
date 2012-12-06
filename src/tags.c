@@ -1017,9 +1017,9 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	if(sel == 1)
 		omobj = mlist->data;
 	else
-		omobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+		omobj = pragha_musicobject_new();
 
-	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+	nmobj = pragha_musicobject_new();
 
 	/* Get new tags edited */
 	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
