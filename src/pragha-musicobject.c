@@ -68,7 +68,7 @@ pragha_musicobject_new (void)
  * pragha_musicobject_get_file:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_file (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
@@ -126,7 +126,7 @@ pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
  * pragha_musicobject_get_title:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_title (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
@@ -155,7 +155,7 @@ pragha_musicobject_set_title (PraghaMusicobject *musicobject,
  * pragha_musicobject_get_artist:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_artist (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
@@ -184,7 +184,7 @@ pragha_musicobject_set_artist (PraghaMusicobject *musicobject,
  * pragha_musicobject_get_album:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_album (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
@@ -213,7 +213,7 @@ pragha_musicobject_set_album (PraghaMusicobject *musicobject,
  * pragha_musicobject_get_genre:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_genre (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
@@ -242,7 +242,7 @@ pragha_musicobject_set_genre (PraghaMusicobject *musicobject,
  * pragha_musicobject_get_comment:
  *
  */
-gchar *
+const gchar *
 pragha_musicobject_get_comment (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);

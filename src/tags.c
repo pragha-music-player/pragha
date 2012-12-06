@@ -20,7 +20,7 @@
 
 typedef struct directory_pressed_data {
 	struct con_win *cwin;
-	gchar *file;
+	const gchar *file;
 } directory_pressed_data_t;
 
 gboolean
@@ -167,7 +167,7 @@ gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
 	return ret;
 }
 
-gboolean confirm_title_multiple_tracks(gchar *title, struct con_win *cwin)
+gboolean confirm_title_multiple_tracks(const gchar *title, struct con_win *cwin)
 {
 	GtkWidget *dialog;
 	gint result;
@@ -756,7 +756,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 
 	directory_pressed_data_t directory_pressed_data;
 	directory_pressed_data.cwin = cwin;
-	directory_pressed_data.file = pragha_musicobject_get_file(omobj);
+	directory_pressed_data.file = ofile;
 
 	/* Connect to check the save changes when change the entry. */
 

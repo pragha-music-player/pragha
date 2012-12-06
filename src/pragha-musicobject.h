@@ -51,7 +51,7 @@ struct _PraghaMusicobjectClass
 PraghaMusicobject *pragha_music_object_new (void);
 GType pragha_musicobject_get_type (void) G_GNUC_CONST;
 
-gchar *
+const gchar *
 pragha_musicobject_get_file (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_file (PraghaMusicobject *musicobject,
@@ -63,31 +63,31 @@ void
 pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
                                   gint file_type);
 
-gchar *
+const gchar *
 pragha_musicobject_get_title (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_title (PraghaMusicobject *musicobject,
                               const gchar *title);
 
-gchar *
+const gchar *
 pragha_musicobject_get_artist (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_artist (PraghaMusicobject *musicobject,
                                const gchar *artist);
 
-gchar *
+const gchar *
 pragha_musicobject_get_album (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_album (PraghaMusicobject *musicobject,
                               const gchar *album);
 
-gchar *
+const gchar *
 pragha_musicobject_get_genre (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_genre (PraghaMusicobject *musicobject,
                               const gchar *genre);
 
-gchar *
+const gchar *
 pragha_musicobject_get_comment (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_comment (PraghaMusicobject *musicobject,

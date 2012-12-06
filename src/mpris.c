@@ -412,7 +412,7 @@ static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
 	return g_variant_new_object_path(o);
 }
 
-void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
+void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *val)
 {
 	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
@@ -422,36 +422,54 @@ void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
 
 static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 {
-	gchar *date = g_strdup_printf("%d", pragha_musicobject_get_year(mobj));
-
-	gchar *url = (pragha_musicobject_get_file_type(mobj) == FILE_HTTP || pragha_musicobject_get_file_type(mobj) == FILE_CDDA) ?
-			g_strdup(pragha_musicobject_get_file(mobj)) : g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL);
+	const gchar *title, *artist, *album, *genre, *comment, *file;
+	gint file_type, track_no, year, length, bitrate, channels, samplerate;
+	gchar *date = NULL, *url = NULL;
 
 	CDEBUG(DBG_MPRIS, "MPRIS handle get metadata");
+
+	file = pragha_musicobject_get_file(mobj);
+	file_type = pragha_musicobject_get_file_type(mobj);
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+	album = pragha_musicobject_get_album(mobj);
+	genre = pragha_musicobject_get_genre(mobj);
+	track_no = pragha_musicobject_get_track_no(mobj);
+	year = pragha_musicobject_get_year(mobj);
+	comment = pragha_musicobject_get_comment(mobj);
+	length = pragha_musicobject_get_length(mobj);
+	bitrate = pragha_musicobject_get_bitrate(mobj);
+	channels = pragha_musicobject_get_channels(mobj);
+	samplerate = pragha_musicobject_get_samplerate(mobj);
+
+	date = g_strdup_printf("%d", year);
+
+	url = (file_type == FILE_HTTP || file_type == FILE_CDDA) ?
+	       g_strdup(file) : g_filename_to_uri(file, NULL, NULL);
 
 	g_variant_builder_add (b, "{sv}", "mpris:trackid",
 		handle_get_trackid(mobj));
 	g_variant_builder_add (b, "{sv}", "xesam:url",
 		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
-		g_variant_new_string(pragha_musicobject_get_title(mobj)));
-	handle_strings_request(b, "xesam:artist", pragha_musicobject_get_artist(mobj));
+		g_variant_new_string(title));
+	handle_strings_request(b, "xesam:artist", artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
-		g_variant_new_string(pragha_musicobject_get_album(mobj)));
-	handle_strings_request(b, "xesam:genre", pragha_musicobject_get_genre(mobj));
+		g_variant_new_string(album));
+	handle_strings_request(b, "xesam:genre", genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
 		g_variant_new_string (date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
-		g_variant_new_int32(pragha_musicobject_get_track_no(mobj)));
-	handle_strings_request(b, "xesam:comment", pragha_musicobject_get_comment(mobj));
+		g_variant_new_int32(track_no));
+	handle_strings_request(b, "xesam:comment", comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
-		g_variant_new_int64((gint64)pragha_musicobject_get_length(mobj) * 1000000));
+		g_variant_new_int64((gint64)length * 1000000));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
-		g_variant_new_int32(pragha_musicobject_get_bitrate(mobj)));
+		g_variant_new_int32(bitrate));
 	g_variant_builder_add (b, "{sv}", "audio-channels",
-		g_variant_new_int32(pragha_musicobject_get_channels(mobj)));
+		g_variant_new_int32(channels));
 	g_variant_builder_add (b, "{sv}", "audio-samplerate",
-		g_variant_new_int32(pragha_musicobject_get_samplerate(mobj)));
+		g_variant_new_int32(samplerate));
 
 	g_free(date);
 	g_free(url);
@@ -977,7 +995,7 @@ void mpris_update_any(struct con_win *cwin)
 {
 	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
-	gchar *newtitle = NULL;
+	const gchar *newtitle = NULL;
 	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
 
 	if(NULL == cwin->cmpris2->dbus_connection)
