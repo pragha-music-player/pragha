@@ -355,23 +355,6 @@ unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
 
-void
-repeat_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
-{
-	GtkAction *action_repeat;
-	gboolean repeat;
-
-	action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
-
-	repeat = gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON(button));
-
-	g_signal_handlers_block_by_func (action_repeat, repeat_action, cwin);
-
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_repeat), repeat);
-
-	g_signal_handlers_unblock_by_func (action_repeat, repeat_action, cwin);
-}
-
 void play_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	pragha_playback_play_pause_resume(cwin);
@@ -588,13 +571,11 @@ create_toolbar(struct con_win *cwin)
 
 	repeat_button = gtk_toggle_tool_button_new ();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(repeat_button), "media-playlist-repeat");
-	g_signal_connect(G_OBJECT(repeat_button), "toggled",
-			 G_CALLBACK(repeat_button_handler), cwin);
 	g_signal_connect(G_OBJECT (repeat_button), "key-press-event",
 			 G_CALLBACK(panel_button_key_press), cwin);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
-	cwin->repeat_button = repeat_button;
+	g_object_bind_property (cwin->preferences, "repeat", repeat_button, "active", binding_flags);
 
 	vol_button = gtk_volume_button_new();
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);

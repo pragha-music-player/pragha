@@ -377,7 +377,7 @@ static void mpris_Player_put_LoopStatus (GVariant *value, GError **error, struct
 
 	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->repeat_button), repeat);
+	pragha_preferences_set_repeat(cwin->preferences, repeat);
 }
 
 static GVariant* mpris_Player_get_Rate (GError **error, struct con_win *cwin)
