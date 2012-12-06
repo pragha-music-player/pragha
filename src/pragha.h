@@ -764,7 +764,6 @@ void update_current_song_info(struct con_win *cwin);
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
 void unset_current_song_info(struct con_win *cwin);
-void __update_track_progress_bar(struct con_win *cwin, gint length);
 void unset_track_progress_bar(struct con_win *cwin);
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
 void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
