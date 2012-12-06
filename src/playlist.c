@@ -342,7 +342,8 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 			      struct con_win *cwin)
 {
 	GError *err = NULL;
-	gchar *query, *str, *title, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
+	gchar *query, *str, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
+	const gchar *title;
 	gint playlist_id, location_id, i = 0, ret = 0;
 	gsize bytes = 0;
 	struct db_result result;

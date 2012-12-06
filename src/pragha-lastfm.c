@@ -532,23 +532,41 @@ do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
+	PraghaMusicobject *mobj = NULL;
+	gchar *title = NULL, *artist = NULL, *album = NULL;
+	gint track_no, length;
 	AsycMessageData *msg_data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
+	mobj = cwin->cstate->curr_mobj;
+	g_object_ref(mobj);
+	g_object_get(mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             "album", &album,
+	             "track_no", &track_no,
+	             "length", &length,
+	             NULL);
+
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
-		pragha_musicobject_get_title(cwin->cstate->curr_mobj),
-		pragha_musicobject_get_album(cwin->cstate->curr_mobj),
-		pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
-		cwin->clastfm->playback_started,
-		pragha_musicobject_get_length(cwin->cstate->curr_mobj),
-		pragha_musicobject_get_track_no(cwin->cstate->curr_mobj),
-		0, NULL);
+	                            title,
+	                            album,
+	                            artist,
+	                            cwin->clastfm->playback_started,
+	                            length,
+	                            track_no,
+	                            0, NULL);
 
 	msg_data = async_finished_message_new((rv != LASTFM_STATUS_OK) ?
 					     _("Last.fm submission failed") :
 					     _("Track scrobbled on Last.fm"),
 					     cwin);
+
+	g_object_unref(mobj);
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 
 	return msg_data;
 }

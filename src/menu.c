@@ -780,7 +780,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
-	gchar *sfile = NULL;
+	gchar *sfile = NULL, *file;
 	gint location_id, changed = 0;
 	PraghaMusicobject *omobj, *nmobj;
 
@@ -823,7 +823,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		g_free(sfile);
 
 		file_arr = g_ptr_array_new();
-		g_ptr_array_add(file_arr, pragha_musicobject_get_file(omobj));
+		file = g_strdup(pragha_musicobject_get_file(omobj));
+		g_ptr_array_add(file_arr, file);
 		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 		g_ptr_array_free(file_arr, TRUE);
 	}
