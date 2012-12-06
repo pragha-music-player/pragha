@@ -791,7 +791,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		omobj = cwin->cstate->curr_mobj;
 		g_object_ref(omobj);
 
-		nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+		nmobj = pragha_musicobject_new();
 		changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 	}
 

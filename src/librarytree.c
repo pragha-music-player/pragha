@@ -1487,8 +1487,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			omobj = new_musicobject_from_db(location_id, cwin);
 		}
 		else {
-			omobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-			                      NULL);
+			omobj = pragha_musicobject_new();
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
 
 			switch(node_type) {
@@ -1516,7 +1515,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+	nmobj = pragha_musicobject_new();
 	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)

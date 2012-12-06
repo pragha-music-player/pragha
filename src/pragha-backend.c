@@ -476,7 +476,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	omobj = cwin->cstate->curr_mobj;
 	g_object_ref(omobj);
 
-	nmobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+	nmobj = pragha_musicobject_new();
 
 	gst_message_parse_tag(message, &tag_list);
 
