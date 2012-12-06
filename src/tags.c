@@ -429,10 +429,10 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	GtkTextIter start, end;
 	gpointer storage;
 
-	gint result, changed = 0;
-	gchar *uri = NULL;
+	const gchar *otitle, *oartist, *oalbum, *ogenre, *ocomment, *ofile = NULL;
+	gint otrack_no, oyear, result, changed = 0;
 
-	/*Create table*/
+	/* Create table */
 
 	tag_table = gtk_table_new(8, 2, FALSE);
 
@@ -707,23 +707,33 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
 
 	/* Fill in initial entries */
-	if (pragha_musicobject_get_title(omobj))
-		gtk_entry_set_text(GTK_ENTRY(entry_title), pragha_musicobject_get_title(omobj));
-	if (pragha_musicobject_get_artist(omobj))
-		gtk_entry_set_text(GTK_ENTRY(entry_artist), pragha_musicobject_get_artist(omobj));
-	if (pragha_musicobject_get_album(omobj))
-		gtk_entry_set_text(GTK_ENTRY(entry_album), pragha_musicobject_get_album(omobj));
-	if (pragha_musicobject_get_genre(omobj))
-		gtk_entry_set_text(GTK_ENTRY(entry_genre), pragha_musicobject_get_genre(omobj));
-	if (pragha_musicobject_get_track_no(omobj) > 0)
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), (int)pragha_musicobject_get_track_no(omobj));
-	if (pragha_musicobject_get_year(omobj) > 0)
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), (int)pragha_musicobject_get_year(omobj));
-	if (pragha_musicobject_get_comment(omobj))
-		gtk_text_buffer_set_text (buffer, pragha_musicobject_get_comment(omobj), -1);
-	if (pragha_musicobject_get_file(omobj)) {
-		gtk_entry_set_text(GTK_ENTRY(entry_file), pragha_musicobject_get_file(omobj));
-		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(pragha_musicobject_get_file(omobj), -1));
+
+	otitle = pragha_musicobject_get_title(omobj);
+	oartist = pragha_musicobject_get_artist(omobj);
+	oalbum = pragha_musicobject_get_album(omobj);
+	ogenre = pragha_musicobject_get_genre(omobj);
+	otrack_no = pragha_musicobject_get_track_no(omobj);
+	oyear = pragha_musicobject_get_year(omobj);
+	ocomment = pragha_musicobject_get_comment(omobj);
+	ofile = pragha_musicobject_get_file(omobj);
+
+	if (otitle)
+		gtk_entry_set_text(GTK_ENTRY(entry_title), otitle);
+	if (oartist)
+		gtk_entry_set_text(GTK_ENTRY(entry_artist), oartist);
+	if (oalbum)
+		gtk_entry_set_text(GTK_ENTRY(entry_album), oalbum);
+	if (ogenre)
+		gtk_entry_set_text(GTK_ENTRY(entry_genre), ogenre);
+	if (otrack_no > 0)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_tno), otrack_no);
+	if (oyear > 0)
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), oyear);
+	if (ocomment)
+		gtk_text_buffer_set_text (buffer, ocomment, -1);
+	if (ofile) {
+		gtk_entry_set_text(GTK_ENTRY(entry_file), ofile);
+		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(ofile, -1));
 		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
 	}
 	else
@@ -884,7 +894,6 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	}
 	gtk_widget_destroy(dialog);
 
-	g_free(uri);
 	g_object_unref(storage);
 
 	return changed;
