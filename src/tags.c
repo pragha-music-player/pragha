@@ -429,7 +429,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	GtkTextIter start, end;
 	gpointer storage;
 
-	const gchar *otitle, *oartist, *oalbum, *ogenre, *ocomment, *ofile = NULL;
+	const gchar *otitle, *oartist, *oalbum, *ogenre, *ocomment, *ofile;
 	gint otrack_no, oyear, result, changed = 0;
 
 	/* Create table */
