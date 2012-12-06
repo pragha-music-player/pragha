@@ -50,7 +50,10 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
     else if (strcmp("Repeat", key) == 0)
         repeat_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin);
     else if (strcmp("Shuffle", key) == 0)
-        shuffle_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin);
+    {
+        gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+        pragha_preferences_set_shuffle(cwin->preferences, !shuffle);
+    }
 
     //XXX missed buttons: "Rewind" and "FastForward"
 }

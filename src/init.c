@@ -907,12 +907,10 @@ void init_tag_completion(struct con_win *cwin)
 
 void init_toggle_buttons(struct con_win *cwin)
 {
-	gboolean shuffle, repeat;
+	gboolean repeat;
 
-	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
 	repeat = pragha_preferences_get_repeat(cwin->preferences);
 
-	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), shuffle);
 	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), repeat);
 }
 

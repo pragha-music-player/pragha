@@ -401,7 +401,7 @@ static GVariant* mpris_Player_get_Shuffle (GError **error, struct con_win *cwin)
 static void mpris_Player_put_Shuffle (GVariant *value, GError **error, struct con_win *cwin)
 {
 	gboolean shuffle = g_variant_get_boolean(value);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->shuffle_button), shuffle);
+	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
 }
 
 static GVariant * handle_get_trackid(struct musicobject *mobj) {

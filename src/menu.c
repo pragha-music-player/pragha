@@ -201,7 +201,7 @@ static GtkActionEntry main_aentries[] = {
 
 static GtkToggleActionEntry toggles_entries[] = {
 	{"Shuffle", NULL, N_("_Shuffle"),
-	 "<Control>U", "Shuffle Songs", G_CALLBACK(shuffle_action),
+	 "<Control>U", "Shuffle Songs", NULL,
 	 FALSE},
 	{"Repeat", NULL, N_("_Repeat"),
 	 "<Control>R", "Repeat Songs", G_CALLBACK(repeat_action),
@@ -881,25 +881,6 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 	pragha_filter_dialog (cwin);
 }
 
-/* Handler for 'Shuffle' option in the Edit menu */
-
-void shuffle_action(GtkToggleAction *action, struct con_win *cwin)
-{
-	gboolean shuffle;
-
-	CDEBUG(DBG_INFO, "shuffle_action");
-
-	shuffle = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
-	
-	g_signal_handlers_block_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
-
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), shuffle);
-
-	g_signal_handlers_unblock_by_func (cwin->shuffle_button, shuffle_button_handler, cwin);
-}
-
 /* Handler for 'Repeat' option in the Edit menu */
 
 void repeat_action(GtkToggleAction *action, struct con_win *cwin)
@@ -1361,6 +1342,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	GtkUIManager *main_menu = NULL;
 	GtkActionGroup *main_actions;
 	GError *error = NULL;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	main_actions = gtk_action_group_new("Main Actions");
 	main_menu = gtk_ui_manager_new();
@@ -1385,6 +1367,9 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	gtk_ui_manager_insert_action_group(main_menu, main_actions, 0);
 
 	cwin->bar_context_menu = main_menu;
+
+	GtkAction *action_shuffle = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Shuffle");
+	g_object_bind_property (cwin->preferences, "shuffle", action_shuffle, "active", binding_flags);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
