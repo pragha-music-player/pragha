@@ -79,25 +79,31 @@ void
 show_osd (struct con_win *cwin)
 {
 	GError *error = NULL;
-	gchar *summary, *body, *length;
+	gchar *summary, *body, *slength;
+	const gchar *file, *title, *artist, *album;
+	gint length;
 
 	/* Check if OSD is enabled in preferences */
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	if(g_utf8_strlen(pragha_musicobject_get_title(cwin->cstate->curr_mobj), 4))
-		summary = g_strdup(pragha_musicobject_get_title(cwin->cstate->curr_mobj));
-	else
-		summary = g_path_get_basename(pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
-	length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj));
+	if(g_utf8_strlen(title, 4))
+		summary = g_strdup(title);
+	else
+		summary = g_path_get_basename(file);
+
+	slength = convert_length_str(length);
 
 	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
-			(pragha_musicobject_get_artist(cwin->cstate->curr_mobj) && strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj))) ?
-			pragha_musicobject_get_artist(cwin->cstate->curr_mobj) : _("Unknown Artist"),
-			(pragha_musicobject_get_album(cwin->cstate->curr_mobj) && strlen(pragha_musicobject_get_album(cwin->cstate->curr_mobj))) ?
-			pragha_musicobject_get_album(cwin->cstate->curr_mobj) : _("Unknown Album"),
-			length);
+	                               (artist && strlen(artist)) ? artist : _("Unknown Artist"),
+	                               (album && strlen(album)) ? album : _("Unknown Album"),
+	                               slength);
 
 	/* Create notification instance */
 	#if NOTIFY_CHECK_VERSION (0, 7, 0)
@@ -151,7 +157,7 @@ show_osd (struct con_win *cwin)
 
 	g_free(summary);
 	g_free(body);
-	g_free(length);
+	g_free(slength);
 }
 
 gint
