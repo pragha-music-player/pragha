@@ -32,7 +32,8 @@ new_musicobject_from_file(const gchar *file)
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", file,
-	                     "file-type", type);
+	                     "file-type", type,
+	                     NULL);
 
 	if(pragha_musicobject_set_tags_from_file(mobj, file))
 		return mobj;
