@@ -1706,11 +1706,11 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 		g_free(ch_track_no);
 	}
 	if (changed & TAG_TITLE_CHANGED) {
-		if(pragha_musicobject_get_title(mobj) && strlen(pragha_musicobject_get_title(mobj)))
-			ch_title = g_strdup(pragha_musicobject_get_title(mobj));
+		const gchar *title = pragha_musicobject_get_title(mobj);
+		if(title && strlen(title))
+			ch_title = g_strdup(title);
 		else
 			ch_title = get_display_name(mobj);
-
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE, ch_title, -1);
 		g_free(ch_title);
 	}
@@ -1798,6 +1798,8 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 			GtkTreeIter *pos)
 {
 	GtkTreeIter iter;
+	const gchar *title, *artist, *album, *genre, *comment;
+	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	if(model == NULL)
@@ -1808,14 +1810,24 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 		return;
 	}
 
-	if(pragha_musicobject_get_track_no(mobj) > 0)
-		ch_track_no = g_strdup_printf("%d", pragha_musicobject_get_track_no(mobj));
-	if(pragha_musicobject_get_year(mobj) > 0)
-		ch_year = g_strdup_printf("%d", pragha_musicobject_get_year(mobj));
-	if(pragha_musicobject_get_length(mobj))
-		ch_length = convert_length_str(pragha_musicobject_get_length(mobj));
-	if(pragha_musicobject_get_bitrate(mobj))
-		ch_bitrate = g_strdup_printf("%d", pragha_musicobject_get_bitrate(mobj));
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+	album = pragha_musicobject_get_album(mobj);
+	genre = pragha_musicobject_get_genre(mobj);
+	track_no = pragha_musicobject_get_track_no(mobj);
+	year = pragha_musicobject_get_year(mobj);
+	comment = pragha_musicobject_get_comment(mobj);
+	length = pragha_musicobject_get_length(mobj);
+	bitrate = pragha_musicobject_get_bitrate(mobj);
+
+	if(track_no > 0)
+		ch_track_no = g_strdup_printf("%d", track_no);
+	if(year > 0)
+		ch_year = g_strdup_printf("%d", year);
+	if(length > 0)
+		ch_length = convert_length_str(length);
+	if(bitrate)
+		ch_bitrate = g_strdup_printf("%d", bitrate);
 
 	ch_filename = get_display_name(mobj);
 
@@ -1825,23 +1837,22 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 		gtk_list_store_insert_before(GTK_LIST_STORE(model), &iter, pos);
 
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-			   P_MOBJ_PTR, mobj,
-			   P_QUEUE, NULL,
-			   P_BUBBLE, FALSE,
-			   P_STATUS_PIXBUF, NULL,
-			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (pragha_musicobject_get_title(mobj) && strlen(pragha_musicobject_get_title(mobj))) ?
-					pragha_musicobject_get_title(mobj) : ch_filename,
-			   P_ARTIST, pragha_musicobject_get_artist(mobj),
-			   P_ALBUM, pragha_musicobject_get_album(mobj),
-			   P_GENRE, pragha_musicobject_get_genre(mobj),
-			   P_BITRATE, ch_bitrate,
-			   P_YEAR, ch_year,
-			   P_COMMENT, pragha_musicobject_get_comment(mobj),
-			   P_LENGTH, ch_length,
-			   P_FILENAME, ch_filename,
-			   P_PLAYED, FALSE,
-			   -1);
+	                   P_MOBJ_PTR, mobj,
+	                   P_QUEUE, NULL,
+	                   P_BUBBLE, FALSE,
+	                   P_STATUS_PIXBUF, NULL,
+	                   P_TRACK_NO, ch_track_no,
+	                   P_TITLE, (title && strlen(title)) ? title : ch_filename,
+	                   P_ARTIST, artist,
+	                   P_ALBUM, album,
+	                   P_GENRE, genre,
+	                   P_BITRATE, ch_bitrate,
+	                   P_YEAR, ch_year,
+	                   P_COMMENT, comment,
+	                   P_LENGTH, ch_length,
+	                   P_FILENAME, ch_filename,
+	                   P_PLAYED, FALSE,
+	                   -1);
 
 	/* Increment global count of tracks */
 
@@ -1869,6 +1880,8 @@ void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, Pra
 void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
+	const gchar *title, *artist, *album, *genre, *comment;
+	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 
 	if (model == NULL)
@@ -1879,38 +1892,45 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, 
 		return;
 	}
 
-	if(pragha_musicobject_get_track_no(mobj) > 0)
-		ch_track_no = g_strdup_printf("%d", pragha_musicobject_get_track_no(mobj));
-	if(pragha_musicobject_get_year(mobj) > 0)
-		ch_year = g_strdup_printf("%d", pragha_musicobject_get_year(mobj));
-	if(pragha_musicobject_get_length(mobj))
-		ch_length = convert_length_str(pragha_musicobject_get_length(mobj));
-	if(pragha_musicobject_get_bitrate(mobj))
-		ch_bitrate = g_strdup_printf("%d", pragha_musicobject_get_bitrate(mobj));
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+	album = pragha_musicobject_get_album(mobj);
+	genre = pragha_musicobject_get_genre(mobj);
+	track_no = pragha_musicobject_get_track_no(mobj);
+	year = pragha_musicobject_get_year(mobj);
+	comment = pragha_musicobject_get_comment(mobj);
+	length = pragha_musicobject_get_length(mobj);
+	bitrate = pragha_musicobject_get_bitrate(mobj);
+
+	if(track_no > 0)
+		ch_track_no = g_strdup_printf("%d", track_no);
+	if(year > 0)
+		ch_year = g_strdup_printf("%d", year);
+	if(length > 0)
+		ch_length = convert_length_str(length);
+	if(bitrate)
+		ch_bitrate = g_strdup_printf("%d", bitrate);
 
 	ch_filename = get_display_name(mobj);
 
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-			   P_MOBJ_PTR, mobj,
-			   P_QUEUE, NULL,
-			   P_BUBBLE, FALSE,
-			   P_STATUS_PIXBUF, NULL,
-			   P_TRACK_NO, ch_track_no,
-			   P_TITLE, (pragha_musicobject_get_title(mobj) &&
-			             strlen(pragha_musicobject_get_title(mobj))) ?
-	                             pragha_musicobject_get_title(mobj) :
-	                             ch_filename,
-			   P_ARTIST, pragha_musicobject_get_artist(mobj),
-			   P_ALBUM, pragha_musicobject_get_album(mobj),
-			   P_GENRE, pragha_musicobject_get_genre(mobj),
-			   P_BITRATE, ch_bitrate,
-			   P_YEAR, ch_year,
-			   P_COMMENT, pragha_musicobject_get_comment(mobj),
-			   P_LENGTH, ch_length,
-			   P_FILENAME, ch_filename,
-			   P_PLAYED, FALSE,
-			   -1);
+	                   P_MOBJ_PTR, mobj,
+	                   P_QUEUE, NULL,
+	                   P_BUBBLE, FALSE,
+	                   P_STATUS_PIXBUF, NULL,
+	                   P_TRACK_NO, ch_track_no,
+	                   P_TITLE, (title && strlen(title)) ? title : ch_filename,
+	                   P_ARTIST, artist,
+	                   P_ALBUM, album,
+	                   P_GENRE, genre,
+	                   P_BITRATE, ch_bitrate,
+	                   P_YEAR, ch_year,
+	                   P_COMMENT, comment,
+	                   P_LENGTH, ch_length,
+	                   P_FILENAME, ch_filename,
+	                   P_PLAYED, FALSE,
+	                   -1);
 
 	/* Increment global count of tracks */
 
