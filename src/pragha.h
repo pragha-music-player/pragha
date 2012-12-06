@@ -607,7 +607,6 @@ struct con_gnome_media_keys;
  * @view - The playlist tree view widget
  * @widget - The parent widget containing the view
  * @changing: If current platlist change is in progress
- * @repeat: If repeat is activated.
  * @no_tracks: Total no. of tracks in the current playlist
  * @unplayed_tracks: Total no. of tracks that haven't been played
  * @rand: To generate random numbers
@@ -627,7 +626,6 @@ typedef struct {
 	GSList *column_widths;
 	gboolean changing;
 	gboolean dragging;
-	gboolean repeat;
 	gint no_tracks;
 	gint unplayed_tracks;
 	GRand *rand;
@@ -1091,8 +1089,6 @@ gboolean
 pragha_playlist_is_changing(PraghaPlaylist* cplaylist);
 void
 pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);
-void
-current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat);
 GtkWidget *
 pragha_playlist_get_view(PraghaPlaylist* cplaylist);
 GtkWidget *

@@ -1080,6 +1080,7 @@ GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist)
 	GList *last;
 	GtkTreeIter iter;
 	gboolean rand_unplayed = FALSE, seq_last = FALSE;
+	gboolean repeat = pragha_preferences_get_repeat(cplaylist->preferences);
 
 	if(cplaylist->changing)
 		return NULL;
@@ -1109,10 +1110,10 @@ GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist)
 			if (!path) seq_last = TRUE;
 		}
 	}
-	if (rand_unplayed && cplaylist->repeat)
+	if (rand_unplayed && repeat)
 		path = get_next_random_track(cplaylist);
 
-	if (seq_last && cplaylist->repeat)
+	if (seq_last && repeat)
 		path = current_playlist_nth_track(0, cplaylist);
 
 	return path;
@@ -1124,6 +1125,7 @@ GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist)
 {
 	GtkTreePath *path = NULL;
 	gboolean seq_first = FALSE;
+	gboolean repeat = pragha_preferences_get_repeat(cplaylist->preferences);
 
 	if(cplaylist->changing)
 		return NULL;
@@ -1135,7 +1137,7 @@ GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist)
 		if (!path) seq_first = TRUE;
 	}
 
-	if (seq_first && cplaylist->repeat)
+	if (seq_first && repeat)
 		path = current_playlist_nth_track((cplaylist->no_tracks-1),
 						  cplaylist);
 
@@ -4107,12 +4109,6 @@ shuffle_changed_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 		else
 			cplaylist->curr_seq_ref = NULL;
 	}
-}
-
-void
-current_playlist_set_repeat(PraghaPlaylist* cplaylist, gboolean repeat)
-{
-	cplaylist->repeat = repeat;
 }
 
 GtkWidget *
