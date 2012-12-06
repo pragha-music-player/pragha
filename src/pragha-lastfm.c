@@ -596,32 +596,41 @@ gpointer
 do_lastfm_now_playing (gpointer data)
 {
 	gint rv;
-	gchar *file, *title, *album, *artist;
+	gchar *title = NULL, *artist = NULL, *album = NULL;
+	gint track_no, length;
 	LFMList *list = NULL;
 	AsycMessageData *msg_data = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
 
-	file = g_strdup(pragha_musicobject_get_file(cwin->cstate->curr_mobj));
-	title = g_strdup(pragha_musicobject_get_title(cwin->cstate->curr_mobj));
-	album = g_strdup(pragha_musicobject_get_album(cwin->cstate->curr_mobj));
-	artist = g_strdup(pragha_musicobject_get_artist(cwin->cstate->curr_mobj));
+	mobj = cwin->cstate->curr_mobj;
+	g_object_ref(mobj);
+	g_object_get(mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             "album", &album,
+	             "track_no", &track_no,
+	             "length", &length,
+	             NULL);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
-		title, album, artist,
-		pragha_musicobject_get_length(cwin->cstate->curr_mobj),
-		pragha_musicobject_get_track_no(cwin->cstate->curr_mobj),
-		0, &list);
-
+	                                      title,
+	                                      album,
+	                                      artist,
+	                                      length,
+	                                      track_no,
+	                                      0,
+	                                      &list);
 	if (rv != LASTFM_STATUS_OK) {
 		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
 	}
 
 	LASTFM_free_track_info_list(list);
 
-	g_free(file);
+	g_object_unref(mobj);
 	g_free(title);
 	g_free(artist);
 	g_free(album);
