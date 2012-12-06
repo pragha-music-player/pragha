@@ -892,7 +892,6 @@ void repeat_action(GtkToggleAction *action, struct con_win *cwin)
 	repeat = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
 	pragha_preferences_set_repeat(cwin->preferences, repeat);
-	current_playlist_set_repeat(cwin->cplaylist, repeat);
 
 	g_signal_handlers_block_by_func (cwin->repeat_button, repeat_button_handler, cwin);
 
