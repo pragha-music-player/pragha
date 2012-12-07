@@ -520,7 +520,6 @@ struct con_pref {
 	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
-	gboolean lateral_panel;
 	gboolean status_bar;
 	gboolean controls_below;
 	gboolean fuse_folders;
