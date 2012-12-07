@@ -1219,13 +1219,6 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SIDEBAR_SIZE,
 			       sidebar_size);
 
-	/* Save last sidebar pane state */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SIDEBAR,
-			       cwin->cpref->lateral_panel);
-
 	/* Save show album art option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
