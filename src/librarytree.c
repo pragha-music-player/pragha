@@ -129,7 +129,7 @@ add_child_node_file(GtkTreeModel *model,
 		gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
 		gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
 
-		if ((l_node_type != NODE_FOLDER) || (g_ascii_strcasecmp(data, node_data) >= 0)) {
+		if ((l_node_type == NODE_BASENAME) && (g_ascii_strcasecmp(data, node_data) >= 0)) {
 			g_free(data);
 			break;
 		}
