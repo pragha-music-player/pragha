@@ -122,7 +122,7 @@ static GtkActionEntry cp_null_context_aentries[] = {
 
 static GtkToggleActionEntry cp_null_toggles_entries[] = {
 	{"Lateral panel", NULL, N_("Lateral _panel"),
-	 "", "Lateral panel", G_CALLBACK(library_pane_action),
+	 "", "Lateral panel", NULL,
 	TRUE}
 };
 
@@ -3369,6 +3369,7 @@ create_cp_null_context_menu(GtkWidget *current_playlist,
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
 	GError *error = NULL;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	context_actions = gtk_action_group_new("CP Null Context Actions");
 	context_menu = gtk_ui_manager_new();
@@ -3390,6 +3391,9 @@ create_cp_null_context_menu(GtkWidget *current_playlist,
 					G_N_ELEMENTS(cp_null_toggles_entries),
 					cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/popup/Lateral panel");
+	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	return context_menu;
 }
