@@ -329,8 +329,8 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 	   pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
 		return list;
 
-	sartist = sanitize_string_sqlite3(artist);
-	stitle = sanitize_string_sqlite3(title);
+	sartist = sanitize_string_to_sqlite3(artist);
+	stitle = sanitize_string_to_sqlite3(title);
 
 	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
@@ -495,14 +495,14 @@ static gint no_single_quote(const gchar *str)
 
 /* Replace ' by '' */
 
-gchar* sanitize_string_sqlite3(const gchar *str)
+gchar* sanitize_string_to_sqlite3(const gchar *str)
 {
 	gint cn, i=0;
 	gchar *ch;
 	const gchar *tmp;
 
 	if (!str)
-		return NULL;
+		return g_strdup("");
 
 	cn = no_single_quote(str);
 	ch = g_malloc0(strlen(str) + cn + 1);
@@ -519,6 +519,31 @@ gchar* sanitize_string_sqlite3(const gchar *str)
 	}
 	return ch;
 }
+
+const gchar* sanitize_string_from_sqlite3(const gchar *str)
+{
+	if (str && g_utf8_strlen(str, 4))
+		return str;
+
+	return NULL;
+}
+
+const gchar* sanitize_string_from_musicobject(const gchar *str)
+{
+	if (!str)
+		return "";
+
+	return str;
+}
+
+const gchar* sanitize_string_to_musicobject(const gchar *str)
+{
+	if (str && g_utf8_strlen(str, 4))
+		return str;
+
+	return NULL;
+}
+
 
 static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
 {

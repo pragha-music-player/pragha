@@ -184,21 +184,21 @@ void __update_current_song_info(struct con_win *cwin)
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 
-	if(g_utf8_strlen(title, 4))
+	if(title)
 		str_title = g_strdup(title);
 	else
 		str_title = get_display_filename(file, FALSE);
 
-	if(g_utf8_strlen(artist, 4) && g_utf8_strlen(album, 4))
+	if(artist && album)
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"),
 		                               str_title,
 		                               artist,
 		                               album);
-	else if(g_utf8_strlen(artist, 4))
+	else if(artist)
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
 		                                str_title,
 		                                artist);
-	else if(g_utf8_strlen(album, 4))
+	else if(album)
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"),
 		                                str_title,
 		                                album);

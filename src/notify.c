@@ -93,7 +93,7 @@ show_osd (struct con_win *cwin)
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
-	if(g_utf8_strlen(title, 4))
+	if(title)
 		summary = g_strdup(title);
 	else
 		summary = g_path_get_basename(file);
@@ -101,8 +101,8 @@ show_osd (struct con_win *cwin)
 	slength = convert_length_str(length);
 
 	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
-	                               (artist && strlen(artist)) ? artist : _("Unknown Artist"),
-	                               (album && strlen(album)) ? album : _("Unknown Album"),
+	                               artist ? artist : _("Unknown Artist"),
+	                               album ? album : _("Unknown Album"),
 	                               slength);
 
 	/* Create notification instance */

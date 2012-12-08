@@ -210,9 +210,17 @@ static void add_folder_file(gchar *path, int location_id,
 
 /* Adds an entry to the library tree by tag (genre, artist...) */
 
-static void add_by_tag(gint location_id, gchar *location, gchar *genre,
-	gchar *album, gchar *year, gchar *artist, gchar *track, struct con_win *cwin,
-	GtkTreeModel *model, GtkTreeIter *p_iter)
+static void
+add_child_node_by_tags (GtkTreeModel *model,
+                       GtkTreeIter *p_iter,
+                       gint location_id,
+                       const gchar *location,
+                       const gchar *genre,
+                       const gchar *album,
+                       const gchar *year,
+                       const gchar *artist,
+                       const gchar *track,
+                       struct con_win *cwin)
 {
 	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL;
@@ -229,26 +237,26 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		switch (node_type) {
 			case NODE_TRACK:
 				node_pixbuf = cwin->pixbuf->pixbuf_track;
-				node_data = g_utf8_strlen(track, 4) ? track : get_display_filename(location, FALSE);
-				if (!g_utf8_strlen(track, 4)) need_gfree = TRUE;
+				node_data = track ? (gchar *)track : get_display_filename(location, FALSE);
+				if (!track) need_gfree = TRUE;
 				break;
 			case NODE_ARTIST:
 				node_pixbuf = cwin->pixbuf->pixbuf_artist;
-				node_data = g_utf8_strlen(artist, 4) ? artist : _("Unknown Artist");
+				node_data = artist ? (gchar *)artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
 				node_pixbuf = cwin->pixbuf->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
-					node_data = g_strconcat ((g_utf8_strlen(year, 4) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 4) ? album : _("Unknown Album"), NULL);
+					node_data = g_strconcat ((year && (atoi(year) > 0)) ? year : _("Unknown"), " - ", album ? album : _("Unknown Album"), NULL);
 					need_gfree = TRUE;
 				}
 				else {
-					node_data = g_utf8_strlen(album, 4) ? album : _("Unknown Album");
+					node_data = album ? (gchar *)album : _("Unknown Album");
 				}
 				break;
 			case NODE_GENRE:
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
-				node_data = g_utf8_strlen(genre, 4) ? genre : _("Unknown Genre");
+				node_data = genre ? (gchar *)genre : _("Unknown Genre");
 				break;
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
@@ -1764,9 +1772,16 @@ void init_library_view(struct con_win *cwin)
 			
 		exec_sqlite_query(query, cwin->cdbase, &result);
 		for_each_result_row(result, i) {
-			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
-				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
-				cwin, model, &iter);
+			add_child_node_by_tags(model,
+			                       &iter,
+			                       atoi(result.resultp[i+6]),
+			                       sanitize_string_from_sqlite3(result.resultp[i+5]),
+			                       sanitize_string_from_sqlite3(result.resultp[i+4]),
+			                       sanitize_string_from_sqlite3(result.resultp[i+3]),
+			                       sanitize_string_from_sqlite3(result.resultp[i+2]),
+			                       sanitize_string_from_sqlite3(result.resultp[i+1]),
+			                       sanitize_string_from_sqlite3(result.resultp[i]),
+			                       cwin);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)

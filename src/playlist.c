@@ -350,7 +350,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
@@ -362,7 +362,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 	base_m3u = get_display_filename(filename, TRUE);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		/* Form a musicobject since length and title are needed */
 
@@ -447,7 +447,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if(playlist_id == 0)
@@ -460,7 +460,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
 			mobj = new_musicobject_from_db(location_id, cwin);
@@ -498,7 +498,7 @@ add_playlist_to_mobj_list(gchar *playlist,
 	struct db_result result;
 	PraghaMusicobject *mobj;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if(playlist_id == 0)
@@ -509,7 +509,7 @@ add_playlist_to_mobj_list(gchar *playlist,
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
 			mobj = new_musicobject_from_db(location_id, cwin);
@@ -544,7 +544,7 @@ add_radio_to_mobj_list(gchar *radio,
 	struct db_result result;
 	PraghaMusicobject *mobj;
 
-	s_radio = sanitize_string_sqlite3(radio);
+	s_radio = sanitize_string_to_sqlite3(radio);
 	radio_id = find_radio_db(s_radio, cwin->cdbase);
 
 	if(radio_id == 0)
@@ -646,7 +646,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			s_playlist = sanitize_string_sqlite3(playlist);
+			s_playlist = sanitize_string_to_sqlite3(playlist);
 
 			n_playlist = rename_playlist_dialog(s_playlist, cwin);
 			if(n_playlist != NULL) {
@@ -729,7 +729,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
-					s_playlist = sanitize_string_sqlite3(playlist);
+					s_playlist = sanitize_string_to_sqlite3(playlist);
 
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db(s_playlist, cwin->cdbase);
@@ -1286,7 +1286,7 @@ append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
-		s_file = sanitize_string_sqlite3(file);
+		s_file = sanitize_string_to_sqlite3(file);
 		add_track_playlist_db(s_file, playlist_id, cwin->cdbase);
 		g_free(s_file);
 		g_free(file);
@@ -1350,7 +1350,7 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 
 	if ((playlist_id = find_playlist_db(s_playlist, cwin->cdbase))) {
 		if (overwrite_existing_playlist(playlist, cwin))
@@ -1376,7 +1376,7 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if (!playlist_id) {
@@ -1400,7 +1400,7 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 		return;
 	}
 
-	s_radio = sanitize_string_sqlite3(name);
+	s_radio = sanitize_string_to_sqlite3(name);
 
 	if ((radio_id = find_radio_db(s_radio, cwin->cdbase))) {
 		if (overwrite_existing_playlist(name, cwin))
@@ -1411,7 +1411,7 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 
 	radio_id = add_new_radio_db(s_radio, cwin->cdbase);
 
-	file = sanitize_string_sqlite3(uri);
+	file = sanitize_string_to_sqlite3(uri);
 	add_track_radio_db(file, radio_id, cwin->cdbase);
 	g_free(file);
 

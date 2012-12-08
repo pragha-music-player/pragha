@@ -231,12 +231,16 @@ do_lastfm_get_similar(PraghaMusicobject *mobj, struct con_win *cwin)
 	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
+	const gchar *title, *artist;
 
 	AddMusicObjectListData *data;
 
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+
 	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
-				      pragha_musicobject_get_title(mobj),
-				      pragha_musicobject_get_artist(mobj),
+				      sanitize_string_from_musicobject(title),
+				      sanitize_string_from_musicobject(artist),
 				      50, &results);
 
 	for(li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
@@ -550,9 +554,9 @@ do_lastfm_scrob (gpointer data)
 	             NULL);
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
-	                            title,
-	                            album,
-	                            artist,
+	                            (char*)sanitize_string_from_musicobject(title),
+	                            (char*)sanitize_string_from_musicobject(album),
+	                            (char*)sanitize_string_from_musicobject(artist),
 	                            cwin->clastfm->playback_started,
 	                            length,
 	                            track_no,
@@ -617,9 +621,9 @@ do_lastfm_now_playing (gpointer data)
 	             NULL);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
-	                                      title,
-	                                      album,
-	                                      artist,
+	                                      (char*)sanitize_string_from_musicobject(title),
+	                                      (char*)sanitize_string_from_musicobject(album),
+	                                      (char*)sanitize_string_from_musicobject(artist),
 	                                      length,
 	                                      track_no,
 	                                      0,
@@ -657,8 +661,8 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	if ((strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj)) == 0) ||
-	    (strlen(pragha_musicobject_get_title(cwin->cstate->curr_mobj)) == 0))
+	if (!pragha_musicobject_get_artist(cwin->cstate->curr_mobj) ||
+	    !pragha_musicobject_get_title(cwin->cstate->curr_mobj))
 		return;
 
 	if(pragha_musicobject_get_length(cwin->cstate->curr_mobj) < 30)
