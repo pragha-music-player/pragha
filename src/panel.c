@@ -134,10 +134,8 @@ void __update_progress_song_info(struct con_win *cwin, gint length)
 {
 	gchar *tot_length = NULL, *cur_pos = NULL, *str_length = NULL, *str_cur_pos = NULL;
 
-	if (!cwin->cstate->curr_mobj) {
-		g_critical("Curr mobj is invalid");
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
-	}
 
 	cur_pos = convert_length_str(length);
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
@@ -173,11 +171,6 @@ void __update_current_song_info(struct con_win *cwin)
 {
 	gchar *str = NULL, *str_title = NULL;
 	const gchar *file, *title, *artist, *album;
-
-	if (!cwin->cstate->curr_mobj) {
-		g_critical("Curr mobj is invalid");
-		return;
-	}
 
 	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
 	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
@@ -238,7 +231,8 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 					      fraction);
 	}
 	else {
-		pragha_musicobject_set_length(cwin->cstate->curr_mobj, GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend)));
+		pragha_musicobject_set_length(cwin->cstate->curr_mobj,
+			GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend)));
 	}
 }
 
@@ -259,6 +253,7 @@ void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con
 		cwin->cpref->timer_remaining_mode = FALSE;
 	else
 		cwin->cpref->timer_remaining_mode = TRUE;
+
 	if(pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		update_current_song_info(cwin);
 }
@@ -274,9 +269,6 @@ void track_progress_change_cb(GtkWidget *widget,
 		return;
 
 	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
-		return;
-
-	if (!cwin->cstate->curr_mobj)
 		return;
 
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
