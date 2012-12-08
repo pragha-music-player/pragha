@@ -260,7 +260,7 @@ static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if (!cwin->cstate->curr_mobj) {
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED) {
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "Nothing to seek");
 		return;
@@ -554,12 +554,12 @@ static GVariant* mpris_Player_get_CanGoPrevious (GError **error, struct con_win 
 
 static GVariant* mpris_Player_get_CanPlay (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(NULL != cwin->cstate->curr_mobj);
+	return g_variant_new_boolean(pragha_backend_get_state (cwin->backend) == ST_PAUSED);
 }
 
 static GVariant* mpris_Player_get_CanPause (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(NULL != cwin->cstate->curr_mobj);
+	return g_variant_new_boolean(pragha_backend_get_state (cwin->backend) == ST_PLAYING);
 }
 
 static GVariant* mpris_Player_get_CanSeek (GError **error, struct con_win *cwin)

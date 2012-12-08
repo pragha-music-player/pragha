@@ -261,12 +261,14 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-
-	CDEBUG(DBG_INFO, "Get Artist info Action");
+	const gchar *artist;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
+
+	CDEBUG(DBG_INFO, "Get Artist info Action");
+
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 
 	if (!artist)
 		return;
@@ -276,13 +278,15 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	const gchar *title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-
-	CDEBUG(DBG_INFO, "Get lyrics Action");
+	const gchar *artist, *title;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
+
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
 
 	if (!artist || !title)
 		return;

@@ -787,13 +787,15 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if (cwin->cstate->curr_mobj) {
-		omobj = cwin->cstate->curr_mobj;
-		g_object_ref(omobj);
+	/* Set the initial tags. */
+	omobj = cwin->cstate->curr_mobj;
+	g_object_ref(omobj);
 
-		nmobj = pragha_musicobject_new();
-		changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
-	}
+	/*New mobj where to place the new tag */
+	nmobj = pragha_musicobject_new();
+
+	/* Get new tags. */
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
