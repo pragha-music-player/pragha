@@ -812,7 +812,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (G_LIKELY(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA &&
 	    pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		sfile = sanitize_string_sqlite3(pragha_musicobject_get_file(omobj));
+		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(omobj));
 		location_id = find_location_db(sfile, cwin->cdbase);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);

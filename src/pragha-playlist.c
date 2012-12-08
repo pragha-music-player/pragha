@@ -1707,7 +1707,7 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		const gchar *title = pragha_musicobject_get_title(mobj);
-		if(title && strlen(title))
+		if(title)
 			ch_title = g_strdup(title);
 		else
 			ch_title = get_display_name(mobj);
@@ -1842,7 +1842,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	                   P_BUBBLE, FALSE,
 	                   P_STATUS_PIXBUF, NULL,
 	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, (title && strlen(title)) ? title : ch_filename,
+	                   P_TITLE, title ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
 	                   P_GENRE, genre,
@@ -1920,7 +1920,7 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, 
 	                   P_BUBBLE, FALSE,
 	                   P_STATUS_PIXBUF, NULL,
 	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, (title && strlen(title)) ? title : ch_filename,
+	                   P_TITLE, title ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
 	                   P_GENRE, genre,
@@ -2257,25 +2257,25 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 		case 2: {
 			change = TAG_TITLE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected titles"),
-						pragha_musicobject_get_title(mobj));
+						sanitize_string_from_musicobject(pragha_musicobject_get_title(mobj)));
 			break;
 			}
 		case 3: {
 			change = TAG_ARTIST_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected artists"),
-						pragha_musicobject_get_artist(mobj));
+						sanitize_string_from_musicobject(pragha_musicobject_get_artist(mobj)));
 			break;
 			}
 		case 4: {
 			change = TAG_ALBUM_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
-						pragha_musicobject_get_album(mobj));
+						sanitize_string_from_musicobject(pragha_musicobject_get_album(mobj)));
 			break;
 		}
 		case 5: {
 			change = TAG_GENRE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected genres"),
-						pragha_musicobject_get_genre(mobj));
+						sanitize_string_from_musicobject(pragha_musicobject_get_genre(mobj)));
 			break;
 		}
 		case 7: {
@@ -2287,7 +2287,7 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 		case 8: {
 			change = TAG_COMMENT_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected comments"),
-						pragha_musicobject_get_comment(mobj));
+						sanitize_string_from_musicobject(pragha_musicobject_get_comment(mobj)));
 			break;
 		}
 		default: {
@@ -3082,14 +3082,14 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
-	s_playlist = sanitize_string_sqlite3(SAVE_PLAYLIST_STATE);
+	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:") == FALSE) {
 			if ((location_id = find_location_db(file, cwin->cdbase)))

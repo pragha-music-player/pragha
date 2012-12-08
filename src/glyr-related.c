@@ -268,7 +268,7 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if (strlen(artist) == 0)
+	if (!artist)
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -284,8 +284,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if ((strlen(artist) == 0) ||
-	    (strlen(title) == 0))
+	if (!artist || !title)
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -301,7 +300,7 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
 
-	if (strlen(artist) == 0)
+	if (!artist)
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -316,8 +315,7 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 
 	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
 
-	if ((strlen(artist) == 0) ||
-	    (strlen(title) == 0))
+	if (!artist || !title)
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -335,12 +333,11 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if ((strlen(pragha_musicobject_get_artist(cwin->cstate->curr_mobj)) == 0) ||
-	    (strlen(pragha_musicobject_get_album(cwin->cstate->curr_mobj)) == 0))
-		return;
-
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+
+	if (!artist || !album)
+		return;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
