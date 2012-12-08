@@ -1050,6 +1050,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1177,6 +1178,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_widget_hide(cwin->ntag_lastfm_button);
 		#endif
 	}
+
+	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->browse_mode, "visible", binding_flags);
 
 	init_menu_actions(cwin);
 	update_menu_playlist_changes(cwin);
