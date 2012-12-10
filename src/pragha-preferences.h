@@ -142,6 +142,13 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_restore_playlist (PraghaPreferences *preferences);
 
+gboolean
+pragha_preferences_get_lateral_panel (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
+                                      gboolean lateral_panel);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

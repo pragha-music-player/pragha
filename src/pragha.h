@@ -520,7 +520,6 @@ struct con_pref {
 	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
-	gboolean lateral_panel;
 	gboolean status_bar;
 	gboolean controls_below;
 	gboolean fuse_folders;
@@ -751,7 +750,6 @@ void search_library_action(GtkAction *action, struct con_win *cwin);
 void search_playlist_action(GtkAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
 void fullscreen_action (GtkAction *action, struct con_win *cwin);
-void library_pane_action (GtkAction *action, struct con_win *cwin);
 void playlists_pane_action (GtkAction *action, struct con_win *cwin);
 void status_bar_action (GtkAction *action, struct con_win *cwin);
 void show_controls_below_action (GtkAction *action, struct con_win *cwin);

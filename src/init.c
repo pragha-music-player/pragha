@@ -155,7 +155,7 @@ gint init_config(struct con_win *cwin)
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -165,7 +165,7 @@ gint init_config(struct con_win *cwin)
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -263,17 +263,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			sidebar_size_f = TRUE;
-		}
-
-		cwin->cpref->lateral_panel =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_SIDEBAR,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			lateral_panel_f = TRUE;
 		}
 
 		/* Retrieve Audio preferences */
@@ -738,8 +727,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
-	if (all_f || lateral_panel_f)
-		cwin->cpref->lateral_panel = TRUE;
 	if (all_f || libs_f)
 		cwin->cpref->library_dir = NULL;
 	if (all_f || lib_add_f)
@@ -926,7 +913,7 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->lateral_panel);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_lateral_panel(cwin->preferences));
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
@@ -1063,6 +1050,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1190,6 +1178,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_widget_hide(cwin->ntag_lastfm_button);
 		#endif
 	}
+
+	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->browse_mode, "visible", binding_flags);
 
 	init_menu_actions(cwin);
 	update_menu_playlist_changes(cwin);
