@@ -287,14 +287,15 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 /* Append to the given array the path of
    all the nodes under the given path */
 
-static void get_path_array(GtkTreePath *path,
-				  GArray *ref_arr,
-				  GtkTreeModel *model,
-				  struct con_win *cwin)
+static void
+get_path_array(GtkTreePath *path,
+               GArray *ref_arr,
+               GtkTreeModel *model,
+               struct con_win *cwin)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
-	GtkTreePath *cpath;
+	GtkTreePath *cpath, *t_path;
 	gboolean valid;
 
 	cwin->cstate->view_change = TRUE;
@@ -314,18 +315,18 @@ static void get_path_array(GtkTreePath *path,
 	/* For all other node types do a recursive add */
 	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
 	while (valid) {
-		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
+		t_path = gtk_tree_model_get_path(model, &t_iter);
 
-		path = gtk_tree_model_get_path(model, &t_iter);
+		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-			cpath = gtk_tree_path_copy(path);
+			cpath = gtk_tree_path_copy(t_path);
 			ref_arr = g_array_prepend_val(ref_arr, cpath);
 		}
 		else {
-			get_path_array(path, ref_arr, model, cwin);
+			get_path_array(t_path, ref_arr, model, cwin);
 		}
-		gtk_tree_path_free(path);
+		gtk_tree_path_free(t_path);
 
 		valid = gtk_tree_model_iter_next(model, &t_iter);
 	}
