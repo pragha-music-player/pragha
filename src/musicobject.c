@@ -187,6 +187,8 @@ new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_wi
 	                     "title", name,
 	                     NULL);
 
+	g_free(file);
+
 	return mobj;
 }
 
