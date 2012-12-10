@@ -210,7 +210,7 @@ static GtkToggleActionEntry toggles_entries[] = {
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
 	{"Lateral panel", NULL, N_("Lateral _panel"),
-	 "F9", "Lateral panel", G_CALLBACK(library_pane_action),
+	 "F9", "Lateral panel", NULL,
 	TRUE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
@@ -915,30 +915,6 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 	}
 }
 
-/* Handler for the 'Library panel' item in the Edit menu and emply pĺaylist menu */
-
-void
-library_pane_action (GtkAction *action, struct con_win *cwin)
-{
-	GtkAction *maction, *paction;
-
-	cwin->cpref->lateral_panel = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	gtk_widget_set_visible (GTK_WIDGET(cwin->browse_mode), cwin->cpref->lateral_panel);
-
-	paction = gtk_ui_manager_get_action(cwin->cplaylist->cp_null_context_menu, "/popup/Lateral panel");
-
-	g_signal_handlers_block_by_func (paction, library_pane_action, cwin);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(paction), cwin->cpref->lateral_panel);
-	g_signal_handlers_unblock_by_func (paction, library_pane_action, cwin);
-
-	maction = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
-
-	g_signal_handlers_block_by_func (maction, library_pane_action, cwin);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(maction), cwin->cpref->lateral_panel);
-	g_signal_handlers_unblock_by_func (maction, library_pane_action, cwin);
-}
-
 /* Handler for the 'Status bar' item in the Edit menu */
 
 void
@@ -1353,6 +1329,9 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	GtkAction *action_repeat = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
 	g_object_bind_property (cwin->preferences, "repeat", action_repeat, "active", binding_flags);
+
+	GtkAction *action_lateral = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
+	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
