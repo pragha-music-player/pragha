@@ -417,7 +417,7 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 		case NODE_BASENAME:
 			mobj = new_musicobject_from_db(location_id, cwin);
 			if(G_LIKELY(mobj))
-				list = g_list_prepend(list, mobj);
+				list = g_list_append(list, mobj);
 			break;
 		case NODE_PLAYLIST:
 			list = add_playlist_to_mobj_list(data, list, FALSE, cwin);
