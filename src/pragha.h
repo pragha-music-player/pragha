@@ -949,8 +949,8 @@ void db_free(struct con_dbase *cdbase);
 
 gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice);
 void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
-GList *add_playlist_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
-GList *add_radio_to_mobj_list(gchar *playlist, GList *list, gboolean prepend, struct con_win *cwin);
+GList *add_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
+GList *add_radio_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (gint choice, struct con_win *cwin);

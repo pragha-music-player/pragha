@@ -2693,12 +2693,12 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 					break;
 				case NODE_PLAYLIST:
 					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
-					list = add_playlist_to_mobj_list(name, list, FALSE, cwin);
+					list = add_playlist_to_mobj_list(name, list, cwin);
 					g_free(name);
 					break;
 				case NODE_RADIO:
 					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
-					list = add_radio_to_mobj_list(name, list, TRUE, cwin);
+					list = add_radio_to_mobj_list(name, list, cwin);
 					g_free(name);
 					break;
 				default:
