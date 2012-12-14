@@ -1288,6 +1288,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 		update_status_bar_playtime(cwin);
 		
 		g_list_free(list);
+		g_list_free(mlist);
 	}
 }
 
@@ -1340,6 +1341,7 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 		update_status_bar_playtime(cwin);
 
 		g_list_free(list);
+		g_list_free(mlist);
 	}
 }
 
