@@ -494,7 +494,6 @@ struct con_pref {
 	gchar *album_art_pattern;
 	gchar *start_mode;
 	gchar *audio_device;
-	gchar *audio_cd_device;
 	gint window_width;
 	gint window_height;
 	gint window_x;

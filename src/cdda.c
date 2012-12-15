@@ -72,8 +72,9 @@ static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
-	if (!cwin->cpref->audio_cd_device) {
+	if (!audio_cd_device) {
 		cdda_devices = cdio_get_devices_with_cap(NULL, CDIO_FS_AUDIO,
 							 FALSE);
 		if (!cdda_devices || (cdda_devices && !*cdda_devices)) {
@@ -90,9 +91,9 @@ static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
 		}
 	} else {
 		CDEBUG(DBG_INFO, "Trying Audio CD Device: %s",
-		       cwin->cpref->audio_cd_device);
+		       audio_cd_device);
 
-		drive = cdio_cddap_identify(cwin->cpref->audio_cd_device,
+		drive = cdio_cddap_identify(audio_cd_device,
 					    0, NULL);
 		if (!drive) {
 			g_warning("Unable to identify Audio CD");

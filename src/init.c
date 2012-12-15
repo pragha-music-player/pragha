@@ -289,16 +289,6 @@ gint init_config(struct con_win *cwin)
 			audio_device_f = TRUE;
 		}
 
-		cwin->cpref->audio_cd_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_cd_device) {
-			g_error_free(error);
-			error = NULL;
-		}
-
 		cwin->cpref->software_mixer =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_AUDIO,

@@ -142,6 +142,13 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_restore_playlist (PraghaPreferences *preferences);
 
+const gchar *
+pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_audio_cd_device (PraghaPreferences *preferences,
+                                        const gchar *audio_cd_device);
+
 gboolean
 pragha_preferences_get_lateral_panel (PraghaPreferences *preferences);
 
