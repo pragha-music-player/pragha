@@ -81,8 +81,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w));
 		if (audio_cd_device) {
-			g_free(cwin->cpref->audio_cd_device);
-			cwin->cpref->audio_cd_device = g_strdup(audio_cd_device);
+			pragha_preferences_set_audio_cd_device(cwin->preferences, audio_cd_device);
 		}
 
 		cwin->cpref->software_mixer =
@@ -562,6 +561,7 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
 	/* Audio Options */
 
@@ -605,9 +605,9 @@ static void update_preferences(struct con_win *cwin)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_device_w),
 				   cwin->cpref->audio_device);
 
-	if (cwin->cpref->audio_cd_device)
+	if (audio_cd_device)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
-				   cwin->cpref->audio_cd_device);
+				   audio_cd_device);
 
 	if (cwin->cpref->software_mixer)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
@@ -1115,29 +1115,6 @@ void save_preferences(struct con_win *cwin)
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
 				       pragha_backend_get_volume (cwin->backend));
-	}
-
-	/* Save audio CD Device */
-
-	if (!cwin->cpref->audio_cd_device ||
-	    (cwin->cpref->audio_cd_device &&
-	     !strlen(cwin->cpref->audio_cd_device))) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_AUDIO) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_AUDIO_CD_DEVICE,
-				       &error))
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-	}
-	else if (cwin->cpref->audio_cd_device) {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_AUDIO,
-				      KEY_AUDIO_CD_DEVICE,
-				      cwin->cpref->audio_cd_device);
 	}
 
 	/* Window Option */
@@ -1826,7 +1803,6 @@ void preferences_free (struct con_pref *cpref)
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->audio_sink);
 	g_free(cpref->audio_device);
-	g_free(cpref->audio_cd_device);
 	g_free(cpref->start_mode);
 	free_str_list(cpref->library_dir);
 	free_str_list(cpref->lib_add);

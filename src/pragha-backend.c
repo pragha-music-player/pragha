@@ -106,8 +106,9 @@ pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win
 	g_object_get (obj, "source", &source, NULL);
 
 	if (source) {
-		if (G_LIKELY(cwin->cpref->audio_cd_device)) {
-			g_object_set (source,  "device", cwin->cpref->audio_cd_device, NULL);
+		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
+		if (audio_cd_device) {
+			g_object_set (source,  "device", audio_cd_device, NULL);
 		}
 		g_object_unref (source);
 	}
