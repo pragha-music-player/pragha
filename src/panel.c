@@ -177,21 +177,21 @@ void __update_current_song_info(struct con_win *cwin)
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 
-	if(title)
+	if(string_is_not_empty(title))
 		str_title = g_strdup(title);
 	else
 		str_title = get_display_filename(file, FALSE);
 
-	if(artist && album)
+	if(string_is_not_empty(artist) && string_is_not_empty(album))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s <small><span weight=\"light\">in</span></small> %s"),
 		                               str_title,
 		                               artist,
 		                               album);
-	else if(artist)
+	else if(string_is_not_empty(artist))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"),
 		                                str_title,
 		                                artist);
-	else if(album)
+	else if(string_is_not_empty(album))
 		str = g_markup_printf_escaped (_("%s <small><span weight=\"light\">in</span></small> %s"),
 		                                str_title,
 		                                album);

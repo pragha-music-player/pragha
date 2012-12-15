@@ -237,26 +237,34 @@ add_child_node_by_tags (GtkTreeModel *model,
 		switch (node_type) {
 			case NODE_TRACK:
 				node_pixbuf = cwin->pixbuf->pixbuf_track;
-				node_data = track ? (gchar *)track : get_display_filename(location, FALSE);
-				if (!track) need_gfree = TRUE;
+				if (string_is_not_empty(track)) {
+					node_data = (gchar *)track;
+				}
+				else {
+					node_data = get_display_filename(location, FALSE);
+					need_gfree = TRUE;
+				}
 				break;
 			case NODE_ARTIST:
 				node_pixbuf = cwin->pixbuf->pixbuf_artist;
-				node_data = artist ? (gchar *)artist : _("Unknown Artist");
+				node_data = string_is_not_empty(artist) ? (gchar *)artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
 				node_pixbuf = cwin->pixbuf->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
-					node_data = g_strconcat ((year && (atoi(year) > 0)) ? year : _("Unknown"), " - ", album ? album : _("Unknown Album"), NULL);
+					node_data = g_strconcat ((string_is_not_empty(year) && (atoi(year) > 0)) ? year : _("Unknown"),
+					                          " - ",
+					                          string_is_not_empty(album) ? album : _("Unknown Album"),
+					                          NULL);
 					need_gfree = TRUE;
 				}
 				else {
-					node_data = album ? (gchar *)album : _("Unknown Album");
+					node_data = string_is_not_empty(album) ? (gchar *)album : _("Unknown Album");
 				}
 				break;
 			case NODE_GENRE:
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
-				node_data = genre ? (gchar *)genre : _("Unknown Genre");
+				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
@@ -1775,12 +1783,12 @@ void init_library_view(struct con_win *cwin)
 			add_child_node_by_tags(model,
 			                       &iter,
 			                       atoi(result.resultp[i+6]),
-			                       sanitize_string_from_sqlite3(result.resultp[i+5]),
-			                       sanitize_string_from_sqlite3(result.resultp[i+4]),
-			                       sanitize_string_from_sqlite3(result.resultp[i+3]),
-			                       sanitize_string_from_sqlite3(result.resultp[i+2]),
-			                       sanitize_string_from_sqlite3(result.resultp[i+1]),
-			                       sanitize_string_from_sqlite3(result.resultp[i]),
+			                       result.resultp[i+5],
+			                       result.resultp[i+4],
+			                       result.resultp[i+3],
+			                       result.resultp[i+2],
+			                       result.resultp[i+1],
+			                       result.resultp[i],
 			                       cwin);
 
 			/* Have to give control to GTK periodically ... */

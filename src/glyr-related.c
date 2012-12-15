@@ -270,7 +270,7 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 
-	if (!artist)
+	if (string_is_empty(artist))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -288,7 +288,7 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
 
-	if (!artist || !title)
+	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -304,7 +304,7 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
 
-	if (!artist)
+	if (string_is_empty(artist))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -319,7 +319,7 @@ related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwi
 
 	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
 
-	if (!artist || !title)
+	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -340,7 +340,7 @@ related_get_album_art_handler (struct con_win *cwin)
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 
-	if (!artist || !album)
+	if (string_is_empty(artist) || string_is_empty(album))
 		return;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",

@@ -53,11 +53,11 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	}
 
 	g_object_set (mobj,
-	              "title", sanitize_string_to_musicobject(taglib_tag_title(tag)),
-	              "artist", sanitize_string_to_musicobject(taglib_tag_artist(tag)),
-	              "album", sanitize_string_to_musicobject(taglib_tag_album(tag)),
-	              "genre", sanitize_string_to_musicobject(taglib_tag_genre(tag)),
-	              "comment", sanitize_string_to_musicobject(taglib_tag_comment(tag)),
+	              "title", taglib_tag_title(tag),
+	              "artist", taglib_tag_artist(tag),
+	              "album", taglib_tag_album(tag),
+	              "genre", taglib_tag_genre(tag),
+	              "comment", taglib_tag_comment(tag),
 	              "year", taglib_tag_year(tag),
 	              "track_no", taglib_tag_track(tag),
 	              "length", taglib_audioproperties_length(audio_prop),
@@ -100,21 +100,21 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 		taglib_tag_set_track(tag, pragha_musicobject_get_track_no(mobj));
 	if (changed & TAG_TITLE_CHANGED)
 		taglib_tag_set_title(tag,
-			sanitize_string_from_musicobject(pragha_musicobject_get_title(mobj)));
+			pragha_musicobject_get_title(mobj));
 	if (changed & TAG_ARTIST_CHANGED)
 		taglib_tag_set_artist(tag,
-			sanitize_string_from_musicobject(pragha_musicobject_get_artist(mobj)));
+			pragha_musicobject_get_artist(mobj));
 	if (changed & TAG_ALBUM_CHANGED)
 		taglib_tag_set_album(tag,
-			sanitize_string_from_musicobject(pragha_musicobject_get_album(mobj)));
+			pragha_musicobject_get_album(mobj));
 	if (changed & TAG_GENRE_CHANGED)
 		taglib_tag_set_genre(tag,
-			sanitize_string_from_musicobject(pragha_musicobject_get_genre(mobj)));
+			pragha_musicobject_get_genre(mobj));
 	if (changed & TAG_YEAR_CHANGED)
 		taglib_tag_set_year(tag, pragha_musicobject_get_year(mobj));
 	if (changed & TAG_COMMENT_CHANGED)
 		taglib_tag_set_comment(tag,
-			sanitize_string_from_musicobject(pragha_musicobject_get_comment(mobj)));
+			pragha_musicobject_get_comment(mobj));
 
 	CDEBUG(DBG_VERBOSE, "Saving tags for file: %s", file);
 
@@ -865,33 +865,34 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_title))) {
 			pragha_musicobject_set_title(nmobj,
-				sanitize_string_to_musicobject(gtk_entry_get_text(GTK_ENTRY(entry_title))));
+				gtk_entry_get_text(GTK_ENTRY(entry_title)));
 			changed |= TAG_TITLE_CHANGED;
 		}
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_artist))) {
 			pragha_musicobject_set_artist(nmobj,
-				sanitize_string_to_musicobject(gtk_entry_get_text(GTK_ENTRY(entry_artist))));
+				gtk_entry_get_text(GTK_ENTRY(entry_artist)));
 			changed |= TAG_ARTIST_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_album))) {
 			pragha_musicobject_set_album(nmobj,
-				sanitize_string_to_musicobject(gtk_entry_get_text(GTK_ENTRY(entry_album))));
+				gtk_entry_get_text(GTK_ENTRY(entry_album)));
 			changed |= TAG_ALBUM_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_genre))) {
 			pragha_musicobject_set_genre(nmobj,
-				sanitize_string_to_musicobject(gtk_entry_get_text(GTK_ENTRY(entry_genre))));
+				gtk_entry_get_text(GTK_ENTRY(entry_genre)));
 			changed |= TAG_GENRE_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_year))) {
-			pragha_musicobject_set_year(nmobj, gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year)));
+			pragha_musicobject_set_year(nmobj,
+				gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(entry_year)));
 			changed |= TAG_YEAR_CHANGED;
 		}
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_comment))) {
 			gtk_text_buffer_get_start_iter (buffer, &start);
 			gtk_text_buffer_get_end_iter (buffer, &end);
 			pragha_musicobject_set_comment(nmobj,
-				sanitize_string_to_musicobject((gtk_text_buffer_get_text (buffer, &start, &end, FALSE))));
+				gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
 			changed |= TAG_COMMENT_CHANGED;
 		}
 		break;

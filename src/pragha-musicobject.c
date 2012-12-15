@@ -577,7 +577,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("file",
 		                    "File",
 		                    "The File",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
@@ -601,7 +601,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("title",
 		                    "Title",
 		                    "The Title",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
@@ -612,7 +612,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("artist",
 		                    "Artist",
 		                    "The Artist",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
@@ -623,7 +623,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("album",
 		                    "Album",
 		                    "The Album",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
@@ -634,7 +634,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("genre",
 		                    "Genre",
 		                    "The Genre",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
@@ -645,7 +645,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_string("comment",
 		                    "Comment",
 		                    "The Comment",
-		                    NULL,
+		                    "",
 		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
