@@ -1707,10 +1707,7 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		const gchar *title = pragha_musicobject_get_title(mobj);
-		if(title)
-			ch_title = g_strdup(title);
-		else
-			ch_title = get_display_name(mobj);
+		ch_title = string_is_not_empty(title) ? g_strdup(title) : get_display_name(mobj);
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE, ch_title, -1);
 		g_free(ch_title);
 	}
@@ -1842,7 +1839,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	                   P_BUBBLE, FALSE,
 	                   P_STATUS_PIXBUF, NULL,
 	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, title ? title : ch_filename,
+	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
 	                   P_GENRE, genre,
@@ -1920,7 +1917,7 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, 
 	                   P_BUBBLE, FALSE,
 	                   P_STATUS_PIXBUF, NULL,
 	                   P_TRACK_NO, ch_track_no,
-	                   P_TITLE, title ? title : ch_filename,
+	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
 	                   P_GENRE, genre,
@@ -2251,43 +2248,43 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 		case 1: {
 			change = TAG_TNO_CHANGED;
 			label = g_strdup_printf(_("Copy \"%i\" to selected track numbers"),
-						pragha_musicobject_get_track_no(mobj));
+			                        pragha_musicobject_get_track_no(mobj));
 			break;
 			}
 		case 2: {
 			change = TAG_TITLE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected titles"),
-						sanitize_string_from_musicobject(pragha_musicobject_get_title(mobj)));
+			                        pragha_musicobject_get_title(mobj));
 			break;
 			}
 		case 3: {
 			change = TAG_ARTIST_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected artists"),
-						sanitize_string_from_musicobject(pragha_musicobject_get_artist(mobj)));
+			                        pragha_musicobject_get_artist(mobj));
 			break;
 			}
 		case 4: {
 			change = TAG_ALBUM_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
-						sanitize_string_from_musicobject(pragha_musicobject_get_album(mobj)));
+			                        pragha_musicobject_get_album(mobj));
 			break;
 		}
 		case 5: {
 			change = TAG_GENRE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected genres"),
-						sanitize_string_from_musicobject(pragha_musicobject_get_genre(mobj)));
+			                        pragha_musicobject_get_genre(mobj));
 			break;
 		}
 		case 7: {
 			change = TAG_YEAR_CHANGED;
 			label = g_strdup_printf(_("Copy \"%i\" to selected years"),
-						pragha_musicobject_get_year(mobj));
+			                        pragha_musicobject_get_year(mobj));
 			break;
 		}
 		case 8: {
 			change = TAG_COMMENT_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected comments"),
-						sanitize_string_from_musicobject(pragha_musicobject_get_comment(mobj)));
+			                        pragha_musicobject_get_comment(mobj));
 			break;
 		}
 		default: {

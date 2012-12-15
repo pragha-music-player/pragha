@@ -238,15 +238,17 @@ do_lastfm_get_similar(PraghaMusicobject *mobj, struct con_win *cwin)
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
-				      sanitize_string_from_musicobject(title),
-				      sanitize_string_from_musicobject(artist),
-				      50, &results);
+	if(string_is_not_empty(title) && string_is_not_empty(artist)) {
+		rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
+					      title,
+					      artist,
+					      50, &results);
 
-	for(li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
-		track = li->data;
-		list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
-		query_count += 1;
+		for(li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
+			track = li->data;
+			list = prepend_song_with_artist_and_title_to_mobj_list(track->artist, track->name, list, cwin);
+			query_count += 1;
+		}
 	}
 
 	data = g_slice_new (AddMusicObjectListData);
@@ -554,9 +556,9 @@ do_lastfm_scrob (gpointer data)
 	             NULL);
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
-	                            (char*)sanitize_string_from_musicobject(title),
-	                            (char*)sanitize_string_from_musicobject(album),
-	                            (char*)sanitize_string_from_musicobject(artist),
+	                            (char*)title,
+	                            (char*)album,
+	                            (char*)artist,
 	                            cwin->clastfm->playback_started,
 	                            length,
 	                            track_no,
@@ -621,9 +623,9 @@ do_lastfm_now_playing (gpointer data)
 	             NULL);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
-	                                      (char*)sanitize_string_from_musicobject(title),
-	                                      (char*)sanitize_string_from_musicobject(album),
-	                                      (char*)sanitize_string_from_musicobject(artist),
+	                                      (char*)title,
+	                                      (char*)album,
+	                                      (char*)artist,
 	                                      length,
 	                                      track_no,
 	                                      0,

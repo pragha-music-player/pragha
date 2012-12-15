@@ -520,28 +520,16 @@ gchar* sanitize_string_to_sqlite3(const gchar *str)
 	return ch;
 }
 
-const gchar* sanitize_string_from_sqlite3(const gchar *str)
+inline gboolean
+string_is_empty(const gchar *str)
 {
-	if (str && g_utf8_strlen(str, 4))
-		return str;
-
-	return NULL;
+	return !(str && g_utf8_strlen(str, 4));
 }
 
-const gchar* sanitize_string_from_musicobject(const gchar *str)
+inline gboolean
+string_is_not_empty(const gchar *str)
 {
-	if (!str)
-		return "";
-
-	return str;
-}
-
-const gchar* sanitize_string_to_musicobject(const gchar *str)
-{
-	if (str && g_utf8_strlen(str, 4))
-		return str;
-
-	return NULL;
+	return (str && g_utf8_strlen(str, 4));
 }
 
 

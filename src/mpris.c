@@ -412,18 +412,9 @@ static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
 	return g_variant_new_object_path(o);
 }
 
-GVariant *
-g_variant_new_sanitized_string(const gchar *val)
-{
-	if(val != NULL)
-		return g_variant_new_string(val);
-	else
-		return g_variant_new_string("");
-}
-
 void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *val)
 {
-	GVariant *vval = g_variant_new_sanitized_string(val);
+	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
 
 	g_variant_builder_add (b, "{sv}", tag, vvals);
@@ -461,13 +452,13 @@ static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 	g_variant_builder_add (b, "{sv}", "xesam:url",
 		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
-		g_variant_new_sanitized_string(title));
+		g_variant_new_string(title));
 	handle_strings_request(b, "xesam:artist", artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
-		g_variant_new_sanitized_string(album));
+		g_variant_new_string(album));
 	handle_strings_request(b, "xesam:genre", genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
-		g_variant_new_sanitized_string(date));
+		g_variant_new_string(date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
 		g_variant_new_int32(track_no));
 	handle_strings_request(b, "xesam:comment", comment);

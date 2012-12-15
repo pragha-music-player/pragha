@@ -209,9 +209,9 @@ pragha_filter_dialog_fill_model (GtkListStore *filter_model, PraghaPlaylist *cpl
 			artist = pragha_musicobject_get_artist(mobj);
 			album = pragha_musicobject_get_album(mobj);
 
-			ch_title = title ?  g_strdup(title) : get_display_filename (file, FALSE);
-			ch_artist = artist ? g_strdup(artist) : g_strdup(_("Unknown Artist"));
-			ch_album = album ? g_strdup(album) : g_strdup(_("Unknown Album"));
+			ch_title = string_is_not_empty(title) ?  g_strdup(title) : get_display_filename (file, FALSE);
+			ch_artist = string_is_not_empty(artist) ? g_strdup(artist) : g_strdup(_("Unknown Artist"));
+			ch_album = string_is_not_empty(album) ? g_strdup(album) : g_strdup(_("Unknown Album"));
 
 			track_data_markup = g_markup_printf_escaped ("%s - %s - %s", ch_title, ch_artist, ch_album);
 
