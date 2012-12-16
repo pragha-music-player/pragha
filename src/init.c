@@ -844,12 +844,6 @@ gint init_first_state(struct con_win *cwin)
 
 	cwin->cstate->view_change = TRUE;
 
-	/* Init others default flags */
-
-#ifdef HAVE_LIBCLASTFM
-	cwin->clastfm->session_id = NULL;
-	cwin->clastfm->status = LASTFM_STATUS_INVALID;
-#endif
 	cwin->osd_notify = NULL;
 
 	return 0;

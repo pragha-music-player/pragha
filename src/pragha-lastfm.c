@@ -65,6 +65,93 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
 }
 
+/* Set correction basedm on lastfm now playing segestion.. */
+
+void
+edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
+{
+	PraghaMusicobject *omobj, *nmobj, *tmobj;
+	const gchar *file, *otitle, *oartist, *oalbum;
+	const gchar *ntitle, *nartist, *nalbum;
+	gchar *sfile = NULL;
+	gint location_id, changed = 0, prechanged = 0;
+	GPtrArray *file_arr = NULL;
+	GArray *loc_arr = NULL;
+
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+		return;
+
+	g_object_ref(cwin->cstate->curr_mobj);
+	omobj = cwin->cstate->curr_mobj;
+
+	file = pragha_musicobject_get_file(omobj);
+	otitle = pragha_musicobject_get_title(omobj);
+	oartist = pragha_musicobject_get_artist(omobj);
+	oalbum = pragha_musicobject_get_album(omobj);
+
+	g_object_ref(cwin->clastfm->nmobj);
+	nmobj = cwin->clastfm->nmobj;
+
+	ntitle = pragha_musicobject_get_title(nmobj);
+	nartist = pragha_musicobject_get_artist(nmobj);
+	nalbum = pragha_musicobject_get_album(nmobj);
+
+	if(g_ascii_strcasecmp(otitle, ntitle))
+		prechanged |= TAG_TITLE_CHANGED;
+	if(g_ascii_strcasecmp(oartist, nartist))
+		prechanged |= TAG_ARTIST_CHANGED;
+	if(g_ascii_strcasecmp(oalbum, nalbum))
+		prechanged |= TAG_ALBUM_CHANGED;
+
+	tmobj = pragha_musicobject_new();
+	changed = tag_edit_dialog(nmobj, prechanged, tmobj, cwin);
+
+	if (!changed)
+		goto exit;
+
+	/* Store the new tags */
+
+	if (G_LIKELY(pragha_musicobject_get_file_type(omobj) != FILE_CDDA &&
+	    pragha_musicobject_get_file_type(omobj) != FILE_HTTP)) {
+		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+		sfile = sanitize_string_to_sqlite3(file);
+		location_id = find_location_db(sfile, cwin->cdbase);
+		if (location_id) {
+			g_array_append_val(loc_arr, location_id);
+			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, tmobj);
+			init_library_view(cwin);
+		}
+		g_array_free(loc_arr, TRUE);
+		g_free(sfile);
+
+		file_arr = g_ptr_array_new();
+		g_ptr_array_add(file_arr, g_strdup(file));
+		pragha_update_local_files_change_tag(file_arr, changed, tmobj);
+		g_ptr_array_free(file_arr, TRUE);
+	}
+
+	/* Update the musicobject, the gui and them mpris */
+
+	pragha_update_musicobject_change_tag(omobj, changed, tmobj);
+
+	/* While the dialog is open, the song may have changed or stopped */
+
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+		goto exit;
+
+	if(omobj == cwin->cstate->curr_mobj) {
+		pragha_playlist_update_current_track(cwin->cplaylist, changed, tmobj);
+		__update_current_song_info(cwin);
+		mpris_update_metadata_changed(cwin);
+	}
+
+exit:
+	gtk_widget_hide(cwin->ntag_lastfm_button);
+	g_object_unref(omobj);
+	g_object_unref(nmobj);
+	g_object_unref(tmobj);
+}
+
 /* Love and unlove music object */
 
 gpointer
@@ -551,7 +638,7 @@ do_lastfm_scrob (gpointer data)
 	             "title", &title,
 	             "artist", &artist,
 	             "album", &album,
-	             "track_no", &track_no,
+	             "track-no", &track_no,
 	             "length", &length,
 	             NULL);
 
@@ -598,29 +685,40 @@ lastfm_scrob_handler(gpointer data)
 	return FALSE;
 }
 
+static gboolean
+show_lastfm_sugest_corrrection_button (gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
+	gtk_widget_show(cwin->ntag_lastfm_button);
+
+	return FALSE;
+}
+
 gpointer
 do_lastfm_now_playing (gpointer data)
 {
-	gint rv;
-	gchar *title = NULL, *artist = NULL, *album = NULL;
+	AsycMessageData *msg_data = NULL;
+	PraghaMusicobject *omobj, *nmobj;
+	const gchar *title, *artist, *album;
 	gint track_no, length;
 	LFMList *list = NULL;
-	AsycMessageData *msg_data = NULL;
-	PraghaMusicobject *mobj = NULL;
+	LASTFM_TRACK_INFO *ntrack;
+	gboolean changed = FALSE;
+	gint rv;
 
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
 
-	mobj = cwin->cstate->curr_mobj;
-	g_object_ref(mobj);
-	g_object_get(mobj,
-	             "title", &title,
-	             "artist", &artist,
-	             "album", &album,
-	             "track_no", &track_no,
-	             "length", &length,
-	             NULL);
+	g_object_ref(cwin->cstate->curr_mobj);
+	omobj = cwin->cstate->curr_mobj;
+
+	title = pragha_musicobject_get_title(omobj);
+	artist = pragha_musicobject_get_artist(omobj);
+	album = pragha_musicobject_get_album(omobj);
+	length = pragha_musicobject_get_length(omobj);
+	track_no = pragha_musicobject_get_track_no(omobj);
 
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
 	                                      (char*)title,
@@ -630,16 +728,49 @@ do_lastfm_now_playing (gpointer data)
 	                                      track_no,
 	                                      0,
 	                                      &list);
-	if (rv != LASTFM_STATUS_OK) {
+
+	g_object_ref(cwin->clastfm->nmobj);
+	nmobj = cwin->clastfm->nmobj;
+
+	if (rv == LASTFM_STATUS_OK) {
+		ntrack = list->data;
+
+		if(g_ascii_strcasecmp(title, ntrack->name) ||
+		   g_ascii_strcasecmp(artist, ntrack->artist) ||
+		   g_ascii_strcasecmp(album, ntrack->album)) {
+			changed = TRUE;
+
+			g_object_set (nmobj,
+			              "file", pragha_musicobject_get_file(omobj),
+			              "file-type", pragha_musicobject_get_file_type(omobj),
+			              "title", ntrack->name,
+			              "artist", ntrack->artist,
+			              "album", ntrack->album,
+			              "genre", pragha_musicobject_get_genre(omobj),
+			              "comment", pragha_musicobject_get_comment(omobj),
+			              "year", pragha_musicobject_get_year(omobj),
+			              "track-no", track_no,
+			              "length", length,
+			              "bitrate", pragha_musicobject_get_bitrate(omobj),
+			              "channels", pragha_musicobject_get_channels(omobj),
+			              "samplerate", pragha_musicobject_get_samplerate(omobj),
+				      NULL);
+		}
+		else {
+			pragha_musicobject_clean(nmobj);
+		}
+
+		if(changed)
+			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
+	}
+	else {
 		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
 	}
 
 	LASTFM_free_track_info_list(list);
 
-	g_object_unref(mobj);
-	g_free(title);
-	g_free(artist);
-	g_free(album);
+	g_object_unref(omobj);
+	g_object_unref(nmobj);
 
 	return msg_data;
 }
@@ -765,8 +896,14 @@ do_init_lastfm_idle(gpointer data)
 }
 
 gint
-init_lastfm_idle(struct con_win *cwin)
+init_lastfm(struct con_win *cwin)
 {
+	/* Init struct flags */
+
+	cwin->clastfm->session_id = NULL;
+	cwin->clastfm->status = LASTFM_STATUS_INVALID;
+	cwin->clastfm->nmobj = pragha_musicobject_new();
+
 	/* Test internet and launch threads.*/
 
 	if (cwin->cpref->lastfm_support) {
@@ -792,6 +929,8 @@ lastfm_free(struct con_lastfm *clastfm)
 {
 	if (clastfm->session_id)
 		LASTFM_dinit(clastfm->session_id);
+
+	g_object_unref(clastfm->nmobj);
 
 	g_slice_free(struct con_lastfm, clastfm);
 }

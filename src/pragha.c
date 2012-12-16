@@ -131,7 +131,7 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm_idle(cwin) == -1) {
+	if (init_lastfm(cwin) == -1) {
 		g_critical("Unable to initialize lastfm");
 	}
 	#endif

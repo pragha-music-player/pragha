@@ -49,6 +49,9 @@ struct _PraghaMusicobjectClass
 
 
 PraghaMusicobject *pragha_musicobject_new (void);
+void
+pragha_musicobject_clean (PraghaMusicobject *musicobject);
+
 GType pragha_musicobject_get_type (void) G_GNUC_CONST;
 
 const gchar *
