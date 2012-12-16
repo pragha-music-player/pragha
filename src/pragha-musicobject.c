@@ -58,10 +58,40 @@ enum
 
 static GParamSpec *gParamSpecs[LAST_PROP];
 
+/**
+ * pragha_musicobject_new:
+ *
+ */
 PraghaMusicobject *
 pragha_musicobject_new (void)
 {
 	return g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+}
+
+/**
+ * pragha_musicobject_clean:
+ *
+ */
+void
+pragha_musicobject_clean (PraghaMusicobject *musicobject)
+{
+	g_return_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject));
+
+	g_object_set (musicobject,
+	              "file", "",
+	              "file-type", 0,
+	              "title", "",
+	              "artist", "",
+	              "album", "",
+	              "genre", "",
+	              "comment", "",
+	              "year", "",
+	              "track-no", 0,
+	              "length", 0,
+	              "bitrate", 0,
+	              "channels", 0,
+	              "samplerate", 0,
+	              NULL);
 }
 
 /**

@@ -565,6 +565,7 @@ struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
+	PraghaMusicobject *nmobj;
 };
 #endif
 
@@ -1289,7 +1290,7 @@ void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_now_playing_handler (struct con_win *cwin);
 gint just_init_lastfm (struct con_win *cwin);
-gint init_lastfm_idle(struct con_win *cwin);
+gint init_lastfm(struct con_win *cwin);
 void lastfm_free(struct con_lastfm *clastfm);
 #endif
 

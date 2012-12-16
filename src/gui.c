@@ -662,8 +662,8 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 			     gtk_image_new_from_stock(GTK_STOCK_SPELL_CHECK,
 						      GTK_ICON_SIZE_MENU));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button), _("Last.fm suggested a tag correction"));
-	/*g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
-			 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);*/
+	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
+	                 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
 	#endif
 
 	gtk_box_pack_start(GTK_BOX(playing_hbox),

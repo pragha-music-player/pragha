@@ -59,7 +59,7 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "genre", taglib_tag_genre(tag),
 	              "comment", taglib_tag_comment(tag),
 	              "year", taglib_tag_year(tag),
-	              "track_no", taglib_tag_track(tag),
+	              "track-no", taglib_tag_track(tag),
 	              "length", taglib_audioproperties_length(audio_prop),
 	              "bitrate", taglib_audioproperties_bitrate(audio_prop),
 	              "channels", taglib_audioproperties_channels(audio_prop),
