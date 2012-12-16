@@ -34,6 +34,7 @@ struct _PraghaPreferencesPrivate
    gboolean   use_hint;
    gboolean   restore_playlist;
    /* Audio preferences. */
+   gboolean   software_mixer;
    gchar     *audio_cd_device;
    /* Window preferences. */
    gboolean   lateral_panel;
@@ -48,6 +49,7 @@ enum
    PROP_REPEAT,
    PROP_USE_HINT,
    PROP_RESTORE_PLAYLIST,
+   PROP_SOFTWARE_MIXER,
    PROP_AUDIO_CD_DEVICE,
    PROP_LATERAL_PANEL,
    LAST_PROP
@@ -392,6 +394,33 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_software_mixer:
+ *
+ */
+gboolean
+pragha_preferences_get_software_mixer (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->software_mixer;
+}
+
+/**
+ * pragha_preferences_set_software_mixer:
+ *
+ */
+void
+pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
+                                       gboolean software_mixer)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->software_mixer = software_mixer;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_MIXER]);
+}
+
+/**
  * pragha_preferences_get_audio_cd_device:
  *
  */
@@ -484,6 +513,10 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_PLAYLIST,
                           KEY_SAVE_PLAYLIST,
                           priv->restore_playlist);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_AUDIO,
+                          KEY_SOFTWARE_MIXER,
+                          priv->software_mixer);
    if (priv->audio_cd_device && strlen(priv->audio_cd_device))
       g_key_file_set_string(priv->rc_keyfile,
                             GROUP_AUDIO,
@@ -539,6 +572,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_RESTORE_PLAYLIST:
       g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
       break;
+   case PROP_SOFTWARE_MIXER:
+      g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
+      break;
    case PROP_AUDIO_CD_DEVICE:
       g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
       break;
@@ -576,6 +612,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_RESTORE_PLAYLIST:
       pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_SOFTWARE_MIXER:
+      pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
       break;
    case PROP_AUDIO_CD_DEVICE:
       pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
@@ -672,6 +711,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_STATIC_STRINGS);
 
    /**
+    * PraghaPreferences:software_mixer:
+    *
+    */
+   gParamSpecs[PROP_SOFTWARE_MIXER] =
+      g_param_spec_boolean("software-mixer",
+                           "SoftwareMixer",
+                           "Use Software Mixer",
+                           FALSE,
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
+
+   /**
     * PraghaPreferences:audio_cd_device:
     *
     */
@@ -702,7 +753,7 @@ static void
 pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
-   gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel;
+   gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
    gchar *audio_cd_device;
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
@@ -828,6 +879,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
    }
    else {
       pragha_preferences_set_restore_playlist(preferences, restore_playlist);
+   }
+
+   software_mixer = g_key_file_get_boolean(priv->rc_keyfile,
+                                           GROUP_AUDIO,
+                                           KEY_SOFTWARE_MIXER,
+                                           &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_software_mixer(preferences, software_mixer);
    }
 
    audio_cd_device = g_key_file_get_string(priv->rc_keyfile,

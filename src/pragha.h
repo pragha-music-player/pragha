@@ -510,7 +510,6 @@ struct con_pref {
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
 	gboolean timer_remaining_mode;
-	gboolean software_mixer;
 #ifdef HAVE_LIBGLYR
 	gboolean get_album_art;
 #endif

@@ -959,7 +959,7 @@ gint backend_init (struct con_win *cwin)
 	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
 	gst_object_unref (bus);
 
-	pragha_backend_set_soft_volume(backend, cwin->cpref->software_mixer);
+	pragha_backend_set_soft_volume(backend, pragha_preferences_get_software_mixer(cwin->preferences));
 	pragha_backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);

@@ -84,10 +84,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			pragha_preferences_set_audio_cd_device(cwin->preferences, audio_cd_device);
 		}
 
-		cwin->cpref->software_mixer =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->preferences_w->soft_mixer_w));
-		pragha_backend_set_soft_volume(cwin->backend, cwin->cpref->software_mixer);
+		pragha_preferences_set_software_mixer(cwin->preferences, software_mixer);
+		pragha_backend_set_soft_volume(cwin->backend, software_mixer);
 
 		/* Library Preferences */
 
@@ -519,7 +519,7 @@ static void update_audio_device_pulse(struct con_win *cwin)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
-	cwin->cpref->software_mixer = FALSE;
+	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
 }
 
 static void update_audio_device_default(struct con_win *cwin)
@@ -527,7 +527,7 @@ static void update_audio_device_default(struct con_win *cwin)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
-	cwin->cpref->software_mixer = FALSE;
+	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
 }
 
 /* The enumerated audio devices have to be changed here */
@@ -609,7 +609,7 @@ static void update_preferences(struct con_win *cwin)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
 				   audio_cd_device);
 
-	if (cwin->cpref->software_mixer)
+	if (pragha_preferences_get_software_mixer(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->soft_mixer_w),
 					     TRUE);
@@ -1103,14 +1103,9 @@ void save_preferences(struct con_win *cwin)
 			      KEY_AUDIO_DEVICE,
 			      cwin->cpref->audio_device);
 
-	/* Save Software mixer option and volume */
+	/* Save volume */
 
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_AUDIO,
-			       KEY_SOFTWARE_MIXER,
-			       cwin->cpref->software_mixer);
-
-	if(cwin->cpref->software_mixer){
+	if (pragha_preferences_get_software_mixer(cwin->preferences)) {
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
