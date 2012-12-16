@@ -142,6 +142,13 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_restore_playlist (PraghaPreferences *preferences);
 
+gboolean
+pragha_preferences_get_software_mixer (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
+                                       gboolean software_mixer);
+
 const gchar *
 pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences);
 
