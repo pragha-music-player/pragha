@@ -361,7 +361,8 @@ pragha_backend_stop (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
-	g_object_unref(cwin->cstate->curr_mobj);
+	if(cwin->cstate->curr_mobj)
+		g_object_unref(cwin->cstate->curr_mobj);
 
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
 }

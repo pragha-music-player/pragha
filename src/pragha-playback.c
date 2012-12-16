@@ -146,6 +146,9 @@ void pragha_playback_stop(struct con_win *cwin)
 {
 	CDEBUG(DBG_BACKEND, "Stopping the current song");
 
+	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+		return;
+
 	pragha_backend_stop(cwin->backend);
 }
 
