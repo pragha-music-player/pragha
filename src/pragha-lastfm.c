@@ -41,7 +41,7 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && (strlen(cwin->cpref->lastfm_user) != 0);
+	gboolean has_user = lfm_inited && string_is_not_empty(cwin->cpref->lastfm_user);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
@@ -519,7 +519,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if ((cwin->clastfm->session_id == NULL) ||
-	    (strlen(cwin->cpref->lastfm_user) == 0)) {
+	    string_is_empty(cwin->cpref->lastfm_user)) {
 		set_status_message(_("No connection Last.fm has been established."), cwin);
 		return;
 	}
@@ -785,8 +785,8 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if((strlen(cwin->cpref->lastfm_user) == 0) ||
-	   (strlen(cwin->cpref->lastfm_pass) == 0))
+	if(string_is_empty(cwin->cpref->lastfm_user) ||
+	   string_is_empty(cwin->cpref->lastfm_pass))
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -834,8 +834,8 @@ do_just_init_lastfm(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
+		if(string_is_not_empty(cwin->cpref->lastfm_user) &&
+		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
 							      cwin->cpref->lastfm_user,
 							      cwin->cpref->lastfm_pass);
@@ -876,8 +876,8 @@ do_init_lastfm_idle(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if((strlen(cwin->cpref->lastfm_user) != 0) &&
-		   (strlen(cwin->cpref->lastfm_pass) != 0)) {
+		if(string_is_not_empty(cwin->cpref->lastfm_user) &&
+		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
 							      cwin->cpref->lastfm_user,
 							      cwin->cpref->lastfm_pass);

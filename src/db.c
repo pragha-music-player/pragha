@@ -776,7 +776,7 @@ void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 	gint playlist_id;
 	gchar *query;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
@@ -889,7 +889,7 @@ void delete_radio_db(const gchar *radio, struct con_dbase *cdbase)
 	gint radio_id;
 	gchar *query;
 
-	if (!radio || !strlen(radio)) {
+	if (string_is_empty(radio)) {
 		g_warning("Radio name is NULL");
 		return;
 	}

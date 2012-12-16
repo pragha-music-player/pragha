@@ -523,7 +523,7 @@ gchar* sanitize_string_to_sqlite3(const gchar *str)
 inline gboolean
 string_is_empty(const gchar *str)
 {
-	return !(str && g_utf8_strlen(str, 4));
+	return (!str || !g_utf8_strlen(str, 4));
 }
 
 inline gboolean
@@ -800,7 +800,7 @@ gboolean validate_album_art_pattern(const gchar *pattern)
 	gint i = 0;
 	gboolean ret = FALSE;
 
-	if (!pattern || (pattern && !strlen(pattern)))
+	if (string_is_empty(pattern))
 		return TRUE;
 
 	if (g_strrstr(pattern, "*")) {

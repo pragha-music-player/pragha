@@ -807,9 +807,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save album art pattern */
 
-	if (!cwin->cpref->album_art_pattern ||
-	    (cwin->cpref->album_art_pattern &&
-	     !strlen(cwin->cpref->album_art_pattern))) {
+	if (string_is_empty(cwin->cpref->album_art_pattern)) {
 		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
 					 GROUP_GENERAL) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
@@ -822,7 +820,7 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
-	else if (cwin->cpref->album_art_pattern) {
+	else {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_GENERAL,
 				      KEY_ALBUM_ART_PATTERN,
@@ -1119,9 +1117,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save audio CD Device */
 
-	if (!cwin->cpref->audio_cd_device ||
-	    (cwin->cpref->audio_cd_device &&
-	     !strlen(cwin->cpref->audio_cd_device))) {
+	if (string_is_empty(cwin->cpref->audio_cd_device)) {
 		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
 					 GROUP_AUDIO) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
@@ -1133,7 +1129,7 @@ void save_preferences(struct con_win *cwin)
 					      KEY_AUDIO_CD_DEVICE,
 					      &error);
 	}
-	else if (cwin->cpref->audio_cd_device) {
+	else {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_AUDIO,
 				      KEY_AUDIO_CD_DEVICE,
