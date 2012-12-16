@@ -590,7 +590,7 @@ void
 pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
 	gchar *stitle = NULL, *sartist = NULL, *scomment= NULL, *salbum = NULL, *sgenre = NULL;
-	gint artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	guint i = 0, elem = 0;
 
 	if (!changed)
@@ -601,6 +601,9 @@ pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_ar
 
 	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
 
+	if (changed & TAG_TNO_CHANGED) {
+		track_no = pragha_musicobject_get_track_no(mobj);
+	}
 	if (changed & TAG_TITLE_CHANGED) {
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 	}
@@ -641,7 +644,8 @@ pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_ar
 			elem = g_array_index(loc_arr, gint, i);
 			if (elem) {
 				update_track_db(elem, changed,
-						pragha_musicobject_get_track_no(mobj), stitle,
+						track_no,
+						stitle,
 						artist_id,
 						album_id,
 						genre_id,
