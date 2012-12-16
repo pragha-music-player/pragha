@@ -704,8 +704,7 @@ do_lastfm_now_playing (gpointer data)
 	gint track_no, length;
 	LFMList *list = NULL;
 	LASTFM_TRACK_INFO *ntrack = NULL;
-	gboolean changed = FALSE;
-	gint rv;
+	gint changed = 0, rv;
 
 	struct con_win *cwin = data;
 
@@ -736,19 +735,21 @@ do_lastfm_now_playing (gpointer data)
 		/* Fist check lastfm response, and compare tags. */
 		if(list != NULL) {
 			ntrack = list->data;
-			if((ntrack->name && g_ascii_strcasecmp(title, ntrack->name)) ||
-			   (ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist)) ||
-			   (ntrack->album && g_ascii_strcasecmp(album, ntrack->album)))
-				changed = TRUE;
+			if(ntrack->name && g_ascii_strcasecmp(title, ntrack->name))
+				changed |= TAG_TITLE_CHANGED;
+			if(ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist))
+				changed |= TAG_ARTIST_CHANGED;
+			if(ntrack->album && g_ascii_strcasecmp(album, ntrack->album))
+				changed |= TAG_ALBUM_CHANGED;
 		}
 
 		if (changed) {
 			g_object_set (nmobj,
 			              "file", pragha_musicobject_get_file(omobj),
 			              "file-type", pragha_musicobject_get_file_type(omobj),
-			              "title", ntrack->name ? ntrack->name : title,
-			              "artist", ntrack->artist ? ntrack->artist : artist,
-			              "album", ntrack->album ? ntrack->album : album,
+			              "title", (changed & TAG_TITLE_CHANGED) ? ntrack->name : title,
+			              "artist", (changed & TAG_ARTIST_CHANGED) ? ntrack->artist : artist,
+			              "album", (changed & TAG_ALBUM_CHANGED) ? ntrack->album : album,
 			              "genre", pragha_musicobject_get_genre(omobj),
 			              "comment", pragha_musicobject_get_comment(omobj),
 			              "year", pragha_musicobject_get_year(omobj),
