@@ -1345,7 +1345,7 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 	gchar *s_playlist;
 	gint playlist_id = 0;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
@@ -1371,7 +1371,7 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 	gchar *s_playlist;
 	gint playlist_id;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
@@ -1395,7 +1395,7 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
 
-	if (!name || !strlen(name)) {
+	if (string_is_empty(name)) {
 		g_warning("Radio name is NULL");
 		return;
 	}
