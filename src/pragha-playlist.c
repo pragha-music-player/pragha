@@ -2188,7 +2188,8 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	}
 
 	/* Stop to set ready and clear all info */
-	pragha_backend_stop(cwin->backend);
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
+		pragha_backend_stop(cwin->backend);
 
 	/* Start playing new track */
 	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
