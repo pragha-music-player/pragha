@@ -703,7 +703,7 @@ do_lastfm_now_playing (gpointer data)
 	const gchar *title, *artist, *album;
 	gint track_no, length;
 	LFMList *list = NULL;
-	LASTFM_TRACK_INFO *ntrack;
+	LASTFM_TRACK_INFO *ntrack = NULL;
 	gboolean changed = FALSE;
 	gint rv;
 
@@ -733,19 +733,22 @@ do_lastfm_now_playing (gpointer data)
 	nmobj = cwin->clastfm->nmobj;
 
 	if (rv == LASTFM_STATUS_OK) {
-		ntrack = list->data;
+		/* Fist check lastfm response, and compare tags. */
+		if(list != NULL) {
+			ntrack = list->data;
+			if((ntrack->name && g_ascii_strcasecmp(title, ntrack->name)) ||
+			   (ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist)) ||
+			   (ntrack->album && g_ascii_strcasecmp(album, ntrack->album)))
+				changed = TRUE;
+		}
 
-		if(g_ascii_strcasecmp(title, ntrack->name) ||
-		   g_ascii_strcasecmp(artist, ntrack->artist) ||
-		   g_ascii_strcasecmp(album, ntrack->album)) {
-			changed = TRUE;
-
+		if (changed) {
 			g_object_set (nmobj,
 			              "file", pragha_musicobject_get_file(omobj),
 			              "file-type", pragha_musicobject_get_file_type(omobj),
-			              "title", ntrack->name,
-			              "artist", ntrack->artist,
-			              "album", ntrack->album,
+			              "title", ntrack->name ? ntrack->name : title,
+			              "artist", ntrack->artist ? ntrack->artist : artist,
+			              "album", ntrack->album ? ntrack->album : album,
 			              "genre", pragha_musicobject_get_genre(omobj),
 			              "comment", pragha_musicobject_get_comment(omobj),
 			              "year", pragha_musicobject_get_year(omobj),
@@ -754,16 +757,16 @@ do_lastfm_now_playing (gpointer data)
 			              "bitrate", pragha_musicobject_get_bitrate(omobj),
 			              "channels", pragha_musicobject_get_channels(omobj),
 			              "samplerate", pragha_musicobject_get_samplerate(omobj),
-				      NULL);
+			              NULL);
+
+			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
 		else {
 			pragha_musicobject_clean(nmobj);
 		}
-
-		if(changed)
-			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 	}
 	else {
+		pragha_musicobject_clean(nmobj);
 		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
 	}
 
