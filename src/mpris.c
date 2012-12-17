@@ -288,21 +288,23 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 	gchar *track_id = NULL;
 
 	g_variant_get(parameters, "(ox)", &track_id, &param);
-
 	mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
-	/* TODO: WTF?. How can lock it? */
-	if (mobj != NULL && mobj == cwin->cstate->curr_mobj) {
-		gint seek = (param / 1000000);
+	g_free(track_id);
 
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	/* FIXME: Ugly hack... */
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	if(mobj != NULL && mobj == cwin->cstate->curr_mobj) {
+		gint seek = (param / 1000000);
 		if (seek >= pragha_musicobject_get_length(cwin->cstate->curr_mobj))
 			seek = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		pragha_backend_seek(cwin->backend, seek);
-	}
 
-	g_free(track_id);
+	}
+	else {
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	}
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
