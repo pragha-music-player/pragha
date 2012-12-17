@@ -765,9 +765,27 @@ lastfm_scrob_handler(gpointer data)
 static gboolean
 show_lastfm_sugest_corrrection_button (gpointer user_data)
 {
+	gchar *cfile = NULL, *nfile = NULL;
+
 	struct con_win *cwin = user_data;
 
-	gtk_widget_show(cwin->ntag_lastfm_button);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "file", &cfile,
+	             NULL);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
+	g_object_get(cwin->clastfm->nmobj,
+	             "file", &nfile,
+	             NULL);
+	pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
+
+	if(g_ascii_strcasecmp(cfile, nfile) == 0)
+		gtk_widget_show(cwin->ntag_lastfm_button);
+
+	g_free(cfile);
+	g_free(nfile);
 
 	return FALSE;
 }
@@ -837,17 +855,8 @@ do_lastfm_now_playing (gpointer data)
 
 			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
-		else {
-			pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
-			pragha_musicobject_clean(cwin->clastfm->nmobj);
-			pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
-		}
 	}
 	else {
-		pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
-		pragha_musicobject_clean(cwin->clastfm->nmobj);
-		pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
-
 		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
 	}
 
