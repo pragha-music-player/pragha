@@ -176,13 +176,15 @@ void update_current_song_info(struct con_win *cwin)
 void __update_current_song_info(struct con_win *cwin)
 {
 	gchar *str = NULL, *str_title = NULL;
-	const gchar *file, *title, *artist, *album;
+	gchar *file = NULL, *title = NULL, *artist = NULL, *album = NULL;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "file", &file,
+	             "title", &title,
+	             "artist", &artist,
+	             "album", &album,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if(string_is_not_empty(title))
@@ -208,8 +210,12 @@ void __update_current_song_info(struct con_win *cwin)
 
 	gtk_label_set_markup(GTK_LABEL(cwin->now_playing_label), str);
 
-	g_free(str);
+	g_free(file);
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 	g_free(str_title);
+	g_free(str);
 }
 
 void unset_current_song_info(struct con_win *cwin)
@@ -241,9 +247,9 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 					      fraction);
 	}
 	else {
+		gint nlength = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend));
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-		pragha_musicobject_set_length(cwin->cstate->curr_mobj,
-			GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend)));
+		pragha_musicobject_set_length(cwin->cstate->curr_mobj, nlength);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 }
