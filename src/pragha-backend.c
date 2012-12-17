@@ -555,7 +555,7 @@ pragha_backend_play (PraghaBackend *backend)
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(file))
-		exit;
+		goto exit;
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
