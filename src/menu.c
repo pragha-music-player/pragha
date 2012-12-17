@@ -788,8 +788,10 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		return;
 
 	/* Set the initial tags. */
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	omobj = cwin->cstate->curr_mobj;
 	g_object_ref(omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/*New mobj where to place the new tag */
 	nmobj = pragha_musicobject_new();
@@ -811,8 +813,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA &&
-	    pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)) {
+	if (G_LIKELY(pragha_musicobject_get_file_type(omobj) != FILE_CDDA &&
+	    pragha_musicobject_get_file_type(omobj) != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(omobj));
 		location_id = find_location_db(sfile, cwin->cdbase);

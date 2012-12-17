@@ -81,8 +81,10 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_ref(cwin->cstate->curr_mobj);
 	omobj = cwin->cstate->curr_mobj;
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	file = pragha_musicobject_get_file(omobj);
 	otitle = pragha_musicobject_get_title(omobj);
@@ -139,6 +141,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		goto exit;
 
+	/* TODO: WTF?. How can lock it? */
 	if(omobj == cwin->cstate->curr_mobj) {
 		pragha_playlist_update_current_track(cwin->cplaylist, changed, tmobj);
 		__update_current_song_info(cwin);
@@ -155,7 +158,7 @@ exit:
 /* Love and unlove music object */
 
 gpointer
-do_lastfm_love_mobj (PraghaMusicobject *mobj, struct con_win *cwin)
+do_lastfm_love_mobj (const gchar *title, const gchar *artist, struct con_win *cwin)
 {
 	AsycMessageData *msg_data = NULL;
 	gint rv;
@@ -163,8 +166,8 @@ do_lastfm_love_mobj (PraghaMusicobject *mobj, struct con_win *cwin)
 	CDEBUG(DBG_LASTFM, "Love mobj on thread");
 
 	rv = LASTFM_track_love (cwin->clastfm->session_id,
-				pragha_musicobject_get_title(mobj),
-				pragha_musicobject_get_artist(mobj));
+	                        title,
+	                        artist);
 
 	if (rv != LASTFM_STATUS_OK)
 		msg_data = async_finished_message_new(_("Love song on Last.fm failed."), cwin);
@@ -173,16 +176,16 @@ do_lastfm_love_mobj (PraghaMusicobject *mobj, struct con_win *cwin)
 }
 
 gpointer
-do_lastfm_unlove_mobj (PraghaMusicobject *mobj, struct con_win *cwin)
+do_lastfm_unlove_mobj (const gchar *title, const gchar *artist, struct con_win *cwin)
 {
 	AsycMessageData *msg_data = NULL;
 	gint rv;
 
 	CDEBUG(DBG_LASTFM, "Unlove mobj on thread");
 
-	rv = LASTFM_track_unlove(cwin->clastfm->session_id,
-				 pragha_musicobject_get_title(mobj),
-				 pragha_musicobject_get_artist(mobj));
+	rv = LASTFM_track_unlove (cwin->clastfm->session_id,
+	                          title,
+	                          artist);
 
 	if (rv != LASTFM_STATUS_OK)
 		msg_data = async_finished_message_new(_("Unlove song on Last.fm failed."), cwin);
@@ -198,12 +201,16 @@ do_lastfm_current_playlist_love (gpointer data)
 {
 	PraghaMusicobject *mobj = NULL;
 	AsycMessageData *msg_data = NULL;
+	const gchar *title, *artist;
 
 	struct con_win *cwin = data;
 
 	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
-	msg_data = do_lastfm_love_mobj(mobj, cwin);
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+
+	msg_data = do_lastfm_love_mobj(title, artist, cwin);
 
 	return msg_data;
 }
@@ -228,12 +235,16 @@ do_lastfm_current_playlist_unlove (gpointer data)
 {
 	PraghaMusicobject *mobj = NULL;
 	AsycMessageData *msg_data = NULL;
+	const gchar *title, *artist;
 
 	struct con_win *cwin = data;
 
 	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
-	msg_data = do_lastfm_unlove_mobj(mobj, cwin);
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+
+	msg_data = do_lastfm_unlove_mobj(title, artist, cwin);
 
 	return msg_data;
 }
@@ -311,19 +322,15 @@ empty:
 }
 
 gpointer
-do_lastfm_get_similar(PraghaMusicobject *mobj, struct con_win *cwin)
+do_lastfm_get_similar(const gchar *title, const gchar *artist, struct con_win *cwin)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
 	guint query_count = 0;
 	GList *list = NULL;
 	gint rv;
-	const gchar *title, *artist;
 
 	AddMusicObjectListData *data;
-
-	title = pragha_musicobject_get_title(mobj);
-	artist = pragha_musicobject_get_artist(mobj);
 
 	if(string_is_not_empty(title) && string_is_not_empty(artist)) {
 		rv = LASTFM_track_get_similar(cwin->clastfm->session_id,
@@ -353,6 +360,7 @@ gpointer
 do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 {
 	PraghaMusicobject *mobj = NULL;
+	const gchar *title, *artist;
 
 	AddMusicObjectListData *data;
 
@@ -360,7 +368,10 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 
 	mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 
-	data = do_lastfm_get_similar(mobj, cwin);
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+
+	data = do_lastfm_get_similar(title, artist, cwin);
 
 	return data;
 }
@@ -534,10 +545,16 @@ gpointer
 do_lastfm_get_similar_action (gpointer user_data)
 {
 	AddMusicObjectListData *data;
+	const gchar *title, *artist;
 
 	struct con_win *cwin = user_data;
 
-	data = do_lastfm_get_similar(cwin->cstate->curr_mobj, cwin);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	data = do_lastfm_get_similar(title, artist, cwin);
 
 	return data;
 }
@@ -565,10 +582,16 @@ gpointer
 do_lastfm_current_song_love (gpointer data)
 {
 	AsycMessageData *msg_data = NULL;
+	const gchar *title, *artist;
 
 	struct con_win *cwin = data;
 
-	msg_data = do_lastfm_love_mobj(cwin->cstate->curr_mobj, cwin);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	msg_data = do_lastfm_love_mobj(title, artist, cwin);
 
 	return msg_data;
 }
@@ -594,10 +617,17 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 gpointer
 do_lastfm_current_song_unlove (gpointer data)
 {
-	struct con_win *cwin = data;
 	AsycMessageData *msg_data = NULL;
+	const gchar *title, *artist;
 
-	msg_data = do_lastfm_unlove_mobj(cwin->cstate->curr_mobj, cwin);
+	struct con_win *cwin = data;
+
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	msg_data = do_lastfm_unlove_mobj(title, artist, cwin);
 
 	return msg_data;
 }
@@ -632,8 +662,9 @@ do_lastfm_scrob (gpointer data)
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	g_object_ref(cwin->cstate->curr_mobj);
 	mobj = cwin->cstate->curr_mobj;
-	g_object_ref(mobj);
 	g_object_get(mobj,
 	             "title", &title,
 	             "artist", &artist,
@@ -641,6 +672,7 @@ do_lastfm_scrob (gpointer data)
 	             "track-no", &track_no,
 	             "length", &length,
 	             NULL);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
 	                            (char*)title,
@@ -710,8 +742,10 @@ do_lastfm_now_playing (gpointer data)
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_ref(cwin->cstate->curr_mobj);
 	omobj = cwin->cstate->curr_mobj;
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	title = pragha_musicobject_get_title(omobj);
 	artist = pragha_musicobject_get_artist(omobj);
@@ -782,6 +816,7 @@ do_lastfm_now_playing (gpointer data)
 void
 lastfm_now_playing_handler (struct con_win *cwin)
 {
+	const gchar *title, *artist;
 	gint length;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
@@ -798,11 +833,16 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	if (!pragha_musicobject_get_artist(cwin->cstate->curr_mobj) ||
-	    !pragha_musicobject_get_title(cwin->cstate->curr_mobj))
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if (string_is_empty(title) || string_is_empty(artist))
 		return;
 
-	if(pragha_musicobject_get_length(cwin->cstate->curr_mobj) < 30)
+	if(length < 30)
 		return;
 
 	pragha_async_launch(do_lastfm_now_playing,
@@ -814,11 +854,11 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	 * and scrob when track is at 50% or 4mins, whichever comes
 	 * first */
 
-	if((pragha_musicobject_get_length(cwin->cstate->curr_mobj) / 2) > (240 - WAIT_UPDATE)) {
+	if((length / 2) > (240 - WAIT_UPDATE)) {
 		length = 240 - WAIT_UPDATE;
 	}
 	else {
-		length = (pragha_musicobject_get_length(cwin->cstate->curr_mobj) / 2) - WAIT_UPDATE;
+		length = (length / 2) - WAIT_UPDATE;
 	}
 
 	cwin->related_timeout_id = g_timeout_add_seconds_full(

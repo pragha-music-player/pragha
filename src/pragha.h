@@ -89,6 +89,20 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
+#if GLIB_CHECK_VERSION (2, 32, 0)
+#define PRAGHA_MUTEX(mtx) GMutex mtx
+#define pragha_mutex_free(mtx) G_STMT_START{ (void)0; }G_STMT_END
+#define pragha_mutex_lock(mtx) g_mutex_lock (&(mtx))
+#define pragha_mutex_unlock(mtx) g_mutex_unlock (&(mtx))
+#define pragha_mutex_create(mtx) g_mutex_init (&(mtx))
+#else
+#define PRAGHA_MUTEX(mtx) GMutex *mtx
+#define pragha_mutex_free(mtx) g_mutex_free (mtx)
+#define pragha_mutex_lock(mtx) g_mutex_lock (mtx)
+#define pragha_mutex_unlock(mtx) g_mutex_unlock (mtx)
+#define pragha_mutex_create(mtx) (mtx) = g_mutex_new ()
+#endif
+
 /* Some default preferences. */
 
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
@@ -551,6 +565,7 @@ struct con_state {
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
 	PraghaMusicobject *curr_mobj;
+	PRAGHA_MUTEX (curr_mobj_mutex);
 };
 
 struct con_dbase;

@@ -90,7 +90,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
-	const gchar *artist = NULL, *album = NULL;
+	const gchar *artist = NULL, *album = NULL, *lartist = NULL, *lalbum = NULL;
 	gchar *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
 	GError *error = NULL;
@@ -112,11 +112,18 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
-			if((pragha_backend_get_state (cwin->backend) != ST_STOPPED) &&
-			   (0 == g_strcmp0(artist, pragha_musicobject_get_artist(cwin->cstate->curr_mobj))) &&
-			   (0 == g_strcmp0(album, pragha_musicobject_get_album(cwin->cstate->curr_mobj)))) {
-				update_album_art(cwin->cstate->curr_mobj, cwin);
-				mpris_update_metadata_changed(cwin);
+			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				lartist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+				lalbum = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+				if((0 == g_strcmp0(artist, lartist)) &&
+				   (0 == g_strcmp0(album, lalbum))) {
+					pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+					update_album_art(cwin->cstate->curr_mobj, cwin);
+					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+					mpris_update_metadata_changed(cwin);
+				}
 			}
 		}
 		else {
@@ -268,7 +275,9 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist))
 		return;
@@ -285,8 +294,10 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
@@ -337,8 +348,10 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist) || string_is_empty(album))
 		return;
@@ -393,6 +406,7 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 {
 	struct con_win *cwin = user_data;
 	enum player_state state = pragha_backend_get_state (cwin->backend);
+	gint file_type = 0;
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
 
@@ -402,7 +416,11 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 	if(state != ST_PLAYING)
 		return;
 
-	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_HTTP)
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if(file_type == FILE_HTTP)
 		return;
 
 	#ifdef HAVE_LIBCLASTFM

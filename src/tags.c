@@ -973,7 +973,7 @@ pragha_update_mobj_list_change_tag(GList *list, gint changed, PraghaMusicobject 
 
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
-	GList *rlist, *mlist;
+	GList *rlist, *mlist, *tlist;
 
 	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
@@ -990,7 +990,10 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 
 	/* If change current song, update gui and mpris. */
-	if(g_list_find (mlist, cwin->cstate->curr_mobj)) {
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	tlist = g_list_find (mlist, cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	if(tlist) {
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
 			mpris_update_metadata_changed(cwin);
@@ -1011,7 +1014,7 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 {
 	PraghaMusicobject *omobj = NULL, *nmobj;
-	GList *rlist, *mlist;
+	GList *rlist, *mlist, *tlist;
 	gint sel = 0, changed = 0;
 
 	/* Get a list of references and music objects selected. */
@@ -1064,7 +1067,10 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
 
 	/* If change current song, update gui and mpris. */
-	if(g_list_find (mlist, cwin->cstate->curr_mobj)) {
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	tlist = g_list_find (mlist, cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	if(tlist) {
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
 			mpris_update_metadata_changed(cwin);
