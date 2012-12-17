@@ -1076,7 +1076,7 @@ void mpris_update_any(struct con_win *cwin)
 		g_variant_builder_clear(&b);
 	}
 
-	g_free(new_title);
+	g_free(newtitle);
 }
 
 void
