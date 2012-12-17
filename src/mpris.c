@@ -1004,7 +1004,7 @@ void mpris_update_any(struct con_win *cwin)
 {
 	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
-	const gchar *newtitle = NULL;
+	gchar *newtitle = NULL;
 	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
 
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -1014,7 +1014,9 @@ void mpris_update_any(struct con_win *cwin)
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-		newtitle = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
+		g_object_get(cwin->cstate->curr_mobj,
+		             "file", &newtitle,
+		              NULL);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 
@@ -1051,9 +1053,9 @@ void mpris_update_any(struct con_win *cwin)
 		change_detected = TRUE;
 		if(cwin->cmpris2->saved_title)
 			g_free(cwin->cmpris2->saved_title);
-		if(newtitle)
+		if(string_is_not_empty(newtitle))
 			cwin->cmpris2->saved_title = g_strdup(newtitle);
-		else 
+		else
 			cwin->cmpris2->saved_title = NULL;
 		g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, cwin));
 	}
@@ -1073,6 +1075,8 @@ void mpris_update_any(struct con_win *cwin)
 	{
 		g_variant_builder_clear(&b);
 	}
+
+	g_free(new_title);
 }
 
 void
