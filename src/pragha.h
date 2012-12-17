@@ -91,7 +91,7 @@
 
 #if GLIB_CHECK_VERSION (2, 32, 0)
 #define PRAGHA_MUTEX(mtx) GMutex mtx
-#define pragha_mutex_free(mtx) G_STMT_START{ (void)0; }G_STMT_END
+#define pragha_mutex_free(mtx) g_mutex_clear (&(mtx))
 #define pragha_mutex_lock(mtx) g_mutex_lock (&(mtx))
 #define pragha_mutex_unlock(mtx) g_mutex_unlock (&(mtx))
 #define pragha_mutex_create(mtx) g_mutex_init (&(mtx))
