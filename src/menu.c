@@ -803,7 +803,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	/* Update the music object, the gui and them mpris */
 
 	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, omobj);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed);
 
 	__update_current_song_info(cwin);
 
