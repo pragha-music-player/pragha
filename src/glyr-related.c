@@ -90,7 +90,8 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
-	const gchar *artist = NULL, *album = NULL, *lartist = NULL, *lalbum = NULL;
+	const gchar *artist = NULL, *album = NULL;
+	gchar *lartist = NULL, *lalbum = NULL;
 	gchar *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
 	GError *error = NULL;
@@ -114,16 +115,22 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-				lartist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-				lalbum = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+				g_object_get(cwin->cstate->curr_mobj,
+				             "artist", &lartist,
+				             "album", &lalbum,
+				             NULL);
 				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 				if((0 == g_strcmp0(artist, lartist)) &&
 				   (0 == g_strcmp0(album, lalbum))) {
 					pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 					update_album_art(cwin->cstate->curr_mobj, cwin);
 					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 					mpris_update_metadata_changed(cwin);
 				}
+				g_free(lartist);
+				g_free(lalbum);
 			}
 		}
 		else {
@@ -268,7 +275,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist;
+	gchar *artist = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
@@ -276,18 +283,23 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "artist", &artist,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist))
-		return;
+		goto exit;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+
+exit:
+	g_free(artist);
 }
 
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist, *title;
+	gchar *artist = NULL, *title = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
@@ -295,14 +307,20 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist) || string_is_empty(title))
-		return;
+		goto exit;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
+
+exit:
+	g_free(artist);
+	g_free(title);
 }
 
 /* Handlers to get lyric and artist bio of current playlist selection. */
@@ -340,7 +358,7 @@ static void
 related_get_album_art_handler (struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
-	const gchar *artist, *album;
+	gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
@@ -349,12 +367,14 @@ related_get_album_art_handler (struct con_win *cwin)
 		return;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "artist", &artist,
+	             "album", &album,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(artist) || string_is_empty(album))
-		return;
+		goto exit;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
@@ -371,8 +391,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
 	glyr_opt_from(&glyr_info->query, "lastfm;musicbrainz");
 
-	glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
-	glyr_opt_album(&glyr_info->query, (char*)album); //FIXME_GLYR_CAST
+	glyr_opt_artist(&glyr_info->query, artist); //FIXME_GLYR_CAST
+	glyr_opt_album(&glyr_info->query, album); //FIXME_GLYR_CAST
 
 	glyr_info->cwin = cwin;
 
@@ -380,6 +400,9 @@ related_get_album_art_handler (struct con_win *cwin)
 
 exists:
 	g_free(album_art_path);
+exit:
+	g_free(artist);
+	g_free(album);
 }
 
 static gboolean
