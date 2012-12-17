@@ -71,10 +71,10 @@ void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
 	PraghaMusicobject *omobj, *nmobj, *tmobj;
-	const gchar *file, *otitle, *oartist, *oalbum;
+	gchar *file = NULL, *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	const gchar *ntitle, *nartist, *nalbum;
 	gchar *sfile = NULL;
-	gint location_id, changed = 0, prechanged = 0;
+	gint location_id, changed = 0, prechanged = 0, file_type = 0;
 	GPtrArray *file_arr = NULL;
 	GArray *loc_arr = NULL;
 
@@ -84,12 +84,14 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_ref(cwin->cstate->curr_mobj);
 	omobj = cwin->cstate->curr_mobj;
+	g_object_get(omobj,
+	             "file", &file,
+	             "file-type", &file_type,
+	             "title", &otitle,
+	             "artist", &oartist,
+	             "album", &oalbum,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-	file = pragha_musicobject_get_file(omobj);
-	otitle = pragha_musicobject_get_title(omobj);
-	oartist = pragha_musicobject_get_artist(omobj);
-	oalbum = pragha_musicobject_get_album(omobj);
 
 	g_object_ref(cwin->clastfm->nmobj);
 	nmobj = cwin->clastfm->nmobj;
@@ -113,8 +115,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(pragha_musicobject_get_file_type(omobj) != FILE_CDDA &&
-	    pragha_musicobject_get_file_type(omobj) != FILE_HTTP)) {
+	if (G_LIKELY(file_type != FILE_CDDA && file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		sfile = sanitize_string_to_sqlite3(file);
 		location_id = find_location_db(sfile, cwin->cdbase);
@@ -134,7 +135,9 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Update the musicobject, the gui and them mpris */
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(omobj, changed, tmobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* While the dialog is open, the song may have changed or stopped */
 
@@ -150,9 +153,18 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 exit:
 	gtk_widget_hide(cwin->ntag_lastfm_button);
+
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 	g_object_unref(nmobj);
 	g_object_unref(tmobj);
+
+	g_free(file);
+	g_free(otitle);
+	g_free(oartist);
+	g_free(oalbum);
 }
 
 /* Love and unlove music object */
@@ -545,16 +557,21 @@ gpointer
 do_lastfm_get_similar_action (gpointer user_data)
 {
 	AddMusicObjectListData *data;
-	const gchar *title, *artist;
+	gchar *title = NULL, *artist = NULL;
 
 	struct con_win *cwin = user_data;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	data = do_lastfm_get_similar(title, artist, cwin);
+
+	g_free(title);
+	g_free(artist);
 
 	return data;
 }
@@ -582,16 +599,21 @@ gpointer
 do_lastfm_current_song_love (gpointer data)
 {
 	AsycMessageData *msg_data = NULL;
-	const gchar *title, *artist;
+	gchar *title = NULL, *artist = NULL;
 
 	struct con_win *cwin = data;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	msg_data = do_lastfm_love_mobj(title, artist, cwin);
+
+	g_free(title);
+	g_free(artist);
 
 	return msg_data;
 }
@@ -618,16 +640,21 @@ gpointer
 do_lastfm_current_song_unlove (gpointer data)
 {
 	AsycMessageData *msg_data = NULL;
-	const gchar *title, *artist;
+	gchar *title = NULL, *artist = NULL;
 
 	struct con_win *cwin = data;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	msg_data = do_lastfm_unlove_mobj(title, artist, cwin);
+
+	g_free(title);
+	g_free(artist);
 
 	return msg_data;
 }
@@ -655,7 +682,6 @@ do_lastfm_scrob (gpointer data)
 {
 	gint rv;
 	struct con_win *cwin = data;
-	PraghaMusicobject *mobj = NULL;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length;
 	AsycMessageData *msg_data;
@@ -663,9 +689,7 @@ do_lastfm_scrob (gpointer data)
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_ref(cwin->cstate->curr_mobj);
-	mobj = cwin->cstate->curr_mobj;
-	g_object_get(mobj,
+	g_object_get(cwin->cstate->curr_mobj,
 	             "title", &title,
 	             "artist", &artist,
 	             "album", &album,
@@ -675,9 +699,9 @@ do_lastfm_scrob (gpointer data)
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	rv = LASTFM_track_scrobble (cwin->clastfm->session_id,
-	                            (char*)title,
-	                            (char*)album,
-	                            (char*)artist,
+	                            title,
+	                            album,
+	                            artist,
 	                            cwin->clastfm->playback_started,
 	                            length,
 	                            track_no,
@@ -688,7 +712,6 @@ do_lastfm_scrob (gpointer data)
 					     _("Track scrobbled on Last.fm"),
 					     cwin);
 
-	g_object_unref(mobj);
 	g_free(title);
 	g_free(artist);
 	g_free(album);
@@ -732,7 +755,7 @@ do_lastfm_now_playing (gpointer data)
 {
 	AsycMessageData *msg_data = NULL;
 	PraghaMusicobject *omobj, *nmobj;
-	const gchar *title, *artist, *album;
+	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length;
 	LFMList *list = NULL;
 	LASTFM_TRACK_INFO *ntrack = NULL;
@@ -745,18 +768,19 @@ do_lastfm_now_playing (gpointer data)
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_ref(cwin->cstate->curr_mobj);
 	omobj = cwin->cstate->curr_mobj;
+	g_object_get(omobj,
+	             "title", &title,
+	             "artist", &artist,
+	             "album", &album,
+	             "track-no", &track_no,
+	             "length", &length,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	title = pragha_musicobject_get_title(omobj);
-	artist = pragha_musicobject_get_artist(omobj);
-	album = pragha_musicobject_get_album(omobj);
-	length = pragha_musicobject_get_length(omobj);
-	track_no = pragha_musicobject_get_track_no(omobj);
-
 	rv = LASTFM_track_update_now_playing (cwin->clastfm->session_id,
-	                                      (char*)title,
-	                                      (char*)album,
-	                                      (char*)artist,
+	                                      title,
+	                                      album,
+	                                      artist,
 	                                      length,
 	                                      track_no,
 	                                      0,
@@ -778,6 +802,10 @@ do_lastfm_now_playing (gpointer data)
 		}
 
 		if (changed) {
+			/* FIXME: I have no way of knowing if you just change
+			 * the object before, but it's unlikely!
+			 * Also need another mutex to cwin->clastfm->nmobj. */
+			pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 			g_object_set (nmobj,
 			              "file", pragha_musicobject_get_file(omobj),
 			              "file-type", pragha_musicobject_get_file_type(omobj),
@@ -793,6 +821,7 @@ do_lastfm_now_playing (gpointer data)
 			              "channels", pragha_musicobject_get_channels(omobj),
 			              "samplerate", pragha_musicobject_get_samplerate(omobj),
 			              NULL);
+			pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
@@ -807,8 +836,15 @@ do_lastfm_now_playing (gpointer data)
 
 	LASTFM_free_track_info_list(list);
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 	g_object_unref(nmobj);
+
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 
 	return msg_data;
 }
@@ -816,7 +852,7 @@ do_lastfm_now_playing (gpointer data)
 void
 lastfm_now_playing_handler (struct con_win *cwin)
 {
-	const gchar *title, *artist;
+	gchar *title = NULL, *artist = NULL;
 	gint length;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
@@ -834,16 +870,15 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	}
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "title", &title,
+	             "artist", &artist,
+	             "length", &length,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	if (string_is_empty(title) || string_is_empty(artist))
-		return;
-
-	if(length < 30)
-		return;
+	if (string_is_empty(title) || string_is_empty(artist) || (length < 30))
+		goto exit;
 
 	pragha_async_launch(do_lastfm_now_playing,
 			    set_async_finished_message,
@@ -864,6 +899,9 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, length,
 			lastfm_scrob_handler, cwin, NULL);
+exit:
+	g_free(title);
+	g_free(artist);
 
 	return;
 }
