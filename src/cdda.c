@@ -47,8 +47,7 @@ static gint cddb_add_tracks(struct con_win *cwin)
 
 static void add_audio_cd_tracks(struct con_win *cwin)
 {
-
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	gint num_tracks = 0, i = 0, prev_tracks = 0;
 
 	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);

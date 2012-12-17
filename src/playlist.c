@@ -222,7 +222,7 @@ exit_failure:
 static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
 {
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
@@ -236,19 +236,19 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 	if(list != NULL) {
 		for (i=list; i != NULL; i = i->next) {
 			mobj = i->data;
-			if(mobj->file_type != FILE_CDDA &&
-			   mobj->file_type != FILE_HTTP) {
-				base = get_display_filename(mobj->file, TRUE);
+			if(pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+			   pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+				base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
 				if (g_ascii_strcasecmp(base_m3u, base) == 0)
-					uri = get_display_filename(mobj->file, FALSE);
+					uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
 				else
-					uri = g_strdup(mobj->file);
+					uri = g_strdup(pragha_musicobject_get_file(mobj));
 
 				/* Format: "#EXTINF:seconds, title" */
 				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-						      mobj->tags->length,
-						      mobj->tags->title,
+						      pragha_musicobject_get_length(mobj),
+						      pragha_musicobject_get_title(mobj),
 						      uri);
 
 				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
@@ -280,7 +280,7 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 {
 	GList *list, *i;
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
@@ -294,19 +294,19 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 		/* Export all selected tracks to the given file */
 		for (i=list; i != NULL; i = i->next) {
 			mobj=i->data;
-			if (mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP) {
-				base = get_display_filename(mobj->file, TRUE);
+			if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+			    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+				base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
 				if (g_ascii_strcasecmp(base_m3u, base) == 0)
-					uri = get_display_filename(mobj->file, FALSE);
+					uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
 				else
-					uri = g_strdup(mobj->file);
+					uri = g_strdup(pragha_musicobject_get_file(mobj));
 
 				/* Format: "#EXTINF:seconds, title" */
 				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-						      mobj->tags->length,
-						      mobj->tags->title,
+						      pragha_musicobject_get_length(mobj),
+						      pragha_musicobject_get_title(mobj),
 						      uri);
 
 				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
@@ -342,14 +342,15 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 			      struct con_win *cwin)
 {
 	GError *err = NULL;
-	gchar *query, *str, *title, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
+	gchar *query, *str, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
+	const gchar *title;
 	gint playlist_id, location_id, i = 0, ret = 0;
 	gsize bytes = 0;
 	struct db_result result;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
@@ -361,7 +362,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 	base_m3u = get_display_filename(filename, TRUE);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		/* Form a musicobject since length and title are needed */
 
@@ -377,24 +378,24 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 			continue;
 		}
 
-		base = get_display_filename(mobj->file, TRUE);
+		base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
 		if (g_ascii_strcasecmp(base_m3u, base) == 0)
-			uri = get_display_filename(mobj->file, FALSE);
+			uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
 		else
-			uri = g_strdup(mobj->file);
+			uri = g_strdup(pragha_musicobject_get_file(mobj));
 
 		/* If title tag is absent, just store the filename */
 
-		if (mobj->tags->title)
-			title = mobj->tags->title;
+		if (pragha_musicobject_get_title(mobj))
+			title = pragha_musicobject_get_title(mobj);
 		else
 			title = uri;
 
 		/* Format: "#EXTINF:seconds, title" */
 
 		str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-				      mobj->tags->length, title, uri);
+				      pragha_musicobject_get_length(mobj), title, uri);
 
 		status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
 		if (status != G_IO_STATUS_NORMAL) {
@@ -413,7 +414,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 		g_free(base);
 
 		if (mobj) {
-			delete_musicobject(mobj);
+			g_object_unref(mobj);
 			mobj = NULL;
 		}
 	}
@@ -422,7 +423,7 @@ exit:
 	g_free(s_playlist);
 	g_free(base_m3u);
 	if (mobj)
-		delete_musicobject(mobj);
+		g_object_unref(mobj);
 	if (err) {
 		g_error_free(err);
 		err = NULL;
@@ -443,10 +444,10 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if(playlist_id == 0)
@@ -459,7 +460,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
 			mobj = new_musicobject_from_db(location_id, cwin);
@@ -494,9 +495,9 @@ add_playlist_to_mobj_list(gchar *playlist,
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if(playlist_id == 0)
@@ -507,7 +508,7 @@ add_playlist_to_mobj_list(gchar *playlist,
 	exec_sqlite_query(query, cwin->cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
 			mobj = new_musicobject_from_db(location_id, cwin);
@@ -536,9 +537,9 @@ add_radio_to_mobj_list(gchar *radio,
 	gchar *s_radio, *query;
 	gint radio_id, i = 0;
 	struct db_result result;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 
-	s_radio = sanitize_string_sqlite3(radio);
+	s_radio = sanitize_string_to_sqlite3(radio);
 	radio_id = find_radio_db(s_radio, cwin->cdbase);
 
 	if(radio_id == 0)
@@ -637,7 +638,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			s_playlist = sanitize_string_sqlite3(playlist);
+			s_playlist = sanitize_string_to_sqlite3(playlist);
 
 			n_playlist = rename_playlist_dialog(s_playlist, cwin);
 			if(n_playlist != NULL) {
@@ -720,7 +721,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
-					s_playlist = sanitize_string_sqlite3(playlist);
+					s_playlist = sanitize_string_to_sqlite3(playlist);
 
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db(s_playlist, cwin->cdbase);
@@ -1230,7 +1231,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	GSList *list = NULL, *i = NULL;
 	gchar *summary;
 	gint try = 0, added = 0;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 
 	set_watch_cursor (cwin->mainwindow);
 
@@ -1277,7 +1278,7 @@ append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
-		s_file = sanitize_string_sqlite3(file);
+		s_file = sanitize_string_to_sqlite3(file);
 		add_track_playlist_db(s_file, playlist_id, cwin->cdbase);
 		g_free(s_file);
 		g_free(file);
@@ -1291,7 +1292,7 @@ append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GList *mlist = NULL, *i;
 	GSList *files = NULL;
 	gchar *file = NULL;
@@ -1310,14 +1311,14 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	if(mlist != NULL) {
 		for (i=mlist; i != NULL; i = i->next) {
 			mobj = i->data;
-			if (mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP) {
-			    	file = g_strdup(mobj->file);
+			if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+			    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+			    	file = g_strdup(pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);
 			}
-			else if(mobj->file_type == FILE_HTTP) {
+			else if(pragha_musicobject_get_file_type(mobj) == FILE_HTTP) {
 				/* TODO: Fix this negradaaa!. */
-				file = g_strdup_printf("Radio:%s", mobj->file);
+				file = g_strdup_printf("Radio:%s", pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);
 			}
 		}
@@ -1336,12 +1337,12 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 	gchar *s_playlist;
 	gint playlist_id = 0;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 
 	if ((playlist_id = find_playlist_db(s_playlist, cwin->cdbase))) {
 		if (overwrite_existing_playlist(playlist, cwin))
@@ -1362,12 +1363,12 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 	gchar *s_playlist;
 	gint playlist_id;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if (!playlist_id) {
@@ -1386,12 +1387,12 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
 
-	if (!name || !strlen(name)) {
+	if (string_is_empty(name)) {
 		g_warning("Radio name is NULL");
 		return;
 	}
 
-	s_radio = sanitize_string_sqlite3(name);
+	s_radio = sanitize_string_to_sqlite3(name);
 
 	if ((radio_id = find_radio_db(s_radio, cwin->cdbase))) {
 		if (overwrite_existing_playlist(name, cwin))
@@ -1402,7 +1403,7 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 
 	radio_id = add_new_radio_db(s_radio, cwin->cdbase);
 
-	file = sanitize_string_sqlite3(uri);
+	file = sanitize_string_to_sqlite3(uri);
 	add_track_radio_db(file, radio_id, cwin->cdbase);
 	g_free(file);
 

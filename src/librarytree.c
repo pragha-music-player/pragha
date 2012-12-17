@@ -210,9 +210,17 @@ static void add_folder_file(gchar *path, int location_id,
 
 /* Adds an entry to the library tree by tag (genre, artist...) */
 
-static void add_by_tag(gint location_id, gchar *location, gchar *genre,
-	gchar *album, gchar *year, gchar *artist, gchar *track, struct con_win *cwin,
-	GtkTreeModel *model, GtkTreeIter *p_iter)
+static void
+add_child_node_by_tags (GtkTreeModel *model,
+                       GtkTreeIter *p_iter,
+                       gint location_id,
+                       const gchar *location,
+                       const gchar *genre,
+                       const gchar *album,
+                       const gchar *year,
+                       const gchar *artist,
+                       const gchar *track,
+                       struct con_win *cwin)
 {
 	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL;
@@ -229,26 +237,34 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		switch (node_type) {
 			case NODE_TRACK:
 				node_pixbuf = cwin->pixbuf->pixbuf_track;
-				node_data = g_utf8_strlen(track, 4) ? track : get_display_filename(location, FALSE);
-				if (!g_utf8_strlen(track, 4)) need_gfree = TRUE;
+				if (string_is_not_empty(track)) {
+					node_data = (gchar *)track;
+				}
+				else {
+					node_data = get_display_filename(location, FALSE);
+					need_gfree = TRUE;
+				}
 				break;
 			case NODE_ARTIST:
 				node_pixbuf = cwin->pixbuf->pixbuf_artist;
-				node_data = g_utf8_strlen(artist, 4) ? artist : _("Unknown Artist");
+				node_data = string_is_not_empty(artist) ? (gchar *)artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
 				node_pixbuf = cwin->pixbuf->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
-					node_data = g_strconcat ((g_utf8_strlen(year, 4) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 4) ? album : _("Unknown Album"), NULL);
+					node_data = g_strconcat ((string_is_not_empty(year) && (atoi(year) > 0)) ? year : _("Unknown"),
+					                          " - ",
+					                          string_is_not_empty(album) ? album : _("Unknown Album"),
+					                          NULL);
 					need_gfree = TRUE;
 				}
 				else {
-					node_data = g_utf8_strlen(album, 4) ? album : _("Unknown Album");
+					node_data = string_is_not_empty(album) ? (gchar *)album : _("Unknown Album");
 				}
 				break;
 			case NODE_GENRE:
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
-				node_data = g_utf8_strlen(genre, 4) ? genre : _("Unknown Genre");
+				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
@@ -389,7 +405,7 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
 	gint location_id;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gchar *data = NULL;
 	gint j = 0;
 
@@ -1265,7 +1281,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 	if (list) {
 		set_watch_cursor (cwin->mainwindow);
 
-		pragha_playlist_remove_all (cwin->cplaylist, cwin);
+		pragha_playlist_remove_all (cwin->cplaylist);
 
 		/* Add all the rows to the current playlist */
 
@@ -1453,8 +1469,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 {
-	struct tags otag, ntag;
-	struct musicobject *mobj = NULL;
 	enum node_type node_type = 0;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1464,13 +1478,12 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL, *uri = NULL, *file = NULL;
+	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
 	gint elem = 0, ielem;
 	gchar *query = NULL;
 	struct db_result result;
 
-	memset(&otag, 0, sizeof(struct tags));
-	memset(&ntag, 0, sizeof(struct tags));
+	PraghaMusicobject *omobj, *nmobj;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
@@ -1489,43 +1502,31 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		if (node_type == NODE_TRACK || node_type == NODE_BASENAME) {
 			gtk_tree_model_get(model, &iter,
 					   L_LOCATION_ID, &location_id, -1);
-			mobj = new_musicobject_from_db(location_id, cwin);
-			if (!mobj) {
-				g_warning("Unable to retrieve details for "
-					  "location_id : %d",
-					  location_id);
-				goto exit;
-			}
-			else {
-				otag.track_no = mobj->tags->track_no;
-				otag.title = mobj->tags->title;
-				otag.artist = mobj->tags->artist;
-				otag.album = mobj->tags->album;
-				otag.genre = mobj->tags->genre;
-				otag.comment = mobj->tags->comment;
-				otag.year =  mobj->tags->year;
-				uri = mobj->file;
-			}
+
+			omobj = new_musicobject_from_db(location_id, cwin);
 		}
 		else {
+			omobj = pragha_musicobject_new();
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
 
 			switch(node_type) {
 			case NODE_ARTIST:
-				otag.artist = node_data;
+				pragha_musicobject_set_artist(omobj, node_data);
 				break;
 			case NODE_ALBUM:
 				if (cwin->cpref->sort_by_year) {
 					split_album = g_strsplit(node_data, " - ", 2);
-					otag.year = atoi (split_album[0]);
-					otag.album = split_album[1];
+					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
+					pragha_musicobject_set_album(omobj, split_album[1]);
+
 				}
 				else {
-					otag.album = node_data;
+					pragha_musicobject_set_album(omobj, node_data);
+
 				}
 				break;
 			case NODE_GENRE:
-				otag.genre = node_data;
+				pragha_musicobject_set_genre(omobj, node_data);
 				break;
 			default:
 				break;
@@ -1533,7 +1534,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	changed = tag_edit_dialog(&otag, 0, &ntag, uri, cwin);
+	nmobj = pragha_musicobject_new();
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
@@ -1551,7 +1553,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	/* Check if user is trying to set the same track no for multiple tracks */
 	if (changed & TAG_TNO_CHANGED) {
 		if (loc_arr->len > 1) {
-			if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin))
 				goto exit;
 		}
 	}
@@ -1560,13 +1562,13 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
 		if (loc_arr->len > 1) {
-			if (!confirm_title_multiple_tracks(ntag.title, cwin))
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin))
 				goto exit;
 		}
 	}
 
 	/* Updata the db changes */
-	pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+	pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
 	init_library_view(cwin);
 
 	/* Get a array of files and update it */
@@ -1584,7 +1586,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			}
 		}
 	}
-	pragha_update_local_files_change_tag(file_arr, changed, &ntag);
+	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 	g_ptr_array_free(file_arr, TRUE);
 	g_array_free(loc_arr, TRUE);
 
@@ -1594,14 +1596,8 @@ exit:
 	g_free(node_data);
 	g_strfreev (split_album);
 
-	g_free(ntag.title);
-	g_free(ntag.artist);
-	g_free(ntag.album);
-	g_free(ntag.genre);
-	g_free(ntag.comment);
-
-	if (mobj)
-		delete_musicobject(mobj);
+	g_object_unref(nmobj);
+	g_object_unref(omobj);
 		
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
@@ -1787,9 +1783,16 @@ void init_library_view(struct con_win *cwin)
 			
 		exec_sqlite_query(query, cwin->cdbase, &result);
 		for_each_result_row(result, i) {
-			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
-				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
-				cwin, model, &iter);
+			add_child_node_by_tags(model,
+			                       &iter,
+			                       atoi(result.resultp[i+6]),
+			                       result.resultp[i+5],
+			                       result.resultp[i+4],
+			                       result.resultp[i+3],
+			                       result.resultp[i+2],
+			                       result.resultp[i+1],
+			                       result.resultp[i],
+			                       cwin);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)

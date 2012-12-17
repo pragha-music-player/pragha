@@ -663,7 +663,7 @@ GtkWidget* create_playing_box(struct con_win *cwin)
 						      GTK_ICON_SIZE_MENU));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button), _("Last.fm suggested a tag correction"));
 	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
-			 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
+	                 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
 	#endif
 
 	gtk_box_pack_start(GTK_BOX(playing_hbox),
@@ -873,7 +873,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 					GTK_MESSAGE_QUESTION,
 					GTK_BUTTONS_NONE,
 					_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
-					cwin->cstate->curr_mobj->file, error->message);
+					pragha_musicobject_get_file(cwin->cstate->curr_mobj), error->message);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);

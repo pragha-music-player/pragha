@@ -316,7 +316,7 @@ void add_recent_file (const gchar *filename)
 
 void handle_selected_file(gpointer data, gpointer udata)
 {
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	struct con_win *cwin = udata;
 
 	if (!data)
@@ -668,7 +668,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
 	const gchar *uri = NULL, *name = NULL;
 	gchar *clipboard_location;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	gint result;
 
 	/* Create dialog window */
@@ -778,37 +778,32 @@ void next_action (GtkAction *action, struct con_win *cwin)
 
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
-	struct tags otag, ntag;
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
-	gchar *sfile = NULL, *tfile = NULL;
+	gchar *sfile = NULL, *file;
 	gint location_id, changed = 0;
+	PraghaMusicobject *omobj, *nmobj;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	memset(&otag, 0, sizeof(struct tags));
-	memset(&ntag, 0, sizeof(struct tags));
+	/* Set the initial tags. */
+	omobj = cwin->cstate->curr_mobj;
+	g_object_ref(omobj);
 
-	if (cwin->cstate->curr_mobj) {
-		otag.track_no = cwin->cstate->curr_mobj->tags->track_no;
-		otag.title = cwin->cstate->curr_mobj->tags->title;
-		otag.artist = cwin->cstate->curr_mobj->tags->artist;
-		otag.album = cwin->cstate->curr_mobj->tags->album;
-		otag.genre = cwin->cstate->curr_mobj->tags->genre;
-		otag.comment = cwin->cstate->curr_mobj->tags->comment;
-		otag.year =  cwin->cstate->curr_mobj->tags->year;
+	/*New mobj where to place the new tag */
+	nmobj = pragha_musicobject_new();
 
-		changed = tag_edit_dialog(&otag, 0, &ntag, cwin->cstate->curr_mobj->file, cwin);
-	}
+	/* Get new tags. */
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
 
 	/* Update the music object, the gui and them mpris */
 
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, &ntag);
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, cwin->cstate->curr_mobj);
+	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, omobj);
 
 	__update_current_song_info(cwin);
 
@@ -816,34 +811,29 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(cwin->cstate->curr_mobj->file_type != FILE_CDDA &&
-	    cwin->cstate->curr_mobj->file_type != FILE_HTTP)) {
+	if (G_LIKELY(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA &&
+	    pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		sfile = sanitize_string_sqlite3(cwin->cstate->curr_mobj->file);
+		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(omobj));
 		location_id = find_location_db(sfile, cwin->cdbase);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
-			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, &ntag);
+			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
 			init_library_view(cwin);
 		}
 		g_array_free(loc_arr, TRUE);
 		g_free(sfile);
 
 		file_arr = g_ptr_array_new();
-		tfile = g_strdup(cwin->cstate->curr_mobj->file);
-		g_ptr_array_add(file_arr, tfile);
-		pragha_update_local_files_change_tag(file_arr, changed, &ntag);
+		file = g_strdup(pragha_musicobject_get_file(omobj));
+		g_ptr_array_add(file_arr, file);
+		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 		g_ptr_array_free(file_arr, TRUE);
-		g_free(tfile);
 	}
 
 exit:
-	/* Cleanup */
-	g_free(ntag.title);
-	g_free(ntag.artist);
-	g_free(ntag.album);
-	g_free(ntag.genre);
-	g_free(ntag.comment);	
+	g_object_unref(omobj);
+	g_object_unref(nmobj);
 }
 
 /* Handler for the 'Quit' item in the pragha menu */
@@ -1175,8 +1165,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	gint i = 0, location_id = 0;
 	gchar *query;
 	struct db_result result;
-	struct musicobject *mobj;
 	GList *list = NULL;
+	PraghaMusicobject *mobj;
 
 	set_watch_cursor (cwin->mainwindow);
 
@@ -1193,8 +1183,9 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 				g_warning("Unable to retrieve details for"
 					  " location_id : %d",
 					  location_id);
-			else
+			else {
 				list = g_list_prepend(list, mobj);
+			}
 
 			if (pragha_process_gtk_events ()) {
 				sqlite3_free_table(result.resultp);

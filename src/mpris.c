@@ -130,7 +130,7 @@ static const gchar mpris2xml[] =
 		mpris_##x##_put_##y(value, error, cwin);
 #define END_INTERFACE }
 
-static struct musicobject *
+static PraghaMusicobject *
 get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
 {
 	gchar *base = NULL;
@@ -260,7 +260,7 @@ static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* para
 
 static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	if (!cwin->cstate->curr_mobj) {
+	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED) {
 		g_dbus_method_invocation_return_error_literal (invocation,
 				G_DBUS_ERROR, G_DBUS_ERROR_FAILED, "Nothing to seek");
 		return;
@@ -272,7 +272,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	gint64 curr_pos = pragha_backend_get_current_position (cwin->backend) / GST_USECOND;
 	gint64 seek = (curr_pos + param) / GST_MSECOND;
 
-	seek = CLAMP (seek, 0, cwin->cstate->curr_mobj->tags->length);
+	seek = CLAMP (seek, 0, pragha_musicobject_get_length(cwin->cstate->curr_mobj));
 
 	pragha_backend_seek(cwin->backend, seek);
 
@@ -282,7 +282,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gint64 param;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
 	g_variant_get(parameters, "(ox)", &track_id, &param);
@@ -291,8 +291,8 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 	if (mobj != NULL && mobj == cwin->cstate->curr_mobj) {
 		gint seek = (param / 1000000);
 
-		if (seek >= cwin->cstate->curr_mobj->tags->length)
-			seek = cwin->cstate->curr_mobj->tags->length;
+		if (seek >= pragha_musicobject_get_length(cwin->cstate->curr_mobj))
+			seek = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
 		pragha_backend_seek(cwin->backend, seek);
 	}
@@ -321,7 +321,7 @@ seeked_cb (PraghaBackend *backend, gpointer user_data)
 static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	gchar *uri = NULL, *path = NULL;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gboolean happened = FALSE;
 
 	g_variant_get(parameters, "(s)", &uri);
@@ -404,7 +404,7 @@ static void mpris_Player_put_Shuffle (GVariant *value, GError **error, struct co
 	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
 }
 
-static GVariant * handle_get_trackid(struct musicobject *mobj) {
+static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
 	gchar *o = alloca(260);
 	if(NULL == mobj)
 		return g_variant_new_object_path("/");
@@ -412,7 +412,7 @@ static GVariant * handle_get_trackid(struct musicobject *mobj) {
 	return g_variant_new_object_path(o);
 }
 
-void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
+void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *val)
 {
 	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
@@ -420,38 +420,56 @@ void handle_strings_request(GVariantBuilder *b, gchar *tag, gchar *val)
 	g_variant_builder_add (b, "{sv}", tag, vvals);
 }
 
-static void handle_get_metadata(struct musicobject *mobj, GVariantBuilder *b)
+static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 {
-	gchar *date = g_strdup_printf("%d", mobj->tags->year);
-
-	gchar *url = (mobj->file_type == FILE_HTTP || mobj->file_type == FILE_CDDA) ?
-			g_strdup(mobj->file) : g_filename_to_uri(mobj->file, NULL, NULL);
+	const gchar *title, *artist, *album, *genre, *comment, *file;
+	gint file_type, track_no, year, length, bitrate, channels, samplerate;
+	gchar *date = NULL, *url = NULL;
 
 	CDEBUG(DBG_MPRIS, "MPRIS handle get metadata");
+
+	file = pragha_musicobject_get_file(mobj);
+	file_type = pragha_musicobject_get_file_type(mobj);
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+	album = pragha_musicobject_get_album(mobj);
+	genre = pragha_musicobject_get_genre(mobj);
+	track_no = pragha_musicobject_get_track_no(mobj);
+	year = pragha_musicobject_get_year(mobj);
+	comment = pragha_musicobject_get_comment(mobj);
+	length = pragha_musicobject_get_length(mobj);
+	bitrate = pragha_musicobject_get_bitrate(mobj);
+	channels = pragha_musicobject_get_channels(mobj);
+	samplerate = pragha_musicobject_get_samplerate(mobj);
+
+	date = g_strdup_printf("%d", year);
+
+	url = (file_type == FILE_HTTP || file_type == FILE_CDDA) ?
+	       g_strdup(file) : g_filename_to_uri(file, NULL, NULL);
 
 	g_variant_builder_add (b, "{sv}", "mpris:trackid",
 		handle_get_trackid(mobj));
 	g_variant_builder_add (b, "{sv}", "xesam:url",
 		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
-		g_variant_new_string(mobj->tags->title));
-	handle_strings_request(b, "xesam:artist", mobj->tags->artist);
+		g_variant_new_string(title));
+	handle_strings_request(b, "xesam:artist", artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
-		g_variant_new_string(mobj->tags->album));
-	handle_strings_request(b, "xesam:genre", mobj->tags->genre);
+		g_variant_new_string(album));
+	handle_strings_request(b, "xesam:genre", genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
-		g_variant_new_string (date));
+		g_variant_new_string(date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
-		g_variant_new_int32(mobj->tags->track_no));
-	handle_strings_request(b, "xesam:comment", mobj->tags->comment);
+		g_variant_new_int32(track_no));
+	handle_strings_request(b, "xesam:comment", comment);
 	g_variant_builder_add (b, "{sv}", "mpris:length",
-		g_variant_new_int64((gint64)mobj->tags->length * 1000000));
+		g_variant_new_int64((gint64)length * 1000000));
 	g_variant_builder_add (b, "{sv}", "audio-bitrate",
-		g_variant_new_int32(mobj->tags->bitrate));
+		g_variant_new_int32(bitrate));
 	g_variant_builder_add (b, "{sv}", "audio-channels",
-		g_variant_new_int32(mobj->tags->channels));
+		g_variant_new_int32(channels));
 	g_variant_builder_add (b, "{sv}", "audio-samplerate",
-		g_variant_new_int32(mobj->tags->samplerate));
+		g_variant_new_int32(samplerate));
 
 	g_free(date);
 	g_free(url);
@@ -527,12 +545,12 @@ static GVariant* mpris_Player_get_CanGoPrevious (GError **error, struct con_win 
 
 static GVariant* mpris_Player_get_CanPlay (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(NULL != cwin->cstate->curr_mobj);
+	return g_variant_new_boolean(pragha_backend_get_state (cwin->backend) == ST_PAUSED);
 }
 
 static GVariant* mpris_Player_get_CanPause (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_boolean(NULL != cwin->cstate->curr_mobj);
+	return g_variant_new_boolean(pragha_backend_get_state (cwin->backend) == ST_PLAYING);
 }
 
 static GVariant* mpris_Player_get_CanSeek (GError **error, struct con_win *cwin)
@@ -572,7 +590,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	if(found_playlist) {
-		pragha_playlist_remove_all (cwin->cplaylist, cwin);
+		pragha_playlist_remove_all (cwin->cplaylist);
 
 		add_playlist_current_playlist(NULL, found_playlist, cwin);
 
@@ -671,7 +689,7 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 	
 	for(i = 0; i < length; i++) {
 		g_variant_builder_open(&b, G_VARIANT_TYPE("a{sv}"));
-		struct musicobject *mobj= NULL;
+		PraghaMusicobject *mobj= NULL;
 		track_id = g_variant_get_string(g_variant_get_child_value(param1, i), NULL);
 		mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
 		if (mobj) {
@@ -712,7 +730,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 			__non_recur_add(file, TRUE, cwin);
 	}
 	else if (is_playable_file(file)) {
-		struct musicobject *mobj = new_musicobject_from_file(file);
+		PraghaMusicobject *mobj = new_musicobject_from_file(file);
 		if (mobj)
 			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
@@ -740,7 +758,7 @@ static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVar
 
 static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
 	g_variant_get(parameters, "(o)", &track_id);
@@ -763,7 +781,7 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
 {
 	GVariantBuilder builder;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist get Tracks");
@@ -977,7 +995,7 @@ void mpris_update_any(struct con_win *cwin)
 {
 	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
-	gchar *newtitle = NULL;
+	const gchar *newtitle = NULL;
 	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
 
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -986,7 +1004,7 @@ void mpris_update_any(struct con_win *cwin)
 	CDEBUG(DBG_MPRIS, "MPRIS update any");
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-		newtitle = cwin->cstate->curr_mobj->file;
+		newtitle = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
 
@@ -1070,7 +1088,7 @@ mpris_update_metadata_changed(struct con_win *cwin)
 		g_variant_new_tuple(tuples, 3) , NULL);
 }
 
-void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj)
+void mpris_update_mobj_remove(struct con_win *cwin, PraghaMusicobject *mobj)
 {
 
 	GVariant * tuples[1];
@@ -1086,11 +1104,11 @@ void mpris_update_mobj_remove(struct con_win *cwin, struct musicobject *mobj)
 		g_variant_new_tuple(tuples, 1), NULL);
 }
 
-void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, GtkTreeIter *iter)
+void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkTreeIter *iter)
 {
 	GtkTreeModel *model;
 	GtkTreePath *path = NULL;
-	struct musicobject *prev = NULL;
+	PraghaMusicobject *prev = NULL;
 	GVariantBuilder b;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -1126,7 +1144,7 @@ void mpris_update_mobj_added(struct con_win *cwin, struct musicobject *mobj, Gtk
 		g_variant_builder_end(&b), NULL);
 }
 
-void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, gint bitmask) {
+void mpris_update_mobj_changed(struct con_win *cwin, PraghaMusicobject *mobj, gint bitmask) {
 	GVariantBuilder b;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
@@ -1151,7 +1169,7 @@ void mpris_update_mobj_changed(struct con_win *cwin, struct musicobject *mobj, g
 void mpris_update_tracklist_replaced(struct con_win *cwin)
 {
 	GVariantBuilder b;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
 
 	if(NULL == cwin->cmpris2->dbus_connection)

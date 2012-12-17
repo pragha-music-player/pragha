@@ -76,7 +76,6 @@ gint main(gint argc, gchar *argv[])
 	cwin->cstate = g_slice_new0(struct con_state);
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
-	cwin->clastfm->ntags = g_slice_new0(struct tags);
 #endif
 	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
 
@@ -132,7 +131,7 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm_idle(cwin) == -1) {
+	if (init_lastfm(cwin) == -1) {
 		g_critical("Unable to initialize lastfm");
 	}
 	#endif
