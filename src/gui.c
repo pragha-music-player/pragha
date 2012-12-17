@@ -865,17 +865,21 @@ backend_error_dialog_response_cb (GtkDialog *dialog, gint response, struct con_w
 void
 gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
 {
-	struct con_win *cwin = user_data;
 	GtkWidget *dialog;
+	gchar *file = NULL;
+
+	struct con_win *cwin = user_data;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file = g_strdup(pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_QUESTION,
 					GTK_BUTTONS_NONE,
 					_("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
-					pragha_musicobject_get_file(cwin->cstate->curr_mobj), error->message);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+					file, error->message);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
@@ -885,7 +889,10 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	g_signal_connect(G_OBJECT(dialog), "response",
 			 G_CALLBACK(backend_error_dialog_response_cb),
 			 cwin);
+
 	gtk_widget_show_all(dialog);
+
+	g_free(file);
 }
 
 void
