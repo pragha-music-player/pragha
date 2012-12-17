@@ -472,7 +472,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	PraghaMusicobject *nmobj, *omobj;
+	PraghaMusicobject *nmobj;
 	gchar *str = NULL;
 	gint changed = 0, file_type = 0;
 
@@ -484,11 +484,6 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 		return;
 
 	CDEBUG(DBG_BACKEND, "Parse message tag");
-
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	omobj = cwin->cstate->curr_mobj;
-	g_object_ref(omobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	nmobj = pragha_musicobject_new();
 
@@ -507,14 +502,16 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 		g_free(str);
 	}
 
-	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 	gst_tag_list_free(tag_list);
-	g_object_unref(omobj);
 }
 
 void
@@ -547,17 +544,18 @@ pragha_backend_play (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
-	const gchar *file;
-	gchar *uri = NULL;
+	gchar *file = NULL, *uri = NULL;
 	gint file_type = 0;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
-	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "file", &file,
+	             "file-type", &file_type,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(file))
-		return;
+		exit;
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
@@ -571,6 +569,9 @@ pragha_backend_play (PraghaBackend *backend)
 	}
 
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);
+
+exit:
+	g_free(file);
 }
 
 static void
