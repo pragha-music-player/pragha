@@ -520,13 +520,13 @@ gchar* sanitize_string_to_sqlite3(const gchar *str)
 	return ch;
 }
 
-inline gboolean
+gboolean
 string_is_empty(const gchar *str)
 {
 	return (!str || !g_utf8_strlen(str, 4));
 }
 
-inline gboolean
+gboolean
 string_is_not_empty(const gchar *str)
 {
 	return (str && g_utf8_strlen(str, 4));
