@@ -140,7 +140,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 		goto exit;
 
 	if(omobj == cwin->cstate->curr_mobj) {
-		pragha_playlist_update_current_track(cwin->cplaylist, changed, tmobj);
+		pragha_playlist_update_current_track(cwin->cplaylist, changed);
 		__update_current_song_info(cwin);
 		mpris_update_metadata_changed(cwin);
 	}

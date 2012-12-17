@@ -1681,10 +1681,11 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 
 /* Update a track to the current playlist */
 
-void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed, PraghaMusicobject *mobj)
+void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed)
 {
 	GtkTreeModel *model;
 	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_title = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	if (!changed)
 		return;
@@ -1692,6 +1693,8 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	CDEBUG(DBG_VERBOSE, "Track Updates: 0x%x", changed);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
+
+	gtk_tree_model_get(model, iter, P_MOBJ_PTR, &mobj, -1);
 
 	if (changed & TAG_TNO_CHANGED) {
 		ch_track_no = g_strdup_printf("%d", pragha_musicobject_get_track_no(mobj));
@@ -1728,7 +1731,6 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 void
 pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed)
 {
-	PraghaMusicobject *mobj = NULL;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
 	GtkTreePath *path = NULL;
@@ -1738,8 +1740,6 @@ pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *lis
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	for (i = list; i != NULL; i = i->next) {
-		mobj = NULL;
-
 		ref = i->data;
 		path = gtk_tree_row_reference_get_path(ref);
 
@@ -1748,18 +1748,12 @@ pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *lis
 		else
 			continue;
 
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-		if (G_UNLIKELY(mobj == NULL)) {
-			g_warning("Invalid mobj pointer");
-			continue;
-		}
-		pragha_playlist_update_change_tag(cplaylist, &iter, changed, mobj);
+		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
 	}
 }
 
 void
-pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *mobj)
+pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed)
 {
 	GtkTreeModel *model;
 	GtkTreePath *path = NULL;
@@ -1773,7 +1767,7 @@ pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, Pr
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view));
 
 	if (gtk_tree_model_get_iter(model, &iter, path))
-		pragha_playlist_update_change_tag(cplaylist, &iter, changed, mobj);
+		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
 
 	gtk_tree_path_free(path);
 }
