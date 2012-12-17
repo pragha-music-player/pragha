@@ -79,7 +79,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 {
 	gchar *file;
 	DBusError error;
- 	struct musicobject *mobj = NULL; 
+ 	PraghaMusicobject *mobj = NULL;
 	gint prev_tracks = 0;
 
 	dbus_error_init(&error);
@@ -129,18 +129,18 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		dbus_message_append_args(reply_msg,
 			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->file,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->title,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->artist,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->album,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->genre,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->year,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->track_no,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->comment,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->length,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->bitrate,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->channels,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->samplerate,
+			 DBUS_TYPE_STRING, pragha_musicobject_get_file(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_title(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_album(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_genre(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_year(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_track_no(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_comment(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_length(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_bitrate(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_channels(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj),
 			 DBUS_TYPE_INVALID);
 	} else {
 		dbus_message_append_args(reply_msg,

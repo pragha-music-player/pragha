@@ -20,7 +20,7 @@
 
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -59,7 +59,7 @@ void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 
 void __recur_add(const gchar *dir_name, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -98,7 +98,7 @@ void __recur_add(const gchar *dir_name, struct con_win *cwin)
 GList *
 append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;

@@ -79,25 +79,31 @@ void
 show_osd (struct con_win *cwin)
 {
 	GError *error = NULL;
-	gchar *summary, *body, *length;
+	gchar *summary, *body, *slength;
+	const gchar *file, *title, *artist, *album;
+	gint length;
 
 	/* Check if OSD is enabled in preferences */
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	if(g_utf8_strlen(cwin->cstate->curr_mobj->tags->title, 4))
-		summary = g_strdup(cwin->cstate->curr_mobj->tags->title);
-	else
-		summary = g_path_get_basename(cwin->cstate->curr_mobj->file);
+	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 
-	length = convert_length_str(cwin->cstate->curr_mobj->tags->length);
+	if(string_is_not_empty(title))
+		summary = g_strdup(title);
+	else
+		summary = g_path_get_basename(file);
+
+	slength = convert_length_str(length);
 
 	body = g_markup_printf_escaped(_("by <b>%s</b> in <b>%s</b> <b>(%s)</b>"),
-			(cwin->cstate->curr_mobj->tags->artist && strlen(cwin->cstate->curr_mobj->tags->artist)) ?
-			cwin->cstate->curr_mobj->tags->artist : _("Unknown Artist"),
-			(cwin->cstate->curr_mobj->tags->album && strlen(cwin->cstate->curr_mobj->tags->album)) ?
-			cwin->cstate->curr_mobj->tags->album : _("Unknown Album"),
-			length);
+	                               string_is_not_empty(artist) ? artist : _("Unknown Artist"),
+	                               string_is_not_empty(album) ? album : _("Unknown Album"),
+	                               slength);
 
 	/* Create notification instance */
 	#if NOTIFY_CHECK_VERSION (0, 7, 0)
@@ -151,7 +157,7 @@ show_osd (struct con_win *cwin)
 
 	g_free(summary);
 	g_free(body);
-	g_free(length);
+	g_free(slength);
 }
 
 gint

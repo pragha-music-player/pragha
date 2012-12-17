@@ -113,8 +113,8 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
 			if((pragha_backend_get_state (cwin->backend) != ST_STOPPED) &&
-			   (0 == g_strcmp0(artist, cwin->cstate->curr_mobj->tags->artist)) &&
-			   (0 == g_strcmp0(album, cwin->cstate->curr_mobj->tags->album))) {
+			   (0 == g_strcmp0(artist, pragha_musicobject_get_artist(cwin->cstate->curr_mobj))) &&
+			   (0 == g_strcmp0(album, pragha_musicobject_get_album(cwin->cstate->curr_mobj)))) {
 				update_album_art(cwin->cstate->curr_mobj, cwin);
 				mpris_update_metadata_changed(cwin);
 			}
@@ -261,14 +261,16 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = cwin->cstate->curr_mobj->tags->artist;
-
-	CDEBUG(DBG_INFO, "Get Artist info Action");
+	const gchar *artist;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if (strlen(artist) == 0)
+	CDEBUG(DBG_INFO, "Get Artist info Action");
+
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+
+	if (string_is_empty(artist))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -276,16 +278,17 @@ void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
 
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 {
-	const gchar *artist = cwin->cstate->curr_mobj->tags->artist;
-	const gchar *title = cwin->cstate->curr_mobj->tags->title;
-
-	CDEBUG(DBG_INFO, "Get lyrics Action");
+	const gchar *artist, *title;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if ((strlen(artist) == 0) ||
-	    (strlen(title) == 0))
+	CDEBUG(DBG_INFO, "Get lyrics Action");
+
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+
+	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -296,12 +299,12 @@ void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
 void
 related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
-	const gchar *artist = mobj->tags->artist;
+	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	const gchar *artist = pragha_musicobject_get_artist(mobj);
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
 
-	if (strlen(artist) == 0)
+	if (string_is_empty(artist))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
@@ -310,14 +313,13 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 void
 related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	struct musicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
-	const gchar *artist = mobj->tags->artist;
-	const gchar *title = mobj->tags->title;
+	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	const gchar *artist = pragha_musicobject_get_artist(mobj);
+	const gchar *title = pragha_musicobject_get_title(mobj);
 
 	CDEBUG(DBG_INFO, "Get lyrics Action of current playlist selection.");
 
-	if ((strlen(artist) == 0) ||
-	    (strlen(title) == 0))
+	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
@@ -335,12 +337,11 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if ((strlen(cwin->cstate->curr_mobj->tags->artist) == 0) ||
-	    (strlen(cwin->cstate->curr_mobj->tags->album) == 0))
-		return;
+	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 
-	artist = cwin->cstate->curr_mobj->tags->artist;
-	album = cwin->cstate->curr_mobj->tags->album;
+	if (string_is_empty(artist) || string_is_empty(album))
+		return;
 
 	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
 					cwin->cpref->cache_folder,
@@ -401,7 +402,7 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 	if(state != ST_PLAYING)
 		return;
 
-	if(cwin->cstate->curr_mobj->file_type == FILE_HTTP)
+	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_HTTP)
 		return;
 
 	#ifdef HAVE_LIBCLASTFM

@@ -32,6 +32,7 @@ pragha_SOURCES =cdda.c \
 		pragha-filter-dialog.c \
 		pragha-album-art.c \
 		pragha-hig.c \
+		pragha-musicobject.c \
 		pragha-playback.c \
 		pragha-playlist.c \
 		pragha-preferences.c \

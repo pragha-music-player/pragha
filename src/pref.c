@@ -807,9 +807,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save album art pattern */
 
-	if (!cwin->cpref->album_art_pattern ||
-	    (cwin->cpref->album_art_pattern &&
-	     !strlen(cwin->cpref->album_art_pattern))) {
+	if (string_is_empty(cwin->cpref->album_art_pattern)) {
 		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
 					 GROUP_GENERAL) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
@@ -822,7 +820,7 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
-	else if (cwin->cpref->album_art_pattern) {
+	else {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_GENERAL,
 				      KEY_ALBUM_ART_PATTERN,
