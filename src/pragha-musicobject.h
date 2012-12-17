@@ -49,6 +49,8 @@ struct _PraghaMusicobjectClass
 
 
 PraghaMusicobject *pragha_musicobject_new (void);
+PraghaMusicobject *
+pragha_musicobject_dup (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_clean (PraghaMusicobject *musicobject);
 

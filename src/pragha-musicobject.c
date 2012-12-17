@@ -69,6 +69,32 @@ pragha_musicobject_new (void)
 }
 
 /**
+ * pragha_musicobject_dup:
+ *
+ */
+PraghaMusicobject *
+pragha_musicobject_dup (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), NULL);
+
+	return g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     "file", pragha_musicobject_get_file(musicobject),
+	                     "file-type", pragha_musicobject_get_file_type(musicobject),
+	                     "title", pragha_musicobject_get_title(musicobject),
+	                     "artist", pragha_musicobject_get_artist(musicobject),
+	                     "album", pragha_musicobject_get_album(musicobject),
+	                     "genre", pragha_musicobject_get_genre(musicobject),
+	                     "comment", pragha_musicobject_get_comment(musicobject),
+	                     "year", pragha_musicobject_get_year(musicobject),
+	                     "track-no", pragha_musicobject_get_track_no(musicobject),
+	                     "length", pragha_musicobject_get_length(musicobject),
+	                     "bitrate", pragha_musicobject_get_bitrate(musicobject),
+	                     "channels", pragha_musicobject_get_channels(musicobject),
+	                     "samplerate", pragha_musicobject_get_samplerate(musicobject),
+	                     NULL);
+}
+
+/**
  * pragha_musicobject_clean:
  *
  */
