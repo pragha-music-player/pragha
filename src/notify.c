@@ -80,7 +80,7 @@ show_osd (struct con_win *cwin)
 {
 	GError *error = NULL;
 	gchar *summary, *body, *slength;
-	const gchar *file, *title, *artist, *album;
+	gchar *file = NULL, *title = NULL, *artist = NULL, *album = NULL;
 	gint length;
 
 	/* Check if OSD is enabled in preferences */
@@ -88,11 +88,13 @@ show_osd (struct con_win *cwin)
 		return;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
-	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
-	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	g_object_get(cwin->cstate->curr_mobj,
+	             "file", &file,
+	             "title", &title,
+	             "artist", &artist,
+	             "album", &album,
+	             "length", &length,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if(string_is_not_empty(title))
@@ -157,6 +159,10 @@ show_osd (struct con_win *cwin)
 
 	/* Cleanup */
 
+	g_free(file);
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 	g_free(summary);
 	g_free(body);
 	g_free(slength);
