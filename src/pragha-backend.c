@@ -491,7 +491,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
 	{
 		changed |= TAG_ARTIST_CHANGED;
-		pragha_musicobject_set_title(nmobj, str);
+		pragha_musicobject_set_artist(nmobj, str);
 		g_free(str);
 	}
 
