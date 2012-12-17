@@ -576,6 +576,7 @@ struct con_lastfm {
 	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
 	PraghaMusicobject *nmobj;
+	PRAGHA_MUTEX (nmobj_mutex);
 };
 #endif
 
