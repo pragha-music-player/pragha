@@ -21,14 +21,14 @@
 /* Search the album art on cache and create a pixbuf of that file */
 #ifdef HAVE_LIBGLYR
 static gchar*
-get_image_path_from_cache (struct con_win *cwin)
+get_image_path_from_cache (const gchar *artist, const gchar *album, struct con_win *cwin)
 {
 	gchar *path = NULL;
 
 	path = g_strdup_printf("%s/album-%s-%s.jpeg",
 				cwin->cpref->cache_folder,
-				pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
-				pragha_musicobject_get_album(cwin->cstate->curr_mobj));
+				artist,
+				album);
 
 	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		g_free(path);
@@ -130,25 +130,31 @@ get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
 	return NULL;
 }
 
-void __update_progress_song_info(struct con_win *cwin, gint length)
+void __update_progress_song_info(struct con_win *cwin, gint progress)
 {
 	gchar *tot_length = NULL, *cur_pos = NULL, *str_length = NULL, *str_cur_pos = NULL;
+	gint length = 0;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	cur_pos = convert_length_str(length);
+	cur_pos = convert_length_str(progress);
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(cwin->track_time_label), str_cur_pos);
 
-	if(pragha_musicobject_get_length(cwin->cstate->curr_mobj) == 0 || !cwin->cpref->timer_remaining_mode){
-		tot_length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj));
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if(length == 0 || !cwin->cpref->timer_remaining_mode) {
+		tot_length = convert_length_str(length);
 		str_length = g_markup_printf_escaped ("<small>%s</small>", tot_length);
 	}
 	else{
-		tot_length = convert_length_str(pragha_musicobject_get_length(cwin->cstate->curr_mobj) - length);
+		tot_length = convert_length_str(length - progress);
 		str_length = g_markup_printf_escaped ("<small>- %s</small>", tot_length);
 	}
+
 	gtk_label_set_markup (GTK_LABEL(cwin->track_length_label), str_length);
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (cwin->track_length_label));
@@ -172,10 +178,12 @@ void __update_current_song_info(struct con_win *cwin)
 	gchar *str = NULL, *str_title = NULL;
 	const gchar *file, *title, *artist, *album;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
 	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if(string_is_not_empty(title))
 		str_title = g_strdup(title);
@@ -222,7 +230,9 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 {
 	gdouble fraction = 0;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	gint length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (length > 0) {
 		fraction = (gdouble)progress / (gdouble)length;
@@ -231,8 +241,10 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 					      fraction);
 	}
 	else {
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		pragha_musicobject_set_length(cwin->cstate->curr_mobj,
 			GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend)));
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 }
 
@@ -271,7 +283,9 @@ void track_progress_change_cb(GtkWidget *widget,
 	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
 		return;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (length == 0)
 		return;
@@ -300,7 +314,9 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 		    pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
 		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP)) {
 			#ifdef HAVE_LIBGLYR
-			album_path = get_image_path_from_cache(cwin);
+			album_path = get_image_path_from_cache(pragha_musicobject_get_artist(mobj),
+			                                       pragha_musicobject_get_album(mobj),
+			                                       cwin);
 			#endif
 			if (album_path == NULL) {
 				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));

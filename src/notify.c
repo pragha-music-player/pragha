@@ -87,11 +87,13 @@ show_osd (struct con_win *cwin)
 	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
 	title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
 	artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
 	album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if(string_is_not_empty(title))
 		summary = g_strdup(title);

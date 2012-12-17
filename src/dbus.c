@@ -127,6 +127,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 	}
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		dbus_message_append_args(reply_msg,
 			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,
 			 DBUS_TYPE_STRING, pragha_musicobject_get_file(cwin->cstate->curr_mobj),
@@ -142,6 +143,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 			 DBUS_TYPE_INT32, pragha_musicobject_get_channels(cwin->cstate->curr_mobj),
 			 DBUS_TYPE_INT32, pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj),
 			 DBUS_TYPE_INVALID);
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	} else {
 		dbus_message_append_args(reply_msg,
 					 DBUS_TYPE_STRING, &stopped_str,

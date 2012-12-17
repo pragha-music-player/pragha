@@ -99,8 +99,13 @@ static void
 pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
 {
 	GObject *source;
+	gint file_type = 0;
 
-	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA)
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if(file_type != FILE_CDDA)
 		return;
 
 	g_object_get (obj, "source", &source, NULL);
@@ -362,8 +367,10 @@ pragha_backend_stop (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	if(cwin->cstate->curr_mobj)
 		g_object_unref(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
 }
@@ -467,16 +474,21 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	GstTagList *tag_list;
 	PraghaMusicobject *nmobj, *omobj;
 	gchar *str = NULL;
+	gint changed = 0, file_type = 0;
 
-	gint changed = 0;
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)
+	if(file_type != FILE_HTTP)
 		return;
 
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	omobj = cwin->cstate->curr_mobj;
 	g_object_ref(omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	nmobj = pragha_musicobject_new();
 
@@ -522,8 +534,10 @@ pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
 		pragha_backend_stop(backend);
 	}
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	cwin->cstate->curr_mobj = mobj;
 	g_object_ref(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	pragha_backend_play(backend);
 }
@@ -533,19 +547,25 @@ pragha_backend_play (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
+	const gchar *file;
 	gchar *uri = NULL;
+	gint file_type = 0;
 
-	if (!pragha_musicobject_get_file(cwin->cstate->curr_mobj))
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
+	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if (string_is_empty(file))
 		return;
 
-	CDEBUG(DBG_BACKEND, "Playing: %s", pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
-	if(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_CDDA ||
-	   pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) == FILE_HTTP) {
-		g_object_set(priv->pipeline, "uri", pragha_musicobject_get_file(cwin->cstate->curr_mobj), NULL);
+	if(file_type == FILE_CDDA || file_type == FILE_HTTP) {
+		g_object_set(priv->pipeline, "uri", file, NULL);
 	}
 	else {
-		uri = g_filename_to_uri (pragha_musicobject_get_file(cwin->cstate->curr_mobj), NULL, NULL);
+		uri = g_filename_to_uri (file, NULL, NULL);
 		g_object_set(priv->pipeline, "uri", uri, NULL);
 		g_free (uri);
 	}
