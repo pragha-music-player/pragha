@@ -397,10 +397,10 @@ static void get_location_ids(GtkTreePath *path,
 /* Add all the tracks under the given path to the current playlist */
 
 GList *
-append_library_row_to_mobj_list(GtkTreePath *path,
-				GtkTreeModel *row_model,
-				GList *list,
-				struct con_win *cwin)
+append_library_row_to_mobj_list(struct con_dbase *cdbase,
+                                GtkTreePath *path,
+                                GtkTreeModel *row_model,
+                                GList *list)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
@@ -425,21 +425,21 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 			/* For all other node types do a recursive add */
 			while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
 				path = gtk_tree_model_get_path(row_model, &t_iter);
-				list = append_library_row_to_mobj_list(path, row_model, list, cwin);
+				list = append_library_row_to_mobj_list(cdbase, path, row_model, list);
 				gtk_tree_path_free(path);
 			}
 			break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			mobj = new_musicobject_from_db(cdbase, location_id);
 			if(G_LIKELY(mobj))
 				list = g_list_append(list, mobj);
 			break;
 		case NODE_PLAYLIST:
-			list = add_playlist_to_mobj_list(cwin->cdbase, data, list);
+			list = add_playlist_to_mobj_list(cdbase, data, list);
 			break;
 		case NODE_RADIO:
-			list = add_radio_to_mobj_list(cwin->cdbase, data, list);
+			list = add_radio_to_mobj_list(cdbase, data, list);
 			break;
 		default:
 			break;
@@ -612,7 +612,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 		set_watch_cursor (cwin->mainwindow);
 		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-		list = append_library_row_to_mobj_list(path, filter_model, list, cwin);
+		list = append_library_row_to_mobj_list(cwin->cdbase, path, filter_model, list);
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
 						 list);
 		g_list_free(list);
@@ -661,7 +661,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			list = append_library_row_to_mobj_list (path, model, list, cwin);
+			list = append_library_row_to_mobj_list (cwin->cdbase, path, model, list);
 
 			if(list) {
 				prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
@@ -1287,7 +1287,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			mlist = append_library_row_to_mobj_list (path, model, mlist, cwin);
+			mlist = append_library_row_to_mobj_list (cwin->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1342,7 +1342,7 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			mlist = append_library_row_to_mobj_list(path, model, mlist, cwin);
+			mlist = append_library_row_to_mobj_list(cwin->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
