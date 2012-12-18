@@ -1269,22 +1269,22 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 /* Appennd a tracks list to a playlist using the given type */
 
 static void
-append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
+append_files_to_playlist(struct con_dbase *cdbase, GSList *list, gint playlist_id)
 {
 	gchar *file, *s_file;
 	GSList *i = NULL;
 
-	db_begin_transaction(cwin->cdbase);
+	db_begin_transaction(cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
 		s_file = sanitize_string_to_sqlite3(file);
-		add_track_playlist_db(s_file, playlist_id, cwin->cdbase);
+		add_track_playlist_db(s_file, playlist_id, cdbase);
 		g_free(s_file);
 		g_free(file);
 	}
 
-	db_commit_transaction(cwin->cdbase);
+	db_commit_transaction(cdbase);
 }
 
 /* Save tracks to a playlist using the given type */
@@ -1326,7 +1326,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	}
 
 	if(files != NULL) {
-		append_files_to_playlist(files, playlist_id, cwin);
+		append_files_to_playlist(cwin->cdbase, files, playlist_id);
 		g_slist_free(files);
 	}
 }
