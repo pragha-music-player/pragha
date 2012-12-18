@@ -450,8 +450,10 @@ append_library_row_to_mobj_list(struct con_dbase *cdbase,
 	return list;
 }
 
-static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
-			       struct con_win *cwin)
+static void
+delete_row_from_db(struct con_dbase *cdbase,
+                   GtkTreePath *path,
+                   GtkTreeModel *model)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
@@ -464,7 +466,7 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-		delete_location_db(location_id, cwin->cdbase);
+		delete_location_db(location_id, cdbase);
 	}
 
 	/* For all other node types do a recursive deletion */
@@ -475,11 +477,11 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
 					   L_LOCATION_ID, &location_id, -1);
-			delete_location_db(location_id, cwin->cdbase);
+			delete_location_db(location_id, cdbase);
 		}
 		else {
 			path = gtk_tree_model_get_path(model, &t_iter);
-			delete_row_from_db(path, model, cwin);
+			delete_row_from_db(cdbase, path, model);
 			gtk_tree_path_free(path);
 		}
 
@@ -1391,7 +1393,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				delete_row_from_db(path, model, cwin);
+				delete_row_from_db(cwin->cdbase, path, model);
 
 				/* Have to give control to GTK periodically ... */
 				if (pragha_process_gtk_events ())
