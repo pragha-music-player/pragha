@@ -1258,25 +1258,25 @@ void about_widget(struct con_win *cwin)
 void home_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(cwin, uri);
+	open_url(uri, cwin->mainwindow);
 }
 
 void community_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
-	open_url(cwin, uri);
+	open_url(uri, cwin->mainwindow);
 }
 
 void wiki_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(cwin, uri);
+	open_url(uri, cwin->mainwindow);
 }
 
 void translate_action(GtkAction *action, struct con_win *cwin)
 {
 	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
-	open_url(cwin, uri);
+	open_url(uri, cwin->mainwindow);
 }
 
 void about_action(GtkAction *action, struct con_win *cwin)

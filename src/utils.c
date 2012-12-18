@@ -837,7 +837,7 @@ pragha_process_gtk_events ()
 }
 
 /* callback used to open default browser when URLs got clicked */
-void open_url(struct con_win *cwin, const gchar *url)
+void open_url(const gchar *url, GtkWidget *parent)
 {
 	gboolean success = TRUE;
 	const gchar *argv[3];
@@ -862,7 +862,7 @@ void open_url(struct con_win *cwin, const gchar *url)
 	/* No method was found to open the URL */
 	if (!success) {
 		GtkWidget *d;
-		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
+		d = gtk_message_dialog_new (GTK_WINDOW (parent),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 					"%s", _("Unable to open the browser"));

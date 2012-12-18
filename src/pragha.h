@@ -1152,7 +1152,7 @@ void free_str_list(GSList *list);
 gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gboolean validate_album_art_pattern(const gchar *pattern);
 gboolean pragha_process_gtk_events ();
-void open_url( struct con_win *cwin, const gchar *url);
+void open_url(const gchar *url, GtkWidget *parent);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 gboolean is_incompatible_upgrade(struct con_win *cwin);
 
