@@ -219,55 +219,55 @@ exit_failure:
 	return NULL;
 }
 
-static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+static gint
+save_mobj_list_to_m3u_playlist(GList *list, GIOChannel *chan, gchar *filename)
 {
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
 	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
+	GList *i;
 	gint ret = 0;
-	GList *list = NULL, *i;
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+	/* Export all selected tracks to the given file */
+	for (i=list; i != NULL; i = i->next) {
+		mobj = i->data;
+		if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+			base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
-	if(list != NULL) {
-		for (i=list; i != NULL; i = i->next) {
-			mobj = i->data;
-			if(pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-			   pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
-				base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
+			if (g_ascii_strcasecmp(base_m3u, base) == 0)
+				uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
+			else
+				uri = g_strdup(pragha_musicobject_get_file(mobj));
 
-				if (g_ascii_strcasecmp(base_m3u, base) == 0)
-					uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
-				else
-					uri = g_strdup(pragha_musicobject_get_file(mobj));
+			/* Format: "#EXTINF:seconds, title" */
+			str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
+					      pragha_musicobject_get_length(mobj),
+					      pragha_musicobject_get_title(mobj),
+					      uri);
 
-				/* Format: "#EXTINF:seconds, title" */
-				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-						      pragha_musicobject_get_length(mobj),
-						      pragha_musicobject_get_title(mobj),
-						      uri);
-
-				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-				if (status != G_IO_STATUS_NORMAL) {
-					g_critical("Unable to write to M3U playlist: %s", filename);
-					ret = -1;
-					goto exit;
-				}
-				g_free(base);
-				g_free(uri);
+			status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
+			if (status != G_IO_STATUS_NORMAL) {
+				g_critical("Unable to write to M3U playlist: %s", filename);
+				ret = -1;
+				goto exit_list;
 			}
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return 0;
+			g_free(base);
+			g_free(uri);
 		}
-		g_list_free(list);
+
+		/* Have to give control to GTK periodically ... */
+		if (pragha_process_gtk_events ()) {
+			g_list_free(list);
+			return 0;
+		}
 	}
 
-exit:
+exit_list:
 	g_free(base_m3u);
 	if (err) {
 		g_error_free(err);
@@ -276,65 +276,33 @@ exit:
 	return ret;
 }
 
+static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+{
+	gint ret = 0;
+	GList *list = NULL;
+
+	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+
+	if(list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
+		g_list_free(list);
+	}
+
+	return ret;
+}
+
 static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
 {
-	GList *list, *i;
-	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	PraghaMusicobject *mobj = NULL;
-	GIOStatus status;
-	gsize bytes = 0;
-	GError *err = NULL;
+	GList *list = NULL;
 	gint ret = 0;
-
-	base_m3u = get_display_filename(filename, TRUE);
 
 	list = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
 
-	if (list) {
-		/* Export all selected tracks to the given file */
-		for (i=list; i != NULL; i = i->next) {
-			mobj=i->data;
-			if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-			    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
-				base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
-
-				if (g_ascii_strcasecmp(base_m3u, base) == 0)
-					uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
-				else
-					uri = g_strdup(pragha_musicobject_get_file(mobj));
-
-				/* Format: "#EXTINF:seconds, title" */
-				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-						      pragha_musicobject_get_length(mobj),
-						      pragha_musicobject_get_title(mobj),
-						      uri);
-
-				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-				if (status != G_IO_STATUS_NORMAL) {
-					g_critical("Unable to write to M3U playlist: %s", filename);
-					ret = -1;
-					goto exit_list;
-				}
-				g_free(base);
-				g_free(uri);
-			}
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ()) {
-				g_list_free(list);
-				return 0;
-			}
-		}
-	}
-
-exit_list:
-	g_free(base_m3u);
-	if (list)
+	if (list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
 		g_list_free(list);
-	if (err) {
-		g_error_free(err);
-		err = NULL;
 	}
+
 	return ret;
 }
 
