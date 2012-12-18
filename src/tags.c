@@ -137,13 +137,13 @@ static void add_entry_tag_completion(gchar *entry, GtkTreeModel *model)
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, entry, -1);
 }
 
-gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
+gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	gint result;
 	gboolean ret = FALSE;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
@@ -167,13 +167,13 @@ gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin)
 	return ret;
 }
 
-gboolean confirm_title_multiple_tracks(const gchar *title, struct con_win *cwin)
+gboolean confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	gint result;
 	gboolean ret = FALSE;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
@@ -1036,7 +1036,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* Check if user is trying to set the same track no for multiple tracks */
 	if (changed & TAG_TNO_CHANGED) {
 		if (sel > 1) {
-			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin))
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
 				goto exit;
 		}
 	}
@@ -1045,7 +1045,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
 		if (sel > 1) {
-			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin))
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
 				goto exit;
 		}
 	}

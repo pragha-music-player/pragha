@@ -1555,7 +1555,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	/* Check if user is trying to set the same track no for multiple tracks */
 	if (changed & TAG_TNO_CHANGED) {
 		if (loc_arr->len > 1) {
-			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin))
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
 				goto exit;
 		}
 	}
@@ -1564,7 +1564,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
 		if (loc_arr->len > 1) {
-			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin))
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
 				goto exit;
 		}
 	}
