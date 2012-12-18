@@ -3083,7 +3083,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 				mobj = new_musicobject_from_file(result.resultp[i]);
 		}
 		else {
-			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"), cwin);
+			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"));
 		}
 		append_current_playlist(cwin->cplaylist, model, mobj);
 		g_free(file);

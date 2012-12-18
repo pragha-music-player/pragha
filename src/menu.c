@@ -727,7 +727,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
 				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
 
-			mobj = new_musicobject_from_location(uri, name, cwin);
+			mobj = new_musicobject_from_location(uri, name);
 
 			append_current_playlist(cwin->cplaylist, NULL, mobj);
 			update_status_bar_playtime(cwin);

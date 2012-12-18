@@ -161,7 +161,7 @@ new_musicobject_from_cdda(struct con_win *cwin,
 }
 
 PraghaMusicobject *
-new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin)
+new_musicobject_from_location(const gchar *uri, const gchar *name)
 {
 	PraghaMusicobject *mobj;
 	gchar *file = NULL;
