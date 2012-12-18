@@ -306,97 +306,57 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 	return ret;
 }
 
-static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
-			      struct con_dbase *cdbase)
+GList *
+pragha_get_mobj_list_of_playlist(struct con_dbase *cdbase, gchar *playlist)
 {
-	GError *err = NULL;
-	gchar *query, *str, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	const gchar *title;
-	gint playlist_id, location_id, i = 0, ret = 0;
-	gsize bytes = 0;
+	gchar *query, *file = NULL, *s_playlist;
+	gint playlist_id = 0, location_id = 0, i = 0;
 	struct db_result result;
 	PraghaMusicobject *mobj = NULL;
-	GIOStatus status;
+	GList *list = NULL;
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	if (!exec_sqlite_query(query, cdbase, &result)) {
-		g_free(s_playlist);
-		return -1;
-	}
-
-	base_m3u = get_display_filename(filename, TRUE);
+	if (!exec_sqlite_query(query, cdbase, &result))
+		goto exit;
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
-
-		/* Form a musicobject since length and title are needed */
 
 		if ((location_id = find_location_db(file, cdbase)))
 			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		if (!mobj) {
-			g_warning("Unable to create musicobject for M3U playlist: %s",
-				  filename);
-			g_free(file);
-			continue;
-		}
+		if (G_LIKELY(mobj))
+			list = g_list_prepend(list, mobj);
 
-		base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
-
-		if (g_ascii_strcasecmp(base_m3u, base) == 0)
-			uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
-		else
-			uri = g_strdup(pragha_musicobject_get_file(mobj));
-
-		/* If title tag is absent, just store the filename */
-
-		if (pragha_musicobject_get_title(mobj))
-			title = pragha_musicobject_get_title(mobj);
-		else
-			title = uri;
-
-		/* Format: "#EXTINF:seconds, title" */
-
-		str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-				      pragha_musicobject_get_length(mobj), title, uri);
-
-		status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-		if (status != G_IO_STATUS_NORMAL) {
-			g_critical("Unable to write to M3U playlist: %s", filename);
-			g_free(uri);
-			g_free(file);
-			g_free(str);
-			g_free(base);
-			ret = -1;
-			goto exit;
-		}
-
-		g_free(str);
 		g_free(file);
-		g_free(uri);
-		g_free(base);
-
-		if (mobj) {
-			g_object_unref(mobj);
-			mobj = NULL;
-		}
 	}
 
 exit:
-	g_free(s_playlist);
-	g_free(base_m3u);
-	if (mobj)
-		g_object_unref(mobj);
-	if (err) {
-		g_error_free(err);
-		err = NULL;
-	}
 	sqlite3_free_table(result.resultp);
+	g_free(s_playlist);
+
+	return list;
+}
+
+static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
+			      struct con_dbase *cdbase)
+{
+	GList *list = NULL;
+	gint ret = 0;
+
+	list = pragha_get_mobj_list_of_playlist(cdbase, playlist);
+
+	if (list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
+
+		g_list_foreach(list, (GFunc) g_object_unref, NULL);
+		g_list_free(list);
+	}
 
 	return ret;
 }
