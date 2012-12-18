@@ -327,7 +327,7 @@ album_art_frame_press_callback (GtkWidget      *event_box,
 	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
 	{
 		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (cwin->albumart), NULL, NULL);
-		open_url (cwin, uri);
+		open_url(uri, cwin->mainwindow);
 		g_free (uri);
 	}
 

@@ -251,7 +251,7 @@ directory_pressed (GtkEntry       *entry,
 {
 	if (position == GTK_ENTRY_ICON_SECONDARY && data->file) {
 		gchar *uri = path_get_dir_as_uri (data->file);
-		open_url (data->cwin, uri);
+		open_url(uri, data->cwin->mainwindow);
 		g_free (uri);
 	}
 }
@@ -269,7 +269,7 @@ popup_menu_open_folder (GtkMenuItem *menuitem, gpointer storage)
 	file = gtk_entry_get_text (GTK_ENTRY(entry_file));
 	uri = path_get_dir_as_uri (file);
 
-	open_url (cwin, uri);
+	open_url(uri, cwin->mainwindow);
 	g_free (uri);
 }
 
