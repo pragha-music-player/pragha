@@ -436,10 +436,10 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 				list = g_list_append(list, mobj);
 			break;
 		case NODE_PLAYLIST:
-			list = add_playlist_to_mobj_list(data, list, cwin);
+			list = add_playlist_to_mobj_list(cwin->cdbase, data, list);
 			break;
 		case NODE_RADIO:
-			list = add_radio_to_mobj_list(data, list, cwin);
+			list = add_radio_to_mobj_list(cwin->cdbase, data, list);
 			break;
 		default:
 			break;
