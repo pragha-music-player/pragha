@@ -344,7 +344,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 			list = g_list_prepend(list, mobj);
 		}
 		sqlite3_free_table(result.resultp);

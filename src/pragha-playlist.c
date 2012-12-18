@@ -2680,7 +2680,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 				case NODE_BASENAME:
 				case NODE_TRACK:
 					gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
-					mobj = new_musicobject_from_db(location_id, cwin);
+					mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 					list = g_list_prepend(list, mobj);
 					break;
 				case NODE_PLAYLIST:
@@ -3078,7 +3078,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:") == FALSE) {
 			if ((location_id = find_location_db(file, cwin->cdbase)))
-				mobj = new_musicobject_from_db(location_id, cwin);
+				mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 			else
 				mobj = new_musicobject_from_file(result.resultp[i]);
 		}
