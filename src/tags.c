@@ -257,17 +257,17 @@ directory_pressed (GtkEntry       *entry,
 static void
 popup_menu_open_folder (GtkMenuItem *menuitem, gpointer storage)
 {
-	GtkWidget *entry_file;
+	GtkWidget *entry_file, *toplevel;
 	const gchar *file;
 	gchar *uri;
 
 	entry_file = g_object_get_data (storage, "entry_file");
-	struct con_win *cwin = g_object_get_data (storage, "cwin");
-
 	file = gtk_entry_get_text (GTK_ENTRY(entry_file));
 	uri = path_get_dir_as_uri (file);
 
-	open_url(uri, cwin->mainwindow);
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(entry_file));
+
+	open_url(uri, toplevel);
 	g_free (uri);
 }
 
@@ -832,7 +832,6 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	g_object_set_data(storage, "entry_genre", entry_genre);
 	g_object_set_data(storage, "entry_comment", entry_comment);
 	g_object_set_data(storage, "entry_file", entry_file);
-	g_object_set_data(storage, "cwin", cwin);
 
 	g_signal_connect (G_OBJECT(entry_file),
 			"populate-popup",
