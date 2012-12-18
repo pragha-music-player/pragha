@@ -339,7 +339,7 @@ exit_list:
 }
 
 static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
-			      struct con_win *cwin)
+			      struct con_dbase *cdbase)
 {
 	GError *err = NULL;
 	gchar *query, *str, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
@@ -351,10 +351,10 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 	GIOStatus status;
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	playlist_id = find_playlist_db(s_playlist, cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if (!exec_sqlite_query(query, cdbase, &result)) {
 		g_free(s_playlist);
 		return -1;
 	}
@@ -366,8 +366,8 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 
 		/* Form a musicobject since length and title are needed */
 
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+		if ((location_id = find_location_db(file, cdbase)))
+			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
@@ -905,7 +905,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 				if (save_m3u_playlist(chan, playlist,
-						      filename, cwin) < 0) {
+						      filename, cwin->cdbase) < 0) {
 					g_warning("Unable to save M3U playlist: %s",
 						  filename);
 					g_free(playlist);
