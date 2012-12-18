@@ -488,9 +488,9 @@ bad:
 /* Append the given playlist to the mobj list. */
 
 GList *
-add_playlist_to_mobj_list(gchar *playlist,
-			  GList *list,
-			  struct con_win *cwin)
+add_playlist_to_mobj_list(struct con_dbase *cdbase,
+                          gchar *playlist,
+                          GList *list)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
@@ -498,20 +498,20 @@ add_playlist_to_mobj_list(gchar *playlist,
 	PraghaMusicobject *mobj;
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	playlist_id = find_playlist_db(s_playlist, cdbase);
 
 	if(playlist_id == 0)
 		goto bad;
 
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	exec_sqlite_query(query, cdbase, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+		if ((location_id = find_location_db(file, cdbase)))
+			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
@@ -530,9 +530,9 @@ bad:
 /* Append the given radio to the mobj list. */
 
 GList *
-add_radio_to_mobj_list(gchar *radio,
-		       GList *list,
-		       struct con_win *cwin)
+add_radio_to_mobj_list(struct con_dbase *cdbase,
+                       gchar *radio,
+                       GList *list)
 {
 	gchar *s_radio, *query;
 	gint radio_id, i = 0;
@@ -540,7 +540,7 @@ add_radio_to_mobj_list(gchar *radio,
 	PraghaMusicobject *mobj;
 
 	s_radio = sanitize_string_to_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cwin->cdbase);
+	radio_id = find_radio_db(s_radio, cdbase);
 
 	if(radio_id == 0)
 		goto bad;
@@ -548,7 +548,7 @@ add_radio_to_mobj_list(gchar *radio,
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
 
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	exec_sqlite_query(query, cdbase, &result);
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio);
 
