@@ -784,8 +784,8 @@ void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed,
 /* Tag functions */
 gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
 gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);
-gboolean confirm_tno_multiple_tracks(gint tno, struct con_win *cwin);
-gboolean confirm_title_multiple_tracks(const gchar *title, struct con_win *cwin);
+gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent);
+gboolean confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent);
 void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMusicobject *mobj);
 gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin);
 void refresh_tag_completion_entries(struct con_win *cwin);
