@@ -306,50 +306,13 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 	return ret;
 }
 
-GList *
-pragha_get_mobj_list_of_playlist(struct con_dbase *cdbase, gchar *playlist)
-{
-	gchar *query, *file = NULL, *s_playlist;
-	gint playlist_id = 0, location_id = 0, i = 0;
-	struct db_result result;
-	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
-
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cdbase);
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	if (!exec_sqlite_query(query, cdbase, &result))
-		goto exit;
-
-	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
-
-		if ((location_id = find_location_db(file, cdbase)))
-			mobj = new_musicobject_from_db(cdbase, location_id);
-		else
-			mobj = new_musicobject_from_file(result.resultp[i]);
-
-		if (G_LIKELY(mobj))
-			list = g_list_prepend(list, mobj);
-
-		g_free(file);
-	}
-
-exit:
-	sqlite3_free_table(result.resultp);
-	g_free(s_playlist);
-
-	return list;
-}
-
 static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
 			      struct con_dbase *cdbase)
 {
 	GList *list = NULL;
 	gint ret = 0;
 
-	list = pragha_get_mobj_list_of_playlist(cdbase, playlist);
+	list = add_playlist_to_mobj_list(cdbase, playlist, list);
 
 	if (list != NULL) {
 		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
@@ -369,48 +332,17 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 
 void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin)
 {
-	gchar *s_playlist, *query, *file;
-	gint playlist_id, location_id, i = 0;
-	struct db_result result;
-	PraghaMusicobject *mobj;
 	GList *list = NULL;
-
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
-
-	if(playlist_id == 0)
-		goto bad;
 
 	set_watch_cursor (cwin->mainwindow);
 
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
-
-	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
-
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
-		else
-			mobj = new_musicobject_from_file(result.resultp[i]);
-
-		if(G_LIKELY(mobj))
-			list = g_list_append(list, mobj);
-
-		g_free(file);
-	}
+	list = add_playlist_to_mobj_list(cwin->cdbase, playlist, list);
 
 	if(list) {
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 		update_status_bar_playtime(cwin);
 	}
 	remove_watch_cursor (cwin->mainwindow);
-
-	sqlite3_free_table(result.resultp);
-
-bad:
-	g_free(s_playlist);
 }
 
 /* Append the given playlist to the mobj list. */
