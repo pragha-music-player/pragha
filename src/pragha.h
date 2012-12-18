@@ -778,7 +778,7 @@ GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);
 PraghaMusicobject* new_musicobject_from_db(struct con_dbase *cdbase, gint location_id);
 PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name, struct con_win *cwin);
+PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
 
 /* Tag functions */

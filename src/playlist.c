@@ -550,7 +550,7 @@ add_radio_to_mobj_list(gchar *radio,
 
 	exec_sqlite_query(query, cwin->cdbase, &result);
 	for_each_result_row(result, i) {
-		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+		mobj = new_musicobject_from_location(result.resultp[i], radio);
 
 		list = g_list_append(list, mobj);
 
