@@ -18,11 +18,6 @@
 
 #include "pragha.h"
 
-typedef struct directory_pressed_data {
-	struct con_win *cwin;
-	const gchar *file;
-} directory_pressed_data_t;
-
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
 {
@@ -245,13 +240,16 @@ clear_pressed (GtkEntry       *entry,
 
 static void
 directory_pressed (GtkEntry       *entry,
-		gint            position,
-		GdkEventButton *event,
-		directory_pressed_data_t *data)
+                   gint            position,
+                   GdkEventButton *event,
+                   gchar const *data)
 {
-	if (position == GTK_ENTRY_ICON_SECONDARY && data->file) {
-		gchar *uri = path_get_dir_as_uri (data->file);
-		open_url(uri, data->cwin->mainwindow);
+	GtkWidget  *toplevel;
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(entry));
+
+	if (position == GTK_ENTRY_ICON_SECONDARY) {
+		gchar *uri = path_get_dir_as_uri (data);
+		open_url(uri, toplevel);
 		g_free (uri);
 	}
 }
@@ -759,10 +757,6 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	if(prechanged & TAG_COMMENT_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_comment), TRUE);
 
-	directory_pressed_data_t directory_pressed_data;
-	directory_pressed_data.cwin = cwin;
-	directory_pressed_data.file = ofile;
-
 	/* Connect to check the save changes when change the entry. */
 
 	g_signal_connect(G_OBJECT(entry_title),
@@ -821,10 +815,12 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 			"icon-press",
 			G_CALLBACK (clear_pressed),
 			NULL);
-	g_signal_connect (G_OBJECT(entry_file),
-			"icon-press",
-			G_CALLBACK (directory_pressed),
-			&directory_pressed_data);
+	if(ofile) {
+		g_signal_connect (G_OBJECT(entry_file),
+				"icon-press",
+				G_CALLBACK (directory_pressed),
+				(gpointer)ofile);
+	}
 
 	/* Genereate storage of gtk_entry and cwin,
 	 *  and add popup menu to copy selection to tags. */
