@@ -431,7 +431,7 @@ append_library_row_to_mobj_list(GtkTreePath *path,
 			break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 			if(G_LIKELY(mobj))
 				list = g_list_append(list, mobj);
 			break;
@@ -1503,7 +1503,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get(model, &iter,
 					   L_LOCATION_ID, &location_id, -1);
 
-			omobj = new_musicobject_from_db(location_id, cwin);
+			omobj = new_musicobject_from_db(cwin->cdbase, location_id);
 		}
 		else {
 			omobj = pragha_musicobject_new();

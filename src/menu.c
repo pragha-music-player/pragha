@@ -1177,7 +1177,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i]);
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 
 			if (!mobj)
 				g_warning("Unable to retrieve details for"

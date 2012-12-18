@@ -367,7 +367,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 		/* Form a musicobject since length and title are needed */
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
@@ -463,7 +463,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
@@ -511,7 +511,7 @@ add_playlist_to_mobj_list(gchar *playlist,
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
 		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
