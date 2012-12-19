@@ -85,7 +85,7 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 	              "album", "",
 	              "genre", "",
 	              "comment", "",
-	              "year", "",
+	              "year", 0,
 	              "track-no", 0,
 	              "length", 0,
 	              "bitrate", 0,
