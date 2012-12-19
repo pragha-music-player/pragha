@@ -1677,6 +1677,10 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 	remove_watch_cursor (cwin->mainwindow);
 
 	update_status_bar_playtime(cwin);
+
+	GtkTreeModel *model;
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_view));
+	gtk_list_store_clear(PRAGHA_LIST(model));
 }
 
 /* Update a track to the current playlist */

@@ -1158,6 +1158,41 @@ exit:
 	g_object_unref(cancellable);
 }
 
+void
+add_libary_to_custom_list(struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	gint i = 0, location_id = 0;
+	gchar *query;
+	struct db_result result;
+	PraghaMusicobject *mobj;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->playlist_view));
+
+	query = g_strdup_printf("SELECT id FROM LOCATION;");
+
+	g_object_ref(model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_view), NULL);
+
+	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+		for_each_result_row(result, i) {
+			location_id = atoi(result.resultp[i]);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+
+			pragha_list_append_song(cwin->playlist, mobj);
+
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+		}
+		sqlite3_free_table(result.resultp);
+	}
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->playlist_view), model);
+	g_object_unref(model);
+}
+
 /* Handler for 'Add All' action in the Tools menu */
 
 void add_libary_action(GtkAction *action, struct con_win *cwin)
@@ -1205,6 +1240,10 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	update_status_bar_playtime(cwin);
 
 	g_list_free(list);
+
+	set_watch_cursor (cwin->mainwindow);
+	add_libary_to_custom_list(cwin);
+	remove_watch_cursor (cwin->mainwindow);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */

@@ -582,9 +582,238 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 /* Externally visible functions */
 /********************************/
 
+static void
+create_current_playlist_columns2(GtkTreeView *view)
+{
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkWidget *label_track,
+		*label_title,
+		*label_artist,
+		*label_album,
+		*label_genre,
+		*label_bitrate,
+		*label_year,
+		*label_comment,
+		*label_length,
+		*label_filename;
+
+	label_track = gtk_label_new(_("Track"));
+	label_title = gtk_label_new(_("Title"));
+	label_artist = gtk_label_new(_("Artist"));
+	label_album = gtk_label_new(_("Album"));
+	label_genre = gtk_label_new(_("Genre"));
+	label_bitrate = gtk_label_new(_("Bitrate"));
+	label_year = gtk_label_new(_("Year"));
+	label_comment = gtk_label_new(_("Comment"));
+	label_length = gtk_label_new(_("Length"));
+	label_filename = gtk_label_new(_("Filename"));
+
+	/* Column : Track No */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_TRACK_NO,
+							  NULL);
+
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_TRACK_NO);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_track);
+	gtk_widget_show(label_track);
+
+	/* Column : Title */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_TITLE,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_TITLE);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_title);
+	gtk_widget_show(label_title);
+
+	/* Column : Artist */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  P_ARTIST,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_ARTIST);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_artist);
+	gtk_widget_show(label_artist);
+
+	/* Column : Album */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  P_ALBUM,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_album);
+	gtk_widget_show(label_album);
+
+	/* Column : Genre */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  P_GENRE,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_GENRE);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_genre);
+	gtk_widget_show(label_genre);
+
+	/* Column : Bitrate */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  P_BITRATE,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_BITRATE);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_bitrate);
+	gtk_widget_show(label_bitrate);
+
+	/* Column : Year */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_YEAR,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_YEAR);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_year);
+	gtk_widget_show(label_year);
+
+	/* Column : Comment */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_COMMENT,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_COMMENT);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_comment);
+	gtk_widget_show(label_comment);
+
+	/* Column : Length */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_LENGTH,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_LENGTH);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_length);
+	gtk_widget_show(label_length);
+
+	/* Column : Filename */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_TRACK_NO_STR,
+							  renderer,
+							  "text",
+							  PRAGHA_LIST_COL_FILENAME,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_FILENAME);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_filename);
+	gtk_widget_show(label_filename);
+}
+
+GtkWidget *
+create_view_and_model (struct con_win *cwin)
+{
+	GtkWidget  *view;
+	PraghaList *list;
+
+	list = pragha_list_new();
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list));
+
+	create_current_playlist_columns2(GTK_TREE_VIEW(view));
+
+	cwin->playlist = list;
+	cwin->playlist_view = view;
+
+	return view;
+}
+
+GtkWidget *
+create_widget (struct con_win *cwin)
+{
+	GtkWidget *view, *scrollwin;
+
+	scrollwin = gtk_scrolled_window_new(NULL,NULL);
+
+	view = create_view_and_model(cwin);
+
+	gtk_container_add(GTK_CONTAINER(scrollwin), view);
+
+	return scrollwin;
+}
+
 GtkWidget* create_main_region(struct con_win *cwin)
 {
-	GtkWidget *hpane;
+	GtkWidget *hpane, *hpane2;
 	GtkWidget *browse_mode;
 	PraghaPlaylist *cplaylist;
 
@@ -607,7 +836,12 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	/* Pack everything into the hpane */
 
 	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (hpane), pragha_playlist_get_widget(cplaylist), TRUE, FALSE);
+
+	hpane2 = gtk_hpaned_new();
+	gtk_paned_pack1 (GTK_PANED (hpane2), create_widget(cwin), FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (hpane2), pragha_playlist_get_widget(cplaylist), TRUE, FALSE);
+
+	gtk_paned_pack2 (GTK_PANED (hpane), hpane2, TRUE, FALSE);
 
 	/* Store references*/
 

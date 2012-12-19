@@ -78,6 +78,7 @@
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
 #include "pragha-musicobject.h"
+#include "pragha-list.h"
 #include "pragha-preferences.h"
 #include "gtkcellrendererbubble.h"
 
@@ -630,6 +631,8 @@ struct con_win {
 	#endif
 	struct con_mpris2 *cmpris2;
 	struct con_gnome_media_keys *cgnome_media_keys;
+	PraghaList *playlist;
+	GtkWidget *playlist_view;
 	GtkWidget *mainwindow;
 	GtkWidget *toolbar;
 	GtkWidget *info_box;
