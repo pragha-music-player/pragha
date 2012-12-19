@@ -83,8 +83,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Get all info of current track */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_ref(cwin->cstate->curr_mobj);
-	omobj = cwin->cstate->curr_mobj;
+	omobj = g_object_ref(cwin->cstate->curr_mobj);
 	g_object_get(omobj,
 	             "file", &file,
 	             "file-type", &file_type,
@@ -96,8 +95,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Get all info of suggestions */
 	pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
-	g_object_ref(cwin->clastfm->nmobj);
-	nmobj = cwin->clastfm->nmobj;
+	nmobj = g_object_ref(cwin->clastfm->nmobj);
 	g_object_get(nmobj,
 	             "title", &ntitle,
 	             "artist", &nartist,
