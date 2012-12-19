@@ -532,8 +532,7 @@ pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
 	}
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	cwin->cstate->curr_mobj = mobj;
-	g_object_ref(cwin->cstate->curr_mobj);
+	cwin->cstate->curr_mobj = g_object_ref(mobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	pragha_backend_play(backend);

@@ -789,9 +789,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Set the initial tags. */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	omobj = cwin->cstate->curr_mobj;
-	g_object_ref(omobj);
-	g_object_get(cwin->cstate->curr_mobj,
+	omobj = g_object_ref(cwin->cstate->curr_mobj);
+	g_object_get(omobj,
 	             "file-type",&file_type,
 	             "file", &file,
 	             NULL);
@@ -812,9 +811,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 	__update_current_song_info(cwin);
 
 	mpris_update_metadata_changed(cwin);
