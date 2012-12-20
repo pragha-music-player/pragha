@@ -836,12 +836,23 @@ static void pixbufs_free (struct pixbuf *pixbuf)
 
 void gui_free (struct con_win *cwin)
 {
+	const gchar *user_config_dir;
+	gchar *pragha_accels_path = NULL;
+
+	/* Save menu accelerators edited */
+
+	user_config_dir = g_get_user_config_dir();
+	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/accels.scm", NULL);
+	gtk_accel_map_save (pragha_accels_path);
+
+	/* Free memory */
+
 	g_object_unref(cwin->library_store);
 
 	pixbufs_free(cwin->pixbuf);
 	cwin->pixbuf = NULL;
-
 	gtk_widget_destroy(GTK_WIDGET(cwin->albumart));
+	g_free(pragha_accels_path);
 }
 
 static void
