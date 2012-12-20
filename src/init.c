@@ -865,6 +865,16 @@ void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
 	gboolean shuffle, repeat;
+	const gchar *user_config_dir;
+	gchar *pragha_accels_path = NULL;
+
+	/* First init menu accelerators edited */
+
+	user_config_dir = g_get_user_config_dir();
+	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/accels.scm", NULL);
+	gtk_accel_map_load (pragha_accels_path);
+
+	/* Init state of menus */
 
 	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
 	repeat = pragha_preferences_get_repeat(cwin->preferences);
@@ -889,6 +899,8 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
+
+	g_free(pragha_accels_path);
 }
 
 void init_pixbufs(struct con_win *cwin)
