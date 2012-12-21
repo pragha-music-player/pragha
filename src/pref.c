@@ -69,8 +69,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		/* Audio preferences */
 		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->audio_sink_combo_w));
 		if(audio_sink) {
-			g_free(cwin->cpref->audio_sink);
-			cwin->cpref->audio_sink = audio_sink;
+			pragha_preferences_set_audio_sink(cwin->preferences, audio_sink);
 		}
 
 		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_device_w));
@@ -561,24 +560,25 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
+	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
 	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
 	/* Audio Options */
 
-	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+	if (audio_sink) {
+		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->preferences_w->audio_sink_combo_w),
 						 1);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->preferences_w->audio_sink_combo_w),
 						 2);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->preferences_w->audio_sink_combo_w),
 						 3);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->preferences_w->audio_sink_combo_w),
 						 4);
@@ -588,14 +588,14 @@ static void update_preferences(struct con_win *cwin)
 						 0);
 	}
 
-	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+	if (audio_sink) {
+		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			update_audio_device_alsa(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
 			update_audio_device_oss4(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
 			update_audio_device_oss(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
 			update_audio_device_pulse(cwin);
 		else
 			update_audio_device_default(cwin);
@@ -1086,13 +1086,6 @@ void save_preferences(struct con_win *cwin)
 			       cwin->cpref->sort_by_year);
 
 	/* Audio Options */
-
-	/* Save Audio sink */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_SINK,
-			      cwin->cpref->audio_sink);
 
 	/* Save Audio device */
 
@@ -1794,7 +1787,6 @@ void preferences_free (struct con_pref *cpref)
 #endif
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
-	g_free(cpref->audio_sink);
 	g_free(cpref->audio_device);
 	g_free(cpref->start_mode);
 	free_str_list(cpref->library_dir);
