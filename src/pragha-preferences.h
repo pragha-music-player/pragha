@@ -142,6 +142,13 @@ pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
 gboolean
 pragha_preferences_get_restore_playlist (PraghaPreferences *preferences);
 
+const gchar *
+pragha_preferences_get_audio_sink (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_audio_sink (PraghaPreferences *preferences,
+                                   const gchar *audio_sink);
+
 gboolean
 pragha_preferences_get_software_mixer (PraghaPreferences *preferences);
 

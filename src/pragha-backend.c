@@ -886,19 +886,21 @@ gint backend_init (struct con_win *cwin)
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
 
-	if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK)) {
+	const gchar *sink_pref = pragha_preferences_get_audio_sink(cwin->preferences);
+
+	if (!g_ascii_strcasecmp(sink_pref, ALSA_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
 		audiosink = "alsasink";
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK)) {
+	else if (!g_ascii_strcasecmp(sink_pref, OSS4_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
 		audiosink = "oss4sink";
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK)) {
+	else if (!g_ascii_strcasecmp(sink_pref, OSS_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
 		audiosink = "osssink";
 	}
-	else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK)) {
+	else if (!g_ascii_strcasecmp(sink_pref, PULSE_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
 		audiosink = "pulsesink";
 	}

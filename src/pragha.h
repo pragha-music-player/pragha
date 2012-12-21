@@ -478,7 +478,6 @@ typedef struct {
 struct con_pref {
 	enum library_view cur_library_view;
 	gchar *installed_version;
-	gchar *audio_sink;
 	gchar *album_art_pattern;
 	gchar *start_mode;
 	gchar *audio_device;
