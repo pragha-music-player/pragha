@@ -265,19 +265,6 @@ gint init_config(struct con_win *cwin)
 			sidebar_size_f = TRUE;
 		}
 
-		/* Retrieve Audio preferences */
-
-		cwin->cpref->audio_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_device) {
-			g_error_free(error);
-			error = NULL;
-			audio_device_f = TRUE;
-		}
-
 		/* Retrieve Collection preferences */
 
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
@@ -746,8 +733,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || controls_below_f)
 		cwin->cpref->controls_below = FALSE;
-	if (all_f || audio_device_f)
-		cwin->cpref->audio_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lastfm_support = FALSE;
