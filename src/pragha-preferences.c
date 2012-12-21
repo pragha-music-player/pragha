@@ -35,6 +35,7 @@ struct _PraghaPreferencesPrivate
    gboolean   restore_playlist;
    /* Audio preferences. */
    gchar     *audio_sink;
+   gchar     *audio_device;
    gboolean   software_mixer;
    gchar     *audio_cd_device;
    /* Window preferences. */
@@ -51,6 +52,7 @@ enum
    PROP_USE_HINT,
    PROP_RESTORE_PLAYLIST,
    PROP_AUDIO_SINK,
+   PROP_AUDIO_DEVICE,
    PROP_SOFTWARE_MIXER,
    PROP_AUDIO_CD_DEVICE,
    PROP_LATERAL_PANEL,
@@ -424,6 +426,34 @@ pragha_preferences_set_audio_sink (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_audio_device:
+ *
+ */
+const gchar *
+pragha_preferences_get_audio_device (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   return preferences->priv->audio_device;
+}
+
+/**
+ * pragha_preferences_set_audio_device:
+ *
+ */
+void
+pragha_preferences_set_audio_device (PraghaPreferences *preferences,
+                                     const gchar *audio_device)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   g_free(preferences->priv->audio_device);
+   preferences->priv->audio_device = g_strdup(audio_device);
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_AUDIO_DEVICE]);
+}
+
+/**
  * pragha_preferences_get_software_mixer:
  *
  */
@@ -547,6 +577,10 @@ pragha_preferences_finalize (GObject *object)
 			 GROUP_AUDIO,
 			 KEY_AUDIO_SINK,
 			 priv->audio_sink);
+   g_key_file_set_string(priv->rc_keyfile,
+			 GROUP_AUDIO,
+			 KEY_AUDIO_DEVICE,
+			 priv->audio_device);
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_AUDIO,
                           KEY_SOFTWARE_MIXER,
@@ -575,6 +609,7 @@ pragha_preferences_finalize (GObject *object)
    g_key_file_free(priv->rc_keyfile);
    g_free(priv->rc_filepath);
    g_free(priv->audio_sink);
+   g_free(priv->audio_device);
    g_free(priv->audio_cd_device);
 
    G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
@@ -609,6 +644,9 @@ pragha_preferences_get_property (GObject *object,
       break;
    case PROP_AUDIO_SINK:
       g_value_set_string (value, pragha_preferences_get_audio_sink(preferences));
+      break;
+   case PROP_AUDIO_DEVICE:
+      g_value_set_string (value, pragha_preferences_get_audio_device(preferences));
       break;
    case PROP_SOFTWARE_MIXER:
       g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
@@ -653,6 +691,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_AUDIO_SINK:
       pragha_preferences_set_audio_sink(preferences, g_value_get_string(value));
+      break;
+   case PROP_AUDIO_DEVICE:
+      pragha_preferences_set_audio_device(preferences, g_value_get_string(value));
       break;
    case PROP_SOFTWARE_MIXER:
       pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
@@ -764,6 +805,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                           G_PARAM_STATIC_STRINGS);
 
    /**
+    * PraghaPreferences:audio_device:
+    *
+    */
+   gParamSpecs[PROP_AUDIO_DEVICE] =
+      g_param_spec_string("audio-device",
+                          "AudioDevice",
+                          "Audio Device",
+                          ALSA_DEFAULT_DEVICE,
+                          G_PARAM_READWRITE |
+                          G_PARAM_STATIC_STRINGS);
+
+   /**
     * PraghaPreferences:software_mixer:
     *
     */
@@ -807,7 +860,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
    gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
-   gchar *audio_sink, *audio_cd_device;
+   gchar *audio_sink, *audio_device, *audio_cd_device;
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
    GError *error = NULL;
@@ -946,6 +999,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
       pragha_preferences_set_audio_sink(preferences, audio_sink);
    }
 
+   audio_device = g_key_file_get_string(priv->rc_keyfile,
+                                        GROUP_AUDIO,
+                                        KEY_AUDIO_DEVICE,
+                                        &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_audio_device(preferences, audio_device);
+   }
+
    software_mixer = g_key_file_get_boolean(priv->rc_keyfile,
                                            GROUP_AUDIO,
                                            KEY_SOFTWARE_MIXER,
@@ -983,6 +1048,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
    }
 
    g_free(audio_sink);
+   g_free(audio_device);
    g_free(audio_cd_device);
 }
 

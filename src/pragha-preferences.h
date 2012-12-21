@@ -149,6 +149,13 @@ void
 pragha_preferences_set_audio_sink (PraghaPreferences *preferences,
                                    const gchar *audio_sink);
 
+const gchar *
+pragha_preferences_get_audio_device (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_audio_device (PraghaPreferences *preferences,
+                                     const gchar *audio_device);
+
 gboolean
 pragha_preferences_get_software_mixer (PraghaPreferences *preferences);
 

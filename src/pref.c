@@ -74,8 +74,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_device_w));
 		if(audio_device) {
-			g_free(cwin->cpref->audio_device);
-			cwin->cpref->audio_device = g_strdup(audio_device);
+			pragha_preferences_set_audio_device(cwin->preferences, audio_device);
 		}
 
 		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w));
@@ -561,6 +560,7 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeModel *model;
 	GError *error = NULL;
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
+	const gchar *audio_device = pragha_preferences_get_audio_device(cwin->preferences);
 	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
 	/* Audio Options */
@@ -601,9 +601,9 @@ static void update_preferences(struct con_win *cwin)
 			update_audio_device_default(cwin);
 	}
 
-	if (cwin->cpref->audio_device)
+	if (audio_device)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_device_w),
-				   cwin->cpref->audio_device);
+				   audio_device);
 
 	if (audio_cd_device)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
@@ -1086,13 +1086,6 @@ void save_preferences(struct con_win *cwin)
 			       cwin->cpref->sort_by_year);
 
 	/* Audio Options */
-
-	/* Save Audio device */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_DEVICE,
-			      cwin->cpref->audio_device);
 
 	/* Save volume */
 
@@ -1787,7 +1780,6 @@ void preferences_free (struct con_pref *cpref)
 #endif
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
-	g_free(cpref->audio_device);
 	g_free(cpref->start_mode);
 	free_str_list(cpref->library_dir);
 	free_str_list(cpref->lib_add);

@@ -912,10 +912,12 @@ gint backend_init (struct con_win *cwin)
 
 	priv->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
+	const gchar *audio_device_pref = pragha_preferences_get_audio_device(cwin->preferences);
+
 	if (priv->audio_sink != NULL) {
 		/* Set the audio device to use. */
-		if (can_set_device && cwin->cpref->audio_device != NULL && *cwin->cpref->audio_device != '\0')
-			g_object_set(priv->audio_sink, "device", cwin->cpref->audio_device, NULL);
+		if (can_set_device && string_is_not_empty(audio_device_pref))
+			g_object_set(priv->audio_sink, "device", audio_device_pref, NULL);
 
 		/* Test 10bands equalizer and test it. */
 		priv->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
