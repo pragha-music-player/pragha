@@ -70,6 +70,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->audio_sink_combo_w));
 		if(audio_sink) {
 			pragha_preferences_set_audio_sink(cwin->preferences, audio_sink);
+			g_free(audio_sink);
 		}
 
 		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_device_w));
