@@ -517,7 +517,7 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_AUDIO,
                           KEY_SOFTWARE_MIXER,
                           priv->software_mixer);
-   if (priv->audio_cd_device && strlen(priv->audio_cd_device))
+   if (string_is_not_empty(priv->audio_cd_device))
       g_key_file_set_string(priv->rc_keyfile,
                             GROUP_AUDIO,
                             KEY_AUDIO_CD_DEVICE,
