@@ -17,3 +17,4 @@ src/pragha-lastfm.c
 src/glyr-related.c
 src/info-bar-import-music.c
 src/pragha-backend.c
+data/pragha.desktop.in
