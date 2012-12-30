@@ -23,15 +23,20 @@ iconsdir = $(datadir)/icons/hicolor/128x128/apps
 icons_DATA = data/pragha.png
 
 desktopdir = $(datadir)/applications
-desktop_DATA = data/pragha.desktop
+desktop_in_files = data/pragha.desktop.in
+desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
+@INTLTOOL_DESKTOP_RULE@
 
 EXTRA_DIST = 		\
 	$(text_DATA)	\
 	$(doc_DATA)	\
 	$(image_DATA)	\
-	$(desktop_DATA)	\
+	$(desktop_in_files)	\
 	$(icons_DATA)	\
 	$(man_MANS)
+
+CLEANFILES =	\
+	$(desktop_DATA)
 
 distclean-local:
 	rm -rf *.cache *~

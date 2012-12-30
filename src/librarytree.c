@@ -25,9 +25,12 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 	GtkTreeIter *p_iter, GtkTreeModel *model)
 {
 	gchar *data = NULL;
-	gint i = 0, cmp;
+	gboolean valid;
+	gint cmp;
 
-	while (gtk_tree_model_iter_nth_child(model, iter, p_iter, i++)) {
+	valid = gtk_tree_model_iter_children(model, iter, p_iter);
+
+	while (valid) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &data, -1);
 		if (data) {
 			cmp = g_ascii_strcasecmp (data, node_data);
@@ -41,6 +44,7 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 			}
 		g_free(data);
 		}
+		valid = gtk_tree_model_iter_next(model, iter);
 	}
 	return FALSE;
 }
@@ -59,50 +63,91 @@ static void add_child_node_by_tag(GtkTreeModel *model, GtkTreeIter *iter,
 		L_NODE_DATA, node_data,
 		L_NODE_TYPE, node_type,
 		L_LOCATION_ID, location_id,
+		L_MACH, FALSE,
 		L_VISIBILE, TRUE, -1);
+}
+
+static void
+add_child_node_folder(GtkTreeModel *model,
+		      GtkTreeIter *iter,
+		      GtkTreeIter *p_iter,
+		      const gchar *node_data,
+		      struct con_win *cwin)
+{
+	GtkTreeIter l_iter;
+	gchar *data = NULL;
+	gint l_node_type;
+	gboolean valid;
+
+	/* Find position of the last directory that is a child of p_iter */
+	valid = gtk_tree_model_iter_children(model, &l_iter, p_iter);
+	while (valid) {
+		gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
+		if (l_node_type != NODE_FOLDER)
+			break;
+		gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
+		if (g_ascii_strcasecmp(data, node_data) >= 0) {
+			g_free(data);
+			break;
+		}
+		g_free(data);
+
+		valid = gtk_tree_model_iter_next(model, &l_iter);
+	}
+
+	/* Insert the new folder after the last subdirectory by order */
+	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, node_data,
+			   L_NODE_TYPE, NODE_FOLDER,
+			   L_LOCATION_ID, 0,
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
+			   -1);
 }
 
 /* Appends a child (iter) to p_iter with given data. NOTE that iter
  * and p_iter must be created outside this function */
 
-static void add_child_node_by_folder(GtkTreeModel *model, GtkTreeIter *iter,
-	GtkTreeIter *p_iter, GdkPixbuf *pixbuf, const gchar *node_data, 
-	int node_type, int location_id)
+static void
+add_child_node_file(GtkTreeModel *model,
+		    GtkTreeIter *iter,
+		    GtkTreeIter *p_iter,
+		    const gchar *node_data,
+		    int location_id,
+		    struct con_win *cwin)
 {
 	GtkTreeIter l_iter;
 	gchar *data = NULL;
-	gint i = 0, pos = 0, l_node_type;
-       
-	if (node_type == NODE_FOLDER) {
-		/* Find position of the last directory that is a child of p_iter */
-		while (gtk_tree_model_iter_nth_child(model, &l_iter, p_iter, i++)) {
-			gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
-			if (l_node_type != NODE_FOLDER)
-				break;
-			gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
-			if (g_ascii_strcasecmp(data, node_data) < 0)
-				pos++;
-			g_free(data);
-		}
-	}
-	else {
-		/* Find position of the last file that is a child of p_iter */
-		while (gtk_tree_model_iter_nth_child(model, &l_iter, p_iter, i++)) {
-			gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
-			gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
+	gint l_node_type;
+	gboolean valid;
 
-			if ((l_node_type == NODE_FOLDER) || (g_ascii_strcasecmp(data, node_data) < 0))
-				pos++;
-            		g_free(data);
+	/* Find position of the last file that is a child of p_iter */
+	valid = gtk_tree_model_iter_children(model, &l_iter, p_iter);
+	while (valid) {
+		gtk_tree_model_get(model, &l_iter, L_NODE_TYPE, &l_node_type, -1);
+		gtk_tree_model_get(model, &l_iter, L_NODE_DATA, &data, -1);
+
+		if ((l_node_type == NODE_BASENAME) && (g_ascii_strcasecmp(data, node_data) >= 0)) {
+			g_free(data);
+			break;
 		}
+		g_free(data);
+
+		valid = gtk_tree_model_iter_next(model, &l_iter);
 	}
-	/* Insert the new file after the last subdirectory/file by order */
-	gtk_tree_store_insert_with_values (GTK_TREE_STORE(model), iter, p_iter, pos,
-					L_PIXBUF, pixbuf,
-					L_NODE_DATA, node_data,
-					L_NODE_TYPE, node_type,
-					L_LOCATION_ID, location_id,
-					L_VISIBILE, TRUE, -1);
+
+	/* Insert the new file after the last file by order */
+	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
+			   L_PIXBUF, cwin->pixbuf->pixbuf_track,
+			   L_NODE_DATA, node_data,
+			   L_NODE_TYPE, NODE_BASENAME,
+			   L_LOCATION_ID, location_id,
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
+			   -1);
 }
 
 /* Adds a file and its parent directories to the library tree */
@@ -136,11 +181,7 @@ static void add_folder_file(gchar *path, int location_id,
 	/* If not fuse_folders add the prefix */
 	if (!cwin->cpref->fuse_folders) {
 		if (!find_child_node(prefix, &search_iter, p_iter, model)) {
-			add_child_node_by_folder(model, &iter, p_iter,
-						cwin->pixbuf->pixbuf_dir,
-						prefix,
-						NODE_FOLDER,
-						0);
+			add_child_node_folder(model, &iter, p_iter, prefix, cwin);
 			p_iter = &iter;
 		}
 		else {
@@ -152,11 +193,10 @@ static void add_folder_file(gchar *path, int location_id,
 	/* Add all subdirectories and filename to the tree */
 	for (i = 0; subpaths[i]; i++) {
 		if (!find_child_node(subpaths[i], &search_iter, p_iter, model)) {
-			add_child_node_by_folder(model, &iter, p_iter,
-						(i < len) ? cwin->pixbuf->pixbuf_dir : cwin->pixbuf->pixbuf_track,
-						subpaths[i],
-						(i < len) ? NODE_FOLDER : NODE_BASENAME,
-						(i < len) ? 0 : location_id);
+			if(i < len)
+				add_child_node_folder(model, &iter, p_iter, subpaths[i], cwin);
+			else
+				add_child_node_file(model, &iter, p_iter, subpaths[i], location_id, cwin);
 			p_iter = &iter;
 		}
 		else {
@@ -170,9 +210,17 @@ static void add_folder_file(gchar *path, int location_id,
 
 /* Adds an entry to the library tree by tag (genre, artist...) */
 
-static void add_by_tag(gint location_id, gchar *location, gchar *genre,
-	gchar *album, gchar *year, gchar *artist, gchar *track, struct con_win *cwin,
-	GtkTreeModel *model, GtkTreeIter *p_iter)
+static void
+add_child_node_by_tags (GtkTreeModel *model,
+                       GtkTreeIter *p_iter,
+                       gint location_id,
+                       const gchar *location,
+                       const gchar *genre,
+                       const gchar *album,
+                       const gchar *year,
+                       const gchar *artist,
+                       const gchar *track,
+                       struct con_win *cwin)
 {
 	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL;
@@ -189,26 +237,34 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 		switch (node_type) {
 			case NODE_TRACK:
 				node_pixbuf = cwin->pixbuf->pixbuf_track;
-				node_data = g_utf8_strlen(track, 4) ? track : get_display_filename(location, FALSE);
-				if (!g_utf8_strlen(track, 4)) need_gfree = TRUE;
+				if (string_is_not_empty(track)) {
+					node_data = (gchar *)track;
+				}
+				else {
+					node_data = get_display_filename(location, FALSE);
+					need_gfree = TRUE;
+				}
 				break;
 			case NODE_ARTIST:
 				node_pixbuf = cwin->pixbuf->pixbuf_artist;
-				node_data = g_utf8_strlen(artist, 4) ? artist : _("Unknown Artist");
+				node_data = string_is_not_empty(artist) ? (gchar *)artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
 				node_pixbuf = cwin->pixbuf->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
-					node_data = g_strconcat ((g_utf8_strlen(year, 4) && (atoi(year)>0)) ? year : _("Unknown"), " - ", g_utf8_strlen(album, 4) ? album : _("Unknown Album"), NULL);
+					node_data = g_strconcat ((string_is_not_empty(year) && (atoi(year) > 0)) ? year : _("Unknown"),
+					                          " - ",
+					                          string_is_not_empty(album) ? album : _("Unknown Album"),
+					                          NULL);
 					need_gfree = TRUE;
 				}
 				else {
-					node_data = g_utf8_strlen(album, 4) ? album : _("Unknown Album");
+					node_data = string_is_not_empty(album) ? (gchar *)album : _("Unknown Album");
 				}
 				break;
 			case NODE_GENRE:
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
-				node_data = g_utf8_strlen(genre, 4) ? genre : _("Unknown Genre");
+				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
@@ -247,15 +303,16 @@ static void add_by_tag(gint location_id, gchar *location, gchar *genre,
 /* Append to the given array the path of
    all the nodes under the given path */
 
-static void get_path_array(GtkTreePath *path,
-				  GArray *ref_arr,
-				  GtkTreeModel *model,
-				  struct con_win *cwin)
+static void
+get_path_array(GtkTreePath *path,
+               GArray *ref_arr,
+               GtkTreeModel *model,
+               struct con_win *cwin)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
-	GtkTreePath *cpath;
-	gint j = 0;
+	GtkTreePath *cpath, *t_path;
+	gboolean valid;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -272,21 +329,22 @@ static void get_path_array(GtkTreePath *path,
 	}
 
 	/* For all other node types do a recursive add */
+	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
+	while (valid) {
+		t_path = gtk_tree_model_get_path(model, &t_iter);
 
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
-
-		path = gtk_tree_model_get_path(model, &t_iter);
-
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
 		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-			cpath = gtk_tree_path_copy(path);
+			cpath = gtk_tree_path_copy(t_path);
 			ref_arr = g_array_prepend_val(ref_arr, cpath);
 		}
 		else {
-			get_path_array(path, ref_arr, model, cwin);
+			get_path_array(t_path, ref_arr, model, cwin);
 		}
-		gtk_tree_path_free(path);
+		gtk_tree_path_free(t_path);
+
+		valid = gtk_tree_model_iter_next(model, &t_iter);
 	}
 
 	cwin->cstate->view_change = FALSE;
@@ -338,15 +396,16 @@ static void get_location_ids(GtkTreePath *path,
 
 /* Add all the tracks under the given path to the current playlist */
 
-static void add_row_current_playlist(GtkTreePath *path,
-				     GtkTreeModel *row_model,
-				     GtkTreeModel *playlist_model,
-				     struct con_win *cwin)
+GList *
+append_library_row_to_mobj_list(struct con_dbase *cdbase,
+                                GtkTreePath *path,
+                                GtkTreeModel *row_model,
+                                GList *list)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
 	gint location_id;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gchar *data = NULL;
 	gint j = 0;
 
@@ -358,54 +417,48 @@ static void add_row_current_playlist(GtkTreePath *path,
 	gtk_tree_model_get(row_model, &r_iter, L_LOCATION_ID, &location_id, -1);
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_DATA, &data, -1);
 
-	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-		mobj = new_musicobject_from_db(location_id, cwin);
-		if (!mobj)
-			g_warning("Unable to retrieve details "
-				  "for location_id : %d",
-				  location_id);
-		else
-			append_current_playlist(playlist_model, mobj, cwin);
-	}
-	else if (node_type == NODE_PLAYLIST) {
-		add_playlist_current_playlist(playlist_model, data, cwin);
-	}
-	else if (node_type == NODE_RADIO) {
-		add_radio_current_playlist(playlist_model, data, cwin);
-	}
-
-	/* For all other node types do a recursive add */
-
-	while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
-		gtk_tree_model_get(row_model, &t_iter, L_NODE_TYPE, &node_type, -1);
-		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
-			gtk_tree_model_get(row_model, &t_iter,
-					   L_LOCATION_ID, &location_id, -1);
-			mobj = new_musicobject_from_db(location_id, cwin);
-			if (!mobj)
-				g_warning("Unable to retrieve details "
-					  "for location_id : %d",
-					  location_id);
-			else
-				append_current_playlist(playlist_model, mobj, cwin);
-		}
-		else {
-			path = gtk_tree_model_get_path(row_model, &t_iter);
-			add_row_current_playlist(path, row_model, playlist_model, cwin);
-			gtk_tree_path_free(path);
-		}
+	switch (node_type) {
+		case NODE_GENRE:
+		case NODE_ARTIST:
+		case NODE_ALBUM:
+		case NODE_FOLDER:
+			/* For all other node types do a recursive add */
+			while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
+				path = gtk_tree_model_get_path(row_model, &t_iter);
+				list = append_library_row_to_mobj_list(cdbase, path, row_model, list);
+				gtk_tree_path_free(path);
+			}
+			break;
+		case NODE_TRACK:
+		case NODE_BASENAME:
+			mobj = new_musicobject_from_db(cdbase, location_id);
+			if(G_LIKELY(mobj))
+				list = g_list_append(list, mobj);
+			break;
+		case NODE_PLAYLIST:
+			list = add_playlist_to_mobj_list(cdbase, data, list);
+			break;
+		case NODE_RADIO:
+			list = add_radio_to_mobj_list(cdbase, data, list);
+			break;
+		default:
+			break;
 	}
 
 	g_free(data);
+
+	return list;
 }
 
-static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
-			       struct con_win *cwin)
+static void
+delete_row_from_db(struct con_dbase *cdbase,
+                   GtkTreePath *path,
+                   GtkTreeModel *model)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
+	gboolean valid;
 	gint location_id;
-	gint j = 0;
 
 	/* If this path is a track, delete it immediately */
 
@@ -413,23 +466,26 @@ static void delete_row_from_db(GtkTreePath *path, GtkTreeModel *model,
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-		delete_location_db(location_id, cwin->cdbase);
+		delete_location_db(location_id, cdbase);
 	}
 
 	/* For all other node types do a recursive deletion */
 
-	while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
+	while (valid) {
 		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
 					   L_LOCATION_ID, &location_id, -1);
-			delete_location_db(location_id, cwin->cdbase);
+			delete_location_db(location_id, cdbase);
 		}
 		else {
 			path = gtk_tree_model_get_path(model, &t_iter);
-			delete_row_from_db(path, model, cwin);
+			delete_row_from_db(cdbase, path, model);
 			gtk_tree_path_free(path);
 		}
+
+		valid = gtk_tree_model_iter_next(model, &t_iter);
 	}
 }
 
@@ -528,9 +584,10 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 				   struct con_win *cwin)
 {
 	GtkTreeIter iter;
-	GtkTreeModel *filter_model, *playlist_model;
+	GtkTreeModel *filter_model;
 	enum node_type node_type;
-	GdkCursor *cursor;
+	gint prev_tracks = 0;
+	GList *list = NULL;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
@@ -554,25 +611,17 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_BASENAME:
 	case NODE_PLAYLIST:
 	case NODE_RADIO:
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+		list = append_library_row_to_mobj_list(cwin->cdbase, path, filter_model, list);
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 list);
+		g_list_free(list);
 
-		add_row_current_playlist(path, filter_model, playlist_model, cwin);
-
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(playlist_model);
-
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-		select_last_path_of_current_playlist(cwin);
-		update_status_bar(cwin);
+		remove_watch_cursor (cwin->mainwindow);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+		update_status_bar_playtime(cwin);
 		break;
 	default:
 		break;
@@ -590,8 +639,10 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
-	gint n_select = 0;
+	gint n_select = 0, prev_tracks = 0;
+	GList *list = NULL;
 
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
@@ -612,14 +663,16 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+			list = append_library_row_to_mobj_list (cwin->cdbase, path, model, list);
 
-			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO)
-				playlist_tree_add_to_playlist(cwin);
-			else
-				library_tree_add_to_playlist(cwin);
+			if(list) {
+				prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+
+				pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+
+				select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+				update_status_bar_playtime(cwin);
+			}
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
@@ -627,7 +680,6 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
@@ -816,7 +868,9 @@ static gboolean set_all_visible(GtkTreeModel *model,
 				gpointer data)
 {
 	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_VISIBILE, TRUE, -1);
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
+			   -1);
 	return FALSE;
 }
 
@@ -824,30 +878,58 @@ static void filter_tree_expand_func(GtkTreeView *view,
 				    GtkTreePath *path,
 				    gpointer data)
 {
-	struct con_win *cwin = data;
 	GtkTreeModel *filter_model;
 	GtkTreeIter iter;
-	gchar *node_data = NULL, *u_str = NULL;
 	enum node_type node_type;
+	gboolean node_mach;
 
-	filter_model = gtk_tree_view_get_model(view);
+	filter_model = data;
+
 	gtk_tree_model_get_iter(filter_model, &iter, path);
-	gtk_tree_model_get(filter_model, &iter, L_NODE_DATA, &node_data, -1);
 	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
-
-	u_str = g_utf8_strdown(node_data, -1);
+	gtk_tree_model_get(filter_model, &iter, L_MACH, &node_mach, -1);
 
 	/* Collapse any non-leaf node that matches the seach entry */
 
-	if (cwin->cstate->filter_entry &&
+	if (node_mach &&
 	    (node_type != NODE_TRACK) &&
-	    (node_type != NODE_BASENAME) &&
-	    g_strstr_lv(u_str, cwin->cstate->filter_entry,
-	    cwin->cpref->aproximate_search ? 1 : 0))
+	    (node_type != NODE_BASENAME))
 		gtk_tree_view_collapse_row(view, path);
+}
 
-	g_free(u_str);
-	g_free(node_data);
+static void
+set_visible_parents_nodes(GtkTreeModel *model, GtkTreeIter *c_iter)
+{
+	GtkTreeIter t_iter, parent;
+
+	t_iter = *c_iter;
+
+	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
+		gtk_tree_store_set(GTK_TREE_STORE(model), &parent,
+				   L_VISIBILE, TRUE,
+				   -1);
+		t_iter = parent;
+	}
+}
+
+static gboolean
+any_parent_node_mach(GtkTreeModel *model, GtkTreeIter *iter)
+{
+	GtkTreeIter t_iter, parent;
+	gboolean p_mach = FALSE;
+
+	t_iter = *iter;
+	while(gtk_tree_model_iter_parent(model, &parent, &t_iter)) {
+		gtk_tree_model_get(model, &parent,
+				   L_MACH, &p_mach,
+				   -1);
+		if (p_mach)
+			return TRUE;
+
+		t_iter = parent;
+	}
+
+	return FALSE;
 }
 
 static gboolean filter_tree_func(GtkTreeModel *model,
@@ -856,10 +938,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 				 gpointer data)
 {
 	struct con_win *cwin = data;
-	gchar *node_data = NULL, *t_node_data, *u_str;
-	gboolean visible, t_flag = FALSE;
-	GtkTreePath *t_path;
-	GtkTreeIter t_iter;
+	gchar *node_data = NULL, *u_str;
+	gboolean p_mach;
 
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
@@ -868,56 +948,24 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	if (cwin->cstate->filter_entry) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
-		if (g_strstr_lv(u_str, cwin->cstate->filter_entry,
-				    cwin->cpref->aproximate_search ? 1 : 0)) {
+		if (pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin)) {
+			/* Set visible the match row */
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-					   L_VISIBILE, TRUE, -1);
-			t_path = gtk_tree_model_get_path(model, iter);
-			while (gtk_tree_path_up(t_path)) {
-				if (gtk_tree_path_get_depth(t_path) > 0) {
-					gtk_tree_model_get_iter(model, &t_iter, t_path);
-					gtk_tree_store_set(GTK_TREE_STORE(model), &t_iter,
-							   L_VISIBILE, TRUE, -1);
-				}
-			}
-			gtk_tree_path_free(t_path);
-		} else {
-			t_path = gtk_tree_model_get_path(model, iter);
-			while (gtk_tree_path_up(t_path)) {
-				if (gtk_tree_path_get_depth(t_path) > 0) {
-					gtk_tree_model_get_iter(model, &t_iter,
-								t_path);
-					gtk_tree_model_get(model,
-							   &t_iter,
-							   L_NODE_DATA,
-							   &t_node_data,
-							   -1);
-					gtk_tree_model_get(model,
-							   &t_iter,
-							   L_VISIBILE,
-							   &visible,
-							   -1);
+					   L_MACH, TRUE,
+					   L_VISIBILE, TRUE,
+					   -1);
 
-					gchar *u_str = g_utf8_strdown(t_node_data, -1);
-
-					if (visible &&
-					    g_strstr_lv(u_str, cwin->cstate->filter_entry,
-							    cwin->cpref->aproximate_search ? 1 : 0))
-						t_flag = TRUE;
-
-					g_free(u_str);
-					g_free(t_node_data);
-				}
-			}
-
-			if (t_flag)
-				gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-						   L_VISIBILE, TRUE, -1);
-			else
-				gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-						   L_VISIBILE, FALSE, -1);
-
-			gtk_tree_path_free(t_path);
+			/* Also set visible the parents */
+			set_visible_parents_nodes(model, iter);
+		}
+		else {
+			/* Check parents. If any node is visible due it mach,
+			 * also shows. So, show the children of coincidences. */
+			p_mach = any_parent_node_mach(model, iter);
+			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
+					   L_MACH, FALSE,
+					   L_VISIBILE, p_mach,
+					   -1);
 		}
 		g_free(u_str);
 		g_free(node_data);
@@ -932,20 +980,25 @@ gboolean do_refilter(struct con_win *cwin )
 {
 	GtkTreeModel *filter_model;
 
+	/* Remove the model of widget. */
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	g_object_ref(filter_model);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+
+	/* Set visibility of rows in the library store. */
 	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
 				filter_tree_func,
 				cwin);
-	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(cwin->library_store),
-			NULL);
-	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(filter_model),
-			L_VISIBILE);
+
+	/* Set the model again.*/
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
 	g_object_unref(filter_model);
+
+	/* Expand all and then reduce properly. */
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
 		filter_tree_expand_func,
-		cwin);
+		filter_model);
 
 	cwin->cstate->timeout_id = 0;
 
@@ -966,7 +1019,7 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	gchar *text = NULL;
 	gboolean has_text;
 	
-	if (!cwin->cpref->instant_filter)
+	if (!pragha_preferences_get_instant_search(cwin->preferences))
 		return FALSE;
 
 	if (cwin->cstate->filter_entry != NULL) {
@@ -1026,22 +1079,34 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 
 void clear_library_search(struct con_win *cwin)
 {
-	GtkTreeModel *model, *filter_model;
+	GtkTreeModel *filter_model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	gint i = 0;
+	gboolean valid;
 
+	/* Remove the model of widget. */
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
+	g_object_ref(filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
 
-	gtk_tree_model_foreach(model, set_all_visible, cwin);
+	/* Set all nodes visibles. */
+	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
+			       set_all_visible,
+			       cwin);
 
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
+	/* Set the model again. */
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	g_object_unref(filter_model);
 
-	while (gtk_tree_model_iter_nth_child(model, &iter, NULL, i++)) {
-		path = gtk_tree_model_get_path(model, &iter);
+	/* Expand the categories. */
+
+	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
+	while (valid) {
+		path = gtk_tree_model_get_path(filter_model, &iter);
 		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
 		gtk_tree_path_free(path);
+
+		valid = gtk_tree_model_iter_next(filter_model, &iter);
 	}
 }
 
@@ -1204,161 +1269,97 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 /* Menu handlers */
 /*****************/
 
-void library_tree_replace_playlist(GtkAction *action, struct con_win *cwin)
+static void
+library_tree_replace_playlist (struct con_win *cwin)
 {
-	GtkTreeModel *model, *playlist_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	GList *list, *i;
-	GdkCursor *cursor;
+	GList *mlist = NULL, *list, *i;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
+		set_watch_cursor (cwin->mainwindow);
 
-		clear_current_playlist(action, cwin);
-
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+		pragha_playlist_remove_all (cwin->cplaylist);
 
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			add_row_current_playlist(path, model, playlist_model, cwin);
+			mlist = append_library_row_to_mobj_list (cwin->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(playlist_model);
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 mlist);
+		remove_watch_cursor (cwin->mainwindow);
 
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-		update_status_bar(cwin);
+		if(!pragha_preferences_get_shuffle(cwin->preferences))
+			select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
+		update_status_bar_playtime(cwin);
 		
 		g_list_free(list);
+		g_list_free(mlist);
 	}
+}
+
+void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	library_tree_replace_playlist (cwin);
 }
 
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
 {
-	GtkTreeModel *model, *playlist_model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *i;
-	GdkCursor *cursor;
+	library_tree_replace_playlist (cwin);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
-
-		clear_current_playlist(action, cwin);
-
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			add_row_current_playlist(path, model, playlist_model, cwin);
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
-		}
-
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(playlist_model);
-
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-		update_status_bar(cwin);
-
-		g_list_free(list);
-	}
-	play_first_current_playlist(cwin);
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
+		pragha_playback_next_track(cwin);
+	else
+		pragha_playback_play_pause_resume(cwin);
 }
 
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
 {
-	library_tree_add_to_playlist(cwin);
-}
-
-void library_tree_add_to_playlist(struct con_win *cwin)
-{
-	GtkTreeModel *model, *playlist_model;
+	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
-	GList *list, *i;
-	GdkCursor *cursor;
+	GList *mlist = NULL, *list, *i;
+	gint prev_tracks = 0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-		gdk_cursor_unref(cursor);
-
-		playlist_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-		g_object_ref(playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
+		set_watch_cursor (cwin->mainwindow);
+		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			add_row_current_playlist(path, model, playlist_model, cwin);
+			mlist = append_library_row_to_mobj_list(cwin->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending())
-				if (gtk_main_iteration_do(FALSE))
-					return;
+			if (pragha_process_gtk_events ())
+				return;
 		}
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 mlist);
 
-		gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), playlist_model);
-		gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-		g_object_unref(playlist_model);
-
-		gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-		select_last_path_of_current_playlist(cwin);
-		update_status_bar(cwin);
+		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+		remove_watch_cursor (cwin->mainwindow);
+		update_status_bar_playtime(cwin);
 
 		g_list_free(list);
+		g_list_free(mlist);
 	}
 }
 
@@ -1369,7 +1370,6 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	gchar *query;
 	gint result;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -1389,31 +1389,24 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 		if( result == GTK_RESPONSE_YES ){
 			/* Delete all the rows */
 
-			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_begin_transaction(cwin->cdbase);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				delete_row_from_db(path, model, cwin);
-				gtk_tree_path_free(path);
+				delete_row_from_db(cwin->cdbase, path, model);
 
 				/* Have to give control to GTK periodically ... */
-				/* If gtk_main_quit has been called, return -
-				   since main loop is no more. */
-
-				while(gtk_events_pending())
-					if (gtk_main_iteration_do(FALSE))
-						return;
+				if (pragha_process_gtk_events ())
+					return;
 			}
 
-			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			db_commit_transaction(cwin->cdbase);
 
 			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
 		}
 
-		g_list_free(list);
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 	}
 }
 
@@ -1425,7 +1418,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *list, *i;
-	gchar *query;
 	gint result;
 	GArray *loc_arr;
 	gboolean unlink = FALSE;
@@ -1449,38 +1441,27 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		gtk_widget_destroy(dialog);
 
 		if(result == GTK_RESPONSE_YES){
-			query = g_strdup_printf("BEGIN;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
-
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
+			db_begin_transaction(cwin->cdbase);
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
 				get_location_ids(path, loc_arr, model, cwin);
 				trash_or_unlink_row(loc_arr, unlink, cwin);
 
-				gtk_tree_path_free(path);
-
 				/* Have to give control to GTK periodically ... */
-				/* If gtk_main_quit has been called, return -
-				   since main loop is no more. */
-
-				while(gtk_events_pending())
-					if (gtk_main_iteration_do(FALSE))
-						return;
+				if (pragha_process_gtk_events ())
+					return;
 			}
+			db_commit_transaction(cwin->cdbase);
 
-			if (loc_arr)
-				g_array_free(loc_arr, TRUE);
-
-			query = g_strdup_printf("END;");
-			exec_sqlite_query(query, cwin->cdbase, NULL);
+			g_array_free(loc_arr, TRUE);
 
 			flush_stale_entries_db(cwin->cdbase);
 			init_library_view(cwin);
 		}
 
-		g_list_free(list);
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 	}
 }
 
@@ -1490,8 +1471,6 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 {
-	struct tags otag, ntag;
-	struct musicobject *mobj = NULL;
 	enum node_type node_type = 0;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1499,11 +1478,14 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
 	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL, *uri = NULL;
+	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
+	gint elem = 0, ielem;
+	gchar *query = NULL;
+	struct db_result result;
 
-	memset(&otag, 0, sizeof(struct tags));
-	memset(&ntag, 0, sizeof(struct tags));
+	PraghaMusicobject *omobj, *nmobj;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
@@ -1522,43 +1504,31 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		if (node_type == NODE_TRACK || node_type == NODE_BASENAME) {
 			gtk_tree_model_get(model, &iter,
 					   L_LOCATION_ID, &location_id, -1);
-			mobj = new_musicobject_from_db(location_id, cwin);
-			if (!mobj) {
-				g_warning("Unable to retrieve details for "
-					  "location_id : %d",
-					  location_id);
-				goto exit;
-			}
-			else {
-				otag.track_no = mobj->tags->track_no;
-				otag.title = mobj->tags->title;
-				otag.artist = mobj->tags->artist;
-				otag.album = mobj->tags->album;
-				otag.genre = mobj->tags->genre;
-				otag.comment = mobj->tags->comment;
-				otag.year =  mobj->tags->year;
-				uri = mobj->file;
-			}
+
+			omobj = new_musicobject_from_db(cwin->cdbase, location_id);
 		}
 		else {
+			omobj = pragha_musicobject_new();
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
 
 			switch(node_type) {
 			case NODE_ARTIST:
-				otag.artist = node_data;
+				pragha_musicobject_set_artist(omobj, node_data);
 				break;
 			case NODE_ALBUM:
 				if (cwin->cpref->sort_by_year) {
 					split_album = g_strsplit(node_data, " - ", 2);
-					otag.year = atoi (split_album[0]);
-					otag.album = split_album[1];
+					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
+					pragha_musicobject_set_album(omobj, split_album[1]);
+
 				}
 				else {
-					otag.album = node_data;
+					pragha_musicobject_set_album(omobj, node_data);
+
 				}
 				break;
 			case NODE_GENRE:
-				otag.genre = node_data;
+				pragha_musicobject_set_genre(omobj, node_data);
 				break;
 			default:
 				break;
@@ -1566,70 +1536,72 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	changed = tag_edit_dialog(&otag, 0, &ntag, uri, cwin);
+	nmobj = pragha_musicobject_new();
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
 
 	/* Store the new tags */
 
+	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+
 	for (i=list; i != NULL; i = i->next) {
 		path = i->data;
-
 		/* Form an array of location ids */
-
-		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		get_location_ids(path, loc_arr, model, cwin);
-
-		if (!loc_arr) {
-			g_array_free(loc_arr, TRUE);
-			continue;
-		}
-
-		/* Check if user is trying to set the same track no for multiple tracks */
-		if (changed & TAG_TNO_CHANGED) {
-			if (loc_arr->len > 1) {
-				if (!confirm_tno_multiple_tracks(ntag.track_no, cwin))
-					goto exit;
-			}
-		}
-
-		/* Check if user is trying to set the same title/track no for
-		   multiple tracks */
-		if (changed & TAG_TITLE_CHANGED) {
-			if (loc_arr->len > 1) {
-				if (!confirm_title_multiple_tracks(ntag.title, cwin))
-					goto exit;
-			}
-		}
-
-		tag_update(loc_arr, NULL, changed, &ntag, cwin);
-		g_array_free(loc_arr, TRUE);
 	}
 
-	if (changed)
-		init_library_view(cwin);
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
+				goto exit;
+		}
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
+				goto exit;
+		}
+	}
+
+	/* Updata the db changes */
+	pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
+	init_library_view(cwin);
+
+	/* Get a array of files and update it */
+	file_arr = g_ptr_array_new();
+	for(ielem = 0; ielem < loc_arr->len; ielem++) {
+		elem = g_array_index(loc_arr, gint, ielem);
+		if (elem) {
+			query = g_strdup_printf("SELECT name FROM LOCATION "
+						"WHERE id = '%d';",
+						elem);
+
+			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+				file = result.resultp[result.no_columns];
+				g_ptr_array_add(file_arr, file);
+			}
+		}
+	}
+	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
+	g_ptr_array_free(file_arr, TRUE);
+	g_array_free(loc_arr, TRUE);
+
 exit:
 	/* Cleanup */
 
 	g_free(node_data);
 	g_strfreev (split_album);
 
-	g_free(ntag.title);
-	g_free(ntag.artist);
-	g_free(ntag.album);
-	g_free(ntag.genre);
-	g_free(ntag.comment);
-
-	if (mobj)
-		delete_musicobject(mobj);
-
-	for (i=list; i != NULL; i = i->next) {
-		path = i->data;
-		gtk_tree_path_free(path);
-	}
+	g_object_unref(nmobj);
+	g_object_unref(omobj);
 		
-	g_list_free(list);
+	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
 static void add_entry_playlist(gchar *playlist,
@@ -1662,13 +1634,10 @@ void init_library_view(struct con_win *cwin)
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	gchar *order_str = NULL;
-	GdkCursor *cursor;
 
 	cwin->cstate->view_change = TRUE;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
@@ -1704,16 +1673,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1742,16 +1706,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1826,22 +1785,24 @@ void init_library_view(struct con_win *cwin)
 			
 		exec_sqlite_query(query, cwin->cdbase, &result);
 		for_each_result_row(result, i) {
-			add_by_tag(atoi(result.resultp[i+6]), result.resultp[i+5], result.resultp[i+4],
-				result.resultp[i+3], result.resultp[i+2], result.resultp[i+1], result.resultp[i],
-				cwin, model, &iter);
+			add_child_node_by_tags(model,
+			                       &iter,
+			                       atoi(result.resultp[i+6]),
+			                       result.resultp[i+5],
+			                       result.resultp[i+4],
+			                       result.resultp[i+3],
+			                       result.resultp[i+2],
+			                       result.resultp[i+1],
+			                       result.resultp[i],
+			                       cwin);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1855,16 +1816,11 @@ void init_library_view(struct con_win *cwin)
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
-			while(gtk_events_pending())
-				gtk_main_iteration_do(FALSE);
+			pragha_process_gtk_events ();
 			#else
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					sqlite3_free_table(result.resultp);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
 			}
 			#endif
 		}
@@ -1883,7 +1839,7 @@ void init_library_view(struct con_win *cwin)
 
 	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	cwin->cstate->view_change = FALSE;
 }

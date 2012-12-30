@@ -3,12 +3,13 @@ src/gui.c
 src/pragha.c
 src/pragha.h
 src/panel.c
-src/current-playlist.c
+src/pragha-playlist.c
 src/librarytree.c
 src/statusicon.c
 src/tags.c
 src/pref.c
 src/menu.c
+src/notify.c
 src/utils.c
 src/playlist.c
 src/db.c
@@ -16,3 +17,4 @@ src/pragha-lastfm.c
 src/glyr-related.c
 src/info-bar-import-music.c
 src/pragha-backend.c
+data/pragha.desktop.in

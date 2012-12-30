@@ -4,21 +4,8 @@ Version=1.0
 Type=Application
 
 Name=Pragha
-GenericName=Music Player
-GenericName[da]=Lydafspiller
-GenericName[de]=Musikspieler
-GenericName[es]=Reproductor de Música
-GenericName[fr]=Lecteur de Musique
-GenericName[it]=Lettore di Musica
-GenericName[nl]=Muziekspeler
-GenericName[no]=Lydavspiller
-GenericName[pt]=Leitor de Música
-GenericName[ro]=Lector de Muzică
-GenericName[se]=Ljudspelare
-Comment=Manage and listen to music
-Comment[de]=Musik verwalten und hören
-Comment[fr]=Gérer et écouter de la musique
-Comment[it]=Gestire e ascoltare musica
+_GenericName=Music Player
+_Comment=Manage and listen to music
 Icon=pragha
 
 Categories=GTK;AudioVideo;Player;

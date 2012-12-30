@@ -34,23 +34,29 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
 {
     struct con_win *cwin = gmk->cwin;
 
-    if (cwin->cgst->emitted_error)
+    if (pragha_backend_emitted_error (cwin->backend))
         return;
 
     if (strcmp("Play", key) == 0)
-        play_pause_resume(cwin);
+        pragha_playback_play_pause_resume(cwin);
     else if (strcmp("Pause", key) == 0)
-        backend_pause(cwin);
+        pragha_backend_pause(cwin->backend);
     else if (strcmp("Stop", key) == 0)
-        backend_stop(NULL, cwin);
+        pragha_playback_stop(cwin);
     else if (strcmp("Previous", key) == 0)
-        play_prev_track(cwin);
+        pragha_playback_prev_track(cwin);
     else if (strcmp("Next", key) == 0)
-        play_next_track(cwin);
+        pragha_playback_next_track(cwin);
     else if (strcmp("Repeat", key) == 0)
-        repeat_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin);
+    {
+        gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
+        pragha_preferences_set_repeat(cwin->preferences, !repeat);
+    }
     else if (strcmp("Shuffle", key) == 0)
-        shuffle_button_handler(GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin);
+    {
+        gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+        pragha_preferences_set_shuffle(cwin->preferences, !shuffle);
+    }
 
     //XXX missed buttons: "Rewind" and "FastForward"
 }
@@ -165,6 +171,79 @@ static void name_vanished_cb(GDBusConnection *connection,
         g_object_unref(gmk->proxy);
         gmk->proxy = NULL;
     }
+}
+
+gboolean gnome_media_keys_will_be_useful()
+{
+    GDBusConnection *bus = NULL;
+    GVariant *response = NULL;
+    GDBusNodeInfo *node_info = NULL;
+    GDBusInterfaceInfo *interface_info;
+    GDBusMethodInfo *method_info;
+    const gchar *xml_data;
+    gboolean result = TRUE;
+
+    bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+
+    if (!bus)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    response = g_dbus_connection_call_sync(bus,
+                                           "org.gnome.SettingsDaemon",
+                                           "/org/gnome/SettingsDaemon/MediaKeys",
+                                           "org.freedesktop.DBus.Introspectable",
+                                           "Introspect",
+                                           NULL,
+                                           G_VARIANT_TYPE ("(s)"),
+                                           G_DBUS_CALL_FLAGS_NO_AUTO_START,
+                                           -1,
+                                           NULL,
+                                           NULL);
+
+    if (!response)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    g_variant_get(response, "(&s)", &xml_data);
+
+    node_info = g_dbus_node_info_new_for_xml(xml_data, NULL);
+
+    if (!node_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    interface_info = g_dbus_node_info_lookup_interface(node_info, "org.gnome.SettingsDaemon.MediaKeys");
+
+    if (!interface_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+    method_info = g_dbus_interface_info_lookup_method(interface_info, "GrabMediaPlayerKeys");
+
+    if (!method_info)
+    {
+        result = FALSE;
+        goto out;
+    }
+
+out:
+    if (bus)
+        g_object_unref(bus);
+    if (response)
+        g_variant_unref(response);
+    if (node_info)
+        g_dbus_node_info_unref(node_info);
+
+    return result;
 }
 
 gint init_gnome_media_keys(struct con_win *cwin)

@@ -47,33 +47,33 @@ static gint cddb_add_tracks(struct con_win *cwin)
 
 static void add_audio_cd_tracks(struct con_win *cwin)
 {
-
-	struct musicobject *mobj;
-	gint num_tracks = 0, i = 0;
+	PraghaMusicobject *mobj;
+	gint num_tracks = 0, i = 0, prev_tracks = 0;
 
 	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);
 	if (!num_tracks)
 		return;
 
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		append_current_playlist(NULL, mobj, cwin);
+		append_current_playlist(cwin->cplaylist, NULL, mobj);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return;
-		}
+		if (pragha_process_gtk_events ())
+			return;
 	}
-	update_status_bar(cwin);
-	select_last_path_of_current_playlist(cwin);
+	update_status_bar_playtime(cwin);
+	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
 }
 
 static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
-	if (!cwin->cpref->audio_cd_device) {
+	if (!audio_cd_device) {
 		cdda_devices = cdio_get_devices_with_cap(NULL, CDIO_FS_AUDIO,
 							 FALSE);
 		if (!cdda_devices || (cdda_devices && !*cdda_devices)) {
@@ -90,9 +90,9 @@ static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
 		}
 	} else {
 		CDEBUG(DBG_INFO, "Trying Audio CD Device: %s",
-		       cwin->cpref->audio_cd_device);
+		       audio_cd_device);
 
-		drive = cdio_cddap_identify(cwin->cpref->audio_cd_device,
+		drive = cdio_cddap_identify(audio_cd_device,
 					    0, NULL);
 		if (!drive) {
 			g_warning("Unable to identify Audio CD");

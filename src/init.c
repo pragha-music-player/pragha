@@ -68,13 +68,11 @@ GOptionEntry cmd_entries[] = {
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
-	update_volume_notify_cb(cwin);
-
 	init_tag_completion(cwin);
 
 	init_library_view(cwin);
 
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -87,19 +85,17 @@ static gboolean _init_gui_state(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	update_volume_notify_cb(cwin);
-
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
 	init_tag_completion(cwin);
 
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
 	init_library_view(cwin);
 
-	if (gtk_main_iteration_do(FALSE))
+	if (pragha_process_gtk_events ())
 		return TRUE;
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -110,67 +106,6 @@ static gboolean _init_gui_state(gpointer data)
 	return TRUE;
 }
 #endif
-
-gint init_dbus(struct con_win *cwin)
-{
-	DBusConnection *conn = NULL;
-	DBusError error;
-	gint ret = 0;
-
-	CDEBUG(DBG_INFO, "Initializing DBUS");
-
-	dbus_error_init(&error);
-	conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
-	if (!conn) {
-		g_critical("Unable to get a DBUS connection");
-		dbus_error_free(&error);
-		return -1;
-	}
-
-	ret = dbus_bus_request_name(conn, DBUS_NAME, 0, &error);
-	if (ret == -1) {
-		g_critical("Unable to request for DBUS service name");
-		dbus_error_free(&error);
-		return -1;
-	}
-
-	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-		cwin->cstate->unique_instance = TRUE;
-	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
-		cwin->cstate->unique_instance = FALSE;
-
-	dbus_connection_setup_with_g_main(conn, NULL);
-	cwin->con_dbus = conn;
-
-	return 0;
-}
-
-gint init_dbus_handlers(struct con_win *cwin)
-{
-	DBusError error;
-
-	dbus_error_init(&error);
-	if (!cwin->con_dbus) {
-		g_critical("No DBUS connection");
-		return -1;
-	}
-
-	dbus_bus_add_match(cwin->con_dbus,
-			   "type='signal',path='/org/pragha/DBus'",
-			   &error);
-	if (dbus_error_is_set(&error)) {
-		g_critical("Unable to register match rule for DBUS");
-		dbus_error_free(&error);
-		return -1;
-	}
-
-	if (!dbus_connection_add_filter(cwin->con_dbus, dbus_filter_handler, cwin, NULL)) {
-		g_critical("Unable to allocate memory for DBUS filter");
-		return -1;
-	}
-
-	return 0;
-}
 
 gint init_options(struct con_win *cwin, int argc, char **argv)
 {
@@ -211,30 +146,26 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
-	gint *col_widths, *win_size, *win_position;
-	gchar *conrc, *condir, **libs, **columns, **nodes, *last_rescan_time;
+	gint *win_size, *win_position;
+	gchar **libs, **nodes, *last_rescan_time;
 	gchar *u_file;
-	const gchar *config_dir;
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
-	gboolean save_playlist_f, shuffle_f,repeat_f, columns_f, col_widths_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
-	gboolean audio_sink_f, audio_device_f, software_mixer_f;
-	gboolean remember_window_state_f, start_mode_f, instant_filter_f, aproximate_search_f, use_hint_f, window_size_f, window_position_f, sidebar_size_f, lateral_panel_f, album_f, album_art_size_f, controls_below_f, status_bar_f;
+	gboolean audio_device_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
 
-
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	save_playlist_f = shuffle_f = repeat_f = columns_f = col_widths_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
-	audio_sink_f = audio_device_f = software_mixer_f = FALSE;
-	remember_window_state_f = start_mode_f = instant_filter_f = aproximate_search_f = use_hint_f = window_size_f = window_position_f = sidebar_size_f = lateral_panel_f = album_f = album_art_size_f = controls_below_f = status_bar_f = FALSE;
+	audio_device_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -247,59 +178,13 @@ gint init_config(struct con_win *cwin)
 
 	all_f = FALSE;
 
-	config_dir = g_get_user_config_dir();
-	condir = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha", NULL);
-	conrc = g_build_path(G_DIR_SEPARATOR_S, config_dir, "/pragha/config", NULL);
+	/* Share keyfile with PraghaPreferences */
 
-	/* Does .config/pragha exist ? */
+	cwin->cpref->configrc_keyfile = pragha_preferences_share_key_file(cwin->preferences);
+	const gchar *configrc_file = pragha_preferences_share_filepath(cwin->preferences);
 
-	if (g_file_test(condir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
-		if (g_mkdir(condir, S_IRWXU) == -1) {
-			g_critical("Unable to create preferences directory, err: %s",
-				   strerror(errno));
-			err = TRUE;
-		}
-		CDEBUG(DBG_INFO, "Created .config/pragha");
-	}
-
-	cwin->cpref->configrc_file = g_strdup(conrc);
-	cwin->cpref->configrc_keyfile = g_key_file_new();
-
-	/* Does conrc exist ? */
-
-	if (g_file_test(conrc, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-		if (g_creat(conrc, S_IRWXU) == -1) {
-			g_critical("Unable to create config file, err: %s",
-				   strerror(errno));
-			err = TRUE;
-		} else {
-			CDEBUG(DBG_INFO, "Created config file");
-		}
-
-		cwin->cstate->first_run = TRUE;
-	}
-
-	/* Get cache of downloaded albums arts */
-	#ifdef HAVE_LIBGLYR
-	cache_folder = g_strdup_printf("%s/pragha",
-					g_get_user_cache_dir());
-
-	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
-		g_mkdir(cache_folder, S_IRWXU);
-	cwin->cpref->cache_folder = g_strdup(cache_folder);
-	#endif
-
-	/* Load the settings file */
-
-	if (!g_key_file_load_from_file(cwin->cpref->configrc_keyfile,
-				       conrc,
-				       G_KEY_FILE_NONE,
-				       &error)) {
-		g_critical("Unable to load config file (Possible first start), err: %s", error->message);
-		g_error_free(error);
-		all_f = TRUE;
-	}
-	else {
+	if (cwin->cpref->configrc_keyfile != NULL &&
+	    configrc_file != NULL) {
 		/* Retrieve version */
 
 		cwin->cpref->installed_version =
@@ -308,6 +193,7 @@ gint init_config(struct con_win *cwin)
 					      KEY_INSTALLED_VERSION,
 					      &error);
 		if (!cwin->cpref->installed_version) {
+			cwin->cstate->first_run = TRUE;
 			g_error_free(error);
 			error = NULL;
 		}
@@ -379,62 +265,6 @@ gint init_config(struct con_win *cwin)
 			sidebar_size_f = TRUE;
 		}
 
-		cwin->cpref->lateral_panel =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_SIDEBAR,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			lateral_panel_f = TRUE;
-		}
-
-		/* Retrieve Audio preferences */
-
-		cwin->cpref->audio_sink =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_SINK,
-					      &error);
-		if (!cwin->cpref->audio_sink) {
-			g_error_free(error);
-			error = NULL;
-			audio_sink_f = TRUE;
-		}
-
-		cwin->cpref->audio_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_device) {
-			g_error_free(error);
-			error = NULL;
-			audio_device_f = TRUE;
-		}
-
-		cwin->cpref->audio_cd_device =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-		if (!cwin->cpref->audio_cd_device) {
-			g_error_free(error);
-			error = NULL;
-		}
-
-		cwin->cpref->software_mixer =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_AUDIO,
-					       KEY_SOFTWARE_MIXER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			software_mixer_f = TRUE;
-		}
-
 		/* Retrieve Collection preferences */
 
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
@@ -465,44 +295,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			libs_f = TRUE;
-		}
-
-		columns = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						     GROUP_PLAYLIST,
-						     KEY_PLAYLIST_COLUMNS,
-						     &cnt,
-						     &error);
-		if (columns) {
-			for (i=0; i<cnt; i++) {
-				cwin->cpref->playlist_columns =
-					g_slist_append(cwin->cpref->playlist_columns,
-						       g_strdup(columns[i]));
-			}
-			g_strfreev(columns);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			columns_f = TRUE;
-		}
-
-		col_widths = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
-							 GROUP_PLAYLIST,
-							 KEY_PLAYLIST_COLUMN_WIDTHS,
-							 &cnt,
-							 &error);
-		if (col_widths) {
-			for (i = 0; i < cnt; i++) {
-				cwin->cpref->playlist_column_widths =
-					g_slist_append(cwin->cpref->playlist_column_widths,
-						       GINT_TO_POINTER(col_widths[i]));
-			}
-			g_free(col_widths);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			col_widths_f = TRUE;
 		}
 
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
@@ -677,17 +469,6 @@ gint init_config(struct con_win *cwin)
 			start_mode_f = TRUE;
 		}
 
-		cwin->cpref->save_playlist =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SAVE_PLAYLIST,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			save_playlist_f = TRUE;
-		}
-
 		cwin->cpref->show_icon_tray =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -719,28 +500,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			recursively_f = TRUE;
-		}
-
-		cwin->cpref->show_album_art =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_SHOW_ALBUM_ART,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_f = TRUE;
-		}
-
-		cwin->cpref->album_art_size =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_ALBUM_ART_SIZE,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			album_art_size_f = TRUE;
 		}
 
 		cwin->cpref->album_art_pattern =
@@ -785,62 +544,6 @@ gint init_config(struct con_win *cwin)
 				last_folder_f = TRUE;
 			}
 			g_free(u_file);
-		}
-
-		cwin->cpref->instant_filter =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_INSTANT_FILTER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			instant_filter_f= TRUE;
-		}
-
-		cwin->cpref->aproximate_search =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_APROXIMATE_SEARCH,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			aproximate_search_f= TRUE;
-		}
-
-
-		cwin->cpref->use_hint =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_USE_HINT,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			use_hint_f= TRUE;
-		}
-
-		cwin->cpref->shuffle =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_PLAYLIST,
-					       KEY_SHUFFLE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			shuffle_f = TRUE;
-		}
-
-		cwin->cpref->repeat =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_PLAYLIST,
-					       KEY_REPEAT,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			repeat_f= TRUE;
 		}
 
 		/* Retrieve Notification preferences */
@@ -890,7 +593,7 @@ gint init_config(struct con_win *cwin)
 
 		/* Retrieve Services Internet preferences */
 		#ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lw.lastfm_support =
+		cwin->cpref->lastfm_support =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
 					       KEY_LASTFM,
@@ -901,7 +604,7 @@ gint init_config(struct con_win *cwin)
 			lastfm_f = TRUE;
 		}
 
-		cwin->cpref->lw.lastfm_user =
+		cwin->cpref->lastfm_user =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_USER,
@@ -911,7 +614,7 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 		}
 
-		cwin->cpref->lw.lastfm_pass =
+		cwin->cpref->lastfm_pass =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_PASS,
@@ -954,6 +657,18 @@ gint init_config(struct con_win *cwin)
 			use_mpris2_f = TRUE;
 		}
 	}
+	else {
+		err = TRUE;
+	}
+
+	/* Get cache of downloaded albums arts */
+	#ifdef HAVE_LIBGLYR
+	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
+
+	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
+		g_mkdir(cache_folder, S_IRWXU);
+	cwin->cpref->cache_folder = cache_folder;
+	#endif
 
 	/* Fill up with failsafe defaults */
 
@@ -967,8 +682,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
-	if (all_f || lateral_panel_f)
-		cwin->cpref->lateral_panel = TRUE;
 	if (all_f || libs_f)
 		cwin->cpref->library_dir = NULL;
 	if (all_f || lib_add_f)
@@ -977,20 +690,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->lib_delete = NULL;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
-	if (all_f || columns_f) {
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
-				       g_strdup(P_TITLE_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
-				       g_strdup(P_ARTIST_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
-				       g_strdup(P_ALBUM_STR));
-		cwin->cpref->playlist_columns =
-			g_slist_append(cwin->cpref->playlist_columns,
-				       g_strdup(P_LENGTH_STR));
-	}
 	if (all_f || nodes_f) {
 		cwin->cpref->library_tree_nodes =
 			g_slist_append(cwin->cpref->library_tree_nodes,
@@ -1006,23 +705,12 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->fuse_folders = FALSE;
 	if (all_f || sort_by_year_f)
 		cwin->cpref->sort_by_year = FALSE;
-	if (all_f || col_widths_f) {
-		for (i=0; i<4; i++) {
-			cwin->cpref->playlist_column_widths =
-				g_slist_append(cwin->cpref->playlist_column_widths,
-				       GINT_TO_POINTER(DEFAULT_PLAYLIST_COL_WIDTH));
-		}
-	}
 	if (all_f || cur_lib_view_f)
 		cwin->cpref->cur_library_view = FOLDERS;
 	if (all_f || recursively_f)
 		cwin->cpref->add_recursively_files = FALSE;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
-	if (all_f || album_f)
-		cwin->cpref->show_album_art = TRUE;
-	if (all_f || album_art_size_f)
-		cwin->cpref->album_art_size = ALBUM_ART_SIZE;
 	if (all_f || timer_remaining_mode_f)
 		cwin->cpref->timer_remaining_mode = FALSE;
 	if (all_f || show_osd_f)
@@ -1045,22 +733,9 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->status_bar = TRUE;
 	if (all_f || controls_below_f)
 		cwin->cpref->controls_below = FALSE;
-	if (all_f || save_playlist_f)
-		cwin->cpref->save_playlist = TRUE;
-	if (all_f || software_mixer_f)
-		cwin->cpref->software_mixer = TRUE;
-	if (all_f || shuffle_f)
-		cwin->cpref->shuffle = FALSE;
-	if (all_f || repeat_f)
-		cwin->cpref->repeat = FALSE;
-
-	if (all_f || audio_sink_f)
-		cwin->cpref->audio_sink = g_strdup(DEFAULT_SINK);
-	if (all_f || audio_device_f)
-		cwin->cpref->audio_device = g_strdup(ALSA_DEFAULT_DEVICE);
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
-		cwin->cpref->lw.lastfm_support = FALSE;
+		cwin->cpref->lastfm_support = FALSE;
 	#endif
 	#ifdef HAVE_LIBGLYR
 	if (all_f || get_album_art_f)
@@ -1070,21 +745,7 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->use_cddb = TRUE;
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
-	if (all_f || instant_filter_f)
-		cwin->cpref->instant_filter = TRUE;
-	if (all_f || aproximate_search_f)
-		cwin->cpref->aproximate_search = FALSE;
 
-	if (all_f || use_hint_f)
-		cwin->cpref->use_hint = TRUE;
-
-	/* Cleanup */
-
-	g_free(conrc);
-	g_free(condir);
-#ifdef HAVE_LIBGLYR
-	g_free(cache_folder);
-#endif
 	if (err)
 		return -1;
 	else
@@ -1099,19 +760,10 @@ gint init_threads(struct con_win *cwin)
 	if (!g_thread_supported())
 		g_thread_init(NULL);
 	#endif
+
+	#if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
-
-	gdk_threads_init();
-
-	return 0;
-}
-
-gint init_notify(struct con_win *cwin)
-{
-	if (cwin->cpref->show_osd) {
-		if (!notify_init(PACKAGE_NAME))
-			return -1;
-	}
+	#endif
 
 	return 0;
 }
@@ -1120,31 +772,14 @@ gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
 
-	cwin->cstate->state = ST_STOPPED;
-
-	cwin->cstate->arturl = NULL;
 	cwin->cstate->filter_entry = NULL;
-	cwin->cstate->jump_filter = NULL;
-
-	cwin->cstate->rand = g_rand_new();
-	cwin->cstate->rand_track_refs = NULL;
-	cwin->cstate->queue_track_refs = NULL;
 
 	cwin->cstate->dragging = FALSE;
-	cwin->cstate->curr_mobj_clear = FALSE;
 
 	cwin->cstate->curr_mobj = NULL;
 
 	cwin->cstate->view_change = TRUE;
-	cwin->cstate->playlist_change = TRUE;
 
-	/* Init others default flags */
-
-#ifdef HAVE_LIBCLASTFM
-	cwin->clastfm->session_id = NULL;
-	cwin->clastfm->status = LASTFM_STATUS_INVALID;
-	init_tag_struct(cwin->clastfm->ntags);
-#endif
 	cwin->osd_notify = NULL;
 
 	return 0;
@@ -1161,7 +796,6 @@ void state_free (struct con_state *cstate)
 		libcddb_shutdown();
 	}
 
-	g_rand_free(cstate->rand);
 	g_free(cstate->last_folder);
 
 	g_slice_free(struct con_state, cstate);
@@ -1199,21 +833,29 @@ void init_tag_completion(struct con_win *cwin)
 	g_object_unref(genre_tag_model);
 }
 
-void init_toggle_buttons(struct con_win *cwin)
-{
-	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->shuffle_button), cwin->cpref->shuffle);
-	gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(cwin->repeat_button), cwin->cpref->repeat);
-}
-
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
+	gboolean shuffle, repeat;
+	const gchar *user_config_dir;
+	gchar *pragha_accels_path = NULL;
+
+	/* First init menu accelerators edited */
+
+	user_config_dir = g_get_user_config_dir();
+	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/accels.scm", NULL);
+	gtk_accel_map_load (pragha_accels_path);
+
+	/* Init state of menus */
+
+	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+	repeat = pragha_preferences_get_repeat(cwin->preferences);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Shuffle");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->shuffle);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), shuffle);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->repeat);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), repeat);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
@@ -1222,7 +864,7 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->lateral_panel);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_lateral_panel(cwin->preferences));
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
@@ -1230,32 +872,7 @@ void init_menu_actions(struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
 
-#ifndef HAVE_LIBGLYR
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu,"/popup/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-#endif
-#ifndef HAVE_LIBCLASTFM
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Love track");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Unlove track");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->cp_context_menu, "/popup/ToolsMenu/Add similar");
-	gtk_action_set_sensitive(action, FALSE);
-#endif
+	g_free(pragha_accels_path);
 }
 
 void init_pixbufs(struct con_win *cwin)
@@ -1327,9 +944,6 @@ void init_pixbufs(struct con_win *cwin)
 										NULL);
 	if (!cwin->pixbuf->pixbuf_dir)
 		g_warning("Unable to load folder png");
-
-	cwin->pixbuf->pixbuf_playing = gtk_icon_theme_load_icon (icontheme, "media-playback-start", 16, 0, NULL);
-	cwin->pixbuf->pixbuf_paused = gtk_icon_theme_load_icon (icontheme, "media-playback-pause", 16, 0, NULL);
 }
 
 #if HAVE_LIBXFCE4UI
@@ -1342,7 +956,7 @@ pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
 void
 pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		save_current_playlist_state(cwin);
 	save_preferences(cwin);
 }
@@ -1382,13 +996,14 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -1484,6 +1099,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(status_bar),
 			   FALSE,FALSE, 0);
 
+	/* Send notifications on gui, OSD and mpris of new songs */
+
+	g_signal_connect(cwin->backend,
+			 "notify::state",
+			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
+
 	/* Init window state */
 
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {
@@ -1511,16 +1132,20 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		#endif
 	}
 
+	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->browse_mode, "visible", binding_flags);
+
 	init_menu_actions(cwin);
-	init_toggle_buttons(cwin);
 	update_menu_playlist_changes(cwin);
 
-	update_menubar_playback_state (cwin);
-
-	if (cwin->album_art_frame)
-		resize_album_art_frame(cwin);
-
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
+
+	g_signal_connect(cwin->backend,
+			 "error",
+			 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
+
+	g_signal_connect(cwin->backend,
+			 "error",
+			 G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
 
 	#if HAVE_LIBXFCE4UI
 	init_session_support(cwin);

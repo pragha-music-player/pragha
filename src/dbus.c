@@ -20,65 +20,49 @@
 
 static void dbus_play_handler(struct con_win *cwin)
 {
-	play_track(cwin);
+	pragha_playback_play_pause_resume(cwin);
 }
 
 static void dbus_stop_handler(struct con_win *cwin)
 {
-	backend_stop(NULL, cwin);
+	pragha_playback_stop(cwin);
 }
 
 static void dbus_pause_handler(struct con_win *cwin)
 {
-	play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(cwin);
 }
 
 static void dbus_next_handler(struct con_win *cwin)
 {
-	play_next_track(cwin);
+	pragha_playback_next_track(cwin);
 }
 
 static void dbus_prev_handler(struct con_win *cwin)
 {
-	play_prev_track(cwin);
+	pragha_playback_prev_track(cwin);
 }
 
 static void dbus_shuffle_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->shuffle)
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
-				     cwin->shuffle_button), FALSE);
-	else
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
-				     cwin->shuffle_button), TRUE);
+	gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+	pragha_preferences_set_shuffle(cwin->preferences, !shuffle);
 }
 
 static void dbus_repeat_handler(struct con_win *cwin)
 {
-	if (cwin->cpref->repeat)
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
-				     cwin->repeat_button), FALSE);
-	else
-		gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON(
-				     cwin->repeat_button), TRUE);
+	gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
+	pragha_preferences_set_repeat(cwin->preferences, !repeat);
 }
 
 static void dbus_inc_vol_handler(struct con_win *cwin)
 {
-	cwin->cgst->curr_vol += 0.05;
-
-	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
-
-	backend_update_volume(cwin);
+	pragha_backend_set_delta_volume (cwin->backend, +0.05);
 }
 
 static void dbus_dec_vol_handler(struct con_win *cwin)
 {
-	cwin->cgst->curr_vol -= 0.05;
-
-	cwin->cgst->curr_vol = CLAMP (cwin->cgst->curr_vol, 0.0, 1.0);
-
-	backend_update_volume(cwin);
+	pragha_backend_set_delta_volume (cwin->backend, -0.05);
 }
 
 static void dbus_show_osd_handler(struct con_win *cwin)
@@ -95,7 +79,8 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 {
 	gchar *file;
 	DBusError error;
- 	struct musicobject *mobj = NULL; 
+ 	PraghaMusicobject *mobj = NULL;
+	gint prev_tracks = 0;
 
 	dbus_error_init(&error);
 	dbus_message_get_args(msg, &error, DBUS_TYPE_STRING, &file, DBUS_TYPE_INVALID);
@@ -106,8 +91,9 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	gdk_threads_enter();
-	if (is_dir_and_accessible(file, cwin)) {
+	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+
+	if (is_dir_and_accessible(file)) {
 		if(cwin->cpref->add_recursively_files)
 			__recur_add(file, cwin);
 		else
@@ -116,16 +102,15 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	else if (is_playable_file(file)) {
 		mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		CDEBUG(DBG_INFO, "Add file from command line: %s", file);
 	}
 	else {
 		g_warning("Unable to add %s", file);
 	}
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
 
-	gdk_threads_leave();
+	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+	update_status_bar_playtime(cwin);
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
@@ -141,21 +126,21 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	if (cwin->cstate->state != ST_STOPPED) {
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		dbus_message_append_args(reply_msg,
-			 DBUS_TYPE_STRING, (cwin->cstate->state == ST_PLAYING) ? &playing_str : &paused_str,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->file,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->title,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->artist,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->album,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->genre,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->year,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->track_no,
-			 DBUS_TYPE_STRING, &cwin->cstate->curr_mobj->tags->comment,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->length,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->bitrate,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->channels,
-			 DBUS_TYPE_INT32, &cwin->cstate->curr_mobj->tags->samplerate,
+			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,
+			 DBUS_TYPE_STRING, pragha_musicobject_get_file(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_title(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_album(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_genre(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_year(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_track_no(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, pragha_musicobject_get_comment(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_length(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_bitrate(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_channels(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_INT32, pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj),
 			 DBUS_TYPE_INVALID);
 	} else {
 		dbus_message_append_args(reply_msg,
@@ -262,6 +247,67 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 	dbus_connection_flush(cwin->con_dbus);
 exit:
 	dbus_message_unref(msg);
+}
+
+gint init_dbus(struct con_win *cwin)
+{
+	DBusConnection *conn = NULL;
+	DBusError error;
+	gint ret = 0;
+
+	CDEBUG(DBG_INFO, "Initializing DBUS");
+
+	dbus_error_init(&error);
+	conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
+	if (!conn) {
+		g_critical("Unable to get a DBUS connection");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	ret = dbus_bus_request_name(conn, DBUS_NAME, 0, &error);
+	if (ret == -1) {
+		g_critical("Unable to request for DBUS service name");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+		cwin->cstate->unique_instance = TRUE;
+	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
+		cwin->cstate->unique_instance = FALSE;
+
+	dbus_connection_setup_with_g_main(conn, NULL);
+	cwin->con_dbus = conn;
+
+	return 0;
+}
+
+gint init_dbus_handlers(struct con_win *cwin)
+{
+	DBusError error;
+
+	dbus_error_init(&error);
+	if (!cwin->con_dbus) {
+		g_critical("No DBUS connection");
+		return -1;
+	}
+
+	dbus_bus_add_match(cwin->con_dbus,
+			   "type='signal',path='/org/pragha/DBus'",
+			   &error);
+	if (dbus_error_is_set(&error)) {
+		g_critical("Unable to register match rule for DBUS");
+		dbus_error_free(&error);
+		return -1;
+	}
+
+	if (!dbus_connection_add_filter(cwin->con_dbus, dbus_filter_handler, cwin, NULL)) {
+		g_critical("Unable to allocate memory for DBUS filter");
+		return -1;
+	}
+
+	return 0;
 }
 
 void dbus_handlers_free (struct con_win *cwin)

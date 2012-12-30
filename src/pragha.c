@@ -26,32 +26,38 @@ static void common_cleanup(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	backend_free (cwin);
+	pragha_playback_stop(cwin);
+
+	cplaylist_free(cwin->cplaylist);
+#ifdef HAVE_LIBGLYR
+	glyr_related_free (cwin);
+#endif
+	mpris_free (cwin->cmpris2);
+	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
+	g_object_unref(G_OBJECT(cwin->preferences));
 	preferences_free (cwin->cpref);
-#ifdef HAVE_LIBGLYR
-	uninit_glyr_related (cwin);
-#endif
 	db_free (cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	lastfm_free (cwin->clastfm);
 #endif
 	dbus_handlers_free (cwin);
-	mpris_free (cwin->cmpris2);
-	if (notify_is_initted())
-		notify_uninit();
+	notify_free ();
+
+	if (cwin->cgnome_media_keys)
+		gnome_media_keys_free (cwin->cgnome_media_keys);
 #ifdef HAVE_LIBKEYBINDER
-	keybinder_free ();
-#else
-	gnome_media_keys_free (cwin->cgnome_media_keys);
+	else
+		keybinder_free ();
 #endif
+
 	g_slice_free(struct con_win, cwin);
 }
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 {
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		save_current_playlist_state(cwin);
 	save_preferences(cwin);
 
@@ -68,10 +74,8 @@ gint main(gint argc, gchar *argv[])
 	cwin->pixbuf = g_slice_new0(struct pixbuf);
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
-	cwin->cgst = g_slice_new0(struct con_gst);
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
-	cwin->clastfm->ntags = g_slice_new0(struct tags);
 #endif
 	cwin->cmpris2 = g_slice_new0(struct con_mpris2);
 
@@ -108,6 +112,9 @@ gint main(gint argc, gchar *argv[])
 	if (!cwin->cstate->unique_instance)
 		return 0;
 
+	cwin->preferences = pragha_preferences_get();
+	/* TODO: Port everiting to PraghaPreferences
+	 *       Search a better condition o errors!!. */
 	if (init_config(cwin) == -1) {
 		g_critical("Unable to init configuration");
 		return -1;
@@ -124,10 +131,15 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm_idle(cwin) == -1) {
+	if (init_lastfm(cwin) == -1) {
 		g_critical("Unable to initialize lastfm");
 	}
 	#endif
+
+	if (backend_init(cwin) == -1) {
+		g_critical("Unable to initialize gstreamer");
+		return -1;
+	}
 
 	#ifdef HAVE_LIBGLYR
 	if (init_glyr_related(cwin) == -1) {
@@ -140,24 +152,20 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if(backend_init(cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
-		return -1;
-	}
-
 	/* Init the gui after bancked to sink volume. */
-	gdk_threads_enter();
+
 	init_gui(argc, argv, cwin);
 
 	/* Init_gnome_media_keys requires constructed main window. */
-	#ifdef HAVE_LIBKEYBINDER
-	if (init_keybinder(cwin) == -1) {
-		g_critical("Unable to initialize keybinder");
-		return -1;
+	if (gnome_media_keys_will_be_useful()) {
+		if (init_gnome_media_keys(cwin) == -1) {
+			g_critical("Unable to initialize gnome media keys");
+			return -1;
+		}
 	}
-	#else
-	if (init_gnome_media_keys(cwin) == -1) {
-		g_critical("Unable to initialize gnome media keys");
+	#ifdef HAVE_LIBKEYBINDER
+	else if (init_keybinder(cwin) == -1) {
+		g_critical("Unable to initialize keybinder");
 		return -1;
 	}
 	#endif
@@ -165,7 +173,7 @@ gint main(gint argc, gchar *argv[])
 	CDEBUG(DBG_INFO, "Init done. Running ...");
 
 	gtk_main();
-	gdk_threads_leave();
+
 	common_cleanup(cwin);
 
 	return 0;

@@ -245,6 +245,20 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
 	return rv;
 }
 
+/* Searches the string haystack for the first occurrence of the string needle,
+ * considering the aproximate_search option. */
+
+gchar *
+pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin)
+{
+	gboolean aproximate_search;
+	aproximate_search = pragha_preferences_get_approximate_search(cwin->preferences);
+
+	return g_strstr_lv(haystack, needle,
+			   aproximate_search ? 1 : 0);
+}
+
+#if !GLIB_CHECK_VERSION(2,32,0)
 /* Functions to check the network manager status. */
 
 static NMState
@@ -295,119 +309,66 @@ nm_is_online ()
 
 	return FALSE;
 }
-
-/* Test if the song is already in the playlist.*/
-
-gboolean
-already_in_current_playlist(struct musicobject *mobj, struct con_win *cwin)
-{
-	GtkTreeModel *playlist_model;
-	GtkTreeIter playlist_iter;
-	struct musicobject *omobj = NULL;
-	gboolean ret;
-
-	playlist_model = gtk_tree_view_get_model (GTK_TREE_VIEW(cwin->current_playlist));
-
-	ret = gtk_tree_model_get_iter_first (playlist_model, &playlist_iter);
-	while (ret) {
-		gtk_tree_model_get (playlist_model, &playlist_iter, P_MOBJ_PTR, &omobj, -1);
-
-		if(0 == g_strcmp0(mobj->file, omobj->file))
-		   	return TRUE;
-
-		ret = gtk_tree_model_iter_next(playlist_model, &playlist_iter);
-	}
-
-	return FALSE;
-}
+#endif
 
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
-gint
-append_track_with_artist_and_title(const gchar *artist, const gchar *title, struct con_win *cwin)
+GList *
+prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
+						const gchar *title,
+						GList *list,
+						struct con_win *cwin)
 {
 	gchar *query = NULL;
 	struct db_result result;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0, i;
+	gchar *sartist, *stitle;
+
+	if(pragha_mobj_list_already_has_title_of_artist(list, title, artist) ||
+	   pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
+		return list;
+
+	sartist = sanitize_string_to_sqlite3(artist);
+	stitle = sanitize_string_to_sqlite3(title);
 
 	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
 				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = \"%s\" COLLATE NOCASE "
-				"AND ARTIST.name = \"%s\" COLLATE NOCASE;",
-				title, artist);
+				"AND TRACK.title = '%s' COLLATE NOCASE "
+				"AND ARTIST.name = '%s' COLLATE NOCASE "
+				"ORDER BY RANDOM() LIMIT 1;",
+				stitle, sartist);
 
 	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 
-			mobj = new_musicobject_from_db(location_id, cwin);
-
-			if(already_in_current_playlist(mobj, cwin) == FALSE) {
-				append_current_playlist(NULL, mobj, cwin);
-			}
-			else {
-				delete_musicobject(mobj);
-				location_id = 0;
-			}
-			break;
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			list = g_list_prepend(list, mobj);
 		}
 		sqlite3_free_table(result.resultp);
 	}
-	return location_id;
-}
+	g_free(sartist);
+	g_free(stitle);
 
-/* Get the musicobject of seleceted track on current playlist */
-
-struct musicobject *
-get_selected_musicobject(struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GList *list;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list != NULL) {
-		path = list->data;
-		if (gtk_tree_model_get_iter(model, &iter, path)) {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (!mobj)
-				g_warning("Invalid mobj pointer");
-		}
-		gtk_tree_path_free(path);
-		g_list_free(list);
-	}
-	return mobj;
+	return list;
 }
 
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
-set_watch_cursor_on_thread(struct con_win *cwin)
+set_watch_cursor (GtkWidget *window)
 {
-	GdkCursor *cursor;
-
-	gdk_threads_enter ();
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-	gdk_threads_leave ();
+	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
+	gdk_window_set_cursor (gtk_widget_get_window (window), cursor);
+	gdk_cursor_unref (cursor);
 }
 
 void
-remove_watch_cursor_on_thread(const gchar *message, struct con_win *cwin)
+remove_watch_cursor (GtkWidget *window)
 {
-	gdk_threads_enter ();
-	if(message != NULL)
-		set_status_message(message, cwin);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-	gdk_threads_leave ();
+	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
 }
 
 /* Set a message on status bar, and restore it at 5 seconds */
@@ -416,7 +377,7 @@ gboolean restore_status_bar(gpointer data)
 {
 	struct con_win *cwin = data;
 
-	update_status_bar(cwin);
+	update_status_bar_playtime(cwin);
 
 	return FALSE;
 }
@@ -426,20 +387,6 @@ void set_status_message (const gchar *message, struct con_win *cwin)
 	g_timeout_add_seconds(5, restore_status_bar, cwin);
 
 	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
-}
-
-/* Set bold atribute to label. */
-
-void gtk_label_set_attribute_bold(GtkLabel *label)
-{
-	PangoAttrList *Bold = pango_attr_list_new();
-	PangoAttribute *Attribute = NULL;
-	Attribute = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-	pango_attr_list_insert(Bold, Attribute);
-
-	gtk_label_set_attributes(label, Bold);
-
-	pango_attr_list_unref(Bold);
 }
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
@@ -479,7 +426,7 @@ gboolean is_playable_file(const gchar *file)
 
 /* Accepts only absolute path */
 
-gboolean is_dir_and_accessible(const gchar *dir, struct con_win *cwin)
+gboolean is_dir_and_accessible(const gchar *dir)
 {
 	gint ret;
 
@@ -548,14 +495,14 @@ static gint no_single_quote(const gchar *str)
 
 /* Replace ' by '' */
 
-gchar* sanitize_string_sqlite3(const gchar *str)
+gchar* sanitize_string_to_sqlite3(const gchar *str)
 {
 	gint cn, i=0;
 	gchar *ch;
 	const gchar *tmp;
 
 	if (!str)
-		return NULL;
+		return g_strdup("");
 
 	cn = no_single_quote(str);
 	ch = g_malloc0(strlen(str) + cn + 1);
@@ -572,6 +519,19 @@ gchar* sanitize_string_sqlite3(const gchar *str)
 	}
 	return ch;
 }
+
+gboolean
+string_is_empty(const gchar *str)
+{
+	return (!str || !g_utf8_strlen(str, 4));
+}
+
+gboolean
+string_is_not_empty(const gchar *str)
+{
+	return (str && g_utf8_strlen(str, 4));
+}
+
 
 static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
 {
@@ -696,7 +656,7 @@ gchar* convert_length_str(gint length)
 	if (length > 86400) {
 		days = length/86400;
 		length = length%86400;
-		g_sprintf(tmp, "%d %s, ", days, (days>1)?_("days"):_("day"));
+		g_sprintf(tmp, "%d %s, ", days, ngettext("day", "days", days));
 		g_strlcat(str, tmp, 24);
 	}
 
@@ -771,6 +731,15 @@ GSList* delete_from_str_list(const gchar *str, GSList *list)
 	return list;
 }
 
+gchar *
+path_get_dir_as_uri (const gchar *path)
+{
+	gchar *dir = g_path_get_dirname (path);
+	gchar *uri = g_filename_to_uri (dir, NULL, NULL);
+	g_free (dir);
+	return uri;
+}
+
 /* Returns either the basename of the given filename, or (if the parameter 
  * get_folder is set) the basename of the container folder of filename. In both
  * cases the returned string is encoded in utf-8 format. If GLib can not make
@@ -798,17 +767,7 @@ gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 
 void free_str_list(GSList *list)
 {
-	gint cnt = 0, i;
-	GSList *l = list;
-
-	cnt = g_slist_length(list);
-
-	for (i=0; i<cnt; i++) {
-		g_free(l->data);
-		l = l->next;
-	}
-
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 }
 
 /* Compare two UTF-8 strings */
@@ -841,7 +800,7 @@ gboolean validate_album_art_pattern(const gchar *pattern)
 	gint i = 0;
 	gboolean ret = FALSE;
 
-	if (!pattern || (pattern && !strlen(pattern)))
+	if (string_is_empty(pattern))
 		return TRUE;
 
 	if (g_strrstr(pattern, "*")) {
@@ -867,14 +826,24 @@ exit:
 	return ret;
 }
 
+gboolean
+pragha_process_gtk_events ()
+{
+	while (gtk_events_pending ()) {
+		if (gtk_main_iteration_do (FALSE))
+			return TRUE;
+	}
+	return FALSE;
+}
+
 /* callback used to open default browser when URLs got clicked */
-void open_url(struct con_win *cwin, const gchar *url)
+void open_url(const gchar *url, GtkWidget *parent)
 {
 	gboolean success = TRUE;
 	const gchar *argv[3];
 	gchar *methods[] = {"xdg-open","firefox","mozilla","opera","konqueror",NULL};
 	int i = 0;
-			
+
 	/* First try gtk_show_uri() (will fail if gvfs is not installed) */
 	if (!gtk_show_uri (NULL, url,  gtk_get_current_event_time (), NULL)) {
 		success = FALSE;
@@ -893,7 +862,7 @@ void open_url(struct con_win *cwin, const gchar *url)
 	/* No method was found to open the URL */
 	if (!success) {
 		GtkWidget *d;
-		d = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
+		d = gtk_message_dialog_new (GTK_WINDOW (parent),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 					"%s", _("Unable to open the browser"));

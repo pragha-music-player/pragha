@@ -20,7 +20,7 @@
 
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -39,7 +39,7 @@ void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (mobj)
-					append_current_playlist(NULL, mobj, cwin);
+					append_current_playlist(cwin->cplaylist, NULL, mobj);
 				CDEBUG(DBG_VERBOSE, "Play file from file_tree: %s",
 				       ab_file);
 			}
@@ -47,10 +47,8 @@ void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 		/* Have to give control to GTK periodically ... */
 
 		if (!init) {
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE))
-					return;
-			}
+			if (pragha_process_gtk_events ())
+				return;
 		}
 
 		g_free(ab_file);
@@ -61,7 +59,7 @@ void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 
 void __recur_add(const gchar *dir_name, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -77,21 +75,13 @@ void __recur_add(const gchar *dir_name, struct con_win *cwin)
 	while (next_file) {
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 
-		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return;
-		}
-
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
 			__recur_add(ab_file, cwin);
 		else {
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (mobj) {
-					append_current_playlist(NULL, mobj, cwin);
+					append_current_playlist(cwin->cplaylist, NULL, mobj);
 					CDEBUG(DBG_VERBOSE,
 					       "Play file from file_tree: %s",
 					       ab_file);
@@ -102,21 +92,13 @@ void __recur_add(const gchar *dir_name, struct con_win *cwin)
 		next_file = g_dir_read_name(dir);
 	}
 
-	/* Have to give control to GTK periodically ... */
-	/* If gtk_main_quit has been called, return -
-	   since main loop is no more. */
-	while(gtk_events_pending()) {
-		if (gtk_main_iteration_do(FALSE))
-			return;
-	}
-
 	g_dir_close(dir);
 }
 
 GList *
 append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
 {
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -146,13 +128,10 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
 				}
 			}
 		}
+
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return NULL;
-		}
+		if (pragha_process_gtk_events ())
+			return NULL;
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);

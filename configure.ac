@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [1])
-m4_define([pragha_version_micro], [0.1])
+m4_define([pragha_version_micro], [2.git])
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
 dnl Initialize autoconf
@@ -68,6 +68,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 dnl Check for basic programs
 AC_PROG_CC()
 AC_PROG_INSTALL()
+IT_PROG_INTLTOOL()
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
@@ -77,10 +78,10 @@ XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.26])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.28])
 AS_IF([test "x$with_gtk3" != xno],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.0.0])],
-	[XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.22.0])])
+	[XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.24.0])])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([DBUS], [dbus-1], [1.1])
 XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.84])
@@ -115,8 +116,11 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
 
 dnl Check global keyboard shortcuts support
 LIBKEYBINDER_FOUND="no"
+AS_IF([test "x$with_gtk3" != xno],
+	[keybinder_version="keybinder-3.0"],
+	[keybinder_version="keybinder"])
 XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
-                       [keybinder], [0.2.0],
+                       [$keybinder_version], [0.2.0],
                        [keybinder],
                        [keybinder library], [yes])
 
@@ -135,9 +139,12 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                        [libglyr library], [yes])
 
 dnl Check libxfce4ui
+AS_IF([test "x$with_gtk3" != xno],
+	[libxfce4ui_version="4.11.0"],
+	[libxfce4ui_version="4.8.0"])
 LIBXFCE4UI_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
-                       [libxfce4ui-1], [4.8.0],
+                       [libxfce4ui-1], [$libxfce4ui_version],
                        [libxfce4ui],
                        [libxfce4ui library], [yes])
 
@@ -153,23 +160,24 @@ po/Makefile.in
 src/Makefile
 ])
 
-case "$debug" in
-     "true" )
-	AC_MSG_RESULT([Debugging enabled, optimizations disabled.]) ;;
-esac
- 
-AC_MSG_RESULT([CFLAGS = $CFLAGS]) 
-
 echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
-echo "  Prefix.................................................................: ${prefix}"
+
+echo "  Gtk version used...: $GTK_VERSION"
+echo "  Prefix.............: ${prefix}"
+echo "  Debug enabled......: $debug"
+echo ""
 AS_IF([test $GSTREAMER_API_VERSION = 1.0],
       [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
       [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
-echo "  Global keyboard shortcuts support............(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"
+AS_IF([test "x$with_gtk3" != xno],
+	[echo "  Use multimedia key without gnome-media-keys.......(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"],
+	[echo "  Use multimedia key without gnome-media-keys..(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"])
+AS_IF([test "x$with_gtk3" != xno],
+	[echo "  Better session management support..........(Need libxfce4ui >= 4.11.0).: $LIBXFCE4UI_FOUND"],
+	[echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"])
 echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"
 echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
 echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""

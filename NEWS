@@ -1,9 +1,44 @@
 ==============================================================
-Overview of changes in Pragha 1.1.0 since 1.0.2
+Overview of changes in Pragha 1.1.1 since 1.1.0.1
+==============================================================
+
+News:
+	Add a button to close the sidebar.
+	Use toolbar style to playback controls.
+	Better Gnome HIG complain in preferences, inspired on transmision code.
+	Adds an option to hide the icon in the notification area.
+
+Others Changes:
+	Depend on gtk+2.24 and glib 2.28.
+	* Both was released a year and a half ago. Nobody should have problems.
+	Modularization/Refactoring/Cleanup of a lot of code thank to Pavel Vasin.
+	Always compile support to gnome-media-keys.
+	* First check gnome-settings-daemon and when not found, use keybinder.
+	Support global hotkeys with keybinder and gtk3 if detect keybinder-3.0.
+	Various improvements in gstreamer.
+	* Check if seeking is allowed and inform it in mpris2.
+	* No buffering live streams and get a new clock if lost it.
+	Enable MusicBrainz to download cover art.
+
+Bugs fixed: (Sumary: The most relevant to the user.)
+	Sanitize artist and title when append from lastfm.
+	Fix equalizer dialog in gtk3 interface.
+	Fix tag dialog in gtk3 interface.
+	equalizer: fix GObject leak.
+	Not refresh the library view if the radio added is not saved.
+	Fix read after free. See Github issue #20.
+	Not forget the previous songs when queue songs.
+	Not forget the previous songs when play songs activating playlist.
+	Removes a lot of unused variables and functions. Thanks to Pavel Vasin.
+
+Updates Translations:
+	Equalizer pressets now are translateable.
+
+==============================================================
+OTHERS REALESES:
 ==============================================================
 
 V1.1.0.1
-
 Bugs fixed:
 	Fix crash when try to crop playlist with accelerator!.
 	* And probably many other crashs.
@@ -78,10 +113,6 @@ Updates Translations:
 	Update Czech translation thanks to anespor.
 	Update some others tranlations in transifex.
 	* Excuse the translators, who lost their names, but thank you very much!.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.0.2
 News:

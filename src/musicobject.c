@@ -18,10 +18,11 @@
 
 #include "pragha.h"
 
-struct musicobject* new_musicobject_from_file(const gchar *file)
+PraghaMusicobject *
+new_musicobject_from_file(const gchar *file)
 {
+	PraghaMusicobject *mobj;
 	enum file_type type;
-	struct musicobject *mobj;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
@@ -29,92 +30,25 @@ struct musicobject* new_musicobject_from_file(const gchar *file)
 	if (type == -1)
 		return NULL;
 
-	mobj = g_slice_new0(struct musicobject);
-	mobj->tags = g_slice_new0(struct tags);
-	mobj->file = g_strdup(file);
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     "file", file,
+	                     "file-type", type,
+	                     NULL);
 
-	switch(type) {
-	case FILE_WAV:
-		if (get_wav_info(file, mobj->tags))
-			mobj->file_type = FILE_WAV;
-		else {
-			g_critical("WAV Info failed");
-			goto bad;
-		}
-		break;
-	case FILE_MP3:
-		if (get_mp3_info(file, mobj->tags))
-			mobj->file_type = FILE_MP3;
-		else {
-			g_critical("MP3 Info failed");
-			goto bad;
-		}
-		break;
-	case FILE_FLAC:
-		if (get_flac_info(file, mobj->tags))
-			mobj->file_type = FILE_FLAC;
-		else {
-			g_critical("FLAC Info failed");
-			goto bad;
-		}
-		break;
-	case FILE_OGGVORBIS:
-		if (get_ogg_info(file, mobj->tags))
-			mobj->file_type = FILE_OGGVORBIS;
-		else {
-			g_critical("OGG Info failed");
-			goto bad;
-		}
-		break;
-	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
-	case FILE_ASF:
-		if (get_asf_info(file, mobj->tags))
-			mobj->file_type = FILE_ASF;
-		else {
-			g_critical("ASF Info failed");
-			goto bad;
-		}
-		break;
-	#endif
-	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
-	case FILE_MP4:
-		if (get_mp4_info(file, mobj->tags))
-			mobj->file_type = FILE_MP4;
-		else {
-			g_critical("MP4 Info failed");
-			goto bad;
-		}
-		break;
-	#endif
-	#ifdef HAVE_TAGLIB_1_7
-	case FILE_APE:
-		if (get_ape_info(file, mobj->tags))
-			mobj->file_type = FILE_APE;
-		else {
-			g_critical("APE Info failed");
-			goto bad;
-		}
-		break;
-	#endif
-	default:
-		break;
-	}
-
-	return mobj;
-
-bad:
-	g_free(mobj->file);
-	g_slice_free(struct tags, mobj->tags);
-	g_slice_free(struct musicobject, mobj);
+	if(pragha_musicobject_set_tags_from_file(mobj, file))
+		return mobj;
+	else
+		g_object_unref(mobj);
 
 	return NULL;
 }
 
-struct musicobject* new_musicobject_from_db(gint location_id, struct con_win *cwin)
+PraghaMusicobject *
+new_musicobject_from_db(struct con_dbase *cdbase, gint location_id)
 {
+	PraghaMusicobject *mobj;
 	gchar *query;
 	struct db_result result;
-	struct musicobject *mobj = NULL;
 	gint i = 0;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject with location id: %d",
@@ -142,29 +76,28 @@ AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = \"%d\";", location_id, location_id);
-	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if (!exec_sqlite_query(query, cdbase, &result)) {
 		g_critical("Track with location id : %d not found in DB",
 			   location_id);
 		return NULL;
 	}
 	else {
 		i = result.no_columns;
-		mobj = g_slice_new0(struct musicobject);
-		mobj->tags = g_slice_new0(struct tags);
-
-		mobj->file = g_strdup(result.resultp[i+12]);
-		mobj->tags->title = g_strdup(result.resultp[i+11]);
-		mobj->tags->artist = g_strdup(result.resultp[i+10]);
-		mobj->tags->album = g_strdup(result.resultp[i+9]);
-		mobj->tags->genre = g_strdup(result.resultp[i+8]);
-		mobj->tags->track_no = atoi(result.resultp[i+7]);
-		mobj->tags->year = atoi(result.resultp[i+6]);
-		mobj->tags->comment = g_strdup(result.resultp[i+5]);
-		mobj->tags->bitrate = atoi(result.resultp[i+4]);
-		mobj->tags->length = atoi(result.resultp[i+3]);
-		mobj->tags->channels = atoi(result.resultp[i+2]);
-		mobj->tags->samplerate = atoi(result.resultp[i+1]);
-		mobj->file_type = atoi(result.resultp[i]);
+		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+		                     "file", result.resultp[i+12],
+		                     "file-type", atoi(result.resultp[i]),
+		                     "title", result.resultp[i+11],
+		                     "artist", result.resultp[i+10],
+		                     "album", result.resultp[i+9],
+		                     "genre", result.resultp[i+8],
+		                     "comment", result.resultp[i+5],
+		                     "year", atoi(result.resultp[i+6]),
+		                     "track-no", atoi(result.resultp[i+7]),
+		                     "length", atoi(result.resultp[i+3]),
+		                     "bitrate", atoi(result.resultp[i+4]),
+		                     "channels", atoi(result.resultp[i+2]),
+		                     "samplerate", atoi(result.resultp[i+1]),
+		                     NULL);
 
 		sqlite3_free_table(result.resultp);
 
@@ -172,11 +105,13 @@ AND LOCATION.id = \"%d\";", location_id, location_id);
 	}
 }
 
-struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
-					      gint track_no)
+PraghaMusicobject *
+new_musicobject_from_cdda(struct con_win *cwin,
+                          gint track_no)
 {
+	PraghaMusicobject *mobj;
 	gint channels, start, end;
-	struct musicobject *mobj;
+	gchar *ntitle = NULL, *nfile = NULL;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from cdda: %d",
 	       track_no);
@@ -185,9 +120,6 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 					   track_no);
 	start = cdio_cddap_track_firstsector(cwin->cstate->cdda_drive, track_no);
 	end = cdio_cddap_track_lastsector(cwin->cstate->cdda_drive, track_no);
-
-	mobj = g_slice_new0(struct musicobject);
-	mobj->tags = g_slice_new0(struct tags);
 
 	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
@@ -199,77 +131,69 @@ struct musicobject* new_musicobject_from_cdda(struct con_win *cwin,
 			artist = cddb_track_get_artist(track);
 
 			if (title)
-				mobj->tags->title = g_strdup(title);
-			if (artist)
-				mobj->tags->artist = g_strdup(artist);
+				ntitle = g_strdup(title);
+			else
+				ntitle = g_strdup_printf("Track %d", track_no);
 		}
 
 		genre = cddb_disc_get_genre(cwin->cstate->cddb_disc);
 		album = cddb_disc_get_title(cwin->cstate->cddb_disc);
 
-		if (genre)
-			mobj->tags->genre = g_strdup(genre);
-		if (album)
-			mobj->tags->album = g_strdup(album);
+		nfile = g_strdup_printf("cdda://%d", track_no);
 
-		mobj->tags->year = cddb_disc_get_year(cwin->cstate->cddb_disc);
+		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+			             "file", nfile,
+			             "file-type", FILE_CDDA,
+			             "title", ntitle,
+			             "artist", artist,
+			             "album", album,
+			             "genre", genre,
+			             "year", cddb_disc_get_year(cwin->cstate->cddb_disc),
+			             "track-no", track_no,
+			             "length", (end - start) / CDIO_CD_FRAMES_PER_SEC,
+			             "channels", (channels > 0) ? channels : 0,
+			             NULL);
+		g_free(nfile);
+		g_free(ntitle);
 	}
-
-	if (!mobj->tags->title)
-		mobj->tags->title = g_strdup_printf("Track %d", track_no);
-	mobj->tags->track_no = track_no;
-	mobj->tags->channels = (channels > 0) ? channels : 0;
-	mobj->tags->length = (end - start) / CDIO_CD_FRAMES_PER_SEC;
-	mobj->file = g_strdup_printf("cdda://%d", track_no);
-
-	mobj->file_type = FILE_CDDA;
 
 	return mobj;
 }
 
-struct musicobject* new_musicobject_from_location(gchar *uri, const gchar *name, struct con_win *cwin)
+PraghaMusicobject *
+new_musicobject_from_location(const gchar *uri, const gchar *name)
 {
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
+	gchar *file = NULL;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to location: %s", uri);
-
-	mobj = g_slice_new0(struct musicobject);
-	mobj->tags = g_slice_new0(struct tags);
-
-	mobj->tags->title = g_strdup(name);
-
-	mobj->tags->artist = g_strdup("");
-	mobj->tags->album = g_strdup("");
-	mobj->tags->genre = g_strdup("");
-	mobj->tags->comment = g_strdup("");
-
-	mobj->tags->track_no = 0;
-	mobj->tags->year = 0;
-	mobj->tags->bitrate = 0;
-	mobj->tags->length = 0;
-	mobj->tags->channels = 0;
-	mobj->tags->samplerate = 0;
 
 #ifdef HAVE_PLPARSER
 	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
 	if(list) {
-		mobj->file = g_strdup(list->data);
-		g_slist_foreach (list, (GFunc)g_free, NULL);
+		file = g_strdup(list->data);
+		g_slist_free_full(list, g_free);
 	}
 	else {
-		mobj->file = g_strdup(uri);
+		file = g_strdup(uri);
 	}
-	g_slist_free(list);
 #else
-	mobj->file = g_strdup(uri);
+	file = g_strdup(uri);
 #endif
-	
-	mobj->file_type = FILE_HTTP;
+
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     "file", file,
+	                     "file-type", FILE_HTTP,
+	                     "title", name,
+	                     NULL);
+
+	g_free(file);
 
 	return mobj;
 }
 
-void update_musicobject(struct musicobject *mobj, gint changed, struct tags *ntag, struct con_win *cwin)
+void
+pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj)
 {
 	if (!changed)
 		return;
@@ -277,88 +201,24 @@ void update_musicobject(struct musicobject *mobj, gint changed, struct tags *nta
 	CDEBUG(DBG_VERBOSE, "Tags Updates: 0x%x", changed);
 
 	if (changed & TAG_TNO_CHANGED) {
-		mobj->tags->track_no = ntag->track_no;
+		pragha_musicobject_set_track_no(mobj, pragha_musicobject_get_track_no(nmobj));
 	}
 	if (changed & TAG_TITLE_CHANGED) {
-		g_free(mobj->tags->title);
-		mobj->tags->title = g_strdup(ntag->title);
+		pragha_musicobject_set_title(mobj, pragha_musicobject_get_title(nmobj));
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
-		g_free(mobj->tags->artist);
-		mobj->tags->artist = g_strdup(ntag->artist);
+		pragha_musicobject_set_artist (mobj, pragha_musicobject_get_artist(nmobj));
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
-		g_free(mobj->tags->album);
-		mobj->tags->album = g_strdup(ntag->album);
+		pragha_musicobject_set_album(mobj, pragha_musicobject_get_album(nmobj));
 	}
 	if (changed & TAG_GENRE_CHANGED) {
-		g_free(mobj->tags->genre);
-		mobj->tags->genre = g_strdup(ntag->genre);
+		pragha_musicobject_set_genre(mobj, pragha_musicobject_get_genre(nmobj));
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		mobj->tags->year = ntag->year;
+		pragha_musicobject_set_year(mobj, pragha_musicobject_get_year(nmobj));
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
-		g_free(mobj->tags->comment);
-		mobj->tags->comment = g_strdup(ntag->comment);
+		pragha_musicobject_set_comment(mobj, pragha_musicobject_get_comment(nmobj));
 	}
-}
-
-void init_tag_struct(struct tags *mtags)
-{
-	/* FIXME: Find that is what prohibits use NULL.
-	 * For Sqlite all nulls are different, so it is impossible to sort them
-	 * correctly!. (Fucking compatibility with Oracle, PostgreSQL, and DB2).
-	 * See here: http://www.sqlite.org/nulls.html*/
-
-	mtags->title = g_strdup("");
-	mtags->artist = g_strdup("");
-	mtags->album = g_strdup("");
-	mtags->comment = g_strdup("");
-	mtags->genre = g_strdup("");
-	mtags->comment = g_strdup("");
-	mtags->track_no = 0;
-	mtags->year = 0;
-	mtags->bitrate = 0;
-	mtags->length = 0;
-	mtags->channels = 0;
-	mtags->samplerate = 0;
-}
-
-void free_tag_struct(struct tags *mtags)
-{
-	g_free(mtags->title);
-	g_free(mtags->artist);
-	g_free(mtags->album);
-	g_free(mtags->genre);
-	g_free(mtags->comment);
-}
-
-void delete_musicobject(struct musicobject *mobj)
-{
-	if (!mobj)
-		return;
-
-	CDEBUG(DBG_MOBJ, "Freeing musicobject: %s", mobj->file);
-
-	g_free(mobj->file);
-	free_tag_struct(mobj->tags);
-
-	g_slice_free(struct tags, mobj->tags);
-	g_slice_free(struct musicobject, mobj);
-}
-
-void test_delete_musicobject(struct musicobject *mobj, struct con_win *cwin)
-{
-	if (!mobj)
-		return;
-
-	CDEBUG(DBG_MOBJ, "Test freeing musicobject: %s", mobj->file);
-
-	mpris_update_mobj_remove(cwin, mobj);
-
-	if (G_UNLIKELY(mobj == cwin->cstate->curr_mobj))
-		cwin->cstate->curr_mobj_clear = TRUE;
-	else
-		delete_musicobject(mobj);
 }

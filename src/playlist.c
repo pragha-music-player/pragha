@@ -18,29 +18,140 @@
 
 #include "pragha.h"
 
-/* Add all the tracks under the given path to the current playlist */
-/* NB: Optimization */
+/* Build a dialog to get a new playlist name */
 
-static void add_playlist_row_current_playlist(GtkTreePath *path, struct con_win *cwin)
+static gchar*
+get_playlist_dialog(enum playlist_mgmt *choice,
+		    enum playlist_mgmt type,
+		    struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	gchar *playlist;
-	gint node_type;
+	gchar **playlists, *playlist = NULL;
+	gint result, i=0;
+	GtkWidget *dialog, *radio_new, *radio_add;
+	GtkWidget *hbox, *vbox1, *vbox2;
+	GtkWidget *entry;
+	GtkWidget *combo_add;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	if (gtk_tree_model_get_iter(model, &iter, path)) {
-		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
-		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+	/* Retrieve list of playlist names from DB */
 
-		if(node_type == NODE_PLAYLIST) {
-			add_playlist_current_playlist(NULL, playlist, cwin);
+	playlists = get_playlist_names_db(cwin->cdbase);
+
+	/* Create dialog window */
+
+	hbox = gtk_hbox_new(TRUE, 2);
+	vbox1 = gtk_vbox_new(TRUE, 2);
+	vbox2 = gtk_vbox_new(TRUE, 2);
+	entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
+	combo_add = gtk_combo_box_text_new();
+	radio_new = gtk_radio_button_new_with_label(NULL, _("Save as a new playlist"));
+	radio_add = gtk_radio_button_new_with_label_from_widget(
+		GTK_RADIO_BUTTON(radio_new), _("Append to an existing playlist"));
+
+	if (playlists) {
+		while (playlists[i]) {
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_add),
+						  playlists[i]);
+			i++;
 		}
-		else if (node_type == NODE_RADIO) {
-			add_radio_current_playlist(NULL, playlist, cwin);
-		}
-		g_free(playlist);
+		g_strfreev(playlists);
 	}
+	else {
+		gtk_widget_set_sensitive(combo_add, FALSE);
+		gtk_widget_set_sensitive(radio_add, FALSE);
+	}
+
+	dialog = gtk_dialog_new_with_buttons(NULL,
+			     GTK_WINDOW(cwin->mainwindow),
+			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+			     GTK_STOCK_CANCEL,
+			     GTK_RESPONSE_CANCEL,
+			     GTK_STOCK_OK,
+			     GTK_RESPONSE_ACCEPT,
+			     NULL);
+
+	if(type == SAVE_COMPLETE)
+		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
+	else
+		gtk_window_set_title (GTK_WINDOW(dialog), _("Save selection"));
+
+	gtk_box_pack_start(GTK_BOX(vbox1), radio_new, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox1), radio_add, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox2), entry, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox2), combo_add, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox1, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 2);
+
+	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	gtk_widget_grab_focus(GTK_WIDGET(entry));
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch(result) {
+	case GTK_RESPONSE_ACCEPT:
+		/* Get playlist name */
+		/* Store a copy because the dialog box is destroyed on return */
+
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_new))) {
+			playlist = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+			*choice = NEW_PLAYLIST;
+		}
+		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_add))) {
+			playlist = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_add));
+			*choice = APPEND_PLAYLIST;
+		}
+		break;
+	case GTK_RESPONSE_HELP:
+		playlist = g_strdup(_("New playlist"));
+		*choice = EXPORT_PLAYLIST;
+		break;
+	case GTK_RESPONSE_CANCEL:
+		break;
+	default:
+		break;
+	}
+
+	gtk_widget_destroy(dialog);
+
+	return playlist;
+}
+
+/* Get a new playlist name that is not reserved */
+
+gchar*
+get_playlist_name(struct con_win *cwin,
+		  enum playlist_mgmt type,
+		  enum playlist_mgmt *choice)
+{
+	gchar *playlist = NULL;
+	enum playlist_mgmt sel = 0;
+
+	do {
+		playlist = get_playlist_dialog(&sel, type, cwin);
+		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
+			GtkWidget *dialog;
+			dialog = gtk_message_dialog_new_with_markup(
+				GTK_WINDOW(cwin->mainwindow),
+				GTK_DIALOG_MODAL,
+				GTK_MESSAGE_INFO,
+				GTK_BUTTONS_OK,
+				_("<b>con_playlist</b> is a reserved playlist name"));
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+			g_free(playlist);
+			continue;
+		} else {
+			break;
+		}
+	} while (1);
+
+	*choice = sel;
+	return playlist;
 }
 
 static gboolean overwrite_existing_playlist(const gchar *playlist,
@@ -108,142 +219,56 @@ exit_failure:
 	return NULL;
 }
 
-static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+static gint
+save_mobj_list_to_m3u_playlist(GList *list, GIOChannel *chan, gchar *filename)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
 	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	struct musicobject *mobj = NULL;
+	PraghaMusicobject *mobj = NULL;
 	GIOStatus status;
 	gsize bytes = 0;
 	GError *err = NULL;
+	GList *i;
 	gint ret = 0;
-	gboolean next;
 
 	base_m3u = get_display_filename(filename, TRUE);
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	next = gtk_tree_model_get_iter_first(model, &iter);
-	while (next) {
-		gtk_tree_model_get (model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (G_LIKELY(mobj &&
-		    mobj->file_type != FILE_CDDA &&
-		    mobj->file_type != FILE_HTTP)) {
-			base = get_display_filename(mobj->file, TRUE);
+	/* Export all selected tracks to the given file */
+	for (i=list; i != NULL; i = i->next) {
+		mobj = i->data;
+		if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+			base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
 			if (g_ascii_strcasecmp(base_m3u, base) == 0)
-				uri = get_display_filename(mobj->file, FALSE);
+				uri = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
 			else
-				uri = g_strdup(mobj->file);
+				uri = g_strdup(pragha_musicobject_get_file(mobj));
 
 			/* Format: "#EXTINF:seconds, title" */
 			str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-					      mobj->tags->length,
-					      mobj->tags->title,
+					      pragha_musicobject_get_length(mobj),
+					      pragha_musicobject_get_title(mobj),
 					      uri);
 
 			status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
 			if (status != G_IO_STATUS_NORMAL) {
 				g_critical("Unable to write to M3U playlist: %s", filename);
 				ret = -1;
-				goto exit;
+				goto exit_list;
 			}
 			g_free(base);
 			g_free(uri);
 		}
 
 		/* Have to give control to GTK periodically ... */
-		/* If gtk_main_quit has been called, return -
-		   since main loop is no more. */
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				return 0;
-			}
-		}
-	next = gtk_tree_model_iter_next(model, &iter);
-	}
-
-exit:
-	g_free(base_m3u);
-	if (err) {
-		g_error_free(err);
-		err = NULL;
-	}
-	return ret;
-}
-
-static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list, *i;
-	gchar *str = NULL, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	struct musicobject *mobj = NULL;
-	GIOStatus status;
-	gsize bytes = 0;
-	GError *err = NULL;
-	gint ret = 0;
-
-	base_m3u = get_display_filename(filename, TRUE);
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->current_playlist));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-	if (list) {
-		/* Export all selected tracks to the given file */
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter,
-					   P_MOBJ_PTR, &mobj, -1);
-			if (G_LIKELY(mobj &&
-			    mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP)) {
-				base = get_display_filename(mobj->file, TRUE);
-
-				if (g_ascii_strcasecmp(base_m3u, base) == 0)
-					uri = get_display_filename(mobj->file, FALSE);
-				else
-					uri = g_strdup(mobj->file);
-
-				/* Format: "#EXTINF:seconds, title" */
-				str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-						      mobj->tags->length,
-						      mobj->tags->title,
-						      uri);
-
-				status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-				if (status != G_IO_STATUS_NORMAL) {
-					g_critical("Unable to write to M3U playlist: %s", filename);
-					ret = -1;
-					goto exit_list;
-				}
-				g_free(base);
-				g_free(uri);
-			}
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return 0;
-				}
-			}
+		if (pragha_process_gtk_events ()) {
+			g_list_free(list);
+			return 0;
 		}
 	}
 
 exit_list:
 	g_free(base_m3u);
-	if (list)
-		g_list_free(list);
 	if (err) {
 		g_error_free(err);
 		err = NULL;
@@ -251,96 +276,50 @@ exit_list:
 	return ret;
 }
 
-static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
-			      struct con_win *cwin)
+static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
 {
-	GError *err = NULL;
-	gchar *query, *str, *title, *file = NULL, *s_playlist, *uri = NULL, *base_m3u = NULL, *base = NULL;
-	gint playlist_id, location_id, i = 0, ret = 0;
-	gsize bytes = 0;
-	struct db_result result;
-	struct musicobject *mobj = NULL;
-	GIOStatus status;
+	gint ret = 0;
+	GList *list = NULL;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	if (!exec_sqlite_query(query, cwin->cdbase, &result)) {
-		g_free(s_playlist);
-		return -1;
+	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+
+	if(list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
+		g_list_free(list);
 	}
 
-	base_m3u = get_display_filename(filename, TRUE);
+	return ret;
+}
 
-	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+{
+	GList *list = NULL;
+	gint ret = 0;
 
-		/* Form a musicobject since length and title are needed */
+	list = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
 
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
-		else
-			mobj = new_musicobject_from_file(result.resultp[i]);
-
-		if (!mobj) {
-			g_warning("Unable to create musicobject for M3U playlist: %s",
-				  filename);
-			g_free(file);
-			continue;
-		}
-
-		base = get_display_filename(mobj->file, TRUE);
-
-		if (g_ascii_strcasecmp(base_m3u, base) == 0)
-			uri = get_display_filename(mobj->file, FALSE);
-		else
-			uri = g_strdup(mobj->file);
-
-		/* If title tag is absent, just store the filename */
-
-		if (mobj->tags->title)
-			title = mobj->tags->title;
-		else
-			title = uri;
-
-		/* Format: "#EXTINF:seconds, title" */
-
-		str = g_strdup_printf("#EXTINF:%d,%s\n%s\n",
-				      mobj->tags->length, title, uri);
-
-		status = g_io_channel_write_chars(chan, str, -1, &bytes, &err);
-		if (status != G_IO_STATUS_NORMAL) {
-			g_critical("Unable to write to M3U playlist: %s", filename);
-			g_free(uri);
-			g_free(file);
-			g_free(str);
-			g_free(base);
-			ret = -1;
-			goto exit;
-		}
-
-		g_free(str);
-		g_free(file);
-		g_free(uri);
-		g_free(base);
-
-		if (mobj) {
-			delete_musicobject(mobj);
-			mobj = NULL;
-		}
+	if (list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
+		g_list_free(list);
 	}
 
-exit:
-	g_free(s_playlist);
-	g_free(base_m3u);
-	if (mobj)
-		delete_musicobject(mobj);
-	if (err) {
-		g_error_free(err);
-		err = NULL;
+	return ret;
+}
+
+static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
+			      struct con_dbase *cdbase)
+{
+	GList *list = NULL;
+	gint ret = 0;
+
+	list = add_playlist_to_mobj_list(cdbase, playlist, list);
+
+	if (list != NULL) {
+		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
+
+		g_list_foreach(list, (GFunc) g_object_unref, NULL);
+		g_list_free(list);
 	}
-	sqlite3_free_table(result.resultp);
 
 	return ret;
 }
@@ -353,92 +332,50 @@ exit:
 
 void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin)
 {
-	gchar *s_playlist, *query, *file;
-	gint playlist_id, location_id, i = 0;
-	struct db_result result;
-	struct musicobject *mobj;
-	GdkCursor *cursor;
+	GList *list = NULL;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	set_watch_cursor (cwin->mainwindow);
 
-	if(playlist_id == 0)
-		goto bad;
+	list = add_playlist_to_mobj_list(cwin->cdbase, playlist, list);
 
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
-
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
-
-	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	g_object_ref(model);
-	cwin->cstate->playlist_change = TRUE;
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), NULL);
-
-	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
-
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
-		else
-			mobj = new_musicobject_from_file(result.resultp[i]);
-
-		append_current_playlist(model, mobj, cwin);
-
-		g_free(file);
+	if(list) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+		update_status_bar_playtime(cwin);
 	}
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->current_playlist), model);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->current_playlist), TRUE);
-	cwin->cstate->playlist_change = FALSE;
-	g_object_unref(model);
-
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
-
-	sqlite3_free_table(result.resultp);
-
-bad:
-	g_free(s_playlist);
+	remove_watch_cursor (cwin->mainwindow);
 }
 
-/* Prepend the given playlist to the mobj list. */
+/* Append the given playlist to the mobj list. */
 
 GList *
-prepend_playlist_to_mobj_list(gchar *playlist, GList *list, struct con_win *cwin)
+add_playlist_to_mobj_list(struct con_dbase *cdbase,
+                          gchar *playlist,
+                          GList *list)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
 	struct db_result result;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 
-	s_playlist = sanitize_string_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
+	playlist_id = find_playlist_db(s_playlist, cdbase);
 
 	if(playlist_id == 0)
 		goto bad;
 
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	exec_sqlite_query(query, cdbase, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_sqlite3(result.resultp[i]);
+		file = sanitize_string_to_sqlite3(result.resultp[i]);
 
-		if ((location_id = find_location_db(file, cwin->cdbase)))
-			mobj = new_musicobject_from_db(location_id, cwin);
+		if ((location_id = find_location_db(file, cdbase)))
+			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		list = g_list_prepend(list, mobj);
+		list = g_list_append(list, mobj);
 
 		g_free(file);
 	}
@@ -450,55 +387,20 @@ bad:
 	return list;
 }
 
-/* Append the given radio to the current playlist */
-
-void add_radio_current_playlist(GtkTreeModel *model, gchar *radio, struct con_win *cwin)
-{
-	gchar *s_radio, *query;
-	gint radio_id, i = 0;
-	struct db_result result;
-	struct musicobject *mobj;
-
-	s_radio = sanitize_string_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cwin->cdbase);
-
-	if(radio_id == 0)
-		goto bad;
-
-	if(model == NULL)
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
-	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
-				radio_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
-
-	for_each_result_row(result, i) {
-		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
-
-		append_current_playlist(model, mobj, cwin);
-	}
-
-	select_last_path_of_current_playlist(cwin);
-	update_status_bar(cwin);
-
-	sqlite3_free_table(result.resultp);
-
-bad:
-	g_free(s_radio);
-}
-
-/* Prepend the given radio to the mobj list. */
+/* Append the given radio to the mobj list. */
 
 GList *
-prepend_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
+add_radio_to_mobj_list(struct con_dbase *cdbase,
+                       gchar *radio,
+                       GList *list)
 {
 	gchar *s_radio, *query;
 	gint radio_id, i = 0;
 	struct db_result result;
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 
-	s_radio = sanitize_string_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cwin->cdbase);
+	s_radio = sanitize_string_to_sqlite3(radio);
+	radio_id = find_radio_db(s_radio, cdbase);
 
 	if(radio_id == 0)
 		goto bad;
@@ -506,11 +408,12 @@ prepend_radio_to_mobj_list(gchar *radio, GList *list, struct con_win *cwin)
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
 
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	exec_sqlite_query(query, cdbase, &result);
 	for_each_result_row(result, i) {
-		mobj = new_musicobject_from_location(result.resultp[i], radio, cwin);
+		mobj = new_musicobject_from_location(result.resultp[i], radio);
 
-		list = g_list_prepend(list, mobj);
+		list = g_list_append(list, mobj);
+
 	}
 	sqlite3_free_table(result.resultp);
 
@@ -518,70 +421,6 @@ bad:
 	g_free(s_radio);
 
 	return list;
-}
-
-void playlist_tree_row_activated_cb(GtkTreeView *playlist_tree,
-				    GtkTreePath *path,
-				    GtkTreeViewColumn *column,
-				    struct con_win *cwin)
-{
-	GtkTreeIter r_iter;
-	GtkTreePath *r_path;
-	GtkTreeModel *model;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-
-	gtk_tree_model_get_iter_first(model, &r_iter);
-	r_path = gtk_tree_model_get_path(model, &r_iter);
-
-	if (!gtk_tree_path_compare(path, r_path)) {
-		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->library_tree),
-						path))
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->library_tree),
-						 path, FALSE);
-		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->library_tree),
-						   path);
-	}
-	else {
-		add_playlist_row_current_playlist(path, cwin);
-	}
-
-	gtk_tree_path_free(r_path);
-}
-
-void playlist_tree_add_to_playlist(struct con_win *cwin)
-{
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-	if (list) {
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			if (gtk_tree_path_get_depth(path) > 1)
-				add_playlist_row_current_playlist(path, cwin);
-
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return;
-				}
-			}
-		}
-		g_list_free(list);
-	}
 }
 
 /* Build a dialog to get a new playlist name */
@@ -659,7 +498,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			s_playlist = sanitize_string_sqlite3(playlist);
+			s_playlist = sanitize_string_to_sqlite3(playlist);
 
 			n_playlist = rename_playlist_dialog(s_playlist, cwin);
 			if(n_playlist != NULL) {
@@ -742,7 +581,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
-					s_playlist = sanitize_string_sqlite3(playlist);
+					s_playlist = sanitize_string_to_sqlite3(playlist);
 
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db(s_playlist, cwin->cdbase);
@@ -854,7 +693,6 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gint resp, cnt;
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
 	gint node_type;
-	GdkCursor *cursor;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -913,9 +751,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 		goto exit;
 	}
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
@@ -929,7 +765,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 				if (save_m3u_playlist(chan, playlist,
-						      filename, cwin) < 0) {
+						      filename, cwin->cdbase) < 0) {
 					g_warning("Unable to save M3U playlist: %s",
 						  filename);
 					g_free(playlist);
@@ -940,14 +776,9 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			/* If gtk_main_quit has been called, return -
-			   since main loop is no more. */
-
-			while(gtk_events_pending()) {
-				if (gtk_main_iteration_do(FALSE)) {
-					g_list_free(list);
-					return;
-				}
+			if (pragha_process_gtk_events ()) {
+				g_list_free(list);
+				return;
 			}
 		}
 	}
@@ -964,7 +795,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 exit_list:
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
+	remove_watch_cursor (cwin->mainwindow);
 
 	if (list)
 		g_list_free(list);
@@ -1182,13 +1013,11 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 		}
 		list = g_slist_append (list, uri);
 
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE)) {
-				g_free(filename);
-				g_free(f_file);
-				g_free(str);
-				goto exit_chan;
-			}
+		if (pragha_process_gtk_events ()) {
+			g_free(filename);
+			g_free(f_file);
+			g_free(str);
+			goto exit_chan;
 		}
 
 		g_free(f_file);
@@ -1262,12 +1091,9 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	GSList *list = NULL, *i = NULL;
 	gchar *summary;
 	gint try = 0, added = 0;
-	struct musicobject *mobj;
-	GdkCursor *cursor;
+	PraghaMusicobject *mobj;
 
-	cursor = gdk_cursor_new(GDK_WATCH);
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), cursor);
-	gdk_cursor_unref(cursor);
+	set_watch_cursor (cwin->mainwindow);
 
 #ifdef HAVE_PLPARSER
 	gchar *uri = g_filename_to_uri (file, NULL, NULL);
@@ -1282,18 +1108,16 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		mobj = new_musicobject_from_file(i->data);
 		if (mobj) {
 			added++;
-			append_current_playlist(NULL, mobj, cwin);
+			append_current_playlist(cwin->cplaylist, NULL, mobj);
 		}
-		while(gtk_events_pending()) {
-			if (gtk_main_iteration_do(FALSE))
-				return;
-		}
+
+		if (pragha_process_gtk_events ())
+			return;
+
 		g_free(i->data);
 	}
 
-	gdk_window_set_cursor(gtk_widget_get_window(cwin->mainwindow), NULL);
-
-	select_last_path_of_current_playlist(cwin);
+	remove_watch_cursor (cwin->mainwindow);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	set_status_message(summary, cwin);
@@ -1304,26 +1128,23 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 /* Appennd a tracks list to a playlist using the given type */
 
-void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cwin)
+static void
+append_files_to_playlist(struct con_dbase *cdbase, GSList *list, gint playlist_id)
 {
-	gchar *file, *s_file, *query;
+	gchar *file, *s_file;
 	GSList *i = NULL;
 
-	query = g_strdup_printf("BEGIN;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
+	db_begin_transaction(cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
-		s_file = sanitize_string_sqlite3(file);
-		add_track_playlist_db(s_file, playlist_id, cwin->cdbase);
+		s_file = sanitize_string_to_sqlite3(file);
+		add_track_playlist_db(s_file, playlist_id, cdbase);
 		g_free(s_file);
 		g_free(file);
 	}
 
-	query = g_strdup_printf("END;");
-	exec_sqlite_query(query, cwin->cdbase, NULL);
-
-	g_slist_free(list);
+	db_commit_transaction(cdbase);
 }
 
 /* Save tracks to a playlist using the given type */
@@ -1331,71 +1152,43 @@ void append_files_to_playlist(GSList *list, gint playlist_id, struct con_win *cw
 void save_playlist(gint playlist_id, enum playlist_mgmt type,
 		   struct con_win *cwin)
 {
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeSelection *selection;
-	GtkTreeIter iter;
-	struct musicobject *mobj = NULL;
-	GList *list, *i;
+	PraghaMusicobject *mobj = NULL;
+	GList *mlist = NULL, *i;
 	GSList *files = NULL;
 	gchar *file = NULL;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->current_playlist));
-
 	switch(type) {
 	case SAVE_COMPLETE:
-		gtk_tree_model_get_iter_first(model, &iter);
-		do {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (G_LIKELY(mobj &&
-			    mobj->file_type != FILE_CDDA &&
-			    mobj->file_type != FILE_HTTP)) {
-			    	file = g_strdup(mobj->file);
-				files = g_slist_append(files, file);
-			}
-			else if(G_LIKELY(mobj &&
-				mobj->file_type == FILE_HTTP)) {
-				/* TODO: Fix this negradaaa!. */
-				file = g_strdup_printf("Radio:%s", mobj->file);
-				files = g_slist_append(files, file);
-			}
-		} while(gtk_tree_model_iter_next(model, &iter));
+		mlist = pragha_playlist_get_mobj_list(cwin->cplaylist);
 		break;
 	case SAVE_SELECTED:
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->current_playlist));
-		list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-		if (list) {
-			for (i=list; i != NULL; i = i->next) {
-				path = i->data;
-				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter,
-						   P_MOBJ_PTR, &mobj, -1);
-
-				if (G_LIKELY(mobj &&
-				    mobj->file_type != FILE_CDDA &&
-				    mobj->file_type != FILE_HTTP)) {
-				    	file = g_strdup(mobj->file);
-					files = g_slist_append(files, file);
-				}
-				else if(G_LIKELY(mobj &&
-					mobj->file_type == FILE_HTTP)) {
-					/* TODO: Fix this negradaaa!. */
-					file = g_strdup_printf("Radio:%s", mobj->file);
-					files = g_slist_append(files, file);
-				}
-				gtk_tree_path_free(path);
-			}
-			g_list_free(list);
-		}
+		mlist = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
 		break;
 	default:
 		break;
 	}
 
-	if(files != NULL)
-		append_files_to_playlist(files, playlist_id, cwin);
+	if(mlist != NULL) {
+		for (i=mlist; i != NULL; i = i->next) {
+			mobj = i->data;
+			if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
+			    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+			    	file = g_strdup(pragha_musicobject_get_file(mobj));
+				files = g_slist_prepend(files, file);
+			}
+			else if(pragha_musicobject_get_file_type(mobj) == FILE_HTTP) {
+				/* TODO: Fix this negradaaa!. */
+				file = g_strdup_printf("Radio:%s", pragha_musicobject_get_file(mobj));
+				files = g_slist_prepend(files, file);
+			}
+		}
+		g_list_free(mlist);
+	}
+
+	if(files != NULL) {
+		append_files_to_playlist(cwin->cdbase, files, playlist_id);
+		g_slist_free(files);
+	}
 }
 
 void new_playlist(const gchar *playlist, enum playlist_mgmt type,
@@ -1404,12 +1197,12 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 	gchar *s_playlist;
 	gint playlist_id = 0;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 
 	if ((playlist_id = find_playlist_db(s_playlist, cwin->cdbase))) {
 		if (overwrite_existing_playlist(playlist, cwin))
@@ -1430,12 +1223,12 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 	gchar *s_playlist;
 	gint playlist_id;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 
 	if (!playlist_id) {
@@ -1449,17 +1242,17 @@ exit:
 	g_free(s_playlist);
 }
 
-void new_radio (gchar *uri, gchar *name, struct con_win *cwin)
+void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 {
 	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
 
-	if (!name || !strlen(name)) {
+	if (string_is_empty(name)) {
 		g_warning("Radio name is NULL");
 		return;
 	}
 
-	s_radio = sanitize_string_sqlite3(name);
+	s_radio = sanitize_string_to_sqlite3(name);
 
 	if ((radio_id = find_radio_db(s_radio, cwin->cdbase))) {
 		if (overwrite_existing_playlist(name, cwin))
@@ -1470,7 +1263,7 @@ void new_radio (gchar *uri, gchar *name, struct con_win *cwin)
 
 	radio_id = add_new_radio_db(s_radio, cwin->cdbase);
 
-	file = sanitize_string_sqlite3(uri);
+	file = sanitize_string_to_sqlite3(uri);
 	add_track_radio_db(file, radio_id, cwin->cdbase);
 	g_free(file);
 
@@ -1513,7 +1306,7 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cp_context_menu, "/popup/Add to another playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cplaylist->cp_context_menu, "/popup/Add to another playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
@@ -1546,7 +1339,7 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cp_context_menu, "/popup/Save playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cplaylist->cp_context_menu, "/popup/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));

@@ -22,6 +22,14 @@ const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
 Wildcards are not accepted as of now ( patches welcome :-) ).");
 
+static void
+album_art_pattern_helper_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
+{
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -33,8 +41,11 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 					"%s",
 					album_art_pattern_info);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Album art pattern"));
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(album_art_pattern_helper_response), cwin);
+
+	gtk_widget_show_all (dialog);
 }
 
 /* Handler for the preferences dialog */
@@ -46,6 +57,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gboolean ret, osd, test_change;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
+	gboolean show_album_art, instant_search, approximate_search, restore_playlist;
+	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 
@@ -54,33 +67,31 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		break;
 	case GTK_RESPONSE_OK:
 		/* Audio preferences */
-		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->cpref->audio_sink_combo_w));
+		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->audio_sink_combo_w));
 		if(audio_sink) {
-			g_free(cwin->cpref->audio_sink);
-			cwin->cpref->audio_sink = audio_sink;
+			pragha_preferences_set_audio_sink(cwin->preferences, audio_sink);
+			g_free(audio_sink);
 		}
 
-		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->audio_device_w));
+		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_device_w));
 		if(audio_device) {
-			g_free(cwin->cpref->audio_device);
-			cwin->cpref->audio_device = g_strdup(audio_device);
+			pragha_preferences_set_audio_device(cwin->preferences, audio_device);
 		}
 
-		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->audio_cd_device_w));
+		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w));
 		if (audio_cd_device) {
-			g_free(cwin->cpref->audio_cd_device);
-			cwin->cpref->audio_cd_device = g_strdup(audio_cd_device);
+			pragha_preferences_set_audio_cd_device(cwin->preferences, audio_cd_device);
 		}
 
-		cwin->cpref->software_mixer =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->soft_mixer_w));
-		backend_set_soft_volume(cwin);
+		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						     cwin->preferences_w->soft_mixer_w));
+		pragha_preferences_set_software_mixer(cwin->preferences, software_mixer);
+		pragha_backend_set_soft_volume(cwin->backend, software_mixer);
 
 		/* Library Preferences */
 
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view_w));
+						cwin->preferences_w->library_view_w));
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
 		/* Free the list of libraries and rebuild it again */
@@ -112,20 +123,20 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		if (cwin->cpref->cur_library_view == FOLDERS) {
 			test_change = cwin->cpref->fuse_folders;
-			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->fuse_folders_w));
+			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w));
 			if (cwin->cpref->fuse_folders != test_change)
 				init_library_view(cwin);
 		}
 		else {
 			test_change = cwin->cpref->sort_by_year;
-			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->cpref->sort_by_year_w));
+			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w));
 			if (cwin->cpref->sort_by_year != test_change)
 				init_library_view(cwin);
 		}
 
 		/* General preferences */
 
-		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->cpref->window_state_combo_w));
+		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->window_state_combo_w));
 
 		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
 			cwin->cpref->remember_window_state = FALSE;
@@ -146,40 +157,44 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		g_free(window_state_sink);
 
-		cwin->cpref->instant_filter =
+		instant_search =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->instant_filter_w));
+						     cwin->preferences_w->instant_filter_w));
+		pragha_preferences_set_instant_search(cwin->preferences, instant_search);
 
-		cwin->cpref->aproximate_search =
+		approximate_search =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->aproximate_search_w));
+						     cwin->preferences_w->aproximate_search_w));
+		pragha_preferences_set_approximate_search(cwin->preferences, approximate_search);
 
-		cwin->cpref->save_playlist =
+		restore_playlist =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->restore_playlist_w));
+						     cwin->preferences_w->restore_playlist_w));
+		pragha_preferences_set_restore_playlist(cwin->preferences, restore_playlist);
+
 
 		cwin->cpref->show_icon_tray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->show_icon_tray_w));
+						  cwin->preferences_w->show_icon_tray_w));
 
 		cwin->cpref->close_to_tray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->close_to_tray_w));
+						  cwin->preferences_w->close_to_tray_w));
 
 		cwin->cpref->add_recursively_files =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->add_recursively_w));
+						  cwin->preferences_w->add_recursively_w));
 
-		cwin->cpref->show_album_art =
+		show_album_art =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->album_art_w));
+						  cwin->preferences_w->album_art_w));
 
-		cwin->cpref->album_art_size =
+		album_art_size =
 			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
-						cwin->cpref->album_art_size_w));
+						cwin->preferences_w->album_art_size_w));
 
-		if (cwin->cpref->show_album_art) {
-			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w));
+		if (show_album_art) {
+			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
 
 			if (album_art_pattern) {
 				if (!validate_album_art_pattern(album_art_pattern)) {
@@ -192,12 +207,13 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			}
 		}
 
-		album_art_toggle_state(cwin);
+		pragha_album_art_set_size(cwin->albumart, album_art_size);
+		pragha_album_art_set_visible(cwin->albumart, show_album_art);
 
 		/* Notification preferences */
 
 		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						   cwin->cpref->show_osd_w));
+						   cwin->preferences_w->show_osd_w));
 		if (osd) {
 			cwin->cpref->show_osd = TRUE;
 			if (!notify_is_initted()) {
@@ -211,38 +227,38 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 #if !NOTIFY_CHECK_VERSION (0, 7, 0)
 		cwin->cpref->osd_in_systray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->osd_in_systray_w));
+						  cwin->preferences_w->osd_in_systray_w));
 #endif
 
 		cwin->cpref->albumart_in_osd =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->albumart_in_osd_w));
+						  cwin->preferences_w->albumart_in_osd_w));
 		cwin->cpref->actions_in_osd =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->cpref->actions_in_osd_w));
+						  cwin->preferences_w->actions_in_osd_w));
 
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lw.lastfm_support =
+		cwin->cpref->lastfm_support =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->lw.lastfm_w));
+						     cwin->preferences_w->lastfm_w));
 
-		if (cwin->cpref->lw.lastfm_user) {
-			g_free(cwin->cpref->lw.lastfm_user);
-			cwin->cpref->lw.lastfm_user = NULL;
+		if (cwin->cpref->lastfm_user) {
+			g_free(cwin->cpref->lastfm_user);
+			cwin->cpref->lastfm_user = NULL;
 		}
-		if (cwin->cpref->lw.lastfm_pass) {
-			g_free(cwin->cpref->lw.lastfm_pass);
-			cwin->cpref->lw.lastfm_pass = NULL;
+		if (cwin->cpref->lastfm_pass) {
+			g_free(cwin->cpref->lastfm_pass);
+			cwin->cpref->lastfm_pass = NULL;
 		}
 
-		if (cwin->cpref->lw.lastfm_support) {
-			cwin->cpref->lw.lastfm_user =
+		if (cwin->cpref->lastfm_support) {
+			cwin->cpref->lastfm_user =
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->cpref->lw.lastfm_uname_w)));
-			cwin->cpref->lw.lastfm_pass =
+					    cwin->preferences_w->lastfm_uname_w)));
+			cwin->cpref->lastfm_pass =
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->cpref->lw.lastfm_pass_w)));
+					    cwin->preferences_w->lastfm_pass_w)));
 
 			if (cwin->clastfm->session_id != NULL) {
 				LASTFM_dinit(cwin->clastfm->session_id);
@@ -256,15 +272,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 #ifdef HAVE_LIBGLYR
 		cwin->cpref->get_album_art =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->get_album_art_w));
+						     cwin->preferences_w->get_album_art_w));
 #endif
 		cwin->cpref->use_cddb =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->use_cddb_w));
+						     cwin->preferences_w->use_cddb_w));
 
 		cwin->cpref->use_mpris2 =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->cpref->use_mpris2_w));
+						     cwin->preferences_w->use_mpris2_w));
 		if(!cwin->cpref->use_mpris2) {
 			if(NULL != cwin->cmpris2->dbus_connection)
 				mpris_close(cwin->cmpris2);
@@ -280,38 +296,26 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		break;
 	}
 
+	g_slice_free(PreferencesWidgets, cwin->preferences_w);
+
 	gtk_widget_destroy(GTK_WIDGET(dialog));
-	cwin->cpref->library_view_w = NULL;
 }
 
 /* Handler for adding a new library */
-
-static void library_add_cb(GtkButton *button, struct con_win *cwin)
+static void
+library_add_cb_response(GtkDialog *dialog,
+			gint response,
+			struct con_win *cwin)
 {
-	GError *error = NULL;
-	GtkWidget *dialog;
-	gint resp;
 	gchar *u_folder, *folder;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	GError *error = NULL;
 
-	/* Create a folder chooser dialog */
-
-	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-					     NULL);
-
-	/* Show it and get the folder */
-
-	resp = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch (resp) {
+	switch (response) {
 	case GTK_RESPONSE_ACCEPT:
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view_w));
+						cwin->preferences_w->library_view_w));
 		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		if (!folder)
 			break;
@@ -344,8 +348,28 @@ static void library_add_cb(GtkButton *button, struct con_win *cwin)
 	default:
 		break;
 	}
-
 	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
+static void library_add_cb(GtkButton *button, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+
+	/* Create a folder chooser dialog */
+
+	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
+					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					     NULL);
+
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(library_add_cb_response), cwin);
+
+	gtk_widget_show_all (dialog);
 }
 
 /* Handler for removing a library */
@@ -359,7 +383,7 @@ static void library_remove_cb(GtkButton *button, struct con_win *cwin)
 	gchar *folder, *u_folder;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-						cwin->cpref->library_view_w));
+						cwin->preferences_w->library_view_w));
 	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
 		if (!u_folder)
@@ -394,10 +418,10 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->cpref->lw.lastfm_w));
+						 cwin->preferences_w->lastfm_w));
 
-	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_uname_w, is_active);
-	gtk_widget_set_sensitive(cwin->cpref->lw.lastfm_pass_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->lastfm_uname_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->lastfm_pass_w, is_active);
 
 	if(!is_active && cwin->clastfm->session_id) {
 		CDEBUG(DBG_INFO, "Shutdown LASTFM");
@@ -416,9 +440,12 @@ static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
 
 static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 {
-	cwin->cpref->use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	gboolean use_hint;
+	use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(cwin->current_playlist), cwin->cpref->use_hint);
+	pragha_playlist_set_rules_hint(cwin->cplaylist, use_hint);
+
+	pragha_preferences_set_use_hint(cwin->preferences, use_hint);
 }
 
 /* Toggle album art pattern */
@@ -428,12 +455,12 @@ static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->cpref->album_art_w));
+						 cwin->preferences_w->album_art_w));
 
-	gtk_widget_set_sensitive(cwin->cpref->album_art_pattern_w, is_active);
-	gtk_widget_set_sensitive(cwin->cpref->album_art_size_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->album_art_pattern_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->album_art_size_w, is_active);
 
-	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
 }
 
 /* Toggle show status icon. */
@@ -443,10 +470,10 @@ static void toggle_show_icon_tray(GtkToggleButton *button, struct con_win *cwin)
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->cpref->show_icon_tray_w));
+						 cwin->preferences_w->show_icon_tray_w));
 
 	if (!is_active)
-		gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, FALSE);
+		gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, FALSE);
 
 	gtk_status_icon_set_visible(cwin->status_icon, is_active);
 }
@@ -458,48 +485,48 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->cpref->show_osd_w));
+						 cwin->preferences_w->show_osd_w));
 
 	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	gtk_widget_set_sensitive(cwin->cpref->osd_in_systray_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->osd_in_systray_w, is_active);
 	#endif
-	gtk_widget_set_sensitive(cwin->cpref->albumart_in_osd_w, is_active);
+	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
 	if (can_support_actions())
-		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, is_active);
+		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, is_active);
 }
 
 static void update_audio_device_alsa(struct con_win *cwin)
 {
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
 }
 
 static void update_audio_device_oss4(struct con_win *cwin)
 {
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
 }
 
 static void update_audio_device_oss(struct con_win *cwin)
 {
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
 }
 
 static void update_audio_device_pulse(struct con_win *cwin)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->cpref->soft_mixer_w), FALSE);
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
-	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
-	cwin->cpref->software_mixer = FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
+	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
+	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
 }
 
 static void update_audio_device_default(struct con_win *cwin)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->cpref->soft_mixer_w), FALSE);
-	gtk_widget_set_sensitive(cwin->cpref->audio_device_w, FALSE);
-	gtk_widget_set_sensitive(cwin->cpref->soft_mixer_w, FALSE);
-	cwin->cpref->software_mixer = FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
+	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
+	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
 }
 
 /* The enumerated audio devices have to be changed here */
@@ -510,7 +537,7 @@ static void change_audio_sink(GtkComboBox *combo, gpointer udata)
 	gchar *audio_sink;
 
 	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(
-					      cwin->cpref->audio_sink_combo_w));
+					      cwin->preferences_w->audio_sink_combo_w));
 
 	if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 		update_audio_device_alsa(cwin);
@@ -533,125 +560,127 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
+	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
+	const gchar *audio_device = pragha_preferences_get_audio_device(cwin->preferences);
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
 
 	/* Audio Options */
 
-	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+	if (audio_sink) {
+		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
+						 cwin->preferences_w->audio_sink_combo_w),
 						 1);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
+						 cwin->preferences_w->audio_sink_combo_w),
 						 2);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
+						 cwin->preferences_w->audio_sink_combo_w),
 						 3);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
+						 cwin->preferences_w->audio_sink_combo_w),
 						 4);
 		else
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->cpref->audio_sink_combo_w),
+						 cwin->preferences_w->audio_sink_combo_w),
 						 0);
 	}
 
-	if (cwin->cpref->audio_sink) {
-		if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, ALSA_SINK))
+	if (audio_sink) {
+		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			update_audio_device_alsa(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS4_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
 			update_audio_device_oss4(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, OSS_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
 			update_audio_device_oss(cwin);
-		else if (!g_ascii_strcasecmp(cwin->cpref->audio_sink, PULSE_SINK))
+		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
 			update_audio_device_pulse(cwin);
 		else
 			update_audio_device_default(cwin);
 	}
 
-	if (cwin->cpref->audio_device)
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->audio_device_w),
-				   cwin->cpref->audio_device);
+	if (audio_device)
+		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_device_w),
+				   audio_device);
 
-	if (cwin->cpref->audio_cd_device)
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->audio_cd_device_w),
-				   cwin->cpref->audio_cd_device);
+	if (audio_cd_device)
+		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
+				   audio_cd_device);
 
-	if (cwin->cpref->software_mixer)
+	if (pragha_preferences_get_software_mixer(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->soft_mixer_w),
+					     cwin->preferences_w->soft_mixer_w),
 					     TRUE);
 
 	/* General Options */
 
 	if(cwin->cpref->remember_window_state)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 0);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 0);
 	else{
 		if(cwin->cpref->start_mode){
 			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 1);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 1);
 			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 2);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 2);
 			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->cpref->window_state_combo_w), 3);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 3);
 		}
 	}
 
-	if (cwin->cpref->use_hint)
+	if (pragha_preferences_get_use_hint(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->use_hint_w),
+					     cwin->preferences_w->use_hint_w),
 					     TRUE);
 
-	if (cwin->cpref->instant_filter)
+	if (pragha_preferences_get_instant_search(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->instant_filter_w),
+					     cwin->preferences_w->instant_filter_w),
 					     TRUE);
 
-	if (cwin->cpref->aproximate_search)
+	if (pragha_preferences_get_approximate_search(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->aproximate_search_w),
+					     cwin->preferences_w->aproximate_search_w),
 					     TRUE);
 
-	if (cwin->cpref->save_playlist)
+	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->restore_playlist_w),
+					     cwin->preferences_w->restore_playlist_w),
 					     TRUE);
 
 	if (cwin->cpref->show_icon_tray)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->show_icon_tray_w),
+					     cwin->preferences_w->show_icon_tray_w),
 					     TRUE);
 
 	if (cwin->cpref->close_to_tray)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->close_to_tray_w),
+					     cwin->preferences_w->close_to_tray_w),
 					     TRUE);
 
 	if (cwin->cpref->add_recursively_files)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->add_recursively_w),
+					     cwin->preferences_w->add_recursively_w),
 					     TRUE);
 
-	if (cwin->cpref->show_album_art)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->album_art_w),
-					     TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+				     cwin->preferences_w->album_art_w),
+				     pragha_album_art_get_visible(cwin->albumart));
 
-	if (cwin->cpref->album_art_size)
-		gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->cpref->album_art_size_w),  (int)cwin->cpref->album_art_size);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
+				   (int) pragha_album_art_get_size(cwin->albumart));
 
 	if (cwin->cpref->album_art_pattern)
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->album_art_pattern_w),
+		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
 				   cwin->cpref->album_art_pattern);
 
 	/* Lbrary Options */
 
 	if (cwin->cpref->library_dir) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->cpref->library_view_w));
+						cwin->preferences_w->library_view_w));
 
 		cnt = g_slist_length(cwin->cpref->library_dir);
 		list = cwin->cpref->library_dir;
@@ -676,76 +705,72 @@ static void update_preferences(struct con_win *cwin)
 	}
 	if (cwin->cpref->fuse_folders)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->fuse_folders_w),
+					     cwin->preferences_w->fuse_folders_w),
 					     TRUE);
 	if (cwin->cpref->sort_by_year)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->sort_by_year_w),
+					     cwin->preferences_w->sort_by_year_w),
 					     TRUE);
 
 	/* Notifications options */
 
 	if (cwin->cpref->show_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->show_osd_w),
+					     cwin->preferences_w->show_osd_w),
 					     TRUE);
 #if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	if (cwin->cpref->osd_in_systray)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->osd_in_systray_w),
+					     cwin->preferences_w->osd_in_systray_w),
 					     TRUE);
 #endif
 	if (cwin->cpref->albumart_in_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->albumart_in_osd_w),
+					     cwin->preferences_w->albumart_in_osd_w),
 					     TRUE);
 	if (!can_support_actions())
-		gtk_widget_set_sensitive(cwin->cpref->actions_in_osd_w, FALSE);
+		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, FALSE);
 	else if (cwin->cpref->actions_in_osd)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->actions_in_osd_w),
+					     cwin->preferences_w->actions_in_osd_w),
 					     TRUE);
 
 	/* Service Internet Option */
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lw.lastfm_support) {
+	if (cwin->cpref->lastfm_support) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->lw.lastfm_w),
+					     cwin->preferences_w->lastfm_w),
 					     TRUE);
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_uname_w),
-				   cwin->cpref->lw.lastfm_user);
-		gtk_entry_set_text(GTK_ENTRY(cwin->cpref->lw.lastfm_pass_w),
-				   cwin->cpref->lw.lastfm_pass);
+		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w),
+				   cwin->cpref->lastfm_user);
+		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w),
+				   cwin->cpref->lastfm_pass);
 	}
 #endif
 #ifdef HAVE_LIBGLYR
 	if(cwin->cpref->get_album_art)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->get_album_art_w),
+					     cwin->preferences_w->get_album_art_w),
 					     TRUE);
 #endif
 	if (cwin->cpref->use_cddb)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->use_cddb_w),
+					     cwin->preferences_w->use_cddb_w),
 					     TRUE);
 	if (cwin->cpref->use_mpris2)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->cpref->use_mpris2_w),
+					     cwin->preferences_w->use_mpris2_w),
 					     TRUE);
 }
 
 void save_preferences(struct con_win *cwin)
 {
-	const gchar *col_name;
-	gchar *data, **libs, **columns, **nodes, *last_rescan_time;
+	gchar **libs, **nodes, *last_rescan_time;
 	gchar *u_file = NULL;
-	gsize length;
-	gint cnt = 0, i = 0, *col_widths, *window_size, *window_position;
+	gint cnt = 0, i = 0, *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
 	GError *error = NULL;
 	GSList *list;
-	GList *cols, *j;
-	GtkTreeViewColumn *col;
 	GdkWindowState state;
 
 	/* General options*/
@@ -783,9 +808,7 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save album art pattern */
 
-	if (!cwin->cpref->album_art_pattern ||
-	    (cwin->cpref->album_art_pattern &&
-	     !strlen(cwin->cpref->album_art_pattern))) {
+	if (string_is_empty(cwin->cpref->album_art_pattern)) {
 		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
 					 GROUP_GENERAL) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
@@ -798,7 +821,7 @@ void save_preferences(struct con_win *cwin)
 					      &error);
 		}
 	}
-	else if (cwin->cpref->album_art_pattern) {
+	else {
 		g_key_file_set_string(cwin->cpref->configrc_keyfile,
 				      GROUP_GENERAL,
 				      KEY_ALBUM_ART_PATTERN,
@@ -826,27 +849,6 @@ void save_preferences(struct con_win *cwin)
 			       KEY_CLOSE_TO_TRAY,
 			       cwin->cpref->close_to_tray);
 
-	/* Save instant filter option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_INSTANT_FILTER,
-			       cwin->cpref->instant_filter);
-
-	/* Save aproximate search option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_APROXIMATE_SEARCH,
-			       cwin->cpref->aproximate_search);
-
-	/* Save use hint option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_USE_HINT,
-			       cwin->cpref->use_hint);
-
 	/* Save show OSD option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
@@ -866,68 +868,7 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SHOW_ACTIONS_OSD,
 			       cwin->cpref->actions_in_osd);
 
-	/* Playlist options */
-
-	/* Save playlist option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SAVE_PLAYLIST,
-			       cwin->cpref->save_playlist);
-
-	/* Shuffle and repeat options */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_SHUFFLE,
-			       cwin->cpref->shuffle);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_PLAYLIST,
-			       KEY_REPEAT,
-			       cwin->cpref->repeat);
-
-	/* Save list of columns visible in current playlist */
-
-	if (cwin->cpref->playlist_columns) {
-		list = cwin->cpref->playlist_columns;
-		cnt = g_slist_length(cwin->cpref->playlist_columns);
-		columns = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			columns[i] = list->data;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_PLAYLIST,
-					   KEY_PLAYLIST_COLUMNS,
-					   (const gchar **)columns,
-					   cnt);
-		g_free(columns);
-	}
-
-	/* Save column widths */
-
-	cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(cwin->current_playlist));
-	cnt = g_list_length(cols);
-	if (cols) {
-		col_widths = g_new0(gint, cnt);
-		for (j=cols, i=0; j != NULL; j = j->next) {
-			col = j->data;
-			col_name = gtk_tree_view_column_get_title(col);
-			if (is_present_str_list(col_name,
-						cwin->cpref->playlist_columns))
-				col_widths[i++] =
-					gtk_tree_view_column_get_width(col);
-		}
-		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_PLAYLIST,
-					    KEY_PLAYLIST_COLUMN_WIDTHS,
-					    col_widths,
-					    i);
-		g_list_free(cols);
-		g_free(col_widths);
-	}
+	current_playlist_save_preferences(cwin->cplaylist);
 
 	/* Library Options */
 
@@ -1147,55 +1088,13 @@ void save_preferences(struct con_win *cwin)
 
 	/* Audio Options */
 
-	/* Save Audio sink */
+	/* Save volume */
 
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_SINK,
-			      cwin->cpref->audio_sink);
-
-	/* Save Audio device */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_AUDIO,
-			      KEY_AUDIO_DEVICE,
-			      cwin->cpref->audio_device);
-
-	/* Save Software mixer option and volume */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_AUDIO,
-			       KEY_SOFTWARE_MIXER,
-			       cwin->cpref->software_mixer);
-
-	if(cwin->cpref->software_mixer){
+	if (pragha_preferences_get_software_mixer(cwin->preferences)) {
 		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 				       GROUP_AUDIO,
 				       KEY_SOFTWARE_VOLUME,
-				       cwin->cgst->curr_vol);
-	}
-
-	/* Save audio CD Device */
-
-	if (!cwin->cpref->audio_cd_device ||
-	    (cwin->cpref->audio_cd_device &&
-	     !strlen(cwin->cpref->audio_cd_device))) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_AUDIO) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_AUDIO_CD_DEVICE,
-				       &error))
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_AUDIO,
-					      KEY_AUDIO_CD_DEVICE,
-					      &error);
-	}
-	else if (cwin->cpref->audio_cd_device) {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_AUDIO,
-				      KEY_AUDIO_CD_DEVICE,
-				      cwin->cpref->audio_cd_device);
+				       pragha_backend_get_volume (cwin->backend));
 	}
 
 	/* Window Option */
@@ -1277,26 +1176,19 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SIDEBAR_SIZE,
 			       sidebar_size);
 
-	/* Save last sidebar pane state */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SIDEBAR,
-			       cwin->cpref->lateral_panel);
-
 	/* Save show album art option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_SHOW_ALBUM_ART,
-			       cwin->cpref->show_album_art);
+			       pragha_album_art_get_visible(cwin->albumart));
 
 	/* Save album art size */
 
 	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_ALBUM_ART_SIZE,
-			       (int)cwin->cpref->album_art_size);
+			       (int) pragha_album_art_get_size(cwin->albumart));
 
 	/* Save show controls below option */
 
@@ -1318,9 +1210,9 @@ void save_preferences(struct con_win *cwin)
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_SERVICES,
 			       KEY_LASTFM,
-			       cwin->cpref->lw.lastfm_support);
+			       cwin->cpref->lastfm_support);
 
-	if (!cwin->cpref->lw.lastfm_support) {
+	if (!cwin->cpref->lastfm_support) {
 		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
 					 GROUP_SERVICES) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
@@ -1345,16 +1237,16 @@ void save_preferences(struct con_win *cwin)
 		}
 	}
 	else {
-		if (cwin->cpref->lw.lastfm_user)
+		if (cwin->cpref->lastfm_user)
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_USER,
-					      cwin->cpref->lw.lastfm_user);
-		if (cwin->cpref->lw.lastfm_pass)
+					      cwin->cpref->lastfm_user);
+		if (cwin->cpref->lastfm_pass)
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
 					      KEY_LASTFM_PASS,
-					      cwin->cpref->lw.lastfm_pass);
+					      cwin->cpref->lastfm_pass);
 	}
 #endif
 
@@ -1378,15 +1270,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_SERVICES,
 			       KEY_ALLOW_MPRIS2,
 			       cwin->cpref->use_mpris2);
-
-	/* Save to conrc */
-
-	data = g_key_file_to_data(cwin->cpref->configrc_keyfile, &length, NULL);
-	if (!g_file_set_contents(cwin->cpref->configrc_file, data, length, &error))
-		g_critical("Unable to write preferences file : %s",
-			   error->message);
-
-	g_free(data);
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
@@ -1413,9 +1296,9 @@ pref_create_audio_page(struct con_win *cwin)
 		  *soft_mixer, *audio_cd_device_label,*audio_cd_device_entry;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Audio"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio"));
 
 	sink_label = gtk_label_new(_("Audio sink"));
 
@@ -1434,7 +1317,7 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(audio_sink_combo),
 				  PULSE_SINK);
 
-	hig_workarea_add_row_w (table, &row, sink_label, audio_sink_combo, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, sink_label, audio_sink_combo);
 
 	audio_device_label = gtk_label_new(_("Audio Device"));
 	gtk_misc_set_alignment(GTK_MISC (audio_device_label), 0, 0);
@@ -1443,14 +1326,14 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_device_entry),
 				    _("Restart Required"));
 
-	hig_workarea_add_row_w (table, &row, audio_device_label, audio_device_entry, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, audio_device_label, audio_device_entry);
 
 	soft_mixer = gtk_check_button_new_with_label(_("Use software mixer"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
 
-	hig_workarea_add_wide_control(table, &row, soft_mixer);
+	pragha_hig_workarea_table_add_wide_control(table, &row, soft_mixer);
 
-	hig_workarea_add_section_title(table, &row, _("Audio CD"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
 
 	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
 	gtk_misc_set_alignment(GTK_MISC (audio_cd_device_label), 0, 0);
@@ -1459,21 +1342,21 @@ pref_create_audio_page(struct con_win *cwin)
 	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry),
 				 AUDIO_CD_DEVICE_ENTRY_LEN);
 
-	hig_workarea_add_row_w (table, &row, audio_cd_device_label, audio_cd_device_entry, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
 
 	/* Store references */
 
-	cwin->cpref->audio_sink_combo_w = audio_sink_combo;
-	cwin->cpref->audio_device_w = audio_device_entry;
-	cwin->cpref->audio_cd_device_w = audio_cd_device_entry;
-	cwin->cpref->soft_mixer_w = soft_mixer;
+	cwin->preferences_w->audio_sink_combo_w = audio_sink_combo;
+	cwin->preferences_w->audio_device_w = audio_device_entry;
+	cwin->preferences_w->audio_cd_device_w = audio_cd_device_entry;
+	cwin->preferences_w->soft_mixer_w = soft_mixer;
 
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(audio_sink_combo), "changed",
 			 G_CALLBACK(change_audio_sink), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1490,9 +1373,9 @@ pref_create_library_page(struct con_win *cwin)
 
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Library"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Library"));
 
 	hbox_library = gtk_hbox_new(FALSE, 6);
 
@@ -1544,19 +1427,19 @@ pref_create_library_page(struct con_win *cwin)
 			   FALSE,
 			   FALSE,
 			   0);
-	hig_workarea_add_wide_tall_control(table, &row, hbox_library);
+	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
 	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
-	hig_workarea_add_wide_control(table, &row, fuse_folders);
+	pragha_hig_workarea_table_add_wide_control(table, &row, fuse_folders);
 
 	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));
-	hig_workarea_add_wide_control(table, &row, sort_by_year);
+	pragha_hig_workarea_table_add_wide_control(table, &row, sort_by_year);
 
 	/* Store references */
 
-	cwin->cpref->library_view_w = library_view;
-	cwin->cpref->fuse_folders_w = fuse_folders;
-	cwin->cpref->sort_by_year_w = sort_by_year;
+	cwin->preferences_w->library_view_w = library_view;
+	cwin->preferences_w->fuse_folders_w = fuse_folders;
+	cwin->preferences_w->sort_by_year_w = sort_by_year;
 
 	/* Setup signal handlers */
 
@@ -1567,7 +1450,7 @@ pref_create_library_page(struct con_win *cwin)
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
 			  G_CALLBACK(library_view_key_press), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1579,22 +1462,22 @@ pref_create_appearance_page(struct con_win *cwin)
 	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Playlist"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));
 
 	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
-	hig_workarea_add_wide_control(table, &row, use_hint);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_hint);
 
-	hig_workarea_add_section_title(table, &row, _("Controls"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Controls"));
 
 	album_art = gtk_check_button_new_with_label(_("Show Album art in Panel"));
-	hig_workarea_add_wide_control(table, &row, album_art);
+	pragha_hig_workarea_table_add_wide_control(table, &row, album_art);
 
 	album_art_size_label = gtk_label_new(_("Size of Album art"));
 	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
 
-	hig_workarea_add_row_w (table, &row, album_art_size_label, album_art_size, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, album_art_size_label, album_art_size);
 
 	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
 	album_art_pattern = gtk_entry_new();
@@ -1602,14 +1485,14 @@ pref_create_appearance_page(struct con_win *cwin)
 				 ALBUM_ART_PATTERN_LEN);
 	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
 
-	hig_workarea_add_row_w (table, &row, album_art_pattern_label, album_art_pattern, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, album_art_pattern_label, album_art_pattern);
 
 	/* Store references */
 
-	cwin->cpref->use_hint_w = use_hint;
-	cwin->cpref->album_art_w = album_art;
-	cwin->cpref->album_art_size_w = album_art_size;
-	cwin->cpref->album_art_pattern_w = album_art_pattern;
+	cwin->preferences_w->use_hint_w = use_hint;
+	cwin->preferences_w->album_art_w = album_art;
+	cwin->preferences_w->album_art_size_w = album_art_size;
+	cwin->preferences_w->album_art_pattern_w = album_art_pattern;
 
 	/* Setup signal handlers */
 
@@ -1618,7 +1501,7 @@ pref_create_appearance_page(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), cwin);
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1630,42 +1513,42 @@ pref_create_general_page(struct con_win *cwin)
 	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Search"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Search"));
 
 	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
-	hig_workarea_add_wide_control(table, &row, instant_filter);
+	pragha_hig_workarea_table_add_wide_control(table, &row, instant_filter);
 
 	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
-	hig_workarea_add_wide_control(table, &row, aproximate_search);
+	pragha_hig_workarea_table_add_wide_control(table, &row, aproximate_search);
 
-	hig_workarea_add_section_title(table, &row, _("When starting pragha"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("When starting pragha"));
 
 	window_state_combo = gtk_combo_box_text_new ();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Remember last window state"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start normal"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start fullscreen"));
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window_state_combo), _("Start in system tray"));
-	hig_workarea_add_wide_control(table, &row, window_state_combo);
+	pragha_hig_workarea_table_add_wide_control(table, &row, window_state_combo);
 
 	restore_playlist = gtk_check_button_new_with_label(_("Restore last playlist"));
-	hig_workarea_add_wide_control(table, &row, restore_playlist);
+	pragha_hig_workarea_table_add_wide_control(table, &row, restore_playlist);
 
-	hig_workarea_add_section_title(table, &row, _("When adding folders"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("When adding folders"));
 	add_recursively = gtk_check_button_new_with_label(_("Add files recursively"));
 
-	hig_workarea_add_wide_control(table, &row, add_recursively);
+	pragha_hig_workarea_table_add_wide_control(table, &row, add_recursively);
 
 	/* Store references */
 
-	cwin->cpref->instant_filter_w = instant_filter;
-	cwin->cpref->aproximate_search_w = aproximate_search;
-	cwin->cpref->window_state_combo_w = window_state_combo;
-	cwin->cpref->restore_playlist_w = restore_playlist;
-	cwin->cpref->add_recursively_w = add_recursively;
+	cwin->preferences_w->instant_filter_w = instant_filter;
+	cwin->preferences_w->aproximate_search_w = aproximate_search;
+	cwin->preferences_w->window_state_combo_w = window_state_combo;
+	cwin->preferences_w->restore_playlist_w = restore_playlist;
+	cwin->preferences_w->add_recursively_w = add_recursively;
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1681,31 +1564,31 @@ pref_create_desktop_page(struct con_win *cwin)
 	#endif
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
-	hig_workarea_add_section_title(table, &row, _("Desktop"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Desktop"));
 
 	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
-	hig_workarea_add_wide_control(table, &row, show_icon_tray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, show_icon_tray);
 
 	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
-	hig_workarea_add_wide_control(table, &row, close_to_tray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, close_to_tray);
 
-	hig_workarea_add_section_title(table, &row, _("Notifications"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Notifications"));
 
 	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-	hig_workarea_add_wide_control(table, &row, show_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, show_osd);
 
 	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
 	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
-	hig_workarea_add_wide_control(table, &row, osd_in_systray);
+	pragha_hig_workarea_table_add_wide_control(table, &row, osd_in_systray);
 	#endif
 
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
-	hig_workarea_add_wide_control(table, &row, albumart_in_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
 
 	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
-	hig_workarea_add_wide_control(table, &row, actions_in_osd);
+	pragha_hig_workarea_table_add_wide_control(table, &row, actions_in_osd);
 
 	/* Setup signal handlers */
 
@@ -1716,16 +1599,16 @@ pref_create_desktop_page(struct con_win *cwin)
 
 	/* Store references. */
 
-	cwin->cpref->show_icon_tray_w = show_icon_tray;
-	cwin->cpref->close_to_tray_w = close_to_tray;
-	cwin->cpref->show_osd_w = show_osd;
+	cwin->preferences_w->show_icon_tray_w = show_icon_tray;
+	cwin->preferences_w->close_to_tray_w = close_to_tray;
+	cwin->preferences_w->show_osd_w = show_osd;
 	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	cwin->cpref->osd_in_systray_w = osd_in_systray;
+	cwin->preferences_w->osd_in_systray_w = osd_in_systray;
 	#endif
-	cwin->cpref->albumart_in_osd_w = albumart_in_osd;
-	cwin->cpref->actions_in_osd_w = actions_in_osd;
+	cwin->preferences_w->albumart_in_osd_w = albumart_in_osd;
+	cwin->preferences_w->actions_in_osd_w = actions_in_osd;
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1743,19 +1626,19 @@ pref_create_services_page(struct con_win *cwin)
 	GtkWidget *use_cddb, *use_mpris2;
 	guint row = 0;
 
-	table = hig_workarea_create( );
+	table = pragha_hig_workarea_table_new();
 
 	#ifdef HAVE_LIBCLASTFM
-	hig_workarea_add_section_title(table, &row, "Last.fm");
+	pragha_hig_workarea_table_add_section_title(table, &row, "Last.fm");
 
 	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
-	hig_workarea_add_wide_control(table, &row, lastfm_check);
+	pragha_hig_workarea_table_add_wide_control(table, &row, lastfm_check);
 
 	lastfm_ulabel = gtk_label_new(_("Username"));
 	lastfm_uname = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
 
-	hig_workarea_add_row_w (table, &row, lastfm_ulabel, lastfm_uname, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
 
 	lastfm_plabel = gtk_label_new(_("Password"));
 	lastfm_pass = gtk_entry_new();
@@ -1763,41 +1646,41 @@ pref_create_services_page(struct con_win *cwin)
 	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
 	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
 
-	hig_workarea_add_row_w (table, &row, lastfm_plabel, lastfm_pass, NULL);
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
 	#endif
 
-	hig_workarea_add_section_title(table, &row, _("Others services"));
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Others services"));
 
 	#ifdef HAVE_LIBGLYR
 	get_album_art = gtk_check_button_new_with_label(_("Get album art"));
-	hig_workarea_add_wide_control(table, &row, get_album_art);
+	pragha_hig_workarea_table_add_wide_control(table, &row, get_album_art);
 	#endif
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-	hig_workarea_add_wide_control(table, &row, use_cddb);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
 
 	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
-	hig_workarea_add_wide_control(table, &row, use_mpris2);
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_mpris2);
 
 	/* Store references. */
 
 	#ifdef HAVE_LIBCLASTFM
-	cwin->cpref->lw.lastfm_w = lastfm_check;
-	cwin->cpref->lw.lastfm_uname_w = lastfm_uname;
-	cwin->cpref->lw.lastfm_pass_w = lastfm_pass;
+	cwin->preferences_w->lastfm_w = lastfm_check;
+	cwin->preferences_w->lastfm_uname_w = lastfm_uname;
+	cwin->preferences_w->lastfm_pass_w = lastfm_pass;
 	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
 			 G_CALLBACK(toggle_lastfm), cwin);
 	#endif
 	#ifdef HAVE_LIBGLYR
-	cwin->cpref->get_album_art_w = get_album_art;
+	cwin->preferences_w->get_album_art_w = get_album_art;
 	#endif
-	cwin->cpref->use_cddb_w = use_cddb;
-	cwin->cpref->use_mpris2_w = use_mpris2;
+	cwin->preferences_w->use_cddb_w = use_cddb;
+	cwin->preferences_w->use_mpris2_w = use_mpris2;
 
 	#ifdef HAVE_LIBCLASTFM
-	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->cpref->lw.lastfm_w), cwin);
+	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w), cwin);
 	#endif
 
-	hig_workarea_finish(table, &row);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1808,6 +1691,8 @@ void preferences_dialog(struct con_win *cwin)
 
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
 	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
+
+	cwin->preferences_w = g_slice_new0(PreferencesWidgets);
 
 	/* The main preferences dialog */
 
@@ -1867,7 +1752,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	/* Add to dialog */
 
-	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha", cwin);
+	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha");
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
@@ -1879,7 +1764,7 @@ void preferences_dialog(struct con_win *cwin)
 
 	update_preferences(cwin);
 
-	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->cpref->album_art_w), cwin);
+	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->preferences_w->album_art_w), cwin);
 
 	gtk_dialog_set_default_response(GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog);
@@ -1888,25 +1773,18 @@ void preferences_dialog(struct con_win *cwin)
 void preferences_free (struct con_pref *cpref)
 {
 #ifdef HAVE_LIBCLASTFM
-	g_free(cpref->lw.lastfm_user);
-	g_free(cpref->lw.lastfm_pass);
+	g_free(cpref->lastfm_user);
+	g_free(cpref->lastfm_pass);
 #endif
 #ifdef HAVE_LIBGLYR
 	g_free(cpref->cache_folder);
 #endif
-	g_free(cpref->configrc_file);
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
-	g_free(cpref->audio_sink);
-	g_free(cpref->audio_device);
-	g_free(cpref->audio_cd_device);
 	g_free(cpref->start_mode);
-	g_key_file_free(cpref->configrc_keyfile);
 	free_str_list(cpref->library_dir);
 	free_str_list(cpref->lib_add);
 	free_str_list(cpref->lib_delete);
-	free_str_list(cpref->playlist_columns);
-	g_slist_free(cpref->playlist_column_widths);
 	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);

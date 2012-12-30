@@ -80,7 +80,7 @@ static void import_playlist_from_file_db(const gchar *playlist_file, struct con_
 
 	playlist = get_display_filename(playlist_file, FALSE);
 
-	s_playlist = sanitize_string_sqlite3(playlist);
+	s_playlist = sanitize_string_to_sqlite3(playlist);
 
 	if (find_playlist_db(s_playlist, cdbase))
 		goto bad;
@@ -97,7 +97,7 @@ static void import_playlist_from_file_db(const gchar *playlist_file, struct con_
 
 	if(list) {
 		for (i=list; i != NULL; i = i->next) {
-			s_file = sanitize_string_sqlite3(i->data);
+			s_file = sanitize_string_to_sqlite3(i->data);
 			add_track_playlist_db(s_file, playlist_id, cdbase);
 			g_free(s_file);
 			g_free(i->data);
@@ -112,18 +112,18 @@ bad:
 
 static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase *cdbase)
 {
-	struct musicobject *mobj;
+	PraghaMusicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	mobj = new_musicobject_from_file(file);
 	if (mobj) {
-		sfile = sanitize_string_sqlite3(file);
-		stitle = sanitize_string_sqlite3(mobj->tags->title);
-		sartist = sanitize_string_sqlite3(mobj->tags->artist);
-		salbum = sanitize_string_sqlite3(mobj->tags->album);
-		sgenre = sanitize_string_sqlite3(mobj->tags->genre);
-		scomment = sanitize_string_sqlite3(mobj->tags->comment);
+		sfile = sanitize_string_to_sqlite3(file);
+		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
+		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
+		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
+		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
+		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
 
 		/* Write location */
 
@@ -147,8 +147,8 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 
 		/* Write year */
 
-		if ((year_id = find_year_db(mobj->tags->year, cdbase)) == 0)
-			year_id = add_new_year_db(mobj->tags->year, cdbase);
+		if ((year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase)) == 0)
+			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
 
 		/* Write comment */
 
@@ -163,12 +163,12 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 				 genre_id,
 				 year_id,
 				 comment_id,
-				 mobj->tags->track_no,
-				 mobj->tags->length,
-				 mobj->tags->channels,
-				 mobj->tags->bitrate,
-				 mobj->tags->samplerate,
-				 mobj->file_type,
+				 pragha_musicobject_get_track_no(mobj),
+				 pragha_musicobject_get_length(mobj),
+				 pragha_musicobject_get_channels(mobj),
+				 pragha_musicobject_get_bitrate(mobj),
+				 pragha_musicobject_get_samplerate(mobj),
+				 pragha_musicobject_get_file_type(mobj),
 				 stitle,
 				 cdbase);
 
@@ -179,7 +179,7 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 		g_free(sgenre);
 		g_free(scomment);
 
-		delete_musicobject(mobj);
+		g_object_unref(mobj);
 	}
 }
 
@@ -199,7 +199,7 @@ static void delete_track_db(const gchar *file, struct con_dbase *cdbase)
 	gint location_id;
 	struct db_result result;
 
-	sfile = sanitize_string_sqlite3(file);
+	sfile = sanitize_string_to_sqlite3(file);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s';", sfile);
 	exec_sqlite_query(query, cdbase, &result);
@@ -586,6 +586,84 @@ void update_track_db(gint location_id, gint changed,
 	}
 }
 
+void
+pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
+{
+	gchar *stitle = NULL, *sartist = NULL, *scomment= NULL, *salbum = NULL, *sgenre = NULL;
+	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	guint i = 0, elem = 0;
+
+	if (!changed)
+		return;
+
+	if (!loc_arr)
+		return;
+
+	CDEBUG(DBG_VERBOSE, "Tags Changed: 0x%x", changed);
+
+	if (changed & TAG_TNO_CHANGED) {
+		track_no = pragha_musicobject_get_track_no(mobj);
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
+		artist_id = find_artist_db(sartist, cdbase);
+		if (!artist_id)
+			artist_id = add_new_artist_db(sartist, cdbase);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
+		album_id = find_album_db(salbum, cdbase);
+		if (!album_id)
+			album_id = add_new_album_db(salbum, cdbase);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
+		genre_id = find_genre_db(sgenre, cdbase);
+		if (!genre_id)
+			genre_id = add_new_genre_db(sgenre, cdbase);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase);
+		if (!year_id)
+			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
+		comment_id = find_comment_db(scomment, cdbase);
+		if (!comment_id)
+			comment_id = add_new_comment_db(scomment, cdbase);
+	}
+
+	db_begin_transaction(cdbase);
+	if (loc_arr) {
+		elem = 0;
+		for(i = 0; i < loc_arr->len; i++) {
+			elem = g_array_index(loc_arr, gint, i);
+			if (elem) {
+				update_track_db(elem, changed,
+						track_no,
+						stitle,
+						artist_id,
+						album_id,
+						genre_id,
+						year_id,
+						comment_id,
+						cdbase);
+			}
+		}
+	}
+	db_commit_transaction(cdbase);
+
+	g_free(stitle);
+	g_free(sartist);
+	g_free(salbum);
+	g_free(sgenre);
+	g_free(scomment);
+}
+
 /* 'playlist' has to be a sanitized string */
 
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase)
@@ -702,7 +780,7 @@ void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 	gint playlist_id;
 	gchar *query;
 
-	if (!playlist || !strlen(playlist)) {
+	if (string_is_empty(playlist)) {
 		g_warning("Playlist name is NULL");
 		return;
 	}
@@ -815,7 +893,7 @@ void delete_radio_db(const gchar *radio, struct con_dbase *cdbase)
 	gint radio_id;
 	gchar *query;
 
-	if (!radio || !strlen(radio)) {
+	if (string_is_empty(radio)) {
 		g_warning("Radio name is NULL");
 		return;
 	}
@@ -958,10 +1036,9 @@ void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 			files_scanned++;
 			add_entry_db(ab_file, cdbase);
 		}
-		/* Have to give control to GTK periodically ... */
 
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		/* Have to give control to GTK periodically ... */
+		pragha_process_gtk_events ();
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
@@ -1019,7 +1096,7 @@ void update_db (const gchar *dir_name,
 			update_db(ab_file, no_files, pbar, last_rescan_time, 0, cancellable, cdbase);
 		else {
 			files_scanned++;
-			s_ab_file = sanitize_string_sqlite3(ab_file);
+			s_ab_file = sanitize_string_to_sqlite3(ab_file);
 			if (!find_location_db(s_ab_file, cdbase)) {
 				add_entry_db(ab_file, cdbase);
 			} else {
@@ -1034,9 +1111,7 @@ void update_db (const gchar *dir_name,
 		}
 
 		/* Have to give control to GTK periodically ... */
-
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		pragha_process_gtk_events ();
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
@@ -1057,7 +1132,7 @@ void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 {
 	gchar *query, *sdir_name;
 
-	sdir_name = sanitize_string_sqlite3(dir_name);
+	sdir_name = sanitize_string_to_sqlite3(dir_name);
 
 	/* Delete all tracks under the given dir */
 
@@ -1277,6 +1352,18 @@ gint db_get_track_count(struct con_dbase *cdbase)
 	return db_get_table_count (cdbase, "TRACK");
 }
 
+void db_begin_transaction(struct con_dbase *cdbase)
+{
+	gchar *query = g_strdup("BEGIN TRANSACTION");
+	exec_sqlite_query(query, cdbase, NULL);
+}
+
+void db_commit_transaction(struct con_dbase *cdbase)
+{
+	gchar *query = g_strdup("END TRANSACTION");
+	exec_sqlite_query(query, cdbase, NULL);
+}
+
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result)
 {
@@ -1328,32 +1415,26 @@ gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 	return ret;
 }
 
+static void
+rescand_icompatible_db_response(GtkDialog *dialog,
+				gint response,
+				struct con_win *cwin)
+{
+	if(response == GTK_RESPONSE_YES)
+		rescan_library_handler(cwin);
+
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void rescand_icompatible_db(struct con_win *cwin)
 {
-	GtkWidget *dialog;
-	gint result;
-
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING,
-					GTK_BUTTONS_YES_NO,
-					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
-					"Want to upgrade the collection?."));
-
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
-
-	if( result == GTK_RESPONSE_YES)
-		rescan_library_handler(cwin);
-}
 #else
 static gboolean rescand_icompatible_db(gpointer data)
 {
 	struct con_win *cwin = data;
-
+#endif
 	GtkWidget *dialog;
-	gint result;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_MODAL,
@@ -1362,15 +1443,14 @@ static gboolean rescand_icompatible_db(gpointer data)
 					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
 					"Want to upgrade the collection?."));
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+	g_signal_connect(G_OBJECT(dialog), "response",
+			G_CALLBACK(rescand_icompatible_db_response), cwin);
 
-	if( result == GTK_RESPONSE_YES)
-		rescan_library_handler(cwin);
-
+	gtk_widget_show_all (dialog);
+#if !GTK_CHECK_VERSION (3, 0, 0)
 	return TRUE;
-}
 #endif
+}
 
 gint init_musicdbase(struct con_win *cwin)
 {
