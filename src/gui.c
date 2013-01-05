@@ -871,7 +871,9 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	struct con_win *cwin = user_data;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file = g_strdup(pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+	g_object_get(cwin->cstate->curr_mobj,
+	             "file", &file,
+	             NULL);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
