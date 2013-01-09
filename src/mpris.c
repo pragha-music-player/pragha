@@ -741,7 +741,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	else if (is_playable_file(file)) {
 		PraghaMusicobject *mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			append_current_playlist(cwin->cplaylist, mobj);
 		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
 	}
 	else {
@@ -1123,9 +1123,7 @@ void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkT
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(pragha_playlist_get_view(cwin->cplaylist)));
-	if(NULL == model)
-		return;
+	model = pragha_playlist_get_model(cwin->cplaylist);
 
 	CDEBUG(DBG_MPRIS, "MPRIS update mobj added");
 

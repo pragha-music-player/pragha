@@ -334,7 +334,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 	else{
 		mobj = new_musicobject_from_file(data);
 		if (mobj) {
-			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			append_current_playlist(cwin->cplaylist, mobj);
 			add_recent_file(data);
 		}
 	}
@@ -729,7 +729,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name);
 
-			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			append_current_playlist(cwin->cplaylist, mobj);
 			update_status_bar_playtime(cwin);
 
 			if (name) {

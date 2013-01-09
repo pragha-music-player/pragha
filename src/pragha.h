@@ -593,6 +593,7 @@ struct con_gnome_media_keys;
 
 typedef struct {
 	GtkWidget *view;
+	GtkTreeModel *model;
 	GtkWidget *widget;
 	GtkWidget *header_context_menu;
 	GtkUIManager *cp_context_menu;
@@ -965,8 +966,8 @@ void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed);
 void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed);
-void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj);
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj, GtkTreePath **path);
+void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
+void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path);
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
@@ -1043,6 +1044,8 @@ void
 pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);
 GtkWidget *
 pragha_playlist_get_view(PraghaPlaylist* cplaylist);
+GtkTreeModel *
+pragha_playlist_get_model(PraghaPlaylist* cplaylist);
 GtkWidget *
 pragha_playlist_get_widget(PraghaPlaylist* cplaylist);
 void
