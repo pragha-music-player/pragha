@@ -1378,15 +1378,7 @@ gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 	/* Caller doesn't expect any result */
 
 	if (!result) {
-		sqlite3_exec(cdbase->db, query, NULL, NULL, &err);
-		if (err) {
-			g_critical("SQL Err : %s",  err);
-			g_critical("query   : %s", query);
-			ret = FALSE;
-		} else {
-			ret = TRUE;
-		}
-		sqlite3_free(err);
+		ret = db_exec_query(cdbase, query);
 	}
 
 	/* Caller expects result */
@@ -1411,6 +1403,31 @@ gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 	/* Free the query here, don't free in the callsite ! */
 
 	g_free(query);
+
+	return ret;
+}
+
+gboolean
+db_exec_query (struct con_dbase *cdbase, const gchar *query)
+{
+	gchar *err = NULL;
+	gboolean ret = FALSE;
+
+	if (!query)
+		return FALSE;
+
+	CDEBUG(DBG_DB, "%s", query);
+
+	sqlite3_exec(cdbase->db, query, NULL, NULL, &err);
+
+	if (err) {
+		g_critical("SQL Err : %s",  err);
+		g_critical("query   : %s", query);
+		sqlite3_free(err);
+		ret = FALSE;
+	} else {
+		ret = TRUE;
+	}
 
 	return ret;
 }

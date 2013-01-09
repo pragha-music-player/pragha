@@ -917,6 +917,7 @@ void db_begin_transaction(struct con_dbase *cdbase);
 void db_commit_transaction(struct con_dbase *cdbase);
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
 			   struct db_result *result);
+gboolean db_exec_query (struct con_dbase *cdbase, const gchar *query);
 void db_free(struct con_dbase *cdbase);
 
 /* Playlist mgmt functions */
