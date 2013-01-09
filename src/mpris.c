@@ -741,7 +741,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	else if (is_playable_file(file)) {
 		PraghaMusicobject *mobj = new_musicobject_from_file(file);
 		if (mobj)
-			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			append_current_playlist(cwin->cplaylist, mobj);
 		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
 	}
 	else {
