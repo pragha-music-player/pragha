@@ -966,8 +966,8 @@ void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed);
 void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed);
-void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj);
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj, GtkTreePath **path);
+void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
+void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path);
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void

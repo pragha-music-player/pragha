@@ -1108,7 +1108,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		mobj = new_musicobject_from_file(i->data);
 		if (mobj) {
 			added++;
-			append_current_playlist(cwin->cplaylist, NULL, mobj);
+			append_current_playlist(cwin->cplaylist, mobj);
 		}
 
 		if (pragha_process_gtk_events ())

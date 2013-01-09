@@ -58,7 +58,7 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		append_current_playlist(cwin->cplaylist, NULL, mobj);
+		append_current_playlist(cwin->cplaylist, mobj);
 
 		if (pragha_process_gtk_events ())
 			return;

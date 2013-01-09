@@ -1739,7 +1739,6 @@ pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed)
 
 static void
 insert_current_playlist(PraghaPlaylist *cplaylist,
-			GtkTreeModel *model,
 			PraghaMusicobject *mobj,
 			GtkTreeViewDropPosition droppos,
 			GtkTreeIter *pos)
@@ -1748,9 +1747,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	const gchar *title, *artist, *album, *genre, *comment;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
-
-	if(model == NULL)
-		model = cplaylist->model;
+	GtkTreeModel *model = cplaylist->model;
 
 	if (!mobj) {
 		g_warning("Dangling entry in current playlist");
@@ -1819,20 +1816,18 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 
 /* Append a track to the current playlist */
 
-void append_current_playlist(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj)
+void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
 {
-	append_current_playlist_ex(cplaylist, model, mobj, NULL);
+	append_current_playlist_ex(cplaylist, mobj, NULL);
 }
 
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, GtkTreeModel *model, PraghaMusicobject *mobj, GtkTreePath **path)
+void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
 	const gchar *title, *artist, *album, *genre, *comment;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
-
-	if (model == NULL)
-		model = cplaylist->model;
+	GtkTreeModel *model = cplaylist->model;
 
 	if (!mobj) {
 		g_warning("Dangling entry in current playlist");
@@ -1899,7 +1894,7 @@ pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobjec
 {
 	GtkTreePath *path;
 
-	append_current_playlist_ex(cplaylist, NULL, mobj, &path);
+	append_current_playlist_ex(cplaylist, mobj, &path);
 	pragha_playlist_activate_path(cplaylist, path);
 	gtk_tree_path_free(path);
 }
@@ -1921,7 +1916,7 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
-		insert_current_playlist(cplaylist, model, mobj, droppos, pos);
+		insert_current_playlist(cplaylist, mobj, droppos, pos);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
 	pragha_playlist_set_changing(cplaylist, FALSE);
@@ -1941,7 +1936,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 
 	for (l = list; l != NULL; l = l->next) {
 		mobj = l->data;
-		append_current_playlist(cplaylist, model, mobj);
+		append_current_playlist(cplaylist, mobj);
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
@@ -3024,7 +3019,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"));
 		}
-		append_current_playlist(cwin->cplaylist, model, mobj);
+		append_current_playlist(cwin->cplaylist, mobj);
 		g_free(file);
 	}
 
