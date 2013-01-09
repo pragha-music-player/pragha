@@ -593,6 +593,7 @@ struct con_gnome_media_keys;
 
 typedef struct {
 	GtkWidget *view;
+	GtkTreeModel *model;
 	GtkWidget *widget;
 	GtkWidget *header_context_menu;
 	GtkUIManager *cp_context_menu;
@@ -1043,6 +1044,8 @@ void
 pragha_playlist_set_changing(PraghaPlaylist* cplaylist, gboolean changing);
 GtkWidget *
 pragha_playlist_get_view(PraghaPlaylist* cplaylist);
+GtkTreeModel *
+pragha_playlist_get_model(PraghaPlaylist* cplaylist);
 GtkWidget *
 pragha_playlist_get_widget(PraghaPlaylist* cplaylist);
 void
