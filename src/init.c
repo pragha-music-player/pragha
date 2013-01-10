@@ -154,7 +154,6 @@ gint init_config(struct con_win *cwin)
 
 	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
-	gboolean audio_device_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
@@ -164,7 +163,6 @@ gint init_config(struct con_win *cwin)
 
 	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
-	audio_device_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
