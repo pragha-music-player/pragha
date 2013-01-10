@@ -67,8 +67,11 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Check for basic programs
 AC_PROG_CC()
+AM_PROG_CC_C_O()
 AC_PROG_INSTALL()
 IT_PROG_INTLTOOL()
+
+dnl Initialize libtool
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
