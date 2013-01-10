@@ -781,29 +781,38 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *file;
-	gint location_id, changed = 0;
-	PraghaMusicobject *omobj, *nmobj;
+	gint location_id, changed = 0, file_type = 0;
+	PraghaMusicobject *omobj, *nmobj, *tmobj;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
 	/* Set the initial tags. */
-	omobj = cwin->cstate->curr_mobj;
-	g_object_ref(omobj);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	omobj = g_object_ref(cwin->cstate->curr_mobj);
+	g_object_get(omobj,
+	             "file-type",&file_type,
+	             "file", &file,
+	             NULL);
+	/* A temp Musicobject to not block the entire dialog */
+	tmobj = pragha_musicobject_dup (omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	/*New mobj where to place the new tag */
+	/* New mobj where to place the new tag */
 	nmobj = pragha_musicobject_new();
 
 	/* Get new tags. */
-	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
+	changed = tag_edit_dialog(tmobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
 
 	/* Update the music object, the gui and them mpris */
 
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
 	pragha_playlist_update_current_track(cwin->cplaylist, changed);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	__update_current_song_info(cwin);
 
@@ -811,10 +820,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_CDDA &&
-	    pragha_musicobject_get_file_type(cwin->cstate->curr_mobj) != FILE_HTTP)) {
+	if (G_LIKELY(file_type != FILE_CDDA && file_type != FILE_HTTP)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(omobj));
+		sfile = sanitize_string_to_sqlite3(file);
 		location_id = find_location_db(sfile, cwin->cdbase);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
@@ -825,15 +833,18 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		g_free(sfile);
 
 		file_arr = g_ptr_array_new();
-		file = g_strdup(pragha_musicobject_get_file(omobj));
-		g_ptr_array_add(file_arr, file);
+		g_ptr_array_add(file_arr, g_strdup(file));
 		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 		g_ptr_array_free(file_arr, TRUE);
 	}
 
 exit:
+	g_free(file);
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(omobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(nmobj);
+	g_object_unref(tmobj);
 }
 
 /* Handler for the 'Quit' item in the pragha menu */

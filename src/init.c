@@ -765,6 +765,8 @@ gint init_threads(struct con_win *cwin)
 	g_type_init ();
 	#endif
 
+	pragha_mutex_create(cwin->cstate->curr_mobj_mutex);
+
 	return 0;
 }
 
