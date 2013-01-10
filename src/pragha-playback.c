@@ -41,7 +41,9 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 		update_current_playlist_view_new_track(cwin);
 
 		/* Update album art */
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		update_album_art(cwin->cstate->curr_mobj, cwin);
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		/* Show osd, and inform new album art. */
 		show_osd(cwin);
