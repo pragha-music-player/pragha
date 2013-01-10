@@ -1,6 +1,6 @@
 bin_PROGRAMS = pragha
 
-INCLUDES =								\
+AM_CPPFLAGS =								\
 	-DDBUS_API_SUBJECT_TO_CHANGE					\
 	-DG_LOG_DOMAIN=\"pragha\"					\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
