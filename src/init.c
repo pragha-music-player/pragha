@@ -798,6 +798,8 @@ void state_free (struct con_state *cstate)
 
 	g_free(cstate->last_folder);
 
+	pragha_mutex_free(cstate->curr_mobj_mutex);
+
 	g_slice_free(struct con_state, cstate);
 }
 
