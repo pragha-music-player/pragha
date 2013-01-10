@@ -36,7 +36,6 @@ static void common_cleanup(struct con_win *cwin)
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
 	state_free (cwin->cstate);
-	pragha_mutex_free(cwin->cstate->curr_mobj_mutex);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	preferences_free (cwin->cpref);
 	db_free (cwin->cdbase);
