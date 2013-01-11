@@ -927,55 +927,24 @@ void flush_radio_db(gint radio_id, struct con_dbase *cdbase)
 
 void flush_db(struct con_dbase *cdbase)
 {
-	gchar *query;
-
-	query = g_strdup_printf("DELETE FROM TRACK");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM LOCATION");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM ARTIST");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM ALBUM");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM GENRE");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM YEAR");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM COMMENT");
-	exec_sqlite_query(query, cdbase, NULL);
+	db_exec_query (cdbase, "DELETE FROM TRACK");
+	db_exec_query (cdbase, "DELETE FROM LOCATION");
+	db_exec_query (cdbase, "DELETE FROM ARTIST");
+	db_exec_query (cdbase, "DELETE FROM ALBUM");
+	db_exec_query (cdbase, "DELETE FROM GENRE");
+	db_exec_query (cdbase, "DELETE FROM YEAR");
+	db_exec_query (cdbase, "DELETE FROM COMMENT");
 }
 
 /* Flush unused artists, albums, genres, years */
 
 void flush_stale_entries_db(struct con_dbase *cdbase)
 {
-	gchar *query;
-
-	query = g_strdup_printf("DELETE FROM ARTIST WHERE id NOT IN "
-				"(SELECT artist FROM TRACK);");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM ALBUM WHERE id NOT IN "
-				"(SELECT album FROM TRACK);");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM GENRE WHERE id NOT IN "
-				"(SELECT genre FROM TRACK);");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM YEAR WHERE id NOT IN "
-				"(SELECT year FROM TRACK);");
-	exec_sqlite_query(query, cdbase, NULL);
-
-	query = g_strdup_printf("DELETE FROM COMMENT WHERE id NOT IN "
-				"(SELECT comment FROM TRACK);");
-	exec_sqlite_query(query, cdbase, NULL);
+	db_exec_query (cdbase, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
+	db_exec_query (cdbase, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
+	db_exec_query (cdbase, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
+	db_exec_query (cdbase, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
+	db_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
 }
 
 gboolean fraction_update(GtkWidget *pbar)
@@ -1162,162 +1131,101 @@ void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 
 gint init_dbase_schema(struct con_dbase *cdbase)
 {
-	gchar *query;
+	gint i;
 
-	/* Set PRAGMA synchronous = OFF */
+	const gchar *queries[] = {
+		"PRAGMA synchronous=OFF",
 
-	query = g_strdup_printf("PRAGMA synchronous=OFF");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+		"CREATE TABLE IF NOT EXISTS TRACK "
+			"(location INT PRIMARY KEY,"
+			"track_no INT,"
+			"artist INT,"
+			"album INT,"
+			"genre INT,"
+			"year INT,"
+			"comment INT,"
+			"bitrate INT,"
+			"length INT,"
+			"channels INT,"
+			"samplerate INT,"
+			"file_type INT,"
+			"title VARCHAR(255));",
 
-	/* Create 'TRACKS' table */
+		"CREATE TABLE IF NOT EXISTS LOCATION "
+			"(id INTEGER PRIMARY KEY,"
+			"name TEXT,"
+			"UNIQUE(name));",
 
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS TRACK "
-				"(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-				"location INT PRIMARY KEY",
-				"track_no INT",
-				"artist INT",
-				"album INT",
-				"genre INT",
-				"year INT",
-				"comment INT",
-				"bitrate INT",
-				"length INT",
-				"channels INT",
-				"samplerate INT",
-				"file_type INT",
-				"title VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+		"CREATE TABLE IF NOT EXISTS ARTIST "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
 
-	/* Create 'LOCATION' table */
+		"CREATE TABLE IF NOT EXISTS ALBUM "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
 
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS LOCATION "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name TEXT");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+		"CREATE TABLE IF NOT EXISTS GENRE "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
 
+		"CREATE TABLE IF NOT EXISTS YEAR "
+			"(id INTEGER PRIMARY KEY,"
+			"year INT,"
+			"UNIQUE(year));",
 
-	/* Create 'ARTIST' table */
+		"CREATE TABLE IF NOT EXISTS COMMENT "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
 
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS ARTIST "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+		"CREATE TABLE IF NOT EXISTS PLAYLIST_TRACKS "
+			"(file TEXT,"
+			"playlist INT);",
 
+		"CREATE TABLE IF NOT EXISTS PLAYLIST "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
 
-	/* Create 'ALBUM' table */
+		"CREATE TABLE IF NOT EXISTS RADIO_TRACKS "
+			"(uri TEXT,"
+			"radio INT);",
 
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS ALBUM "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+		"CREATE TABLE IF NOT EXISTS RADIO "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));"
+	};
 
-	/* Create 'GENRE' table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS GENRE "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-
-	/* Create 'YEAR' table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS YEAR "
-				"(%s, %s, UNIQUE(year));",
-				"id INTEGER PRIMARY KEY",
-				"year INT");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-	/* Create 'COMMENT' table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS COMMENT "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-	/* Create 'PLAYLIST_TRACKS' table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS PLAYLIST_TRACKS "
-				"(%s, %s);",
-				"file TEXT",
-				"playlist INT");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-	/* Create 'PLAYLIST table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS PLAYLIST "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-	/* Create 'RADIO_TRACKS' table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS RADIO_TRACKS "
-				"(%s, %s);",
-				"uri TEXT",
-				"radio INT");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
-
-	/* Create 'RADIO table */
-
-	query = g_strdup_printf("CREATE TABLE IF NOT EXISTS RADIO "
-				"(%s, %s, UNIQUE(name));",
-				"id INTEGER PRIMARY KEY",
-				"name VARCHAR(255)");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		return -1;
+	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
+		if (!db_exec_query (cdbase, queries[i]))
+			return -1;
+	}
 
 	return 0;
 }
 
 gint drop_dbase_schema(struct con_dbase *cdbase)
 {
-	gint ret = 0;
-	gchar *query;
+	gint i, ret = 0;
 
-	query = g_strdup_printf("DROP TABLE ALBUM");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
+	const gchar *queries[] = {
+		"DROP TABLE ALBUM",
+		"DROP TABLE ARTIST",
+		"DROP TABLE GENRE",
+		"DROP TABLE LOCATION",
+		"DROP TABLE TRACK",
+		"DROP TABLE YEAR",
+		"DROP TABLE COMMENT"
+	};
 
-	query = g_strdup_printf("DROP TABLE ARTIST");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
-
-	query = g_strdup_printf("DROP TABLE GENRE");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
-
-	query = g_strdup_printf("DROP TABLE LOCATION");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
-
-	query = g_strdup_printf("DROP TABLE TRACK");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
-
-	query = g_strdup_printf("DROP TABLE YEAR");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
-
-	query = g_strdup_printf("DROP TABLE COMMENT");
-	if (!exec_sqlite_query(query, cdbase, NULL))
-		ret = -1;
+	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
+		if (!db_exec_query (cdbase, queries[i]))
+			ret = -1;
+	}
 
 	return ret;
 }
@@ -1354,14 +1262,12 @@ gint db_get_track_count(struct con_dbase *cdbase)
 
 void db_begin_transaction(struct con_dbase *cdbase)
 {
-	gchar *query = g_strdup("BEGIN TRANSACTION");
-	exec_sqlite_query(query, cdbase, NULL);
+	db_exec_query (cdbase, "BEGIN TRANSACTION");
 }
 
 void db_commit_transaction(struct con_dbase *cdbase)
 {
-	gchar *query = g_strdup("END TRANSACTION");
-	exec_sqlite_query(query, cdbase, NULL);
+	db_exec_query (cdbase, "END TRANSACTION");
 }
 
 gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
