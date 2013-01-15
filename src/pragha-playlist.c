@@ -209,16 +209,18 @@ static gint get_total_playtime(PraghaPlaylist *cplaylist)
 
 /* Update status bar */
 
-void update_status_bar_playtime(struct con_win *cwin)
+void
+pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist)
 {
+	PraghaStatusbar *statusbar;
 	gint total_playtime = 0, no_tracks = 0;
 	gchar *str, *tot_str;
 
-	if(pragha_playlist_is_changing(cwin->cplaylist))
+	if(pragha_playlist_is_changing(cplaylist))
 		return;
 
-	total_playtime = get_total_playtime(cwin->cplaylist);
-	no_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+	total_playtime = get_total_playtime(cplaylist);
+	no_tracks = pragha_playlist_get_no_tracks(cplaylist);
 
 	tot_str = convert_length_str(total_playtime);
 	str = g_strdup_printf("%i %s - %s",
@@ -228,7 +230,9 @@ void update_status_bar_playtime(struct con_win *cwin)
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
-	pragha_statusbar_set_main_text(cwin->statusbar, str);
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_main_text(statusbar, str);
+	g_object_unref(G_OBJECT(statusbar));
 
 	g_free(tot_str);
 	g_free(str);
@@ -1364,7 +1368,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_remove_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Crop selected rows from current playlist */
@@ -1445,7 +1449,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_crop_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Show track properties dialog
@@ -1645,7 +1649,7 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 	pragha_playlist_remove_all (cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Update a track to the current playlist */
@@ -2813,7 +2817,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	else
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 
 	if (is_row)
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
@@ -3026,7 +3030,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
 	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
 	sqlite3_free_table(result.resultp);
