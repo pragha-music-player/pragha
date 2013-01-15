@@ -1031,7 +1031,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
+	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *menu_bar;
 	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
@@ -1107,7 +1107,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
 	hbox_main = create_main_region(cwin);
-	status_bar = create_status_bar(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
 	/* Pack all hboxen into vbox */
@@ -1124,9 +1123,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_main),
 			   TRUE,TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(status_bar),
-			   FALSE,FALSE, 0);
 
 	/* Send notifications on gui, OSD and mpris of new songs */
 

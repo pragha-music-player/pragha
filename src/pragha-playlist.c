@@ -228,7 +228,7 @@ void update_status_bar_playtime(struct con_win *cwin)
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
-	gtk_label_set_text(GTK_LABEL(cwin->status_bar), str);
+	pragha_statusbar_set_main_text(cwin->statusbar, str);
 
 	g_free(tot_str);
 	g_free(str);
