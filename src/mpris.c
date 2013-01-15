@@ -353,7 +353,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			mobj = new_musicobject_from_file(path);
 			if(mobj) {
 				pragha_playlist_append_mobj_and_play(cwin->cplaylist, mobj);
-				update_status_bar_playtime(cwin);
+				pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 				happened = TRUE;
 			}
 		}
@@ -760,7 +760,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	}
 
 	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 
 	g_free(file);
 exit:

@@ -434,7 +434,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		remove_watch_cursor (cwin->mainwindow);
 
 		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-		update_status_bar_playtime(cwin);
+		pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 	}
 }
 
@@ -730,7 +730,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			mobj = new_musicobject_from_location(uri, name);
 
 			append_current_playlist(cwin->cplaylist, mobj);
-			update_status_bar_playtime(cwin);
+			pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 
 			if (name) {
 				new_radio(cwin->cplaylist, uri, name);
@@ -1210,7 +1210,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	remove_watch_cursor (cwin->mainwindow);
 	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 
 	g_list_free(list);
 }

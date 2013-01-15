@@ -346,7 +346,7 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 
 	if(list) {
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-		update_status_bar_playtime(cwin);
+		pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 	}
 	remove_watch_cursor (cwin->mainwindow);
 }

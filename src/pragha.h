@@ -945,7 +945,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
-void update_status_bar_playtime(struct con_win *cwin);
+void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
