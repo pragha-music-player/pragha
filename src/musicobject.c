@@ -44,7 +44,7 @@ new_musicobject_from_file(const gchar *file)
 }
 
 PraghaMusicobject *
-new_musicobject_from_db(struct con_dbase *cdbase, gint location_id)
+new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 {
 	PraghaMusicobject *mobj;
 	gchar *query;
@@ -76,7 +76,7 @@ AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = \"%d\";", location_id, location_id);
-	if (!exec_sqlite_query(query, cdbase, &result)) {
+	if (!pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		g_critical("Track with location id : %d not found in DB",
 			   location_id);
 		return NULL;

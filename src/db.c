@@ -18,10 +18,6 @@
 
 #include "pragha.h"
 
-struct con_dbase {
-	sqlite3 *db;	/* SQLITE3 handle of the opened DB */
-};
-
 static void add_new_track_db(gint location_id,
 			     gint artist_id,
 			     gint album_id,
@@ -35,7 +31,7 @@ static void add_new_track_db(gint location_id,
 			     gint samplerate,
 			     gint file_type,
 			     gchar *title,
-			     struct con_dbase *cdbase)
+			     PraghaDatabase *cdbase)
 {
 	gchar *query;
 
@@ -69,10 +65,11 @@ static void add_new_track_db(gint location_id,
 				channels,
 				file_type,
 				title);
-	exec_sqlite_query(query, cdbase, NULL);
+
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-static void import_playlist_from_file_db(const gchar *playlist_file, struct con_dbase *cdbase)
+static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatabase *cdbase)
 {
 	gchar *s_playlist, *playlist = NULL, *s_file;
 	gint playlist_id = 0;
@@ -110,7 +107,7 @@ bad:
 	g_free(playlist);
 }
 
-static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase *cdbase)
+static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *cdbase)
 {
 	PraghaMusicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
@@ -183,7 +180,7 @@ static void add_new_musicobject_from_file_db(const gchar *file, struct con_dbase
 	}
 }
 
-static void add_entry_db(const gchar *file, struct con_dbase *cdbase)
+static void add_entry_db(const gchar *file, PraghaDatabase *cdbase)
 {
 	if (pragha_pl_parser_guess_format_from_extension(file) != PL_FORMAT_UNKNOWN) {
 		import_playlist_from_file_db(file, cdbase);
@@ -193,7 +190,7 @@ static void add_entry_db(const gchar *file, struct con_dbase *cdbase)
 	}
 }
 
-static void delete_track_db(const gchar *file, struct con_dbase *cdbase)
+static void delete_track_db(const gchar *file, PraghaDatabase *cdbase)
 {
 	gchar *query, *sfile;
 	gint location_id;
@@ -202,7 +199,7 @@ static void delete_track_db(const gchar *file, struct con_dbase *cdbase)
 	sfile = sanitize_string_to_sqlite3(file);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s';", sfile);
-	exec_sqlite_query(query, cdbase, &result);
+	pragha_database_exec_sqlite_query(cdbase, query, &result);
 	if (!result.no_rows) {
 		g_warning("File not present in DB: %s", sfile);
 		goto bad;
@@ -210,7 +207,7 @@ static void delete_track_db(const gchar *file, struct con_dbase *cdbase)
 
 	location_id = atoi(result.resultp[result.no_columns]);
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 bad:
 	g_free(sfile);
 }
@@ -221,7 +218,7 @@ bad:
 
 /* NB: All of the add_* functions require sanitized strings */
 
-gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase)
+gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint artist_id = 0;
@@ -229,11 +226,11 @@ gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO ARTIST (name) VALUES ('%s')",
 				artist);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s'",
 				artist);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		artist_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -241,7 +238,7 @@ gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase)
 	return artist_id;
 }
 
-gint add_new_album_db(const gchar *album, struct con_dbase *cdbase)
+gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint album_id = 0;
@@ -249,11 +246,11 @@ gint add_new_album_db(const gchar *album, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO ALBUM (name) VALUES ('%s')",
 				album);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM ALBUM WHERE name = '%s'",
 				album);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		album_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -261,7 +258,7 @@ gint add_new_album_db(const gchar *album, struct con_dbase *cdbase)
 	return album_id;
 }
 
-gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase)
+gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint genre_id = 0;
@@ -269,11 +266,11 @@ gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO GENRE (name) VALUES ('%s')",
 				genre);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s'",
 				genre);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		genre_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -281,7 +278,7 @@ gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase)
 	return genre_id;
 }
 
-gint add_new_year_db(guint year, struct con_dbase *cdbase)
+gint add_new_year_db(guint year, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint year_id = 0;
@@ -289,11 +286,11 @@ gint add_new_year_db(guint year, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO YEAR (year) VALUES ('%d')",
 				year);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM YEAR WHERE year = '%d'",
 				year);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		year_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -301,7 +298,7 @@ gint add_new_year_db(guint year, struct con_dbase *cdbase)
 	return year_id;
 }
 
-gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase)
+gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint comment_id = 0;
@@ -309,11 +306,11 @@ gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO COMMENT (name) VALUES ('%s')",
 				comment);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM COMMENT WHERE name = '%s'",
 				comment);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		comment_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -321,7 +318,7 @@ gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase)
 	return comment_id;
 }
 
-gint add_new_location_db(const gchar *location, struct con_dbase *cdbase)
+gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint location_id = 0;
@@ -329,11 +326,11 @@ gint add_new_location_db(const gchar *location, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO LOCATION (name) VALUES ('%s')",
 				location);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s'",
 				location);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		location_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -341,7 +338,7 @@ gint add_new_location_db(const gchar *location, struct con_dbase *cdbase)
 	return location_id;
 }
 
-void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_dbase *cdbase)
+void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
 
@@ -349,10 +346,10 @@ void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_dbase
 				"VALUES ('%s', %d);",
 				file,
 				playlist_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-void add_track_radio_db(const gchar *uri, gint radio_id, struct con_dbase *cdbase)
+void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
 
@@ -360,19 +357,19 @@ void add_track_radio_db(const gchar *uri, gint radio_id, struct con_dbase *cdbas
 				"VALUES ('%s', %d);",
 				uri,
 				radio_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
 
-gint find_artist_db(const gchar *artist, struct con_dbase *cdbase)
+gint find_artist_db(const gchar *artist, PraghaDatabase *cdbase)
 {
 	gint artist_id = 0;
 	gchar *query;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s';", artist);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if(result.no_rows)
 			artist_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -381,14 +378,14 @@ gint find_artist_db(const gchar *artist, struct con_dbase *cdbase)
 	return artist_id;
 }
 
-gint find_album_db(const gchar *album, struct con_dbase *cdbase)
+gint find_album_db(const gchar *album, PraghaDatabase *cdbase)
 {
 	gint album_id = 0;
 	gchar *query;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT id FROM ALBUM WHERE name = '%s';", album);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows)
 			album_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -397,14 +394,14 @@ gint find_album_db(const gchar *album, struct con_dbase *cdbase)
 	return album_id;
 }
 
-gint find_genre_db(const gchar *genre, struct con_dbase *cdbase)
+gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 {
 	gint genre_id = 0;
 	gchar *query;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s';", genre);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows)
 			genre_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -413,14 +410,14 @@ gint find_genre_db(const gchar *genre, struct con_dbase *cdbase)
 	return genre_id;
 }
 
-gint find_year_db(gint year, struct con_dbase *cdbase)
+gint find_year_db(gint year, PraghaDatabase *cdbase)
 {
 	gint year_id = 0;
 	gchar *query;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT id FROM YEAR WHERE year = '%d';", year);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows)
 			year_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -429,14 +426,14 @@ gint find_year_db(gint year, struct con_dbase *cdbase)
 	return year_id;
 }
 
-gint find_comment_db(const gchar *comment, struct con_dbase *cdbase)
+gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 {
 	gint comment_id = 0;
 	gchar *query;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT id FROM COMMENT WHERE name = '%s';", comment);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows)
 			comment_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -445,7 +442,7 @@ gint find_comment_db(const gchar *comment, struct con_dbase *cdbase)
 	return comment_id;
 }
 
-gint find_location_db(const gchar *location, struct con_dbase *cdbase)
+gint find_location_db(const gchar *location, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint location_id = 0;
@@ -453,7 +450,7 @@ gint find_location_db(const gchar *location, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s'",
 				location);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_columns)
 			location_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -462,7 +459,7 @@ gint find_location_db(const gchar *location, struct con_dbase *cdbase)
 	return location_id;
 }
 
-gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
+gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint playlist_id = 0;
@@ -470,7 +467,7 @@ gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				playlist);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_columns)
 			playlist_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -479,7 +476,7 @@ gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 	return playlist_id;
 }
 
-gint find_radio_db(const gchar *radio, struct con_dbase *cdbase)
+gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint radio_id = 0;
@@ -487,7 +484,7 @@ gint find_radio_db(const gchar *radio, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				radio);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_columns)
 			radio_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
@@ -496,25 +493,25 @@ gint find_radio_db(const gchar *radio, struct con_dbase *cdbase)
 	return radio_id;
 }
 
-void delete_location_db(gint location_id, struct con_dbase *cdbase)
+void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
 
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-gint delete_location_hdd(gint location_id, struct con_dbase *cdbase)
+gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase)
 {
 	gint ret = 0;
 	gchar *query, *file;
 	struct db_result result;
 
 	query = g_strdup_printf("SELECT name FROM LOCATION WHERE id = %d;", location_id);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_columns) {
 			file = result.resultp[result.no_columns];
 			ret = g_unlink(file);
@@ -537,7 +534,7 @@ gint delete_location_hdd(gint location_id, struct con_dbase *cdbase)
 void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     struct con_dbase *cdbase)
+		     PraghaDatabase *cdbase)
 {
 	gchar *query = NULL;
 
@@ -545,49 +542,49 @@ void update_track_db(gint location_id, gint changed,
 		query = g_strdup_printf("UPDATE TRACK SET track_no = '%d' "
 					"WHERE LOCATION = '%d';",
 					track_no, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET title = '%s' "
 					"WHERE LOCATION = '%d';",
 					title, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET artist = '%d' "
 					"WHERE LOCATION = '%d';",
 					artist_id, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET album = '%d' "
 					"WHERE LOCATION = '%d';",
 					album_id, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET genre = '%d' "
 					"WHERE LOCATION = '%d';",
 					genre_id, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET year = '%d' "
 					"WHERE LOCATION = '%d';",
 					year_id, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET comment = '%d' "
 					"WHERE LOCATION = '%d';",
 					comment_id, location_id);
-		exec_sqlite_query(query, cdbase, NULL);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 }
 
 void
-pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
+pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
 	gchar *stitle = NULL, *sartist = NULL, *scomment= NULL, *salbum = NULL, *sgenre = NULL;
 	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
@@ -666,7 +663,7 @@ pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_ar
 
 /* 'playlist' has to be a sanitized string */
 
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase)
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint playlist_id = 0;
@@ -675,7 +672,7 @@ void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct co
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				oplaylist);
 
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		playlist_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -685,13 +682,13 @@ void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct co
 					"WHERE id = '%d';",
 					nplaylist, playlist_id);
 
-		exec_sqlite_query(query, cdbase, &result);
+		pragha_database_exec_sqlite_query(cdbase, query, &result);
 	}
 
 }
 
 
-gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
+gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint playlist_id = 0;
@@ -699,11 +696,11 @@ gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO PLAYLIST (name) VALUES ('%s')",
 				playlist);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				playlist);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		playlist_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -714,7 +711,7 @@ gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 /* Get the names of all the playlists stored in the DB.
    Returned NULL terminated array of strings that has to freed by caller. */
 
-gchar** get_playlist_names_db(struct con_dbase *cdbase)
+gchar** get_playlist_names_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
 	struct db_result result;
@@ -723,7 +720,7 @@ gchar** get_playlist_names_db(struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";",
 				SAVE_PLAYLIST_STATE);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows) {
 			playlists = g_malloc0((result.no_rows+1) * sizeof(gchar *));
 			for_each_result_row(result, i) {
@@ -740,7 +737,7 @@ gchar** get_playlist_names_db(struct con_dbase *cdbase)
 
 /* Get the number of all the playlists stored in the DB. */
 
-gint get_playlist_count_db(struct con_dbase *cdbase)
+gint get_playlist_count_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
 	struct db_result result;
@@ -748,7 +745,7 @@ gint get_playlist_count_db(struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST WHERE NAME != \"%s\";",
 				SAVE_PLAYLIST_STATE);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		n_playlists = atoi(result.resultp[1]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -758,7 +755,7 @@ gint get_playlist_count_db(struct con_dbase *cdbase)
 
 /* Get the number of all trackslist tracks currently in the DB. */
 
-gint get_tracklist_count_db(struct con_dbase *cdbase)
+gint get_tracklist_count_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
 	struct db_result result;
@@ -766,7 +763,7 @@ gint get_tracklist_count_db(struct con_dbase *cdbase)
 	gint playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cdbase);
 	gint n_playlists = 0;
 	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;", playlist_id);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		n_playlists = atoi(result.resultp[1]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -775,7 +772,7 @@ gint get_tracklist_count_db(struct con_dbase *cdbase)
 }
 /* 'playlist' has to be a sanitized string */
 
-void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
+void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
 	gint playlist_id;
 	gchar *query;
@@ -794,27 +791,27 @@ void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;",
 				playlist_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST WHERE ID=%d;",
 				playlist_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* Flushes all the tracks in a given playlist */
 
-void flush_playlist_db(gint playlist_id, struct con_dbase *cdbase)
+void flush_playlist_db(gint playlist_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;",
 				playlist_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* 'radio' has to be a sanitized string */
 
-void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *cdbase)
+void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint radio_id = 0;
@@ -823,7 +820,7 @@ void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				oradio);
 
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		radio_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -833,13 +830,13 @@ void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *
 					"WHERE id = '%d';",
 					nradio, radio_id);
 
-		exec_sqlite_query(query, cdbase, &result);
+		pragha_database_exec_sqlite_query(cdbase, query, &result);
 	}
 
 }
 
 
-gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase)
+gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint radio_id = 0;
@@ -847,11 +844,11 @@ gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO RADIO (name) VALUES ('%s')",
 				radio);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				radio);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		radio_id = atoi(result.resultp[result.no_columns]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -862,7 +859,7 @@ gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase)
 /* Get the names of all the radio stored in the DB.
    Returned NULL terminated array of strings that has to freed by caller. */
 
-gchar** get_radio_names_db(struct con_dbase *cdbase)
+gchar** get_radio_names_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
 	struct db_result result;
@@ -871,7 +868,7 @@ gchar** get_radio_names_db(struct con_dbase *cdbase)
 
 	query = g_strdup_printf("SELECT NAME FROM RADIO");
 
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_rows) {
 			radio = g_malloc0((result.no_rows+1) * sizeof(gchar *));
 			for_each_result_row(result, i) {
@@ -888,7 +885,7 @@ gchar** get_radio_names_db(struct con_dbase *cdbase)
 
 /* 'radio' has to be a sanitized string */
 
-void delete_radio_db(const gchar *radio, struct con_dbase *cdbase)
+void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gint radio_id;
 	gchar *query;
@@ -907,44 +904,44 @@ void delete_radio_db(const gchar *radio, struct con_dbase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
 				radio_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM RADIO WHERE ID=%d;",
 				radio_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* Flushes all the tracks in a given playlist */
 
-void flush_radio_db(gint radio_id, struct con_dbase *cdbase)
+void flush_radio_db(gint radio_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
 
 	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
 				radio_id);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-void flush_db(struct con_dbase *cdbase)
+void flush_db(PraghaDatabase *cdbase)
 {
-	db_exec_query (cdbase, "DELETE FROM TRACK");
-	db_exec_query (cdbase, "DELETE FROM LOCATION");
-	db_exec_query (cdbase, "DELETE FROM ARTIST");
-	db_exec_query (cdbase, "DELETE FROM ALBUM");
-	db_exec_query (cdbase, "DELETE FROM GENRE");
-	db_exec_query (cdbase, "DELETE FROM YEAR");
-	db_exec_query (cdbase, "DELETE FROM COMMENT");
+	pragha_database_exec_query (cdbase, "DELETE FROM TRACK");
+	pragha_database_exec_query (cdbase, "DELETE FROM LOCATION");
+	pragha_database_exec_query (cdbase, "DELETE FROM ARTIST");
+	pragha_database_exec_query (cdbase, "DELETE FROM ALBUM");
+	pragha_database_exec_query (cdbase, "DELETE FROM GENRE");
+	pragha_database_exec_query (cdbase, "DELETE FROM YEAR");
+	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT");
 }
 
 /* Flush unused artists, albums, genres, years */
 
-void flush_stale_entries_db(struct con_dbase *cdbase)
+void flush_stale_entries_db(PraghaDatabase *cdbase)
 {
-	db_exec_query (cdbase, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
-	db_exec_query (cdbase, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
-	db_exec_query (cdbase, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
-	db_exec_query (cdbase, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
-	db_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
 }
 
 gboolean fraction_update(GtkWidget *pbar)
@@ -965,7 +962,7 @@ gboolean fraction_update(GtkWidget *pbar)
 }
 
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, GCancellable *cancellable, struct con_dbase *cdbase)
+	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase)
 {
 	static gint files_scanned = 0;
 	gint progress_timeout = 0;
@@ -1026,7 +1023,7 @@ void update_db (const gchar *dir_name,
 		GTimeVal last_rescan_time,
 		gint call_recur,
 		GCancellable *cancellable,
-		struct con_dbase *cdbase)
+		PraghaDatabase *cdbase)
 {
 	static gint files_scanned = 0;
 	gint progress_timeout = 0;
@@ -1097,7 +1094,7 @@ exit:
    Also, flush the database of unused albums, artists, etc. */
 
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_dbase *cdbase)
+	       gint call_recur, PraghaDatabase *cdbase)
 {
 	gchar *query, *sdir_name;
 
@@ -1108,19 +1105,19 @@ void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location IN "
 				"(SELECT id FROM LOCATION WHERE NAME LIKE '%s%%');",
 				sdir_name);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Delete the location entries */
 
 	query = g_strdup_printf("DELETE FROM LOCATION WHERE name LIKE '%s%%';",
 				sdir_name);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE file LIKE '%s%%';",
 				sdir_name);
-	exec_sqlite_query(query, cdbase, NULL);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Now flush unused artists, albums, genres, years */
 
@@ -1129,7 +1126,7 @@ void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	g_free(sdir_name);
 }
 
-gint init_dbase_schema(struct con_dbase *cdbase)
+gint init_dbase_schema(PraghaDatabase *cdbase)
 {
 	gint i;
 
@@ -1201,14 +1198,14 @@ gint init_dbase_schema(struct con_dbase *cdbase)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
-		if (!db_exec_query (cdbase, queries[i]))
+		if (!pragha_database_exec_query (cdbase, queries[i]))
 			return -1;
 	}
 
 	return 0;
 }
 
-gint drop_dbase_schema(struct con_dbase *cdbase)
+gint drop_dbase_schema(PraghaDatabase *cdbase)
 {
 	gint i, ret = 0;
 
@@ -1223,21 +1220,21 @@ gint drop_dbase_schema(struct con_dbase *cdbase)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
-		if (!db_exec_query (cdbase, queries[i]))
+		if (!pragha_database_exec_query (cdbase, queries[i]))
 			ret = -1;
 	}
 
 	return ret;
 }
 
-static gint db_get_table_count(struct con_dbase *cdbase, const gchar *table)
+static gint db_get_table_count(PraghaDatabase *cdbase, const gchar *table)
 {
 	gchar *query;
 	struct db_result result;
 	gint ret = 0;
 
 	query = g_strdup_printf("SELECT COUNT() FROM %s;", table);
-	if (exec_sqlite_query(query, cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		ret = atoi(result.resultp[1]);
 		sqlite3_free_table(result.resultp);
 	}
@@ -1245,178 +1242,27 @@ static gint db_get_table_count(struct con_dbase *cdbase, const gchar *table)
 	return ret;
 }
 
-gint db_get_artist_count(struct con_dbase *cdbase)
+gint db_get_artist_count(PraghaDatabase *cdbase)
 {
 	return db_get_table_count (cdbase, "ARTIST");
 }
 
-gint db_get_album_count(struct con_dbase *cdbase)
+gint db_get_album_count(PraghaDatabase *cdbase)
 {
 	return db_get_table_count (cdbase, "ALBUM");
 }
 
-gint db_get_track_count(struct con_dbase *cdbase)
+gint db_get_track_count(PraghaDatabase *cdbase)
 {
 	return db_get_table_count (cdbase, "TRACK");
 }
 
-void db_begin_transaction(struct con_dbase *cdbase)
+void db_begin_transaction(PraghaDatabase *cdbase)
 {
-	db_exec_query (cdbase, "BEGIN TRANSACTION");
+	pragha_database_exec_query (cdbase, "BEGIN TRANSACTION");
 }
 
-void db_commit_transaction(struct con_dbase *cdbase)
+void db_commit_transaction(PraghaDatabase *cdbase)
 {
-	db_exec_query (cdbase, "END TRANSACTION");
-}
-
-gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
-			   struct db_result *result)
-{
-	gchar *err = NULL;
-	gboolean ret = FALSE;
-
-	if (!query)
-		return FALSE;
-
-	CDEBUG(DBG_DB, "%s", query);
-
-	/* Caller doesn't expect any result */
-
-	if (!result) {
-		ret = db_exec_query(cdbase, query);
-	}
-
-	/* Caller expects result */
-
-	else {
-		sqlite3_get_table(cdbase->db, query,
-				  &result->resultp,
-				  &result->no_rows,
-				  &result->no_columns,
-				  &err);
-		if (err) {
-			g_critical("SQL Err : %s",  err);
-			g_critical("query   : %s", query);
-			ret = FALSE;
-		}
-		else {
-			ret = TRUE;
-		}
-		sqlite3_free(err);
-	}
-
-	/* Free the query here, don't free in the callsite ! */
-
-	g_free(query);
-
-	return ret;
-}
-
-gboolean
-db_exec_query (struct con_dbase *cdbase, const gchar *query)
-{
-	gchar *err = NULL;
-	gboolean ret = FALSE;
-
-	if (!query)
-		return FALSE;
-
-	CDEBUG(DBG_DB, "%s", query);
-
-	sqlite3_exec(cdbase->db, query, NULL, NULL, &err);
-
-	if (err) {
-		g_critical("SQL Err : %s",  err);
-		g_critical("query   : %s", query);
-		sqlite3_free(err);
-		ret = FALSE;
-	} else {
-		ret = TRUE;
-	}
-
-	return ret;
-}
-
-static void
-rescand_icompatible_db_response(GtkDialog *dialog,
-				gint response,
-				struct con_win *cwin)
-{
-	if(response == GTK_RESPONSE_YES)
-		rescan_library_handler(cwin);
-
-	gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
-#if GTK_CHECK_VERSION (3, 0, 0)
-static void rescand_icompatible_db(struct con_win *cwin)
-{
-#else
-static gboolean rescand_icompatible_db(gpointer data)
-{
-	struct con_win *cwin = data;
-#endif
-	GtkWidget *dialog;
-
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING,
-					GTK_BUTTONS_YES_NO,
-					_("Sorry: The music database is incompatible with previous versions to 0.8.0\n\n"
-					"Want to upgrade the collection?."));
-
-	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(rescand_icompatible_db_response), cwin);
-
-	gtk_widget_show_all (dialog);
-#if !GTK_CHECK_VERSION (3, 0, 0)
-	return TRUE;
-#endif
-}
-
-gint init_musicdbase(struct con_win *cwin)
-{
-	gint ret;
-	gchar *db_file;
-	const gchar *home;
-
-	CDEBUG(DBG_INFO, "Initializing music dbase");
-
-	cwin->cdbase = g_slice_new0(struct con_dbase);
-
-	home = g_get_user_config_dir();
-	db_file = g_build_path(G_DIR_SEPARATOR_S, home, "/pragha/pragha.db", NULL);
-
-	if (cwin->cpref->installed_version != NULL &&
-	    g_ascii_strcasecmp(cwin->cpref->installed_version, MIN_DATABASE_VERSION) < 0 ) {
-		g_critical("Deleted Music database incompatible with previous to 0.8.0. Please rescan library.");
-		ret = g_unlink(db_file);
-		if (ret != 0)
-			g_warning("%s", strerror(ret));
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		rescand_icompatible_db(cwin);
-		#else
-		gtk_init_add(rescand_icompatible_db, cwin);
-		#endif
-	}
-
-	/* Create the database file */
-
-	ret = sqlite3_open(db_file, &cwin->cdbase->db);
-	if (ret) {
-		g_critical("Unable to open/create DB file : %s", db_file);
-		g_free(db_file);
-		return -1;
-	}
-
-	g_free(db_file);
-
-	return init_dbase_schema(cwin->cdbase);
-}
-
-void db_free (struct con_dbase *cdbase)
-{
-	sqlite3_close(cdbase->db);
-	g_slice_free(struct con_dbase, cdbase);
+	pragha_database_exec_query (cdbase, "END TRANSACTION");
 }
