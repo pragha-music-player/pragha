@@ -307,7 +307,7 @@ static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, str
 }
 
 static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
-			      struct con_dbase *cdbase)
+			      PraghaDatabase *cdbase)
 {
 	GList *list = NULL;
 	gint ret = 0;
@@ -348,7 +348,7 @@ void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct 
 /* Append the given playlist to the mobj list. */
 
 GList *
-add_playlist_to_mobj_list(struct con_dbase *cdbase,
+add_playlist_to_mobj_list(PraghaDatabase *cdbase,
                           gchar *playlist,
                           GList *list)
 {
@@ -365,7 +365,7 @@ add_playlist_to_mobj_list(struct con_dbase *cdbase,
 
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cdbase, &result);
+	pragha_database_exec_sqlite_query(cdbase, query, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
@@ -390,7 +390,7 @@ bad:
 /* Append the given radio to the mobj list. */
 
 GList *
-add_radio_to_mobj_list(struct con_dbase *cdbase,
+add_radio_to_mobj_list(PraghaDatabase *cdbase,
                        gchar *radio,
                        GList *list)
 {
@@ -408,7 +408,7 @@ add_radio_to_mobj_list(struct con_dbase *cdbase,
 	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
 				radio_id);
 
-	exec_sqlite_query(query, cdbase, &result);
+	pragha_database_exec_sqlite_query(cdbase, query, &result);
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio);
 
@@ -1129,7 +1129,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 /* Appennd a tracks list to a playlist using the given type */
 
 static void
-append_files_to_playlist(struct con_dbase *cdbase, GSList *list, gint playlist_id)
+append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 {
 	gchar *file, *s_file;
 	GSList *i = NULL;
@@ -1318,7 +1318,7 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1351,7 +1351,7 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1392,7 +1392,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
@@ -1433,7 +1433,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	exec_sqlite_query (query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);

@@ -397,7 +397,7 @@ static void get_location_ids(GtkTreePath *path,
 /* Add all the tracks under the given path to the current playlist */
 
 GList *
-append_library_row_to_mobj_list(struct con_dbase *cdbase,
+append_library_row_to_mobj_list(PraghaDatabase *cdbase,
                                 GtkTreePath *path,
                                 GtkTreeModel *row_model,
                                 GList *list)
@@ -451,7 +451,7 @@ append_library_row_to_mobj_list(struct con_dbase *cdbase,
 }
 
 static void
-delete_row_from_db(struct con_dbase *cdbase,
+delete_row_from_db(PraghaDatabase *cdbase,
                    GtkTreePath *path,
                    GtkTreeModel *model)
 {
@@ -509,7 +509,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 			query = g_strdup_printf("SELECT name FROM LOCATION "
 						"WHERE id = '%d';",
 						location_id);
-			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 				filename = result.resultp[result.no_columns];
 				if(filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
 					GError *error = NULL;
@@ -1582,7 +1582,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 						"WHERE id = '%d';",
 						elem);
 
-			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 				file = result.resultp[result.no_columns];
 				g_ptr_array_add(file_arr, file);
 			}
@@ -1654,7 +1654,7 @@ void init_library_view(struct con_win *cwin)
 
 	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
 				SAVE_PLAYLIST_STATE);
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	if (result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1687,7 +1687,7 @@ void init_library_view(struct con_win *cwin)
 	/* Radios. */
 
 	query = g_strdup_printf("SELECT NAME FROM RADIO ORDER BY NAME");
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	if(result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1783,7 +1783,7 @@ void init_library_view(struct con_win *cwin)
 					"ORDER BY %s;", order_str);
 		g_free(order_str);
 			
-		exec_sqlite_query(query, cwin->cdbase, &result);
+		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 		for_each_result_row(result, i) {
 			add_child_node_by_tags(model,
 			                       &iter,
@@ -1810,7 +1810,7 @@ void init_library_view(struct con_win *cwin)
 	else {
 		/* Query for folders view */
 		query = g_strdup("SELECT name, id FROM LOCATION ORDER BY name DESC");
-		exec_sqlite_query(query, cwin->cdbase, &result);
+		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 		for_each_result_row(result, i) {
 			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model, &iter);
 

@@ -340,7 +340,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 				"ORDER BY RANDOM() LIMIT 1;",
 				stitle, sartist);
 
-	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if(pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 

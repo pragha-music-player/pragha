@@ -1185,7 +1185,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	/* NB: Optimization */
 
 	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i]);
 			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
