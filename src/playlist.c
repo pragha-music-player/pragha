@@ -1095,6 +1095,7 @@ GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con_win *cwin)
 {
 	GSList *list = NULL, *i = NULL;
+	GList *mlist = NULL;
 	gchar *summary;
 	gint try = 0, added = 0;
 	PraghaMusicobject *mobj;
@@ -1114,7 +1115,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		mobj = new_musicobject_from_file(i->data);
 		if (mobj) {
 			added++;
-			append_current_playlist(cwin->cplaylist, mobj);
+			mlist = g_list_append(mlist, mobj);
 		}
 
 		if (pragha_process_gtk_events ())
@@ -1122,6 +1123,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 		g_free(i->data);
 	}
+	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 
 	remove_watch_cursor (cwin->mainwindow);
 
@@ -1130,6 +1132,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	g_free(summary);
 
 	g_slist_free(list);
+	g_list_free(mlist);
 }
 
 /* Appennd a tracks list to a playlist using the given type */
