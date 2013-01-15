@@ -623,6 +623,7 @@ typedef struct {
 	GdkPixbuf *paused_pixbuf;
 	GdkPixbuf *playing_pixbuf;
 	PraghaPreferences *preferences;
+	PraghaDatabase *cdbase;
 } PraghaPlaylist;
 
 struct con_win {
@@ -912,23 +913,27 @@ void db_commit_transaction(PraghaDatabase *cdbase);
 
 /* Playlist mgmt functions */
 
-gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice);
-void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
+gchar* get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type, enum playlist_mgmt *choice);
+void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
 GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
-void export_playlist (gint choice, struct con_win *cwin);
+void export_playlist (PraghaPlaylist* cplaylist, gint choice);
 void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
-void save_playlist(gint playlist_id, enum playlist_mgmt type,
-		   struct con_win *cwin);
-void new_playlist(const gchar *playlist, enum playlist_mgmt type,
-		  struct con_win *cwin);
-void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
-void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin);
+void
+save_playlist(PraghaPlaylist* cplaylist,
+              gint playlist_id,
+              enum playlist_mgmt type);
+void
+new_playlist(PraghaPlaylist* cplaylist,
+             const gchar *playlist,
+             enum playlist_mgmt type);
+void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
+void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
 void update_menu_playlist_changes(struct con_win *cwin);
 void complete_add_to_playlist_submenu (struct con_win *cwin);
 void complete_save_playlist_submenu (struct con_win *cwin);

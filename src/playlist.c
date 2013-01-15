@@ -21,9 +21,9 @@
 /* Build a dialog to get a new playlist name */
 
 static gchar*
-get_playlist_dialog(enum playlist_mgmt *choice,
-		    enum playlist_mgmt type,
-		    struct con_win *cwin)
+get_playlist_dialog(PraghaPlaylist* cplaylist,
+                    enum playlist_mgmt *choice,
+                    enum playlist_mgmt type)
 {
 	gchar **playlists, *playlist = NULL;
 	gint result, i=0;
@@ -34,7 +34,7 @@ get_playlist_dialog(enum playlist_mgmt *choice,
 
 	/* Retrieve list of playlist names from DB */
 
-	playlists = get_playlist_names_db(cwin->cdbase);
+	playlists = get_playlist_names_db(cplaylist->cdbase);
 
 	/* Create dialog window */
 
@@ -62,7 +62,7 @@ get_playlist_dialog(enum playlist_mgmt *choice,
 	}
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
-			     GTK_WINDOW(cwin->mainwindow),
+			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
@@ -124,7 +124,7 @@ get_playlist_dialog(enum playlist_mgmt *choice,
 /* Get a new playlist name that is not reserved */
 
 gchar*
-get_playlist_name(struct con_win *cwin,
+get_playlist_name(PraghaPlaylist* cplaylist,
 		  enum playlist_mgmt type,
 		  enum playlist_mgmt *choice)
 {
@@ -132,11 +132,11 @@ get_playlist_name(struct con_win *cwin,
 	enum playlist_mgmt sel = 0;
 
 	do {
-		playlist = get_playlist_dialog(&sel, type, cwin);
+		playlist = get_playlist_dialog(cplaylist, &sel, type);
 		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
 			GtkWidget *dialog;
 			dialog = gtk_message_dialog_new_with_markup(
-				GTK_WINDOW(cwin->mainwindow),
+				GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_INFO,
 				GTK_BUTTONS_OK,
@@ -154,14 +154,17 @@ get_playlist_name(struct con_win *cwin,
 	return playlist;
 }
 
-static gboolean overwrite_existing_playlist(const gchar *playlist,
-					    struct con_win *cwin)
+static gboolean
+overwrite_existing_playlist(const gchar *playlist,
+                            PraghaPlaylist* cplaylist)
 {
 	gboolean choice = FALSE;
 	gint ret;
-	GtkWidget *dialog;
+	GtkWidget *dialog, *toplevel;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget));
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(toplevel),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
@@ -185,7 +188,8 @@ static gboolean overwrite_existing_playlist(const gchar *playlist,
 	return choice;
 }
 
-static GIOChannel* create_m3u_playlist(gchar *file, struct con_win *cwin)
+static GIOChannel*
+create_m3u_playlist(gchar *file)
 {
 	GIOChannel *chan = NULL;
 	GIOStatus status;
@@ -276,12 +280,13 @@ exit_list:
 	return ret;
 }
 
-static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+static gint
+save_complete_m3u_playlist(PraghaPlaylist* cplaylist, GIOChannel *chan, gchar *filename)
 {
 	gint ret = 0;
 	GList *list = NULL;
 
-	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+	list = pragha_playlist_get_mobj_list(cplaylist);
 
 	if(list != NULL) {
 		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
@@ -291,12 +296,13 @@ static gint save_complete_m3u_playlist(GIOChannel *chan, gchar *filename, struct
 	return ret;
 }
 
-static gint save_selected_to_m3u_playlist(GIOChannel *chan, gchar *filename, struct con_win *cwin)
+static gint
+save_selected_to_m3u_playlist(PraghaPlaylist* cplaylist, GIOChannel *chan, gchar *filename)
 {
 	GList *list = NULL;
 	gint ret = 0;
 
-	list = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
+	list = pragha_playlist_get_selection_mobj_list(cplaylist);
 
 	if (list != NULL) {
 		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
@@ -330,7 +336,7 @@ static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename
 
 /* Append the given playlist to the current playlist */
 
-void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin)
+void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 {
 	GList *list = NULL;
 
@@ -606,7 +612,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 
 /* Export selection/current playlist to a M3U file */
 
-void export_playlist (gint choice, struct con_win *cwin)
+void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 {
 	GtkWidget *dialog;
 	gchar *filename = NULL, *playlistm3u = NULL;
@@ -615,7 +621,7 @@ void export_playlist (gint choice, struct con_win *cwin)
 	gint resp;
 
 	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
-					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
 					     GTK_FILE_CHOOSER_ACTION_SAVE,
 					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 					     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -640,7 +646,7 @@ void export_playlist (gint choice, struct con_win *cwin)
 	if (!filename)
 		goto exit;
 
-	chan = create_m3u_playlist(filename, cwin);
+	chan = create_m3u_playlist(filename);
 	if (!chan) {
 		g_warning("Unable to create M3U playlist file: %s", filename);
 		goto exit;
@@ -648,13 +654,13 @@ void export_playlist (gint choice, struct con_win *cwin)
 
 	switch(choice) {
 	case SAVE_COMPLETE:
-		if (save_complete_m3u_playlist(chan, filename, cwin) < 0) {
+		if (save_complete_m3u_playlist(cplaylist, chan, filename) < 0) {
 			g_warning("Unable to save M3U playlist: %s", filename);
 			goto exit;
 		}
 		break;
 	case SAVE_SELECTED:
-		if (save_selected_to_m3u_playlist(chan, filename, cwin) < 0) {
+		if (save_selected_to_m3u_playlist(cplaylist, chan, filename) < 0) {
 			g_warning("Unable to save M3U playlist: %s", filename);
 			goto exit;
 		}
@@ -745,7 +751,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	if (!filename)
 		goto exit;
 
-	chan = create_m3u_playlist(filename, cwin);
+	chan = create_m3u_playlist(filename);
 	if (!chan) {
 		g_warning("Unable to create M3U playlist file: %s", filename);
 		goto exit;
@@ -1149,8 +1155,10 @@ append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 
 /* Save tracks to a playlist using the given type */
 
-void save_playlist(gint playlist_id, enum playlist_mgmt type,
-		   struct con_win *cwin)
+void
+save_playlist(PraghaPlaylist* cplaylist,
+              gint playlist_id,
+              enum playlist_mgmt type)
 {
 	PraghaMusicobject *mobj = NULL;
 	GList *mlist = NULL, *i;
@@ -1159,10 +1167,10 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 
 	switch(type) {
 	case SAVE_COMPLETE:
-		mlist = pragha_playlist_get_mobj_list(cwin->cplaylist);
+		mlist = pragha_playlist_get_mobj_list(cplaylist);
 		break;
 	case SAVE_SELECTED:
-		mlist = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
+		mlist = pragha_playlist_get_selection_mobj_list(cplaylist);
 		break;
 	default:
 		break;
@@ -1186,13 +1194,15 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	}
 
 	if(files != NULL) {
-		append_files_to_playlist(cwin->cdbase, files, playlist_id);
+		append_files_to_playlist(cplaylist->cdbase, files, playlist_id);
 		g_slist_free(files);
 	}
 }
 
-void new_playlist(const gchar *playlist, enum playlist_mgmt type,
-		  struct con_win *cwin)
+void
+new_playlist(PraghaPlaylist* cplaylist,
+             const gchar *playlist,
+             enum playlist_mgmt type)
 {
 	gchar *s_playlist;
 	gint playlist_id = 0;
@@ -1204,21 +1214,21 @@ void new_playlist(const gchar *playlist, enum playlist_mgmt type,
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
 
-	if ((playlist_id = find_playlist_db(s_playlist, cwin->cdbase))) {
-		if (overwrite_existing_playlist(playlist, cwin))
-			delete_playlist_db(s_playlist, cwin->cdbase);
+	if ((playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase))) {
+		if (overwrite_existing_playlist(playlist, cplaylist))
+			delete_playlist_db(s_playlist, cplaylist->cdbase);
 		else
 			goto exit;
 	}
 
-	playlist_id = add_new_playlist_db(s_playlist, cwin->cdbase);
-	save_playlist(playlist_id, type, cwin);
+	playlist_id = add_new_playlist_db(s_playlist, cplaylist->cdbase);
+	save_playlist(cplaylist, playlist_id, type);
 
 exit:
 	g_free(s_playlist);
 }
 
-void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
+void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type)
 {
 	gchar *s_playlist;
 	gint playlist_id;
@@ -1229,20 +1239,20 @@ void append_playlist(const gchar *playlist, gint type, struct con_win *cwin)
 	}
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
 
 	if (!playlist_id) {
 		g_warning("Playlist doesn't exist\n");
 		goto exit;
 	}
 
-	save_playlist(playlist_id, type, cwin);
+	save_playlist(cplaylist, playlist_id, type);
 
 exit:
 	g_free(s_playlist);
 }
 
-void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
+void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 {
 	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
@@ -1254,17 +1264,17 @@ void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin)
 
 	s_radio = sanitize_string_to_sqlite3(name);
 
-	if ((radio_id = find_radio_db(s_radio, cwin->cdbase))) {
-		if (overwrite_existing_playlist(name, cwin))
-			delete_radio_db(s_radio, cwin->cdbase);
+	if ((radio_id = find_radio_db(s_radio, cplaylist->cdbase))) {
+		if (overwrite_existing_playlist(name, cplaylist))
+			delete_radio_db(s_radio, cplaylist->cdbase);
 		else
 			goto exit;
 	}
 
-	radio_id = add_new_radio_db(s_radio, cwin->cdbase);
+	radio_id = add_new_radio_db(s_radio, cplaylist->cdbase);
 
 	file = sanitize_string_to_sqlite3(uri);
-	add_track_radio_db(file, radio_id, cwin->cdbase);
+	add_track_radio_db(file, radio_id, cplaylist->cdbase);
 	g_free(file);
 
 exit:
@@ -1277,7 +1287,7 @@ void append_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
 
 	playlist = gtk_menu_item_get_label (menuitem);
 
-	append_playlist(playlist, SAVE_SELECTED, cwin);
+	append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
 }
 
 void save_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
@@ -1286,7 +1296,7 @@ void save_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
 
 	playlist = gtk_menu_item_get_label (menuitem);
 
-	new_playlist(playlist, SAVE_COMPLETE, cwin);
+	new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
 }
 
 void update_menu_playlist_changes(struct con_win *cwin)
