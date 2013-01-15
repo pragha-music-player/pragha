@@ -109,7 +109,7 @@ PraghaMusicobject *
 new_musicobject_from_cdda(struct con_win *cwin,
                           gint track_no)
 {
-	PraghaMusicobject *mobj;
+	PraghaMusicobject *mobj = NULL;
 	gint channels, start, end;
 	gchar *ntitle = NULL, *nfile = NULL;
 
@@ -121,41 +121,52 @@ new_musicobject_from_cdda(struct con_win *cwin,
 	start = cdio_cddap_track_firstsector(cwin->cstate->cdda_drive, track_no);
 	end = cdio_cddap_track_lastsector(cwin->cstate->cdda_drive, track_no);
 
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
+
 	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
+		gint year;
 
 		track = cddb_disc_get_track(cwin->cstate->cddb_disc, track_no - 1);
 		if (track) {
 			title = cddb_track_get_title(track);
-			artist = cddb_track_get_artist(track);
-
 			if (title)
 				ntitle = g_strdup(title);
-			else
-				ntitle = g_strdup_printf("Track %d", track_no);
+
+			artist = cddb_track_get_artist(track);
+			if(artist)
+				pragha_musicobject_set_artist(mobj, artist);
+
+			album = cddb_disc_get_title(cwin->cstate->cddb_disc);
+			if(album)
+				pragha_musicobject_set_album(mobj, album);
+
+			year = cddb_disc_get_year(cwin->cstate->cddb_disc);
+			if(year)
+				pragha_musicobject_set_year(mobj, year);
+
+			genre = cddb_disc_get_genre(cwin->cstate->cddb_disc);
+			if(genre)
+				pragha_musicobject_set_genre(mobj, genre);
 		}
-
-		genre = cddb_disc_get_genre(cwin->cstate->cddb_disc);
-		album = cddb_disc_get_title(cwin->cstate->cddb_disc);
-
-		nfile = g_strdup_printf("cdda://%d", track_no);
-
-		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-			             "file", nfile,
-			             "file-type", FILE_CDDA,
-			             "title", ntitle,
-			             "artist", artist,
-			             "album", album,
-			             "genre", genre,
-			             "year", cddb_disc_get_year(cwin->cstate->cddb_disc),
-			             "track-no", track_no,
-			             "length", (end - start) / CDIO_CD_FRAMES_PER_SEC,
-			             "channels", (channels > 0) ? channels : 0,
-			             NULL);
-		g_free(nfile);
-		g_free(ntitle);
 	}
+
+	nfile = g_strdup_printf("cdda://%d", track_no);
+	pragha_musicobject_set_file(mobj, nfile);
+	pragha_musicobject_set_file_type(mobj, FILE_CDDA);
+
+	pragha_musicobject_set_track_no(mobj, track_no);
+
+	if (!ntitle)
+		ntitle = g_strdup_printf("Track %d", track_no);
+	pragha_musicobject_set_title(mobj, ntitle);
+
+	pragha_musicobject_set_length(mobj, (end - start) / CDIO_CD_FRAMES_PER_SEC);
+	pragha_musicobject_set_channels(mobj, (channels > 0) ? channels : 0);
+
+	g_free(nfile);
+	g_free(ntitle);
 
 	return mobj;
 }
