@@ -194,7 +194,7 @@ static void delete_track_db(const gchar *file, PraghaDatabase *cdbase)
 {
 	gchar *query, *sfile;
 	gint location_id;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	sfile = sanitize_string_to_sqlite3(file);
 
@@ -222,7 +222,7 @@ gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint artist_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO ARTIST (name) VALUES ('%s')",
 				artist);
@@ -242,7 +242,7 @@ gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint album_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO ALBUM (name) VALUES ('%s')",
 				album);
@@ -262,7 +262,7 @@ gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint genre_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO GENRE (name) VALUES ('%s')",
 				genre);
@@ -282,7 +282,7 @@ gint add_new_year_db(guint year, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint year_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO YEAR (year) VALUES ('%d')",
 				year);
@@ -302,7 +302,7 @@ gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint comment_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO COMMENT (name) VALUES ('%s')",
 				comment);
@@ -322,7 +322,7 @@ gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint location_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO LOCATION (name) VALUES ('%s')",
 				location);
@@ -366,7 +366,7 @@ gint find_artist_db(const gchar *artist, PraghaDatabase *cdbase)
 {
 	gint artist_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s';", artist);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -382,7 +382,7 @@ gint find_album_db(const gchar *album, PraghaDatabase *cdbase)
 {
 	gint album_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM ALBUM WHERE name = '%s';", album);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -398,7 +398,7 @@ gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 {
 	gint genre_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s';", genre);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -414,7 +414,7 @@ gint find_year_db(gint year, PraghaDatabase *cdbase)
 {
 	gint year_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM YEAR WHERE year = '%d';", year);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -430,7 +430,7 @@ gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 {
 	gint comment_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM COMMENT WHERE name = '%s';", comment);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -446,7 +446,7 @@ gint find_location_db(const gchar *location, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint location_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s'",
 				location);
@@ -463,7 +463,7 @@ gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint playlist_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				playlist);
@@ -480,7 +480,7 @@ gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint radio_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				radio);
@@ -508,7 +508,7 @@ gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase)
 {
 	gint ret = 0;
 	gchar *query, *file;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT name FROM LOCATION WHERE id = %d;", location_id);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -667,7 +667,7 @@ void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDat
 {
 	gchar *query;
 	gint playlist_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				oplaylist);
@@ -692,7 +692,7 @@ gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint playlist_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO PLAYLIST (name) VALUES ('%s')",
 				playlist);
@@ -714,7 +714,7 @@ gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 gchar** get_playlist_names_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	gchar **playlists = NULL;
 	gint i, j=0;
 
@@ -740,7 +740,7 @@ gchar** get_playlist_names_db(PraghaDatabase *cdbase)
 gint get_playlist_count_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	gint n_playlists = 0;
 
 	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST WHERE NAME != \"%s\";",
@@ -758,7 +758,7 @@ gint get_playlist_count_db(PraghaDatabase *cdbase)
 gint get_tracklist_count_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	/* this ID should be cached during open */
 	gint playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cdbase);
 	gint n_playlists = 0;
@@ -815,7 +815,7 @@ void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cd
 {
 	gchar *query;
 	gint radio_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				oradio);
@@ -840,7 +840,7 @@ gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gchar *query;
 	gint radio_id = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	query = g_strdup_printf("INSERT INTO RADIO (name) VALUES ('%s')",
 				radio);
@@ -862,7 +862,7 @@ gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 gchar** get_radio_names_db(PraghaDatabase *cdbase)
 {
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	gchar **radio = NULL;
 	gint i, j=0;
 
@@ -1230,7 +1230,7 @@ gint drop_dbase_schema(PraghaDatabase *cdbase)
 static gint db_get_table_count(PraghaDatabase *cdbase, const gchar *table)
 {
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	gint ret = 0;
 
 	query = g_strdup_printf("SELECT COUNT() FROM %s;", table);

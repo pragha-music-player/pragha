@@ -2992,7 +2992,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 	GtkTreeModel *model = cwin->cplaylist->model;
 

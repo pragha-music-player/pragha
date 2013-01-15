@@ -498,7 +498,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	gint response, location_id = 0;
 	guint i;
 	gboolean deleted = FALSE;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	if (!loc_arr)
 		return;
@@ -1483,7 +1483,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
 	gint elem = 0, ielem;
 	gchar *query = NULL;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	PraghaMusicobject *omobj, *nmobj;
 
@@ -1630,7 +1630,7 @@ void init_library_view(struct con_win *cwin)
 {
 	gint i = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	gchar *order_str = NULL;

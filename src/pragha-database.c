@@ -58,7 +58,7 @@ pragha_database_exec_query (PraghaDatabase *database,
 gboolean
 pragha_database_exec_sqlite_query(PraghaDatabase *database,
                                   gchar *query,
-                                  struct db_result *result)
+                                  PraghaDbResponse *result)
 {
 	gchar *err = NULL;
 	gboolean ret = FALSE;
