@@ -2024,19 +2024,19 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	playlist = get_playlist_name(cwin, SAVE_SELECTED, &choice);
+	playlist = get_playlist_name(cwin->cplaylist, SAVE_SELECTED, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(playlist, SAVE_SELECTED, cwin);
+			new_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(playlist, SAVE_SELECTED, cwin);
+			append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (SAVE_SELECTED, cwin);
+			export_playlist (cwin->cplaylist, SAVE_SELECTED);
 			break;
 		default:
 			break;
@@ -2065,19 +2065,19 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	playlist = get_playlist_name(cwin, SAVE_COMPLETE, &choice);
+	playlist = get_playlist_name(cwin->cplaylist, SAVE_COMPLETE, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(playlist, SAVE_COMPLETE, cwin);
+			new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(playlist, SAVE_COMPLETE, cwin);
+			append_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (SAVE_COMPLETE, cwin);
+			export_playlist (cwin->cplaylist, SAVE_COMPLETE);
 			break;
 		default:
 			break;
@@ -2963,7 +2963,7 @@ void save_current_playlist_state(struct con_win *cwin)
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return;
 
-	save_playlist(playlist_id, SAVE_COMPLETE, cwin);
+	save_playlist(cwin->cplaylist, playlist_id, SAVE_COMPLETE);
 
 	/* Save reference to current song. */
 
@@ -4146,6 +4146,7 @@ cplaylist_free(PraghaPlaylist* cplaylist)
 	g_object_unref(cplaylist->paused_pixbuf);
 
 	g_object_unref(cplaylist->preferences);
+	g_object_unref(cplaylist->cdbase);
 
 	g_slice_free(PraghaPlaylist, cplaylist);
 }
@@ -4158,6 +4159,7 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist = g_slice_new0(PraghaPlaylist);
 
 	cplaylist->preferences = pragha_preferences_get();
+	cplaylist->cdbase = pragha_database_get();
 
 	cplaylist->view = create_current_playlist_view(cplaylist, cwin);
 	cplaylist->model = g_object_ref(gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view)));

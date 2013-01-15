@@ -733,7 +733,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 			update_status_bar_playtime(cwin);
 
 			if (name) {
-				new_radio(uri, name, cwin);
+				new_radio(cwin->cplaylist, uri, name);
 				init_library_view(cwin);
 			}
 		}
