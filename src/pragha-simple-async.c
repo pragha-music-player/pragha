@@ -27,7 +27,7 @@ set_async_finished_message (gpointer user_data)
 	if (data == NULL)
 		return FALSE;
 
-	set_status_message (data->message, data->cwin);
+	pragha_statusbar_set_misc_text(data->cwin->statusbar, data->message);
 
 	g_slice_free (AsycMessageData, data);
 

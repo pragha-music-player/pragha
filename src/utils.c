@@ -371,24 +371,6 @@ remove_watch_cursor (GtkWidget *window)
 	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
 }
 
-/* Set a message on status bar, and restore it at 5 seconds */
-
-gboolean restore_status_bar(gpointer data)
-{
-	struct con_win *cwin = data;
-
-	update_status_bar_playtime(cwin);
-
-	return FALSE;
-}
-
-void set_status_message (const gchar *message, struct con_win *cwin)
-{
-	g_timeout_add_seconds(5, restore_status_bar, cwin);
-
-	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
-}
-
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
 GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)

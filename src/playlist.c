@@ -1126,7 +1126,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	remove_watch_cursor (cwin->mainwindow);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
-	set_status_message(summary, cwin);
+	pragha_statusbar_set_misc_text(cwin->statusbar, summary);
 	g_free(summary);
 
 	g_slist_free(list);

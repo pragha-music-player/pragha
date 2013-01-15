@@ -923,10 +923,7 @@ status_bar_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	if(cwin->cpref->status_bar)
-		gtk_widget_show(GTK_WIDGET(cwin->status_bar));
-	else
-		gtk_widget_hide(GTK_WIDGET(cwin->status_bar));
+	gtk_widget_set_visible(GTK_WIDGET(cwin->statusbar), cwin->cpref->status_bar);
 }
 
 /* Handler for the 'Show_controls_below_action' item in the view menu */

@@ -553,6 +553,39 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 	return vbox_lib;
 }
 
+static GtkWidget*
+create_playlist_pane_view(struct con_win *cwin)
+{
+	GtkWidget *vbox;
+	PraghaPlaylist *cplaylist;
+	PraghaStatusbar *statusbar;
+
+	vbox = gtk_vbox_new(FALSE, 2);
+
+	statusbar = pragha_statusbar_get();
+	cplaylist = cplaylist_new(cwin);
+
+	/* Pack everything */
+
+	gtk_box_pack_start(GTK_BOX(vbox),
+			   pragha_playlist_get_widget(cplaylist),
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(vbox),
+			   GTK_WIDGET(statusbar),
+			   FALSE,
+			   FALSE,
+			   0);
+
+	/* Store references*/
+
+	cwin->cplaylist = cplaylist;
+	cwin->statusbar = statusbar;
+
+	return vbox;
+}
+
 /*****************/
 /* DnD functions */
 /*****************/
@@ -585,8 +618,8 @@ gboolean tree_selection_func_false(GtkTreeSelection *selection,
 GtkWidget* create_main_region(struct con_win *cwin)
 {
 	GtkWidget *hpane;
-	GtkWidget *browse_mode;
-	PraghaPlaylist *cplaylist;
+	GtkWidget *browse_mode, *playlist_pane;
+
 
 	/* A two paned container */
 
@@ -598,7 +631,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Right pane contains the current playlist */
 
-	cplaylist = cplaylist_new(cwin);
+	playlist_pane = create_playlist_pane_view(cwin);
 
 	/* Set initial sizes */
 
@@ -607,11 +640,10 @@ GtkWidget* create_main_region(struct con_win *cwin)
 	/* Pack everything into the hpane */
 
 	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (hpane), pragha_playlist_get_widget(cplaylist), TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (hpane), playlist_pane, TRUE, FALSE);
 
 	/* Store references*/
 
-	cwin->cplaylist = cplaylist;
 	cwin->paned = hpane;
 
 	return hpane;
@@ -766,17 +798,6 @@ GtkWidget* create_info_box(struct con_win *cwin)
 	cwin->info_box = info_box;
 
 	return info_box;
-}
-
-GtkWidget* create_status_bar(struct con_win *cwin)
-{
-	GtkWidget *status_bar;
-
-	status_bar = gtk_label_new(NULL);
-	gtk_misc_set_alignment(GTK_MISC(status_bar), 0.99, 0);
-	cwin->status_bar = status_bar;
-
-	return status_bar;
 }
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)

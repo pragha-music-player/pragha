@@ -183,14 +183,14 @@ glyr_finished_incorrectly(glyr_struct *glyr_info)
 {
 	switch (glyr_info->query.type) {
 	case GLYR_TYPE_LYRICS:
-		set_status_message(_("Lyrics not found."), glyr_info->cwin);
+		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Lyrics not found."));
 		break;
 #if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_TYPE_ARTIST_BIO:
 #else
 	case GLYR_TYPE_ARTISTBIO:
 #endif
-		set_status_message(_("Artist information not found."), glyr_info->cwin);
+		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Artist information not found."));
 		break;
 	case GLYR_TYPE_COVERART:
 	default:
