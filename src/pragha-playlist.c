@@ -2998,12 +2998,9 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
-	GtkTreeModel *model = cwin->cplaylist->model;
+	GList *list = NULL;
 
 	set_watch_cursor (cwin->mainwindow);
-
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
 
 	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
@@ -3023,18 +3020,19 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"));
 		}
-		append_current_playlist(cwin->cplaylist, mobj);
+		list = g_list_append(list, mobj);
 		g_free(file);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);
+
+	g_list_free(list);
 }
 
 void init_current_playlist_view(struct con_win *cwin)
