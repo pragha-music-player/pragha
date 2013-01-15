@@ -1175,7 +1175,7 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
 	gint i = 0, location_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	GList *list = NULL;
 	PraghaMusicobject *mobj;
 

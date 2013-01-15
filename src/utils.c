@@ -320,7 +320,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 						struct con_win *cwin)
 {
 	gchar *query = NULL;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0, i;
 	gchar *sartist, *stitle;

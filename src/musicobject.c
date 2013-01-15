@@ -48,7 +48,7 @@ new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 {
 	PraghaMusicobject *mobj;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	gint i = 0;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject with location id: %d",

@@ -1087,7 +1087,7 @@ exit:
 void refresh_tag_completion_entries(struct con_win *cwin)
 {
 	GtkTreeModel *artist_tag_model, *album_tag_model, *genre_tag_model;
-	struct db_result result;
+	PraghaDbResponse result;
 	gchar *query;
 	gint i = 0;
 

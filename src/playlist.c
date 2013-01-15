@@ -354,7 +354,7 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
@@ -396,7 +396,7 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
 {
 	gchar *s_radio, *query;
 	gint radio_id, i = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
 	s_radio = sanitize_string_to_sqlite3(radio);
@@ -1299,7 +1299,7 @@ void update_menu_playlist_changes(struct con_win *cwin)
 
 void complete_add_to_playlist_submenu (struct con_win *cwin)
 {
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	gchar *query;
 	gint i;
@@ -1332,7 +1332,7 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 
 void complete_save_playlist_submenu (struct con_win *cwin)
 {
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	gchar *query;
 	gint i;
@@ -1365,7 +1365,7 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 
 void complete_main_save_playlist_submenu (struct con_win *cwin)
 {
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
 	gchar *query;
@@ -1406,7 +1406,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 {
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
 	gchar *query;

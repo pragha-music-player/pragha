@@ -34,11 +34,11 @@ typedef struct _PraghaDatabase PraghaDatabase;
 typedef struct _PraghaDatabaseClass PraghaDatabaseClass;
 typedef struct _PraghaDatabasePrivate PraghaDatabasePrivate;
 
-struct db_result {
+typedef struct {
 	gchar **resultp;
 	gint no_rows;
 	gint no_columns;
-};
+} PraghaDbResponse;
 
 struct _PraghaDatabase
 {
@@ -60,7 +60,7 @@ pragha_database_exec_query (PraghaDatabase *database,
 gboolean
 pragha_database_exec_sqlite_query(PraghaDatabase *database,
                                   gchar *query,
-                                  struct db_result *result);
+                                  PraghaDbResponse *result);
 
 gboolean
 pragha_database_start_successfully (PraghaDatabase *database);
