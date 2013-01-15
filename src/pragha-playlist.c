@@ -2483,8 +2483,7 @@ drag_current_playlist_get_data (GtkWidget *widget,
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
 				if (G_LIKELY(mobj &&
-				    pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-				    pragha_musicobject_get_file_type(mobj) != FILE_HTTP))
+				    pragha_musicobject_is_local_file(mobj)))
 					uri_list[uri_i++] = g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL);
 
 				gtk_tree_path_free(path);

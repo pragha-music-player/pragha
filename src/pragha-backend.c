@@ -544,13 +544,13 @@ pragha_backend_play (PraghaBackend *backend)
 	PraghaBackendPrivate *priv = backend->priv;
 	struct con_win *cwin = priv->cwin;
 	gchar *file = NULL, *uri = NULL;
-	gint file_type = 0;
+	gboolean local_file;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_get(cwin->cstate->curr_mobj,
 	             "file", &file,
-	             "file-type", &file_type,
 	             NULL);
+	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(file))
@@ -558,13 +558,13 @@ pragha_backend_play (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
-	if(file_type == FILE_CDDA || file_type == FILE_HTTP) {
-		g_object_set(priv->pipeline, "uri", file, NULL);
+	if (local_file) {
+		uri = g_filename_to_uri (file, NULL, NULL);
+		g_object_set (priv->pipeline, "uri", uri, NULL);
+		g_free (uri);
 	}
 	else {
-		uri = g_filename_to_uri (file, NULL, NULL);
-		g_object_set(priv->pipeline, "uri", uri, NULL);
-		g_free (uri);
+		g_object_set (priv->pipeline, "uri", file, NULL);
 	}
 
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);

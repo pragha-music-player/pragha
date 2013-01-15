@@ -317,8 +317,7 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 
 	if (pragha_album_art_get_visible(cwin->albumart)) {
 		if (G_LIKELY(mobj &&
-		    pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP)) {
+		    pragha_musicobject_is_local_file(mobj))) {
 			#ifdef HAVE_LIBGLYR
 			album_path = get_image_path_from_cache(pragha_musicobject_get_artist(mobj),
 			                                       pragha_musicobject_get_album(mobj),

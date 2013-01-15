@@ -440,13 +440,12 @@ void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *v
 static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 {
 	const gchar *title, *artist, *album, *genre, *comment, *file;
-	gint file_type, track_no, year, length, bitrate, channels, samplerate;
+	gint track_no, year, length, bitrate, channels, samplerate;
 	gchar *date = NULL, *url = NULL;
 
 	CDEBUG(DBG_MPRIS, "MPRIS handle get metadata");
 
 	file = pragha_musicobject_get_file(mobj);
-	file_type = pragha_musicobject_get_file_type(mobj);
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 	album = pragha_musicobject_get_album(mobj);
@@ -461,8 +460,8 @@ static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 
 	date = g_strdup_printf("%d", year);
 
-	url = (file_type == FILE_HTTP || file_type == FILE_CDDA) ?
-	       g_strdup(file) : g_filename_to_uri(file, NULL, NULL);
+	url = (pragha_musicobject_is_local_file(mobj)) ?
+	       g_filename_to_uri(file, NULL, NULL) : g_strdup(file);
 
 	g_variant_builder_add (b, "{sv}", "mpris:trackid",
 		handle_get_trackid(mobj));

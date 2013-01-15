@@ -151,6 +151,20 @@ pragha_musicobject_set_file (PraghaMusicobject *musicobject,
 }
 
 /**
+ * pragha_musicobject_is_local_file:
+ *
+ */
+gboolean
+pragha_musicobject_is_local_file (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
+
+	enum file_type file_type = musicobject->priv->file_type;
+
+	return file_type != FILE_CDDA && file_type != FILE_HTTP;
+}
+
+/**
  * pragha_musicobject_get_file_type:
  *
  */

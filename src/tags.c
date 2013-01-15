@@ -923,8 +923,7 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 	for (i = list; i != NULL; i = i->next) {
 		mobj = i->data;
 
-		if (G_LIKELY(pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP)) {
+		if (G_LIKELY(pragha_musicobject_is_local_file(mobj))) {
 			sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(mobj));
 			location_id = find_location_db(sfile, cwin->cdbase);
 			if (G_LIKELY(location_id))

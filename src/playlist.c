@@ -235,8 +235,7 @@ save_mobj_list_to_m3u_playlist(GList *list, GIOChannel *chan, gchar *filename)
 	/* Export all selected tracks to the given file */
 	for (i=list; i != NULL; i = i->next) {
 		mobj = i->data;
-		if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-		    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+		if (pragha_musicobject_is_local_file(mobj)) {
 			base = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 
 			if (g_ascii_strcasecmp(base_m3u, base) == 0)
@@ -1171,8 +1170,7 @@ void save_playlist(gint playlist_id, enum playlist_mgmt type,
 	if(mlist != NULL) {
 		for (i=mlist; i != NULL; i = i->next) {
 			mobj = i->data;
-			if (pragha_musicobject_get_file_type(mobj) != FILE_CDDA &&
-			    pragha_musicobject_get_file_type(mobj) != FILE_HTTP) {
+			if (pragha_musicobject_is_local_file(mobj)) {
 			    	file = g_strdup(pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);
 			}
