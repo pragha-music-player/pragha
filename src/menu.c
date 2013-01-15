@@ -781,7 +781,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
 	gchar *sfile = NULL, *file;
-	gint location_id, changed = 0, file_type = 0;
+	gint location_id, changed = 0;
+	gboolean local_file;
 	PraghaMusicobject *omobj, *nmobj, *tmobj;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
@@ -791,9 +792,9 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	omobj = g_object_ref(cwin->cstate->curr_mobj);
 	g_object_get(omobj,
-	             "file-type",&file_type,
 	             "file", &file,
 	             NULL);
+	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
 	/* A temp Musicobject to not block the entire dialog */
 	tmobj = pragha_musicobject_dup (omobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
@@ -820,7 +821,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(file_type != FILE_CDDA && file_type != FILE_HTTP)) {
+	if (G_LIKELY(local_file)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		sfile = sanitize_string_to_sqlite3(file);
 		location_id = find_location_db(sfile, cwin->cdbase);

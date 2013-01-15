@@ -74,7 +74,8 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	gchar *file = NULL, *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
 	gchar *sfile = NULL;
-	gint location_id, changed = 0, prechanged = 0, file_type = 0;
+	gint location_id, changed = 0, prechanged = 0;
+	gboolean local_file;
 	GPtrArray *file_arr = NULL;
 	GArray *loc_arr = NULL;
 
@@ -86,11 +87,11 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	omobj = g_object_ref(cwin->cstate->curr_mobj);
 	g_object_get(omobj,
 	             "file", &file,
-	             "file-type", &file_type,
 	             "title", &otitle,
 	             "artist", &oartist,
 	             "album", &oalbum,
 	             NULL);
+	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Get all info of suggestions */
@@ -121,7 +122,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Store the new tags */
 
-	if (G_LIKELY(file_type != FILE_CDDA && file_type != FILE_HTTP)) {
+	if (G_LIKELY(local_file)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		sfile = sanitize_string_to_sqlite3(file);
 		location_id = find_location_db(sfile, cwin->cdbase);

@@ -62,6 +62,9 @@ void
 pragha_musicobject_set_file (PraghaMusicobject *musicobject,
                              const gchar *file);
 
+gboolean
+pragha_musicobject_is_local_file (PraghaMusicobject *musicobject);
+
 gint
 pragha_musicobject_get_file_type (PraghaMusicobject *musicobject);
 void
