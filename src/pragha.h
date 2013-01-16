@@ -705,10 +705,6 @@ extern const gchar *mime_playlist[];
 extern const gchar *mime_dual[];
 #endif
 
-/*Open file function*/
-
-void handle_selected_file(gpointer data, gpointer udata);
-
 /* Convenience macros */
 
 #define for_each_result_row(result, i)					\
@@ -779,6 +775,9 @@ GtkWidget* create_toolbar(struct con_win *cwin);
 
 /* File utils functions */
 
+gboolean is_playable_file(const gchar *file);
+gboolean is_dir_and_accessible(const gchar *dir);
+gint dir_file_count(const gchar *dir_name, gint call_recur);
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin);
 void __recur_add(const gchar *dir_name, struct con_win *cwin);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
@@ -1148,9 +1147,6 @@ GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, cons
 void set_watch_cursor (GtkWidget *window);
 void remove_watch_cursor (GtkWidget *window);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
-gboolean is_playable_file(const gchar *file);
-gboolean is_dir_and_accessible(const gchar *dir);
-gint dir_file_count(const gchar *dir_name, gint call_recur);
 gchar* sanitize_string_to_sqlite3(const gchar *str);
 gboolean string_is_empty(const gchar *str);
 gboolean string_is_not_empty(const gchar *str);
