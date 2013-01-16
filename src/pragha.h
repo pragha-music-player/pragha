@@ -777,11 +777,12 @@ void album_art_toggle_state(struct con_win *cwin);
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 GtkWidget* create_toolbar(struct con_win *cwin);
 
-/* File tree functions */
+/* File utils functions */
 
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin);
 void __recur_add(const gchar *dir_name, struct con_win *cwin);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
+GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
 
 /* Musicobject functions */
 
