@@ -778,8 +778,6 @@ GtkWidget* create_toolbar(struct con_win *cwin);
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
 gint dir_file_count(const gchar *dir_name, gint call_recur);
-void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin);
-void __recur_add(const gchar *dir_name, struct con_win *cwin);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
 GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
 
