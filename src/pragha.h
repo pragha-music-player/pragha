@@ -983,11 +983,6 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mo
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
-pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
-				 GList *list,
-				 GtkTreeViewDropPosition droppos,
-				 GtkTreeIter *pos);
-void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
 gboolean
 pragha_mobj_list_already_has_title_of_artist(GList *list,

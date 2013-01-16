@@ -1905,7 +1905,7 @@ pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobjec
 
 /* Insert a list of mobj to the current playlist. */
 
-void
+static void
 pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 				 GList *list,
 				 GtkTreeViewDropPosition droppos,
