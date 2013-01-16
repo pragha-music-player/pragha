@@ -1820,12 +1820,8 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 
 /* Append a track to the current playlist */
 
-void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
-{
-	append_current_playlist_ex(cplaylist, mobj, NULL);
-}
-
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
+static void
+append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
 	const gchar *title, *artist, *album, *genre, *comment;
@@ -1893,14 +1889,30 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mo
 	g_free(ch_filename);
 }
 
+void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
+{
+	append_current_playlist_ex(cplaylist, mobj, NULL);
+}
+
+void
+pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
+{
+	append_current_playlist(cplaylist, mobj);
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
+}
+
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
 {
-	GtkTreePath *path;
+	GtkTreePath *path = NULL;
 
 	append_current_playlist_ex(cplaylist, mobj, &path);
-	pragha_playlist_activate_path(cplaylist, path);
-	gtk_tree_path_free(path);
+
+	if(path) {
+		pragha_playlist_activate_path(cplaylist, path);
+		gtk_tree_path_free(path);
+	}
 }
 
 /* Insert a list of mobj to the current playlist. */
