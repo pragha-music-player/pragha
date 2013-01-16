@@ -47,6 +47,72 @@ add_recent_file (const gchar *filename)
 	g_free (uri);
 }
 
+/* Accepts only absolute filename */
+
+gboolean is_playable_file(const gchar *file)
+{
+	if (!file)
+		return FALSE;
+
+	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
+	    (get_file_type(file) != -1))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+/* Accepts only absolute path */
+
+gboolean is_dir_and_accessible(const gchar *dir)
+{
+	gint ret;
+
+	if (!dir)
+		return FALSE;
+
+	if (g_file_test(dir, G_FILE_TEST_IS_DIR) && !g_access(dir, R_OK | X_OK))
+		ret = TRUE;
+	else
+		ret = FALSE;
+
+	return ret;
+}
+
+gint dir_file_count(const gchar *dir_name, gint call_recur)
+{
+	static gint file_count = 0;
+	GDir *dir;
+	const gchar *next_file = NULL;
+	gchar *ab_file;
+	GError *error = NULL;
+
+	/* Reinitialize static variable if called from rescan_library_action */
+
+	if (call_recur)
+		file_count = 0;
+
+	dir = g_dir_open(dir_name, 0, &error);
+	if (!dir) {
+		g_warning("Unable to open library : %s", dir_name);
+		return file_count;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
+			dir_file_count(ab_file, 0);
+		else {
+			file_count++;
+		}
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+
+	g_dir_close(dir);
+	return file_count;
+}
+
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -144,7 +210,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 	while (next_file) {
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 
-		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR)) {
+		if (is_dir_and_accessible(ab_file)) {
 			preferences = pragha_preferences_get();
 			if(pragha_preferences_get_add_recursively(preferences))
 				list = append_mobj_list_from_folder(list, ab_file);
@@ -180,17 +246,19 @@ append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
 {
 	PraghaMusicobject *mobj;
 
-	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
+	if (is_dir_and_accessible(filename)) {
 		list = append_mobj_list_from_folder(list, filename);
 	}
 	else if (pragha_pl_parser_guess_format_from_extension(filename) != PL_FORMAT_UNKNOWN) {
 		list = pragha_pl_parser_append_mobj_list_by_extension(list, filename);
 	}
 	else {
-		mobj = new_musicobject_from_file(filename);
-		if (mobj) {
-			list = g_list_append(list, mobj);
-			add_recent_file(filename);
+		if (is_playable_file(filename)) {
+			mobj = new_musicobject_from_file(filename);
+			if (mobj) {
+				list = g_list_append(list, mobj);
+				add_recent_file(filename);
+			}
 		}
 	}
 
