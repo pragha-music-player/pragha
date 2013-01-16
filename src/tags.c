@@ -1086,7 +1086,7 @@ exit:
 void refresh_tag_completion_entries(struct con_win *cwin)
 {
 	GtkTreeModel *artist_tag_model, *album_tag_model, *genre_tag_model;
-	struct db_result result;
+	PraghaDbResponse result;
 	gchar *query;
 	gint i = 0;
 
@@ -1099,7 +1099,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(genre_tag_model));
 
 	query = g_strdup_printf("SELECT name FROM ARTIST;");
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1113,7 +1113,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM ALBUM;");
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {
@@ -1127,7 +1127,7 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	sqlite3_free_table(result.resultp);
 
 	query = g_strdup_printf("SELECT name FROM GENRE;");
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	i = 0;
 	for_each_result_row(result, i) {

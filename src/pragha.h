@@ -77,8 +77,10 @@
 
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
+#include "pragha-database.h"
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
+#include "pragha-statusbar.h"
 #include "gtkcellrendererbubble.h"
 
 #include "xml_helper.h"
@@ -504,7 +506,6 @@ struct con_pref {
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
 #endif
-	gboolean add_recursively_files;
 	gboolean show_osd;
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;
@@ -533,11 +534,6 @@ struct con_pref {
 #endif
 };
 
-struct db_result {
-	gchar **resultp;
-	gint no_rows;
-	gint no_columns;
-};
 
 /**
  * struct con_state - Pertains to the current state of the player
@@ -565,8 +561,6 @@ struct con_state {
 	PraghaMusicobject *curr_mobj;
 	PRAGHA_MUTEX (curr_mobj_mutex);
 };
-
-struct con_dbase;
 
 #ifdef HAVE_LIBCLASTFM
 struct con_lastfm {
@@ -629,15 +623,16 @@ typedef struct {
 	GdkPixbuf *paused_pixbuf;
 	GdkPixbuf *playing_pixbuf;
 	PraghaPreferences *preferences;
+	PraghaDatabase *cdbase;
 } PraghaPlaylist;
 
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
-	struct con_dbase *cdbase;
 	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
+	PraghaDatabase *cdbase;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
@@ -656,7 +651,7 @@ struct con_win {
 	GtkToolItem *next_button;
 	GtkToolItem *unfull_button;
 	GtkWidget *vol_button;
-	GtkWidget *status_bar;
+	PraghaStatusbar *statusbar;
 	GtkWidget *search_entry;
 	GtkWidget *browse_mode;
 	GtkWidget *paned;
@@ -709,10 +704,6 @@ extern const gchar *mime_image[];
 extern const gchar *mime_playlist[];
 extern const gchar *mime_dual[];
 #endif
-
-/*Open file function*/
-
-void handle_selected_file(gpointer data, gpointer udata);
 
 /* Convenience macros */
 
@@ -782,16 +773,18 @@ void album_art_toggle_state(struct con_win *cwin);
 void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
 GtkWidget* create_toolbar(struct con_win *cwin);
 
-/* File tree functions */
+/* File utils functions */
 
-void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin);
-void __recur_add(const gchar *dir_name, struct con_win *cwin);
-GList *append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin);
+gboolean is_playable_file(const gchar *file);
+gboolean is_dir_and_accessible(const gchar *dir);
+gint dir_file_count(const gchar *dir_name, gint call_recur);
+GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
+GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
 
 /* Musicobject functions */
 
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);
-PraghaMusicobject* new_musicobject_from_db(struct con_dbase *cdbase, gint location_id);
+PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
 PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
 PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
@@ -857,88 +850,90 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
-gint add_new_artist_db(const gchar *artist, struct con_dbase *cdbase);
-gint add_new_album_db(const gchar *album, struct con_dbase *cdbase);
-gint add_new_genre_db(const gchar *genre, struct con_dbase *cdbase);
-gint add_new_year_db(guint year, struct con_dbase *cdbase);
-gint add_new_comment_db(const gchar *comment, struct con_dbase *cdbase);
-gint add_new_location_db(const gchar *location, struct con_dbase *cdbase);
-void add_track_playlist_db(const gchar *file, gint playlist_id, struct con_dbase *cdbase);
-void add_track_radio_db(const gchar *uri, gint radio_id, struct con_dbase *cdbase);
-gint find_artist_db(const gchar *artist, struct con_dbase *cdbase);
-gint find_album_db(const gchar *album, struct con_dbase *cdbase);
-gint find_genre_db(const gchar *genre, struct con_dbase *cdbase);
-gint find_year_db(gint year, struct con_dbase *cdbase);
-gint find_comment_db(const gchar *comment, struct con_dbase *cdbase);
-gint find_location_db(const gchar *location, struct con_dbase *cdbase);
-gint find_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
-gint find_radio_db(const gchar *radio, struct con_dbase *cdbase);
-void delete_location_db(gint location_id, struct con_dbase *cdbase);
-gint delete_location_hdd(gint location_id, struct con_dbase *cdbase);
+gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase);
+gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase);
+gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase);
+gint add_new_year_db(guint year, PraghaDatabase *cdbase);
+gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase);
+gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase);
+void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
+void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase);
+gint find_artist_db(const gchar *artist, PraghaDatabase *cdbase);
+gint find_album_db(const gchar *album, PraghaDatabase *cdbase);
+gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase);
+gint find_year_db(gint year, PraghaDatabase *cdbase);
+gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase);
+gint find_location_db(const gchar *location, PraghaDatabase *cdbase);
+gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
+gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
+void delete_location_db(gint location_id, PraghaDatabase *cdbase);
+gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);
 void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
 		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     struct con_dbase *cdbase);
+		     PraghaDatabase *cdbase);
 void
-pragha_db_update_local_files_change_tag(struct con_dbase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, struct con_dbase *cdbase);
-gint add_new_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
-gchar** get_playlist_names_db(struct con_dbase *cdbase);
-gint get_playlist_count_db(struct con_dbase *cdbase);
-void update_radio_name_db(const gchar *oradio, gchar *nradio, struct con_dbase *cdbase);
-gint add_new_radio_db(const gchar *radio, struct con_dbase *cdbase);
-gchar** get_radio_names_db(struct con_dbase *cdbase);
+pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
+void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase);
+gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
+gchar** get_playlist_names_db(PraghaDatabase *cdbase);
+gint get_playlist_count_db(PraghaDatabase *cdbase);
+void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cdbase);
+gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase);
+gchar** get_radio_names_db(PraghaDatabase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
-gint get_tracklist_count_db(struct con_dbase *cdbase);
-void delete_playlist_db(const gchar *playlist, struct con_dbase *cdbase);
-void flush_playlist_db(gint playlist_id, struct con_dbase *cdbase);
-void delete_radio_db(const gchar *radio, struct con_dbase *cdbase);
-void flush_radio_db(gint radio_id, struct con_dbase *cdbase);
-void flush_stale_entries_db(struct con_dbase *cdbase);
-void flush_db(struct con_dbase *cdbase);
+gint get_tracklist_count_db(PraghaDatabase *cdbase);
+void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
+void flush_playlist_db(gint playlist_id, PraghaDatabase *cdbase);
+void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase);
+void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
+void flush_stale_entries_db(PraghaDatabase *cdbase);
+void flush_db(PraghaDatabase *cdbase);
 gboolean fraction_update(GtkWidget *pbar);
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, GCancellable *cancellable, struct con_dbase *cdbase);
+	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase);
 void update_db (const gchar *dir_name,
 		gint no_files,
 		GtkWidget *pbar,
 		GTimeVal last_rescan_time,
 		gint call_recur,
 		GCancellable *cancellable,
-		struct con_dbase *cdbase);
+		PraghaDatabase *cdbase);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, struct con_dbase *cdbase);
-gint init_dbase_schema(struct con_dbase *cdbase);
-gint drop_dbase_schema(struct con_dbase *cdbase);
-gint db_get_artist_count(struct con_dbase *cdbase);
-gint db_get_album_count(struct con_dbase *cdbase);
-gint db_get_track_count(struct con_dbase *cdbase);
-void db_begin_transaction(struct con_dbase *cdbase);
-void db_commit_transaction(struct con_dbase *cdbase);
-gboolean exec_sqlite_query(gchar *query, struct con_dbase *cdbase,
-			   struct db_result *result);
-gboolean db_exec_query (struct con_dbase *cdbase, const gchar *query);
-void db_free(struct con_dbase *cdbase);
+	       gint call_recur, PraghaDatabase *cdbase);
+gint init_dbase_schema(PraghaDatabase *cdbase);
+gint drop_dbase_schema(PraghaDatabase *cdbase);
+gint db_get_artist_count(PraghaDatabase *cdbase);
+gint db_get_album_count(PraghaDatabase *cdbase);
+gint db_get_track_count(PraghaDatabase *cdbase);
+void db_begin_transaction(PraghaDatabase *cdbase);
+void db_commit_transaction(PraghaDatabase *cdbase);
 
 /* Playlist mgmt functions */
 
-gchar* get_playlist_name(struct con_win *cwin, enum playlist_mgmt type, enum playlist_mgmt *choice);
-void add_playlist_current_playlist(GtkTreeModel *model, gchar *playlist, struct con_win *cwin);
-GList *add_playlist_to_mobj_list(struct con_dbase *cdbase, gchar *playlist, GList *list);
-GList *add_radio_to_mobj_list(struct con_dbase *cdbase, gchar *playlist, GList *list);
+gchar* get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type, enum playlist_mgmt *choice);
+void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
+GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
+GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
-void export_playlist (gint choice, struct con_win *cwin);
+void export_playlist (PraghaPlaylist* cplaylist, gint choice);
 void playlist_tree_export(GtkAction *action, struct con_win *cwin);
+GList *
+pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
-void save_playlist(gint playlist_id, enum playlist_mgmt type,
-		   struct con_win *cwin);
-void new_playlist(const gchar *playlist, enum playlist_mgmt type,
-		  struct con_win *cwin);
-void append_playlist(const gchar *playlist, gint type, struct con_win *cwin);
-void new_radio (const gchar *uri, const gchar *name, struct con_win *cwin);
+void
+save_playlist(PraghaPlaylist* cplaylist,
+              gint playlist_id,
+              enum playlist_mgmt type);
+void
+new_playlist(PraghaPlaylist* cplaylist,
+             const gchar *playlist,
+             enum playlist_mgmt type);
+void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
+void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
 void update_menu_playlist_changes(struct con_win *cwin);
 void complete_add_to_playlist_submenu (struct con_win *cwin);
 void complete_save_playlist_submenu (struct con_win *cwin);
@@ -949,7 +944,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
-void update_status_bar_playtime(struct con_win *cwin);
+void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
@@ -984,14 +979,10 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 void pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path);
+void
+pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
-void
-pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
-				 GList *list,
-				 GtkTreeViewDropPosition droppos,
-				 GtkTreeIter *pos);
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list);
 gboolean
@@ -1149,11 +1140,7 @@ gboolean already_in_current_playlist(PraghaMusicobject *mobj, struct con_win *cw
 GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
 void set_watch_cursor (GtkWidget *window);
 void remove_watch_cursor (GtkWidget *window);
-void set_status_message (const gchar *message, struct con_win *cwin);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
-gboolean is_playable_file(const gchar *file);
-gboolean is_dir_and_accessible(const gchar *dir);
-gint dir_file_count(const gchar *dir_name, gint call_recur);
 gchar* sanitize_string_to_sqlite3(const gchar *str);
 gboolean string_is_empty(const gchar *str);
 gboolean string_is_not_empty(const gchar *str);
@@ -1185,7 +1172,6 @@ GtkWidget* create_main_region(struct con_win *cwin);
 GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
-GtkWidget* create_status_bar(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
 GtkWidget* create_combo_order(struct con_win *cwin);
 void create_status_icon(struct con_win *cwin);
@@ -1206,7 +1192,6 @@ gint init_dbus(struct con_win *cwin);
 gint init_dbus_handlers(struct con_win *cwin);
 gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_config(struct con_win *cwin);
-gint init_musicdbase(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);

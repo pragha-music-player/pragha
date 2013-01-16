@@ -152,7 +152,7 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
-	gboolean last_folder_f, recursively_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
+	gboolean last_folder_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
 	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
@@ -161,7 +161,7 @@ gint init_config(struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = recursively_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
+	last_folder_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
@@ -489,17 +489,6 @@ gint init_config(struct con_win *cwin)
 			close_to_tray_f = TRUE;
 		}
 
-		cwin->cpref->add_recursively_files =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_ADD_RECURSIVELY_FILES,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			recursively_f = TRUE;
-		}
-
 		cwin->cpref->album_art_pattern =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_GENERAL,
@@ -705,8 +694,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->sort_by_year = FALSE;
 	if (all_f || cur_lib_view_f)
 		cwin->cpref->cur_library_view = FOLDERS;
-	if (all_f || recursively_f)
-		cwin->cpref->add_recursively_files = FALSE;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || timer_remaining_mode_f)
@@ -1031,7 +1018,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *status_bar, *menu_bar;
+	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *menu_bar;
 	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
@@ -1107,7 +1094,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
 	hbox_main = create_main_region(cwin);
-	status_bar = create_status_bar(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
 	/* Pack all hboxen into vbox */
@@ -1124,9 +1110,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_main),
 			   TRUE,TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(status_bar),
-			   FALSE,FALSE, 0);
 
 	/* Send notifications on gui, OSD and mpris of new songs */
 

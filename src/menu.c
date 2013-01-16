@@ -284,65 +284,6 @@ static void rescan_dialog_response_cb(GtkDialog *dialog,
 		g_cancellable_cancel (cancellable);
 }
 
-/* Generate and add the recently-used data */
-
-void add_recent_file (const gchar *filename)
-{
-	GtkRecentData recent_data;
-	gchar *uri = NULL;
-
-	recent_data.mime_type = get_mime_type(filename);
-	if (recent_data.mime_type == NULL)
-		return;
-
-	recent_data.display_name = g_filename_display_basename (filename);
-	recent_data.app_name = g_strdup (g_get_application_name ());
-	recent_data.app_exec =  g_strjoin (" ", g_get_prgname (), "%u", NULL);
-	recent_data.description = NULL;
-	recent_data.groups = NULL;
-	recent_data.is_private = FALSE;
-
-	uri = g_filename_to_uri(filename, NULL, NULL);
-	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &recent_data);
-
-	g_free (recent_data.display_name);
-	g_free (recent_data.mime_type);
-	g_free (recent_data.app_name);
-	g_free (recent_data.app_exec);
-	g_free (uri);
-}
-
-/* Add selected files from the file chooser to the current playlist */
-
-void handle_selected_file(gpointer data, gpointer udata)
-{
-	PraghaMusicobject *mobj;
-	struct con_win *cwin = udata;
-
-	if (!data)
-		return;
-
-	if (g_file_test(data, G_FILE_TEST_IS_DIR)){
-		if(cwin->cpref->add_recursively_files)
-			__recur_add(data, cwin);
-		else
-			__non_recur_add(data, TRUE, cwin);
-	}
-	else if (pragha_pl_parser_guess_format_from_extension(data) != PL_FORMAT_UNKNOWN) {
-		pragha_pl_parser_open_from_file_by_extension(data, cwin);
-	}
-	else{
-		mobj = new_musicobject_from_file(data);
-		if (mobj) {
-			append_current_playlist(cwin->cplaylist, mobj);
-			add_recent_file(data);
-		}
-	}
-
-	/* Have to give control to GTK periodically ... */
-	pragha_process_gtk_events ();
-}
-
 /* Create a dialog box with a progress bar for rescan/update library */
 
 static GtkWidget* lib_progress_bar(struct con_win *cwin, int update, gpointer cb_data)
@@ -407,15 +348,17 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
-	GSList *files = NULL;
-	gint prev_tracks = 0;
+	GSList *files = NULL, *l;
+	gboolean add_recursively;
+	GList *mlist = NULL;
 
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
 	struct con_win *cwin = g_object_get_data(data, "cwin");
 
-	cwin->cpref->add_recursively_files = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
 	g_free (cwin->cstate->last_folder);
 	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
 
@@ -424,17 +367,12 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(window);
 
 	if (files) {
-		set_watch_cursor (cwin->mainwindow);
-
-		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
-		g_slist_foreach(files, handle_selected_file, cwin);
+		for (l = files; l != NULL; l = l->next) {
+			mlist = append_mobj_list_from_unknown_filename(mlist, l->data);
+		}
 		g_slist_free_full(files, g_free);
 
-		remove_watch_cursor (cwin->mainwindow);
-
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-		update_status_bar_playtime(cwin);
+		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 	}
 }
 
@@ -487,8 +425,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle),
-					cwin->cpref->add_recursively_files ? TRUE : FALSE);
+	if(pragha_preferences_get_add_recursively(cwin->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
+
 	bbox = gtk_hbutton_box_new();
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(bbox), 6);
@@ -729,11 +668,10 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name);
 
-			append_current_playlist(cwin->cplaylist, mobj);
-			update_status_bar_playtime(cwin);
+			pragha_playlist_append_single_song(cwin->cplaylist, mobj);
 
 			if (name) {
-				new_radio(uri, name, cwin);
+				new_radio(cwin->cplaylist, uri, name);
 				init_library_view(cwin);
 			}
 		}
@@ -924,10 +862,7 @@ status_bar_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	if(cwin->cpref->status_bar)
-		gtk_widget_show(GTK_WIDGET(cwin->status_bar));
-	else
-		gtk_widget_hide(GTK_WIDGET(cwin->status_bar));
+	gtk_widget_set_visible(GTK_WIDGET(cwin->statusbar), cwin->cpref->status_bar);
 }
 
 /* Handler for the 'Show_controls_below_action' item in the view menu */
@@ -1176,17 +1111,15 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
 	gint i = 0, location_id = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	GList *list = NULL;
 	PraghaMusicobject *mobj;
-
-	set_watch_cursor (cwin->mainwindow);
 
 	/* Query and insert entries */
 	/* NB: Optimization */
 
 	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i]);
 			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
@@ -1207,14 +1140,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		sqlite3_free_table(result.resultp);
 	}
 
-	pragha_playlist_insert_mobj_list(cwin->cplaylist,
-					 list,
-					 GTK_TREE_VIEW_DROP_AFTER,
-					 NULL);
-
-	remove_watch_cursor (cwin->mainwindow);
-	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
-	update_status_bar_playtime(cwin);
+	list = g_list_reverse(list);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	g_list_free(list);
 }

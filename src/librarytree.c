@@ -397,7 +397,7 @@ static void get_location_ids(GtkTreePath *path,
 /* Add all the tracks under the given path to the current playlist */
 
 GList *
-append_library_row_to_mobj_list(struct con_dbase *cdbase,
+append_library_row_to_mobj_list(PraghaDatabase *cdbase,
                                 GtkTreePath *path,
                                 GtkTreeModel *row_model,
                                 GList *list)
@@ -451,7 +451,7 @@ append_library_row_to_mobj_list(struct con_dbase *cdbase,
 }
 
 static void
-delete_row_from_db(struct con_dbase *cdbase,
+delete_row_from_db(PraghaDatabase *cdbase,
                    GtkTreePath *path,
                    GtkTreeModel *model)
 {
@@ -498,7 +498,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	gint response, location_id = 0;
 	guint i;
 	gboolean deleted = FALSE;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	if (!loc_arr)
 		return;
@@ -509,7 +509,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 			query = g_strdup_printf("SELECT name FROM LOCATION "
 						"WHERE id = '%d';",
 						location_id);
-			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 				filename = result.resultp[result.no_columns];
 				if(filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
 					GError *error = NULL;
@@ -586,7 +586,6 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model;
 	enum node_type node_type;
-	gint prev_tracks = 0;
 	GList *list = NULL;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
@@ -611,17 +610,10 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_BASENAME:
 	case NODE_PLAYLIST:
 	case NODE_RADIO:
-		set_watch_cursor (cwin->mainwindow);
-		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 		list = append_library_row_to_mobj_list(cwin->cdbase, path, filter_model, list);
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
 						 list);
 		g_list_free(list);
-
-		remove_watch_cursor (cwin->mainwindow);
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-		update_status_bar_playtime(cwin);
 		break;
 	default:
 		break;
@@ -639,7 +631,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
-	gint n_select = 0, prev_tracks = 0;
+	gint n_select = 0;
 	GList *list = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
@@ -665,14 +657,8 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 
 			list = append_library_row_to_mobj_list (cwin->cdbase, path, model, list);
 
-			if(list) {
-				prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
+			if(list)
 				pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-
-				select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-				update_status_bar_playtime(cwin);
-			}
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
@@ -1281,8 +1267,6 @@ library_tree_replace_playlist (struct con_win *cwin)
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		set_watch_cursor (cwin->mainwindow);
-
 		pragha_playlist_remove_all (cwin->cplaylist);
 
 		/* Add all the rows to the current playlist */
@@ -1299,12 +1283,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
 						 mlist);
-		remove_watch_cursor (cwin->mainwindow);
 
-		if(!pragha_preferences_get_shuffle(cwin->preferences))
-			select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
-		update_status_bar_playtime(cwin);
-		
 		g_list_free(list);
 		g_list_free(mlist);
 	}
@@ -1331,15 +1310,11 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *mlist = NULL, *list, *i;
-	gint prev_tracks = 0;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		set_watch_cursor (cwin->mainwindow);
-		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 		/* Add all the rows to the current playlist */
 
 		for (i=list; i != NULL; i = i->next) {
@@ -1353,10 +1328,6 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 		}
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
 						 mlist);
-
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-		remove_watch_cursor (cwin->mainwindow);
-		update_status_bar_playtime(cwin);
 
 		g_list_free(list);
 		g_list_free(mlist);
@@ -1483,7 +1454,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
 	gint elem = 0, ielem;
 	gchar *query = NULL;
-	struct db_result result;
+	PraghaDbResponse result;
 
 	PraghaMusicobject *omobj, *nmobj;
 
@@ -1582,7 +1553,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 						"WHERE id = '%d';",
 						elem);
 
-			if (exec_sqlite_query(query, cwin->cdbase, &result)) {
+			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 				file = result.resultp[result.no_columns];
 				g_ptr_array_add(file_arr, file);
 			}
@@ -1630,7 +1601,7 @@ void init_library_view(struct con_win *cwin)
 {
 	gint i = 0;
 	gchar *query;
-	struct db_result result;
+	PraghaDbResponse result;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 	gchar *order_str = NULL;
@@ -1654,7 +1625,7 @@ void init_library_view(struct con_win *cwin)
 
 	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
 				SAVE_PLAYLIST_STATE);
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	if (result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1687,7 +1658,7 @@ void init_library_view(struct con_win *cwin)
 	/* Radios. */
 
 	query = g_strdup_printf("SELECT NAME FROM RADIO ORDER BY NAME");
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	if(result.no_rows) {
 		gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1783,7 +1754,7 @@ void init_library_view(struct con_win *cwin)
 					"ORDER BY %s;", order_str);
 		g_free(order_str);
 			
-		exec_sqlite_query(query, cwin->cdbase, &result);
+		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 		for_each_result_row(result, i) {
 			add_child_node_by_tags(model,
 			                       &iter,
@@ -1810,7 +1781,7 @@ void init_library_view(struct con_win *cwin)
 	else {
 		/* Query for folders view */
 		query = g_strdup("SELECT name, id FROM LOCATION ORDER BY name DESC");
-		exec_sqlite_query(query, cwin->cdbase, &result);
+		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 		for_each_result_row(result, i) {
 			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model, &iter);
 

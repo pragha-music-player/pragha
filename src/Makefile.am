@@ -13,7 +13,7 @@ pragha_SOURCES =cdda.c \
 		cmdline.c \
 		db.c \
 		dbus.c \
-		filetree.c \
+		file-utils.c \
 		gui.c \
 		glyr-related.c \
 		init.c \
@@ -29,6 +29,7 @@ pragha_SOURCES =cdda.c \
 		pragha.c \
 		pragha.h \
 		pragha-backend.c \
+		pragha-database.c \
 		pragha-filter-dialog.c \
 		pragha-album-art.c \
 		pragha-hig.c \
@@ -37,6 +38,7 @@ pragha_SOURCES =cdda.c \
 		pragha-playlist.c \
 		pragha-preferences.c \
 		pragha-simple-async.c \
+		pragha-statusbar.c \
 		pref.c \
 		statusicon.c \
 		tags.c \
