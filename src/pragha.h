@@ -921,6 +921,8 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (PraghaPlaylist* cplaylist, gint choice);
 void playlist_tree_export(GtkAction *action, struct con_win *cwin);
+GList *
+pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);

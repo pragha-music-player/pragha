@@ -1092,6 +1092,35 @@ GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 }
 #endif
 
+GList *
+pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
+{
+	GSList *list = NULL, *i = NULL;
+	PraghaMusicobject *mobj;
+
+#ifdef HAVE_PLPARSER
+	gchar *uri = g_filename_to_uri (file, NULL, NULL);
+	list = pragha_totem_pl_parser_parse_from_uri(uri);
+	g_free (uri);
+#else
+	list = pragha_pl_parser_parse_from_file_by_extension (file);
+#endif
+
+	for (i = list; i != NULL; i = i->next) {
+		mobj = new_musicobject_from_file(i->data);
+		if (mobj)
+			mlist = g_list_append(mlist, mobj);
+
+		if (pragha_process_gtk_events ())
+			return NULL;
+
+		g_free(i->data);
+	}
+	g_slist_free(list);
+
+	return mlist;
+}
+
 void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con_win *cwin)
 {
 	GSList *list = NULL, *i = NULL;

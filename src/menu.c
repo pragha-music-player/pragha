@@ -314,33 +314,29 @@ void add_recent_file (const gchar *filename)
 
 /* Add selected files from the file chooser to the current playlist */
 
-void handle_selected_file(gpointer data, gpointer udata)
+GList *
+append_mobj_list_from__unknown_filename(GList *list, gchar *filename)
 {
 	PraghaMusicobject *mobj;
-	struct con_win *cwin = udata;
 
-	if (!data)
-		return;
-
-	if (g_file_test(data, G_FILE_TEST_IS_DIR)){
-		if(pragha_preferences_get_add_recursively(cwin->preferences))
-			__recur_add(data, cwin);
-		else
-			__non_recur_add(data, TRUE, cwin);
+	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
+		list = append_mobj_list_from_folder(list, filename);
 	}
-	else if (pragha_pl_parser_guess_format_from_extension(data) != PL_FORMAT_UNKNOWN) {
-		pragha_pl_parser_open_from_file_by_extension(data, cwin);
+	else if (pragha_pl_parser_guess_format_from_extension(filename) != PL_FORMAT_UNKNOWN) {
+		list = pragha_pl_parser_append_mobj_list_by_extension(list, filename);
 	}
-	else{
-		mobj = new_musicobject_from_file(data);
+	else {
+		mobj = new_musicobject_from_file(filename);
 		if (mobj) {
-			append_current_playlist(cwin->cplaylist, mobj);
-			add_recent_file(data);
+			list = g_list_append(list, mobj);
+			add_recent_file(filename);
 		}
 	}
 
 	/* Have to give control to GTK periodically ... */
 	pragha_process_gtk_events ();
+
+	return list;
 }
 
 /* Create a dialog box with a progress bar for rescan/update library */
@@ -407,9 +403,10 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
-	GSList *files = NULL;
+	GSList *files = NULL, *l;
 	gint prev_tracks = 0;
 	gboolean add_recursively;
+	GList *mlist = NULL;
 
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
@@ -430,8 +427,12 @@ add_button_cb(GtkWidget *widget, gpointer data)
 
 		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
-		g_slist_foreach(files, handle_selected_file, cwin);
+		for (l = files; l != NULL; l = l->next) {
+			mlist = append_mobj_list_from__unknown_filename(mlist, l->data);
+		}
 		g_slist_free_full(files, g_free);
+
+		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 
 		remove_watch_cursor (cwin->mainwindow);
 
