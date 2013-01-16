@@ -323,7 +323,7 @@ void handle_selected_file(gpointer data, gpointer udata)
 		return;
 
 	if (g_file_test(data, G_FILE_TEST_IS_DIR)){
-		if(cwin->cpref->add_recursively_files)
+		if(pragha_preferences_get_add_recursively(cwin->preferences))
 			__recur_add(data, cwin);
 		else
 			__non_recur_add(data, TRUE, cwin);
@@ -409,13 +409,15 @@ add_button_cb(GtkWidget *widget, gpointer data)
 {
 	GSList *files = NULL;
 	gint prev_tracks = 0;
+	gboolean add_recursively;
 
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
 	struct con_win *cwin = g_object_get_data(data, "cwin");
 
-	cwin->cpref->add_recursively_files = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
 	g_free (cwin->cstate->last_folder);
 	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
 
@@ -487,8 +489,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle),
-					cwin->cpref->add_recursively_files ? TRUE : FALSE);
+	if(pragha_preferences_get_add_recursively(cwin->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
+
 	bbox = gtk_hbutton_box_new();
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(bbox), 6);

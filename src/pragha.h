@@ -506,7 +506,6 @@ struct con_pref {
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
 #endif
-	gboolean add_recursively_files;
 	gboolean show_osd;
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;

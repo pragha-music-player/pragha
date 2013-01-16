@@ -177,6 +177,13 @@ void
 pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
                                       gboolean lateral_panel);
 
+gboolean
+pragha_preferences_get_add_recursively (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_add_recursively(PraghaPreferences *preferences,
+                                       gboolean add_recursively);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */
