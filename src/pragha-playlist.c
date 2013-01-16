@@ -1931,10 +1931,15 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 {
-	GtkTreeModel *model = cplaylist->model;
 	PraghaMusicobject *mobj;
+	gint prev_tracks = 0;
 	GList *l;
 
+	prev_tracks = pragha_playlist_get_no_tracks(cplaylist);
+	
+	/* TODO: Change set_watch_cursor() to allow any widget.
+	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1943,8 +1948,13 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 		append_current_playlist(cplaylist, mobj);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
+
 	pragha_playlist_set_changing(cplaylist, FALSE);
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
+	select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
 }
 
 /* Test if the song is already in the mobj list */
@@ -3000,8 +3010,6 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
-	set_watch_cursor (cwin->mainwindow);
-
 	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
@@ -3025,9 +3033,6 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	}
 
 	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
-	remove_watch_cursor (cwin->mainwindow);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);

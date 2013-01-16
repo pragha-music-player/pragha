@@ -340,15 +340,10 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 {
 	GList *list = NULL;
 
-	set_watch_cursor (cwin->mainwindow);
-
 	list = add_playlist_to_mobj_list(cwin->cdbase, playlist, list);
 
-	if(list) {
+	if(list)
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-		pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
-	}
-	remove_watch_cursor (cwin->mainwindow);
 }
 
 /* Append the given playlist to the mobj list. */
@@ -1129,8 +1124,6 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	gint try = 0, added = 0;
 	PraghaMusicobject *mobj;
 
-	set_watch_cursor (cwin->mainwindow);
-
 #ifdef HAVE_PLPARSER
 	gchar *uri = g_filename_to_uri (file, NULL, NULL);
 	list = pragha_totem_pl_parser_parse_from_uri(uri);
@@ -1153,8 +1146,6 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 		g_free(i->data);
 	}
 	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
-
-	remove_watch_cursor (cwin->mainwindow);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	pragha_statusbar_set_misc_text(cwin->statusbar, summary);

@@ -79,7 +79,6 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 {
 	gchar *file;
 	DBusError error;
-	gint prev_tracks = 0;
 	GList *mlist = NULL;
 
 	dbus_error_init(&error);
@@ -91,14 +90,9 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 
 	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
-
-	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)

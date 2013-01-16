@@ -349,7 +349,6 @@ static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
 	GSList *files = NULL, *l;
-	gint prev_tracks = 0;
 	gboolean add_recursively;
 	GList *mlist = NULL;
 
@@ -368,21 +367,12 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(window);
 
 	if (files) {
-		set_watch_cursor (cwin->mainwindow);
-
-		prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 		for (l = files; l != NULL; l = l->next) {
 			mlist = append_mobj_list_from_unknown_filename(mlist, l->data);
 		}
 		g_slist_free_full(files, g_free);
 
 		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
-
-		remove_watch_cursor (cwin->mainwindow);
-
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-		pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 	}
 }
 

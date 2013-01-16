@@ -300,7 +300,6 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 {
 	gchar *summary = NULL;
 	guint songs_added = 0;
-	gint prev_tracks = 0;
 
 	AddMusicObjectListData *data = user_data;
 
@@ -309,8 +308,6 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 
 	if(list == NULL)
 		goto empty;
-
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	pragha_playlist_append_mobj_list(cwin->cplaylist,
 					 list);
@@ -339,14 +336,10 @@ empty:
 			break;
 	}
 
-	if(songs_added > 0)
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-
 	if (summary != NULL) {
 		pragha_statusbar_set_misc_text(cwin->statusbar, summary);
 		g_free(summary);
 	}
-	remove_watch_cursor (cwin->mainwindow);
 
 	g_slice_free (AddMusicObjectListData, data);
 
@@ -433,7 +426,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 {
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
-	gint try = 0, added = 0, prev_tracks = 0;
+	gint try = 0, added = 0;
 	GList *list = NULL;
 
 	GFile *file;
@@ -457,10 +450,6 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 		}
 	}
 
-	set_watch_cursor (cwin->mainwindow);
-
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 	xml = tinycxml_parse(contents);
 
 	xi = xmlnode_get(xml,CCA { "playlist","trackList","track",NULL},NULL,NULL);
@@ -473,14 +462,8 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 			list = prepend_song_with_artist_and_title_to_mobj_list(xc->content, xt->content, list, cwin);
 	}
 
-	added = g_list_length(list);
-	if(added > 0) {
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 list);
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-	}
-
-	remove_watch_cursor (cwin->mainwindow);
+	if(list)
+		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 	pragha_statusbar_set_misc_text(cwin->statusbar, summary);
