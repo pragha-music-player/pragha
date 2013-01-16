@@ -40,6 +40,8 @@ struct _PraghaPreferencesPrivate
    gchar     *audio_cd_device;
    /* Window preferences. */
    gboolean   lateral_panel;
+   /* Misc preferences. */
+   gboolean   add_recursively;
 };
 
 enum
@@ -56,6 +58,7 @@ enum
    PROP_SOFTWARE_MIXER,
    PROP_AUDIO_CD_DEVICE,
    PROP_LATERAL_PANEL,
+   PROP_ADD_RECURSIVELY,
    LAST_PROP
 };
 
@@ -535,6 +538,33 @@ pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
    g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LATERAL_PANEL]);
 }
 
+/**
+ * pragha_preferences_get_add_recursively:
+ *
+ */
+gboolean
+pragha_preferences_get_add_recursively (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+   return preferences->priv->add_recursively;
+}
+
+/**
+ * pragha_preferences_set_add_recursively:
+ *
+ */
+void
+pragha_preferences_set_add_recursively(PraghaPreferences *preferences,
+                                       gboolean add_recursively)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->add_recursively = add_recursively;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ADD_RECURSIVELY]);
+}
+
 static void
 pragha_preferences_finalize (GObject *object)
 {
@@ -598,7 +628,10 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_WINDOW,
                           KEY_SIDEBAR,
                           priv->lateral_panel);
-
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_ADD_RECURSIVELY_FILES,
+                          priv->add_recursively);
    /* Save to key file */
 
    data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -657,6 +690,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_LATERAL_PANEL:
       g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
       break;
+   case PROP_ADD_RECURSIVELY:
+      g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -703,6 +739,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_LATERAL_PANEL:
       pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_ADD_RECURSIVELY:
+      pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
       break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -852,6 +891,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
 
+   /**
+    * PraghaPreferences:add_recursively:
+    *
+    */
+   gParamSpecs[PROP_ADD_RECURSIVELY] =
+      g_param_spec_boolean("add-recursively",
+                           "AddRecursively",
+                           "Add Recursively Preference",
+                           FALSE,
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
+
    g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }
 
@@ -860,6 +911,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
    gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
+   gboolean add_recursively;
    gchar *audio_sink, *audio_device, *audio_cd_device;
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
@@ -1045,6 +1097,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
    }
    else {
       pragha_preferences_set_lateral_panel(preferences, lateral_panel);
+   }
+
+   add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
+                                            GROUP_GENERAL,
+                                            KEY_ADD_RECURSIVELY_FILES,
+                                            &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_add_recursively(preferences, add_recursively);
    }
 
    g_free(audio_sink);

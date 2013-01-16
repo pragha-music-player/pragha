@@ -353,7 +353,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 			mobj = new_musicobject_from_file(path);
 			if(mobj) {
 				pragha_playlist_append_mobj_and_play(cwin->cplaylist, mobj);
-				update_status_bar_playtime(cwin);
+				pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 				happened = TRUE;
 			}
 		}
@@ -611,7 +611,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	if(found_playlist) {
 		pragha_playlist_remove_all (cwin->cplaylist);
 
-		add_playlist_current_playlist(NULL, found_playlist, cwin);
+		add_playlist_current_playlist(found_playlist, cwin);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 			pragha_playback_next_track(cwin);
@@ -729,7 +729,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	gchar *uri;
 	gchar *after_track; //TODO use this
 	gboolean set_as_current; //TODO use this
-	gint prev_tracks = 0;
+	GList *mlist = NULL;
 
 	g_variant_get(parameters, "(sob)", &uri, &after_track, &set_as_current);
 
@@ -739,27 +739,9 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		g_warning("Invalid uri: %s", uri);
 		goto exit;
 	}
+	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
-	if (is_dir_and_accessible(file)) {
-		if(cwin->cpref->add_recursively_files)
-			__recur_add(file, cwin);
-		else
-			__non_recur_add(file, TRUE, cwin);
-	}
-	else if (is_playable_file(file)) {
-		PraghaMusicobject *mobj = new_musicobject_from_file(file);
-		if (mobj)
-			append_current_playlist(cwin->cplaylist, mobj);
-		CDEBUG(DBG_INFO, "Add file from mpris: %s", file);
-	}
-	else {
-		g_warning("Unable to add file %s", file);
-	}
-
-	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-	update_status_bar_playtime(cwin);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 
 	g_free(file);
 exit:

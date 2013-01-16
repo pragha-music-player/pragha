@@ -48,23 +48,23 @@ static gint cddb_add_tracks(struct con_win *cwin)
 static void add_audio_cd_tracks(struct con_win *cwin)
 {
 	PraghaMusicobject *mobj;
-	gint num_tracks = 0, i = 0, prev_tracks = 0;
+	gint num_tracks = 0, i = 0;
+	GList *list = NULL;
 
 	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);
 	if (!num_tracks)
 		return;
 
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
-
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		append_current_playlist(cwin->cplaylist, mobj);
+		list = g_list_append(list, mobj);
 
 		if (pragha_process_gtk_events ())
 			return;
 	}
-	update_status_bar_playtime(cwin);
-	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
+
+	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+	g_list_free(list);
 }
 
 static cdrom_drive_t* find_audio_cd(struct con_win *cwin)

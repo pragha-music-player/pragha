@@ -38,7 +38,7 @@ static void common_cleanup(struct con_win *cwin)
 	state_free (cwin->cstate);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	preferences_free (cwin->cpref);
-	db_free (cwin->cdbase);
+	g_object_unref(cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	lastfm_free (cwin->clastfm);
 #endif
@@ -120,7 +120,8 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (init_musicdbase(cwin) == -1) {
+	cwin->cdbase = pragha_database_get();
+	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
 		g_critical("Unable to init music dbase");
 		return -1;
 	}

@@ -79,8 +79,7 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 {
 	gchar *file;
 	DBusError error;
- 	PraghaMusicobject *mobj = NULL;
-	gint prev_tracks = 0;
+	GList *mlist = NULL;
 
 	dbus_error_init(&error);
 	dbus_message_get_args(msg, &error, DBUS_TYPE_STRING, &file, DBUS_TYPE_INVALID);
@@ -91,26 +90,9 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 
-	if (is_dir_and_accessible(file)) {
-		if(cwin->cpref->add_recursively_files)
-			__recur_add(file, cwin);
-		else
-			__non_recur_add(file, TRUE, cwin);
-	}
-	else if (is_playable_file(file)) {
-		mobj = new_musicobject_from_file(file);
-		if (mobj)
-			append_current_playlist(cwin->cplaylist, mobj);
-		CDEBUG(DBG_INFO, "Add file from command line: %s", file);
-	}
-	else {
-		g_warning("Unable to add %s", file);
-	}
-
-	select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-	update_status_bar_playtime(cwin);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)

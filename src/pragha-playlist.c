@@ -209,16 +209,18 @@ static gint get_total_playtime(PraghaPlaylist *cplaylist)
 
 /* Update status bar */
 
-void update_status_bar_playtime(struct con_win *cwin)
+void
+pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist)
 {
+	PraghaStatusbar *statusbar;
 	gint total_playtime = 0, no_tracks = 0;
 	gchar *str, *tot_str;
 
-	if(pragha_playlist_is_changing(cwin->cplaylist))
+	if(pragha_playlist_is_changing(cplaylist))
 		return;
 
-	total_playtime = get_total_playtime(cwin->cplaylist);
-	no_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
+	total_playtime = get_total_playtime(cplaylist);
+	no_tracks = pragha_playlist_get_no_tracks(cplaylist);
 
 	tot_str = convert_length_str(total_playtime);
 	str = g_strdup_printf("%i %s - %s",
@@ -228,7 +230,9 @@ void update_status_bar_playtime(struct con_win *cwin)
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
-	gtk_label_set_text(GTK_LABEL(cwin->status_bar), str);
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_main_text(statusbar, str);
+	g_object_unref(G_OBJECT(statusbar));
 
 	g_free(tot_str);
 	g_free(str);
@@ -1364,7 +1368,7 @@ void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_remove_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Crop selected rows from current playlist */
@@ -1445,7 +1449,7 @@ void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_crop_selection(cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Show track properties dialog
@@ -1645,7 +1649,7 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 	pragha_playlist_remove_all (cwin->cplaylist);
 	remove_watch_cursor (cwin->mainwindow);
 
-	update_status_bar_playtime(cwin);
+	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Update a track to the current playlist */
@@ -1816,12 +1820,8 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 
 /* Append a track to the current playlist */
 
-void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
-{
-	append_current_playlist_ex(cplaylist, mobj, NULL);
-}
-
-void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
+static void
+append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
 	const gchar *title, *artist, *album, *genre, *comment;
@@ -1889,28 +1889,46 @@ void append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mo
 	g_free(ch_filename);
 }
 
+void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
+{
+	append_current_playlist_ex(cplaylist, mobj, NULL);
+}
+
+void
+pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
+{
+	append_current_playlist(cplaylist, mobj);
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
+}
+
 void
 pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
 {
-	GtkTreePath *path;
+	GtkTreePath *path = NULL;
 
 	append_current_playlist_ex(cplaylist, mobj, &path);
-	pragha_playlist_activate_path(cplaylist, path);
-	gtk_tree_path_free(path);
+
+	if(path) {
+		pragha_playlist_activate_path(cplaylist, path);
+		gtk_tree_path_free(path);
+	}
 }
 
 /* Insert a list of mobj to the current playlist. */
 
-void
+static void
 pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 				 GList *list,
 				 GtkTreeViewDropPosition droppos,
 				 GtkTreeIter *pos)
 {
-	GtkTreeModel *model = cplaylist->model;
 	PraghaMusicobject *mobj;
 	GList *l;
 
+	/* TODO: Change set_watch_cursor() to allow any widget.
+	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1918,8 +1936,13 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 		mobj = l->data;
 		insert_current_playlist(cplaylist, mobj, droppos, pos);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
+
 	pragha_playlist_set_changing(cplaylist, FALSE);
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
 
 /* Append a list of mobj to the current playlist */
@@ -1927,10 +1950,15 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 void
 pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 {
-	GtkTreeModel *model = cplaylist->model;
 	PraghaMusicobject *mobj;
+	gint prev_tracks = 0;
 	GList *l;
 
+	prev_tracks = pragha_playlist_get_no_tracks(cplaylist);
+	
+	/* TODO: Change set_watch_cursor() to allow any widget.
+	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1939,8 +1967,13 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 		append_current_playlist(cplaylist, mobj);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
+
 	pragha_playlist_set_changing(cplaylist, FALSE);
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
+	select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
 }
 
 /* Test if the song is already in the mobj list */
@@ -2024,19 +2057,19 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	playlist = get_playlist_name(cwin, SAVE_SELECTED, &choice);
+	playlist = get_playlist_name(cwin->cplaylist, SAVE_SELECTED, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(playlist, SAVE_SELECTED, cwin);
+			new_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(playlist, SAVE_SELECTED, cwin);
+			append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (SAVE_SELECTED, cwin);
+			export_playlist (cwin->cplaylist, SAVE_SELECTED);
 			break;
 		default:
 			break;
@@ -2065,19 +2098,19 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	playlist = get_playlist_name(cwin, SAVE_COMPLETE, &choice);
+	playlist = get_playlist_name(cwin->cplaylist, SAVE_COMPLETE, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(playlist, SAVE_COMPLETE, cwin);
+			new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
 			update_menu_playlist_changes(cwin);
 			init_library_view(cwin);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(playlist, SAVE_COMPLETE, cwin);
+			append_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (SAVE_COMPLETE, cwin);
+			export_playlist (cwin->cplaylist, SAVE_COMPLETE);
 			break;
 		default:
 			break;
@@ -2671,7 +2704,7 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data,
 		for(i = 0; uris[i] != NULL; i++) {
 			filename = g_filename_from_uri(uris[i], NULL, NULL);
 			if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-				list = append_mobj_list_from_folder(list, filename, cwin);
+				list = append_mobj_list_from_folder(list, filename);
 			}
 			else {
 				mobj = new_musicobject_from_file(filename);
@@ -2707,7 +2740,7 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data,
 	filename = (gchar*)gtk_selection_data_get_text(data);
 
 	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
-		list = append_mobj_list_from_folder(list, filename, cwin);
+		list = append_mobj_list_from_folder(list, filename);
 	}
 	else {
 		mobj = new_musicobject_from_file(filename);
@@ -2745,7 +2778,6 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GList *list = NULL;
-	gint prev_tracks = 0;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(playlist_view));
 
@@ -2780,14 +2812,6 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 		goto exit;
 	}
 
-	/* Show busy mouse icon */
-
-	set_watch_cursor (cwin->mainwindow);
-
-	/* Save the last position to select the songs added */
-
-	prev_tracks = cwin->cplaylist->no_tracks;
-
 	/* Get new tracks to append on playlist */
 
 	switch(info) {
@@ -2807,21 +2831,12 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	/* Insert mobj list to current playlist. */
 
-	if (is_row)
+	if (is_row) {
 		pragha_playlist_insert_mobj_list(cwin->cplaylist, list, pos, &dest_iter);
+		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
+	}
 	else
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-
-	update_status_bar_playtime(cwin);
-
-	if (is_row)
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
-	else
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-
-	/* Remove busy mouse icon */
-
-	remove_watch_cursor (cwin->mainwindow);
 
 	g_list_free(list);
 
@@ -2962,7 +2977,7 @@ void save_current_playlist_state(struct con_win *cwin)
 	if (!gtk_tree_model_get_iter_first(model, &iter))
 		return;
 
-	save_playlist(playlist_id, SAVE_COMPLETE, cwin);
+	save_playlist(cwin->cplaylist, playlist_id, SAVE_COMPLETE);
 
 	/* Save reference to current song. */
 
@@ -2991,20 +3006,15 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
-	GtkTreeModel *model = cwin->cplaylist->model;
-
-	set_watch_cursor (cwin->mainwindow);
-
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), NULL);
+	GList *list = NULL;
 
 	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
 	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	exec_sqlite_query(query, cwin->cdbase, &result);
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
@@ -3018,18 +3028,16 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"));
 		}
-		append_current_playlist(cwin->cplaylist, mobj);
+		list = g_list_append(list, mobj);
 		g_free(file);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->cplaylist->view), model);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
-
-	update_status_bar_playtime(cwin);
-	remove_watch_cursor (cwin->mainwindow);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);
+
+	g_list_free(list);
 }
 
 void init_current_playlist_view(struct con_win *cwin)
@@ -4145,6 +4153,7 @@ cplaylist_free(PraghaPlaylist* cplaylist)
 	g_object_unref(cplaylist->paused_pixbuf);
 
 	g_object_unref(cplaylist->preferences);
+	g_object_unref(cplaylist->cdbase);
 
 	g_slice_free(PraghaPlaylist, cplaylist);
 }
@@ -4157,6 +4166,7 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist = g_slice_new0(PraghaPlaylist);
 
 	cplaylist->preferences = pragha_preferences_get();
+	cplaylist->cdbase = pragha_database_get();
 
 	cplaylist->view = create_current_playlist_view(cplaylist, cwin);
 	cplaylist->model = g_object_ref(gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view)));

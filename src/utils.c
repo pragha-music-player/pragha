@@ -320,7 +320,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 						struct con_win *cwin)
 {
 	gchar *query = NULL;
-	struct db_result result;
+	PraghaDbResponse result;
 	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0, i;
 	gchar *sartist, *stitle;
@@ -340,7 +340,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 				"ORDER BY RANDOM() LIMIT 1;",
 				stitle, sartist);
 
-	if(exec_sqlite_query(query, cwin->cdbase, &result)) {
+	if(pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
 		for_each_result_row(result, i) {
 			location_id = atoi(result.resultp[i+2]);
 
@@ -371,24 +371,6 @@ remove_watch_cursor (GtkWidget *window)
 	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
 }
 
-/* Set a message on status bar, and restore it at 5 seconds */
-
-gboolean restore_status_bar(gpointer data)
-{
-	struct con_win *cwin = data;
-
-	update_status_bar_playtime(cwin);
-
-	return FALSE;
-}
-
-void set_status_message (const gchar *message, struct con_win *cwin)
-{
-	g_timeout_add_seconds(5, restore_status_bar, cwin);
-
-	gtk_label_set_text(GTK_LABEL(cwin->status_bar), message);
-}
-
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
 
 GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
@@ -408,72 +390,6 @@ GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
 		g_error_free (err);	
 	}
 	return buffer_pix;
-}
-
-/* Accepts only absolute filename */
-
-gboolean is_playable_file(const gchar *file)
-{
-	if (!file)
-		return FALSE;
-
-	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
-	    (get_file_type(file) != -1))
-		return TRUE;
-	else
-		return FALSE;
-}
-
-/* Accepts only absolute path */
-
-gboolean is_dir_and_accessible(const gchar *dir)
-{
-	gint ret;
-
-	if (!dir)
-		return FALSE;
-
-	if (g_file_test(dir, G_FILE_TEST_IS_DIR) && !g_access(dir, R_OK | X_OK))
-		ret = TRUE;
-	else
-		ret = FALSE;
-
-	return ret;
-}
-
-gint dir_file_count(const gchar *dir_name, gint call_recur)
-{
-	static gint file_count = 0;
-	GDir *dir;
-	const gchar *next_file = NULL;
-	gchar *ab_file;
-	GError *error = NULL;
-
-	/* Reinitialize static variable if called from rescan_library_action */
-
-	if (call_recur)
-		file_count = 0;
-
-	dir = g_dir_open(dir_name, 0, &error);
-	if (!dir) {
-		g_warning("Unable to open library : %s", dir_name);
-		return file_count;
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			dir_file_count(ab_file, 0);
-		else {
-			file_count++;
-		}
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-
-	g_dir_close(dir);
-	return file_count;
 }
 
 static gint no_single_quote(const gchar *str)
