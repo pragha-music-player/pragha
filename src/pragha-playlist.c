@@ -2676,7 +2676,7 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data,
 		for(i = 0; uris[i] != NULL; i++) {
 			filename = g_filename_from_uri(uris[i], NULL, NULL);
 			if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-				list = append_mobj_list_from_folder(list, filename, cwin);
+				list = append_mobj_list_from_folder(list, filename);
 			}
 			else {
 				mobj = new_musicobject_from_file(filename);
@@ -2712,7 +2712,7 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data,
 	filename = (gchar*)gtk_selection_data_get_text(data);
 
 	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
-		list = append_mobj_list_from_folder(list, filename, cwin);
+		list = append_mobj_list_from_folder(list, filename);
 	}
 	else {
 		mobj = new_musicobject_from_file(filename);
