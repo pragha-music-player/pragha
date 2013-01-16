@@ -1911,10 +1911,12 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 				 GtkTreeViewDropPosition droppos,
 				 GtkTreeIter *pos)
 {
-	GtkTreeModel *model = cplaylist->model;
 	PraghaMusicobject *mobj;
 	GList *l;
 
+	/* TODO: Change set_watch_cursor() to allow any widget.
+	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1922,8 +1924,13 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 		mobj = l->data;
 		insert_current_playlist(cplaylist, mobj, droppos, pos);
 	}
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
+
 	pragha_playlist_set_changing(cplaylist, FALSE);
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
 
 /* Append a list of mobj to the current playlist */
@@ -2760,7 +2767,6 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	GdkRectangle vrect, crect;
 	gdouble row_align;
 	GList *list = NULL;
-	gint prev_tracks = 0;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(playlist_view));
 
@@ -2795,14 +2801,6 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 		goto exit;
 	}
 
-	/* Show busy mouse icon */
-
-	set_watch_cursor (cwin->mainwindow);
-
-	/* Save the last position to select the songs added */
-
-	prev_tracks = cwin->cplaylist->no_tracks;
-
 	/* Get new tracks to append on playlist */
 
 	switch(info) {
@@ -2822,21 +2820,12 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	/* Insert mobj list to current playlist. */
 
-	if (is_row)
+	if (is_row) {
 		pragha_playlist_insert_mobj_list(cwin->cplaylist, list, pos, &dest_iter);
+		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
+	}
 	else
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
-
-	if (is_row)
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
-	else
-		select_numered_path_of_current_playlist(cwin->cplaylist, prev_tracks, TRUE);
-
-	/* Remove busy mouse icon */
-
-	remove_watch_cursor (cwin->mainwindow);
 
 	g_list_free(list);
 

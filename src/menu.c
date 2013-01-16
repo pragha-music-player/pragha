@@ -1115,8 +1115,6 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	GList *list = NULL;
 	PraghaMusicobject *mobj;
 
-	set_watch_cursor (cwin->mainwindow);
-
 	/* Query and insert entries */
 	/* NB: Optimization */
 
@@ -1146,10 +1144,6 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 					 list,
 					 GTK_TREE_VIEW_DROP_AFTER,
 					 NULL);
-
-	remove_watch_cursor (cwin->mainwindow);
-	select_numered_path_of_current_playlist(cwin->cplaylist, 0, FALSE);
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 
 	g_list_free(list);
 }
