@@ -1140,10 +1140,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		sqlite3_free_table(result.resultp);
 	}
 
-	pragha_playlist_insert_mobj_list(cwin->cplaylist,
-					 list,
-					 GTK_TREE_VIEW_DROP_AFTER,
-					 NULL);
+	list = g_list_reverse(list);
+	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	g_list_free(list);
 }
