@@ -668,8 +668,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name);
 
-			append_current_playlist(cwin->cplaylist, mobj);
-			pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
+			pragha_playlist_append_single_song(cwin->cplaylist, mobj);
 
 			if (name) {
 				new_radio(cwin->cplaylist, uri, name);
