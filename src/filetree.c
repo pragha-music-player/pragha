@@ -111,15 +111,16 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 		return list;
 	}
 
-	preferences = pragha_preferences_get();
-
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 
-		if (pragha_preferences_get_add_recursively(preferences) &&
-		    g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			list = append_mobj_list_from_folder(list, ab_file);
+		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR)) {
+			preferences = pragha_preferences_get();
+			if(pragha_preferences_get_add_recursively(preferences))
+				list = append_mobj_list_from_folder(list, ab_file);
+			g_object_unref(G_OBJECT(preferences));
+		}
 		else {
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
@@ -141,7 +142,6 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 	}
 
 	g_dir_close(dir);
-	g_object_unref(G_OBJECT(preferences));
 
 	return list;
 }
