@@ -18,6 +18,35 @@
 
 #include "pragha.h"
 
+/* Generate and add the recently-used data */
+
+static void
+add_recent_file (const gchar *filename)
+{
+	GtkRecentData recent_data;
+	gchar *uri = NULL;
+
+	recent_data.mime_type = get_mime_type(filename);
+	if (recent_data.mime_type == NULL)
+		return;
+
+	recent_data.display_name = g_filename_display_basename (filename);
+	recent_data.app_name = g_strdup (g_get_application_name ());
+	recent_data.app_exec =  g_strjoin (" ", g_get_prgname (), "%u", NULL);
+	recent_data.description = NULL;
+	recent_data.groups = NULL;
+	recent_data.is_private = FALSE;
+
+	uri = g_filename_to_uri(filename, NULL, NULL);
+	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &recent_data);
+
+	g_free (recent_data.display_name);
+	g_free (recent_data.mime_type);
+	g_free (recent_data.app_name);
+	g_free (recent_data.app_exec);
+	g_free (uri);
+}
+
 void __non_recur_add(const gchar *dir_name, gboolean init, struct con_win *cwin)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -142,6 +171,31 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 	}
 
 	g_dir_close(dir);
+
+	return list;
+}
+
+GList *
+append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
+{
+	PraghaMusicobject *mobj;
+
+	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
+		list = append_mobj_list_from_folder(list, filename);
+	}
+	else if (pragha_pl_parser_guess_format_from_extension(filename) != PL_FORMAT_UNKNOWN) {
+		list = pragha_pl_parser_append_mobj_list_by_extension(list, filename);
+	}
+	else {
+		mobj = new_musicobject_from_file(filename);
+		if (mobj) {
+			list = g_list_append(list, mobj);
+			add_recent_file(filename);
+		}
+	}
+
+	/* Have to give control to GTK periodically ... */
+	pragha_process_gtk_events ();
 
 	return list;
 }

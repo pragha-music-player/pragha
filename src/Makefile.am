@@ -13,7 +13,7 @@ pragha_SOURCES =cdda.c \
 		cmdline.c \
 		db.c \
 		dbus.c \
-		filetree.c \
+		file-utils.c \
 		gui.c \
 		glyr-related.c \
 		init.c \
