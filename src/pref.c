@@ -57,7 +57,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gboolean ret, osd, test_change;
 	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL, *folder = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
-	gboolean show_album_art, instant_search, approximate_search, restore_playlist;
+	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
@@ -181,9 +181,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->close_to_tray_w));
 
-		cwin->cpref->add_recursively_files =
+		add_recursively =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->add_recursively_w));
+		pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
 
 		show_album_art =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -660,7 +661,7 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->close_to_tray_w),
 					     TRUE);
 
-	if (cwin->cpref->add_recursively_files)
+	if (pragha_preferences_get_add_recursively(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->add_recursively_w),
 					     TRUE);
@@ -798,13 +799,6 @@ void save_preferences(struct con_win *cwin)
 				      u_file);
 		g_free(u_file);
 	}
-
-	/* Save add recursively in file chooser option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_ADD_RECURSIVELY_FILES,
-			       cwin->cpref->add_recursively_files);
 
 	/* Save album art pattern */
 

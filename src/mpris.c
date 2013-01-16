@@ -744,7 +744,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 	prev_tracks = pragha_playlist_get_no_tracks(cwin->cplaylist);
 
 	if (is_dir_and_accessible(file)) {
-		if(cwin->cpref->add_recursively_files)
+		if(pragha_preferences_get_add_recursively(cwin->preferences))
 			__recur_add(file, cwin);
 		else
 			__non_recur_add(file, TRUE, cwin);

@@ -114,7 +114,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name, struct con_win *cwin)
 	while (next_file) {
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 
-		if (cwin->cpref->add_recursively_files &&
+		if (pragha_preferences_get_add_recursively(cwin->preferences) &&
 		    g_file_test(ab_file, G_FILE_TEST_IS_DIR))
 			list = append_mobj_list_from_folder(list, ab_file, cwin);
 		else {
