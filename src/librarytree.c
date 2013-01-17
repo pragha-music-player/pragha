@@ -266,10 +266,12 @@ add_child_node_by_tags (GtkTreeModel *model,
 				node_pixbuf = cwin->pixbuf->pixbuf_genre;
 				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
+			case NODE_CATEGORY:
 			case NODE_FOLDER:
 			case NODE_PLAYLIST:
 			case NODE_RADIO:
 			case NODE_BASENAME:
+			default:
 				g_warning("add_by_tag: Bad node type.");
 				break;
 		}
@@ -300,54 +302,61 @@ add_child_node_by_tags (GtkTreeModel *model,
 	}
 }
 
-/* Append to the given array the path of
-   all the nodes under the given path */
-
-static void
-get_path_array(GtkTreePath *path,
-               GArray *ref_arr,
-               GtkTreeModel *model,
-               struct con_win *cwin)
+GString *
+append_pragha_uri_string_list(GtkTreePath *path,
+                              GString *list,
+                              GtkTreeModel *model,
+                              struct con_win *cwin)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
-	GtkTreePath *cpath, *t_path;
-	gboolean valid;
+	GtkTreePath *t_path;
+	gint location_id, j = 0;
+	gchar *data, *uri = NULL;
 
 	cwin->cstate->view_change = TRUE;
 
 	gtk_tree_model_get_iter(model, &r_iter, path);
-
-	/* If this path is a track/radio/playlist, just append it to the array */
-
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 
-	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
-	    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-		cpath = gtk_tree_path_copy(path);
-		ref_arr = g_array_prepend_val(ref_arr, cpath);
+	switch (node_type) {
+		case NODE_CATEGORY:
+		case NODE_FOLDER:
+		case NODE_GENRE:
+		case NODE_ARTIST:
+		case NODE_ALBUM:
+			while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+				t_path = gtk_tree_model_get_path(model, &t_iter);
+				list = append_pragha_uri_string_list(t_path, list, model, cwin);
+				gtk_tree_path_free(t_path);
+			}
+			break;
+		case NODE_TRACK:
+		case NODE_BASENAME:
+			gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+			uri = g_strdup_printf("Location:/%d", location_id);
+			break;
+		case NODE_PLAYLIST:
+			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
+			uri = g_strdup_printf("Playlist:/%s", data);
+			break;
+		case NODE_RADIO:
+			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
+			uri = g_strdup_printf("Radio:/%s", data);
+			break;
+		default:
+			break;
 	}
 
-	/* For all other node types do a recursive add */
-	valid = gtk_tree_model_iter_children(model, &t_iter, &r_iter);
-	while (valid) {
-		t_path = gtk_tree_model_get_path(model, &t_iter);
-
-		gtk_tree_model_get(model, &t_iter, L_NODE_TYPE, &node_type, -1);
-		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME) ||
-		    (node_type == NODE_PLAYLIST) || (node_type == NODE_RADIO)) {
-			cpath = gtk_tree_path_copy(t_path);
-			ref_arr = g_array_prepend_val(ref_arr, cpath);
-		}
-		else {
-			get_path_array(t_path, ref_arr, model, cwin);
-		}
-		gtk_tree_path_free(t_path);
-
-		valid = gtk_tree_model_iter_next(model, &t_iter);
+	if(uri) {
+		g_string_append (list, uri);
+		g_string_append (list, "\r\n");
+		g_free(uri);
 	}
 
 	cwin->cstate->view_change = FALSE;
+
+	return list;
 }
 
 /* Append to the given array the location ids of
@@ -418,10 +427,11 @@ append_library_row_to_mobj_list(PraghaDatabase *cdbase,
 	gtk_tree_model_get(row_model, &r_iter, L_NODE_DATA, &data, -1);
 
 	switch (node_type) {
+		case NODE_CATEGORY:
+		case NODE_FOLDER:
 		case NODE_GENRE:
 		case NODE_ARTIST:
 		case NODE_ALBUM:
-		case NODE_FOLDER:
 			/* For all other node types do a recursive add */
 			while (gtk_tree_model_iter_nth_child(row_model, &t_iter, &r_iter, j++)) {
 				path = gtk_tree_model_get_path(row_model, &t_iter);
@@ -798,6 +808,29 @@ gboolean dnd_library_tree_begin(GtkWidget *widget,
 	return FALSE;
 }
 
+gboolean
+gtk_selection_data_set_pragha_uris (GtkSelectionData  *selection_data,
+                                    GString *list)
+{
+	gchar *result;
+	gsize length;
+
+	result = g_convert (list->str, list->len,
+	                    "ASCII", "UTF-8",
+	                    NULL, &length, NULL);
+
+	if (result) {
+		gtk_selection_data_set (selection_data,
+		                        gtk_selection_data_get_target(selection_data),
+		                        8, (guchar *) result, length);
+		g_free (result);
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 /* Callback for DnD signal 'drag-data-get' */
 
 void dnd_library_tree_get(GtkWidget *widget,
@@ -810,34 +843,26 @@ void dnd_library_tree_get(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GList *list = NULL, *l;
-	GArray *ref_arr;
+	GString *rlist;
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
+		rlist = g_string_new (NULL);
+
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 							cwin->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
-		if (!list) {
-			gtk_selection_data_set(data, gtk_selection_data_get_data_type(data), 8, NULL, 0);
-			break;
-		}
-
-		ref_arr = g_array_new(TRUE, TRUE, sizeof(GtkTreePath *));
-
 		l = list;
 		while(l) {
-			get_path_array(l->data, ref_arr, model, cwin);
+			rlist = append_pragha_uri_string_list(l->data, rlist, model, cwin);
 			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
-		g_list_free(list);
+		gtk_selection_data_set_pragha_uris(data, rlist);
 
-		gtk_selection_data_set(data,
-				       gtk_selection_data_get_data_type(data),
-				       8,
-				       (guchar *)&ref_arr,
-				       sizeof(GArray *));
+		g_list_free(list);
+		g_string_free (rlist, TRUE);
  		break;
 	default:
 		g_warning("Unknown DND type");
@@ -1634,7 +1659,7 @@ void init_library_view(struct con_win *cwin)
 		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
 				   L_NODE_DATA, _("Playlists"),
-				   L_NODE_TYPE, NODE_PLAYLIST,
+				   L_NODE_TYPE, NODE_CATEGORY,
 				   -1);
 
 		for_each_result_row(result, i) {
@@ -1667,7 +1692,7 @@ void init_library_view(struct con_win *cwin)
 		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
 				   L_NODE_DATA, _("Radios"),
-				   L_NODE_TYPE, NODE_RADIO,
+				   L_NODE_TYPE, NODE_CATEGORY,
 				   -1);
 
 		for_each_result_row(result, i) {
