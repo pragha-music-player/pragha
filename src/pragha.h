@@ -313,14 +313,15 @@ enum playlist_action {
 /* Node types in library view */
 
 enum node_type {
+	NODE_CATEGORY,
+	NODE_FOLDER,
 	NODE_GENRE,
 	NODE_ARTIST,
 	NODE_ALBUM,
 	NODE_TRACK,
-	NODE_FOLDER,
+	NODE_BASENAME,
 	NODE_PLAYLIST,
-	NODE_RADIO,
-	NODE_BASENAME
+	NODE_RADIO
 };
 
 /* Columns in Library view */

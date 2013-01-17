@@ -2613,27 +2613,20 @@ exit:
 
 GList *
 dnd_current_playlist_received_from_library(GtkSelectionData *data,
-							struct con_win *cwin)
+                                           struct con_win *cwin)
 {
-	GtkTreeModel *library_model;
-	GArray *ref_arr;
-	GtkTreePath *path = NULL;
-	gint i = 0, location_id = 0;
-	GtkTreeIter iter;
-	gchar *name = NULL;
-	enum node_type node_type;
+	gint n = 0, location_id = 0;
+	gchar *name = NULL, *uri, **uris;
 	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL;
 
 	CDEBUG(DBG_VERBOSE, "Dnd: Library");
 
-	cwin->cstate->view_change = TRUE;
-
-	ref_arr = *(GArray **)gtk_selection_data_get_data(data);
-	if (!ref_arr)
+	uris = g_uri_list_extract_uris ((const gchar *) gtk_selection_data_get_data (data));
+	if (!uris) {
 		g_warning("No selections to process in DnD");
-
-	library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+		return list;
+	}
 
 	/* Dnd from the library, so will read everything from database. */
 
@@ -2641,48 +2634,26 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	/* Get the mobjs from the path of the library. */
 
-	do {
-		path = g_array_index(ref_arr, GtkTreePath *, i);
-		if (path) {
-			gtk_tree_model_get_iter(library_model, &iter, path);
-			gtk_tree_model_get(library_model, &iter, L_NODE_TYPE, &node_type, -1);
-
-			switch (node_type)
-			{
-				case NODE_BASENAME:
-				case NODE_TRACK:
-					gtk_tree_model_get(library_model, &iter, L_LOCATION_ID, &location_id, -1);
-					mobj = new_musicobject_from_db(cwin->cdbase, location_id);
-					list = g_list_prepend(list, mobj);
-					break;
-				case NODE_PLAYLIST:
-					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
-					list = add_playlist_to_mobj_list(cwin->cdbase, name, list);
-					g_free(name);
-					break;
-				case NODE_RADIO:
-					gtk_tree_model_get(library_model, &iter, L_NODE_DATA, &name, -1);
-					list = add_radio_to_mobj_list(cwin->cdbase, name, list);
-					g_free(name);
-					break;
-				default:
-					break;
-			}
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return NULL;
-
-			gtk_tree_path_free(path);
+	for (n = 0; uris[n] != NULL; n++) {
+		uri = uris[n];
+		if (g_str_has_prefix(uri, "Location:/")) {
+			location_id = atoi(uri + strlen("Location:/"));
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			if (mobj)
+				list = g_list_append(list, mobj);
 		}
-		i++;
-	} while (path != NULL);
+		else if(g_str_has_prefix(uri, "Playlist:/")) {
+			name = uri + strlen("Playlist:/");
+			list = add_playlist_to_mobj_list(cwin->cdbase, name, list);
+		}
+		else if(g_str_has_prefix(uri, "Radio:/")) {
+			name = uri + strlen("Radio:/");
+			list = add_radio_to_mobj_list(cwin->cdbase, name, list);
+		}
+	}
+	g_strfreev(uris);
 
 	db_commit_transaction(cwin->cdbase);
-
-	cwin->cstate->view_change = FALSE;
-
-	g_array_free(ref_arr, FALSE);
 
 	return list;
 }
@@ -3019,14 +2990,14 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
 		/* TODO: Fix this negradaaa!. */
-		if(g_str_has_prefix(file, "Radio:") == FALSE) {
+		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
 			if ((location_id = find_location_db(file, cwin->cdbase)))
 				mobj = new_musicobject_from_db(cwin->cdbase, location_id);
 			else
 				mobj = new_musicobject_from_file(result.resultp[i]);
 		}
 		else {
-			mobj = new_musicobject_from_location(file + strlen("Radio:"), file + strlen("Radio:"));
+			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));
 		}
 		list = g_list_append(list, mobj);
 		g_free(file);
