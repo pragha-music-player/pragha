@@ -359,6 +359,59 @@ append_pragha_uri_string_list(GtkTreePath *path,
 	return list;
 }
 
+GString *
+append_uri_string_list(GtkTreePath *path,
+                       GString *list,
+                       GtkTreeModel *model,
+                       struct con_win *cwin)
+{
+	GtkTreeIter t_iter, r_iter;
+	enum node_type node_type = 0;
+	GtkTreePath *t_path;
+	gint location_id, j = 0;
+	PraghaMusicobject *mobj = NULL;
+
+	cwin->cstate->view_change = TRUE;
+
+	gtk_tree_model_get_iter(model, &r_iter, path);
+	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
+
+	switch (node_type) {
+		case NODE_CATEGORY:
+		case NODE_FOLDER:
+		case NODE_GENRE:
+		case NODE_ARTIST:
+		case NODE_ALBUM:
+			while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
+				t_path = gtk_tree_model_get_path(model, &t_iter);
+				list = append_uri_string_list(t_path, list, model, cwin);
+				gtk_tree_path_free(t_path);
+			}
+			break;
+		case NODE_TRACK:
+		case NODE_BASENAME:
+			gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			break;
+		case NODE_PLAYLIST:
+		case NODE_RADIO:
+			g_message("Drag Radios and Playlist not yet implemented");
+			break;
+		default:
+			break;
+	}
+
+	if(mobj) {
+		g_string_append (list, g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL));
+		g_string_append (list, "\r\n");
+		g_object_unref(G_OBJECT(mobj));
+	}
+
+	cwin->cstate->view_change = FALSE;
+
+	return list;
+}
+
 /* Append to the given array the location ids of
    all the nodes under the given path */
 
@@ -864,8 +917,28 @@ void dnd_library_tree_get(GtkWidget *widget,
 		g_list_free(list);
 		g_string_free (rlist, TRUE);
  		break;
+ 	case TARGET_URI_LIST:
+		rlist = g_string_new (NULL);
+
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
+							cwin->library_tree));
+		list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+		l = list;
+		while(l) {
+			rlist = append_uri_string_list(l->data, rlist, model, cwin);
+			gtk_tree_path_free(l->data);
+			l = l->next;
+		}
+		gtk_selection_data_set_pragha_uris(data, rlist);
+
+		g_list_free(list);
+		g_string_free (rlist, TRUE);
+		break;
+	case TARGET_PLAIN_TEXT:
 	default:
 		g_warning("Unknown DND type");
+		break;
 	}
 }
 
