@@ -2539,19 +2539,30 @@ dnd_current_playlist_drop(GtkWidget *widget,
 			  gint x,
 			  gint y,
 			  guint time,
-			  struct con_win *cwin)
+			  PraghaPlaylist *cplaylist)
 {
-	GdkAtom target;
+	GList *p;
 
-	if (gtk_drag_get_source_widget(context) == cwin->library_tree) {
-		CDEBUG(DBG_VERBOSE, "DnD: library_tree");
-		target = GDK_POINTER_TO_ATOM(g_list_nth_data(gdk_drag_context_list_targets(context),
-							     TARGET_REF_LIBRARY));
-		gtk_drag_get_data(widget,
-				  context,
-				  target,
-				  time);
-		return TRUE;
+	if (gdk_drag_context_list_targets (context) == NULL)
+		return FALSE;
+
+	for (p = gdk_drag_context_list_targets (context); p != NULL; p = p->next) {
+		gchar *possible_type;
+
+		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
+		if (!strcmp (possible_type, "REF_LIBRARY")) {
+			CDEBUG(DBG_VERBOSE, "DnD: library_tree");
+
+			gtk_drag_get_data(widget,
+					  context,
+					  GDK_POINTER_TO_ATOM (p->data),
+					  time);
+
+			g_free (possible_type);
+
+			return TRUE;
+		}
+		g_free (possible_type);
 	}
 
 	return FALSE;
@@ -3304,7 +3315,8 @@ static const GtkTargetEntry pentries[] = {
 	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
 };
 
-static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
+static void
+init_playlist_dnd(PraghaPlaylist *cplaylist)
 {
 	/* Source/Dest: Current Playlist */
 
@@ -3330,7 +3342,7 @@ static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(cplaylist->view),
 			 "drag-drop",
 			 G_CALLBACK(dnd_current_playlist_drop),
-			 cwin);
+			 cplaylist);
 	g_signal_connect(G_OBJECT(cplaylist->view),
 			 "drag-data-received",
 			 G_CALLBACK(dnd_current_playlist_received),
@@ -4157,7 +4169,7 @@ cplaylist_new(struct con_win *cwin)
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->widget), cplaylist->view);
 
-	init_playlist_dnd(cplaylist, cwin);
+	init_playlist_dnd(cplaylist);
 
 	cplaylist->rand = g_rand_new();
 	cplaylist->changing = TRUE;
