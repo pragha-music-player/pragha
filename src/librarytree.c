@@ -339,10 +339,12 @@ append_pragha_uri_string_list(GtkTreePath *path,
 		case NODE_PLAYLIST:
 			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
 			uri = g_strdup_printf("Playlist:/%s", data);
+			g_free(data);
 			break;
 		case NODE_RADIO:
 			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
 			uri = g_strdup_printf("Radio:/%s", data);
+			g_free(data);
 			break;
 		default:
 			break;
