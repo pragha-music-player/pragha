@@ -2613,7 +2613,7 @@ exit:
 
 GList *
 dnd_current_playlist_received_from_library(GtkSelectionData *data,
-                                           struct con_win *cwin)
+                                           PraghaPlaylist *cplaylist)
 {
 	gint n = 0, location_id = 0;
 	gchar *name = NULL, *uri, **uris;
@@ -2630,7 +2630,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	/* Dnd from the library, so will read everything from database. */
 
-	db_begin_transaction(cwin->cdbase);
+	db_begin_transaction(cplaylist->cdbase);
 
 	/* Get the mobjs from the path of the library. */
 
@@ -2638,29 +2638,28 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 		uri = uris[n];
 		if (g_str_has_prefix(uri, "Location:/")) {
 			location_id = atoi(uri + strlen("Location:/"));
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			if (mobj)
 				list = g_list_append(list, mobj);
 		}
 		else if(g_str_has_prefix(uri, "Playlist:/")) {
 			name = uri + strlen("Playlist:/");
-			list = add_playlist_to_mobj_list(cwin->cdbase, name, list);
+			list = add_playlist_to_mobj_list(cplaylist->cdbase, name, list);
 		}
 		else if(g_str_has_prefix(uri, "Radio:/")) {
 			name = uri + strlen("Radio:/");
-			list = add_radio_to_mobj_list(cwin->cdbase, name, list);
+			list = add_radio_to_mobj_list(cplaylist->cdbase, name, list);
 		}
 	}
 	g_strfreev(uris);
 
-	db_commit_transaction(cwin->cdbase);
+	db_commit_transaction(cplaylist->cdbase);
 
 	return list;
 }
 
 GList *
-dnd_current_playlist_received_uri_list(GtkSelectionData *data,
-						   struct con_win *cwin)
+dnd_current_playlist_received_uri_list(GtkSelectionData *data)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar **uris = NULL, *filename = NULL;
@@ -2699,8 +2698,7 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data,
 }
 
 GList *
-dnd_current_playlist_received_plain_text(GtkSelectionData *data,
-							struct con_win *cwin)
+dnd_current_playlist_received_plain_text(GtkSelectionData *data)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *filename = NULL;
@@ -2739,7 +2737,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 			     GtkSelectionData *data,
 			     enum dnd_target info,
 			     guint time,
-			     struct con_win *cwin)
+			     PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreePath *dest_path = NULL;
@@ -2779,7 +2777,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	/* Reorder within current playlist */
 
 	if (gtk_drag_get_source_widget(context) == playlist_view) {
-		dnd_current_playlist_reorder(model, &dest_iter, pos, cwin->cplaylist);
+		dnd_current_playlist_reorder(model, &dest_iter, pos, cplaylist);
 		goto exit;
 	}
 
@@ -2787,13 +2785,13 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
-		list = dnd_current_playlist_received_from_library(data, cwin);
+		list = dnd_current_playlist_received_from_library(data, cplaylist);
 		break;
 	case TARGET_URI_LIST:
-		list = dnd_current_playlist_received_uri_list(data, cwin);
+		list = dnd_current_playlist_received_uri_list(data);
 		break;
 	case TARGET_PLAIN_TEXT:
-		list = dnd_current_playlist_received_plain_text(data, cwin);
+		list = dnd_current_playlist_received_plain_text(data);
 		break;
 	default:
 		g_warning("Unknown DND type");
@@ -2803,11 +2801,11 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 	/* Insert mobj list to current playlist. */
 
 	if (is_row) {
-		pragha_playlist_insert_mobj_list(cwin->cplaylist, list, pos, &dest_iter);
+		pragha_playlist_insert_mobj_list(cplaylist, list, pos, &dest_iter);
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist_view), dest_path, NULL, TRUE, row_align, 0.0);
 	}
 	else
-		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+		pragha_playlist_append_mobj_list(cplaylist, list);
 
 	g_list_free(list);
 
@@ -3336,7 +3334,7 @@ static void init_playlist_dnd(PraghaPlaylist *cplaylist, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(cplaylist->view),
 			 "drag-data-received",
 			 G_CALLBACK(dnd_current_playlist_received),
-			 cwin);
+			 cplaylist);
 }
 
 static void
