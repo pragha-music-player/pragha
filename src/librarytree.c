@@ -370,6 +370,7 @@ append_uri_string_list(GtkTreePath *path,
 	GtkTreePath *t_path;
 	gint location_id, j = 0;
 	PraghaMusicobject *mobj = NULL;
+	gchar *uri = NULL;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -402,8 +403,13 @@ append_uri_string_list(GtkTreePath *path,
 	}
 
 	if(mobj) {
-		g_string_append (list, g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL));
-		g_string_append (list, "\r\n");
+		uri = g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL)
+		if(uri) {
+			g_string_append (list, uri);
+			g_string_append (list, "\r\n");
+
+			g_free(uri);
+		}
 		g_object_unref(G_OBJECT(mobj));
 	}
 
