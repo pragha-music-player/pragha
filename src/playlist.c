@@ -375,7 +375,8 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
-		list = g_list_append(list, mobj);
+		if (G_LIKELY(mobj))
+			list = g_list_append(list, mobj);
 
 		g_free(file);
 	}
@@ -411,9 +412,8 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
 	pragha_database_exec_sqlite_query(cdbase, query, &result);
 	for_each_result_row(result, i) {
 		mobj = new_musicobject_from_location(result.resultp[i], radio);
-
-		list = g_list_append(list, mobj);
-
+		if (G_LIKELY(mobj))
+			list = g_list_append(list, mobj);
 	}
 	sqlite3_free_table(result.resultp);
 
@@ -1102,7 +1102,7 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 
 	for (i = list; i != NULL; i = i->next) {
 		mobj = new_musicobject_from_file(i->data);
-		if (mobj)
+		if (G_LIKELY(mobj))
 			mlist = g_list_append(mlist, mobj);
 
 		if (pragha_process_gtk_events ())
@@ -1134,7 +1134,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	for (i = list; i != NULL; i = i->next) {
 		try++;
 		mobj = new_musicobject_from_file(i->data);
-		if (mobj) {
+		if (G_LIKELY(mobj)) {
 			added++;
 			mlist = g_list_append(mlist, mobj);
 		}

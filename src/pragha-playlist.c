@@ -2650,7 +2650,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 		if (g_str_has_prefix(uri, "Location:/")) {
 			location_id = atoi(uri + strlen("Location:/"));
 			mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
-			if (mobj)
+			if (G_LIKELY(mobj))
 				list = g_list_append(list, mobj);
 		}
 		else if(g_str_has_prefix(uri, "Playlist:/")) {
@@ -2662,9 +2662,9 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 			list = add_radio_to_mobj_list(cplaylist->cdbase, name, list);
 		}
 	}
-	g_strfreev(uris);
-
 	db_commit_transaction(cplaylist->cdbase);
+
+	g_strfreev(uris);
 
 	return list;
 }
@@ -2689,11 +2689,8 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data)
 			}
 			else {
 				mobj = new_musicobject_from_file(filename);
-				if (!mobj)
-					g_critical("Invalid location filename");
-				else {
+				if (G_LIKELY(mobj))
 					list = g_list_append(list, mobj);
-				}
 			}
 
 			/* Have to give control to GTK periodically ... */
@@ -2724,11 +2721,9 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data)
 	}
 	else {
 		mobj = new_musicobject_from_file(filename);
-		if (!mobj)
-			g_critical("Invalid location filename");
-		else {
+		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
-		}
+
 		/* Have to give control to GTK periodically ... */
 		if (pragha_process_gtk_events ())
 			return NULL;
@@ -3008,7 +3003,10 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));
 		}
-		list = g_list_append(list, mobj);
+
+		if (G_LIKELY(mobj))
+			list = g_list_append(list, mobj);
+
 		g_free(file);
 	}
 
