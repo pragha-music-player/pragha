@@ -494,7 +494,7 @@ append_library_row_to_mobj_list(PraghaDatabase *cdbase,
 		case NODE_TRACK:
 		case NODE_BASENAME:
 			mobj = new_musicobject_from_db(cdbase, location_id);
-			if(G_LIKELY(mobj))
+			if (G_LIKELY(mobj))
 				list = g_list_append(list, mobj);
 			break;
 		case NODE_PLAYLIST:

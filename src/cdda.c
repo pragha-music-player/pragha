@@ -57,7 +57,8 @@ static void add_audio_cd_tracks(struct con_win *cwin)
 
 	for (i = 1; i <= num_tracks; i++) {
 		mobj = new_musicobject_from_cdda(cwin, i);
-		list = g_list_append(list, mobj);
+		if (G_LIKELY(mobj))
+			list = g_list_append(list, mobj);
 
 		if (pragha_process_gtk_events ())
 			return;

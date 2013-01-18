@@ -21,7 +21,7 @@
 PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)
 {
-	PraghaMusicobject *mobj;
+	PraghaMusicobject *mobj = NULL;
 	enum file_type type;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
@@ -35,10 +35,12 @@ new_musicobject_from_file(const gchar *file)
 	                     "file-type", type,
 	                     NULL);
 
-	if(pragha_musicobject_set_tags_from_file(mobj, file))
+	if(G_LIKELY(pragha_musicobject_set_tags_from_file(mobj, file)))
 		return mobj;
-	else
+	else {
+		g_critical("Fail to create musicobject from file");
 		g_object_unref(mobj);
+	}
 
 	return NULL;
 }
@@ -46,7 +48,7 @@ new_musicobject_from_file(const gchar *file)
 PraghaMusicobject *
 new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 {
-	PraghaMusicobject *mobj;
+	PraghaMusicobject *mobj = NULL;
 	gchar *query;
 	PraghaDbResponse result;
 	gint i = 0;
@@ -76,12 +78,8 @@ AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = \"%d\";", location_id, location_id);
-	if (!pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		g_critical("Track with location id : %d not found in DB",
-			   location_id);
-		return NULL;
-	}
-	else {
+
+	if (G_LIKELY(pragha_database_exec_sqlite_query(cdbase, query, &result))) {
 		i = result.no_columns;
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 		                     "file", result.resultp[i+12],
@@ -103,6 +101,12 @@ AND LOCATION.id = \"%d\";", location_id, location_id);
 
 		return mobj;
 	}
+	else {
+		g_critical("Track with location id : %d not found in DB",
+			   location_id);
+	}
+
+	return NULL;
 }
 
 PraghaMusicobject *
@@ -174,7 +178,7 @@ new_musicobject_from_cdda(struct con_win *cwin,
 PraghaMusicobject *
 new_musicobject_from_location(const gchar *uri, const gchar *name)
 {
-	PraghaMusicobject *mobj;
+	PraghaMusicobject *mobj = NULL;
 	gchar *file = NULL;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to location: %s", uri);

@@ -142,12 +142,8 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 		else {
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
-				if (mobj) {
+				if (G_LIKELY(mobj))
 					list = g_list_append(list, mobj);
-					CDEBUG(DBG_VERBOSE,
-					       "Play file from file_tree: %s",
-					       ab_file);
-				}
 			}
 		}
 
@@ -178,7 +174,7 @@ append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
 	else {
 		if (is_playable_file(filename)) {
 			mobj = new_musicobject_from_file(filename);
-			if (mobj) {
+			if (G_LIKELY(mobj)) {
 				list = g_list_append(list, mobj);
 				add_recent_file(filename);
 			}
