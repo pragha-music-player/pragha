@@ -314,8 +314,6 @@ append_pragha_uri_string_list(GtkTreePath *path,
 	gint location_id, j = 0;
 	gchar *data, *uri = NULL;
 
-	cwin->cstate->view_change = TRUE;
-
 	gtk_tree_model_get_iter(model, &r_iter, path);
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 
@@ -356,8 +354,6 @@ append_pragha_uri_string_list(GtkTreePath *path,
 		g_free(uri);
 	}
 
-	cwin->cstate->view_change = FALSE;
-
 	return list;
 }
 
@@ -372,8 +368,6 @@ append_uri_string_list(GtkTreePath *path,
 	GtkTreePath *t_path;
 	gint location_id, j = 0;
 	gchar *filename = NULL, *uri = NULL;
-
-	cwin->cstate->view_change = TRUE;
 
 	gtk_tree_model_get_iter(model, &r_iter, path);
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
@@ -413,8 +407,6 @@ append_uri_string_list(GtkTreePath *path,
 		}
 		g_free(filename);
 	}
-
-	cwin->cstate->view_change = FALSE;
 
 	return list;
 }
@@ -910,6 +902,9 @@ void dnd_library_tree_get(GtkWidget *widget,
 	case TARGET_REF_LIBRARY:
 		rlist = g_string_new (NULL);
 
+		set_watch_cursor (cwin->mainwindow);
+		cwin->cstate->view_change = TRUE;
+
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 							cwin->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -920,6 +915,10 @@ void dnd_library_tree_get(GtkWidget *widget,
 			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
+
+		cwin->cstate->view_change = FALSE;
+		remove_watch_cursor (cwin->mainwindow);
+
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
 		g_list_free(list);
@@ -927,6 +926,9 @@ void dnd_library_tree_get(GtkWidget *widget,
  		break;
  	case TARGET_URI_LIST:
 		rlist = g_string_new (NULL);
+
+		set_watch_cursor (cwin->mainwindow);
+		cwin->cstate->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 							cwin->library_tree));
@@ -938,6 +940,10 @@ void dnd_library_tree_get(GtkWidget *widget,
 			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
+
+		cwin->cstate->view_change = FALSE;
+		remove_watch_cursor (cwin->mainwindow);
+
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
 		g_list_free(list);
