@@ -371,8 +371,7 @@ append_uri_string_list(GtkTreePath *path,
 	enum node_type node_type = 0;
 	GtkTreePath *t_path;
 	gint location_id, j = 0;
-	PraghaMusicobject *mobj = NULL;
-	gchar *uri = NULL;
+	gchar *filename = NULL, *uri = NULL;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -394,7 +393,7 @@ append_uri_string_list(GtkTreePath *path,
 		case NODE_TRACK:
 		case NODE_BASENAME:
 			gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			filename = pragha_database_get_filename_from_location_id(cwin->cdbase, location_id);
 			break;
 		case NODE_PLAYLIST:
 		case NODE_RADIO:
@@ -404,15 +403,15 @@ append_uri_string_list(GtkTreePath *path,
 			break;
 	}
 
-	if(mobj) {
-		uri = g_filename_to_uri(pragha_musicobject_get_file(mobj), NULL, NULL)
+	if(filename) {
+		uri = g_filename_to_uri(filename, NULL, NULL);
 		if(uri) {
 			g_string_append (list, uri);
 			g_string_append (list, "\r\n");
 
 			g_free(uri);
 		}
-		g_object_unref(G_OBJECT(mobj));
+		g_free(filename);
 	}
 
 	cwin->cstate->view_change = FALSE;

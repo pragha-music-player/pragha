@@ -504,26 +504,40 @@ void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase)
+gchar *
+pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id)
 {
-	gint ret = 0;
-	gchar *query, *file;
+	gchar *query, *file = NULL;
 	PraghaDbResponse result;
 
 	query = g_strdup_printf("SELECT name FROM LOCATION WHERE id = %d;", location_id);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
 		if (result.no_columns) {
-			file = result.resultp[result.no_columns];
-			ret = g_unlink(file);
-			if (ret != 0)
-				g_warning("%s", strerror(ret));
-			else
-				CDEBUG(DBG_VERBOSE, "Deleted file: %s", file);
+			file = g_strdup(result.resultp[result.no_columns]);
 		}
 		sqlite3_free_table(result.resultp);
-	} else {
+	}
+	else {
 		g_warning("Unable to find filename for location id: %d", location_id);
-		ret = -1;
+	}
+
+	return file;
+}
+
+gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase)
+{
+	gint ret = 0;
+	gchar *file = NULL;
+
+	file = pragha_database_get_filename_from_location_id(cdbase, location_id);
+
+	if (file) {
+		ret = g_unlink(file);
+		if (ret != 0)
+			g_warning("%s", strerror(ret));
+		else
+			CDEBUG(DBG_VERBOSE, "Deleted file: %s", file);
+		g_free(file);
 	}
 
 	return ret;

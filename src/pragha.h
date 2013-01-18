@@ -868,6 +868,7 @@ gint find_location_db(const gchar *location, PraghaDatabase *cdbase);
 gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
 gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
+gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);
 gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);
 void update_track_db(gint location_id, gint changed,
 		     gint track_no, const gchar *title,
