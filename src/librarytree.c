@@ -663,6 +663,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
 
 	switch(node_type) {
+	case NODE_CATEGORY:
 	case NODE_ARTIST:
 	case NODE_ALBUM:
 	case NODE_GENRE:
@@ -1849,6 +1850,7 @@ void init_library_view(struct con_win *cwin)
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
 			   L_NODE_DATA, _("Library"),
+			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
 
 	if (cwin->cpref->cur_library_view != FOLDERS) {
