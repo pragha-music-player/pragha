@@ -42,6 +42,7 @@
 #include "pragha-glyr.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
+#include "pragha-cdda.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
@@ -495,7 +496,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin)
 {
-	add_audio_cd(cwin);
+	pragha_cdda_add (cwin);
 }
 
 /* Build a dialog to get a new playlist name */

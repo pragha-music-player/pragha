@@ -19,6 +19,7 @@
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 
+#include "pragha-cdda.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"

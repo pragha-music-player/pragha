@@ -101,7 +101,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(DBUS_CFLAGS) 							\
 	$(DBUS_GLIB_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
@@ -115,13 +114,16 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(DBUS_LIBS) 							\
 	$(DBUS_GLIB_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
+endif
+
+if HAVE_GSTREAMER_PBUTILS
+pragha_CFLAGS += $(GSTREAMER_PBUTILS_CFLAGS)
+pragha_LDADD += $(GSTREAMER_PBUTILS_LIBS)
 endif
 
 if HAVE_LIBKEYBINDER
