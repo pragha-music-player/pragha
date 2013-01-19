@@ -970,7 +970,6 @@ gchar* get_ref_current_track(struct con_win *cwin);
 void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
 void queue_current_playlist(GtkAction *action, struct con_win *cwin);
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
-int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
 void remove_from_playlist(GtkAction *action, struct con_win *cwin);
 void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
