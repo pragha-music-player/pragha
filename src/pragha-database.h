@@ -42,15 +42,16 @@ typedef struct {
 
 struct _PraghaDatabase
 {
-   GObject parent;
+	GObject parent;
 
-   /*< private >*/
-   PraghaDatabasePrivate *priv;
+	/*< private >*/
+	PraghaDatabasePrivate *priv;
 };
 
 struct _PraghaDatabaseClass
 {
-   GObjectClass parent_class;
+	GObjectClass parent_class;
+	void (*playlists_change) (PraghaDatabase *database);
 };
 
 gboolean
@@ -61,6 +62,9 @@ gboolean
 pragha_database_exec_sqlite_query(PraghaDatabase *database,
                                   gchar *query,
                                   PraghaDbResponse *result);
+
+void
+pragha_database_change_playlists_done(PraghaDatabase *database);
 
 gboolean
 pragha_database_start_successfully (PraghaDatabase *database);

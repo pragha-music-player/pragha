@@ -502,6 +502,12 @@ create_sidebar_header(struct con_win *cwin)
 	return hbox;
 }
 
+static void
+update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
+{
+	init_library_view(cwin);
+}
+
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 {
 	GtkWidget *vbox_lib;
@@ -549,6 +555,8 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 
 	cwin->browse_mode = vbox_lib;
 	cwin->search_entry = search_entry;
+
+	g_signal_connect (cwin->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
 
 	return vbox_lib;
 }

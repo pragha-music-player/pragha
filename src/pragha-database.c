@@ -26,6 +26,13 @@ struct _PraghaDatabasePrivate
 	gboolean successfully;
 };
 
+enum {
+	SIGNAL_PLAYLISTS_CHANGED,
+	LAST_SIGNAL
+};
+
+static int signals[LAST_SIGNAL] = { 0 };
+
 gboolean
 pragha_database_exec_query (PraghaDatabase *database,
                             const gchar *query)
@@ -103,6 +110,18 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 }
 
 /**
+ * pragha_database_change_playlists_done:
+ *
+ */
+void
+pragha_database_change_playlists_done(PraghaDatabase *database)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE(database));
+
+	g_signal_emit (database, signals[SIGNAL_PLAYLISTS_CHANGED], 0);
+}
+
+/**
  * pragha_database_start_successfully:
  *
  */
@@ -132,6 +151,15 @@ pragha_database_class_init (PraghaDatabaseClass *klass)
 
 	object_class = G_OBJECT_CLASS(klass);
 	object_class->finalize = pragha_database_finalize;
+
+	signals[SIGNAL_PLAYLISTS_CHANGED] = g_signal_new ("PlaylistsChanged",
+	                                                  G_TYPE_FROM_CLASS (object_class),
+	                                                  G_SIGNAL_RUN_LAST,
+	                                                  G_STRUCT_OFFSET (PraghaDatabaseClass, playlists_change),
+	                                                  NULL, NULL,
+	                                                  g_cclosure_marshal_VOID__VOID,
+	                                                  G_TYPE_NONE, 0);
+
 	g_type_class_add_private(object_class, sizeof(PraghaDatabasePrivate));
 }
 
