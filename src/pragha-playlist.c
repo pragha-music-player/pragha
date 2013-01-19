@@ -1233,64 +1233,6 @@ void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist)
 	g_list_free (list);
 }
 
-/* Based on Totem Code */
-int current_playlist_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreeRowReference *ref;
-	GtkTreeIter iter;
-	GList *list;
-	gint n_select = 0;
-	gboolean is_queue = FALSE;
-
-	/* Special case some shortcuts 
-	if (event->state != 0) {
-		if ((event->state & GDK_CONTROL_MASK)
-		    && event->keyval == GDK_KEY_a) {
-			gtk_tree_selection_select_all
-				(playlist->priv->selection);
-			return TRUE;
-		}
-	}*/
-	/* If we have modifiers, and either Ctrl, Mod1 (Alt), or any
-	 * of Mod3 to Mod5 (Mod2 is num-lock...) are pressed, we
-	 * let Gtk+ handle the key */
-	if (event->state != 0
-			&& ((event->state & GDK_CONTROL_MASK)
-			|| (event->state & GDK_MOD1_MASK)
-			|| (event->state & GDK_MOD3_MASK)
-			|| (event->state & GDK_MOD4_MASK)
-			|| (event->state & GDK_MOD5_MASK)))
-		return FALSE;
-	if (event->keyval == GDK_KEY_Delete){
-		remove_from_playlist(NULL, cwin);
-		return TRUE;
-	}
-	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q){
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->cplaylist->view));
-		n_select = gtk_tree_selection_count_selected_rows(selection);
-
-		if(n_select==1){
-			list = gtk_tree_selection_get_selected_rows(selection, &model);
-			if (gtk_tree_model_get_iter(model, &iter, list->data)){
-				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
-				if(is_queue)
-					delete_queue_track_refs(list->data, cwin->cplaylist);
-				else{
-					ref = gtk_tree_row_reference_new(model, list->data);
-					cwin->cplaylist->queue_track_refs = g_slist_append(cwin->cplaylist->queue_track_refs, ref);
-				}
-				requeue_track_refs(cwin->cplaylist);
-			}
-			gtk_tree_path_free(list->data);
-			g_list_free (list);
-		}
-		return TRUE;
-	}
-	return FALSE;
-}
-
 /* Remove selected rows from current playlist */
 
 void
@@ -1304,6 +1246,8 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 	GList *list = NULL, *i = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gboolean played = FALSE;
+
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1360,15 +1304,15 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 	}
 
 	requeue_track_refs (cplaylist);
+
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
 
 void remove_from_playlist(GtkAction *action, struct con_win *cwin)
 {
-	set_watch_cursor (cwin->mainwindow);
 	pragha_playlist_remove_selection(cwin->cplaylist);
-	remove_watch_cursor (cwin->mainwindow);
-
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Crop selected rows from current playlist */
@@ -1384,6 +1328,8 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 	GtkTreeRowReference *ref;
 	GtkTreePath *path;
 	GSList *to_delete = NULL, *i = NULL;
+
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 
@@ -1439,17 +1385,77 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 	pragha_playlist_set_changing(cplaylist, FALSE);
 
 	requeue_track_refs (cplaylist);
-	g_slist_free(to_delete);
 
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	pragha_playlist_update_statusbar_playtime(cplaylist);
+
+	g_slist_free(to_delete);
 }
 
 void crop_current_playlist(GtkAction *action, struct con_win *cwin)
 {
-	set_watch_cursor (cwin->mainwindow);
 	pragha_playlist_crop_selection(cwin->cplaylist);
-	remove_watch_cursor (cwin->mainwindow);
+}
 
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
+/* Handle key press on current playlist view.
+ * Based on Totem Code*/
+
+static gint
+current_playlist_key_press (GtkWidget *win, GdkEventKey *event, PraghaPlaylist *cplaylist)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreeRowReference *ref;
+	GtkTreeIter iter;
+	GList *list;
+	gint n_select = 0;
+	gboolean is_queue = FALSE;
+
+	/* Special case some shortcuts 
+	if (event->state != 0) {
+		if ((event->state & GDK_CONTROL_MASK)
+		    && event->keyval == GDK_KEY_a) {
+			gtk_tree_selection_select_all
+				(playlist->priv->selection);
+			return TRUE;
+		}
+	}*/
+	/* If we have modifiers, and either Ctrl, Mod1 (Alt), or any
+	 * of Mod3 to Mod5 (Mod2 is num-lock...) are pressed, we
+	 * let Gtk+ handle the key */
+	if (event->state != 0
+			&& ((event->state & GDK_CONTROL_MASK)
+			|| (event->state & GDK_MOD1_MASK)
+			|| (event->state & GDK_MOD3_MASK)
+			|| (event->state & GDK_MOD4_MASK)
+			|| (event->state & GDK_MOD5_MASK)))
+		return FALSE;
+	if (event->keyval == GDK_KEY_Delete){
+		pragha_playlist_remove_selection(cplaylist);
+		return TRUE;
+	}
+	else if(event->keyval == GDK_KEY_q || event->keyval == GDK_KEY_Q){
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+		n_select = gtk_tree_selection_count_selected_rows(selection);
+
+		if(n_select==1){
+			list = gtk_tree_selection_get_selected_rows(selection, &model);
+			if (gtk_tree_model_get_iter(model, &iter, list->data)){
+				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
+				if(is_queue)
+					delete_queue_track_refs(list->data, cplaylist);
+				else{
+					ref = gtk_tree_row_reference_new(model, list->data);
+					cplaylist->queue_track_refs = g_slist_append(cplaylist->queue_track_refs, ref);
+				}
+				requeue_track_refs(cplaylist);
+			}
+			gtk_tree_path_free(list->data);
+			g_list_free (list);
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
 /* Show track properties dialog
@@ -3699,7 +3705,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist, struct con_win *cwin)
 			 G_CALLBACK(current_playlist_row_activated_cb), cwin);
 
 	g_signal_connect (G_OBJECT (current_playlist), "key-press-event",
-			  G_CALLBACK (current_playlist_key_press), cwin);
+			  G_CALLBACK (current_playlist_key_press), cplaylist);
 
 	/* Store the treeview in the scrollbar widget */
 
@@ -4143,7 +4149,7 @@ cplaylist_new(struct con_win *cwin)
 
 	cplaylist->view = create_current_playlist_view(cplaylist, cwin);
 	cplaylist->model = g_object_ref(gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view)));
-	cplaylist->widget = create_current_playlist_container(cwin);
+	cplaylist->widget = create_current_playlist_container(cplaylist);
 
 	init_current_playlist_columns(cplaylist);
 
