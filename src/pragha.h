@@ -1138,8 +1138,8 @@ gboolean nm_is_online ();
 #endif
 gboolean already_in_current_playlist(PraghaMusicobject *mobj, struct con_win *cwin);
 GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
-void set_watch_cursor (GtkWidget *window);
-void remove_watch_cursor (GtkWidget *window);
+void set_watch_cursor (GtkWidget *widget);
+void remove_watch_cursor (GtkWidget *widget);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gchar* sanitize_string_to_sqlite3(const gchar *str);
 gboolean string_is_empty(const gchar *str);

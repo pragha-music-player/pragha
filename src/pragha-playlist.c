@@ -1235,7 +1235,7 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 	PraghaMusicobject *mobj = NULL;
 	gboolean played = FALSE;
 
-	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	set_watch_cursor (cplaylist->widget);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -1293,7 +1293,7 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 
 	requeue_track_refs (cplaylist);
 
-	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	remove_watch_cursor (cplaylist->widget);
 
 	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
@@ -1317,7 +1317,7 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 	GtkTreePath *path;
 	GSList *to_delete = NULL, *i = NULL;
 
-	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	set_watch_cursor (cplaylist->widget);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 
@@ -1374,7 +1374,7 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 
 	requeue_track_refs (cplaylist);
 
-	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	remove_watch_cursor (cplaylist->widget);
 	pragha_playlist_update_statusbar_playtime(cplaylist);
 
 	g_slist_free(to_delete);
@@ -1454,7 +1454,7 @@ pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
 	PraghaMusicobject *mobj = NULL;
 	gboolean ret;
 
-	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	set_watch_cursor (cplaylist->widget);
 
 	clear_rand_track_refs(cplaylist);
 	clear_queue_track_refs(cplaylist);
@@ -1470,7 +1470,7 @@ pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
 
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
-	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	remove_watch_cursor (cplaylist->widget);
 
 	cplaylist->no_tracks = 0;
 	cplaylist->unplayed_tracks = 0;
@@ -1760,7 +1760,7 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 
 	/* TODO: Change set_watch_cursor() to allow any widget.
 	 * pragha_playlist_set_changing() should be set cursor automatically. */
-	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	set_watch_cursor (cplaylist->widget);
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1772,7 +1772,7 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
 
 	pragha_playlist_set_changing(cplaylist, FALSE);
-	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	remove_watch_cursor (cplaylist->widget);
 
 	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
@@ -1790,7 +1790,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	
 	/* TODO: Change set_watch_cursor() to allow any widget.
 	 * pragha_playlist_set_changing() should be set cursor automatically. */
-	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	set_watch_cursor (cplaylist->widget);
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
 
@@ -1802,7 +1802,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), cplaylist->model);
 
 	pragha_playlist_set_changing(cplaylist, FALSE);
-	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+	remove_watch_cursor (cplaylist->widget);
 
 	pragha_playlist_update_statusbar_playtime(cplaylist);
 	select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);

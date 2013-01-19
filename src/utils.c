@@ -358,17 +358,28 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
-set_watch_cursor (GtkWidget *window)
+set_watch_cursor (GtkWidget *widget)
 {
-	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
-	gdk_window_set_cursor (gtk_widget_get_window (window), cursor);
-	gdk_cursor_unref (cursor);
+	GdkCursor *cursor;
+	GtkWidget  *toplevel;
+
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+	if (G_LIKELY (toplevel != NULL)) {
+		cursor = gdk_cursor_new (GDK_WATCH);
+
+		gdk_window_set_cursor (gtk_widget_get_window (toplevel), cursor);
+		gdk_cursor_unref (cursor);
+	}
 }
 
 void
-remove_watch_cursor (GtkWidget *window)
+remove_watch_cursor (GtkWidget *widget)
 {
-	gdk_window_set_cursor (gtk_widget_get_window (window), NULL);
+	GtkWidget  *toplevel;
+
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+	if (G_LIKELY (toplevel != NULL))
+		gdk_window_set_cursor (gtk_widget_get_window (toplevel), NULL);
 }
 
 /* Obtain Pixbuf of lastfm. Based on Amatory code. */
