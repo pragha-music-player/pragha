@@ -951,8 +951,8 @@ enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* c
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
-void update_current_playlist_view_new_track(struct con_win *cwin);
-void update_current_playlist_view_track(struct con_win *cwin);
+void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
+void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
@@ -1181,7 +1181,7 @@ gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 void gui_free(struct con_win *cwin);
 void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
-void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
+void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
 
 /* Info bar import music */
 
@@ -1231,7 +1231,7 @@ void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
 
 /* pragha-playback.c: Functions to control playback and notify events. */
 
-void pragha_playback_notificate_new_track(GObject *gobject, GParamSpec *pspec, gpointer user_data);
+void pragha_playback_notificate_new_track (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin);
 
 void pragha_playback_prev_track(struct con_win *cwin);
 void pragha_playback_play_pause_resume(struct con_win *cwin);

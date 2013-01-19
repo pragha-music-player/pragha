@@ -20,11 +20,9 @@
 /* Update gui, mpris on new track playback */
 
 void
-pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+pragha_playback_notificate_new_track (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
 {
-	struct con_win *cwin = user_data;
-
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+	enum player_state state = pragha_backend_get_state (backend);
 
 	if(state != ST_PLAYING)
 		return;
@@ -38,7 +36,7 @@ pragha_playback_notificate_new_track (GObject *gobject, GParamSpec *pspec, gpoin
 		__update_progress_song_info(cwin, 0);
 
 		/* Update and jump in current playlist */
-		update_current_playlist_view_new_track(cwin);
+		update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 		/* Update album art */
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);

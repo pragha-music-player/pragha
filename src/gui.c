@@ -930,8 +930,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 }
 
 void
-gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
+gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin)
 {
-	struct con_win *cwin = user_data;
-	update_current_playlist_view_new_track (cwin);
+	update_current_playlist_view_new_track (cwin->cplaylist, backend);
 }

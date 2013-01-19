@@ -128,9 +128,9 @@ static GtkToggleActionEntry cp_null_toggles_entries[] = {
 
 /* Update playback state pixbuf */
 
-void pragha_playlist_update_pixbuf_path(PraghaPlaylist* cplaylist, GtkTreePath *path, struct con_win *cwin)
+static void
+pragha_playlist_update_pixbuf_path(PraghaPlaylist* cplaylist, GtkTreePath *path, PraghaBackend *backend)
 {
-	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf = NULL;
 	GtkIconTheme *icon_theme;
@@ -139,9 +139,9 @@ void pragha_playlist_update_pixbuf_path(PraghaPlaylist* cplaylist, GtkTreePath *
 	if(pragha_playlist_is_changing(cplaylist))
 		return;
 
-	if(pragha_backend_emitted_error(cwin->backend)) {
+	if(pragha_backend_emitted_error(backend)) {
 		icon_theme = gtk_icon_theme_get_default ();
-		error = pragha_backend_get_error(cwin->backend);
+		error = pragha_backend_get_error(backend);
 
 		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
@@ -149,7 +149,7 @@ void pragha_playlist_update_pixbuf_path(PraghaPlaylist* cplaylist, GtkTreePath *
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
 	}
 	else {
-		switch (pragha_backend_get_state (cwin->backend))
+		switch (pragha_backend_get_state (backend))
 		{
 			case ST_PLAYING:
 				pixbuf = cplaylist->playing_pixbuf;
@@ -163,8 +163,8 @@ void pragha_playlist_update_pixbuf_path(PraghaPlaylist* cplaylist, GtkTreePath *
 	}
 
 	if (path != NULL) {
-		if (gtk_tree_model_get_iter (model, &iter, path)) {
-			gtk_list_store_set (GTK_LIST_STORE(model), &iter, P_STATUS_PIXBUF, pixbuf, -1);
+		if (gtk_tree_model_get_iter (cplaylist->model, &iter, path)) {
+			gtk_list_store_set (GTK_LIST_STORE(cplaylist->model), &iter, P_STATUS_PIXBUF, pixbuf, -1);
 		}
 	}
 
@@ -931,25 +931,25 @@ pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTree
 	current_playlist_set_dirty_track(cplaylist, path);
 }
 
-void update_current_playlist_view_new_track(struct con_win *cwin)
+void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
 {
 	GtkTreePath *path;
-	path = current_playlist_get_actual(cwin->cplaylist);
 
+	path = current_playlist_get_actual(cplaylist);
 	if(path) {
-		pragha_playlist_update_pixbuf_path (cwin->cplaylist, path, cwin);
-		jump_to_path_on_current_playlist (cwin->cplaylist, path, pragha_preferences_get_shuffle(cwin->preferences));
+		pragha_playlist_update_pixbuf_path (cplaylist, path, backend);
+		jump_to_path_on_current_playlist (cplaylist, path, pragha_preferences_get_shuffle(cplaylist->preferences));
 		gtk_tree_path_free(path);
 	}
 }
 
-void update_current_playlist_view_track(struct con_win *cwin)
+void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
 {
 	GtkTreePath *path;
-	path = current_playlist_get_actual(cwin->cplaylist);
 
+	path = current_playlist_get_actual(cplaylist);
 	if(path) {
-		pragha_playlist_update_pixbuf_path (cwin->cplaylist, path, cwin);
+		pragha_playlist_update_pixbuf_path (cplaylist, path, backend);
 		gtk_tree_path_free(path);
 	}
 }
@@ -3601,12 +3601,10 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 }
 
 static void
-update_current_playlist_view_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist)
 {
-	struct con_win *cwin = user_data;
-
-	if (cwin->cplaylist->current_update_action == PLAYLIST_NONE)
-		update_current_playlist_view_track(cwin);
+	if (cplaylist->current_update_action == PLAYLIST_NONE)
+		update_current_playlist_view_track(cplaylist, backend);
 }
 
 GtkWidget *
@@ -3707,10 +3705,6 @@ create_current_playlist_view (PraghaPlaylist *cplaylist, struct con_win *cwin)
 
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist),
 				      pragha_preferences_get_use_hint(cwin->preferences));
-
-	/* Update menu depending playback state */
-
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin);
 
 	g_object_unref(store);
 
@@ -4177,6 +4171,8 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->current_update_action = PLAYLIST_NONE;
 
 	g_signal_connect(cplaylist->preferences, "notify::shuffle", G_CALLBACK (shuffle_changed_cb), cplaylist);
+
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cplaylist);
 
 	return cplaylist;
 }
