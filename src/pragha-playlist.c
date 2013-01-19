@@ -2932,9 +2932,8 @@ pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
 
 /* Save current playlist state on exit */
 
-void save_current_playlist_state(struct con_win *cwin)
+void save_current_playlist_state(PraghaPlaylist* cplaylist)
 {
-	GtkTreeModel *model = cwin->cplaylist->model;
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
 	gint playlist_id = 0;
@@ -2942,33 +2941,33 @@ void save_current_playlist_state(struct con_win *cwin)
 
 	/* Save last playlist. */
 
-	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cwin->cdbase);
+	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cplaylist->cdbase);
 	if (!playlist_id)
 		playlist_id = add_new_playlist_db(SAVE_PLAYLIST_STATE,
-						  cwin->cdbase);
+						  cplaylist->cdbase);
 	else
-		flush_playlist_db(playlist_id, cwin->cdbase);
+		flush_playlist_db(playlist_id, cplaylist->cdbase);
 
-	if (!gtk_tree_model_get_iter_first(model, &iter))
+	if (!gtk_tree_model_get_iter_first(cplaylist->model, &iter))
 		return;
 
-	save_playlist(cwin->cplaylist, playlist_id, SAVE_COMPLETE);
+	save_playlist(cplaylist, playlist_id, SAVE_COMPLETE);
 
 	/* Save reference to current song. */
 
-	path = current_playlist_get_actual(cwin->cplaylist);
+	path = current_playlist_get_actual(cplaylist);
 	if(path) {
 		ref_char = gtk_tree_path_to_string (path);
 		gtk_tree_path_free(path);
 
-		pragha_preferences_set_string(cwin->preferences,
+		pragha_preferences_set_string(cplaylist->preferences,
 					      GROUP_PLAYLIST,
 					      KEY_CURRENT_REF,
 					      ref_char);
 		g_free (ref_char);
 	}
 	else {
-		pragha_preferences_remove_key(cwin->preferences,
+		pragha_preferences_remove_key(cplaylist->preferences,
 					      GROUP_PLAYLIST,
 					      KEY_CURRENT_REF);
 	}
@@ -2977,7 +2976,7 @@ void save_current_playlist_state(struct con_win *cwin)
 /* Init current playlist on application bringup,
    restore stored playlist */
 
-static void init_playlist_current_playlist(struct con_win *cwin)
+static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 {
 	gchar *s_playlist, *query, *file;
 	gint playlist_id, location_id, i = 0;
@@ -2986,17 +2985,17 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	GList *list = NULL;
 
 	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
-	playlist_id = find_playlist_db(s_playlist, cwin->cdbase);
+	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
 	for_each_result_row(result, i) {
 		file = sanitize_string_to_sqlite3(result.resultp[i]);
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
-			if ((location_id = find_location_db(file, cwin->cdbase)))
-				mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			if ((location_id = find_location_db(file, cplaylist->cdbase)))
+				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			else
 				mobj = new_musicobject_from_file(result.resultp[i]);
 		}
@@ -3010,7 +3009,7 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 		g_free(file);
 	}
 
-	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+	pragha_playlist_append_mobj_list(cplaylist, list);
 
 	sqlite3_free_table(result.resultp);
 	g_free(s_playlist);
@@ -3018,22 +3017,22 @@ static void init_playlist_current_playlist(struct con_win *cwin)
 	g_list_free(list);
 }
 
-void init_current_playlist_view(struct con_win *cwin)
+void init_current_playlist_view(PraghaPlaylist *cplaylist)
 {
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
 
-	init_playlist_current_playlist(cwin);
+	init_playlist_current_playlist(cplaylist);
 
-	ref = pragha_preferences_get_string(cwin->preferences,
-					      GROUP_PLAYLIST,
-					      KEY_CURRENT_REF);
+	ref = pragha_preferences_get_string(cplaylist->preferences,
+	                                    GROUP_PLAYLIST,
+	                                    KEY_CURRENT_REF);
 
 	if (!ref)
 		return;
 
 	path = gtk_tree_path_new_from_string(ref);
-	jump_to_path_on_current_playlist (cwin->cplaylist, path, pragha_preferences_get_shuffle(cwin->preferences));
+	jump_to_path_on_current_playlist (cplaylist, path, pragha_preferences_get_shuffle(cplaylist->preferences));
 
 	gtk_tree_path_free(path);
 	g_free(ref);
@@ -3041,7 +3040,8 @@ void init_current_playlist_view(struct con_win *cwin)
 
 /* Initialize columns of current playlist */
 
-void init_current_playlist_columns(PraghaPlaylist* cplaylist, struct con_win *cwin)
+static void
+init_current_playlist_columns(PraghaPlaylist* cplaylist)
 {
 	gchar **columns;
 	const gchar *col_name;
@@ -3052,7 +3052,7 @@ void init_current_playlist_columns(PraghaPlaylist* cplaylist, struct con_win *cw
 	gint *col_widths;
 	gsize cnt = 0, isize;
 
-	columns = pragha_preferences_get_string_list(cwin->preferences,
+	columns = pragha_preferences_get_string_list(cplaylist->preferences,
 						     GROUP_PLAYLIST,
 						     KEY_PLAYLIST_COLUMNS,
 						     &cnt);
@@ -3079,7 +3079,7 @@ void init_current_playlist_columns(PraghaPlaylist* cplaylist, struct con_win *cw
 				       g_strdup(P_LENGTH_STR));
 	}
 
-	col_widths = pragha_preferences_get_integer_list(cwin->preferences,
+	col_widths = pragha_preferences_get_integer_list(cplaylist->preferences,
 							 GROUP_PLAYLIST,
 							 KEY_PLAYLIST_COLUMN_WIDTHS,
 							 &cnt);
@@ -3608,7 +3608,7 @@ update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSp
 }
 
 GtkWidget *
-create_current_playlist_container(struct con_win *cwin)
+create_current_playlist_container(PraghaPlaylist *cplaylist)
 {
 	GtkWidget *scroll_window;
 
@@ -4145,7 +4145,7 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->model = g_object_ref(gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view)));
 	cplaylist->widget = create_current_playlist_container(cwin);
 
-	init_current_playlist_columns(cplaylist, cwin);
+	init_current_playlist_columns(cplaylist);
 
 	cplaylist->header_context_menu = create_header_context_menu(cplaylist);
 	cplaylist->cp_context_menu = create_cp_context_menu(cplaylist->view, cwin);

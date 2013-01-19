@@ -73,7 +73,7 @@ static void init_gui_state(struct con_win *cwin)
 	init_library_view(cwin);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin);
+		init_current_playlist_view(cwin->cplaylist);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
@@ -96,7 +96,7 @@ static gboolean _init_gui_state(gpointer data)
 	if (pragha_process_gtk_events ())
 		return TRUE;
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin);
+		init_current_playlist_view(cwin->cplaylist);
 
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
@@ -973,7 +973,7 @@ void
 pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		save_current_playlist_state(cwin);
+		save_current_playlist_state(cwin->cplaylist);
 	save_preferences(cwin);
 }
 
