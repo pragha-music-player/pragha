@@ -937,10 +937,6 @@ new_playlist(PraghaPlaylist* cplaylist,
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
 void update_menu_playlist_changes(struct con_win *cwin);
-void complete_add_to_playlist_submenu (struct con_win *cwin);
-void complete_save_playlist_submenu (struct con_win *cwin);
-void complete_main_save_playlist_submenu (struct con_win *cwin);
-void complete_main_add_to_playlist_submenu (struct con_win *cwin);
 
 /* Current playlist */
 
@@ -994,8 +990,8 @@ pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 					    const gchar *title,
 					    const gchar *artist);
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void save_selected_playlist(GtkAction *action, struct con_win *cwin);
-void save_current_playlist(GtkAction *action, struct con_win *cwin);
+void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
+void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void jump_to_playing_song(struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);

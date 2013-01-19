@@ -1299,33 +1299,26 @@ exit:
 	g_free(s_radio);
 }
 
-void append_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
+void append_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 {
 	const gchar *playlist;
 
 	playlist = gtk_menu_item_get_label (menuitem);
 
-	append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
+	append_playlist(cplaylist, playlist, SAVE_SELECTED);
 }
 
-void save_to_playlist(GtkMenuItem *menuitem, struct con_win *cwin)
+void save_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 {
 	const gchar *playlist;
 
 	playlist = gtk_menu_item_get_label (menuitem);
 
-	new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
+	new_playlist(cplaylist, playlist, SAVE_COMPLETE);
 }
 
-void update_menu_playlist_changes(struct con_win *cwin)
-{
-	complete_add_to_playlist_submenu (cwin);
-	complete_save_playlist_submenu (cwin);
-	complete_main_save_playlist_submenu(cwin);
-	complete_main_add_to_playlist_submenu (cwin);
-}
-
-void complete_add_to_playlist_submenu (struct con_win *cwin)
+static void
+complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
 {
 	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
@@ -1334,11 +1327,11 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cplaylist->cp_context_menu, "/popup/Add to another playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cplaylist->cp_context_menu, "/popup/Add to another playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1346,11 +1339,11 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cwin);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1358,7 +1351,8 @@ void complete_add_to_playlist_submenu (struct con_win *cwin)
 	sqlite3_free_table (result.resultp);
 }
 
-void complete_save_playlist_submenu (struct con_win *cwin)
+static void
+complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 {
 	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
@@ -1367,11 +1361,11 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cwin->cplaylist->cp_context_menu, "/popup/Save playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cplaylist->cp_context_menu, "/popup/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cwin);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1379,11 +1373,11 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 
 	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1391,7 +1385,8 @@ void complete_save_playlist_submenu (struct con_win *cwin)
 	sqlite3_free_table (result.resultp);
 }
 
-void complete_main_save_playlist_submenu (struct con_win *cwin)
+static void
+complete_main_save_playlist_submenu (struct con_win *cwin)
 {
 	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
@@ -1405,7 +1400,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cwin);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cwin->cplaylist);
 
 	accel_group = gtk_accel_group_new ();
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow), accel_group);
@@ -1424,7 +1419,7 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1432,7 +1427,8 @@ void complete_main_save_playlist_submenu (struct con_win *cwin)
 	sqlite3_free_table (result.resultp);
 }
 
-void complete_main_add_to_playlist_submenu (struct con_win *cwin)
+static void
+complete_main_add_to_playlist_submenu (struct con_win *cwin)
 {
 	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
@@ -1446,7 +1442,7 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin->cplaylist);
 
 	accel_group = gtk_accel_group_new ();
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow), accel_group);
@@ -1465,10 +1461,21 @@ void complete_main_add_to_playlist_submenu (struct con_win *cwin)
 
 	for_each_result_row (result, i) {
 		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
 	gtk_widget_show_all (submenu);
 	sqlite3_free_table (result.resultp);
+}
+
+void update_menu_playlist_changes(struct con_win *cwin)
+{
+	/* Update main menu. */
+	complete_main_save_playlist_submenu(cwin);
+	complete_main_add_to_playlist_submenu (cwin);
+
+	/* Update playlist pupup menu. */
+	complete_add_to_playlist_submenu (cwin->cplaylist);
+	complete_save_playlist_submenu (cwin->cplaylist);
 }

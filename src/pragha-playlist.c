@@ -1866,9 +1866,9 @@ void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 
 /* Save selected tracks as a playlist */
 
-void save_selected_playlist(GtkAction *action, struct con_win *cwin)
+void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 {
-	GtkTreeModel *model = cwin->cplaylist->model;
+	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gchar *playlist;
@@ -1884,23 +1884,22 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 	/* If no tracks have been selected in the current playlist,
 	   return immediately. */
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-						cwin->cplaylist->view));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	playlist = get_playlist_name(cwin->cplaylist, SAVE_SELECTED, &choice);
+	playlist = get_playlist_name(cplaylist, SAVE_SELECTED, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
-			pragha_database_change_playlists_done(cwin->cdbase);
+			new_playlist(cplaylist, playlist, SAVE_SELECTED);
+			pragha_database_change_playlists_done(cplaylist->cdbase);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
+			append_playlist(cplaylist, playlist, SAVE_SELECTED);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (cwin->cplaylist, SAVE_SELECTED);
+			export_playlist (cplaylist, SAVE_SELECTED);
 			break;
 		default:
 			break;
@@ -1912,16 +1911,16 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 
 /* Save current playlist */
 
-void save_current_playlist(GtkAction *action, struct con_win *cwin)
+void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 {
-	GtkTreeModel *model = cwin->cplaylist->model;
+	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	gchar *playlist = NULL;
 	enum playlist_mgmt choice = 0;
 
 	/* If current playlist is empty, return immediately. */
 
-	if(pragha_playlist_is_changing(cwin->cplaylist))
+	if(pragha_playlist_is_changing(cplaylist))
 		return;
 
 	if (!gtk_tree_model_get_iter_first(model, &iter)) {
@@ -1929,18 +1928,18 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	playlist = get_playlist_name(cwin->cplaylist, SAVE_COMPLETE, &choice);
+	playlist = get_playlist_name(cplaylist, SAVE_COMPLETE, &choice);
 	if (playlist) {
 		switch(choice) {
 		case NEW_PLAYLIST:
-			new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
-			pragha_database_change_playlists_done(cwin->cdbase);
+			new_playlist(cplaylist, playlist, SAVE_COMPLETE);
+			pragha_database_change_playlists_done(cplaylist->cdbase);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
+			append_playlist(cplaylist, playlist, SAVE_COMPLETE);
 			break;
 		case EXPORT_PLAYLIST:
-			export_playlist (cwin->cplaylist, SAVE_COMPLETE);
+			export_playlist (cplaylist, SAVE_COMPLETE);
 			break;
 		default:
 			break;
