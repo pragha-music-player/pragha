@@ -505,7 +505,11 @@ create_sidebar_header(struct con_win *cwin)
 static void
 update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 {
+	/*
+	 * Rework to olny update Playlist and radio tree!!!.
+	 **/
 	init_library_view(cwin);
+	update_menu_playlist_changes(cwin);
 }
 
 static GtkWidget* create_browse_mode_view(struct con_win *cwin)
