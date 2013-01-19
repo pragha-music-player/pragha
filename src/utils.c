@@ -679,6 +679,18 @@ gchar* get_display_filename(const gchar *filename, gboolean get_folder)
 	return utf8_filename;
 }
 
+gchar* get_display_name(PraghaMusicobject *mobj)
+{
+	gchar *name = NULL;
+	
+	if (pragha_musicobject_get_file_type(mobj) == FILE_CDDA) {
+		name = g_strdup(pragha_musicobject_get_file(mobj));
+	} else {
+		name = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
+	}
+	return name;
+}
+
 /* Free a list of strings */
 
 void free_str_list(GSList *list)
