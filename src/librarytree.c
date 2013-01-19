@@ -305,8 +305,7 @@ add_child_node_by_tags (GtkTreeModel *model,
 GString *
 append_pragha_uri_string_list(GtkTreePath *path,
                               GString *list,
-                              GtkTreeModel *model,
-                              struct con_win *cwin)
+                              GtkTreeModel *model)
 {
 	GtkTreeIter t_iter, r_iter;
 	enum node_type node_type = 0;
@@ -325,7 +324,7 @@ append_pragha_uri_string_list(GtkTreePath *path,
 		case NODE_ALBUM:
 			while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
 				t_path = gtk_tree_model_get_path(model, &t_iter);
-				list = append_pragha_uri_string_list(t_path, list, model, cwin);
+				list = append_pragha_uri_string_list(t_path, list, model);
 				gtk_tree_path_free(t_path);
 			}
 			break;
@@ -911,7 +910,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 
 		l = list;
 		while(l) {
-			rlist = append_pragha_uri_string_list(l->data, rlist, model, cwin);
+			rlist = append_pragha_uri_string_list(l->data, rlist, model);
 			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
