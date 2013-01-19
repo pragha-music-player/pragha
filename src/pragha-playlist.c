@@ -1630,6 +1630,8 @@ pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
 	PraghaMusicobject *mobj = NULL;
 	gboolean ret;
 
+	set_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
 	clear_rand_track_refs(cplaylist);
 	clear_queue_track_refs(cplaylist);
 	clear_curr_seq_ref(cplaylist);
@@ -1644,18 +1646,18 @@ pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
 
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 
+	remove_watch_cursor (gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
+
 	cplaylist->no_tracks = 0;
 	cplaylist->unplayed_tracks = 0;
+
+	pragha_playlist_update_statusbar_playtime(cplaylist);
 }
 
 void
 current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 {
-	set_watch_cursor (cwin->mainwindow);
 	pragha_playlist_remove_all (cwin->cplaylist);
-	remove_watch_cursor (cwin->mainwindow);
-
-	pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
 }
 
 /* Update a track to the current playlist */
