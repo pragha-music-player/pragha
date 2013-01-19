@@ -672,7 +672,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			if (name) {
 				new_radio(cwin->cplaylist, uri, name);
-				init_library_view(cwin);
+				pragha_database_change_playlists_done(cwin->cdbase);
 			}
 		}
 		break;

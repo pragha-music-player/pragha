@@ -504,10 +504,8 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
-				if(node_type == NODE_PLAYLIST) {
+				if(node_type == NODE_PLAYLIST)
 					update_playlist_name_db(s_playlist, n_playlist, cwin->cdbase);
-					update_menu_playlist_changes(cwin);
-				}
 				else if (node_type == NODE_RADIO)
 					update_radio_name_db(s_playlist, n_playlist, cwin->cdbase);
 
@@ -585,7 +583,6 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db(s_playlist, cwin->cdbase);
-						update_menu_playlist_changes(cwin);
 					}
 					else if (node_type == NODE_RADIO) {
 						delete_radio_db(s_playlist, cwin->cdbase);
@@ -601,7 +598,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	}
 
 	if(removed)
-		init_library_view(cwin);
+		pragha_database_change_playlists_done(cwin->cdbase);
 }
 
 /* Export selection/current playlist to a M3U file */

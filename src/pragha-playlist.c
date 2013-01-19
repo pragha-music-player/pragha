@@ -1894,8 +1894,7 @@ void save_selected_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
-			update_menu_playlist_changes(cwin);
-			init_library_view(cwin);
+			pragha_database_change_playlists_done(cwin->cdbase);
 			break;
 		case APPEND_PLAYLIST:
 			append_playlist(cwin->cplaylist, playlist, SAVE_SELECTED);
@@ -1935,8 +1934,7 @@ void save_current_playlist(GtkAction *action, struct con_win *cwin)
 		switch(choice) {
 		case NEW_PLAYLIST:
 			new_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
-			update_menu_playlist_changes(cwin);
-			init_library_view(cwin);
+			pragha_database_change_playlists_done(cwin->cdbase);
 			break;
 		case APPEND_PLAYLIST:
 			append_playlist(cwin->cplaylist, playlist, SAVE_COMPLETE);
