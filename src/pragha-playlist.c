@@ -3454,7 +3454,7 @@ create_current_playlist_container(PraghaPlaylist *cplaylist)
 }
 
 static GtkWidget*
-create_current_playlist_view (PraghaPlaylist *cplaylist, struct con_win *cwin)
+create_current_playlist_view (PraghaPlaylist *cplaylist)
 {
 	GtkWidget *current_playlist;
 	GtkListStore *store;
@@ -3526,15 +3526,12 @@ create_current_playlist_view (PraghaPlaylist *cplaylist, struct con_win *cwin)
 	/* Signal handler for double-clicking on a row */
 
 	g_signal_connect(G_OBJECT(current_playlist), "row-activated",
-			 G_CALLBACK(current_playlist_row_activated_cb), cwin);
-
-	g_signal_connect (G_OBJECT (current_playlist), "key-press-event",
 			  G_CALLBACK (current_playlist_key_press), cplaylist);
 
 	/* Store the treeview in the scrollbar widget */
 
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist),
-				      pragha_preferences_get_use_hint(cwin->preferences));
+				      pragha_preferences_get_use_hint(cplaylist->preferences));
 
 	g_object_unref(store);
 
@@ -3971,7 +3968,7 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->preferences = pragha_preferences_get();
 	cplaylist->cdbase = pragha_database_get();
 
-	cplaylist->view = create_current_playlist_view(cplaylist, cwin);
+	cplaylist->view = create_current_playlist_view(cplaylist);
 	cplaylist->model = g_object_ref(gtk_tree_view_get_model(GTK_TREE_VIEW(cplaylist->view)));
 	cplaylist->widget = create_current_playlist_container(cplaylist);
 
@@ -3981,9 +3978,10 @@ cplaylist_new(struct con_win *cwin)
 	cplaylist->cp_context_menu = create_cp_context_menu(cplaylist->view, cwin);
 	cplaylist->cp_null_context_menu = create_cp_null_context_menu(cplaylist->view, cwin);
 
+	g_signal_connect(G_OBJECT(cplaylist->view), "row-activated",
+			 G_CALLBACK(current_playlist_row_activated_cb), cwin);
 	g_signal_connect(G_OBJECT(cplaylist->view), "button-press-event",
 			 G_CALLBACK(current_playlist_button_press_cb), cplaylist);
-
 	g_signal_connect(G_OBJECT(cplaylist->view), "button-release-event",
 			 G_CALLBACK(current_playlist_button_release_cb), cplaylist);
 
