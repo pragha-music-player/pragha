@@ -511,9 +511,9 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 				else if (node_type == NODE_RADIO)
 					update_radio_name_db(s_playlist, n_playlist, cwin->cdbase);
 
-				g_free(n_playlist);
+				pragha_database_change_playlists_done(cwin->cdbase);
 
-				init_library_view(cwin);
+				g_free(n_playlist);
 			}
 			g_free(s_playlist);
 			g_free(playlist);
