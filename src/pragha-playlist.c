@@ -3524,7 +3524,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 
 	/* Signal handler for double-clicking on a row */
 
-	g_signal_connect(G_OBJECT(current_playlist), "row-activated",
+	g_signal_connect(G_OBJECT(current_playlist), "key-press-event",
 			  G_CALLBACK (current_playlist_key_press), cplaylist);
 
 	/* Store the treeview in the scrollbar widget */
