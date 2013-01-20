@@ -1567,7 +1567,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	gchar *query = NULL;
 	PraghaDbResponse result;
 
-	PraghaMusicobject *omobj, *nmobj;
+	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
@@ -1616,6 +1616,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				break;
 			}
 		}
+	} else {
+		omobj = pragha_musicobject_new ();
 	}
 
 	nmobj = pragha_musicobject_new();
@@ -1680,8 +1682,10 @@ exit:
 	g_free(node_data);
 	g_strfreev (split_album);
 
-	g_object_unref(nmobj);
-	g_object_unref(omobj);
+	if (nmobj)
+		g_object_unref (nmobj);
+	if (omobj)
+		g_object_unref (omobj);
 		
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
