@@ -903,7 +903,7 @@ void update_db (const gchar *dir_name,
 		PraghaDatabase *cdbase);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, PraghaDatabase *cdbase);
-gint init_dbase_schema(PraghaDatabase *cdbase);
+gboolean pragha_database_init_schema (PraghaDatabase *database);
 gint drop_dbase_schema(PraghaDatabase *cdbase);
 gint db_get_artist_count(PraghaDatabase *cdbase);
 gint db_get_album_count(PraghaDatabase *cdbase);

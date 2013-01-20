@@ -922,7 +922,7 @@ void rescan_library_handler(struct con_win *cwin)
 			g_critical("Unable to drop database schema");
 			return;
 		}
-		if (init_dbase_schema(cwin->cdbase) == -1) {
+		if (!pragha_database_init_schema (cwin->cdbase)) {
 			g_critical("Unable to init database schema");
 			return;
 		}

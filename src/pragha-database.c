@@ -109,87 +109,10 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 	return ret;
 }
 
-/**
- * pragha_database_change_playlists_done:
- *
- */
-void
-pragha_database_change_playlists_done(PraghaDatabase *database)
-{
-	g_return_if_fail(PRAGHA_IS_DATABASE(database));
-
-	g_signal_emit (database, signals[SIGNAL_PLAYLISTS_CHANGED], 0);
-}
-
-/**
- * pragha_database_start_successfully:
- *
- */
 gboolean
-pragha_database_start_successfully (PraghaDatabase *database)
+pragha_database_init_schema (PraghaDatabase *database)
 {
-	g_return_val_if_fail(PRAGHA_IS_DATABASE(database), FALSE);
-
-	return database->priv->successfully;
-}
-
-static void
-pragha_database_finalize (GObject *object)
-{
-	PraghaDatabase *database = PRAGHA_DATABASE(object);
-	PraghaDatabasePrivate *priv = database->priv;
-
-	sqlite3_close(priv->sqlitedb);
-
-	G_OBJECT_CLASS(pragha_database_parent_class)->finalize(object);
-}
-
-static void
-pragha_database_class_init (PraghaDatabaseClass *klass)
-{
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS(klass);
-	object_class->finalize = pragha_database_finalize;
-
-	signals[SIGNAL_PLAYLISTS_CHANGED] = g_signal_new ("PlaylistsChanged",
-	                                                  G_TYPE_FROM_CLASS (object_class),
-	                                                  G_SIGNAL_RUN_LAST,
-	                                                  G_STRUCT_OFFSET (PraghaDatabaseClass, playlists_change),
-	                                                  NULL, NULL,
-	                                                  g_cclosure_marshal_VOID__VOID,
-	                                                  G_TYPE_NONE, 0);
-
-	g_type_class_add_private(object_class, sizeof(PraghaDatabasePrivate));
-}
-
-static void
-pragha_database_init (PraghaDatabase *database)
-{
-	gint ret, i;
-	gchar *database_file;
-	const gchar *home;
-
-	database->priv = G_TYPE_INSTANCE_GET_PRIVATE(database,
-	                                             PRAGHA_TYPE_DATABASE,
-	                                             PraghaDatabasePrivate);
-
-	PraghaDatabasePrivate *priv = database->priv;
-
-	home = g_get_user_config_dir();
-	database_file = g_build_path(G_DIR_SEPARATOR_S, home, "/pragha/pragha.db", NULL);
-
-	priv->successfully = FALSE;
-
-	/* Create the database file */
-
-	ret = sqlite3_open(database_file, &priv->sqlitedb);
-	if (ret) {
-		g_critical("Unable to open/create DATABASE file : %s", database_file);
-		g_free(database_file);
-		return;
-	}
-	g_free(database_file);
+	gint i;
 
 	const gchar *queries[] = {
 		"PRAGMA synchronous=OFF",
@@ -260,8 +183,96 @@ pragha_database_init (PraghaDatabase *database)
 
 	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
 		if (!pragha_database_exec_query (database, queries[i]))
-			return;
+			return FALSE;
 	}
+
+	return TRUE;
+}
+
+/**
+ * pragha_database_change_playlists_done:
+ *
+ */
+void
+pragha_database_change_playlists_done(PraghaDatabase *database)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE(database));
+
+	g_signal_emit (database, signals[SIGNAL_PLAYLISTS_CHANGED], 0);
+}
+
+/**
+ * pragha_database_start_successfully:
+ *
+ */
+gboolean
+pragha_database_start_successfully (PraghaDatabase *database)
+{
+	g_return_val_if_fail(PRAGHA_IS_DATABASE(database), FALSE);
+
+	return database->priv->successfully;
+}
+
+static void
+pragha_database_finalize (GObject *object)
+{
+	PraghaDatabase *database = PRAGHA_DATABASE(object);
+	PraghaDatabasePrivate *priv = database->priv;
+
+	sqlite3_close(priv->sqlitedb);
+
+	G_OBJECT_CLASS(pragha_database_parent_class)->finalize(object);
+}
+
+static void
+pragha_database_class_init (PraghaDatabaseClass *klass)
+{
+	GObjectClass *object_class;
+
+	object_class = G_OBJECT_CLASS(klass);
+	object_class->finalize = pragha_database_finalize;
+
+	signals[SIGNAL_PLAYLISTS_CHANGED] = g_signal_new ("PlaylistsChanged",
+	                                                  G_TYPE_FROM_CLASS (object_class),
+	                                                  G_SIGNAL_RUN_LAST,
+	                                                  G_STRUCT_OFFSET (PraghaDatabaseClass, playlists_change),
+	                                                  NULL, NULL,
+	                                                  g_cclosure_marshal_VOID__VOID,
+	                                                  G_TYPE_NONE, 0);
+
+	g_type_class_add_private(object_class, sizeof(PraghaDatabasePrivate));
+}
+
+static void
+pragha_database_init (PraghaDatabase *database)
+{
+	gint ret;
+	gchar *database_file;
+	const gchar *home;
+
+	database->priv = G_TYPE_INSTANCE_GET_PRIVATE(database,
+	                                             PRAGHA_TYPE_DATABASE,
+	                                             PraghaDatabasePrivate);
+
+	PraghaDatabasePrivate *priv = database->priv;
+
+	home = g_get_user_config_dir();
+	database_file = g_build_path(G_DIR_SEPARATOR_S, home, "/pragha/pragha.db", NULL);
+
+	priv->successfully = FALSE;
+
+	/* Create the database file */
+
+	ret = sqlite3_open(database_file, &priv->sqlitedb);
+	if (ret) {
+		g_critical("Unable to open/create DATABASE file : %s", database_file);
+		g_free(database_file);
+		return;
+	}
+	g_free(database_file);
+
+	if (!pragha_database_init_schema (database))
+		return;
 
 	priv->successfully = TRUE;
 }
