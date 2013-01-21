@@ -303,18 +303,17 @@ add_child_node_by_tags (GtkTreeModel *model,
 }
 
 GString *
-append_pragha_uri_string_list(GtkTreePath *path,
+append_pragha_uri_string_list(GtkTreeIter *r_iter,
                               GString *list,
                               GtkTreeModel *model)
 {
-	GtkTreeIter t_iter, r_iter;
+	GtkTreeIter t_iter;
 	enum node_type node_type = 0;
-	GtkTreePath *t_path;
-	gint location_id, j = 0;
+	gint location_id;
 	gchar *data, *uri = NULL;
+	gboolean valid;
 
-	gtk_tree_model_get_iter(model, &r_iter, path);
-	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
+	gtk_tree_model_get(model, r_iter, L_NODE_TYPE, &node_type, -1);
 
 	switch (node_type) {
 		case NODE_CATEGORY:
@@ -322,24 +321,26 @@ append_pragha_uri_string_list(GtkTreePath *path,
 		case NODE_GENRE:
 		case NODE_ARTIST:
 		case NODE_ALBUM:
-			while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
-				t_path = gtk_tree_model_get_path(model, &t_iter);
-				list = append_pragha_uri_string_list(t_path, list, model);
-				gtk_tree_path_free(t_path);
+			valid = gtk_tree_model_iter_children(model, &t_iter, r_iter);
+			while (valid) {
+				list = append_pragha_uri_string_list(&t_iter, list, model);
+
+				valid = gtk_tree_model_iter_next(model, &t_iter);
 			}
-			break;
+			pragha_process_gtk_events ();
+	 		break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+			gtk_tree_model_get(model, r_iter, L_LOCATION_ID, &location_id, -1);
 			uri = g_strdup_printf("Location:/%d", location_id);
 			break;
 		case NODE_PLAYLIST:
-			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
+			gtk_tree_model_get(model, r_iter, L_NODE_DATA, &data, -1);
 			uri = g_strdup_printf("Playlist:/%s", data);
 			g_free(data);
 			break;
 		case NODE_RADIO:
-			gtk_tree_model_get(model, &r_iter, L_NODE_DATA, &data, -1);
+			gtk_tree_model_get(model, r_iter, L_NODE_DATA, &data, -1);
 			uri = g_strdup_printf("Radio:/%s", data);
 			g_free(data);
 			break;
@@ -357,19 +358,18 @@ append_pragha_uri_string_list(GtkTreePath *path,
 }
 
 GString *
-append_uri_string_list(GtkTreePath *path,
+append_uri_string_list(GtkTreeIter *r_iter,
                        GString *list,
                        GtkTreeModel *model,
                        struct con_win *cwin)
 {
-	GtkTreeIter t_iter, r_iter;
+	GtkTreeIter t_iter;
 	enum node_type node_type = 0;
-	GtkTreePath *t_path;
-	gint location_id, j = 0;
+	gint location_id;
 	gchar *filename = NULL, *uri = NULL;
+	gboolean valid;
 
-	gtk_tree_model_get_iter(model, &r_iter, path);
-	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
+	gtk_tree_model_get(model, r_iter, L_NODE_TYPE, &node_type, -1);
 
 	switch (node_type) {
 		case NODE_CATEGORY:
@@ -377,15 +377,17 @@ append_uri_string_list(GtkTreePath *path,
 		case NODE_GENRE:
 		case NODE_ARTIST:
 		case NODE_ALBUM:
-			while (gtk_tree_model_iter_nth_child(model, &t_iter, &r_iter, j++)) {
-				t_path = gtk_tree_model_get_path(model, &t_iter);
-				list = append_uri_string_list(t_path, list, model, cwin);
-				gtk_tree_path_free(t_path);
+			valid = gtk_tree_model_iter_children(model, &t_iter, r_iter);
+			while (valid) {
+				list = append_uri_string_list(&t_iter, list, model, cwin);
+
+				valid = gtk_tree_model_iter_next(model, &t_iter);
 			}
+			pragha_process_gtk_events ();
 			break;
 		case NODE_TRACK:
 		case NODE_BASENAME:
-			gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
+			gtk_tree_model_get(model, r_iter, L_LOCATION_ID, &location_id, -1);
 			filename = pragha_database_get_filename_from_location_id(cwin->cdbase, location_id);
 			break;
 		case NODE_PLAYLIST:
@@ -896,6 +898,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 	GtkTreeModel *model;
 	GList *list = NULL, *l;
 	GString *rlist;
+	GtkTreeIter s_iter;
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
@@ -910,7 +913,8 @@ void dnd_library_tree_get(GtkWidget *widget,
 
 		l = list;
 		while(l) {
-			rlist = append_pragha_uri_string_list(l->data, rlist, model);
+			if(gtk_tree_model_get_iter(model, &s_iter, l->data))
+				rlist = append_pragha_uri_string_list(&s_iter, rlist, model);
 			gtk_tree_path_free(l->data);
 			l = l->next;
 		}
@@ -935,8 +939,8 @@ void dnd_library_tree_get(GtkWidget *widget,
 
 		l = list;
 		while(l) {
-			rlist = append_uri_string_list(l->data, rlist, model, cwin);
-			gtk_tree_path_free(l->data);
+			if(gtk_tree_model_get_iter(model, &s_iter, l->data))
+				rlist = append_uri_string_list(&s_iter, rlist, model, cwin);
 			l = l->next;
 		}
 
