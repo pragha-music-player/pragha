@@ -2451,7 +2451,7 @@ exit:
 	g_list_free(list);
 }
 
-GList *
+static GList *
 dnd_current_playlist_received_from_library(GtkSelectionData *data,
                                            PraghaPlaylist *cplaylist)
 {
@@ -2498,7 +2498,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 	return list;
 }
 
-GList *
+static GList *
 dnd_current_playlist_received_uri_list(GtkSelectionData *data)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -2534,7 +2534,7 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data)
 	return list;
 }
 
-GList *
+static GList *
 dnd_current_playlist_received_plain_text(GtkSelectionData *data)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -3921,7 +3921,7 @@ current_playlist_save_preferences(PraghaPlaylist* cplaylist)
 	g_object_unref(G_OBJECT(preferences));
 }
 
-void
+static void
 cplatlist_init_pixbuf(PraghaPlaylist* cplaylist)
 {
 	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
