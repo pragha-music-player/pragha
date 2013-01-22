@@ -29,12 +29,8 @@
 
 #include <stdlib.h>
 
-#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
-#if GST_CHECK_VERSION (1, 0, 0)
+#if HAVE_GSTREAMER_AUDIO
 #include <gst/audio/streamvolume.h>
-#else
-#include <gst/interfaces/streamvolume.h>
-#endif //GST_CHECK_VERSION
 #define convert_volume(from, to, val) gst_stream_volume_convert_volume((from), (to), (val))
 #define VOLUME_FORMAT_LINEAR GST_STREAM_VOLUME_FORMAT_LINEAR
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
@@ -142,11 +138,7 @@ pragha_backend_get_current_length (PraghaBackend *backend)
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
-#if GST_CHECK_VERSION (1, 0, 0)
 	result = gst_element_query_duration(priv->pipeline, format, &song_length);
-#else
-	result = gst_element_query_duration(priv->pipeline, &format, &song_length);
-#endif
 
 	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
@@ -162,11 +154,7 @@ pragha_backend_get_current_position (PraghaBackend *backend)
 	gboolean result;
 	GstFormat format = GST_FORMAT_TIME;
 
-#if GST_CHECK_VERSION (1, 0, 0)
 	result = gst_element_query_position(priv->pipeline, format, &song_position);
-#else
-	result = gst_element_query_position(priv->pipeline, &format, &song_position);
-#endif
 
 	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
@@ -242,7 +230,7 @@ pragha_backend_get_volume (PraghaBackend *backend)
 
 	g_object_get (priv->pipeline, "volume", &volume, NULL);
 
-#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
+#if HAVE_GSTREAMER_AUDIO
 	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
 #endif
 
@@ -272,7 +260,7 @@ pragha_backend_set_volume (PraghaBackend *backend, gdouble volume)
 
 	volume = CLAMP (volume, 0.0, 1.0);
 
-#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
+#if HAVE_GSTREAMER_AUDIO
 	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, volume);
 #endif
 
@@ -954,11 +942,7 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
 
-#if GST_CHECK_VERSION (1, 0, 0)
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
-#else
-	priv->pipeline = gst_element_factory_make("playbin2", "playbin");
-#endif
 
 	if (priv->pipeline == NULL) {
 		g_critical ("Failed to create playbin element. Please check your GStreamer installation.");
