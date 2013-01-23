@@ -26,9 +26,17 @@ typedef struct directory_pressed_data {
 static gboolean get_info_taglib(const gchar *file, struct tags *tags)
 {
 	gboolean ret = FALSE;
-	TagLib_File *tfile;
+	TagLib_File *tfile = NULL;
 	TagLib_Tag *tag;
 	const TagLib_AudioProperties *audio_prop;
+
+	/* workaround for crash in taglib
+	   https://github.com/taglib/taglib/issues/78 */
+	if (!g_file_test (file, G_FILE_TEST_EXISTS)) {
+		g_warning("Unable to open file using taglib : %s", file);
+		ret = FALSE;
+		goto exit;
+	}
 
 	tfile = taglib_file_new(file);
 	if (!tfile) {
