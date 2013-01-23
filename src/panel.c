@@ -146,7 +146,7 @@ void __update_progress_song_info(struct con_win *cwin, gint progress)
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	if(length == 0 || !cwin->cpref->timer_remaining_mode) {
+	if (length == 0 || !pragha_preferences_get_timer_remaining_mode (cwin->preferences)) {
 		tot_length = convert_length_str(length);
 		str_length = g_markup_printf_escaped ("<small>%s</small>", tot_length);
 	}
@@ -267,10 +267,8 @@ void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win
 
 void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin)
 {
-	if(cwin->cpref->timer_remaining_mode)
-		cwin->cpref->timer_remaining_mode = FALSE;
-	else
-		cwin->cpref->timer_remaining_mode = TRUE;
+	gboolean mode = pragha_preferences_get_timer_remaining_mode (cwin->preferences);
+	pragha_preferences_set_timer_remaining_mode (cwin->preferences, !mode);
 
 	if(pragha_backend_get_state (cwin->backend) != ST_STOPPED)
 		update_current_song_info(cwin);

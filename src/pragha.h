@@ -511,7 +511,6 @@ struct con_pref {
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
-	gboolean timer_remaining_mode;
 #ifdef HAVE_LIBGLYR
 	gboolean get_album_art;
 #endif

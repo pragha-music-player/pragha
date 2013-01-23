@@ -184,6 +184,13 @@ void
 pragha_preferences_set_add_recursively(PraghaPreferences *preferences,
                                        gboolean add_recursively);
 
+gboolean
+pragha_preferences_get_timer_remaining_mode (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
+                                            gboolean add_recursively);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

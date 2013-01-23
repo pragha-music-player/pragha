@@ -822,13 +822,6 @@ void save_preferences(struct con_win *cwin)
 				      cwin->cpref->album_art_pattern);
 	}
 
-	/* Save time remaining mode option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_TIMER_REMAINING_MODE,
-			       cwin->cpref->timer_remaining_mode);
-
 	/* Save show status icon option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
