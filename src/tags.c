@@ -22,9 +22,17 @@ gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
 {
 	gboolean ret = TRUE;
-	TagLib_File *tfile;
+	TagLib_File *tfile = NULL;
 	TagLib_Tag *tag;
 	const TagLib_AudioProperties *audio_prop;
+
+	/* workaround for crash in taglib
+	   https://github.com/taglib/taglib/issues/78 */
+	if (!g_file_test (file, G_FILE_TEST_EXISTS)) {
+		g_warning("Unable to open file using taglib : %s", file);
+		ret = FALSE;
+		goto exit;
+	}
 
 	tfile = taglib_file_new(file);
 	if (!tfile) {
