@@ -968,8 +968,8 @@ void flush_stale_entries_db(PraghaDatabase *cdbase)
 /* Delete all tracks falling under the given directory.
    Also, flush the database of unused albums, artists, etc. */
 
-void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, PraghaDatabase *cdbase)
+void
+pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name)
 {
 	gchar *query, *sdir_name;
 

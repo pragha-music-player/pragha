@@ -19,8 +19,12 @@
 
 typedef struct {
 	PraghaDatabase *cdbase;
+	/* Temporality added cwin.
+	 * TODO: Port cwin->cpref->last_rescan_time to PraghaPreferences */
+	struct con_win *cwin;
 	GSList         *folder_list;
-	GTimeVal        LastTimeVal;
+	GSList         *folder_added;
+	GSList         *folder_removed;
 	GtkWidget      *dialog;
 	GtkWidget      *label;
 	GtkWidget      *progress_bar;
