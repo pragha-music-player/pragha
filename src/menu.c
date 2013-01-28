@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-scanner.h"
 
 static GtkWidget *library_dialog;
 
@@ -891,9 +892,22 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 }
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
+
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
 {
-	rescan_library_handler(cwin);
+	pragha_rescan_library(cwin->cpref->library_dir, cwin);
+
+	/* Save rescan time */
+
+	g_get_current_time(&cwin->cpref->last_rescan_time);
+
+	/* Free lists */
+
+	/*free_str_list(cwin->cpref->lib_add);
+	free_str_list(cwin->cpref->lib_delete);
+
+	cwin->cpref->lib_add = NULL;
+	cwin->cpref->lib_delete = NULL;*/
 }
 
 void rescan_library_handler(struct con_win *cwin)
@@ -926,7 +940,8 @@ void rescan_library_handler(struct con_win *cwin)
 			g_critical("Unable to init database schema");
 			return;
 		}
-	} else {
+	}
+	else {
 		flush_db(cwin->cdbase);
 	}
 

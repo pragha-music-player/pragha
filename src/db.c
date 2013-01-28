@@ -180,7 +180,7 @@ static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *
 	}
 }
 
-static void add_entry_db(const gchar *file, PraghaDatabase *cdbase)
+void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file)
 {
 	if (pragha_pl_parser_guess_format_from_extension(file) != PL_FORMAT_UNKNOWN) {
 		import_playlist_from_file_db(file, cdbase);
@@ -1014,7 +1014,7 @@ void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 			rescan_db(ab_file, no_files, pbar, 0, cancellable, cdbase);
 		else {
 			files_scanned++;
-			add_entry_db(ab_file, cdbase);
+			pragha_database_add_new_file(cdbase, ab_file);
 		}
 
 		/* Have to give control to GTK periodically ... */
@@ -1078,13 +1078,13 @@ void update_db (const gchar *dir_name,
 			files_scanned++;
 			s_ab_file = sanitize_string_to_sqlite3(ab_file);
 			if (!find_location_db(s_ab_file, cdbase)) {
-				add_entry_db(ab_file, cdbase);
+				pragha_database_add_new_file(cdbase, ab_file);
 			} else {
 				g_stat(ab_file, &sbuf);
 				if (sbuf.st_mtime > last_rescan_time.tv_sec) {
 					if (find_location_db(s_ab_file, cdbase))
 						delete_track_db(ab_file, cdbase);
-					add_entry_db(ab_file, cdbase);
+					pragha_database_add_new_file(cdbase, ab_file);
 				}
 			}
 			g_free(s_ab_file);
