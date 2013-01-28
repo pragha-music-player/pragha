@@ -22,6 +22,7 @@ typedef struct {
 	GSList         *folder_list;
 	GTimeVal        LastTimeVal;
 	GtkWidget      *dialog;
+	GtkWidget      *label;
 	GtkWidget      *progress_bar;
 	guint           no_files;
 	PRAGHA_MUTEX   (no_files_mutex);
