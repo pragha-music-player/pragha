@@ -30,7 +30,7 @@ gtk_label_set_attribute_bold(GtkLabel *label)
 	pango_attr_list_unref(Bold);
 }
 
-void
+GtkWidget *
 pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title)
 {
 	GtkWidget *section_label;
@@ -45,6 +45,8 @@ pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const 
 			 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
 			 0, 0);
 	++ * row;
+
+	return section_label;
 }
 
 void

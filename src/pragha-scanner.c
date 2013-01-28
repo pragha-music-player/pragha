@@ -342,7 +342,8 @@ PraghaScanner *
 pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 {
 	PraghaScanner *scanner;
-	GtkWidget *dialog, *hbox, *label, *spinner, *progress_bar;
+	GtkWidget *dialog, *table, *label, *progress_bar;
+	guint row = 0;
 
 	scanner = g_slice_new0(PraghaScanner);
 
@@ -353,7 +354,7 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	scanner->folder_removed = cwin->cpref->lib_delete;
 	scanner->folder_added = cwin->cpref->lib_add;
 
-	/* Create the window scanner */
+	/* Create the scanner dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Rescan Library"),
 	                                     GTK_WINDOW(cwin->mainwindow),
@@ -361,32 +362,22 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	                                     GTK_STOCK_CANCEL,
 	                                     GTK_RESPONSE_CANCEL,
 	                                     NULL);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+				  GTK_BUTTONBOX_SPREAD);
 
-	/* Create the label */
+	/* Create the layout */
 
-	label = gtk_label_new(_("Searching files to analyze"));
+	table = pragha_hig_workarea_table_new();
 
-	/* Create a progress bar */
+	label = pragha_hig_workarea_table_add_section_title(table, &row, _("Searching files to analyze"));
 
 	progress_bar = gtk_progress_bar_new();
-	gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress_bar));
-
-	hbox = gtk_hbox_new (FALSE, 5);
-
-	spinner = gtk_spinner_new ();
-	gtk_container_add (GTK_CONTAINER (hbox), spinner);
-	gtk_spinner_start(GTK_SPINNER(spinner));
-
-	gtk_container_add (GTK_CONTAINER (hbox), progress_bar);
-
-	/* Set various properties */
-
 	gtk_widget_set_size_request(progress_bar,
 				    PROGRESS_BAR_WIDTH,
 				    -1);
 
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-				  GTK_BUTTONBOX_SPREAD);
+	pragha_hig_workarea_table_add_wide_control(table, &row, progress_bar);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	/* Setup signal handlers */
 
@@ -395,10 +386,9 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(dialog), "response",
 			 G_CALLBACK(scanner_dialog_response_event), scanner);
 
-	/* Add the progress bar to the dialog box's vbox and show everything */
+	/* Add the layout to the dialog and show everything */
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox, TRUE, TRUE, 0);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 
 	scanner->dialog = dialog;
 	scanner->label = label;
