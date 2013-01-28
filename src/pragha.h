@@ -778,6 +778,7 @@ GtkWidget* create_toolbar(struct con_win *cwin);
 
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
+gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable);
 gint dir_file_count(const gchar *dir_name, gint call_recur);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
 GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
@@ -892,6 +893,7 @@ void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
 gboolean fraction_update(GtkWidget *pbar);
+void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
 void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase);
 void update_db (const gchar *dir_name,

@@ -37,6 +37,7 @@ pragha_SOURCES =cdda.c \
 		pragha-playback.c \
 		pragha-playlist.c \
 		pragha-preferences.c \
+		pragha-scanner.c \
 		pragha-simple-async.c \
 		pragha-statusbar.c \
 		pref.c \
