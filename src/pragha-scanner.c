@@ -45,7 +45,7 @@ pragha_scanner_update_progress(gpointer user_data)
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), fraction);
 
 		data = g_strdup_printf(_("%i files analzed of %i detected"), files_scanned, no_files);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), data);
+		gtk_label_set_text(GTK_LABEL(scanner->label), data);
 		g_free(data);
 	}
 	else {
@@ -265,7 +265,7 @@ PraghaScanner *
 pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 {
 	PraghaScanner *scanner;
-	GtkWidget *dialog, *hbox, *spinner, *progress_bar;
+	GtkWidget *dialog, *hbox, *label, *spinner, *progress_bar;
 
 	scanner = g_slice_new0(PraghaScanner);
 
@@ -281,6 +281,10 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	                                     GTK_STOCK_CANCEL,
 	                                     GTK_RESPONSE_CANCEL,
 	                                     NULL);
+
+	/* Create the label */
+
+	label = gtk_label_new(_("Searching files to analyze"));
 
 	/* Create a progress bar */
 
@@ -313,9 +317,11 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 
 	/* Add the progress bar to the dialog box's vbox and show everything */
 
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox, TRUE, TRUE, 0);
 
 	scanner->dialog = dialog;
+	scanner->label = label;
 	scanner->progress_bar = progress_bar;
 
 	scanner->files_scanned = 0;
