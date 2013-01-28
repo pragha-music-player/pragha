@@ -20,7 +20,7 @@
 /* Update the dialog. */
 
 gboolean
-update_scanned_progress(gpointer user_data)
+pragha_scanner_update_progress(gpointer user_data)
 {
 	gdouble fraction = 0.0;
 	gint files_scanned = 0;
@@ -58,7 +58,7 @@ update_scanned_progress(gpointer user_data)
 /* Thread that counts all files in the library */
 
 gpointer
-pragha_count_no_files_worker(gpointer data)
+pragha_scanner_count_no_files_worker(gpointer data)
 {
 	GSList *list;
 	gint no_files = 0;
@@ -118,6 +118,9 @@ pragha_scanner_worker_finished (gpointer data)
 	/* Update the library view */
 	pragha_database_change_playlists_done(scanner->cdbase);
 
+	/* Save last time update */
+	g_get_current_time(&scanner->LastTimeVal);
+
 	/* Clean memory */
 	g_object_unref(scanner->cdbase);
 	pragha_mutex_free(scanner->no_files_mutex);
@@ -132,7 +135,7 @@ pragha_scanner_worker_finished (gpointer data)
 /* Function that analyzes all files of library recursively */
 
 void
-pragha_rescan_handler(PraghaScanner *scanner, const gchar *dir_name)
+pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 {
 	GDir *dir;
 	const gchar *next_file = NULL;
@@ -157,7 +160,7 @@ pragha_rescan_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			pragha_rescan_handler(scanner, ab_file);
+			pragha_scanner_scan_handler(scanner, ab_file);
 		else {
 			pragha_database_add_new_file(scanner->cdbase, ab_file);
 
@@ -175,7 +178,7 @@ pragha_rescan_handler(PraghaScanner *scanner, const gchar *dir_name)
 /* Thread that analyze all files in the library */
 
 gpointer
-pragha_scanner_worker(gpointer data)
+pragha_scanner_scan_worker(gpointer data)
 {
 	GSList *list;
 
@@ -185,18 +188,56 @@ pragha_scanner_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		pragha_rescan_handler(scanner, list->data);
+		pragha_scanner_scan_handler(scanner, list->data);
 	}
 
 	return scanner;
 }
 
-/* Signal handler for deleting rescan dialog box */
+/* Function that analyzes all files of library recursively */
+
+void
+pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
+{
+
+}
+
+/* Thread that analyze all files in the library */
+
+gpointer
+pragha_scanner_update_worker(gpointer data)
+{
+	gchar *query;
+	PraghaDbResponse result;
+	gint i = 0;
+
+	PraghaScanner *scanner = data;
+
+	/* First clean removed files */
+	query = g_strdup_printf("SELECT name FROM LOCATION;");
+	if (pragha_database_exec_sqlite_query(scanner->cdbase, query, &result)) {
+		for_each_result_row(result, i) {
+			if(g_cancellable_is_cancelled (scanner->cancellable))
+				break;
+			if(!g_file_test(result.resultp[i], G_FILE_TEST_EXISTS))
+				pragha_database_forget_track(scanner->cdbase, result.resultp[i]);
+		}
+		sqlite3_free_table(result.resultp);
+	}
+
+	/* Then add news files or update others..
+	 * lalala.. */
+
+	return scanner;
+}
+
+
+/* Signal handler for deleting the scanner dialog */
 
 gboolean
-rescan_dialog_delete_event(GtkWidget *dialog,
-                           GdkEvent *event,
-                           gpointer user_data)
+scanner_dialog_delete_event(GtkWidget *dialog,
+                            GdkEvent *event,
+                            gpointer user_data)
 {
 	PraghaScanner *scanner = user_data;
 
@@ -205,12 +246,12 @@ rescan_dialog_delete_event(GtkWidget *dialog,
 	return TRUE;
 }
 
-/* Signal handler for cancelling rescan dialog box */
+/* Signal handler for cancelling the scanner dialog */
 
 void
-rescan_dialog_response_event(GtkDialog *dialog,
-                             gint response_id,
-                             gpointer user_data)
+scanner_dialog_response_event(GtkDialog *dialog,
+                              gint response_id,
+                              gpointer user_data)
 {
 	PraghaScanner *scanner = user_data;
 
@@ -218,30 +259,19 @@ rescan_dialog_response_event(GtkDialog *dialog,
 		g_cancellable_cancel (scanner->cancellable);
 }
 
-void
-pragha_rescan_library(GSList *folder_list, struct con_win *cwin)
+/* Create the dialog and init all */
+
+PraghaScanner *
+pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 {
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *hbox, *spinner, *progress_bar;
-
-	if (is_incompatible_upgrade(cwin)) {
-		if (drop_dbase_schema(cwin->cdbase) == -1) {
-			g_critical("Unable to drop database schema");
-			return;
-		}
-		if (!pragha_database_init_schema (cwin->cdbase)) {
-			g_critical("Unable to init database schema");
-			return;
-		}
-	}
-	else {
-		flush_db(cwin->cdbase);
-	}
 
 	scanner = g_slice_new0(PraghaScanner);
 
 	scanner->cdbase = pragha_database_get();
 	scanner->folder_list = folder_list;
+	scanner->LastTimeVal = cwin->cpref->last_rescan_time;
 
 	/* Create the window scanner */
 
@@ -277,9 +307,9 @@ pragha_rescan_library(GSList *folder_list, struct con_win *cwin)
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(GTK_WINDOW(dialog)), "delete_event",
-			 G_CALLBACK(rescan_dialog_delete_event), scanner);
+			 G_CALLBACK(scanner_dialog_delete_event), scanner);
 	g_signal_connect(G_OBJECT(dialog), "response",
-			 G_CALLBACK(rescan_dialog_response_event), scanner);
+			 G_CALLBACK(scanner_dialog_response_event), scanner);
 
 	/* Add the progress bar to the dialog box's vbox and show everything */
 
@@ -296,17 +326,65 @@ pragha_rescan_library(GSList *folder_list, struct con_win *cwin)
 
 	scanner->cancellable = g_cancellable_new ();
 
-	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)update_scanned_progress, scanner);
+	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
 	gtk_widget_show_all(dialog);
 
 	#if GLIB_CHECK_VERSION(2,31,0)
-	scanner->no_files_thread = g_thread_new("Count no files", pragha_count_no_files_worker, scanner);
+	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);
 	#else
-	scanner->no_files_thread = g_thread_create(pragha_count_no_files_worker, scanner, FALSE, NULL);
+	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, FALSE, NULL);
 	#endif
 
-	pragha_async_launch(pragha_scanner_worker,
+	return scanner;
+}
+
+void
+pragha_scanner_update_library(GSList *folder_list, struct con_win *cwin)
+{
+	PraghaScanner *scanner;
+
+	scanner = pragha_scanner_dialog_new(folder_list, cwin);
+
+	pragha_async_launch(pragha_scanner_update_worker,
 			    pragha_scanner_worker_finished,
 			    scanner);
+}
+
+void
+pragha_scanner_scan_library(GSList *folder_list, struct con_win *cwin)
+{
+	PraghaScanner *scanner;
+
+	if (is_incompatible_upgrade(cwin)) {
+		if (drop_dbase_schema(cwin->cdbase) == -1) {
+			g_critical("Unable to drop database schema");
+			return;
+		}
+		if (!pragha_database_init_schema (cwin->cdbase)) {
+			g_critical("Unable to init database schema");
+			return;
+		}
+	}
+	else {
+		flush_db(cwin->cdbase);
+	}
+
+	scanner = pragha_scanner_dialog_new(folder_list, cwin);
+
+	pragha_async_launch(pragha_scanner_scan_worker,
+			    pragha_scanner_worker_finished,
+			    scanner);
+
+	/* Save rescan time */
+
+	//g_get_current_time(&cwin->cpref->last_rescan_time);
+
+	/* Free lists */
+
+	free_str_list(cwin->cpref->lib_add);
+	free_str_list(cwin->cpref->lib_delete);
+
+	cwin->cpref->lib_add = NULL;
+	cwin->cpref->lib_delete = NULL;
 }
