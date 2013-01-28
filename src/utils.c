@@ -768,6 +768,11 @@ exit:
 gboolean
 pragha_process_gtk_events ()
 {
+#ifdef DEBUG
+	extern GThread *pragha_main_thread;
+	if (g_thread_self () != pragha_main_thread)
+		g_warning ("THREAD SAFETY ERROR!");
+#endif
 	while (gtk_events_pending ()) {
 		if (gtk_main_iteration_do (FALSE))
 			return TRUE;

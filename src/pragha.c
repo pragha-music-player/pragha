@@ -20,6 +20,9 @@
 #include <locale.h> /* require LC_ALL */
 
 gint debug_level;
+#ifdef DEBUG
+GThread *pragha_main_thread = NULL;
+#endif
 
 /* FIXME: Cleanup track refs */
 static void common_cleanup(struct con_win *cwin)
@@ -69,6 +72,11 @@ void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 gint main(gint argc, gchar *argv[])
 {
 	struct con_win *cwin;
+
+#ifdef DEBUG
+	g_print ("debug enabled\n");
+	pragha_main_thread = g_thread_self ();
+#endif
 
 	cwin = g_slice_new0(struct con_win);
 	cwin->pixbuf = g_slice_new0(struct pixbuf);
