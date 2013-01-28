@@ -893,8 +893,8 @@ void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
 void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
-void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, PraghaDatabase *cdbase);
+void
+pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name);
 gboolean pragha_database_init_schema (PraghaDatabase *database);
 gint drop_dbase_schema(PraghaDatabase *cdbase);
 gint db_get_artist_count(PraghaDatabase *cdbase);

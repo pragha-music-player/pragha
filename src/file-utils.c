@@ -99,7 +99,7 @@ gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable)
 
 		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			file_count += dir_file_count(ab_file, 0);
+			file_count += pragha_get_dir_count(ab_file, cancellable);
 		else {
 			file_count++;
 		}

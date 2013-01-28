@@ -119,13 +119,19 @@ pragha_scanner_worker_finished (gpointer data)
 	pragha_database_change_playlists_done(scanner->cdbase);
 
 	/* Save last time update */
-	g_get_current_time(&scanner->LastTimeVal);
+	g_get_current_time(&scanner->cwin->cpref->last_rescan_time);
 
 	/* Clean memory */
 	g_object_unref(scanner->cdbase);
 	pragha_mutex_free(scanner->no_files_mutex);
 	pragha_mutex_free(scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);
+
+	free_str_list(scanner->folder_added);
+	free_str_list(scanner->folder_removed);
+
+	scanner->folder_added = NULL;
+	scanner->folder_removed = NULL;
 
 	g_slice_free (PraghaScanner, data);
 
@@ -199,7 +205,54 @@ pragha_scanner_scan_worker(gpointer data)
 void
 pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 {
+	GDir *dir;
+	const gchar *next_file = NULL;
+	gchar *ab_file = NULL, *s_ab_file = NULL;
+	GError *error = NULL;
+	struct stat sbuf;
 
+	if(g_cancellable_is_cancelled (scanner->cancellable))
+		return;
+
+	dir = g_dir_open(dir_name, 0, &error);
+	if (!dir) {
+		g_critical("Unable to open library : %s", dir_name);
+		return;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		if(g_cancellable_is_cancelled (scanner->cancellable))
+			return;
+
+		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+
+		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR)) {
+			pragha_scanner_update_handler(scanner, ab_file);
+		}
+		else {
+			s_ab_file = sanitize_string_to_sqlite3(ab_file);
+			if (!find_location_db(s_ab_file, scanner->cdbase)) {
+				pragha_database_add_new_file(scanner->cdbase, ab_file);
+			}
+			else {
+				g_stat(ab_file, &sbuf);
+				if(sbuf.st_mtime > scanner->cwin->cpref->last_rescan_time.tv_sec) {
+					pragha_database_forget_track(scanner->cdbase, ab_file);
+					pragha_database_add_new_file(scanner->cdbase, ab_file);
+				}
+			}
+
+			pragha_mutex_lock (scanner->files_scanned_mutex);
+			scanner->files_scanned++;
+			pragha_mutex_unlock (scanner->files_scanned_mutex);
+
+			g_free(s_ab_file);
+		}
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+	g_dir_close(dir);
 }
 
 /* Thread that analyze all files in the library */
@@ -207,13 +260,22 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 gpointer
 pragha_scanner_update_worker(gpointer data)
 {
+	GSList *list;
 	gchar *query;
 	PraghaDbResponse result;
 	gint i = 0;
 
 	PraghaScanner *scanner = data;
 
-	/* First clean removed files */
+	/* First clean removed folders in library. */
+
+	for(list = scanner->folder_removed ; list != NULL; list = list->next) {
+		if(g_cancellable_is_cancelled (scanner->cancellable))
+			break;
+		pragha_database_delete_folder(scanner->cdbase, list->data);
+	}
+
+	/* Also clean removed files */
 	query = g_strdup_printf("SELECT name FROM LOCATION;");
 	if (pragha_database_exec_sqlite_query(scanner->cdbase, query, &result)) {
 		for_each_result_row(result, i) {
@@ -225,8 +287,23 @@ pragha_scanner_update_worker(gpointer data)
 		sqlite3_free_table(result.resultp);
 	}
 
-	/* Then add news files or update others..
-	 * lalala.. */
+	/* Then update files changed.. */
+	for(list = scanner->folder_list ; list != NULL; list = list->next) {
+		if(g_cancellable_is_cancelled (scanner->cancellable))
+			break;
+
+		if(!is_present_str_list(list->data, scanner->folder_added));
+			pragha_scanner_update_handler(scanner, list->data);
+	}
+
+	/* Then add news folder in library */
+
+	for(list = scanner->folder_added ; list != NULL; list = list->next) {
+		if(g_cancellable_is_cancelled (scanner->cancellable))
+			break;
+
+		pragha_scanner_scan_handler(scanner, list->data);
+	}
 
 	return scanner;
 }
@@ -270,8 +347,11 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	scanner = g_slice_new0(PraghaScanner);
 
 	scanner->cdbase = pragha_database_get();
+	scanner->cwin = cwin;
+
 	scanner->folder_list = folder_list;
-	scanner->LastTimeVal = cwin->cpref->last_rescan_time;
+	scanner->folder_removed = cwin->cpref->lib_delete;
+	scanner->folder_added = cwin->cpref->lib_add;
 
 	/* Create the window scanner */
 
@@ -381,16 +461,4 @@ pragha_scanner_scan_library(GSList *folder_list, struct con_win *cwin)
 	pragha_async_launch(pragha_scanner_scan_worker,
 			    pragha_scanner_worker_finished,
 			    scanner);
-
-	/* Save rescan time */
-
-	//g_get_current_time(&cwin->cpref->last_rescan_time);
-
-	/* Free lists */
-
-	free_str_list(cwin->cpref->lib_add);
-	free_str_list(cwin->cpref->lib_delete);
-
-	cwin->cpref->lib_add = NULL;
-	cwin->cpref->lib_delete = NULL;
 }
