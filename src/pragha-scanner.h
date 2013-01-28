@@ -20,6 +20,7 @@
 typedef struct {
 	PraghaDatabase *cdbase;
 	GSList         *folder_list;
+	GTimeVal        LastTimeVal;
 	GtkWidget      *dialog;
 	GtkWidget      *progress_bar;
 	guint           no_files;
@@ -31,30 +32,7 @@ typedef struct {
 	guint           update_timeout;
 } PraghaScanner;
 
-/* Update the dialog. */
-
-gboolean
-update_scanned_progress(gpointer user_data);
-
-gpointer
-pragha_count_no_files_worker(gpointer data);
-
 void
-pragha_rescan_handler(PraghaScanner *scanner, const gchar *dir_name);
-
-gpointer
-pragha_scanner_worker(gpointer data);
-
-gboolean
-rescan_dialog_delete_event(GtkWidget *widget,
-                           GdkEvent *event,
-                           gpointer user_data);
-
+pragha_scanner_update_library(GSList *folder_list, struct con_win *cwin);
 void
-rescan_dialog_response_event(GtkDialog *dialog,
-                             gint response_id,
-                             gpointer user_data);
-
-void
-pragha_rescan_library (GSList *folder_list, struct con_win *cwin);
-
+pragha_scanner_scan_library(GSList *folder_list, struct con_win *cwin);

@@ -749,7 +749,6 @@ void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
-void rescan_library_handler(struct con_win *cwin);
 GtkUIManager* create_menu(struct con_win *cwin);
 
 /* Panel */
@@ -852,6 +851,7 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
+void pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file);
 gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase);
 gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase);
 gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase);
@@ -892,17 +892,7 @@ void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
-gboolean fraction_update(GtkWidget *pbar);
 void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
-void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase);
-void update_db (const gchar *dir_name,
-		gint no_files,
-		GtkWidget *pbar,
-		GTimeVal last_rescan_time,
-		gint call_recur,
-		GCancellable *cancellable,
-		PraghaDatabase *cdbase);
 void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
 	       gint call_recur, PraghaDatabase *cdbase);
 gboolean pragha_database_init_schema (PraghaDatabase *database);
