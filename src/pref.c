@@ -95,8 +95,14 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
 		/* Free the list of libraries and rebuild it again */
-		free_str_list(cwin->cpref->library_dir);
-		cwin->cpref->library_dir = NULL;
+		if(cwin->cpref->library_scanned == NULL) {
+			cwin->cpref->library_scanned = cwin->cpref->library_dir;
+			cwin->cpref->library_dir = NULL;
+		}
+		else {
+			free_str_list(cwin->cpref->library_dir);
+			cwin->cpref->library_dir = NULL;
+		}
 
 		while (ret) {
 			gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
@@ -332,12 +338,6 @@ library_add_cb_response(GtkDialog *dialog,
 			break;
 		}
 
-		cwin->cpref->lib_delete =
-			delete_from_str_list(folder, cwin->cpref->lib_delete);
-		cwin->cpref->lib_add =
-			g_slist_append(cwin->cpref->lib_add,
-				       g_strdup(folder));
-
 		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0,
 				   u_folder, -1);
@@ -377,39 +377,15 @@ static void library_add_cb(GtkButton *button, struct con_win *cwin)
 
 static void library_remove_cb(GtkButton *button, struct con_win *cwin)
 {
-	GError *error = NULL;
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *folder, *u_folder;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 						cwin->preferences_w->library_view_w));
-	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
-		gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
-		if (!u_folder)
-			return;
 
-		folder = g_filename_from_utf8(u_folder, -1,
-					      NULL, NULL, &error);
-		if (!folder) {
-			g_warning("Unable to get UTF-8 from "
-				  "filename: %s",
-				  u_folder);
-			g_error_free(error);
-			g_free(u_folder);
-			return;
-		}
-
-		cwin->cpref->lib_delete =
-			g_slist_append(cwin->cpref->lib_delete, g_strdup(folder));
-		cwin->cpref->lib_add =
-			delete_from_str_list(folder, cwin->cpref->lib_add);
-
-		g_free(u_folder);
-		g_free(folder);
+	if (gtk_tree_selection_get_selected(selection, &model, &iter))
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
-	}
 }
 
 /* Toggle displaying last.fm username/password widgets */
@@ -913,11 +889,11 @@ void save_preferences(struct con_win *cwin)
 		}
 	}
 
-	/* List of libraries to be added/deleted from db */
+	/* Save last folders scanned on db */
 
-	if (cwin->cpref->lib_delete) {
-		list = cwin->cpref->lib_delete;
-		cnt = g_slist_length(cwin->cpref->lib_delete);
+	if (cwin->cpref->library_scanned) {
+		list = cwin->cpref->library_scanned;
+		cnt = g_slist_length(cwin->cpref->library_scanned);
 		libs = g_new0(gchar *, cnt);
 
 		for (i=0; i<cnt; i++) {
@@ -938,7 +914,7 @@ void save_preferences(struct con_win *cwin)
 
 		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
 					   GROUP_LIBRARY,
-					   KEY_LIBRARY_DELETE,
+					   KEY_LIBRARY_SCANNED,
 					   (const gchar **)libs,
 					   cnt);
 
@@ -952,57 +928,11 @@ void save_preferences(struct con_win *cwin)
 					 GROUP_LIBRARY) &&
 		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
 				       GROUP_LIBRARY,
-				       KEY_LIBRARY_DELETE,
+				       KEY_LIBRARY_SCANNED,
 				       &error)) {
 			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
 					      GROUP_LIBRARY,
-					      KEY_LIBRARY_DELETE,
-					      &error);
-		}
-	}
-
-	if (cwin->cpref->lib_add) {
-		list = cwin->cpref->lib_add;
-		cnt = g_slist_length(cwin->cpref->lib_add);
-		libs = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			u_file = g_filename_to_utf8(list->data, -1,
-						    NULL, NULL, &error);
-			if (!u_file) {
-				g_warning("Unable to convert "
-					  "file to UTF-8: %s",
-					  libs[i]);
-				g_error_free(error);
-				error = NULL;
-				list = list->next;
-				continue;
-			}
-			libs[i] = u_file;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_ADD,
-					   (const gchar **)libs,
-					   cnt);
-
-		for(i = 0; i < cnt; i++) {
-			g_free(libs[i]);
-		}
-		g_free(libs);
-	}
-	else {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_LIBRARY) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_LIBRARY,
-				       KEY_LIBRARY_ADD,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_LIBRARY,
-					      KEY_LIBRARY_ADD,
+					      KEY_LIBRARY_SCANNED,
 					      &error);
 		}
 	}
@@ -1768,8 +1698,7 @@ void preferences_free (struct con_pref *cpref)
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
 	free_str_list(cpref->library_dir);
-	free_str_list(cpref->lib_add);
-	free_str_list(cpref->lib_delete);
+	free_str_list(cpref->library_scanned);
 	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);

@@ -34,8 +34,7 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 		case GTK_RESPONSE_CANCEL:
 			break;
 		case GTK_RESPONSE_YES:
-			cwin->cpref->lib_delete = delete_from_str_list(dir, cwin->cpref->lib_delete);
-			cwin->cpref->lib_add = g_slist_append(cwin->cpref->lib_add, g_strdup(dir));
+			cwin->cpref->library_scanned = NULL;
 			cwin->cpref->library_dir = g_slist_append(cwin->cpref->library_dir, g_strdup(dir));
 
 			update_library_action(NULL, cwin);

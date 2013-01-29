@@ -116,6 +116,12 @@ pragha_scanner_worker_finished (gpointer data)
 		gtk_widget_destroy(msg_dialog);
 	}
 
+	/* If not cancelled, remove last scanned folders */
+	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
+		free_str_list(scanner->folder_scanned);
+		scanner->folder_scanned = NULL;
+	}
+
 	/* Update the library view */
 	pragha_database_change_playlists_done(scanner->cdbase);
 
@@ -126,9 +132,6 @@ pragha_scanner_worker_finished (gpointer data)
 	pragha_mutex_free(scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);
 
-	free_str_list(scanner->folder_added);
-	free_str_list(scanner->folder_removed);
-
 	/* Save last time update and folders */
 
 	g_get_current_time(&scanner->last_update);
@@ -138,9 +141,6 @@ pragha_scanner_worker_finished (gpointer data)
 	                             KEY_LIBRARY_LAST_SCANNED,
 	                             last_scan_time);
 	g_free(last_scan_time);
-
-	scanner->folder_added = NULL;
-	scanner->folder_removed = NULL;
 
 	g_slice_free (PraghaScanner, data);
 
@@ -283,11 +283,12 @@ pragha_scanner_update_worker(gpointer data)
 	db_begin_transaction(scanner->cdbase);
 
 	/* First clean removed folders in library. */
-
-	for(list = scanner->folder_removed ; list != NULL; list = list->next) {
+	for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
-		pragha_database_delete_folder(scanner->cdbase, list->data);
+
+		if(!is_present_str_list(list->data, scanner->folder_list))
+			pragha_database_delete_folder(scanner->cdbase, list->data);
 	}
 
 	/* Also clean removed files */
@@ -307,17 +308,17 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(!is_present_str_list(list->data, scanner->folder_added));
+		if(is_present_str_list(list->data, scanner->folder_scanned));
 			pragha_scanner_update_handler(scanner, list->data);
 	}
 
 	/* Then add news folder in library */
-
-	for(list = scanner->folder_added ; list != NULL; list = list->next) {
+	for(list = scanner->folder_list; list != NULL; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		pragha_scanner_scan_handler(scanner, list->data);
+		if(!is_present_str_list(list->data, scanner->folder_scanned));
+			pragha_scanner_scan_handler(scanner, list->data);
 	}
 
 	db_commit_transaction(scanner->cdbase);
@@ -380,8 +381,7 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 	}
 
 	scanner->folder_list = folder_list;
-	scanner->folder_removed = cwin->cpref->lib_delete;
-	scanner->folder_added = cwin->cpref->lib_add;
+	scanner->folder_scanned = cwin->cpref->library_scanned;
 
 	/* Create the scanner dialog */
 

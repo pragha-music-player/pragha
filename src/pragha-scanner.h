@@ -21,8 +21,7 @@ typedef struct {
 	PraghaDatabase    *cdbase;
 	PraghaPreferences *preferences;
 	GSList            *folder_list;
-	GSList            *folder_added;
-	GSList            *folder_removed;
+	GSList            *folder_scanned;
 	GTimeVal          last_update;
 	GtkWidget         *dialog;
 	GtkWidget         *label;
