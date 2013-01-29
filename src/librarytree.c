@@ -1701,7 +1701,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 {
 	gchar *query, *filepath;
 	PraghaDbResponse result;
-	GtkTreeIter iter;
+	GtkTreeIter iter, *f_iter;
 	GSList *list = NULL;
 	gint i = 0;
 
@@ -1719,7 +1719,10 @@ library_view_complete_folder_view(GtkTreeModel *model,
 					   L_MACH, FALSE,
 					   L_VISIBILE, TRUE,
 					   -1);
-			p_iter = &iter;
+			f_iter = &iter;
+		}
+		else {
+			f_iter = p_iter;
 		}
 
 		/* Add folder structure  without headers */
@@ -1728,7 +1731,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 		for_each_result_row(result, i) {
 			/* Remove headers prefix and add it. */
 			filepath = result.resultp[i] + strlen(list->data) + 1;
-			add_folder_file(model, filepath, atoi(result.resultp[i+1]), p_iter, cwin);
+			add_folder_file(model, filepath, atoi(result.resultp[i+1]), f_iter, cwin);
 
 			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
@@ -1744,6 +1747,90 @@ library_view_complete_folder_view(GtkTreeModel *model,
 	}
 }
 
+void
+library_view_complete_tags_view(GtkTreeModel *model,
+                                GtkTreeIter *p_iter,
+                                struct con_win *cwin)
+{
+	gchar *order_str = NULL;
+	gchar *query;
+	PraghaDbResponse result;
+	gint i = 0;
+
+	/* Get order needed to sqlite query. */
+	switch(cwin->cpref->cur_library_view) {
+		case FOLDERS:
+			break;
+		case ARTIST:
+			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			break;
+		case ALBUM:
+			if (cwin->cpref->sort_by_year)
+				order_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			else
+				order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			break;
+		case GENRE:
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			break;
+		case ARTIST_ALBUM:
+			if (cwin->cpref->sort_by_year)
+				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			else
+				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			break;
+		case GENRE_ARTIST:
+			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			break;
+		case GENRE_ALBUM:
+			if (cwin->cpref->sort_by_year)
+				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			else
+				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			break;
+		case GENRE_ARTIST_ALBUM:
+			if (cwin->cpref->sort_by_year)
+				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			else
+				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			break;
+		default:
+			break;
+	}
+
+	/* Common query for all tag based library views */
+	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+	                        "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+	                        "ORDER BY %s;", order_str);
+	g_free(order_str);
+			
+	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	for_each_result_row(result, i) {
+		add_child_node_by_tags(model,
+		                       p_iter,
+		                       atoi(result.resultp[i+6]),
+		                       result.resultp[i+5],
+		                       result.resultp[i+4],
+		                       result.resultp[i+3],
+		                       result.resultp[i+2],
+		                       result.resultp[i+1],
+		                       result.resultp[i],
+		                       cwin);
+
+		/* Have to give control to GTK periodically ... */
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		pragha_process_gtk_events ();
+		#else
+		if (pragha_process_gtk_events ()) {
+			sqlite3_free_table(result.resultp);
+			return;
+		}
+		#endif
+	}
+	sqlite3_free_table(result.resultp);
+}
+
 /********/
 /* Init */
 /********/
@@ -1755,7 +1842,6 @@ void init_library_view(struct con_win *cwin)
 	PraghaDbResponse result;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
-	gchar *order_str = NULL;
 
 	cwin->cstate->view_change = TRUE;
 
@@ -1839,55 +1925,38 @@ void init_library_view(struct con_win *cwin)
 	}
 	sqlite3_free_table(result.resultp);
 
-	/* Library. */
+	/* Set order button label */
 
 	switch(cwin->cpref->cur_library_view) {
-	case FOLDERS:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Folders structure"));
-		break;
-	case ARTIST:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist"));
-		order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
-		break;
-	case ALBUM:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Album"));
-		if (cwin->cpref->sort_by_year)
-			order_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
-		else
-			order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
-		break;
-	case GENRE:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
-		break;
-	case ARTIST_ALBUM:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist / Album"));
-		if (cwin->cpref->sort_by_year)
-			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		else
-			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		break;
-	case GENRE_ARTIST:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist"));
-		order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
-		break;
-	case GENRE_ALBUM:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Album"));
-		if (cwin->cpref->sort_by_year)
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		else
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		break;
-	case GENRE_ARTIST_ALBUM:
-		gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist / Album"));
-		if (cwin->cpref->sort_by_year)
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		else
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-		break;
-	default:
-		break;
+		case FOLDERS:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Folders structure"));
+			break;
+		case ARTIST:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist"));
+			break;
+		case ALBUM:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Album"));
+			break;
+		case GENRE:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre"));
+			break;
+		case ARTIST_ALBUM:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist / Album"));
+			break;
+		case GENRE_ARTIST:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist"));
+			break;
+		case GENRE_ALBUM:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Album"));
+			break;
+		case GENRE_ARTIST_ALBUM:
+			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist / Album"));
+			break;
+		default:
+			break;
 	}
+
+	/* Add library header */
 
 	gtk_tree_store_append(GTK_TREE_STORE(model),
 			      &iter,
@@ -1902,37 +1971,7 @@ void init_library_view(struct con_win *cwin)
 		library_view_complete_folder_view(model, &iter, cwin);
 	}
 	else {
-		/* Common query for all tag based library views */
-		query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
-					"FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
-					"WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
-					"ORDER BY %s;", order_str);
-		g_free(order_str);
-			
-		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-		for_each_result_row(result, i) {
-			add_child_node_by_tags(model,
-			                       &iter,
-			                       atoi(result.resultp[i+6]),
-			                       result.resultp[i+5],
-			                       result.resultp[i+4],
-			                       result.resultp[i+3],
-			                       result.resultp[i+2],
-			                       result.resultp[i+1],
-			                       result.resultp[i],
-			                       cwin);
-
-			/* Have to give control to GTK periodically ... */
-			#if GTK_CHECK_VERSION (3, 0, 0)
-			pragha_process_gtk_events ();
-			#else
-			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-			#endif
-		}
-		sqlite3_free_table(result.resultp);
+		library_view_complete_tags_view(model, &iter, cwin);
 	}
 
 	/* Refresh tag completion entries, sensitive, set model and filter */
