@@ -147,7 +147,7 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar **libs, **nodes, *last_rescan_time;
+	gchar **libs, **nodes;
 	gchar *u_file;
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
@@ -344,21 +344,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			cur_lib_view_f = TRUE;
-		}
-
-		last_rescan_time =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_LIBRARY,
-					      KEY_LIBRARY_LAST_SCANNED,
-					      &error);
-		if (!last_rescan_time) {
-			g_error_free(error);
-			error = NULL;
-		} else {
-			if (!g_time_val_from_iso8601(last_rescan_time,
-						     &cwin->cpref->last_rescan_time))
-				g_warning("Unable to convert last rescan time");
-			g_free(last_rescan_time);
 		}
 
 		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,

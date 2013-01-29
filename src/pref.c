@@ -766,7 +766,7 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar **libs, **nodes, *last_rescan_time;
+	gchar **libs, **nodes;
 	gchar *u_file = NULL;
 	gint cnt = 0, i = 0, *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
@@ -1056,15 +1056,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_LIBRARY,
 			       KEY_LIBRARY_VIEW_ORDER,
 			       cwin->cpref->cur_library_view);
-
-	/* Save last rescan time */
-
-	last_rescan_time = g_time_val_to_iso8601(&cwin->cpref->last_rescan_time);
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_LIBRARY,
-			      KEY_LIBRARY_LAST_SCANNED,
-			      last_rescan_time);
-	g_free(last_rescan_time);
 
 	/* Save fuse folders option */
 

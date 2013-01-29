@@ -18,23 +18,22 @@
 #include "pragha.h"
 
 typedef struct {
-	PraghaDatabase *cdbase;
-	/* Temporality added cwin.
-	 * TODO: Port cwin->cpref->last_rescan_time to PraghaPreferences */
-	struct con_win *cwin;
-	GSList         *folder_list;
-	GSList         *folder_added;
-	GSList         *folder_removed;
-	GtkWidget      *dialog;
-	GtkWidget      *label;
-	GtkWidget      *progress_bar;
-	guint           no_files;
-	PRAGHA_MUTEX   (no_files_mutex);
-	GThread        *no_files_thread;
-	guint           files_scanned;
-	PRAGHA_MUTEX   (files_scanned_mutex);
-	GCancellable   *cancellable;
-	guint           update_timeout;
+	PraghaDatabase    *cdbase;
+	PraghaPreferences *preferences;
+	GSList            *folder_list;
+	GSList            *folder_added;
+	GSList            *folder_removed;
+	GTimeVal          last_update;
+	GtkWidget         *dialog;
+	GtkWidget         *label;
+	GtkWidget         *progress_bar;
+	guint              no_files;
+	PRAGHA_MUTEX      (no_files_mutex);
+	GThread           *no_files_thread;
+	guint              files_scanned;
+	PRAGHA_MUTEX      (files_scanned_mutex);
+	GCancellable      *cancellable;
+	guint              update_timeout;
 } PraghaScanner;
 
 void
