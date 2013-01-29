@@ -199,12 +199,16 @@ pragha_scanner_scan_worker(gpointer data)
 
 	PraghaScanner *scanner = data;
 
+	db_begin_transaction(scanner->cdbase);
+
 	for(list = scanner->folder_list ; list != NULL; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
 		pragha_scanner_scan_handler(scanner, list->data);
 	}
+
+	db_commit_transaction(scanner->cdbase);
 
 	return scanner;
 }
@@ -276,6 +280,8 @@ pragha_scanner_update_worker(gpointer data)
 
 	PraghaScanner *scanner = data;
 
+	db_begin_transaction(scanner->cdbase);
+
 	/* First clean removed folders in library. */
 
 	for(list = scanner->folder_removed ; list != NULL; list = list->next) {
@@ -313,6 +319,8 @@ pragha_scanner_update_worker(gpointer data)
 
 		pragha_scanner_scan_handler(scanner, list->data);
 	}
+
+	db_commit_transaction(scanner->cdbase);
 
 	return scanner;
 }
