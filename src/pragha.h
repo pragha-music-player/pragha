@@ -236,8 +236,7 @@ typedef enum {
 
 #define GROUP_LIBRARY  "Library"
 #define KEY_LIBRARY_DIR            "library_dir"
-#define KEY_LIBRARY_DELETE         "library_delete"
-#define KEY_LIBRARY_ADD            "library_add"
+#define KEY_LIBRARY_SCANNED        "library_scanned"
 #define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
@@ -525,8 +524,7 @@ struct con_pref {
 	gboolean sort_by_year;
 	GSList *library_dir;
 	GSList *library_tree_nodes;
-	GSList *lib_delete;
-	GSList *lib_add;
+	GSList *library_scanned;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
