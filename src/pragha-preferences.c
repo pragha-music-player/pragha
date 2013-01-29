@@ -222,13 +222,12 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
 GSList *
 pragha_preferences_get_filename_list (PraghaPreferences *preferences,
                                       const gchar *group_name,
-                                      const gchar *key,
-                                      gsize *length)
+                                      const gchar *key)
 {
    gchar **clist;
    GSList *slist = NULL;
    gchar *filename = NULL;
-   gsize cnt = 0, i;
+   gsize i, length;
    GError *error = NULL;
 
    g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
@@ -236,10 +235,10 @@ pragha_preferences_get_filename_list (PraghaPreferences *preferences,
    clist = g_key_file_get_string_list(preferences->priv->rc_keyfile,
                                       group_name,
                                       key,
-                                      length,
+                                      &length,
                                       NULL);
    if (clist) {
-      for (i = 0 ; i < *length ; i++) {
+      for (i = 0 ; i < length ; i++) {
          filename = g_filename_from_utf8(clist[i], -1, NULL, NULL, &error);
          if (!filename) {
             g_warning("Unable to get filename from UTF-8 string: %s", clist[i]);
