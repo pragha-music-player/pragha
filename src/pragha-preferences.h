@@ -101,6 +101,17 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
                                     const gchar * const list[],
                                     gsize length);
 
+GSList *
+pragha_preferences_get_filename_list (PraghaPreferences *preferences,
+                                      const gchar *group_name,
+                                      const gchar *key,
+                                      gsize *length);
+void
+pragha_preferences_set_filename_list (PraghaPreferences *preferences,
+                                      const gchar *group_name,
+                                      const gchar *key,
+                                      GSList *list);
+
 void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
                                const gchar *group_name,
