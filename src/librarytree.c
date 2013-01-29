@@ -152,43 +152,24 @@ add_child_node_file(GtkTreeModel *model,
 
 /* Adds a file and its parent directories to the library tree */
 
-static void add_folder_file(gchar *path, int location_id,
-	struct con_win *cwin, GtkTreeModel *model, GtkTreeIter *p_iter)
+static void
+add_folder_file(GtkTreeModel *model,
+                gchar *filepath,
+                int location_id,
+                GtkTreeIter *p_iter,
+                struct con_win *cwin)
 {
-	gchar *prefix = NULL, *filepath = NULL;	/* Do not free */
 	gchar **subpaths = NULL;		/* To be freed */
 
 	GtkTreeIter iter, iter2, search_iter;
 	int i = 0 , len = 0;
 
-	/* Search all library directories for the one that matches the path */
-	while ((prefix = g_slist_nth_data(cwin->cpref->library_dir, i++))) {
-		if (g_str_has_prefix(path, prefix)) {
-			break;
-		}
-	}
-
-	g_assert(prefix != NULL);
-
 	/* Point after library directory prefix */
 
-	filepath = path + strlen(prefix) + 1;
 	subpaths = g_strsplit(filepath, G_DIR_SEPARATOR_S, -1);
 
 	len = g_strv_length (subpaths);
 	len--;
-
-	/* If not fuse_folders add the prefix */
-	if (!cwin->cpref->fuse_folders) {
-		if (!find_child_node(prefix, &search_iter, p_iter, model)) {
-			add_child_node_folder(model, &iter, p_iter, prefix, cwin);
-			p_iter = &iter;
-		}
-		else {
-			iter2 = search_iter;
-			p_iter = &iter2;
-		}
-	}
 
 	/* Add all subdirectories and filename to the tree */
 	for (i = 0; subpaths[i]; i++) {
@@ -1712,6 +1693,57 @@ static void add_entry_playlist(gchar *playlist,
 			   -1);
 }
 
+void
+library_view_complete_folder_view(GtkTreeModel *model,
+                                  GtkTreeIter *p_iter,
+                                  struct con_win *cwin)
+
+{
+	gchar *query, *filepath;
+	PraghaDbResponse result;
+	GtkTreeIter iter;
+	GSList *list = NULL;
+	gint i = 0;
+
+	for(list = cwin->cpref->library_dir ; list != NULL ; list=list->next) {
+		/*If no need to fuse folders, add headers and set p_iter */
+		if(!cwin->cpref->fuse_folders) {
+			gtk_tree_store_append(GTK_TREE_STORE(model),
+					      &iter,
+					      p_iter);
+			gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+					   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+					   L_NODE_DATA, list->data,
+					   L_NODE_TYPE, NODE_FOLDER,
+					   L_LOCATION_ID, 0,
+					   L_MACH, FALSE,
+					   L_VISIBILE, TRUE,
+					   -1);
+			p_iter = &iter;
+		}
+
+		/* Add folder structure  without headers */
+		query = g_strdup_printf("SELECT name, id FROM LOCATION WHERE name LIKE '%s%%' ORDER BY name DESC;", (gchar *)list->data);
+		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+		for_each_result_row(result, i) {
+			/* Remove headers prefix and add it. */
+			filepath = result.resultp[i] + strlen(list->data) + 1;
+			add_folder_file(model, filepath, atoi(result.resultp[i+1]), p_iter, cwin);
+
+			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			pragha_process_gtk_events ();
+			#else
+			if (pragha_process_gtk_events ()) {
+				sqlite3_free_table(result.resultp);
+				return;
+			}
+			#endif
+		}
+		sqlite3_free_table(result.resultp);
+	}
+}
+
 /********/
 /* Init */
 /********/
@@ -1866,7 +1898,10 @@ void init_library_view(struct con_win *cwin)
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
 
-	if (cwin->cpref->cur_library_view != FOLDERS) {
+	if (cwin->cpref->cur_library_view == FOLDERS) {
+		library_view_complete_folder_view(model, &iter, cwin);
+	}
+	else {
 		/* Common query for all tag based library views */
 		query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
 					"FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
@@ -1897,26 +1932,8 @@ void init_library_view(struct con_win *cwin)
 			}
 			#endif
 		}
+		sqlite3_free_table(result.resultp);
 	}
-	else {
-		/* Query for folders view */
-		query = g_strdup("SELECT name, id FROM LOCATION ORDER BY name DESC");
-		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-		for_each_result_row(result, i) {
-			add_folder_file(result.resultp[i], atoi(result.resultp[i+1]), cwin, model, &iter);
-
-			/* Have to give control to GTK periodically ... */
-			#if GTK_CHECK_VERSION (3, 0, 0)
-			pragha_process_gtk_events ();
-			#else
-			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-			#endif
-		}
-	}
-	sqlite3_free_table(result.resultp);
 
 	/* Refresh tag completion entries, sensitive, set model and filter */
 
