@@ -216,6 +216,89 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_filename_list:
+ *
+ */
+GSList *
+pragha_preferences_get_filename_list (PraghaPreferences *preferences,
+                                      const gchar *group_name,
+                                      const gchar *key,
+                                      gsize *length)
+{
+   gchar **clist;
+   GSList *slist = NULL;
+   gchar *filename = NULL;
+   gsize cnt = 0, i;
+   GError *error = NULL;
+
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+   clist = g_key_file_get_string_list(preferences->priv->rc_keyfile,
+                                      group_name,
+                                      key,
+                                      length,
+                                      NULL);
+   if (clist) {
+      for (i = 0 ; i < *length ; i++) {
+         filename = g_filename_from_utf8(clist[i], -1, NULL, NULL, &error);
+         if (!filename) {
+            g_warning("Unable to get filename from UTF-8 string: %s", clist[i]);
+            error = NULL;
+            continue;
+         }
+         else {
+            slist = g_slist_append(slist, filename);
+         }
+      }
+      g_strfreev(clist);
+   }
+
+   return slist;
+}
+
+/**
+ * pragha_preferences_set_filename_list:
+ *
+ */
+void
+pragha_preferences_set_filename_list (PraghaPreferences *preferences,
+                                      const gchar *group_name,
+                                      const gchar *key,
+                                      GSList *list)
+{
+   gchar **clist;
+   gchar *filename = NULL;
+   gsize cnt = 0, i;
+   GError *error = NULL;
+
+   cnt = g_slist_length(list);
+   clist = g_new0(gchar *, cnt);
+
+   for (i = 0 ; i < cnt ; i++) {
+      filename = g_filename_to_utf8(list->data, -1, NULL, NULL, &error);
+      if (!filename) {
+         g_warning("Unable to convert file to UTF-8: %s", (gchar *)list->data);
+         g_error_free(error);
+         error = NULL;
+         list = list->next;
+         continue;
+      }
+      clist[i] = filename;
+      list = list->next;
+   }
+   g_key_file_set_string_list(preferences->priv->rc_keyfile,
+                              group_name,
+                              key,
+                              (const gchar **)clist,
+                              cnt);
+
+   for(i = 0; i < cnt; i++) {
+      g_free(clist[i]);
+   }
+   g_free(clist);
+}
+
+/**
  * pragha_preferences_remove_key:
  *
  */

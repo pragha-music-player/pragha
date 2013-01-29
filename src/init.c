@@ -147,13 +147,13 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar **libs, **nodes;
+	gchar **nodes;
 	gchar *u_file;
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, album_art_pattern_f, timer_remaining_mode_f, show_icon_tray_f, close_to_tray_f;
-	gboolean libs_f, lib_scanned_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
+	gboolean nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
@@ -162,7 +162,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = timer_remaining_mode_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	libs_f = lib_scanned_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
+	nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
@@ -264,67 +264,17 @@ gint init_config(struct con_win *cwin)
 		}
 
 		/* Retrieve Collection preferences */
-
-		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						  GROUP_LIBRARY,
-						  KEY_LIBRARY_DIR,
-						  &cnt,
-						  &error);
-		if (libs) {
-			for (i=0; i<cnt; i++) {
-				gchar *file = g_filename_from_utf8(libs[i],
-						   -1, NULL, NULL, &error);
-				if (!file) {
-					g_warning("Unable to get filename "
-						  "from UTF-8 string: %s",
-						  libs[i]);
-					g_error_free(error);
-					error = NULL;
-					continue;
-				}
-				cwin->cpref->library_dir =
-					g_slist_append(cwin->cpref->library_dir,
-						       g_strdup(file));
-				g_free(file);
-			}
-			g_strfreev(libs);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			libs_f = TRUE;
-		}
-
-		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						  GROUP_LIBRARY,
-						  KEY_LIBRARY_SCANNED,
-						  &cnt,
-						  &error);
-		if (libs) {
-			for (i = 0; i < cnt; i++) {
-				gchar *file = g_filename_from_utf8(libs[i],
-						   -1, NULL, NULL, &error);
-				if (!file) {
-					g_warning("Unable to get filename "
-						  "from UTF-8 string: %s",
-						  libs[i]);
-					g_error_free(error);
-					error = NULL;
-					continue;
-				}
-				cwin->cpref->library_scanned =
-					g_slist_append(cwin->cpref->library_scanned,
-						       g_strdup(file));
-				g_free(file);
-			}
-			g_strfreev(libs);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			lib_scanned_f = TRUE;
-		}
-
+		cwin->cpref->library_dir =
+			pragha_preferences_get_filename_list(cwin->preferences,
+			                                     GROUP_LIBRARY,
+			                                     KEY_LIBRARY_DIR,
+			                                     &cnt);
+		cwin->cpref->library_scanned =
+			pragha_preferences_get_filename_list(cwin->preferences,
+			                                     GROUP_LIBRARY,
+			                                     KEY_LIBRARY_SCANNED,
+			                                     &cnt);
+		 
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						   GROUP_LIBRARY,
 						   KEY_LIBRARY_TREE_NODES,
@@ -624,10 +574,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
-	if (all_f || libs_f)
-		cwin->cpref->library_dir = NULL;
-	if (all_f || lib_scanned_f)
-		cwin->cpref->library_scanned = NULL;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || nodes_f) {

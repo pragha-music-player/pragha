@@ -742,7 +742,7 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar **libs, **nodes;
+	gchar **nodes;
 	gchar *u_file = NULL;
 	gint cnt = 0, i = 0, *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
@@ -845,96 +845,29 @@ void save_preferences(struct con_win *cwin)
 	/* Save the list of libraries folders */
 
 	if (cwin->cpref->library_dir) {
-		list = cwin->cpref->library_dir;
-		cnt = g_slist_length(cwin->cpref->library_dir);
-		libs = g_new0(gchar *, cnt);
-
-		for (i = 0; i < cnt; i++) {
-			u_file = g_filename_to_utf8(list->data, -1,
-						    NULL, NULL, &error);
-			if (!u_file) {
-				g_warning("Unable to convert file to UTF-8: %s",
-					  libs[i]);
-				g_error_free(error);
-				error = NULL;
-				list = list->next;
-				continue;
-			}
-			libs[i] = u_file;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_DIR,
-					   (const gchar **)libs,
-					   cnt);
-
-		for(i = 0; i < cnt; i++) {
-			g_free(libs[i]);
-		}
-		g_free(libs);
+		pragha_preferences_set_filename_list(cwin->preferences,
+		                                     GROUP_LIBRARY,
+		                                     KEY_LIBRARY_DIR,
+		                                     cwin->cpref->library_dir);
 	}
 	else {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_LIBRARY) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_LIBRARY,
-				       KEY_LIBRARY_DIR,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_LIBRARY,
-					      KEY_LIBRARY_DIR,
-					      &error);
-		}
+		pragha_preferences_remove_key(cwin->preferences,
+		                              GROUP_LIBRARY,
+		                              KEY_LIBRARY_DIR);
 	}
 
 	/* Save last folders scanned on db */
 
 	if (cwin->cpref->library_scanned) {
-		list = cwin->cpref->library_scanned;
-		cnt = g_slist_length(cwin->cpref->library_scanned);
-		libs = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			u_file = g_filename_to_utf8(list->data, -1,
-						    NULL, NULL, &error);
-			if (!u_file) {
-				g_warning("Unable to convert "
-					  "file to UTF-8: %s",
-					  libs[i]);
-				g_error_free(error);
-				error = NULL;
-				list = list->next;
-				continue;
-			}
-			libs[i] = u_file;
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_SCANNED,
-					   (const gchar **)libs,
-					   cnt);
-
-		for(i = 0; i < cnt; i++) {
-			g_free(libs[i]);
-		}
-		g_free(libs);
+		pragha_preferences_set_filename_list(cwin->preferences,
+		                                     GROUP_LIBRARY,
+		                                     KEY_LIBRARY_SCANNED,
+		                                     cwin->cpref->library_scanned);
 	}
 	else {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_LIBRARY) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_LIBRARY,
-				       KEY_LIBRARY_SCANNED,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_LIBRARY,
-					      KEY_LIBRARY_SCANNED,
-					      &error);
-		}
+		pragha_preferences_remove_key(cwin->preferences,
+		                              GROUP_LIBRARY,
+		                              KEY_LIBRARY_SCANNED);
 	}
 
 	/* Save the library tree nodes */
