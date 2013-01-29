@@ -105,7 +105,7 @@ pragha_scanner_worker_finished (gpointer data)
 
 	/* If was not canceled, shows a dialog */
 	if (!g_cancellable_is_cancelled (scanner->cancellable)) {
-		msg_dialog = gtk_message_dialog_new(NULL,
+		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(scanner->parent),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
 						    GTK_BUTTONS_OK,
@@ -118,8 +118,9 @@ pragha_scanner_worker_finished (gpointer data)
 
 	/* If not cancelled, remove last scanned folders */
 	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
-		free_str_list(scanner->folder_scanned);
-		scanner->folder_scanned = NULL;
+		pragha_preferences_remove_key(scanner->preferences,
+		                              GROUP_LIBRARY,
+		                              KEY_LIBRARY_SCANNED);
 	}
 
 	/* Update the library view */
@@ -357,7 +358,7 @@ scanner_dialog_response_event(GtkDialog *dialog,
 /* Create the dialog and init all */
 
 PraghaScanner *
-pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
+pragha_scanner_dialog_new(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *table, *label, *progress_bar;
@@ -368,6 +369,7 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 
 	scanner->cdbase = pragha_database_get();
 	scanner->preferences = pragha_preferences_get();
+	scanner->parent = parent;
 
 	/* Get last time that update the library and folders to analyze */
 
@@ -380,13 +382,18 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 		g_free(last_scan_time);
 	}
 
-	scanner->folder_list = folder_list;
-	scanner->folder_scanned = cwin->cpref->library_scanned;
-
+	scanner->folder_list =
+		pragha_preferences_get_filename_list(scanner->preferences,
+		                                     GROUP_LIBRARY,
+		                                     KEY_LIBRARY_DIR);
+	scanner->folder_scanned =
+		pragha_preferences_get_filename_list(scanner->preferences,
+		                                     GROUP_LIBRARY,
+		                                     KEY_LIBRARY_SCANNED);
 	/* Create the scanner dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Rescan Library"),
-	                                     GTK_WINDOW(cwin->mainwindow),
+	                                     GTK_WINDOW(parent),
 	                                     GTK_DIALOG_MODAL,
 	                                     GTK_STOCK_CANCEL,
 	                                     GTK_RESPONSE_CANCEL,
@@ -449,11 +456,11 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 }
 
 void
-pragha_scanner_update_library(GSList *folder_list, struct con_win *cwin)
+pragha_scanner_update_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	scanner = pragha_scanner_dialog_new(folder_list, cwin);
+	scanner = pragha_scanner_dialog_new(parent);
 
 	pragha_async_launch(pragha_scanner_update_worker,
 			    pragha_scanner_worker_finished,
@@ -461,25 +468,13 @@ pragha_scanner_update_library(GSList *folder_list, struct con_win *cwin)
 }
 
 void
-pragha_scanner_scan_library(GSList *folder_list, struct con_win *cwin)
+pragha_scanner_scan_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	if (is_incompatible_upgrade(cwin)) {
-		if (drop_dbase_schema(cwin->cdbase) == -1) {
-			g_critical("Unable to drop database schema");
-			return;
-		}
-		if (!pragha_database_init_schema (cwin->cdbase)) {
-			g_critical("Unable to init database schema");
-			return;
-		}
-	}
-	else {
-		flush_db(cwin->cdbase);
-	}
+	scanner = pragha_scanner_dialog_new(parent);
 
-	scanner = pragha_scanner_dialog_new(folder_list, cwin);
+	flush_db(scanner->cdbase);
 
 	pragha_async_launch(pragha_scanner_scan_worker,
 			    pragha_scanner_worker_finished,

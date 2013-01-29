@@ -522,9 +522,7 @@ struct con_pref {
 	gboolean controls_below;
 	gboolean fuse_folders;
 	gboolean sort_by_year;
-	GSList *library_dir;
 	GSList *library_tree_nodes;
-	GSList *library_scanned;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;

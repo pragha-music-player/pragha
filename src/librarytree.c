@@ -1702,10 +1702,15 @@ library_view_complete_folder_view(GtkTreeModel *model,
 	gchar *query, *filepath;
 	PraghaDbResponse result;
 	GtkTreeIter iter, *f_iter;
-	GSList *list = NULL;
+	GSList *list = NULL, *library_dir = NULL;
 	gint i = 0;
 
-	for(list = cwin->cpref->library_dir ; list != NULL ; list=list->next) {
+	library_dir =
+		pragha_preferences_get_filename_list(cwin->preferences,
+			                             GROUP_LIBRARY,
+			                             KEY_LIBRARY_DIR);
+
+	for(list = library_dir ; list != NULL ; list=list->next) {
 		/*If no need to fuse folders, add headers and set p_iter */
 		if(!cwin->cpref->fuse_folders) {
 			gtk_tree_store_append(GTK_TREE_STORE(model),
@@ -1745,6 +1750,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 		}
 		sqlite3_free_table(result.resultp);
 	}
+	free_str_list(library_dir);
 }
 
 void

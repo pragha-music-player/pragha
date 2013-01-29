@@ -61,6 +61,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	GSList *library_dir = NULL, *library_scanned = NULL;
 
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
@@ -95,14 +96,28 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
 		/* Free the list of libraries and rebuild it again */
-		if(cwin->cpref->library_scanned == NULL) {
-			cwin->cpref->library_scanned = cwin->cpref->library_dir;
-			cwin->cpref->library_dir = NULL;
+
+		library_dir =
+			pragha_preferences_get_filename_list(cwin->preferences,
+				                             GROUP_LIBRARY,
+				                             KEY_LIBRARY_DIR);
+		library_scanned =
+			pragha_preferences_get_filename_list(cwin->preferences,
+				                             GROUP_LIBRARY,
+				                             KEY_LIBRARY_SCANNED);
+
+		if(library_scanned == NULL) {
+			pragha_preferences_set_filename_list(cwin->preferences,
+				                             GROUP_LIBRARY,
+				                             KEY_LIBRARY_SCANNED,
+				                             library_dir);
 		}
 		else {
-			free_str_list(cwin->cpref->library_dir);
-			cwin->cpref->library_dir = NULL;
+			free_str_list(library_scanned);
 		}
+
+		free_str_list(library_dir);
+		library_dir = NULL;
 
 		while (ret) {
 			gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
@@ -119,13 +134,18 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 								       &iter);
 					continue;
 				}
-				cwin->cpref->library_dir =
-					g_slist_append(cwin->cpref->library_dir,
-						       folder);
+				library_dir = g_slist_append(library_dir, folder);
 			}
 			g_free(u_folder);
 			ret = gtk_tree_model_iter_next(model, &iter);
 		}
+
+		pragha_preferences_set_filename_list(cwin->preferences,
+			                             GROUP_LIBRARY,
+			                             KEY_LIBRARY_DIR,
+			                             library_dir);
+		free_str_list(library_dir);
+		library_dir = NULL;
 
 		if (cwin->cpref->cur_library_view == FOLDERS) {
 			test_change = cwin->cpref->fuse_folders;
@@ -537,6 +557,8 @@ static void update_preferences(struct con_win *cwin)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GError *error = NULL;
+	GSList *library_dir = NULL;
+
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
 	const gchar *audio_device = pragha_preferences_get_audio_device(cwin->preferences);
 	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
@@ -655,12 +677,17 @@ static void update_preferences(struct con_win *cwin)
 
 	/* Lbrary Options */
 
-	if (cwin->cpref->library_dir) {
+	library_dir =
+		pragha_preferences_get_filename_list(cwin->preferences,
+			                             GROUP_LIBRARY,
+			                             KEY_LIBRARY_DIR);
+
+	if (library_dir) {
 		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
 						cwin->preferences_w->library_view_w));
 
-		cnt = g_slist_length(cwin->cpref->library_dir);
-		list = cwin->cpref->library_dir;
+		cnt = g_slist_length(library_dir);
+		list = library_dir;
 
 		for (i=0; i < cnt; i++) {
 			/* Convert to UTF-8 before adding to the model */
@@ -679,7 +706,9 @@ static void update_preferences(struct con_win *cwin)
 			list = list->next;
 			g_free(u_file);
 		}
+		free_str_list(library_dir);
 	}
+
 	if (cwin->cpref->fuse_folders)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->fuse_folders_w),
@@ -841,34 +870,6 @@ void save_preferences(struct con_win *cwin)
 	current_playlist_save_preferences(cwin->cplaylist);
 
 	/* Library Options */
-
-	/* Save the list of libraries folders */
-
-	if (cwin->cpref->library_dir) {
-		pragha_preferences_set_filename_list(cwin->preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_DIR,
-		                                     cwin->cpref->library_dir);
-	}
-	else {
-		pragha_preferences_remove_key(cwin->preferences,
-		                              GROUP_LIBRARY,
-		                              KEY_LIBRARY_DIR);
-	}
-
-	/* Save last folders scanned on db */
-
-	if (cwin->cpref->library_scanned) {
-		pragha_preferences_set_filename_list(cwin->preferences,
-		                                     GROUP_LIBRARY,
-		                                     KEY_LIBRARY_SCANNED,
-		                                     cwin->cpref->library_scanned);
-	}
-	else {
-		pragha_preferences_remove_key(cwin->preferences,
-		                              GROUP_LIBRARY,
-		                              KEY_LIBRARY_SCANNED);
-	}
 
 	/* Save the library tree nodes */
 
@@ -1630,8 +1631,6 @@ void preferences_free (struct con_pref *cpref)
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
-	free_str_list(cpref->library_dir);
-	free_str_list(cpref->library_scanned);
 	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);

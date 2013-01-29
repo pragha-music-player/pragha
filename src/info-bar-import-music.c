@@ -16,6 +16,7 @@
  */
 
 #include "pragha.h"
+#include "pragha-scanner.h"
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 {
@@ -24,6 +25,8 @@ gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 
 static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
 {
+	GSList *library_dir = NULL;
+
 	struct con_win *cwin = user_data;
 	const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
 
@@ -34,10 +37,18 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 		case GTK_RESPONSE_CANCEL:
 			break;
 		case GTK_RESPONSE_YES:
-			cwin->cpref->library_scanned = NULL;
-			cwin->cpref->library_dir = g_slist_append(cwin->cpref->library_dir, g_strdup(dir));
+			pragha_preferences_remove_key(cwin->preferences,
+			                              GROUP_LIBRARY,
+			                              KEY_LIBRARY_SCANNED);
 
-			update_library_action(NULL, cwin);
+			library_dir = g_slist_append(library_dir, g_strdup(dir));
+			pragha_preferences_set_filename_list(cwin->preferences,
+				                             GROUP_LIBRARY,
+				                             KEY_LIBRARY_DIR,
+				                             library_dir);
+			free_str_list(library_dir);
+
+			pragha_scanner_scan_library(cwin->mainwindow);
 			break;
 		default:
 			g_warn_if_reached();

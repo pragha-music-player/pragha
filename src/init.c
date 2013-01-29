@@ -264,17 +264,7 @@ gint init_config(struct con_win *cwin)
 		}
 
 		/* Retrieve Collection preferences */
-		cwin->cpref->library_dir =
-			pragha_preferences_get_filename_list(cwin->preferences,
-			                                     GROUP_LIBRARY,
-			                                     KEY_LIBRARY_DIR,
-			                                     &cnt);
-		cwin->cpref->library_scanned =
-			pragha_preferences_get_filename_list(cwin->preferences,
-			                                     GROUP_LIBRARY,
-			                                     KEY_LIBRARY_SCANNED,
-			                                     &cnt);
-		 
+
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						   GROUP_LIBRARY,
 						   KEY_LIBRARY_TREE_NODES,

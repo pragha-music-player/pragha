@@ -20,6 +20,7 @@
 typedef struct {
 	PraghaDatabase    *cdbase;
 	PraghaPreferences *preferences;
+	GtkWidget         *parent;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
 	GTimeVal          last_update;
@@ -36,6 +37,6 @@ typedef struct {
 } PraghaScanner;
 
 void
-pragha_scanner_update_library(GSList *folder_list, struct con_win *cwin);
+pragha_scanner_update_library(GtkWidget *parent);
 void
-pragha_scanner_scan_library(GSList *folder_list, struct con_win *cwin);
+pragha_scanner_scan_library(GtkWidget *parent);

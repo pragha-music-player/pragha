@@ -104,8 +104,7 @@ pragha_preferences_set_string_list (PraghaPreferences *preferences,
 GSList *
 pragha_preferences_get_filename_list (PraghaPreferences *preferences,
                                       const gchar *group_name,
-                                      const gchar *key,
-                                      gsize *length);
+                                      const gchar *key);
 void
 pragha_preferences_set_filename_list (PraghaPreferences *preferences,
                                       const gchar *group_name,
