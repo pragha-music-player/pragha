@@ -90,6 +90,7 @@ gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
 	GtkWidget *msg_dialog;
+	gchar *last_scan_time = NULL;
 
 	PraghaScanner *scanner = data;
 
@@ -118,17 +119,25 @@ pragha_scanner_worker_finished (gpointer data)
 	/* Update the library view */
 	pragha_database_change_playlists_done(scanner->cdbase);
 
-	/* Save last time update */
-	g_get_current_time(&scanner->cwin->cpref->last_rescan_time);
-
 	/* Clean memory */
 	g_object_unref(scanner->cdbase);
+	g_object_unref(scanner->preferences);
 	pragha_mutex_free(scanner->no_files_mutex);
 	pragha_mutex_free(scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);
 
 	free_str_list(scanner->folder_added);
 	free_str_list(scanner->folder_removed);
+
+	/* Save last time update and folders */
+
+	g_get_current_time(&scanner->last_update);
+	last_scan_time = g_time_val_to_iso8601(&scanner->last_update);
+	pragha_preferences_set_string(scanner->preferences,
+	                             GROUP_LIBRARY,
+	                             KEY_LIBRARY_LAST_SCANNED,
+	                             last_scan_time);
+	g_free(last_scan_time);
 
 	scanner->folder_added = NULL;
 	scanner->folder_removed = NULL;
@@ -237,7 +246,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			}
 			else {
 				g_stat(ab_file, &sbuf);
-				if(sbuf.st_mtime > scanner->cwin->cpref->last_rescan_time.tv_sec) {
+				if(sbuf.st_mtime > scanner->last_update.tv_sec) {
 					pragha_database_forget_track(scanner->cdbase, ab_file);
 					pragha_database_add_new_file(scanner->cdbase, ab_file);
 				}
@@ -343,12 +352,24 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 {
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *table, *label, *progress_bar;
+	gchar *last_scan_time = NULL;
 	guint row = 0;
 
 	scanner = g_slice_new0(PraghaScanner);
 
 	scanner->cdbase = pragha_database_get();
-	scanner->cwin = cwin;
+	scanner->preferences = pragha_preferences_get();
+
+	/* Get last time that update the library and folders to analyze */
+
+	last_scan_time = pragha_preferences_get_string(scanner->preferences,
+	                                                GROUP_LIBRARY,
+	                                                KEY_LIBRARY_LAST_SCANNED);
+	if (last_scan_time) {
+		if (!g_time_val_from_iso8601(last_scan_time, &scanner->last_update))
+			g_warning("Unable to convert last rescan time");
+		g_free(last_scan_time);
+	}
 
 	scanner->folder_list = folder_list;
 	scanner->folder_removed = cwin->cpref->lib_delete;
@@ -390,9 +411,13 @@ pragha_scanner_dialog_new(GSList *folder_list, struct con_win *cwin)
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 
+	/* Save references */
+
 	scanner->dialog = dialog;
 	scanner->label = label;
 	scanner->progress_bar = progress_bar;
+
+	/* Init threads */
 
 	scanner->files_scanned = 0;
 	pragha_mutex_create(scanner->files_scanned_mutex);
