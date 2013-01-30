@@ -309,7 +309,7 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(is_present_str_list(list->data, scanner->folder_scanned));
+		if(is_present_str_list(list->data, scanner->folder_scanned))
 			pragha_scanner_update_handler(scanner, list->data);
 	}
 
@@ -318,7 +318,7 @@ pragha_scanner_update_worker(gpointer data)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
-		if(!is_present_str_list(list->data, scanner->folder_scanned));
+		if(!is_present_str_list(list->data, scanner->folder_scanned))
 			pragha_scanner_scan_handler(scanner, list->data);
 	}
 
@@ -390,6 +390,7 @@ pragha_scanner_dialog_new(GtkWidget *parent)
 		pragha_preferences_get_filename_list(scanner->preferences,
 		                                     GROUP_LIBRARY,
 		                                     KEY_LIBRARY_SCANNED);
+
 	/* Create the scanner dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Rescan Library"),
