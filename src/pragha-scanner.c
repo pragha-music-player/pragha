@@ -361,7 +361,7 @@ scanner_dialog_response_event(GtkDialog *dialog,
 /* Create the dialog and init all */
 
 PraghaScanner *
-pragha_scanner_dialog_new(GtkWidget *parent)
+pragha_scanner_dialog_new(GtkWidget *parent, const gchar *title)
 {
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *table, *label, *progress_bar;
@@ -396,7 +396,7 @@ pragha_scanner_dialog_new(GtkWidget *parent)
 
 	/* Create the scanner dialog */
 
-	dialog = gtk_dialog_new_with_buttons(_("Rescan Library"),
+	dialog = gtk_dialog_new_with_buttons(title,
 	                                     GTK_WINDOW(parent),
 	                                     GTK_DIALOG_MODAL,
 	                                     GTK_STOCK_CANCEL,
@@ -464,7 +464,7 @@ pragha_scanner_update_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	scanner = pragha_scanner_dialog_new(parent);
+	scanner = pragha_scanner_dialog_new(parent, _("Update Library"));
 
 	pragha_async_launch(pragha_scanner_update_worker,
 			    pragha_scanner_worker_finished,
@@ -476,7 +476,7 @@ pragha_scanner_scan_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	scanner = pragha_scanner_dialog_new(parent);
+	scanner = pragha_scanner_dialog_new(parent, _("Rescan Library"));
 
 	flush_db(scanner->cdbase);
 
