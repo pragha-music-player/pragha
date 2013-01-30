@@ -21,8 +21,20 @@
 
 #include <glib.h>
 
-#include <cdio/cdda.h>
-#include <cdio/cd_types.h>
+#ifdef HAVE_PARANOIA_NEW_INCLUDES
+   #include <cdio/paranoia/cdda.h>
+   #include <cdio/paranoia/cd_types.h>
+   #ifdef __CDIO_CONFIG_H__
+      #include <cdio/paranoia/cdio_unconfig.h>
+   #endif
+#else
+   #include <cdio/cdda.h>
+   #include <cdio/cd_types.h>
+   #ifdef __CDIO_CONFIG_H__
+      #include <cdio/cdio_unconfig.h>
+   #endif
+#endif
+
 #ifdef __CDIO_CONFIG_H__
 #include <cdio/cdio_unconfig.h>
 #endif
