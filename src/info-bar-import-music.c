@@ -37,10 +37,6 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 		case GTK_RESPONSE_CANCEL:
 			break;
 		case GTK_RESPONSE_YES:
-			pragha_preferences_remove_key(cwin->preferences,
-			                              GROUP_LIBRARY,
-			                              KEY_LIBRARY_SCANNED);
-
 			library_dir = g_slist_append(library_dir, g_strdup(dir));
 			pragha_preferences_set_filename_list(cwin->preferences,
 				                             GROUP_LIBRARY,

@@ -118,9 +118,10 @@ pragha_scanner_worker_finished (gpointer data)
 
 	/* If not cancelled, remove last scanned folders */
 	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
-		pragha_preferences_remove_key(scanner->preferences,
-		                              GROUP_LIBRARY,
-		                              KEY_LIBRARY_SCANNED);
+		pragha_preferences_set_filename_list(scanner->preferences,
+			                             GROUP_LIBRARY,
+			                             KEY_LIBRARY_SCANNED,
+			                             scanner->folder_list);
 	}
 
 	/* Update the library view */
@@ -129,6 +130,8 @@ pragha_scanner_worker_finished (gpointer data)
 	/* Clean memory */
 	g_object_unref(scanner->cdbase);
 	g_object_unref(scanner->preferences);
+	free_str_list(scanner->folder_list);
+	free_str_list(scanner->folder_scanned);
 	pragha_mutex_free(scanner->no_files_mutex);
 	pragha_mutex_free(scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);

@@ -61,7 +61,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-	GSList *library_dir = NULL, *library_scanned = NULL;
+	GSList *library_dir = NULL;
 
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
@@ -95,30 +95,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						cwin->preferences_w->library_view_w));
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
-		/* Free the list of libraries and rebuild it again */
-
-		library_dir =
-			pragha_preferences_get_filename_list(cwin->preferences,
-				                             GROUP_LIBRARY,
-				                             KEY_LIBRARY_DIR);
-		library_scanned =
-			pragha_preferences_get_filename_list(cwin->preferences,
-				                             GROUP_LIBRARY,
-				                             KEY_LIBRARY_SCANNED);
-
-		if(library_scanned == NULL) {
-			pragha_preferences_set_filename_list(cwin->preferences,
-				                             GROUP_LIBRARY,
-				                             KEY_LIBRARY_SCANNED,
-				                             library_dir);
-		}
-		else {
-			free_str_list(library_scanned);
-		}
-
-		free_str_list(library_dir);
-		library_dir = NULL;
-
 		while (ret) {
 			gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
 			if (u_folder) {
@@ -145,7 +121,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			                             KEY_LIBRARY_DIR,
 			                             library_dir);
 		free_str_list(library_dir);
-		library_dir = NULL;
 
 		if (cwin->cpref->cur_library_view == FOLDERS) {
 			test_change = cwin->cpref->fuse_folders;
