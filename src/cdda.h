@@ -35,8 +35,4 @@
    #endif
 #endif
 
-#ifdef __CDIO_CONFIG_H__
-#include <cdio/cdio_unconfig.h>
-#endif
-
 #endif /* CDDA_H */
