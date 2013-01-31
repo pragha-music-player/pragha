@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2012 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -193,7 +193,6 @@ exit:
 gpointer
 do_lastfm_love_mobj (const gchar *title, const gchar *artist, struct con_win *cwin)
 {
-	AsycMessageData *msg_data = NULL;
 	gint rv;
 
 	CDEBUG(DBG_LASTFM, "Love mobj on thread");
@@ -203,15 +202,14 @@ do_lastfm_love_mobj (const gchar *title, const gchar *artist, struct con_win *cw
 	                        artist);
 
 	if (rv != LASTFM_STATUS_OK)
-		msg_data = async_finished_message_new(_("Love song on Last.fm failed."), cwin);
-
-	return msg_data;
+		return _("Love song on Last.fm failed.");
+	else
+		return NULL;
 }
 
 gpointer
 do_lastfm_unlove_mobj (const gchar *title, const gchar *artist, struct con_win *cwin)
 {
-	AsycMessageData *msg_data = NULL;
 	gint rv;
 
 	CDEBUG(DBG_LASTFM, "Unlove mobj on thread");
@@ -221,9 +219,9 @@ do_lastfm_unlove_mobj (const gchar *title, const gchar *artist, struct con_win *
 	                          artist);
 
 	if (rv != LASTFM_STATUS_OK)
-		msg_data = async_finished_message_new(_("Unlove song on Last.fm failed."), cwin);
-
-	return msg_data;
+		return _("Unove song on Last.fm failed.");
+	else
+		return NULL;
 }
 
 
@@ -233,7 +231,6 @@ gpointer
 do_lastfm_current_playlist_love (gpointer data)
 {
 	PraghaMusicobject *mobj = NULL;
-	AsycMessageData *msg_data = NULL;
 	const gchar *title, *artist;
 
 	struct con_win *cwin = data;
@@ -243,9 +240,7 @@ do_lastfm_current_playlist_love (gpointer data)
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	msg_data = do_lastfm_love_mobj(title, artist, cwin);
-
-	return msg_data;
+	return do_lastfm_love_mobj(title, artist, cwin);
 }
 
 void
@@ -259,7 +254,7 @@ lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cw
 	}
 
 	pragha_async_launch(do_lastfm_current_playlist_love,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 }
 
@@ -267,7 +262,6 @@ gpointer
 do_lastfm_current_playlist_unlove (gpointer data)
 {
 	PraghaMusicobject *mobj = NULL;
-	AsycMessageData *msg_data = NULL;
 	const gchar *title, *artist;
 
 	struct con_win *cwin = data;
@@ -277,9 +271,7 @@ do_lastfm_current_playlist_unlove (gpointer data)
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	msg_data = do_lastfm_unlove_mobj(title, artist, cwin);
-
-	return msg_data;
+	return do_lastfm_unlove_mobj(title, artist, cwin);
 }
 
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin)
@@ -292,7 +284,7 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 	}
 
 	pragha_async_launch(do_lastfm_current_playlist_unlove,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 }
 
@@ -601,8 +593,8 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 gpointer
 do_lastfm_current_song_love (gpointer data)
 {
-	AsycMessageData *msg_data = NULL;
 	gchar *title = NULL, *artist = NULL;
+	gpointer msg_data = NULL;
 
 	struct con_win *cwin = data;
 
@@ -635,15 +627,15 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 	}
 
 	pragha_async_launch(do_lastfm_current_song_love,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 }
 
 gpointer
 do_lastfm_current_song_unlove (gpointer data)
 {
-	AsycMessageData *msg_data = NULL;
 	gchar *title = NULL, *artist = NULL;
+	gpointer msg_data = NULL;
 
 	struct con_win *cwin = data;
 
@@ -676,7 +668,7 @@ lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 	}
 
 	pragha_async_launch(do_lastfm_current_song_unlove,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 }
 
@@ -687,7 +679,6 @@ do_lastfm_scrob (gpointer data)
 	struct con_win *cwin = data;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length;
-	AsycMessageData *msg_data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
@@ -710,16 +701,14 @@ do_lastfm_scrob (gpointer data)
 	                            track_no,
 	                            0, NULL);
 
-	msg_data = async_finished_message_new((rv != LASTFM_STATUS_OK) ?
-					     _("Last.fm submission failed") :
-					     _("Track scrobbled on Last.fm"),
-					     cwin);
-
 	g_free(title);
 	g_free(artist);
 	g_free(album);
 
-	return msg_data;
+	if (rv != LASTFM_STATUS_OK)
+		return _("Last.fm submission failed");
+	else
+		return _("Track scrobbled on Last.fm");
 }
 
 gboolean
@@ -738,7 +727,7 @@ lastfm_scrob_handler(gpointer data)
 	}
 
 	pragha_async_launch(do_lastfm_scrob,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 	return FALSE;
 }
@@ -774,7 +763,6 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 gpointer
 do_lastfm_now_playing (gpointer data)
 {
-	AsycMessageData *msg_data = NULL;
 	PraghaMusicobject *tmobj;
 	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length;
@@ -837,9 +825,6 @@ do_lastfm_now_playing (gpointer data)
 			g_idle_add (show_lastfm_sugest_corrrection_button, cwin);
 		}
 	}
-	else {
-		msg_data = async_finished_message_new(_("Update current song on Last.fm failed."), cwin);
-	}
 
 	LASTFM_free_track_info_list(list);
 
@@ -847,7 +832,10 @@ do_lastfm_now_playing (gpointer data)
 	g_free(artist);
 	g_free(album);
 
-	return msg_data;
+	if (rv != LASTFM_STATUS_OK)
+		return _("Update current song on Last.fm failed.");
+	else
+		return NULL;
 }
 
 void
@@ -882,7 +870,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		goto exit;
 
 	pragha_async_launch(do_lastfm_now_playing,
-			    set_async_finished_message,
+			    pragha_async_set_idle_message,
 			    cwin);
 
 	/* Kick the lastfm scrobbler on
