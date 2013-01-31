@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -1250,13 +1250,7 @@ typedef struct {
 	GSourceFunc func_f;
 } AsyncSimple;
 
-typedef struct {
-	const gchar *message;
-	struct con_win *cwin;
-} AsycMessageData;
-
-gboolean set_async_finished_message (gpointer user_data);
-AsycMessageData *async_finished_message_new(const gchar *message, struct con_win *cwin);
+gboolean pragha_async_set_idle_message (gpointer user_data);
 void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */

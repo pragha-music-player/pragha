@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redisasibute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -17,33 +17,25 @@
 
 #include "pragha.h"
 
-/* Generic function to set a message when finished the async operation. */
+/* Generic function to set a message when finished the async operation.
+ * You need set 'pragha_async_set_idle_message' as finish_func
+ * and then return a 'const gchar *' on worker_func. */
 
 gboolean
-set_async_finished_message (gpointer user_data)
+pragha_async_set_idle_message (gpointer user_data)
 {
-	AsycMessageData *data = user_data;
+	PraghaStatusbar *statusbar;
 
-	if (data == NULL)
+	const gchar *message = user_data;
+
+	if (message == NULL)
 		return FALSE;
 
-	pragha_statusbar_set_misc_text(data->cwin->statusbar, data->message);
-
-	g_slice_free (AsycMessageData, data);
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_misc_text(statusbar, message);
+	g_object_unref(G_OBJECT(statusbar));
 
 	return FALSE;
-}
-
-AsycMessageData *
-async_finished_message_new(const gchar *message, struct con_win *cwin)
-{
-	AsycMessageData *data;
-	data = g_slice_new (AsycMessageData);
-
-	data->message = message;
-	data->cwin = cwin;
-
-	return data;
 }
 
 /* Launch a asynchronous operation (worker_func), and when finished use another
