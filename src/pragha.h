@@ -19,7 +19,9 @@
 #ifndef PRAGHA_H
 #define PRAGHA_H
 
-#include "cdda.h" //should be before config.h, libcdio issue
+#ifndef HAVE_PARANOIA_NEW_INCLUDES
+#include "cdda.h" // Should be before config.h, libcdio 0.83 issue
+#endif
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -82,6 +84,11 @@
 #include "pragha-preferences.h"
 #include "pragha-statusbar.h"
 #include "gtkcellrendererbubble.h"
+
+/* With libcio 0.83 should be before config.h. libcdio issue */
+#ifdef HAVE_PARANOIA_NEW_INCLUDES
+#include "cdda.h"
+#endif
 
 #include "xml_helper.h"
 
