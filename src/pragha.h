@@ -718,6 +718,9 @@ extern const gchar *mime_dual[];
 	for (i=result.no_columns; i<((result.no_rows+1)*(result.no_columns)); \
 	     i+=result.no_columns)
 
+#define string_is_empty(s) (!s || !g_utf8_strlen(s, 4))
+#define string_is_not_empty(s) (s && g_utf8_strlen(s, 4))
+
 /* Debugging */
 
 #define CDEBUG(_lvl, _fmt, ...)			\
@@ -1144,8 +1147,6 @@ void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 gchar* sanitize_string_to_sqlite3(const gchar *str);
-gboolean string_is_empty(const gchar *str);
-gboolean string_is_not_empty(const gchar *str);
 enum file_type get_file_type(const gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
