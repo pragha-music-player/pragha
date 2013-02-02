@@ -447,19 +447,6 @@ gchar* sanitize_string_to_sqlite3(const gchar *str)
 	return ch;
 }
 
-gboolean
-string_is_empty(const gchar *str)
-{
-	return (!str || !g_utf8_strlen(str, 4));
-}
-
-gboolean
-string_is_not_empty(const gchar *str)
-{
-	return (str && g_utf8_strlen(str, 4));
-}
-
-
 static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
 {
 	gint i=0;
