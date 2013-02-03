@@ -19,6 +19,7 @@
 #define PRAGHA_DATABASE_H
 
 #include <glib-object.h>
+#include "pragha-prepared-statement.h"
 
 G_BEGIN_DECLS
 
@@ -63,11 +64,17 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
                                   gchar *query,
                                   PraghaDbResponse *result);
 
+PraghaPreparedStatement *
+pragha_database_create_statement (PraghaDatabase *database, const gchar *sql);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
 gboolean
 pragha_database_start_successfully (PraghaDatabase *database);
+
+const gchar *
+pragha_database_get_last_error (PraghaDatabase *database);
 
 PraghaDatabase* pragha_database_get (void);
 GType pragha_database_get_type (void) G_GNUC_CONST;
