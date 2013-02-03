@@ -67,6 +67,9 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 PraghaPreparedStatement *
 pragha_database_create_statement (PraghaDatabase *database, const gchar *sql);
 
+gint
+pragha_database_find_location (PraghaDatabase *database, const gchar *location);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
