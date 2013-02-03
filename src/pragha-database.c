@@ -109,6 +109,19 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 	return ret;
 }
 
+PraghaPreparedStatement *
+pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
+{
+	sqlite3_stmt *stmt;
+
+	if (sqlite3_prepare_v2 (database->priv->sqlitedb, sql, -1, &stmt, NULL) != SQLITE_OK) {
+		g_critical ("db: %s", pragha_database_get_last_error (database));
+		return NULL;
+	}
+
+	return pragha_prepared_statement_new (stmt, database);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
@@ -211,6 +224,12 @@ pragha_database_start_successfully (PraghaDatabase *database)
 	g_return_val_if_fail(PRAGHA_IS_DATABASE(database), FALSE);
 
 	return database->priv->successfully;
+}
+
+const gchar *
+pragha_database_get_last_error (PraghaDatabase *database)
+{
+	return sqlite3_errmsg (database->priv->sqlitedb);
 }
 
 static void
