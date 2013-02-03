@@ -128,6 +128,11 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
+	if (init_taglib(cwin) == -1) {
+		g_critical("Unable to init taglib");
+		return -1;
+	}
+
 	cwin->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
 		g_critical("Unable to init music dbase");
