@@ -718,8 +718,8 @@ extern const gchar *mime_dual[];
 	for (i=result.no_columns; i<((result.no_rows+1)*(result.no_columns)); \
 	     i+=result.no_columns)
 
-#define string_is_empty(s) (!s || !g_utf8_strlen(s, 4))
-#define string_is_not_empty(s) (s && g_utf8_strlen(s, 4))
+#define string_is_empty(s) (!(s) || !(s)[0])
+#define string_is_not_empty(s) (s && (s)[0])
 
 /* Debugging */
 
@@ -1195,6 +1195,7 @@ GtkWidget* create_info_bar_import_music(struct con_win *cwin);
 gint init_dbus(struct con_win *cwin);
 gint init_dbus_handlers(struct con_win *cwin);
 gint init_options(struct con_win *cwin, int argc, char **argv);
+gint init_taglib(struct con_win *cwin);
 gint init_config(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);

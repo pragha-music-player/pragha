@@ -143,6 +143,13 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 	return 0;
 }
 
+gint init_taglib(struct con_win *cwin)
+{
+	taglib_set_strings_unicode(TRUE);
+
+	return 0;
+}
+
 gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
