@@ -122,6 +122,19 @@ pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
 	return pragha_prepared_statement_new (stmt, database);
 }
 
+gint
+pragha_database_find_location (PraghaDatabase *database, const gchar *location)
+{
+	gint location_id = 0;
+	const gchar *sql = "SELECT id FROM LOCATION WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, location);
+	if (pragha_prepared_statement_step (statement))
+		location_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return location_id;
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {

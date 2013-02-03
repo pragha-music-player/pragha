@@ -638,7 +638,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
-	gchar *sfile = NULL, *file;
+	gchar *file;
 	gint location_id, changed = 0;
 	gboolean local_file;
 	PraghaMusicobject *omobj, *nmobj, *tmobj;
@@ -681,15 +681,13 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	if (G_LIKELY(local_file)) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		sfile = sanitize_string_to_sqlite3(file);
-		location_id = find_location_db(sfile, cwin->cdbase);
+		location_id = pragha_database_find_location (cwin->cdbase, file);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
 			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
 			init_library_view(cwin);
 		}
 		g_array_free(loc_arr, TRUE);
-		g_free(sfile);
 
 		file_arr = g_ptr_array_new();
 		g_ptr_array_add(file_arr, g_strdup(file));

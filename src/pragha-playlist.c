@@ -2807,7 +2807,7 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 {
-	gchar *s_playlist, *query, *file;
+	gchar *s_playlist, *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
@@ -2820,13 +2820,13 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
+		const gchar *file = result.resultp[i];
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
-			if ((location_id = find_location_db(file, cplaylist->cdbase)))
+			if ((location_id = pragha_database_find_location (cplaylist->cdbase, file)))
 				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			else
-				mobj = new_musicobject_from_file(result.resultp[i]);
+				mobj = new_musicobject_from_file(file);
 		}
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));
@@ -2834,8 +2834,6 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
-
-		g_free(file);
 	}
 
 	pragha_playlist_append_mobj_list(cplaylist, list);

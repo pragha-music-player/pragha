@@ -352,7 +352,7 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
                           gchar *playlist,
                           GList *list)
 {
-	gchar *s_playlist, *query, *file;
+	gchar *s_playlist, *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
@@ -368,17 +368,13 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 	pragha_database_exec_sqlite_query(cdbase, query, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
-
-		if ((location_id = find_location_db(file, cdbase)))
+		if ((location_id = pragha_database_find_location (cdbase, result.resultp[i])))
 			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
-
-		g_free(file);
 	}
 	sqlite3_free_table(result.resultp);
 

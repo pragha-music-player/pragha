@@ -872,7 +872,6 @@ gint find_album_db(const gchar *album, PraghaDatabase *cdbase);
 gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase);
 gint find_year_db(gint year, PraghaDatabase *cdbase);
 gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase);
-gint find_location_db(const gchar *location, PraghaDatabase *cdbase);
 gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
 gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
