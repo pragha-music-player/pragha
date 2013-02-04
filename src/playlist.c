@@ -389,13 +389,12 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
                        gchar *radio,
                        GList *list)
 {
-	gchar *s_radio, *query;
+	gchar *query;
 	gint radio_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
-	s_radio = sanitize_string_to_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cdbase);
+	radio_id = pragha_database_find_radio (cdbase, radio);
 
 	if(radio_id == 0)
 		goto bad;
@@ -412,7 +411,6 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
 	sqlite3_free_table(result.resultp);
 
 bad:
-	g_free(s_radio);
 
 	return list;
 }
@@ -554,7 +552,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list, *i;
-	gchar *playlist, *s_playlist;
+	gchar *playlist;
 	gint node_type;
 	gboolean removed = FALSE;
 
@@ -573,15 +571,12 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
-					s_playlist = sanitize_string_to_sqlite3(playlist);
-
 					if(node_type == NODE_PLAYLIST) {
 						delete_playlist_db (playlist, cwin->cdbase);
 					}
 					else if (node_type == NODE_RADIO) {
-						delete_radio_db(s_playlist, cwin->cdbase);
+						delete_radio_db(playlist, cwin->cdbase);
 					}
-					g_free(s_playlist);
 					removed = TRUE;
 				}
 				g_free(playlist);
@@ -1271,9 +1266,9 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 
 	s_radio = sanitize_string_to_sqlite3(name);
 
-	if ((radio_id = find_radio_db(s_radio, cplaylist->cdbase))) {
+	if ((radio_id = pragha_database_find_radio (cplaylist->cdbase, name))) {
 		if (overwrite_existing_playlist(name, cplaylist))
-			delete_radio_db(s_radio, cplaylist->cdbase);
+			delete_radio_db (name, cplaylist->cdbase);
 		else
 			goto exit;
 	}
