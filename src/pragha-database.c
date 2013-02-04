@@ -201,6 +201,19 @@ pragha_database_find_year (PraghaDatabase *database, gint year)
 }
 
 gint
+pragha_database_find_playlist (PraghaDatabase *database, const gchar *playlist)
+{
+	gint playlist_id = 0;
+	const gchar *sql = "SELECT id FROM PLAYLIST WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, playlist);
+	if (pragha_prepared_statement_step (statement))
+		playlist_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return playlist_id;
+}
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location)
 {
 	const gchar *sql = "INSERT INTO LOCATION (name) VALUES (?)";
