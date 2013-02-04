@@ -175,6 +175,19 @@ pragha_database_find_genre (PraghaDatabase *database, const gchar *genre)
 }
 
 gint
+pragha_database_find_comment (PraghaDatabase *database, const gchar *comment)
+{
+	gint comment_id = 0;
+	const gchar *sql = "SELECT id FROM COMMENT WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, comment);
+	if (pragha_prepared_statement_step (statement))
+		comment_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return comment_id;
+}
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location)
 {
 	const gchar *sql = "INSERT INTO LOCATION (name) VALUES (?)";
