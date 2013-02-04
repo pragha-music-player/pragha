@@ -336,6 +336,17 @@ pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio)
 	return pragha_database_find_radio (database, radio);
 }
 
+void
+pragha_database_add_radio_track (PraghaDatabase *database, gint radio_id, const gchar *uri)
+{
+	const gchar *sql = "INSERT INTO RADIO_TRACKS (uri, radio) VALUES (?, ?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, uri);
+	pragha_prepared_statement_bind_int (statement, 2, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
