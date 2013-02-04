@@ -74,6 +74,9 @@ gint
 pragha_database_find_artist (PraghaDatabase *database, const gchar *artist);
 
 gint
+pragha_database_find_album (PraghaDatabase *database, const gchar *album);
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
 
 gint

@@ -109,7 +109,7 @@ bad:
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
-	const gchar *file, *artist;
+	const gchar *file, *artist, *album;
 	gchar *stitle, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
@@ -117,7 +117,8 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		file = pragha_musicobject_get_file (mobj);
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		artist = pragha_musicobject_get_artist (mobj);
-		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
+		album = pragha_musicobject_get_album (mobj);
+		salbum = sanitize_string_to_sqlite3 (album);
 		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
 		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
 
@@ -133,7 +134,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 
 		/* Write album */
 
-		if ((album_id = find_album_db(salbum, cdbase)) == 0)
+		if ((album_id = pragha_database_find_album (cdbase, album)) == 0)
 			album_id = add_new_album_db(salbum, cdbase);
 
 		/* Write genre */
@@ -334,22 +335,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
-
-gint find_album_db(const gchar *album, PraghaDatabase *cdbase)
-{
-	gint album_id = 0;
-	gchar *query;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM ALBUM WHERE name = '%s';", album);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_rows)
-			album_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return album_id;
-}
 
 gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 {
@@ -565,8 +550,9 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 			artist_id = pragha_database_add_new_artist (cdbase, artist);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
-		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
-		album_id = find_album_db(salbum, cdbase);
+		const gchar *album = pragha_musicobject_get_album (mobj);
+		salbum = sanitize_string_to_sqlite3 (album);
+		album_id = pragha_database_find_album (cdbase, album);
 		if (!album_id)
 			album_id = add_new_album_db(salbum, cdbase);
 	}
