@@ -109,7 +109,7 @@ bad:
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
-	const gchar *file;
+	const gchar *file, *artist;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
@@ -117,7 +117,8 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		file = pragha_musicobject_get_file (mobj);
 		sfile = sanitize_string_to_sqlite3 (file);
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
-		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
+		artist = pragha_musicobject_get_artist (mobj);
+		sartist = sanitize_string_to_sqlite3 (artist);
 		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
 		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
 		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
@@ -129,7 +130,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 
 		/* Write artist */
 
-		if ((artist_id = find_artist_db(sartist, cdbase)) == 0)
+		if ((artist_id = pragha_database_find_artist (cdbase, artist)) == 0)
 			artist_id = add_new_artist_db(sartist, cdbase);
 
 		/* Write album */
@@ -378,22 +379,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 
 /* NB: All of the find_* functions require sanitized strings. */
 
-gint find_artist_db(const gchar *artist, PraghaDatabase *cdbase)
-{
-	gint artist_id = 0;
-	gchar *query;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s';", artist);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if(result.no_rows)
-			artist_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return artist_id;
-}
-
 gint find_album_db(const gchar *album, PraghaDatabase *cdbase)
 {
 	gint album_id = 0;
@@ -618,8 +603,9 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
-		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
-		artist_id = find_artist_db(sartist, cdbase);
+		const gchar *artist = pragha_musicobject_get_artist (mobj);
+		sartist = sanitize_string_to_sqlite3 (artist);
+		artist_id = pragha_database_find_artist (cdbase, artist);
 		if (!artist_id)
 			artist_id = add_new_artist_db(sartist, cdbase);
 	}
