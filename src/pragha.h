@@ -865,7 +865,6 @@ gint add_new_year_db(guint year, PraghaDatabase *cdbase);
 gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase);
 void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
 void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase);
-gint find_album_db(const gchar *album, PraghaDatabase *cdbase);
 gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase);
 gint find_year_db(gint year, PraghaDatabase *cdbase);
 gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase);
