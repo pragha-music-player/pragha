@@ -331,64 +331,75 @@ gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase)
 	return ret;
 }
 
-/* Arg. title has to be sanitized */
-
-void update_track_db(gint location_id, gint changed,
+void db_update_track(PraghaDatabase *database,
+		     gint location_id, gint changed,
 		     gint track_no, const gchar *title,
-		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     PraghaDatabase *cdbase)
+		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id)
 {
-	gchar *query = NULL;
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
 
 	if (changed & TAG_TNO_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET track_no = '%d' "
-					"WHERE LOCATION = '%d';",
-					track_no, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
+		sql = "UPDATE TRACK SET track_no = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, track_no);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_TITLE_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET title = '%s' "
-					"WHERE LOCATION = '%d';",
-					title, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET title = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_string (statement, 1, title);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET artist = '%d' "
-					"WHERE LOCATION = '%d';",
-					artist_id, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET artist = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, artist_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET album = '%d' "
-					"WHERE LOCATION = '%d';",
-					album_id, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET album = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, album_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET genre = '%d' "
-					"WHERE LOCATION = '%d';",
-					genre_id, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET genre = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, genre_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET year = '%d' "
-					"WHERE LOCATION = '%d';",
-					year_id, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET year = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, year_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
-		query = g_strdup_printf("UPDATE TRACK SET comment = '%d' "
-					"WHERE LOCATION = '%d';",
-					comment_id, location_id);
-		pragha_database_exec_sqlite_query(cdbase, query, NULL);
+		sql = "UPDATE TRACK SET comment = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, comment_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
 	}
 }
 
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
-	gchar *stitle = NULL;
 	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	guint i = 0, elem = 0;
 
@@ -404,7 +415,6 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 		track_no = pragha_musicobject_get_track_no(mobj);
 	}
 	if (changed & TAG_TITLE_CHANGED) {
-		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		const gchar *artist = pragha_musicobject_get_artist (mobj);
@@ -442,21 +452,19 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 		for(i = 0; i < loc_arr->len; i++) {
 			elem = g_array_index(loc_arr, gint, i);
 			if (elem) {
-				update_track_db(elem, changed,
+				db_update_track(cdbase,
+						elem, changed,
 						track_no,
-						stitle,
+						pragha_musicobject_get_title (mobj),
 						artist_id,
 						album_id,
 						genre_id,
 						year_id,
-						comment_id,
-						cdbase);
+						comment_id);
 			}
 		}
 	}
 	db_commit_transaction(cdbase);
-
-	g_free(stitle);
 }
 
 /* 'playlist' has to be a sanitized string */

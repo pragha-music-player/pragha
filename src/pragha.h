@@ -866,10 +866,10 @@ gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
 gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);
 gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);
-void update_track_db(gint location_id, gint changed,
+void db_update_track(PraghaDatabase *database,
+		     gint location_id, gint changed,
 		     gint track_no, const gchar *title,
-		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     PraghaDatabase *cdbase);
+		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id);
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase);
