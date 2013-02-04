@@ -89,6 +89,9 @@ gint
 pragha_database_find_playlist (PraghaDatabase *database, const gchar *playlist);
 
 gint
+pragha_database_find_radio (PraghaDatabase *database, const gchar *radio);
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
 
 gint

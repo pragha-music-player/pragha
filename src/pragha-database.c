@@ -214,6 +214,19 @@ pragha_database_find_playlist (PraghaDatabase *database, const gchar *playlist)
 }
 
 gint
+pragha_database_find_radio (PraghaDatabase *database, const gchar *radio)
+{
+	gint radio_id = 0;
+	const gchar *sql = "SELECT id FROM RADIO WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, radio);
+	if (pragha_prepared_statement_step (statement))
+		radio_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return radio_id;
+}
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location)
 {
 	const gchar *sql = "INSERT INTO LOCATION (name) VALUES (?)";

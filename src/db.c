@@ -216,25 +216,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-/* NB: All of the find_* functions require sanitized strings. */
-
-gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint radio_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
-				radio);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_columns)
-			radio_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return radio_id;
-}
-
 void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
@@ -615,8 +596,6 @@ gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 	return radio_id;
 }
 
-/* 'radio' has to be a sanitized string */
-
 void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gint radio_id;
@@ -627,7 +606,7 @@ void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 		return;
 	}
 
-	radio_id = find_radio_db(radio, cdbase);
+	radio_id = pragha_database_find_radio (cdbase, radio);
 
 	if (!radio_id) {
 		g_warning("Radio doesn't exist");
