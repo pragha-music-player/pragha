@@ -70,18 +70,16 @@ static void db_add_new_track(PraghaDatabase *database,
 
 static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatabase *cdbase)
 {
-	gchar *s_playlist, *playlist = NULL, *s_file;
+	gchar *playlist = NULL, *s_file;
 	gint playlist_id = 0;
 	GSList *list = NULL, *i = NULL;
 
 	playlist = get_display_filename(playlist_file, FALSE);
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-
 	if (pragha_database_find_playlist (cdbase, playlist))
 		goto bad;
 
-	playlist_id = add_new_playlist_db(s_playlist, cdbase);
+	playlist_id = pragha_database_add_new_playlist (cdbase, playlist);
 
 #ifdef HAVE_PLPARSER
 	gchar *uri = g_filename_to_uri (playlist_file, NULL, NULL);
@@ -102,7 +100,6 @@ static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatab
 	}
 
 bad:
-	g_free(s_playlist);
 	g_free(playlist);
 }
 
@@ -415,27 +412,6 @@ void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDat
 		pragha_database_exec_sqlite_query(cdbase, query, &result);
 	}
 
-}
-
-
-gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint playlist_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("INSERT INTO PLAYLIST (name) VALUES ('%s')",
-				playlist);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
-				playlist);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		playlist_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return playlist_id;
 }
 
 /* Get the names of all the playlists stored in the DB.

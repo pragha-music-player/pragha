@@ -1211,7 +1211,6 @@ new_playlist(PraghaPlaylist* cplaylist,
              const gchar *playlist,
              enum playlist_mgmt type)
 {
-	gchar *s_playlist;
 	gint playlist_id = 0;
 
 	if (string_is_empty(playlist)) {
@@ -1219,20 +1218,15 @@ new_playlist(PraghaPlaylist* cplaylist,
 		return;
 	}
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-
 	if ((playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist))) {
 		if (overwrite_existing_playlist(playlist, cplaylist))
 			delete_playlist_db(playlist, cplaylist->cdbase);
 		else
-			goto exit;
+			return;
 	}
 
-	playlist_id = add_new_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_add_new_playlist (cplaylist->cdbase, playlist);
 	save_playlist(cplaylist, playlist_id, type);
-
-exit:
-	g_free(s_playlist);
 }
 
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type)
