@@ -859,7 +859,6 @@ void init_library_view(struct con_win *cwin);
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
 void pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file);
-gint add_new_year_db(guint year, PraghaDatabase *cdbase);
 void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
 void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase);
 gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
