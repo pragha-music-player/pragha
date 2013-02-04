@@ -324,6 +324,18 @@ pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
 	pragha_prepared_statement_free (statement);
 }
 
+gint
+pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio)
+{
+	const gchar *sql = "INSERT INTO RADIO (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, radio);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_radio (database, radio);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
