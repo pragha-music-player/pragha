@@ -648,7 +648,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "File",
 		                    "The File",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:file_type:
@@ -672,7 +672,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "Title",
 		                    "The Title",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:artist:
@@ -683,7 +683,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "Artist",
 		                    "The Artist",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:album:
@@ -694,7 +694,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "Album",
 		                    "The Album",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:genre:
@@ -705,7 +705,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "Genre",
 		                    "The Genre",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:comment:
@@ -716,7 +716,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "Comment",
 		                    "The Comment",
 		                    "",
-		                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:year:
