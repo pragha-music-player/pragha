@@ -2770,7 +2770,7 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 	/* Save last playlist. */
 
-	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	if (!playlist_id)
 		playlist_id = add_new_playlist_db(SAVE_PLAYLIST_STATE,
 						  cplaylist->cdbase);
@@ -2807,14 +2807,13 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 {
-	gchar *s_playlist, *query;
+	gchar *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
-	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
-	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
@@ -2839,7 +2838,6 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 	pragha_playlist_append_mobj_list(cplaylist, list);
 
 	sqlite3_free_table(result.resultp);
-	g_free(s_playlist);
 
 	g_list_free(list);
 }

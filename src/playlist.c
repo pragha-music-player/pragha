@@ -352,13 +352,12 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
                           gchar *playlist,
                           GList *list)
 {
-	gchar *s_playlist, *query;
+	gchar *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cdbase);
+	playlist_id = pragha_database_find_playlist (cdbase, playlist);
 
 	if(playlist_id == 0)
 		goto bad;
@@ -379,7 +378,6 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 	sqlite3_free_table(result.resultp);
 
 bad:
-	g_free(s_playlist);
 
 	return list;
 }
@@ -578,7 +576,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 					s_playlist = sanitize_string_to_sqlite3(playlist);
 
 					if(node_type == NODE_PLAYLIST) {
-						delete_playlist_db(s_playlist, cwin->cdbase);
+						delete_playlist_db (playlist, cwin->cdbase);
 					}
 					else if (node_type == NODE_RADIO) {
 						delete_radio_db(s_playlist, cwin->cdbase);
@@ -1228,9 +1226,9 @@ new_playlist(PraghaPlaylist* cplaylist,
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
 
-	if ((playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase))) {
+	if ((playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist))) {
 		if (overwrite_existing_playlist(playlist, cplaylist))
-			delete_playlist_db(s_playlist, cplaylist->cdbase);
+			delete_playlist_db(playlist, cplaylist->cdbase);
 		else
 			goto exit;
 	}
@@ -1244,7 +1242,6 @@ exit:
 
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type)
 {
-	gchar *s_playlist;
 	gint playlist_id;
 
 	if (string_is_empty(playlist)) {
@@ -1252,18 +1249,14 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type
 		return;
 	}
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist);
 
 	if (!playlist_id) {
 		g_warning("Playlist doesn't exist\n");
-		goto exit;
+		return;
 	}
 
 	save_playlist(cplaylist, playlist_id, type);
-
-exit:
-	g_free(s_playlist);
 }
 
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)

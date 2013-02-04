@@ -860,7 +860,6 @@ void init_library_view(struct con_win *cwin);
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
 void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
 void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase);
-gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
 gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
 gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);

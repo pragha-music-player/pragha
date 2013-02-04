@@ -78,7 +78,7 @@ static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatab
 
 	s_playlist = sanitize_string_to_sqlite3(playlist);
 
-	if (find_playlist_db(s_playlist, cdbase))
+	if (pragha_database_find_playlist (cdbase, playlist))
 		goto bad;
 
 	playlist_id = add_new_playlist_db(s_playlist, cdbase);
@@ -217,23 +217,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
-
-gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint playlist_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
-				playlist);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_columns)
-			playlist_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return playlist_id;
-}
 
 gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
@@ -537,7 +520,7 @@ gint get_tracklist_count_db(PraghaDatabase *cdbase)
 	gchar *query;
 	PraghaDbResponse result;
 	/* this ID should be cached during open */
-	gint playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cdbase);
+	gint playlist_id = pragha_database_find_playlist (cdbase, SAVE_PLAYLIST_STATE);
 	gint n_playlists = 0;
 	query = g_strdup_printf("SELECT COUNT() FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;", playlist_id);
 	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
@@ -547,7 +530,6 @@ gint get_tracklist_count_db(PraghaDatabase *cdbase)
 
 	return n_playlists;
 }
-/* 'playlist' has to be a sanitized string */
 
 void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
@@ -559,7 +541,7 @@ void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 		return;
 	}
 
-	playlist_id = find_playlist_db(playlist, cdbase);
+	playlist_id = pragha_database_find_playlist (cdbase, playlist);
 
 	if (!playlist_id) {
 		g_warning("Playlist doesn't exist");
