@@ -188,6 +188,19 @@ pragha_database_find_comment (PraghaDatabase *database, const gchar *comment)
 }
 
 gint
+pragha_database_find_year (PraghaDatabase *database, gint year)
+{
+	gint year_id = 0;
+	const gchar *sql = "SELECT id FROM YEAR WHERE year = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, year);
+	if (pragha_prepared_statement_step (statement))
+		year_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return year_id;
+}
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location)
 {
 	const gchar *sql = "INSERT INTO LOCATION (name) VALUES (?)";
