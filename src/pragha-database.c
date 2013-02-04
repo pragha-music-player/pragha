@@ -148,6 +148,18 @@ pragha_database_find_artist (PraghaDatabase *database, const gchar *artist)
 	return artist_id;
 }
 
+gint
+pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist)
+{
+	const gchar *sql = "INSERT INTO ARTIST (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, artist);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_artist (database, artist);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {

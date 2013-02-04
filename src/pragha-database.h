@@ -73,6 +73,9 @@ pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 gint
 pragha_database_find_artist (PraghaDatabase *database, const gchar *artist);
 
+gint
+pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
