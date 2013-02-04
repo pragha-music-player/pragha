@@ -109,7 +109,7 @@ bad:
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
-	const gchar *file, *artist, *album;
+	const gchar *file, *artist, *album, *genre;
 	gchar *stitle, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
@@ -118,7 +118,8 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
-		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
+		genre = pragha_musicobject_get_genre (mobj);
+		sgenre = sanitize_string_to_sqlite3 (genre);
 		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
 
 		/* Write location */
@@ -138,7 +139,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 
 		/* Write genre */
 
-		if ((genre_id = find_genre_db(sgenre, cdbase)) == 0)
+		if ((genre_id = pragha_database_find_genre (cdbase, genre)) == 0)
 			genre_id = add_new_genre_db(sgenre, cdbase);
 
 		/* Write year */
@@ -313,22 +314,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
-
-gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase)
-{
-	gint genre_id = 0;
-	gchar *query;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s';", genre);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_rows)
-			genre_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return genre_id;
-}
 
 gint find_year_db(gint year, PraghaDatabase *cdbase)
 {
@@ -534,8 +519,9 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 			album_id = pragha_database_add_new_album (cdbase, album);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
-		sgenre = sanitize_string_to_sqlite3(pragha_musicobject_get_genre(mobj));
-		genre_id = find_genre_db(sgenre, cdbase);
+		const gchar *genre = pragha_musicobject_get_genre (mobj);
+		sgenre = sanitize_string_to_sqlite3 (genre);
+		genre_id = pragha_database_find_genre (cdbase, genre);
 		if (!genre_id)
 			genre_id = add_new_genre_db(sgenre, cdbase);
 	}
