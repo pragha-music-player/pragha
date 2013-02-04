@@ -575,27 +575,6 @@ void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cd
 
 }
 
-
-gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint radio_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("INSERT INTO RADIO (name) VALUES ('%s')",
-				radio);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
-				radio);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		radio_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return radio_id;
-}
-
 void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 {
 	gint radio_id;

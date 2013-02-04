@@ -109,6 +109,9 @@ pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment)
 gint
 pragha_database_add_new_year (PraghaDatabase *database, guint year);
 
+gint
+pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio);
+
 void
 pragha_database_forget_track (PraghaDatabase *database, const gchar *file);
 
