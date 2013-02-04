@@ -210,6 +210,18 @@ pragha_database_add_new_album (PraghaDatabase *database, const gchar *album)
 	return pragha_database_find_album (database, album);
 }
 
+gint
+pragha_database_add_new_genre (PraghaDatabase *database, const gchar *genre)
+{
+	const gchar *sql = "INSERT INTO GENRE (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, genre);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_genre (database, genre);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
