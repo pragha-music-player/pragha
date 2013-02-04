@@ -47,6 +47,7 @@ struct _PraghaMusicobjectClass
    GObjectClass parent_class;
 };
 
+#define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS
 
 PraghaMusicobject *pragha_musicobject_new (void);
 PraghaMusicobject *
