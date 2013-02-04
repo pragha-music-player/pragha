@@ -94,6 +94,9 @@ pragha_database_add_new_album (PraghaDatabase *database, const gchar *album);
 gint
 pragha_database_add_new_genre (PraghaDatabase *database, const gchar *genre);
 
+gint
+pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
