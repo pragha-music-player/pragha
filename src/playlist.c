@@ -1256,7 +1256,6 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type
 
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 {
-	gchar *file = NULL;
 	gint radio_id = 0;
 
 	if (string_is_empty(name)) {
@@ -1273,9 +1272,7 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 
 	radio_id = pragha_database_add_new_radio (cplaylist->cdbase, name);
 
-	file = sanitize_string_to_sqlite3(uri);
-	add_track_radio_db(file, radio_id, cplaylist->cdbase);
-	g_free(file);
+	pragha_database_add_radio_track (cplaylist->cdbase, radio_id, uri);
 }
 
 void append_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)

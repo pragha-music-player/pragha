@@ -116,6 +116,9 @@ void
 pragha_database_forget_track (PraghaDatabase *database, const gchar *file);
 
 void
+pragha_database_add_radio_track (PraghaDatabase *database, gint radio_id, const gchar *uri);
+
+void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
 gboolean

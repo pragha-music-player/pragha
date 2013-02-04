@@ -205,17 +205,6 @@ void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *
 	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
-void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
-{
-	gchar *query;
-
-	query = g_strdup_printf("INSERT INTO RADIO_TRACKS (uri, radio) "
-				"VALUES ('%s', %d);",
-				uri,
-				radio_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-}
-
 void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 {
 	gchar *query;
