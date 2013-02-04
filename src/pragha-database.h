@@ -82,6 +82,9 @@ pragha_database_add_new_location (PraghaDatabase *database, const gchar *locatio
 gint
 pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist);
 
+gint
+pragha_database_add_new_album (PraghaDatabase *database, const gchar *album);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
