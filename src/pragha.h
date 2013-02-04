@@ -869,7 +869,6 @@ void db_update_track(PraghaDatabase *database,
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
 void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase);
-gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
 gchar** get_playlist_names_db(PraghaDatabase *cdbase);
 gint get_playlist_count_db(PraghaDatabase *cdbase);
 void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cdbase);

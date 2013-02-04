@@ -325,6 +325,18 @@ pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
 }
 
 gint
+pragha_database_add_new_playlist (PraghaDatabase *database, const gchar *playlist)
+{
+	const gchar *sql = "INSERT INTO PLAYLIST (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, playlist);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_playlist (database, playlist);
+}
+
+gint
 pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio)
 {
 	const gchar *sql = "INSERT INTO RADIO (name) VALUES (?)";
