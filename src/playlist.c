@@ -1145,16 +1145,14 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 static void
 append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 {
-	gchar *file, *s_file;
+	gchar *file;
 	GSList *i = NULL;
 
 	db_begin_transaction(cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
-		s_file = sanitize_string_to_sqlite3(file);
-		add_track_playlist_db(s_file, playlist_id, cdbase);
-		g_free(s_file);
+		pragha_database_add_playlist_track (cdbase, playlist_id, file);
 		g_free(file);
 	}
 
