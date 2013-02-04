@@ -858,7 +858,6 @@ void init_library_view(struct con_win *cwin);
 /* DB (Sqlite) Functions */
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
-void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
 gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);
 gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);

@@ -70,7 +70,7 @@ static void db_add_new_track(PraghaDatabase *database,
 
 static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatabase *cdbase)
 {
-	gchar *playlist = NULL, *s_file;
+	gchar *playlist = NULL;
 	gint playlist_id = 0;
 	GSList *list = NULL, *i = NULL;
 
@@ -91,9 +91,7 @@ static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatab
 
 	if(list) {
 		for (i=list; i != NULL; i = i->next) {
-			s_file = sanitize_string_to_sqlite3(i->data);
-			add_track_playlist_db(s_file, playlist_id, cdbase);
-			g_free(s_file);
+			pragha_database_add_playlist_track (cdbase, playlist_id, i->data);
 			g_free(i->data);
 		}
 		g_slist_free(list);
@@ -188,19 +186,6 @@ void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file)
 /**************/
 /* Public API */
 /**************/
-
-/* NB: All of the add_* functions require sanitized strings */
-
-void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase)
-{
-	gchar *query;
-
-	query = g_strdup_printf("INSERT INTO PLAYLIST_TRACKS (file, playlist) "
-				"VALUES ('%s', %d);",
-				file,
-				playlist_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-}
 
 void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 {

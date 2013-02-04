@@ -112,6 +112,9 @@ pragha_database_add_new_year (PraghaDatabase *database, guint year);
 gint
 pragha_database_add_new_playlist (PraghaDatabase *database, const gchar *playlist);
 
+void
+pragha_database_add_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file);
+
 gint
 pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio);
 
