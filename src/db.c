@@ -110,7 +110,7 @@ bad:
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
 	const gchar *file, *artist, *album, *genre;
-	gchar *stitle, *sgenre, *scomment;
+	gchar *stitle, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	if (mobj) {
@@ -119,7 +119,6 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
 		genre = pragha_musicobject_get_genre (mobj);
-		sgenre = sanitize_string_to_sqlite3 (genre);
 		scomment = sanitize_string_to_sqlite3(pragha_musicobject_get_comment(mobj));
 
 		/* Write location */
@@ -140,7 +139,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		/* Write genre */
 
 		if ((genre_id = pragha_database_find_genre (cdbase, genre)) == 0)
-			genre_id = add_new_genre_db(sgenre, cdbase);
+			genre_id = pragha_database_add_new_genre (cdbase, genre);
 
 		/* Write year */
 
@@ -170,7 +169,6 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 				 cdbase);
 
 		g_free(stitle);
-		g_free(sgenre);
 		g_free(scomment);
 	}
 }
@@ -230,26 +228,6 @@ bad:
 /**************/
 
 /* NB: All of the add_* functions require sanitized strings */
-
-gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint genre_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("INSERT INTO GENRE (name) VALUES ('%s')",
-				genre);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s'",
-				genre);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		genre_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return genre_id;
-}
 
 gint add_new_year_db(guint year, PraghaDatabase *cdbase)
 {
@@ -488,7 +466,7 @@ void update_track_db(gint location_id, gint changed,
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
-	gchar *stitle = NULL, *scomment= NULL, *sgenre = NULL;
+	gchar *stitle = NULL, *scomment= NULL;
 	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	guint i = 0, elem = 0;
 
@@ -520,10 +498,9 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 	}
 	if (changed & TAG_GENRE_CHANGED) {
 		const gchar *genre = pragha_musicobject_get_genre (mobj);
-		sgenre = sanitize_string_to_sqlite3 (genre);
 		genre_id = pragha_database_find_genre (cdbase, genre);
 		if (!genre_id)
-			genre_id = add_new_genre_db(sgenre, cdbase);
+			genre_id = pragha_database_add_new_genre (cdbase, genre);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
 		year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase);
@@ -558,7 +535,6 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 	db_commit_transaction(cdbase);
 
 	g_free(stitle);
-	g_free(sgenre);
 	g_free(scomment);
 }
 
