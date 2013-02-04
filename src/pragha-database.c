@@ -135,6 +135,19 @@ pragha_database_find_location (PraghaDatabase *database, const gchar *location)
 	return location_id;
 }
 
+gint
+pragha_database_find_artist (PraghaDatabase *database, const gchar *artist)
+{
+	gint artist_id = 0;
+	const gchar *sql = "SELECT id FROM ARTIST WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, artist);
+	if (pragha_prepared_statement_step (statement))
+		artist_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return artist_id;
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
