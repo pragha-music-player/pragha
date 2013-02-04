@@ -110,12 +110,11 @@ bad:
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
 	const gchar *file, *artist;
-	gchar *sfile, *stitle, *salbum, *sgenre, *scomment;
+	gchar *stitle, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	if (mobj) {
 		file = pragha_musicobject_get_file (mobj);
-		sfile = sanitize_string_to_sqlite3 (file);
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		artist = pragha_musicobject_get_artist (mobj);
 		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
@@ -125,7 +124,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 		/* Write location */
 
 		if ((location_id = pragha_database_find_location (cdbase, file)) == 0)
-			location_id = add_new_location_db(sfile, cdbase);
+			location_id = pragha_database_add_new_location (cdbase, file);
 
 		/* Write artist */
 
@@ -169,7 +168,6 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 				 stitle,
 				 cdbase);
 
-		g_free(sfile);
 		g_free(stitle);
 		g_free(salbum);
 		g_free(sgenre);
@@ -311,26 +309,6 @@ gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 	}
 
 	return comment_id;
-}
-
-gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint location_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("INSERT INTO LOCATION (name) VALUES ('%s')",
-				location);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s'",
-				location);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		location_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return location_id;
 }
 
 void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase)
