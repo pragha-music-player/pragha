@@ -235,6 +235,18 @@ pragha_database_add_new_genre (PraghaDatabase *database, const gchar *genre)
 	return pragha_database_find_genre (database, genre);
 }
 
+gint
+pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment)
+{
+	const gchar *sql = "INSERT INTO COMMENT (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, comment);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_comment (database, comment);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
