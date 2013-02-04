@@ -143,7 +143,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 
 		/* Write year */
 
-		if ((year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase)) == 0)
+		if ((year_id = pragha_database_find_year (cdbase, pragha_musicobject_get_year (mobj))) == 0)
 			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
 
 		/* Write comment */
@@ -271,22 +271,6 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
-
-gint find_year_db(gint year, PraghaDatabase *cdbase)
-{
-	gint year_id = 0;
-	gchar *query;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM YEAR WHERE year = '%d';", year);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_rows)
-			year_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	return year_id;
-}
 
 gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 {
@@ -466,7 +450,7 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 			genre_id = pragha_database_add_new_genre (cdbase, genre);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
-		year_id = find_year_db(pragha_musicobject_get_year(mobj), cdbase);
+		year_id = pragha_database_find_year (cdbase, pragha_musicobject_get_year (mobj));
 		if (!year_id)
 			year_id = add_new_year_db(pragha_musicobject_get_year(mobj), cdbase);
 	}
