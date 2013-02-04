@@ -80,6 +80,9 @@ gint
 pragha_database_find_genre (PraghaDatabase *database, const gchar *genre);
 
 gint
+pragha_database_find_comment (PraghaDatabase *database, const gchar *comment);
+
+gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
 
 gint
