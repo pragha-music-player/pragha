@@ -18,7 +18,8 @@
 
 #include "pragha.h"
 
-static void add_new_track_db(gint location_id,
+static void db_add_new_track(PraghaDatabase *database,
+			     gint location_id,
 			     gint artist_id,
 			     gint album_id,
 			     gint genre_id,
@@ -30,12 +31,9 @@ static void add_new_track_db(gint location_id,
 			     gint bitrate,
 			     gint samplerate,
 			     gint file_type,
-			     gchar *title,
-			     PraghaDatabase *cdbase)
+			     const gchar *title)
 {
-	gchar *query;
-
-	query = g_strdup_printf("INSERT INTO TRACK ("
+	const gchar *sql = "INSERT INTO TRACK ("
 				"location, "
 				"track_no, "
 				"artist, "
@@ -50,23 +48,24 @@ static void add_new_track_db(gint location_id,
 				"file_type, "
 				"title) "
 				"VALUES "
-				"('%d', '%d', '%d', '%d', '%d', '%d', '%d', "
-				"'%d', '%d', '%d', %d, '%d', '%s')",
-				location_id,
-				track_no,
-				artist_id,
-				album_id,
-				genre_id,
-				year_id,
-				comment_id,
-				bitrate,
-				samplerate,
-				length,
-				channels,
-				file_type,
-				title);
+				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_bind_int (statement, 2, track_no);
+	pragha_prepared_statement_bind_int (statement, 3, artist_id);
+	pragha_prepared_statement_bind_int (statement, 4, album_id);
+	pragha_prepared_statement_bind_int (statement, 5, genre_id);
+	pragha_prepared_statement_bind_int (statement, 6, year_id);
+	pragha_prepared_statement_bind_int (statement, 7, comment_id);
+	pragha_prepared_statement_bind_int (statement, 8, bitrate);
+	pragha_prepared_statement_bind_int (statement, 9, samplerate);
+	pragha_prepared_statement_bind_int (statement, 10, length);
+	pragha_prepared_statement_bind_int (statement, 11, channels);
+	pragha_prepared_statement_bind_int (statement, 12, file_type);
+	pragha_prepared_statement_bind_string (statement, 13, title);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
 }
 
 static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatabase *cdbase)
@@ -110,12 +109,10 @@ bad:
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
 	const gchar *file, *artist, *album, *genre, *comment;
-	gchar *stitle;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	if (mobj) {
 		file = pragha_musicobject_get_file (mobj);
-		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
 		genre = pragha_musicobject_get_genre (mobj);
@@ -153,7 +150,8 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 
 		/* Write track */
 
-		add_new_track_db(location_id,
+		db_add_new_track(cdbase,
+				 location_id,
 				 artist_id,
 				 album_id,
 				 genre_id,
@@ -165,10 +163,7 @@ void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 				 pragha_musicobject_get_bitrate(mobj),
 				 pragha_musicobject_get_samplerate(mobj),
 				 pragha_musicobject_get_file_type(mobj),
-				 stitle,
-				 cdbase);
-
-		g_free(stitle);
+				 pragha_musicobject_get_title(mobj));
 	}
 }
 
