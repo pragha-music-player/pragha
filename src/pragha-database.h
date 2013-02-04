@@ -100,6 +100,9 @@ pragha_database_add_new_genre (PraghaDatabase *database, const gchar *genre);
 gint
 pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment);
 
+gint
+pragha_database_add_new_year (PraghaDatabase *database, guint year);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 

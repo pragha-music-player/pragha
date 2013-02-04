@@ -260,6 +260,18 @@ pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment)
 	return pragha_database_find_comment (database, comment);
 }
 
+gint
+pragha_database_add_new_year (PraghaDatabase *database, guint year)
+{
+	const gchar *sql = "INSERT INTO YEAR (year) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, year);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_year (database, year);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
