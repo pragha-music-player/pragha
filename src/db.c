@@ -373,32 +373,6 @@ pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr,
 	db_commit_transaction(cdbase);
 }
 
-/* 'playlist' has to be a sanitized string */
-
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase)
-{
-	gchar *query;
-	gint playlist_id = 0;
-	PraghaDbResponse result;
-
-	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
-				oplaylist);
-
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		playlist_id = atoi(result.resultp[result.no_columns]);
-		sqlite3_free_table(result.resultp);
-	}
-
-	if(playlist_id != 0) {
-		query = g_strdup_printf("UPDATE PLAYLIST SET name = '%s' "
-					"WHERE id = '%d';",
-					nplaylist, playlist_id);
-
-		pragha_database_exec_sqlite_query(cdbase, query, &result);
-	}
-
-}
-
 /* Get the names of all the playlists stored in the DB.
    Returned NULL terminated array of strings that has to freed by caller. */
 
