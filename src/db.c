@@ -532,42 +532,6 @@ void flush_stale_entries_db(PraghaDatabase *cdbase)
 	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
 }
 
-/* Delete all tracks falling under the given directory.
-   Also, flush the database of unused albums, artists, etc. */
-
-void
-pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name)
-{
-	gchar *query, *sdir_name;
-
-	sdir_name = sanitize_string_to_sqlite3(dir_name);
-
-	/* Delete all tracks under the given dir */
-
-	query = g_strdup_printf("DELETE FROM TRACK WHERE location IN "
-				"(SELECT id FROM LOCATION WHERE NAME LIKE '%s%%');",
-				sdir_name);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	/* Delete the location entries */
-
-	query = g_strdup_printf("DELETE FROM LOCATION WHERE name LIKE '%s%%';",
-				sdir_name);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
-
-	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE file LIKE '%s%%';",
-				sdir_name);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	/* Now flush unused artists, albums, genres, years */
-
-	flush_stale_entries_db(cdbase);
-
-	g_free(sdir_name);
-}
-
 gint drop_dbase_schema(PraghaDatabase *cdbase)
 {
 	gint i, ret = 0;
