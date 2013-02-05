@@ -895,8 +895,6 @@ gint drop_dbase_schema(PraghaDatabase *cdbase);
 gint db_get_artist_count(PraghaDatabase *cdbase);
 gint db_get_album_count(PraghaDatabase *cdbase);
 gint db_get_track_count(PraghaDatabase *cdbase);
-void db_begin_transaction(PraghaDatabase *cdbase);
-void db_commit_transaction(PraghaDatabase *cdbase);
 
 /* Playlist mgmt functions */
 
