@@ -55,16 +55,13 @@ struct _PraghaDatabaseClass
 };
 
 gboolean
-pragha_database_exec_write_query (PraghaDatabase *database,
-                                  const gchar *query);
+pragha_database_exec_query (PraghaDatabase *database,
+                            const gchar *query);
 
 gboolean
 pragha_database_exec_sqlite_query(PraghaDatabase *database,
                                   gchar *query,
                                   PraghaDbResponse *result);
-
-void db_begin_transaction(PraghaDatabase *database);
-void db_commit_transaction(PraghaDatabase *database);
 
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
