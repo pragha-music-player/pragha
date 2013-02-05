@@ -386,6 +386,22 @@ pragha_database_update_playlist_name (PraghaDatabase *database, const gchar *old
 	pragha_prepared_statement_free (statement);
 }
 
+void
+pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name)
+{
+	gint radio_id = pragha_database_find_radio (database, old_name);
+
+	if (!radio_id)
+		return;
+
+	const gchar *sql = "UPDATE RADIO SET name = ? WHERE id = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, new_name);
+	pragha_prepared_statement_bind_int (statement, 2, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
