@@ -478,7 +478,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list;
-	gchar *playlist = NULL, *s_playlist = NULL, *n_playlist = NULL;
+	gchar *playlist = NULL, *n_playlist = NULL;
 	gint node_type;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -490,8 +490,6 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			s_playlist = sanitize_string_to_sqlite3(playlist);
-
 			n_playlist = rename_playlist_dialog (playlist, cwin);
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
@@ -499,13 +497,12 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 				if(node_type == NODE_PLAYLIST)
 					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
 				else if (node_type == NODE_RADIO)
-					update_radio_name_db(s_playlist, n_playlist, cwin->cdbase);
+					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
 
 				pragha_database_change_playlists_done(cwin->cdbase);
 
 				g_free(n_playlist);
 			}
-			g_free(s_playlist);
 			g_free(playlist);
 		}
 		gtk_tree_path_free(path);

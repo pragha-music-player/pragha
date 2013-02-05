@@ -128,6 +128,9 @@ void
 pragha_database_update_playlist_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name);
 
 void
+pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name);
+
+void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
 gboolean
