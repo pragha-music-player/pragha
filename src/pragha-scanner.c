@@ -91,6 +91,7 @@ pragha_scanner_worker_finished (gpointer data)
 {
 	GtkWidget *msg_dialog;
 	gchar *last_scan_time = NULL;
+	GSList *list = NULL;
 
 	PraghaScanner *scanner = data;
 
@@ -122,6 +123,14 @@ pragha_scanner_worker_finished (gpointer data)
 			                             GROUP_LIBRARY,
 			                             KEY_LIBRARY_SCANNED,
 			                             scanner->folder_list);
+	}
+
+	if (scanner->updating_action) {
+		flush_db(scanner->cdbase);
+
+		for(list = scanner->tracks_list ; list != NULL ; list = list->next)
+			add_new_musicobject_db(scanner->cdbase, list->data);
+		g_slist_free_full(scanner->tracks_list, g_object_unref);
 	}
 
 	/* Update the library view */
@@ -160,6 +169,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 	const gchar *next_file = NULL;
 	gchar *ab_file;
 	GError *error = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	if(g_cancellable_is_cancelled (scanner->cancellable))
 		return;
@@ -181,7 +191,11 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
 			pragha_scanner_scan_handler(scanner, ab_file);
 		else {
-			pragha_database_add_new_file(scanner->cdbase, ab_file);
+			if (is_playable_file(ab_file)) {
+				mobj = new_musicobject_from_file(ab_file);
+				if (G_LIKELY(mobj))
+					scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+			}
 
 			pragha_mutex_lock (scanner->files_scanned_mutex);
 			scanner->files_scanned++;
@@ -361,7 +375,7 @@ scanner_dialog_response_event(GtkDialog *dialog,
 /* Create the dialog and init all */
 
 PraghaScanner *
-pragha_scanner_dialog_new(GtkWidget *parent, const gchar *title)
+pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 {
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *table, *label, *progress_bar;
@@ -396,11 +410,10 @@ pragha_scanner_dialog_new(GtkWidget *parent, const gchar *title)
 
 	/* Create the scanner dialog */
 
-	dialog = gtk_dialog_new_with_buttons(title,
+	dialog = gtk_dialog_new_with_buttons(updating_action ? _("Update Library") : _("Rescan Library"),
 	                                     GTK_WINDOW(parent),
-	                                     GTK_DIALOG_MODAL,
-	                                     GTK_STOCK_CANCEL,
-	                                     GTK_RESPONSE_CANCEL,
+	                                     updating_action ? (GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT) : GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 	                                     NULL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 				  GTK_BUTTONBOX_SPREAD);
@@ -435,6 +448,7 @@ pragha_scanner_dialog_new(GtkWidget *parent, const gchar *title)
 	scanner->dialog = dialog;
 	scanner->label = label;
 	scanner->progress_bar = progress_bar;
+	scanner->updating_action = updating_action;
 
 	/* Init threads */
 
@@ -464,7 +478,7 @@ pragha_scanner_update_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	scanner = pragha_scanner_dialog_new(parent, _("Update Library"));
+	scanner = pragha_scanner_dialog_new(parent, TRUE);
 
 	pragha_async_launch(pragha_scanner_update_worker,
 			    pragha_scanner_worker_finished,
@@ -476,9 +490,7 @@ pragha_scanner_scan_library(GtkWidget *parent)
 {
 	PraghaScanner *scanner;
 
-	scanner = pragha_scanner_dialog_new(parent, _("Rescan Library"));
-
-	flush_db(scanner->cdbase);
+	scanner = pragha_scanner_dialog_new(parent, FALSE);
 
 	pragha_async_launch(pragha_scanner_scan_worker,
 			    pragha_scanner_worker_finished,
