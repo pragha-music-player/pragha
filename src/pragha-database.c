@@ -22,8 +22,9 @@ G_DEFINE_TYPE(PraghaDatabase, pragha_database, G_TYPE_OBJECT)
 
 struct _PraghaDatabasePrivate
 {
-	sqlite3 *sqlitedb;
-	gboolean successfully;
+	sqlite3 *     sqlitedb;
+	PRAGHA_MUTEX (db_write_mutex);
+	gboolean      successfully;
 };
 
 enum {
@@ -34,8 +35,8 @@ enum {
 static int signals[LAST_SIGNAL] = { 0 };
 
 gboolean
-pragha_database_exec_query (PraghaDatabase *database,
-                            const gchar *query)
+pragha_database_exec_write_query (PraghaDatabase *database,
+                                  const gchar *query)
 {
 	gchar *err = NULL;
 	gboolean ret = FALSE;
@@ -47,7 +48,11 @@ pragha_database_exec_query (PraghaDatabase *database,
 
 	CDEBUG(DBG_DB, "%s", query);
 
+	/* Is a write to db and caller doesn't expect any result */
+
+	pragha_mutex_lock (database->priv->db_write_mutex);
 	sqlite3_exec(database->priv->sqlitedb, query, NULL, NULL, &err);
+	pragha_mutex_unlock (database->priv->db_write_mutex);
 
 	if (err) {
 		g_critical("SQL Err : %s",  err);
@@ -79,27 +84,20 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 
 	/* Caller doesn't expect any result */
 
-	if (!result) {
-		ret = pragha_database_exec_query(database, query);
-	}
+	sqlite3_get_table(database->priv->sqlitedb, query,
+	                  &result->resultp,
+	                  &result->no_rows,
+	                  &result->no_columns,
+	                  &err);
 
-	/* Caller expects result */
-
-	else {
-		sqlite3_get_table(database->priv->sqlitedb, query,
-				  &result->resultp,
-				  &result->no_rows,
-				  &result->no_columns,
-				  &err);
-		if (err) {
-			g_critical("SQL Err : %s",  err);
-			g_critical("query   : %s", query);
-			ret = FALSE;
-		}
-		else {
-			ret = TRUE;
-		}
+	if (err) {
+		g_critical("SQL Err : %s",  err);
+		g_critical("query   : %s", query);
 		sqlite3_free(err);
+		ret = FALSE;
+	}
+	else {
+		ret = TRUE;
 	}
 
 	/* Free the query here, don't free in the callsite ! */
@@ -107,6 +105,32 @@ pragha_database_exec_sqlite_query(PraghaDatabase *database,
 	g_free(query);
 
 	return ret;
+}
+
+void db_begin_transaction(PraghaDatabase *database)
+{
+	gchar *err = NULL;
+
+	g_return_if_fail(PRAGHA_IS_DATABASE(database));
+
+	sqlite3_exec(database->priv->sqlitedb, "BEGIN TRANSACTION", NULL, NULL, &err);
+	if (err) {
+		g_critical("BEGIN TRANSACTION: SQL Err : %s",  err);
+		sqlite3_free(err);
+	}
+}
+
+void db_commit_transaction(PraghaDatabase *database)
+{
+	gchar *err = NULL;
+
+	g_return_if_fail(PRAGHA_IS_DATABASE(database));
+
+	sqlite3_exec(database->priv->sqlitedb, "END TRANSACTION",NULL, NULL, &err);
+	if (err) {
+		g_critical("END TRANSACTION: SQL Err : %s",  err);
+		sqlite3_free(err);
+	}
 }
 
 gboolean
@@ -182,7 +206,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
-		if (!pragha_database_exec_query (database, queries[i]))
+		if (!pragha_database_exec_write_query (database, queries[i]))
 			return FALSE;
 	}
 
@@ -220,6 +244,7 @@ pragha_database_finalize (GObject *object)
 	PraghaDatabasePrivate *priv = database->priv;
 
 	sqlite3_close(priv->sqlitedb);
+	pragha_mutex_free(priv->db_write_mutex);
 
 	G_OBJECT_CLASS(pragha_database_parent_class)->finalize(object);
 }
@@ -273,6 +298,8 @@ pragha_database_init (PraghaDatabase *database)
 
 	if (!pragha_database_init_schema (database))
 		return;
+
+	pragha_mutex_create(priv->db_write_mutex);
 
 	priv->successfully = TRUE;
 }
