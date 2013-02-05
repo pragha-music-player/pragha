@@ -104,8 +104,40 @@ pragha_scanner_worker_finished (gpointer data)
 	/* Ensure that the other thread has finished */
 	g_thread_join (scanner->no_files_thread);
 
-	/* If was not canceled, shows a dialog */
-	if (!g_cancellable_is_cancelled (scanner->cancellable)) {
+	/* If not cancelled, update database and show a dialog */
+	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
+		/* Save new database */
+	
+		flush_db(scanner->cdbase);
+		for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
+			if(list->data) {
+				add_new_musicobject_db(scanner->cdbase, list->data);
+				g_object_unref(list->data);
+
+				pragha_process_gtk_events ();
+			}
+		}
+
+		/* Update the library view */
+
+		pragha_database_change_playlists_done(scanner->cdbase);
+
+		/* Save finished time and folders scanned. */
+
+		g_get_current_time(&scanner->last_update);
+		last_scan_time = g_time_val_to_iso8601(&scanner->last_update);
+		pragha_preferences_set_string(scanner->preferences,
+			                     GROUP_LIBRARY,
+			                     KEY_LIBRARY_LAST_SCANNED,
+			                     last_scan_time);
+		g_free(last_scan_time);
+
+		pragha_preferences_set_filename_list(scanner->preferences,
+			                             GROUP_LIBRARY,
+			                             KEY_LIBRARY_SCANNED,
+			                             scanner->folder_list);
+		/* Show the dialog */
+
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(scanner->parent),
 						    GTK_DIALOG_MODAL,
 						    GTK_MESSAGE_INFO,
@@ -113,47 +145,19 @@ pragha_scanner_worker_finished (gpointer data)
 						    "%s",
 						    _("Library scan complete"));
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
-
 		gtk_widget_destroy(msg_dialog);
 	}
 
-	/* If not cancelled, remove last scanned folders */
-	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
-		pragha_preferences_set_filename_list(scanner->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_SCANNED,
-			                             scanner->folder_list);
-	}
-
-	if (scanner->updating_action) {
-		flush_db(scanner->cdbase);
-
-		for(list = scanner->tracks_list ; list != NULL ; list = list->next)
-			add_new_musicobject_db(scanner->cdbase, list->data);
-		g_slist_free_full(scanner->tracks_list, g_object_unref);
-	}
-
-	/* Update the library view */
-	pragha_database_change_playlists_done(scanner->cdbase);
-
 	/* Clean memory */
+
 	g_object_unref(scanner->cdbase);
 	g_object_unref(scanner->preferences);
+	g_slist_free(scanner->tracks_list);
 	free_str_list(scanner->folder_list);
 	free_str_list(scanner->folder_scanned);
 	pragha_mutex_free(scanner->no_files_mutex);
 	pragha_mutex_free(scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);
-
-	/* Save last time update and folders */
-
-	g_get_current_time(&scanner->last_update);
-	last_scan_time = g_time_val_to_iso8601(&scanner->last_update);
-	pragha_preferences_set_string(scanner->preferences,
-	                             GROUP_LIBRARY,
-	                             KEY_LIBRARY_LAST_SCANNED,
-	                             last_scan_time);
-	g_free(last_scan_time);
 
 	g_slice_free (PraghaScanner, data);
 
@@ -217,16 +221,12 @@ pragha_scanner_scan_worker(gpointer data)
 
 	PraghaScanner *scanner = data;
 
-	db_begin_transaction(scanner->cdbase);
-
 	for(list = scanner->folder_list ; list != NULL; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
 
 		pragha_scanner_scan_handler(scanner, list->data);
 	}
-
-	db_commit_transaction(scanner->cdbase);
 
 	return scanner;
 }
@@ -239,8 +239,10 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file = NULL, *s_ab_file = NULL;
+	GSList *list;
 	GError *error = NULL;
 	struct stat sbuf;
+	PraghaMusicobject *mobj = NULL;
 
 	if(g_cancellable_is_cancelled (scanner->cancellable))
 		return;
@@ -262,15 +264,27 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			pragha_scanner_update_handler(scanner, ab_file);
 		}
 		else {
-			s_ab_file = sanitize_string_to_sqlite3(ab_file);
-			if (!find_location_db(s_ab_file, scanner->cdbase)) {
-				pragha_database_add_new_file(scanner->cdbase, ab_file);
+			mobj = NULL;
+			for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
+				if(g_cancellable_is_cancelled (scanner->cancellable))
+					break;
+				if(!g_strcmp0(pragha_musicobject_get_file(list->data), ab_file)) {
+					mobj = list->data;
+					break;
+				}
+			}
+			if(!mobj) {
+				mobj = new_musicobject_from_file(ab_file);
+				if (G_LIKELY(mobj))
+					scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
 			}
 			else {
 				g_stat(ab_file, &sbuf);
 				if(sbuf.st_mtime > scanner->last_update.tv_sec) {
-					pragha_database_forget_track(scanner->cdbase, ab_file);
-					pragha_database_add_new_file(scanner->cdbase, ab_file);
+					g_object_unref(mobj);
+					mobj = new_musicobject_from_file(ab_file);
+					if (G_LIKELY(mobj))
+						scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
 				}
 			}
 
@@ -292,33 +306,17 @@ gpointer
 pragha_scanner_update_worker(gpointer data)
 {
 	GSList *list;
-	gchar *query;
-	PraghaDbResponse result;
-	gint i = 0;
 
 	PraghaScanner *scanner = data;
 
-	db_begin_transaction(scanner->cdbase);
-
-	/* First clean removed folders in library. */
-	for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
+	/* Clean removed files */
+	for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			break;
-
-		if(!is_present_str_list(list->data, scanner->folder_list))
-			pragha_database_delete_folder(scanner->cdbase, list->data);
-	}
-
-	/* Also clean removed files */
-	query = g_strdup_printf("SELECT name FROM LOCATION;");
-	if (pragha_database_exec_sqlite_query(scanner->cdbase, query, &result)) {
-		for_each_result_row(result, i) {
-			if(g_cancellable_is_cancelled (scanner->cancellable))
-				break;
-			if(!g_file_test(result.resultp[i], G_FILE_TEST_EXISTS))
-				pragha_database_forget_track(scanner->cdbase, result.resultp[i]);
+		if(!g_file_test(pragha_musicobject_get_file(list->data), G_FILE_TEST_EXISTS)) {
+			g_object_unref(list->data);
+			list->data = NULL;
 		}
-		sqlite3_free_table(result.resultp);
 	}
 
 	/* Then update files changed.. */
@@ -338,8 +336,6 @@ pragha_scanner_update_worker(gpointer data)
 		if(!is_present_str_list(list->data, scanner->folder_scanned))
 			pragha_scanner_scan_handler(scanner, list->data);
 	}
-
-	db_commit_transaction(scanner->cdbase);
 
 	return scanner;
 }
@@ -380,7 +376,11 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 	PraghaScanner *scanner;
 	GtkWidget *dialog, *table, *label, *progress_bar;
 	gchar *last_scan_time = NULL;
-	guint row = 0;
+	PraghaMusicobject *mobj = NULL;
+	guint row = 0, i = 0;
+	GSList *list;
+	gchar *query;
+	PraghaDbResponse result;
 
 	scanner = g_slice_new0(PraghaScanner);
 
@@ -412,7 +412,7 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 
 	dialog = gtk_dialog_new_with_buttons(updating_action ? _("Update Library") : _("Rescan Library"),
 	                                     GTK_WINDOW(parent),
-	                                     updating_action ? (GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT) : GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                     GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 	                                     NULL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
@@ -449,6 +449,26 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 	scanner->label = label;
 	scanner->progress_bar = progress_bar;
 	scanner->updating_action = updating_action;
+
+	scanner->tracks_list = NULL;
+	if(updating_action) {
+		/* Append the files from database that no changed. */
+		for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
+			if(is_present_str_list(list->data, scanner->folder_list)) {
+				query = g_strdup_printf("SELECT id FROM LOCATION WHERE name LIKE '%s%%';", (gchar *)list->data);
+				if (pragha_database_exec_sqlite_query(scanner->cdbase, query, &result)) {
+					for_each_result_row(result, i) {
+						mobj = new_musicobject_from_db(scanner->cdbase, atoi(result.resultp[i]));
+						if (G_LIKELY(mobj))
+							scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+
+						pragha_process_gtk_events ();
+					}
+					sqlite3_free_table(result.resultp);
+				}
+			}
+		}
+	}
 
 	/* Init threads */
 
