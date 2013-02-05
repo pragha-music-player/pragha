@@ -66,8 +66,7 @@ static void add_new_track_db(gint location_id,
 				file_type,
 				title);
 
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 static void import_playlist_from_file_db(const gchar *playlist_file, PraghaDatabase *cdbase)
@@ -211,12 +210,10 @@ pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file)
 	}
 
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 bad:
 	g_free(sfile);
@@ -236,8 +233,7 @@ gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO ARTIST (name) VALUES ('%s')",
 				artist);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM ARTIST WHERE name = '%s'",
 				artist);
@@ -257,8 +253,7 @@ gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO ALBUM (name) VALUES ('%s')",
 				album);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM ALBUM WHERE name = '%s'",
 				album);
@@ -278,8 +273,7 @@ gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO GENRE (name) VALUES ('%s')",
 				genre);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM GENRE WHERE name = '%s'",
 				genre);
@@ -299,8 +293,7 @@ gint add_new_year_db(guint year, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO YEAR (year) VALUES ('%d')",
 				year);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM YEAR WHERE year = '%d'",
 				year);
@@ -320,8 +313,7 @@ gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO COMMENT (name) VALUES ('%s')",
 				comment);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM COMMENT WHERE name = '%s'",
 				comment);
@@ -341,8 +333,7 @@ gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO LOCATION (name) VALUES ('%s')",
 				location);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s'",
 				location);
@@ -362,8 +353,7 @@ void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *
 				"VALUES ('%s', %d);",
 				file,
 				playlist_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
@@ -374,8 +364,7 @@ void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase)
 				"VALUES ('%s', %d);",
 				uri,
 				radio_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* NB: All of the find_* functions require sanitized strings. */
@@ -516,12 +505,10 @@ void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 	gchar *query;
 
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 gchar *
@@ -576,51 +563,44 @@ void update_track_db(gint location_id, gint changed,
 		query = g_strdup_printf("UPDATE TRACK SET track_no = '%d' "
 					"WHERE LOCATION = '%d';",
 					track_no, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	}
 	if (changed & TAG_TITLE_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET title = '%s' "
 					"WHERE LOCATION = '%d';",
 					title, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_ARTIST_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET artist = '%d' "
 					"WHERE LOCATION = '%d';",
 					artist_id, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_ALBUM_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET album = '%d' "
 					"WHERE LOCATION = '%d';",
 					album_id, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_GENRE_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET genre = '%d' "
 					"WHERE LOCATION = '%d';",
 					genre_id, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_YEAR_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET year = '%d' "
 					"WHERE LOCATION = '%d';",
 					year_id, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 	if (changed & TAG_COMMENT_CHANGED) {
 		query = g_strdup_printf("UPDATE TRACK SET comment = '%d' "
 					"WHERE LOCATION = '%d';",
 					comment_id, location_id);
-		pragha_database_exec_write_query(cdbase, query);
-		g_free(query);
+		pragha_database_exec_sqlite_query(cdbase, query, NULL);
 	}
 }
 
@@ -737,8 +717,7 @@ gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO PLAYLIST (name) VALUES ('%s')",
 				playlist);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM PLAYLIST WHERE name = '%s'",
 				playlist);
@@ -833,13 +812,11 @@ void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;",
 				playlist_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST WHERE ID=%d;",
 				playlist_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* Flushes all the tracks in a given playlist */
@@ -850,8 +827,7 @@ void flush_playlist_db(gint playlist_id, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d;",
 				playlist_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* 'radio' has to be a sanitized string */
@@ -889,8 +865,7 @@ gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("INSERT INTO RADIO (name) VALUES ('%s')",
 				radio);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("SELECT id FROM RADIO WHERE name = '%s'",
 				radio);
@@ -950,13 +925,11 @@ void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
 				radio_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	query = g_strdup_printf("DELETE FROM RADIO WHERE ID=%d;",
 				radio_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 /* Flushes all the tracks in a given playlist */
@@ -967,30 +940,29 @@ void flush_radio_db(gint radio_id, PraghaDatabase *cdbase)
 
 	query = g_strdup_printf("DELETE FROM RADIO_TRACKS WHERE RADIO=%d;",
 				radio_id);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 }
 
 void flush_db(PraghaDatabase *cdbase)
 {
-	pragha_database_exec_write_query (cdbase, "DELETE FROM TRACK");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM LOCATION");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM ARTIST");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM ALBUM");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM GENRE");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM YEAR");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM COMMENT");
+	pragha_database_exec_query (cdbase, "DELETE FROM TRACK");
+	pragha_database_exec_query (cdbase, "DELETE FROM LOCATION");
+	pragha_database_exec_query (cdbase, "DELETE FROM ARTIST");
+	pragha_database_exec_query (cdbase, "DELETE FROM ALBUM");
+	pragha_database_exec_query (cdbase, "DELETE FROM GENRE");
+	pragha_database_exec_query (cdbase, "DELETE FROM YEAR");
+	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT");
 }
 
 /* Flush unused artists, albums, genres, years */
 
 void flush_stale_entries_db(PraghaDatabase *cdbase)
 {
-	pragha_database_exec_write_query (cdbase, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
-	pragha_database_exec_write_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
+	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
 }
 
 /* Delete all tracks falling under the given directory.
@@ -1008,22 +980,19 @@ pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name)
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location IN "
 				"(SELECT id FROM LOCATION WHERE NAME LIKE '%s%%');",
 				sdir_name);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Delete the location entries */
 
 	query = g_strdup_printf("DELETE FROM LOCATION WHERE name LIKE '%s%%';",
 				sdir_name);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
 
 	query = g_strdup_printf("DELETE FROM PLAYLIST_TRACKS WHERE file LIKE '%s%%';",
 				sdir_name);
-	pragha_database_exec_write_query(cdbase, query);
-	g_free(query);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
 
 	/* Now flush unused artists, albums, genres, years */
 
@@ -1047,7 +1016,7 @@ gint drop_dbase_schema(PraghaDatabase *cdbase)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS(queries); i++) {
-		if (!pragha_database_exec_write_query (cdbase, queries[i]))
+		if (!pragha_database_exec_query (cdbase, queries[i]))
 			ret = -1;
 	}
 
@@ -1082,4 +1051,14 @@ gint db_get_album_count(PraghaDatabase *cdbase)
 gint db_get_track_count(PraghaDatabase *cdbase)
 {
 	return db_get_table_count (cdbase, "TRACK");
+}
+
+void db_begin_transaction(PraghaDatabase *cdbase)
+{
+	pragha_database_exec_query (cdbase, "BEGIN TRANSACTION");
+}
+
+void db_commit_transaction(PraghaDatabase *cdbase)
+{
+	pragha_database_exec_query (cdbase, "END TRANSACTION");
 }
