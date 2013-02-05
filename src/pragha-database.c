@@ -402,6 +402,44 @@ pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_na
 	pragha_prepared_statement_free (statement);
 }
 
+void
+pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name)
+{
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
+	gchar *mask = g_strconcat (dir_name, "%", NULL);
+
+	/* Delete all tracks under the given dir */
+
+	sql = "DELETE FROM TRACK WHERE location IN (SELECT id FROM LOCATION WHERE NAME LIKE ?)";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete the location entries */
+
+	sql = "DELETE FROM LOCATION WHERE name LIKE ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
+
+	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file LIKE ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Now flush unused artists, albums, genres, years */
+
+	flush_stale_entries_db (database);
+
+	g_free (mask);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
