@@ -1116,7 +1116,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	PraghaMusicobject *mobj;
 
 	/* Query and insert entries */
-	/* NB: Optimization */
+
+	set_watch_cursor (cwin->mainwindow);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION;");
 	if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
@@ -1139,6 +1140,8 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 		}
 		sqlite3_free_table(result.resultp);
 	}
+
+	remove_watch_cursor (cwin->mainwindow);
 
 	list = g_list_reverse(list);
 	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
