@@ -1112,7 +1112,6 @@ GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, cons
 void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
-gchar* sanitize_string_to_sqlite3(const gchar *str);
 enum file_type get_file_type(const gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
