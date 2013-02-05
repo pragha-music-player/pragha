@@ -107,15 +107,13 @@ bad:
 	g_free(playlist);
 }
 
-static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *cdbase)
+void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
-	PraghaMusicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
-	mobj = new_musicobject_from_file(file);
 	if (mobj) {
-		sfile = sanitize_string_to_sqlite3(file);
+		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(mobj));
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
 		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
@@ -175,7 +173,16 @@ static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *
 		g_free(salbum);
 		g_free(sgenre);
 		g_free(scomment);
+	}
+}
 
+static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *cdbase)
+{
+	PraghaMusicobject *mobj = NULL;
+
+	mobj = new_musicobject_from_file(file);
+	if (mobj) {
+		add_new_musicobject_db(cdbase, mobj);
 		g_object_unref(mobj);
 	}
 }

@@ -846,6 +846,7 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
+void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
 void pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file);
 gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase);
 gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase);
