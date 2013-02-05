@@ -492,12 +492,12 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 
 			s_playlist = sanitize_string_to_sqlite3(playlist);
 
-			n_playlist = rename_playlist_dialog(s_playlist, cwin);
+			n_playlist = rename_playlist_dialog (playlist, cwin);
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 				if(node_type == NODE_PLAYLIST)
-					update_playlist_name_db(s_playlist, n_playlist, cwin->cdbase);
+					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
 				else if (node_type == NODE_RADIO)
 					update_radio_name_db(s_playlist, n_playlist, cwin->cdbase);
 
