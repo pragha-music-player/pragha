@@ -130,15 +130,6 @@ static const gchar mpris2xml[] =
 		mpris_##x##_put_##y(value, error, cwin);
 #define END_INTERFACE }
 
-static GVariant *
-variant_new_string0 (const gchar *string)
-{
-	if (!string)
-		return g_variant_new_string ("");
-
-	return g_variant_new_string (string);
-}
-
 static PraghaMusicobject *
 get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
 {
@@ -431,7 +422,7 @@ static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
 
 void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *val)
 {
-	GVariant *vval = variant_new_string0(val);
+	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
 
 	g_variant_builder_add (b, "{sv}", tag, vvals);
@@ -466,15 +457,15 @@ static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 	g_variant_builder_add (b, "{sv}", "mpris:trackid",
 		handle_get_trackid(mobj));
 	g_variant_builder_add (b, "{sv}", "xesam:url",
-		variant_new_string0(url));
+		g_variant_new_string(url));
 	g_variant_builder_add (b, "{sv}", "xesam:title",
-		variant_new_string0(title));
+		g_variant_new_string(title));
 	handle_strings_request(b, "xesam:artist", artist);
 	g_variant_builder_add (b, "{sv}", "xesam:album",
-		variant_new_string0(album));
+		g_variant_new_string(album));
 	handle_strings_request(b, "xesam:genre", genre);
 	g_variant_builder_add (b, "{sv}", "xesam:contentCreated",
-		variant_new_string0(date));
+		g_variant_new_string(date));
 	g_variant_builder_add (b, "{sv}", "xesam:trackNumber",
 		g_variant_new_int32(track_no));
 	handle_strings_request(b, "xesam:comment", comment);
@@ -510,7 +501,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 		if (pragha_album_art_get_path(cwin->albumart) != NULL) {
 			artUrl_uri = g_filename_to_uri(pragha_album_art_get_path(cwin->albumart), NULL, NULL);
 			g_variant_builder_add (&b, "{sv}", "mpris:artUrl",
-				variant_new_string0(artUrl_uri));
+				g_variant_new_string(artUrl_uri));
 			g_free(artUrl_uri);
 		}
 	}
