@@ -198,7 +198,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (G_LIKELY(mobj))
-					scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+					scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
 			}
 
 			pragha_mutex_lock (scanner->files_scanned_mutex);
@@ -276,7 +276,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			if(!mobj) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (G_LIKELY(mobj))
-					scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+					scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
 			}
 			else {
 				g_stat(ab_file, &sbuf);
@@ -284,7 +284,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 					g_object_unref(mobj);
 					mobj = new_musicobject_from_file(ab_file);
 					if (G_LIKELY(mobj))
-						scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+						scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
 				}
 			}
 
@@ -460,7 +460,7 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 					for_each_result_row(result, i) {
 						mobj = new_musicobject_from_db(scanner->cdbase, atoi(result.resultp[i]));
 						if (G_LIKELY(mobj))
-							scanner->tracks_list = g_slist_append(scanner->tracks_list, mobj);
+							scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
 
 						pragha_process_gtk_events ();
 					}
