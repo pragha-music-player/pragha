@@ -22,7 +22,7 @@ typedef struct {
 	PraghaPreferences *preferences;
 	GtkWidget         *parent;
 	gboolean           updating_action;
-	GSList            *tracks_list;
+	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
 	GTimeVal          last_update;

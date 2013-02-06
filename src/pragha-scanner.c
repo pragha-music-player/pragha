@@ -86,20 +86,29 @@ pragha_scanner_count_no_files_worker(gpointer data)
  * This runs on the main thread. So, can show a dialog.
  * Finally, frees all memory. */
 
+static void
+pragha_scanner_add_track_db(gpointer key,
+                            gpointer value,
+                            gpointer user_data)
+{
+	PraghaScanner *scanner = user_data;
+	PraghaMusicobject *mobj = value;
+
+	add_new_musicobject_db(scanner->cdbase, mobj);
+
+	pragha_process_gtk_events ();
+}
+
 gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
 	GtkWidget *msg_dialog;
 	gchar *last_scan_time = NULL;
-	GSList *list = NULL;
 
 	PraghaScanner *scanner = data;
 
 	/* Stop updates */
 	g_source_remove(scanner->update_timeout);
-
-	/* Destroy the dialog */
-	gtk_widget_destroy(scanner->dialog);
 
 	/* Ensure that the other thread has finished */
 	g_thread_join (scanner->no_files_thread);
@@ -109,18 +118,17 @@ pragha_scanner_worker_finished (gpointer data)
 		/* Save new database */
 	
 		flush_db(scanner->cdbase);
-		for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
-			if(list->data) {
-				add_new_musicobject_db(scanner->cdbase, list->data);
-				g_object_unref(list->data);
-
-				pragha_process_gtk_events ();
-			}
-		}
+		g_hash_table_foreach (scanner->tracks_table,
+		                      pragha_scanner_add_track_db,
+		                      scanner);
 
 		/* Update the library view */
 
 		pragha_database_change_playlists_done(scanner->cdbase);
+
+		/* Destroy the dialog */
+
+		gtk_widget_destroy(scanner->dialog);
 
 		/* Save finished time and folders scanned. */
 
@@ -147,12 +155,14 @@ pragha_scanner_worker_finished (gpointer data)
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
-
+	else {
+		gtk_widget_destroy(scanner->dialog);
+	}
 	/* Clean memory */
 
 	g_object_unref(scanner->cdbase);
 	g_object_unref(scanner->preferences);
-	g_slist_free(scanner->tracks_list);
+	g_hash_table_destroy(scanner->tracks_table);
 	free_str_list(scanner->folder_list);
 	free_str_list(scanner->folder_scanned);
 	pragha_mutex_free(scanner->no_files_mutex);
@@ -198,7 +208,9 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 			if (is_playable_file(ab_file)) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (G_LIKELY(mobj))
-					scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
+					 g_hash_table_insert(scanner->tracks_table,
+					                     g_strdup(pragha_musicobject_get_file(mobj)),
+					                     mobj);
 			}
 
 			pragha_mutex_lock (scanner->files_scanned_mutex);
@@ -239,7 +251,6 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file = NULL, *s_ab_file = NULL;
-	GSList *list;
 	GError *error = NULL;
 	struct stat sbuf;
 	PraghaMusicobject *mobj = NULL;
@@ -264,27 +275,25 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 			pragha_scanner_update_handler(scanner, ab_file);
 		}
 		else {
-			mobj = NULL;
-			for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
-				if(g_cancellable_is_cancelled (scanner->cancellable))
-					break;
-				if(!g_strcmp0(pragha_musicobject_get_file(list->data), ab_file)) {
-					mobj = list->data;
-					break;
-				}
-			}
+			mobj = g_hash_table_lookup(scanner->tracks_table,
+			                           ab_file);
 			if(!mobj) {
 				mobj = new_musicobject_from_file(ab_file);
 				if (G_LIKELY(mobj))
-					scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
+					 g_hash_table_insert(scanner->tracks_table,
+					                     g_strdup(pragha_musicobject_get_file(mobj)),
+					                     mobj);
+
 			}
 			else {
 				g_stat(ab_file, &sbuf);
 				if(sbuf.st_mtime > scanner->last_update.tv_sec) {
-					g_object_unref(mobj);
 					mobj = new_musicobject_from_file(ab_file);
-					if (G_LIKELY(mobj))
-						scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
+					if (G_LIKELY(mobj)) {
+						g_hash_table_replace(scanner->tracks_table,
+						                     g_strdup(pragha_musicobject_get_file(mobj)),
+						                     mobj);
+					}
 				}
 			}
 
@@ -302,6 +311,19 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 /* Thread that analyze all files in the library */
 
+static void
+pragha_scanner_forget_remove_file(gpointer key,
+                                  gpointer value,
+                                  gpointer user_data)
+{
+	gchar *file             = key;
+	PraghaMusicobject *mobj = value;
+
+	/* TODO: How to remove the key within foreach? */
+	if(!g_file_test(file, G_FILE_TEST_EXISTS))
+		pragha_musicobject_set_file(mobj, NULL);
+}
+
 gpointer
 pragha_scanner_update_worker(gpointer data)
 {
@@ -310,14 +332,9 @@ pragha_scanner_update_worker(gpointer data)
 	PraghaScanner *scanner = data;
 
 	/* Clean removed files */
-	for(list = scanner->tracks_list ; list != NULL ; list = list->next) {
-		if(g_cancellable_is_cancelled (scanner->cancellable))
-			break;
-		if(!g_file_test(pragha_musicobject_get_file(list->data), G_FILE_TEST_EXISTS)) {
-			g_object_unref(list->data);
-			list->data = NULL;
-		}
-	}
+	g_hash_table_foreach (scanner->tracks_table,
+	                      pragha_scanner_forget_remove_file,
+	                      scanner);
 
 	/* Then update files changed.. */
 	for(list = scanner->folder_list ; list != NULL; list = list->next) {
@@ -377,7 +394,7 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 	GtkWidget *dialog, *table, *label, *progress_bar;
 	gchar *last_scan_time = NULL;
 	PraghaMusicobject *mobj = NULL;
-	guint row = 0, i = 0;
+	guint row = 0, i = 0, location_id;
 	GSList *list;
 	gchar *query;
 	PraghaDbResponse result;
@@ -450,7 +467,10 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 	scanner->progress_bar = progress_bar;
 	scanner->updating_action = updating_action;
 
-	scanner->tracks_list = NULL;
+	scanner->tracks_table = g_hash_table_new_full (g_str_hash,
+	                                               g_str_equal,
+	                                               g_free,
+	                                               g_object_unref);
 	if(updating_action) {
 		/* Append the files from database that no changed. */
 		for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
@@ -458,9 +478,13 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 				query = g_strdup_printf("SELECT id FROM LOCATION WHERE name LIKE '%s%%';", (gchar *)list->data);
 				if (pragha_database_exec_sqlite_query(scanner->cdbase, query, &result)) {
 					for_each_result_row(result, i) {
-						mobj = new_musicobject_from_db(scanner->cdbase, atoi(result.resultp[i]));
-						if (G_LIKELY(mobj))
-							scanner->tracks_list = g_slist_prepend(scanner->tracks_list, mobj);
+						location_id = atoi(result.resultp[i]);
+						mobj = new_musicobject_from_db(scanner->cdbase, location_id);
+						if (G_LIKELY(mobj)) {
+							 g_hash_table_insert(scanner->tracks_table,
+							                     g_strdup(pragha_musicobject_get_file(mobj)),
+							                     mobj);
+						}
 
 						pragha_process_gtk_events ();
 					}
