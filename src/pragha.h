@@ -1242,7 +1242,7 @@ typedef struct {
 
 gboolean set_async_finished_message (gpointer user_data);
 AsycMessageData *async_finished_message_new(const gchar *message, struct con_win *cwin);
-void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+GThread *pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
 

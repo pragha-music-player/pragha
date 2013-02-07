@@ -474,12 +474,12 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	#if GLIB_CHECK_VERSION(2,31,0)
 	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);
 	#else
-	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, FALSE, NULL);
+	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
 	#endif
 
-	pragha_async_launch(pragha_scanner_update_worker,
-			    pragha_scanner_worker_finished,
-			    scanner);
+	scanner->worker_thread = pragha_async_launch(pragha_scanner_update_worker,
+	                                             pragha_scanner_worker_finished,
+	                                             scanner);
 }
 
 void
@@ -525,12 +525,12 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 	#if GLIB_CHECK_VERSION(2,31,0)
 	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);
 	#else
-	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, FALSE, NULL);
+	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
 	#endif
 
-	pragha_async_launch(pragha_scanner_scan_worker,
-			    pragha_scanner_worker_finished,
-			    scanner);
+	scanner->worker_thread = pragha_async_launch(pragha_scanner_scan_worker,
+	                                             pragha_scanner_worker_finished,
+	                                             scanner);
 }
 
 void
@@ -539,6 +539,7 @@ pragha_scanner_free(PraghaScanner *scanner)
 	if(scanner->update_timeout) {
 		g_cancellable_cancel (scanner->cancellable);
 		g_thread_join (scanner->no_files_thread);
+		g_thread_join (scanner->worker_thread);
 	}
 
 	g_hash_table_destroy(scanner->tracks_table);
