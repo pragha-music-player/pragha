@@ -201,19 +201,20 @@ void delete_location_db(gint location_id, PraghaDatabase *cdbase)
 gchar *
 pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id)
 {
-	gchar *query, *file = NULL;
-	PraghaDbResponse result;
+	PraghaPreparedStatement *statement;
+	const gchar *sql;
+	gchar *file = NULL;
 
-	query = g_strdup_printf("SELECT name FROM LOCATION WHERE id = %d;", location_id);
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_columns) {
-			file = g_strdup(result.resultp[result.no_columns]);
-		}
-		sqlite3_free_table(result.resultp);
-	}
-	else {
+	sql = "SELECT name FROM LOCATION WHERE id = ?";
+	statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+
+	if(pragha_prepared_statement_step (statement))
+		file = g_strdup(pragha_prepared_statement_get_string(statement, 0));
+	else
 		g_warning("Unable to find filename for location id: %d", location_id);
-	}
+
+	pragha_prepared_statement_free (statement);
 
 	return file;
 }
