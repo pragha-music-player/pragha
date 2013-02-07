@@ -406,12 +406,12 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 {
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
-	gchar *last_scan_time = NULL;
+	PraghaPreparedStatement *statement;
 	PraghaMusicobject *mobj = NULL;
-	guint i = 0, location_id;
+	gchar *mask = NULL, *last_scan_time = NULL;
+	const gchar *sql = NULL;
+	guint location_id;
 	GSList *list;
-	gchar *query;
-	PraghaDbResponse result;
 
 	if(scanner->update_timeout)
 		return;
@@ -450,21 +450,23 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	database = pragha_database_get();
 	for(list = scanner->folder_scanned ; list != NULL; list = list->next) {
 		if(is_present_str_list(list->data, scanner->folder_list)) {
-			query = g_strdup_printf("SELECT id FROM LOCATION WHERE name LIKE '%s%%';", (gchar *)list->data);
-			if (pragha_database_exec_sqlite_query(database, query, &result)) {
-				for_each_result_row(result, i) {
-					location_id = atoi(result.resultp[i]);
-					mobj = new_musicobject_from_db(database, location_id);
-					if (G_LIKELY(mobj)) {
-						 g_hash_table_insert(scanner->tracks_table,
-						                     g_strdup(pragha_musicobject_get_file(mobj)),
-						                     mobj);
-					}
-
-					pragha_process_gtk_events ();
+			sql = "SELECT id FROM LOCATION WHERE name LIKE ?";
+			statement = pragha_database_create_statement (database, sql);
+			mask = g_strconcat (list->data, "%", NULL);
+			pragha_prepared_statement_bind_string (statement, 1, mask);
+			while (pragha_prepared_statement_step (statement)) {
+				location_id = pragha_prepared_statement_get_int (statement, 0);
+				mobj = new_musicobject_from_db(database, location_id);
+				if (G_LIKELY(mobj)) {
+					g_hash_table_insert(scanner->tracks_table,
+					                    g_strdup(pragha_musicobject_get_file(mobj)),
+					                    mobj);
 				}
-				sqlite3_free_table(result.resultp);
+
+				pragha_process_gtk_events ();
 			}
+			pragha_prepared_statement_free (statement);
+			g_free(mask);
 		}
 	}
 	g_object_unref(database);
