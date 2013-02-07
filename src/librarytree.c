@@ -154,7 +154,7 @@ add_child_node_file(GtkTreeModel *model,
 
 static void
 add_folder_file(GtkTreeModel *model,
-                gchar *filepath,
+                const gchar *filepath,
                 int location_id,
                 GtkTreeIter *p_iter,
                 struct con_win *cwin)
@@ -1699,11 +1699,11 @@ library_view_complete_folder_view(GtkTreeModel *model,
                                   struct con_win *cwin)
 
 {
-	gchar *query, *filepath;
-	PraghaDbResponse result;
+	PraghaPreparedStatement *statement;
+	const gchar *sql = NULL, *filepath = NULL;
+	gchar *mask = NULL;
 	GtkTreeIter iter, *f_iter;
 	GSList *list = NULL, *library_dir = NULL;
-	gint i = 0;
 
 	library_dir =
 		pragha_preferences_get_filename_list(cwin->preferences,
@@ -1730,25 +1730,31 @@ library_view_complete_folder_view(GtkTreeModel *model,
 			f_iter = p_iter;
 		}
 
-		/* Add folder structure  without headers */
-		query = g_strdup_printf("SELECT name, id FROM LOCATION WHERE name LIKE '%s%%' ORDER BY name DESC;", (gchar *)list->data);
-		pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-		for_each_result_row(result, i) {
-			/* Remove headers prefix and add it. */
-			filepath = result.resultp[i] + strlen(list->data) + 1;
-			add_folder_file(model, filepath, atoi(result.resultp[i+1]), f_iter, cwin);
+		sql = "SELECT name, id FROM LOCATION WHERE name LIKE ? ORDER BY name DESC";
+		statement = pragha_database_create_statement (cwin->cdbase, sql);
+		mask = g_strconcat (list->data, "%", NULL);
+		pragha_prepared_statement_bind_string (statement, 1, mask);
+		while (pragha_prepared_statement_step (statement)) {
+			filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(list->data) + 1;
+			add_folder_file(model,
+			                filepath,
+			                pragha_prepared_statement_get_int(statement, 1),
+			                f_iter,
+			                cwin);
 
-			/* Have to give control to GTK periodically ... */
 			#if GTK_CHECK_VERSION (3, 0, 0)
 			pragha_process_gtk_events ();
 			#else
 			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
+				pragha_prepared_statement_free (statement);
+				free_str_list(library_dir);
+				g_free(mask);
 				return;
 			}
 			#endif
 		}
-		sqlite3_free_table(result.resultp);
+		pragha_prepared_statement_free (statement);
+		g_free(mask);
 	}
 	free_str_list(library_dir);
 }
@@ -1758,10 +1764,8 @@ library_view_complete_tags_view(GtkTreeModel *model,
                                 GtkTreeIter *p_iter,
                                 struct con_win *cwin)
 {
-	gchar *order_str = NULL;
-	gchar *query;
-	PraghaDbResponse result;
-	gint i = 0;
+	PraghaPreparedStatement *statement;
+	gchar *order_str = NULL, *sql = NULL;
 
 	/* Get order needed to sqlite query. */
 	switch(cwin->cpref->cur_library_view) {
@@ -1805,23 +1809,22 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	}
 
 	/* Common query for all tag based library views */
-	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+	sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
 	                        "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
 	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
 	                        "ORDER BY %s;", order_str);
-	g_free(order_str);
-			
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-	for_each_result_row(result, i) {
+
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	while (pragha_prepared_statement_step (statement)) {
 		add_child_node_by_tags(model,
 		                       p_iter,
-		                       atoi(result.resultp[i+6]),
-		                       result.resultp[i+5],
-		                       result.resultp[i+4],
-		                       result.resultp[i+3],
-		                       result.resultp[i+2],
-		                       result.resultp[i+1],
-		                       result.resultp[i],
+		                       pragha_prepared_statement_get_int(statement, 6),
+		                       pragha_prepared_statement_get_string(statement, 5),
+		                       pragha_prepared_statement_get_string(statement, 4),
+		                       pragha_prepared_statement_get_string(statement, 3),
+		                       pragha_prepared_statement_get_string(statement, 2),
+		                       pragha_prepared_statement_get_string(statement, 1),
+		                       pragha_prepared_statement_get_string(statement, 0),
 		                       cwin);
 
 		/* Have to give control to GTK periodically ... */
@@ -1829,12 +1832,15 @@ library_view_complete_tags_view(GtkTreeModel *model,
 		pragha_process_gtk_events ();
 		#else
 		if (pragha_process_gtk_events ()) {
-			sqlite3_free_table(result.resultp);
+			pragha_prepared_statement_free (statement);
 			return;
 		}
 		#endif
 	}
-	sqlite3_free_table(result.resultp);
+	pragha_prepared_statement_free (statement);
+
+	g_free(order_str);
+	g_free(sql);
 }
 
 /********/
