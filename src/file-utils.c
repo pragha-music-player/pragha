@@ -78,6 +78,40 @@ gboolean is_dir_and_accessible(const gchar *dir)
 	return ret;
 }
 
+gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable)
+{
+	gint file_count = 0;
+	GDir *dir;
+	const gchar *next_file = NULL;
+	gchar *ab_file;
+	GError *error = NULL;
+
+	dir = g_dir_open(dir_name, 0, &error);
+	if (!dir) {
+		g_warning("Unable to open library : %s", dir_name);
+		return file_count;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		if(g_cancellable_is_cancelled (cancellable))
+			return 0;
+
+		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
+			file_count += pragha_get_dir_count(ab_file, cancellable);
+		else {
+			file_count++;
+		}
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+
+	g_dir_close(dir);
+
+	return file_count;
+}
+
 gint dir_file_count(const gchar *dir_name, gint call_recur)
 {
 	static gint file_count = 0;

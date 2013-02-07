@@ -77,26 +77,7 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-album-art.h"
-#include "pragha-backend.h"
-#include "pragha-database.h"
-#include "pragha-musicobject.h"
-#include "pragha-preferences.h"
-#include "pragha-statusbar.h"
-#include "gtkcellrendererbubble.h"
-
-/* With libcio 0.83 should be before config.h. libcdio issue */
-#ifdef HAVE_PARANOIA_NEW_INCLUDES
-#include "cdda.h"
-#endif
-
-#include "xml_helper.h"
-
 /* Some definitions to solve different versions of the libraries. */
-
-#ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
-#endif
 
 #if GLIB_CHECK_VERSION (2, 32, 0)
 #define PRAGHA_MUTEX(mtx) GMutex mtx
@@ -110,6 +91,26 @@
 #define pragha_mutex_lock(mtx) g_mutex_lock (mtx)
 #define pragha_mutex_unlock(mtx) g_mutex_unlock (mtx)
 #define pragha_mutex_create(mtx) (mtx) = g_mutex_new ()
+#endif
+
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#endif
+
+#include "pragha-album-art.h"
+#include "pragha-backend.h"
+#include "pragha-database.h"
+#include "pragha-musicobject.h"
+#include "pragha-preferences.h"
+#include "pragha-scanner.h"
+#include "pragha-statusbar.h"
+#include "gtkcellrendererbubble.h"
+
+#include "xml_helper.h"
+
+/* With libcio 0.83 should be before config.h. libcdio issue */
+#ifdef HAVE_PARANOIA_NEW_INCLUDES
+#include "cdda.h"
 #endif
 
 /* Some default preferences. */
@@ -243,8 +244,7 @@ typedef enum {
 
 #define GROUP_LIBRARY  "Library"
 #define KEY_LIBRARY_DIR            "library_dir"
-#define KEY_LIBRARY_DELETE         "library_delete"
-#define KEY_LIBRARY_ADD            "library_add"
+#define KEY_LIBRARY_SCANNED        "library_scanned"
 #define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
@@ -509,7 +509,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	gint sidebar_size;
-	GTimeVal last_rescan_time;
 	GKeyFile *configrc_keyfile;
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
@@ -530,10 +529,7 @@ struct con_pref {
 	gboolean controls_below;
 	gboolean fuse_folders;
 	gboolean sort_by_year;
-	GSList *library_dir;
 	GSList *library_tree_nodes;
-	GSList *lib_delete;
-	GSList *lib_add;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
@@ -640,6 +636,7 @@ struct con_win {
 	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
+	PraghaScanner  *scanner;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
@@ -758,7 +755,6 @@ void community_action(GtkAction *action, struct con_win *cwin);
 void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
-void rescan_library_handler(struct con_win *cwin);
 GtkUIManager* create_menu(struct con_win *cwin);
 
 /* Panel */
@@ -787,6 +783,7 @@ GtkWidget* create_toolbar(struct con_win *cwin);
 
 gboolean is_playable_file(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
+gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable);
 gint dir_file_count(const gchar *dir_name, gint call_recur);
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
 GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
@@ -860,6 +857,8 @@ void init_library_view(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 
+void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
+void pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file);
 gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase);
 gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase);
 gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase);
@@ -899,18 +898,9 @@ void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
-gboolean fraction_update(GtkWidget *pbar);
-void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase);
-void update_db (const gchar *dir_name,
-		gint no_files,
-		GtkWidget *pbar,
-		GTimeVal last_rescan_time,
-		gint call_recur,
-		GCancellable *cancellable,
-		PraghaDatabase *cdbase);
-void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, PraghaDatabase *cdbase);
+void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
+void
+pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name);
 gboolean pragha_database_init_schema (PraghaDatabase *database);
 gint drop_dbase_schema(PraghaDatabase *cdbase);
 gint db_get_artist_count(PraghaDatabase *cdbase);
@@ -1224,7 +1214,8 @@ void notify_free();
 /* pragha-hig.c: HIG helpers and pango extention. */
 
 void gtk_label_set_attribute_bold(GtkLabel *label);
-void pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title);
+GtkWidget *
+pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title);
 void pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget);
 void pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget);
 void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
@@ -1252,7 +1243,7 @@ typedef struct {
 } AsyncSimple;
 
 gboolean pragha_async_set_idle_message (gpointer user_data);
-void pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+GThread *pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
 

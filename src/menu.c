@@ -18,8 +18,6 @@
 
 #include "pragha.h"
 
-static GtkWidget *library_dialog;
-
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"
@@ -257,84 +255,6 @@ update_menubar_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer 
 	#ifdef HAVE_LIBCLASTFM
 	update_menubar_lastfm_state (cwin);
 	#endif
-}
-
-/* Signal handler for deleting rescan dialog box */
-
-static gboolean rescan_dialog_delete_cb(GtkWidget *widget,
-					GdkEvent *event,
-					gpointer user_data)
-{
-	GCancellable *cancellable = user_data;
-
-	g_cancellable_cancel (cancellable);
-
-	return TRUE;
-}
-
-/* Signal handler for cancelling rescan dialog box */
-
-static void rescan_dialog_response_cb(GtkDialog *dialog,
-				      gint response_id,
-				      gpointer user_data)
-{
-	GCancellable *cancellable = user_data;
-
-	if (response_id == GTK_RESPONSE_CANCEL)
-		g_cancellable_cancel (cancellable);
-}
-
-/* Create a dialog box with a progress bar for rescan/update library */
-
-static GtkWidget* lib_progress_bar(struct con_win *cwin, int update, gpointer cb_data)
-{
-	GtkWidget *hbox, *spinner, *progress_bar;
-
-	/* Create a dialog with a Cancel button */
-
-	library_dialog =
-		gtk_dialog_new_with_buttons((update) ?
-					    _("Update Library") : _("Rescan Library"),
-					    GTK_WINDOW(cwin->mainwindow),
-					    GTK_DIALOG_MODAL,
-					    GTK_STOCK_CANCEL,
-					    GTK_RESPONSE_CANCEL,
-					    NULL);
-
-	/* Create a progress bar */
-
-	progress_bar = gtk_progress_bar_new();
-	gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress_bar));
-
-	hbox = gtk_hbox_new (FALSE, 5);
-
-	spinner = gtk_spinner_new ();
-	gtk_container_add (GTK_CONTAINER (hbox), spinner);
-	gtk_spinner_start(GTK_SPINNER(spinner));
-
-	gtk_container_add (GTK_CONTAINER (hbox), progress_bar);
-
-	/* Set various properties */
-
-	gtk_widget_set_size_request(progress_bar,
-				    PROGRESS_BAR_WIDTH,
-				    -1);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(library_dialog))),
-				  GTK_BUTTONBOX_SPREAD);
-
-	/* Setup signal handlers */
-
-	g_signal_connect(G_OBJECT(GTK_WINDOW(library_dialog)), "delete_event",
-			 G_CALLBACK(rescan_dialog_delete_cb), cb_data);
-	g_signal_connect(G_OBJECT(library_dialog), "response",
-			 G_CALLBACK(rescan_dialog_response_cb), cb_data);
-
-	/* Add the progress bar to the dialog box's vbox and show everything */
-
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(library_dialog))), hbox);
-	gtk_widget_show_all(library_dialog);
-
-	return progress_bar;
 }
 
 /* Add Files a folders to play list based on Audacius code.*/
@@ -891,218 +811,17 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 }
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
+
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
 {
-	rescan_library_handler(cwin);
-}
-
-void rescan_library_handler(struct con_win *cwin)
-{
-	GtkWidget *msg_dialog;
-	GtkWidget *progress_bar;
-	GCancellable *cancellable;
-	gint no_files = 0, i, cnt = 0;
-	GSList *list;
-	gchar *lib;
-
-	/* Check if Library is set */
-
-	if (!cwin->cpref->library_dir) {
-		g_warning("Library is not set, flushing existing library");
-		flush_db(cwin->cdbase);
-		init_library_view(cwin);
-		return ;
-	}
-
-	/* Check if versions are incompatible, if so drop tables and
-	   initialize schema, otherwise, just flush the library database */
-
-	if (is_incompatible_upgrade(cwin)) {
-		if (drop_dbase_schema(cwin->cdbase) == -1) {
-			g_critical("Unable to drop database schema");
-			return;
-		}
-		if (!pragha_database_init_schema (cwin->cdbase)) {
-			g_critical("Unable to init database schema");
-			return;
-		}
-	} else {
-		flush_db(cwin->cdbase);
-	}
-
-	cancellable = g_cancellable_new ();
-
-	/* Create the dialog */
-
-	progress_bar = lib_progress_bar(cwin, 0, cancellable);
-
-	/* Start the scan */
-
-	list = cwin->cpref->library_dir;
-	cnt = g_slist_length(cwin->cpref->library_dir);
-
-	for (i=0; i<cnt; i++) {
-		lib = list->data;
-		no_files = dir_file_count(lib, 1);
-
-		db_begin_transaction(cwin->cdbase);
-
-		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
-
-		db_commit_transaction(cwin->cdbase);
-
-		list = list->next;
-	}
-
-	update_menu_playlist_changes(cwin);
-	init_library_view(cwin);
-
-	gtk_widget_destroy(library_dialog);
-
-	if (!g_cancellable_is_cancelled (cancellable)) {
-		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-						    GTK_DIALOG_MODAL,
-						    GTK_MESSAGE_INFO,
-						    GTK_BUTTONS_OK,
-						    "%s",
-						    _("Library scan complete"));
-		gtk_dialog_run(GTK_DIALOG(msg_dialog));
-		gtk_widget_destroy(msg_dialog);
-	}
-
-	g_object_unref(cancellable);
-
-	/* Save rescan time */
-
-	g_get_current_time(&cwin->cpref->last_rescan_time);
-
-	/* Free lists */
-
-	free_str_list(cwin->cpref->lib_add);
-	free_str_list(cwin->cpref->lib_delete);
-
-	cwin->cpref->lib_add = NULL;
-	cwin->cpref->lib_delete = NULL;
+	pragha_scanner_scan_library(cwin->scanner);
 }
 
 /* Handler for the 'Update Library' item in the Tools menu */
 
 void update_library_action(GtkAction *action, struct con_win *cwin)
 {
-	GtkWidget *msg_dialog;
-	GtkWidget *progress_bar;
-	GCancellable *cancellable;
-	gint no_files = 0, i, cnt = 0;
-	GSList *list;
-	gchar *lib;
-
-	/* To track user termination */
-
-	cancellable = g_cancellable_new ();
-
-	/* Create the dialog */
-
-	progress_bar = lib_progress_bar(cwin, 1, cancellable);
-
-	/* Check if any library has been removed */
-
-	list = cwin->cpref->lib_delete;
-	cnt = g_slist_length(cwin->cpref->lib_delete);
-
-	for (i=0; i<cnt; i++) {
-		lib = list->data;
-		no_files = dir_file_count(lib, 1);
-
-		db_begin_transaction(cwin->cdbase);
-
-		delete_db(lib, no_files, progress_bar, 1, cwin->cdbase);
-
-		db_commit_transaction(cwin->cdbase);
-
-		if (g_cancellable_is_cancelled (cancellable))
-			goto exit;
-		list = list->next;
-	}
-
-	/* Check if any library has been added */
-
-	list = cwin->cpref->lib_add;
-	cnt = g_slist_length(cwin->cpref->lib_add);
-
-	for (i=0; i<cnt; i++) {
-		lib = list->data;
-		no_files = dir_file_count(lib, 1);
-
-		db_begin_transaction(cwin->cdbase);
-
-		rescan_db(lib, no_files, progress_bar, 1, cancellable, cwin->cdbase);
-
-		db_commit_transaction(cwin->cdbase);
-
-		if (g_cancellable_is_cancelled (cancellable))
-			goto exit;
-		list = list->next;
-	}
-
-	/* Check if any files in the existing library dirs
-	   have been modified */
-
-	list = cwin->cpref->library_dir;
-	cnt = g_slist_length(cwin->cpref->library_dir);
-
-	for (i=0; i<cnt; i++) {
-		lib = list->data;
-
-		/* Don't rescan if lib is present in lib_add,
-		   we just rescanned it above */
-
-		if (is_present_str_list(lib, cwin->cpref->lib_add)) {
-			list = list->next;
-			continue;
-		}
-
-		no_files = dir_file_count(lib, 1);
-
-		db_begin_transaction(cwin->cdbase);
-
-		update_db(lib, no_files, progress_bar, cwin->cpref->last_rescan_time, 1, cancellable, cwin->cdbase);
-
-		db_commit_transaction(cwin->cdbase);
-
-		if (g_cancellable_is_cancelled (cancellable))
-			goto exit;
-		list = list->next;
-	}
-
-	/* Save update time */
-
-	g_get_current_time(&cwin->cpref->last_rescan_time);
-
-	/* Free lists */
-
-	free_str_list(cwin->cpref->lib_add);
-	free_str_list(cwin->cpref->lib_delete);
-
-	cwin->cpref->lib_add = NULL;
-	cwin->cpref->lib_delete = NULL;
-exit:
-	update_menu_playlist_changes(cwin);
-	init_library_view(cwin);
-
-	gtk_widget_destroy(library_dialog);
-
-	if (!g_cancellable_is_cancelled (cancellable)) {
-		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-						    GTK_DIALOG_MODAL,
-						    GTK_MESSAGE_INFO,
-						    GTK_BUTTONS_OK,
-						    "%s",
-						    _("Library scan complete"));
-		gtk_dialog_run(GTK_DIALOG(msg_dialog));
-		gtk_widget_destroy(msg_dialog);
-	}
-
-	g_object_unref(cancellable);
+	pragha_scanner_update_library(cwin->scanner);
 }
 
 /* Handler for 'Add All' action in the Tools menu */

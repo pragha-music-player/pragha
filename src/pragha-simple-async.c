@@ -60,13 +60,13 @@ pragha_async_worker(gpointer data)
 
 	as->finished_data = as->func_w(as->userdata);
 
-	g_idle_add(pragha_async_finished, as);
+	g_idle_add_full(G_PRIORITY_HIGH_IDLE, pragha_async_finished, as, NULL);
 	g_thread_exit(NULL);
 
 	return NULL;
 }
 
-void
+GThread *
 pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata)
 {
 	AsyncSimple *as;
@@ -78,8 +78,8 @@ pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer u
 	as->finished_data = NULL;
 
 	#if GLIB_CHECK_VERSION(2,31,0)
-	g_thread_new("Launch async", pragha_async_worker, as);
+	return g_thread_new("Launch async", pragha_async_worker, as);
 	#else
-	g_thread_create(pragha_async_worker, as, FALSE, NULL);
+	return g_thread_create(pragha_async_worker, as, TRUE, NULL);
 	#endif
 }

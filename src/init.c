@@ -75,6 +75,7 @@ static void init_gui_state(struct con_win *cwin)
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
 
+	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		mainwindow_add_widget_to_info_box(cwin, info_bar);
@@ -98,6 +99,7 @@ static gboolean _init_gui_state(gpointer data)
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
 
+	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		mainwindow_add_widget_to_info_box(cwin, info_bar);
@@ -154,13 +156,13 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar **libs, **nodes, *last_rescan_time;
+	gchar **nodes;
 	gchar *u_file;
 	gboolean err = FALSE;
 	gsize cnt = 0, i;
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
-	gboolean libs_f, lib_add_f, lib_delete_f, nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
+	gboolean nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
@@ -169,7 +171,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	libs_f = lib_add_f = lib_delete_f = nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
+	nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
@@ -272,36 +274,6 @@ gint init_config(struct con_win *cwin)
 
 		/* Retrieve Collection preferences */
 
-		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						  GROUP_LIBRARY,
-						  KEY_LIBRARY_DIR,
-						  &cnt,
-						  &error);
-		if (libs) {
-			for (i=0; i<cnt; i++) {
-				gchar *file = g_filename_from_utf8(libs[i],
-						   -1, NULL, NULL, &error);
-				if (!file) {
-					g_warning("Unable to get filename "
-						  "from UTF-8 string: %s",
-						  libs[i]);
-					g_error_free(error);
-					error = NULL;
-					continue;
-				}
-				cwin->cpref->library_dir =
-					g_slist_append(cwin->cpref->library_dir,
-						       g_strdup(file));
-				g_free(file);
-			}
-			g_strfreev(libs);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			libs_f = TRUE;
-		}
-
 		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
 						   GROUP_LIBRARY,
 						   KEY_LIBRARY_TREE_NODES,
@@ -351,81 +323,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			cur_lib_view_f = TRUE;
-		}
-
-		last_rescan_time =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_LIBRARY,
-					      KEY_LIBRARY_LAST_SCANNED,
-					      &error);
-		if (!last_rescan_time) {
-			g_error_free(error);
-			error = NULL;
-		} else {
-			if (!g_time_val_from_iso8601(last_rescan_time,
-						     &cwin->cpref->last_rescan_time))
-				g_warning("Unable to convert last rescan time");
-			g_free(last_rescan_time);
-		}
-
-		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						  GROUP_LIBRARY,
-						  KEY_LIBRARY_ADD,
-						  &cnt,
-						  &error);
-		if (libs) {
-			for (i = 0; i < cnt; i++) {
-				gchar *file = g_filename_from_utf8(libs[i],
-						   -1, NULL, NULL, &error);
-				if (!file) {
-					g_warning("Unable to get filename "
-						  "from UTF-8 string: %s",
-						  libs[i]);
-					g_error_free(error);
-					error = NULL;
-					continue;
-				}
-				cwin->cpref->lib_add =
-					g_slist_append(cwin->cpref->lib_add,
-						       g_strdup(file));
-				g_free(file);
-			}
-			g_strfreev(libs);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			lib_add_f = TRUE;
-		}
-
-		libs = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						  GROUP_LIBRARY,
-						  KEY_LIBRARY_DELETE,
-						  &cnt,
-						  &error);
-		if (libs) {
-			for (i = 0; i < cnt; i++) {
-				gchar *file = g_filename_from_utf8(libs[i],
-						   -1, NULL, NULL, &error);
-				if (!file) {
-					g_warning("Unable to get filename "
-						  "from UTF-8 string: %s",
-						  libs[i]);
-					g_error_free(error);
-					error = NULL;
-					continue;
-				}
-				cwin->cpref->lib_delete =
-					g_slist_append(cwin->cpref->lib_delete,
-						       g_strdup(file));
-				g_free(file);
-			}
-			g_strfreev(libs);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			lib_delete_f = TRUE;
 		}
 
 		cwin->cpref->fuse_folders =
@@ -665,12 +562,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || sidebar_size_f)
 		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
-	if (all_f || libs_f)
-		cwin->cpref->library_dir = NULL;
-	if (all_f || lib_add_f)
-		cwin->cpref->lib_add = NULL;
-	if (all_f || lib_delete_f)
-		cwin->cpref->lib_delete = NULL;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || nodes_f) {
