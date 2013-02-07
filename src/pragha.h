@@ -858,38 +858,17 @@ void init_library_view(struct con_win *cwin);
 /* DB (Sqlite) Functions */
 
 void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
-void pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file);
-gint add_new_artist_db(const gchar *artist, PraghaDatabase *cdbase);
-gint add_new_album_db(const gchar *album, PraghaDatabase *cdbase);
-gint add_new_genre_db(const gchar *genre, PraghaDatabase *cdbase);
-gint add_new_year_db(guint year, PraghaDatabase *cdbase);
-gint add_new_comment_db(const gchar *comment, PraghaDatabase *cdbase);
-gint add_new_location_db(const gchar *location, PraghaDatabase *cdbase);
-void add_track_playlist_db(const gchar *file, gint playlist_id, PraghaDatabase *cdbase);
-void add_track_radio_db(const gchar *uri, gint radio_id, PraghaDatabase *cdbase);
-gint find_artist_db(const gchar *artist, PraghaDatabase *cdbase);
-gint find_album_db(const gchar *album, PraghaDatabase *cdbase);
-gint find_genre_db(const gchar *genre, PraghaDatabase *cdbase);
-gint find_year_db(gint year, PraghaDatabase *cdbase);
-gint find_comment_db(const gchar *comment, PraghaDatabase *cdbase);
-gint find_location_db(const gchar *location, PraghaDatabase *cdbase);
-gint find_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
-gint find_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 void delete_location_db(gint location_id, PraghaDatabase *cdbase);
 gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);
 gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);
-void update_track_db(gint location_id, gint changed,
+void db_update_track(PraghaDatabase *database,
+		     gint location_id, gint changed,
 		     gint track_no, const gchar *title,
-		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id,
-		     PraghaDatabase *cdbase);
+		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id);
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
-void update_playlist_name_db(const gchar *oplaylist, gchar *nplaylist, PraghaDatabase *cdbase);
-gint add_new_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
 gchar** get_playlist_names_db(PraghaDatabase *cdbase);
 gint get_playlist_count_db(PraghaDatabase *cdbase);
-void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cdbase);
-gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
 gint get_tracklist_count_db(PraghaDatabase *cdbase);
 void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
@@ -899,8 +878,6 @@ void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
 void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
-void
-pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name);
 gboolean pragha_database_init_schema (PraghaDatabase *database);
 gint drop_dbase_schema(PraghaDatabase *cdbase);
 gint db_get_artist_count(PraghaDatabase *cdbase);
@@ -1135,7 +1112,6 @@ GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, cons
 void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
-gchar* sanitize_string_to_sqlite3(const gchar *str);
 enum file_type get_file_type(const gchar *file);
 gchar* get_mime_type(const gchar *file);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);

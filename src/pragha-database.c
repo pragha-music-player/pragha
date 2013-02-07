@@ -122,6 +122,324 @@ pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
 	return pragha_prepared_statement_new (stmt, database);
 }
 
+gint
+pragha_database_find_location (PraghaDatabase *database, const gchar *location)
+{
+	gint location_id = 0;
+	const gchar *sql = "SELECT id FROM LOCATION WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, location);
+	if (pragha_prepared_statement_step (statement))
+		location_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return location_id;
+}
+
+gint
+pragha_database_find_artist (PraghaDatabase *database, const gchar *artist)
+{
+	gint artist_id = 0;
+	const gchar *sql = "SELECT id FROM ARTIST WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, artist);
+	if (pragha_prepared_statement_step (statement))
+		artist_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return artist_id;
+}
+
+gint
+pragha_database_find_album (PraghaDatabase *database, const gchar *album)
+{
+	gint album_id = 0;
+	const gchar *sql = "SELECT id FROM ALBUM WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, album);
+	if (pragha_prepared_statement_step (statement))
+		album_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return album_id;
+}
+
+gint
+pragha_database_find_genre (PraghaDatabase *database, const gchar *genre)
+{
+	gint genre_id = 0;
+	const gchar *sql = "SELECT id FROM GENRE WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, genre);
+	if (pragha_prepared_statement_step (statement))
+		genre_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return genre_id;
+}
+
+gint
+pragha_database_find_comment (PraghaDatabase *database, const gchar *comment)
+{
+	gint comment_id = 0;
+	const gchar *sql = "SELECT id FROM COMMENT WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, comment);
+	if (pragha_prepared_statement_step (statement))
+		comment_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return comment_id;
+}
+
+gint
+pragha_database_find_year (PraghaDatabase *database, gint year)
+{
+	gint year_id = 0;
+	const gchar *sql = "SELECT id FROM YEAR WHERE year = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, year);
+	if (pragha_prepared_statement_step (statement))
+		year_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return year_id;
+}
+
+gint
+pragha_database_find_playlist (PraghaDatabase *database, const gchar *playlist)
+{
+	gint playlist_id = 0;
+	const gchar *sql = "SELECT id FROM PLAYLIST WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, playlist);
+	if (pragha_prepared_statement_step (statement))
+		playlist_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return playlist_id;
+}
+
+gint
+pragha_database_find_radio (PraghaDatabase *database, const gchar *radio)
+{
+	gint radio_id = 0;
+	const gchar *sql = "SELECT id FROM RADIO WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, radio);
+	if (pragha_prepared_statement_step (statement))
+		radio_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return radio_id;
+}
+
+gint
+pragha_database_add_new_location (PraghaDatabase *database, const gchar *location)
+{
+	const gchar *sql = "INSERT INTO LOCATION (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, location);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_location (database, location);
+}
+
+gint
+pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist)
+{
+	const gchar *sql = "INSERT INTO ARTIST (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, artist);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_artist (database, artist);
+}
+
+gint
+pragha_database_add_new_album (PraghaDatabase *database, const gchar *album)
+{
+	const gchar *sql = "INSERT INTO ALBUM (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, album);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_album (database, album);
+}
+
+gint
+pragha_database_add_new_genre (PraghaDatabase *database, const gchar *genre)
+{
+	const gchar *sql = "INSERT INTO GENRE (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, genre);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_genre (database, genre);
+}
+
+gint
+pragha_database_add_new_comment (PraghaDatabase *database, const gchar *comment)
+{
+	const gchar *sql = "INSERT INTO COMMENT (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, comment);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_comment (database, comment);
+}
+
+gint
+pragha_database_add_new_year (PraghaDatabase *database, guint year)
+{
+	const gchar *sql = "INSERT INTO YEAR (year) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, year);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_year (database, year);
+}
+
+void
+pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
+{
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
+
+	gint location_id = pragha_database_find_location (database, file);
+
+	if (!location_id) {
+		g_warning ("File not present in DB: %s", file);
+		return;
+	}
+
+	sql = "DELETE FROM TRACK WHERE location = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	sql = "DELETE FROM LOCATION WHERE id = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+gint
+pragha_database_add_new_playlist (PraghaDatabase *database, const gchar *playlist)
+{
+	const gchar *sql = "INSERT INTO PLAYLIST (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, playlist);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_playlist (database, playlist);
+}
+
+void
+pragha_database_add_playlist_track (PraghaDatabase *database, gint playlist_id, const gchar *file)
+{
+	const gchar *sql = "INSERT INTO PLAYLIST_TRACKS (file, playlist) VALUES (?, ?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, file);
+	pragha_prepared_statement_bind_int (statement, 2, playlist_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+gint
+pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio)
+{
+	const gchar *sql = "INSERT INTO RADIO (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, radio);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_radio (database, radio);
+}
+
+void
+pragha_database_add_radio_track (PraghaDatabase *database, gint radio_id, const gchar *uri)
+{
+	const gchar *sql = "INSERT INTO RADIO_TRACKS (uri, radio) VALUES (?, ?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, uri);
+	pragha_prepared_statement_bind_int (statement, 2, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_update_playlist_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name)
+{
+	gint playlist_id = pragha_database_find_playlist (database, old_name);
+
+	if (!playlist_id)
+		return;
+
+	const gchar *sql = "UPDATE PLAYLIST SET name = ? WHERE id = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, new_name);
+	pragha_prepared_statement_bind_int (statement, 2, playlist_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name)
+{
+	gint radio_id = pragha_database_find_radio (database, old_name);
+
+	if (!radio_id)
+		return;
+
+	const gchar *sql = "UPDATE RADIO SET name = ? WHERE id = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, new_name);
+	pragha_prepared_statement_bind_int (statement, 2, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name)
+{
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
+	gchar *mask = g_strconcat (dir_name, "%", NULL);
+
+	/* Delete all tracks under the given dir */
+
+	sql = "DELETE FROM TRACK WHERE location IN (SELECT id FROM LOCATION WHERE NAME LIKE ?)";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete the location entries */
+
+	sql = "DELETE FROM LOCATION WHERE name LIKE ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
+
+	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file LIKE ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Now flush unused artists, albums, genres, years */
+
+	flush_stale_entries_db (database);
+
+	g_free (mask);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
