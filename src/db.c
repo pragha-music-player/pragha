@@ -187,17 +187,6 @@ void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file)
 /* Public API */
 /**************/
 
-void delete_location_db(gint location_id, PraghaDatabase *cdbase)
-{
-	gchar *query;
-
-	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-}
-
 gchar *
 pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id)
 {
