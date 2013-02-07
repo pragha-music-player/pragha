@@ -49,22 +49,28 @@ static gboolean find_child_node(const gchar *node_data, GtkTreeIter *iter,
 	return FALSE;
 }
 
-/* Appends a child (iter) to p_iter with given data. NOTE that iter
+/* Prepend a child (iter) to p_iter with given data. NOTE that iter
  * and p_iter must be created outside this function */
 
-static void add_child_node_by_tag(GtkTreeModel *model, GtkTreeIter *iter,
-	GtkTreeIter *p_iter, GdkPixbuf *pixbuf, const gchar *node_data,
-	int node_type, int location_id)
+static void
+library_store_prepend_node(GtkTreeModel *model,
+                           GtkTreeIter *iter,
+                           GtkTreeIter *p_iter,
+                           GdkPixbuf *pixbuf,
+                           const gchar *node_data,
+                           int node_type,
+                           int location_id)
 {
 	gtk_tree_store_prepend(GTK_TREE_STORE(model), iter, p_iter);
 
 	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-		L_PIXBUF, pixbuf,
-		L_NODE_DATA, node_data,
-		L_NODE_TYPE, node_type,
-		L_LOCATION_ID, location_id,
-		L_MACH, FALSE,
-		L_VISIBILE, TRUE, -1);
+	                   L_PIXBUF, pixbuf,
+	                   L_NODE_DATA, node_data,
+	                   L_NODE_TYPE, node_type,
+	                   L_LOCATION_ID, location_id,
+	                   L_MACH, FALSE,
+	                   L_VISIBILE, TRUE,
+	                   -1);
 }
 
 static void
@@ -260,8 +266,13 @@ add_child_node_by_tags (GtkTreeModel *model,
 		/* Find / add child node if it's not already added */
 		if (node_type != NODE_TRACK) {
 			if (!find_child_node(node_data, &search_iter, p_iter, model)) {
-				add_child_node_by_tag(model, &iter, p_iter, node_pixbuf,
-					node_data, node_type, 0);
+				library_store_prepend_node(model,
+				                           &iter,
+				                           p_iter,
+				                           node_pixbuf,
+				                           node_data,
+				                           node_type,
+				                           0);
 				p_iter = &iter;
 			}
 			else {
@@ -270,8 +281,13 @@ add_child_node_by_tags (GtkTreeModel *model,
 			}
 		}
 		else {
-			add_child_node_by_tag(model, &iter, p_iter, node_pixbuf,
-						node_data, NODE_TRACK, location_id);
+			library_store_prepend_node(model,
+			                           &iter,
+			                           p_iter,
+			                           node_pixbuf,
+			                           node_data,
+			                           NODE_TRACK,
+			                           location_id);
 		}
 
 		/* Free node_data if needed */
@@ -1675,24 +1691,6 @@ exit:
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
-static void add_entry_playlist(const gchar *playlist,
-			       int node_type,
-			       GtkTreeIter *root,
-			       GtkTreeModel *model,
-			       struct con_win *cwin)
-{
-	GtkTreeIter iter;
-
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      root);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_NODE_TYPE, node_type,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_track,
-			   L_NODE_DATA, playlist,
-			   -1);
-}
-
 static void
 library_view_append_playlists(GtkTreeModel *model,
                               GtkTreeIter *p_iter,
@@ -1700,18 +1698,22 @@ library_view_append_playlists(GtkTreeModel *model,
 {
 	PraghaPreparedStatement *statement;
 	const gchar *sql = NULL, *playlist = NULL;
+	GtkTreeIter iter;
 
-	sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name";
+	sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE DESC";
 	statement = pragha_database_create_statement (cwin->cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
 	while (pragha_prepared_statement_step (statement)) {
 		playlist = pragha_prepared_statement_get_string(statement, 0);
-		add_entry_playlist(playlist,
-				   NODE_PLAYLIST,
-				   p_iter,
-				   model,
-				   cwin);
+
+		library_store_prepend_node(model,
+		                           &iter,
+		                           p_iter,
+		                           cwin->pixbuf->pixbuf_track,
+		                           playlist,
+		                           NODE_PLAYLIST,
+		                           0);
 
 		#if GTK_CHECK_VERSION (3, 0, 0)
 		pragha_process_gtk_events ();
@@ -1732,16 +1734,20 @@ library_view_append_radios(GtkTreeModel *model,
 {
 	PraghaPreparedStatement *statement;
 	const gchar *sql = NULL, *radio = NULL;
+	GtkTreeIter iter;
 
-	sql = "SELECT name FROM RADIO ORDER BY name";
+	sql = "SELECT name FROM RADIO ORDER BY name COLLATE NOCASE DESC";
 	statement = pragha_database_create_statement (cwin->cdbase, sql);
 	while (pragha_prepared_statement_step (statement)) {
 		radio = pragha_prepared_statement_get_string(statement, 0);
-		add_entry_playlist(radio,
-				   NODE_RADIO,
-				   p_iter,
-				   model,
-				   cwin);
+
+		library_store_prepend_node(model,
+		                           &iter,
+		                           p_iter,
+		                           cwin->pixbuf->pixbuf_track,
+		                           radio,
+		                           NODE_RADIO,
+		                           0);
 
 		#if GTK_CHECK_VERSION (3, 0, 0)
 		pragha_process_gtk_events ();
