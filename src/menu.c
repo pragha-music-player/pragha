@@ -1109,9 +1109,6 @@ exit:
 
 void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
-	gint i = 0, location_id = 0;
-	gchar *query;
-	PraghaDbResponse result;
 	GList *list = NULL;
 	PraghaMusicobject *mobj;
 
@@ -1119,27 +1116,25 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	set_watch_cursor (cwin->mainwindow);
 
-	query = g_strdup_printf("SELECT id FROM LOCATION;");
-	if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
-		for_each_result_row(result, i) {
-			location_id = atoi(result.resultp[i]);
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
+	const gchar *sql = "SELECT id FROM LOCATION";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
 
-			if (!mobj)
-				g_warning("Unable to retrieve details for"
-					  " location_id : %d",
-					  location_id);
-			else {
-				list = g_list_prepend(list, mobj);
-			}
+	while (pragha_prepared_statement_step (statement)) {
+		gint location_id = pragha_prepared_statement_get_int (statement, 0);
+		mobj = new_musicobject_from_db (cwin->cdbase, location_id);
 
-			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
+		if (!mobj)
+			g_warning ("Unable to retrieve details for"
+				   " location_id : %d",
+				   location_id);
+		else {
+			list = g_list_prepend (list, mobj);
 		}
-		sqlite3_free_table(result.resultp);
+
+		pragha_process_gtk_events ();
 	}
+
+	pragha_prepared_statement_free (statement);
 
 	remove_watch_cursor (cwin->mainwindow);
 
