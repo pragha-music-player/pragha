@@ -49,14 +49,11 @@ PraghaMusicobject *
 new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 {
 	PraghaMusicobject *mobj = NULL;
-	gchar *query;
-	PraghaDbResponse result;
-	gint i = 0;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject with location id: %d",
 	       location_id);
 
-	query = g_strdup_printf("SELECT \
+	const gchar *sql = "SELECT \
 TRACK.file_type, \
 TRACK.samplerate, \
 TRACK.channels, \
@@ -71,42 +68,43 @@ ARTIST.name, \
 TRACK.title, \
 LOCATION.name \
 FROM TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
-WHERE TRACK.location = \"%d\" \
+WHERE TRACK.location = ? \
 AND COMMENT.id = TRACK.comment \
 AND YEAR.id = TRACK.year \
 AND GENRE.id = TRACK.genre \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
-AND LOCATION.id = \"%d\";", location_id, location_id);
+AND LOCATION.id = ?";
 
-	if (G_LIKELY(pragha_database_exec_sqlite_query(cdbase, query, &result))) {
-		i = result.no_columns;
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_bind_int (statement, 2, location_id);
+
+	if (pragha_prepared_statement_step (statement)) {
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-		                     "file", result.resultp[i+12],
-		                     "file-type", atoi(result.resultp[i]),
-		                     "title", result.resultp[i+11],
-		                     "artist", result.resultp[i+10],
-		                     "album", result.resultp[i+9],
-		                     "genre", result.resultp[i+8],
-		                     "comment", result.resultp[i+5],
-		                     "year", atoi(result.resultp[i+6]),
-		                     "track-no", atoi(result.resultp[i+7]),
-		                     "length", atoi(result.resultp[i+3]),
-		                     "bitrate", atoi(result.resultp[i+4]),
-		                     "channels", atoi(result.resultp[i+2]),
-		                     "samplerate", atoi(result.resultp[i+1]),
+		                     "file", pragha_prepared_statement_get_string (statement, 12),
+		                     "file-type", pragha_prepared_statement_get_int (statement, 0),
+		                     "title", pragha_prepared_statement_get_string (statement, 11),
+		                     "artist", pragha_prepared_statement_get_string (statement, 10),
+		                     "album", pragha_prepared_statement_get_string (statement, 9),
+		                     "genre", pragha_prepared_statement_get_string (statement, 8),
+		                     "comment", pragha_prepared_statement_get_string (statement, 5),
+		                     "year", pragha_prepared_statement_get_int (statement, 6),
+		                     "track-no", pragha_prepared_statement_get_int (statement, 7),
+		                     "length", pragha_prepared_statement_get_int (statement, 3),
+		                     "bitrate", pragha_prepared_statement_get_int (statement, 4),
+		                     "channels", pragha_prepared_statement_get_int (statement, 2),
+		                     "samplerate", pragha_prepared_statement_get_int (statement, 1),
 		                     NULL);
-
-		sqlite3_free_table(result.resultp);
-
-		return mobj;
 	}
 	else {
 		g_critical("Track with location id : %d not found in DB",
 			   location_id);
 	}
 
-	return NULL;
+	pragha_prepared_statement_free (statement);
+
+	return mobj;
 }
 
 PraghaMusicobject *
