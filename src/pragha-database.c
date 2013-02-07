@@ -272,6 +272,32 @@ pragha_database_add_new_year (PraghaDatabase *database, guint year)
 	return pragha_database_find_year (database, year);
 }
 
+void
+pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
+{
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
+
+	gint location_id = pragha_database_find_location (database, file);
+
+	if (!location_id) {
+		g_warning ("File not present in DB: %s", file);
+		return;
+	}
+
+	sql = "DELETE FROM TRACK WHERE location = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	sql = "DELETE FROM LOCATION WHERE id = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {
