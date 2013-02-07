@@ -103,7 +103,22 @@ pragha_scanner_add_track_db(gpointer key,
 static void
 pragha_scanner_finished_dialog_response_cb (GtkDialog *dialog, gint response, gpointer data)
 {
-	gtk_widget_destroy(GTK_WIDGET(dialog));
+	PraghaScanner *scanner = data;
+
+	if(!scanner->update_timeout)
+		gtk_widget_destroy(GTK_WIDGET(dialog));
+
+}
+
+static gboolean
+pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpointer data)
+{
+	PraghaScanner *scanner = data;
+
+	if(scanner->update_timeout)
+		return TRUE;
+
+	return FALSE;
 }
 
 gboolean
@@ -136,8 +151,12 @@ pragha_scanner_worker_finished (gpointer data)
 						    _("Library scan complete"));
 
 		g_signal_connect(G_OBJECT(msg_dialog), "response",
-				 G_CALLBACK(pragha_scanner_finished_dialog_response_cb),
-				 NULL);
+		                 G_CALLBACK(pragha_scanner_finished_dialog_response_cb),
+		                 scanner);
+
+		g_signal_connect(G_OBJECT(msg_dialog), "delete-event",
+		                 G_CALLBACK(pragha_scanner_finished_dialog_delete),
+		                 scanner);
 
 		gtk_widget_show_all(msg_dialog);
 
