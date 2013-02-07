@@ -119,6 +119,19 @@ pragha_scanner_worker_finished (gpointer data)
 
 	/* If not cancelled, update database and show a dialog */
 	if(!g_cancellable_is_cancelled (scanner->cancellable)) {
+		/* Hide the scanner and show the dialog */
+
+		gtk_widget_hide(scanner->hbox);
+		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->hbox))),
+		                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+		                                    GTK_MESSAGE_INFO,
+						    GTK_BUTTONS_OK,
+						    "%s",
+						    _("Library scan complete"));
+
+		gtk_dialog_run(GTK_DIALOG(msg_dialog));
+		gtk_widget_destroy(msg_dialog);
+
 		/* Save new database and update the library view */
 
 		database = pragha_database_get();
@@ -151,18 +164,6 @@ pragha_scanner_worker_finished (gpointer data)
 			                             KEY_LIBRARY_SCANNED,
 			                             scanner->folder_list);
 		g_object_unref(G_OBJECT(preferences));
-
-		/* Hide the scanner and show the dialog */
-
-		gtk_widget_hide(scanner->hbox);
-		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->hbox))),
-		                                    GTK_DIALOG_MODAL,
-		                                    GTK_MESSAGE_INFO,
-						    GTK_BUTTONS_OK,
-						    "%s",
-						    _("Library scan complete"));
-		gtk_dialog_run(GTK_DIALOG(msg_dialog));
-		gtk_widget_destroy(msg_dialog);
 	}
 	else {
 		gtk_widget_hide(scanner->hbox);

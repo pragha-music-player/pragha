@@ -68,7 +68,7 @@ pragha_async_worker(gpointer data)
 
 	as->finished_data = as->func_w(as->userdata);
 
-	g_idle_add(pragha_async_finished, as);
+	g_idle_add_full(G_PRIORITY_HIGH_IDLE, pragha_async_finished, as, NULL);
 	g_thread_exit(NULL);
 
 	return NULL;
