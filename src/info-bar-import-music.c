@@ -16,7 +16,6 @@
  */
 
 #include "pragha.h"
-#include "pragha-scanner.h"
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 {
@@ -44,7 +43,7 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 				                             library_dir);
 			free_str_list(library_dir);
 
-			pragha_scanner_scan_library(cwin->mainwindow);
+			pragha_scanner_scan_library(cwin->scanner);
 			break;
 		default:
 			g_warn_if_reached();

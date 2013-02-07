@@ -75,21 +75,7 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-album-art.h"
-#include "pragha-backend.h"
-#include "pragha-database.h"
-#include "pragha-musicobject.h"
-#include "pragha-preferences.h"
-#include "pragha-statusbar.h"
-#include "gtkcellrendererbubble.h"
-
-#include "xml_helper.h"
-
 /* Some definitions to solve different versions of the libraries. */
-
-#ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
-#endif
 
 #if GLIB_CHECK_VERSION (2, 32, 0)
 #define PRAGHA_MUTEX(mtx) GMutex mtx
@@ -104,6 +90,21 @@
 #define pragha_mutex_unlock(mtx) g_mutex_unlock (mtx)
 #define pragha_mutex_create(mtx) (mtx) = g_mutex_new ()
 #endif
+
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#endif
+
+#include "pragha-album-art.h"
+#include "pragha-backend.h"
+#include "pragha-database.h"
+#include "pragha-musicobject.h"
+#include "pragha-preferences.h"
+#include "pragha-scanner.h"
+#include "pragha-statusbar.h"
+#include "gtkcellrendererbubble.h"
+
+#include "xml_helper.h"
 
 /* Some default preferences. */
 
@@ -629,6 +630,7 @@ struct con_win {
 	PraghaPlaylist *cplaylist;
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
+	PraghaScanner  *scanner;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
