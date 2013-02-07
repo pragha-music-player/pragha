@@ -1675,7 +1675,7 @@ exit:
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
-static void add_entry_playlist(gchar *playlist,
+static void add_entry_playlist(const gchar *playlist,
 			       int node_type,
 			       GtkTreeIter *root,
 			       GtkTreeModel *model,
@@ -1691,6 +1691,68 @@ static void add_entry_playlist(gchar *playlist,
 			   L_PIXBUF, cwin->pixbuf->pixbuf_track,
 			   L_NODE_DATA, playlist,
 			   -1);
+}
+
+static void
+library_view_append_playlists(GtkTreeModel *model,
+                              GtkTreeIter *p_iter,
+                              struct con_win *cwin)
+{
+	PraghaPreparedStatement *statement;
+	const gchar *sql = NULL, *playlist = NULL;
+
+	sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name";
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+
+	while (pragha_prepared_statement_step (statement)) {
+		playlist = pragha_prepared_statement_get_string(statement, 0);
+		add_entry_playlist(playlist,
+				   NODE_PLAYLIST,
+				   p_iter,
+				   model,
+				   cwin);
+
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		pragha_process_gtk_events ();
+		#else
+		if (pragha_process_gtk_events ()) {
+			pragha_prepared_statement_free (statement);
+			return;
+		}
+		#endif
+	}
+	pragha_prepared_statement_free (statement);
+}
+
+static void
+library_view_append_radios(GtkTreeModel *model,
+                           GtkTreeIter *p_iter,
+                           struct con_win *cwin)
+{
+	PraghaPreparedStatement *statement;
+	const gchar *sql = NULL, *radio = NULL;
+
+	sql = "SELECT name FROM RADIO ORDER BY name";
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	while (pragha_prepared_statement_step (statement)) {
+		radio = pragha_prepared_statement_get_string(statement, 0);
+		add_entry_playlist(radio,
+				   NODE_RADIO,
+				   p_iter,
+				   model,
+				   cwin);
+
+		#if GTK_CHECK_VERSION (3, 0, 0)
+		pragha_process_gtk_events ();
+		#else
+		if (pragha_process_gtk_events ()) {
+			pragha_prepared_statement_free (statement);
+			return;
+		}
+		#endif
+	}
+	pragha_prepared_statement_free (statement);
 }
 
 void
@@ -1849,9 +1911,6 @@ library_view_complete_tags_view(GtkTreeModel *model,
 
 void init_library_view(struct con_win *cwin)
 {
-	gint i = 0;
-	gchar *query;
-	PraghaDbResponse result;
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 
@@ -1872,70 +1931,29 @@ void init_library_view(struct con_win *cwin)
 
 	/* Playlists.*/
 
-	query = g_strdup_printf("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\" ORDER BY NAME;",
-				SAVE_PLAYLIST_STATE);
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, _("Playlists"),
+			   L_NODE_TYPE, NODE_CATEGORY,
+			   -1);
 
-	if (result.no_rows) {
-		gtk_tree_store_append(GTK_TREE_STORE(model),
-				      &iter,
-				      NULL);
-		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
-				   L_NODE_DATA, _("Playlists"),
-				   L_NODE_TYPE, NODE_CATEGORY,
-				   -1);
-
-		for_each_result_row(result, i) {
-			add_entry_playlist(result.resultp[i],
-					   NODE_PLAYLIST,
-					   &iter, model, cwin);
-
-			/* Have to give control to GTK periodically ... */
-			#if GTK_CHECK_VERSION (3, 0, 0)
-			pragha_process_gtk_events ();
-			#else
-			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-			#endif
-		}
-	}
-	sqlite3_free_table(result.resultp);
+	library_view_append_playlists(model, &iter, cwin);
 
 	/* Radios. */
 
-	query = g_strdup_printf("SELECT NAME FROM RADIO ORDER BY NAME");
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	gtk_tree_store_append(GTK_TREE_STORE(model),
+			      &iter,
+			      NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_NODE_DATA, _("Radios"),
+			   L_NODE_TYPE, NODE_CATEGORY,
+			   -1);
 
-	if(result.no_rows) {
-		gtk_tree_store_append(GTK_TREE_STORE(model),
-				      &iter,
-				      NULL);
-		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-				   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
-				   L_NODE_DATA, _("Radios"),
-				   L_NODE_TYPE, NODE_CATEGORY,
-				   -1);
-
-		for_each_result_row(result, i) {
-			add_entry_playlist(result.resultp[i],
-					   NODE_RADIO,
-					   &iter, model, cwin);
-
-			/* Have to give control to GTK periodically ... */
-			#if GTK_CHECK_VERSION (3, 0, 0)
-			pragha_process_gtk_events ();
-			#else
-			if (pragha_process_gtk_events ()) {
-				sqlite3_free_table(result.resultp);
-				return;
-			}
-			#endif
-		}
-	}
-	sqlite3_free_table(result.resultp);
+	library_view_append_radios(model, &iter, cwin);
 
 	/* Set order button label */
 
