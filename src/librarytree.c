@@ -553,12 +553,12 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				struct con_win *cwin)
 {
 	GtkWidget *question_dialog;
-	gchar *query = NULL, *filename = NULL;
-	gchar *primary, *secondary;
+	gchar *primary, *secondary, *filename = NULL;
 	gint response, location_id = 0;
 	guint i;
 	gboolean deleted = FALSE;
-	PraghaDbResponse result;
+	GError *error = NULL;
+	GFile *file = NULL;
 
 	if (!loc_arr)
 		return;
@@ -566,70 +566,62 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	for(i = 0; i < loc_arr->len; i++) {
 		location_id = g_array_index(loc_arr, gint, i);
 		if (location_id) {
-			query = g_strdup_printf("SELECT name FROM LOCATION "
-						"WHERE id = '%d';",
-						location_id);
-			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
-				filename = result.resultp[result.no_columns];
-				if(filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
-					GError *error = NULL;
-					GFile *file = g_file_new_for_path(filename);
+			filename = pragha_database_get_filename_from_location_id(cwin->cdbase, location_id);
+			if (filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
+				file = g_file_new_for_path(filename);
 
-					if(!unlink && !(deleted = g_file_trash(file, NULL, &error))) {
-						primary = g_strdup (_("Cannot move file to trash, do you want to delete immediately?"));
-						secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
-										g_file_get_basename (file), error->message);
+				if(!unlink && !(deleted = g_file_trash(file, NULL, &error))) {
+					primary = g_strdup (_("Cannot move file to trash, do you want to delete immediately?"));
+					secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
+									g_file_get_basename (file), error->message);
 
-						question_dialog = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
-					                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					                                                GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", primary);
-						gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (question_dialog), "%s", secondary);
+					question_dialog = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
+				                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+				                                                GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", primary);
+					gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (question_dialog), "%s", secondary);
 
-						gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
-						if (loc_arr->len > 1) {
-						        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP, PRAGHA_RESPONSE_SKIP);
-						        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP_ALL, PRAGHA_RESPONSE_SKIP_ALL);
-				        		gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_DELETE_ALL, PRAGHA_RESPONSE_DELETE_ALL);
-						}
-						gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_DELETE, GTK_RESPONSE_ACCEPT);
-
-						response = gtk_dialog_run (GTK_DIALOG (question_dialog));
-						gtk_widget_destroy (question_dialog);
-						g_free (primary);
-						g_free (secondary);
-						g_error_free (error);
-						error = NULL;
-
-						switch (response)
-						{
-							case PRAGHA_RESPONSE_DELETE_ALL:
-								unlink = TRUE;
-								break;
-							case GTK_RESPONSE_ACCEPT:
-								g_unlink(filename);
-								deleted = TRUE;
-								break;
-							case PRAGHA_RESPONSE_SKIP:
-								break;
-							case PRAGHA_RESPONSE_SKIP_ALL:
-							case GTK_RESPONSE_CANCEL:
-							case GTK_RESPONSE_DELETE_EVENT:
-							default:
-								sqlite3_free_table(result.resultp);
-								return;
-						}
+					gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+					if (loc_arr->len > 1) {
+					        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP, PRAGHA_RESPONSE_SKIP);
+					        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP_ALL, PRAGHA_RESPONSE_SKIP_ALL);
+			        		gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_DELETE_ALL, PRAGHA_RESPONSE_DELETE_ALL);
 					}
-					if(unlink) {
-						g_unlink(filename);
-						deleted = TRUE;
+					gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_DELETE, GTK_RESPONSE_ACCEPT);
+
+					response = gtk_dialog_run (GTK_DIALOG (question_dialog));
+					gtk_widget_destroy (question_dialog);
+					g_free (primary);
+					g_free (secondary);
+					g_error_free (error);
+					error = NULL;
+
+					switch (response)
+					{
+						case PRAGHA_RESPONSE_DELETE_ALL:
+							unlink = TRUE;
+							break;
+						case GTK_RESPONSE_ACCEPT:
+							g_unlink(filename);
+							deleted = TRUE;
+							break;
+						case PRAGHA_RESPONSE_SKIP:
+							break;
+						case PRAGHA_RESPONSE_SKIP_ALL:
+						case GTK_RESPONSE_CANCEL:
+						case GTK_RESPONSE_DELETE_EVENT:
+						default:
+							return;
 					}
-					g_object_unref(G_OBJECT(file));
 				}
+				if(unlink) {
+					g_unlink(filename);
+					deleted = TRUE;
+				}
+				g_object_unref(G_OBJECT(file));
 			}
 			if (deleted) {
 				delete_location_db(location_id, cwin->cdbase);
 			}
-			sqlite3_free_table(result.resultp);
 		}
 	}
 }
@@ -1565,8 +1557,6 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	gint sel, location_id, changed = 0;
 	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
 	gint elem = 0, ielem;
-	gchar *query = NULL;
-	PraghaDbResponse result;
 
 	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
 
@@ -1663,14 +1653,9 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	for(ielem = 0; ielem < loc_arr->len; ielem++) {
 		elem = g_array_index(loc_arr, gint, ielem);
 		if (elem) {
-			query = g_strdup_printf("SELECT name FROM LOCATION "
-						"WHERE id = '%d';",
-						elem);
-
-			if (pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
-				file = result.resultp[result.no_columns];
+			file = pragha_database_get_filename_from_location_id(cwin->cdbase, elem);
+			if(file)
 				g_ptr_array_add(file_arr, file);
-			}
 		}
 	}
 	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
