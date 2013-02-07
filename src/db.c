@@ -870,33 +870,6 @@ gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase)
 	return radio_id;
 }
 
-/* Get the names of all the radio stored in the DB.
-   Returned NULL terminated array of strings that has to freed by caller. */
-
-gchar** get_radio_names_db(PraghaDatabase *cdbase)
-{
-	gchar *query;
-	PraghaDbResponse result;
-	gchar **radio = NULL;
-	gint i, j=0;
-
-	query = g_strdup_printf("SELECT NAME FROM RADIO");
-
-	if (pragha_database_exec_sqlite_query(cdbase, query, &result)) {
-		if (result.no_rows) {
-			radio = g_malloc0((result.no_rows+1) * sizeof(gchar *));
-			for_each_result_row(result, i) {
-				radio[j] = g_strdup(result.resultp[i]);
-				j++;
-			}
-			radio[j] = NULL;
-		}
-		sqlite3_free_table(result.resultp);
-	}
-
-	return radio;
-}
-
 /* 'radio' has to be a sanitized string */
 
 void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase)
