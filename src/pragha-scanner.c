@@ -162,6 +162,9 @@ pragha_scanner_worker_finished (gpointer data)
 
 		/* Save new database and update the library view */
 
+		set_watch_cursor(msg_dialog);
+		set_watch_cursor(scanner->hbox);
+
 		database = pragha_database_get();
 
 		db_begin_transaction(database);
@@ -175,6 +178,9 @@ pragha_scanner_worker_finished (gpointer data)
 
 		pragha_database_change_playlists_done(database);
 		g_object_unref(database);
+
+		remove_watch_cursor(scanner->hbox);
+		remove_watch_cursor(msg_dialog);
 
 		/* Save finished time and folders scanned. */
 
