@@ -334,30 +334,26 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 /* Thread that analyze all files in the library */
 
-static gboolean
-pragha_scanner_forget_remove_file(gpointer key,
-                                  gpointer value,
-                                  gpointer user_data)
-{
-	gchar *file = key;
-
-	if(!g_file_test(file, G_FILE_TEST_EXISTS))
-		return TRUE;
-
-	return FALSE;
-}
-
 gpointer
 pragha_scanner_update_worker(gpointer data)
 {
 	GSList *list;
+	GHashTableIter iter;
+	gpointer key, value;
+	gchar *file;
 
 	PraghaScanner *scanner = data;
 
 	/* Clean removed files */
-	g_hash_table_foreach_remove (scanner->tracks_table,
-	                             pragha_scanner_forget_remove_file,
-	                             scanner);
+
+	g_hash_table_iter_init (&iter, scanner->tracks_table);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		file = key;
+		if(g_cancellable_is_cancelled (scanner->cancellable))
+			break;
+		if(!g_file_test(file, G_FILE_TEST_EXISTS))
+			g_hash_table_iter_remove(&iter);
+	}
 
 	/* Then update files changed.. */
 	for(list = scanner->folder_list ; list != NULL; list = list->next) {
