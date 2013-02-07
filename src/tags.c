@@ -302,7 +302,8 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 /* Tag Editing */
 /***************/
 
-static void add_entry_tag_completion(gchar *entry, GtkTreeModel *model)
+static void
+add_entry_tag_completion (const gchar *entry, GtkTreeModel *model)
 {
 	GtkTreeIter iter;
 
@@ -1259,9 +1260,8 @@ exit:
 void refresh_tag_completion_entries(struct con_win *cwin)
 {
 	GtkTreeModel *artist_tag_model, *album_tag_model, *genre_tag_model;
-	PraghaDbResponse result;
-	gchar *query;
-	gint i = 0;
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
 
 	artist_tag_model = gtk_entry_completion_get_model(cwin->completion[0]);
 	album_tag_model = gtk_entry_completion_get_model(cwin->completion[1]);
@@ -1271,45 +1271,33 @@ void refresh_tag_completion_entries(struct con_win *cwin)
 	gtk_list_store_clear(GTK_LIST_STORE(album_tag_model));
 	gtk_list_store_clear(GTK_LIST_STORE(genre_tag_model));
 
-	query = g_strdup_printf("SELECT name FROM ARTIST;");
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	sql = "SELECT name FROM ARTIST";
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
 
-	i = 0;
-	for_each_result_row(result, i) {
-		add_entry_tag_completion(result.resultp[i], artist_tag_model);
-
-		if (pragha_process_gtk_events ()) {
-			sqlite3_free_table(result.resultp);
-			return;
-		}
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		add_entry_tag_completion (name, artist_tag_model);
 	}
-	sqlite3_free_table(result.resultp);
 
-	query = g_strdup_printf("SELECT name FROM ALBUM;");
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	pragha_prepared_statement_free (statement);
 
-	i = 0;
-	for_each_result_row(result, i) {
-		add_entry_tag_completion(result.resultp[i], album_tag_model);
+	sql = "SELECT name FROM ALBUM";
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
 
-		if (pragha_process_gtk_events ()) {
-			sqlite3_free_table(result.resultp);
-			return;
-		}
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		add_entry_tag_completion (name, album_tag_model);
 	}
-	sqlite3_free_table(result.resultp);
 
-	query = g_strdup_printf("SELECT name FROM GENRE;");
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
+	pragha_prepared_statement_free (statement);
 
-	i = 0;
-	for_each_result_row(result, i) {
-		add_entry_tag_completion(result.resultp[i], genre_tag_model);
+	sql = "SELECT name FROM GENRE";
+	statement = pragha_database_create_statement (cwin->cdbase, sql);
 
-		if (pragha_process_gtk_events ()) {
-			sqlite3_free_table(result.resultp);
-			return;
-		}
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		add_entry_tag_completion (name, genre_tag_model);
 	}
-	sqlite3_free_table(result.resultp);
+
+	pragha_prepared_statement_free (statement);
 }
