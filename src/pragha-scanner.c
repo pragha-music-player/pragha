@@ -122,11 +122,15 @@ pragha_scanner_worker_finished (gpointer data)
 		/* Save new database and update the library view */
 
 		database = pragha_database_get();
-		flush_db(database);
 
+		db_begin_transaction(database);
+
+		flush_db(database);
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      database);
+
+		db_commit_transaction(database);
 
 		pragha_database_change_playlists_done(database);
 		g_object_unref(database);
