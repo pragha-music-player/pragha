@@ -18,18 +18,26 @@
 #include "pragha.h"
 
 typedef struct {
+	/* Widgets */
+	GtkWidget         *hbox;
+	GtkWidget         *progress_bar;
+	/* Cache */
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
 	GTimeVal          last_update;
-	GtkWidget         *hbox;
-	GtkWidget         *progress_bar;
-	guint              no_files;
-	PRAGHA_MUTEX      (no_files_mutex);
+	/* Threads */
 	GThread           *no_files_thread;
-	guint              files_scanned;
+	GThread           *worker_thread;
+	/* Mutex to protect progress */
+	PRAGHA_MUTEX      (no_files_mutex);
 	PRAGHA_MUTEX      (files_scanned_mutex);
+	/* Progress of threads */
+	guint              no_files;
+	guint              files_scanned;
+	/* Cancellation safe */
 	GCancellable      *cancellable;
+	/* Timeout of update progress, also used as operating flag*/
 	guint              update_timeout;
 } PraghaScanner;
 
