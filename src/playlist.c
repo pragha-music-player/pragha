@@ -352,13 +352,12 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
                           gchar *playlist,
                           GList *list)
 {
-	gchar *s_playlist, *query, *file;
+	gchar *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cdbase);
+	playlist_id = pragha_database_find_playlist (cdbase, playlist);
 
 	if(playlist_id == 0)
 		goto bad;
@@ -368,22 +367,17 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 	pragha_database_exec_sqlite_query(cdbase, query, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
-
-		if ((location_id = find_location_db(file, cdbase)))
+		if ((location_id = pragha_database_find_location (cdbase, result.resultp[i])))
 			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
 			mobj = new_musicobject_from_file(result.resultp[i]);
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
-
-		g_free(file);
 	}
 	sqlite3_free_table(result.resultp);
 
 bad:
-	g_free(s_playlist);
 
 	return list;
 }
@@ -395,13 +389,12 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
                        gchar *radio,
                        GList *list)
 {
-	gchar *s_radio, *query;
+	gchar *query;
 	gint radio_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 
-	s_radio = sanitize_string_to_sqlite3(radio);
-	radio_id = find_radio_db(s_radio, cdbase);
+	radio_id = pragha_database_find_radio (cdbase, radio);
 
 	if(radio_id == 0)
 		goto bad;
@@ -418,7 +411,6 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
 	sqlite3_free_table(result.resultp);
 
 bad:
-	g_free(s_radio);
 
 	return list;
 }
@@ -486,7 +478,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list;
-	gchar *playlist = NULL, *s_playlist = NULL, *n_playlist = NULL;
+	gchar *playlist = NULL, *n_playlist = NULL;
 	gint node_type;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
@@ -498,22 +490,19 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			s_playlist = sanitize_string_to_sqlite3(playlist);
-
-			n_playlist = rename_playlist_dialog(s_playlist, cwin);
+			n_playlist = rename_playlist_dialog (playlist, cwin);
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 				if(node_type == NODE_PLAYLIST)
-					update_playlist_name_db(s_playlist, n_playlist, cwin->cdbase);
+					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
 				else if (node_type == NODE_RADIO)
-					update_radio_name_db(s_playlist, n_playlist, cwin->cdbase);
+					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
 
 				pragha_database_change_playlists_done(cwin->cdbase);
 
 				g_free(n_playlist);
 			}
-			g_free(s_playlist);
 			g_free(playlist);
 		}
 		gtk_tree_path_free(path);
@@ -560,7 +549,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list, *i;
-	gchar *playlist, *s_playlist;
+	gchar *playlist;
 	gint node_type;
 	gboolean removed = FALSE;
 
@@ -579,15 +568,12 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 						   &playlist, -1);
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
-					s_playlist = sanitize_string_to_sqlite3(playlist);
-
 					if(node_type == NODE_PLAYLIST) {
-						delete_playlist_db(s_playlist, cwin->cdbase);
+						delete_playlist_db (playlist, cwin->cdbase);
 					}
 					else if (node_type == NODE_RADIO) {
-						delete_radio_db(s_playlist, cwin->cdbase);
+						delete_radio_db(playlist, cwin->cdbase);
 					}
-					g_free(s_playlist);
 					removed = TRUE;
 				}
 				g_free(playlist);
@@ -1156,16 +1142,14 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 static void
 append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 {
-	gchar *file, *s_file;
+	gchar *file;
 	GSList *i = NULL;
 
 	db_begin_transaction(cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
-		s_file = sanitize_string_to_sqlite3(file);
-		add_track_playlist_db(s_file, playlist_id, cdbase);
-		g_free(s_file);
+		pragha_database_add_playlist_track (cdbase, playlist_id, file);
 		g_free(file);
 	}
 
@@ -1222,7 +1206,6 @@ new_playlist(PraghaPlaylist* cplaylist,
              const gchar *playlist,
              enum playlist_mgmt type)
 {
-	gchar *s_playlist;
 	gint playlist_id = 0;
 
 	if (string_is_empty(playlist)) {
@@ -1230,25 +1213,19 @@ new_playlist(PraghaPlaylist* cplaylist,
 		return;
 	}
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-
-	if ((playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase))) {
+	if ((playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist))) {
 		if (overwrite_existing_playlist(playlist, cplaylist))
-			delete_playlist_db(s_playlist, cplaylist->cdbase);
+			delete_playlist_db(playlist, cplaylist->cdbase);
 		else
-			goto exit;
+			return;
 	}
 
-	playlist_id = add_new_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_add_new_playlist (cplaylist->cdbase, playlist);
 	save_playlist(cplaylist, playlist_id, type);
-
-exit:
-	g_free(s_playlist);
 }
 
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type)
 {
-	gchar *s_playlist;
 	gint playlist_id;
 
 	if (string_is_empty(playlist)) {
@@ -1256,23 +1233,18 @@ void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type
 		return;
 	}
 
-	s_playlist = sanitize_string_to_sqlite3(playlist);
-	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist);
 
 	if (!playlist_id) {
 		g_warning("Playlist doesn't exist\n");
-		goto exit;
+		return;
 	}
 
 	save_playlist(cplaylist, playlist_id, type);
-
-exit:
-	g_free(s_playlist);
 }
 
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 {
-	gchar *s_radio, *file = NULL;
 	gint radio_id = 0;
 
 	if (string_is_empty(name)) {
@@ -1280,23 +1252,16 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 		return;
 	}
 
-	s_radio = sanitize_string_to_sqlite3(name);
-
-	if ((radio_id = find_radio_db(s_radio, cplaylist->cdbase))) {
+	if ((radio_id = pragha_database_find_radio (cplaylist->cdbase, name))) {
 		if (overwrite_existing_playlist(name, cplaylist))
-			delete_radio_db(s_radio, cplaylist->cdbase);
+			delete_radio_db (name, cplaylist->cdbase);
 		else
-			goto exit;
+			return;
 	}
 
-	radio_id = add_new_radio_db(s_radio, cplaylist->cdbase);
+	radio_id = pragha_database_add_new_radio (cplaylist->cdbase, name);
 
-	file = sanitize_string_to_sqlite3(uri);
-	add_track_radio_db(file, radio_id, cplaylist->cdbase);
-	g_free(file);
-
-exit:
-	g_free(s_radio);
+	pragha_database_add_radio_track (cplaylist->cdbase, radio_id, uri);
 }
 
 void append_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)

@@ -2770,10 +2770,9 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 	/* Save last playlist. */
 
-	playlist_id = find_playlist_db(SAVE_PLAYLIST_STATE, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	if (!playlist_id)
-		playlist_id = add_new_playlist_db(SAVE_PLAYLIST_STATE,
-						  cplaylist->cdbase);
+		playlist_id = pragha_database_add_new_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	else
 		flush_playlist_db(playlist_id, cplaylist->cdbase);
 
@@ -2807,26 +2806,25 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 {
-	gchar *s_playlist, *query, *file;
+	gchar *query;
 	gint playlist_id, location_id, i = 0;
 	PraghaDbResponse result;
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
-	s_playlist = sanitize_string_to_sqlite3(SAVE_PLAYLIST_STATE);
-	playlist_id = find_playlist_db(s_playlist, cplaylist->cdbase);
+	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
 				playlist_id);
 	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
 	for_each_result_row(result, i) {
-		file = sanitize_string_to_sqlite3(result.resultp[i]);
+		const gchar *file = result.resultp[i];
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
-			if ((location_id = find_location_db(file, cplaylist->cdbase)))
+			if ((location_id = pragha_database_find_location (cplaylist->cdbase, file)))
 				mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
 			else
-				mobj = new_musicobject_from_file(result.resultp[i]);
+				mobj = new_musicobject_from_file(file);
 		}
 		else {
 			mobj = new_musicobject_from_location(file + strlen("Radio:/"), file + strlen("Radio:/"));
@@ -2834,14 +2832,11 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
-
-		g_free(file);
 	}
 
 	pragha_playlist_append_mobj_list(cplaylist, list);
 
 	sqlite3_free_table(result.resultp);
-	g_free(s_playlist);
 
 	g_list_free(list);
 }

@@ -1086,7 +1086,7 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 {
 	PraghaMusicobject *mobj = NULL;
 	gint location_id;
-	gchar *sfile = NULL, *tfile;
+	gchar *tfile;
 	GArray *loc_arr = NULL;
 	GPtrArray *file_arr = NULL;
 	GList *i;
@@ -1098,11 +1098,9 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 		mobj = i->data;
 
 		if (G_LIKELY(pragha_musicobject_is_local_file(mobj))) {
-			sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(mobj));
-			location_id = find_location_db(sfile, cwin->cdbase);
+			location_id = pragha_database_find_location(cwin->cdbase, pragha_musicobject_get_file(mobj));
 			if (G_LIKELY(location_id))
 				g_array_append_val(loc_arr, location_id);
-			g_free(sfile);
 
 			tfile = g_strdup(pragha_musicobject_get_file(mobj));
 			g_ptr_array_add(file_arr, tfile);

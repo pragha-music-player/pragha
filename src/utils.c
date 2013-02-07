@@ -319,38 +319,30 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 						GList *list,
 						struct con_win *cwin)
 {
-	gchar *query = NULL;
-	PraghaDbResponse result;
 	PraghaMusicobject *mobj = NULL;
-	gint location_id = 0, i;
-	gchar *sartist, *stitle;
+	gint location_id = 0;
 
 	if(pragha_mobj_list_already_has_title_of_artist(list, title, artist) ||
 	   pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
 		return list;
 
-	sartist = sanitize_string_to_sqlite3(artist);
-	stitle = sanitize_string_to_sqlite3(title);
-
-	query = g_strdup_printf("SELECT TRACK.title, ARTIST.name, LOCATION.id "
+	const gchar *sql = "SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
 				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = '%s' COLLATE NOCASE "
-				"AND ARTIST.name = '%s' COLLATE NOCASE "
-				"ORDER BY RANDOM() LIMIT 1;",
-				stitle, sartist);
+				"AND TRACK.title = ? COLLATE NOCASE "
+				"AND ARTIST.name = ? COLLATE NOCASE "
+				"ORDER BY RANDOM() LIMIT 1;";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, title);
+	pragha_prepared_statement_bind_string (statement, 2, artist);
 
-	if(pragha_database_exec_sqlite_query(cwin->cdbase, query, &result)) {
-		for_each_result_row(result, i) {
-			location_id = atoi(result.resultp[i+2]);
-
-			mobj = new_musicobject_from_db(cwin->cdbase, location_id);
-			list = g_list_prepend(list, mobj);
-		}
-		sqlite3_free_table(result.resultp);
+	if (pragha_prepared_statement_step (statement)) {
+		location_id = pragha_prepared_statement_get_int (statement, 2);
+		mobj = new_musicobject_from_db (cwin->cdbase, location_id);
+		list = g_list_prepend (list, mobj);
 	}
-	g_free(sartist);
-	g_free(stitle);
+
+	pragha_prepared_statement_free (statement);
 
 	return list;
 }
@@ -401,50 +393,6 @@ GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
 		g_error_free (err);	
 	}
 	return buffer_pix;
-}
-
-static gint no_single_quote(const gchar *str)
-{
-	const gchar *tmp = str;
-	gint i = 0;
-
-	if (!str)
-		return 0;
-
-	while (*tmp) {
-		if (*tmp == '\'') {
-			i++;
-		}
-		tmp++;
-	}
-	return i;
-}
-
-/* Replace ' by '' */
-
-gchar* sanitize_string_to_sqlite3(const gchar *str)
-{
-	gint cn, i=0;
-	gchar *ch;
-	const gchar *tmp;
-
-	if (!str)
-		return g_strdup("");
-
-	cn = no_single_quote(str);
-	ch = g_malloc0(strlen(str) + cn + 1);
-	tmp = str;
-
-	while (*tmp) {
-		if (*tmp == '\'') {
-			ch[i++] = '\'';
-			ch[i++] = '\'';
-			tmp++;
-			continue;
-		}
-		ch[i++] = *tmp++;
-	}
-	return ch;
 }
 
 static gboolean is_valid_mime(const gchar *mime, const gchar **mlist)
