@@ -891,7 +891,6 @@ gchar** get_playlist_names_db(PraghaDatabase *cdbase);
 gint get_playlist_count_db(PraghaDatabase *cdbase);
 void update_radio_name_db(const gchar *oradio, gchar *nradio, PraghaDatabase *cdbase);
 gint add_new_radio_db(const gchar *radio, PraghaDatabase *cdbase);
-gchar** get_radio_names_db(PraghaDatabase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
 gint get_tracklist_count_db(PraghaDatabase *cdbase);
 void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
