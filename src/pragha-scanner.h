@@ -18,10 +18,6 @@
 #include "pragha.h"
 
 typedef struct {
-	PraghaDatabase    *cdbase;
-	PraghaPreferences *preferences;
-	GtkWidget         *parent;
-	gboolean           updating_action;
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
@@ -38,6 +34,13 @@ typedef struct {
 } PraghaScanner;
 
 void
-pragha_scanner_update_library(GtkWidget *parent);
+pragha_scanner_update_library(PraghaScanner *scanner);
+
 void
-pragha_scanner_scan_library(GtkWidget *parent);
+pragha_scanner_scan_library(PraghaScanner *scanner);
+
+void
+pragha_scanner_free(PraghaScanner *scanner);
+
+PraghaScanner *
+pragha_scanner_new();

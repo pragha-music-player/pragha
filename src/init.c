@@ -75,6 +75,7 @@ static void init_gui_state(struct con_win *cwin)
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
 
+	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		mainwindow_add_widget_to_info_box(cwin, info_bar);
@@ -98,6 +99,7 @@ static gboolean _init_gui_state(gpointer data)
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
 
+	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		mainwindow_add_widget_to_info_box(cwin, info_bar);

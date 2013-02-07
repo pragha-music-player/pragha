@@ -17,7 +17,6 @@
 /*************************************************************************/
 
 #include "pragha.h"
-#include "pragha-scanner.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
@@ -815,14 +814,14 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_scanner_scan_library(cwin->mainwindow);
+	pragha_scanner_scan_library(cwin->scanner);
 }
 
 /* Handler for the 'Update Library' item in the Tools menu */
 
 void update_library_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_scanner_update_library(cwin->mainwindow);
+	pragha_scanner_update_library(cwin->scanner);
 }
 
 /* Handler for 'Add All' action in the Tools menu */
