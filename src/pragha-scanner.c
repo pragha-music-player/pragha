@@ -100,6 +100,12 @@ pragha_scanner_add_track_db(gpointer key,
 	pragha_process_gtk_events ();
 }
 
+static void
+pragha_scanner_finished_dialog_response_cb (GtkDialog *dialog, gint response, gpointer data)
+{
+	gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
 gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
@@ -129,8 +135,11 @@ pragha_scanner_worker_finished (gpointer data)
 						    "%s",
 						    _("Library scan complete"));
 
-		gtk_dialog_run(GTK_DIALOG(msg_dialog));
-		gtk_widget_destroy(msg_dialog);
+		g_signal_connect(G_OBJECT(msg_dialog), "response",
+				 G_CALLBACK(pragha_scanner_finished_dialog_response_cb),
+				 NULL);
+
+		gtk_widget_show_all(msg_dialog);
 
 		/* Save new database and update the library view */
 
