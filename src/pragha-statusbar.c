@@ -109,6 +109,27 @@ pragha_statusbar_set_misc_text (PraghaStatusbar *statusbar,
 }
 
 /**
+ * pragha_statusbar_add_widget:
+ * @statusbar : a #PraghaStatusbar instance.
+ * @wdget     : the widget to append in @statusbar.
+ *
+ * Sets up a new misc text for @statusbar.
+ **/
+void
+pragha_statusbar_add_widget(PraghaStatusbar *statusbar,
+                            GtkWidget       *widget)
+{
+	GtkWidget *hbox;
+
+	g_return_if_fail (PRAGHA_IS_STATUSBAR (statusbar));
+	g_return_if_fail (widget != NULL);
+
+	hbox = gtk_statusbar_get_message_area(GTK_STATUSBAR (statusbar));
+
+	gtk_box_pack_end (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
+}
+
+/**
  * pragha_statusbar_get:
  *
  * Queries the global #GtkStatusbar instance, which is shared
