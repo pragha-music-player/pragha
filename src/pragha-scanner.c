@@ -536,6 +536,11 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 void
 pragha_scanner_free(PraghaScanner *scanner)
 {
+	if(scanner->update_timeout) {
+		g_cancellable_cancel (scanner->cancellable);
+		g_thread_join (scanner->no_files_thread);
+	}
+
 	g_hash_table_destroy(scanner->tracks_table);
 	free_str_list(scanner->folder_list);
 	free_str_list(scanner->folder_scanned);
