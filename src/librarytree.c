@@ -526,7 +526,7 @@ delete_row_from_db(PraghaDatabase *cdbase,
 	gtk_tree_model_get(model, &r_iter, L_NODE_TYPE, &node_type, -1);
 	if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 		gtk_tree_model_get(model, &r_iter, L_LOCATION_ID, &location_id, -1);
-		delete_location_db(location_id, cdbase);
+		pragha_database_forget_location(cdbase, location_id);
 	}
 
 	/* For all other node types do a recursive deletion */
@@ -537,7 +537,7 @@ delete_row_from_db(PraghaDatabase *cdbase,
 		if ((node_type == NODE_TRACK) || (node_type == NODE_BASENAME)) {
 			gtk_tree_model_get(model, &t_iter,
 					   L_LOCATION_ID, &location_id, -1);
-			delete_location_db(location_id, cdbase);
+			pragha_database_forget_location(cdbase, location_id);
 		}
 		else {
 			path = gtk_tree_model_get_path(model, &t_iter);
@@ -620,7 +620,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				g_object_unref(G_OBJECT(file));
 			}
 			if (deleted) {
-				delete_location_db(location_id, cwin->cdbase);
+				pragha_database_forget_location(cwin->cdbase, location_id);
 			}
 		}
 	}

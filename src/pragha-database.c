@@ -299,17 +299,10 @@ pragha_database_add_new_year (PraghaDatabase *database, guint year)
 }
 
 void
-pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
+pragha_database_forget_location (PraghaDatabase *database, gint location_id)
 {
 	const gchar *sql;
 	PraghaPreparedStatement *statement;
-
-	gint location_id = pragha_database_find_location (database, file);
-
-	if (!location_id) {
-		g_warning ("File not present in DB: %s", file);
-		return;
-	}
 
 	sql = "DELETE FROM TRACK WHERE location = ?";
 	statement = pragha_database_create_statement (database, sql);
@@ -322,6 +315,19 @@ pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_forget_track (PraghaDatabase *database, const gchar *file)
+{
+	gint location_id = pragha_database_find_location (database, file);
+
+	if (!location_id) {
+		g_warning ("File not present in DB: %s", file);
+		return;
+	}
+
+	pragha_database_forget_location(database, location_id);
 }
 
 gint

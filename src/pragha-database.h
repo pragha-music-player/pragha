@@ -119,6 +119,9 @@ gint
 pragha_database_add_new_radio (PraghaDatabase *database, const gchar *radio);
 
 void
+pragha_database_forget_location (PraghaDatabase *database, gint location_id);
+
+void
 pragha_database_forget_track (PraghaDatabase *database, const gchar *file);
 
 void
