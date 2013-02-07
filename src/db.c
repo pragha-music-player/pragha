@@ -107,15 +107,13 @@ bad:
 	g_free(playlist);
 }
 
-static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *cdbase)
+void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj)
 {
-	PraghaMusicobject *mobj;
 	gchar *sfile, *stitle, *sartist, *salbum, *sgenre, *scomment;
 	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
 
-	mobj = new_musicobject_from_file(file);
 	if (mobj) {
-		sfile = sanitize_string_to_sqlite3(file);
+		sfile = sanitize_string_to_sqlite3(pragha_musicobject_get_file(mobj));
 		stitle = sanitize_string_to_sqlite3(pragha_musicobject_get_title(mobj));
 		sartist = sanitize_string_to_sqlite3(pragha_musicobject_get_artist(mobj));
 		salbum = sanitize_string_to_sqlite3(pragha_musicobject_get_album(mobj));
@@ -175,12 +173,21 @@ static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *
 		g_free(salbum);
 		g_free(sgenre);
 		g_free(scomment);
+	}
+}
 
+static void add_new_musicobject_from_file_db(const gchar *file, PraghaDatabase *cdbase)
+{
+	PraghaMusicobject *mobj = NULL;
+
+	mobj = new_musicobject_from_file(file);
+	if (mobj) {
+		add_new_musicobject_db(cdbase, mobj);
 		g_object_unref(mobj);
 	}
 }
 
-static void add_entry_db(const gchar *file, PraghaDatabase *cdbase)
+void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file)
 {
 	if (pragha_pl_parser_guess_format_from_extension(file) != PL_FORMAT_UNKNOWN) {
 		import_playlist_from_file_db(file, cdbase);
@@ -190,24 +197,31 @@ static void add_entry_db(const gchar *file, PraghaDatabase *cdbase)
 	}
 }
 
-static void delete_track_db(const gchar *file, PraghaDatabase *cdbase)
+void
+pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file)
 {
 	gchar *query, *sfile;
-	gint location_id;
+	gint location_id = 0;
 	PraghaDbResponse result;
 
 	sfile = sanitize_string_to_sqlite3(file);
 
 	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s';", sfile);
 	pragha_database_exec_sqlite_query(cdbase, query, &result);
-	if (!result.no_rows) {
+	if (result.no_rows) {
+		location_id = atoi(result.resultp[result.no_columns]);
+	}
+	else {
 		g_warning("File not present in DB: %s", sfile);
 		goto bad;
 	}
 
-	location_id = atoi(result.resultp[result.no_columns]);
 	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
 	pragha_database_exec_sqlite_query(cdbase, query, NULL);
+
+	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
+	pragha_database_exec_sqlite_query(cdbase, query, NULL);
+
 bad:
 	g_free(sfile);
 }
@@ -931,157 +945,11 @@ void flush_stale_entries_db(PraghaDatabase *cdbase)
 	pragha_database_exec_query (cdbase, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
 }
 
-gboolean fraction_update(GtkWidget *pbar)
-{
-	static gdouble fraction = 0.0;
-	gint files_scanned = 0;
-	gint no_files;
-
-	no_files = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pbar), "no_files"));
-	files_scanned = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pbar), "files_scanned"));
-
-	if(files_scanned > 0)
-		fraction = (gdouble)files_scanned / (gdouble)no_files;
-
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pbar), fraction);
-
-	return TRUE;
-}
-
-void rescan_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, GCancellable *cancellable, PraghaDatabase *cdbase)
-{
-	static gint files_scanned = 0;
-	gint progress_timeout = 0;
-	GDir *dir;
-	const gchar *next_file = NULL;
-	gchar *ab_file;
-	GError *error = NULL;
-
-	/* Reinitialize static variables if called from rescan_library_action */
-
-	if (call_recur)
-		files_scanned = 0;
-
-	if (g_cancellable_is_cancelled (cancellable))
-		goto exit;
-
-	dir = g_dir_open(dir_name, 0, &error);
-	if (!dir) {
-		g_critical("Unable to open library : %s", dir_name);
-		goto exit;
-	}
-
-	if(progress_timeout == 0) {
-		g_object_set_data(G_OBJECT(pbar), "no_files", GINT_TO_POINTER(no_files));
-		g_object_set_data(G_OBJECT(pbar), "files_scanned", GINT_TO_POINTER(files_scanned));
-		progress_timeout = g_timeout_add_seconds(3, (GSourceFunc)fraction_update, pbar);
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		if (g_cancellable_is_cancelled (cancellable))
-			goto exit;
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			rescan_db(ab_file, no_files, pbar, 0, cancellable, cdbase);
-		else {
-			files_scanned++;
-			add_entry_db(ab_file, cdbase);
-		}
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-	g_dir_close(dir);
-exit:
-	if(progress_timeout != 0) {
-		g_source_remove(progress_timeout);
-		progress_timeout = 0;
-	}
-}
-
-void update_db (const gchar *dir_name,
-		gint no_files,
-		GtkWidget *pbar,
-		GTimeVal last_rescan_time,
-		gint call_recur,
-		GCancellable *cancellable,
-		PraghaDatabase *cdbase)
-{
-	static gint files_scanned = 0;
-	gint progress_timeout = 0;
-	GDir *dir;
-	const gchar *next_file = NULL;
-	gchar *ab_file = NULL, *s_ab_file = NULL;
-	GError *error = NULL;
-	struct stat sbuf;
-
-	/* Reinitialize static variables if called from rescan_library_action */
-
-	if (call_recur)
-		files_scanned = 0;
-
-	if (g_cancellable_is_cancelled (cancellable))
-		goto exit;
-
-	dir = g_dir_open(dir_name, 0, &error);
-	if (!dir) {
-		g_critical("Unable to open library : %s", dir_name);
-		goto exit;
-	}
-
-	if(progress_timeout == 0) {
-		g_object_set_data(G_OBJECT(pbar), "no_files", GINT_TO_POINTER(no_files));
-		g_object_set_data(G_OBJECT(pbar), "files_scanned", GINT_TO_POINTER(files_scanned));
-		progress_timeout = g_timeout_add_seconds(3, (GSourceFunc)fraction_update, pbar);
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		if (g_cancellable_is_cancelled (cancellable))
-			goto exit;
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			update_db(ab_file, no_files, pbar, last_rescan_time, 0, cancellable, cdbase);
-		else {
-			files_scanned++;
-			s_ab_file = sanitize_string_to_sqlite3(ab_file);
-			if (!find_location_db(s_ab_file, cdbase)) {
-				add_entry_db(ab_file, cdbase);
-			} else {
-				g_stat(ab_file, &sbuf);
-				if (sbuf.st_mtime > last_rescan_time.tv_sec) {
-					if (find_location_db(s_ab_file, cdbase))
-						delete_track_db(ab_file, cdbase);
-					add_entry_db(ab_file, cdbase);
-				}
-			}
-			g_free(s_ab_file);
-		}
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-	g_dir_close(dir);
-exit:
-	if(progress_timeout != 0) {
-		g_source_remove(progress_timeout);
-		progress_timeout = 0;
-	}
-}
-
 /* Delete all tracks falling under the given directory.
    Also, flush the database of unused albums, artists, etc. */
 
-void delete_db(const gchar *dir_name, gint no_files, GtkWidget *pbar,
-	       gint call_recur, PraghaDatabase *cdbase)
+void
+pragha_database_delete_folder(PraghaDatabase *cdbase, const gchar *dir_name)
 {
 	gchar *query, *sdir_name;
 
