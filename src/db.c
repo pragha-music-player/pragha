@@ -188,35 +188,6 @@ void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file)
 	}
 }
 
-void
-pragha_database_forget_track(PraghaDatabase *cdbase, const gchar *file)
-{
-	gchar *query, *sfile;
-	gint location_id = 0;
-	PraghaDbResponse result;
-
-	sfile = sanitize_string_to_sqlite3(file);
-
-	query = g_strdup_printf("SELECT id FROM LOCATION WHERE name = '%s';", sfile);
-	pragha_database_exec_sqlite_query(cdbase, query, &result);
-	if (result.no_rows) {
-		location_id = atoi(result.resultp[result.no_columns]);
-	}
-	else {
-		g_warning("File not present in DB: %s", sfile);
-		goto bad;
-	}
-
-	query = g_strdup_printf("DELETE FROM TRACK WHERE location = %d;", location_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-	query = g_strdup_printf("DELETE FROM LOCATION WHERE id = %d;", location_id);
-	pragha_database_exec_sqlite_query(cdbase, query, NULL);
-
-bad:
-	g_free(sfile);
-}
-
 /**************/
 /* Public API */
 /**************/

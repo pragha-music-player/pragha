@@ -104,6 +104,9 @@ gint
 pragha_database_add_new_year (PraghaDatabase *database, guint year);
 
 void
+pragha_database_forget_track (PraghaDatabase *database, const gchar *file);
+
+void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
 gboolean
