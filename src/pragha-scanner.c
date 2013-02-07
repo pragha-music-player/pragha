@@ -45,7 +45,7 @@ pragha_scanner_update_progress(gpointer user_data)
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(scanner->progress_bar), fraction);
 
 		data = g_strdup_printf(_("%i files analized of %i detected"), files_scanned, no_files);
-		gtk_label_set_text(GTK_LABEL(scanner->label), data);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(scanner->progress_bar), data);
 		g_free(data);
 	}
 	else {
@@ -110,6 +110,9 @@ pragha_scanner_worker_finished (gpointer data)
 	/* Stop updates */
 	g_source_remove(scanner->update_timeout);
 
+	/* Destroy the dialog */
+	gtk_widget_destroy(scanner->hbox);
+
 	/* Ensure that the other thread has finished */
 	g_thread_join (scanner->no_files_thread);
 
@@ -118,6 +121,7 @@ pragha_scanner_worker_finished (gpointer data)
 		/* Save new database */
 	
 		flush_db(scanner->cdbase);
+
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      scanner);
@@ -125,10 +129,6 @@ pragha_scanner_worker_finished (gpointer data)
 		/* Update the library view */
 
 		pragha_database_change_playlists_done(scanner->cdbase);
-
-		/* Destroy the dialog */
-
-		gtk_widget_destroy(scanner->dialog);
 
 		/* Save finished time and folders scanned. */
 
@@ -155,9 +155,7 @@ pragha_scanner_worker_finished (gpointer data)
 		gtk_dialog_run(GTK_DIALOG(msg_dialog));
 		gtk_widget_destroy(msg_dialog);
 	}
-	else {
-		gtk_widget_destroy(scanner->dialog);
-	}
+
 	/* Clean memory */
 
 	g_object_unref(scanner->cdbase);
@@ -358,31 +356,12 @@ pragha_scanner_update_worker(gpointer data)
 }
 
 
-/* Signal handler for deleting the scanner dialog */
-
-gboolean
-scanner_dialog_delete_event(GtkWidget *dialog,
-                            GdkEvent *event,
-                            gpointer user_data)
-{
-	PraghaScanner *scanner = user_data;
-
-	g_cancellable_cancel (scanner->cancellable);
-
-	return TRUE;
-}
-
 /* Signal handler for cancelling the scanner dialog */
 
 void
-scanner_dialog_response_event(GtkDialog *dialog,
-                              gint response_id,
-                              gpointer user_data)
+scanner_cancel_click_handler(GtkButton *button, PraghaScanner *scanner)
 {
-	PraghaScanner *scanner = user_data;
-
-	if (response_id == GTK_RESPONSE_CANCEL)
-		g_cancellable_cancel (scanner->cancellable);
+	g_cancellable_cancel (scanner->cancellable);
 }
 
 /* Create the dialog and init all */
@@ -391,10 +370,10 @@ PraghaScanner *
 pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 {
 	PraghaScanner *scanner;
-	GtkWidget *dialog, *table, *label, *progress_bar;
+	GtkWidget *hbox, *progress_bar, *button, *image;
 	gchar *last_scan_time = NULL;
 	PraghaMusicobject *mobj = NULL;
-	guint row = 0, i = 0, location_id;
+	guint i = 0, location_id;
 	GSList *list;
 	gchar *query;
 	PraghaDbResponse result;
@@ -425,46 +404,33 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 		                                     GROUP_LIBRARY,
 		                                     KEY_LIBRARY_SCANNED);
 
-	/* Create the scanner dialog */
-
-	dialog = gtk_dialog_new_with_buttons(updating_action ? _("Update Library") : _("Rescan Library"),
-	                                     GTK_WINDOW(parent),
-	                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                     NULL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-				  GTK_BUTTONBOX_SPREAD);
-
-	/* Create the layout */
-
-	table = pragha_hig_workarea_table_new();
-
-	label = pragha_hig_workarea_table_add_section_title(table, &row, _("Searching files to analyze"));
+	hbox = gtk_hbox_new(FALSE, 0);
 
 	progress_bar = gtk_progress_bar_new();
-	gtk_widget_set_size_request(progress_bar,
-				    PROGRESS_BAR_WIDTH,
-				    -1);
+	gtk_widget_set_size_request(progress_bar, PROGRESS_BAR_WIDTH, -1);
+	#if GTK_CHECK_VERSION (3, 0, 0)
+	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(progress_bar), TRUE);
+	#endif
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress_bar), _("Searching files to analyze"));
 
-	pragha_hig_workarea_table_add_wide_control(table, &row, progress_bar);
-	pragha_hig_workarea_table_finish(table, &row);
+	button = gtk_button_new ();
+	image = gtk_image_new_from_stock (GTK_STOCK_CANCEL, GTK_ICON_SIZE_MENU);
+	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
+	gtk_container_add (GTK_CONTAINER (button), image);
 
-	/* Setup signal handlers */
+	g_signal_connect(G_OBJECT (button),
+			 "clicked",
+			 G_CALLBACK(scanner_cancel_click_handler),
+			 scanner);
 
-	g_signal_connect(G_OBJECT(GTK_WINDOW(dialog)), "delete_event",
-			 G_CALLBACK(scanner_dialog_delete_event), scanner);
-	g_signal_connect(G_OBJECT(dialog), "response",
-			 G_CALLBACK(scanner_dialog_response_event), scanner);
-
-	/* Add the layout to the dialog and show everything */
-
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
+	gtk_box_pack_start (GTK_BOX (hbox), progress_bar, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 
 	/* Save references */
 
-	scanner->dialog = dialog;
-	scanner->label = label;
 	scanner->progress_bar = progress_bar;
+	scanner->hbox = hbox;
 	scanner->updating_action = updating_action;
 
 	scanner->tracks_table = g_hash_table_new_full (g_str_hash,
@@ -506,7 +472,12 @@ pragha_scanner_dialog_new(GtkWidget *parent, gboolean updating_action)
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
-	gtk_widget_show_all(dialog);
+	PraghaStatusbar *statusbar;
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_add_widget(statusbar, hbox);
+	g_object_unref(G_OBJECT(statusbar));
+
+	gtk_widget_show_all(hbox);
 
 	#if GLIB_CHECK_VERSION(2,31,0)
 	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);

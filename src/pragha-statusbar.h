@@ -40,6 +40,10 @@ void
 pragha_statusbar_set_misc_text (PraghaStatusbar *statusbar,
                                 const gchar     *text);
 
+void
+pragha_statusbar_add_widget(PraghaStatusbar *statusbar,
+                            GtkWidget       *widget);
+
 GType      pragha_statusbar_get_type    (void) G_GNUC_CONST;
 
 PraghaStatusbar *
