@@ -964,27 +964,27 @@ static gboolean set_all_visible(GtkTreeModel *model,
 	return FALSE;
 }
 
-static void filter_tree_expand_func(GtkTreeView *view,
-				    GtkTreePath *path,
-				    gpointer data)
+static void
+library_expand_filtered_tree_func(GtkTreeView *view,
+                                  GtkTreePath *path,
+                                  gpointer data)
 {
-	GtkTreeModel *filter_model;
 	GtkTreeIter iter;
 	enum node_type node_type;
 	gboolean node_mach;
 
-	filter_model = data;
-
-	gtk_tree_model_get_iter(filter_model, &iter, path);
-	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
-	gtk_tree_model_get(filter_model, &iter, L_MACH, &node_mach, -1);
+	GtkTreeModel *filter_model = data;
 
 	/* Collapse any non-leaf node that matches the seach entry */
 
-	if (node_mach &&
-	    (node_type != NODE_TRACK) &&
-	    (node_type != NODE_BASENAME))
-		gtk_tree_view_collapse_row(view, path);
+	gtk_tree_model_get_iter(filter_model, &iter, path);
+	gtk_tree_model_get(filter_model, &iter, L_MACH, &node_mach, -1);
+
+	if (node_mach) {
+		gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
+		if ((node_type != NODE_TRACK) && (node_type != NODE_BASENAME))
+			gtk_tree_view_collapse_row(view, path);
+	}
 }
 
 static void
@@ -1087,7 +1087,7 @@ gboolean do_refilter(struct con_win *cwin )
 	/* Expand all and then reduce properly. */
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
-		filter_tree_expand_func,
+		library_expand_filtered_tree_func,
 		filter_model);
 
 	cwin->cstate->timeout_id = 0;
@@ -1192,10 +1192,17 @@ void clear_library_search(struct con_win *cwin)
 
 	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
 	while (valid) {
-		path = gtk_tree_model_get_path(filter_model, &iter);
-		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
-		gtk_tree_path_free(path);
-
+		if(gtk_tree_model_iter_has_child(filter_model, &iter)) {
+			path = gtk_tree_model_get_path(filter_model, &iter);
+			gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
+			gtk_tree_path_free(path);
+		}
+		else {
+			/* TODO: Hide empty categories!. It no work!. Why? :(
+			gtk_tree_store_set(GTK_TREE_STORE(filter_model), &iter,
+			                   L_VISIBILE, FALSE, -1);
+			*/
+		}
 		valid = gtk_tree_model_iter_next(filter_model, &iter);
 	}
 }
