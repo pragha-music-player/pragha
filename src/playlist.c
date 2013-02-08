@@ -568,10 +568,10 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 
 				if(delete_existing_item_dialog(playlist, cwin)) {
 					if(node_type == NODE_PLAYLIST) {
-						delete_playlist_db (playlist, cwin->cdbase);
+						pragha_database_delete_playlist (cwin->cdbase, playlist);
 					}
 					else if (node_type == NODE_RADIO) {
-						delete_radio_db(playlist, cwin->cdbase);
+						pragha_database_delete_radio (cwin->cdbase, playlist);
 					}
 					removed = TRUE;
 				}
@@ -1214,7 +1214,7 @@ new_playlist(PraghaPlaylist* cplaylist,
 
 	if ((playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist))) {
 		if (overwrite_existing_playlist(playlist, cplaylist))
-			delete_playlist_db(playlist, cplaylist->cdbase);
+			pragha_database_delete_playlist (cplaylist->cdbase, playlist);
 		else
 			return;
 	}
@@ -1253,7 +1253,7 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 
 	if ((radio_id = pragha_database_find_radio (cplaylist->cdbase, name))) {
 		if (overwrite_existing_playlist(name, cplaylist))
-			delete_radio_db (name, cplaylist->cdbase);
+			pragha_database_delete_radio (cplaylist->cdbase, name);
 		else
 			return;
 	}

@@ -867,13 +867,7 @@ void db_update_track(PraghaDatabase *database,
 void
 pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
 gchar** get_playlist_names_db(PraghaDatabase *cdbase);
-gint get_playlist_count_db(PraghaDatabase *cdbase);
 gint get_radio_count_db(struct con_win *cwin);
-gint get_tracklist_count_db(PraghaDatabase *cdbase);
-void delete_playlist_db(const gchar *playlist, PraghaDatabase *cdbase);
-void flush_playlist_db(gint playlist_id, PraghaDatabase *cdbase);
-void delete_radio_db(const gchar *radio, PraghaDatabase *cdbase);
-void flush_radio_db(gint radio_id, PraghaDatabase *cdbase);
 void flush_stale_entries_db(PraghaDatabase *cdbase);
 void flush_db(PraghaDatabase *cdbase);
 void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
