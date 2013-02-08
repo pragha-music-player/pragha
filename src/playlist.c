@@ -349,12 +349,10 @@ void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
 
 GList *
 add_playlist_to_mobj_list(PraghaDatabase *cdbase,
-                          gchar *playlist,
+                          const gchar *playlist,
                           GList *list)
 {
-	gchar *query;
-	gint playlist_id, location_id, i = 0;
-	PraghaDbResponse result;
+	gint playlist_id, location_id;
 	PraghaMusicobject *mobj;
 
 	playlist_id = pragha_database_find_playlist (cdbase, playlist);
@@ -362,21 +360,23 @@ add_playlist_to_mobj_list(PraghaDatabase *cdbase,
 	if(playlist_id == 0)
 		goto bad;
 
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	pragha_database_exec_sqlite_query(cdbase, query, &result);
+	const gchar *sql = "SELECT file FROM PLAYLIST_TRACKS WHERE playlist = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
 
-	for_each_result_row(result, i) {
-		if ((location_id = pragha_database_find_location (cdbase, result.resultp[i])))
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *file = pragha_prepared_statement_get_string (statement, 0);
+
+		if ((location_id = pragha_database_find_location (cdbase, file)))
 			mobj = new_musicobject_from_db(cdbase, location_id);
 		else
-			mobj = new_musicobject_from_file(result.resultp[i]);
+			mobj = new_musicobject_from_file (file);
 
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 	}
-	sqlite3_free_table(result.resultp);
 
+	pragha_prepared_statement_free (statement);
 bad:
 
 	return list;
@@ -386,12 +386,10 @@ bad:
 
 GList *
 add_radio_to_mobj_list(PraghaDatabase *cdbase,
-                       gchar *radio,
+                       const gchar *radio,
                        GList *list)
 {
-	gchar *query;
-	gint radio_id, i = 0;
-	PraghaDbResponse result;
+	gint radio_id;
 	PraghaMusicobject *mobj;
 
 	radio_id = pragha_database_find_radio (cdbase, radio);
@@ -399,17 +397,18 @@ add_radio_to_mobj_list(PraghaDatabase *cdbase,
 	if(radio_id == 0)
 		goto bad;
 
-	query = g_strdup_printf("SELECT URI FROM RADIO_TRACKS WHERE RADIO=%d",
-				radio_id);
+	const gchar *sql = "SELECT uri FROM RADIO_TRACKS WHERE radio = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_int (statement, 1, radio_id);
 
-	pragha_database_exec_sqlite_query(cdbase, query, &result);
-	for_each_result_row(result, i) {
-		mobj = new_musicobject_from_location(result.resultp[i], radio);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *uri = pragha_prepared_statement_get_string (statement, 0);
+		mobj = new_musicobject_from_location (uri, radio);
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 	}
-	sqlite3_free_table(result.resultp);
 
+	pragha_prepared_statement_free (statement);
 bad:
 
 	return list;
@@ -1285,10 +1284,7 @@ void save_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 static void
 complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
 {
-	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
-	gchar *query;
-	gint i;
 	
 	submenu = gtk_menu_new ();
 
@@ -1302,27 +1298,26 @@ complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cplaylist->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
-
-	for_each_result_row (result, i) {
-		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		menuitem = gtk_image_menu_item_new_with_label (name);
 		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
+	pragha_prepared_statement_free (statement);
+
 	gtk_widget_show_all (submenu);
-	sqlite3_free_table (result.resultp);
 }
 
 static void
 complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 {
-	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
-	gchar *query;
-	gint i;
 	
 	submenu = gtk_menu_new ();
 
@@ -1336,28 +1331,27 @@ complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cplaylist->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
-
-	for_each_result_row (result, i) {
-		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		menuitem = gtk_image_menu_item_new_with_label (name);
 		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
+	pragha_prepared_statement_free (statement);
+
 	gtk_widget_show_all (submenu);
-	sqlite3_free_table (result.resultp);
 }
 
 static void
 complete_main_save_playlist_submenu (struct con_win *cwin)
 {
-	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
-	gchar *query;
-	gint i;
 
 	submenu = gtk_menu_new ();
 
@@ -1378,28 +1372,27 @@ complete_main_save_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-
-	for_each_result_row (result, i) {
-		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		menuitem = gtk_image_menu_item_new_with_label (name);
 		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
+	pragha_prepared_statement_free (statement);
+
 	gtk_widget_show_all (submenu);
-	sqlite3_free_table (result.resultp);
 }
 
 static void
 complete_main_add_to_playlist_submenu (struct con_win *cwin)
 {
-	PraghaDbResponse result;
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
-	gchar *query;
-	gint i;
 	
 	submenu = gtk_menu_new ();
 
@@ -1420,18 +1413,20 @@ complete_main_add_to_playlist_submenu (struct con_win *cwin)
 	menuitem = gtk_separator_menu_item_new ();
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
-	query = g_strdup_printf ("SELECT NAME FROM PLAYLIST WHERE NAME != \"%s\";", SAVE_PLAYLIST_STATE);
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
-	pragha_database_exec_sqlite_query(cwin->cdbase, query, &result);
-
-	for_each_result_row (result, i) {
-		menuitem = gtk_image_menu_item_new_with_label (result.resultp[i]);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		menuitem = gtk_image_menu_item_new_with_label (name);
 		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
+	pragha_prepared_statement_free (statement);
+
 	gtk_widget_show_all (submenu);
-	sqlite3_free_table (result.resultp);
 }
 
 void update_menu_playlist_changes(struct con_win *cwin)

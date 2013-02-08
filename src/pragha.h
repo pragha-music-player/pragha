@@ -889,8 +889,8 @@ void db_commit_transaction(PraghaDatabase *cdbase);
 
 gchar* get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type, enum playlist_mgmt *choice);
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
-GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
-GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
+GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
+GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, const gchar *radio, GList *list);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void export_playlist (PraghaPlaylist* cplaylist, gint choice);
