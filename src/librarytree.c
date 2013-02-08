@@ -1205,11 +1205,8 @@ void clear_library_search(struct con_win *cwin)
 /********************************/
 
 static void
-library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+library_pane_update_style (PraghaLibraryPane *clibrary)
 {
-	struct con_win *cwin = user_data;
-	PraghaLibraryPane *clibrary = cwin->clibrary;
-
 	g_slist_free (clibrary->library_tree_nodes);
 	clibrary->library_tree_nodes = NULL;
 
@@ -1230,7 +1227,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Artist"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Artist"));
 			break;
 		case ALBUM:
 			clibrary->library_tree_nodes =
@@ -1239,7 +1236,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Album"));
 			break;
 		case GENRE:
 			clibrary->library_tree_nodes =
@@ -1248,7 +1245,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre"));
 			break;
 		case ARTIST_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1260,7 +1257,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Artist / Album"));
 			break;
 		case GENRE_ARTIST:
 			clibrary->library_tree_nodes =
@@ -1272,7 +1269,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Artist"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Artist"));
 			break;
 		case GENRE_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1284,7 +1281,7 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Album"));
 			break;
 		case GENRE_ARTIST_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1299,12 +1296,19 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Artist / Album"));
 			break;
 		default:
 			break;
 	}
+}
 
+static void
+library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
+	library_pane_update_style(cwin->clibrary);
 	library_pane_view_reload(cwin);
 }
 
@@ -1978,7 +1982,8 @@ library_pane_view_reload(struct con_win *cwin)
 
 void init_library_view(struct con_win *cwin)
 {
-	library_pane_change_style(NULL, NULL, cwin);
+	library_pane_update_style(cwin->clibrary);
+	library_pane_view_reload(cwin);
 }
 
 static void
