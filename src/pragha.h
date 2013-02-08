@@ -386,7 +386,7 @@ enum dnd_target {
 
 /* Library Views */
 
-enum library_view {
+enum library_style {
 	FOLDERS,
 	ARTIST,
 	ALBUM,
@@ -394,7 +394,8 @@ enum library_view {
 	ARTIST_ALBUM,
 	GENRE_ARTIST,
 	GENRE_ALBUM,
-	GENRE_ARTIST_ALBUM
+	GENRE_ARTIST_ALBUM,
+	LAST_LIBRARY_STYLE
 };
 
 /* Playlist management */
@@ -495,7 +496,6 @@ typedef struct {
 }PreferencesWidgets;
 
 struct con_pref {
-	enum library_view cur_library_view;
 	gchar *installed_version;
 	gchar *album_art_pattern;
 	gchar *start_mode;
