@@ -622,7 +622,7 @@ typedef struct {
 	GtkTreeStore *library_store;
 	GtkWidget *library_tree;
 	GtkWidget *search_entry;
-	GtkWidget *browse_mode;
+	GtkWidget *widget;
 	GtkWidget *combo_order;
 	GtkWidget *combo_order_label;
 	gboolean dragging;
@@ -824,18 +824,6 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 gboolean library_page_right_click_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin);
-gboolean dnd_library_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-gboolean dnd_library_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin);
-void dnd_library_tree_get(GtkWidget *widget,
-			  GdkDragContext *context,
-			  GtkSelectionData *data,
-			  enum dnd_target info,
-			  guint time,
-			  struct con_win *cwin);
 void simple_library_search_keyrelease(struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
 gboolean simple_library_search_activate_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
@@ -856,7 +844,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
 void
 library_pane_view_reload(PraghaLibraryPane *clibrary);
-void init_library_view(PraghaLibraryPane *clibrary);
+void pragha_library_pane_init_view(PraghaLibraryPane *clibrary);
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
