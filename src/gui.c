@@ -229,17 +229,17 @@ static void init_library_dnd(struct con_win *cwin)
 {
 	/* Source: Library View */
 
-	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->library_tree),
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(cwin->clibrary->library_tree),
 					       GDK_BUTTON1_MASK,
 					       lentries,
 					       G_N_ELEMENTS(lentries),
 					       GDK_ACTION_COPY);
 
-	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->library_tree)),
+	g_signal_connect(G_OBJECT(GTK_WIDGET(cwin->clibrary->library_tree)),
 			 "drag-begin",
 			 G_CALLBACK(dnd_library_tree_begin),
 			 cwin);
-	g_signal_connect(G_OBJECT(cwin->library_tree),
+	g_signal_connect(G_OBJECT(cwin->clibrary->library_tree),
 			 "drag-data-get",
 			 G_CALLBACK(dnd_library_tree_get),
 			 cwin);
@@ -324,8 +324,8 @@ static GtkWidget* create_library_tree(struct con_win *cwin)
 
 	/* Save references and configure dnd */
 
-	cwin->library_store = store;
-	cwin->library_tree = library_tree;
+	cwin->clibrary->library_store = store;
+	cwin->clibrary->library_tree = library_tree;
 
 	init_library_dnd(cwin);
 
@@ -472,8 +472,8 @@ create_library_view_options_combo(struct con_win *cwin)
 
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("Options of the library"));
 
-	cwin->combo_order = button;
-	cwin->combo_order_label = label_order;
+	cwin->clibrary->combo_order = button;
+	cwin->clibrary->combo_order_label = label_order;
 
 	return button;
 }
@@ -557,8 +557,8 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 			   TRUE,
 			   0);
 
-	cwin->browse_mode = vbox_lib;
-	cwin->search_entry = search_entry;
+	cwin->clibrary->browse_mode = vbox_lib;
+	cwin->clibrary->search_entry = search_entry;
 
 	g_signal_connect (cwin->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
 
@@ -853,16 +853,6 @@ static void pixbufs_free (struct pixbuf *pixbuf)
 {
 	if (pixbuf->pixbuf_app)
 		g_object_unref(pixbuf->pixbuf_app);
-	if (pixbuf->pixbuf_dir)
-		g_object_unref(pixbuf->pixbuf_dir);
-	if (pixbuf->pixbuf_artist)
-		g_object_unref(pixbuf->pixbuf_artist);
-	if (pixbuf->pixbuf_album)
-		g_object_unref(pixbuf->pixbuf_album);
-	if (pixbuf->pixbuf_track)
-		g_object_unref(pixbuf->pixbuf_track);
-	if (pixbuf->pixbuf_genre)
-		g_object_unref(pixbuf->pixbuf_genre);
 
 	g_slice_free(struct pixbuf, pixbuf);
 }
@@ -880,7 +870,7 @@ void gui_free (struct con_win *cwin)
 
 	/* Free memory */
 
-	g_object_unref(cwin->library_store);
+	g_object_unref(cwin->clibrary->library_store);
 
 	pixbufs_free(cwin->pixbuf);
 	cwin->pixbuf = NULL;

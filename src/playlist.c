@@ -481,7 +481,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	gchar *playlist = NULL, *n_playlist = NULL;
 	gint node_type;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -553,7 +553,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	gint node_type;
 	gboolean removed = FALSE;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -677,8 +677,8 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
 	gint node_type;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	cnt = (gtk_tree_selection_count_selected_rows(selection));
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);

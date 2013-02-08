@@ -104,7 +104,7 @@ add_child_node_folder(GtkTreeModel *model,
 	/* Insert the new folder after the last subdirectory by order */
 	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_PIXBUF, cwin->clibrary->pixbuf_dir,
 			   L_NODE_DATA, node_data,
 			   L_NODE_TYPE, NODE_FOLDER,
 			   L_LOCATION_ID, 0,
@@ -147,7 +147,7 @@ add_child_node_file(GtkTreeModel *model,
 	/* Insert the new file after the last file by order */
 	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_track,
+			   L_PIXBUF, cwin->clibrary->pixbuf_track,
 			   L_NODE_DATA, node_data,
 			   L_NODE_TYPE, NODE_BASENAME,
 			   L_LOCATION_ID, location_id,
@@ -223,7 +223,7 @@ add_child_node_by_tags (GtkTreeModel *model,
 		node_type = GPOINTER_TO_INT(g_slist_nth_data(cwin->cpref->library_tree_nodes, node_level));
 		switch (node_type) {
 			case NODE_TRACK:
-				node_pixbuf = cwin->pixbuf->pixbuf_track;
+				node_pixbuf = cwin->clibrary->pixbuf_track;
 				if (string_is_not_empty(track)) {
 					node_data = (gchar *)track;
 				}
@@ -233,11 +233,11 @@ add_child_node_by_tags (GtkTreeModel *model,
 				}
 				break;
 			case NODE_ARTIST:
-				node_pixbuf = cwin->pixbuf->pixbuf_artist;
+				node_pixbuf = cwin->clibrary->pixbuf_artist;
 				node_data = string_is_not_empty(artist) ? (gchar *)artist : _("Unknown Artist");
 				break;
 			case NODE_ALBUM:
-				node_pixbuf = cwin->pixbuf->pixbuf_album;
+				node_pixbuf = cwin->clibrary->pixbuf_album;
 				if (cwin->cpref->sort_by_year) {
 					node_data = g_strconcat ((string_is_not_empty(year) && (atoi(year) > 0)) ? year : _("Unknown"),
 					                          " - ",
@@ -250,7 +250,7 @@ add_child_node_by_tags (GtkTreeModel *model,
 				}
 				break;
 			case NODE_GENRE:
-				node_pixbuf = cwin->pixbuf->pixbuf_genre;
+				node_pixbuf = cwin->clibrary->pixbuf_genre;
 				node_data = string_is_not_empty(genre) ? (gchar *)genre : _("Unknown Genre");
 				break;
 			case NODE_CATEGORY:
@@ -422,7 +422,7 @@ static void get_location_ids(GtkTreePath *path,
 	gint location_id;
 	gint j = 0;
 
-	cwin->cstate->view_change = TRUE;
+	cwin->clibrary->view_change = TRUE;
 
 	gtk_tree_model_get_iter(model, &r_iter, path);
 
@@ -450,7 +450,7 @@ static void get_location_ids(GtkTreePath *path,
 		}
 	}
 
-	cwin->cstate->view_change = FALSE;
+	cwin->clibrary->view_change = FALSE;
 }
 
 /* Add all the tracks under the given path to the current playlist */
@@ -640,7 +640,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	enum node_type node_type;
 	GList *list = NULL;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	gtk_tree_model_get_iter(filter_model, &iter, path);
 	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
 
@@ -650,13 +650,13 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_ALBUM:
 	case NODE_GENRE:
 	case NODE_FOLDER:
-		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->library_tree),
+		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->clibrary->library_tree),
 						path))
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->library_tree),
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->clibrary->library_tree),
 						 path,
 						 TRUE);
 		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->library_tree),
+			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->clibrary->library_tree),
 						   path);
 		break;
 	case NODE_TRACK:
@@ -687,8 +687,8 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	gint n_select = 0;
 	GList *list = NULL;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
 		switch(event->button) {
@@ -782,11 +782,11 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 
-	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->cstate->dragging == TRUE) || (event->button!=1)){
+	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->clibrary->dragging == TRUE) || (event->button!=1)){
 		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
-		cwin->cstate->dragging = FALSE;
+		cwin->clibrary->dragging = FALSE;
 		return FALSE;
 	}
 
@@ -814,7 +814,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), widget, NULL);
 	}
 
-	if (!cwin->cstate->view_change) {
+	if (!cwin->clibrary->view_change) {
 		switch(event->button) {
 		case 3: {
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
@@ -823,7 +823,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 			break;
 		}
 		case 1: {
-			if (widget == cwin->combo_order){
+			if (widget == cwin->clibrary->combo_order){
 				gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
 						(GtkMenuPositionFunc) menu_position, widget, 
 						0, gtk_get_current_event_time());
@@ -847,7 +847,7 @@ gboolean dnd_library_tree_begin(GtkWidget *widget,
 				    GdkDragContext *context,
 				    struct con_win *cwin)
 {
-	cwin->cstate->dragging = TRUE;
+	cwin->clibrary->dragging = TRUE;
 	return FALSE;
 }
 
@@ -894,10 +894,10 @@ void dnd_library_tree_get(GtkWidget *widget,
 		rlist = g_string_new (NULL);
 
 		set_watch_cursor (cwin->mainwindow);
-		cwin->cstate->view_change = TRUE;
+		cwin->clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->library_tree));
+							cwin->clibrary->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 		l = list;
@@ -908,7 +908,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 			l = l->next;
 		}
 
-		cwin->cstate->view_change = FALSE;
+		cwin->clibrary->view_change = FALSE;
 		remove_watch_cursor (cwin->mainwindow);
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
@@ -920,10 +920,10 @@ void dnd_library_tree_get(GtkWidget *widget,
 		rlist = g_string_new (NULL);
 
 		set_watch_cursor (cwin->mainwindow);
-		cwin->cstate->view_change = TRUE;
+		cwin->clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->library_tree));
+							cwin->clibrary->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 		l = list;
@@ -933,7 +933,7 @@ void dnd_library_tree_get(GtkWidget *widget,
 			l = l->next;
 		}
 
-		cwin->cstate->view_change = FALSE;
+		cwin->clibrary->view_change = FALSE;
 		remove_watch_cursor (cwin->mainwindow);
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
@@ -1035,10 +1035,10 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	   If search entry doesn't match, check if _any_ ancestor has
 	   been marked as visible and if so, mark current node as visible too. */
 
-	if (cwin->cstate->filter_entry) {
+	if (cwin->clibrary->filter_entry) {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
-		if (pragha_strstr_lv(u_str, cwin->cstate->filter_entry, cwin)) {
+		if (pragha_strstr_lv(u_str, cwin->clibrary->filter_entry, cwin)) {
 			/* Set visible the match row */
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_MACH, TRUE,
@@ -1071,36 +1071,36 @@ gboolean do_refilter(struct con_win *cwin )
 	GtkTreeModel *filter_model;
 
 	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), NULL);
 
 	/* Set visibility of rows in the library store. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
+	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->clibrary->library_store),
 				filter_tree_func,
 				cwin);
 
 	/* Set the model again.*/
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
 	/* Expand all and then reduce properly. */
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
-	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->library_tree),
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(cwin->clibrary->library_tree),
 		filter_tree_expand_func,
 		filter_model);
 
-	cwin->cstate->timeout_id = 0;
+	cwin->clibrary->timeout_id = 0;
 
 	return FALSE;
 }
 
 void queue_refilter (struct con_win *cwin)
 {
-	if(cwin->cstate->timeout_id)
-		g_source_remove(cwin->cstate->timeout_id);
+	if(cwin->clibrary->timeout_id)
+		g_source_remove(cwin->clibrary->timeout_id);
 
-	cwin->cstate->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, cwin);
+	cwin->clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, cwin);
 }
 
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
@@ -1112,16 +1112,16 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	if (!pragha_preferences_get_instant_search(cwin->preferences))
 		return FALSE;
 
-	if (cwin->cstate->filter_entry != NULL) {
-		g_free (cwin->cstate->filter_entry);
-		cwin->cstate->filter_entry = NULL;
+	if (cwin->clibrary->filter_entry != NULL) {
+		g_free (cwin->clibrary->filter_entry);
+		cwin->clibrary->filter_entry = NULL;
 	}
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
-		cwin->cstate->filter_entry = g_utf8_strdown (text, -1);
+		cwin->clibrary->filter_entry = g_utf8_strdown (text, -1);
 
 		queue_refilter(cwin);
 	}
@@ -1145,14 +1145,14 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
-	if (cwin->cstate->filter_entry != NULL) {
-		g_free (cwin->cstate->filter_entry);
-		cwin->cstate->filter_entry = NULL;
+	if (cwin->clibrary->filter_entry != NULL) {
+		g_free (cwin->clibrary->filter_entry);
+		cwin->clibrary->filter_entry = NULL;
 	}
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
-		cwin->cstate->filter_entry = g_utf8_strdown (text, -1);
+		cwin->clibrary->filter_entry = g_utf8_strdown (text, -1);
 
 		do_refilter (cwin);
 	}
@@ -1175,17 +1175,17 @@ void clear_library_search(struct con_win *cwin)
 	gboolean valid;
 
 	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), NULL);
 
 	/* Set all nodes visibles. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->library_store),
+	gtk_tree_model_foreach(GTK_TREE_MODEL(cwin->clibrary->library_store),
 			       set_all_visible,
 			       cwin);
 
 	/* Set the model again. */
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
 	/* Expand the categories. */
@@ -1193,7 +1193,7 @@ void clear_library_search(struct con_win *cwin)
 	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
 	while (valid) {
 		path = gtk_tree_model_get_path(filter_model, &iter);
-		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->library_tree), path, FALSE);
+		gtk_tree_view_expand_row (GTK_TREE_VIEW(cwin->clibrary->library_tree), path, FALSE);
 		gtk_tree_path_free(path);
 
 		valid = gtk_tree_model_iter_next(filter_model, &iter);
@@ -1367,7 +1367,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 	GtkTreePath *path;
 	GList *mlist = NULL, *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -1415,7 +1415,7 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 	GtkTreePath *path;
 	GList *mlist = NULL, *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -1447,7 +1447,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	gint result;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -1497,7 +1497,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr;
 	gboolean unlink = FALSE;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -1560,7 +1560,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 
 	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -1695,7 +1695,7 @@ library_view_append_playlists(GtkTreeModel *model,
 		library_store_prepend_node(model,
 		                           &iter,
 		                           p_iter,
-		                           cwin->pixbuf->pixbuf_track,
+		                           cwin->clibrary->pixbuf_track,
 		                           playlist,
 		                           NODE_PLAYLIST,
 		                           0);
@@ -1729,7 +1729,7 @@ library_view_append_radios(GtkTreeModel *model,
 		library_store_prepend_node(model,
 		                           &iter,
 		                           p_iter,
-		                           cwin->pixbuf->pixbuf_track,
+		                           cwin->clibrary->pixbuf_track,
 		                           radio,
 		                           NODE_RADIO,
 		                           0);
@@ -1770,7 +1770,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 					      &iter,
 					      p_iter);
 			gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-					   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+					   L_PIXBUF, cwin->clibrary->pixbuf_dir,
 					   L_NODE_DATA, list->data,
 					   L_NODE_TYPE, NODE_FOLDER,
 					   L_LOCATION_ID, 0,
@@ -1905,18 +1905,18 @@ void init_library_view(struct con_win *cwin)
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
 
-	cwin->cstate->view_change = TRUE;
+	cwin->clibrary->view_change = TRUE;
 
 	set_watch_cursor (cwin->mainwindow);
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
 	g_object_ref(filter_model);
 
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), FALSE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), NULL);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->clibrary->search_entry), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->clibrary->library_tree), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), NULL);
 
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
 
@@ -1926,7 +1926,7 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_PIXBUF, cwin->clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Playlists"),
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
@@ -1939,7 +1939,7 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_PIXBUF, cwin->clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Radios"),
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
@@ -1950,28 +1950,28 @@ void init_library_view(struct con_win *cwin)
 
 	switch(cwin->cpref->cur_library_view) {
 		case FOLDERS:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Folders structure"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Folders structure"));
 			break;
 		case ARTIST:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Artist"));
 			break;
 		case ALBUM:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Album"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Album"));
 			break;
 		case GENRE:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre"));
 			break;
 		case ARTIST_ALBUM:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Artist / Album"));
 			break;
 		case GENRE_ARTIST:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Artist"));
 			break;
 		case GENRE_ALBUM:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Album"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Album"));
 			break;
 		case GENRE_ARTIST_ALBUM:
-			gtk_label_set_text (GTK_LABEL(cwin->combo_order_label), _("Genre / Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Genre / Artist / Album"));
 			break;
 		default:
 			break;
@@ -1983,7 +1983,7 @@ void init_library_view(struct con_win *cwin)
 			      &iter,
 			      NULL);
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, cwin->pixbuf->pixbuf_dir,
+			   L_PIXBUF, cwin->clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Library"),
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
@@ -1999,15 +1999,113 @@ void init_library_view(struct con_win *cwin)
 
 	refresh_tag_completion_entries(cwin);
 
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->search_entry), TRUE);
-	gtk_widget_set_sensitive(GTK_WIDGET(cwin->library_tree), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->clibrary->search_entry), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(cwin->clibrary->library_tree), TRUE);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->library_tree), filter_model);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(cwin->clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
-	g_signal_emit_by_name (G_OBJECT (cwin->search_entry), "activate", cwin);
+	g_signal_emit_by_name (G_OBJECT (cwin->clibrary->search_entry), "activate", cwin);
 
 	remove_watch_cursor (cwin->mainwindow);
 
-	cwin->cstate->view_change = FALSE;
+	cwin->clibrary->view_change = FALSE;
 }
+
+static void
+pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
+{
+	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
+
+	librarypane->pixbuf_artist =
+		gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/artist.png",
+		                                  16, 16,
+		                                  TRUE,
+		                                  NULL);
+	if (!librarypane->pixbuf_artist)
+		g_warning("Unable to load artist png");
+
+	librarypane->pixbuf_album =
+		gtk_icon_theme_load_icon(icontheme,
+		                         "media-optical",
+		                         16, 0,
+		                         NULL);
+	if (!librarypane->pixbuf_album)
+		librarypane->pixbuf_album =
+			gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/album.png",
+			                                  16, 16,
+			                                  TRUE, NULL);
+	if (!librarypane->pixbuf_album)
+		g_warning("Unable to load album png");
+
+	librarypane->pixbuf_track =
+		gtk_icon_theme_load_icon(icontheme,
+		                         "audio-x-generic",
+		                         16, 0,
+		                         NULL);
+	if (!librarypane->pixbuf_track)
+		librarypane->pixbuf_track =
+			gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR "/track.png",
+			                                  16, 16,
+			                                  TRUE, NULL);
+
+	if (!librarypane->pixbuf_track)
+		g_warning("Unable to load track png");
+
+	librarypane->pixbuf_genre =
+		gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/genre.png",
+			                                  16, 16,
+			                                  TRUE, NULL);
+	if (!librarypane->pixbuf_genre)
+		g_warning("Unable to load genre png");
+
+	librarypane->pixbuf_dir =
+		gtk_icon_theme_load_icon(icontheme,
+		                         "folder-music",
+		                         16, 0,
+		                         NULL);
+	if (!librarypane->pixbuf_dir)
+		librarypane->pixbuf_dir =
+			gtk_icon_theme_load_icon(icontheme,
+			                         "folder",
+			                         16, 0,
+			                         NULL);
+	if (!librarypane->pixbuf_dir)
+		g_warning("Unable to load folder png");
+}
+
+void
+pragha_library_pane_free(PraghaLibraryPane *librarypane)
+{
+	if (librarypane->pixbuf_dir)
+		g_object_unref(librarypane->pixbuf_dir);
+	if (librarypane->pixbuf_artist)
+		g_object_unref(librarypane->pixbuf_artist);
+	if (librarypane->pixbuf_album)
+		g_object_unref(librarypane->pixbuf_album);
+	if (librarypane->pixbuf_track)
+		g_object_unref(librarypane->pixbuf_track);
+	if (librarypane->pixbuf_genre)
+		g_object_unref(librarypane->pixbuf_genre);
+
+	g_slice_free(PraghaLibraryPane, librarypane);
+}
+
+PraghaLibraryPane *
+pragha_library_pane_new(struct con_win *cwin)
+{
+	PraghaLibraryPane *clibrary;
+
+	clibrary = g_slice_new0(PraghaLibraryPane);
+
+	clibrary->filter_entry = NULL;
+	clibrary->dragging = FALSE;
+	clibrary->view_change = TRUE;
+	clibrary->timeout_id = 0;
+
+	pragha_library_pane_init_pixbufs(clibrary);
+
+	return clibrary;
+}
+
+
