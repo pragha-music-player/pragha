@@ -122,16 +122,22 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			                             library_dir);
 		free_str_list(library_dir);
 
-		if (pragha_preferences_get_library_style(cwin->clibrary->preferences) == FOLDERS) {
-			test_change = cwin->cpref->fuse_folders;
-			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w));
-			if (cwin->cpref->fuse_folders != test_change)
+		if (pragha_preferences_get_library_style(cwin->preferences) == FOLDERS) {
+			test_change = pragha_preferences_get_fuse_folders(cwin->preferences);
+
+			pragha_preferences_set_fuse_folders(cwin->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
+
+			if (pragha_preferences_get_fuse_folders(cwin->clibrary->preferences) != test_change)
 				library_pane_view_reload(cwin);
 		}
 		else {
-			test_change = cwin->cpref->sort_by_year;
-			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w));
-			if (cwin->cpref->sort_by_year != test_change)
+			test_change = pragha_preferences_get_sort_by_year(cwin->preferences);
+
+			pragha_preferences_set_sort_by_year(cwin->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)));
+
+			if (pragha_preferences_get_sort_by_year(cwin->preferences) != test_change)
 				library_pane_view_reload(cwin);
 		}
 
@@ -684,11 +690,11 @@ static void update_preferences(struct con_win *cwin)
 		free_str_list(library_dir);
 	}
 
-	if (cwin->cpref->fuse_folders)
+	if (pragha_preferences_get_fuse_folders(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->fuse_folders_w),
 					     TRUE);
-	if (cwin->cpref->sort_by_year)
+	if (pragha_preferences_get_sort_by_year(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->sort_by_year_w),
 					     TRUE);
@@ -834,22 +840,6 @@ void save_preferences(struct con_win *cwin)
 			       cwin->cpref->actions_in_osd);
 
 	current_playlist_save_preferences(cwin->cplaylist);
-
-	/* Library Options */
-
-	/* Save fuse folders option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_FUSE_FOLDERS,
-			       cwin->cpref->fuse_folders);
-
-	/* Save sort by year option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_SORT_BY_YEAR,
-			       cwin->cpref->sort_by_year);
 
 	/* Audio Options */
 

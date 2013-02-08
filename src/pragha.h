@@ -521,8 +521,6 @@ struct con_pref {
 	gboolean remember_window_state;
 	gboolean status_bar;
 	gboolean controls_below;
-	gboolean fuse_folders;
-	gboolean sort_by_year;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
