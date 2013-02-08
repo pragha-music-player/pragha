@@ -1216,7 +1216,7 @@ void folders_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_BASENAME));
 
-	cwin->cpref->cur_library_view = FOLDERS;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, FOLDERS);
 
 	init_library_view(cwin);
 }
@@ -1233,7 +1233,7 @@ void artist_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = ARTIST;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST);
 
 	init_library_view(cwin);
 }
@@ -1250,7 +1250,7 @@ void album_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = ALBUM;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ALBUM);
 
 	init_library_view(cwin);
 }
@@ -1267,7 +1267,7 @@ void genre_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = GENRE;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE);
 
 	init_library_view(cwin);
 }
@@ -1287,7 +1287,7 @@ void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = ARTIST_ALBUM;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST_ALBUM);
 
 	init_library_view(cwin);
 }
@@ -1307,7 +1307,7 @@ void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = GENRE_ALBUM;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ALBUM);
 
 	init_library_view(cwin);
 }
@@ -1327,7 +1327,7 @@ void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = GENRE_ARTIST;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST);
 
 	init_library_view(cwin);
 }
@@ -1350,7 +1350,7 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 		g_slist_append(cwin->cpref->library_tree_nodes,
 			       GINT_TO_POINTER(NODE_TRACK));
 
-	cwin->cpref->cur_library_view = GENRE_ARTIST_ALBUM;
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST_ALBUM);
 
 	init_library_view(cwin);
 }
@@ -1821,7 +1821,7 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	gchar *order_str = NULL, *sql = NULL;
 
 	/* Get order needed to sqlite query. */
-	switch(cwin->cpref->cur_library_view) {
+	switch(pragha_preferences_get_library_style(cwin->clibrary->preferences)) {
 		case FOLDERS:
 			break;
 		case ARTIST:
@@ -1948,7 +1948,7 @@ void init_library_view(struct con_win *cwin)
 
 	/* Set order button label */
 
-	switch(cwin->cpref->cur_library_view) {
+	switch(pragha_preferences_get_library_style(cwin->clibrary->preferences)) {
 		case FOLDERS:
 			gtk_label_set_text (GTK_LABEL(cwin->clibrary->combo_order_label), _("Folders structure"));
 			break;
@@ -1988,7 +1988,7 @@ void init_library_view(struct con_win *cwin)
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   -1);
 
-	if (cwin->cpref->cur_library_view == FOLDERS) {
+	if (pragha_preferences_get_library_style(cwin->clibrary->preferences) == FOLDERS) {
 		library_view_complete_folder_view(model, &iter, cwin);
 	}
 	else {
@@ -2092,6 +2092,12 @@ pragha_library_pane_free(PraghaLibraryPane *librarypane)
 	g_object_unref(librarypane->preferences);
 
 	g_slice_free(PraghaLibraryPane, librarypane);
+}
+
+void
+pragha_library_pane_init_preferences(PraghaLibraryPane *librarypane)
+{
+
 }
 
 PraghaLibraryPane *

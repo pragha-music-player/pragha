@@ -122,7 +122,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			                             library_dir);
 		free_str_list(library_dir);
 
-		if (cwin->cpref->cur_library_view == FOLDERS) {
+		if (pragha_preferences_get_library_style(cwin->clibrary->preferences) == FOLDERS) {
 			test_change = cwin->cpref->fuse_folders;
 			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w));
 			if (cwin->cpref->fuse_folders != test_change)
@@ -881,13 +881,6 @@ void save_preferences(struct con_win *cwin)
 					   cnt);
 		g_free(nodes);
 	}
-
-	/* Save the library view order */
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_LIBRARY_VIEW_ORDER,
-			       cwin->cpref->cur_library_view);
 
 	/* Save fuse folders option */
 

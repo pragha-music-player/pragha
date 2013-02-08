@@ -28,6 +28,8 @@ struct _PraghaPreferencesPrivate
    /* Search preferences. */
    gboolean   instant_search;
    gboolean   approximate_search;
+   /* LibraryPane preferences */
+   gint       library_style;
    /* Playlist preferences. */
    gboolean   shuffle;
    gboolean   repeat;
@@ -50,6 +52,7 @@ enum
    PROP_0,
    PROP_INSTANT_SEARCH,
    PROP_APPROXIMATE_SEARCH,
+   PROP_LIBRARY_STYLE,
    PROP_SHUFFLE,
    PROP_REPEAT,
    PROP_USE_HINT,
@@ -377,6 +380,33 @@ pragha_preferences_set_approximate_search (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_library_style:
+ *
+ */
+gint
+pragha_preferences_get_library_style (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), 0);
+
+   return preferences->priv->library_style;
+}
+
+/**
+ * pragha_preferences_set_library_style:
+ *
+ */
+void
+pragha_preferences_set_library_style (PraghaPreferences *preferences,
+                                      gint library_style)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->library_style = library_style;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LIBRARY_STYLE]);
+}
+
+/**
  * pragha_preferences_get_shuffle:
  *
  */
@@ -692,11 +722,15 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_GENERAL,
                           KEY_INSTANT_SEARCH,
                           priv->instant_search);
-
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_GENERAL,
                           KEY_APPROXIMATE_SEARCH,
                           priv->approximate_search);
+
+   g_key_file_set_integer(priv->rc_keyfile,
+                          GROUP_LIBRARY,
+                          KEY_LIBRARY_VIEW_ORDER,
+			  priv->library_style);
 
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_PLAYLIST,
@@ -778,6 +812,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_APPROXIMATE_SEARCH:
       g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
       break;
+   case PROP_LIBRARY_STYLE:
+      g_value_set_int (value, pragha_preferences_get_library_style(preferences));
+      break;
    case PROP_SHUFFLE:
       g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
       break;
@@ -830,6 +867,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_APPROXIMATE_SEARCH:
       pragha_preferences_set_approximate_search(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_LIBRARY_STYLE:
+      pragha_preferences_set_library_style(preferences, g_value_get_int(value));
       break;
    case PROP_SHUFFLE:
       pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
@@ -903,6 +943,20 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            FALSE,
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
+
+   /**
+    * PraghaPreferences:library_style:
+    *
+    */
+   gParamSpecs[PROP_LIBRARY_STYLE] =
+      g_param_spec_int ("library-style",
+                        "LibraryStyle",
+                        "Library Style Preferences",
+                        0,
+                        LAST_LIBRARY_STYLE,
+                        FOLDERS,
+                        G_PARAM_READWRITE |
+                        G_PARAM_STATIC_STRINGS);
 
    /**
     * PraghaPreferences:shuffle:
@@ -1046,6 +1100,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
    gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
    gboolean add_recursively, timer_remaining_mode;
    gchar *audio_sink, *audio_device, *audio_cd_device;
+   gint library_style;
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
    GError *error = NULL;
@@ -1160,6 +1215,17 @@ pragha_preferences_init (PraghaPreferences *preferences)
       pragha_preferences_set_use_hint(preferences, use_hint);
    }
 
+   library_style = g_key_file_get_integer(priv->rc_keyfile,
+                                          GROUP_LIBRARY,
+                                          KEY_LIBRARY_VIEW_ORDER,
+                                          &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_library_style(preferences, library_style);
+   }
    restore_playlist = g_key_file_get_boolean(priv->rc_keyfile,
                                              GROUP_PLAYLIST,
                                              KEY_SAVE_PLAYLIST,

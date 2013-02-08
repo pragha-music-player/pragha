@@ -314,17 +314,6 @@ gint init_config(struct con_win *cwin)
 			nodes_f = TRUE;
 		}
 
-		cwin->cpref->cur_library_view =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-					       GROUP_LIBRARY,
-					       KEY_LIBRARY_VIEW_ORDER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			cur_lib_view_f = TRUE;
-		}
-
 		cwin->cpref->fuse_folders =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_LIBRARY,
@@ -579,8 +568,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->fuse_folders = FALSE;
 	if (all_f || sort_by_year_f)
 		cwin->cpref->sort_by_year = FALSE;
-	if (all_f || cur_lib_view_f)
-		cwin->cpref->cur_library_view = FOLDERS;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || show_osd_f)

@@ -129,6 +129,12 @@ gboolean
 pragha_preferences_get_instant_search (PraghaPreferences *preferences);
 
 void
+pragha_preferences_set_library_style (PraghaPreferences *preferences,
+                                      gint library_style);
+gint
+pragha_preferences_get_library_style (PraghaPreferences *preferences);
+
+void
 pragha_preferences_set_shuffle (PraghaPreferences *preferences,
                                 gboolean shuffle);
 gboolean
