@@ -1818,46 +1818,45 @@ library_view_complete_tags_view(GtkTreeModel *model,
                                 struct con_win *cwin)
 {
 	PraghaPreparedStatement *statement;
-	gchar *order_str = NULL, *sql = NULL;
+	gchar *sql;
+	const gchar *order_str;
 
 	/* Get order needed to sqlite query. */
 	switch(cwin->cpref->cur_library_view) {
 		case FOLDERS:
 			break;
 		case ARTIST:
-			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_str = "ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC";
 			break;
 		case ALBUM:
 			if (cwin->cpref->sort_by_year)
-				order_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+				order_str = "YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC";
 			else
-				order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+				order_str = "ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC";
 			break;
 		case GENRE:
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_str = "GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC";
 			break;
 		case ARTIST_ALBUM:
 			if (cwin->cpref->sort_by_year)
-				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_str = "ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			else
-				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_str = "ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			break;
 		case GENRE_ARTIST:
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_str = "GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC";
 			break;
 		case GENRE_ALBUM:
 			if (cwin->cpref->sort_by_year)
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_str = "GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			else
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_str = "GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			break;
 		case GENRE_ARTIST_ALBUM:
 			if (cwin->cpref->sort_by_year)
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_str = "GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			else
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-			break;
-		default:
+				order_str = "GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC";
 			break;
 	}
 
@@ -1892,7 +1891,6 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	}
 	pragha_prepared_statement_free (statement);
 
-	g_free(order_str);
 	g_free(sql);
 }
 
