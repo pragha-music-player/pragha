@@ -35,12 +35,6 @@ typedef struct _PraghaDatabase PraghaDatabase;
 typedef struct _PraghaDatabaseClass PraghaDatabaseClass;
 typedef struct _PraghaDatabasePrivate PraghaDatabasePrivate;
 
-typedef struct {
-	gchar **resultp;
-	gint no_rows;
-	gint no_columns;
-} PraghaDbResponse;
-
 struct _PraghaDatabase
 {
 	GObject parent;
@@ -58,11 +52,6 @@ struct _PraghaDatabaseClass
 gboolean
 pragha_database_exec_query (PraghaDatabase *database,
                             const gchar *query);
-
-gboolean
-pragha_database_exec_sqlite_query(PraghaDatabase *database,
-                                  gchar *query,
-                                  PraghaDbResponse *result);
 
 PraghaPreparedStatement *
 pragha_database_create_statement (PraghaDatabase *database, const gchar *sql);

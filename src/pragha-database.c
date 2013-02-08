@@ -62,53 +62,6 @@ pragha_database_exec_query (PraghaDatabase *database,
 	return ret;
 }
 
-gboolean
-pragha_database_exec_sqlite_query(PraghaDatabase *database,
-                                  gchar *query,
-                                  PraghaDbResponse *result)
-{
-	gchar *err = NULL;
-	gboolean ret = FALSE;
-
-	g_return_val_if_fail(PRAGHA_IS_DATABASE(database), FALSE);
-
-	if (!query)
-		return FALSE;
-
-	CDEBUG(DBG_INFO, "%s", query);
-
-	/* Caller doesn't expect any result */
-
-	if (!result) {
-		ret = pragha_database_exec_query(database, query);
-	}
-
-	/* Caller expects result */
-
-	else {
-		sqlite3_get_table(database->priv->sqlitedb, query,
-				  &result->resultp,
-				  &result->no_rows,
-				  &result->no_columns,
-				  &err);
-		if (err) {
-			g_critical("SQL Err : %s",  err);
-			g_critical("query   : %s", query);
-			ret = FALSE;
-		}
-		else {
-			ret = TRUE;
-		}
-		sqlite3_free(err);
-	}
-
-	/* Free the query here, don't free in the callsite ! */
-
-	g_free(query);
-
-	return ret;
-}
-
 PraghaPreparedStatement *
 pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
 {
