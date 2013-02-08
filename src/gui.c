@@ -508,7 +508,7 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	/*
 	 * Rework to olny update Playlist and radio tree!!!.
 	 **/
-	init_library_view(cwin);
+	library_pane_view_reload(cwin);
 	update_menu_playlist_changes(cwin);
 }
 
