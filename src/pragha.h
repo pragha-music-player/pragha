@@ -711,10 +711,6 @@ extern const gchar *mime_dual[];
 
 /* Convenience macros */
 
-#define for_each_result_row(result, i)					\
-	for (i=result.no_columns; i<((result.no_rows+1)*(result.no_columns)); \
-	     i+=result.no_columns)
-
 #define string_is_empty(s) (!(s) || !(s)[0])
 #define string_is_not_empty(s) (s && (s)[0])
 
