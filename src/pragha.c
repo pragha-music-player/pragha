@@ -32,6 +32,7 @@ static void common_cleanup(struct con_win *cwin)
 	pragha_playback_stop(cwin);
 
 	cplaylist_free(cwin->cplaylist);
+	pragha_library_pane_free(cwin->clibrary);
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif
@@ -166,6 +167,8 @@ gint main(gint argc, gchar *argv[])
 		g_critical("Unable to initialize MPRIS");
 		return -1;
 	}
+
+	cwin->clibrary = pragha_library_pane_new(cwin);
 
 	/* Init the gui after bancked to sink volume. */
 

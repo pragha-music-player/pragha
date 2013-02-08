@@ -644,13 +644,7 @@ gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
 
-	cwin->cstate->filter_entry = NULL;
-
-	cwin->cstate->dragging = FALSE;
-
 	cwin->cstate->curr_mobj = NULL;
-
-	cwin->cstate->view_change = TRUE;
 
 	cwin->osd_notify = NULL;
 
@@ -778,73 +772,9 @@ void init_menu_actions(struct con_win *cwin)
 
 void init_pixbufs(struct con_win *cwin)
 {
-	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
-
 	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
 	if (!cwin->pixbuf->pixbuf_app)
 		g_warning("Unable to load pragha png");
-
-	cwin->pixbuf->pixbuf_artist = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-									"/artist.png",
-									16,
-									16,
-									TRUE,
-									NULL);
-	if (!cwin->pixbuf->pixbuf_artist)
-		g_warning("Unable to load artist png");
-
-	cwin->pixbuf->pixbuf_album = gtk_icon_theme_load_icon(icontheme,
-							      "media-optical",
-							      16,
-							      0,
-							      NULL);
-	if (!cwin->pixbuf->pixbuf_album)
-		cwin->pixbuf->pixbuf_album = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-										"/album.png",
-										16,
-										16,
-										TRUE,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_album)
-		g_warning("Unable to load album png");
-
-	cwin->pixbuf->pixbuf_track = gtk_icon_theme_load_icon(icontheme,
-							     "audio-x-generic",
-							     16,
-							     0,
-							     NULL);
-	if (!cwin->pixbuf->pixbuf_track)
-		cwin->pixbuf->pixbuf_track = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-										"/track.png",
-										16,
-										16,
-										TRUE,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_track)
-		g_warning("Unable to load track png");
-
-	cwin->pixbuf->pixbuf_genre = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-								       "/genre.png",
-								       16,
-								       16,
-								       TRUE,
-								       NULL);
-	if (!cwin->pixbuf->pixbuf_genre)
-		g_warning("Unable to load genre png");
-
-	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-							    "folder-music",
-							    16,
-							    0,
-							    NULL);
-	if (!cwin->pixbuf->pixbuf_dir)
-		cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-										"folder",
-										16,
-										0,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_dir)
-		g_warning("Unable to load folder png");
 }
 
 #if HAVE_LIBXFCE4UI
@@ -1029,7 +959,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		#endif
 	}
 
-	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->browse_mode, "visible", binding_flags);
+	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->clibrary->browse_mode, "visible", binding_flags);
 
 	init_menu_actions(cwin);
 	update_menu_playlist_changes(cwin);

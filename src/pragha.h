@@ -450,11 +450,6 @@ enum track_source {
 
 struct pixbuf {
 	GdkPixbuf *pixbuf_app;
-	GdkPixbuf *pixbuf_artist;
-	GdkPixbuf *pixbuf_album;
-	GdkPixbuf *pixbuf_track;
-	GdkPixbuf *pixbuf_genre;
-	GdkPixbuf *pixbuf_dir;
 };
 
 typedef struct {
@@ -551,13 +546,9 @@ struct con_pref {
  */
 
 struct con_state {
-	gboolean dragging;
 	gboolean unique_instance;
-	gboolean view_change;
 	gboolean first_run;
-	guint timeout_id;
 	gchar *last_folder;
-	gchar *filter_entry;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
@@ -629,11 +620,30 @@ typedef struct {
 	PraghaDatabase *cdbase;
 } PraghaPlaylist;
 
+typedef struct {
+	GtkTreeStore *library_store;
+	GtkWidget *library_tree;
+	GtkWidget *search_entry;
+	GtkWidget *browse_mode;
+	GtkWidget *combo_order;
+	GtkWidget *combo_order_label;
+	gboolean dragging;
+	gboolean view_change;
+	gchar *filter_entry;
+	guint timeout_id;
+	GdkPixbuf *pixbuf_artist;
+	GdkPixbuf *pixbuf_album;
+	GdkPixbuf *pixbuf_track;
+	GdkPixbuf *pixbuf_genre;
+	GdkPixbuf *pixbuf_dir;
+} PraghaLibraryPane;
+
 struct con_win {
 	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	PraghaPlaylist *cplaylist;
+	PraghaLibraryPane *clibrary;
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
 	PraghaScanner  *scanner;
@@ -656,20 +666,13 @@ struct con_win {
 	GtkToolItem *unfull_button;
 	GtkWidget *vol_button;
 	PraghaStatusbar *statusbar;
-	GtkWidget *search_entry;
-	GtkWidget *browse_mode;
 	GtkWidget *paned;
-	GtkWidget *toggle_lib;
-	GtkWidget *combo_order;
-	GtkWidget *combo_order_label;
 	GtkWidget *track_length_label;
 	GtkWidget *track_time_label;
 	GtkWidget *now_playing_label;
 	#ifdef HAVE_LIBCLASTFM
 	GtkWidget *ntag_lastfm_button;
 	#endif
-	GtkWidget *library_tree;
-	GtkTreeStore *library_store;
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
@@ -737,7 +740,6 @@ void add_audio_cd(struct con_win *cwin);
 void quit_action(GtkAction *action, struct con_win *cwin);
 void expand_all_action(GtkAction *action, struct con_win *cwin);
 void collapse_all_action(GtkAction *action, struct con_win *cwin);
-void search_library_action(GtkAction *action, struct con_win *cwin);
 void search_playlist_action(GtkAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
 void fullscreen_action (GtkAction *action, struct con_win *cwin);
@@ -854,6 +856,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
 void init_library_view(struct con_win *cwin);
+void pragha_library_pane_free(PraghaLibraryPane *librarypane);
+PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
 /* DB (Sqlite) Functions */
 

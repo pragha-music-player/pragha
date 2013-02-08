@@ -715,21 +715,14 @@ void quit_action(GtkAction *action, struct con_win *cwin)
 
 void expand_all_action(GtkAction *action, struct con_win *cwin)
 {
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 }
 
 /* Handler for 'Collapse All' option in the Edit menu */
 
 void collapse_all_action(GtkAction *action, struct con_win *cwin)
 {
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
-}
-
-/* Handler for 'Search Library' option in the Edit menu */
-
-void search_library_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_widget_grab_focus(GTK_WIDGET(cwin->search_entry));
+	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
