@@ -385,7 +385,7 @@ append_uri_string_list(GtkTreeIter *r_iter,
 		case NODE_TRACK:
 		case NODE_BASENAME:
 			gtk_tree_model_get(model, r_iter, L_LOCATION_ID, &location_id, -1);
-			filename = pragha_database_get_filename_from_location_id(cwin->cdbase, location_id);
+			filename = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, location_id);
 			break;
 		case NODE_PLAYLIST:
 		case NODE_RADIO:
@@ -566,7 +566,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	for(i = 0; i < loc_arr->len; i++) {
 		location_id = g_array_index(loc_arr, gint, i);
 		if (location_id) {
-			filename = pragha_database_get_filename_from_location_id(cwin->cdbase, location_id);
+			filename = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, location_id);
 			if (filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
 				file = g_file_new_for_path(filename);
 
@@ -620,7 +620,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				g_object_unref(G_OBJECT(file));
 			}
 			if (deleted) {
-				pragha_database_forget_location(cwin->cdbase, location_id);
+				pragha_database_forget_location(cwin->clibrary->cdbase, location_id);
 			}
 		}
 	}
@@ -663,7 +663,7 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_BASENAME:
 	case NODE_PLAYLIST:
 	case NODE_RADIO:
-		list = append_library_row_to_mobj_list(cwin->cdbase, path, filter_model, list);
+		list = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, filter_model, list);
 		pragha_playlist_append_mobj_list(cwin->cplaylist,
 						 list);
 		g_list_free(list);
@@ -708,7 +708,7 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 				gtk_tree_selection_select_path(selection, path);
 			}
 
-			list = append_library_row_to_mobj_list (cwin->cdbase, path, model, list);
+			list = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, list);
 
 			if(list)
 				pragha_playlist_append_mobj_list(cwin->cplaylist, list);
@@ -1109,7 +1109,7 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	gchar *text = NULL;
 	gboolean has_text;
 	
-	if (!pragha_preferences_get_instant_search(cwin->preferences))
+	if (!pragha_preferences_get_instant_search(cwin->clibrary->preferences))
 		return FALSE;
 
 	if (cwin->clibrary->filter_entry != NULL) {
@@ -1377,7 +1377,7 @@ library_tree_replace_playlist (struct con_win *cwin)
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			mlist = append_library_row_to_mobj_list (cwin->cdbase, path, model, mlist);
+			mlist = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1423,7 +1423,7 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 
 		for (i=list; i != NULL; i = i->next) {
 			path = i->data;
-			mlist = append_library_row_to_mobj_list(cwin->cdbase, path, model, mlist);
+			mlist = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, model, mlist);
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
@@ -1464,20 +1464,20 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 		if( result == GTK_RESPONSE_YES ){
 			/* Delete all the rows */
 
-			db_begin_transaction(cwin->cdbase);
+			db_begin_transaction(cwin->clibrary->cdbase);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				delete_row_from_db(cwin->cdbase, path, model);
+				delete_row_from_db(cwin->clibrary->cdbase, path, model);
 
 				/* Have to give control to GTK periodically ... */
 				if (pragha_process_gtk_events ())
 					return;
 			}
 
-			db_commit_transaction(cwin->cdbase);
+			db_commit_transaction(cwin->clibrary->cdbase);
 
-			flush_stale_entries_db(cwin->cdbase);
+			flush_stale_entries_db(cwin->clibrary->cdbase);
 			init_library_view(cwin);
 		}
 
@@ -1518,7 +1518,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		if(result == GTK_RESPONSE_YES){
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
-			db_begin_transaction(cwin->cdbase);
+			db_begin_transaction(cwin->clibrary->cdbase);
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
 				get_location_ids(path, loc_arr, model, cwin);
@@ -1528,11 +1528,11 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				if (pragha_process_gtk_events ())
 					return;
 			}
-			db_commit_transaction(cwin->cdbase);
+			db_commit_transaction(cwin->clibrary->cdbase);
 
 			g_array_free(loc_arr, TRUE);
 
-			flush_stale_entries_db(cwin->cdbase);
+			flush_stale_entries_db(cwin->clibrary->cdbase);
 			init_library_view(cwin);
 		}
 
@@ -1578,7 +1578,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get(model, &iter,
 					   L_LOCATION_ID, &location_id, -1);
 
-			omobj = new_musicobject_from_db(cwin->cdbase, location_id);
+			omobj = new_musicobject_from_db(cwin->clibrary->cdbase, location_id);
 		}
 		else {
 			omobj = pragha_musicobject_new();
@@ -1645,7 +1645,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	}
 
 	/* Updata the db changes */
-	pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
+	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
 	init_library_view(cwin);
 
 	/* Get a array of files and update it */
@@ -1653,7 +1653,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	for(ielem = 0; ielem < loc_arr->len; ielem++) {
 		elem = g_array_index(loc_arr, gint, ielem);
 		if (elem) {
-			file = pragha_database_get_filename_from_location_id(cwin->cdbase, elem);
+			file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
 			if(file)
 				g_ptr_array_add(file_arr, file);
 		}
@@ -1686,7 +1686,7 @@ library_view_append_playlists(GtkTreeModel *model,
 	GtkTreeIter iter;
 
 	sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE DESC";
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	statement = pragha_database_create_statement (cwin->clibrary->cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
 	while (pragha_prepared_statement_step (statement)) {
@@ -1722,7 +1722,7 @@ library_view_append_radios(GtkTreeModel *model,
 	GtkTreeIter iter;
 
 	sql = "SELECT name FROM RADIO ORDER BY name COLLATE NOCASE DESC";
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	statement = pragha_database_create_statement (cwin->clibrary->cdbase, sql);
 	while (pragha_prepared_statement_step (statement)) {
 		radio = pragha_prepared_statement_get_string(statement, 0);
 
@@ -1759,7 +1759,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 	GSList *list = NULL, *library_dir = NULL;
 
 	library_dir =
-		pragha_preferences_get_filename_list(cwin->preferences,
+		pragha_preferences_get_filename_list(cwin->clibrary->preferences,
 			                             GROUP_LIBRARY,
 			                             KEY_LIBRARY_DIR);
 
@@ -1784,7 +1784,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 		}
 
 		sql = "SELECT name, id FROM LOCATION WHERE name LIKE ? ORDER BY name DESC";
-		statement = pragha_database_create_statement (cwin->cdbase, sql);
+		statement = pragha_database_create_statement (cwin->clibrary->cdbase, sql);
 		mask = g_strconcat (list->data, "%", NULL);
 		pragha_prepared_statement_bind_string (statement, 1, mask);
 		while (pragha_prepared_statement_step (statement)) {
@@ -1867,7 +1867,7 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
 	                        "ORDER BY %s;", order_str);
 
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
+	statement = pragha_database_create_statement (cwin->clibrary->cdbase, sql);
 	while (pragha_prepared_statement_step (statement)) {
 		add_child_node_by_tags(model,
 		                       p_iter,
@@ -2088,6 +2088,9 @@ pragha_library_pane_free(PraghaLibraryPane *librarypane)
 	if (librarypane->pixbuf_genre)
 		g_object_unref(librarypane->pixbuf_genre);
 
+	g_object_unref(librarypane->cdbase);
+	g_object_unref(librarypane->preferences);
+
 	g_slice_free(PraghaLibraryPane, librarypane);
 }
 
@@ -2097,6 +2100,9 @@ pragha_library_pane_new(struct con_win *cwin)
 	PraghaLibraryPane *clibrary;
 
 	clibrary = g_slice_new0(PraghaLibraryPane);
+
+	clibrary->cdbase = pragha_database_get();
+	clibrary->preferences = pragha_preferences_get();
 
 	clibrary->filter_entry = NULL;
 	clibrary->dragging = FALSE;

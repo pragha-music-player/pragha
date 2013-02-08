@@ -621,6 +621,8 @@ typedef struct {
 } PraghaPlaylist;
 
 typedef struct {
+	PraghaDatabase *cdbase;
+	PraghaPreferences *preferences;
 	GtkTreeStore *library_store;
 	GtkWidget *library_tree;
 	GtkWidget *search_entry;
