@@ -1110,7 +1110,7 @@ pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint change
 	/* Save new tags in db */
 	if(loc_arr->len) {
 		pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-		library_pane_view_reload(cwin);
+		library_pane_view_reload(cwin->clibrary);
 	}
 
 	/* Save new tags in files */

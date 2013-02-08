@@ -508,7 +508,7 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	/*
 	 * Rework to olny update Playlist and radio tree!!!.
 	 **/
-	library_pane_view_reload(cwin);
+	library_pane_view_reload(cwin->clibrary);
 	update_menu_playlist_changes(cwin);
 }
 
@@ -523,9 +523,9 @@ static GtkWidget* create_browse_mode_view(struct con_win *cwin)
 	search_entry = pragha_search_entry_new(cwin);
 
 	g_signal_connect (G_OBJECT(search_entry), "changed",
-			 G_CALLBACK(simple_library_search_keyrelease_handler), cwin);
+			 G_CALLBACK(simple_library_search_keyrelease_handler), cwin->clibrary);
 	g_signal_connect (G_OBJECT(search_entry), "activate",
-			 G_CALLBACK(simple_library_search_activate_handler), cwin);
+			 G_CALLBACK(simple_library_search_activate_handler), cwin->clibrary);
 
 	order_selector = create_sidebar_header (cwin);
 

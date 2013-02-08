@@ -249,10 +249,10 @@ g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance)
  * considering the aproximate_search option. */
 
 gchar *
-pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin)
+pragha_strstr_lv(gchar *haystack, gchar *needle, PraghaPreferences *preferences)
 {
 	gboolean aproximate_search;
-	aproximate_search = pragha_preferences_get_approximate_search(cwin->preferences);
+	aproximate_search = pragha_preferences_get_approximate_search(preferences);
 
 	return g_strstr_lv(haystack, needle,
 			   aproximate_search ? 1 : 0);
