@@ -70,7 +70,7 @@ static void init_gui_state(struct con_win *cwin)
 {
 	init_tag_completion(cwin);
 
-	init_library_view(cwin);
+	init_library_view(cwin->clibrary);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
@@ -92,7 +92,7 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	init_library_view(cwin);
+	init_library_view(cwin->clibrary);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;

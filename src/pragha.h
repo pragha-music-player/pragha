@@ -837,9 +837,9 @@ void dnd_library_tree_get(GtkWidget *widget,
 			  guint time,
 			  struct con_win *cwin);
 void simple_library_search_keyrelease(struct con_win *cwin);
-gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, struct con_win *cwin);
-gboolean simple_library_search_activate_handler(GtkEntry *entry, struct con_win *cwin);
-void clear_library_search(struct con_win *cwin);
+gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
+gboolean simple_library_search_activate_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
+void clear_library_search(PraghaLibraryPane *clibrary);
 void folders_library_tree(GtkAction *action, struct con_win *cwin);
 void artist_library_tree(GtkAction *action, struct con_win *cwin);
 void album_library_tree(GtkAction *action, struct con_win *cwin);
@@ -855,8 +855,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
 void
-library_pane_view_reload(struct con_win *cwin);
-void init_library_view(struct con_win *cwin);
+library_pane_view_reload(PraghaLibraryPane *clibrary);
+void init_library_view(PraghaLibraryPane *clibrary);
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
@@ -1107,7 +1107,7 @@ gchar *e2_utf8_ndup (const gchar *str, glong num);
 gsize levenshtein_strcmp(const gchar * s, const gchar * t);
 gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
 gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
-gchar *pragha_strstr_lv(gchar *haystack, gchar *needle, struct con_win *cwin);
+gchar *pragha_strstr_lv(gchar *haystack, gchar *needle, PraghaPreferences *preferences);
 #if !GLIB_CHECK_VERSION(2,32,0)
 gboolean nm_is_online ();
 #endif
