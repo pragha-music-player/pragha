@@ -135,6 +135,18 @@ gint
 pragha_preferences_get_library_style (PraghaPreferences *preferences);
 
 void
+pragha_preferences_set_sort_by_year (PraghaPreferences *preferences,
+                                     gboolean sort_by_year);
+gboolean
+pragha_preferences_get_sort_by_year (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_fuse_folders (PraghaPreferences *preferences,
+                                     gboolean fuse_folders);
+gboolean
+pragha_preferences_get_fuse_folders (PraghaPreferences *preferences);
+
+void
 pragha_preferences_set_shuffle (PraghaPreferences *preferences,
                                 gboolean shuffle);
 gboolean
