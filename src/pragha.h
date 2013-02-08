@@ -245,7 +245,6 @@ typedef enum {
 #define GROUP_LIBRARY  "Library"
 #define KEY_LIBRARY_DIR            "library_dir"
 #define KEY_LIBRARY_SCANNED        "library_scanned"
-#define KEY_LIBRARY_TREE_NODES     "library_tree_nodes"
 #define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
 #define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
 #define KEY_FUSE_FOLDERS	   "library_fuse_folders"
@@ -524,7 +523,6 @@ struct con_pref {
 	gboolean controls_below;
 	gboolean fuse_folders;
 	gboolean sort_by_year;
-	GSList *library_tree_nodes;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
@@ -633,6 +631,7 @@ typedef struct {
 	gboolean view_change;
 	gchar *filter_entry;
 	guint timeout_id;
+	GSList *library_tree_nodes;
 	GdkPixbuf *pixbuf_artist;
 	GdkPixbuf *pixbuf_album;
 	GdkPixbuf *pixbuf_track;
@@ -857,6 +856,8 @@ void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
+void
+library_pane_view_reload(struct con_win *cwin);
 void init_library_view(struct con_win *cwin);
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);

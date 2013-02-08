@@ -126,13 +126,13 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			test_change = cwin->cpref->fuse_folders;
 			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w));
 			if (cwin->cpref->fuse_folders != test_change)
-				init_library_view(cwin);
+				library_pane_view_reload(cwin);
 		}
 		else {
 			test_change = cwin->cpref->sort_by_year;
 			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w));
 			if (cwin->cpref->sort_by_year != test_change)
-				init_library_view(cwin);
+				library_pane_view_reload(cwin);
 		}
 
 		/* General preferences */
@@ -746,12 +746,10 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar **nodes;
 	gchar *u_file = NULL;
-	gint cnt = 0, i = 0, *window_size, *window_position;
+	gint *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y, sidebar_size;
 	GError *error = NULL;
-	GSList *list;
 	GdkWindowState state;
 
 	/* General options*/
@@ -838,49 +836,6 @@ void save_preferences(struct con_win *cwin)
 	current_playlist_save_preferences(cwin->cplaylist);
 
 	/* Library Options */
-
-	/* Save the library tree nodes */
-
-	if (cwin->cpref->library_tree_nodes) {
-		list = cwin->cpref->library_tree_nodes;
-		cnt = g_slist_length(cwin->cpref->library_tree_nodes);
-		nodes = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			switch (GPOINTER_TO_INT(list->data)) {
-				case NODE_TRACK:
-					nodes[i] = P_TITLE_STR;
-					break;
-				case NODE_ARTIST:
-					nodes[i] = P_ARTIST_STR;
-					break;
-				case NODE_ALBUM:
-					nodes[i] = P_ALBUM_STR;
-					break;
-				case NODE_GENRE:
-					nodes[i] = P_GENRE_STR;
-					break;
-				case NODE_FOLDER:
-					nodes[i] = P_FOLDER_STR;
-					break;
-				case NODE_BASENAME:
-					nodes[i] = P_BASENAME_STR;
-					break;
-				case NODE_PLAYLIST:
-				case NODE_RADIO:
-					g_warning("Save library tree oreder: Bad node type.");
-				break;
-			}
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_TREE_NODES,
-					   (const gchar **)nodes,
-					   cnt);
-		g_free(nodes);
-	}
 
 	/* Save fuse folders option */
 
@@ -1592,7 +1547,6 @@ void preferences_free (struct con_pref *cpref)
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
-	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);
 }
