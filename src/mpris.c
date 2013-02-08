@@ -677,7 +677,7 @@ static GVariant* mpris_Playlists_get_Orderings (GError **error, struct con_win *
 
 static GVariant* mpris_Playlists_get_PlaylistCount (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_uint32(get_playlist_count_db(cwin->cdbase));
+	return g_variant_new_uint32 (pragha_database_get_playlist_count (cwin->cdbase));
 }
 
 /* org.mpris.MediaPlayer2.TrackList */

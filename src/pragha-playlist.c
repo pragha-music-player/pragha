@@ -2774,7 +2774,7 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 	if (!playlist_id)
 		playlist_id = pragha_database_add_new_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
 	else
-		flush_playlist_db(playlist_id, cplaylist->cdbase);
+		pragha_database_flush_playlist (cplaylist->cdbase, playlist_id);
 
 	if (!gtk_tree_model_get_iter_first(cplaylist->model, &iter))
 		return;

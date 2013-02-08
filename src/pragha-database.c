@@ -446,6 +446,93 @@ pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name)
 	g_free (mask);
 }
 
+gint
+pragha_database_get_playlist_count (PraghaDatabase *database)
+{
+	gint n_playlists = 0;
+
+	const gchar *sql = "SELECT COUNT() FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+	if (pragha_prepared_statement_step (statement))
+		n_playlists = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+
+	return n_playlists;
+}
+
+void
+pragha_database_flush_playlist (PraghaDatabase *database, gint playlist_id)
+{
+	const gchar *sql = "DELETE FROM PLAYLIST_TRACKS WHERE playlist = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_delete_playlist (PraghaDatabase *database, const gchar *playlist)
+{
+	gint playlist_id;
+
+	if (string_is_empty(playlist)) {
+		g_warning("Playlist name is NULL");
+		return;
+	}
+
+	playlist_id = pragha_database_find_playlist (database, playlist);
+
+	if (!playlist_id) {
+		g_warning("Playlist doesn't exist");
+		return;
+	}
+
+	pragha_database_flush_playlist (database, playlist_id);
+
+	const gchar *sql = "DELETE FROM PLAYLIST WHERE id = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_flush_radio (PraghaDatabase *database, gint radio_id)
+{
+	const gchar *sql = "DELETE FROM RADIO_TRACKS WHERE radio = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio)
+{
+	gint radio_id;
+
+	if (string_is_empty(radio)) {
+		g_warning("Radio name is NULL");
+		return;
+	}
+
+	radio_id = pragha_database_find_radio (database, radio);
+
+	if (!radio_id) {
+		g_warning("Radio doesn't exist");
+		return;
+	}
+
+	pragha_database_flush_radio (database, radio_id);
+
+	const gchar *sql = "DELETE FROM RADIO WHERE id = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, radio_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
 gboolean
 pragha_database_init_schema (PraghaDatabase *database)
 {

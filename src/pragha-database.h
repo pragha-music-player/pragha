@@ -136,6 +136,21 @@ pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_na
 void
 pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name);
 
+gint
+pragha_database_get_playlist_count (PraghaDatabase *database);
+
+void
+pragha_database_flush_playlist (PraghaDatabase *database, gint playlist_id);
+
+void
+pragha_database_delete_playlist (PraghaDatabase *database, const gchar *playlist);
+
+void
+pragha_database_flush_radio (PraghaDatabase *database, gint radio_id);
+
+void
+pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio);
+
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
 
