@@ -2806,19 +2806,18 @@ void save_current_playlist_state(PraghaPlaylist* cplaylist)
 
 static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 {
-	gchar *query;
-	gint playlist_id, location_id, i = 0;
-	PraghaDbResponse result;
+	gint playlist_id, location_id;
 	PraghaMusicobject *mobj;
 	GList *list = NULL;
 
 	playlist_id = pragha_database_find_playlist (cplaylist->cdbase, SAVE_PLAYLIST_STATE);
-	query = g_strdup_printf("SELECT FILE FROM PLAYLIST_TRACKS WHERE PLAYLIST=%d",
-				playlist_id);
-	pragha_database_exec_sqlite_query(cplaylist->cdbase, query, &result);
 
-	for_each_result_row(result, i) {
-		const gchar *file = result.resultp[i];
+	const gchar *sql = "SELECT file FROM PLAYLIST_TRACKS WHERE playlist = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cplaylist->cdbase, sql);
+	pragha_prepared_statement_bind_int (statement, 1, playlist_id);
+
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *file = pragha_prepared_statement_get_string (statement, 0);
 		/* TODO: Fix this negradaaa!. */
 		if(g_str_has_prefix(file, "Radio:/") == FALSE) {
 			if ((location_id = pragha_database_find_location (cplaylist->cdbase, file)))
@@ -2834,9 +2833,9 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 			list = g_list_append(list, mobj);
 	}
 
-	pragha_playlist_append_mobj_list(cplaylist, list);
+	pragha_prepared_statement_free (statement);
 
-	sqlite3_free_table(result.resultp);
+	pragha_playlist_append_mobj_list(cplaylist, list);
 
 	g_list_free(list);
 }
