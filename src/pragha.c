@@ -168,8 +168,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	cwin->clibrary = pragha_library_pane_new(cwin);
-
 	/* Init the gui after bancked to sink volume. */
 
 	init_gui(argc, argv, cwin);

@@ -18,6 +18,127 @@
 
 #include "pragha.h"
 
+gchar *playlist_tree_context_menu_xml = "<ui>	\
+	<popup>					\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>	\
+	<separator/>				\
+	<menuitem action=\"Rename\"/>		\
+	<menuitem action=\"Delete\"/>		\
+	<menuitem action=\"Export\"/>		\
+	</popup>				\
+	</ui>";
+
+gchar *library_tree_context_menu_xml = "<ui>		\
+	<popup>						\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>		\
+	<separator/>					\
+	<menuitem action=\"Edit tags\"/>		\
+	<separator/>					\
+	<menuitem action=\"Move to trash\"/>		\
+	<menuitem action=\"Delete from library\"/>	\
+	</popup>					\
+	</ui>";
+
+gchar *header_library_tree_context_menu_xml = "<ui>	\
+	<popup>						\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>		\
+	<separator/>					\
+	<menuitem action=\"Rescan library\"/>		\
+	<menuitem action=\"Update library\"/>		\
+	</popup>					\
+	</ui>";
+
+gchar *library_page_context_menu_xml = "<ui>			\
+	<popup>							\
+	<menuitem action=\"Expand library\"/>			\
+	<menuitem action=\"Collapse library\"/>			\
+	<separator/>						\
+	<menuitem action=\"folders\"/>				\
+	<separator/>						\
+	<menuitem action=\"artist\"/>				\
+	<menuitem action=\"album\"/>				\
+	<menuitem action=\"genre\"/>				\
+	<separator/>						\
+	<menuitem action=\"artist_album\"/>			\
+	<menuitem action=\"genre_artist\"/>			\
+	<menuitem action=\"genre_album\"/>			\
+	<separator/>						\
+	<menuitem action=\"genre_artist_album\"/>		\
+	</popup>						\
+	</ui>";
+
+GtkActionEntry playlist_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Rename", NULL, N_("Rename"),
+	 "", "Rename", G_CALLBACK(playlist_tree_rename)},
+	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
+	 "", "Delete", G_CALLBACK(playlist_tree_delete)},
+	{"Export", GTK_STOCK_SAVE, N_("Export"),
+	 "", "Export", G_CALLBACK(playlist_tree_export)}
+};
+
+GtkActionEntry library_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
+	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
+	{"Move to trash", "user-trash", N_("Move to _trash"),
+	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
+	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
+	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)}
+};
+
+GtkActionEntry header_library_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
+	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
+	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
+	 "", "Update library", G_CALLBACK(update_library_action)}
+};
+
+GtkActionEntry library_page_context_aentries[] = {
+	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
+	 "", "Expand the library", G_CALLBACK(expand_all_action)},
+	{"Collapse library", GTK_STOCK_REMOVE, N_("_Collapse library"),
+	 "", "Collapse the library", G_CALLBACK(collapse_all_action)},
+	{"folders", GTK_STOCK_REFRESH, N_("Folders structure"),
+	 "", "Folders structure", G_CALLBACK(folders_library_tree)},
+	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
+	 "", "Artist", G_CALLBACK(artist_library_tree)},
+	{"album", GTK_STOCK_REFRESH, N_("Album"),
+	 "", "Album", G_CALLBACK(album_library_tree)},
+	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
+	 "", "Genre", G_CALLBACK(genre_library_tree)},
+	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
+	 "", "Artist / Album", G_CALLBACK(artist_album_library_tree)},
+	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
+	 "", "Genre / Album", G_CALLBACK(genre_album_library_tree)},
+	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
+	 "", "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
+	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
+	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
+};
+
 /* Returns TRUE if any of the childs of p_iter matches node_data. iter
  * and p_iter must be created outside this function */
 
@@ -673,6 +794,22 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	}
 }
 
+int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+{
+	if (event->state != 0
+			&& ((event->state & GDK_CONTROL_MASK)
+			|| (event->state & GDK_MOD1_MASK)
+			|| (event->state & GDK_MOD3_MASK)
+			|| (event->state & GDK_MOD4_MASK)
+			|| (event->state & GDK_MOD5_MASK)))
+		return FALSE;
+	if (event->keyval == GDK_KEY_Delete){
+		library_tree_delete_db(NULL, cwin);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 gboolean library_tree_button_press_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin)
@@ -843,11 +980,12 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 /* DnD */
 /*******/
 
-gboolean dnd_library_tree_begin(GtkWidget *widget,
-				    GdkDragContext *context,
-				    struct con_win *cwin)
+static gboolean
+dnd_library_tree_begin(GtkWidget *widget,
+                       GdkDragContext *context,
+                       PraghaLibraryPane *clibrary)
 {
-	cwin->clibrary->dragging = TRUE;
+	clibrary->dragging = TRUE;
 	return FALSE;
 }
 
@@ -876,12 +1014,13 @@ gtk_selection_data_set_pragha_uris (GtkSelectionData  *selection_data,
 
 /* Callback for DnD signal 'drag-data-get' */
 
-void dnd_library_tree_get(GtkWidget *widget,
-			  GdkDragContext *context,
-			  GtkSelectionData *data,
-			  enum dnd_target info,
-			  guint time,
-			  struct con_win *cwin)
+static void
+dnd_library_tree_get(GtkWidget *widget,
+                     GdkDragContext *context,
+                     GtkSelectionData *data,
+                     enum dnd_target info,
+                     guint time,
+                     PraghaLibraryPane *clibrary)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
@@ -893,11 +1032,11 @@ void dnd_library_tree_get(GtkWidget *widget,
 	case TARGET_REF_LIBRARY:
 		rlist = g_string_new (NULL);
 
-		set_watch_cursor (cwin->mainwindow);
-		cwin->clibrary->view_change = TRUE;
+		set_watch_cursor (clibrary->widget);
+		clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->clibrary->library_tree));
+							clibrary->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 		l = list;
@@ -908,8 +1047,8 @@ void dnd_library_tree_get(GtkWidget *widget,
 			l = l->next;
 		}
 
-		cwin->clibrary->view_change = FALSE;
-		remove_watch_cursor (cwin->mainwindow);
+		clibrary->view_change = FALSE;
+		remove_watch_cursor (clibrary->widget);
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
@@ -919,22 +1058,22 @@ void dnd_library_tree_get(GtkWidget *widget,
  	case TARGET_URI_LIST:
 		rlist = g_string_new (NULL);
 
-		set_watch_cursor (cwin->mainwindow);
-		cwin->clibrary->view_change = TRUE;
+		set_watch_cursor (clibrary->widget);
+		clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-							cwin->clibrary->library_tree));
+							clibrary->library_tree));
 		list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 		l = list;
 		while(l) {
 			if(gtk_tree_model_get_iter(model, &s_iter, l->data))
-				rlist = append_uri_string_list(&s_iter, rlist, model, cwin->clibrary);
+				rlist = append_uri_string_list(&s_iter, rlist, model, clibrary);
 			l = l->next;
 		}
 
-		cwin->clibrary->view_change = FALSE;
-		remove_watch_cursor (cwin->mainwindow);
+		clibrary->view_change = FALSE;
+		remove_watch_cursor (clibrary->widget);
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
@@ -946,6 +1085,33 @@ void dnd_library_tree_get(GtkWidget *widget,
 		g_warning("Unknown DND type");
 		break;
 	}
+}
+
+static const GtkTargetEntry lentries[] = {
+	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
+	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
+	{"text/plain", GTK_TARGET_OTHER_APP, TARGET_PLAIN_TEXT}
+};
+
+static void
+library_pane_init_dnd(PraghaLibraryPane *clibrary)
+{
+	/* Source: Library View */
+
+	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(clibrary->library_tree),
+					       GDK_BUTTON1_MASK,
+					       lentries,
+					       G_N_ELEMENTS(lentries),
+					       GDK_ACTION_COPY);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(clibrary->library_tree)),
+	                 "drag-begin",
+	                 G_CALLBACK(dnd_library_tree_begin),
+	                 clibrary);
+	g_signal_connect(G_OBJECT(clibrary->library_tree),
+	                 "drag-data-get",
+	                 G_CALLBACK(dnd_library_tree_get),
+	                 clibrary);
 }
 
 /**********/
@@ -1905,7 +2071,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	clibrary->view_change = TRUE;
 
-	//set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (clibrary->widget);
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
@@ -1975,15 +2141,412 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate", clibrary);
 
-	//remove_watch_cursor (cwin->mainwindow);
+	remove_watch_cursor (clibrary->widget);
 
 	clibrary->view_change = FALSE;
 }
 
-void init_library_view(PraghaLibraryPane *clibrary)
+static GtkUIManager* create_playlist_tree_context_menu(struct con_win *cwin)
 {
-	library_pane_update_style(clibrary);
-	library_pane_view_reload(clibrary);
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Playlist Tree Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       playlist_tree_context_menu_xml,
+					       -1, &error)) {
+		g_critical("Unable to create playlist tree context menu, err : %s",
+			   error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     playlist_tree_context_aentries,
+				     G_N_ELEMENTS(playlist_tree_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
+}
+
+static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
+						      struct con_win *cwin)
+{
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Library Tree Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       library_tree_context_menu_xml,
+					       -1, &error)) {
+		g_critical("(%s): Unable to create library tree context menu, err : %s",
+			   __func__, error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     library_tree_context_aentries,
+				     G_N_ELEMENTS(library_tree_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
+}
+
+static GtkUIManager* create_header_library_tree_context_menu(GtkWidget *library_tree,
+						      struct con_win *cwin)
+{
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Header Library Tree Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       header_library_tree_context_menu_xml,
+					       -1, &error)) {
+		g_critical("(%s): Unable to create header library tree context menu, err : %s",
+			   __func__, error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     header_library_tree_context_aentries,
+				     G_N_ELEMENTS(header_library_tree_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
+}
+
+static void
+update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
+{
+	/*
+	 * Rework to olny update Playlist and radio tree!!!.
+	 **/
+	library_pane_view_reload(cwin->clibrary);
+	update_menu_playlist_changes(cwin);
+}
+
+static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *library_tree;
+	GtkTreeModel *library_filter_tree;
+	GtkTreeStore *store;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkTreeSelection *selection;
+
+	/* Create the tree store */
+
+	store = gtk_tree_store_new(N_L_COLUMNS,
+				   GDK_TYPE_PIXBUF, /* Pixbuf */
+				   G_TYPE_STRING,   /* Node */
+				   G_TYPE_INT,      /* Node type : Artist / Album / Track */
+				   G_TYPE_INT,      /* Location id (valid only for Track) */
+				   G_TYPE_BOOLEAN,  /* Flag to save mach when filtering */
+				   G_TYPE_BOOLEAN); /* Row visibility */
+
+
+	/* Create the filter model */
+
+	library_filter_tree = gtk_tree_model_filter_new(GTK_TREE_MODEL(store), NULL);
+	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(library_filter_tree),
+						 L_VISIBILE);
+	/* Create the tree view */
+
+	library_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_filter_tree));
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(library_tree), FALSE);
+	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(library_tree), TRUE);
+
+	/* Selection mode is multiple */
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library_tree));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
+
+	/* Create column and cell renderers */
+
+	column = gtk_tree_view_column_new();
+
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start(column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(column, renderer,
+					    "pixbuf", L_PIXBUF,
+					    NULL);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(column, renderer, TRUE);
+	gtk_tree_view_column_set_attributes(column, renderer,
+					    "text", L_NODE_DATA,
+					    NULL);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+
+	gtk_tree_view_append_column(GTK_TREE_VIEW(library_tree), column);
+
+	/* Connect signals and create right click popup menu */
+
+	g_signal_connect(G_OBJECT(library_tree), "row-activated",
+			 G_CALLBACK(library_tree_row_activated_cb), cwin);
+	g_signal_connect (G_OBJECT (library_tree), "key-press-event",
+			  G_CALLBACK(library_tree_key_press), cwin);
+
+	/* Create right click popup menu */
+
+	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
+									   cwin);
+
+	cwin->header_library_tree_context_menu = create_header_library_tree_context_menu(library_tree,
+											 cwin);
+
+	/* Signal handler for right-clicking and selection */
+ 
+ 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
+			 G_CALLBACK(library_tree_button_press_cb), cwin);
+
+	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
+			 G_CALLBACK(library_tree_button_release_cb), cwin);
+
+	/* Save references and configure dnd */
+
+	clibrary->library_store = store;
+	clibrary->library_tree = library_tree;
+
+	library_pane_init_dnd(clibrary);
+
+	g_object_unref(library_filter_tree);
+	
+	return library_tree;
+}
+
+static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
+{
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Library Page Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       library_page_context_menu_xml,
+					       -1, &error)) {
+		g_critical("Unable to create library page context menu, err : %s",
+			   error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     library_page_context_aentries,
+				     G_N_ELEMENTS(library_page_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
+}
+
+static void
+pragha_sidebar_close (GtkWidget *widget, struct con_win *cwin)
+{
+	GtkAction *action;
+	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
+}
+
+GtkWidget *
+create_close_button(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *button, *image;
+    
+	button = gtk_button_new ();
+	image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
+	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
+	gtk_container_add (GTK_CONTAINER (button), image);
+
+	g_signal_connect(G_OBJECT (button),
+			 "clicked",
+			 G_CALLBACK(pragha_sidebar_close),
+			 cwin);
+
+	return button;
+}
+
+GtkWidget *
+create_library_view_options_combo(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *button;
+	GtkWidget *hbox;
+	GtkWidget *label_order, *arrow;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+
+	label_order = gtk_label_new("");
+	gtk_misc_set_alignment(GTK_MISC(label_order), 0, 0.5);
+	arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
+
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   label_order,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   arrow,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	gtk_container_add (GTK_CONTAINER(button), hbox);
+
+	/* Create library page context menu */
+
+	cwin->library_page_context_menu = create_library_page_context_menu(cwin);
+
+	/* Create right click popup menu */
+
+	cwin->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
+
+	g_signal_connect(G_OBJECT(button),
+			 "button-press-event",
+			 G_CALLBACK(library_page_right_click_cb),
+			 cwin);
+
+	gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("Options of the library"));
+
+	clibrary->combo_order = button;
+	clibrary->combo_order_label = label_order;
+
+	return button;
+}
+
+GtkWidget *
+create_sidebar_header(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *hbox, *combo, *close_button;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	combo = create_library_view_options_combo(clibrary, cwin);
+	close_button = create_close_button(clibrary, cwin);
+
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   combo,
+			   TRUE,
+			   TRUE,
+			   0);
+	gtk_box_pack_start(GTK_BOX(hbox),
+			   close_button,
+			   FALSE,
+			   FALSE,
+			   0);
+
+	return hbox;
+}
+
+static GtkWidget*
+library_pane_create_widgets(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *vbox_lib;
+	GtkWidget *header, *search_entry, *library_tree_scroll, *library_tree;
+
+	vbox_lib = gtk_vbox_new(FALSE, 2);
+
+	/* The header to select order and close the pane */
+	header = create_sidebar_header (clibrary, cwin);
+
+	/* The filter entry */
+	search_entry = pragha_search_entry_new(cwin);
+
+	/* The scrroll and library tree. */
+	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
+					GTK_SHADOW_IN);
+	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
+
+	library_tree = create_library_tree(clibrary, cwin);
+
+	/* Package all */
+
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   header,
+	                   FALSE,
+	                   FALSE,
+	                   0);
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   search_entry,
+	                   FALSE,
+	                   FALSE,
+	                   0);
+	gtk_container_add(GTK_CONTAINER(library_tree_scroll),
+	                  library_tree);
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   library_tree_scroll,
+	                   TRUE,
+	                   TRUE,
+	                   0);
+
+	/* Conect signals */
+	g_signal_connect (G_OBJECT(search_entry),
+	                  "changed",
+	                  G_CALLBACK(simple_library_search_keyrelease_handler),
+	                  clibrary);
+	g_signal_connect (G_OBJECT(search_entry),
+	                  "activate",
+	                  G_CALLBACK(simple_library_search_activate_handler),
+	                  clibrary);
+
+	/* Save references */
+	clibrary->search_entry = search_entry;
+
+	return vbox_lib;
+}
+
+void
+pragha_library_pane_free(PraghaLibraryPane *librarypane)
+{
+	if (librarypane->pixbuf_dir)
+		g_object_unref(librarypane->pixbuf_dir);
+	if (librarypane->pixbuf_artist)
+		g_object_unref(librarypane->pixbuf_artist);
+	if (librarypane->pixbuf_album)
+		g_object_unref(librarypane->pixbuf_album);
+	if (librarypane->pixbuf_track)
+		g_object_unref(librarypane->pixbuf_track);
+	if (librarypane->pixbuf_genre)
+		g_object_unref(librarypane->pixbuf_genre);
+
+	g_object_unref(librarypane->cdbase);
+	g_object_unref(librarypane->preferences);
+	g_object_unref(librarypane->library_store);
+
+	g_slist_free(librarypane->library_tree_nodes);
+
+	g_slice_free(PraghaLibraryPane, librarypane);
 }
 
 static void
@@ -2049,31 +2612,10 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 }
 
 void
-pragha_library_pane_free(PraghaLibraryPane *librarypane)
+pragha_library_pane_init_view(PraghaLibraryPane *clibrary)
 {
-	if (librarypane->pixbuf_dir)
-		g_object_unref(librarypane->pixbuf_dir);
-	if (librarypane->pixbuf_artist)
-		g_object_unref(librarypane->pixbuf_artist);
-	if (librarypane->pixbuf_album)
-		g_object_unref(librarypane->pixbuf_album);
-	if (librarypane->pixbuf_track)
-		g_object_unref(librarypane->pixbuf_track);
-	if (librarypane->pixbuf_genre)
-		g_object_unref(librarypane->pixbuf_genre);
-
-	g_object_unref(librarypane->cdbase);
-	g_object_unref(librarypane->preferences);
-
-	g_slist_free(librarypane->library_tree_nodes);
-
-	g_slice_free(PraghaLibraryPane, librarypane);
-}
-
-void
-pragha_library_pane_init_preferences(PraghaLibraryPane *librarypane)
-{
-
+	library_pane_update_style(clibrary);
+	library_pane_view_reload(clibrary);
 }
 
 PraghaLibraryPane *
@@ -2081,22 +2623,29 @@ pragha_library_pane_new(struct con_win *cwin)
 {
 	PraghaLibraryPane *clibrary;
 
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
 	clibrary = g_slice_new0(PraghaLibraryPane);
 
 	clibrary->cdbase = pragha_database_get();
 	clibrary->preferences = pragha_preferences_get();
 
+	clibrary->widget = library_pane_create_widgets(clibrary, cwin);
+
 	clibrary->filter_entry = NULL;
 	clibrary->dragging = FALSE;
 	clibrary->view_change = TRUE;
 	clibrary->timeout_id = 0;
-	g_slist_free(clibrary->library_tree_nodes);
+	clibrary->library_tree_nodes = NULL;
 
 	pragha_library_pane_init_pixbufs(clibrary);
 
+	/* Conect signals */
+
+	g_signal_connect (clibrary->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
 	g_signal_connect(clibrary->preferences, "notify::library-style", G_CALLBACK (library_pane_change_style), cwin);
+	g_object_bind_property (clibrary->preferences, "lateral-panel", clibrary->widget, "visible", binding_flags);
 
 	return clibrary;
 }
-
-
