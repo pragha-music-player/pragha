@@ -1708,6 +1708,8 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Playlists"),
 			   L_NODE_TYPE, NODE_CATEGORY,
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
 			   -1);
 
 	library_view_append_playlists(model, &iter, clibrary);
@@ -1721,6 +1723,8 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Radios"),
 			   L_NODE_TYPE, NODE_CATEGORY,
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
 			   -1);
 
 	library_view_append_radios(model, &iter, clibrary);
@@ -1734,6 +1738,8 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Library"),
 			   L_NODE_TYPE, NODE_CATEGORY,
+			   L_MACH, FALSE,
+			   L_VISIBILE, TRUE,
 			   -1);
 
 	if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
@@ -1750,10 +1756,10 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 	
-	/*
-	 * Why not can only expand categories?. All nodes added with L_VISIBILE = TRUE.
-	 */
-	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
+	if(gtk_entry_get_text_length (GTK_ENTRY(clibrary->search_entry)))
+		g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
+	else
+		pragha_library_expand_categories(clibrary);
 
 	remove_watch_cursor (clibrary->widget);
 
@@ -1803,7 +1809,7 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
-	if(clibrary->filter_entry)
+	if(gtk_entry_get_text_length (GTK_ENTRY(clibrary->search_entry)))
 		g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
 	else
 		pragha_library_expand_categories(clibrary);
