@@ -703,7 +703,6 @@ extern const gchar *mime_mp4[];
 extern const gchar *mime_ape[];
 #endif
 
-
 extern const gchar *mime_image[];
 
 #ifdef HAVE_PLPARSER
@@ -811,6 +810,33 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
 
 /* Library manipulation functions */
 
+/*
+ * Menu Callbacks of Library Pane
+ *
+ **/
+
+void expand_all_action(GtkAction *action, struct con_win *cwin);
+void collapse_all_action(GtkAction *action, struct con_win *cwin);
+void folders_library_tree(GtkAction *action, struct con_win *cwin);
+void artist_library_tree(GtkAction *action, struct con_win *cwin);
+void album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_library_tree(GtkAction *action, struct con_win *cwin);
+void artist_album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
+void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
+
+void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
+void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
+void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
+void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
+void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
+void playlist_tree_export(GtkAction *action, struct con_win *cwin);
+
+void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
+void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
+void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
+
 void library_tree_row_activated_cb(GtkTreeView *library_tree,
 				   GtkTreePath *path,
 				   GtkTreeViewColumn *column,
@@ -828,23 +854,10 @@ void simple_library_search_keyrelease(struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
 gboolean simple_library_search_activate_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
 void clear_library_search(PraghaLibraryPane *clibrary);
-void folders_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_library_tree(GtkAction *action, struct con_win *cwin);
-void album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
-void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
-void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
-void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
-void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
-void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
-void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
-void
-library_pane_view_reload(PraghaLibraryPane *clibrary);
+
+void library_pane_view_reload(PraghaLibraryPane *clibrary);
 void pragha_library_pane_init_view(PraghaLibraryPane *clibrary);
+
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
@@ -884,8 +897,8 @@ gchar* get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type, enu
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
 GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
-void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
-void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
+gboolean delete_existing_item_dialog(const gchar *item, struct con_win *cwin);
+gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin);
 void export_playlist (PraghaPlaylist* cplaylist, gint choice);
 void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GList *

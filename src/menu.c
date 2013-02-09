@@ -711,20 +711,6 @@ void quit_action(GtkAction *action, struct con_win *cwin)
 	exit_pragha(NULL, cwin);
 }
 
-/* Handler for 'Expand All' option in the Edit menu */
-
-void expand_all_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-}
-
-/* Handler for 'Collapse All' option in the Edit menu */
-
-void collapse_all_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-}
-
 /* Handler for 'Search Playlist' option in the Edit menu */
 
 void search_playlist_action(GtkAction *action, struct con_win *cwin)

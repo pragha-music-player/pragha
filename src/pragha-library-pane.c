@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
 /*									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -18,41 +18,10 @@
 
 #include "pragha.h"
 
-gchar *playlist_tree_context_menu_xml = "<ui>	\
-	<popup>					\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>	\
-	<separator/>				\
-	<menuitem action=\"Rename\"/>		\
-	<menuitem action=\"Delete\"/>		\
-	<menuitem action=\"Export\"/>		\
-	</popup>				\
-	</ui>";
-
-gchar *library_tree_context_menu_xml = "<ui>		\
-	<popup>						\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>		\
-	<separator/>					\
-	<menuitem action=\"Edit tags\"/>		\
-	<separator/>					\
-	<menuitem action=\"Move to trash\"/>		\
-	<menuitem action=\"Delete from library\"/>	\
-	</popup>					\
-	</ui>";
-
-gchar *header_library_tree_context_menu_xml = "<ui>	\
-	<popup>						\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>		\
-	<separator/>					\
-	<menuitem action=\"Rescan library\"/>		\
-	<menuitem action=\"Update library\"/>		\
-	</popup>					\
-	</ui>";
+/*
+ * Menus definitions
+ *
+ **/
 
 gchar *library_page_context_menu_xml = "<ui>			\
 	<popup>							\
@@ -72,49 +41,6 @@ gchar *library_page_context_menu_xml = "<ui>			\
 	<menuitem action=\"genre_artist_album\"/>		\
 	</popup>						\
 	</ui>";
-
-GtkActionEntry playlist_tree_context_aentries[] = {
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
-	{"Rename", NULL, N_("Rename"),
-	 "", "Rename", G_CALLBACK(playlist_tree_rename)},
-	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
-	 "", "Delete", G_CALLBACK(playlist_tree_delete)},
-	{"Export", GTK_STOCK_SAVE, N_("Export"),
-	 "", "Export", G_CALLBACK(playlist_tree_export)}
-};
-
-GtkActionEntry library_tree_context_aentries[] = {
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
-	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
-	{"Move to trash", "user-trash", N_("Move to _trash"),
-	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
-	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
-	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)}
-};
-
-GtkActionEntry header_library_tree_context_aentries[] = {
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
-	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
-	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
-	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
-	 "", "Update library", G_CALLBACK(update_library_action)}
-};
 
 GtkActionEntry library_page_context_aentries[] = {
 	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
@@ -137,6 +63,85 @@ GtkActionEntry library_page_context_aentries[] = {
 	 "", "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
 	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
 	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
+};
+
+gchar *playlist_tree_context_menu_xml = "<ui>	\
+	<popup>					\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>	\
+	<separator/>				\
+	<menuitem action=\"Rename\"/>		\
+	<menuitem action=\"Delete\"/>		\
+	<menuitem action=\"Export\"/>		\
+	</popup>				\
+	</ui>";
+
+GtkActionEntry playlist_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Rename", NULL, N_("Rename"),
+	 "", "Rename", G_CALLBACK(playlist_tree_rename)},
+	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
+	 "", "Delete", G_CALLBACK(playlist_tree_delete)},
+	{"Export", GTK_STOCK_SAVE, N_("Export"),
+	 "", "Export", G_CALLBACK(playlist_tree_export)}
+};
+
+gchar *library_tree_context_menu_xml = "<ui>		\
+	<popup>						\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>		\
+	<separator/>					\
+	<menuitem action=\"Edit tags\"/>		\
+	<separator/>					\
+	<menuitem action=\"Move to trash\"/>		\
+	<menuitem action=\"Delete from library\"/>	\
+	</popup>					\
+	</ui>";
+
+GtkActionEntry library_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
+	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
+	{"Move to trash", "user-trash", N_("Move to _trash"),
+	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
+	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
+	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)}
+};
+
+gchar *header_library_tree_context_menu_xml = "<ui>	\
+	<popup>						\
+	<menuitem action=\"Add to current playlist\"/>	\
+	<menuitem action=\"Replace current playlist\"/>	\
+	<menuitem action=\"Replace and play\"/>		\
+	<separator/>					\
+	<menuitem action=\"Rescan library\"/>		\
+	<menuitem action=\"Update library\"/>		\
+	</popup>					\
+	</ui>";
+
+GtkActionEntry header_library_tree_context_aentries[] = {
+	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
+	{"Replace current playlist", NULL, N_("_Replace current playlist"),
+	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
+	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
+	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
+	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
+	 "", "Update library", G_CALLBACK(update_library_action)}
 };
 
 /* Returns TRUE if any of the childs of p_iter matches node_data. iter
@@ -1478,366 +1483,10 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 	library_pane_view_reload(cwin->clibrary);
 }
 
-void folders_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, FOLDERS);
-}
 
-void artist_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST);
-}
-
-void album_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ALBUM);
-}
-
-void genre_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE);
-}
-
-void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST_ALBUM);
-}
-
-void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ALBUM);
-}
-
-void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST);
-}
-
-void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
-{
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST_ALBUM);
-}
-
-/*****************/
-/* Menu handlers */
-/*****************/
-
-static void
-library_tree_replace_playlist (struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *mlist = NULL, *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		pragha_playlist_remove_all (cwin->cplaylist);
-
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			mlist = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, mlist);
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return;
-		}
-
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 mlist);
-
-		g_list_free(list);
-		g_list_free(mlist);
-	}
-}
-
-void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	library_tree_replace_playlist (cwin);
-}
-
-void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
-{
-	library_tree_replace_playlist (cwin);
-
-	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-		pragha_playback_next_track(cwin);
-	else
-		pragha_playback_play_pause_resume(cwin);
-}
-
-void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *mlist = NULL, *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			mlist = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, model, mlist);
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return;
-		}
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 mlist);
-
-		g_list_free(list);
-		g_list_free(mlist);
-	}
-}
-
-void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
-{
-	GtkWidget *dialog;
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *i;
-	gint result;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_QUESTION,
-					GTK_BUTTONS_YES_NO,
-					_("Are you sure you want to delete current file from library?\n\n"
-					"Warning: To recover we must rescan the entire library."));
-
-		result = gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_destroy(dialog);
-
-		if( result == GTK_RESPONSE_YES ){
-			/* Delete all the rows */
-
-			db_begin_transaction(cwin->clibrary->cdbase);
-
-			for (i=list; i != NULL; i = i->next) {
-				path = i->data;
-				delete_row_from_db(cwin->clibrary->cdbase, path, model);
-
-				/* Have to give control to GTK periodically ... */
-				if (pragha_process_gtk_events ())
-					return;
-			}
-
-			db_commit_transaction(cwin->clibrary->cdbase);
-
-			flush_stale_entries_db(cwin->clibrary->cdbase);
-			library_pane_view_reload(cwin->clibrary);
-		}
-
-		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
-	}
-}
-
-void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
-{
-	GtkWidget *dialog;
-	GtkWidget *toggle_unlink;
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *list, *i;
-	gint result;
-	GArray *loc_arr;
-	gboolean unlink = FALSE;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-						GTK_MESSAGE_QUESTION,
-						GTK_BUTTONS_YES_NO,
-						_("Really want to move the files to trash?"));
-
-		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
-		gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), toggle_unlink, TRUE, TRUE, 0);
-
-		gtk_widget_show_all(dialog);
-		result = gtk_dialog_run(GTK_DIALOG(dialog));
-		unlink = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_unlink));
-		gtk_widget_destroy(dialog);
-
-		if(result == GTK_RESPONSE_YES){
-			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-
-			db_begin_transaction(cwin->clibrary->cdbase);
-			for (i=list; i != NULL; i = i->next) {
-				path = i->data;
-				get_location_ids(path, loc_arr, model, cwin->clibrary);
-				trash_or_unlink_row(loc_arr, unlink, cwin);
-
-				/* Have to give control to GTK periodically ... */
-				if (pragha_process_gtk_events ())
-					return;
-			}
-			db_commit_transaction(cwin->clibrary->cdbase);
-
-			g_array_free(loc_arr, TRUE);
-
-			flush_stale_entries_db(cwin->clibrary->cdbase);
-			library_pane_view_reload(cwin->clibrary);
-		}
-
-		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
-	}
-}
-
-/***************/
-/* Tag Editing */
-/***************/
-
-void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
-{
-	enum node_type node_type = 0;
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list, *i;
-	GArray *loc_arr = NULL;
-	GPtrArray *file_arr = NULL;
-	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
-	gint elem = 0, ielem;
-
-	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	sel = gtk_tree_selection_count_selected_rows(selection);
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	/* Setup initial entries */
-
-	if (sel == 1) {
-		path = list->data;
-
-		if (!gtk_tree_model_get_iter(model, &iter, path))
-			goto exit;
-
-		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-
-		if (node_type == NODE_TRACK || node_type == NODE_BASENAME) {
-			gtk_tree_model_get(model, &iter,
-					   L_LOCATION_ID, &location_id, -1);
-
-			omobj = new_musicobject_from_db(cwin->clibrary->cdbase, location_id);
-		}
-		else {
-			omobj = pragha_musicobject_new();
-			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
-
-			switch(node_type) {
-			case NODE_ARTIST:
-				pragha_musicobject_set_artist(omobj, node_data);
-				break;
-			case NODE_ALBUM:
-				if (pragha_preferences_get_sort_by_year(cwin->clibrary->preferences)) {
-					split_album = g_strsplit(node_data, " - ", 2);
-					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
-					pragha_musicobject_set_album(omobj, split_album[1]);
-
-				}
-				else {
-					pragha_musicobject_set_album(omobj, node_data);
-
-				}
-				break;
-			case NODE_GENRE:
-				pragha_musicobject_set_genre(omobj, node_data);
-				break;
-			default:
-				break;
-			}
-		}
-	} else {
-		omobj = pragha_musicobject_new ();
-	}
-
-	nmobj = pragha_musicobject_new();
-	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
-
-	if (!changed)
-		goto exit;
-
-	/* Store the new tags */
-
-	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-
-	for (i=list; i != NULL; i = i->next) {
-		path = i->data;
-		/* Form an array of location ids */
-		get_location_ids(path, loc_arr, model, cwin->clibrary);
-	}
-
-	/* Check if user is trying to set the same track no for multiple tracks */
-	if (changed & TAG_TNO_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
-				goto exit;
-		}
-	}
-
-	/* Check if user is trying to set the same title/track no for
-	   multiple tracks */
-	if (changed & TAG_TITLE_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
-				goto exit;
-		}
-	}
-
-	/* Updata the db changes */
-	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
-	library_pane_view_reload(cwin->clibrary);
-
-	/* Get a array of files and update it */
-	file_arr = g_ptr_array_new();
-	for(ielem = 0; ielem < loc_arr->len; ielem++) {
-		elem = g_array_index(loc_arr, gint, ielem);
-		if (elem) {
-			file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
-			if(file)
-				g_ptr_array_add(file_arr, file);
-		}
-	}
-	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-	g_ptr_array_free(file_arr, TRUE);
-	g_array_free(loc_arr, TRUE);
-
-exit:
-	/* Cleanup */
-
-	g_free(node_data);
-	g_strfreev (split_album);
-
-	if (nmobj)
-		g_object_unref (nmobj);
-	if (omobj)
-		g_object_unref (omobj);
-		
-	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
-}
+/*********************************/
+/* Functions to reload playlist. */
+/*********************************/
 
 static void
 library_view_append_playlists(GtkTreeModel *model,
@@ -2059,10 +1708,6 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	g_free(sql);
 }
 
-/********/
-/* Init */
-/********/
-
 void
 library_pane_view_reload(PraghaLibraryPane *clibrary)
 {
@@ -2146,7 +1791,486 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	clibrary->view_change = FALSE;
 }
 
-static GtkUIManager* create_playlist_tree_context_menu(struct con_win *cwin)
+static void
+update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
+{
+	/*
+	 * Rework to olny update Playlist and radio tree!!!.
+	 **/
+	library_pane_view_reload(cwin->clibrary);
+	update_menu_playlist_changes(cwin);
+}
+
+/*************************************/
+/* All menu handlers of library pane */
+/*************************************/
+
+/*
+ * library_page_context_menu calbacks
+ */
+void expand_all_action(GtkAction *action, struct con_win *cwin)
+{
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+}
+
+void collapse_all_action(GtkAction *action, struct con_win *cwin)
+{
+	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+}
+
+void folders_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, FOLDERS);
+}
+
+void artist_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST);
+}
+
+void album_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ALBUM);
+}
+
+void genre_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE);
+}
+
+void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST_ALBUM);
+}
+
+void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ALBUM);
+}
+
+void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST);
+}
+
+void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
+{
+	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST_ALBUM);
+}
+
+/*
+ * playlist_tree_context_menu calbacks
+ */
+void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *mlist = NULL, *list, *i;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		/* Add all the rows to the current playlist */
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			mlist = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, model, mlist);
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			if (pragha_process_gtk_events ())
+				return;
+		}
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 mlist);
+
+		g_list_free(list);
+		g_list_free(mlist);
+	}
+}
+
+static void
+library_tree_replace_playlist (struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *mlist = NULL, *list, *i;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		pragha_playlist_remove_all (cwin->cplaylist);
+
+		/* Add all the rows to the current playlist */
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			mlist = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, mlist);
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			if (pragha_process_gtk_events ())
+				return;
+		}
+
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 mlist);
+
+		g_list_free(list);
+		g_list_free(mlist);
+	}
+}
+
+void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
+{
+	library_tree_replace_playlist (cwin);
+}
+
+void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
+{
+	library_tree_replace_playlist (cwin);
+
+	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
+		pragha_playback_next_track(cwin);
+	else
+		pragha_playback_play_pause_resume(cwin);
+}
+
+void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list;
+	gchar *playlist = NULL, *n_playlist = NULL;
+	gint node_type;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		path = list->data;
+		if (gtk_tree_path_get_depth(path) > 1) {
+			gtk_tree_model_get_iter(model, &iter, path);
+			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
+
+			n_playlist = rename_playlist_dialog (playlist, cwin);
+			if(n_playlist != NULL) {
+				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+
+				if(node_type == NODE_PLAYLIST)
+					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
+				else if (node_type == NODE_RADIO)
+					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
+
+				pragha_database_change_playlists_done(cwin->cdbase);
+
+				g_free(n_playlist);
+			}
+			g_free(playlist);
+		}
+		gtk_tree_path_free(path);
+	}
+	g_list_free(list);
+}
+
+void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
+{
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list, *i;
+	gchar *playlist;
+	gint node_type;
+	gboolean removed = FALSE;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		/* Delete selected playlists */
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			if (gtk_tree_path_get_depth(path) > 1) {
+				gtk_tree_model_get_iter(model, &iter, path);
+				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+				gtk_tree_model_get(model, &iter, L_NODE_DATA,
+						   &playlist, -1);
+
+				if(delete_existing_item_dialog(playlist, cwin)) {
+					if(node_type == NODE_PLAYLIST) {
+						delete_playlist_db (playlist, cwin->cdbase);
+					}
+					else if (node_type == NODE_RADIO) {
+						delete_radio_db(playlist, cwin->cdbase);
+					}
+					removed = TRUE;
+				}
+				g_free(playlist);
+			}
+			gtk_tree_path_free(path);
+		}
+		g_list_free(list);
+	}
+
+	if(removed)
+		pragha_database_change_playlists_done(cwin->cdbase);
+}
+
+/* TODO: mudularize: void playlist_tree_export(GtkAction *action, struct con_win *cwin);
+ * And compy here..
+ */
+
+/*
+ * library_tree_context_menu_xml calbacks
+ */
+void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
+{
+	enum node_type node_type = 0;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list, *i;
+	GArray *loc_arr = NULL;
+	GPtrArray *file_arr = NULL;
+	gint sel, location_id, changed = 0;
+	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
+	gint elem = 0, ielem;
+
+	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	sel = gtk_tree_selection_count_selected_rows(selection);
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	/* Setup initial entries */
+
+	if (sel == 1) {
+		path = list->data;
+
+		if (!gtk_tree_model_get_iter(model, &iter, path))
+			goto exit;
+
+		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+
+		if (node_type == NODE_TRACK || node_type == NODE_BASENAME) {
+			gtk_tree_model_get(model, &iter,
+					   L_LOCATION_ID, &location_id, -1);
+
+			omobj = new_musicobject_from_db(cwin->clibrary->cdbase, location_id);
+		}
+		else {
+			omobj = pragha_musicobject_new();
+			gtk_tree_model_get(model, &iter, L_NODE_DATA, &node_data, -1);
+
+			switch(node_type) {
+			case NODE_ARTIST:
+				pragha_musicobject_set_artist(omobj, node_data);
+				break;
+			case NODE_ALBUM:
+				if (pragha_preferences_get_sort_by_year(cwin->clibrary->preferences)) {
+					split_album = g_strsplit(node_data, " - ", 2);
+					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
+					pragha_musicobject_set_album(omobj, split_album[1]);
+
+				}
+				else {
+					pragha_musicobject_set_album(omobj, node_data);
+
+				}
+				break;
+			case NODE_GENRE:
+				pragha_musicobject_set_genre(omobj, node_data);
+				break;
+			default:
+				break;
+			}
+		}
+	} else {
+		omobj = pragha_musicobject_new ();
+	}
+
+	nmobj = pragha_musicobject_new();
+	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
+
+	if (!changed)
+		goto exit;
+
+	/* Store the new tags */
+
+	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+
+	for (i=list; i != NULL; i = i->next) {
+		path = i->data;
+		/* Form an array of location ids */
+		get_location_ids(path, loc_arr, model, cwin->clibrary);
+	}
+
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
+				goto exit;
+		}
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (loc_arr->len > 1) {
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
+				goto exit;
+		}
+	}
+
+	/* Updata the db changes */
+	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
+	library_pane_view_reload(cwin->clibrary);
+
+	/* Get a array of files and update it */
+	file_arr = g_ptr_array_new();
+	for(ielem = 0; ielem < loc_arr->len; ielem++) {
+		elem = g_array_index(loc_arr, gint, ielem);
+		if (elem) {
+			file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
+			if(file)
+				g_ptr_array_add(file_arr, file);
+		}
+	}
+	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
+	g_ptr_array_free(file_arr, TRUE);
+	g_array_free(loc_arr, TRUE);
+
+exit:
+	/* Cleanup */
+
+	g_free(node_data);
+	g_strfreev (split_album);
+
+	if (nmobj)
+		g_object_unref (nmobj);
+	if (omobj)
+		g_object_unref (omobj);
+		
+	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
+}
+
+void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkWidget *toggle_unlink;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *list, *i;
+	gint result;
+	GArray *loc_arr;
+	gboolean unlink = FALSE;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+						GTK_MESSAGE_QUESTION,
+						GTK_BUTTONS_YES_NO,
+						_("Really want to move the files to trash?"));
+
+		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
+		gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), toggle_unlink, TRUE, TRUE, 0);
+
+		gtk_widget_show_all(dialog);
+		result = gtk_dialog_run(GTK_DIALOG(dialog));
+		unlink = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_unlink));
+		gtk_widget_destroy(dialog);
+
+		if(result == GTK_RESPONSE_YES){
+			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+
+			db_begin_transaction(cwin->clibrary->cdbase);
+			for (i=list; i != NULL; i = i->next) {
+				path = i->data;
+				get_location_ids(path, loc_arr, model, cwin->clibrary);
+				trash_or_unlink_row(loc_arr, unlink, cwin);
+
+				/* Have to give control to GTK periodically ... */
+				if (pragha_process_gtk_events ())
+					return;
+			}
+			db_commit_transaction(cwin->clibrary->cdbase);
+
+			g_array_free(loc_arr, TRUE);
+
+			flush_stale_entries_db(cwin->clibrary->cdbase);
+			library_pane_view_reload(cwin->clibrary);
+		}
+
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
+	}
+}
+
+void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
+{
+	GtkWidget *dialog;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GList *list, *i;
+	gint result;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	list = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	if (list) {
+		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_QUESTION,
+					GTK_BUTTONS_YES_NO,
+					_("Are you sure you want to delete current file from library?\n\n"
+					"Warning: To recover we must rescan the entire library."));
+
+		result = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+
+		if( result == GTK_RESPONSE_YES ){
+			/* Delete all the rows */
+
+			db_begin_transaction(cwin->clibrary->cdbase);
+
+			for (i=list; i != NULL; i = i->next) {
+				path = i->data;
+				delete_row_from_db(cwin->clibrary->cdbase, path, model);
+
+				/* Have to give control to GTK periodically ... */
+				if (pragha_process_gtk_events ())
+					return;
+			}
+
+			db_commit_transaction(cwin->clibrary->cdbase);
+
+			flush_stale_entries_db(cwin->clibrary->cdbase);
+			library_pane_view_reload(cwin->clibrary);
+		}
+
+		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
+	}
+}
+
+/**************************************/
+/* Construction menus of library pane */
+/**************************************/
+
+static GtkUIManager*
+create_playlist_tree_context_menu(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2175,8 +2299,9 @@ static GtkUIManager* create_playlist_tree_context_menu(struct con_win *cwin)
 	return context_menu;
 }
 
-static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
-						      struct con_win *cwin)
+static GtkUIManager*
+create_library_tree_context_menu(GtkWidget *library_tree,
+                                 struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2205,8 +2330,9 @@ static GtkUIManager* create_library_tree_context_menu(GtkWidget *library_tree,
 	return context_menu;
 }
 
-static GtkUIManager* create_header_library_tree_context_menu(GtkWidget *library_tree,
-						      struct con_win *cwin)
+static GtkUIManager*
+create_header_library_tree_context_menu(GtkWidget *library_tree,
+                                        struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2235,15 +2361,39 @@ static GtkUIManager* create_header_library_tree_context_menu(GtkWidget *library_
 	return context_menu;
 }
 
-static void
-update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
+static GtkUIManager*
+create_library_page_context_menu(struct con_win *cwin)
 {
-	/*
-	 * Rework to olny update Playlist and radio tree!!!.
-	 **/
-	library_pane_view_reload(cwin->clibrary);
-	update_menu_playlist_changes(cwin);
+	GtkUIManager *context_menu = NULL;
+	GtkActionGroup *context_actions;
+	GError *error = NULL;
+
+	context_actions = gtk_action_group_new("Library Page Context Actions");
+	context_menu = gtk_ui_manager_new();
+
+	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
+
+	if (!gtk_ui_manager_add_ui_from_string(context_menu,
+					       library_page_context_menu_xml,
+					       -1, &error)) {
+		g_critical("Unable to create library page context menu, err : %s",
+			   error->message);
+	}
+
+	gtk_action_group_add_actions(context_actions,
+				     library_page_context_aentries,
+				     G_N_ELEMENTS(library_page_context_aentries),
+				     (gpointer)cwin);
+	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
+				   gtk_ui_manager_get_accel_group(context_menu));
+	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	return context_menu;
 }
+
+/********************************/
+/* Construction of library pane */
+/********************************/
 
 static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_win *cwin)
 {
@@ -2332,35 +2482,6 @@ static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_wi
 	g_object_unref(library_filter_tree);
 	
 	return library_tree;
-}
-
-static GtkUIManager* create_library_page_context_menu(struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("Library Page Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       library_page_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create library page context menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(context_actions,
-				     library_page_context_aentries,
-				     G_N_ELEMENTS(library_page_context_aentries),
-				     (gpointer)cwin);
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(context_menu));
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	return context_menu;
 }
 
 static void
