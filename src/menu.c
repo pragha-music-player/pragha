@@ -877,7 +877,7 @@ void about_widget(struct con_win *cwin)
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(cwin->mainwindow),
-				"logo", cwin->pixbuf->pixbuf_app,
+				"logo", cwin->pixbuf_app,
 				"authors", authors,
 				"translator-credits", _("translator-credits"),
 				"comments", "A lightweight GTK+ music player",

@@ -305,14 +305,6 @@ void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(cwin->info_box), widget);
 }
 
-static void pixbufs_free (struct pixbuf *pixbuf)
-{
-	if (pixbuf->pixbuf_app)
-		g_object_unref(pixbuf->pixbuf_app);
-
-	g_slice_free(struct pixbuf, pixbuf);
-}
-
 void gui_free (struct con_win *cwin)
 {
 	const gchar *user_config_dir;
@@ -326,8 +318,8 @@ void gui_free (struct con_win *cwin)
 
 	/* Free memory */
 
-	pixbufs_free(cwin->pixbuf);
-	cwin->pixbuf = NULL;
+	if (cwin->pixbuf_app)
+		g_object_unref(cwin->pixbuf_app);
 	gtk_widget_destroy(GTK_WIDGET(cwin->albumart));
 	g_free(pragha_accels_path);
 }

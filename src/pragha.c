@@ -81,7 +81,6 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	cwin = g_slice_new0(struct con_win);
-	cwin->pixbuf = g_slice_new0(struct pixbuf);
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
 #ifdef HAVE_LIBCLASTFM

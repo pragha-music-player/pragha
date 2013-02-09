@@ -448,10 +448,6 @@ enum track_source {
 	UNKNOWN_SOURCE
 };
 
-struct pixbuf {
-	GdkPixbuf *pixbuf_app;
-};
-
 typedef struct {
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;
@@ -643,7 +639,6 @@ typedef struct {
 } PraghaLibraryPane;
 
 struct con_win {
-	struct pixbuf *pixbuf;
 	struct con_pref *cpref;
 	struct con_state *cstate;
 	PraghaPlaylist *cplaylist;
@@ -659,6 +654,7 @@ struct con_win {
 	struct con_mpris2 *cmpris2;
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
+	GdkPixbuf *pixbuf_app;
 	GtkWidget *toolbar;
 	GtkWidget *info_box;
 	PraghaAlbumArt *albumart;
