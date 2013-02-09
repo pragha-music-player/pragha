@@ -867,20 +867,20 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
-				popup_menu = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+				popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
 									"/popup");
 
-				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
 									"/popup/Rename");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 && gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
 									"/popup/Delete");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->playlist_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
 									"/popup/Export");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 &&
@@ -889,10 +889,10 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			}
 			else {
 				if (gtk_tree_path_get_depth(path) > 1)
-					popup_menu = gtk_ui_manager_get_widget(cwin->library_tree_context_menu,
+					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
 									       "/popup");
 				else
-					popup_menu = gtk_ui_manager_get_widget(cwin->header_library_tree_context_menu,
+					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->header_library_tree_context_menu,
 									       "/popup");
 			}
 
@@ -951,7 +951,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 	gboolean ret = FALSE;
 
 	if(!popup_menu){
-		popup_menu = gtk_ui_manager_get_widget(cwin->library_page_context_menu,
+		popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_page_context_menu,
 						       "/popup");
 		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), widget, NULL);
 	}
@@ -2554,14 +2554,6 @@ static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_wi
 	g_signal_connect (G_OBJECT (library_tree), "key-press-event",
 			  G_CALLBACK(library_tree_key_press), cwin);
 
-	/* Create right click popup menu */
-
-	cwin->library_tree_context_menu = create_library_tree_context_menu(library_tree,
-									   cwin);
-
-	cwin->header_library_tree_context_menu = create_header_library_tree_context_menu(library_tree,
-											 cwin);
-
 	/* Signal handler for right-clicking and selection */
  
  	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
@@ -2638,14 +2630,6 @@ create_library_view_options_combo(PraghaLibraryPane *clibrary, struct con_win *c
 			   0);
 
 	gtk_container_add (GTK_CONTAINER(button), hbox);
-
-	/* Create library page context menu */
-
-	cwin->library_page_context_menu = create_library_page_context_menu(cwin);
-
-	/* Create right click popup menu */
-
-	cwin->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
 
 	g_signal_connect(G_OBJECT(button),
 			 "button-press-event",
@@ -2857,6 +2841,11 @@ pragha_library_pane_new(struct con_win *cwin)
 	clibrary->view_change = TRUE;
 	clibrary->timeout_id = 0;
 	clibrary->library_tree_nodes = NULL;
+
+	clibrary->library_page_context_menu = create_library_page_context_menu(cwin);
+	clibrary->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
+	clibrary->library_tree_context_menu = create_library_tree_context_menu(clibrary->library_tree, cwin);
+	clibrary->header_library_tree_context_menu = create_header_library_tree_context_menu(clibrary->library_tree, cwin);
 
 	pragha_library_pane_init_pixbufs(clibrary);
 
