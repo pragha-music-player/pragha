@@ -965,7 +965,7 @@ gboolean library_page_right_click_cb(GtkWidget *widget,
 			break;
 		}
 		case 1: {
-			if (widget == cwin->clibrary->combo_order){
+			if (widget == cwin->clibrary->header_menu_button){
 				gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
 						(GtkMenuPositionFunc) menu_position, widget, 
 						0, gtk_get_current_event_time());
@@ -1389,7 +1389,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				              GINT_TO_POINTER(NODE_BASENAME));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Folders structure"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Folders structure"));
 			break;
 		case ARTIST:
 			clibrary->library_tree_nodes =
@@ -1398,7 +1398,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Artist"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Artist"));
 			break;
 		case ALBUM:
 			clibrary->library_tree_nodes =
@@ -1407,7 +1407,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Album"));
 			break;
 		case GENRE:
 			clibrary->library_tree_nodes =
@@ -1416,7 +1416,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Genre"));
 			break;
 		case ARTIST_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1428,7 +1428,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Artist / Album"));
 			break;
 		case GENRE_ARTIST:
 			clibrary->library_tree_nodes =
@@ -1440,7 +1440,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Artist"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Genre / Artist"));
 			break;
 		case GENRE_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1452,7 +1452,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Genre / Album"));
 			break;
 		case GENRE_ARTIST_ALBUM:
 			clibrary->library_tree_nodes =
@@ -1467,7 +1467,7 @@ library_pane_update_style (PraghaLibraryPane *clibrary)
 			clibrary->library_tree_nodes =
 				g_slist_append(clibrary->library_tree_nodes,
 				               GINT_TO_POINTER(NODE_TRACK));
-			gtk_label_set_text (GTK_LABEL(clibrary->combo_order_label), _("Genre / Artist / Album"));
+			gtk_label_set_text (GTK_LABEL(clibrary->header_label), _("Genre / Artist / Album"));
 			break;
 		default:
 			break;
@@ -2493,29 +2493,32 @@ create_library_page_context_menu(struct con_win *cwin)
 /* Construction of library pane */
 /********************************/
 
-static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_win *cwin)
+static GtkTreeStore *
+pragha_library_pane_store_new()
+{
+	GtkTreeStore *store;
+	store = gtk_tree_store_new(N_L_COLUMNS,
+	                           GDK_TYPE_PIXBUF, /* Pixbuf */
+	                           G_TYPE_STRING,   /* Node */
+	                           G_TYPE_INT,      /* Node type : Artist / Album / Track */
+	                           G_TYPE_INT,      /* Location id (valid only for Track) */
+	                           G_TYPE_BOOLEAN,  /* Flag to save mach when filtering */
+	                           G_TYPE_BOOLEAN); /* Row visibility */
+	return store;
+}
+
+static GtkWidget*
+pragha_library_pane_tree_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
 {
 	GtkWidget *library_tree;
 	GtkTreeModel *library_filter_tree;
-	GtkTreeStore *store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
 
-	/* Create the tree store */
-
-	store = gtk_tree_store_new(N_L_COLUMNS,
-				   GDK_TYPE_PIXBUF, /* Pixbuf */
-				   G_TYPE_STRING,   /* Node */
-				   G_TYPE_INT,      /* Node type : Artist / Album / Track */
-				   G_TYPE_INT,      /* Location id (valid only for Track) */
-				   G_TYPE_BOOLEAN,  /* Flag to save mach when filtering */
-				   G_TYPE_BOOLEAN); /* Row visibility */
-
-
 	/* Create the filter model */
 
-	library_filter_tree = gtk_tree_model_filter_new(GTK_TREE_MODEL(store), NULL);
+	library_filter_tree = gtk_tree_model_filter_new(GTK_TREE_MODEL(clibrary->library_store), NULL);
 	gtk_tree_model_filter_set_visible_column(GTK_TREE_MODEL_FILTER(library_filter_tree),
 						 L_VISIBILE);
 	/* Create the tree view */
@@ -2562,15 +2565,8 @@ static GtkWidget* create_library_tree(PraghaLibraryPane *clibrary, struct con_wi
 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
 			 G_CALLBACK(library_tree_button_release_cb), cwin);
 
-	/* Save references and configure dnd */
-
-	clibrary->library_store = store;
-	clibrary->library_tree = library_tree;
-
-	library_pane_init_dnd(clibrary);
-
 	g_object_unref(library_filter_tree);
-	
+
 	return library_tree;
 }
 
@@ -2638,14 +2634,13 @@ create_library_view_options_combo(PraghaLibraryPane *clibrary, struct con_win *c
 
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), _("Options of the library"));
 
-	clibrary->combo_order = button;
-	clibrary->combo_order_label = label_order;
+	clibrary->header_label = label_order;
 
 	return button;
 }
 
 GtkWidget *
-create_sidebar_header(PraghaLibraryPane *clibrary, struct con_win *cwin)
+pragha_library_pane_header_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
 {
 	GtkWidget *hbox, *combo, *close_button;
 
@@ -2665,55 +2660,18 @@ create_sidebar_header(PraghaLibraryPane *clibrary, struct con_win *cwin)
 			   FALSE,
 			   0);
 
+	clibrary->header_menu_button = combo;
+
 	return hbox;
 }
 
 static GtkWidget*
-library_pane_create_widgets(PraghaLibraryPane *clibrary, struct con_win *cwin)
+pragha_library_pane_search_entry_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
 {
-	GtkWidget *vbox_lib;
-	GtkWidget *header, *search_entry, *library_tree_scroll, *library_tree;
+	GtkWidget *search_entry;
 
-	vbox_lib = gtk_vbox_new(FALSE, 2);
-
-	/* The header to select order and close the pane */
-	header = create_sidebar_header (clibrary, cwin);
-
-	/* The filter entry */
 	search_entry = pragha_search_entry_new(cwin);
 
-	/* The scrroll and library tree. */
-	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
-					GTK_SHADOW_IN);
-	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
-
-	library_tree = create_library_tree(clibrary, cwin);
-
-	/* Package all */
-
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-	                   header,
-	                   FALSE,
-	                   FALSE,
-	                   0);
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-	                   search_entry,
-	                   FALSE,
-	                   FALSE,
-	                   0);
-	gtk_container_add(GTK_CONTAINER(library_tree_scroll),
-	                  library_tree);
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-	                   library_tree_scroll,
-	                   TRUE,
-	                   TRUE,
-	                   0);
-
-	/* Conect signals */
 	g_signal_connect (G_OBJECT(search_entry),
 	                  "changed",
 	                  G_CALLBACK(simple_library_search_keyrelease_handler),
@@ -2723,8 +2681,44 @@ library_pane_create_widgets(PraghaLibraryPane *clibrary, struct con_win *cwin)
 	                  G_CALLBACK(simple_library_search_activate_handler),
 	                  clibrary);
 
-	/* Save references */
-	clibrary->search_entry = search_entry;
+	return search_entry;
+}
+
+static GtkWidget*
+pragha_library_pane_create_widget(PraghaLibraryPane *clibrary, struct con_win *cwin)
+{
+	GtkWidget *vbox_lib;
+	GtkWidget *library_tree_scroll;
+
+	vbox_lib = gtk_vbox_new(FALSE, 2);
+
+	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
+				       GTK_POLICY_AUTOMATIC,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
+					GTK_SHADOW_IN);
+	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
+
+	/* Package all */
+
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   clibrary->header,
+	                   FALSE,
+	                   FALSE,
+	                   0);
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   clibrary->search_entry,
+	                   FALSE,
+	                   FALSE,
+	                   0);
+	gtk_container_add(GTK_CONTAINER(library_tree_scroll),
+	                  clibrary->library_tree);
+	gtk_box_pack_start(GTK_BOX(vbox_lib),
+	                   library_tree_scroll,
+	                   TRUE,
+	                   TRUE,
+	                   0);
 
 	return vbox_lib;
 }
@@ -2831,10 +2825,33 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	clibrary = g_slice_new0(PraghaLibraryPane);
 
+	/* Get usefuls instances */
+
 	clibrary->cdbase = pragha_database_get();
 	clibrary->preferences = pragha_preferences_get();
 
-	clibrary->widget = library_pane_create_widgets(clibrary, cwin);
+	/* Create the store */
+
+	clibrary->library_store = pragha_library_pane_store_new();
+
+	/* Create the widgets */
+
+	clibrary->header = pragha_library_pane_header_new (clibrary, cwin);
+	clibrary->search_entry = pragha_library_pane_search_entry_new(clibrary, cwin);
+	clibrary->library_tree = pragha_library_pane_tree_new(clibrary, cwin);
+
+	/* Create main widget */
+
+	clibrary->widget = pragha_library_pane_create_widget(clibrary, cwin);
+
+	/* Create context menus */
+
+	clibrary->library_page_context_menu = create_library_page_context_menu(cwin);
+	clibrary->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
+	clibrary->library_tree_context_menu = create_library_tree_context_menu(clibrary->library_tree, cwin);
+	clibrary->header_library_tree_context_menu = create_header_library_tree_context_menu(clibrary->library_tree, cwin);
+
+	/* Init the rest of flags */
 
 	clibrary->filter_entry = NULL;
 	clibrary->dragging = FALSE;
@@ -2842,10 +2859,11 @@ pragha_library_pane_new(struct con_win *cwin)
 	clibrary->timeout_id = 0;
 	clibrary->library_tree_nodes = NULL;
 
-	clibrary->library_page_context_menu = create_library_page_context_menu(cwin);
-	clibrary->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
-	clibrary->library_tree_context_menu = create_library_tree_context_menu(clibrary->library_tree, cwin);
-	clibrary->header_library_tree_context_menu = create_header_library_tree_context_menu(clibrary->library_tree, cwin);
+	/* Init drag and drop */
+
+	library_pane_init_dnd(clibrary);
+
+	/* Init pixbufs */
 
 	pragha_library_pane_init_pixbufs(clibrary);
 

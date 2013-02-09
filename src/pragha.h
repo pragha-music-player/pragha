@@ -620,11 +620,12 @@ typedef struct {
 	PraghaDatabase *cdbase;
 	PraghaPreferences *preferences;
 	GtkTreeStore *library_store;
-	GtkWidget *library_tree;
+	GtkWidget *header;
+	GtkWidget *header_menu_button;
+	GtkWidget *header_label;
 	GtkWidget *search_entry;
+	GtkWidget *library_tree;
 	GtkWidget *widget;
-	GtkWidget *combo_order;
-	GtkWidget *combo_order_label;
 	gboolean dragging;
 	gboolean view_change;
 	gchar *filter_entry;
