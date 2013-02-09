@@ -685,7 +685,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
 			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-			pragha_database_change_tracks_done(cwin->cdbase);
+			if(pragha_library_need_update(cwin->clibrary, changed))
+				pragha_database_change_tracks_done(cwin->cdbase);
 		}
 		g_array_free(loc_arr, TRUE);
 

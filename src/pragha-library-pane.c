@@ -1343,6 +1343,63 @@ void clear_library_search(PraghaLibraryPane *clibrary)
 	pragha_library_expand_categories(clibrary);
 }
 
+/*
+ * Return if you must update the library according to the changes, and the current view.
+ */
+
+gboolean
+pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
+{
+	gboolean need_update = FALSE;
+
+	switch (pragha_preferences_get_library_style(clibrary->preferences)) {
+		case FOLDERS:
+			break;
+		case ARTIST:
+			need_update = ((changed & TAG_ARTIST_CHANGED) ||
+			               (changed & TAG_TITLE_CHANGED));
+
+			break;
+		case ALBUM:
+			need_update = ((changed & TAG_ALBUM_CHANGED) ||
+			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		case GENRE:
+			need_update = ((changed & TAG_GENRE_CHANGED) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		case ARTIST_ALBUM:
+			need_update = ((changed & TAG_ARTIST_CHANGED) ||
+			               (changed & TAG_ALBUM_CHANGED) ||
+			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		case GENRE_ARTIST:
+			need_update = ((changed & TAG_GENRE_CHANGED) ||
+			               (changed & TAG_ARTIST_CHANGED) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		case GENRE_ALBUM:
+			need_update = ((changed & TAG_GENRE_CHANGED) ||
+			               (changed & TAG_ALBUM_CHANGED) ||
+			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		case GENRE_ARTIST_ALBUM:
+			need_update = ((changed & TAG_GENRE_CHANGED) ||
+			               (changed & TAG_ARTIST_CHANGED) ||
+			               (changed & TAG_ALBUM_CHANGED) ||
+			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (changed & TAG_TITLE_CHANGED));
+			break;
+		default:
+			break;
+	}
+
+	return need_update;
+}
+
 /********************************/
 /* Library view order selection */
 /********************************/
@@ -2263,7 +2320,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 
 	/* Updata the db changes */
 	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
-	pragha_database_change_tracks_done(cwin->cdbase);
+	if(pragha_library_need_update(cwin->clibrary, changed))
+		pragha_database_change_tracks_done(cwin->cdbase);
 
 	/* Get a array of files and update it */
 	file_arr = g_ptr_array_new();
