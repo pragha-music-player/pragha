@@ -860,7 +860,7 @@ void simple_library_search_keyrelease(struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
 gboolean simple_library_search_activate_handler(GtkEntry *entry, PraghaLibraryPane *clibrary);
 void clear_library_search(PraghaLibraryPane *clibrary);
-
+gboolean pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed);
 void library_pane_view_reload(PraghaLibraryPane *clibrary);
 void pragha_library_pane_init_view(PraghaLibraryPane *clibrary, struct con_win *cwin);
 GtkWidget *pragha_library_pane_get_widget(PraghaLibraryPane *librarypane);
