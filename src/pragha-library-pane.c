@@ -2683,6 +2683,12 @@ pragha_library_pane_init_view(PraghaLibraryPane *clibrary, struct con_win *cwin)
 	library_pane_view_reload(clibrary);
 }
 
+GtkWidget *
+pragha_library_pane_get_widget(PraghaLibraryPane *librarypane)
+{
+	return librarypane->widget;
+}
+
 PraghaLibraryPane *
 pragha_library_pane_new(struct con_win *cwin)
 {

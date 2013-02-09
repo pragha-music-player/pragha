@@ -36,12 +36,18 @@ pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *popup_menu)
 }
 
 void
-pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget)
+pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *pane)
 {
 	gtk_notebook_insert_page(GTK_NOTEBOOK(sidebar->container),
-	                         widget,
+	                         pane,
 	                         NULL,
 	                         0);
+}
+
+GtkWidget *
+pragha_sidebar_get_widget(PraghaSidebar *sidebar)
+{
+	return sidebar->widget;
 }
 
 /*
