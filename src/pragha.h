@@ -1146,7 +1146,7 @@ gboolean is_incompatible_upgrade(struct con_win *cwin);
 /* Some widgets. */
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
-GtkWidget* pragha_search_entry_new(struct con_win *cwin);
+GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
 
 /* GUI */
 

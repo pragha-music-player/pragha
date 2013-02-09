@@ -1445,7 +1445,6 @@ library_pane_change_style (GObject *gobject, GParamSpec *pspec, gpointer user_da
 	library_pane_view_reload(cwin->clibrary);
 }
 
-
 /*********************************/
 /* Functions to reload playlist. */
 /*********************************/
@@ -1741,7 +1740,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
-	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate", clibrary);
+	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
 
 	remove_watch_cursor (clibrary->widget);
 
@@ -2540,11 +2539,11 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
 }
 
 static GtkWidget*
-pragha_library_pane_search_entry_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
+pragha_library_pane_search_entry_new(PraghaLibraryPane *clibrary)
 {
 	GtkWidget *search_entry;
 
-	search_entry = pragha_search_entry_new(cwin);
+	search_entry = pragha_search_entry_new(clibrary->preferences);
 
 	g_signal_connect (G_OBJECT(search_entry),
 	                  "changed",
@@ -2702,7 +2701,7 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	/* Create the widgets */
 
-	clibrary->search_entry = pragha_library_pane_search_entry_new(clibrary, cwin);
+	clibrary->search_entry = pragha_library_pane_search_entry_new(clibrary);
 	clibrary->library_tree = pragha_library_pane_tree_new(clibrary, cwin);
 
 	/* Create main widget */
