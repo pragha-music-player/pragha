@@ -635,6 +635,10 @@ typedef struct {
 	GdkPixbuf *pixbuf_track;
 	GdkPixbuf *pixbuf_genre;
 	GdkPixbuf *pixbuf_dir;
+	GtkUIManager *library_page_context_menu;
+	GtkUIManager *playlist_tree_context_menu;
+	GtkUIManager *library_tree_context_menu;
+	GtkUIManager *header_library_tree_context_menu;
 } PraghaLibraryPane;
 
 struct con_win {
@@ -676,10 +680,6 @@ struct con_win {
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
-	GtkUIManager *playlist_tree_context_menu;
-	GtkUIManager *library_tree_context_menu;
-	GtkUIManager *header_library_tree_context_menu;
-	GtkUIManager *library_page_context_menu;
 	GtkUIManager *systray_menu;
 #ifdef HAVE_LIBGLYR
 	GlyrDatabase *cache_db;
