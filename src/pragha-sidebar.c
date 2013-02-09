@@ -38,9 +38,10 @@ pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *popup_menu)
 void
 pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget)
 {
-	gtk_notebook_append_page(GTK_NOTEBOOK(sidebar->container),
+	gtk_notebook_insert_page(GTK_NOTEBOOK(sidebar->container),
 	                         widget,
-	                         NULL);
+	                         NULL,
+	                         0);
 }
 
 /*
@@ -64,6 +65,9 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
 	gboolean ret = FALSE;
 
 	if(!sidebar->popup_menu)
+		return FALSE;
+
+	if(!gtk_widget_get_sensitive(gtk_notebook_get_nth_page (GTK_NOTEBOOK(sidebar->container), 0)))
 		return FALSE;
 
 	switch(event->button) {
