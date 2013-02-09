@@ -1300,12 +1300,29 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 	return FALSE;
 }
 
-void clear_library_search(PraghaLibraryPane *clibrary)
+void
+pragha_library_expand_categories(PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *filter_model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	gboolean valid;
+
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
+
+	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
+	while (valid) {
+		path = gtk_tree_model_get_path(filter_model, &iter);
+		gtk_tree_view_expand_row (GTK_TREE_VIEW(clibrary->library_tree), path, FALSE);
+		gtk_tree_path_free(path);
+
+		valid = gtk_tree_model_iter_next(filter_model, &iter);
+	}
+}
+
+void clear_library_search(PraghaLibraryPane *clibrary)
+{
+	GtkTreeModel *filter_model;
 
 	/* Remove the model of widget. */
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
@@ -1323,14 +1340,7 @@ void clear_library_search(PraghaLibraryPane *clibrary)
 
 	/* Expand the categories. */
 
-	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
-	while (valid) {
-		path = gtk_tree_model_get_path(filter_model, &iter);
-		gtk_tree_view_expand_row (GTK_TREE_VIEW(clibrary->library_tree), path, FALSE);
-		gtk_tree_path_free(path);
-
-		valid = gtk_tree_model_iter_next(filter_model, &iter);
-	}
+	pragha_library_expand_categories(clibrary);
 }
 
 /********************************/
@@ -1739,7 +1749,10 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
-
+	
+	/*
+	 * Why not can only expand categories?. All nodes added with L_VISIBILE = TRUE.
+	 */
 	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
 
 	remove_watch_cursor (clibrary->widget);
@@ -1790,7 +1803,10 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
 
-	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
+	if(clibrary->filter_entry)
+		g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
+	else
+		pragha_library_expand_categories(clibrary);
 
 	remove_watch_cursor (clibrary->widget);
 
