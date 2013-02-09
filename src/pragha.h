@@ -642,6 +642,7 @@ typedef struct {
 	GtkWidget *menu_button;
 	GtkWidget *close_button;
 	GtkWidget *label;
+	GtkMenu *popup_menu;
 } PraghaSidebar;
 
 struct con_win {
@@ -1223,7 +1224,7 @@ void pragha_advance_playback (struct con_win *cwin);
 /* pragha-sidebar.c Very simple sidebar widget. */
 
 void pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text);
-void pragha_sidebar_atach_menu(PraghaSidebar *sidebar, GtkMenu *menu);
+void pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *menu);
 void pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget);
 void pragha_sidebar_free(PraghaSidebar *sidebar);
 PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);

@@ -943,44 +943,6 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 	return FALSE;
 }
 
-gboolean library_page_right_click_cb(GtkWidget *widget,
-				     GdkEventButton *event,
-				     struct con_win *cwin)
-{
-	static GtkWidget *popup_menu = NULL;
-	gboolean ret = FALSE;
-
-	if(!popup_menu){
-		popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_page_context_menu,
-						       "/popup");
-		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), widget, NULL);
-	}
-
-	if (!cwin->clibrary->view_change) {
-		switch(event->button) {
-		case 3: {
-			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
-				       event->button, event->time);
-			ret = TRUE;
-			break;
-		}
-		case 1: {
-			if (widget == cwin->sidebar->menu_button){
-				gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
-						(GtkMenuPositionFunc) menu_position, widget, 
-						0, gtk_get_current_event_time());
-				ret = TRUE;
-			}
-			break;
-		}
-		default:
-			ret = FALSE;
-			break;
-		}
-	}
-	return ret;
-}
-
 /*******/
 /* DnD */
 /*******/
