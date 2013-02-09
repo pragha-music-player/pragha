@@ -873,6 +873,7 @@ static void
 pragha_preferences_class_init (PraghaPreferencesClass *klass)
 {
    GObjectClass *object_class;
+   const GParamFlags PRAGHA_PREF_PARAMS = G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS;
 
    object_class = G_OBJECT_CLASS(klass);
    object_class->finalize = pragha_preferences_finalize;
@@ -889,8 +890,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "InstantSearch",
                            "Instant Search Preference",
                            TRUE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:approximate_searches:
@@ -901,8 +901,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "ApproximateSearches",
                            "Approximate Searches Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:shuffle:
@@ -913,8 +912,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "Shuffle",
                            "Shuffle Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:repeat:
@@ -925,8 +923,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "Repeat",
                            "Repeat Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:use_hint:
@@ -936,9 +933,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
       g_param_spec_boolean("use-hint",
                            "UseHint",
                            "Use hint Preference",
-                           FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:restore_playlist:
@@ -948,9 +944,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
       g_param_spec_boolean("restore-playlist",
                            "RestorePlaylist",
                            "Restore Playlist Preference",
-                           FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:audio_sink:
@@ -961,8 +956,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                           "AudioSink",
                           "Audio Sink",
                           DEFAULT_SINK,
-                          G_PARAM_READWRITE |
-                          G_PARAM_STATIC_STRINGS);
+                          PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:audio_device:
@@ -973,8 +967,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                           "AudioDevice",
                           "Audio Device",
                           ALSA_DEFAULT_DEVICE,
-                          G_PARAM_READWRITE |
-                          G_PARAM_STATIC_STRINGS);
+                          PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:software_mixer:
@@ -985,8 +978,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "SoftwareMixer",
                            "Use Software Mixer",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:audio_cd_device:
@@ -997,8 +989,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                           "AudioCDDevice",
                           "Audio CD Device",
                           NULL,
-                          G_PARAM_READWRITE |
-                          G_PARAM_STATIC_STRINGS);
+                          PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:lateral_panel:
@@ -1008,9 +999,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
       g_param_spec_boolean("lateral-panel",
                            "LateralPanel",
                            "Show Lateral Panel Preference",
-                           FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:add_recursively:
@@ -1021,8 +1011,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "AddRecursively",
                            "Add Recursively Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:timer_remaining_mode:
@@ -1033,8 +1022,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "TimerRemainingMode",
                            "Timer Remaining Mode Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }
