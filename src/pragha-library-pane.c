@@ -1750,10 +1750,52 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 static void
 update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 {
-	/*
-	 * Rework to olny update Playlist and radio tree!!!.
-	 **/
-	library_pane_view_reload(cwin->clibrary);
+	GtkTreeModel *model, *filter_model;
+	GtkTreeIter c_iter, iter;
+
+	PraghaLibraryPane *clibrary = cwin->clibrary;
+
+	clibrary->view_change = TRUE;
+
+	set_watch_cursor (clibrary->widget);
+
+	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
+	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
+
+	g_object_ref(filter_model);
+
+	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), FALSE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
+
+	if(find_child_node(_("Playlists"), &c_iter, NULL, model)) {
+		while (gtk_tree_model_iter_nth_child(model, &iter, &c_iter, 0)) {
+			gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
+		}
+		library_view_append_playlists(model,
+				              &c_iter,
+				              clibrary);
+	}
+
+	if(find_child_node(_("Radios"), &c_iter, NULL, model)) {
+		while (gtk_tree_model_iter_nth_child(model, &iter, &c_iter, 0)) {
+			gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
+		}
+		library_view_append_radios(model,
+				           &c_iter,
+				           clibrary);
+	}
+
+	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), TRUE);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
+	g_object_unref(filter_model);
+
+	g_signal_emit_by_name (G_OBJECT (clibrary->search_entry), "activate");
+
+	remove_watch_cursor (clibrary->widget);
+
+	clibrary->view_change = FALSE;
+
 	update_menu_playlist_changes(cwin);
 }
 
