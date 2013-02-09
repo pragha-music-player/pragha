@@ -39,6 +39,7 @@ pragha_SOURCES =cdda.c \
 		pragha-preferences.c \
 		pragha-prepared-statement.c \
 		pragha-scanner.c \
+		pragha-sidebar.c \
 		pragha-simple-async.c \
 		pragha-statusbar.c \
 		pref.c \
