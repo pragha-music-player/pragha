@@ -1685,8 +1685,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	g_object_ref(filter_model);
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->search_entry), FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->library_tree), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
 
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
@@ -1737,8 +1736,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	/* Sensitive, set model and filter */
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->search_entry), TRUE);
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->library_tree), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), TRUE);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
