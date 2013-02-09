@@ -677,8 +677,8 @@ void init_menu_actions(struct con_win *cwin)
 
 void init_pixbufs(struct con_win *cwin)
 {
-	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
-	if (!cwin->pixbuf->pixbuf_app)
+	cwin->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
+	if (!cwin->pixbuf_app)
 		g_warning("Unable to load pragha png");
 }
 
@@ -755,9 +755,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	if (cwin->pixbuf->pixbuf_app)
+	if (cwin->pixbuf_app)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
-				    cwin->pixbuf->pixbuf_app);
+		                    cwin->pixbuf_app);
 
 	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
 
