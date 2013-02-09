@@ -49,12 +49,9 @@ pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget)
  */
 
 static void
-pragha_sidebar_close (GtkWidget *widget, struct con_win *cwin)
+pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
 {
-	GtkAction *action;
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
-
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
+	gtk_widget_hide(GTK_WIDGET(sidebar->widget));
 }
 
 static gboolean
@@ -144,7 +141,7 @@ praga_sidebar_menu_button_new(PraghaSidebar *sidebar)
 }
 
 GtkWidget *
-pragha_sidebar_close_button_new(PraghaSidebar *sidebar, struct con_win *cwin)
+pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *button, *image;
     
@@ -156,8 +153,8 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar, struct con_win *cwin)
 
 	g_signal_connect(G_OBJECT (button),
 	                 "clicked",
-	                 G_CALLBACK(pragha_sidebar_close),
-	                 cwin);
+	                 G_CALLBACK(pragha_sidebar_close_button_cb),
+	                 sidebar);
 
 	return button;
 }
@@ -232,7 +229,7 @@ pragha_sidebar_new(struct con_win *cwin)
 
 	sidebar->label = praga_sidebar_label_new();
 	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar);
-	sidebar->close_button = pragha_sidebar_close_button_new(sidebar, cwin);
+	sidebar->close_button = pragha_sidebar_close_button_new(sidebar);
 
 	sidebar->header = pragha_sidebar_header_new(sidebar);
 	sidebar->container = pragha_sidebar_container_new(sidebar);
