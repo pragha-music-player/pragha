@@ -1773,10 +1773,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 		library_view_complete_tags_view(model, &iter, clibrary);
 	}
 
-	/* Refresh tag completion entries, sensitive, set model and filter */
-
-	/* TODO: Move to database?
-	 *refresh_tag_completion_entries(cwin); */
+	/* Sensitive, set model and filter */
 
 	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->search_entry), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->library_tree), TRUE);
@@ -1799,6 +1796,10 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	 **/
 	library_pane_view_reload(cwin->clibrary);
 	update_menu_playlist_changes(cwin);
+
+	/* Refresh tag completion entries */
+
+	refresh_tag_completion_entries(cwin);
 }
 
 /*************************************/
