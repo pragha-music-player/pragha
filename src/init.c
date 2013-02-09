@@ -873,6 +873,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		#endif
 	}
 
+	/* TODO: Move it to PraghaSidebar construction. */
 	g_object_bind_property (cwin->preferences, "lateral-panel",
 	                        cwin->sidebar->widget, "visible",
 	                        binding_flags);
