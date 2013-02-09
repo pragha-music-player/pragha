@@ -2024,9 +2024,107 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 		pragha_database_change_playlists_done(cwin->cdbase);
 }
 
-/* TODO: mudularize: void playlist_tree_export(GtkAction *action, struct con_win *cwin);
- * And compy here..
- */
+void playlist_tree_export(GtkAction *action, struct con_win *cwin)
+{
+	GIOChannel *chan = NULL;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *list, *i;
+	GError *err = NULL;
+	gint cnt;
+	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL;
+	gint node_type;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	cnt = (gtk_tree_selection_count_selected_rows(selection));
+
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	path = list->data;
+
+	/* If only is 'Playlist' node, just return, else get playlistname. */
+	if ((cnt == 1) && (gtk_tree_path_get_depth(path) == 1)) {
+		gtk_tree_path_free(path);
+		g_list_free(list);
+		return;
+	}
+	else {
+		gtk_tree_model_get_iter(model, &iter, path);
+		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlistpath, -1);
+
+		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
+		if(node_type != NODE_PLAYLIST) {
+			gtk_tree_path_free(path);
+			g_list_free(list);
+			return;
+		}
+	}
+
+	filename = playlist_export_dialog_get_filename(playlistpath, cwin->mainwindow);
+
+	if (!filename)
+		goto exit;
+
+	chan = create_m3u_playlist(filename);
+	if (!chan) {
+		g_warning("Unable to create M3U playlist file: %s", filename);
+		goto exit;
+	}
+
+	set_watch_cursor (cwin->mainwindow);
+
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	if (list) {
+		/* Export all the playlists to the given file */
+
+		for (i=list; i != NULL; i = i->next) {
+			path = i->data;
+			if (gtk_tree_path_get_depth(path) > 1) {
+				gtk_tree_model_get_iter(model, &iter, path);
+				gtk_tree_model_get(model, &iter, L_NODE_DATA,
+						   &playlist, -1);
+				if (save_m3u_playlist(chan, playlist,
+						      filename, cwin->cdbase) < 0) {
+					g_warning("Unable to save M3U playlist: %s",
+						  filename);
+					g_free(playlist);
+					goto exit_list;
+				}
+				g_free(playlist);
+			}
+			gtk_tree_path_free(path);
+
+			/* Have to give control to GTK periodically ... */
+			if (pragha_process_gtk_events ()) {
+				g_list_free(list);
+				return;
+			}
+		}
+	}
+
+	if (chan) {
+		if (g_io_channel_shutdown(chan, TRUE, &err) != G_IO_STATUS_NORMAL) {
+			g_critical("Unable to save M3U playlist: %s", filename);
+			g_error_free(err);
+			err = NULL;
+		} else {
+			CDEBUG(DBG_INFO, "Saved M3U playlist: %s", filename);
+		}
+		g_io_channel_unref(chan);
+	}
+
+exit_list:
+	remove_watch_cursor (cwin->mainwindow);
+
+	if (list)
+		g_list_free(list);
+exit:
+	g_free(playlistpath);
+	g_free(filename);
+}
 
 /*
  * library_tree_context_menu_xml calbacks

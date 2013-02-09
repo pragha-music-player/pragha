@@ -899,8 +899,10 @@ GList *add_playlist_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList 
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, gchar *playlist, GList *list);
 gboolean delete_existing_item_dialog(const gchar *item, struct con_win *cwin);
 gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin);
+GIOChannel *create_m3u_playlist(gchar *file);
+gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase);
+gchar *playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent);
 void export_playlist (PraghaPlaylist* cplaylist, gint choice);
-void playlist_tree_export(GtkAction *action, struct con_win *cwin);
 GList *
 pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
