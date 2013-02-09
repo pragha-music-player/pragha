@@ -36,6 +36,12 @@
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
 #endif
 
+#if HAVE_GSTREAMER_AUDIO
+#include <gst/audio/gstaudiocdsrc.h>
+#else
+#define GST_IS_AUDIO_CD_SRC(x) TRUE
+#endif
+
 static void pragha_backend_evaluate_state(GstState old,
 					  GstState new,
 					  GstState pending,
@@ -107,27 +113,25 @@ emit_tick_cb (gpointer user_data)
 }
 
 static void
-pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
+pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, gpointer user_data)
 {
-	GObject *source;
-	gint file_type = 0;
-
+	PraghaBackend *backend = user_data;
 	PraghaBackendPrivate *priv = backend->priv;
-
-	file_type = pragha_musicobject_get_file_type(priv->mobj);
-
-	if(file_type != FILE_CDDA)
-		return;
+	GObject *source = NULL;
 
 	g_object_get (obj, "source", &source, NULL);
 
-	if (source) {
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(priv->preferences);
-		if (audio_cd_device) {
+	if (!source)
+		return;
+
+	if (GST_IS_AUDIO_CD_SRC (source)) {
+		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (priv->preferences);
+		if (string_is_not_empty (audio_cd_device)) {
 			g_object_set (source, "device", audio_cd_device, NULL);
 		}
-		g_object_unref (source);
 	}
+
+	g_object_unref (source);
 }
 
 gint64
