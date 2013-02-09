@@ -127,7 +127,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
 			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, tmobj2);
-			library_pane_view_reload(cwin->clibrary);
+			pragha_database_change_tracks_done(cwin->cdbase);
 		}
 		g_array_free(loc_arr, TRUE);
 

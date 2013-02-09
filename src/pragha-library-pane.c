@@ -1796,11 +1796,19 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	 **/
 	library_pane_view_reload(cwin->clibrary);
 	update_menu_playlist_changes(cwin);
+}
+
+static void
+update_library_tracks_changes(PraghaDatabase *database, struct con_win *cwin)
+{
+	/*
+	 * Rework to olny update library tree!!!.
+	 **/
+	library_pane_view_reload(cwin->clibrary);
 
 	/* Refresh tag completion entries */
 
-	refresh_tag_completion_entries(cwin);
-}
+	refresh_tag_completion_entries(cwin);}
 
 /*************************************/
 /* All menu handlers of library pane */
@@ -2232,7 +2240,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 
 	/* Updata the db changes */
 	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
-	library_pane_view_reload(cwin->clibrary);
+	pragha_database_change_tracks_done(cwin->cdbase);
 
 	/* Get a array of files and update it */
 	file_arr = g_ptr_array_new();
@@ -2310,7 +2318,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 			g_array_free(loc_arr, TRUE);
 
 			flush_stale_entries_db(cwin->clibrary->cdbase);
-			library_pane_view_reload(cwin->clibrary);
+			pragha_database_change_tracks_done(cwin->cdbase);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2357,7 +2365,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 			db_commit_transaction(cwin->clibrary->cdbase);
 
 			flush_stale_entries_db(cwin->clibrary->cdbase);
-			library_pane_view_reload(cwin->clibrary);
+			pragha_database_change_tracks_done(cwin->cdbase);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2868,6 +2876,7 @@ pragha_library_pane_new(struct con_win *cwin)
 	/* Conect signals */
 
 	g_signal_connect (clibrary->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
+	g_signal_connect (clibrary->cdbase, "TracksChanged", G_CALLBACK (update_library_tracks_changes), cwin);
 	g_signal_connect(clibrary->preferences, "notify::library-style", G_CALLBACK (library_pane_change_style), cwin);
 
 	return clibrary;
