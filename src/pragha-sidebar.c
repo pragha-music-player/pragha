@@ -28,9 +28,11 @@ pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text)
 }
 
 void
-pragha_sidebar_atach_menu(PraghaSidebar *sidebar, GtkMenu *menu)
+pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *popup_menu)
 {
-	gtk_menu_attach_to_widget(GTK_MENU(menu), sidebar->menu_button, NULL);
+	gtk_menu_attach_to_widget(GTK_MENU(popup_menu), sidebar->menu_button, NULL);
+
+	sidebar->popup_menu = popup_menu;
 }
 
 void
@@ -54,6 +56,41 @@ pragha_sidebar_close (GtkWidget *widget, struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 }
 
+static gboolean
+pragha_sidebar_right_click_cb(GtkWidget *widget,
+                              GdkEventButton *event,
+                              PraghaSidebar *sidebar)
+{
+	gboolean ret = FALSE;
+
+	if(!sidebar->popup_menu)
+		return FALSE;
+
+	switch(event->button) {
+		case 3:
+			gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
+			               NULL, NULL, NULL, NULL,
+			               event->button, event->time);
+			ret = TRUE;
+			break;
+		case 1:
+			if (widget == sidebar->menu_button) {
+				gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
+				                NULL, NULL,
+				                (GtkMenuPositionFunc) menu_position,
+				                widget,
+				                0,
+				                gtk_get_current_event_time());
+				ret = TRUE;
+			}
+			break;
+		default:
+			break;
+	}
+
+	return ret;
+}
+
 /**
  * Construction:
  **/
@@ -70,7 +107,7 @@ praga_sidebar_label_new()
 }
 
 GtkWidget *
-praga_sidebar_menu_button_new(PraghaSidebar *sidebar, struct con_win *cwin)
+praga_sidebar_menu_button_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *button, *hbox, *arrow;
 
@@ -94,10 +131,10 @@ praga_sidebar_menu_button_new(PraghaSidebar *sidebar, struct con_win *cwin)
 
 	gtk_container_add (GTK_CONTAINER(button), hbox);
 
-	/*g_signal_connect(G_OBJECT(button),
-			 "button-press-event",
-			 G_CALLBACK(library_page_right_click_cb),
-			 cwin);*/
+	g_signal_connect(G_OBJECT(button),
+	                 "button-press-event",
+	                 G_CALLBACK(pragha_sidebar_right_click_cb),
+	                 sidebar);
 
 	return button;
 }
@@ -190,13 +227,15 @@ pragha_sidebar_new(struct con_win *cwin)
 	sidebar = g_slice_new0(PraghaSidebar);
 
 	sidebar->label = praga_sidebar_label_new();
-	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar, cwin);
+	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar);
 	sidebar->close_button = pragha_sidebar_close_button_new(sidebar, cwin);
 
 	sidebar->header = pragha_sidebar_header_new(sidebar);
 	sidebar->container = pragha_sidebar_container_new(sidebar);
 
 	sidebar->widget = pragha_sidebar_widget_new(sidebar);
+
+	sidebar->popup_menu = NULL;
 
 	return sidebar;
 }

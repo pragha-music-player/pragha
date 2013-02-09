@@ -819,6 +819,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	cwin->clibrary = pragha_library_pane_new(cwin);
 
 	pragha_sidebar_add_widget(cwin->sidebar, cwin->clibrary->widget);
+	pragha_sidebar_attach_menu(cwin->sidebar,
+	                           GTK_MENU(gtk_ui_manager_get_widget(cwin->clibrary->library_page_context_menu, "/popup")));
 
 	hbox_main = create_main_region(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
