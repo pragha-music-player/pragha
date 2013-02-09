@@ -2820,9 +2820,6 @@ pragha_library_pane_new(struct con_win *cwin)
 {
 	PraghaLibraryPane *clibrary;
 
-	const GBindingFlags binding_flags =
-		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
-
 	clibrary = g_slice_new0(PraghaLibraryPane);
 
 	/* Get usefuls instances */
@@ -2871,7 +2868,6 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	g_signal_connect (clibrary->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
 	g_signal_connect(clibrary->preferences, "notify::library-style", G_CALLBACK (library_pane_change_style), cwin);
-	g_object_bind_property (clibrary->preferences, "lateral-panel", clibrary->widget, "visible", binding_flags);
 
 	return clibrary;
 }
