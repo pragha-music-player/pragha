@@ -33,6 +33,7 @@ static void common_cleanup(struct con_win *cwin)
 
 	cplaylist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
+	pragha_sidebar_free(cwin->sidebar);
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif

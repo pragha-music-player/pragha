@@ -70,7 +70,7 @@ static void init_gui_state(struct con_win *cwin)
 {
 	init_tag_completion(cwin);
 
-	pragha_library_pane_init_view(cwin->clibrary);
+	pragha_library_pane_init_view(cwin->clibrary, cwin);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
@@ -92,7 +92,7 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	pragha_library_pane_init_view(cwin->clibrary);
+	pragha_library_pane_init_view(cwin->clibrary, cwin);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
@@ -815,7 +815,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
 
+	cwin->sidebar = pragha_sidebar_new(cwin);
 	cwin->clibrary = pragha_library_pane_new(cwin);
+
+	pragha_sidebar_add_widget(cwin->sidebar, cwin->clibrary->widget);
 
 	hbox_main = create_main_region(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
@@ -869,7 +872,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	}
 
 	g_object_bind_property (cwin->preferences, "lateral-panel",
-	                        cwin->clibrary->widget, "visible",
+	                        cwin->sidebar->widget, "visible",
 	                        binding_flags);
 
 	init_menu_actions(cwin);

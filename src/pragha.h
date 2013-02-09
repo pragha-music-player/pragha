@@ -616,9 +616,6 @@ typedef struct {
 	PraghaDatabase *cdbase;
 	PraghaPreferences *preferences;
 	GtkTreeStore *library_store;
-	GtkWidget *header;
-	GtkWidget *header_menu_button;
-	GtkWidget *header_label;
 	GtkWidget *search_entry;
 	GtkWidget *library_tree;
 	GtkWidget *widget;
@@ -638,6 +635,15 @@ typedef struct {
 	GtkUIManager *header_library_tree_context_menu;
 } PraghaLibraryPane;
 
+typedef struct {
+	GtkWidget *widget;
+	GtkWidget *container;
+	GtkWidget *header;
+	GtkWidget *menu_button;
+	GtkWidget *close_button;
+	GtkWidget *label;
+} PraghaSidebar;
+
 struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
@@ -646,6 +652,7 @@ struct con_win {
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
 	PraghaScanner  *scanner;
+	PraghaSidebar *sidebar;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
@@ -794,6 +801,7 @@ PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
 
 /* Tag functions */
+
 gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
 gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);
 gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent);
@@ -853,7 +861,7 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry, PraghaLibraryPa
 void clear_library_search(PraghaLibraryPane *clibrary);
 
 void library_pane_view_reload(PraghaLibraryPane *clibrary);
-void pragha_library_pane_init_view(PraghaLibraryPane *clibrary);
+void pragha_library_pane_init_view(PraghaLibraryPane *clibrary, struct con_win *cwin);
 
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
@@ -1212,6 +1220,13 @@ void pragha_playback_stop(struct con_win *cwin);
 void pragha_playback_next_track(struct con_win *cwin);
 void pragha_advance_playback (struct con_win *cwin);
 
+/* pragha-sidebar.c Very simple sidebar widget. */
+
+void pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text);
+void pragha_sidebar_atach_menu(PraghaSidebar *sidebar, GtkMenu *menu);
+void pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget);
+void pragha_sidebar_free(PraghaSidebar *sidebar);
+PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
 
 /* pragha-simple-async.c: Very simple and generic async API. */
 
