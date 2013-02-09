@@ -471,47 +471,9 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 	return playlist;
 }
 
-void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list;
-	gchar *playlist = NULL, *n_playlist = NULL;
-	gint node_type;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		path = list->data;
-		if (gtk_tree_path_get_depth(path) > 1) {
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
-
-			n_playlist = rename_playlist_dialog (playlist, cwin);
-			if(n_playlist != NULL) {
-				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-
-				if(node_type == NODE_PLAYLIST)
-					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
-				else if (node_type == NODE_RADIO)
-					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
-
-				pragha_database_change_playlists_done(cwin->cdbase);
-
-				g_free(n_playlist);
-			}
-			g_free(playlist);
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-static gboolean delete_existing_item_dialog(const gchar *item,
-					    struct con_win *cwin)
+gboolean
+delete_existing_item_dialog(const gchar *item,
+                           struct con_win *cwin)
 {
 	gboolean choice = FALSE;
 	gint ret;
@@ -540,51 +502,6 @@ static gboolean delete_existing_item_dialog(const gchar *item,
 	gtk_widget_destroy(dialog);
 
 	return choice;
-}
-
-void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list, *i;
-	gchar *playlist;
-	gint node_type;
-	gboolean removed = FALSE;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		/* Delete selected playlists */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			if (gtk_tree_path_get_depth(path) > 1) {
-				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-				gtk_tree_model_get(model, &iter, L_NODE_DATA,
-						   &playlist, -1);
-
-				if(delete_existing_item_dialog(playlist, cwin)) {
-					if(node_type == NODE_PLAYLIST) {
-						delete_playlist_db (playlist, cwin->cdbase);
-					}
-					else if (node_type == NODE_RADIO) {
-						delete_radio_db(playlist, cwin->cdbase);
-					}
-					removed = TRUE;
-				}
-				g_free(playlist);
-			}
-			gtk_tree_path_free(path);
-		}
-		g_list_free(list);
-	}
-
-	if(removed)
-		pragha_database_change_playlists_done(cwin->cdbase);
 }
 
 /* Export selection/current playlist to a M3U file */
