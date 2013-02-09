@@ -863,7 +863,7 @@ void clear_library_search(PraghaLibraryPane *clibrary);
 
 void library_pane_view_reload(PraghaLibraryPane *clibrary);
 void pragha_library_pane_init_view(PraghaLibraryPane *clibrary, struct con_win *cwin);
-
+GtkWidget *pragha_library_pane_get_widget(PraghaLibraryPane *librarypane);
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
@@ -1225,7 +1225,8 @@ void pragha_advance_playback (struct con_win *cwin);
 
 void pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text);
 void pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *menu);
-void pragha_sidebar_add_widget(PraghaSidebar *sidebar, GtkWidget *widget);
+void pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *widget);
+GtkWidget *pragha_sidebar_get_widget(PraghaSidebar *sidebar);
 void pragha_sidebar_free(PraghaSidebar *sidebar);
 PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
 

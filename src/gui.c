@@ -95,7 +95,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	/* Left pane contains a notebook widget holding the various views */
 
-	browse_mode = cwin->sidebar->widget;
+	browse_mode = pragha_sidebar_get_widget(cwin->sidebar);
 
 	/* Right pane contains the current playlist */
 
