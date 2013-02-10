@@ -128,7 +128,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			pragha_preferences_set_fuse_folders(cwin->preferences,
 			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
 
-			if (pragha_preferences_get_fuse_folders(cwin->clibrary->preferences) != test_change)
+			if (pragha_preferences_get_fuse_folders(cwin->preferences) != test_change)
 				library_pane_view_reload(cwin->clibrary);
 		}
 		else {
