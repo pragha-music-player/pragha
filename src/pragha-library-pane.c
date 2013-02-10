@@ -23,7 +23,7 @@
  *
  **/
 
-gchar *library_page_context_menu_xml = "<ui>			\
+gchar *library_pane_context_menu_xml = "<ui>			\
 	<popup>							\
 	<menuitem action=\"Expand library\"/>			\
 	<menuitem action=\"Collapse library\"/>			\
@@ -42,7 +42,7 @@ gchar *library_page_context_menu_xml = "<ui>			\
 	</popup>						\
 	</ui>";
 
-GtkActionEntry library_page_context_aentries[] = {
+GtkActionEntry library_pane_context_aentries[] = {
 	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
 	 "", "Expand the library", G_CALLBACK(expand_all_action)},
 	{"Collapse library", GTK_STOCK_REMOVE, N_("_Collapse library"),
@@ -65,19 +65,38 @@ GtkActionEntry library_page_context_aentries[] = {
 	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
 };
 
-gchar *playlist_tree_context_menu_xml = "<ui>	\
-	<popup>					\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>	\
-	<separator/>				\
-	<menuitem action=\"Rename\"/>		\
-	<menuitem action=\"Delete\"/>		\
-	<menuitem action=\"Export\"/>		\
-	</popup>				\
+gchar *library_tree_context_menu_xml = "<ui>		\
+	<popup name=\"PlaylistPopup\">				\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	<separator/>						\
+	<menuitem action=\"Rename\"/>				\
+	<menuitem action=\"Delete\"/>				\
+	<menuitem action=\"Export\"/>				\
+	</popup>						\
+	<popup name=\"LibraryPopup\">				\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	<separator/>						\
+	<menuitem action=\"Edit tags\"/>			\
+	<separator/>						\
+	<menuitem action=\"Move to trash\"/>			\
+	<menuitem action=\"Delete from library\"/>		\
+	</popup>						\
+	<popup name=\"CategoriesPopup\">			\
+	<menuitem action=\"Add to current playlist\"/>		\
+	<menuitem action=\"Replace current playlist\"/>		\
+	<menuitem action=\"Replace and play\"/>			\
+	<separator/>						\
+	<menuitem action=\"Rescan library\"/>			\
+	<menuitem action=\"Update library\"/>			\
+	</popup>						\
 	</ui>";
 
-GtkActionEntry playlist_tree_context_aentries[] = {
+GtkActionEntry library_tree_context_aentries[] = {
+	/* Playlist and Radio tree */
 	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
 	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace current playlist", NULL, N_("_Replace current playlist"),
@@ -89,55 +108,13 @@ GtkActionEntry playlist_tree_context_aentries[] = {
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
 	 "", "Delete", G_CALLBACK(playlist_tree_delete)},
 	{"Export", GTK_STOCK_SAVE, N_("Export"),
-	 "", "Export", G_CALLBACK(playlist_tree_export)}
-};
-
-gchar *library_tree_context_menu_xml = "<ui>		\
-	<popup>						\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>		\
-	<separator/>					\
-	<menuitem action=\"Edit tags\"/>		\
-	<separator/>					\
-	<menuitem action=\"Move to trash\"/>		\
-	<menuitem action=\"Delete from library\"/>	\
-	</popup>					\
-	</ui>";
-
-GtkActionEntry library_tree_context_aentries[] = {
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	 "", "Export", G_CALLBACK(playlist_tree_export)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
 	{"Move to trash", "user-trash", N_("Move to _trash"),
 	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
 	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
-	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)}
-};
-
-gchar *header_library_tree_context_menu_xml = "<ui>	\
-	<popup>						\
-	<menuitem action=\"Add to current playlist\"/>	\
-	<menuitem action=\"Replace current playlist\"/>	\
-	<menuitem action=\"Replace and play\"/>		\
-	<separator/>					\
-	<menuitem action=\"Rescan library\"/>		\
-	<menuitem action=\"Update library\"/>		\
-	</popup>					\
-	</ui>";
-
-GtkActionEntry header_library_tree_context_aentries[] = {
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
-	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
-	{"Replace current playlist", NULL, N_("_Replace current playlist"),
-	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)},
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
 	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
@@ -867,21 +844,21 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
-				popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
-									"/popup");
+				popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+									"/PlaylistPopup");
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
-									"/popup/Rename");
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+									"/PlaylistPopup/Rename");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 && gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
-									"/popup/Delete");
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+									"/PlaylistPopup/Delete");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->playlist_tree_context_menu,
-									"/popup/Export");
+				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+									"/PlaylistPopup/Export");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 &&
 							  gtk_tree_path_get_depth(path) > 1 &&
@@ -890,10 +867,10 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			else {
 				if (gtk_tree_path_get_depth(path) > 1)
 					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
-									       "/popup");
+									       "/LibraryPopup");
 				else
-					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->header_library_tree_context_menu,
-									       "/popup");
+					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+									       "/CategoriesPopup");
 			}
 
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
@@ -1895,7 +1872,7 @@ update_library_tracks_changes(PraghaDatabase *database, struct con_win *cwin)
 /*************************************/
 
 /*
- * library_page_context_menu calbacks
+ * library_pane_context_menu calbacks
  */
 void expand_all_action(GtkAction *action, struct con_win *cwin)
 {
@@ -1948,7 +1925,7 @@ void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
 }
 
 /*
- * playlist_tree_context_menu calbacks
+ * library_tree_context_menu calbacks
  */
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
 {
@@ -2458,38 +2435,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 /**************************************/
 
 static GtkUIManager*
-create_playlist_tree_context_menu(struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("Playlist Tree Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       playlist_tree_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create playlist tree context menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(context_actions,
-				     playlist_tree_context_aentries,
-				     G_N_ELEMENTS(playlist_tree_context_aentries),
-				     (gpointer)cwin);
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(context_menu));
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	return context_menu;
-}
-
-static GtkUIManager*
-create_library_tree_context_menu(GtkWidget *library_tree,
-                                 struct con_win *cwin)
+pragha_library_tree_context_menu_new(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2503,8 +2449,8 @@ create_library_tree_context_menu(GtkWidget *library_tree,
 	if (!gtk_ui_manager_add_ui_from_string(context_menu,
 					       library_tree_context_menu_xml,
 					       -1, &error)) {
-		g_critical("(%s): Unable to create library tree context menu, err : %s",
-			   __func__, error->message);
+		g_critical("Unable to create library tree context menu, err : %s",
+			   error->message);
 	}
 
 	gtk_action_group_add_actions(context_actions,
@@ -2519,58 +2465,27 @@ create_library_tree_context_menu(GtkWidget *library_tree,
 }
 
 static GtkUIManager*
-create_header_library_tree_context_menu(GtkWidget *library_tree,
-                                        struct con_win *cwin)
+pragha_library_pane_header_context_menu_new(struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
 	GError *error = NULL;
 
-	context_actions = gtk_action_group_new("Header Library Tree Context Actions");
+	context_actions = gtk_action_group_new("Header Library Pane Context Actions");
 	context_menu = gtk_ui_manager_new();
 
 	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
 
 	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       header_library_tree_context_menu_xml,
+					       library_pane_context_menu_xml,
 					       -1, &error)) {
 		g_critical("(%s): Unable to create header library tree context menu, err : %s",
 			   __func__, error->message);
 	}
 
 	gtk_action_group_add_actions(context_actions,
-				     header_library_tree_context_aentries,
-				     G_N_ELEMENTS(header_library_tree_context_aentries),
-				     (gpointer)cwin);
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(context_menu));
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	return context_menu;
-}
-
-static GtkUIManager*
-create_library_page_context_menu(struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("Library Page Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       library_page_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create library page context menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(context_actions,
-				     library_page_context_aentries,
-				     G_N_ELEMENTS(library_page_context_aentries),
+				     library_pane_context_aentries,
+				     G_N_ELEMENTS(library_pane_context_aentries),
 				     (gpointer)cwin);
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
 				   gtk_ui_manager_get_accel_group(context_menu));
@@ -2837,11 +2752,8 @@ pragha_library_pane_new(struct con_win *cwin)
 	clibrary->widget = pragha_library_pane_create_widget(clibrary, cwin);
 
 	/* Create context menus */
-
-	clibrary->library_page_context_menu = create_library_page_context_menu(cwin);
-	clibrary->playlist_tree_context_menu = create_playlist_tree_context_menu(cwin);
-	clibrary->library_tree_context_menu = create_library_tree_context_menu(clibrary->library_tree, cwin);
-	clibrary->header_library_tree_context_menu = create_header_library_tree_context_menu(clibrary->library_tree, cwin);
+	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new(cwin);
+	clibrary->library_tree_context_menu = pragha_library_tree_context_menu_new(cwin);
 
 	/* Init the rest of flags */
 
