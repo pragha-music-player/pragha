@@ -593,6 +593,16 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_widget_show (item);
 }
 
+static gboolean
+select_all_on_click(GtkWidget *widget,
+                    GdkEvent  *event,
+                    gpointer   user_data)
+{
+	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+	return FALSE;
+}
+
 gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin)
 {
 	GtkWidget *dialog;
@@ -961,6 +971,15 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 			 "changed",
 			 G_CALLBACK(check_entry),
 			 chk_comment);
+
+	g_signal_connect(G_OBJECT(entry_year),
+			  "button-release-event",
+			 G_CALLBACK(select_all_on_click),
+			 NULL);
+	g_signal_connect(G_OBJECT(entry_year),
+			  "button-release-event",
+			 G_CALLBACK(select_all_on_click),
+			 NULL);
 
 	/* Save changes when press enter. */
 	
