@@ -591,8 +591,7 @@ typedef struct {
 	GtkTreeModel *model;
 	GtkWidget *widget;
 	GtkWidget *header_context_menu;
-	GtkUIManager *cp_context_menu;
-	GtkUIManager *cp_null_context_menu;
+	GtkUIManager *playlist_context_menu;
 	GSList *columns;
 	GSList *column_widths;
 	gboolean changing;

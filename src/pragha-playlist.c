@@ -18,8 +18,8 @@
 
 #include "pragha.h"
 
-static const gchar *cp_context_menu_xml = "<ui>					\
-	<popup>					    				\
+static const gchar *playlist_context_menu_xml = "<ui>				\
+	<popup name=\"SelectionPopup\">		   				\
 	<menuitem action=\"Queue track\"/>					\
 	<menuitem action=\"Dequeue track\"/>					\
 	<separator/>				    				\
@@ -44,10 +44,7 @@ static const gchar *cp_context_menu_xml = "<ui>					\
 	<separator/>				    				\
 	<menuitem action=\"Edit tags\"/>					\
 	</popup>				    				\
-	</ui>";
-
-static const gchar *cp_null_context_menu_xml = "<ui>				\
-	<popup>					    				\
+	<<popup name=\"EmptyPlaylistPopup\">	    				\
 	<menuitem action=\"Add files\"/>					\
 	<menuitem action=\"Add Audio CD\"/>					\
 	<menuitem action=\"Add location\"/>					\
@@ -60,7 +57,7 @@ static const gchar *cp_null_context_menu_xml = "<ui>				\
 	</popup>				    				\
 	</ui>";
 
-static GtkActionEntry cp_context_aentries[] = {
+static GtkActionEntry playlist_context_aentries[] = {
 	{"Queue track", GTK_STOCK_ADD, N_("Add to playback queue"),
 	 "", "Add to playback queue", G_CALLBACK(queue_current_playlist)},
 	{"Dequeue track", GTK_STOCK_REMOVE, N_("Remove to playback queue"),
@@ -104,10 +101,7 @@ static GtkActionEntry cp_context_aentries[] = {
 	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
 	 "", "Copy tag to selection", G_CALLBACK(copy_tags_to_selection_action)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
-	 "", "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)}
-};
-
-static GtkActionEntry cp_null_context_aentries[] = {
+	 "", "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)},
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
 	 "", N_("Open a media file"), G_CALLBACK(open_file_action)},
 	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
@@ -120,7 +114,7 @@ static GtkActionEntry cp_null_context_aentries[] = {
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}
 };
 
-static GtkToggleActionEntry cp_null_toggles_entries[] = {
+static GtkToggleActionEntry playlist_context_toggles_entries[] = {
 	{"Lateral panel", NULL, N_("Lateral _panel"),
 	 "", "Lateral panel", NULL,
 	TRUE}
@@ -2084,8 +2078,8 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 	}
 
 	if (change) {
-		action = gtk_ui_manager_get_action(cplaylist->cp_context_menu,
-						   "/popup/Copy tag to selection");
+		action = gtk_ui_manager_get_action(cplaylist->playlist_context_menu,
+						   "/SelectionPopup/Copy tag to selection");
 
 		g_object_set_data(G_OBJECT(action), "mobj", mobj);
 		g_object_set_data(G_OBJECT(action), "change", GINT_TO_POINTER(change));
@@ -2135,7 +2129,7 @@ current_playlist_button_press_cb(GtkWidget *widget,
 		break;
 	case 3:
 		if (cplaylist->no_tracks == 0) {
-			popup_menu = gtk_ui_manager_get_widget(cplaylist->cp_null_context_menu, "/popup");
+			popup_menu = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/EmptyPlaylistPopup");
 			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL, event->button, event->time);
 			ret = FALSE;
 			break;
@@ -2148,52 +2142,52 @@ current_playlist_button_press_cb(GtkWidget *widget,
 
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/ToolsMenu");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/ToolsMenu");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), (n_select == 1));
 
 			if (gtk_tree_model_get_iter(model, &iter, path)){
 				gtk_tree_model_get(model, &iter, P_BUBBLE, &is_queue, -1);
 
 				if(is_queue){
-					item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Queue track");
+					item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Queue track");
 					gtk_widget_hide(GTK_WIDGET(item_widget));
 
-					item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Dequeue track");
+					item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Dequeue track");
 					gtk_widget_show(GTK_WIDGET(item_widget));
 				}
 				else{
-					item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Queue track");
+					item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Queue track");
 					gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 					gtk_widget_show(GTK_WIDGET(item_widget));
 
-					item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Dequeue track");
+					item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Dequeue track");
 					gtk_widget_hide(GTK_WIDGET(item_widget));
 				}
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Remove from playlist");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Remove from playlist");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Crop playlist");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Crop playlist");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Add to another playlist");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Add to another playlist");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Copy tag to selection");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Copy tag to selection");
 
 				if(n_select > 1)
 					personalize_copy_tag_to_seleccion(item_widget, column, &iter, cplaylist);
 				else
 					gtk_widget_hide (GTK_WIDGET(item_widget));
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Edit tags");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Edit tags");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 			}
 			else{
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Queue track");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Queue track");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 				gtk_widget_show(GTK_WIDGET(item_widget));
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Dequeue track");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Dequeue track");
 				gtk_widget_hide(GTK_WIDGET(item_widget));
 			}
 
@@ -2207,36 +2201,36 @@ current_playlist_button_press_cb(GtkWidget *widget,
 			gtk_tree_path_free(path);
 		}
 		else {
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Queue track");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Queue track");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 			gtk_widget_show(GTK_WIDGET(item_widget));
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Dequeue track");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Dequeue track");
 			gtk_widget_hide(GTK_WIDGET(item_widget));
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Remove from playlist");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Remove from playlist");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Crop playlist");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Crop playlist");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Add to another playlist");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Add to another playlist");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/ToolsMenu");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/ToolsMenu");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Copy tag to selection");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Copy tag to selection");
 			gtk_widget_hide (GTK_WIDGET(item_widget));
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->cp_context_menu, "/popup/Edit tags");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Edit tags");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			gtk_tree_selection_unselect_all(selection);
 		}
 
-		popup_menu = gtk_ui_manager_get_widget(cplaylist->cp_context_menu,
-						       "/popup");
+		popup_menu = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu,
+						       "/SelectionPopup");
 		gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 			       event->button, event->time);
 		break;
@@ -3067,69 +3061,38 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 }
 
 static GtkUIManager*
-create_cp_context_menu(GtkWidget *current_playlist,
-		       struct con_win *cwin)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("CP Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       cp_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create current playlist context menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(context_actions,
-				     cp_context_aentries,
-				     G_N_ELEMENTS(cp_context_aentries),
-				     (gpointer)cwin);
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	return context_menu;
-}
-
-static GtkUIManager*
-create_cp_null_context_menu(GtkWidget *current_playlist,
-			    struct con_win *cwin)
+pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
+                                 struct con_win *cwin)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
 	GError *error = NULL;
 	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	context_actions = gtk_action_group_new("CP Null Context Actions");
+	context_actions = gtk_action_group_new("Playlist Context Actions");
 	context_menu = gtk_ui_manager_new();
 
 	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
 
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       cp_null_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create current playlist null context menu, err : %s",
-			   error->message);
+	if (!gtk_ui_manager_add_ui_from_string(context_menu, playlist_context_menu_xml, -1, &error)) {
+		g_critical("Unable to create current playlist context menu, err : %s", error->message);
 	}
 	gtk_action_group_add_actions(context_actions,
-				     cp_null_context_aentries,
-				     G_N_ELEMENTS(cp_null_context_aentries),
-				     (gpointer)cwin);
+	                             playlist_context_aentries,
+	                             G_N_ELEMENTS(playlist_context_aentries),
+	                             (gpointer)cwin);
 	gtk_action_group_add_toggle_actions (context_actions,
-					cp_null_toggles_entries,
-					G_N_ELEMENTS(cp_null_toggles_entries),
-					cwin);
+	                                     playlist_context_toggles_entrie,
+	                                     G_N_ELEMENTS(playlist_context_toggles_entries),
+	                                     cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/popup/Lateral panel");
-	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
+	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	return context_menu;
 }
+
 static const GtkTargetEntry pentries[] = {
 	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
@@ -3962,8 +3925,7 @@ cplaylist_new(struct con_win *cwin)
 	init_current_playlist_columns(cplaylist);
 
 	cplaylist->header_context_menu = create_header_context_menu(cplaylist);
-	cplaylist->cp_context_menu = create_cp_context_menu(cplaylist->view, cwin);
-	cplaylist->cp_null_context_menu = create_cp_null_context_menu(cplaylist->view, cwin);
+	cplaylist->playlist_context_menu = pragha_playlist_context_menu_new(cplaylist, cwin);
 
 	g_signal_connect(G_OBJECT(cplaylist->view), "row-activated",
 			 G_CALLBACK(current_playlist_row_activated_cb), cwin);
