@@ -3082,7 +3082,7 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	                             G_N_ELEMENTS(playlist_context_aentries),
 	                             (gpointer)cwin);
 	gtk_action_group_add_toggle_actions (context_actions,
-	                                     playlist_context_toggles_entrie,
+	                                     playlist_context_toggles_entries,
 	                                     G_N_ELEMENTS(playlist_context_toggles_entries),
 	                                     cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
