@@ -44,7 +44,7 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<separator/>				    				\
 	<menuitem action=\"Edit tags\"/>					\
 	</popup>				    				\
-	<<popup name=\"EmptyPlaylistPopup\">	    				\
+	<popup name=\"EmptyPlaylistPopup\">	    				\
 	<menuitem action=\"Add files\"/>					\
 	<menuitem action=\"Add Audio CD\"/>					\
 	<menuitem action=\"Add location\"/>					\
@@ -3087,7 +3087,7 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	                                     cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
-	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/popup/Lateral panel");
+	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
 	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	return context_menu;
