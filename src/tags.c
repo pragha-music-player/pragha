@@ -972,7 +972,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 			 G_CALLBACK(check_entry),
 			 chk_comment);
 
-	g_signal_connect(G_OBJECT(entry_year),
+	g_signal_connect(G_OBJECT(entry_tno),
 			  "button-release-event",
 			 G_CALLBACK(select_all_on_click),
 			 NULL);
