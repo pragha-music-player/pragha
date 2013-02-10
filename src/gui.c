@@ -97,6 +97,11 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	browse_mode = pragha_sidebar_get_widget(cwin->sidebar);
 
+	/* Set initial sizes */
+
+	gtk_paned_set_position (GTK_PANED (hpane),
+		pragha_preferences_get_sidebar_size(cwin->preferences));
+
 	/* Right pane contains the current playlist */
 
 	playlist_pane = create_playlist_pane_view(cwin);
