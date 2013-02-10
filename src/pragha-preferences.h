@@ -205,6 +205,13 @@ void
 pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
                                       gboolean lateral_panel);
 
+gint
+pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
+                                     gint sidebar_size);
+
 gboolean
 pragha_preferences_get_add_recursively (PraghaPreferences *preferences);
 

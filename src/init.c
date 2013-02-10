@@ -161,7 +161,7 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0;
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -169,7 +169,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -256,17 +256,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			controls_below_f = TRUE;
-		}
-
-		cwin->cpref->sidebar_size =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-						GROUP_WINDOW,
-						KEY_SIDEBAR_SIZE,
-						&error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			sidebar_size_f = TRUE;
 		}
 
 		/* Retrieve General preferences */
@@ -482,8 +471,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || sidebar_size_f)
-		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || last_folder_f)

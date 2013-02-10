@@ -754,7 +754,7 @@ void save_preferences(struct con_win *cwin)
 {
 	gchar *u_file = NULL;
 	gint *window_size, *window_position;
-	gint win_width, win_height, win_x, win_y, sidebar_size;
+	gint win_width, win_height, win_x, win_y;
 	GError *error = NULL;
 	GdkWindowState state;
 
@@ -924,12 +924,8 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save sidebar size */
 
-	sidebar_size = gtk_paned_get_position(GTK_PANED(cwin->paned));
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SIDEBAR_SIZE,
-			       sidebar_size);
+	pragha_preferences_set_sidebar_size(cwin->preferences,
+		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 
 	/* Save show album art option */
 

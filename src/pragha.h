@@ -498,7 +498,6 @@ struct con_pref {
 	gint window_height;
 	gint window_x;
 	gint window_y;
-	gint sidebar_size;
 	GKeyFile *configrc_keyfile;
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
