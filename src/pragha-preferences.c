@@ -1352,8 +1352,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                         0,
                         LAST_LIBRARY_STYLE,
                         FOLDERS,
-                        G_PARAM_READWRITE |
-                        G_PARAM_STATIC_STRINGS);
+                        PRAGHA_PREF_PARAMS);
+
    /**
     * PraghaPreferences:sort_by_year:
     *
@@ -1363,8 +1363,8 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "SortByYear",
                            "Sort By Year Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
+
    /**
     * PraghaPreferences:fuse_folders:
     *
@@ -1374,8 +1374,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            "FuseFolders",
                            "Fuse Folders Preference",
                            FALSE,
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:shuffle:
@@ -1485,7 +1484,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                         "Sidebar Size Preferences",
                         0,
                         G_MAXINT,
-                        LAST_LIBRARY_STYLE,
+                        DEFAULT_SIDEBAR_SIZE,
                         PRAGHA_PREF_PARAMS);
 
    /**
