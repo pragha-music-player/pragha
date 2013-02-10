@@ -1085,7 +1085,7 @@ pragha_preferences_finalize (GObject *object)
    g_key_file_set_integer(priv->rc_keyfile,
                           GROUP_LIBRARY,
                           KEY_LIBRARY_VIEW_ORDER,
-			  priv->library_style);
+                          priv->library_style);
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_LIBRARY,
                           KEY_SORT_BY_YEAR,
