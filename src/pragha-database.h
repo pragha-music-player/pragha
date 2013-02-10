@@ -47,6 +47,7 @@ struct _PraghaDatabaseClass
 {
 	GObjectClass parent_class;
 	void (*playlists_change) (PraghaDatabase *database);
+	void (*tracks_change)    (PraghaDatabase *database);
 };
 
 gboolean
@@ -142,6 +143,8 @@ pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio);
 
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
+void
+pragha_database_change_tracks_done(PraghaDatabase *database);
 
 gboolean
 pragha_database_start_successfully (PraghaDatabase *database);

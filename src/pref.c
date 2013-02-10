@@ -122,17 +122,23 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			                             library_dir);
 		free_str_list(library_dir);
 
-		if (cwin->cpref->cur_library_view == FOLDERS) {
-			test_change = cwin->cpref->fuse_folders;
-			cwin->cpref->fuse_folders = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w));
-			if (cwin->cpref->fuse_folders != test_change)
-				init_library_view(cwin);
+		if (pragha_preferences_get_library_style(cwin->preferences) == FOLDERS) {
+			test_change = pragha_preferences_get_fuse_folders(cwin->preferences);
+
+			pragha_preferences_set_fuse_folders(cwin->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
+
+			if (pragha_preferences_get_fuse_folders(cwin->preferences) != test_change)
+				library_pane_view_reload(cwin->clibrary);
 		}
 		else {
-			test_change = cwin->cpref->sort_by_year;
-			cwin->cpref->sort_by_year = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w));
-			if (cwin->cpref->sort_by_year != test_change)
-				init_library_view(cwin);
+			test_change = pragha_preferences_get_sort_by_year(cwin->preferences);
+
+			pragha_preferences_set_sort_by_year(cwin->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)));
+
+			if (pragha_preferences_get_sort_by_year(cwin->preferences) != test_change)
+				library_pane_view_reload(cwin->clibrary);
 		}
 
 		/* General preferences */
@@ -682,11 +688,11 @@ static void update_preferences(struct con_win *cwin)
 		free_str_list(library_dir);
 	}
 
-	if (cwin->cpref->fuse_folders)
+	if (pragha_preferences_get_fuse_folders(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->fuse_folders_w),
 					     TRUE);
-	if (cwin->cpref->sort_by_year)
+	if (pragha_preferences_get_sort_by_year(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->sort_by_year_w),
 					     TRUE);
@@ -744,12 +750,10 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar **nodes;
 	gchar *u_file = NULL;
-	gint cnt = 0, i = 0, *window_size, *window_position;
-	gint win_width, win_height, win_x, win_y, sidebar_size;
+	gint *window_size, *window_position;
+	gint win_width, win_height, win_x, win_y;
 	GError *error = NULL;
-	GSList *list;
 	GdkWindowState state;
 
 	/* General options*/
@@ -835,72 +839,6 @@ void save_preferences(struct con_win *cwin)
 
 	current_playlist_save_preferences(cwin->cplaylist);
 
-	/* Library Options */
-
-	/* Save the library tree nodes */
-
-	if (cwin->cpref->library_tree_nodes) {
-		list = cwin->cpref->library_tree_nodes;
-		cnt = g_slist_length(cwin->cpref->library_tree_nodes);
-		nodes = g_new0(gchar *, cnt);
-
-		for (i=0; i<cnt; i++) {
-			switch (GPOINTER_TO_INT(list->data)) {
-				case NODE_TRACK:
-					nodes[i] = P_TITLE_STR;
-					break;
-				case NODE_ARTIST:
-					nodes[i] = P_ARTIST_STR;
-					break;
-				case NODE_ALBUM:
-					nodes[i] = P_ALBUM_STR;
-					break;
-				case NODE_GENRE:
-					nodes[i] = P_GENRE_STR;
-					break;
-				case NODE_FOLDER:
-					nodes[i] = P_FOLDER_STR;
-					break;
-				case NODE_BASENAME:
-					nodes[i] = P_BASENAME_STR;
-					break;
-				case NODE_PLAYLIST:
-				case NODE_RADIO:
-					g_warning("Save library tree oreder: Bad node type.");
-				break;
-			}
-			list = list->next;
-		}
-
-		g_key_file_set_string_list(cwin->cpref->configrc_keyfile,
-					   GROUP_LIBRARY,
-					   KEY_LIBRARY_TREE_NODES,
-					   (const gchar **)nodes,
-					   cnt);
-		g_free(nodes);
-	}
-
-	/* Save the library view order */
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_LIBRARY_VIEW_ORDER,
-			       cwin->cpref->cur_library_view);
-
-	/* Save fuse folders option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_FUSE_FOLDERS,
-			       cwin->cpref->fuse_folders);
-
-	/* Save sort by year option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_LIBRARY,
-			       KEY_SORT_BY_YEAR,
-			       cwin->cpref->sort_by_year);
-
 	/* Audio Options */
 
 	/* Save volume */
@@ -984,12 +922,8 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save sidebar size */
 
-	sidebar_size = gtk_paned_get_position(GTK_PANED(cwin->paned));
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SIDEBAR_SIZE,
-			       sidebar_size);
+	pragha_preferences_set_sidebar_size(cwin->preferences,
+		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 
 	/* Save show album art option */
 
@@ -1597,7 +1531,6 @@ void preferences_free (struct con_pref *cpref)
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
-	g_slist_free(cpref->library_tree_nodes);
 
 	g_slice_free(struct con_pref, cpref);
 }

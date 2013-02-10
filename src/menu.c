@@ -685,7 +685,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
 			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-			init_library_view(cwin);
+			if(pragha_library_need_update(cwin->clibrary, changed))
+				pragha_database_change_tracks_done(cwin->cdbase);
 		}
 		g_array_free(loc_arr, TRUE);
 
@@ -709,27 +710,6 @@ exit:
 void quit_action(GtkAction *action, struct con_win *cwin)
 {
 	exit_pragha(NULL, cwin);
-}
-
-/* Handler for 'Expand All' option in the Edit menu */
-
-void expand_all_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->library_tree));
-}
-
-/* Handler for 'Collapse All' option in the Edit menu */
-
-void collapse_all_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->library_tree));
-}
-
-/* Handler for 'Search Library' option in the Edit menu */
-
-void search_library_action(GtkAction *action, struct con_win *cwin)
-{
-	gtk_widget_grab_focus(GTK_WIDGET(cwin->search_entry));
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
@@ -898,7 +878,7 @@ void about_widget(struct con_win *cwin)
 		NULL};
 
 	gtk_show_about_dialog(GTK_WINDOW(cwin->mainwindow),
-				"logo", cwin->pixbuf->pixbuf_app,
+				"logo", cwin->pixbuf_app,
 				"authors", authors,
 				"translator-credits", _("translator-credits"),
 				"comments", "A lightweight GTK+ music player",

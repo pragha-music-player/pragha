@@ -27,6 +27,7 @@ struct _PraghaDatabasePrivate
 };
 
 enum {
+	SIGNAL_TRACKS_CHANGED,
 	SIGNAL_PLAYLISTS_CHANGED,
 	LAST_SIGNAL
 };
@@ -579,6 +580,18 @@ pragha_database_change_playlists_done(PraghaDatabase *database)
 }
 
 /**
+ * pragha_database_change_tracks_done:
+ *
+ */
+void
+pragha_database_change_tracks_done(PraghaDatabase *database)
+{
+	g_return_if_fail(PRAGHA_IS_DATABASE(database));
+
+	g_signal_emit (database, signals[SIGNAL_TRACKS_CHANGED], 0);
+}
+
+/**
  * pragha_database_start_successfully:
  *
  */
@@ -622,6 +635,14 @@ pragha_database_class_init (PraghaDatabaseClass *klass)
 	                                                  NULL, NULL,
 	                                                  g_cclosure_marshal_VOID__VOID,
 	                                                  G_TYPE_NONE, 0);
+
+	signals[SIGNAL_TRACKS_CHANGED] = g_signal_new ("TracksChanged",
+	                                                G_TYPE_FROM_CLASS (object_class),
+	                                                G_SIGNAL_RUN_LAST,
+	                                                G_STRUCT_OFFSET (PraghaDatabaseClass, tracks_change),
+	                                                NULL, NULL,
+	                                                g_cclosure_marshal_VOID__VOID,
+	                                                G_TYPE_NONE, 0);
 
 	g_type_class_add_private(object_class, sizeof(PraghaDatabasePrivate));
 }

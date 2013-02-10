@@ -129,6 +129,24 @@ gboolean
 pragha_preferences_get_instant_search (PraghaPreferences *preferences);
 
 void
+pragha_preferences_set_library_style (PraghaPreferences *preferences,
+                                      gint library_style);
+gint
+pragha_preferences_get_library_style (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_sort_by_year (PraghaPreferences *preferences,
+                                     gboolean sort_by_year);
+gboolean
+pragha_preferences_get_sort_by_year (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_fuse_folders (PraghaPreferences *preferences,
+                                     gboolean fuse_folders);
+gboolean
+pragha_preferences_get_fuse_folders (PraghaPreferences *preferences);
+
+void
 pragha_preferences_set_shuffle (PraghaPreferences *preferences,
                                 gboolean shuffle);
 gboolean
@@ -186,6 +204,13 @@ pragha_preferences_get_lateral_panel (PraghaPreferences *preferences);
 void
 pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
                                       gboolean lateral_panel);
+
+gint
+pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
+                                     gint sidebar_size);
 
 gboolean
 pragha_preferences_get_add_recursively (PraghaPreferences *preferences);

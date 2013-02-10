@@ -188,7 +188,7 @@ overwrite_existing_playlist(const gchar *playlist,
 	return choice;
 }
 
-static GIOChannel*
+GIOChannel*
 create_m3u_playlist(gchar *file)
 {
 	GIOChannel *chan = NULL;
@@ -311,8 +311,8 @@ save_selected_to_m3u_playlist(PraghaPlaylist* cplaylist, GIOChannel *chan, gchar
 	return ret;
 }
 
-static gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename,
-			      PraghaDatabase *cdbase)
+gint
+save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase)
 {
 	GList *list = NULL;
 	gint ret = 0;
@@ -470,47 +470,9 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 	return playlist;
 }
 
-void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list;
-	gchar *playlist = NULL, *n_playlist = NULL;
-	gint node_type;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		path = list->data;
-		if (gtk_tree_path_get_depth(path) > 1) {
-			gtk_tree_model_get_iter(model, &iter, path);
-			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
-
-			n_playlist = rename_playlist_dialog (playlist, cwin);
-			if(n_playlist != NULL) {
-				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-
-				if(node_type == NODE_PLAYLIST)
-					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
-				else if (node_type == NODE_RADIO)
-					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
-
-				pragha_database_change_playlists_done(cwin->cdbase);
-
-				g_free(n_playlist);
-			}
-			g_free(playlist);
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-static gboolean delete_existing_item_dialog(const gchar *item,
-					    struct con_win *cwin)
+gboolean
+delete_existing_item_dialog(const gchar *item,
+                           struct con_win *cwin)
 {
 	gboolean choice = FALSE;
 	gint ret;
@@ -541,83 +503,50 @@ static gboolean delete_existing_item_dialog(const gchar *item,
 	return choice;
 }
 
-void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list, *i;
-	gchar *playlist;
-	gint node_type;
-	gboolean removed = FALSE;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		/* Delete selected playlists */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			if (gtk_tree_path_get_depth(path) > 1) {
-				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-				gtk_tree_model_get(model, &iter, L_NODE_DATA,
-						   &playlist, -1);
-
-				if(delete_existing_item_dialog(playlist, cwin)) {
-					if(node_type == NODE_PLAYLIST) {
-						pragha_database_delete_playlist (cwin->cdbase, playlist);
-					}
-					else if (node_type == NODE_RADIO) {
-						pragha_database_delete_radio (cwin->cdbase, playlist);
-					}
-					removed = TRUE;
-				}
-				g_free(playlist);
-			}
-			gtk_tree_path_free(path);
-		}
-		g_list_free(list);
-	}
-
-	if(removed)
-		pragha_database_change_playlists_done(cwin->cdbase);
-}
-
 /* Export selection/current playlist to a M3U file */
 
-void export_playlist (PraghaPlaylist* cplaylist, gint choice)
+gchar *
+playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	gchar *filename = NULL, *playlistm3u = NULL;
-	GIOChannel *chan = NULL;
-	GError *err = NULL;
 	gint resp;
 
 	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
-					     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
-					     GTK_FILE_CHOOSER_ACTION_SAVE,
-					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-					     NULL);
+	                                     GTK_WINDOW(parent),
+	                                     GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+	                                     NULL);
 
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
-						       TRUE);
+	                                               TRUE);
 
-	playlistm3u = g_strdup_printf("%s.m3u", _("Playlists"));
+	playlistm3u = g_strdup_printf("%s.m3u", prefix);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), playlistm3u);
+	g_free(playlistm3u);
 
 	resp = gtk_dialog_run(GTK_DIALOG(dialog));
-
 	switch (resp) {
-	case GTK_RESPONSE_ACCEPT:
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		break;
-	default:
-		goto exit;
+		case GTK_RESPONSE_ACCEPT:
+			filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			break;
+		default:
+			break;
 	}
+	gtk_widget_destroy(dialog);
+
+	return filename;
+}
+
+void export_playlist (PraghaPlaylist* cplaylist, gint choice)
+{
+	gchar *filename = NULL;
+	GIOChannel *chan = NULL;
+	GError *err = NULL;
+
+	filename = playlist_export_dialog_get_filename(_("Playlists"),
+	                                               gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 
 	if (!filename)
 		goto exit;
@@ -655,137 +584,7 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 	}
 
 exit:
-	g_free(playlistm3u);
 	g_free(filename);
-	gtk_widget_destroy(dialog);
-}
-
-/* Export saved playlist to a M3U file */
-
-void playlist_tree_export(GtkAction *action, struct con_win *cwin)
-{
-	GtkWidget *dialog;
-	GIOChannel *chan = NULL;
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list, *i;
-	GError *err = NULL;
-	gint resp, cnt;
-	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL, *playlistm3u = NULL;
-	gint node_type;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->library_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->library_tree));
-	cnt = (gtk_tree_selection_count_selected_rows(selection));
-
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-	path = list->data;
-
-	/* If only is 'Playlist' node, just return, else get playlistname. */
-	if ((cnt == 1) && (gtk_tree_path_get_depth(path) == 1)) {
-		gtk_tree_path_free(path);
-		g_list_free(list);
-		return;
-	}
-	else {
-		gtk_tree_model_get_iter(model, &iter, path);
-		gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlistpath, -1);
-
-		gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-		if(node_type != NODE_PLAYLIST) {
-			gtk_tree_path_free(path);
-			g_list_free(list);
-			return;
-		}
-	}
-
-	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_FILE_CHOOSER_ACTION_SAVE,
-					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-					     NULL);
-
-	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
-						       TRUE);
-
-	playlistm3u = g_strdup_printf("%s.m3u", playlistpath);
-	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(dialog), playlistm3u);
-
-	resp = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch (resp) {
-	case GTK_RESPONSE_ACCEPT:
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		break;
-	default:
-		goto exit;
-	}
-
-	if (!filename)
-		goto exit;
-
-	chan = create_m3u_playlist(filename);
-	if (!chan) {
-		g_warning("Unable to create M3U playlist file: %s", filename);
-		goto exit;
-	}
-
-	set_watch_cursor (cwin->mainwindow);
-
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-
-	if (list) {
-		/* Export all the playlists to the given file */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			if (gtk_tree_path_get_depth(path) > 1) {
-				gtk_tree_model_get_iter(model, &iter, path);
-				gtk_tree_model_get(model, &iter, L_NODE_DATA,
-						   &playlist, -1);
-				if (save_m3u_playlist(chan, playlist,
-						      filename, cwin->cdbase) < 0) {
-					g_warning("Unable to save M3U playlist: %s",
-						  filename);
-					g_free(playlist);
-					goto exit_list;
-				}
-				g_free(playlist);
-			}
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ()) {
-				g_list_free(list);
-				return;
-			}
-		}
-	}
-
-	if (chan) {
-		if (g_io_channel_shutdown(chan, TRUE, &err) != G_IO_STATUS_NORMAL) {
-			g_critical("Unable to save M3U playlist: %s", filename);
-			g_error_free(err);
-			err = NULL;
-		} else {
-			CDEBUG(DBG_INFO, "Saved M3U playlist: %s", filename);
-		}
-		g_io_channel_unref(chan);
-	}
-
-exit_list:
-	remove_watch_cursor (cwin->mainwindow);
-
-	if (list)
-		g_list_free(list);
-exit:
-	g_free(playlistm3u);
-	g_free(playlistpath);
-	g_free(filename);
-	gtk_widget_destroy(dialog);
 }
 
 #ifdef HAVE_PLPARSER

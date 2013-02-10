@@ -70,7 +70,7 @@ static void init_gui_state(struct con_win *cwin)
 {
 	init_tag_completion(cwin);
 
-	init_library_view(cwin);
+	pragha_library_pane_init_view(cwin->clibrary, cwin);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
@@ -92,7 +92,7 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	init_library_view(cwin);
+	pragha_library_pane_init_view(cwin->clibrary, cwin);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
@@ -156,14 +156,12 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar **nodes;
 	gchar *u_file;
 	gboolean err = FALSE;
-	gsize cnt = 0, i;
+	gsize cnt = 0;
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
-	gboolean nodes_f, cur_lib_view_f, fuse_folders_f, sort_by_year_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, sidebar_size_f, album_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f, status_bar_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -171,8 +169,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	nodes_f = cur_lib_view_f = fuse_folders_f = sort_by_year_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = sidebar_size_f = album_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = status_bar_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -259,92 +256,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			controls_below_f = TRUE;
-		}
-
-		cwin->cpref->sidebar_size =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-						GROUP_WINDOW,
-						KEY_SIDEBAR_SIZE,
-						&error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			sidebar_size_f = TRUE;
-		}
-
-		/* Retrieve Collection preferences */
-
-		nodes = g_key_file_get_string_list(cwin->cpref->configrc_keyfile,
-						   GROUP_LIBRARY,
-						   KEY_LIBRARY_TREE_NODES,
-						   &cnt,
-						   &error);
-		if (nodes) {
-			for (i=0; i<cnt; i++) {
-				if (!g_ascii_strcasecmp(P_TITLE_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_TRACK));
-				else if (!g_ascii_strcasecmp(P_ARTIST_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_ARTIST));
-				else if (!g_ascii_strcasecmp(P_ALBUM_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_ALBUM));
-				else if (!g_ascii_strcasecmp(P_GENRE_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_GENRE));
-				else if (!g_ascii_strcasecmp(P_ALBUM_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_BASENAME));
-				else if (!g_ascii_strcasecmp(P_GENRE_STR, nodes[i]))
-					cwin->cpref->library_tree_nodes =
-						g_slist_append(cwin->cpref->library_tree_nodes,
-							       GINT_TO_POINTER(NODE_FOLDER));
-			}
-			g_strfreev(nodes);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			nodes_f = TRUE;
-		}
-
-		cwin->cpref->cur_library_view =
-			g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-					       GROUP_LIBRARY,
-					       KEY_LIBRARY_VIEW_ORDER,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			cur_lib_view_f = TRUE;
-		}
-
-		cwin->cpref->fuse_folders =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_LIBRARY,
-					       KEY_FUSE_FOLDERS,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			fuse_folders_f = TRUE;
-		}
-
-		cwin->cpref->sort_by_year =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_LIBRARY,
-					       KEY_SORT_BY_YEAR,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			sort_by_year_f = TRUE;
 		}
 
 		/* Retrieve General preferences */
@@ -560,27 +471,8 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || sidebar_size_f)
-		cwin->cpref->sidebar_size = DEFAULT_SIDEBAR_SIZE;
 	if (all_f || album_art_pattern_f)
 		cwin->cpref->album_art_pattern = NULL;
-	if (all_f || nodes_f) {
-		cwin->cpref->library_tree_nodes =
-			g_slist_append(cwin->cpref->library_tree_nodes,
-				       GINT_TO_POINTER(NODE_ARTIST));
-		cwin->cpref->library_tree_nodes =
-			g_slist_append(cwin->cpref->library_tree_nodes,
-				       GINT_TO_POINTER(NODE_ALBUM));
-		cwin->cpref->library_tree_nodes =
-			g_slist_append(cwin->cpref->library_tree_nodes,
-				       GINT_TO_POINTER(NODE_TRACK));
-	}
-	if (all_f || fuse_folders_f)
-		cwin->cpref->fuse_folders = FALSE;
-	if (all_f || sort_by_year_f)
-		cwin->cpref->sort_by_year = FALSE;
-	if (all_f || cur_lib_view_f)
-		cwin->cpref->cur_library_view = FOLDERS;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || show_osd_f)
@@ -644,13 +536,7 @@ gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
 
-	cwin->cstate->filter_entry = NULL;
-
-	cwin->cstate->dragging = FALSE;
-
 	cwin->cstate->curr_mobj = NULL;
-
-	cwin->cstate->view_change = TRUE;
 
 	cwin->osd_notify = NULL;
 
@@ -737,9 +623,6 @@ void init_menu_actions(struct con_win *cwin)
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Lateral panel");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_lateral_panel(cwin->preferences));
-
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
 
@@ -778,73 +661,9 @@ void init_menu_actions(struct con_win *cwin)
 
 void init_pixbufs(struct con_win *cwin)
 {
-	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
-
-	cwin->pixbuf->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
-	if (!cwin->pixbuf->pixbuf_app)
+	cwin->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
+	if (!cwin->pixbuf_app)
 		g_warning("Unable to load pragha png");
-
-	cwin->pixbuf->pixbuf_artist = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-									"/artist.png",
-									16,
-									16,
-									TRUE,
-									NULL);
-	if (!cwin->pixbuf->pixbuf_artist)
-		g_warning("Unable to load artist png");
-
-	cwin->pixbuf->pixbuf_album = gtk_icon_theme_load_icon(icontheme,
-							      "media-optical",
-							      16,
-							      0,
-							      NULL);
-	if (!cwin->pixbuf->pixbuf_album)
-		cwin->pixbuf->pixbuf_album = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-										"/album.png",
-										16,
-										16,
-										TRUE,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_album)
-		g_warning("Unable to load album png");
-
-	cwin->pixbuf->pixbuf_track = gtk_icon_theme_load_icon(icontheme,
-							     "audio-x-generic",
-							     16,
-							     0,
-							     NULL);
-	if (!cwin->pixbuf->pixbuf_track)
-		cwin->pixbuf->pixbuf_track = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-										"/track.png",
-										16,
-										16,
-										TRUE,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_track)
-		g_warning("Unable to load track png");
-
-	cwin->pixbuf->pixbuf_genre = gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR
-								       "/genre.png",
-								       16,
-								       16,
-								       TRUE,
-								       NULL);
-	if (!cwin->pixbuf->pixbuf_genre)
-		g_warning("Unable to load genre png");
-
-	cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-							    "folder-music",
-							    16,
-							    0,
-							    NULL);
-	if (!cwin->pixbuf->pixbuf_dir)
-		cwin->pixbuf->pixbuf_dir = gtk_icon_theme_load_icon(icontheme,
-										"folder",
-										16,
-										0,
-										NULL);
-	if (!cwin->pixbuf->pixbuf_dir)
-		g_warning("Unable to load folder png");
 }
 
 #if HAVE_LIBXFCE4UI
@@ -904,7 +723,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *menu_bar;
-	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
@@ -919,9 +739,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	if (cwin->pixbuf->pixbuf_app)
+	if (cwin->pixbuf_app)
 		gtk_window_set_icon(GTK_WINDOW(cwin->mainwindow),
-				    cwin->pixbuf->pixbuf_app);
+		                    cwin->pixbuf_app);
 
 	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
 
@@ -978,6 +798,15 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	menu = create_menu(cwin);
 	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
+
+	cwin->sidebar = pragha_sidebar_new(cwin);
+	cwin->clibrary = pragha_library_pane_new(cwin);
+
+	pragha_sidebar_add_pane(cwin->sidebar,
+	                        pragha_library_pane_get_widget(cwin->clibrary));
+	pragha_sidebar_attach_menu(cwin->sidebar,
+	                           GTK_MENU(gtk_ui_manager_get_widget(cwin->clibrary->library_pane_context_menu, "/popup")));
+
 	hbox_main = create_main_region(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
 
@@ -1029,7 +858,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		#endif
 	}
 
-	g_object_bind_property (cwin->preferences, "lateral-panel", cwin->browse_mode, "visible", binding_flags);
+	/* TODO: Move it to PraghaSidebar construction. */
+	g_object_bind_property (cwin->preferences, "lateral-panel",
+	                        cwin->sidebar->widget, "visible",
+	                        binding_flags);
 
 	init_menu_actions(cwin);
 	update_menu_playlist_changes(cwin);
