@@ -2513,7 +2513,7 @@ pragha_library_pane_store_new()
 }
 
 static GtkWidget*
-pragha_library_pane_tree_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
+pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 {
 	GtkWidget *library_tree;
 	GtkTreeModel *library_filter_tree;
@@ -2555,21 +2555,6 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary, struct con_win *cwin)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_tree), column);
 
-	/* Connect signals and create right click popup menu */
-
-	g_signal_connect(G_OBJECT(library_tree), "row-activated",
-			 G_CALLBACK(library_tree_row_activated_cb), cwin);
-	g_signal_connect (G_OBJECT (library_tree), "key-press-event",
-			  G_CALLBACK(library_tree_key_press), cwin);
-
-	/* Signal handler for right-clicking and selection */
- 
- 	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-press-event",
-			 G_CALLBACK(library_tree_button_press_cb), cwin);
-
-	g_signal_connect(G_OBJECT(GTK_WIDGET(library_tree)), "button-release-event",
-			 G_CALLBACK(library_tree_button_release_cb), cwin);
-
 	g_object_unref(library_filter_tree);
 
 	return library_tree;
@@ -2595,7 +2580,7 @@ pragha_library_pane_search_entry_new(PraghaLibraryPane *clibrary)
 }
 
 static GtkWidget*
-pragha_library_pane_create_widget(PraghaLibraryPane *clibrary, struct con_win *cwin)
+pragha_library_pane_create_widget(PraghaLibraryPane *clibrary)
 {
 	GtkWidget *vbox_lib;
 	GtkWidget *library_tree_scroll;
@@ -2745,13 +2730,14 @@ pragha_library_pane_new(struct con_win *cwin)
 	/* Create the widgets */
 
 	clibrary->search_entry = pragha_library_pane_search_entry_new(clibrary);
-	clibrary->library_tree = pragha_library_pane_tree_new(clibrary, cwin);
+	clibrary->library_tree = pragha_library_pane_tree_new(clibrary);
 
 	/* Create main widget */
 
-	clibrary->widget = pragha_library_pane_create_widget(clibrary, cwin);
+	clibrary->widget = pragha_library_pane_create_widget(clibrary);
 
 	/* Create context menus */
+
 	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new(cwin);
 	clibrary->library_tree_context_menu = pragha_library_tree_context_menu_new(cwin);
 
@@ -2773,9 +2759,22 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	/* Conect signals */
 
-	g_signal_connect (clibrary->cdbase, "PlaylistsChanged", G_CALLBACK (update_library_playlist_changes), cwin);
-	g_signal_connect (clibrary->cdbase, "TracksChanged", G_CALLBACK (update_library_tracks_changes), cwin);
-	g_signal_connect(clibrary->preferences, "notify::library-style", G_CALLBACK (library_pane_change_style), cwin);
+	g_signal_connect(G_OBJECT(clibrary->library_tree), "row-activated",
+	                 G_CALLBACK(library_tree_row_activated_cb), cwin);
+	g_signal_connect(G_OBJECT (clibrary->library_tree), "key-press-event",
+	                 G_CALLBACK(library_tree_key_press), cwin);
+	g_signal_connect(G_OBJECT(clibrary->library_tree), "button-press-event",
+	                 G_CALLBACK(library_tree_button_press_cb), cwin);
+	g_signal_connect(G_OBJECT(clibrary->library_tree), "button-release-event",
+	                 G_CALLBACK(library_tree_button_release_cb), cwin);
+
+	g_signal_connect(clibrary->cdbase, "PlaylistsChanged",
+	                 G_CALLBACK (update_library_playlist_changes), cwin);
+	g_signal_connect(clibrary->cdbase, "TracksChanged",
+	                 G_CALLBACK (update_library_tracks_changes), cwin);
+
+	g_signal_connect(clibrary->preferences, "notify::library-style",
+	                 G_CALLBACK (library_pane_change_style), cwin);
 
 	return clibrary;
 }
