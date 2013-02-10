@@ -44,6 +44,7 @@ struct _PraghaPreferencesPrivate
    gchar     *audio_cd_device;
    /* Window preferences. */
    gboolean   lateral_panel;
+   gint       sidebar_size;
    /* Misc preferences. */
    gboolean   add_recursively;
    gboolean   timer_remaining_mode;
@@ -66,6 +67,7 @@ enum
    PROP_SOFTWARE_MIXER,
    PROP_AUDIO_CD_DEVICE,
    PROP_LATERAL_PANEL,
+   PROP_SIDEBAR_SIZE,
    PROP_ADD_RECURSIVELY,
    PROP_TIMER_REMAINING_MODE,
    LAST_PROP
@@ -712,6 +714,33 @@ pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_sidebar_size:
+ *
+ */
+gint
+pragha_preferences_get_sidebar_size (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), DEFAULT_SIDEBAR_SIZE);
+
+   return preferences->priv->sidebar_size;
+}
+
+/**
+ * pragha_preferences_set_sidebar_size:
+ *
+ */
+void
+pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
+                                     gint sidebar_size)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->sidebar_size = sidebar_size;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SIDEBAR_SIZE]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -836,10 +865,16 @@ pragha_preferences_finalize (GObject *object)
       pragha_preferences_remove_key(preferences,
                                     GROUP_AUDIO,
                                     KEY_AUDIO_CD_DEVICE);
+
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_WINDOW,
                           KEY_SIDEBAR,
                           priv->lateral_panel);
+   g_key_file_set_integer(priv->rc_keyfile,
+                          GROUP_WINDOW,
+                          KEY_SIDEBAR_SIZE,
+                          priv->sidebar_size);
+
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_GENERAL,
                           KEY_ADD_RECURSIVELY_FILES,
@@ -915,6 +950,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_LATERAL_PANEL:
       g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
       break;
+   case PROP_SIDEBAR_SIZE:
+      g_value_set_int (value, pragha_preferences_get_sidebar_size(preferences));
+      break;
    case PROP_ADD_RECURSIVELY:
       g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
       break;
@@ -976,6 +1014,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_LATERAL_PANEL:
       pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_SIDEBAR_SIZE:
+      pragha_preferences_set_sidebar_size(preferences, g_value_get_int(value));
       break;
    case PROP_ADD_RECURSIVELY:
       pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -1166,6 +1207,19 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                            FALSE,
                            G_PARAM_READWRITE |
                            G_PARAM_STATIC_STRINGS);
+   /**
+    * PraghaPreferences:sidebar_size:
+    *
+    */
+   gParamSpecs[PROP_SIDEBAR_SIZE] =
+      g_param_spec_int ("sidebar-size",
+                        "SidebarSize",
+                        "Sidebar Size Preferences",
+                        0,
+                        G_MAXINT,
+                        LAST_LIBRARY_STYLE,
+                        G_PARAM_READWRITE |
+                        G_PARAM_STATIC_STRINGS);
 
    /**
     * PraghaPreferences:add_recursively:
@@ -1201,7 +1255,7 @@ pragha_preferences_init (PraghaPreferences *preferences)
    gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
    gboolean add_recursively, timer_remaining_mode;
    gchar *audio_sink, *audio_device, *audio_cd_device;
-   gint library_style;
+   gint library_style, sidebar_size;
    gboolean fuse_folders, sort_by_year;
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
@@ -1423,6 +1477,18 @@ pragha_preferences_init (PraghaPreferences *preferences)
    }
    else {
       pragha_preferences_set_lateral_panel(preferences, lateral_panel);
+   }
+
+   sidebar_size = g_key_file_get_integer(priv->rc_keyfile,
+                                         GROUP_WINDOW,
+                                         KEY_SIDEBAR_SIZE,
+                                         &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_sidebar_size(preferences, sidebar_size);
    }
 
    add_recursively = g_key_file_get_boolean(priv->rc_keyfile,

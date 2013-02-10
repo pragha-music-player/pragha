@@ -101,10 +101,6 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	playlist_pane = create_playlist_pane_view(cwin);
 
-	/* Set initial sizes */
-
-	gtk_paned_set_position (GTK_PANED (hpane), cwin->cpref->sidebar_size);
-
 	/* Pack everything into the hpane */
 
 	gtk_paned_pack1 (GTK_PANED (hpane), browse_mode, FALSE, TRUE);

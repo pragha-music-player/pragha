@@ -242,6 +242,10 @@ pragha_sidebar_new(struct con_win *cwin)
 
 	sidebar->widget = pragha_sidebar_widget_new(sidebar);
 
+	gtk_widget_set_size_request(GTK_WIDGET(sidebar->widget),
+		pragha_preferences_get_sidebar_size(cwin->preferences),
+		-1);
+
 	sidebar->popup_menu = NULL;
 
 	return sidebar;
