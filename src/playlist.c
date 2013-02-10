@@ -1062,6 +1062,111 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 	pragha_database_add_radio_track (cplaylist->cdbase, radio_id, uri);
 }
 
+enum playlist_mgmt
+replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, gint type)
+{
+	GtkWidget *dialog;
+	GtkWidget *table, *radio_replace, *radio_add;
+	gchar *string_options = NULL;
+	gint result;
+	guint row = 0;
+	enum playlist_mgmt choise = EXPORT_PLAYLIST;
+
+	/* Create dialog window */
+
+	table = pragha_hig_workarea_table_new();
+
+	pragha_hig_workarea_table_add_section_title(table, &row, _("What do you want to do?"));
+
+	string_options = g_strdup_printf(_("Replace the playlist \"%s\""), playlist);
+	radio_replace = gtk_radio_button_new_with_label_from_widget (NULL, string_options);
+	pragha_hig_workarea_table_add_wide_control(table, &row, radio_replace);
+	g_free(string_options);
+
+	string_options = g_strdup_printf(_("Add to playlist \"%s\""), playlist);
+	radio_add = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(radio_replace), string_options);
+	pragha_hig_workarea_table_add_wide_control(table, &row, radio_add);
+	g_free(string_options);
+
+	pragha_hig_workarea_table_finish(table, &row);
+
+	dialog = gtk_dialog_new_with_buttons(NULL,
+			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
+			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+			     GTK_STOCK_CANCEL,
+			     GTK_RESPONSE_CANCEL,
+			     GTK_STOCK_OK,
+			     GTK_RESPONSE_ACCEPT,
+			     NULL);
+
+	if(type == SAVE_COMPLETE)
+		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
+	else
+		gtk_window_set_title (GTK_WINDOW(dialog), _("Save selection"));
+
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch(result) {
+		case GTK_RESPONSE_ACCEPT:
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_replace)))
+				choise = NEW_PLAYLIST;
+			else
+				choise = APPEND_PLAYLIST;
+			break;
+		case GTK_RESPONSE_CANCEL:
+		default:
+			break;
+	}
+	gtk_widget_destroy(dialog);
+
+	return choise;
+}
+
+void playlist_save_selection(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+{
+	enum playlist_mgmt choise;
+	const gchar *playlist;
+
+	playlist = gtk_menu_item_get_label (menuitem);
+
+	choise = replace_or_append_dialog(cplaylist, playlist, SAVE_SELECTED);
+	switch(choise) {
+		case NEW_PLAYLIST:
+			new_playlist(cplaylist, playlist, SAVE_SELECTED);
+			break;
+		case APPEND_PLAYLIST:
+			append_playlist(cplaylist, playlist, SAVE_SELECTED);
+			break;
+		default:
+			break;
+	}
+}
+
+void playlist_save_complete_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+{
+	enum playlist_mgmt choise;
+	const gchar *playlist;
+
+	playlist = gtk_menu_item_get_label (menuitem);
+
+	choise = replace_or_append_dialog(cplaylist, playlist, SAVE_COMPLETE);
+	switch(choise) {
+		case NEW_PLAYLIST:
+			new_playlist(cplaylist, playlist, SAVE_COMPLETE);
+			break;
+		case APPEND_PLAYLIST:
+			append_playlist(cplaylist, playlist, SAVE_COMPLETE);
+			break;
+		default:
+			break;
+	}
+}
+
 void append_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 {
 	const gchar *playlist;
@@ -1081,7 +1186,7 @@ void save_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 }
 
 static void
-complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
+complete_save_selection_playlist_submenu (PraghaPlaylist *cplaylist)
 {
 	GtkWidget *submenu, *menuitem;
 	
@@ -1109,7 +1214,7 @@ complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_selection), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1147,7 +1252,7 @@ complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_complete_playlist), cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1192,7 +1297,7 @@ complete_main_save_playlist_submenu (struct con_win *cwin)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(save_to_playlist), cwin->cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_complete_playlist), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1237,7 +1342,7 @@ complete_main_save_selection_playlist_submenu (struct con_win *cwin)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(append_to_playlist), cwin->cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_selection), cwin->cplaylist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1253,6 +1358,6 @@ void update_menu_playlist_changes(struct con_win *cwin)
 	complete_main_save_selection_playlist_submenu (cwin);
 
 	/* Update playlist pupup menu. */
-	complete_add_to_playlist_submenu (cwin->cplaylist);
+	complete_save_selection_playlist_submenu (cwin->cplaylist);
 	complete_save_playlist_submenu (cwin->cplaylist);
 }
