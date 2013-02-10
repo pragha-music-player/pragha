@@ -302,7 +302,7 @@ pragha_filter_dialog (struct con_win *cwin)
 
 	/* Crete the filter entry */
 
-	search_entry = pragha_search_entry_new(cwin);
+	search_entry = pragha_search_entry_new(cwin->preferences);
 
 	g_signal_connect (G_OBJECT(search_entry), "changed",
 			 G_CALLBACK(simple_filter_search_keyrelease_handler), fdialog);

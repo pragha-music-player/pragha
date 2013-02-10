@@ -32,6 +32,8 @@ static void common_cleanup(struct con_win *cwin)
 	pragha_playback_stop(cwin);
 
 	cplaylist_free(cwin->cplaylist);
+	pragha_library_pane_free(cwin->clibrary);
+	pragha_sidebar_free(cwin->sidebar);
 #ifdef HAVE_LIBGLYR
 	glyr_related_free (cwin);
 #endif
@@ -80,7 +82,6 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	cwin = g_slice_new0(struct con_win);
-	cwin->pixbuf = g_slice_new0(struct pixbuf);
 	cwin->cpref = g_slice_new0(struct con_pref);
 	cwin->cstate = g_slice_new0(struct con_state);
 #ifdef HAVE_LIBCLASTFM
