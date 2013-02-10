@@ -1087,11 +1087,16 @@ complete_add_to_playlist_submenu (PraghaPlaylist *cplaylist)
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cplaylist->playlist_context_menu, "/SelectionPopup/Add to another playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (cplaylist->playlist_context_menu, "/SelectionPopup/Save selection")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cplaylist);
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
+
+	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1125,6 +1130,11 @@ complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cplaylist);
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
+
+	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1165,7 +1175,11 @@ complete_main_save_playlist_submenu (struct con_win *cwin)
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
 	gtk_accel_map_add_entry ("<SubMenu>/New playlist", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK);
 	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/New playlist");
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
+	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), cwin->cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1188,14 +1202,14 @@ complete_main_save_playlist_submenu (struct con_win *cwin)
 }
 
 static void
-complete_main_add_to_playlist_submenu (struct con_win *cwin)
+complete_main_save_selection_playlist_submenu (struct con_win *cwin)
 {
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
 	
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Add to another playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Save selection")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
@@ -1204,9 +1218,13 @@ complete_main_add_to_playlist_submenu (struct con_win *cwin)
 	accel_group = gtk_accel_group_new ();
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow), accel_group);
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
-	gtk_accel_map_add_entry ("<SubMenu>/Add to another playlist", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK+GDK_SHIFT_MASK);
-	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/Add to another playlist");
+	gtk_accel_map_add_entry ("<SubMenu>/Save selection", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK+GDK_SHIFT_MASK);
+	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/Save selection");
+	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
+	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), cwin->cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1232,7 +1250,7 @@ void update_menu_playlist_changes(struct con_win *cwin)
 {
 	/* Update main menu. */
 	complete_main_save_playlist_submenu(cwin);
-	complete_main_add_to_playlist_submenu (cwin);
+	complete_main_save_selection_playlist_submenu (cwin);
 
 	/* Update playlist pupup menu. */
 	complete_add_to_playlist_submenu (cwin->cplaylist);

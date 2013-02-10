@@ -55,8 +55,8 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
 			<separator/>				    		\
-			<menuitem action=\"Add to another playlist\"/>		\
 			<menuitem action=\"Save playlist\"/>			\
+			<menuitem action=\"Save selection\"/>			\
 			<separator/>						\
 			<menuitem action=\"Search in playlist\"/>		\
 		</menu>								\
@@ -134,8 +134,8 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>C", "Crop playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
 	 "<Control>L", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
-	{"Add to another playlist", NULL, N_("Add selection to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE_AS, N_("Save playlist")},
+	{"Save selection", NULL, N_("Save selection")},
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Preferences", GTK_STOCK_PREFERENCES, N_("_Preferences"),
