@@ -966,6 +966,8 @@ pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
+void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
+void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void jump_to_playing_song(struct con_win *cwin);
 void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);

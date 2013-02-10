@@ -27,8 +27,8 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<menuitem action=\"Crop playlist\"/>					\
 	<menuitem action=\"Clear playlist\"/>					\
 	<separator/>				    				\
-	<menuitem action=\"Add to another playlist\"/>				\
 	<menuitem action=\"Save playlist\"/>					\
+	<menuitem action=\"Save selection\"/>					\
 	<separator/>				    				\
 	<menu action=\"ToolsMenu\">						\
 		<menuitem action=\"Search lyric\"/>				\
@@ -68,8 +68,8 @@ static GtkActionEntry playlist_context_aentries[] = {
 	 "", "Remove no telected tracks of playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
 	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
-	{"Add to another playlist", GTK_STOCK_SAVE_AS, N_("Add to another playlist")},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
+	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	#ifdef HAVE_LIBGLYR
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
@@ -1943,6 +1943,48 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 	}
 }
 
+void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
+{
+	GtkTreeIter iter;
+
+	if(pragha_playlist_is_changing(cplaylist))
+		return;
+
+	/* If current playlist change or is empty, return immediately. */
+
+	if (!gtk_tree_model_get_iter_first(cplaylist->model, &iter)) {
+		g_warning("Current playlist is empty");
+		return;
+	}
+
+	export_playlist (cplaylist, SAVE_COMPLETE);
+}
+
+void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
+{
+	GtkTreeIter iter;
+	GtkTreeSelection *selection;
+
+	/* If current playlist change or is empty, return immediately. */
+
+	if(pragha_playlist_is_changing(cplaylist))
+		return;
+
+	if (!gtk_tree_model_get_iter_first(cplaylist->model, &iter)) {
+		g_warning("Current playlist is empty");
+		return;
+	}
+
+	/* If no tracks have been selected in the current playlist,
+	   return immediately. */
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	if (!gtk_tree_selection_count_selected_rows(selection))
+		return;
+
+	export_playlist (cplaylist, SAVE_SELECTED);
+}
+
 /*******************/
 /* Event Callbacks */
 /*******************/
@@ -2169,7 +2211,7 @@ current_playlist_button_press_cb(GtkWidget *widget,
 				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Crop playlist");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
-				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Add to another playlist");
+				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Save selection");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget), TRUE);
 
 				item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Copy tag to selection");
@@ -2214,7 +2256,7 @@ current_playlist_button_press_cb(GtkWidget *widget,
 			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Crop playlist");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
-			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Add to another playlist");
+			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/Save selection");
 			gtk_widget_set_sensitive (GTK_WIDGET(item_widget), FALSE);
 
 			item_widget = gtk_ui_manager_get_widget(cplaylist->playlist_context_menu, "/SelectionPopup/ToolsMenu");
