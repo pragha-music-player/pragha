@@ -415,8 +415,6 @@ static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
 	gboolean use_hint;
 	use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	pragha_playlist_set_rules_hint(cwin->cplaylist, use_hint);
-
 	pragha_preferences_set_use_hint(cwin->preferences, use_hint);
 }
 

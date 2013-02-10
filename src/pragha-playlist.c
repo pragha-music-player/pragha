@@ -3454,6 +3454,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeSortable *sortable;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE;
 
 	/* Create the tree store */
 
@@ -3523,8 +3524,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 
 	/* Store the treeview in the scrollbar widget */
 
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW(current_playlist),
-				      pragha_preferences_get_use_hint(cplaylist->preferences));
+	g_object_bind_property (cplaylist->preferences, "use-hint", current_playlist, "rules-hint", binding_flags);
 
 	g_object_unref(store);
 
@@ -3773,12 +3773,6 @@ pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, PraghaMusicobjec
 		pragha_playlist_activate_path(cplaylist, path);
 		gtk_tree_path_free (path);
 	}
-}
-
-void
-pragha_playlist_set_rules_hint(PraghaPlaylist* cplaylist, gboolean use_hint)
-{
-	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(cplaylist->view), use_hint);
 }
 
 gint
