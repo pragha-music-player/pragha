@@ -677,358 +677,7 @@ pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
 }
 
 static void
-pragha_preferences_finalize (GObject *object)
-{
-   gchar *data = NULL;
-   gsize length;
-   GError *error = NULL;
-
-   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
-   PraghaPreferencesPrivate *priv = preferences->priv;
-
-   /* Store new preferences */
-
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_GENERAL,
-                          KEY_INSTANT_SEARCH,
-                          priv->instant_search);
-
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_GENERAL,
-                          KEY_APPROXIMATE_SEARCH,
-                          priv->approximate_search);
-
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_PLAYLIST,
-                          KEY_SHUFFLE,
-                          priv->shuffle);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_PLAYLIST,
-                          KEY_REPEAT,
-                          priv->repeat);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_GENERAL,
-                          KEY_USE_HINT,
-                          priv->use_hint);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_PLAYLIST,
-                          KEY_SAVE_PLAYLIST,
-                          priv->restore_playlist);
-   g_key_file_set_string(priv->rc_keyfile,
-			 GROUP_AUDIO,
-			 KEY_AUDIO_SINK,
-			 priv->audio_sink);
-   g_key_file_set_string(priv->rc_keyfile,
-			 GROUP_AUDIO,
-			 KEY_AUDIO_DEVICE,
-			 priv->audio_device);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_AUDIO,
-                          KEY_SOFTWARE_MIXER,
-                          priv->software_mixer);
-   if (string_is_not_empty(priv->audio_cd_device))
-      g_key_file_set_string(priv->rc_keyfile,
-                            GROUP_AUDIO,
-                            KEY_AUDIO_CD_DEVICE,
-                            priv->audio_cd_device);
-   else
-      pragha_preferences_remove_key(preferences,
-                                    GROUP_AUDIO,
-                                    KEY_AUDIO_CD_DEVICE);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_WINDOW,
-                          KEY_SIDEBAR,
-                          priv->lateral_panel);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_GENERAL,
-                          KEY_ADD_RECURSIVELY_FILES,
-                          priv->add_recursively);
-   g_key_file_set_boolean(priv->rc_keyfile,
-                          GROUP_GENERAL,
-                          KEY_TIMER_REMAINING_MODE,
-                          priv->timer_remaining_mode);
-   /* Save to key file */
-
-   data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
-   if(!g_file_set_contents(priv->rc_filepath, data, length, &error))
-      g_critical("Unable to write preferences file : %s", error->message);
-
-   g_free(data);
-   g_key_file_free(priv->rc_keyfile);
-   g_free(priv->rc_filepath);
-   g_free(priv->audio_sink);
-   g_free(priv->audio_device);
-   g_free(priv->audio_cd_device);
-
-   G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
-}
-
-static void
-pragha_preferences_get_property (GObject *object,
-                                 guint prop_id,
-                                 GValue *value,
-                                 GParamSpec *pspec)
-{
-   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
-
-   switch (prop_id) {
-   case PROP_INSTANT_SEARCH:
-      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
-      break;
-   case PROP_APPROXIMATE_SEARCH:
-      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
-      break;
-   case PROP_SHUFFLE:
-      g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
-      break;
-   case PROP_REPEAT:
-      g_value_set_boolean (value, pragha_preferences_get_repeat(preferences));
-      break;
-   case PROP_USE_HINT:
-      g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
-      break;
-   case PROP_RESTORE_PLAYLIST:
-      g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
-      break;
-   case PROP_AUDIO_SINK:
-      g_value_set_string (value, pragha_preferences_get_audio_sink(preferences));
-      break;
-   case PROP_AUDIO_DEVICE:
-      g_value_set_string (value, pragha_preferences_get_audio_device(preferences));
-      break;
-   case PROP_SOFTWARE_MIXER:
-      g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
-      break;
-   case PROP_AUDIO_CD_DEVICE:
-      g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
-      break;
-   case PROP_LATERAL_PANEL:
-      g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
-      break;
-   case PROP_ADD_RECURSIVELY:
-      g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
-      break;
-   case PROP_TIMER_REMAINING_MODE:
-      g_value_set_boolean (value, pragha_preferences_get_timer_remaining_mode(preferences));
-      break;
-   default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-   }
-}
-
-static void
-pragha_preferences_set_property (GObject *object,
-                                 guint prop_id,
-                                 const GValue *value,
-                                 GParamSpec *pspec)
-{
-   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
-
-   switch (prop_id) {
-   case PROP_INSTANT_SEARCH:
-      pragha_preferences_set_instant_search(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_APPROXIMATE_SEARCH:
-      pragha_preferences_set_approximate_search(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_SHUFFLE:
-      pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_REPEAT:
-      pragha_preferences_set_repeat(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_USE_HINT:
-      pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_RESTORE_PLAYLIST:
-      pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_AUDIO_SINK:
-      pragha_preferences_set_audio_sink(preferences, g_value_get_string(value));
-      break;
-   case PROP_AUDIO_DEVICE:
-      pragha_preferences_set_audio_device(preferences, g_value_get_string(value));
-      break;
-   case PROP_SOFTWARE_MIXER:
-      pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_AUDIO_CD_DEVICE:
-      pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
-      break;
-   case PROP_LATERAL_PANEL:
-      pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_ADD_RECURSIVELY:
-      pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
-      break;
-   case PROP_TIMER_REMAINING_MODE:
-      pragha_preferences_set_timer_remaining_mode(preferences, g_value_get_boolean(value));
-      break;
-   default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-   }
-}
-
-static void
-pragha_preferences_class_init (PraghaPreferencesClass *klass)
-{
-   GObjectClass *object_class;
-   const GParamFlags PRAGHA_PREF_PARAMS = G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS;
-
-   object_class = G_OBJECT_CLASS(klass);
-   object_class->finalize = pragha_preferences_finalize;
-   object_class->get_property = pragha_preferences_get_property;
-   object_class->set_property = pragha_preferences_set_property;
-   g_type_class_add_private(object_class, sizeof(PraghaPreferencesPrivate));
-
-   /**
-    * PraghaPreferences:instant_search:
-    *
-    */
-   gParamSpecs[PROP_INSTANT_SEARCH] =
-      g_param_spec_boolean("instant-search",
-                           "InstantSearch",
-                           "Instant Search Preference",
-                           TRUE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:approximate_searches:
-    *
-    */
-   gParamSpecs[PROP_APPROXIMATE_SEARCH] =
-      g_param_spec_boolean("approximate-searches",
-                           "ApproximateSearches",
-                           "Approximate Searches Preference",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:shuffle:
-    *
-    */
-   gParamSpecs[PROP_SHUFFLE] =
-      g_param_spec_boolean("shuffle",
-                           "Shuffle",
-                           "Shuffle Preference",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:repeat:
-    *
-    */
-   gParamSpecs[PROP_REPEAT] =
-      g_param_spec_boolean("repeat",
-                           "Repeat",
-                           "Repeat Preference",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:use_hint:
-    *
-    */
-   gParamSpecs[PROP_USE_HINT] =
-      g_param_spec_boolean("use-hint",
-                           "UseHint",
-                           "Use hint Preference",
-                           TRUE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:restore_playlist:
-    *
-    */
-   gParamSpecs[PROP_RESTORE_PLAYLIST] =
-      g_param_spec_boolean("restore-playlist",
-                           "RestorePlaylist",
-                           "Restore Playlist Preference",
-                           TRUE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:audio_sink:
-    *
-    */
-   gParamSpecs[PROP_AUDIO_SINK] =
-      g_param_spec_string("audio-sink",
-                          "AudioSink",
-                          "Audio Sink",
-                          DEFAULT_SINK,
-                          PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:audio_device:
-    *
-    */
-   gParamSpecs[PROP_AUDIO_DEVICE] =
-      g_param_spec_string("audio-device",
-                          "AudioDevice",
-                          "Audio Device",
-                          ALSA_DEFAULT_DEVICE,
-                          PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:software_mixer:
-    *
-    */
-   gParamSpecs[PROP_SOFTWARE_MIXER] =
-      g_param_spec_boolean("software-mixer",
-                           "SoftwareMixer",
-                           "Use Software Mixer",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:audio_cd_device:
-    *
-    */
-   gParamSpecs[PROP_AUDIO_CD_DEVICE] =
-      g_param_spec_string("audio-cd-device",
-                          "AudioCDDevice",
-                          "Audio CD Device",
-                          NULL,
-                          PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:lateral_panel:
-    *
-    */
-   gParamSpecs[PROP_LATERAL_PANEL] =
-      g_param_spec_boolean("lateral-panel",
-                           "LateralPanel",
-                           "Show Lateral Panel Preference",
-                           TRUE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:add_recursively:
-    *
-    */
-   gParamSpecs[PROP_ADD_RECURSIVELY] =
-      g_param_spec_boolean("add-recursively",
-                           "AddRecursively",
-                           "Add Recursively Preference",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   /**
-    * PraghaPreferences:timer_remaining_mode:
-    *
-    */
-   gParamSpecs[PROP_TIMER_REMAINING_MODE] =
-      g_param_spec_boolean("timer-remaining-mode",
-                           "TimerRemainingMode",
-                           "Timer Remaining Mode Preference",
-                           FALSE,
-                           PRAGHA_PREF_PARAMS);
-
-   g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
-}
-
-static void
-pragha_preferences_init (PraghaPreferences *preferences)
+pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
    gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
@@ -1037,11 +686,6 @@ pragha_preferences_init (PraghaPreferences *preferences)
    const gchar *user_config_dir;
    gchar *pragha_config_dir = NULL;
    GError *error = NULL;
-
-   preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE(preferences,
-                                                   PRAGHA_TYPE_PREFERENCES,
-                                                   PraghaPreferencesPrivate);
-
    PraghaPreferencesPrivate *priv = preferences->priv;
 
    /* First check preferences folder or create it */
@@ -1247,6 +891,376 @@ pragha_preferences_init (PraghaPreferences *preferences)
    g_free(audio_sink);
    g_free(audio_device);
    g_free(audio_cd_device);
+}
+
+static void
+pragha_preferences_finalize (GObject *object)
+{
+   gchar *data = NULL;
+   gsize length;
+   GError *error = NULL;
+
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
+   PraghaPreferencesPrivate *priv = preferences->priv;
+
+   /* Store new preferences */
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_INSTANT_SEARCH,
+                          priv->instant_search);
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_APPROXIMATE_SEARCH,
+                          priv->approximate_search);
+
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_SHUFFLE,
+                          priv->shuffle);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_REPEAT,
+                          priv->repeat);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_USE_HINT,
+                          priv->use_hint);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_PLAYLIST,
+                          KEY_SAVE_PLAYLIST,
+                          priv->restore_playlist);
+   g_key_file_set_string(priv->rc_keyfile,
+			 GROUP_AUDIO,
+			 KEY_AUDIO_SINK,
+			 priv->audio_sink);
+   g_key_file_set_string(priv->rc_keyfile,
+			 GROUP_AUDIO,
+			 KEY_AUDIO_DEVICE,
+			 priv->audio_device);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_AUDIO,
+                          KEY_SOFTWARE_MIXER,
+                          priv->software_mixer);
+   if (string_is_not_empty(priv->audio_cd_device))
+      g_key_file_set_string(priv->rc_keyfile,
+                            GROUP_AUDIO,
+                            KEY_AUDIO_CD_DEVICE,
+                            priv->audio_cd_device);
+   else
+      pragha_preferences_remove_key(preferences,
+                                    GROUP_AUDIO,
+                                    KEY_AUDIO_CD_DEVICE);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_WINDOW,
+                          KEY_SIDEBAR,
+                          priv->lateral_panel);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_ADD_RECURSIVELY_FILES,
+                          priv->add_recursively);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_GENERAL,
+                          KEY_TIMER_REMAINING_MODE,
+                          priv->timer_remaining_mode);
+   /* Save to key file */
+
+   data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
+   if(!g_file_set_contents(priv->rc_filepath, data, length, &error))
+      g_critical("Unable to write preferences file : %s", error->message);
+
+   g_free(data);
+   g_key_file_free(priv->rc_keyfile);
+   g_free(priv->rc_filepath);
+   g_free(priv->audio_sink);
+   g_free(priv->audio_device);
+   g_free(priv->audio_cd_device);
+
+   G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
+}
+
+static void
+pragha_preferences_get_property (GObject *object,
+                                 guint prop_id,
+                                 GValue *value,
+                                 GParamSpec *pspec)
+{
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
+
+   switch (prop_id) {
+   case PROP_INSTANT_SEARCH:
+      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
+      break;
+   case PROP_APPROXIMATE_SEARCH:
+      g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
+      break;
+   case PROP_SHUFFLE:
+      g_value_set_boolean (value, pragha_preferences_get_shuffle(preferences));
+      break;
+   case PROP_REPEAT:
+      g_value_set_boolean (value, pragha_preferences_get_repeat(preferences));
+      break;
+   case PROP_USE_HINT:
+      g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
+      break;
+   case PROP_RESTORE_PLAYLIST:
+      g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
+      break;
+   case PROP_AUDIO_SINK:
+      g_value_set_string (value, pragha_preferences_get_audio_sink(preferences));
+      break;
+   case PROP_AUDIO_DEVICE:
+      g_value_set_string (value, pragha_preferences_get_audio_device(preferences));
+      break;
+   case PROP_SOFTWARE_MIXER:
+      g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
+      break;
+   case PROP_AUDIO_CD_DEVICE:
+      g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
+      break;
+   case PROP_LATERAL_PANEL:
+      g_value_set_boolean (value, pragha_preferences_get_lateral_panel(preferences));
+      break;
+   case PROP_ADD_RECURSIVELY:
+      g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
+      break;
+   case PROP_TIMER_REMAINING_MODE:
+      g_value_set_boolean (value, pragha_preferences_get_timer_remaining_mode(preferences));
+      break;
+   default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
+static void
+pragha_preferences_set_property (GObject *object,
+                                 guint prop_id,
+                                 const GValue *value,
+                                 GParamSpec *pspec)
+{
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES(object);
+
+   switch (prop_id) {
+   case PROP_INSTANT_SEARCH:
+      pragha_preferences_set_instant_search(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_APPROXIMATE_SEARCH:
+      pragha_preferences_set_approximate_search(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_SHUFFLE:
+      pragha_preferences_set_shuffle(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_REPEAT:
+      pragha_preferences_set_repeat(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_USE_HINT:
+      pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_RESTORE_PLAYLIST:
+      pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_AUDIO_SINK:
+      pragha_preferences_set_audio_sink(preferences, g_value_get_string(value));
+      break;
+   case PROP_AUDIO_DEVICE:
+      pragha_preferences_set_audio_device(preferences, g_value_get_string(value));
+      break;
+   case PROP_SOFTWARE_MIXER:
+      pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_AUDIO_CD_DEVICE:
+      pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
+      break;
+   case PROP_LATERAL_PANEL:
+      pragha_preferences_set_lateral_panel(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_ADD_RECURSIVELY:
+      pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
+      break;
+   case PROP_TIMER_REMAINING_MODE:
+      pragha_preferences_set_timer_remaining_mode(preferences, g_value_get_boolean(value));
+      break;
+   default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
+static GObject *
+pragha_preferences_constructor (GType type, guint n_construct_properties, GObjectConstructParam *construct_properties)
+{
+   GObject *object = G_OBJECT_CLASS (pragha_preferences_parent_class)->
+      constructor (type, n_construct_properties, construct_properties);
+   PraghaPreferences *preferences = PRAGHA_PREFERENCES (object);
+   pragha_preferences_load_from_file (preferences);
+   return object;
+}
+
+static void
+pragha_preferences_class_init (PraghaPreferencesClass *klass)
+{
+   GObjectClass *object_class;
+   const GParamFlags PRAGHA_PREF_PARAMS = G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS;
+
+   object_class = G_OBJECT_CLASS(klass);
+   object_class->constructor = pragha_preferences_constructor;
+   object_class->finalize = pragha_preferences_finalize;
+   object_class->get_property = pragha_preferences_get_property;
+   object_class->set_property = pragha_preferences_set_property;
+   g_type_class_add_private(object_class, sizeof(PraghaPreferencesPrivate));
+
+   /**
+    * PraghaPreferences:instant_search:
+    *
+    */
+   gParamSpecs[PROP_INSTANT_SEARCH] =
+      g_param_spec_boolean("instant-search",
+                           "InstantSearch",
+                           "Instant Search Preference",
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:approximate_searches:
+    *
+    */
+   gParamSpecs[PROP_APPROXIMATE_SEARCH] =
+      g_param_spec_boolean("approximate-searches",
+                           "ApproximateSearches",
+                           "Approximate Searches Preference",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:shuffle:
+    *
+    */
+   gParamSpecs[PROP_SHUFFLE] =
+      g_param_spec_boolean("shuffle",
+                           "Shuffle",
+                           "Shuffle Preference",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:repeat:
+    *
+    */
+   gParamSpecs[PROP_REPEAT] =
+      g_param_spec_boolean("repeat",
+                           "Repeat",
+                           "Repeat Preference",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:use_hint:
+    *
+    */
+   gParamSpecs[PROP_USE_HINT] =
+      g_param_spec_boolean("use-hint",
+                           "UseHint",
+                           "Use hint Preference",
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:restore_playlist:
+    *
+    */
+   gParamSpecs[PROP_RESTORE_PLAYLIST] =
+      g_param_spec_boolean("restore-playlist",
+                           "RestorePlaylist",
+                           "Restore Playlist Preference",
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:audio_sink:
+    *
+    */
+   gParamSpecs[PROP_AUDIO_SINK] =
+      g_param_spec_string("audio-sink",
+                          "AudioSink",
+                          "Audio Sink",
+                          DEFAULT_SINK,
+                          PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:audio_device:
+    *
+    */
+   gParamSpecs[PROP_AUDIO_DEVICE] =
+      g_param_spec_string("audio-device",
+                          "AudioDevice",
+                          "Audio Device",
+                          ALSA_DEFAULT_DEVICE,
+                          PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:software_mixer:
+    *
+    */
+   gParamSpecs[PROP_SOFTWARE_MIXER] =
+      g_param_spec_boolean("software-mixer",
+                           "SoftwareMixer",
+                           "Use Software Mixer",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:audio_cd_device:
+    *
+    */
+   gParamSpecs[PROP_AUDIO_CD_DEVICE] =
+      g_param_spec_string("audio-cd-device",
+                          "AudioCDDevice",
+                          "Audio CD Device",
+                          NULL,
+                          PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:lateral_panel:
+    *
+    */
+   gParamSpecs[PROP_LATERAL_PANEL] =
+      g_param_spec_boolean("lateral-panel",
+                           "LateralPanel",
+                           "Show Lateral Panel Preference",
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:add_recursively:
+    *
+    */
+   gParamSpecs[PROP_ADD_RECURSIVELY] =
+      g_param_spec_boolean("add-recursively",
+                           "AddRecursively",
+                           "Add Recursively Preference",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   /**
+    * PraghaPreferences:timer_remaining_mode:
+    *
+    */
+   gParamSpecs[PROP_TIMER_REMAINING_MODE] =
+      g_param_spec_boolean("timer-remaining-mode",
+                           "TimerRemainingMode",
+                           "Timer Remaining Mode Preference",
+                           FALSE,
+                           PRAGHA_PREF_PARAMS);
+
+   g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
+}
+
+static void
+pragha_preferences_init (PraghaPreferences *preferences)
+{
+   preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE(preferences,
+                                                   PRAGHA_TYPE_PREFERENCES,
+                                                   PraghaPreferencesPrivate);
 }
 
 GKeyFile*
