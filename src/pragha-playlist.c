@@ -1881,7 +1881,7 @@ void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	playlist = get_playlist_name(cplaylist, SAVE_SELECTED);
+	playlist = get_playlist_name(SAVE_SELECTED, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 
 	if (playlist) {
 		new_playlist(cplaylist, playlist, SAVE_SELECTED);
@@ -1908,7 +1908,7 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 		return;
 	}
 
-	playlist = get_playlist_name(cplaylist, SAVE_COMPLETE);
+	playlist = get_playlist_name(SAVE_COMPLETE, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget)));
 	if (playlist) {
 		new_playlist(cplaylist, playlist, SAVE_COMPLETE);
 		pragha_database_change_playlists_done(cplaylist->cdbase);

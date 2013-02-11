@@ -2032,7 +2032,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			n_playlist = rename_playlist_dialog (playlist, cwin);
+			n_playlist = rename_playlist_dialog (playlist, cwin->mainwindow);
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
@@ -2077,7 +2077,7 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 
-				if(delete_existing_item_dialog(playlist, cwin)) {
+				if(delete_existing_item_dialog(playlist, cwin->mainwindow)) {
 					if(node_type == NODE_PLAYLIST) {
 						pragha_database_delete_playlist(cwin->cdbase, playlist);
 					}

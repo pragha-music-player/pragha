@@ -21,7 +21,7 @@
 /* Build a dialog to get a new playlist name */
 
 static gchar *
-get_playlist_dialog(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
+get_playlist_dialog(enum playlist_mgmt type, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	GtkWidget *table, *label, *entry;
@@ -47,7 +47,7 @@ get_playlist_dialog(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
 	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
-			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
+			     GTK_WINDOW(parent),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
@@ -83,25 +83,25 @@ get_playlist_dialog(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
 /* Get a new playlist name that is not reserved */
 
 gchar *
-get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
+get_playlist_name(enum playlist_mgmt type, GtkWidget *parent)
 {
 	gchar *playlist = NULL;
 
 	do {
-		playlist = get_playlist_dialog(cplaylist, type);
+		playlist = get_playlist_dialog(type, parent);
 		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
 			GtkWidget *dialog;
-			dialog = gtk_message_dialog_new_with_markup(
-				GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_INFO,
-				GTK_BUTTONS_OK,
-				_("<b>con_playlist</b> is a reserved playlist name"));
+			dialog = gtk_message_dialog_new_with_markup(GTK_WINDOW(parent),
+			                                            GTK_DIALOG_MODAL,
+			                                            GTK_MESSAGE_INFO,
+			                                            GTK_BUTTONS_OK,
+			                                            _("<b>con_playlist</b> is a reserved playlist name"));
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
 			g_free(playlist);
 			continue;
-		} else {
+		}
+		else {
 			break;
 		}
 	} while (1);
@@ -110,16 +110,13 @@ get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
 }
 
 static gboolean
-overwrite_existing_playlist(const gchar *playlist,
-                            PraghaPlaylist* cplaylist)
+overwrite_existing_playlist(const gchar *playlist, GtkWidget *parent)
 {
+	GtkWidget *dialog;
 	gboolean choice = FALSE;
 	gint ret;
-	GtkWidget *dialog, *toplevel;
 
-	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget));
-
-	dialog = gtk_message_dialog_new(GTK_WINDOW(toplevel),
+	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
@@ -371,7 +368,7 @@ bad:
 
 /* Build a dialog to get a new playlist name */
 
-gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
+gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	GtkWidget *table, *entry;
@@ -392,7 +389,7 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(_("Rename"),
-			     GTK_WINDOW(cwin->mainwindow),
+			     GTK_WINDOW(parent),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
@@ -425,14 +422,13 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 }
 
 gboolean
-delete_existing_item_dialog(const gchar *item,
-                           struct con_win *cwin)
+delete_existing_item_dialog(const gchar *item, GtkWidget *parent)
 {
 	gboolean choice = FALSE;
 	gint ret;
 	GtkWidget *dialog;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
+	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
 				GTK_DIALOG_MODAL,
 				GTK_MESSAGE_QUESTION,
 				GTK_BUTTONS_YES_NO,
@@ -966,7 +962,7 @@ new_playlist(PraghaPlaylist* cplaylist,
 	}
 
 	if ((playlist_id = pragha_database_find_playlist (cplaylist->cdbase, playlist))) {
-		if (overwrite_existing_playlist(playlist, cplaylist))
+		if (overwrite_existing_playlist(playlist, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))))
 			pragha_database_delete_playlist (cplaylist->cdbase, playlist);
 		else
 			return;
@@ -1005,7 +1001,7 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 	}
 
 	if ((radio_id = pragha_database_find_radio (cplaylist->cdbase, name))) {
-		if (overwrite_existing_playlist(name, cplaylist))
+		if (overwrite_existing_playlist(name, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))))
 			pragha_database_delete_radio (cplaylist->cdbase, name);
 		else
 			return;
