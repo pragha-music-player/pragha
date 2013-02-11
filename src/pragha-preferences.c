@@ -45,6 +45,8 @@ struct _PraghaPreferencesPrivate
    /* Window preferences. */
    gboolean   lateral_panel;
    gint       sidebar_size;
+   gboolean   show_album_art;
+
    /* Misc preferences. */
    gboolean   add_recursively;
    gboolean   timer_remaining_mode;
@@ -68,6 +70,7 @@ enum
    PROP_AUDIO_CD_DEVICE,
    PROP_LATERAL_PANEL,
    PROP_SIDEBAR_SIZE,
+   PROP_SHOW_ALBUM_ART,
    PROP_ADD_RECURSIVELY,
    PROP_TIMER_REMAINING_MODE,
    LAST_PROP
@@ -741,6 +744,33 @@ pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_show_album_art:
+ *
+ */
+gboolean
+pragha_preferences_get_show_album_art (PraghaPreferences *preferences)
+{
+   g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+   return preferences->priv->show_album_art;
+}
+
+/**
+ * pragha_preferences_set_show_album_art:
+ *
+ */
+void
+pragha_preferences_set_show_album_art (PraghaPreferences *preferences,
+                                       gboolean show_album_art)
+{
+   g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+   preferences->priv->show_album_art = show_album_art;
+
+   g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_ALBUM_ART]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -798,7 +828,8 @@ static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
    gboolean approximate_search, instant_search;
-   gboolean shuffle, repeat, use_hint, restore_playlist, lateral_panel, software_mixer;
+   gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
+   gboolean lateral_panel, show_album_art;
    gboolean add_recursively, timer_remaining_mode;
    gchar *audio_sink, *audio_device, *audio_cd_device;
    gint library_style, sidebar_size;
@@ -1032,6 +1063,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
       pragha_preferences_set_sidebar_size(preferences, sidebar_size);
    }
 
+   show_album_art = g_key_file_get_boolean(priv->rc_keyfile,
+                                           GROUP_WINDOW,
+                                           KEY_SHOW_ALBUM_ART,
+                                           &error);
+   if (error) {
+      g_error_free(error);
+      error = NULL;
+   }
+   else {
+      pragha_preferences_set_show_album_art(preferences, show_album_art);
+   }
+
    add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
                                             GROUP_GENERAL,
                                             KEY_ADD_RECURSIVELY_FILES,
@@ -1141,6 +1184,10 @@ pragha_preferences_finalize (GObject *object)
                           GROUP_WINDOW,
                           KEY_SIDEBAR_SIZE,
                           priv->sidebar_size);
+   g_key_file_set_boolean(priv->rc_keyfile,
+                          GROUP_WINDOW,
+                          KEY_SHOW_ALBUM_ART,
+                          priv->show_album_art);
 
    g_key_file_set_boolean(priv->rc_keyfile,
                           GROUP_GENERAL,
@@ -1220,6 +1267,9 @@ pragha_preferences_get_property (GObject *object,
    case PROP_SIDEBAR_SIZE:
       g_value_set_int (value, pragha_preferences_get_sidebar_size(preferences));
       break;
+   case PROP_SHOW_ALBUM_ART:
+      g_value_set_boolean (value, pragha_preferences_get_show_album_art(preferences));
+      break;
    case PROP_ADD_RECURSIVELY:
       g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
       break;
@@ -1284,6 +1334,9 @@ pragha_preferences_set_property (GObject *object,
       break;
    case PROP_SIDEBAR_SIZE:
       pragha_preferences_set_sidebar_size(preferences, g_value_get_int(value));
+      break;
+   case PROP_SHOW_ALBUM_ART:
+      pragha_preferences_set_show_album_art(preferences, g_value_get_boolean(value));
       break;
    case PROP_ADD_RECURSIVELY:
       pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -1486,6 +1539,16 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
                         G_MAXINT,
                         DEFAULT_SIDEBAR_SIZE,
                         PRAGHA_PREF_PARAMS);
+   /**
+    * PraghaPreferences:show_album_art:
+    *
+    */
+   gParamSpecs[PROP_SHOW_ALBUM_ART] =
+      g_param_spec_boolean("show-album-art",
+                           "ShowAlbumArt",
+                           "show Album Art Preference",
+                           TRUE,
+                           PRAGHA_PREF_PARAMS);
 
    /**
     * PraghaPreferences:add_recursively:

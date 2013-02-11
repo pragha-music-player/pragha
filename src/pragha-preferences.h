@@ -205,6 +205,13 @@ void
 pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
                                       gboolean lateral_panel);
 
+gboolean
+pragha_preferences_get_show_album_art (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_show_album_art (PraghaPreferences *preferences,
+                                       gboolean show_album_art);
+
 gint
 pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 
