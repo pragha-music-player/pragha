@@ -864,7 +864,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	                        binding_flags);
 
 	init_menu_actions(cwin);
-	update_menu_playlist_changes(cwin);
+	update_playlist_changes_on_menu(cwin);
 
 	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
 
