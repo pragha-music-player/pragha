@@ -1136,7 +1136,7 @@ void save_to_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 }
 
 static void
-complete_save_selection_playlist_submenu (PraghaPlaylist *cplaylist)
+update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist)
 {
 	GtkWidget *submenu, *menuitem;
 	
@@ -1174,7 +1174,7 @@ complete_save_selection_playlist_submenu (PraghaPlaylist *cplaylist)
 }
 
 static void
-complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
+update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 {
 	GtkWidget *submenu, *menuitem;
 	
@@ -1212,7 +1212,7 @@ complete_save_playlist_submenu (PraghaPlaylist *cplaylist)
 }
 
 static void
-complete_main_save_playlist_submenu (struct con_win *cwin)
+update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 {
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
@@ -1257,7 +1257,7 @@ complete_main_save_playlist_submenu (struct con_win *cwin)
 }
 
 static void
-complete_main_save_selection_playlist_submenu (struct con_win *cwin)
+update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 {
 	GtkWidget *submenu, *menuitem;
 	GtkAccelGroup* accel_group;
@@ -1301,13 +1301,13 @@ complete_main_save_selection_playlist_submenu (struct con_win *cwin)
 	gtk_widget_show_all (submenu);
 }
 
-void update_menu_playlist_changes(struct con_win *cwin)
+void update_playlist_changes_on_menu(struct con_win *cwin)
 {
 	/* Update main menu. */
-	complete_main_save_playlist_submenu(cwin);
-	complete_main_save_selection_playlist_submenu (cwin);
+	update_playlist_changes_save_playlist_mainmenu(cwin);
+	update_playlist_changes_save_selection_mainmenu(cwin);
 
 	/* Update playlist pupup menu. */
-	complete_save_selection_playlist_submenu (cwin->cplaylist);
-	complete_save_playlist_submenu (cwin->cplaylist);
+	update_playlist_changes_save_playlist_popup_playlist(cwin->cplaylist);
+	update_playlist_changes_save_selection_popup_playlist(cwin->cplaylist);
 }

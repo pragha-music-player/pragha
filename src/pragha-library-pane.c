@@ -1859,7 +1859,7 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 
 	clibrary->view_change = FALSE;
 
-	update_menu_playlist_changes(cwin);
+	update_playlist_changes_on_menu(cwin);
 }
 
 static void

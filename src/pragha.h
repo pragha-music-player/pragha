@@ -910,7 +910,7 @@ new_playlist(PraghaPlaylist* cplaylist,
              enum playlist_mgmt type);
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
-void update_menu_playlist_changes(struct con_win *cwin);
+void update_playlist_changes_on_menu(struct con_win *cwin);
 
 /* Current playlist */
 
