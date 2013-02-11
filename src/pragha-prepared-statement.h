@@ -25,13 +25,14 @@ G_BEGIN_DECLS
 struct PraghaPreparedStatement;
 typedef struct PraghaPreparedStatement PraghaPreparedStatement;
 
-PraghaPreparedStatement* pragha_prepared_statement_new               (gpointer stmt, gpointer database);
 void                     pragha_prepared_statement_free              (PraghaPreparedStatement *statement);
 void                     pragha_prepared_statement_bind_string       (PraghaPreparedStatement *statement, gint n, const gchar *value);
 void                     pragha_prepared_statement_bind_int          (PraghaPreparedStatement *statement, gint n, gint value);
 gboolean                 pragha_prepared_statement_step              (PraghaPreparedStatement *statement);
 gint                     pragha_prepared_statement_get_int           (PraghaPreparedStatement *statement, gint column);
 const gchar *            pragha_prepared_statement_get_string        (PraghaPreparedStatement *statement, gint column);
+void                     pragha_prepared_statement_reset             (PraghaPreparedStatement *statement);
+const gchar *            pragha_prepared_statement_get_sql           (PraghaPreparedStatement *statement);
 
 G_END_DECLS
 

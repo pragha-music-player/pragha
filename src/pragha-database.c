@@ -15,14 +15,18 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha-database.h"
+#include <sqlite3.h>
+
 #include "pragha.h"
+#include "pragha-database.h"
+#include "pragha-prepared-statement-private.h"
 
 G_DEFINE_TYPE(PraghaDatabase, pragha_database, G_TYPE_OBJECT)
 
 struct _PraghaDatabasePrivate
 {
 	sqlite3 *sqlitedb;
+	GHashTable *statements_cache;
 	gboolean successfully;
 };
 
@@ -63,17 +67,42 @@ pragha_database_exec_query (PraghaDatabase *database,
 	return ret;
 }
 
-PraghaPreparedStatement *
-pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
+static PraghaPreparedStatement *
+new_statement (PraghaDatabase *database, const gchar *sql)
 {
+	PraghaDatabasePrivate *priv = database->priv;
 	sqlite3_stmt *stmt;
 
-	if (sqlite3_prepare_v2 (database->priv->sqlitedb, sql, -1, &stmt, NULL) != SQLITE_OK) {
+	if (sqlite3_prepare_v2 (priv->sqlitedb, sql, -1, &stmt, NULL) != SQLITE_OK) {
 		g_critical ("db: %s", pragha_database_get_last_error (database));
 		return NULL;
 	}
 
 	return pragha_prepared_statement_new (stmt, database);
+}
+
+PraghaPreparedStatement *
+pragha_database_create_statement (PraghaDatabase *database, const gchar *sql)
+{
+	PraghaDatabasePrivate *priv = database->priv;
+	PraghaPreparedStatement *cached = g_hash_table_lookup (priv->statements_cache, sql);
+
+	if (cached) {
+		g_hash_table_steal (priv->statements_cache, sql);
+		return cached;
+	}
+
+	return new_statement (database, sql);
+}
+
+void
+pragha_database_release_statement (PraghaDatabase *database, PraghaPreparedStatement *statement)
+{
+	PraghaDatabasePrivate *priv = database->priv;
+	gpointer sql = (gpointer) pragha_prepared_statement_get_sql (statement);
+
+	pragha_prepared_statement_reset (statement);
+	g_hash_table_replace (priv->statements_cache, sql, statement);
 }
 
 gint
@@ -615,6 +644,10 @@ pragha_database_finalize (GObject *object)
 	PraghaDatabase *database = PRAGHA_DATABASE(object);
 	PraghaDatabasePrivate *priv = database->priv;
 
+	CDEBUG (DBG_DB, "statements in cache: %i", g_hash_table_size (priv->statements_cache));
+
+	g_hash_table_destroy (priv->statements_cache);
+
 	sqlite3_close(priv->sqlitedb);
 
 	G_OBJECT_CLASS(pragha_database_parent_class)->finalize(object);
@@ -659,6 +692,9 @@ pragha_database_init (PraghaDatabase *database)
 	                                             PraghaDatabasePrivate);
 
 	PraghaDatabasePrivate *priv = database->priv;
+
+	priv->statements_cache = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
+	                                       (GDestroyNotify) pragha_prepared_statement_finalize);
 
 	home = g_get_user_config_dir();
 	database_file = g_build_path(G_DIR_SEPARATOR_S, home, "/pragha/pragha.db", NULL);
