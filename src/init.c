@@ -858,9 +858,12 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		#endif
 	}
 
-	/* TODO: Move it to PraghaSidebar construction. */
+	/* TODO: Move it to Widgets construction. */
 	g_object_bind_property (cwin->preferences, "lateral-panel",
 	                        cwin->sidebar->widget, "visible",
+	                        binding_flags);
+	g_object_bind_property (cwin->preferences, "show-album-art",
+	                        GTK_WIDGET(cwin->albumart), "visible",
 	                        binding_flags);
 
 	init_menu_actions(cwin);

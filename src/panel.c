@@ -313,7 +313,7 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 
 	gchar *album_path = NULL, *path = NULL;
 
-	if (pragha_album_art_get_visible(cwin->albumart)) {
+	if (pragha_preferences_get_show_album_art(cwin->preferences)) {
 		if (G_LIKELY(mobj &&
 		    pragha_musicobject_is_local_file(mobj))) {
 			#ifdef HAVE_LIBGLYR
@@ -456,19 +456,7 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 void init_toolbar_preferences_saved(struct con_win *cwin)
 {
 	GError *error = NULL;
-	gboolean show_album_art;
 	gint album_art_size;
-
-	show_album_art =
-		g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-				       GROUP_WINDOW,
-				       KEY_SHOW_ALBUM_ART,
-				       &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-		show_album_art = TRUE;
-	}
 
 	album_art_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
 						GROUP_WINDOW,
@@ -481,7 +469,6 @@ void init_toolbar_preferences_saved(struct con_win *cwin)
 	}
 
 	pragha_album_art_set_size(cwin->albumart, album_art_size);
-	pragha_album_art_set_visible(cwin->albumart, show_album_art);
 	pragha_album_art_set_path(cwin->albumart, NULL);
 }
 

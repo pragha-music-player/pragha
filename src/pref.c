@@ -196,10 +196,12 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		show_album_art =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->album_art_w));
+		pragha_preferences_set_show_album_art(cwin->preferences, show_album_art);
 
 		album_art_size =
 			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
 						cwin->preferences_w->album_art_size_w));
+		pragha_album_art_set_size(cwin->albumart, album_art_size);
 
 		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
@@ -214,9 +216,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
 			}
 		}
-
-		pragha_album_art_set_size(cwin->albumart, album_art_size);
-		pragha_album_art_set_visible(cwin->albumart, show_album_art);
 
 		/* Notification preferences */
 
@@ -643,9 +642,10 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->add_recursively_w),
 					     TRUE);
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-				     cwin->preferences_w->album_art_w),
-				     pragha_album_art_get_visible(cwin->albumart));
+	if (pragha_preferences_get_show_album_art(cwin->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+		                             cwin->preferences_w->album_art_w),
+		                             TRUE);
 
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
 				   (int) pragha_album_art_get_size(cwin->albumart));
@@ -924,13 +924,6 @@ void save_preferences(struct con_win *cwin)
 
 	pragha_preferences_set_sidebar_size(cwin->preferences,
 		gtk_paned_get_position(GTK_PANED(cwin->paned)));
-
-	/* Save show album art option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_SHOW_ALBUM_ART,
-			       pragha_album_art_get_visible(cwin->albumart));
 
 	/* Save album art size */
 
