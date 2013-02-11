@@ -374,22 +374,22 @@ bad:
 gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *hbox;
-	GtkWidget *label_new, *entry;
+	GtkWidget *table, *entry;
 	gchar *playlist = NULL;
 	gint result;
+	guint row = 0;
 
 	/* Create dialog window */
 
-	hbox = gtk_hbox_new(FALSE, 2);
-
-	label_new = gtk_label_new_with_mnemonic(_("Choose a new name"));
+	table = pragha_hig_workarea_table_new();
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Choose a new name"));
 
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
 	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	pragha_hig_workarea_table_add_wide_control(table, &row, entry);
 
-	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(_("Rename"),
 			     GTK_WINDOW(cwin->mainwindow),
@@ -402,10 +402,9 @@ gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin)
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
-	gtk_box_pack_start(GTK_BOX(hbox), label_new, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 2);
+	gtk_entry_set_text(GTK_ENTRY(entry), oplaylist);
 
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 
 	gtk_widget_show_all(dialog);
 
