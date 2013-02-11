@@ -20,46 +20,31 @@
 
 /* Build a dialog to get a new playlist name */
 
-static gchar*
-get_playlist_dialog(PraghaPlaylist* cplaylist,
-                    enum playlist_mgmt *choice,
-                    enum playlist_mgmt type)
+static gchar *
+get_playlist_dialog(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
 {
-	gchar **playlists, *playlist = NULL;
-	gint result, i=0;
-	GtkWidget *dialog, *radio_new, *radio_add;
-	GtkWidget *hbox, *vbox1, *vbox2;
-	GtkWidget *entry;
-	GtkWidget *combo_add;
+	GtkWidget *dialog;
+	GtkWidget *table, *label, *entry;
+	gchar *playlist = NULL;
+	gint result;
+	guint row = 0;
 
-	/* Retrieve list of playlist names from DB */
+	table = pragha_hig_workarea_table_new();
 
-	playlists = get_playlist_names_db(cplaylist->cdbase);
+	if(type == SAVE_COMPLETE)
+		pragha_hig_workarea_table_add_section_title(table, &row, _("Save playlist"));
+	else
+		pragha_hig_workarea_table_add_section_title(table, &row, _("Save selection"));
 
-	/* Create dialog window */
+	label = gtk_label_new_with_mnemonic(_("Playlist"));
 
-	hbox = gtk_hbox_new(TRUE, 2);
-	vbox1 = gtk_vbox_new(TRUE, 2);
-	vbox2 = gtk_vbox_new(TRUE, 2);
 	entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
-	combo_add = gtk_combo_box_text_new();
-	radio_new = gtk_radio_button_new_with_label(NULL, _("Save as a new playlist"));
-	radio_add = gtk_radio_button_new_with_label_from_widget(
-		GTK_RADIO_BUTTON(radio_new), _("Append to an existing playlist"));
+	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
+	gtk_widget_grab_focus(GTK_WIDGET(entry));
 
-	if (playlists) {
-		while (playlists[i]) {
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_add),
-						  playlists[i]);
-			i++;
-		}
-		g_strfreev(playlists);
-	}
-	else {
-		gtk_widget_set_sensitive(combo_add, FALSE);
-		gtk_widget_set_sensitive(radio_add, FALSE);
-	}
+	pragha_hig_workarea_table_add_row(table, &row, label, entry);
+	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
 			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist->widget))),
@@ -70,52 +55,26 @@ get_playlist_dialog(PraghaPlaylist* cplaylist,
 			     GTK_RESPONSE_ACCEPT,
 			     NULL);
 
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
 	if(type == SAVE_COMPLETE)
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
 	else
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save selection"));
 
-	gtk_box_pack_start(GTK_BOX(vbox1), radio_new, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox1), radio_add, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox2), entry, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox2), combo_add, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), vbox1, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 2);
-
-	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
-	gtk_widget_grab_focus(GTK_WIDGET(entry));
-
-	gtk_dialog_add_button(GTK_DIALOG(dialog), _("Export"), GTK_RESPONSE_HELP);
-	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
-
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), table);
 	gtk_widget_show_all(dialog);
 
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 	switch(result) {
-	case GTK_RESPONSE_ACCEPT:
-		/* Get playlist name */
-		/* Store a copy because the dialog box is destroyed on return */
-
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_new))) {
+		case GTK_RESPONSE_ACCEPT:
 			playlist = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
-			*choice = NEW_PLAYLIST;
-		}
-		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_add))) {
-			playlist = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_add));
-			*choice = APPEND_PLAYLIST;
-		}
-		break;
-	case GTK_RESPONSE_HELP:
-		playlist = g_strdup(_("New playlist"));
-		*choice = EXPORT_PLAYLIST;
-		break;
-	case GTK_RESPONSE_CANCEL:
-		break;
-	default:
-		break;
+			break;
+		case GTK_RESPONSE_CANCEL:
+			break;
+		default:
+			break;
 	}
-
 	gtk_widget_destroy(dialog);
 
 	return playlist;
@@ -123,16 +82,13 @@ get_playlist_dialog(PraghaPlaylist* cplaylist,
 
 /* Get a new playlist name that is not reserved */
 
-gchar*
-get_playlist_name(PraghaPlaylist* cplaylist,
-		  enum playlist_mgmt type,
-		  enum playlist_mgmt *choice)
+gchar *
+get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type)
 {
 	gchar *playlist = NULL;
-	enum playlist_mgmt sel = 0;
 
 	do {
-		playlist = get_playlist_dialog(cplaylist, &sel, type);
+		playlist = get_playlist_dialog(cplaylist, type);
 		if (playlist && !g_ascii_strcasecmp(playlist, SAVE_PLAYLIST_STATE)) {
 			GtkWidget *dialog;
 			dialog = gtk_message_dialog_new_with_markup(
@@ -150,7 +106,6 @@ get_playlist_name(PraghaPlaylist* cplaylist,
 		}
 	} while (1);
 
-	*choice = sel;
 	return playlist;
 }
 
