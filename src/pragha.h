@@ -64,7 +64,6 @@
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
-#include <sqlite3.h>
 #include <gdk/gdkkeysyms.h>
 #include <tag_c.h>
 #include <taglib_config.h>

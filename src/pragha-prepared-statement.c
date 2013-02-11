@@ -18,6 +18,7 @@
 #include <sqlite3.h>
 #include "pragha-database.h"
 #include "pragha-prepared-statement.h"
+#include "pragha-prepared-statement-private.h"
 
 struct PraghaPreparedStatement {
 	sqlite3_stmt *stmt;
@@ -25,20 +26,25 @@ struct PraghaPreparedStatement {
 };
 
 PraghaPreparedStatement *
-pragha_prepared_statement_new (gpointer stmt, gpointer database)
+pragha_prepared_statement_new (sqlite3_stmt *stmt, PraghaDatabase *database)
 {
 	PraghaPreparedStatement *statement = g_slice_new (PraghaPreparedStatement);
 	statement->stmt = stmt;
-	statement->database = g_object_ref (database);
+	statement->database = database;
 	return statement;
+}
+
+void
+pragha_prepared_statement_finalize (PraghaPreparedStatement *statement)
+{
+	sqlite3_finalize (statement->stmt);
+	g_slice_free (PraghaPreparedStatement, statement);
 }
 
 void
 pragha_prepared_statement_free (PraghaPreparedStatement *statement)
 {
-	sqlite3_finalize (statement->stmt);
-	g_object_unref (statement->database);
-	g_slice_free (PraghaPreparedStatement, statement);
+	pragha_database_release_statement (statement->database, statement);
 }
 
 static void
@@ -84,4 +90,18 @@ const gchar *
 pragha_prepared_statement_get_string (PraghaPreparedStatement *statement, gint column)
 {
 	return (const gchar *) sqlite3_column_text (statement->stmt, column);
+}
+
+void
+pragha_prepared_statement_reset (PraghaPreparedStatement *statement)
+{
+	sqlite3_stmt *stmt = statement->stmt;
+	sqlite3_reset (stmt);
+	sqlite3_clear_bindings (stmt);
+}
+
+const gchar *
+pragha_prepared_statement_get_sql (PraghaPreparedStatement *statement)
+{
+	return sqlite3_sql (statement->stmt);
 }

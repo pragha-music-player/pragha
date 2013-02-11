@@ -57,6 +57,9 @@ pragha_database_exec_query (PraghaDatabase *database,
 PraghaPreparedStatement *
 pragha_database_create_statement (PraghaDatabase *database, const gchar *sql);
 
+void
+pragha_database_release_statement (PraghaDatabase *database, PraghaPreparedStatement *statement);
+
 gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 
