@@ -1866,7 +1866,6 @@ void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gchar *playlist;
-	enum playlist_mgmt choice = 0;
 
 	/* If current playlist is empty, return immediately. */
 
@@ -1882,23 +1881,11 @@ void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 	if (!gtk_tree_selection_count_selected_rows(selection))
 		return;
 
-	playlist = get_playlist_name(cplaylist, SAVE_SELECTED, &choice);
-	if (playlist) {
-		switch(choice) {
-		case NEW_PLAYLIST:
-			new_playlist(cplaylist, playlist, SAVE_SELECTED);
-			pragha_database_change_playlists_done(cplaylist->cdbase);
-			break;
-		case APPEND_PLAYLIST:
-			append_playlist(cplaylist, playlist, SAVE_SELECTED);
-			break;
-		case EXPORT_PLAYLIST:
-			export_playlist (cplaylist, SAVE_SELECTED);
-			break;
-		default:
-			break;
+	playlist = get_playlist_name(cplaylist, SAVE_SELECTED);
 
-		}
+	if (playlist) {
+		new_playlist(cplaylist, playlist, SAVE_SELECTED);
+		pragha_database_change_playlists_done(cplaylist->cdbase);
 		g_free(playlist);
 	}
 }
@@ -1910,7 +1897,6 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	gchar *playlist = NULL;
-	enum playlist_mgmt choice = 0;
 
 	/* If current playlist is empty, return immediately. */
 
@@ -1922,23 +1908,10 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 		return;
 	}
 
-	playlist = get_playlist_name(cplaylist, SAVE_COMPLETE, &choice);
+	playlist = get_playlist_name(cplaylist, SAVE_COMPLETE);
 	if (playlist) {
-		switch(choice) {
-		case NEW_PLAYLIST:
-			new_playlist(cplaylist, playlist, SAVE_COMPLETE);
-			pragha_database_change_playlists_done(cplaylist->cdbase);
-			break;
-		case APPEND_PLAYLIST:
-			append_playlist(cplaylist, playlist, SAVE_COMPLETE);
-			break;
-		case EXPORT_PLAYLIST:
-			export_playlist (cplaylist, SAVE_COMPLETE);
-			break;
-		default:
-			break;
-
-		}
+		new_playlist(cplaylist, playlist, SAVE_COMPLETE);
+		pragha_database_change_playlists_done(cplaylist->cdbase);
 		g_free(playlist);
 	}
 }

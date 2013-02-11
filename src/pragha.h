@@ -885,7 +885,7 @@ void db_commit_transaction(PraghaDatabase *cdbase);
 
 /* Playlist mgmt functions */
 
-gchar* get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type, enum playlist_mgmt *choice);
+gchar *get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type);
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
 GList * add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
