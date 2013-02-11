@@ -885,12 +885,12 @@ void db_commit_transaction(PraghaDatabase *cdbase);
 
 /* Playlist mgmt functions */
 
-gchar *get_playlist_name(PraghaPlaylist* cplaylist, enum playlist_mgmt type);
+gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
 GList * add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
-gboolean delete_existing_item_dialog(const gchar *item, struct con_win *cwin);
-gchar* rename_playlist_dialog(const gchar * oplaylist, struct con_win *cwin);
+gboolean delete_existing_item_dialog(const gchar *item, GtkWidget *parent);
+gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent);
 GIOChannel *create_m3u_playlist(gchar *file);
 gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase);
 gchar *playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent);
