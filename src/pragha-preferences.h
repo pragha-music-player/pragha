@@ -36,10 +36,10 @@ typedef struct _PraghaPreferencesPrivate PraghaPreferencesPrivate;
 
 struct _PraghaPreferences
 {
-   GObject parent;
+	GObject parent;
 
-   /*< private >*/
-   PraghaPreferencesPrivate *priv;
+	/*< private >*/
+	PraghaPreferencesPrivate *priv;
 };
 
 struct _PraghaPreferencesClass
