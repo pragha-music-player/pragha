@@ -217,7 +217,7 @@ do_lastfm_unlove_mobj (const gchar *title, const gchar *artist, struct con_win *
 	                          artist);
 
 	if (rv != LASTFM_STATUS_OK)
-		return _("Unove song on Last.fm failed.");
+		return _("Unlove song on Last.fm failed.");
 	else
 		return NULL;
 }
