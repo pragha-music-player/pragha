@@ -586,7 +586,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	g_variant_get(parameters, "(o)", &get_playlist);
 
 	if(get_playlist && g_str_has_prefix(get_playlist, MPRIS_PATH)) {
-		db_playlists = get_playlist_names_db(cwin->cdbase);
+		db_playlists = pragha_database_get_playlist_names (cwin->cdbase);
 		if(db_playlists) {
 			while(db_playlists[i]) {
 				test_playlist = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
@@ -636,7 +636,7 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("(a(oss))"));
 	g_variant_builder_open(&builder, G_VARIANT_TYPE("a(oss)"));
 
-	lists = get_playlist_names_db(cwin->cdbase);
+	lists = pragha_database_get_playlist_names (cwin->cdbase);
 
 	if (lists) {
 		g_variant_get(parameters, "(uusb)", &start, &max, &order, &reverse);

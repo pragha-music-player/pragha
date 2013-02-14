@@ -12,7 +12,6 @@ src/menu.c
 src/notify.c
 src/utils.c
 src/playlist.c
-src/db.c
 src/pragha-lastfm.c
 src/glyr-related.c
 src/info-bar-import-music.c
