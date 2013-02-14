@@ -66,8 +66,14 @@ pragha_async_worker(gpointer data)
 	return NULL;
 }
 
+void
+pragha_async_launch (GThreadFunc worker_func, GSourceFunc finish_func, gpointer user_data)
+{
+	g_thread_unref (pragha_async_launch_full (worker_func, finish_func, user_data));
+}
+
 GThread *
-pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata)
+pragha_async_launch_full (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata)
 {
 	AsyncSimple *as;
 

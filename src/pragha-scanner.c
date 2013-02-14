@@ -479,9 +479,9 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
 	#endif
 
-	scanner->worker_thread = pragha_async_launch(pragha_scanner_update_worker,
-	                                             pragha_scanner_worker_finished,
-	                                             scanner);
+	scanner->worker_thread = pragha_async_launch_full(pragha_scanner_update_worker,
+	                                                  pragha_scanner_worker_finished,
+	                                                  scanner);
 }
 
 void
@@ -530,9 +530,9 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
 	#endif
 
-	scanner->worker_thread = pragha_async_launch(pragha_scanner_scan_worker,
-	                                             pragha_scanner_worker_finished,
-	                                             scanner);
+	scanner->worker_thread = pragha_async_launch_full(pragha_scanner_scan_worker,
+	                                                  pragha_scanner_worker_finished,
+	                                                  scanner);
 }
 
 void

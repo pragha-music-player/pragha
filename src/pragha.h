@@ -1225,7 +1225,8 @@ typedef struct {
 } AsyncSimple;
 
 gboolean pragha_async_set_idle_message (gpointer user_data);
-GThread *pragha_async_launch(GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+void pragha_async_launch (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+GThread *pragha_async_launch_full (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
 
