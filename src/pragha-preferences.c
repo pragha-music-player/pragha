@@ -848,7 +848,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	pragha_config_dir = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha", NULL);
 
 	if (g_file_test(pragha_config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
-		if (g_mkdir(pragha_config_dir, S_IRWXU) == -1) {
+		if (g_mkdir_with_parents (pragha_config_dir, S_IRWXU) == -1) {
 			g_free(pragha_config_dir);
 			g_critical("Unable to create preferences directory, err: %s", strerror(errno));
 			return;

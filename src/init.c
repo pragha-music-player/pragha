@@ -457,7 +457,7 @@ gint init_config(struct con_win *cwin)
 	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
 
 	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
-		g_mkdir(cache_folder, S_IRWXU);
+		g_mkdir_with_parents (cache_folder, S_IRWXU);
 	cwin->cpref->cache_folder = cache_folder;
 	#endif
 
