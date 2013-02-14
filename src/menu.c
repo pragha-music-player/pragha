@@ -684,7 +684,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		location_id = pragha_database_find_location (cwin->cdbase, file);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
-			pragha_db_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
+			pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
 			if(pragha_library_need_update(cwin->clibrary, changed))
 				pragha_database_change_tracks_done(cwin->cdbase);
 		}
@@ -848,9 +848,9 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	n_artists = db_get_artist_count(cwin->cdbase);
-	n_albums = db_get_album_count(cwin->cdbase);
-	n_tracks = db_get_track_count(cwin->cdbase);
+	n_artists = pragha_database_get_artist_count (cwin->cdbase);
+	n_albums = pragha_database_get_album_count (cwin->cdbase);
+	n_tracks = pragha_database_get_track_count (cwin->cdbase);
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
 					GTK_DIALOG_DESTROY_WITH_PARENT,

@@ -95,7 +95,7 @@ pragha_scanner_add_track_db(gpointer key,
 	PraghaMusicobject *mobj = value;
 	PraghaDatabase *database = user_data;
 
-	add_new_musicobject_db(database, mobj);
+	pragha_database_add_new_musicobject (database, mobj);
 
 	pragha_process_gtk_events ();
 }
@@ -167,14 +167,14 @@ pragha_scanner_worker_finished (gpointer data)
 
 		database = pragha_database_get();
 
-		db_begin_transaction(database);
+		pragha_database_begin_transaction (database);
 
-		flush_db(database);
+		pragha_database_flush (database);
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      database);
 
-		db_commit_transaction(database);
+		pragha_database_commit_transaction (database);
 
 		pragha_database_change_playlists_done(database);
 		g_object_unref(database);

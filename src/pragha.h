@@ -858,30 +858,6 @@ GtkWidget *pragha_library_pane_get_widget(PraghaLibraryPane *librarypane);
 void pragha_library_pane_free(PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new(struct con_win *cwin);
 
-/* DB (Sqlite) Functions */
-
-void add_new_musicobject_db(PraghaDatabase *cdbase, PraghaMusicobject *mobj);
-gchar *pragha_database_get_filename_from_location_id(PraghaDatabase *cdbase, gint location_id);
-gint delete_location_hdd(gint location_id, PraghaDatabase *cdbase);
-void db_update_track(PraghaDatabase *database,
-		     gint location_id, gint changed,
-		     gint track_no, const gchar *title,
-		     gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id);
-void
-pragha_db_update_local_files_change_tag(PraghaDatabase *cdbase, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
-gchar** get_playlist_names_db(PraghaDatabase *cdbase);
-gint get_radio_count_db(struct con_win *cwin);
-void flush_stale_entries_db(PraghaDatabase *cdbase);
-void flush_db(PraghaDatabase *cdbase);
-void pragha_database_add_new_file(PraghaDatabase *cdbase, const gchar *file);
-gboolean pragha_database_init_schema (PraghaDatabase *database);
-gint drop_dbase_schema(PraghaDatabase *cdbase);
-gint db_get_artist_count(PraghaDatabase *cdbase);
-gint db_get_album_count(PraghaDatabase *cdbase);
-gint db_get_track_count(PraghaDatabase *cdbase);
-void db_begin_transaction(PraghaDatabase *cdbase);
-void db_commit_transaction(PraghaDatabase *cdbase);
-
 /* Playlist mgmt functions */
 
 gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);

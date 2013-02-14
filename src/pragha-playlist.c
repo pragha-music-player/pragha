@@ -2479,7 +2479,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 
 	/* Dnd from the library, so will read everything from database. */
 
-	db_begin_transaction(cplaylist->cdbase);
+	pragha_database_begin_transaction (cplaylist->cdbase);
 
 	/* Get the mobjs from the path of the library. */
 
@@ -2500,7 +2500,7 @@ dnd_current_playlist_received_from_library(GtkSelectionData *data,
 			list = add_radio_to_mobj_list(cplaylist->cdbase, name, list);
 		}
 	}
-	db_commit_transaction(cplaylist->cdbase);
+	pragha_database_commit_transaction (cplaylist->cdbase);
 
 	g_strfreev(uris);
 

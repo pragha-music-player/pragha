@@ -2303,7 +2303,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	}
 
 	/* Updata the db changes */
-	pragha_db_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
+	pragha_database_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
 	if(pragha_library_need_update(cwin->clibrary, changed))
 		pragha_database_change_tracks_done(cwin->cdbase);
 
@@ -2368,7 +2368,7 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		if(result == GTK_RESPONSE_YES){
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
-			db_begin_transaction(cwin->clibrary->cdbase);
+			pragha_database_begin_transaction(cwin->clibrary->cdbase);
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
 				get_location_ids(path, loc_arr, model, cwin->clibrary);
@@ -2378,11 +2378,11 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 				if (pragha_process_gtk_events ())
 					return;
 			}
-			db_commit_transaction(cwin->clibrary->cdbase);
+			pragha_database_commit_transaction(cwin->clibrary->cdbase);
 
 			g_array_free(loc_arr, TRUE);
 
-			flush_stale_entries_db(cwin->clibrary->cdbase);
+			pragha_database_flush_stale_entries (cwin->clibrary->cdbase);
 			pragha_database_change_tracks_done(cwin->cdbase);
 		}
 
@@ -2416,7 +2416,7 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 		if( result == GTK_RESPONSE_YES ){
 			/* Delete all the rows */
 
-			db_begin_transaction(cwin->clibrary->cdbase);
+			pragha_database_begin_transaction (cwin->clibrary->cdbase);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
@@ -2427,9 +2427,9 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 					return;
 			}
 
-			db_commit_transaction(cwin->clibrary->cdbase);
+			pragha_database_commit_transaction (cwin->clibrary->cdbase);
 
-			flush_stale_entries_db(cwin->clibrary->cdbase);
+			pragha_database_flush_stale_entries (cwin->clibrary->cdbase);
 			pragha_database_change_tracks_done(cwin->cdbase);
 		}
 

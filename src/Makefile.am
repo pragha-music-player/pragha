@@ -11,7 +11,6 @@ AM_CPPFLAGS =								\
 pragha_SOURCES =cdda.c \
 		cdda.h \
 		cmdline.c \
-		db.c \
 		dbus.c \
 		file-utils.c \
 		gui.c \

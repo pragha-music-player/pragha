@@ -893,7 +893,7 @@ append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 	gchar *file;
 	GSList *i = NULL;
 
-	db_begin_transaction(cdbase);
+	pragha_database_begin_transaction (cdbase);
 
 	for (i=list; i != NULL; i = i->next) {
 		file = i->data;
@@ -901,7 +901,7 @@ append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 		g_free(file);
 	}
 
-	db_commit_transaction(cdbase);
+	pragha_database_commit_transaction (cdbase);
 }
 
 /* Save tracks to a playlist using the given type */

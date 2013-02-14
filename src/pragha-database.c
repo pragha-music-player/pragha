@@ -1,5 +1,7 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2012-2013 Pavel Vasin					 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -103,6 +105,18 @@ pragha_database_release_statement (PraghaDatabase *database, PraghaPreparedState
 
 	pragha_prepared_statement_reset (statement);
 	g_hash_table_replace (priv->statements_cache, sql, statement);
+}
+
+void
+pragha_database_begin_transaction (PraghaDatabase *database)
+{
+	pragha_database_exec_query (database, "BEGIN TRANSACTION");
+}
+
+void
+pragha_database_commit_transaction (PraghaDatabase *database)
+{
+	pragha_database_exec_query (database, "END TRANSACTION");
 }
 
 gint
@@ -424,7 +438,7 @@ pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name)
 
 	/* Now flush unused artists, albums, genres, years */
 
-	flush_stale_entries_db (database);
+	pragha_database_flush_stale_entries (database);
 
 	g_free (mask);
 }
@@ -514,6 +528,358 @@ pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio)
 	pragha_prepared_statement_bind_int (statement, 1, radio_id);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
+}
+
+static void
+pragha_database_add_new_track (PraghaDatabase *database,
+                               gint location_id,
+                               gint artist_id,
+                               gint album_id,
+                               gint genre_id,
+                               gint year_id,
+                               gint comment_id,
+                               guint track_no,
+                               gint length,
+                               gint channels,
+                               gint bitrate,
+                               gint samplerate,
+                               gint file_type,
+                               const gchar *title)
+{
+	const gchar *sql = "INSERT INTO TRACK ("
+				"location, "
+				"track_no, "
+				"artist, "
+				"album, "
+				"genre, "
+				"year, "
+				"comment, "
+				"bitrate, "
+				"samplerate, "
+				"length, "
+				"channels, "
+				"file_type, "
+				"title) "
+				"VALUES "
+				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+	pragha_prepared_statement_bind_int (statement, 2, track_no);
+	pragha_prepared_statement_bind_int (statement, 3, artist_id);
+	pragha_prepared_statement_bind_int (statement, 4, album_id);
+	pragha_prepared_statement_bind_int (statement, 5, genre_id);
+	pragha_prepared_statement_bind_int (statement, 6, year_id);
+	pragha_prepared_statement_bind_int (statement, 7, comment_id);
+	pragha_prepared_statement_bind_int (statement, 8, bitrate);
+	pragha_prepared_statement_bind_int (statement, 9, samplerate);
+	pragha_prepared_statement_bind_int (statement, 10, length);
+	pragha_prepared_statement_bind_int (statement, 11, channels);
+	pragha_prepared_statement_bind_int (statement, 12, file_type);
+	pragha_prepared_statement_bind_string (statement, 13, title);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+}
+
+void
+pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject *mobj)
+{
+	const gchar *file, *artist, *album, *genre, *comment;
+	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
+
+	if (mobj) {
+		file = pragha_musicobject_get_file (mobj);
+		artist = pragha_musicobject_get_artist (mobj);
+		album = pragha_musicobject_get_album (mobj);
+		genre = pragha_musicobject_get_genre (mobj);
+		comment = pragha_musicobject_get_comment (mobj);
+
+		/* Write location */
+
+		if ((location_id = pragha_database_find_location (database, file)) == 0)
+			location_id = pragha_database_add_new_location (database, file);
+
+		/* Write artist */
+
+		if ((artist_id = pragha_database_find_artist (database, artist)) == 0)
+			artist_id = pragha_database_add_new_artist (database, artist);
+
+		/* Write album */
+
+		if ((album_id = pragha_database_find_album (database, album)) == 0)
+			album_id = pragha_database_add_new_album (database, album);
+
+		/* Write genre */
+
+		if ((genre_id = pragha_database_find_genre (database, genre)) == 0)
+			genre_id = pragha_database_add_new_genre (database, genre);
+
+		/* Write year */
+
+		if ((year_id = pragha_database_find_year (database, pragha_musicobject_get_year (mobj))) == 0)
+			year_id = pragha_database_add_new_year (database, pragha_musicobject_get_year (mobj));
+
+		/* Write comment */
+
+		if ((comment_id = pragha_database_find_comment (database, comment)) == 0)
+			comment_id = pragha_database_add_new_comment (database, comment);
+
+		/* Write track */
+
+		pragha_database_add_new_track (database,
+		                               location_id,
+		                               artist_id,
+		                               album_id,
+		                               genre_id,
+		                               year_id,
+		                               comment_id,
+		                               pragha_musicobject_get_track_no (mobj),
+		                               pragha_musicobject_get_length (mobj),
+		                               pragha_musicobject_get_channels (mobj),
+		                               pragha_musicobject_get_bitrate (mobj),
+		                               pragha_musicobject_get_samplerate (mobj),
+		                               pragha_musicobject_get_file_type (mobj),
+		                               pragha_musicobject_get_title (mobj));
+	}
+}
+
+gchar *
+pragha_database_get_filename_from_location_id (PraghaDatabase *database, gint location_id)
+{
+	PraghaPreparedStatement *statement;
+	const gchar *sql;
+	gchar *file = NULL;
+
+	sql = "SELECT name FROM LOCATION WHERE id = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, location_id);
+
+	if (pragha_prepared_statement_step (statement))
+		file = g_strdup (pragha_prepared_statement_get_string (statement, 0));
+	else
+		g_warning ("Unable to find filename for location id: %d", location_id);
+
+	pragha_prepared_statement_free (statement);
+
+	return file;
+}
+
+static void
+pragha_database_update_track (PraghaDatabase *database,
+                              gint location_id, gint changed,
+                              gint track_no, const gchar *title,
+                              gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id)
+{
+	const gchar *sql;
+	PraghaPreparedStatement *statement;
+
+	if (changed & TAG_TNO_CHANGED) {
+		sql = "UPDATE TRACK SET track_no = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, track_no);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+		sql = "UPDATE TRACK SET title = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_string (statement, 1, title);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		sql = "UPDATE TRACK SET artist = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, artist_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		sql = "UPDATE TRACK SET album = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, album_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		sql = "UPDATE TRACK SET genre = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, genre_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		sql = "UPDATE TRACK SET year = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, year_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		sql = "UPDATE TRACK SET comment = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, comment_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+}
+
+void
+pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
+{
+	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	guint i = 0, elem = 0;
+
+	if (!changed)
+		return;
+
+	if (!loc_arr)
+		return;
+
+	CDEBUG (DBG_VERBOSE, "Tags Changed: 0x%x", changed);
+
+	if (changed & TAG_TNO_CHANGED) {
+		track_no = pragha_musicobject_get_track_no (mobj);
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		const gchar *artist = pragha_musicobject_get_artist (mobj);
+		artist_id = pragha_database_find_artist (database, artist);
+		if (!artist_id)
+			artist_id = pragha_database_add_new_artist (database, artist);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		const gchar *album = pragha_musicobject_get_album (mobj);
+		album_id = pragha_database_find_album (database, album);
+		if (!album_id)
+			album_id = pragha_database_add_new_album (database, album);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		const gchar *genre = pragha_musicobject_get_genre (mobj);
+		genre_id = pragha_database_find_genre (database, genre);
+		if (!genre_id)
+			genre_id = pragha_database_add_new_genre (database, genre);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		year_id = pragha_database_find_year (database, pragha_musicobject_get_year (mobj));
+		if (!year_id)
+			year_id = pragha_database_add_new_year (database, pragha_musicobject_get_year (mobj));
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		const gchar *comment = pragha_musicobject_get_comment (mobj);
+		comment_id = pragha_database_find_comment (database, comment);
+		if (!comment_id)
+			comment_id = pragha_database_add_new_comment (database, comment);
+	}
+
+	pragha_database_begin_transaction (database);
+	if (loc_arr) {
+		elem = 0;
+		for (i = 0; i < loc_arr->len; i++) {
+			elem = g_array_index (loc_arr, gint, i);
+			if (elem) {
+				pragha_database_update_track (database,
+				                              elem, changed,
+				                              track_no,
+				                              pragha_musicobject_get_title (mobj),
+				                              artist_id,
+				                              album_id,
+				                              genre_id,
+				                              year_id,
+				                              comment_id);
+			}
+		}
+	}
+	pragha_database_commit_transaction (database);
+}
+
+gchar**
+pragha_database_get_playlist_names (PraghaDatabase *database)
+{
+	GPtrArray *playlists = g_ptr_array_new ();
+
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+		g_ptr_array_add (playlists, g_strdup (name));
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	if (playlists->len > 0) {
+		g_ptr_array_add (playlists, NULL);
+		return (gchar**) g_ptr_array_free (playlists, FALSE);
+	} else {
+		g_ptr_array_free (playlists, TRUE);
+		return NULL;
+	}
+}
+
+void
+pragha_database_flush (PraghaDatabase *database)
+{
+	pragha_database_exec_query (database, "DELETE FROM TRACK");
+	pragha_database_exec_query (database, "DELETE FROM LOCATION");
+	pragha_database_exec_query (database, "DELETE FROM ARTIST");
+	pragha_database_exec_query (database, "DELETE FROM ALBUM");
+	pragha_database_exec_query (database, "DELETE FROM GENRE");
+	pragha_database_exec_query (database, "DELETE FROM YEAR");
+	pragha_database_exec_query (database, "DELETE FROM COMMENT");
+}
+
+void
+pragha_database_flush_stale_entries (PraghaDatabase *database)
+{
+	pragha_database_exec_query (database, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
+}
+
+static gint
+pragha_database_get_table_count (PraghaDatabase *database, const gchar *table)
+{
+	gchar *sql;
+	gint count = 0;
+
+	sql = g_strdup_printf ("SELECT COUNT() FROM %s;", table);
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	if (pragha_prepared_statement_step (statement))
+		count = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	g_free (sql);
+
+	return count;
+}
+
+gint
+pragha_database_get_artist_count (PraghaDatabase *database)
+{
+	return pragha_database_get_table_count (database, "ARTIST");
+}
+
+gint
+pragha_database_get_album_count (PraghaDatabase *database)
+{
+	return pragha_database_get_table_count (database, "ALBUM");
+}
+
+gint
+pragha_database_get_track_count (PraghaDatabase *database)
+{
+	return pragha_database_get_table_count (database, "TRACK");
 }
 
 gboolean

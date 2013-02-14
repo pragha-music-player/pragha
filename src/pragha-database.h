@@ -20,6 +20,7 @@
 
 #include <glib-object.h>
 #include "pragha-prepared-statement.h"
+#include "pragha-musicobject.h"
 
 G_BEGIN_DECLS
 
@@ -59,6 +60,12 @@ pragha_database_create_statement (PraghaDatabase *database, const gchar *sql);
 
 void
 pragha_database_release_statement (PraghaDatabase *database, PraghaPreparedStatement *statement);
+
+void
+pragha_database_begin_transaction (PraghaDatabase *database);
+
+void
+pragha_database_commit_transaction (PraghaDatabase *database);
 
 gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
@@ -143,6 +150,33 @@ pragha_database_flush_radio (PraghaDatabase *database, gint radio_id);
 
 void
 pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio);
+
+void
+pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject *mobj);
+
+gchar *
+pragha_database_get_filename_from_location_id (PraghaDatabase *database, gint location_id);
+
+void
+pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray *loc_arr, gint changed, PraghaMusicobject *mobj);
+
+gchar**
+pragha_database_get_playlist_names (PraghaDatabase *database);
+
+void
+pragha_database_flush (PraghaDatabase *database);
+
+void
+pragha_database_flush_stale_entries (PraghaDatabase *database);
+
+gint
+pragha_database_get_artist_count (PraghaDatabase *database);
+
+gint
+pragha_database_get_album_count (PraghaDatabase *database);
+
+gint
+pragha_database_get_track_count (PraghaDatabase *database);
 
 void
 pragha_database_change_playlists_done(PraghaDatabase *database);
