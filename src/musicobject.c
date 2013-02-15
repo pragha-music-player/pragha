@@ -197,8 +197,9 @@ new_musicobject_from_location(const gchar *uri, const gchar *name)
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", file,
 	                     "file-type", FILE_HTTP,
-	                     "title", name,
 	                     NULL);
+	if (name)
+		pragha_musicobject_set_title(mobj, name);
 
 	g_free(file);
 
