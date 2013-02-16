@@ -26,21 +26,30 @@ pragha_SOURCES =cdda.c \
 		playlist.c \
 		pragha.c \
 		pragha.h \
-		pragha-backend.c \
-		pragha-database.c \
-		pragha-filter-dialog.c \
 		pragha-album-art.c \
+		pragha-album-art.h \
+		pragha-backend.c \
+		pragha-backend.h \
+		pragha-database.c \
+		pragha-database.h \
+		pragha-filter-dialog.c \
 		pragha-hig.c \
 		pragha-library-pane.c \
 		pragha-musicobject.c \
+		pragha-musicobject.h \
 		pragha-playback.c \
 		pragha-playlist.c \
 		pragha-preferences.c \
+		pragha-preferences.h \
 		pragha-prepared-statement.c \
+		pragha-prepared-statement.h \
+		pragha-prepared-statement-private.h \
 		pragha-scanner.c \
+		pragha-scanner.h \
 		pragha-sidebar.c \
 		pragha-simple-async.c \
 		pragha-statusbar.c \
+		pragha-statusbar.h \
 		pref.c \
 		statusicon.c \
 		tags.c \
