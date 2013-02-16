@@ -61,7 +61,8 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 	gint album_art_size;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-	GSList *library_dir = NULL;
+	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
+	GtkWidget *infobar;
 
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
@@ -116,11 +117,41 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			ret = gtk_tree_model_iter_next(model, &iter);
 		}
 
+		/* Save new library folders */
+
 		pragha_preferences_set_filename_list(cwin->preferences,
 			                             GROUP_LIBRARY,
 			                             KEY_LIBRARY_DIR,
 			                             library_dir);
+
+		/* Get scanded folders and compare. If changed show infobar */
+
+		folder_scanned =
+			pragha_preferences_get_filename_list(cwin->preferences,
+				                             GROUP_LIBRARY,
+				                             KEY_LIBRARY_SCANNED);
+
+		test_change = FALSE;
+		for(list = folder_scanned; list != NULL; list = list->next) {
+			if(is_present_str_list(list->data, library_dir))
+				continue;
+			test_change = TRUE;
+			break;
+		}
+		for(list = library_dir; list != NULL; list = list->next) {
+			if(is_present_str_list(list->data, folder_scanned))
+				continue;
+			test_change = TRUE;
+			break;
+		}
+
+		if(test_change) {
+			infobar = create_info_bar_update_music(cwin);
+			mainwindow_add_widget_to_info_box(cwin, infobar);
+		}
+
 		free_str_list(library_dir);
+		free_str_list(folder_scanned);
 
 		if (pragha_preferences_get_library_style(cwin->preferences) == FOLDERS) {
 			test_change = pragha_preferences_get_fuse_folders(cwin->preferences);
