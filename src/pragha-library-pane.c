@@ -1282,7 +1282,7 @@ pragha_library_expand_categories(PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *filter_model, *model;
 	GtkTreePath *path;
-	GtkTreeIter iter, child_iter;
+	GtkTreeIter iter;
 	gboolean valid, visible;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
