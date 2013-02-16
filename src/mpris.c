@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (C) 2011-2012 matias <mati86dl@gmail.com>                  *
+ * Copyright (C) 2011-2013 matias <mati86dl@gmail.com>                  *
  * Copyright (C) 2011      hakan  <smultimeter@gmail.com>               *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
