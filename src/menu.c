@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>			 */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
 /* 									 */
 /* This program is free software: you can redistribute it and/or modify	 */
 /* it under the terms of the GNU General Public License as published by	 */
@@ -882,7 +882,7 @@ void about_widget(struct con_win *cwin)
 				"authors", authors,
 				"translator-credits", _("translator-credits"),
 				"comments", "A lightweight GTK+ music player",
-				"copyright", "(C) 2007-2009 Sujith\n(C) 2009-2012 Matias",
+				"copyright", "(C) 2007-2009 Sujith\n(C) 2009-2013 Matias",
 				"license", license,
 				"name", PACKAGE_NAME,
 				"version", PACKAGE_VERSION,
