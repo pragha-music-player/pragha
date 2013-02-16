@@ -77,3 +77,44 @@ GtkWidget * create_info_bar_import_music(struct con_win *cwin)
 
 	return info_bar;
 }
+
+static void info_bar_update_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+
+	gtk_widget_destroy(GTK_WIDGET(info_bar));
+
+	switch (response_id)
+	{
+		case GTK_RESPONSE_CANCEL:
+			break;
+		case GTK_RESPONSE_YES:
+			pragha_scanner_update_library(cwin->scanner);
+			break;
+		default:
+			g_warn_if_reached();
+	}
+}
+
+GtkWidget *create_info_bar_update_music(struct con_win *cwin)
+{
+	GtkWidget *info_bar = gtk_info_bar_new();
+	GtkWidget *action_area = gtk_info_bar_get_action_area(GTK_INFO_BAR (info_bar));
+	GtkWidget *content_area = gtk_info_bar_get_content_area(GTK_INFO_BAR(info_bar));
+
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(action_area), GTK_ORIENTATION_HORIZONTAL);
+
+	//GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_NO, GTK_RESPONSE_CANCEL);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_YES, GTK_RESPONSE_YES);
+
+	GtkWidget *label = gtk_label_new(_("Want to upgrade your music library?"));
+	gtk_box_pack_start(GTK_BOX(content_area), label, FALSE, FALSE, 0);
+
+	g_signal_connect(info_bar, "response", G_CALLBACK(info_bar_update_response_cb), cwin);
+
+	gtk_widget_show_all(info_bar);
+
+	return info_bar;
+}
+

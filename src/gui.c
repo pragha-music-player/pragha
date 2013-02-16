@@ -303,6 +303,18 @@ void toogle_main_window (struct con_win *cwin, gboolean ignoreActivity)
 
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget)
 {
+	GList *list;
+	GtkWidget *children;
+
+	list = gtk_container_get_children (GTK_CONTAINER(cwin->info_box));
+
+	if(list) {
+		children = list->data;
+		gtk_container_remove(GTK_CONTAINER(cwin->info_box), children);
+		gtk_widget_destroy(GTK_WIDGET(children));
+		g_list_free(list);
+	}
+		
 	gtk_container_add(GTK_CONTAINER(cwin->info_box), widget);
 }
 

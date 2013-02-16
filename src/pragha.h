@@ -1128,6 +1128,7 @@ void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
 GtkWidget* create_info_bar_import_music(struct con_win *cwin);
+GtkWidget* create_info_bar_update_music(struct con_win *cwin);
 
 /* Init */
 
