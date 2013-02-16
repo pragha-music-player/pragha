@@ -1280,27 +1280,25 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 void
 pragha_library_expand_categories(PraghaLibraryPane *clibrary)
 {
-	GtkTreeModel *filter_model;
+	GtkTreeModel *filter_model, *model;
 	GtkTreePath *path;
-	GtkTreeIter iter;
-	gboolean valid;
+	GtkTreeIter iter, child_iter;
+	gboolean valid, visible;
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
+	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
-	valid = gtk_tree_model_get_iter_first (filter_model, &iter);
+	valid = gtk_tree_model_get_iter_first (model, &iter);
 	while (valid) {
-		if(gtk_tree_model_iter_has_child(filter_model, &iter)) {
-			path = gtk_tree_model_get_path(filter_model, &iter);
-			gtk_tree_view_expand_row (GTK_TREE_VIEW(clibrary->library_tree), path, FALSE);
-			gtk_tree_path_free(path);
-		}
-		else {
-			/* TODO: Hide empty categories!. It no work!. Why? :(
-			gtk_tree_store_set(GTK_TREE_STORE(filter_model), &iter,
-			                   L_VISIBILE, FALSE, -1);
-			*/
-		}
-		valid = gtk_tree_model_iter_next(filter_model, &iter);
+		visible = gtk_tree_model_iter_has_child(model, &iter);
+		gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+		                   L_VISIBILE, visible, -1);
+
+		path = gtk_tree_model_get_path(model, &iter);
+		gtk_tree_view_expand_row (GTK_TREE_VIEW(clibrary->library_tree), path, FALSE);
+		gtk_tree_path_free(path);
+
+		valid = gtk_tree_model_iter_next(model, &iter);
 	}
 }
 
