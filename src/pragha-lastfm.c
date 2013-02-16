@@ -297,16 +297,17 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	GList *list = data->list;
 	struct con_win *cwin = data->cwin;
 
-	if(list == NULL)
-		goto empty;
+	if(list != NULL) {
+		pragha_playlist_append_mobj_list(cwin->cplaylist,
+						 list);
 
-	pragha_playlist_append_mobj_list(cwin->cplaylist,
-					 list);
+		songs_added = g_list_length(list);
+		g_list_free(list);
+	}
+	else {
+		remove_watch_cursor (cwin->mainwindow);
+	}
 
-	songs_added = g_list_length(list);
-	g_list_free(list);
-
-empty:
 	switch(data->query_type) {
 		case LASTFM_GET_SIMILAR:
 			if(data->query_count > 0)
