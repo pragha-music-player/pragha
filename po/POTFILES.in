@@ -4,7 +4,7 @@ src/pragha.c
 src/pragha.h
 src/panel.c
 src/pragha-playlist.c
-src/librarytree.c
+src/pragha-library-pane.c
 src/statusicon.c
 src/tags.c
 src/pref.c
