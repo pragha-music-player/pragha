@@ -1752,8 +1752,7 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 	PraghaMusicobject *mobj;
 	GList *l;
 
-	/* TODO: Change set_watch_cursor() to allow any widget.
-	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	/* TODO: pragha_playlist_set_changing() should be set cursor automatically. */
 	set_watch_cursor (cplaylist->widget);
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
@@ -1778,12 +1777,13 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 {
 	PraghaMusicobject *mobj;
 	gint prev_tracks = 0;
+	GtkSortType order;
+	gint column;
 	GList *l;
 
 	prev_tracks = pragha_playlist_get_no_tracks(cplaylist);
 	
-	/* TODO: Change set_watch_cursor() to allow any widget.
-	 * pragha_playlist_set_changing() should be set cursor automatically. */
+	/* TODO: pragha_playlist_set_changing() should be set cursor automatically. */
 	set_watch_cursor (cplaylist->widget);
 	pragha_playlist_set_changing(cplaylist, TRUE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
@@ -1799,7 +1799,10 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	remove_watch_cursor (cplaylist->widget);
 
 	pragha_playlist_update_statusbar_playtime(cplaylist);
-	select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
+
+	if(gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(cplaylist->model),
+	                                        &column, &order))
+		select_numered_path_of_current_playlist(cplaylist, prev_tracks, TRUE);
 }
 
 /* Test if the song is already in the mobj list */
