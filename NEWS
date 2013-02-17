@@ -1,5 +1,51 @@
 ==============================================================
-Overview of changes in Pragha 1.1.1 since 1.1.0.1
+Overview of changes in Pragha 1.1.2 since 1.1.1
+==============================================================
+  
+News:
+	Improved indexing of the library. Also allows continue listening music while analyzing. [1]
+	The database uses prepared statements, improving the general performance of Pragha.
+
+Others Changes:
+	A general cleaning of the code, but there is much to be done.
+	* First rewrites using GObjects as PraghaBackend, PraghaAlbumArt, PraghaMusicobject, PraghaPreferences, PraghaDatabase, and PraghaStatusbar.
+	* Many other rewrites as PraghaLibraryPane and PraghaPlaylist.
+	* Many changes to work with threads safes.
+	Now add, remove or rename playlist and radios is super fast.
+	Now select the content of the "Track No" and "Year" in "Edit tags" window after focusing or clicking into them.
+	Now you can drag songs from the library to any file manager to copy or burn with brasero.
+	Now you can add playlists using command line or file managers.
+	Save and restore menu accelerators edited.
+	Now whenever you add songs, select the first song added.
+	Translations: use intltool for desktop file
+
+Bugs fixed: (Sumary: The most relevant to the user.)
+	Try to fix issue #46: Header moved location in libcdio-paranoia-0.90. [2]
+	Update Autotools, and fix a warning when use autogen.sh due to cdda.h
+	glyr-related.c: Use lang autodetection to get artist bio. See issue #39
+	mpris: fix problems with long tracks
+	translations: fix plural forms
+	gtk3: fix minor bugs
+	add workaround for crash in taglib
+	fix a deadlock on adding to current playlist
+
+Updates Translations:
+	Update Czech translation thanks to anespor, and petr.simacek.
+	Update Dutch translation thanks to Vistaus.
+	Update German translation thanks to cwickert.
+	Update Hungarian translation thanks to Polesz.
+	Update Portuguese translation thanks to smarquespt.
+	Update Portuguese (Brazil) translation thanks to rafaelff1.
+	Update Russian translation thanks to Lazy_Kent, and 4glitch.
+	Update Turkish translation thanks to fatihmalakci, necdetyucel, and emfi.
+	Update Ukrainian translation thanks to paul.rufous.
+
+Notes:
+[1] Sorry, but also adds a regression. Stop importing playlists.
+[2] To compile, have to comment the line 23 of Pragha.h
+
+==============================================================
+OTHERS REALESES:
 ==============================================================
 
 News:
@@ -33,10 +79,6 @@ Bugs fixed: (Sumary: The most relevant to the user.)
 
 Updates Translations:
 	Equalizer pressets now are translateable.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.1.0.1
 Bugs fixed:
