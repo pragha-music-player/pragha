@@ -46,6 +46,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   lateral_panel;
 	gint       sidebar_size;
 	gboolean   show_album_art;
+	gboolean   show_status_bar;
 
 	/* Misc preferences. */
 	gboolean   add_recursively;
@@ -71,6 +72,7 @@ enum
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
 	PROP_SHOW_ALBUM_ART,
+	PROP_SHOW_STATUS_BAR,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	LAST_PROP
@@ -774,6 +776,33 @@ pragha_preferences_set_show_album_art (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_show_status_bar:
+ *
+ */
+gboolean
+pragha_preferences_get_show_status_bar (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->show_status_bar;
+}
+
+/**
+ * pragha_preferences_set_show_status_bar:
+ *
+ */
+void
+pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
+                                        gboolean show_status_bar)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->show_status_bar = show_status_bar;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_STATUS_BAR]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -832,7 +861,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, show_album_art;
+	gboolean lateral_panel, show_album_art, show_status_bar;
 	gboolean add_recursively, timer_remaining_mode;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size;
@@ -1078,6 +1107,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_album_art(preferences, show_album_art);
 	}
 
+	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
+	                                         GROUP_WINDOW,
+	                                         KEY_STATUS_BAR,
+	                                         &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_show_status_bar(preferences, show_status_bar);
+	}
+
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_GENERAL,
 	                                         KEY_ADD_RECURSIVELY_FILES,
@@ -1191,6 +1232,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_WINDOW,
 	                       KEY_SHOW_ALBUM_ART,
 	                       priv->show_album_art);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_STATUS_BAR,
+	                       priv->show_status_bar);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
@@ -1274,6 +1319,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SHOW_ALBUM_ART:
 			g_value_set_boolean (value, pragha_preferences_get_show_album_art(preferences));
 			break;
+		case PROP_SHOW_STATUS_BAR:
+			g_value_set_boolean (value, pragha_preferences_get_show_status_bar(preferences));
+			break;
 		case PROP_ADD_RECURSIVELY:
 			g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
 			break;
@@ -1341,6 +1389,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SHOW_ALBUM_ART:
 			pragha_preferences_set_show_album_art(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_SHOW_STATUS_BAR:
+			pragha_preferences_set_show_status_bar(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -1553,6 +1604,16 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("show-album-art",
 		                     "ShowAlbumArt",
 		                     "show Album Art Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+	/**
+	  * PraghaPreferences:show_status_bar:
+	  *
+	  */
+	gParamSpecs[PROP_SHOW_STATUS_BAR] =
+		g_param_spec_boolean("show-status-bar",
+		                     "ShowStatusBar",
+		                     "Show Status Bar Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 

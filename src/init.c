@@ -161,7 +161,7 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0;
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f, status_bar_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
 	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
@@ -169,7 +169,7 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = status_bar_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
 	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -234,17 +234,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			window_position_f = TRUE;
-		}
-
-		cwin->cpref->status_bar =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_STATUS_BAR,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			status_bar_f = TRUE;
 		}
 
 		cwin->cpref->controls_below =
@@ -491,8 +480,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->show_icon_tray = TRUE;
 	if (all_f || close_to_tray_f)
 		cwin->cpref->close_to_tray = TRUE;
-	if (all_f || status_bar_f)
-		cwin->cpref->status_bar = TRUE;
 	if (all_f || controls_below_f)
 		cwin->cpref->controls_below = FALSE;
 	#ifdef HAVE_LIBCLASTFM
@@ -622,9 +609,6 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Status bar");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->status_bar);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
@@ -861,6 +845,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* TODO: Move it to Widgets construction. */
 	g_object_bind_property (cwin->preferences, "lateral-panel",
 	                        cwin->sidebar->widget, "visible",
+	                        binding_flags);
+	g_object_bind_property (cwin->preferences, "show-status-bar",
+	                        cwin->statusbar, "visible",
 	                        binding_flags);
 	g_object_bind_property (cwin->preferences, "show-album-art",
 	                        GTK_WIDGET(cwin->albumart), "visible",
