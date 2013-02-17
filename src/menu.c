@@ -758,9 +758,11 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 status_bar_action (GtkAction *action, struct con_win *cwin)
 {
-	cwin->cpref->status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	/*gboolean show_status_bar;
+	show_status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	gtk_widget_set_visible(GTK_WIDGET(cwin->statusbar), cwin->cpref->status_bar);
+	pragha_preferences_set_show_status_bar (cwin->preferences,
+	                                        show_status_bar);*/
 }
 
 /* Handler for the 'Show_controls_below_action' item in the view menu */
@@ -957,6 +959,9 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	GtkAction *action_lateral = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Lateral panel");
 	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
+
+	GtkAction *action_status_bar = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Status bar");
+	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 

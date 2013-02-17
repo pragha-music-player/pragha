@@ -970,13 +970,6 @@ void save_preferences(struct con_win *cwin)
 			       KEY_CONTROLS_BELOW,
 			       cwin->cpref->controls_below);
 
-	/* Save status bar option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_STATUS_BAR,
-			       cwin->cpref->status_bar);
-
 	/* Services internet */
 	/* Save last.fm option */
 #ifdef HAVE_LIBCLASTFM

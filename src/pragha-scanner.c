@@ -443,6 +443,8 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
+
+	pragha_preferences_set_show_status_bar (preferences, TRUE);
 	gtk_widget_show_all(scanner->hbox);
 
 	/* Append the files from database that no changed. */
@@ -520,6 +522,7 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 
 	scanner->update_timeout = g_timeout_add_seconds(1, (GSourceFunc)pragha_scanner_update_progress, scanner);
 
+	pragha_preferences_set_show_status_bar (preferences, TRUE);
 	gtk_widget_show_all(scanner->hbox);
 
 	/* Launch threads */

@@ -513,7 +513,6 @@ struct con_pref {
 	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
-	gboolean status_bar;
 	gboolean controls_below;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
