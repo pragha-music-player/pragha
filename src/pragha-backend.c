@@ -136,11 +136,10 @@ pragha_backend_get_current_length (PraghaBackend *backend)
 	PraghaBackendPrivate *priv = backend->priv;
 	gint64 song_length;
 	gboolean result;
-	GstFormat format = GST_FORMAT_TIME;
 
-	result = gst_element_query_duration(priv->pipeline, format, &song_length);
+	result = gst_element_query_duration (priv->pipeline, GST_FORMAT_TIME, &song_length);
 
-	if (!result || format != GST_FORMAT_TIME)
+	if (!result)
 		return GST_CLOCK_TIME_NONE;
  
 	return song_length;
@@ -152,11 +151,10 @@ pragha_backend_get_current_position (PraghaBackend *backend)
 	PraghaBackendPrivate *priv = backend->priv;
 	gint64 song_position;
 	gboolean result;
-	GstFormat format = GST_FORMAT_TIME;
 
-	result = gst_element_query_position(priv->pipeline, format, &song_position);
+	result = gst_element_query_position (priv->pipeline, GST_FORMAT_TIME, &song_position);
 
-	if (!result || format != GST_FORMAT_TIME)
+	if (!result)
 		return GST_CLOCK_TIME_NONE;
 
 	return song_position;
