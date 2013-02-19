@@ -49,6 +49,7 @@ typedef enum {
 
 struct PraghaBackendPrivate {
 	struct con_win *cwin;
+	PraghaPreferences *preferences;
 	GstElement *pipeline;
 	GstElement *audio_sink;
 	GstElement *equalizer;
@@ -710,6 +711,10 @@ pragha_backend_dispose (GObject *object)
 		gst_object_unref (priv->pipeline);
 		priv->pipeline = NULL;
 	}
+	if (priv->preferences) {
+		g_object_unref (priv->preferences);
+		priv->preferences = NULL;
+	}
 
 	G_OBJECT_CLASS (pragha_backend_parent_class)->dispose (object);
 }
@@ -762,9 +767,9 @@ pragha_backend_init_equalizer_preset (struct con_win *cwin)
 	if (priv->equalizer == NULL)
 		return;
 
-	saved_bands = pragha_preferences_get_double_list(cwin->preferences,
-							 GROUP_AUDIO,
-							 KEY_EQ_10_BANDS);
+	saved_bands = pragha_preferences_get_double_list (priv->preferences,
+							  GROUP_AUDIO,
+							  KEY_EQ_10_BANDS);
 
 	if (saved_bands != NULL) {
 		pragha_backend_update_equalizer(cwin->backend, saved_bands);
@@ -888,6 +893,7 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->seeking = FALSE;
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
+	priv->preferences = pragha_preferences_get ();
 	/* FIXME */
 }
 
@@ -921,7 +927,7 @@ gint backend_init (struct con_win *cwin)
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
 
-	const gchar *sink_pref = pragha_preferences_get_audio_sink(cwin->preferences);
+	const gchar *sink_pref = pragha_preferences_get_audio_sink (priv->preferences);
 
 	if (!g_ascii_strcasecmp(sink_pref, ALSA_SINK)) {
 		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
@@ -947,7 +953,7 @@ gint backend_init (struct con_win *cwin)
 
 	priv->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
 
-	const gchar *audio_device_pref = pragha_preferences_get_audio_device(cwin->preferences);
+	const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
 
 	if (priv->audio_sink != NULL) {
 		/* Set the audio device to use. */
@@ -997,7 +1003,7 @@ gint backend_init (struct con_win *cwin)
 	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
 	gst_object_unref (bus);
 
-	pragha_backend_set_soft_volume(backend, pragha_preferences_get_software_mixer(cwin->preferences));
+	pragha_backend_set_soft_volume(backend, pragha_preferences_get_software_mixer (priv->preferences));
 	pragha_backend_init_equalizer_preset(cwin);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
