@@ -700,15 +700,28 @@ pragha_backend_message_tag (GstBus *bus, GstMessage *msg, PraghaBackend *backend
 }
 
 static void
+pragha_backend_dispose (GObject *object)
+{
+	PraghaBackend *backend = PRAGHA_BACKEND (object);
+	PraghaBackendPrivate *priv = backend->priv;
+
+	if (priv->pipeline) {
+		gst_element_set_state (priv->pipeline, GST_STATE_NULL);
+		gst_object_unref (priv->pipeline);
+		priv->pipeline = NULL;
+	}
+
+	G_OBJECT_CLASS (pragha_backend_parent_class)->dispose (object);
+}
+
+static void
 pragha_backend_finalize (GObject *object)
 {
 	PraghaBackend *backend = PRAGHA_BACKEND (object);
 	PraghaBackendPrivate *priv = backend->priv;
 
-	gst_element_set_state(priv->pipeline, GST_STATE_NULL);
-	gst_object_unref(priv->pipeline);
-	if(priv->error)
-		g_error_free(priv->error);
+	if (priv->error)
+		g_error_free (priv->error);
 
 	CDEBUG(DBG_BACKEND, "Pipeline destruction complete");
 
@@ -808,6 +821,7 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 
 	gobject_class->set_property = pragha_backend_set_property;
 	gobject_class->get_property = pragha_backend_get_property;
+	gobject_class->dispose = pragha_backend_dispose;
 	gobject_class->finalize = pragha_backend_finalize;
 
 	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Playback volume.",
