@@ -768,6 +768,36 @@ pragha_backend_init_equalizer_preset (PraghaBackend *backend)
 	}
 }
 
+static GstElement *
+make_audio_sink (PraghaPreferences *preferences)
+{
+	const gchar *audiosink;
+	const gchar *sink_pref = pragha_preferences_get_audio_sink (preferences);
+
+	if (!g_ascii_strcasecmp (sink_pref, ALSA_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Alsa like audio sink");
+		audiosink = "alsasink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, OSS4_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Oss4 like audio sink");
+		audiosink = "oss4sink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, OSS_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Oss like audio sink");
+		audiosink = "osssink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, PULSE_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Pulseaudio like audio sink");
+		audiosink = "pulsesink";
+	}
+	else {
+		CDEBUG (DBG_BACKEND, "Setting autoaudiosink like audio sink");
+		audiosink = "autoaudiosink";
+	}
+
+	return gst_element_factory_make (audiosink, "audio-sink");
+}
+
 static void
 pragha_backend_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
@@ -901,20 +931,6 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
-	/* FIXME */
-}
-
-gint backend_init (struct con_win *cwin)
-{
-	GstBus *bus;
-	const gchar *audiosink = NULL;
-	gboolean can_set_device = TRUE;
-	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
-	PraghaBackendPrivate *priv = backend->priv;
-
-	cwin->backend = backend;
-
-	gst_init(NULL, NULL);
 
 #if GST_CHECK_VERSION (1, 0, 0)
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
@@ -922,50 +938,22 @@ gint backend_init (struct con_win *cwin)
 	priv->pipeline = gst_element_factory_make("playbin2", "playbin");
 #endif
 
-	if (priv->pipeline == NULL)
-		return -1;
-
-	//notify::volume is emitted from gstreamer worker thread
-	g_signal_connect (priv->pipeline, "notify::volume",
-			  G_CALLBACK (volume_notify_cb), backend);
-	g_signal_connect (priv->pipeline, "notify::source",
-			  G_CALLBACK (pragha_backend_source_notify_cb), backend);
+	if (priv->pipeline == NULL) {
+		g_critical ("Failed to create playbin element. Please check your GStreamer installation.");
+		exit (1);
+	}
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
-
-	const gchar *sink_pref = pragha_preferences_get_audio_sink (priv->preferences);
-
-	if (!g_ascii_strcasecmp(sink_pref, ALSA_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
-		audiosink = "alsasink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, OSS4_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
-		audiosink = "oss4sink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, OSS_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
-		audiosink = "osssink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, PULSE_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
-		audiosink = "pulsesink";
-	}
-	else {
-		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
-		can_set_device = FALSE;
-		audiosink = "autoaudiosink";
-	}
-
-	priv->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
-
-	const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
+	priv->audio_sink = make_audio_sink (priv->preferences);
 
 	if (priv->audio_sink != NULL) {
+		const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
+		gboolean can_set_device = g_object_class_find_property (G_OBJECT_GET_CLASS (priv->audio_sink), "device") != NULL;
+
 		/* Set the audio device to use. */
-		if (can_set_device && string_is_not_empty(audio_device_pref))
-			g_object_set(priv->audio_sink, "device", audio_device_pref, NULL);
+		if (can_set_device && string_is_not_empty (audio_device_pref))
+			g_object_set (priv->audio_sink, "device", audio_device_pref, NULL);
 
 		/* Test 10bands equalizer and test it. */
 		priv->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
@@ -973,41 +961,38 @@ gint backend_init (struct con_win *cwin)
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
 
-			bin = gst_bin_new("audiobin");
+			bin = gst_bin_new ("audiobin");
 			gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, NULL);
 			gst_element_link_many (priv->equalizer, priv->audio_sink, NULL);
 
 			pad = gst_element_get_static_pad (priv->equalizer, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
 			gst_pad_set_active (ghost_pad, TRUE);
-			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
+			gst_element_add_pad (bin, ghost_pad);
 			gst_object_unref (pad);
 
-			g_object_set(priv->pipeline, "audio-sink", bin, NULL);
-		}
-		else {
-			g_warning("Failed to create the 10bands equalizer element. Not use it.");
+			g_object_set (priv->pipeline, "audio-sink", bin, NULL);
+		} else {
+			g_warning ("Failed to create the 10bands equalizer element. Not use it.");
 
-			g_object_set(priv->pipeline, "audio-sink", priv->audio_sink, NULL);
+			g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 		}
-	}
-	else {
-		g_warning("Failed to create audio-sink element. Use default sink, without equalizer. ");
+	} else {
+		g_warning ("Failed to create audio-sink element. Use default sink, without equalizer.");
 
 		priv->equalizer = NULL;
-		g_object_set(priv->pipeline, "audio-sink", priv->audio_sink, NULL);
+		g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 	}
 
-	bus = gst_pipeline_get_bus(GST_PIPELINE(priv->pipeline));
-
-	gst_bus_add_signal_watch(bus);
-	g_signal_connect(G_OBJECT(bus), "message::error", (GCallback)pragha_backend_message_error, backend);
-	g_signal_connect(G_OBJECT(bus), "message::eos", (GCallback)pragha_backend_message_eos, backend);
-	g_signal_connect(G_OBJECT(bus), "message::state-changed", (GCallback)pragha_backend_message_state_changed, backend);
-	g_signal_connect(G_OBJECT(bus), "message::async-done", (GCallback)pragha_backend_message_async_done, backend);
-	g_signal_connect(G_OBJECT(bus), "message::buffering", (GCallback)pragha_backend_message_buffering, backend);
-	g_signal_connect(G_OBJECT(bus), "message::clock-lost", (GCallback)pragha_backend_message_clock_lost, backend);
-	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
+	GstBus *bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
+	gst_bus_add_signal_watch (bus);
+	g_signal_connect (bus, "message::error", G_CALLBACK (pragha_backend_message_error), backend);
+	g_signal_connect (bus, "message::eos", G_CALLBACK (pragha_backend_message_eos), backend);
+	g_signal_connect (bus, "message::state-changed", G_CALLBACK (pragha_backend_message_state_changed), backend);
+	g_signal_connect (bus, "message::async-done", G_CALLBACK (pragha_backend_message_async_done), backend);
+	g_signal_connect (bus, "message::buffering", G_CALLBACK (pragha_backend_message_buffering), backend);
+	g_signal_connect (bus, "message::clock-lost", G_CALLBACK (pragha_backend_message_clock_lost), backend);
+	g_signal_connect (bus, "message::tag", G_CALLBACK (pragha_backend_message_tag), backend);
 	gst_object_unref (bus);
 
 	if(pragha_preferences_get_software_mixer (priv->preferences)) {
@@ -1016,9 +1001,23 @@ gint backend_init (struct con_win *cwin)
 	}
 	pragha_backend_init_equalizer_preset (backend);
 
-	gst_element_set_state(priv->pipeline, GST_STATE_READY);
+	//notify::volume is emitted from gstreamer worker thread
+	g_signal_connect (priv->pipeline, "notify::volume",
+			  G_CALLBACK (volume_notify_cb), backend);
+	g_signal_connect (priv->pipeline, "notify::source",
+			  G_CALLBACK (pragha_backend_source_notify_cb), backend);
 
-	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
+	gst_element_set_state (priv->pipeline, GST_STATE_READY);
 
-	return 0;
+	CDEBUG (DBG_BACKEND, "Pipeline construction completed");
+}
+
+PraghaBackend *
+pragha_backend_new (struct con_win *cwin)
+{
+	gst_init (NULL, NULL);
+
+	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
+
+	return backend;
 }
