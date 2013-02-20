@@ -177,6 +177,7 @@ pragha_scanner_worker_finished (gpointer data)
 		pragha_database_commit_transaction (database);
 
 		pragha_database_change_playlists_done(database);
+		pragha_database_change_tracks_done (database);
 		g_object_unref(database);
 
 		remove_watch_cursor(scanner->hbox);
