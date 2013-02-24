@@ -17,14 +17,16 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include <taginfo/taginfo_c.h>
+//#include <taginfo/taginfo.h>
 
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
 {
 	gboolean ret = TRUE;
-	TagLib_File *tfile = NULL;
-	TagLib_Tag *tag;
-	const TagLib_AudioProperties *audio_prop;
+	TagInfo_Info *tfile = NULL;
+	/*TagLib_Tag *tag;
+	const TagLib_AudioProperties *audio_prop;*/
 
 	/* workaround for crash in taglib
 	   https://github.com/taglib/taglib/issues/78 */
@@ -34,44 +36,45 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		goto exit;
 	}
 
-	tfile = taglib_file_new(file);
+	tfile = taginfo_info_factory_make(file);
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
 		ret = FALSE;
 		goto exit;
 	}
 
-	tag = taglib_file_tag(tfile);
-	if (!tag) {
+	if (!taginfo_info_read(tfile)) {
 		g_warning("Unable to locate tag in file %s", file);
 		ret = FALSE;
 		goto exit;
 	}
 
-	audio_prop = taglib_file_audioproperties(tfile);
+	/*audio_prop = taglib_file_audioproperties(tfile);
 	if (!audio_prop) {
 		g_warning("Unable to locate audio properties in file %s", file);
 		ret = FALSE;
 		goto exit;
-	}
+	}*/
 
 	g_object_set (mobj,
-	              "title", taglib_tag_title(tag),
-	              "artist", taglib_tag_artist(tag),
-	              "album", taglib_tag_album(tag),
-	              "genre", taglib_tag_genre(tag),
-	              "comment", taglib_tag_comment(tag),
-	              "year", taglib_tag_year(tag),
-	              "track-no", taglib_tag_track(tag),
-	              "length", taglib_audioproperties_length(audio_prop),
-	              "bitrate", taglib_audioproperties_bitrate(audio_prop),
-	              "channels", taglib_audioproperties_channels(audio_prop),
-	              "samplerate", taglib_audioproperties_samplerate(audio_prop),
+	              "title", taginfo_info_get_artist(tfile),
+	              "artist", taginfo_info_get_artist(tfile),
+	              "album", taginfo_info_get_album(tfile),
+	              "genre", taginfo_info_get_genre(tfile),
+	              "comment", "", //taginfo_info_get_comment(tfile),
+	              "year", taginfo_info_get_year(tfile),
+	              "track-no", taginfo_info_get_tracknumber(tfile),
+	              "length", taginfo_info_get_length(tfile),
+	              "bitrate", taginfo_info_get_bitrate(tfile),
+	              "channels", 2 , //taglib_audioproperties_channels(audio_prop),
+	              "samplerate", 0, //taglib_audioproperties_samplerate(audio_prop),
 	              NULL);
-
+	if(taginfo_info_get_is_compilation(tfile))
+		g_print("FILE: %s is part of compilation!! :) \n", file);
+	if(taginfo_info_get_has_image(tfile))
+		g_print("FILE: %s has image..!! :) \n", file);
 exit:
-	taglib_tag_free_strings();
-	taglib_file_free(tfile);
+	taginfo_info_free(tfile);
 
 	return ret;
 }
@@ -80,7 +83,7 @@ gboolean
 pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed)
 {
 	gboolean ret = TRUE;
-	TagLib_File *tfile;
+	/*TagLib_File *tfile;
 	TagLib_Tag *tag;
 
 	if (!file || !changed)
@@ -128,7 +131,7 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 
 	taglib_tag_free_strings();
 exit:
-	taglib_file_free(tfile);
+	taglib_file_free(tfile);*/
 
 	return ret;
 }

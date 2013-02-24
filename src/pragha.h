@@ -65,8 +65,6 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <tag_c.h>
-#include <taglib_config.h>
 #include <cddb/cddb.h>
 #include <gst/gst.h>
 

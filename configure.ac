@@ -92,18 +92,11 @@ XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
-XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
+XDT_CHECK_PACKAGE([TAGINFO], [taginfo_c], [0.0.9])
 
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
 	AC_DEFINE(HAVE_PARANOIA_NEW_INCLUDES, 1, [Define to 1 if cdio/paranoia/paranoia.h is present]) ])
-
-dnl Check min taglib to add monkeyaudio support
-TAGLIB_1_7_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
-                       [taglib], [1.7.0],
-                       [taglib],
-                       [taglib library to APE], [yes])
 
 dnl Check gstreamer-interfaces
 dnl need for gstreamer 0.10

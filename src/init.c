@@ -147,7 +147,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 
 gint init_taglib(struct con_win *cwin)
 {
-	taglib_set_strings_unicode(TRUE);
+	//taglib_set_strings_unicode(TRUE);
 
 	return 0;
 }
