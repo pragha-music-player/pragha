@@ -619,6 +619,8 @@ typedef struct {
 	gboolean view_change;
 	gchar *filter_entry;
 	guint timeout_id;
+	GtkTreeModel *library_model;
+	GCancellable *filter_cancellable;
 	GSList *library_tree_nodes;
 	GdkPixbuf *pixbuf_artist;
 	GdkPixbuf *pixbuf_album;

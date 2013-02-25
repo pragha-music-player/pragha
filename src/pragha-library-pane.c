@@ -1141,6 +1141,9 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	gchar *node_data = NULL, *u_str;
 	gboolean p_mach;
 
+	if(g_cancellable_is_cancelled (clibrary->filter_cancellable))
+		return TRUE;
+
 	/* Mark node and its parents visible if search entry matches.
 	   If search entry doesn't match, check if _any_ ancestor has
 	   been marked as visible and if so, mark current node as visible too. */
@@ -1176,31 +1179,67 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	return FALSE;
 }
 
-gboolean do_refilter(PraghaLibraryPane *clibrary)
+static gboolean
+pragha_library_filter_finished (gpointer data)
 {
-	GtkTreeModel *filter_model;
-
-	/* Remove the model of widget. */
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
-	g_object_ref(filter_model);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
-
-	/* Set visibility of rows in the library store. */
-	gtk_tree_model_foreach(GTK_TREE_MODEL(clibrary->library_store),
-				filter_tree_func,
-				clibrary);
+	PraghaLibraryPane *clibrary = data;
 
 	/* Set the model again.*/
-	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
-	g_object_unref(filter_model);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), clibrary->library_model);
+	g_object_unref(clibrary->library_model);
 
 	/* Expand all and then reduce properly. */
+
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(clibrary->library_tree));
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(clibrary->library_tree),
-		library_expand_filtered_tree_func,
-		filter_model);
+	                                library_expand_filtered_tree_func,
+	                                clibrary->library_model);
 
+	/* Cancelled plus timeout_id = 0, indicates over!. */
+
+	g_cancellable_cancel (clibrary->filter_cancellable);
 	clibrary->timeout_id = 0;
+
+	return FALSE;
+}
+
+/* Set visibility of rows in the library store. */
+
+static gpointer
+pragha_library_filter_worker(gpointer data)
+{
+	PraghaLibraryPane *clibrary = data;
+
+	do {
+		g_cancellable_reset (clibrary->filter_cancellable);
+		gtk_tree_model_foreach(GTK_TREE_MODEL(clibrary->library_store),
+		                       filter_tree_func,
+		                       clibrary);
+	}
+	while (g_cancellable_is_cancelled (clibrary->filter_cancellable) && clibrary->timeout_id != 0);
+
+	return clibrary;
+}
+
+gboolean do_refilter(PraghaLibraryPane *clibrary)
+{
+	/* NOTE: Here always clibrary->timeout_id != 0 */
+
+	/* Cancelled indicates over!.*/
+	if (g_cancellable_is_cancelled (clibrary->filter_cancellable)) {
+		clibrary->library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
+		g_object_ref(clibrary->library_model);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
+
+		pragha_async_launch (pragha_library_filter_worker,
+			                 pragha_library_filter_finished,
+			                 clibrary);
+	}
+	else {
+		/* Cancel to reinit filter. */
+		g_cancellable_cancel (clibrary->filter_cancellable);
+	}
 
 	return FALSE;
 }
@@ -1210,7 +1249,15 @@ void queue_refilter (PraghaLibraryPane *clibrary)
 	if(clibrary->timeout_id)
 		g_source_remove(clibrary->timeout_id);
 
-	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
+	clibrary->timeout_id = g_timeout_add(300, (GSourceFunc)do_refilter, clibrary);
+}
+
+void queue_just_refilter (PraghaLibraryPane *clibrary)
+{
+	if(clibrary->timeout_id)
+		g_source_remove(clibrary->timeout_id);
+
+	clibrary->timeout_id = g_idle_add ((GSourceFunc)do_refilter, clibrary);
 }
 
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
@@ -1264,7 +1311,7 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
 		clibrary->filter_entry = g_utf8_strdown (text, -1);
 
-		do_refilter (clibrary);
+		queue_just_refilter(clibrary);
 	}
 	else {
 		clear_library_search (clibrary);
@@ -2731,6 +2778,7 @@ pragha_library_pane_new(struct con_win *cwin)
 	/* Create the store */
 
 	clibrary->library_store = pragha_library_pane_store_new();
+	clibrary->library_model = NULL;
 
 	/* Create the widgets */
 
@@ -2751,8 +2799,12 @@ pragha_library_pane_new(struct con_win *cwin)
 	clibrary->filter_entry = NULL;
 	clibrary->dragging = FALSE;
 	clibrary->view_change = TRUE;
-	clibrary->timeout_id = 0;
+	clibrary->filter_cancellable = g_cancellable_new();
 	clibrary->library_tree_nodes = NULL;
+
+	/* Cancelled plus timeout_id = 0, indicates over!. */
+	g_cancellable_cancel (clibrary->filter_cancellable);
+	clibrary->timeout_id = 0;
 
 	/* Init drag and drop */
 
