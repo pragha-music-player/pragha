@@ -618,6 +618,7 @@ typedef struct {
 	gboolean dragging;
 	gboolean view_change;
 	gchar *filter_entry;
+	PRAGHA_MUTEX (filter_entry_mutex);
 	guint timeout_id;
 	GtkTreeModel *library_model;
 	GCancellable *filter_cancellable;

@@ -1140,6 +1140,7 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	PraghaLibraryPane *clibrary = data;
 	gchar *node_data = NULL, *u_str;
 	gboolean p_mach;
+	const gchar *r_str;
 
 	if(g_cancellable_is_cancelled (clibrary->filter_cancellable))
 		return TRUE;
@@ -1148,10 +1149,13 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 	   If search entry doesn't match, check if _any_ ancestor has
 	   been marked as visible and if so, mark current node as visible too. */
 
-	if (clibrary->filter_entry) {
+	/*if (clibrary->filter_entry)*/ {
 		gtk_tree_model_get(model, iter, L_NODE_DATA, &node_data, -1);
 		u_str = g_utf8_strdown(node_data, -1);
-		if (pragha_strstr_lv(u_str, clibrary->filter_entry, clibrary->preferences)) {
+		pragha_mutex_lock(clibrary->filter_entry_mutex);
+		r_str = pragha_strstr_lv(u_str, clibrary->filter_entry, clibrary->preferences);
+		pragha_mutex_unlock(clibrary->filter_entry_mutex);
+		if (r_str) {
 			/* Set visible the match row */
 			gtk_tree_store_set(GTK_TREE_STORE(model), iter,
 					   L_MACH, TRUE,
@@ -1173,8 +1177,8 @@ static gboolean filter_tree_func(GtkTreeModel *model,
 		g_free(u_str);
 		g_free(node_data);
 	}
-	else
-		return TRUE;
+	/*else
+		return TRUE;*/
 
 	return FALSE;
 }
@@ -1273,16 +1277,20 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
 		return FALSE;
 
+	pragha_mutex_lock(clibrary->filter_entry_mutex);
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);
 		clibrary->filter_entry = NULL;
 	}
+	pragha_mutex_unlock(clibrary->filter_entry_mutex);
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		pragha_mutex_lock(clibrary->filter_entry_mutex);
 		clibrary->filter_entry = g_utf8_strdown (text, -1);
+		pragha_mutex_unlock(clibrary->filter_entry_mutex);
 
 		queue_refilter(clibrary);
 	}
@@ -1306,10 +1314,12 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
+	pragha_mutex_lock(clibrary->filter_entry_mutex);
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);
 		clibrary->filter_entry = NULL;
 	}
+	pragha_mutex_unlock(clibrary->filter_entry_mutex);
 
 	if (has_text) {
 		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
@@ -2687,6 +2697,10 @@ pragha_library_pane_free(PraghaLibraryPane *librarypane)
 	g_object_unref(librarypane->preferences);
 	g_object_unref(librarypane->library_store);
 
+	if(librarypane->filter_entry)
+		g_free(librarypane->filter_entry);
+	pragha_mutex_free(librarypane->filter_entry_mutex);
+
 	g_slist_free(librarypane->library_tree_nodes);
 
 	g_slice_free(PraghaLibraryPane, librarypane);
@@ -2798,17 +2812,20 @@ pragha_library_pane_new(struct con_win *cwin)
 	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new(cwin);
 	clibrary->library_tree_context_menu = pragha_library_tree_context_menu_new(cwin);
 
-	/* Init the rest of flags */
+	/* Cancelled plus timeout_id = 0, indicates over!. */
+
+	g_cancellable_cancel (clibrary->filter_cancellable);
+	clibrary->timeout_id = 0;
 
 	clibrary->filter_entry = NULL;
+	pragha_mutex_create(clibrary->filter_entry_mutex);
+
+	/* Init the rest of flags */
+
 	clibrary->dragging = FALSE;
 	clibrary->view_change = TRUE;
 	clibrary->filter_cancellable = g_cancellable_new();
 	clibrary->library_tree_nodes = NULL;
-
-	/* Cancelled plus timeout_id = 0, indicates over!. */
-	g_cancellable_cancel (clibrary->filter_cancellable);
-	clibrary->timeout_id = 0;
 
 	/* Init drag and drop */
 
