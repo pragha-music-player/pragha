@@ -1196,6 +1196,8 @@ pragha_library_filter_finished (gpointer data)
 	                                library_expand_filtered_tree_func,
 	                                clibrary->library_model);
 
+	remove_watch_cursor (clibrary->widget);
+
 	/* Cancelled plus timeout_id = 0, indicates over!. */
 
 	g_cancellable_cancel (clibrary->filter_cancellable);
@@ -1228,6 +1230,8 @@ gboolean do_refilter(PraghaLibraryPane *clibrary)
 
 	/* Cancelled indicates over!.*/
 	if (g_cancellable_is_cancelled (clibrary->filter_cancellable)) {
+		set_watch_cursor (clibrary->widget);
+
 		clibrary->library_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
 		g_object_ref(clibrary->library_model);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
