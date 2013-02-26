@@ -132,7 +132,7 @@ pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *
 			gst_element_get_state (GST_ELEMENT (parser->pipeline), &state, NULL,
 				5 * GST_SECOND)) {
 			g_print ("State change failed for %s. Aborting\n", filename);
-			return;
+			goto bad;
 		}
 	}
 	else if (sret != GST_STATE_CHANGE_SUCCESS) {
@@ -157,6 +157,7 @@ pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *
 	else
 		g_print ("No metadata found for %s\n", filename);
 
+bad:
 	sret = gst_element_set_state (GST_ELEMENT (parser->pipeline), GST_STATE_NULL);
 	if (GST_STATE_CHANGE_ASYNC == sret) {
 		if (GST_STATE_CHANGE_FAILURE ==
