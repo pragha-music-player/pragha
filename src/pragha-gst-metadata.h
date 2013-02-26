@@ -15,7 +15,19 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <gst/gst.h>
 #include <glib.h>
 
-int
-print_filename_list_tags (GSList *files);
+typedef struct _PraghaGstMetadataParser {
+	GstElement *pipeline;
+	GstElement *source;
+} PraghaGstMetadataParser;
+
+void
+pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *filename);
+
+void
+pragha_metadata_parser_free(PraghaGstMetadataParser *parser);
+
+PraghaGstMetadataParser *
+pragha_metadata_parser_new(void);

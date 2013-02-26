@@ -285,11 +285,15 @@ add_button_cb(GtkWidget *widget, gpointer data)
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
 
-	print_filename_list_tags(files);
-
 	gtk_widget_destroy(window);
 
 	if (files) {
+		PraghaGstMetadataParser *parser = pragha_metadata_parser_new();
+		for (l = files; l != NULL; l = l->next) {
+			pragha_metadata_parser_print_tag (parser, (gchar *)l->data);
+		}
+		pragha_metadata_parser_free(parser);
+
 		for (l = files; l != NULL; l = l->next) {
 			mlist = append_mobj_list_from_unknown_filename(mlist, l->data);
 		}

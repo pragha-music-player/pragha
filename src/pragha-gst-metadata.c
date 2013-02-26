@@ -34,12 +34,6 @@
 #include <gst/gst.h>
 #include <glib.h>
 
-static char *filename = NULL;
-static GstElement *pipeline = NULL;
-static GstElement *source = NULL;
-
-//#define NEW_PIPE_PER_FILE
-
 static gboolean
 message_loop (GstElement * element, GstTagList ** tags)
 {
@@ -91,25 +85,6 @@ message_loop (GstElement * element, GstTagList ** tags)
 }
 
 static void
-make_pipeline (void)
-{
-	GstElement *decodebin;
-
-	if (pipeline != NULL)
-		gst_object_unref (pipeline);
-
-	pipeline = gst_pipeline_new (NULL);
-
-	source = gst_element_factory_make ("filesrc", "source");
-	g_assert (GST_IS_ELEMENT (source));
-	decodebin = gst_element_factory_make ("decodebin", "decodebin");
-	g_assert (GST_IS_ELEMENT (decodebin));
-
-	gst_bin_add_many (GST_BIN (pipeline), source, decodebin, NULL);
-	gst_element_link (source, decodebin);
-}
-
-static void
 print_tag (const GstTagList * list, const gchar * tag, gpointer unused)
 {
 	gint i, count;
@@ -137,91 +112,97 @@ print_tag (const GstTagList * list, const gchar * tag, gpointer unused)
 	}
 }
 
-int
-print_filename_list_tags (GSList *files)
+void
+pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *filename)
 {
-	GSList *l;
+	GstStateChangeReturn sret;
+	GstState state;
+	GstTagList *tags = NULL;
 
-	make_pipeline ();
+	g_object_set (parser->source, "location", filename, NULL);
 
-	for (l = files ; l != NULL ; l = l->next) {
-		GstStateChangeReturn sret;
-		GstState state;
-		GstTagList *tags = NULL;
+	GST_DEBUG ("Starting reading for %s", filename);
 
-		filename = l->data;
-		g_object_set (source, "location", filename, NULL);
+	/* Decodebin will only commit to PAUSED if it actually finds a type;
+	 * otherwise the state change fails */
+	sret = gst_element_set_state (GST_ELEMENT (parser->pipeline), GST_STATE_PAUSED);
 
-		GST_DEBUG ("Starting reading for %s", filename);
-
-		/* Decodebin will only commit to PAUSED if it actually finds a type;
-		 * otherwise the state change fails */
-		sret = gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PAUSED);
-
-		if (GST_STATE_CHANGE_ASYNC == sret) {
-			if (GST_STATE_CHANGE_SUCCESS !=
-				gst_element_get_state (GST_ELEMENT (pipeline), &state, NULL,
-					5 * GST_SECOND)) {
-				g_print ("State change failed for %s. Aborting\n", filename);
-				break;
-			}
+	if (GST_STATE_CHANGE_ASYNC == sret) {
+		if (GST_STATE_CHANGE_SUCCESS !=
+			gst_element_get_state (GST_ELEMENT (parser->pipeline), &state, NULL,
+				5 * GST_SECOND)) {
+			g_print ("State change failed for %s. Aborting\n", filename);
+			return;
 		}
-		else if (sret != GST_STATE_CHANGE_SUCCESS) {
-			g_print ("%s - Could not read file\n", filename);
-		#ifdef NEW_PIPE_PER_FILE
-			goto next_file;
-		#else
-			continue;
-		#endif
-		}
-
-		if (!message_loop (GST_ELEMENT (pipeline), &tags)) {
-			g_print ("Failed in message reading for %s\n", filename);
-		}
-
-		if (tags) {
-			g_print ("Metadata for %s:\n", filename);
-			gst_tag_list_foreach (tags, print_tag, NULL);
-			#if GST_CHECK_VERSION (1, 0, 0)
-			gst_tag_list_unref (tags);
-			#else
-			gst_tag_list_free (tags);
-			#endif
-			tags = NULL;
-		}
-		else
-			g_print ("No metadata found for %s\n", filename);
-
-		sret = gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_NULL);
-#ifdef NEW_PIPE_PER_FILE
-		if (sret != GST_STATE_CHANGE_SUCCESS) {
-			g_print ("State change failed. Aborting\n");
-			break;
-		}
-#else
-		if (GST_STATE_CHANGE_ASYNC == sret) {
-			if (GST_STATE_CHANGE_FAILURE ==
-				gst_element_get_state (GST_ELEMENT (pipeline),
-					                   &state, NULL,
-					                   GST_CLOCK_TIME_NONE)) {
-				g_print ("State change failed. Aborting");
-				break;
-			}
-		}
-		else if (sret != GST_STATE_CHANGE_SUCCESS) {
-			g_print ("State change failed. Aborting\n");
-			break;
-		}
-#endif
-
-#ifdef NEW_PIPE_PER_FILE
-		next_file:
-		make_pipeline ();
-#endif
+	}
+	else if (sret != GST_STATE_CHANGE_SUCCESS) {
+		g_print ("%s - Could not read file\n", filename);
+		return;
 	}
 
-	if (pipeline)
-		gst_object_unref (pipeline);
+	if (!message_loop (GST_ELEMENT (parser->pipeline), &tags)) {
+		g_print ("Failed in message reading for %s\n", filename);
+	}
 
-	return 0;
+	if (tags) {
+		g_print ("Metadata for %s:\n", filename);
+		gst_tag_list_foreach (tags, print_tag, NULL);
+		#if GST_CHECK_VERSION (1, 0, 0)
+		gst_tag_list_unref (tags);
+		#else
+		gst_tag_list_free (tags);
+		#endif
+		tags = NULL;
+	}
+	else
+		g_print ("No metadata found for %s\n", filename);
+
+	sret = gst_element_set_state (GST_ELEMENT (parser->pipeline), GST_STATE_NULL);
+	if (GST_STATE_CHANGE_ASYNC == sret) {
+		if (GST_STATE_CHANGE_FAILURE ==
+			gst_element_get_state (GST_ELEMENT (parser->pipeline),
+				                   &state, NULL,
+				                   GST_CLOCK_TIME_NONE)) {
+			g_print ("State change failed. Aborting");
+			return;
+		}
+	}
+	else if (sret != GST_STATE_CHANGE_SUCCESS) {
+		g_print ("State change failed. Aborting\n");
+		return;
+	}
 }
+
+void
+pragha_metadata_parser_free(PraghaGstMetadataParser *parser)
+{
+	gst_object_unref (parser->pipeline);
+	g_slice_free(PraghaGstMetadataParser, parser);
+}
+
+PraghaGstMetadataParser *
+pragha_metadata_parser_new(void)
+{
+	GstElement *decodebin;
+	GstElement *pipeline = NULL;
+	GstElement *source = NULL;
+
+	PraghaGstMetadataParser *parser;
+
+	parser = g_slice_new0(PraghaGstMetadataParser);
+
+	pipeline = gst_pipeline_new (NULL);
+	source = gst_element_factory_make ("filesrc", "source");
+	g_assert (GST_IS_ELEMENT (source));
+	decodebin = gst_element_factory_make ("decodebin", "decodebin");
+	g_assert (GST_IS_ELEMENT (decodebin));
+
+	gst_bin_add_many (GST_BIN (pipeline), source, decodebin, NULL);
+	gst_element_link (source, decodebin);
+
+	parser->pipeline = pipeline;
+	parser->source = source;
+
+	return parser;
+}
+
