@@ -157,9 +157,11 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	if(!mobj)
 		return;
 
+	gint channels_n = pragha_musicobject_get_channels(mobj);
+
 	length = convert_length_str(pragha_musicobject_get_length(mobj));
 	bitrate = g_strdup_printf("%d kbps", pragha_musicobject_get_bitrate(mobj));
-	channels = g_strdup_printf("%d %s", pragha_musicobject_get_channels(mobj), _("Channels"));
+	channels = g_strdup_printf("%d %s", channels_n, ngettext("channel", "channels", channels_n));
 	samplerate = g_strdup_printf("%d Hz", pragha_musicobject_get_samplerate(mobj));
 	folder = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 	filename = get_display_name(mobj);
