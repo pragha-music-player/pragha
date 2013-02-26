@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-gst-metadata.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
@@ -283,6 +284,8 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
+
+	print_filename_list_tags(files);
 
 	gtk_widget_destroy(window);
 
