@@ -90,32 +90,52 @@ pragha_metadata_parser_mobj_set_tag (const GstTagList *list, const gchar *tag_na
 {
 	PraghaMusicobject *mobj = data;
 	gchar *tag = NULL;
+	guint uitag = 0;
+	guint64 ui64tag = 0;
 
 	if(g_ascii_strcasecmp(GST_TAG_TITLE, tag_name) == 0) {
-		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		gst_tag_list_get_string (list, tag_name, &tag);
 		pragha_musicobject_set_title(mobj, tag);
 		g_free(tag);
 	}
 	else if(g_ascii_strcasecmp(GST_TAG_ARTIST, tag_name) == 0) {
-		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		gst_tag_list_get_string (list, tag_name, &tag);
 		pragha_musicobject_set_artist(mobj, tag);
 		g_free(tag);
 	}
 	else if(g_ascii_strcasecmp(GST_TAG_ALBUM, tag_name) == 0) {
-		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		gst_tag_list_get_string (list, tag_name, &tag);
 		pragha_musicobject_set_album(mobj, tag);
 		g_free(tag);
 	}
 	else if(g_ascii_strcasecmp(GST_TAG_GENRE, tag_name) == 0) {
-		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		gst_tag_list_get_string (list, tag_name, &tag);
 		pragha_musicobject_set_genre(mobj, tag);
 		g_free(tag);
 	}
 	else if(g_ascii_strcasecmp(GST_TAG_COMMENT, tag_name) == 0) {
-		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		gst_tag_list_get_string (list, tag_name, &tag);
 		pragha_musicobject_set_comment(mobj, tag);
 		g_free(tag);
 	}
+	else if(g_ascii_strcasecmp(GST_TAG_TRACK_NUMBER, tag_name) == 0) {
+		gst_tag_list_get_uint (list, GST_TAG_DURATION, &uitag);
+		pragha_musicobject_set_track_no(mobj, uitag);
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_DURATION, tag_name) == 0) {
+		gst_tag_list_get_uint64 (list, GST_TAG_DURATION, &ui64tag);
+		pragha_musicobject_set_length(mobj, GST_TIME_AS_SECONDS (ui64tag));
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_BITRATE, tag_name) == 0) {
+		gst_tag_list_get_uint64 (list, GST_TAG_DURATION, &ui64tag);
+		pragha_musicobject_set_bitrate(mobj, GST_TIME_AS_SECONDS (ui64tag));
+		g_free(tag);
+	}
+	/*
+	 *TODO: Channels and saplerate must get from caps.. And year ¿?
+	 */
 }
 
 PraghaMusicobject *
