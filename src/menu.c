@@ -272,6 +272,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	GSList *files = NULL, *l;
 	gboolean add_recursively;
 	GList *mlist = NULL;
+	PraghaMusicobject *mobj = NULL;
 
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
@@ -290,12 +291,9 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	if (files) {
 		PraghaGstMetadataParser *parser = pragha_metadata_parser_new();
 		for (l = files; l != NULL; l = l->next) {
-			pragha_metadata_parser_print_tag (parser, (gchar *)l->data);
-		}
-		pragha_metadata_parser_free(parser);
-
-		for (l = files; l != NULL; l = l->next) {
-			mlist = append_mobj_list_from_unknown_filename(mlist, l->data);
+			mobj = pragha_metadata_parser_get_mobj(parser, (gchar *)l->data);
+			if (G_LIKELY(mobj))
+				mlist = g_list_append(mlist, mobj);
 		}
 		g_slist_free_full(files, g_free);
 

@@ -17,14 +17,15 @@
 
 #include <gst/gst.h>
 #include <glib.h>
+#include "pragha-musicobject.h"
 
 typedef struct _PraghaGstMetadataParser {
 	GstElement *pipeline;
 	GstElement *source;
 } PraghaGstMetadataParser;
 
-void
-pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *filename);
+PraghaMusicobject *
+pragha_metadata_parser_get_mobj (PraghaGstMetadataParser *parser, const gchar *filename);
 
 void
 pragha_metadata_parser_free(PraghaGstMetadataParser *parser);

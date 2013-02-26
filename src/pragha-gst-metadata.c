@@ -27,6 +27,7 @@
 #endif
 
 #include "pragha-gst-metadata.h"
+#include "pragha-musicobject.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -85,39 +86,46 @@ message_loop (GstElement * element, GstTagList ** tags)
 }
 
 static void
-print_tag (const GstTagList * list, const gchar * tag, gpointer unused)
+pragha_metadata_parser_mobj_set_tag (const GstTagList *list, const gchar *tag_name, gpointer data)
 {
-	gint i, count;
+	PraghaMusicobject *mobj = data;
+	gchar *tag = NULL;
 
-	count = gst_tag_list_get_tag_size (list, tag);
-
-	for (i = 0; i < count; i++) {
-		gchar *str;
-
-	if (gst_tag_get_type (tag) == G_TYPE_STRING) {
-		if (!gst_tag_list_get_string_index (list, tag, i, &str))
-			g_assert_not_reached ();
-		}
-		else {
-			str = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag, i));
-		}
-
-		if (i == 0) {
-			g_print ("  %15s: %s\n", gst_tag_get_nick (tag), str);
-		} 
-		else {
-			g_print ("                 : %s\n", str);
-		}
-		g_free (str);
+	if(g_ascii_strcasecmp(GST_TAG_TITLE, tag_name) == 0) {
+		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		pragha_musicobject_set_title(mobj, tag);
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_ARTIST, tag_name) == 0) {
+		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		pragha_musicobject_set_artist(mobj, tag);
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_ALBUM, tag_name) == 0) {
+		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		pragha_musicobject_set_album(mobj, tag);
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_GENRE, tag_name) == 0) {
+		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		pragha_musicobject_set_genre(mobj, tag);
+		g_free(tag);
+	}
+	else if(g_ascii_strcasecmp(GST_TAG_COMMENT, tag_name) == 0) {
+		tag = g_strdup_value_contents (gst_tag_list_get_value_index (list, tag_name, 0));
+		pragha_musicobject_set_comment(mobj, tag);
+		g_free(tag);
 	}
 }
 
-void
-pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *filename)
+PraghaMusicobject *
+pragha_metadata_parser_get_mobj (PraghaGstMetadataParser *parser, const gchar *filename)
 {
 	GstStateChangeReturn sret;
 	GstState state;
 	GstTagList *tags = NULL;
+
+	PraghaMusicobject *mobj = NULL;
 
 	g_object_set (parser->source, "location", filename, NULL);
 
@@ -137,7 +145,7 @@ pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *
 	}
 	else if (sret != GST_STATE_CHANGE_SUCCESS) {
 		g_print ("%s - Could not read file\n", filename);
-		return;
+		return NULL;
 	}
 
 	if (!message_loop (GST_ELEMENT (parser->pipeline), &tags)) {
@@ -146,7 +154,10 @@ pragha_metadata_parser_print_tag (PraghaGstMetadataParser *parser, const gchar *
 
 	if (tags) {
 		g_print ("Metadata for %s:\n", filename);
-		gst_tag_list_foreach (tags, print_tag, NULL);
+		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+		                     "file", filename,
+		                     NULL);
+		gst_tag_list_foreach (tags, pragha_metadata_parser_mobj_set_tag, mobj);
 		#if GST_CHECK_VERSION (1, 0, 0)
 		gst_tag_list_unref (tags);
 		#else
@@ -165,13 +176,14 @@ bad:
 				                   &state, NULL,
 				                   GST_CLOCK_TIME_NONE)) {
 			g_print ("State change failed. Aborting");
-			return;
+			return NULL;
 		}
 	}
 	else if (sret != GST_STATE_CHANGE_SUCCESS) {
 		g_print ("State change failed. Aborting\n");
-		return;
+		return NULL;
 	}
+	return mobj;
 }
 
 void
