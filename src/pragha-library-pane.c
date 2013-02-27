@@ -1640,7 +1640,7 @@ library_view_complete_tags_view(GtkTreeModel *model,
                                 PraghaLibraryPane *clibrary)
 {
 	PraghaPreparedStatement *statement;
-	gchar *order_str = NULL, *sql = NULL;
+	gchar *order_str = NULL, *vorder_str, *sql = NULL;
 
 	/* Get order needed to sqlite query. */
 	switch(pragha_preferences_get_library_style(clibrary->preferences)) {
@@ -1659,10 +1659,14 @@ library_view_complete_tags_view(GtkTreeModel *model,
 			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			break;
 		case ARTIST_ALBUM:
-			if (pragha_preferences_get_sort_by_year(clibrary->preferences))
+			if (pragha_preferences_get_sort_by_year(clibrary->preferences)) {
+				vorder_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
-			else
+			}
+			else {
+				vorder_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+			}
 			break;
 		case GENRE_ARTIST:
 			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
@@ -1682,40 +1686,120 @@ library_view_complete_tags_view(GtkTreeModel *model,
 		default:
 			break;
 	}
+	if(pragha_preferences_get_library_style(clibrary->preferences) == ARTIST_ALBUM) {
+		sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+			                    "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+			                    "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+			                    "AND TRACK.compilation = ? "
+			                    "ORDER BY %s;", order_str);
+		statement = pragha_database_create_statement (clibrary->cdbase, sql);
+		pragha_prepared_statement_bind_int (statement, 1, 0);
 
-	/* Common query for all tag based library views */
-	sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
-	                        "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
-	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
-	                        "ORDER BY %s;", order_str);
+		while (pragha_prepared_statement_step (statement)) {
+			add_child_node_by_tags(model,
+				                   p_iter,
+				                   pragha_prepared_statement_get_int(statement, 6),
+				                   pragha_prepared_statement_get_string(statement, 5),
+				                   pragha_prepared_statement_get_string(statement, 4),
+				                   pragha_prepared_statement_get_string(statement, 3),
+				                   pragha_prepared_statement_get_string(statement, 2),
+				                   pragha_prepared_statement_get_string(statement, 1),
+				                   pragha_prepared_statement_get_string(statement, 0),
+				                   clibrary);
 
-	statement = pragha_database_create_statement (clibrary->cdbase, sql);
-	while (pragha_prepared_statement_step (statement)) {
-		add_child_node_by_tags(model,
-		                       p_iter,
-		                       pragha_prepared_statement_get_int(statement, 6),
-		                       pragha_prepared_statement_get_string(statement, 5),
-		                       pragha_prepared_statement_get_string(statement, 4),
-		                       pragha_prepared_statement_get_string(statement, 3),
-		                       pragha_prepared_statement_get_string(statement, 2),
-		                       pragha_prepared_statement_get_string(statement, 1),
-		                       pragha_prepared_statement_get_string(statement, 0),
-		                       clibrary);
-
-		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
-		pragha_process_gtk_events ();
-		#else
-		if (pragha_process_gtk_events ()) {
-			pragha_prepared_statement_free (statement);
-			return;
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			pragha_process_gtk_events ();
+			#else
+			if (pragha_process_gtk_events ()) {
+				pragha_prepared_statement_free (statement);
+				return;
+			}
+			#endif
 		}
-		#endif
+		pragha_prepared_statement_free (statement);
+		g_free(sql);
+
+		/* Forse various artist header. */
+		GtkTreeIter iter;
+		library_store_prepend_node(model,
+		                           &iter,
+		                           p_iter,
+		                           clibrary->pixbuf_album,
+		                           _("Various artists"),
+		                           NODE_ARTIST,
+		                           0);
+
+		/* Common query for all tag based library views */
+		sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+			                    "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+			                    "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+			                    "AND TRACK.compilation = ? "
+			                    "ORDER BY %s;", vorder_str);
+		g_free(vorder_str);
+
+		statement = pragha_database_create_statement (clibrary->cdbase, sql);
+		pragha_prepared_statement_bind_int (statement, 1, 1);
+
+		while (pragha_prepared_statement_step (statement)) {
+			add_child_node_by_tags(model,
+				                   p_iter,
+				                   pragha_prepared_statement_get_int(statement, 6),
+				                   pragha_prepared_statement_get_string(statement, 5),
+				                   pragha_prepared_statement_get_string(statement, 4),
+				                   pragha_prepared_statement_get_string(statement, 3),
+				                   pragha_prepared_statement_get_string(statement, 2),
+				                   _("Various artists"),
+				                   pragha_prepared_statement_get_string(statement, 0),
+				                   clibrary);
+
+			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			pragha_process_gtk_events ();
+			#else
+			if (pragha_process_gtk_events ()) {
+				pragha_prepared_statement_free (statement);
+				return;
+			}
+			#endif
+		}
+		pragha_prepared_statement_free (statement);
+		g_free(sql);
+	}
+	else {
+		/* Common query for all tag based library views */
+		sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
+			                    "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+			                    "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+			                    "ORDER BY %s;", order_str);
+
+		statement = pragha_database_create_statement (clibrary->cdbase, sql);
+		while (pragha_prepared_statement_step (statement)) {
+			add_child_node_by_tags(model,
+				                   p_iter,
+				                   pragha_prepared_statement_get_int(statement, 6),
+				                   pragha_prepared_statement_get_string(statement, 5),
+				                   pragha_prepared_statement_get_string(statement, 4),
+				                   pragha_prepared_statement_get_string(statement, 3),
+				                   pragha_prepared_statement_get_string(statement, 2),
+				                   pragha_prepared_statement_get_string(statement, 1),
+				                   pragha_prepared_statement_get_string(statement, 0),
+				                   clibrary);
+
+			/* Have to give control to GTK periodically ... */
+			#if GTK_CHECK_VERSION (3, 0, 0)
+			pragha_process_gtk_events ();
+			#else
+			if (pragha_process_gtk_events ()) {
+				pragha_prepared_statement_free (statement);
+				return;
+			}
+			#endif
+		}
+		g_free(sql);
 	}
 	pragha_prepared_statement_free (statement);
 
 	g_free(order_str);
-	g_free(sql);
 }
 
 void
