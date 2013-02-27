@@ -18,22 +18,12 @@
 
 #include "pragha.h"
 #include <taginfo/taginfo_c.h>
-//#include <taginfo/taginfo.h>
 
-gboolean
-pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
+TagInfo_Info *
+get_taginfo_from_file_type(const gchar* file, gint file_type)
 {
-	gboolean ret = TRUE;
 	TagInfo_Info *tfile = NULL;
-
-	/* workaround for crash in taglib
-	   https://github.com/taglib/taglib/issues/78 */
-	if (!g_file_test (file, G_FILE_TEST_EXISTS)) {
-		g_warning("Unable to open file using taglib : %s", file);
-		ret = FALSE;
-		goto exit;
-	}
-	switch(pragha_musicobject_get_file_type(mobj)) {
+	switch(file_type) {
 		case FILE_WAV:
 			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_WAV);
 			break;
@@ -59,6 +49,24 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 			break;
 	}
 
+	return tfile;
+}
+
+gboolean
+pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
+{
+	gboolean ret = TRUE;
+	TagInfo_Info *tfile = NULL;
+
+	/* workaround for crash in taglib
+	   https://github.com/taglib/taglib/issues/78 */
+	if (!g_file_test (file, G_FILE_TEST_EXISTS)) {
+		g_warning("Unable to open file using taglib : %s", file);
+		ret = FALSE;
+		goto exit;
+	}
+
+	tfile = get_taginfo_from_file_type(file, pragha_musicobject_get_file_type(mobj));
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
 		ret = FALSE;
@@ -100,55 +108,52 @@ gboolean
 pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed)
 {
 	gboolean ret = TRUE;
-	/*TagLib_File *tfile;
-	TagLib_Tag *tag;
+	TagInfo_Info *tfile = NULL;
 
 	if (!file || !changed)
 		return FALSE;
 
-	tfile = taglib_file_new(file);
+	tfile = get_taginfo_from_file_type(file, get_file_type(file));
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
 		return FALSE;
 	}
 
-	tag = taglib_file_tag(tfile);
-	if (!tag) {
-		g_warning("Unable to locate tag in file %s", file);
-		ret = FALSE;
-		goto exit;
-	}
-
 	if (changed & TAG_TNO_CHANGED)
-		taglib_tag_set_track(tag, pragha_musicobject_get_track_no(mobj));
+		taginfo_info_set_tracknumber(tfile, pragha_musicobject_get_track_no(mobj));
 	if (changed & TAG_TITLE_CHANGED)
-		taglib_tag_set_title(tag,
+		taginfo_info_set_title(tfile,
 			pragha_musicobject_get_title(mobj));
 	if (changed & TAG_ARTIST_CHANGED)
-		taglib_tag_set_artist(tag,
+		taginfo_info_set_artist(tfile,
 			pragha_musicobject_get_artist(mobj));
 	if (changed & TAG_ALBUM_CHANGED)
-		taglib_tag_set_album(tag,
+		taginfo_info_set_album(tfile,
 			pragha_musicobject_get_album(mobj));
+	if (changed & TAG_ALBUM_ARTIST_CHANGED)
+		taginfo_info_set_albumartist(tfile,
+			pragha_musicobject_get_album_artist(mobj));
 	if (changed & TAG_GENRE_CHANGED)
-		taglib_tag_set_genre(tag,
+		taginfo_info_set_genre(tfile,
 			pragha_musicobject_get_genre(mobj));
 	if (changed & TAG_YEAR_CHANGED)
-		taglib_tag_set_year(tag, pragha_musicobject_get_year(mobj));
+		taginfo_info_set_year(tfile,
+			pragha_musicobject_get_year(mobj));
 	if (changed & TAG_COMMENT_CHANGED)
-		taglib_tag_set_comment(tag,
+		taginfo_info_set_comment(tfile,
 			pragha_musicobject_get_comment(mobj));
+	if (changed & TAG_COMPILATION_CHANGED)
+		taginfo_info_set_is_compilation(tfile,
+			pragha_musicobject_is_compilation(mobj));
 
 	CDEBUG(DBG_VERBOSE, "Saving tags for file: %s", file);
 
-	if (!taglib_file_save(tfile)) {
+	if (!taginfo_info_write(tfile)) {
 		g_warning("Unable to save tags for: %s\n", file);
 		ret = FALSE;
 	}
 
-	taglib_tag_free_strings();
-exit:
-	taglib_file_free(tfile);*/
+	taginfo_info_free(tfile);
 
 	return ret;
 }
