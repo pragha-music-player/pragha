@@ -159,6 +159,19 @@ pragha_database_find_album (PraghaDatabase *database, const gchar *album)
 }
 
 gint
+pragha_database_find_album_artist (PraghaDatabase *database, const gchar *album_artist)
+{
+	gint album_artist_id = 0;
+	const gchar *sql = "SELECT id FROM ALBUM_ARTIST WHERE name = ?";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, album_artist);
+	if (pragha_prepared_statement_step (statement))
+		album_artist_id = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+	return album_artist_id;
+}
+
+gint
 pragha_database_find_genre (PraghaDatabase *database, const gchar *genre)
 {
 	gint genre_id = 0;
@@ -257,6 +270,18 @@ pragha_database_add_new_album (PraghaDatabase *database, const gchar *album)
 	pragha_prepared_statement_free (statement);
 
 	return pragha_database_find_album (database, album);
+}
+
+gint
+pragha_database_add_new_album_artist (PraghaDatabase *database, const gchar *album_artist)
+{
+	const gchar *sql = "INSERT INTO ALBUM_ARTIST (name) VALUES (?)";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, album_artist);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	return pragha_database_find_album_artist (database, album_artist);
 }
 
 gint
@@ -535,6 +560,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
                                gint location_id,
                                gint artist_id,
                                gint album_id,
+                               gint album_artist_id,
                                gint genre_id,
                                gint year_id,
                                gint comment_id,
@@ -551,6 +577,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
 				"track_no, "
 				"artist, "
 				"album, "
+				"album_artist, "
 				"genre, "
 				"year, "
 				"comment, "
@@ -561,22 +588,23 @@ pragha_database_add_new_track (PraghaDatabase *database,
 				"file_type, "
 				"title) "
 				"VALUES "
-				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
 	pragha_prepared_statement_bind_int (statement, 2, track_no);
 	pragha_prepared_statement_bind_int (statement, 3, artist_id);
 	pragha_prepared_statement_bind_int (statement, 4, album_id);
-	pragha_prepared_statement_bind_int (statement, 5, genre_id);
-	pragha_prepared_statement_bind_int (statement, 6, year_id);
-	pragha_prepared_statement_bind_int (statement, 7, comment_id);
-	pragha_prepared_statement_bind_int (statement, 8, bitrate);
-	pragha_prepared_statement_bind_int (statement, 9, samplerate);
-	pragha_prepared_statement_bind_int (statement, 10, length);
-	pragha_prepared_statement_bind_int (statement, 11, channels);
-	pragha_prepared_statement_bind_int (statement, 12, file_type);
-	pragha_prepared_statement_bind_string (statement, 13, title);
+	pragha_prepared_statement_bind_int (statement, 5, album_artist_id);
+	pragha_prepared_statement_bind_int (statement, 6, genre_id);
+	pragha_prepared_statement_bind_int (statement, 7, year_id);
+	pragha_prepared_statement_bind_int (statement, 8, comment_id);
+	pragha_prepared_statement_bind_int (statement, 9, bitrate);
+	pragha_prepared_statement_bind_int (statement, 10, samplerate);
+	pragha_prepared_statement_bind_int (statement, 11, length);
+	pragha_prepared_statement_bind_int (statement, 12, channels);
+	pragha_prepared_statement_bind_int (statement, 13, file_type);
+	pragha_prepared_statement_bind_string (statement, 14, title);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -584,13 +612,14 @@ pragha_database_add_new_track (PraghaDatabase *database,
 void
 pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject *mobj)
 {
-	const gchar *file, *artist, *album, *genre, *comment;
-	gint location_id = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id;
+	const gchar *file, *artist, *album, *album_artist, *genre, *comment;
+	gint location_id = 0, artist_id = 0, album_id = 0, album_artist_id = 0, genre_id = 0, year_id = 0, comment_id;
 
 	if (mobj) {
 		file = pragha_musicobject_get_file (mobj);
 		artist = pragha_musicobject_get_artist (mobj);
 		album = pragha_musicobject_get_album (mobj);
+		album_artist = pragha_musicobject_get_album_artist (mobj);
 		genre = pragha_musicobject_get_genre (mobj);
 		comment = pragha_musicobject_get_comment (mobj);
 
@@ -608,6 +637,11 @@ pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject
 
 		if ((album_id = pragha_database_find_album (database, album)) == 0)
 			album_id = pragha_database_add_new_album (database, album);
+
+		/* Write album artist*/
+
+		if ((album_artist_id = pragha_database_find_album_artist (database, album_artist)) == 0)
+			album_artist_id = pragha_database_add_new_album_artist (database, album_artist);
 
 		/* Write genre */
 
@@ -630,6 +664,7 @@ pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject
 		                               location_id,
 		                               artist_id,
 		                               album_id,
+		                               album_artist_id,
 		                               genre_id,
 		                               year_id,
 		                               comment_id,
@@ -668,7 +703,8 @@ static void
 pragha_database_update_track (PraghaDatabase *database,
                               gint location_id, gint changed,
                               gint track_no, const gchar *title,
-                              gint artist_id, gint album_id, gint genre_id, gint year_id, gint comment_id)
+                              gint artist_id, gint album_id, gint album_artist_id,
+                              gint genre_id, gint year_id, gint comment_id)
 {
 	const gchar *sql;
 	PraghaPreparedStatement *statement;
@@ -705,6 +741,14 @@ pragha_database_update_track (PraghaDatabase *database,
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
 	}
+	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+		sql = "UPDATE TRACK SET album_artist = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, album_artist_id);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}*/
 	if (changed & TAG_GENRE_CHANGED) {
 		sql = "UPDATE TRACK SET genre = ? WHERE LOCATION = ?";
 		statement = pragha_database_create_statement (database, sql);
@@ -734,7 +778,7 @@ pragha_database_update_track (PraghaDatabase *database,
 void
 pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
-	gint track_no = 0, artist_id = 0, album_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	gint track_no = 0, artist_id = 0, album_id = 0, album_artist_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
 	guint i = 0, elem = 0;
 
 	if (!changed)
@@ -762,6 +806,12 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 		if (!album_id)
 			album_id = pragha_database_add_new_album (database, album);
 	}
+	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+		const gchar *album_artist = pragha_musicobject_get_album_artist (mobj);
+		album_artist_id = pragha_database_find_album (database, album_artist);
+		if (!album_artist_id)
+			album_artist_id = pragha_database_add_new_album_artist (database, album_artist);
+	}*/
 	if (changed & TAG_GENRE_CHANGED) {
 		const gchar *genre = pragha_musicobject_get_genre (mobj);
 		genre_id = pragha_database_find_genre (database, genre);
@@ -792,6 +842,7 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 				                              pragha_musicobject_get_title (mobj),
 				                              artist_id,
 				                              album_id,
+				                              album_artist_id,
 				                              genre_id,
 				                              year_id,
 				                              comment_id);
@@ -833,6 +884,7 @@ pragha_database_flush (PraghaDatabase *database)
 	pragha_database_exec_query (database, "DELETE FROM LOCATION");
 	pragha_database_exec_query (database, "DELETE FROM ARTIST");
 	pragha_database_exec_query (database, "DELETE FROM ALBUM");
+	pragha_database_exec_query (database, "DELETE FROM ALBUM_ARTIST");
 	pragha_database_exec_query (database, "DELETE FROM GENRE");
 	pragha_database_exec_query (database, "DELETE FROM YEAR");
 	pragha_database_exec_query (database, "DELETE FROM COMMENT");
@@ -843,6 +895,7 @@ pragha_database_flush_stale_entries (PraghaDatabase *database)
 {
 	pragha_database_exec_query (database, "DELETE FROM ARTIST WHERE id NOT IN (SELECT artist FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM ALBUM WHERE id NOT IN (SELECT album FROM TRACK);");
+	pragha_database_exec_query (database, "DELETE FROM ALBUM_ARTIST WHERE id NOT IN (SELECT album_artist FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM GENRE WHERE id NOT IN (SELECT genre FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM YEAR WHERE id NOT IN (SELECT year FROM TRACK);");
 	pragha_database_exec_query (database, "DELETE FROM COMMENT WHERE id NOT IN (SELECT comment FROM TRACK);");
@@ -895,6 +948,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 			"track_no INT,"
 			"artist INT,"
 			"album INT,"
+			"album_artist INT,"
 			"genre INT,"
 			"year INT,"
 			"comment INT,"
@@ -916,6 +970,11 @@ pragha_database_init_schema (PraghaDatabase *database)
 			"UNIQUE(name));",
 
 		"CREATE TABLE IF NOT EXISTS ALBUM "
+			"(id INTEGER PRIMARY KEY,"
+			"name VARCHAR(255),"
+			"UNIQUE(name));",
+
+		"CREATE TABLE IF NOT EXISTS ALBUM_ARTIST "
 			"(id INTEGER PRIMARY KEY,"
 			"name VARCHAR(255),"
 			"UNIQUE(name));",

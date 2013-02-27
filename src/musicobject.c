@@ -63,15 +63,17 @@ COMMENT.name, \
 YEAR.year, \
 TRACK.track_no, \
 GENRE.name, \
+ALBUM_ARTIST.name, \
 ALBUM.name, \
 ARTIST.name, \
 TRACK.title, \
 LOCATION.name \
-FROM TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
+FROM TRACK, COMMENT, YEAR, GENRE, ALBUM_ARTIST, ALBUM, ARTIST, LOCATION \
 WHERE TRACK.location = ? \
 AND COMMENT.id = TRACK.comment \
 AND YEAR.id = TRACK.year \
 AND GENRE.id = TRACK.genre \
+AND ALBUM_ARTIST.id = TRACK.album_artist \
 AND ALBUM.id = TRACK.album \
 AND ARTIST.id = TRACK.artist \
 AND LOCATION.id = ?";
@@ -82,11 +84,12 @@ AND LOCATION.id = ?";
 
 	if (pragha_prepared_statement_step (statement)) {
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-		                     "file", pragha_prepared_statement_get_string (statement, 12),
+		                     "file", pragha_prepared_statement_get_string (statement, 13),
 		                     "file-type", pragha_prepared_statement_get_int (statement, 0),
-		                     "title", pragha_prepared_statement_get_string (statement, 11),
-		                     "artist", pragha_prepared_statement_get_string (statement, 10),
-		                     "album", pragha_prepared_statement_get_string (statement, 9),
+		                     "title", pragha_prepared_statement_get_string (statement, 12),
+		                     "artist", pragha_prepared_statement_get_string (statement, 11),
+		                     "album", pragha_prepared_statement_get_string (statement, 10),
+		                     "album-artist", pragha_prepared_statement_get_string (statement, 9),
 		                     "genre", pragha_prepared_statement_get_string (statement, 8),
 		                     "comment", pragha_prepared_statement_get_string (statement, 5),
 		                     "year", pragha_prepared_statement_get_int (statement, 6),
