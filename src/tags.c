@@ -33,8 +33,32 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		ret = FALSE;
 		goto exit;
 	}
+	switch(pragha_musicobject_get_file_type(mobj)) {
+		case FILE_WAV:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_WAV);
+			break;
+		case FILE_MP3:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_MP3);
+			break;
+		case FILE_FLAC:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_FLAC);
+			break;
+		case FILE_OGGVORBIS:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_OGG);
+			break;
+		case FILE_ASF:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_ASF);
+			break;
+		case FILE_MP4:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_MP4);
+			break;
+		case FILE_APE:
+			tfile = taginfo_info_factory_make_with_format(file, MEDIA_FILE_TYPE_APE);
+			break;
+		default:
+			break;
+	}
 
-	tfile = taginfo_info_factory_make(file);
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
 		ret = FALSE;

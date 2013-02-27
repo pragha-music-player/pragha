@@ -415,15 +415,9 @@ enum file_type {
 	FILE_MP3,
 	FILE_FLAC,
 	FILE_OGGVORBIS,
-#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 	FILE_ASF,
-#endif
-#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	FILE_MP4,
-#endif
-#ifdef HAVE_TAGLIB_1_7
 	FILE_APE,
-#endif
 	FILE_CDDA,
 	FILE_HTTP,
 	LAST_FILE_TYPE
