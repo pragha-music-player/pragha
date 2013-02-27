@@ -57,17 +57,17 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	}*/
 
 	g_object_set (mobj,
-	              "title", taginfo_info_get_artist(tfile),
+	              "title", taginfo_info_get_title(tfile),
 	              "artist", taginfo_info_get_artist(tfile),
 	              "album", taginfo_info_get_album(tfile),
 	              "genre", taginfo_info_get_genre(tfile),
-	              "comment", "", //taginfo_info_get_comment(tfile),
+	              "comment", taginfo_info_get_genre(tfile),
 	              "year", taginfo_info_get_year(tfile),
 	              "track-no", taginfo_info_get_tracknumber(tfile),
 	              "length", taginfo_info_get_length(tfile),
 	              "bitrate", taginfo_info_get_bitrate(tfile),
-	              "channels", 2 , //taglib_audioproperties_channels(audio_prop),
-	              "samplerate", 0, //taglib_audioproperties_samplerate(audio_prop),
+	              "channels", taginfo_info_get_channels(tfile),
+	              "samplerate", taginfo_info_get_samplerate(tfile),
 	              NULL);
 	if(taginfo_info_get_is_compilation(tfile))
 		g_print("FILE: %s is part of compilation!! :) \n", file);
