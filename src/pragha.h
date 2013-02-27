@@ -132,6 +132,7 @@
 #define P_TITLE_STR         N_("Title")
 #define P_ARTIST_STR        N_("Artist")
 #define P_ALBUM_STR         N_("Album")
+#define P_ALBUM_ARTIST_STR  N_("Album Artist")
 #define P_GENRE_STR         N_("Genre")
 #define P_BITRATE_STR       N_("Bitrate")
 #define P_YEAR_STR          N_("Year")
@@ -350,6 +351,7 @@ enum curplaylist_columns {
 	P_TITLE,
 	P_ARTIST,
 	P_ALBUM,
+	P_ALBUM_ARTIST,
 	P_GENRE,
 	P_BITRATE,
 	P_YEAR,
@@ -955,6 +957,8 @@ void playlist_title_column_change_cb(GtkCheckMenuItem *item,
 void playlist_artist_column_change_cb(GtkCheckMenuItem *item,
 				      PraghaPlaylist* cplaylist);
 void playlist_album_column_change_cb(GtkCheckMenuItem *item,
+				     PraghaPlaylist* cplaylist);
+void playlist_album_artist_column_change_cb(GtkCheckMenuItem *item,
 				     PraghaPlaylist* cplaylist);
 void playlist_genre_column_change_cb(GtkCheckMenuItem *item,
 				     PraghaPlaylist* cplaylist);

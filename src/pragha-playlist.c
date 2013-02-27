@@ -1510,6 +1510,9 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	if (changed & TAG_ALBUM_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM, pragha_musicobject_get_album(mobj),-1);
 	}
+	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM_ARTIST, pragha_musicobject_get_album_artist(mobj),-1);
+	}*/
 	if (changed & TAG_GENRE_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_GENRE, pragha_musicobject_get_genre(mobj),-1);
 	}
@@ -1574,7 +1577,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 			GtkTreeIter *pos)
 {
 	GtkTreeIter iter;
-	const gchar *title, *artist, *album, *genre, *comment;
+	const gchar *title, *artist, *album, *album_artist, *genre, *comment;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 	GtkTreeModel *model = cplaylist->model;
@@ -1587,6 +1590,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 	album = pragha_musicobject_get_album(mobj);
+	album_artist = pragha_musicobject_get_album_artist(mobj);
 	genre = pragha_musicobject_get_genre(mobj);
 	track_no = pragha_musicobject_get_track_no(mobj);
 	year = pragha_musicobject_get_year(mobj);
@@ -1619,6 +1623,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
+	                   P_ALBUM_ARTIST, album_artist,
 	                   P_GENRE, genre,
 	                   P_BITRATE, ch_bitrate,
 	                   P_YEAR, ch_year,
@@ -1650,7 +1655,7 @@ static void
 append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
-	const gchar *title, *artist, *album, *genre, *comment;
+	const gchar *title, *artist, *album, *album_artist, *genre, *comment;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 	GtkTreeModel *model = cplaylist->model;
@@ -1663,6 +1668,7 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 	album = pragha_musicobject_get_album(mobj);
+	album_artist = pragha_musicobject_get_album_artist(mobj);
 	genre = pragha_musicobject_get_genre(mobj);
 	track_no = pragha_musicobject_get_track_no(mobj);
 	year = pragha_musicobject_get_year(mobj);
@@ -1691,6 +1697,7 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
+	                   P_ALBUM, album_artist,
 	                   P_GENRE, genre,
 	                   P_BITRATE, ch_bitrate,
 	                   P_YEAR, ch_year,
@@ -2073,18 +2080,24 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 			break;
 		}
 		case 5: {
+			/*change = TAG_ALBUM_ARTIST_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
+			                        pragha_musicobject_get_album(mobj));*/
+			break;
+		}
+		case 6: {
 			change = TAG_GENRE_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected genres"),
 			                        pragha_musicobject_get_genre(mobj));
 			break;
 		}
-		case 7: {
+		case 8: {
 			change = TAG_YEAR_CHANGED;
 			label = g_strdup_printf(_("Copy \"%i\" to selected years"),
 			                        pragha_musicobject_get_year(mobj));
 			break;
 		}
-		case 8: {
+		case 9: {
 			change = TAG_COMMENT_CHANGED;
 			label = g_strdup_printf(_("Copy \"%s\" to selected comments"),
 			                        pragha_musicobject_get_comment(mobj));
@@ -2981,6 +2994,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 		*toggle_title,
 		*toggle_artist,
 		*toggle_album,
+		*toggle_album_artist,
 		*toggle_genre,
 		*toggle_bitrate,
 		*toggle_year,
@@ -2998,6 +3012,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	toggle_title = gtk_check_menu_item_new_with_label(_("Title"));
 	toggle_artist = gtk_check_menu_item_new_with_label(_("Artist"));
 	toggle_album = gtk_check_menu_item_new_with_label(_("Album"));
+	toggle_album_artist = gtk_check_menu_item_new_with_label(_("Album Artist"));
 	toggle_genre = gtk_check_menu_item_new_with_label(_("Genre"));
 	toggle_bitrate = gtk_check_menu_item_new_with_label(_("Bitrate"));
 	toggle_year = gtk_check_menu_item_new_with_label(_("Year"));
@@ -3016,6 +3031,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_title);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_artist);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_album);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_album_artist);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_genre);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_bitrate);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_year);
@@ -3035,6 +3051,8 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_artist), TRUE);
 	if (is_present_str_list(P_ALBUM_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_album), TRUE);
+	if (is_present_str_list(P_ALBUM_ARTIST_STR, cplaylist->columns))
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_album_artist), TRUE);
 	if (is_present_str_list(P_GENRE_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_genre), TRUE);
 	if (is_present_str_list(P_BITRATE_STR, cplaylist->columns))
@@ -3058,6 +3076,8 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 			 G_CALLBACK(playlist_artist_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_album), "toggled",
 			 G_CALLBACK(playlist_album_column_change_cb), cplaylist);
+	g_signal_connect(G_OBJECT(toggle_album_artist), "toggled",
+			 G_CALLBACK(playlist_album_artist_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_genre), "toggled",
 			 G_CALLBACK(playlist_genre_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_bitrate), "toggled",
@@ -3161,6 +3181,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 		*label_title,
 		*label_artist,
 		*label_album,
+		*label_album_artist,
 		*label_genre,
 		*label_bitrate,
 		*label_year,
@@ -3173,6 +3194,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	label_title = gtk_label_new(_("Title"));
 	label_artist = gtk_label_new(_("Artist"));
 	label_album = gtk_label_new(_("Album"));
+	label_album_artist = gtk_label_new(_("Album Artist"));
 	label_genre = gtk_label_new(_("Genre"));
 	label_bitrate = gtk_label_new(_("Bitrate"));
 	label_year = gtk_label_new(_("Year"));
@@ -3281,6 +3303,26 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	gtk_tree_view_column_set_widget(column, label_album);
 	gtk_widget_show(label_album);
 	col_button = gtk_widget_get_ancestor(label_album, GTK_TYPE_BUTTON);
+	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
+			 G_CALLBACK(header_right_click_cb), cplaylist);
+
+	/* Column : Album Artist*/
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_ALBUM_ARTIST_STR,
+							  renderer,
+							  "text",
+							  P_ALBUM_ARTIST,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_ALBUM_ARTIST);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_album_artist);
+	gtk_widget_show(label_album_artist);
+	col_button = gtk_widget_get_ancestor(label_album_artist, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
 			 G_CALLBACK(header_right_click_cb), cplaylist);
 
@@ -3448,6 +3490,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 				   G_TYPE_STRING,	/* Tag : Title */
 				   G_TYPE_STRING,	/* Tag : Artist */
 				   G_TYPE_STRING,	/* Tag : Album */
+				   G_TYPE_STRING,	/* Tag : Album Artist */
 				   G_TYPE_STRING,	/* Tag : Genre */
 				   G_TYPE_STRING,	/* Tag : Bitrate */
 				   G_TYPE_STRING,	/* Tag : Year */
@@ -3570,6 +3613,17 @@ void playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 
 	playlist_column_set_visible(cplaylist, P_ALBUM, state);
 }
+
+/* Callback for adding/deleting album artist column */
+
+void playlist_album_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+{
+	gboolean state;
+	state = gtk_check_menu_item_get_active(item);
+
+	playlist_column_set_visible(cplaylist, P_ALBUM_ARTIST, state);
+}
+
 
 /* Callback for adding/deleting genre column */
 
