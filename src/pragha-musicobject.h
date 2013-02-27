@@ -91,6 +91,12 @@ pragha_musicobject_set_album (PraghaMusicobject *musicobject,
                               const gchar *album);
 
 const gchar *
+pragha_musicobject_get_artist_album (PraghaMusicobject *musicobject);
+void
+pragha_musicobject_set_artist_album (PraghaMusicobject *musicobject,
+                                     const gchar *artist);
+
+const gchar *
 pragha_musicobject_get_genre (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_genre (PraghaMusicobject *musicobject,
@@ -101,6 +107,12 @@ pragha_musicobject_get_comment (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_comment (PraghaMusicobject *musicobject,
                                 const gchar *comment);
+
+gboolean
+pragha_musicobject_is_compilation (PraghaMusicobject *musicobject);
+void
+pragha_musicobject_set_compilation (PraghaMusicobject *musicobject,
+                                    gboolean compilation);
 
 guint
 pragha_musicobject_get_year (PraghaMusicobject *musicobject);

@@ -25,8 +25,6 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 {
 	gboolean ret = TRUE;
 	TagInfo_Info *tfile = NULL;
-	/*TagLib_Tag *tag;
-	const TagLib_AudioProperties *audio_prop;*/
 
 	/* workaround for crash in taglib
 	   https://github.com/taglib/taglib/issues/78 */
@@ -49,19 +47,15 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		goto exit;
 	}
 
-	/*audio_prop = taglib_file_audioproperties(tfile);
-	if (!audio_prop) {
-		g_warning("Unable to locate audio properties in file %s", file);
-		ret = FALSE;
-		goto exit;
-	}*/
-
+	gchar *albumartist = taginfo_info_get_albumartist(tfile);
 	g_object_set (mobj,
 	              "title", taginfo_info_get_title(tfile),
 	              "artist", taginfo_info_get_artist(tfile),
 	              "album", taginfo_info_get_album(tfile),
+	              "artist-album", albumartist ? albumartist : "",
 	              "genre", taginfo_info_get_genre(tfile),
 	              "comment", taginfo_info_get_genre(tfile),
+	              "compilation", taginfo_info_get_is_compilation(tfile),
 	              "year", taginfo_info_get_year(tfile),
 	              "track-no", taginfo_info_get_tracknumber(tfile),
 	              "length", taginfo_info_get_length(tfile),
@@ -69,10 +63,9 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "channels", taginfo_info_get_channels(tfile),
 	              "samplerate", taginfo_info_get_samplerate(tfile),
 	              NULL);
-	if(taginfo_info_get_is_compilation(tfile))
-		g_print("FILE: %s is part of compilation!! :) \n", file);
-	if(taginfo_info_get_has_image(tfile))
-		g_print("FILE: %s has image..!! :) \n", file);
+
+	g_free(albumartist);
+
 exit:
 	taginfo_info_free(tfile);
 

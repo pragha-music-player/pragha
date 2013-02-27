@@ -27,8 +27,10 @@ struct _PraghaMusicobjectPrivate
 	gchar *title;
 	gchar *artist;
 	gchar *album;
+	gchar *artist_album;
 	gchar *genre;
 	gchar *comment;
+	gboolean compilation;
 	guint year;
 	guint track_no;
 	gint length;
@@ -44,9 +46,11 @@ enum
 	PROP_FILE_TYPE,
 	PROP_TITLE,
 	PROP_ARTIST,
+	PROP_ARTIST_ALBUM,
 	PROP_ALBUM,
 	PROP_GENRE,
 	PROP_COMMENT,
+	PROP_COMPILATION,
 	PROP_YEAR,
 	PROP_TRACK_NO,
 	PROP_LENGTH,
@@ -83,8 +87,10 @@ pragha_musicobject_dup (PraghaMusicobject *musicobject)
 	                     "title", pragha_musicobject_get_title(musicobject),
 	                     "artist", pragha_musicobject_get_artist(musicobject),
 	                     "album", pragha_musicobject_get_album(musicobject),
+	                     "artist-album", pragha_musicobject_get_artist_album(musicobject),
 	                     "genre", pragha_musicobject_get_genre(musicobject),
 	                     "comment", pragha_musicobject_get_comment(musicobject),
+	                     "compilation", pragha_musicobject_is_compilation(musicobject),
 	                     "year", pragha_musicobject_get_year(musicobject),
 	                     "track-no", pragha_musicobject_get_track_no(musicobject),
 	                     "length", pragha_musicobject_get_length(musicobject),
@@ -109,8 +115,10 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 	              "title", "",
 	              "artist", "",
 	              "album", "",
+	              "artist-album", "",
 	              "genre", "",
 	              "comment", "",
+	              "compilation", FALSE,
 	              "year", 0,
 	              "track-no", 0,
 	              "length", 0,
@@ -280,6 +288,35 @@ pragha_musicobject_set_album (PraghaMusicobject *musicobject,
 }
 
 /**
+ * pragha_musicobject_get_artist_album:
+ *
+ */
+const gchar *
+pragha_musicobject_get_artist_album (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), NULL);
+
+	return musicobject->priv->artist_album;
+}
+/**
+ * pragha_musicobject_set_artist_album:
+ *
+ */
+void
+pragha_musicobject_set_artist_album (PraghaMusicobject *musicobject,
+                                     const gchar *artist_album)
+{
+	PraghaMusicobjectPrivate *priv;
+
+	g_return_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject));
+
+	priv = musicobject->priv;
+
+	g_free(priv->artist_album);
+	priv->artist_album = g_strdup(artist_album);
+}
+
+/**
  * pragha_musicobject_get_genre:
  *
  */
@@ -335,6 +372,34 @@ pragha_musicobject_set_comment (PraghaMusicobject *musicobject,
 
 	g_free(priv->comment);
 	priv->comment = g_strdup(comment);
+}
+
+/**
+ * pragha_musicobject_is_compilation:
+ *
+ */
+gboolean
+pragha_musicobject_is_compilation (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
+
+	return musicobject->priv->compilation;
+}
+/**
+ * pragha_musicobject_set_compilation:
+ *
+ */
+void
+pragha_musicobject_set_compilation (PraghaMusicobject *musicobject,
+                                    gboolean compilation)
+{
+	PraghaMusicobjectPrivate *priv;
+
+	g_return_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject));
+
+	priv = musicobject->priv;
+
+	priv->compilation = compilation;
 }
 
 /**
@@ -516,6 +581,7 @@ pragha_musicobject_finalize (GObject *object)
 	g_free(priv->title);
 	g_free(priv->artist);
 	g_free(priv->album);
+	g_free(priv->artist_album);
 	g_free(priv->genre);
 	g_free(priv->comment);
 
@@ -546,11 +612,17 @@ pragha_musicobject_get_property (GObject *object,
 	case PROP_ALBUM:
 		g_value_set_string (value, pragha_musicobject_get_album(musicobject));
 		break;
+	case PROP_ARTIST_ALBUM:
+		g_value_set_string (value, pragha_musicobject_get_artist_album(musicobject));
+		break;
 	case PROP_GENRE:
 		g_value_set_string (value, pragha_musicobject_get_genre(musicobject));
 		break;
 	case PROP_COMMENT:
 		g_value_set_string (value, pragha_musicobject_get_comment(musicobject));
+		break;
+	case PROP_COMPILATION:
+		g_value_set_boolean (value, pragha_musicobject_is_compilation(musicobject));
 		break;
 	case PROP_YEAR:
 		g_value_set_uint (value, pragha_musicobject_get_year(musicobject));
@@ -599,11 +671,17 @@ pragha_musicobject_set_property (GObject *object,
 	case PROP_ALBUM:
 		pragha_musicobject_set_album(musicobject, g_value_get_string(value));
 		break;
+	case PROP_ARTIST_ALBUM:
+		pragha_musicobject_set_artist_album(musicobject, g_value_get_string(value));
+		break;
 	case PROP_GENRE:
 		pragha_musicobject_set_genre(musicobject, g_value_get_string(value));
 		break;
 	case PROP_COMMENT:
 		pragha_musicobject_set_comment(musicobject, g_value_get_string(value));
+		break;
+	case PROP_COMPILATION:
+		pragha_musicobject_set_compilation(musicobject, g_value_get_boolean(value));
 		break;
 	case PROP_YEAR:
 		pragha_musicobject_set_year(musicobject, g_value_get_uint(value));
@@ -697,6 +775,17 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
+	  * PraghaMusicobject:artist_album:
+	  *
+	  */
+	gParamSpecs[PROP_ARTIST_ALBUM] =
+		g_param_spec_string("artist-album",
+		                    "ArtistAlbum",
+		                    "The Artist Album",
+		                    "",
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
+
+	/**
 	  * PraghaMusicobject:genre:
 	  *
 	  */
@@ -717,6 +806,17 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    "The Comment",
 		                    "",
 		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
+
+	/**
+	  * PraghaMusicobject:compilation:
+	  *
+	  */
+	gParamSpecs[PROP_COMPILATION] =
+		g_param_spec_boolean("compilation",
+		                     "Compilation",
+		                     "Is compilation flag",
+		                     FALSE,
+		                     PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:year:
