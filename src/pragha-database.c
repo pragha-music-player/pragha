@@ -564,6 +564,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
                                gint genre_id,
                                gint year_id,
                                gint comment_id,
+                               gint compilation,
                                guint track_no,
                                gint length,
                                gint channels,
@@ -579,6 +580,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
 				"album, "
 				"album_artist, "
 				"genre, "
+				"compilation, "
 				"year, "
 				"comment, "
 				"bitrate, "
@@ -588,7 +590,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
 				"file_type, "
 				"title) "
 				"VALUES "
-				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
@@ -597,14 +599,15 @@ pragha_database_add_new_track (PraghaDatabase *database,
 	pragha_prepared_statement_bind_int (statement, 4, album_id);
 	pragha_prepared_statement_bind_int (statement, 5, album_artist_id);
 	pragha_prepared_statement_bind_int (statement, 6, genre_id);
-	pragha_prepared_statement_bind_int (statement, 7, year_id);
-	pragha_prepared_statement_bind_int (statement, 8, comment_id);
-	pragha_prepared_statement_bind_int (statement, 9, bitrate);
-	pragha_prepared_statement_bind_int (statement, 10, samplerate);
-	pragha_prepared_statement_bind_int (statement, 11, length);
-	pragha_prepared_statement_bind_int (statement, 12, channels);
-	pragha_prepared_statement_bind_int (statement, 13, file_type);
-	pragha_prepared_statement_bind_string (statement, 14, title);
+	pragha_prepared_statement_bind_int (statement, 7, compilation);
+	pragha_prepared_statement_bind_int (statement, 8, year_id);
+	pragha_prepared_statement_bind_int (statement, 9, comment_id);
+	pragha_prepared_statement_bind_int (statement, 10, bitrate);
+	pragha_prepared_statement_bind_int (statement, 11, samplerate);
+	pragha_prepared_statement_bind_int (statement, 12, length);
+	pragha_prepared_statement_bind_int (statement, 13, channels);
+	pragha_prepared_statement_bind_int (statement, 14, file_type);
+	pragha_prepared_statement_bind_string (statement, 15, title);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 }
@@ -668,6 +671,7 @@ pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject
 		                               genre_id,
 		                               year_id,
 		                               comment_id,
+		                               pragha_musicobject_is_compilation (mobj) ? 1 : 0,
 		                               pragha_musicobject_get_track_no (mobj),
 		                               pragha_musicobject_get_length (mobj),
 		                               pragha_musicobject_get_channels (mobj),
@@ -704,7 +708,8 @@ pragha_database_update_track (PraghaDatabase *database,
                               gint location_id, gint changed,
                               gint track_no, const gchar *title,
                               gint artist_id, gint album_id, gint album_artist_id,
-                              gint genre_id, gint year_id, gint comment_id)
+                              gint genre_id, gint year_id, gint comment_id,
+                              gint compilation)
 {
 	const gchar *sql;
 	PraghaPreparedStatement *statement;
@@ -773,12 +778,20 @@ pragha_database_update_track (PraghaDatabase *database,
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
 	}
+	/*if (changed & TAG_COMPILATION_CHANGED) {
+		sql = "UPDATE TRACK SET compilation = ? WHERE LOCATION = ?";
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_int (statement, 1, compilation);
+		pragha_prepared_statement_bind_int (statement, 2, location_id);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}*/
 }
 
 void
 pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray *loc_arr, gint changed, PraghaMusicobject *mobj)
 {
-	gint track_no = 0, artist_id = 0, album_id = 0, album_artist_id = 0, genre_id = 0, year_id = 0, comment_id = 0;
+	gint track_no = 0, artist_id = 0, album_id = 0, album_artist_id = 0, genre_id = 0, year_id = 0, comment_id = 0, compilation = 0;
 	guint i = 0, elem = 0;
 
 	if (!changed)
@@ -829,6 +842,9 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 		if (!comment_id)
 			comment_id = pragha_database_add_new_comment (database, comment);
 	}
+	/*if (changed & TAG_COMPILATION_CHANGED) {
+		compilation = pragha_musicobject_is_compilation (mobj) ? 1 : 0;
+	}*/
 
 	pragha_database_begin_transaction (database);
 	if (loc_arr) {
@@ -845,7 +861,8 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 				                              album_artist_id,
 				                              genre_id,
 				                              year_id,
-				                              comment_id);
+				                              comment_id,
+				                              compilation);
 			}
 		}
 	}
@@ -952,6 +969,7 @@ pragha_database_init_schema (PraghaDatabase *database)
 			"genre INT,"
 			"year INT,"
 			"comment INT,"
+			"compilation INT,"
 			"bitrate INT,"
 			"length INT,"
 			"channels INT,"

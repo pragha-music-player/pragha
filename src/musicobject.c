@@ -62,6 +62,7 @@ TRACK.bitrate, \
 COMMENT.name, \
 YEAR.year, \
 TRACK.track_no, \
+TRACK.compilation, \
 GENRE.name, \
 ALBUM_ARTIST.name, \
 ALBUM.name, \
@@ -84,14 +85,15 @@ AND LOCATION.id = ?";
 
 	if (pragha_prepared_statement_step (statement)) {
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-		                     "file", pragha_prepared_statement_get_string (statement, 13),
+		                     "file", pragha_prepared_statement_get_string (statement, 14),
 		                     "file-type", pragha_prepared_statement_get_int (statement, 0),
-		                     "title", pragha_prepared_statement_get_string (statement, 12),
-		                     "artist", pragha_prepared_statement_get_string (statement, 11),
-		                     "album", pragha_prepared_statement_get_string (statement, 10),
-		                     "album-artist", pragha_prepared_statement_get_string (statement, 9),
-		                     "genre", pragha_prepared_statement_get_string (statement, 8),
+		                     "title", pragha_prepared_statement_get_string (statement, 13),
+		                     "artist", pragha_prepared_statement_get_string (statement, 12),
+		                     "album", pragha_prepared_statement_get_string (statement, 11),
+		                     "album-artist", pragha_prepared_statement_get_string (statement, 10),
+		                     "genre", pragha_prepared_statement_get_string (statement, 9),
 		                     "comment", pragha_prepared_statement_get_string (statement, 5),
+		                     "compilation", (pragha_prepared_statement_get_int (statement, 8) == 1) ? TRUE : FALSE,
 		                     "year", pragha_prepared_statement_get_int (statement, 6),
 		                     "track-no", pragha_prepared_statement_get_int (statement, 7),
 		                     "length", pragha_prepared_statement_get_int (statement, 3),
