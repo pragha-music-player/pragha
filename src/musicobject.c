@@ -231,6 +231,9 @@ pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, Prag
 	if (changed & TAG_ALBUM_CHANGED) {
 		pragha_musicobject_set_album(mobj, pragha_musicobject_get_album(nmobj));
 	}
+	if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+		pragha_musicobject_set_album_artist(mobj, pragha_musicobject_get_album_artist(nmobj));
+	}
 	if (changed & TAG_GENRE_CHANGED) {
 		pragha_musicobject_set_genre(mobj, pragha_musicobject_get_genre(nmobj));
 	}

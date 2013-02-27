@@ -746,14 +746,14 @@ pragha_database_update_track (PraghaDatabase *database,
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
 	}
-	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+	if (changed & TAG_ALBUM_ARTIST_CHANGED) {
 		sql = "UPDATE TRACK SET album_artist = ? WHERE LOCATION = ?";
 		statement = pragha_database_create_statement (database, sql);
 		pragha_prepared_statement_bind_int (statement, 1, album_artist_id);
 		pragha_prepared_statement_bind_int (statement, 2, location_id);
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
-	}*/
+	}
 	if (changed & TAG_GENRE_CHANGED) {
 		sql = "UPDATE TRACK SET genre = ? WHERE LOCATION = ?";
 		statement = pragha_database_create_statement (database, sql);
@@ -778,14 +778,14 @@ pragha_database_update_track (PraghaDatabase *database,
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
 	}
-	/*if (changed & TAG_COMPILATION_CHANGED) {
+	if (changed & TAG_COMPILATION_CHANGED) {
 		sql = "UPDATE TRACK SET compilation = ? WHERE LOCATION = ?";
 		statement = pragha_database_create_statement (database, sql);
 		pragha_prepared_statement_bind_int (statement, 1, compilation);
 		pragha_prepared_statement_bind_int (statement, 2, location_id);
 		pragha_prepared_statement_step (statement);
 		pragha_prepared_statement_free (statement);
-	}*/
+	}
 }
 
 void
@@ -819,12 +819,12 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 		if (!album_id)
 			album_id = pragha_database_add_new_album (database, album);
 	}
-	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+	if (changed & TAG_ALBUM_ARTIST_CHANGED) {
 		const gchar *album_artist = pragha_musicobject_get_album_artist (mobj);
 		album_artist_id = pragha_database_find_album (database, album_artist);
 		if (!album_artist_id)
 			album_artist_id = pragha_database_add_new_album_artist (database, album_artist);
-	}*/
+	}
 	if (changed & TAG_GENRE_CHANGED) {
 		const gchar *genre = pragha_musicobject_get_genre (mobj);
 		genre_id = pragha_database_find_genre (database, genre);
@@ -842,9 +842,9 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 		if (!comment_id)
 			comment_id = pragha_database_add_new_comment (database, comment);
 	}
-	/*if (changed & TAG_COMPILATION_CHANGED) {
+	if (changed & TAG_COMPILATION_CHANGED) {
 		compilation = pragha_musicobject_is_compilation (mobj) ? 1 : 0;
-	}*/
+	}
 
 	pragha_database_begin_transaction (database);
 	if (loc_arr) {

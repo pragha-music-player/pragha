@@ -981,10 +981,10 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_artist), TRUE);
 	if(prechanged & TAG_ALBUM_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_album), TRUE);
-	/*if(prechanged & TAG_ALBUM_ARTIST_CHANGED)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_album_artist), TRUE);*/
-	/*if(prechanged & TAG_COMPILATION_CHANGED)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_compilation), TRUE);*/
+	if(prechanged & TAG_ALBUM_ARTIST_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_album_artist), TRUE);
+	if(prechanged & TAG_COMPILATION_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_compilation), TRUE);
 	if(prechanged & TAG_GENRE_CHANGED)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_genre), TRUE);
 	if(prechanged & TAG_YEAR_CHANGED)
@@ -1129,17 +1129,16 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 				gtk_entry_get_text(GTK_ENTRY(entry_album)));
 			changed |= TAG_ALBUM_CHANGED;
 		}
-		/*if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_album_artist))) {
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_album_artist))) {
 			pragha_musicobject_set_album_artist(nmobj,
 				gtk_entry_get_text(GTK_ENTRY(entry_album_artist)));
 			changed |= TAG_ALBUM_ARTIST_CHANGED;
-		}*/
-		/*if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_compilation))) {
+		}
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_compilation))) {
 			pragha_musicobject_set_compilation(nmobj,
 				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_compilation)));
-			changed |= TAG_ALBUM_ARTIST_CHANGED;
-		}*/
-
+			changed |= TAG_COMPILATION_CHANGED;
+		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_genre))) {
 			pragha_musicobject_set_genre(nmobj,
 				gtk_entry_get_text(GTK_ENTRY(entry_genre)));

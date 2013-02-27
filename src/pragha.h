@@ -277,13 +277,15 @@ typedef enum {
 #define KEY_USE_CDDB               "use_cddb"
 #define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
-#define TAG_TNO_CHANGED		1<<0
-#define TAG_TITLE_CHANGED	1<<1
-#define TAG_ARTIST_CHANGED	1<<2
-#define TAG_ALBUM_CHANGED	1<<3
-#define TAG_GENRE_CHANGED	1<<4
-#define TAG_YEAR_CHANGED	1<<5
-#define TAG_COMMENT_CHANGED	1<<6
+#define TAG_TNO_CHANGED          1<<0
+#define TAG_TITLE_CHANGED        1<<1
+#define TAG_ARTIST_CHANGED       1<<2
+#define TAG_ALBUM_CHANGED        1<<3
+#define TAG_ALBUM_ARTIST_CHANGED 1<<4
+#define TAG_GENRE_CHANGED        1<<5
+#define TAG_YEAR_CHANGED         1<<6
+#define TAG_COMMENT_CHANGED      1<<7
+#define TAG_COMPILATION_CHANGED  1<<8
 
 #define PRAGHA_BUTTON_SKIP       _("_Skip")
 #define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")

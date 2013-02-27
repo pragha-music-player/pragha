@@ -1510,9 +1510,9 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 	if (changed & TAG_ALBUM_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM, pragha_musicobject_get_album(mobj),-1);
 	}
-	/*if (changed & TAG_ALBUM_ARTIST_CHANGED) {
+	if (changed & TAG_ALBUM_ARTIST_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM_ARTIST, pragha_musicobject_get_album_artist(mobj),-1);
-	}*/
+	}
 	if (changed & TAG_GENRE_CHANGED) {
 		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_GENRE, pragha_musicobject_get_genre(mobj),-1);
 	}
@@ -2080,9 +2080,9 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 			break;
 		}
 		case 5: {
-			/*change = TAG_ALBUM_ARTIST_CHANGED;
-			label = g_strdup_printf(_("Copy \"%s\" to selected albums"),
-			                        pragha_musicobject_get_album(mobj));*/
+			change = TAG_ALBUM_ARTIST_CHANGED;
+			label = g_strdup_printf(_("Copy \"%s\" to selected albums artist"),
+			                        pragha_musicobject_get_album_artist(mobj));
 			break;
 		}
 		case 6: {
