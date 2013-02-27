@@ -91,10 +91,10 @@ pragha_musicobject_set_album (PraghaMusicobject *musicobject,
                               const gchar *album);
 
 const gchar *
-pragha_musicobject_get_artist_album (PraghaMusicobject *musicobject);
+pragha_musicobject_get_album_artist (PraghaMusicobject *musicobject);
 void
-pragha_musicobject_set_artist_album (PraghaMusicobject *musicobject,
-                                     const gchar *artist);
+pragha_musicobject_set_album_artist (PraghaMusicobject *musicobject,
+                                     const gchar *albu_artist);
 
 const gchar *
 pragha_musicobject_get_genre (PraghaMusicobject *musicobject);

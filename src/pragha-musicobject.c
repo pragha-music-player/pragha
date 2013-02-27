@@ -27,7 +27,7 @@ struct _PraghaMusicobjectPrivate
 	gchar *title;
 	gchar *artist;
 	gchar *album;
-	gchar *artist_album;
+	gchar *album_artist;
 	gchar *genre;
 	gchar *comment;
 	gboolean compilation;
@@ -46,8 +46,8 @@ enum
 	PROP_FILE_TYPE,
 	PROP_TITLE,
 	PROP_ARTIST,
-	PROP_ARTIST_ALBUM,
 	PROP_ALBUM,
+	PROP_ALBUM_ARTIST,
 	PROP_GENRE,
 	PROP_COMMENT,
 	PROP_COMPILATION,
@@ -87,7 +87,7 @@ pragha_musicobject_dup (PraghaMusicobject *musicobject)
 	                     "title", pragha_musicobject_get_title(musicobject),
 	                     "artist", pragha_musicobject_get_artist(musicobject),
 	                     "album", pragha_musicobject_get_album(musicobject),
-	                     "artist-album", pragha_musicobject_get_artist_album(musicobject),
+	                     "album-artist", pragha_musicobject_get_album_artist(musicobject),
 	                     "genre", pragha_musicobject_get_genre(musicobject),
 	                     "comment", pragha_musicobject_get_comment(musicobject),
 	                     "compilation", pragha_musicobject_is_compilation(musicobject),
@@ -115,7 +115,7 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 	              "title", "",
 	              "artist", "",
 	              "album", "",
-	              "artist-album", "",
+	              "album-artist", "",
 	              "genre", "",
 	              "comment", "",
 	              "compilation", FALSE,
@@ -288,23 +288,23 @@ pragha_musicobject_set_album (PraghaMusicobject *musicobject,
 }
 
 /**
- * pragha_musicobject_get_artist_album:
+ * pragha_musicobject_get_album_artist:
  *
  */
 const gchar *
-pragha_musicobject_get_artist_album (PraghaMusicobject *musicobject)
+pragha_musicobject_get_album_artist (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), NULL);
 
-	return musicobject->priv->artist_album;
+	return musicobject->priv->album_artist;
 }
 /**
- * pragha_musicobject_set_artist_album:
+ * pragha_musicobject_set_album_artist:
  *
  */
 void
-pragha_musicobject_set_artist_album (PraghaMusicobject *musicobject,
-                                     const gchar *artist_album)
+pragha_musicobject_set_album_artist (PraghaMusicobject *musicobject,
+                                     const gchar *album_artist)
 {
 	PraghaMusicobjectPrivate *priv;
 
@@ -312,8 +312,8 @@ pragha_musicobject_set_artist_album (PraghaMusicobject *musicobject,
 
 	priv = musicobject->priv;
 
-	g_free(priv->artist_album);
-	priv->artist_album = g_strdup(artist_album);
+	g_free(priv->album_artist);
+	priv->album_artist = g_strdup(album_artist);
 }
 
 /**
@@ -581,7 +581,7 @@ pragha_musicobject_finalize (GObject *object)
 	g_free(priv->title);
 	g_free(priv->artist);
 	g_free(priv->album);
-	g_free(priv->artist_album);
+	g_free(priv->album_artist);
 	g_free(priv->genre);
 	g_free(priv->comment);
 
@@ -612,8 +612,8 @@ pragha_musicobject_get_property (GObject *object,
 	case PROP_ALBUM:
 		g_value_set_string (value, pragha_musicobject_get_album(musicobject));
 		break;
-	case PROP_ARTIST_ALBUM:
-		g_value_set_string (value, pragha_musicobject_get_artist_album(musicobject));
+	case PROP_ALBUM_ARTIST:
+		g_value_set_string (value, pragha_musicobject_get_album_artist(musicobject));
 		break;
 	case PROP_GENRE:
 		g_value_set_string (value, pragha_musicobject_get_genre(musicobject));
@@ -671,8 +671,8 @@ pragha_musicobject_set_property (GObject *object,
 	case PROP_ALBUM:
 		pragha_musicobject_set_album(musicobject, g_value_get_string(value));
 		break;
-	case PROP_ARTIST_ALBUM:
-		pragha_musicobject_set_artist_album(musicobject, g_value_get_string(value));
+	case PROP_ALBUM_ARTIST:
+		pragha_musicobject_set_album_artist(musicobject, g_value_get_string(value));
 		break;
 	case PROP_GENRE:
 		pragha_musicobject_set_genre(musicobject, g_value_get_string(value));
@@ -775,13 +775,13 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
-	  * PraghaMusicobject:artist_album:
+	  * PraghaMusicobject:album_artist:
 	  *
 	  */
-	gParamSpecs[PROP_ARTIST_ALBUM] =
-		g_param_spec_string("artist-album",
-		                    "ArtistAlbum",
-		                    "The Artist Album",
+	gParamSpecs[PROP_ALBUM_ARTIST] =
+		g_param_spec_string("album-artist",
+		                    "AlbumArtist",
+		                    "The Album Artist",
 		                    "",
 		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
