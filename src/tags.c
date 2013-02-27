@@ -1160,7 +1160,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_compilation))) {
 			pragha_musicobject_set_compilation(nmobj,
-				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_compilation)));
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_compilation)));
 			changed |= TAG_COMPILATION_CHANGED;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_genre))) {
