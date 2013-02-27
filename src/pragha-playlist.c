@@ -1697,7 +1697,7 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	                   P_TITLE, string_is_not_empty(title) ? title : ch_filename,
 	                   P_ARTIST, artist,
 	                   P_ALBUM, album,
-	                   P_ALBUM, album_artist,
+	                   P_ALBUM_ARTIST, album_artist,
 	                   P_GENRE, genre,
 	                   P_BITRATE, ch_bitrate,
 	                   P_YEAR, ch_year,
