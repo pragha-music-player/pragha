@@ -243,4 +243,7 @@ pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, Prag
 	if (changed & TAG_COMMENT_CHANGED) {
 		pragha_musicobject_set_comment(mobj, pragha_musicobject_get_comment(nmobj));
 	}
+	if (changed & TAG_COMPILATION_CHANGED) {
+		pragha_musicobject_set_compilation(mobj, pragha_musicobject_is_compilation(nmobj));
+	}
 }

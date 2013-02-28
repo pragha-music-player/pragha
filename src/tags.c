@@ -119,6 +119,11 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 		return FALSE;
 	}
 
+	if (!taginfo_info_read(tfile)) {
+		g_warning("Unable to locate tag in file %s", file);
+		ret = FALSE;
+	}
+
 	if (changed & TAG_TNO_CHANGED)
 		taginfo_info_set_tracknumber(tfile, pragha_musicobject_get_track_no(mobj));
 	if (changed & TAG_TITLE_CHANGED)
