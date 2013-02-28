@@ -17,7 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
-#include <taginfo/taginfo_c.h>
+#include <libtaginfo/taginfo_c.h>
 
 TagInfo_Info *
 get_taginfo_from_file_type(const gchar* file, gint file_type)

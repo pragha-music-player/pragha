@@ -92,7 +92,7 @@ XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
-XDT_CHECK_PACKAGE([TAGINFO], [taginfo_c], [0.0.9])
+XDT_CHECK_PACKAGE([TAGINFO], [libtaginfo_c], [0.0.10])
 
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
