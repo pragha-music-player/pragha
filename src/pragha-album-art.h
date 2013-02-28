@@ -65,6 +65,9 @@ pragha_album_art_set_pixbuf (PraghaAlbumArt *albumart,
 GdkPixbuf *
 pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart);
 
+void
+pragha_album_art_set_abstract_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf);
+
 G_END_DECLS
 
 #endif /* PRAGHA_ALBUM_ART_H */

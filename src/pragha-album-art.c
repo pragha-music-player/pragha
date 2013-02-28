@@ -180,6 +180,32 @@ pragha_album_art_get_pixbuf (PraghaAlbumArt *albumart)
    return pixbuf;
 }
 
+/**
+ * album_art_set_abstract_pixbuf:
+ *
+ */
+void
+pragha_album_art_set_abstract_pixbuf (PraghaAlbumArt *albumart, GdkPixbuf *pixbuf)
+{
+   PraghaAlbumArtPrivate *priv;
+   GdkPixbuf *spixbuf;
+
+   g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
+
+   priv = albumart->priv;
+
+   g_free(priv->path);
+   priv->path = NULL;
+
+   spixbuf = gdk_pixbuf_scale_simple (pixbuf,
+                                      priv->size,
+                                      priv->size,
+                                      GDK_INTERP_BILINEAR);
+
+   pragha_album_art_set_pixbuf(albumart, spixbuf);
+   g_object_unref(G_OBJECT(spixbuf));
+}
+
 static void
 pragha_album_art_finalize (GObject *object)
 {

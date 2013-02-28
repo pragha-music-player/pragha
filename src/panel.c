@@ -312,27 +312,41 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Update album art");
 
 	gchar *album_path = NULL, *path = NULL;
+	GdkPixbuf *pixbuf = NULL;
 
 	if (pragha_preferences_get_show_album_art(cwin->preferences)) {
 		if (G_LIKELY(mobj &&
 		    pragha_musicobject_is_local_file(mobj))) {
-			#ifdef HAVE_LIBGLYR
-			album_path = get_image_path_from_cache(pragha_musicobject_get_artist(mobj),
-			                                       pragha_musicobject_get_album(mobj),
-			                                       cwin);
-			#endif
-			if (album_path == NULL) {
-				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
-				if (cwin->cpref->album_art_pattern) {
-					album_path = get_pref_image_path_dir(path, cwin);
-					if (!album_path)
-						album_path = get_image_path_from_dir(path);
+		    if(TRUE) { //TODO: Ad preferences!.
+		    	pixbuf = pragha_get_incrusted_image_tag(pragha_musicobject_get_file(mobj));
+		    	if(pixbuf) {
+		    		pragha_album_art_set_abstract_pixbuf(cwin->albumart, pixbuf);
+		    		g_print("PICTURE!!-)\n");
+		    	}
+		    }
+
+			if(pixbuf == NULL) {
+				#ifdef HAVE_LIBGLYR
+				album_path = get_image_path_from_cache(pragha_musicobject_get_artist(mobj),
+					                                   pragha_musicobject_get_album(mobj),
+					                                   cwin);
+				#endif
+				if (album_path == NULL) {
+					path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
+					if (cwin->cpref->album_art_pattern) {
+						album_path = get_pref_image_path_dir(path, cwin);
+						if (!album_path)
+							album_path = get_image_path_from_dir(path);
+					}
+					else album_path = get_image_path_from_dir(path);
+					g_free(path);
 				}
-				else album_path = get_image_path_from_dir(path);
-				g_free(path);
+				pragha_album_art_set_path(cwin->albumart, album_path);
+				g_free(album_path);
 			}
-			pragha_album_art_set_path(cwin->albumart, album_path);
-			g_free(album_path);
+			else {
+				g_object_unref(G_OBJECT(pixbuf));
+			}
 		}
 	}
 }

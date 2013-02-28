@@ -79,12 +79,11 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		goto exit;
 	}
 
-	gchar *albumartist = taginfo_info_get_albumartist(tfile);
 	g_object_set (mobj,
 	              "title", taginfo_info_get_title(tfile),
 	              "artist", taginfo_info_get_artist(tfile),
 	              "album", taginfo_info_get_album(tfile),
-	              "album-artist", albumartist ? albumartist : "",
+	              "album-artist", taginfo_info_get_albumartist(tfile),
 	              "genre", taginfo_info_get_genre(tfile),
 	              "comment", taginfo_info_get_genre(tfile),
 	              "compilation", taginfo_info_get_is_compilation(tfile),
@@ -95,8 +94,6 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "channels", taginfo_info_get_channels(tfile),
 	              "samplerate", taginfo_info_get_samplerate(tfile),
 	              NULL);
-
-	g_free(albumartist);
 
 exit:
 	taginfo_info_free(tfile);
@@ -161,6 +158,40 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 	taginfo_info_free(tfile);
 
 	return ret;
+}
+
+GdkPixbuf *
+pragha_get_incrusted_image_tag(const gchar *filename)
+{
+	GdkPixbuf *pixbuf = NULL;
+	TagInfo_Info *tfile = NULL;
+	gchar *data;
+	gint size;
+	TagInfo_ImageType type = 0;
+
+	tfile = get_taginfo_from_file_type(filename, get_file_type(filename));
+	if (!tfile) {
+		g_warning("Unable to open file using taglib : %s", filename);
+		return NULL;
+	}
+
+	if (!taginfo_info_read(tfile)) {
+		g_warning("Unable to locate tag in file %s", filename);
+		goto bad;
+	}
+
+	if(taginfo_info_get_has_image(tfile)) {
+		if(taginfo_info_get_image(tfile, &data, &size, &type)) {
+			if(type == TagInfo_IMAGE_TYPE_JPEG) {
+				pixbuf = vgdk_pixbuf_new_from_memory(data, size);
+			}
+		}
+	}
+    
+bad:
+	taginfo_info_free(tfile);
+
+    return pixbuf;
 }
 
 /* Show track properties dialog */
