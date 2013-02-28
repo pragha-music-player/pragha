@@ -22,16 +22,9 @@ const gchar *mime_flac[] = {"audio/x-flac", NULL};
 const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
 const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", NULL};
 const gchar *mime_wav[] = {"audio/x-wav", NULL};
-
-#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", NULL};
-#endif
-#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
-#endif
-#ifdef HAVE_TAGLIB_1_7
 const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NULL};
-#endif
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
 
@@ -431,18 +424,12 @@ get_file_type(const gchar *file)
 			ret = FILE_OGGVORBIS;
 		else if (is_valid_mime(result, mime_wav))
 			ret = FILE_WAV;
-		#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 		else if (is_valid_mime(result, mime_asf))
 			ret = FILE_ASF;
-		#endif
-		#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 		else if (is_valid_mime(result, mime_mp4))
 			ret = FILE_MP4;
-		#endif
-		#ifdef HAVE_TAGLIB_1_7
 		else if (is_valid_mime(result, mime_ape))
 			ret = FILE_APE;
-		#endif
 
 		else ret = -1;
 	}
