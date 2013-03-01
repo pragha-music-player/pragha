@@ -85,7 +85,7 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "album", taginfo_info_get_album(tfile),
 	              "album-artist", taginfo_info_get_albumartist(tfile),
 	              "genre", taginfo_info_get_genre(tfile),
-	              "comment", taginfo_info_get_genre(tfile),
+	              "comment", taginfo_info_get_comment(tfile),
 	              "compilation", taginfo_info_get_is_compilation(tfile),
 	              "year", taginfo_info_get_year(tfile),
 	              "track-no", taginfo_info_get_tracknumber(tfile),
@@ -194,171 +194,6 @@ bad:
     return pixbuf;
 }
 
-/* Show track properties dialog */
-
-static void
-pragha_track_properties_response(GtkDialog *dialog,
-                                 gint response,
-                                 gpointer data)
-{
-	gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
-static void
-pragha_track_properties_dialog(PraghaMusicobject *mobj,
-                               GtkWidget *parent)
-{
-	GtkWidget *dialog;
-	GtkWidget *properties_table;
-	GtkWidget *label_length, *label_bitrate, *label_channels, *label_samplerate, *label_folder, *label_filename;
-	GtkWidget *info_length, *info_bitrate, *info_channels, *info_samplerate, *info_folder, *info_filename;
-
-	gchar *length = NULL, *bitrate = NULL, *channels = NULL, *samplerate = NULL, *folder = NULL, *filename = NULL;
-
-	if(!mobj)
-		return;
-
-	length = convert_length_str(pragha_musicobject_get_length(mobj));
-	bitrate = g_strdup_printf("%d kbps", pragha_musicobject_get_bitrate(mobj));
-	channels = g_strdup_printf("%d %s", pragha_musicobject_get_channels(mobj), _("Channels"));
-	samplerate = g_strdup_printf("%d Hz", pragha_musicobject_get_samplerate(mobj));
-	folder = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
-	filename = get_display_name(mobj);
-
-	/* Create table */
-
-	properties_table = gtk_table_new(6, 2, FALSE);
-
-	gtk_table_set_col_spacings(GTK_TABLE(properties_table), 5);
-	gtk_table_set_row_spacings(GTK_TABLE(properties_table), 5);
-	gtk_container_set_border_width(GTK_CONTAINER(properties_table), 5);
-
-	/* Create labels */
-
-	label_length = gtk_label_new(_("Length"));
-	label_bitrate = gtk_label_new(_("Bitrate"));
-	label_channels = gtk_label_new(_("Channels"));
-	label_samplerate = gtk_label_new(_("Samplerate"));
-	label_folder = gtk_label_new(_("Folder"));
-	label_filename = gtk_label_new(_("Filename"));
-
-	gtk_misc_set_alignment(GTK_MISC (label_length), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_bitrate), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_channels), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_samplerate), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_folder), 1, 0);
-	gtk_misc_set_alignment(GTK_MISC (label_filename), 1, 0);
-
-	gtk_label_set_attribute_bold(GTK_LABEL(label_length));
-	gtk_label_set_attribute_bold(GTK_LABEL(label_bitrate));
-	gtk_label_set_attribute_bold(GTK_LABEL(label_channels));
-	gtk_label_set_attribute_bold(GTK_LABEL(label_samplerate));
-	gtk_label_set_attribute_bold(GTK_LABEL(label_folder));
-	gtk_label_set_attribute_bold(GTK_LABEL(label_filename));
-
-	/* Create info labels */
-
-	info_length = gtk_label_new(length);
-	info_bitrate = gtk_label_new(bitrate);
-	info_channels = gtk_label_new(channels);
-	info_samplerate = gtk_label_new(samplerate);
-	info_folder = gtk_label_new(folder);
-	info_filename = gtk_label_new(filename);
-
-	gtk_misc_set_alignment(GTK_MISC (info_length), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_bitrate), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_channels), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_samplerate), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_folder), 0, 0);
-	gtk_misc_set_alignment(GTK_MISC (info_filename), 0, 0);
-
-	gtk_label_set_selectable(GTK_LABEL(info_length), TRUE);
-	gtk_label_set_selectable(GTK_LABEL(info_bitrate), TRUE);
-	gtk_label_set_selectable(GTK_LABEL(info_channels), TRUE);
-	gtk_label_set_selectable(GTK_LABEL(info_samplerate), TRUE);
-	gtk_label_set_selectable(GTK_LABEL(info_folder), TRUE);
-	gtk_label_set_selectable(GTK_LABEL(info_filename), TRUE);
-
-	/* Attach labels */
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_length,
-			0, 1, 0, 1,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_length,
-			1, 2, 0, 1,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_bitrate,
-			0, 1, 1, 2,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_bitrate,
-			1, 2, 1, 2,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_channels,
-			0, 1, 2, 3,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_channels,
-			1, 2, 2, 3,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_samplerate,
-			0, 1, 3, 4,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_samplerate,
-			1, 2, 3, 4,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_folder,
-			0, 1, 4, 5,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_folder,
-			1, 2, 4, 5,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	gtk_table_attach(GTK_TABLE (properties_table), label_filename,
-			0, 1, 5, 6,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_filename,
-			1, 2, 5, 6,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
-
-	/* The main edit dialog */
-
-	dialog = gtk_dialog_new_with_buttons(_("Details"),
-					     GTK_WINDOW(parent),
-					     GTK_DIALOG_MODAL,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_OK,
-					     NULL);
-
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
-
-	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(pragha_track_properties_response), NULL);
-
-	gtk_widget_show_all(dialog);
-
-	g_free(length);
-	g_free(bitrate);
-	g_free(channels);
-	g_free(samplerate);
-	g_free(folder);
-	g_free(filename);
-}
-
 /***************/
 /* Tag Editing */
 /***************/
@@ -456,6 +291,10 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 		}
 	}
 }
+
+/*
+ * Tag dialog.
+ */
 
 void check_entry(GtkEntry *entry, GtkCheckButton *check)
 {
@@ -667,23 +506,30 @@ select_all_on_click(GtkWidget *widget,
 gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin)
 {
 	GtkWidget *dialog;
-	GtkWidget *tag_table;
+	GtkWidget *tag_table, *properties_table;
 	GtkWidget *label_title, *label_artist, *label_album, *label_album_artist, *label_genre, *label_tno, *label_year, *label_comment, *label_file;
 	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_album_artist, *chk_compilation, *chk_genre, *chk_tno, *chk_year, *chk_comment;
 	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_album_artist, *check_compilation, *entry_genre,  *entry_tno, *entry_year, *entry_comment, *entry_file;
 	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_album_artist, *hbox_compilation, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
 	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
+	GtkWidget *label_length, *label_bitrate, *label_channels, *label_samplerate;
+	GtkWidget *info_length, *info_bitrate, *info_channels, *info_samplerate;
+	GtkWidget *hbox_image_change, *image_change_button, *chk_change_image;
+	PraghaAlbumArt *image;
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
+	GdkPixbuf *pixbuf;
 	gpointer storage;
 
 	const gchar *otitle, *oartist, *oalbum, *oalbum_artist, *ogenre, *ocomment, *ofile;
+	gchar *length = NULL, *bitrate = NULL, *channels = NULL, *samplerate = NULL;
+
 	gboolean ocompilation = FALSE;
 	gint otrack_no, oyear, result, changed = 0;
 
 	/* Create table */
 
-	tag_table = gtk_table_new(10, 2, FALSE);
+	tag_table = gtk_table_new(10, 3, FALSE);
 
 	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 5);
 	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
@@ -982,6 +828,140 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
 			0, 0);
 
+	/* Propertites. */
+
+	properties_table = gtk_table_new(6, 2, FALSE);
+
+	gtk_table_set_col_spacings(GTK_TABLE(properties_table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(properties_table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(properties_table), 5);
+
+	image = pragha_album_art_new();
+	pragha_album_art_set_size(image, 128);
+
+	if(omobj && string_is_not_empty(pragha_musicobject_get_file(omobj))) {
+	   	pixbuf = pragha_get_incrusted_image_tag(pragha_musicobject_get_file(omobj));
+	   	if(pixbuf) {
+	   		pragha_album_art_set_abstract_pixbuf(image, pixbuf);
+	   		g_object_unref(G_OBJECT(pixbuf));
+		}
+		length = convert_length_str(pragha_musicobject_get_length(omobj));
+		bitrate = g_strdup_printf("%d kbps", pragha_musicobject_get_bitrate(omobj));
+		channels = g_strdup_printf("%d %s", pragha_musicobject_get_channels(omobj), _("Channels"));
+		samplerate = g_strdup_printf("%d Hz", pragha_musicobject_get_samplerate(omobj));
+	}
+	else {
+		length = g_strdup(_("Unknown"));
+		bitrate = g_strdup(_("Unknown"));
+		channels = g_strdup(_("Unknown"));
+		samplerate = g_strdup(_("Unknown"));
+	}
+
+	hbox_image_change = gtk_hbox_new(FALSE, 0);
+	image_change_button = gtk_button_new_with_label(_("Change image"));
+	//gtk_button_set_relief(GTK_BUTTON(image_change_button), GTK_RELIEF_NONE);
+	chk_change_image = gtk_check_button_new();
+
+	gtk_widget_set_sensitive (hbox_image_change, FALSE);
+
+	gtk_box_pack_start(GTK_BOX(hbox_image_change),
+	                   image_change_button,
+	                   TRUE,
+	                   TRUE,
+	                   0);
+	gtk_box_pack_start(GTK_BOX(hbox_image_change),
+	                   chk_change_image,
+	                   FALSE,
+	                   FALSE,
+	                   0);
+
+	/* Create labels */
+
+	label_length = gtk_label_new(_("Length"));
+	label_bitrate = gtk_label_new(_("Bitrate"));
+	label_channels = gtk_label_new(_("Channels"));
+	label_samplerate = gtk_label_new(_("Samplerate"));
+
+	gtk_misc_set_alignment(GTK_MISC (label_length), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_bitrate), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_channels), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_samplerate), 1, 0);
+
+	gtk_label_set_attribute_bold(GTK_LABEL(label_length));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_bitrate));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_channels));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_samplerate));
+
+	/* Create info labels */
+
+	info_length = gtk_label_new(length);
+	info_bitrate = gtk_label_new(bitrate);
+	info_channels = gtk_label_new(channels);
+	info_samplerate = gtk_label_new(samplerate);
+
+	gtk_misc_set_alignment(GTK_MISC (info_length), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_bitrate), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_channels), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_samplerate), 0, 0);
+
+	gtk_label_set_selectable(GTK_LABEL(info_length), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_bitrate), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_channels), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_samplerate), TRUE);
+
+	/* Attach labels */
+
+	gtk_table_attach(GTK_TABLE (properties_table), GTK_WIDGET(image),
+	                 0, 2, 0, 1,
+	                 GTK_SHRINK, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), hbox_image_change,
+	                 0, 2, 1, 2,
+	                 GTK_SHRINK, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_length,
+	                 0, 1, 2, 3,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_length,
+	                 1, 2, 2, 3,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_bitrate,
+	                 0, 1, 3, 4,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_bitrate,
+	                 1, 2, 3, 4,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_channels,
+	                 0, 1, 4, 5,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_channels,
+	                 1, 2, 4, 5,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (properties_table), label_samplerate,
+	                 0, 1, 5, 6,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (properties_table), info_samplerate,
+	                 1, 2, 5, 6,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), properties_table,
+		             2, 3, 0, 10,
+		             GTK_FILL, GTK_FILL,
+		             0, 0);
+
 	/* The main edit dialog */
 
 	dialog = gtk_dialog_new_with_buttons(_("Edit tags"),
@@ -993,7 +973,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 					     GTK_RESPONSE_OK,
 					     NULL);
 
-	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 300);
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 600, 300);
 
 	/* Add to the dialog's main vbox */
 
@@ -1030,10 +1010,9 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry_year), oyear);
 	if (ocomment)
 		gtk_text_buffer_set_text (buffer, ocomment, -1);
-	if (ofile) {
+	if (string_is_not_empty(ofile)) {
 		gtk_entry_set_text(GTK_ENTRY(entry_file), ofile);
 		gtk_editable_set_position(GTK_EDITABLE(entry_file), g_utf8_strlen(ofile, -1));
-		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
 	}
 	else
 		gtk_widget_set_sensitive(GTK_WIDGET(entry_file), FALSE);
@@ -1162,15 +1141,7 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog);
 
-	while ((result = gtk_dialog_run (GTK_DIALOG (dialog))) &&
-		(result != GTK_RESPONSE_CANCEL) &&
-		(result != GTK_RESPONSE_OK) &&
-		(result != GTK_RESPONSE_DELETE_EVENT)) {
-
-		if(result == GTK_RESPONSE_HELP){
-			pragha_track_properties_dialog(omobj, cwin->mainwindow);
-		}
-	}
+	result = gtk_dialog_run (GTK_DIALOG (dialog));
 
 	switch (result)
 	{
@@ -1232,6 +1203,11 @@ gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobjec
 	gtk_widget_destroy(dialog);
 
 	g_object_unref(storage);
+
+	g_free(length);
+	g_free(bitrate);
+	g_free(channels);
+	g_free(samplerate);
 
 	return changed;
 }
