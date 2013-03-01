@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include <libtaginfo/taginfo_c.h>
 
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;
@@ -147,7 +148,7 @@ gint init_options(struct con_win *cwin, int argc, char **argv)
 
 gint init_taglib(struct con_win *cwin)
 {
-	//taglib_set_strings_unicode(TRUE);
+	taginfo_info_enable_string_management(true);
 
 	return 0;
 }

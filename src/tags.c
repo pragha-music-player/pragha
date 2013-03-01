@@ -95,6 +95,8 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "samplerate", taginfo_info_get_samplerate(tfile),
 	              NULL);
 
+	taginfo_info_free_strings();
+
 exit:
 	taginfo_info_free(tfile);
 
