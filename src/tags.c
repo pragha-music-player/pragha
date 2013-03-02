@@ -187,6 +187,7 @@ pragha_get_incrusted_image_tag(const gchar *filename)
 			if(type == TagInfo_IMAGE_TYPE_JPEG) {
 				pixbuf = vgdk_pixbuf_new_from_memory(data, size);
 			}
+			taginfo_free_image_data(data);
 		}
 	}
     
