@@ -1795,9 +1795,9 @@ library_view_complete_tags_view(GtkTreeModel *model,
 			}
 			#endif
 		}
+    	pragha_prepared_statement_free (statement);
 		g_free(sql);
 	}
-	pragha_prepared_statement_free (statement);
 
 	g_free(order_str);
 }
