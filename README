@@ -35,7 +35,7 @@ Requirements:
 Optional:
  * libclastfm >= 0.5: Scrobbling, love, unlove song, and append similar song to
    get related playlists.
- * libglyr >= 0.9.0: Get lyrics and artist bio over many internet services, and
+ * libglyr >= 1.0.1: Get lyrics and artist bio over many internet services, and
    download missing album cover art from Last.fm.
  * libxfce4ui >= 4.8.0 (Or >= 4.11.0 with gtk+-3.0): Better session managament
    support. Save the current playlist, last posicion when save session, etc.
