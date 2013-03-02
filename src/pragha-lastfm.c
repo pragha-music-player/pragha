@@ -163,7 +163,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	}
 
 exit:
-	gtk_widget_hide(cwin->ntag_lastfm_button);
+	gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(omobj);
@@ -751,7 +751,7 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 	pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
 
 	if(g_ascii_strcasecmp(cfile, nfile) == 0)
-		gtk_widget_show(cwin->ntag_lastfm_button);
+		gtk_widget_show(cwin->toolbar->ntag_lastfm_button);
 
 	g_free(cfile);
 	g_free(nfile);
