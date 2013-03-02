@@ -27,8 +27,6 @@ typedef struct
 }
 glyr_struct;
 
-//FIXME_GLYR_CAST: drop discarding const when we switch to enough new glyr, see https://github.com/sahib/glyr/issues/29
-
 /* Use the download info on glyr thread and show a dialog. */
 
 static void
@@ -159,11 +157,7 @@ glyr_finished_successfully(glyr_struct *glyr_info)
 		subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), glyr_info->query.title, glyr_info->query.artist);
 		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
 		break;
-#if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_TYPE_ARTIST_BIO:
-#else
-	case GLYR_TYPE_ARTISTBIO:
-#endif
 		title_header =  g_strdup_printf(_("Artist info"));
 		subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), glyr_info->query.artist, glyr_info->head->prov);
 		pragha_show_related_text_info_dialog(glyr_info, title_header, subtitle_header);
@@ -185,11 +179,7 @@ glyr_finished_incorrectly(glyr_struct *glyr_info)
 	case GLYR_GET_LYRICS:
 		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Lyrics not found."));
 		break;
-#if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_GET_ARTIST_BIO:
-#else
-	case GLYR_GET_ARTISTBIO:
-#endif
 		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Artist information not found."));
 		break;
 	case GLYR_GET_COVERART:
@@ -244,19 +234,15 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 	glyr_opt_type(&glyr_info->query, type);
 
 	switch (type) {
-#if GLYR_CHECK_VERSION (1, 0, 0)
 	case GLYR_GET_ARTIST_BIO:
-#else
-	case GLYR_GET_ARTISTBIO:
-#endif
-		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
+		glyr_opt_artist(&glyr_info->query, artist);
 
 		glyr_opt_lang (&glyr_info->query, "auto");
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 		break;
 	case GLYR_GET_LYRICS:
-		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
-		glyr_opt_title(&glyr_info->query, (char*)title); //FIXME_GLYR_CAST
+		glyr_opt_artist(&glyr_info->query, artist);
+		glyr_opt_title(&glyr_info->query, title);
 		break;
 	default:
 		break;
@@ -391,8 +377,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
 	glyr_opt_from(&glyr_info->query, "lastfm;musicbrainz");
 
-	glyr_opt_artist(&glyr_info->query, artist); //FIXME_GLYR_CAST
-	glyr_opt_album(&glyr_info->query, album); //FIXME_GLYR_CAST
+	glyr_opt_artist(&glyr_info->query, artist);
+	glyr_opt_album(&glyr_info->query, album);
 
 	glyr_info->cwin = cwin;
 
