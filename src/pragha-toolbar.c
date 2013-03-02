@@ -620,6 +620,8 @@ pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 void
 pragha_toolbar_free(PraghaToolbar *toolbar)
 {
+	gtk_widget_destroy(GTK_WIDGET(toolbar->albumart));
+
 	g_slice_free(PraghaToolbar, toolbar);
 }
 
@@ -738,7 +740,7 @@ pragha_toolbar_new(struct con_win *cwin)
 	g_signal_connect(G_OBJECT (next_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), cwin);
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
-                     G_CALLBACK (album_art_frame_press_callback), cwin);
+	                 G_CALLBACK (album_art_frame_press_callback), cwin);
 	g_signal_connect(G_OBJECT(unfull_button), "clicked",
 	                 G_CALLBACK(unfull_button_handler), cwin);
 	g_signal_connect(G_OBJECT (unfull_button), "key-press-event",
@@ -748,7 +750,7 @@ pragha_toolbar_new(struct con_win *cwin)
 	g_signal_connect(G_OBJECT (repeat_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), cwin);
 	g_signal_connect(G_OBJECT (vol_button), "key-press-event",
-	                G_CALLBACK(panel_button_key_press), cwin);
+	                 G_CALLBACK(panel_button_key_press), cwin);
 
 	g_signal_connect(cwin->backend, "tick",
 	                 G_CALLBACK(update_gui), cwin);

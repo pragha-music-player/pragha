@@ -193,7 +193,6 @@ void gui_free (struct con_win *cwin)
 
 	if (cwin->pixbuf_app)
 		g_object_unref(cwin->pixbuf_app);
-	gtk_widget_destroy(GTK_WIDGET(cwin->toolbar->albumart));
 	g_free(pragha_accels_path);
 }
 
