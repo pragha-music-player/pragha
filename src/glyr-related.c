@@ -27,8 +27,6 @@ typedef struct
 }
 glyr_struct;
 
-//FIXME_GLYR_CAST: drop discarding const when we switch to enough new glyr, see https://github.com/sahib/glyr/issues/29
-
 /* Use the download info on glyr thread and show a dialog. */
 
 static void
@@ -237,14 +235,14 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 	switch (type) {
 	case GLYR_GET_ARTIST_BIO:
-		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
+		glyr_opt_artist(&glyr_info->query, artist);
 
 		glyr_opt_lang (&glyr_info->query, "auto");
 		glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 		break;
 	case GLYR_GET_LYRICS:
-		glyr_opt_artist(&glyr_info->query, (char*)artist); //FIXME_GLYR_CAST
-		glyr_opt_title(&glyr_info->query, (char*)title); //FIXME_GLYR_CAST
+		glyr_opt_artist(&glyr_info->query, artist);
+		glyr_opt_title(&glyr_info->query, title);
 		break;
 	default:
 		break;
@@ -379,8 +377,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_opt_type(&glyr_info->query, GLYR_GET_COVERART);
 	glyr_opt_from(&glyr_info->query, "lastfm;musicbrainz");
 
-	glyr_opt_artist(&glyr_info->query, artist); //FIXME_GLYR_CAST
-	glyr_opt_album(&glyr_info->query, album); //FIXME_GLYR_CAST
+	glyr_opt_artist(&glyr_info->query, artist);
+	glyr_opt_album(&glyr_info->query, album);
 
 	glyr_info->cwin = cwin;
 
