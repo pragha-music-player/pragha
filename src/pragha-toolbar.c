@@ -338,9 +338,9 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 }
 
 gboolean
-album_art_frame_press_callback (GtkWidget      *event_box,
-				GdkEventButton *event,
-				struct con_win *cwin)
+pragha_toolbar_album_art_activated (GtkWidget      *event_box,
+                                    GdkEventButton *event,
+                                    struct con_win *cwin)
 {
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED &&
 	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
@@ -739,7 +739,7 @@ pragha_toolbar_new(struct con_win *cwin)
 	g_signal_connect(G_OBJECT (next_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), cwin);
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
-	                 G_CALLBACK (album_art_frame_press_callback), cwin);
+	                 G_CALLBACK (pragha_toolbar_album_art_activated), cwin);
 	g_signal_connect(G_OBJECT(unfull_button), "clicked",
 	                 G_CALLBACK(unfull_button_handler), cwin);
 	g_signal_connect(G_OBJECT (unfull_button), "key-press-event",
