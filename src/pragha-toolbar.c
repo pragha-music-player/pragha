@@ -400,10 +400,30 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 }
 
 static void
-update_panel_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
+{
+	PraghaToolbar *toolbar = user_data;
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), (gdouble)percent/100);
+}
+
+static void
+pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+
+	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(backend));
+
+	if (newsec > 0) {
+		__update_track_progress_bar(cwin, newsec);
+		__update_progress_song_info(cwin, newsec);
+	}
+}
+
+static void
+pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
@@ -422,26 +442,6 @@ update_panel_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer us
 		unset_track_progress_bar(cwin);
 		pragha_album_art_set_path(cwin->toolbar->albumart, NULL);
 	}
-}
-
-static void
-update_gui(PraghaBackend *backend, gpointer user_data)
-{
-	struct con_win *cwin = user_data;
-
-	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
-
-	if (newsec > 0) {
-		__update_track_progress_bar(cwin, newsec);
-		__update_progress_song_info(cwin, newsec);
-	}
-}
-
-static void
-buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
-{
-	GtkProgressBar *track_progress_bar = user_data;
-	gtk_progress_bar_set_fraction(track_progress_bar, (gdouble)percent/100);
 }
 
 GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
@@ -523,7 +523,6 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
 			 G_CALLBACK(track_progress_change_cb), cwin);
 	#endif
-	g_signal_connect (cwin->backend, "buffering", G_CALLBACK(buffering_cb), track_progress_bar);
 
 	track_time_label = gtk_label_new(NULL);
 	track_length_label = gtk_label_new(NULL);
@@ -753,9 +752,11 @@ pragha_toolbar_new(struct con_win *cwin)
 	                 G_CALLBACK(panel_button_key_press), cwin);
 
 	g_signal_connect(cwin->backend, "tick",
-	                 G_CALLBACK(update_gui), cwin);
+	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin);
 	g_signal_connect(cwin->backend, "notify::state",
-	                 G_CALLBACK(update_panel_playback_state_cb), cwin);
+	                 G_CALLBACK(pragha_toolbar_playback_state_cb), cwin);
+	g_signal_connect(cwin->backend, "buffering",
+	                 G_CALLBACK(pragha_toolbar_update_buffering_cb), pragha_toolbar);
 
 	g_object_bind_property(cwin->preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(cwin->preferences, "repeat", repeat_button, "active", binding_flags);
