@@ -639,6 +639,24 @@ typedef struct {
 	GtkMenu *popup_menu;
 } PraghaSidebar;
 
+typedef struct {
+	GtkWidget *widget;
+	PraghaAlbumArt *albumart;
+	GtkWidget *track_progress_bar;
+	GtkToolItem *prev_button;
+	GtkToolItem *play_button;
+	GtkToolItem *stop_button;
+	GtkToolItem *next_button;
+	GtkToolItem *unfull_button;
+	GtkWidget *vol_button;
+	GtkWidget *track_length_label;
+	GtkWidget *track_time_label;
+	GtkWidget *now_playing_label;
+	#ifdef HAVE_LIBCLASTFM
+	GtkWidget *ntag_lastfm_button;
+	#endif
+} PraghaToolbar;
+
 struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
@@ -648,6 +666,8 @@ struct con_win {
 	PraghaDatabase *cdbase;
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
+	PraghaStatusbar *statusbar;
+	PraghaToolbar *toolbar;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
@@ -657,24 +677,8 @@ struct con_win {
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
-	GtkWidget *toolbar;
 	GtkWidget *info_box;
-	PraghaAlbumArt *albumart;
-	GtkWidget *track_progress_bar;
-	GtkToolItem *prev_button;
-	GtkToolItem *play_button;
-	GtkToolItem *stop_button;
-	GtkToolItem *next_button;
-	GtkToolItem *unfull_button;
-	GtkWidget *vol_button;
-	PraghaStatusbar *statusbar;
 	GtkWidget *paned;
-	GtkWidget *track_length_label;
-	GtkWidget *track_time_label;
-	GtkWidget *now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
-	#endif
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
@@ -1111,7 +1115,6 @@ GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
 /* GUI */
 
 GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
@@ -1190,6 +1193,12 @@ void pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *widget);
 GtkWidget *pragha_sidebar_get_widget(PraghaSidebar *sidebar);
 void pragha_sidebar_free(PraghaSidebar *sidebar);
 PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
+
+/* pragha-toolbar.c */
+
+GtkWidget *pragha_toolbar_get_widget(PraghaToolbar *toolbar);
+void pragha_toolbar_free(PraghaToolbar *toolbar);
+PraghaToolbar *pragha_toolbar_new(struct con_win *cwin);
 
 /* pragha-simple-async.c: Very simple and generic async API. */
 

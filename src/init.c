@@ -706,7 +706,7 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
-	GtkWidget *vbox, *toolbar, *info_box, *hbox_main, *menu_bar;
+	GtkWidget *vbox, *info_box, *hbox_main, *menu_bar;
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
@@ -780,11 +780,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Create hboxen */
 
 	menu = create_menu(cwin);
-	toolbar = create_toolbar(cwin);
 	info_box = create_info_box(cwin);
 
 	cwin->sidebar = pragha_sidebar_new(cwin);
 	cwin->clibrary = pragha_library_pane_new(cwin);
+	cwin->toolbar = pragha_toolbar_new(cwin);
 
 	pragha_sidebar_add_pane(cwin->sidebar,
 	                        pragha_library_pane_get_widget(cwin->clibrary));
@@ -800,7 +800,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(menu_bar),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(toolbar),
+			   GTK_WIDGET(cwin->toolbar->widget),
 			   FALSE,FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(info_box),
@@ -828,17 +828,17 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			g_warning("(%s): No embedded status_icon.", __func__);
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 			gtk_widget_show_all(cwin->mainwindow);
-			gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
+			gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
 			#ifdef HAVE_LIBCLASTFM
-			gtk_widget_hide(cwin->ntag_lastfm_button);
+			gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
 			#endif
 		}
 	}
 	else {
 		gtk_widget_show_all(cwin->mainwindow);
-		gtk_widget_hide(GTK_WIDGET(cwin->unfull_button));
+		gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
 		#ifdef HAVE_LIBCLASTFM
-		gtk_widget_hide(cwin->ntag_lastfm_button);
+		gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
 		#endif
 	}
 
@@ -850,13 +850,13 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	                        cwin->statusbar, "visible",
 	                        binding_flags);
 	g_object_bind_property (cwin->preferences, "show-album-art",
-	                        GTK_WIDGET(cwin->albumart), "visible",
+	                        GTK_WIDGET(cwin->toolbar->albumart), "visible",
 	                        binding_flags);
 
 	init_menu_actions(cwin);
 	update_playlist_changes_on_menu(cwin);
 
-	gtk_widget_grab_focus(GTK_WIDGET(cwin->play_button));
+	gtk_widget_grab_focus(GTK_WIDGET(cwin->toolbar->play_button));
 
 	g_signal_connect(cwin->backend,
 			 "error",

@@ -232,7 +232,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		album_art_size =
 			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
 						cwin->preferences_w->album_art_size_w));
-		pragha_album_art_set_size(cwin->albumart, album_art_size);
+		pragha_album_art_set_size(cwin->toolbar->albumart, album_art_size);
 
 		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
@@ -679,7 +679,7 @@ static void update_preferences(struct con_win *cwin)
 		                             TRUE);
 
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
-				   (int) pragha_album_art_get_size(cwin->albumart));
+				   (int) pragha_album_art_get_size(cwin->toolbar->albumart));
 
 	if (cwin->cpref->album_art_pattern)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
@@ -961,7 +961,7 @@ void save_preferences(struct con_win *cwin)
 	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
 			       GROUP_WINDOW,
 			       KEY_ALBUM_ART_SIZE,
-			       (int) pragha_album_art_get_size(cwin->albumart));
+			       (int) pragha_album_art_get_size(cwin->toolbar->albumart));
 
 	/* Save show controls below option */
 

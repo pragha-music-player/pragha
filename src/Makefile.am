@@ -22,7 +22,6 @@ pragha_SOURCES =cdda.c \
 		gnome-media-keys.c \
 		musicobject.c \
 		notify.c \
-		panel.c \
 		playlist.c \
 		pragha.c \
 		pragha.h \
@@ -50,6 +49,7 @@ pragha_SOURCES =cdda.c \
 		pragha-simple-async.c \
 		pragha-statusbar.c \
 		pragha-statusbar.h \
+		pragha-toolbar.c \
 		pref.c \
 		statusicon.c \
 		tags.c \
