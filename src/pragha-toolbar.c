@@ -399,6 +399,9 @@ void next_button_handler(GtkButton *button, struct con_win *cwin)
 	pragha_playback_next_track(cwin);
 }
 
+/*
+ * Callbacks that response to gstreamer signals.
+ */
 static void
 pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
 {
@@ -443,6 +446,10 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 		pragha_album_art_set_path(cwin->toolbar->albumart, NULL);
 	}
 }
+
+/*
+ * Toolbar creation.
+ */
 
 GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 {
@@ -591,25 +598,6 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 }
 
-void init_toolbar_preferences_saved(PraghaToolbar *toolbar, struct con_win *cwin)
-{
-	GError *error = NULL;
-	gint album_art_size;
-
-	album_art_size = g_key_file_get_integer(cwin->cpref->configrc_keyfile,
-						GROUP_WINDOW,
-						KEY_ALBUM_ART_SIZE,
-						&error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-		album_art_size = ALBUM_ART_SIZE;
-	}
-
-	pragha_album_art_set_size(toolbar->albumart, album_art_size);
-	pragha_album_art_set_path(toolbar->albumart, NULL);
-}
-
 GtkWidget *
 pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 {
@@ -716,10 +704,6 @@ pragha_toolbar_new(struct con_win *cwin)
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), vol_button);
 	pragha_toolbar->vol_button = vol_button;
 
-	/* Insensitive Prev/Stop/Next buttons and set unknown album art. */
-
-	init_toolbar_preferences_saved(pragha_toolbar, cwin);
-
 	/* Connect signals */
 
 	g_signal_connect(G_OBJECT(prev_button), "clicked",
@@ -760,6 +744,7 @@ pragha_toolbar_new(struct con_win *cwin)
 
 	g_object_bind_property(cwin->preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(cwin->preferences, "repeat", repeat_button, "active", binding_flags);
+	g_object_bind_property(cwin->preferences, "album-art-size", albumart, "size", binding_flags);
 
 	g_object_bind_property (cwin->backend, "volume", vol_button, "value", G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
 
