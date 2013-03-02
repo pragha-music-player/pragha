@@ -141,7 +141,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
 dnl Check libglyr
 LIBGLYR_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
-                       [libglyr], [0.9.4],
+                       [libglyr], [1.0.1],
                        [libglyr],
                        [libglyr library], [yes])
 
@@ -185,7 +185,7 @@ AS_IF([test "x$with_gtk3" != xno],
 	[echo "  Better session management support..........(Need libxfce4ui >= 4.11.0).: $LIBXFCE4UI_FOUND"],
 	[echo "  Better session management support...........(Need libxfce4ui >= 4.8.0).: $LIBXFCE4UI_FOUND"])
 echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 0.9.4).: $LIBGLYR_FOUND"
+echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
 
