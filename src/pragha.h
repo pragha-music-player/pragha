@@ -117,7 +117,7 @@
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
 #define MIN_WINDOW_HEIGHT          (gdk_screen_height() * 3 / 4)
 #define DEFAULT_SIDEBAR_SIZE       200
-#define ALBUM_ART_SIZE             36
+#define DEFAULT_ALBUM_ART_SIZE     36
 #define PROGRESS_BAR_WIDTH         300
 #define COL_WIDTH_THRESH           30
 #define DEFAULT_PLAYLIST_COL_WIDTH ((MIN_WINDOW_WIDTH - DEFAULT_SIDEBAR_SIZE) / 4)
