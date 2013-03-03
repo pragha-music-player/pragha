@@ -33,7 +33,7 @@ create_playlist_pane_view(struct con_win *cwin)
 	vbox = gtk_vbox_new(FALSE, 2);
 
 	statusbar = pragha_statusbar_get();
-	cplaylist = cplaylist_new(cwin);
+	cplaylist = pragha_playlist_new(cwin);
 
 	/* Pack everything */
 

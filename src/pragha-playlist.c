@@ -3832,7 +3832,7 @@ pragha_playlist_get_widget(PraghaPlaylist* cplaylist)
 }
 
 void
-current_playlist_save_preferences(PraghaPlaylist* cplaylist)
+pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 {
 	GtkTreeViewColumn *col;
 	const gchar *col_name;
@@ -3891,7 +3891,7 @@ current_playlist_save_preferences(PraghaPlaylist* cplaylist)
 }
 
 static void
-cplatlist_init_pixbuf(PraghaPlaylist* cplaylist)
+pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 {
 	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
 
@@ -3907,7 +3907,7 @@ cplatlist_init_pixbuf(PraghaPlaylist* cplaylist)
 }
 
 void
-cplaylist_free(PraghaPlaylist* cplaylist)
+pragha_playlist_free(PraghaPlaylist* cplaylist)
 {
 	g_signal_handlers_disconnect_by_func(cplaylist->preferences, shuffle_changed_cb, cplaylist);
 
@@ -3927,7 +3927,7 @@ cplaylist_free(PraghaPlaylist* cplaylist)
 }
 
 PraghaPlaylist*
-cplaylist_new(struct con_win *cwin)
+pragha_playlist_new(struct con_win *cwin)
 {
 	PraghaPlaylist *cplaylist;
 
@@ -3952,7 +3952,7 @@ cplaylist_new(struct con_win *cwin)
 	g_signal_connect(G_OBJECT(cplaylist->view), "button-release-event",
 			 G_CALLBACK(current_playlist_button_release_cb), cplaylist);
 
-	cplatlist_init_pixbuf(cplaylist);
+	pragha_playlist_init_pixbuf(cplaylist);
 
 	gtk_container_add (GTK_CONTAINER(cplaylist->widget), cplaylist->view);
 

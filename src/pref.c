@@ -870,7 +870,7 @@ void save_preferences(struct con_win *cwin)
 			       KEY_SHOW_ACTIONS_OSD,
 			       cwin->cpref->actions_in_osd);
 
-	current_playlist_save_preferences(cwin->cplaylist);
+	pragha_playlist_save_preferences(cwin->cplaylist);
 
 	/* Audio Options */
 
