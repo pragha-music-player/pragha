@@ -794,6 +794,34 @@ int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 	return FALSE;
 }
 
+/*****************/
+/* DnD functions */
+/*****************/
+/* These two functions are only callbacks that must be passed to
+gtk_tree_selection_set_select_function() to chose if GTK is allowed
+to change selection itself or if we handle it ourselves */
+
+static gboolean
+pragha_library_pane_selection_func_true(GtkTreeSelection *selection,
+                                        GtkTreeModel *model,
+                                        GtkTreePath *path,
+                                        gboolean path_currently_selected,
+                                        gpointer data)
+{
+	return TRUE;
+}
+
+static gboolean
+pragha_library_pane_selection_func_false(GtkTreeSelection *selection,
+                                         GtkTreeModel *model,
+                                         GtkTreePath *path,
+                                         gboolean path_currently_selected,
+                                         gpointer data)
+{
+	return FALSE;
+}
+
+
 gboolean library_tree_button_press_cb(GtkWidget *widget,
 				     GdkEventButton *event,
 				     struct con_win *cwin)
@@ -817,10 +845,10 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			if (gtk_tree_selection_path_is_selected(selection, path)
 			    && !(event->state & GDK_CONTROL_MASK)
 			    && !(event->state & GDK_SHIFT_MASK)) {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_false, cwin, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_false, cwin, NULL);
 			}
 			else {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
 			}
 			break;
 		case 2:
@@ -906,7 +934,7 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 
 	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->clibrary->dragging == TRUE) || (event->button!=1)){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
+		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
 		cwin->clibrary->dragging = FALSE;
 		return FALSE;
 	}
@@ -914,7 +942,7 @@ gboolean library_tree_button_release_cb(GtkWidget *widget,
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cwin, NULL);
+		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(selection, path);
 		gtk_tree_path_free(path);
