@@ -880,9 +880,9 @@ pragha_playlist_get_model(PraghaPlaylist* cplaylist);
 GtkWidget *
 pragha_playlist_get_widget(PraghaPlaylist* cplaylist);
 void
-current_playlist_save_preferences(PraghaPlaylist* cplaylist);
-void cplaylist_free(PraghaPlaylist *cplaylist);
-PraghaPlaylist *cplaylist_new(struct con_win *cwin);
+pragha_playlist_save_preferences(PraghaPlaylist* cplaylist);
+void pragha_playlist_free(PraghaPlaylist *cplaylist);
+PraghaPlaylist *pragha_playlist_new(struct con_win *cwin);
 
 /* Preferences */
 

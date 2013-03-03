@@ -33,7 +33,7 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_playback_stop(cwin);
 
-	cplaylist_free(cwin->cplaylist);
+	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
 	pragha_toolbar_free(cwin->toolbar);
