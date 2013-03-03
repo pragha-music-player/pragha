@@ -93,6 +93,8 @@
 #include "pragha-statusbar.h"
 #include "pragha-toolbar.h"
 
+#include "gnome-media-keys.h"
+
 #include "gtkcellrendererbubble.h"
 
 #include "xml_helper.h"
@@ -348,8 +350,6 @@ struct con_state {
 	PraghaMusicobject *curr_mobj;
 	PRAGHA_MUTEX (curr_mobj_mutex);
 };
-
-struct con_gnome_media_keys;
 
 struct con_win {
 	struct con_pref *cpref;
@@ -632,12 +632,6 @@ gint init_first_state(struct con_win *cwin);
 void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
-
-/* gnome media keys */
-
-gboolean gnome_media_keys_will_be_useful();
-gint init_gnome_media_keys(struct con_win *cwin);
-void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
 
 /* keybinder */
 
