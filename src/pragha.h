@@ -82,6 +82,7 @@
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-musicobject.h"
+#include "mpris.h"
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
@@ -155,9 +156,6 @@
 
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 #define DBUS_EVENT_UPDATE_STATE   "update_state"
-
-#define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
-#define MPRIS_PATH "/org/mpris/MediaPlayer2"
 
 #if !GLIB_CHECK_VERSION(2,32,0)
 /* Defines to get network manager status. */
@@ -351,19 +349,6 @@ struct con_state {
 	PRAGHA_MUTEX (curr_mobj_mutex);
 };
 
-struct con_mpris2 {
-	struct con_win *cwin;
-	guint owner_id;
-	GDBusNodeInfo *introspection_data;
-	GDBusConnection *dbus_connection;
-	GQuark interface_quarks[4];
-	gboolean saved_playbackstatus;
-	gboolean saved_shuffle;
-	gchar *saved_title;
-	gdouble volume;
-	enum player_state state;
-};
-
 struct con_gnome_media_keys;
 
 struct con_win {
@@ -382,7 +367,7 @@ struct con_win {
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif
-	struct con_mpris2 *cmpris2;
+	PraghaMpris2 *cmpris2;
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
@@ -574,18 +559,6 @@ DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
 				      gpointer data);
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 void dbus_handlers_free(struct con_win *cwin);
-
-/* MPRIS functions */
-
-gint mpris_init(struct con_win *cwin);
-void mpris_update_any(struct con_win *cwin);
-void mpris_update_metadata_changed(struct con_win *cwin);
-void mpris_update_mobj_remove(struct con_win *cwin, PraghaMusicobject *mobj);
-void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkTreeIter *iter);
-void mpris_update_mobj_changed(struct con_win *cwin, PraghaMusicobject *mobj, gint bitmask);
-void mpris_update_tracklist_replaced(struct con_win *cwin);
-void mpris_close(struct con_mpris2 *cmpris2);
-void mpris_free(struct con_mpris2 *cmpris2);
 
 /* Utilities */
 
