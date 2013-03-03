@@ -20,15 +20,9 @@
 
 #include "pragha.h"
 #include "pragha-playback.h"
+#include "gnome-media-keys.h"
 
 #define PLAYER_NAME "Pragha"
-
-struct con_gnome_media_keys {
-    struct con_win *cwin;
-    guint watch_id;
-    guint handler_id;
-    GDBusProxy *proxy;
-};
 
 static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
                                         const gchar *key)
