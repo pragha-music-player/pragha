@@ -42,6 +42,46 @@ typedef struct {
 	GtkUIManager *library_tree_context_menu;
 } PraghaLibraryPane;
 
+/* Node types in library view */
+
+enum node_type {
+	NODE_CATEGORY,
+	NODE_FOLDER,
+	NODE_GENRE,
+	NODE_ARTIST,
+	NODE_ALBUM,
+	NODE_TRACK,
+	NODE_BASENAME,
+	NODE_PLAYLIST,
+	NODE_RADIO
+};
+
+/* Columns in Library view */
+
+enum library_columns {
+	L_PIXBUF,
+	L_NODE_DATA,
+	L_NODE_TYPE,
+	L_LOCATION_ID,
+	L_MACH,
+	L_VISIBILE,
+	N_L_COLUMNS
+};
+
+/* Library Views */
+
+enum library_style {
+	FOLDERS,
+	ARTIST,
+	ALBUM,
+	GENRE,
+	ARTIST_ALBUM,
+	GENRE_ARTIST,
+	GENRE_ALBUM,
+	GENRE_ARTIST_ALBUM,
+	LAST_LIBRARY_STYLE
+};
+
 void expand_all_action(GtkAction *action, struct con_win *cwin);
 void collapse_all_action(GtkAction *action, struct con_win *cwin);
 void folders_library_tree(GtkAction *action, struct con_win *cwin);

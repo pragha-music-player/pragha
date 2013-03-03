@@ -298,32 +298,6 @@ enum debug_level {
 	DBG_VERBOSE,
 };
 
-/* Node types in library view */
-
-enum node_type {
-	NODE_CATEGORY,
-	NODE_FOLDER,
-	NODE_GENRE,
-	NODE_ARTIST,
-	NODE_ALBUM,
-	NODE_TRACK,
-	NODE_BASENAME,
-	NODE_PLAYLIST,
-	NODE_RADIO
-};
-
-/* Columns in Library view */
-
-enum library_columns {
-	L_PIXBUF,
-	L_NODE_DATA,
-	L_NODE_TYPE,
-	L_LOCATION_ID,
-	L_MACH,
-	L_VISIBILE,
-	N_L_COLUMNS
-};
-
 /* Columns in current playlist view */
 
 enum curplaylist_columns {
@@ -363,20 +337,6 @@ enum dnd_target {
 	TARGET_REF_LIBRARY,
 	TARGET_URI_LIST,
 	TARGET_PLAIN_TEXT
-};
-
-/* Library Views */
-
-enum library_style {
-	FOLDERS,
-	ARTIST,
-	ALBUM,
-	GENRE,
-	ARTIST_ALBUM,
-	GENRE_ARTIST,
-	GENRE_ALBUM,
-	GENRE_ARTIST_ALBUM,
-	LAST_LIBRARY_STYLE
 };
 
 /* Playlist management */
