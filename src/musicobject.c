@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-file-utils.h"
 
 PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)

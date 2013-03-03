@@ -18,6 +18,7 @@
 
 #include "pragha.h"
 #include "pragha-playback.h"
+#include "pragha-file-utils.h"
 
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 #if GST_CHECK_VERSION (1, 0, 0)

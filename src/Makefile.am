@@ -12,7 +12,6 @@ pragha_SOURCES =cdda.c \
 		cdda.h \
 		cmdline.c \
 		dbus.c \
-		file-utils.c \
 		gui.c \
 		glyr-related.c \
 		init.c \
@@ -32,6 +31,8 @@ pragha_SOURCES =cdda.c \
 		pragha-backend.h \
 		pragha-database.c \
 		pragha-database.h \
+		pragha-file-utils.c \
+		pragha-file-utils.h \
 		pragha-filter-dialog.c \
 		pragha-filter-dialog.h \
 		pragha-hig.c \
