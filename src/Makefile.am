@@ -10,7 +10,6 @@ AM_CPPFLAGS =								\
 
 pragha_SOURCES =cdda.c \
 		cdda.h \
-		gui.c \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
@@ -66,6 +65,8 @@ pragha_SOURCES =cdda.c \
 		pragha-toolbar.h \
 		pragha-utils.c \
 		pragha-utils.h \
+		pragha-window.c \
+		pragha-window.h \
 		pref.c \
 		tags.c \
 		gtkcellrendererbubble.c \

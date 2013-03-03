@@ -22,6 +22,7 @@
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
 #include "pragha-dbus.h"
+#include "pragha-window.h"
 
 #include <locale.h> /* require LC_ALL */
 
