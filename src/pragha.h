@@ -103,6 +103,8 @@
 #include "pragha-preferences.h"
 #include "pragha-scanner.h"
 #include "pragha-statusbar.h"
+#include "pragha-toolbar.h"
+
 #include "gtkcellrendererbubble.h"
 
 #include "xml_helper.h"
@@ -639,24 +641,6 @@ typedef struct {
 	GtkMenu *popup_menu;
 } PraghaSidebar;
 
-typedef struct {
-	GtkWidget *widget;
-	PraghaAlbumArt *albumart;
-	GtkWidget *track_progress_bar;
-	GtkToolItem *prev_button;
-	GtkToolItem *play_button;
-	GtkToolItem *stop_button;
-	GtkToolItem *next_button;
-	GtkToolItem *unfull_button;
-	GtkWidget *vol_button;
-	GtkWidget *track_length_label;
-	GtkWidget *track_time_label;
-	GtkWidget *now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
-	#endif
-} PraghaToolbar;
-
 struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
@@ -755,28 +739,6 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 GtkUIManager* create_menu(struct con_win *cwin);
-
-/* Panel */
-
-void update_current_song_info(struct con_win *cwin);
-void __update_progress_song_info(struct con_win *cwin, gint length);
-void __update_current_song_info(struct con_win *cwin);
-void unset_current_song_info(struct con_win *cwin);
-void unset_track_progress_bar(struct con_win *cwin);
-void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
-void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
-void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
-gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
-void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin);
-gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
-void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
-void play_button_handler(GtkButton *button, struct con_win *cwin);
-void stop_button_handler(GtkButton *button, struct con_win *cwin);
-void prev_button_handler(GtkButton *button, struct con_win *cwin);
-void next_button_handler(GtkButton *button, struct con_win *cwin);
-void album_art_toggle_state(struct con_win *cwin);
-void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
-GtkWidget* create_toolbar(struct con_win *cwin);
 
 /* File utils functions */
 
@@ -1193,12 +1155,6 @@ void pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *widget);
 GtkWidget *pragha_sidebar_get_widget(PraghaSidebar *sidebar);
 void pragha_sidebar_free(PraghaSidebar *sidebar);
 PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
-
-/* pragha-toolbar.c */
-
-GtkWidget *pragha_toolbar_get_widget(PraghaToolbar *toolbar);
-void pragha_toolbar_free(PraghaToolbar *toolbar);
-PraghaToolbar *pragha_toolbar_new(struct con_win *cwin);
 
 /* pragha-simple-async.c: Very simple and generic async API. */
 
