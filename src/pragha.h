@@ -105,8 +105,6 @@
 
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
 #define MIN_WINDOW_HEIGHT          (gdk_screen_height() * 3 / 4)
-#define DEFAULT_SIDEBAR_SIZE       200
-#define DEFAULT_ALBUM_ART_SIZE     36
 #define PROGRESS_BAR_WIDTH         300
 #define COL_WIDTH_THRESH           30
 #define DEFAULT_PLAYLIST_COL_WIDTH ((MIN_WINDOW_WIDTH - DEFAULT_SIDEBAR_SIZE) / 4)
@@ -133,15 +131,6 @@
 #define PANE_NONE		"none"
 
 #define MIN_DATABASE_VERSION	"0.8.0"
-
-#define DEFAULT_SINK "default"
-#define ALSA_SINK    "alsa"
-#define OSS4_SINK    "oss4"
-#define OSS_SINK     "oss"
-#define PULSE_SINK   "pulse"
-
-#define ALSA_DEFAULT_DEVICE "default"
-#define OSS_DEFAULT_DEVICE  "/dev/dsp"
 
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
@@ -188,69 +177,6 @@ typedef enum {
         NM_STATE_CONNECTED_GLOBAL = 70
 } NMState;
 #endif
-
-/* Defines to key preferences. */
-
-#define GROUP_GENERAL  "General"
-#define KEY_INSTALLED_VERSION      "installed_version"
-#define KEY_LAST_FOLDER            "last_folder"
-#define KEY_ADD_RECURSIVELY_FILES  "add_recursively_files"
-#define KEY_ALBUM_ART_PATTERN      "album_art_pattern"
-#define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
-#define KEY_SHOW_ICON_TRAY	   "show_icon_tray"
-#define KEY_CLOSE_TO_TRAY	   "close_to_tray"
-#define KEY_SHOW_OSD               "show_osd"
-#define KEY_OSD_IN_TRAY            "osd_in_tray"
-#define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
-#define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
-#define KEY_INSTANT_SEARCH         "instant_filter"
-#define KEY_APPROXIMATE_SEARCH     "aproximate_search"
-#define KEY_USE_HINT               "use_hint"
-
-#define GROUP_PLAYLIST "Playlist"
-#define KEY_SAVE_PLAYLIST          "save_playlist"
-#define KEY_CURRENT_REF		   "current_ref"
-#define KEY_SHUFFLE                "shuffle"
-#define KEY_REPEAT                 "repeat"
-#define KEY_PLAYLIST_COLUMNS       "playlist_columns"
-#define KEY_PLAYLIST_COLUMN_WIDTHS "playlist_column_widths"
-
-#define GROUP_LIBRARY  "Library"
-#define KEY_LIBRARY_DIR            "library_dir"
-#define KEY_LIBRARY_SCANNED        "library_scanned"
-#define KEY_LIBRARY_VIEW_ORDER     "library_view_order"
-#define KEY_LIBRARY_LAST_SCANNED   "library_last_scanned"
-#define KEY_FUSE_FOLDERS	   "library_fuse_folders"
-#define KEY_SORT_BY_YEAR	   "library_sort_by_year"
-
-#define GROUP_AUDIO    "Audio"
-#define KEY_AUDIO_SINK             "audio_sink"
-#define KEY_AUDIO_DEVICE           "audio_device"
-#define KEY_SOFTWARE_MIXER         "software_mixer"
-#define KEY_SOFTWARE_VOLUME	   "software_volume"
-#define KEY_AUDIO_CD_DEVICE        "audio_cd_device"
-#define KEY_EQ_10_BANDS            "equealizer_10_bands"
-#define KEY_EQ_PRESET              "equalizer_preset"
-
-#define GROUP_WINDOW   "Window"
-#define KEY_REMEMBER_STATE	   "remember_window_state"
-#define KEY_START_MODE		   "start_mode"
-#define KEY_WINDOW_SIZE            "window_size"
-#define KEY_WINDOW_POSITION        "window_position"
-#define KEY_SIDEBAR_SIZE           "sidebar_size"
-#define KEY_SIDEBAR                "sidebar"
-#define KEY_SHOW_ALBUM_ART         "show_album_art"
-#define KEY_ALBUM_ART_SIZE         "album_art_size"
-#define KEY_STATUS_BAR             "status_bar"
-#define KEY_CONTROLS_BELOW         "controls_below"
-
-#define GROUP_SERVICES   "services"
-#define KEY_LASTFM                 "lastfm"
-#define KEY_LASTFM_USER            "lastfm_user"
-#define KEY_LASTFM_PASS            "lastfm_pass"
-#define KEY_GET_ALBUM_ART          "get_album_art"
-#define KEY_USE_CDDB               "use_cddb"
-#define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
 #define TAG_TNO_CHANGED		1<<0
 #define TAG_TITLE_CHANGED	1<<1
