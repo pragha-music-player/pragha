@@ -146,16 +146,6 @@
 #define TAG_YEAR_CHANGED	1<<5
 #define TAG_COMMENT_CHANGED	1<<6
 
-#define PRAGHA_BUTTON_SKIP       _("_Skip")
-#define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
-#define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
-
-typedef enum {
-	PRAGHA_RESPONSE_SKIP,
-	PRAGHA_RESPONSE_SKIP_ALL,
-	PRAGHA_RESPONSE_DELETE_ALL
-} PraghaDeleteResponseType;
-
 enum debug_level {
 	DBG_BACKEND = 1,
 	DBG_INFO,
