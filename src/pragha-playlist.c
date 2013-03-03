@@ -18,6 +18,7 @@
 
 #include "pragha.h"
 #include "pragha-playlist.h"
+#include "pragha-lastfm.h"
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\

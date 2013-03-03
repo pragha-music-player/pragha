@@ -31,10 +31,6 @@
 #include <keybinder.h>
 #endif
 
-#ifdef HAVE_LIBCLASTFM
-#include <clastfm.h>
-#endif
-
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
 #include <glyr/cache.h>
@@ -89,6 +85,7 @@
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
+#include "pragha-lastfm.h"
 #include "pragha-scanner.h"
 #include "pragha-sidebar.h"
 #include "pragha-simple-async.h"
@@ -147,9 +144,6 @@
 #define OSS_DEFAULT_DEVICE  "/dev/dsp"
 
 #define SAVE_PLAYLIST_STATE         "con_playlist"
-
-#define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
-#define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
 
 #define WAIT_UPDATE 5
 
@@ -333,16 +327,6 @@ enum playlist_type {
 	PL_FORMAT_XSPF
 };
 
-/* Track sources for last.fm submission */
-
-enum track_source {
-	USER_SOURCE,
-	BROADCAST_SOURCE,
-	RECO_SOURCE,
-	LASTFM_SOURCE,
-	UNKNOWN_SOURCE
-};
-
 typedef struct {
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;
@@ -440,16 +424,6 @@ struct con_state {
 	PraghaMusicobject *curr_mobj;
 	PRAGHA_MUTEX (curr_mobj_mutex);
 };
-
-#ifdef HAVE_LIBCLASTFM
-struct con_lastfm {
-	LASTFM_SESSION *session_id;
-	enum LASTFM_STATUS_CODES status;
-	time_t playback_started;
-	PraghaMusicobject *nmobj;
-	PRAGHA_MUTEX (nmobj_mutex);
-};
-#endif
 
 struct con_mpris2 {
 	struct con_win *cwin;
@@ -777,25 +751,6 @@ gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 void notify_free();
-
-/* Lastfm Helper */
-
-#ifdef HAVE_LIBCLASTFM
-void update_menubar_lastfm_state (struct con_win *cwin);
-void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
-void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin);
-void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
-void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
-void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_now_playing_handler (struct con_win *cwin);
-gint just_init_lastfm (struct con_win *cwin);
-gint init_lastfm(struct con_win *cwin);
-void lastfm_free(struct con_lastfm *clastfm);
-#endif
 
 /* Related info helpers */
 

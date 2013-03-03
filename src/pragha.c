@@ -19,6 +19,8 @@
 #include "pragha.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
+#include "pragha-lastfm.h"
+
 #include <locale.h> /* require LC_ALL */
 
 gint debug_level;
