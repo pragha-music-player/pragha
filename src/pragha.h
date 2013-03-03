@@ -78,20 +78,6 @@
 
 /* Some definitions to solve different versions of the libraries. */
 
-#if GLIB_CHECK_VERSION (2, 32, 0)
-#define PRAGHA_MUTEX(mtx) GMutex mtx
-#define pragha_mutex_free(mtx) g_mutex_clear (&(mtx))
-#define pragha_mutex_lock(mtx) g_mutex_lock (&(mtx))
-#define pragha_mutex_unlock(mtx) g_mutex_unlock (&(mtx))
-#define pragha_mutex_create(mtx) g_mutex_init (&(mtx))
-#else
-#define PRAGHA_MUTEX(mtx) GMutex *mtx
-#define pragha_mutex_free(mtx) g_mutex_free (mtx)
-#define pragha_mutex_lock(mtx) g_mutex_lock (mtx)
-#define pragha_mutex_unlock(mtx) g_mutex_unlock (mtx)
-#define pragha_mutex_create(mtx) (mtx) = g_mutex_new ()
-#endif
-
 #ifndef NOTIFY_CHECK_VERSION
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
@@ -102,6 +88,7 @@
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
 #include "pragha-scanner.h"
+#include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 #include "pragha-toolbar.h"
 
@@ -1155,19 +1142,6 @@ void pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *widget);
 GtkWidget *pragha_sidebar_get_widget(PraghaSidebar *sidebar);
 void pragha_sidebar_free(PraghaSidebar *sidebar);
 PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
-
-/* pragha-simple-async.c: Very simple and generic async API. */
-
-typedef struct {
-	gpointer userdata;
-	gpointer finished_data;
-	GThreadFunc func_w;
-	GSourceFunc func_f;
-} AsyncSimple;
-
-gboolean pragha_async_set_idle_message (gpointer user_data);
-void pragha_async_launch (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
-GThread *pragha_async_launch_full (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 /* Lastfm Helper */
 

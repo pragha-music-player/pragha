@@ -47,6 +47,7 @@ pragha_SOURCES =cdda.c \
 		pragha-scanner.h \
 		pragha-sidebar.c \
 		pragha-simple-async.c \
+		pragha-simple-async.h \
 		pragha-statusbar.c \
 		pragha-statusbar.h \
 		pragha-toolbar.c \
