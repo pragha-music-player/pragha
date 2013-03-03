@@ -19,6 +19,9 @@
 #include "pragha.h"
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
+#include "pragha-utils.h"
+
+#include <tag_c.h>
 
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)

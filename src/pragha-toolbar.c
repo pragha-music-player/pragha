@@ -16,10 +16,11 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha.h"
 #include "pragha-toolbar.h"
 #include "pragha-playback.h"
 #include "pragha-lastfm.h"
-#include "pragha.h"
+#include "pragha-utils.h"
 
 /* Search the album art on cache and create a pixbuf of that file */
 #ifdef HAVE_LIBGLYR

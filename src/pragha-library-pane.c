@@ -20,6 +20,7 @@
 #include "pragha-library-pane.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
+#include "pragha-utils.h"
 
 /*
  * Menus definitions

@@ -67,6 +67,7 @@ extern const gchar *mime_dual[];
 #endif
 
 gboolean is_playable_file(const gchar *file);
+enum file_type get_file_type(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
 gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable);
 gint dir_file_count(const gchar *dir_name, gint call_recur);

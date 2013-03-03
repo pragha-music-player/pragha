@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-utils.h"
 #include "pragha-file-utils.h"
 
 /* Function to save debug on file. */

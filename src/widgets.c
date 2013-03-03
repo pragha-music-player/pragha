@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-utils.h"
 
 /* Generic search entry, valid to library tree, and jump dialog. */
 

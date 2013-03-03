@@ -22,6 +22,7 @@
 #include "pragha-lastfm.h"
 #include "pragha-file-utils.h"
 #include "pragha-menubar.h"
+#include "pragha-utils.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"

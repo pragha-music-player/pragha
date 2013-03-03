@@ -18,6 +18,7 @@
 #include "pragha.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"
+#include "pragha-utils.h"
 
 #ifdef HAVE_LIBGLYR
 
