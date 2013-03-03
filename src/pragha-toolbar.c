@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha-toolbar.h"
+#include "pragha-playback.h"
 #include "pragha.h"
 
 /* Search the album art on cache and create a pixbuf of that file */

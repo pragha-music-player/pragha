@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-playback.h"
 #include <locale.h> /* require LC_ALL */
 
 gint debug_level;

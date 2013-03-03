@@ -19,6 +19,7 @@
 //based on code from Totem movie player
 
 #include "pragha.h"
+#include "pragha-playback.h"
 
 #define PLAYER_NAME "Pragha"
 
