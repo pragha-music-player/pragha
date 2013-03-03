@@ -33,6 +33,7 @@ pragha_SOURCES =cdda.c \
 		pragha-database.h \
 		pragha-filter-dialog.c \
 		pragha-hig.c \
+		pragha-hig.h \
 		pragha-library-pane.c \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
