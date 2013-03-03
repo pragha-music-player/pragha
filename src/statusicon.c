@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-playback.h"
 
 static void systray_play_pause_action(GtkAction *action, struct con_win *cwin);
 static void systray_stop_action(GtkAction *action, struct con_win *cwin);

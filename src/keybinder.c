@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-playback.h"
 
 static void keybind_prev_handler (const char *keystring, gpointer data)
 {

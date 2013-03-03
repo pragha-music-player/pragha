@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-playback.h"
 
 /*
  * Menus definitions

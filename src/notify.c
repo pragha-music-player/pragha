@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-playback.h"
 
 static void
 notify_closed_cb (NotifyNotification *osd,
