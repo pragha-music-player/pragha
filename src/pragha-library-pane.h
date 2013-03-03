@@ -21,6 +21,27 @@
 
 #include "pragha.h"
 
+typedef struct {
+	PraghaDatabase *cdbase;
+	PraghaPreferences *preferences;
+	GtkTreeStore *library_store;
+	GtkWidget *search_entry;
+	GtkWidget *library_tree;
+	GtkWidget *widget;
+	gboolean dragging;
+	gboolean view_change;
+	gchar *filter_entry;
+	guint timeout_id;
+	GSList *library_tree_nodes;
+	GdkPixbuf *pixbuf_artist;
+	GdkPixbuf *pixbuf_album;
+	GdkPixbuf *pixbuf_track;
+	GdkPixbuf *pixbuf_genre;
+	GdkPixbuf *pixbuf_dir;
+	GtkUIManager *library_pane_context_menu;
+	GtkUIManager *library_tree_context_menu;
+} PraghaLibraryPane;
+
 void expand_all_action(GtkAction *action, struct con_win *cwin);
 void collapse_all_action(GtkAction *action, struct con_win *cwin);
 void folders_library_tree(GtkAction *action, struct con_win *cwin);
