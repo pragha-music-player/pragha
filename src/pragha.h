@@ -1113,17 +1113,6 @@ void show_osd(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 void notify_free();
 
-/* pragha-hig.c: HIG helpers and pango extention. */
-
-void gtk_label_set_attribute_bold(GtkLabel *label);
-GtkWidget *
-pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const char *section_title);
-void pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget);
-void pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget);
-void pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
-GtkWidget *pragha_hig_workarea_table_new();
-void pragha_hig_workarea_table_finish(GtkWidget *table, guint *row);
-
 /* pragha-playback.c: Functions to control playback and notify events. */
 
 void pragha_playback_notificate_new_track (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin);

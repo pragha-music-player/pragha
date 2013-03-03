@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-hig.h"
 
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)

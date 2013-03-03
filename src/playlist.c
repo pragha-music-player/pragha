@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-hig.h"
 
 /* Build a dialog to get a new playlist name */
 
