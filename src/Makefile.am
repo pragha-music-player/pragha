@@ -50,6 +50,7 @@ pragha_SOURCES =cdda.c \
 		pragha-statusbar.c \
 		pragha-statusbar.h \
 		pragha-toolbar.c \
+		pragha-toolbar.h \
 		pref.c \
 		statusicon.c \
 		tags.c \

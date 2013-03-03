@@ -1,21 +1,22 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha-toolbar.h"
 #include "pragha.h"
 
 /* Search the album art on cache and create a pixbuf of that file */
@@ -218,7 +219,8 @@ void __update_current_song_info(struct con_win *cwin)
 	g_free(str);
 }
 
-void unset_current_song_info(struct con_win *cwin)
+static void
+pragha_toolbar_unset_song_info(struct con_win *cwin)
 {
 	gtk_label_set_markup(GTK_LABEL(cwin->toolbar->now_playing_label),
 				  _("<b>Not playing</b>"));
@@ -254,18 +256,25 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 	}
 }
 
-void unset_track_progress_bar(struct con_win *cwin)
+static void
+pragha_toolbar_unset_progress_bar(struct con_win *cwin)
 {
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->toolbar->track_progress_bar), 0);
 }
 
-void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin)
+static void
+pragha_toolbar_song_label_event_edit(GtkWidget *w,
+                                     GdkEventButton* event,
+                                     struct con_win *cwin)
 {
 	if (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS)
 		edit_tags_playing_action(NULL, cwin);
 }
 
-void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin)
+static void
+pragha_toolbar_timer_label_event_change_mode(GtkWidget *w,
+                                             GdkEventButton* event,
+                                             struct con_win *cwin)
 {
 	gboolean mode = pragha_preferences_get_timer_remaining_mode (cwin->preferences);
 	pragha_preferences_set_timer_remaining_mode (cwin->preferences, !mode);
@@ -274,9 +283,10 @@ void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con
 		update_current_song_info(cwin);
 }
 
-void track_progress_change_cb(GtkWidget *widget,
-			      GdkEventButton *event,
-			      struct con_win *cwin)
+static void
+pragha_toolbar_progress_bar_event_seek(GtkWidget *widget,
+                                       GdkEventButton *event,
+                                       struct con_win *cwin)
 {
 	gint seek = 0, length = 0;
 	gdouble fraction = 0;
@@ -337,7 +347,24 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 	}
 }
 
-gboolean
+/* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
+
+static gboolean
+panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+{
+	gboolean ret = FALSE;
+
+	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
+	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
+		ret = pragha_playlist_propagate_event(cwin->cplaylist, event);
+	}
+
+	return ret;
+}
+
+/* Handler for show album art on viewer. */
+
+static gboolean
 pragha_toolbar_album_art_activated (GtkWidget      *event_box,
                                     GdkEventButton *event,
                                     struct con_win *cwin)
@@ -353,23 +380,9 @@ pragha_toolbar_album_art_activated (GtkWidget      *event_box,
 	return TRUE;
 }
 
-/* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
+/* Handler for buttons on toolbar. */
 
-gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
-{
-	gboolean ret = FALSE;
-
-	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
-	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
-		ret = pragha_playlist_propagate_event(cwin->cplaylist, event);
-	}
-
-	return ret;
-}
-
-/* Handler for the 'Leave fullscren' button item in Panel */
-
-void
+static void
 unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 {
 	GtkAction *action_fullscreen;
@@ -379,22 +392,26 @@ unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
 
-void play_button_handler(GtkButton *button, struct con_win *cwin)
+static void
+play_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	pragha_playback_play_pause_resume(cwin);
 }
 
-void stop_button_handler(GtkButton *button, struct con_win *cwin)
+static void
+stop_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	pragha_playback_stop(cwin);
 }
 
-void prev_button_handler(GtkButton *button, struct con_win *cwin)
+static void
+prev_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	pragha_playback_prev_track(cwin);
 }
 
-void next_button_handler(GtkButton *button, struct con_win *cwin)
+static void
+next_button_handler(GtkButton *button, struct con_win *cwin)
 {
 	pragha_playback_next_track(cwin);
 }
@@ -441,8 +458,8 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 	gtk_widget_set_sensitive(GTK_WIDGET(cwin->toolbar->next_button), playing);
 
 	if (playing == FALSE) {
-		unset_current_song_info(cwin);
-		unset_track_progress_bar(cwin);
+		pragha_toolbar_unset_song_info(cwin);
+		pragha_toolbar_unset_progress_bar(cwin);
 		pragha_album_art_set_path(cwin->toolbar->albumart, NULL);
 	}
 }
@@ -473,7 +490,7 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(track_playing_event_box), FALSE);
 
 	g_signal_connect (G_OBJECT(track_playing_event_box), "button-press-event",
-			G_CALLBACK(edit_tags_playing_event), cwin);
+			G_CALLBACK(pragha_toolbar_song_label_event_edit), cwin);
 
 	now_playing_label = gtk_label_new(NULL);
 	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
@@ -522,13 +539,13 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 	gtk_container_add(GTK_CONTAINER(track_progress_event_box), track_progress_bar);
 
 	g_signal_connect(G_OBJECT(track_progress_event_box), "button-press-event",
-			 G_CALLBACK(track_progress_change_cb), cwin);
+			 G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
 	#else
 	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_bar);
 	gtk_widget_set_events(track_progress_bar, GDK_BUTTON_PRESS_MASK);
 
 	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
-			 G_CALLBACK(track_progress_change_cb), cwin);
+			 G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
 	#endif
 
 	track_time_label = gtk_label_new(NULL);
@@ -547,7 +564,7 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(track_length_event_box), FALSE);
 
 	g_signal_connect (G_OBJECT(track_length_event_box), "button-press-event",
-			G_CALLBACK(timer_remaining_mode_change), cwin);
+			G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), cwin);
 	gtk_container_add(GTK_CONTAINER(track_length_event_box), track_length_align);
 
 	toolbar->track_progress_bar = 	track_progress_bar;
