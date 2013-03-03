@@ -18,6 +18,7 @@
 
 #include "pragha.h"
 #include "pragha-playback.h"
+#include "pragha-file-utils.h"
 
 static void dbus_play_handler(struct con_win *cwin)
 {

@@ -20,6 +20,7 @@
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
+#include "pragha-file-utils.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
@@ -387,24 +388,18 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_ogg[i++]);
 
-	#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
 	i = 0;
 	while (mime_asf[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_asf[i++]);
-	#endif
-	#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
 	i = 0;
 	while (mime_mp4[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_mp4[i++]);
-	#endif
-	#ifdef HAVE_TAGLIB_1_7
 	i = 0;
 	while (mime_ape[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_ape[i++]);
-	#endif
 
 	#ifdef HAVE_PLPARSER
 	i = 0;

@@ -218,37 +218,6 @@ enum playlist_mgmt {
 	SAVE_SELECTED
 };
 
-/* File Type */
-
-enum file_type {
-	FILE_WAV,
-	FILE_MP3,
-	FILE_FLAC,
-	FILE_OGGVORBIS,
-#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
-	FILE_ASF,
-#endif
-#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
-	FILE_MP4,
-#endif
-#ifdef HAVE_TAGLIB_1_7
-	FILE_APE,
-#endif
-	FILE_CDDA,
-	FILE_HTTP,
-	LAST_FILE_TYPE
-};
-
-/* Playlist type formats */
-
-enum playlist_type {
-	PL_FORMAT_UNKNOWN,
-	PL_FORMAT_M3U,
-	PL_FORMAT_PLS,
-	PL_FORMAT_ASX,
-	PL_FORMAT_XSPF
-};
-
 typedef struct {
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;
@@ -381,29 +350,9 @@ struct con_win {
 	DBusConnection *con_dbus;
 };
 
-extern gint debug_level;
-extern const gchar *mime_mpeg[];
-extern const gchar *mime_wav[];
-extern const gchar *mime_flac[];
-extern const gchar *mime_ogg[];
-#if defined(TAGLIB_WITH_ASF) && (TAGLIB_WITH_ASF==1)
-extern const gchar *mime_asf[];
-#endif
-#if defined(TAGLIB_WITH_MP4) && (TAGLIB_WITH_MP4==1)
-extern const gchar *mime_mp4[];
-#endif
-#ifdef HAVE_TAGLIB_1_7
-extern const gchar *mime_ape[];
-#endif
-
-extern const gchar *mime_image[];
-
-#ifdef HAVE_PLPARSER
-extern const gchar *mime_playlist[];
-extern const gchar *mime_dual[];
-#endif
-
 /* Debugging */
+
+extern gint debug_level;
 
 #define CDEBUG(_lvl, _fmt, ...)			\
 	if (G_UNLIKELY(_lvl <= debug_level))	\
@@ -440,15 +389,6 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 GtkUIManager* create_menu(struct con_win *cwin);
-
-/* File utils functions */
-
-gboolean is_playable_file(const gchar *file);
-gboolean is_dir_and_accessible(const gchar *dir);
-gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable);
-gint dir_file_count(const gchar *dir_name, gint call_recur);
-GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
-GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
 
 /* Musicobject functions */
 
