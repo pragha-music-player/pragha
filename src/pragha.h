@@ -43,8 +43,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 //#include <gio/gio.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
+//#include <dbus/dbus.h>
+//#include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
@@ -117,26 +117,6 @@
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
 #define WAIT_UPDATE 5
-
-#define DBUS_PATH      "/org/pragha/DBus"
-#define DBUS_NAME      "org.pragha.DBus"
-#define DBUS_INTERFACE "org.pragha.DBus"
-
-#define DBUS_SIG_PLAY     "play"
-#define DBUS_SIG_STOP     "stop"
-#define DBUS_SIG_PAUSE    "pause"
-#define DBUS_SIG_NEXT     "next"
-#define DBUS_SIG_PREV     "prev"
-#define DBUS_SIG_SHUFFLE  "shuffle"
-#define DBUS_SIG_REPEAT   "repeat"
-#define DBUS_SIG_INC_VOL  "inc_vol"
-#define DBUS_SIG_DEC_VOL  "dec_vol"
-#define DBUS_SIG_TOGGLE_VIEW      "toggle_view"
-#define DBUS_SIG_SHOW_OSD "show_osd"
-#define DBUS_SIG_ADD_FILE "add_files"
-
-#define DBUS_METHOD_CURRENT_STATE "curent_state"
-#define DBUS_EVENT_UPDATE_STATE   "update_state"
 
 #define TAG_TNO_CHANGED		1<<0
 #define TAG_TITLE_CHANGED	1<<1
@@ -367,45 +347,6 @@ void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
 void preferences_free(struct con_pref *cpref);
 
-/* Command line functions */
-
-gboolean cmd_version(const gchar *opt_name, const gchar *val,
-		     struct con_win *cwin, GError **error);
-gboolean cmd_play(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error);
-gboolean cmd_stop(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error);
-gboolean cmd_pause(const gchar *opt_name, const gchar *val,
-		   struct con_win *cwin, GError **error);
-gboolean cmd_prev(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error);
-gboolean cmd_next(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error);
-gboolean cmd_shuffle(const gchar *opt_name, const gchar *val,
-		     struct con_win *cwin, GError **error);
-gboolean cmd_repeat(const gchar *opt_name, const gchar *val,
-		    struct con_win *cwin, GError **error);
-gboolean cmd_inc_volume(const gchar *opt_name, const gchar *val,
-			struct con_win *cwin, GError **error);
-gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
-			struct con_win *cwin, GError **error);
-gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error);
-gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error);
-gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
-			   struct con_win *cwin, GError **error);
-gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error);
-
-/* D-BUS functions */
-
-DBusHandlerResult dbus_filter_handler(DBusConnection *conn,
-				      DBusMessage *msg,
-				      gpointer data);
-void dbus_send_signal(const gchar *signal, struct con_win *cwin);
-void dbus_handlers_free(struct con_win *cwin);
-
 /* Some widgets. */
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
@@ -433,7 +374,6 @@ GtkWidget* create_info_bar_update_music(struct con_win *cwin);
 /* Init */
 
 gint init_dbus(struct con_win *cwin);
-gint init_dbus_handlers(struct con_win *cwin);
 gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_taglib(struct con_win *cwin);
 gint init_config(struct con_win *cwin);

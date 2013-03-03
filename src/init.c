@@ -22,6 +22,7 @@
 #include "pragha-menubar.h"
 #include "pragha-statusicon.h"
 #include "pragha-utils.h"
+#include "pragha-cmdline.h"
 
 #ifdef HAVE_LIBXFCE4UI
 #include <libxfce4ui/libxfce4ui.h>
