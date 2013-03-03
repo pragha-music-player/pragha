@@ -121,18 +121,6 @@
 #define TAG_MAX_LEN                256
 #define AUDIO_CD_DEVICE_ENTRY_LEN  32
 
-#define P_TRACK_NO_STR      "#"
-#define P_TNO_FULL_STR      N_("Track No")
-#define P_TITLE_STR         N_("Title")
-#define P_ARTIST_STR        N_("Artist")
-#define P_ALBUM_STR         N_("Album")
-#define P_GENRE_STR         N_("Genre")
-#define P_BITRATE_STR       N_("Bitrate")
-#define P_YEAR_STR          N_("Year")
-#define P_COMMENT_STR       N_("Comment")
-#define P_LENGTH_STR        N_("Length")
-#define P_FILENAME_STR      N_("Filename")
-
 /* These are not seen in the playlist columns */
 /* Used for library view and preferences */
 
@@ -296,27 +284,6 @@ enum debug_level {
 	DBG_MOBJ,
 	DBG_DB,
 	DBG_VERBOSE,
-};
-
-/* Columns in current playlist view */
-
-enum curplaylist_columns {
-	P_MOBJ_PTR,
-	P_QUEUE,
-	P_BUBBLE,
-	P_STATUS_PIXBUF,
-	P_TRACK_NO,
-	P_TITLE,
-	P_ARTIST,
-	P_ALBUM,
-	P_GENRE,
-	P_BITRATE,
-	P_YEAR,
-	P_COMMENT,
-	P_LENGTH,
-	P_FILENAME,
-	P_PLAYED,
-	N_P_COLUMNS
 };
 
 /* DnD */
