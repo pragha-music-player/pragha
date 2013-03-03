@@ -352,19 +352,6 @@ void preferences_free(struct con_pref *cpref);
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
 GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
 
-/* GUI */
-
-GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_info_box(struct con_win *cwin);
-GtkWidget* create_paned_region(struct con_win *cwin);
-GtkWidget* create_search_bar(struct con_win *cwin);
-GtkWidget* create_combo_order(struct con_win *cwin);
-gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
-void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
-void gui_free(struct con_win *cwin);
-void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
-void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
-
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);

@@ -20,6 +20,7 @@
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
+#include "pragha-window.h"
 
 const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
