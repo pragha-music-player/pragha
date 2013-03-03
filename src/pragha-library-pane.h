@@ -82,6 +82,18 @@ enum library_style {
 	LAST_LIBRARY_STYLE
 };
 
+typedef enum {
+	PRAGHA_RESPONSE_SKIP,
+	PRAGHA_RESPONSE_SKIP_ALL,
+	PRAGHA_RESPONSE_DELETE_ALL
+} PraghaDeleteResponseType;
+
+#define PRAGHA_BUTTON_SKIP       _("_Skip")
+#define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
+#define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
+
+/* Functions */
+
 void expand_all_action(GtkAction *action, struct con_win *cwin);
 void collapse_all_action(GtkAction *action, struct con_win *cwin);
 void folders_library_tree(GtkAction *action, struct con_win *cwin);
