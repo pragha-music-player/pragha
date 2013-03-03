@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "pragha.h"
 #include "pragha-simple-async.h"
+#include "pragha-library-pane.h"
 
 #ifdef HAVE_LIBCLASTFM
 
