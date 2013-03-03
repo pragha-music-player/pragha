@@ -32,6 +32,7 @@ pragha_SOURCES =cdda.c \
 		pragha-database.c \
 		pragha-database.h \
 		pragha-filter-dialog.c \
+		pragha-filter-dialog.h \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \
