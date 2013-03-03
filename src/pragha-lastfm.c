@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include "pragha.h"
+#include "pragha-simple-async.h"
 
 #ifdef HAVE_LIBCLASTFM
 

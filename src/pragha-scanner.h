@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-simple-async.h"
 
 typedef struct {
 	/* Widgets */
