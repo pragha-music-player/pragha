@@ -58,12 +58,13 @@ pragha_SOURCES =cdda.c \
 		pragha-simple-async.h \
 		pragha-statusbar.c \
 		pragha-statusbar.h \
+		pragha-statusicon.c \
+		pragha-statusicon.h \
 		pragha-toolbar.c \
 		pragha-toolbar.h \
 		pragha-utils.c \
 		pragha-utils.h \
 		pref.c \
-		statusicon.c \
 		tags.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \

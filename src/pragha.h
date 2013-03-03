@@ -413,13 +413,6 @@ void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
 void preferences_free(struct con_pref *cpref);
 
-/* Systray functions */
-
-void create_status_icon (struct con_win *cwin);
-void systray_display_popup_menu (struct con_win *cwin);
-
-void about_widget(struct con_win *cwin);
-
 /* Command line functions */
 
 gboolean cmd_version(const gchar *opt_name, const gchar *val,
@@ -471,7 +464,6 @@ GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);
 GtkWidget* create_combo_order(struct con_win *cwin);
-void create_status_icon(struct con_win *cwin);
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 void gui_free(struct con_win *cwin);
