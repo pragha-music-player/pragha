@@ -16,6 +16,7 @@
  */
 
 #include "pragha.h"
+#include "pragha-utils.h"
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 {

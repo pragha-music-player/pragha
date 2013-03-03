@@ -21,6 +21,7 @@
 
 G_BEGIN_DECLS
 
+#include <gst/gst.h>
 #include "pragha-musicobject.h"
 
 //forward declarations

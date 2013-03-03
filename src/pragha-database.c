@@ -22,6 +22,7 @@
 #include "pragha.h"
 #include "pragha-database.h"
 #include "pragha-prepared-statement-private.h"
+#include "pragha-utils.h"
 
 G_DEFINE_TYPE(PraghaDatabase, pragha_database, G_TYPE_OBJECT)
 

@@ -17,10 +17,11 @@
 /*************************************************************************/
 
 #include "pragha.h"
-#include "pragha-playback.h"
 #include "mpris.h"
+#include "pragha-playback.h"
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
+#include "pragha-utils.h"
 
 static const gchar mpris2xml[] = 
 "<node>"

@@ -16,9 +16,11 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
 #include "pragha-library-pane.h"
-#include "pragha-lastfm.h"
+#include "pragha-utils.h"
+#include "xml_helper.h"
 
 #ifdef HAVE_LIBCLASTFM
 void

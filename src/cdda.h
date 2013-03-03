@@ -30,5 +30,6 @@
    #endif
 #endif
 #include <cdio/cd_types.h>
+#include <cddb/cddb.h>
 
 #endif /* CDDA_H */

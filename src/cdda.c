@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-utils.h"
 
 static gint cddb_add_tracks(struct con_win *cwin)
 {

@@ -18,6 +18,7 @@
 #include "pragha.h" // LAST_LIBRARY_STYLE and FOLDERS
 #include "pragha-preferences.h"
 #include "pragha-file-utils.h"
+#include "pragha-utils.h"
 //#include "pragha-library-pane.h" // LAST_LIBRARY_STYLE and FOLDERS
 
 G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)

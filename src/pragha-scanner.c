@@ -17,6 +17,7 @@
 
 #include "pragha.h"
 #include "pragha-file-utils.h"
+#include "pragha-utils.h"
 
 /* Update the dialog. */
 

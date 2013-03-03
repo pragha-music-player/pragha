@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-filter-dialog.h"
+#include "pragha-utils.h"
 
 static void
 pragha_filter_dialog_select_row_on_current_playlist(GtkTreeView *fliter_view,

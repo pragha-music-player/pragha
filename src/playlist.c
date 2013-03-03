@@ -19,6 +19,11 @@
 #include "pragha.h"
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
+#include "pragha-utils.h"
+
+#ifdef HAVE_PLPARSER
+#include <totem-pl-parser.h>
+#endif
 
 /* Build a dialog to get a new playlist name */
 

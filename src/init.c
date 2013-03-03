@@ -21,6 +21,12 @@
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
 #include "pragha-statusicon.h"
+#include "pragha-utils.h"
+
+#ifdef HAVE_LIBXFCE4UI
+#include <libxfce4ui/libxfce4ui.h>
+#endif
+#include <tag_c.h>
 
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;

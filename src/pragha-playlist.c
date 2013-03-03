@@ -21,6 +21,8 @@
 #include "pragha-lastfm.h"
 #include "pragha-file-utils.h"
 #include "pragha-menubar.h"
+#include "pragha-utils.h"
+#include "gtkcellrendererbubble.h"
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\

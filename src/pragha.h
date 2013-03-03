@@ -32,35 +32,23 @@
 #include <glyr/cache.h>
 #endif
 
-#ifdef HAVE_LIBXFCE4UI
-#include <libxfce4ui/libxfce4ui.h>
-#endif
-
-#ifdef HAVE_PLPARSER
-#include <totem-pl-parser.h>
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <errno.h>
+//#include <string.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <gio/gio.h>
+//#include <gio/gio.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <tag_c.h>
-#include <taglib_config.h>
-#include <cddb/cddb.h>
-#include <gst/gst.h>
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -78,7 +66,6 @@
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-musicobject.h"
-#include "mpris.h"
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
@@ -88,12 +75,8 @@
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 #include "pragha-toolbar.h"
-#include "pragha-utils.h"
 #include "gnome-media-keys.h"
-
-#include "gtkcellrendererbubble.h"
-
-#include "xml_helper.h"
+#include "mpris.h"
 
 /* With libcio 0.83 should be before config.h. libcdio issue */
 #ifdef HAVE_PARANOIA_NEW_INCLUDES
