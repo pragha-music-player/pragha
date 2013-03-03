@@ -20,6 +20,7 @@ pragha_SOURCES =cdda.c \
 		menu.c \
 		mpris.c \
 		gnome-media-keys.c \
+		gnome-media-keys.h \
 		musicobject.c \
 		notify.c \
 		playlist.c \
@@ -39,7 +40,9 @@ pragha_SOURCES =cdda.c \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-playback.c \
+		pragha-playback.h \
 		pragha-playlist.c \
+		pragha-playlist.h \
 		pragha-preferences.c \
 		pragha-preferences.h \
 		pragha-prepared-statement.c \
@@ -61,6 +64,7 @@ pragha_SOURCES =cdda.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
 		pragha-lastfm.c \
+		pragha-lastfm.h \
 		xml_helper.c \
 		xml_helper.h \
 		equalizer.c \
@@ -107,7 +111,8 @@ pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBKEYBINDER
-pragha_SOURCES += keybinder.c
+pragha_SOURCES += pragha-keybinder.c
+pragha_SOURCES += pragha-keybinder.h
 pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
 pragha_LDADD += $(LIBKEYBINDER_LIBS)
 endif

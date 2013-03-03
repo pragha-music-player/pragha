@@ -20,7 +20,7 @@
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
-#include "keybinder.h"
+#include "pragha-keybinder.h"
 
 #include <locale.h> /* require LC_ALL */
 
