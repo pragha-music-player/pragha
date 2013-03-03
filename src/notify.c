@@ -149,7 +149,7 @@ show_osd (struct con_win *cwin)
 
 	/* Add album art if set */
 	notify_notification_set_icon_from_pixbuf(cwin->osd_notify,
-						 pragha_album_art_get_pixbuf(cwin->albumart));
+						 pragha_album_art_get_pixbuf(cwin->toolbar->albumart));
 
 	/* Show OSD */
 	if (!notify_notification_show(cwin->osd_notify, &error)) {
