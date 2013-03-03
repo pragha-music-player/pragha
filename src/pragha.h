@@ -103,6 +103,8 @@
 #include "pragha-preferences.h"
 #include "pragha-scanner.h"
 #include "pragha-statusbar.h"
+#include "pragha-toolbar.h"
+
 #include "gtkcellrendererbubble.h"
 
 #include "xml_helper.h"
@@ -117,7 +119,7 @@
 #define MIN_WINDOW_WIDTH           (gdk_screen_width() * 3 / 4)
 #define MIN_WINDOW_HEIGHT          (gdk_screen_height() * 3 / 4)
 #define DEFAULT_SIDEBAR_SIZE       200
-#define ALBUM_ART_SIZE             36
+#define DEFAULT_ALBUM_ART_SIZE     36
 #define PROGRESS_BAR_WIDTH         300
 #define COL_WIDTH_THRESH           30
 #define DEFAULT_PLAYLIST_COL_WIDTH ((MIN_WINDOW_WIDTH - DEFAULT_SIDEBAR_SIZE) / 4)
@@ -648,6 +650,8 @@ struct con_win {
 	PraghaDatabase *cdbase;
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
+	PraghaStatusbar *statusbar;
+	PraghaToolbar *toolbar;
 	PraghaPreferences *preferences;
 	PreferencesWidgets *preferences_w;
 	#ifdef HAVE_LIBCLASTFM
@@ -657,24 +661,8 @@ struct con_win {
 	struct con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
-	GtkWidget *toolbar;
 	GtkWidget *info_box;
-	PraghaAlbumArt *albumart;
-	GtkWidget *track_progress_bar;
-	GtkToolItem *prev_button;
-	GtkToolItem *play_button;
-	GtkToolItem *stop_button;
-	GtkToolItem *next_button;
-	GtkToolItem *unfull_button;
-	GtkWidget *vol_button;
-	PraghaStatusbar *statusbar;
 	GtkWidget *paned;
-	GtkWidget *track_length_label;
-	GtkWidget *track_time_label;
-	GtkWidget *now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
-	#endif
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
 	GtkEntryCompletion *completion[3];
@@ -751,28 +739,6 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 GtkUIManager* create_menu(struct con_win *cwin);
-
-/* Panel */
-
-void update_current_song_info(struct con_win *cwin);
-void __update_progress_song_info(struct con_win *cwin, gint length);
-void __update_current_song_info(struct con_win *cwin);
-void unset_current_song_info(struct con_win *cwin);
-void unset_track_progress_bar(struct con_win *cwin);
-void timer_remaining_mode_change(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
-void edit_tags_playing_event(GtkWidget *w, GdkEventButton* event, struct con_win *cwin);
-void track_progress_change_cb(GtkWidget *widget, GdkEventButton *event,struct con_win *cwin);
-gboolean album_art_frame_press_callback (GtkWidget *event_box, GdkEventButton *event, struct con_win *cwin);
-void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin);
-gboolean panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin);
-void unfull_button_handler(GtkToggleToolButton *button, struct con_win *cwin);
-void play_button_handler(GtkButton *button, struct con_win *cwin);
-void stop_button_handler(GtkButton *button, struct con_win *cwin);
-void prev_button_handler(GtkButton *button, struct con_win *cwin);
-void next_button_handler(GtkButton *button, struct con_win *cwin);
-void album_art_toggle_state(struct con_win *cwin);
-void toggled_cb(GtkToggleButton *toggle, struct con_win *cwin);
-GtkWidget* create_toolbar(struct con_win *cwin);
 
 /* File utils functions */
 
@@ -1111,7 +1077,6 @@ GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
 /* GUI */
 
 GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_playing_box(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
 GtkWidget* create_search_bar(struct con_win *cwin);

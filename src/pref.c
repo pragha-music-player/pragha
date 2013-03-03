@@ -232,7 +232,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		album_art_size =
 			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
 						cwin->preferences_w->album_art_size_w));
-		pragha_album_art_set_size(cwin->albumart, album_art_size);
+		pragha_preferences_set_album_art_size(cwin->preferences, album_art_size);
 
 		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
@@ -679,7 +679,7 @@ static void update_preferences(struct con_win *cwin)
 		                             TRUE);
 
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
-				   (int) pragha_album_art_get_size(cwin->albumart));
+	                           pragha_preferences_get_album_art_size(cwin->preferences));
 
 	if (cwin->cpref->album_art_pattern)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
@@ -956,12 +956,6 @@ void save_preferences(struct con_win *cwin)
 	pragha_preferences_set_sidebar_size(cwin->preferences,
 		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 
-	/* Save album art size */
-
-	g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_ALBUM_ART_SIZE,
-			       (int) pragha_album_art_get_size(cwin->albumart));
 
 	/* Save show controls below option */
 
@@ -1241,7 +1235,7 @@ pref_create_appearance_page(struct con_win *cwin)
 	pragha_hig_workarea_table_add_wide_control(table, &row, album_art);
 
 	album_art_size_label = gtk_label_new(_("Size of Album art"));
-	album_art_size = gtk_spin_button_new_with_range (ALBUM_ART_SIZE, 128, 2);
+	album_art_size = gtk_spin_button_new_with_range (DEFAULT_ALBUM_ART_SIZE, 128, 2);
 
 	pragha_hig_workarea_table_add_row (table, &row, album_art_size_label, album_art_size);
 

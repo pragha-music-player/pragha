@@ -212,6 +212,13 @@ void
 pragha_preferences_set_show_album_art (PraghaPreferences *preferences,
                                        gboolean show_album_art);
 
+gint
+pragha_preferences_get_album_art_size (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_album_art_size (PraghaPreferences *preferences,
+                                       gint album_art_size);
+
 gboolean
 pragha_preferences_get_show_status_bar (PraghaPreferences *preferences);
 
