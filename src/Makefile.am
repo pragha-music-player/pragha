@@ -57,10 +57,11 @@ pragha_SOURCES =cdda.c \
 		pragha-statusbar.h \
 		pragha-toolbar.c \
 		pragha-toolbar.h \
+		pragha-utils.c \
+		pragha-utils.h \
 		pref.c \
 		statusicon.c \
 		tags.c \
-		utils.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
 		pragha-lastfm.c \
