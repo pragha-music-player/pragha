@@ -56,31 +56,6 @@ create_playlist_pane_view(struct con_win *cwin)
 	return vbox;
 }
 
-/*****************/
-/* DnD functions */
-/*****************/
-/* These two functions are only callbacks that must be passed to
-gtk_tree_selection_set_select_function() to chose if GTK is allowed
-to change selection itself or if we handle it ourselves */
-
-gboolean tree_selection_func_true(GtkTreeSelection *selection,
-					       GtkTreeModel *model,
-					       GtkTreePath *path,
-					       gboolean path_currently_selected,
-					       gpointer data)
-{
-	return TRUE;
-}
-
-gboolean tree_selection_func_false(GtkTreeSelection *selection,
-					       GtkTreeModel *model,
-					       GtkTreePath *path,
-					       gboolean path_currently_selected,
-					       gpointer data)
-{
-	return FALSE;
-}
-
 /********************************/
 /* Externally visible functions */
 /********************************/

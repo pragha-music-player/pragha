@@ -286,20 +286,6 @@ enum debug_level {
 	DBG_VERBOSE,
 };
 
-/* DnD */
-
-gboolean tree_selection_func_true(GtkTreeSelection *selection,
-					       GtkTreeModel *model,
-					       GtkTreePath *path,
-					       gboolean path_currently_selected,
-					       gpointer data);
-
-gboolean tree_selection_func_false(GtkTreeSelection *selection,
-					       GtkTreeModel *model,
-					       GtkTreePath *path,
-					       gboolean path_currently_selected,
-					       gpointer data);
-
 enum dnd_target {
 	TARGET_REF_LIBRARY,
 	TARGET_URI_LIST,

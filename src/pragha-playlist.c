@@ -2114,6 +2114,34 @@ personalize_copy_tag_to_seleccion(GtkWidget *item_widget,
 	g_free(label);
 }
 
+/*****************/
+/* DnD functions */
+/*****************/
+/* These two functions are only callbacks that must be passed to
+gtk_tree_selection_set_select_function() to chose if GTK is allowed
+to change selection itself or if we handle it ourselves */
+
+static gboolean
+pragha_playlist_selection_func_true(GtkTreeSelection *selection,
+                                    GtkTreeModel *model,
+                                    GtkTreePath *path,
+                                    gboolean path_currently_selected,
+                                    gpointer data)
+{
+	return TRUE;
+}
+
+static gboolean
+pragha_playlist_selection_func_false(GtkTreeSelection *selection,
+                                     GtkTreeModel *model,
+                                     GtkTreePath *path,
+                                     gboolean path_currently_selected,
+                                     gpointer data)
+{
+	return FALSE;
+}
+
+
 /* Handler for current playlist click */
 
 static gboolean
@@ -2138,10 +2166,10 @@ current_playlist_button_press_cb(GtkWidget *widget,
 			if (gtk_tree_selection_path_is_selected(selection, path)
 			    && !(event->state & GDK_CONTROL_MASK)
 			    && !(event->state & GDK_SHIFT_MASK)) {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_false, cplaylist, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_playlist_selection_func_false, cplaylist, NULL);
 			}
 			else {
-				gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cplaylist, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_playlist_selection_func_true, cplaylist, NULL);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -2272,7 +2300,7 @@ current_playlist_button_release_cb(GtkWidget *widget,
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
 
 	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cplaylist->dragging == TRUE) || (event->button!=1)){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cplaylist, NULL);
+		gtk_tree_selection_set_select_function(selection, &pragha_playlist_selection_func_true, cplaylist, NULL);
 		cplaylist->dragging = FALSE;
 		return FALSE;
 	}
@@ -2280,7 +2308,7 @@ current_playlist_button_release_cb(GtkWidget *widget,
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
-		gtk_tree_selection_set_select_function(selection, &tree_selection_func_true, cplaylist, NULL);
+		gtk_tree_selection_set_select_function(selection, &pragha_playlist_selection_func_true, cplaylist, NULL);
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(selection, path);
 		gtk_tree_path_free(path);
