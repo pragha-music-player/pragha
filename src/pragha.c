@@ -21,6 +21,7 @@
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
+#include "pragha-dbus.h"
 
 #include <locale.h> /* require LC_ALL */
 

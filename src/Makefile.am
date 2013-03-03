@@ -10,8 +10,6 @@ AM_CPPFLAGS =								\
 
 pragha_SOURCES =cdda.c \
 		cdda.h \
-		cmdline.c \
-		dbus.c \
 		gui.c \
 		glyr-related.c \
 		init.c \
@@ -29,8 +27,12 @@ pragha_SOURCES =cdda.c \
 		pragha-album-art.h \
 		pragha-backend.c \
 		pragha-backend.h \
+		pragha-cmdline.c \
+		pragha-cmdline.h \
 		pragha-database.c \
 		pragha-database.h \
+		pragha-dbus.c \
+		pragha-dbus.h \
 		pragha-file-utils.c \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
