@@ -138,25 +138,6 @@
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 #define DBUS_EVENT_UPDATE_STATE   "update_state"
 
-#if !GLIB_CHECK_VERSION(2,32,0)
-/* Defines to get network manager status. */
-
-#define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"
-#define NM_DBUS_PATH		"/org/freedesktop/NetworkManager"
-#define NM_DBUS_INTERFACE	"org.freedesktop.NetworkManager"
-
-typedef enum {
-        NM_STATE_UNKNOWN          = 0,
-        NM_STATE_ASLEEP           = 10,
-        NM_STATE_DISCONNECTED     = 20,
-        NM_STATE_DISCONNECTING    = 30,
-        NM_STATE_CONNECTING       = 40,
-        NM_STATE_CONNECTED_LOCAL  = 50,
-        NM_STATE_CONNECTED_SITE   = 60,
-        NM_STATE_CONNECTED_GLOBAL = 70
-} NMState;
-#endif
-
 #define TAG_TNO_CHANGED		1<<0
 #define TAG_TITLE_CHANGED	1<<1
 #define TAG_ARTIST_CHANGED	1<<2
