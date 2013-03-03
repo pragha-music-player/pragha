@@ -1,21 +1,21 @@
 /*************************************************************************/
-/* Copyright (C) 2013 matias <mati86dl@gmail.com>			 */
-/*									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2013 matias <mati86dl@gmail.com>                        */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include "pragha-sidebar.h"
 
 /*
  * Public Api.
@@ -54,6 +54,40 @@ pragha_sidebar_get_widget(PraghaSidebar *sidebar)
  * Internal Calbacks.
  */
 
+void
+pragha_sidebar_menu_position(GtkMenu *menu,
+                             gint *x, gint *y,
+                             gboolean *push_in,
+                             gpointer user_data)
+{
+	GtkWidget *widget;
+	GtkRequisition requisition;
+	gint menu_xpos;
+	gint menu_ypos;
+
+	widget = GTK_WIDGET (user_data);
+
+	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+
+	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
+
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(widget, &allocation);
+
+	menu_xpos += allocation.x;
+	menu_ypos += allocation.y;
+
+	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
+		menu_ypos -= requisition.height + gtk_widget_get_style(widget)->ythickness;
+	else
+		menu_ypos += allocation.height + gtk_widget_get_style(widget)->ythickness;
+
+	*x = menu_xpos;
+	*y = menu_ypos - 5;
+
+	*push_in = TRUE;
+}
+
 static void
 pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
 {
@@ -84,7 +118,7 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
 			if (widget == sidebar->menu_button) {
 				gtk_menu_popup(GTK_MENU(sidebar->popup_menu),
 				                NULL, NULL,
-				                (GtkMenuPositionFunc) menu_position,
+				                (GtkMenuPositionFunc) pragha_sidebar_menu_position,
 				                widget,
 				                0,
 				                gtk_get_current_event_time());
@@ -227,7 +261,7 @@ pragha_sidebar_free(PraghaSidebar *sidebar)
 }
 
 PraghaSidebar *
-pragha_sidebar_new(struct con_win *cwin)
+pragha_sidebar_new()
 {
 	PraghaSidebar *sidebar;
 

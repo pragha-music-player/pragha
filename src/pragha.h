@@ -90,6 +90,7 @@
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
 #include "pragha-scanner.h"
+#include "pragha-sidebar.h"
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 #include "pragha-toolbar.h"
@@ -552,16 +553,6 @@ struct con_mpris2 {
 
 struct con_gnome_media_keys;
 
-typedef struct {
-	GtkWidget *widget;
-	GtkWidget *container;
-	GtkWidget *header;
-	GtkWidget *menu_button;
-	GtkWidget *close_button;
-	GtkWidget *label;
-	GtkMenu *popup_menu;
-} PraghaSidebar;
-
 struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
@@ -873,15 +864,6 @@ gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);
 void notify_free();
-
-/* pragha-sidebar.c Very simple sidebar widget. */
-
-void pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text);
-void pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *menu);
-void pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *widget);
-GtkWidget *pragha_sidebar_get_widget(PraghaSidebar *sidebar);
-void pragha_sidebar_free(PraghaSidebar *sidebar);
-PraghaSidebar *pragha_sidebar_new(struct con_win *cwin);
 
 /* Lastfm Helper */
 
