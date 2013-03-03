@@ -19,6 +19,7 @@
 #include "pragha.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
+#include "pragha-menubar.h"
 
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;
