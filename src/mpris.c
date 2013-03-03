@@ -1213,8 +1213,8 @@ gint mpris_init(struct con_win *cwin)
 
 	cwin->cmpris2->cwin = cwin;
 
-	cwin->cmpris2->saved_shuffle = false;
-	cwin->cmpris2->saved_playbackstatus = false;
+	cwin->cmpris2->saved_shuffle = FALSE;
+	cwin->cmpris2->saved_playbackstatus = FALSE;
 	cwin->cmpris2->saved_title = NULL;
 	cwin->cmpris2->volume = 0;
 
