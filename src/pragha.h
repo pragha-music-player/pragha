@@ -358,38 +358,6 @@ extern gint debug_level;
 	if (G_UNLIKELY(_lvl <= debug_level))	\
 		g_debug(_fmt, ##__VA_ARGS__);
 
-/* Menu */
-
-void open_file_action(GtkAction *action, struct con_win *cwin);
-void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
-void add_location_action(GtkAction *action, struct con_win *cwin);
-void prev_action(GtkAction *action, struct con_win *cwin);
-void play_pause_action(GtkAction *action, struct con_win *cwin);
-void stop_action(GtkAction *action, struct con_win *cwin);
-void next_action (GtkAction *action, struct con_win *cwin);
-void add_audio_cd(struct con_win *cwin);
-void quit_action(GtkAction *action, struct con_win *cwin);
-void expand_all_action(GtkAction *action, struct con_win *cwin);
-void collapse_all_action(GtkAction *action, struct con_win *cwin);
-void search_playlist_action(GtkAction *action, struct con_win *cwin);
-void pref_action(GtkAction *action, struct con_win *cwin);
-void fullscreen_action (GtkAction *action, struct con_win *cwin);
-void playlists_pane_action (GtkAction *action, struct con_win *cwin);
-void status_bar_action (GtkAction *action, struct con_win *cwin);
-void show_controls_below_action (GtkAction *action, struct con_win *cwin);
-void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
-void show_equalizer_action(GtkAction *action, struct con_win *cwin);
-void rescan_library_action(GtkAction *action, struct con_win *cwin);
-void update_library_action(GtkAction *action, struct con_win *cwin);
-void add_libary_action(GtkAction *action, struct con_win *cwin);
-void statistics_action(GtkAction *action, struct con_win *cwin);
-void home_action(GtkAction *action, struct con_win *cwin);
-void community_action(GtkAction *action, struct con_win *cwin);
-void wiki_action(GtkAction *action, struct con_win *cwin);
-void translate_action(GtkAction *action, struct con_win *cwin);
-void about_action(GtkAction *action, struct con_win *cwin);
-GtkUIManager* create_menu(struct con_win *cwin);
-
 /* Musicobject functions */
 
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);

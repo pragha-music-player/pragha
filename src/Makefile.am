@@ -16,8 +16,8 @@ pragha_SOURCES =cdda.c \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
-		menu.c \
 		mpris.c \
+		mpris.h \
 		gnome-media-keys.c \
 		gnome-media-keys.h \
 		musicobject.c \
@@ -38,6 +38,8 @@ pragha_SOURCES =cdda.c \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \
+		pragha-menubar.c \
+		pragha-menubar.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-playback.c \

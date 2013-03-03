@@ -19,6 +19,8 @@
 #include "pragha.h"
 #include "pragha-playback.h"
 #include "mpris.h"
+#include "pragha-menubar.h"
+#include "pragha-file-utils.h"
 
 static const gchar mpris2xml[] = 
 "<node>"
