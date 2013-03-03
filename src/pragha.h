@@ -27,10 +27,6 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_LIBKEYBINDER
-#include <keybinder.h>
-#endif
-
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
 #include <glyr/cache.h>
@@ -632,11 +628,6 @@ gint init_first_state(struct con_win *cwin);
 void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
-
-/* keybinder */
-
-gint init_keybinder(struct con_win *cwin);
-void keybinder_free();
 
 /* notify */
 
