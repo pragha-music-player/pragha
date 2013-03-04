@@ -22,6 +22,7 @@
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+#include "pragha-playlists-mgmt.h"
 
 static const gchar mpris2xml[] = 
 "<node>"

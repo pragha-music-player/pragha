@@ -312,35 +312,6 @@ void refresh_tag_completion_entries(struct con_win *cwin);
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changes, struct con_win *cwin);
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
 
-/* Playlist mgmt functions */
-
-gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);
-void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
-GList * add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
-GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
-gboolean delete_existing_item_dialog(const gchar *item, GtkWidget *parent);
-gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent);
-GIOChannel *create_m3u_playlist(gchar *file);
-gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase);
-gchar *playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent);
-void export_playlist (PraghaPlaylist* cplaylist, gint choice);
-GList *
-pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
-GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
-GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
-void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
-void
-save_playlist(PraghaPlaylist* cplaylist,
-              gint playlist_id,
-              enum playlist_mgmt type);
-void
-new_playlist(PraghaPlaylist* cplaylist,
-             const gchar *playlist,
-             enum playlist_mgmt type);
-void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
-void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
-void update_playlist_changes_on_menu(struct con_win *cwin);
-
 /* Preferences */
 
 void save_preferences(struct con_win *cwin);
@@ -389,8 +360,6 @@ int init_glyr_related (struct con_win *cwin);
 void glyr_related_free (struct con_win *cwin);
 
 /* Others */
-
-void pragha_filter_dialog (struct con_win *cwin);
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
 
