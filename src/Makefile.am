@@ -31,6 +31,7 @@ pragha_SOURCES =cdda.c \
 		pragha-database.h \
 		pragha-dbus.c \
 		pragha-dbus.h \
+		pragha-equalizer.c \
 		pragha-file-utils.c \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
@@ -76,7 +77,6 @@ pragha_SOURCES =cdda.c \
 		pragha-lastfm.h \
 		xml_helper.c \
 		xml_helper.h \
-		equalizer.c \
 		widgets.c
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
