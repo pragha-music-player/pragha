@@ -8,13 +8,10 @@ AM_CPPFLAGS =								\
 	-DDESKTOPENTRY=\""$(datadir)/applications/pragha.desktop"\"	\
 	-I$(top_srcdir)
 
-pragha_SOURCES =cdda.c \
-		cdda.h \
+pragha_SOURCES = \
 		glyr-related.c \
 		init.c \
 		info-bar-import-music.c \
-		mpris.c \
-		mpris.h \
 		gnome-media-keys.c \
 		gnome-media-keys.h \
 		musicobject.c \
@@ -24,6 +21,8 @@ pragha_SOURCES =cdda.c \
 		pragha-album-art.h \
 		pragha-backend.c \
 		pragha-backend.h \
+		pragha-cdda.c \
+		pragha-cdda.h \
 		pragha-cmdline.c \
 		pragha-cmdline.h \
 		pragha-database.c \
@@ -40,6 +39,8 @@ pragha_SOURCES =cdda.c \
 		pragha-library-pane.c \
 		pragha-menubar.c \
 		pragha-menubar.h \
+		pragha-mpris.c \
+		pragha-mpris.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-notify.c \
