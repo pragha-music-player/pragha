@@ -18,7 +18,6 @@ pragha_SOURCES =cdda.c \
 		gnome-media-keys.c \
 		gnome-media-keys.h \
 		musicobject.c \
-		notify.c \
 		pragha.c \
 		pragha.h \
 		pragha-album-art.c \
@@ -43,6 +42,8 @@ pragha_SOURCES =cdda.c \
 		pragha-menubar.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
+		pragha-notify.c \
+		pragha-notify.h \
 		pragha-playback.c \
 		pragha-playback.h \
 		pragha-playlist.c \

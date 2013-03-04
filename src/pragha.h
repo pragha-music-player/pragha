@@ -342,13 +342,6 @@ void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
-/* notify */
-
-gboolean can_support_actions(void);
-void show_osd(struct con_win *cwin);
-gint init_notify(struct con_win *cwin);
-void notify_free();
-
 /* Related info helpers */
 
 void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);

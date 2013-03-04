@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-playback.h"
+#include "pragha-notify.h"
 
 /* Update gui, mpris on new track playback */
 
