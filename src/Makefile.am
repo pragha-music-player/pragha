@@ -72,13 +72,14 @@ pragha_SOURCES = \
 		pragha-statusicon.h \
 		pragha-tags-dialog.c \
 		pragha-tags-dialog.h \
+		pragha-tags-mgmt.c \
+		pragha-tags-mgmt.h \
 		pragha-toolbar.c \
 		pragha-toolbar.h \
 		pragha-utils.c \
 		pragha-utils.h \
 		pragha-window.c \
 		pragha-window.h \
-		tags.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
 		pragha-lastfm.c \
