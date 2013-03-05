@@ -310,12 +310,6 @@ void refresh_tag_completion_entries(struct con_win *cwin);
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changes, struct con_win *cwin);
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
 
-/* Preferences */
-
-void save_preferences(struct con_win *cwin);
-void preferences_dialog(struct con_win *cwin);
-void preferences_free(struct con_pref *cpref);
-
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
