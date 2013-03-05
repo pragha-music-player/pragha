@@ -19,7 +19,10 @@
 #ifndef PRAGHA_UTILS_H
 #define PRAGHA_UTILS_H
 
+#include <gtk/gtk.h>
+
 #include "pragha-musicobject.h"
+#include "pragha-preferences.h"
 
 #define string_is_empty(s) (!(s) || !(s)[0])
 #define string_is_not_empty(s) (s && (s)[0])

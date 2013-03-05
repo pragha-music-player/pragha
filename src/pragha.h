@@ -92,7 +92,6 @@
 #define DEFAULT_PLAYLIST_COL_WIDTH ((MIN_WINDOW_WIDTH - DEFAULT_SIDEBAR_SIZE) / 4)
 #define OSD_TIMEOUT                5000
 #define ALBUM_ART_PATTERN_LEN      1024
-#define ALBUM_ART_NO_PATTERNS      6
 #define LASTFM_UNAME_LEN           256
 #define LASTFM_PASS_LEN            512
 #define TAG_MAX_LEN                256
