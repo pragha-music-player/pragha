@@ -27,6 +27,7 @@
 #include "glyr-related.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include <stdlib.h>
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\

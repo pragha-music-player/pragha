@@ -19,6 +19,7 @@
 #include "pragha.h"
 #include "pragha-cmdline.h"
 #include "pragha-dbus.h"
+#include <stdlib.h>
 
 /* Handler for 'version' option on the cmdline */
 

@@ -26,6 +26,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include <stdlib.h>
 
 /*
  * Menus definitions
