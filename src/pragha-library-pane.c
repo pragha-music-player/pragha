@@ -28,6 +28,27 @@
 #include "pragha-musicobject-mgmt.h"
 #include <stdlib.h>
 
+struct _PraghaLibraryPane {
+	PraghaDatabase *cdbase;
+	PraghaPreferences *preferences;
+	GtkTreeStore *library_store;
+	GtkWidget *search_entry;
+	GtkWidget *library_tree;
+	GtkWidget *widget;
+	gboolean dragging;
+	gboolean view_change;
+	gchar *filter_entry;
+	guint timeout_id;
+	GSList *library_tree_nodes;
+	GdkPixbuf *pixbuf_artist;
+	GdkPixbuf *pixbuf_album;
+	GdkPixbuf *pixbuf_track;
+	GdkPixbuf *pixbuf_genre;
+	GdkPixbuf *pixbuf_dir;
+	GtkUIManager *library_pane_context_menu;
+	GtkUIManager *library_tree_context_menu;
+};
+
 /*
  * Menus definitions
  *
@@ -2753,6 +2774,13 @@ pragha_library_pane_get_widget(PraghaLibraryPane *librarypane)
 {
 	return librarypane->widget;
 }
+
+GtkUIManager *
+pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
+{
+	return clibrary->library_pane_context_menu;
+}
+
 
 PraghaLibraryPane *
 pragha_library_pane_new(struct con_win *cwin)

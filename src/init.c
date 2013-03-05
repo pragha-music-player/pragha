@@ -803,7 +803,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	pragha_sidebar_add_pane(cwin->sidebar,
 	                        pragha_library_pane_get_widget(cwin->clibrary));
 	pragha_sidebar_attach_menu(cwin->sidebar,
-	                           GTK_MENU(gtk_ui_manager_get_widget(cwin->clibrary->library_pane_context_menu, "/popup")));
+	                           GTK_MENU(gtk_ui_manager_get_widget(pragha_library_pane_get_pane_context_menu(cwin->clibrary), "/popup")));
 
 	hbox_main = create_main_region(cwin);
 	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
