@@ -61,6 +61,8 @@ pragha_SOURCES = \
 		pragha-sidebar.c \
 		pragha-simple-async.c \
 		pragha-simple-async.h \
+		pragha-simple-widgets.c \
+		pragha-simple-widgets.h \
 		pragha-statusbar.c \
 		pragha-statusbar.h \
 		pragha-statusicon.c \
@@ -78,8 +80,7 @@ pragha_SOURCES = \
 		pragha-lastfm.c \
 		pragha-lastfm.h \
 		xml_helper.c \
-		xml_helper.h \
-		widgets.c
+		xml_helper.h
 
 pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GSTREAMER_BASE_CFLAGS)					\
