@@ -15,6 +15,9 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#ifndef PRAGHA_SCANNER_H
+#define PRAGHA_SCANNER_H
+
 #include "pragha.h"
 #include "pragha-simple-async.h"
 
@@ -53,3 +56,5 @@ pragha_scanner_free(PraghaScanner *scanner);
 
 PraghaScanner *
 pragha_scanner_new();
+
+#endif /* PRAGHA_SCANNER_H */
