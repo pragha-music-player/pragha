@@ -16,9 +16,16 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include <stdio.h>
 #include "pragha-utils.h"
 #include "pragha-file-utils.h"
+
+#include <glib/gprintf.h>
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
 
 /* Function to save debug on file. */
 

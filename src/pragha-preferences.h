@@ -124,6 +124,8 @@ struct _PraghaPreferencesClass
 #define ALSA_DEFAULT_DEVICE        "default"
 #define OSS_DEFAULT_DEVICE         "/dev/dsp"
 
+#define ALBUM_ART_NO_PATTERNS      6
+
 /*
  * Public Api.
  */
