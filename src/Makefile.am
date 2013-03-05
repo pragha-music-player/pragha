@@ -10,6 +10,7 @@ AM_CPPFLAGS =								\
 
 pragha_SOURCES = \
 		glyr-related.c \
+		glyr-related.h \
 		init.c \
 		info-bar-import-music.c \
 		gnome-media-keys.c \
