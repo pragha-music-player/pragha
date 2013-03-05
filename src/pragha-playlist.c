@@ -29,6 +29,44 @@
 #include "pragha-musicobject-mgmt.h"
 #include <stdlib.h>
 
+/**
+ * PraghaPlaylist - Pertains to the current state of the playlist
+ * @view - The playlist tree view widget
+ * @widget - The parent widget containing the view
+ * @changing: If current platlist change is in progress
+ * @no_tracks: Total no. of tracks in the current playlist
+ * @unplayed_tracks: Total no. of tracks that haven't been played
+ * @rand: To generate random numbers
+ * @rand_track_refs: List of references maintained in Shuffle mode
+ * @queue_track_refs: List of references of queued songs
+ * @curr_rand_ref: Currently playing track in Shuffle mode
+ * @curr_seq_ref: Currently playing track in non-Shuffle mode
+ */
+
+struct _PraghaPlaylist {
+	GtkWidget *view;
+	GtkTreeModel *model;
+	GtkWidget *widget;
+	GtkWidget *header_context_menu;
+	GtkUIManager *playlist_context_menu;
+	GSList *columns;
+	GSList *column_widths;
+	gboolean changing;
+	gboolean dragging;
+	gint no_tracks;
+	gint unplayed_tracks;
+	GRand *rand;
+	enum playlist_action current_update_action;
+	GList *rand_track_refs;
+	GSList *queue_track_refs;
+	GtkTreeRowReference *curr_rand_ref;
+	GtkTreeRowReference *curr_seq_ref;
+	GdkPixbuf *paused_pixbuf;
+	GdkPixbuf *playing_pixbuf;
+	PraghaPreferences *preferences;
+	PraghaDatabase *cdbase;
+};
+
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\
 	<menuitem action=\"Queue track\"/>					\
@@ -3868,6 +3906,18 @@ GtkWidget *
 pragha_playlist_get_widget(PraghaPlaylist* cplaylist)
 {
 	return cplaylist->widget;
+}
+
+GtkUIManager *
+pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->playlist_context_menu;
+}
+
+PraghaDatabase *
+pragha_playlist_get_database(PraghaPlaylist* cplaylist)
+{
+	return cplaylist->cdbase;
 }
 
 void

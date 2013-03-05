@@ -21,6 +21,8 @@
 
 #include "pragha.h"
 
+typedef struct _PraghaPlaylist PraghaPlaylist;
+
 /* Columns in current playlist view */
 
 #define P_TRACK_NO_STR      "#"
@@ -62,44 +64,6 @@ enum playlist_action {
 	PLAYLIST_NEXT,
 	PLAYLIST_PREV
 };
-
-/**
- * PraghaPlaylist - Pertains to the current state of the playlist
- * @view - The playlist tree view widget
- * @widget - The parent widget containing the view
- * @changing: If current platlist change is in progress
- * @no_tracks: Total no. of tracks in the current playlist
- * @unplayed_tracks: Total no. of tracks that haven't been played
- * @rand: To generate random numbers
- * @rand_track_refs: List of references maintained in Shuffle mode
- * @queue_track_refs: List of references of queued songs
- * @curr_rand_ref: Currently playing track in Shuffle mode
- * @curr_seq_ref: Currently playing track in non-Shuffle mode
- */
-
-typedef struct {
-	GtkWidget *view;
-	GtkTreeModel *model;
-	GtkWidget *widget;
-	GtkWidget *header_context_menu;
-	GtkUIManager *playlist_context_menu;
-	GSList *columns;
-	GSList *column_widths;
-	gboolean changing;
-	gboolean dragging;
-	gint no_tracks;
-	gint unplayed_tracks;
-	GRand *rand;
-	enum playlist_action current_update_action;
-	GList *rand_track_refs;
-	GSList *queue_track_refs;
-	GtkTreeRowReference *curr_rand_ref;
-	GtkTreeRowReference *curr_seq_ref;
-	GdkPixbuf *paused_pixbuf;
-	GdkPixbuf *playing_pixbuf;
-	PraghaPreferences *preferences;
-	PraghaDatabase *cdbase;
-} PraghaPlaylist;
 
 void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
@@ -208,7 +172,9 @@ void     pragha_playlist_set_changing (PraghaPlaylist* cplaylist, gboolean chang
 GtkWidget    *pragha_playlist_get_view  (PraghaPlaylist* cplaylist);
 GtkTreeModel *pragha_playlist_get_model (PraghaPlaylist* cplaylist);
 
-GtkWidget *pragha_playlist_get_widget (PraghaPlaylist* cplaylist);
+GtkWidget      *pragha_playlist_get_widget (PraghaPlaylist* cplaylist);
+GtkUIManager   *pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist);
+PraghaDatabase *pragha_playlist_get_database(PraghaPlaylist* cplaylist);
 
 void pragha_playlist_save_preferences (PraghaPlaylist* cplaylist);
 
