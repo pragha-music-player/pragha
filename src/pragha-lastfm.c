@@ -20,6 +20,7 @@
 #include "pragha-simple-async.h"
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
+#include "pragha-tags-dialog.h"
 #include "xml_helper.h"
 
 #ifdef HAVE_LIBCLASTFM

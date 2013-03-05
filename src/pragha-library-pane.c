@@ -23,6 +23,7 @@
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-widgets.h"
+#include "pragha-tags-dialog.h"
 
 /*
  * Menus definitions
