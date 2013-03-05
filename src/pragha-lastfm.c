@@ -26,6 +26,14 @@
 #include "xml_helper.h"
 
 #ifdef HAVE_LIBCLASTFM
+
+typedef struct {
+	GList *list;
+	guint query_type;
+	guint query_count;
+	struct con_win *cwin;
+} AddMusicObjectListData;
+
 void
 update_menubar_lastfm_state (struct con_win *cwin)
 {
