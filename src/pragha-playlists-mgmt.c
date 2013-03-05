@@ -21,6 +21,7 @@
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+#include "pragha-musicobject-mgmt.h"
 
 #ifdef HAVE_PLPARSER
 #include <totem-pl-parser.h>

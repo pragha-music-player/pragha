@@ -15,7 +15,6 @@ pragha_SOURCES = \
 		info-bar-import-music.c \
 		gnome-media-keys.c \
 		gnome-media-keys.h \
-		musicobject.c \
 		pragha.c \
 		pragha.h \
 		pragha-album-art.c \
@@ -44,6 +43,8 @@ pragha_SOURCES = \
 		pragha-mpris.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
+		pragha-musicobject-mgmt.c \
+		pragha-musicobject-mgmt.h \
 		pragha-notify.c \
 		pragha-notify.h \
 		pragha-playback.c \

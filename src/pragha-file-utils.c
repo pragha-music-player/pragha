@@ -25,6 +25,7 @@
 #include "pragha-preferences.h"
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-musicobject-mgmt.h"
 
 /*
  * Mimetype handles by pragha
