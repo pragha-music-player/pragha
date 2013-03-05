@@ -24,6 +24,7 @@
 #include "pragha-dbus.h"
 #include "pragha-window.h"
 #include "pragha-notify.h"
+#include "pragha-preferences-dialog.h"
 
 #include <locale.h> /* require LC_ALL */
 

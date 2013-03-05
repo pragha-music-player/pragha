@@ -53,6 +53,8 @@ pragha_SOURCES = \
 		pragha-playlists-mgmt.h \
 		pragha-preferences.c \
 		pragha-preferences.h \
+		pragha-preferences-dialog.c \
+		pragha-preferences-dialog.h \
 		pragha-prepared-statement.c \
 		pragha-prepared-statement.h \
 		pragha-prepared-statement-private.h \
@@ -75,7 +77,6 @@ pragha_SOURCES = \
 		pragha-utils.h \
 		pragha-window.c \
 		pragha-window.h \
-		pref.c \
 		tags.c \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
