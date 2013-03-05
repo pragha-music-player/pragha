@@ -20,15 +20,6 @@
 
 #include "pragha.h"
 
-typedef struct {
-	GtkWidget *filter_view;
-	GtkTreeModel *filter_model;
-	gchar *filter_string;
-	guint timeout_id;
-	PraghaPlaylist *cplaylist;
-	PraghaPreferences *preferences;
-} PraghaFilterDialog;
-
 void
 pragha_filter_dialog (struct con_win *cwin);
 

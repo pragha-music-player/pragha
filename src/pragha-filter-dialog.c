@@ -19,6 +19,15 @@
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
 
+typedef struct {
+	GtkWidget *filter_view;
+	GtkTreeModel *filter_model;
+	gchar *filter_string;
+	guint timeout_id;
+	PraghaPlaylist *cplaylist;
+	PraghaPreferences *preferences;
+} PraghaFilterDialog;
+
 static void
 pragha_filter_dialog_select_row_on_current_playlist(GtkTreeView *fliter_view,
 						    GtkTreePath *filter_path,
