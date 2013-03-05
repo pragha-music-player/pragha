@@ -21,15 +21,10 @@
 
 #include "pragha.h"
 
-struct con_gnome_media_keys {
-    struct con_win *cwin;
-    guint watch_id;
-    guint handler_id;
-    GDBusProxy *proxy;
-};
+typedef struct _con_gnome_media_keys con_gnome_media_keys;
 
 gboolean gnome_media_keys_will_be_useful();
 gint init_gnome_media_keys(struct con_win *cwin);
-void gnome_media_keys_free(struct con_gnome_media_keys *gmk);
+void gnome_media_keys_free(con_gnome_media_keys *gmk);
 
 #endif /* PRAGHAGNOME_MEDIA_KEYS_H */

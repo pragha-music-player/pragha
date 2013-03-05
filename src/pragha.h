@@ -266,7 +266,7 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	PraghaMpris2 *cmpris2;
-	struct con_gnome_media_keys *cgnome_media_keys;
+	con_gnome_media_keys *cgnome_media_keys;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 	GtkWidget *info_box;
