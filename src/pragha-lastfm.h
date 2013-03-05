@@ -41,13 +41,6 @@ enum LASTFM_QUERY_TYPE {
 	LASTFM_GET_LOVED
 };
 
-typedef struct {
-	GList *list;
-	guint query_type;
-	guint query_count;
-	struct con_win *cwin;
-} AddMusicObjectListData;
-
 void update_menubar_lastfm_state (struct con_win *cwin);
 void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);

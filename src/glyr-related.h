@@ -20,14 +20,6 @@
 
 #ifdef HAVE_LIBGLYR
 
-typedef struct
-{
-	struct con_win	*cwin;
-	GlyrQuery	query;
-	GlyrMemCache	*head;
-}
-glyr_struct;
-
 void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
