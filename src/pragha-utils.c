@@ -254,42 +254,6 @@ nm_is_online ()
 }
 #endif
 
-/* Find a song with the artist and title independently of the album and adds it to the playlist */
-
-GList *
-prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
-						const gchar *title,
-						GList *list,
-						struct con_win *cwin)
-{
-	PraghaMusicobject *mobj = NULL;
-	gint location_id = 0;
-
-	if(pragha_mobj_list_already_has_title_of_artist(list, title, artist) ||
-	   pragha_playlist_already_has_title_of_artist(cwin->cplaylist, title, artist))
-		return list;
-
-	const gchar *sql = "SELECT TRACK.title, ARTIST.name, LOCATION.id "
-				"FROM TRACK, ARTIST, LOCATION "
-				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
-				"AND TRACK.title = ? COLLATE NOCASE "
-				"AND ARTIST.name = ? COLLATE NOCASE "
-				"ORDER BY RANDOM() LIMIT 1;";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
-	pragha_prepared_statement_bind_string (statement, 1, title);
-	pragha_prepared_statement_bind_string (statement, 2, artist);
-
-	if (pragha_prepared_statement_step (statement)) {
-		location_id = pragha_prepared_statement_get_int (statement, 2);
-		mobj = new_musicobject_from_db (cwin->cdbase, location_id);
-		list = g_list_prepend (list, mobj);
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	return list;
-}
-
 /* Set and remove the watch cursor to suggest background work.*/
 
 void
@@ -620,20 +584,4 @@ menu_position(GtkMenu *menu,
 	*y = menu_ypos - 5;
 
 	*push_in = TRUE;
-}
-
-/* Return TRUE if the previous installed version is
-   incompatible with the current one */
-
-gboolean is_incompatible_upgrade(struct con_win *cwin)
-{
-	/* Lesser than 0.2, version string is non-existent */
-
-	if (!cwin->cpref->installed_version)
-		return TRUE;
-
-	if (atof(cwin->cpref->installed_version) < atof(PACKAGE_VERSION))
-		return TRUE;
-
-	return FALSE;
 }

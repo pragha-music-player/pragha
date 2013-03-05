@@ -19,6 +19,8 @@
 #ifndef PRAGHA_UTILS_H
 #define PRAGHA_UTILS_H
 
+#include "pragha-musicobject.h"
+
 #define string_is_empty(s) (!(s) || !(s)[0])
 #define string_is_not_empty(s) (s && (s)[0])
 
@@ -48,9 +50,6 @@ typedef enum {
 gboolean nm_is_online ();
 #endif
 
-gboolean already_in_current_playlist(PraghaMusicobject *mobj, struct con_win *cwin);
-GList *prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist, const gchar *title, GList *list, struct con_win *cwin);
-
 void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 
@@ -69,6 +68,5 @@ gboolean validate_album_art_pattern(const gchar *pattern);
 gboolean pragha_process_gtk_events ();
 void open_url(const gchar *url, GtkWidget *parent);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
-gboolean is_incompatible_upgrade(struct con_win *cwin);
 
 #endif /* PRAGHA_UTILS_H */

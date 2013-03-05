@@ -318,11 +318,6 @@ void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
 void preferences_free(struct con_pref *cpref);
 
-/* Some widgets. */
-
-gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
-GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
-
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
