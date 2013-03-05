@@ -22,6 +22,7 @@
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
 #include "pragha-tags-dialog.h"
+#include "pragha-musicobject-mgmt.h"
 
 #include <tag_c.h>
 

@@ -291,14 +291,6 @@ extern gint debug_level;
 	if (G_UNLIKELY(_lvl <= debug_level))	\
 		g_debug(_fmt, ##__VA_ARGS__);
 
-/* Musicobject functions */
-
-PraghaMusicobject* new_musicobject_from_file(const gchar *file);
-PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
-PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
-PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
-void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
-
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);

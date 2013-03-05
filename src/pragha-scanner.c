@@ -18,6 +18,7 @@
 #include "pragha.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+#include "pragha-musicobject-mgmt.h"
 
 /* Update the dialog. */
 
