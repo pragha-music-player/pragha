@@ -518,12 +518,12 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 
 		/* Append the album art url metadata. */
 		/* TODO: Add temp var or convert uri on album art set properties..*/
-		if (pragha_album_art_get_path(cwin->toolbar->albumart) != NULL) {
+		/*if (pragha_album_art_get_path(cwin->toolbar->albumart) != NULL) {
 			artUrl_uri = g_filename_to_uri(pragha_album_art_get_path(cwin->toolbar->albumart), NULL, NULL);
 			g_variant_builder_add (&b, "{sv}", "mpris:artUrl",
 				g_variant_new_string(artUrl_uri));
 			g_free(artUrl_uri);
-		}
+		}*/
 	}
 	else {
 		g_variant_builder_add (&b, "{sv}", "mpris:trackid",

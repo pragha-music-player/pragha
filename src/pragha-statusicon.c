@@ -98,7 +98,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
                        GtkTooltip       *tooltip,
                        struct con_win   *cwin)
 {
-	gchar *markup_text;
+	/*gchar *markup_text;
 
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
@@ -115,7 +115,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);
 
-	gtk_tooltip_set_icon (tooltip, pragha_album_art_get_pixbuf(cwin->toolbar->albumart));
+	gtk_tooltip_set_icon (tooltip, pragha_album_art_get_pixbuf(cwin->toolbar->albumart));*/
 
 	return TRUE;
 }

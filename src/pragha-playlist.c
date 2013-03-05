@@ -4058,5 +4058,7 @@ pragha_playlist_new(struct con_win *cwin)
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cplaylist);
 
+	gtk_widget_show_all(cplaylist->widget);
+
 	return cplaylist;
 }

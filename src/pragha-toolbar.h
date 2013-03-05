@@ -21,23 +21,7 @@
 #ifndef PRAGHA_TOOLBAR_H
 #define PRAGHA_TOOLBAR_H
 
-typedef struct {
-	GtkWidget *widget;
-	PraghaAlbumArt *albumart;
-	GtkWidget *track_progress_bar;
-	GtkToolItem *prev_button;
-	GtkToolItem *play_button;
-	GtkToolItem *stop_button;
-	GtkToolItem *next_button;
-	GtkToolItem *unfull_button;
-	GtkWidget *vol_button;
-	GtkWidget *track_length_label;
-	GtkWidget *track_time_label;
-	GtkWidget *now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
-	#endif
-} PraghaToolbar;
+typedef struct _PraghaToolbar PraghaToolbar;
 
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);

@@ -92,6 +92,8 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	cwin->paned = hpane;
 
+	gtk_widget_show_all(hpane);
+
 	return hpane;
 }
 
