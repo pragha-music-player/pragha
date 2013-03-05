@@ -21,26 +21,7 @@
 
 #include "pragha.h"
 
-typedef struct {
-	PraghaDatabase *cdbase;
-	PraghaPreferences *preferences;
-	GtkTreeStore *library_store;
-	GtkWidget *search_entry;
-	GtkWidget *library_tree;
-	GtkWidget *widget;
-	gboolean dragging;
-	gboolean view_change;
-	gchar *filter_entry;
-	guint timeout_id;
-	GSList *library_tree_nodes;
-	GdkPixbuf *pixbuf_artist;
-	GdkPixbuf *pixbuf_album;
-	GdkPixbuf *pixbuf_track;
-	GdkPixbuf *pixbuf_genre;
-	GdkPixbuf *pixbuf_dir;
-	GtkUIManager *library_pane_context_menu;
-	GtkUIManager *library_tree_context_menu;
-} PraghaLibraryPane;
+typedef struct _PraghaLibraryPane PraghaLibraryPane;
 
 /* Node types in library view */
 
@@ -144,6 +125,8 @@ void     library_pane_view_reload      (PraghaLibraryPane *clibrary);
 void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary, struct con_win *cwin);
 
 GtkWidget         *pragha_library_pane_get_widget (PraghaLibraryPane *librarypane);
+GtkUIManager      *pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary);
+
 void               pragha_library_pane_free       (PraghaLibraryPane *librarypane);
 PraghaLibraryPane *pragha_library_pane_new        (struct con_win *cwin);
 
