@@ -24,7 +24,14 @@
 
 #define PLAYER_NAME "Pragha"
 
-static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
+struct _con_gnome_media_keys {
+    struct con_win *cwin;
+    guint watch_id;
+    guint handler_id;
+    GDBusProxy *proxy;
+};
+
+static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
                                         const gchar *key)
 {
     struct con_win *cwin = gmk->cwin;
@@ -58,7 +65,7 @@ static void on_media_player_key_pressed(struct con_gnome_media_keys *gmk,
 
 static void grab_media_player_keys_cb(GDBusProxy *proxy,
                                       GAsyncResult *res,
-                                      struct con_gnome_media_keys *gmk)
+                                      con_gnome_media_keys *gmk)
 {
     GVariant *variant;
     GError *error = NULL;
@@ -76,7 +83,7 @@ static void grab_media_player_keys_cb(GDBusProxy *proxy,
     g_variant_unref(variant);
 }
 
-static void grab_media_player_keys(struct con_gnome_media_keys *gmk)
+static void grab_media_player_keys(con_gnome_media_keys *gmk)
 {
     if (gmk->proxy == NULL)
         return;
@@ -92,7 +99,7 @@ static void grab_media_player_keys(struct con_gnome_media_keys *gmk)
 
 static gboolean on_window_focus_in_event(GtkWidget *window,
                                          GdkEventFocus *event,
-                                         struct con_gnome_media_keys *gmk)
+                                         con_gnome_media_keys *gmk)
 {
     grab_media_player_keys(gmk);
 
@@ -103,7 +110,7 @@ static void key_pressed(GDBusProxy *proxy,
                         gchar *sender_name,
                         gchar *signal_name,
                         GVariant *parameters,
-                        struct con_gnome_media_keys *gmk)
+                        con_gnome_media_keys *gmk)
 {
     char *app, *cmd;
 
@@ -121,7 +128,7 @@ static void key_pressed(GDBusProxy *proxy,
 
 static void got_proxy_cb(GObject *source_object,
                          GAsyncResult *res,
-                         struct con_gnome_media_keys *gmk)
+                         con_gnome_media_keys *gmk)
 {
     GError *error = NULL;
 
@@ -143,7 +150,7 @@ static void got_proxy_cb(GObject *source_object,
 static void name_appeared_cb(GDBusConnection *connection,
                              const gchar *name,
                              const gchar *name_owner,
-                             struct con_gnome_media_keys *gmk)
+                             con_gnome_media_keys *gmk)
 {
     g_dbus_proxy_new_for_bus(G_BUS_TYPE_SESSION,
                              G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES |
@@ -159,7 +166,7 @@ static void name_appeared_cb(GDBusConnection *connection,
 
 static void name_vanished_cb(GDBusConnection *connection,
                              const gchar *name,
-                             struct con_gnome_media_keys *gmk)
+                             con_gnome_media_keys *gmk)
 {
     if (gmk->proxy != NULL)
     {
@@ -243,7 +250,7 @@ out:
 
 gint init_gnome_media_keys(struct con_win *cwin)
 {
-    struct con_gnome_media_keys *gmk = g_slice_new0(struct con_gnome_media_keys);
+    con_gnome_media_keys *gmk = g_slice_new0(con_gnome_media_keys);
 
     gmk->cwin = cwin;
 
@@ -263,7 +270,7 @@ gint init_gnome_media_keys(struct con_win *cwin)
     return 0;
 }
 
-void gnome_media_keys_free(struct con_gnome_media_keys *gmk)
+void gnome_media_keys_free(con_gnome_media_keys *gmk)
 {
     struct con_win *cwin = gmk->cwin;
 
@@ -275,5 +282,5 @@ void gnome_media_keys_free(struct con_gnome_media_keys *gmk)
     if (gmk->proxy != NULL)
         g_object_unref(gmk->proxy);
 
-    g_slice_free(struct con_gnome_media_keys, gmk);
+    g_slice_free(con_gnome_media_keys, gmk);
 }
