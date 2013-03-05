@@ -26,6 +26,7 @@
 #include "pragha-filter-dialog.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-tags-dialog.h"
+#include "pragha-tags-mgmt.h"
 #include "pragha-preferences-dialog.h"
 #include "glyr-related.h"
 

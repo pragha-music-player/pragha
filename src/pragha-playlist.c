@@ -25,6 +25,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "gtkcellrendererbubble.h"
 #include "glyr-related.h"
+#include "pragha-tags-mgmt.h"
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\

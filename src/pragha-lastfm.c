@@ -21,6 +21,7 @@
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
 #include "pragha-tags-dialog.h"
+#include "pragha-tags-mgmt.h"
 #include "xml_helper.h"
 
 #ifdef HAVE_LIBCLASTFM

@@ -299,17 +299,6 @@ PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no
 PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
 
-/* Tag functions */
-
-gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
-gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);
-gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent);
-gboolean confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent);
-void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMusicobject *mobj);
-void refresh_tag_completion_entries(struct con_win *cwin);
-void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changes, struct con_win *cwin);
-void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
-
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
