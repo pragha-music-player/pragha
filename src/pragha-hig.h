@@ -15,8 +15,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_HIG_ASYNC_H
-#define PRAGHA_HIG_ASYNC_H
+#ifndef PRAGHA_HIG_H
+#define PRAGHA_HIG_H
 
 #include <gtk/gtk.h>
 
@@ -29,4 +29,4 @@ void       pragha_hig_workarea_table_add_row               (GtkWidget *table, gu
 GtkWidget *pragha_hig_workarea_table_new                   ();
 void       pragha_hig_workarea_table_finish                (GtkWidget *table, guint *row);
 
-#endif /* PRAGHA_HIG_ASYNC_H */
+#endif /* PRAGHA_HIG_H */
