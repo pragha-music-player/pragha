@@ -25,6 +25,7 @@
 #include "pragha-window.h"
 #include "pragha-notify.h"
 #include "pragha-preferences-dialog.h"
+#include "glyr-related.h"
 
 #include <locale.h> /* require LC_ALL */
 

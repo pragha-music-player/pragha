@@ -329,16 +329,6 @@ void state_free(struct con_state *cstate);
 void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
-/* Related info helpers */
-
-void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);
-void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin);
-void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
-void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
-
-int init_glyr_related (struct con_win *cwin);
-void glyr_related_free (struct con_win *cwin);
-
 /* Others */
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin);
