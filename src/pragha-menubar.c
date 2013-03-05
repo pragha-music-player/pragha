@@ -25,6 +25,7 @@
 #include "pragha-utils.h"
 #include "pragha-filter-dialog.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-tags-dialog.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"
