@@ -22,6 +22,24 @@
 #include "pragha-lastfm.h"
 #include "pragha-utils.h"
 
+struct _PraghaToolbar {
+	GtkWidget *widget;
+	PraghaAlbumArt *albumart;
+	GtkWidget *track_progress_bar;
+	GtkToolItem *prev_button;
+	GtkToolItem *play_button;
+	GtkToolItem *stop_button;
+	GtkToolItem *next_button;
+	GtkToolItem *unfull_button;
+	GtkWidget *vol_button;
+	GtkWidget *track_length_label;
+	GtkWidget *track_time_label;
+	GtkWidget *now_playing_label;
+	#ifdef HAVE_LIBCLASTFM
+	GtkWidget *ntag_lastfm_button;
+	#endif
+};
+
 /* Search the album art on cache and create a pixbuf of that file */
 #ifdef HAVE_LIBGLYR
 static gchar*
@@ -632,6 +650,16 @@ pragha_toolbar_free(PraghaToolbar *toolbar)
 	g_slice_free(PraghaToolbar, toolbar);
 }
 
+static gboolean
+pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar)
+{
+	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
+		gtk_widget_set_visible(GTK_WIDGET(toolbar->unfull_button), (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
+	}
+
+	return FALSE;
+}
+
 PraghaToolbar *
 pragha_toolbar_new(struct con_win *cwin)
 {
@@ -762,11 +790,19 @@ pragha_toolbar_new(struct con_win *cwin)
 	g_signal_connect(cwin->backend, "buffering",
 	                 G_CALLBACK(pragha_toolbar_update_buffering_cb), pragha_toolbar);
 
+	g_object_bind_property (cwin->backend, "volume", vol_button, "value",  binding_flags);
+
 	g_object_bind_property(cwin->preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(cwin->preferences, "repeat", repeat_button, "active", binding_flags);
 	g_object_bind_property(cwin->preferences, "album-art-size", albumart, "size", binding_flags);
 
-	g_object_bind_property (cwin->backend, "volume", vol_button, "value", G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+	gtk_widget_show_all(toolbar);
+	gtk_widget_hide(GTK_WIDGET(pragha_toolbar->unfull_button));
+
+	g_object_bind_property(cwin->preferences, "show-album-art", albumart, "visible", binding_flags);
+
+	g_signal_connect(G_OBJECT(cwin->mainwindow), "window-state-event",
+	                 G_CALLBACK(pragha_toolbar_window_state_event), pragha_toolbar);
 
     pragha_toolbar->widget = toolbar;
 

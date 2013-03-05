@@ -748,14 +748,14 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 
 	if(fullscreen){
 		gtk_window_fullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_show(GTK_WIDGET(cwin->toolbar->unfull_button));
+		//gtk_widget_show(GTK_WIDGET(cwin->toolbar->unfull_button));
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
 		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
-		gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
+		//gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
 		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
 }
@@ -779,11 +779,12 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
 	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
-	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(cwin->toolbar->widget));
+	GtkWidget *toolbar = pragha_toolbar_get_widget(cwin->toolbar);
+	GtkWidget *parent = gtk_widget_get_parent(toolbar);
 
 	gint position = cwin->cpref->controls_below ? 3 : 1;
 
-	gtk_box_reorder_child(GTK_BOX(parent), cwin->toolbar->widget, position);
+	gtk_box_reorder_child(GTK_BOX(parent), toolbar, position);
 }
 
 void
@@ -971,6 +972,8 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
+
+	gtk_widget_show_all(gtk_ui_manager_get_widget(main_menu, "/Menubar"));
 
 	return main_menu;
 }

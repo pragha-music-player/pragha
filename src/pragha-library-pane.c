@@ -2847,5 +2847,7 @@ pragha_library_pane_new(struct con_win *cwin)
 	g_signal_connect(clibrary->preferences, "notify::library-style",
 	                 G_CALLBACK (library_pane_change_style), cwin);
 
+	gtk_widget_show_all(clibrary->widget);
+
 	return clibrary;
 }

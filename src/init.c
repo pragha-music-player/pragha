@@ -814,7 +814,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			   GTK_WIDGET(menu_bar),
 			   FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
-			   GTK_WIDGET(cwin->toolbar->widget),
+			   GTK_WIDGET(pragha_toolbar_get_widget(cwin->toolbar)),
 			   FALSE,FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(info_box),
@@ -822,6 +822,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(vbox),
 			   GTK_WIDGET(hbox_main),
 			   TRUE,TRUE, 0);
+
+	gtk_widget_show(vbox);
 
 	/* Send notifications on gui, OSD and mpris of new songs */
 
@@ -832,7 +834,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Init window state */
 
 	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {
-		gtk_widget_show_all(cwin->mainwindow);
+		gtk_widget_show(cwin->mainwindow);
 	}
 	else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE)) {
 		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
@@ -841,18 +843,16 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		else {
 			g_warning("(%s): No embedded status_icon.", __func__);
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
-			gtk_widget_show_all(cwin->mainwindow);
-			gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
+			gtk_widget_show(cwin->mainwindow);
 			#ifdef HAVE_LIBCLASTFM
-			gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
+			//gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
 			#endif
 		}
 	}
 	else {
-		gtk_widget_show_all(cwin->mainwindow);
-		gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
+		gtk_widget_show(cwin->mainwindow);
 		#ifdef HAVE_LIBCLASTFM
-		gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
+		//gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
 		#endif
 	}
 
@@ -863,14 +863,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	g_object_bind_property (cwin->preferences, "show-status-bar",
 	                        cwin->statusbar, "visible",
 	                        binding_flags);
-	g_object_bind_property (cwin->preferences, "show-album-art",
-	                        GTK_WIDGET(cwin->toolbar->albumart), "visible",
-	                        binding_flags);
 
 	init_menu_actions(cwin);
 	update_playlist_changes_on_menu(cwin);
 
-	gtk_widget_grab_focus(GTK_WIDGET(cwin->toolbar->play_button));
+	//gtk_widget_grab_focus(GTK_WIDGET(cwin->toolbar->play_button));
 
 	g_signal_connect(cwin->backend,
 			 "error",
