@@ -15,12 +15,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_HIG_ASYNC_H
-#define PRAGHA_HIG_ASYNC_H
+#ifndef PRAGHA_FILTER_DIALOG_H
+#define PRAGHA_FILTER_DIALOG_H
 
 #include "pragha.h"
 
 void
 pragha_filter_dialog (struct con_win *cwin);
 
-#endif /* PRAGHA_SIMPLE_ASYNC_H */
+#endif /* PRAGHA_FILTER_DIALOG_H */
