@@ -327,11 +327,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->preferences_w->use_mpris2_w));
 		if(!cwin->cpref->use_mpris2) {
-			if(NULL != cwin->cmpris2->dbus_connection)
-				mpris_close(cwin->cmpris2);
-		} else {
-			if(NULL == cwin->cmpris2->dbus_connection)
-				mpris_init(cwin);
+			mpris_close(cwin->cmpris2);
+		}
+		else {
+			mpris_init(cwin);
 		}
 
 		save_preferences(cwin);
