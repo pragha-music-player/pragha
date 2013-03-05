@@ -98,7 +98,7 @@ gint main(gint argc, gchar *argv[])
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 #endif
-	cwin->cmpris2 = g_slice_new0(PraghaMpris2);
+	cwin->cmpris2 = pragha_mpris_new();
 
 	if(init_first_state(cwin) == -1)
 		return -1;

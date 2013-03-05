@@ -25,6 +25,19 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 
+struct _PraghaMpris2 {
+	struct con_win *cwin;
+	guint owner_id;
+	GDBusNodeInfo *introspection_data;
+	GDBusConnection *dbus_connection;
+	GQuark interface_quarks[4];
+	gboolean saved_playbackstatus;
+	gboolean saved_shuffle;
+	gchar *saved_title;
+	gdouble volume;
+	enum player_state state;
+};
+
 static const gchar mpris2xml[] = 
 "<node>"
 "        <interface name='org.mpris.MediaPlayer2'>"
@@ -1216,6 +1229,9 @@ gint mpris_init(struct con_win *cwin)
 	if (!cwin->cpref->use_mpris2)
 		return 0;
 
+	if(NULL != cwin->cmpris2->dbus_connection)
+		return 0;
+
 	CDEBUG(DBG_INFO, "Initializing MPRIS");
 
 	cwin->cmpris2->cwin = cwin;
@@ -1250,6 +1266,9 @@ void mpris_close (PraghaMpris2 *cmpris2)
 {
 	struct con_win *cwin = cmpris2->cwin;
 
+	if(NULL == cmpris2->dbus_connection)
+		return;
+
 	g_signal_handlers_disconnect_by_func (cwin->backend, seeked_cb, cwin);
 	g_signal_handlers_disconnect_by_func (cwin->backend, any_notify_cb, cwin);
 
@@ -1270,6 +1289,11 @@ void mpris_free (PraghaMpris2 *cmpris2)
 {
 	mpris_close (cmpris2);
 	g_slice_free (PraghaMpris2, cmpris2);
+}
+
+PraghaMpris2 *pragha_mpris_new()
+{
+	return g_slice_new0(PraghaMpris2);
 }
 
 // still todo:

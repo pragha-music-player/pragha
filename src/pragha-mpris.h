@@ -21,18 +21,7 @@
 
 #include "pragha.h"
 
-typedef struct _PraghaMpris2 {
-	struct con_win *cwin;
-	guint owner_id;
-	GDBusNodeInfo *introspection_data;
-	GDBusConnection *dbus_connection;
-	GQuark interface_quarks[4];
-	gboolean saved_playbackstatus;
-	gboolean saved_shuffle;
-	gchar *saved_title;
-	gdouble volume;
-	enum player_state state;
-} PraghaMpris2;
+typedef struct _PraghaMpris2 PraghaMpris2;
 
 #define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
 #define MPRIS_PATH "/org/mpris/MediaPlayer2"
@@ -46,5 +35,7 @@ void mpris_update_mobj_changed(struct con_win *cwin, PraghaMusicobject *mobj, gi
 void mpris_update_tracklist_replaced(struct con_win *cwin);
 void mpris_close(PraghaMpris2 *cmpris2);
 void mpris_free(PraghaMpris2 *cmpris2);
+
+PraghaMpris2 *pragha_mpris_new();
 
 #endif /* PRAGHA_MPRIS_H */
