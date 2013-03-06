@@ -105,7 +105,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 
 /* Set correction basedm on lastfm now playing segestion.. */
 
-void
+static void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
 	PraghaMusicobject *omobj, *nmobj, *tmobj, *tmobj2;
@@ -201,7 +201,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	}
 
 exit:
-	//gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
+	gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(omobj);
@@ -222,6 +222,24 @@ exit:
 	g_free(ntitle);
 	g_free(nartist);
 	g_free(nalbum);
+}
+
+static GtkWidget*
+pragha_lastfm_tag_suggestion_button_new(struct con_win *cwin)
+{
+	GtkWidget* ntag_lastfm_button;
+
+	ntag_lastfm_button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(ntag_lastfm_button), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(ntag_lastfm_button),
+                         gtk_image_new_from_stock(GTK_STOCK_SPELL_CHECK, GTK_ICON_SIZE_MENU));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button),
+	                            _("Last.fm suggested a tag correction"));
+
+	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
+	                 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
+
+	return ntag_lastfm_button;
 }
 
 /* Love and unlove music object */
@@ -776,6 +794,13 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 
 	struct con_win *cwin = user_data;
 
+	/* Hack to safe!.*/
+	if(!cwin->clastfm->ntag_lastfm_button) {
+		cwin->clastfm->ntag_lastfm_button =
+			pragha_lastfm_tag_suggestion_button_new(cwin);
+		pragha_toolbar_add_extention_widget(cwin->toolbar, cwin->clastfm->ntag_lastfm_button);
+	}
+
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_get(cwin->cstate->curr_mobj,
 	             "file", &cfile,
@@ -788,8 +813,8 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 	             NULL);
 	pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
 
-	/*if(g_ascii_strcasecmp(cfile, nfile) == 0)
-		gtk_widget_show(cwin->toolbar->ntag_lastfm_button);*/
+	if(g_ascii_strcasecmp(cfile, nfile) == 0)
+		gtk_widget_show(cwin->clastfm->ntag_lastfm_button);
 
 	g_free(cfile);
 	g_free(nfile);
@@ -1012,6 +1037,7 @@ init_lastfm(struct con_win *cwin)
 	cwin->clastfm->status = LASTFM_STATUS_INVALID;
 	cwin->clastfm->nmobj = pragha_musicobject_new();
 	pragha_mutex_create(cwin->clastfm->nmobj_mutex);
+	cwin->clastfm->ntag_lastfm_button = NULL;
 
 	/* Test internet and launch threads.*/
 
