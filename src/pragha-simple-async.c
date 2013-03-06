@@ -16,7 +16,14 @@
 /*************************************************************************/
 
 #include "pragha-simple-async.h"
-#include "pragha.h"
+#include "pragha-statusbar.h"
+
+struct _AsyncSimple {
+	gpointer userdata;
+	gpointer finished_data;
+	GThreadFunc func_w;
+	GSourceFunc func_f;
+};
 
 /* Generic function to set a message when finished the async operation.
  * You need set 'pragha_async_set_idle_message' as finish_func
