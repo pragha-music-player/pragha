@@ -19,6 +19,8 @@
 #ifndef PRAGHA_MUSICOBJECT_MGMT_H
 #define PRAGHA_MUSICOBJECT_MGMT_H
 
+#include "pragha.h"
+
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);
 PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
 PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
