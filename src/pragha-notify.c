@@ -151,8 +151,8 @@ show_osd (struct con_win *cwin)
 	notify_notification_set_timeout(cwin->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
-	/*notify_notification_set_icon_from_pixbuf(cwin->osd_notify,
-						 pragha_album_art_get_pixbuf(cwin->toolbar->albumart));*/
+	notify_notification_set_icon_from_pixbuf(cwin->osd_notify,
+		pragha_album_art_get_pixbuf(pragha_toolbar_get_album_art(cwin->toolbar)));
 
 	/* Show OSD */
 	if (!notify_notification_show(cwin->osd_notify, &error)) {

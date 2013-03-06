@@ -28,7 +28,9 @@ void __update_current_song_info(struct con_win *cwin);
 
 void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin);
 
-GtkWidget     *pragha_toolbar_get_widget (PraghaToolbar *toolbar);
+PraghaAlbumArt *pragha_toolbar_get_album_art (PraghaToolbar *toolbar);
+GtkWidget      *pragha_toolbar_get_widget    (PraghaToolbar *toolbar);
+
 void           pragha_toolbar_free       (PraghaToolbar *toolbar);
 PraghaToolbar *pragha_toolbar_new        (struct con_win *cwin);
 
