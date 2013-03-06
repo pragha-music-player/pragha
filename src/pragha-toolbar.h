@@ -16,10 +16,10 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
-
 #ifndef PRAGHA_TOOLBAR_H
 #define PRAGHA_TOOLBAR_H
+
+#include "pragha.h"
 
 typedef struct _PraghaToolbar PraghaToolbar;
 
