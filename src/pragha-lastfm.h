@@ -31,6 +31,7 @@ struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
+	GtkWidget *ntag_lastfm_button;
 	PraghaMusicobject *nmobj;
 	PRAGHA_MUTEX (nmobj_mutex);
 };
@@ -42,7 +43,6 @@ enum LASTFM_QUERY_TYPE {
 };
 
 void update_menubar_lastfm_state (struct con_win *cwin);
-void edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);

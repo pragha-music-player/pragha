@@ -844,16 +844,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			g_warning("(%s): No embedded status_icon.", __func__);
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 			gtk_widget_show(cwin->mainwindow);
-			#ifdef HAVE_LIBCLASTFM
-			//gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
-			#endif
 		}
 	}
 	else {
 		gtk_widget_show(cwin->mainwindow);
-		#ifdef HAVE_LIBCLASTFM
-		//gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
-		#endif
 	}
 
 	/* TODO: Move it to Widgets construction. */

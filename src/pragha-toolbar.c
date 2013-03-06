@@ -35,9 +35,7 @@ struct _PraghaToolbar {
 	GtkWidget *track_length_label;
 	GtkWidget *track_time_label;
 	GtkWidget *now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
-	#endif
+	GtkWidget *extention_box;
 };
 
 /* Search the album art on cache and create a pixbuf of that file */
@@ -249,10 +247,6 @@ pragha_toolbar_unset_song_info(struct con_win *cwin)
 	gtk_label_set_markup(GTK_LABEL(cwin->toolbar->track_time_label),"<small>00:00</small>");
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->toolbar->track_progress_bar), 0);
-
-	#ifdef HAVE_LIBCLASTFM
-	gtk_widget_hide(cwin->toolbar->ntag_lastfm_button);
-	#endif
 }
 
 static void __update_track_progress_bar(struct con_win *cwin, gint progress)
@@ -496,13 +490,10 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
 	GtkWidget *pack_vbox, *playing_hbox, *time_hbox;
 	GtkWidget *track_length_event_box, *track_playing_event_box;
+	GtkWidget *extention_box;
 
 	#if GTK_CHECK_VERSION (3, 0, 0)
 	GtkWidget *track_progress_event_box;
-	#endif
- 
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *ntag_lastfm_button;
 	#endif
 
 	playing_hbox = gtk_hbox_new(FALSE, 2);
@@ -520,25 +511,14 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 
 	gtk_container_add(GTK_CONTAINER(track_playing_event_box), now_playing_label);
 
-	#ifdef HAVE_LIBCLASTFM
-	ntag_lastfm_button = gtk_button_new();
-	gtk_button_set_relief(GTK_BUTTON(ntag_lastfm_button), GTK_RELIEF_NONE);
-	gtk_button_set_image(GTK_BUTTON(ntag_lastfm_button),
-			     gtk_image_new_from_stock(GTK_STOCK_SPELL_CHECK,
-						      GTK_ICON_SIZE_MENU));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button), _("Last.fm suggested a tag correction"));
-	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
-	                 G_CALLBACK(edit_tags_corrected_by_lastfm), cwin);
-	#endif
+	extention_box = gtk_vbox_new(FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(playing_hbox),
 			   GTK_WIDGET(track_playing_event_box),
 			   TRUE, TRUE, 0);
-	#ifdef HAVE_LIBCLASTFM
 	gtk_box_pack_start(GTK_BOX(playing_hbox),
-			   GTK_WIDGET(ntag_lastfm_button),
+			   GTK_WIDGET(extention_box),
 			   FALSE, FALSE, 0);
-	#endif
 
 	time_hbox = gtk_hbox_new(FALSE, 2);
 
@@ -590,11 +570,9 @@ GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
 
 	toolbar->track_progress_bar = 	track_progress_bar;
 	toolbar->now_playing_label = 	now_playing_label;
-	#ifdef HAVE_LIBCLASTFM
-	toolbar->ntag_lastfm_button =	ntag_lastfm_button;
-	#endif
 	toolbar->track_time_label =	track_time_label;
 	toolbar->track_length_label = 	track_length_label;
+	toolbar->extention_box = extention_box;
 
 	gtk_box_pack_start(GTK_BOX(time_hbox),
 			   GTK_WIDGET(track_time_align),
@@ -634,6 +612,22 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 
 	gtk_container_add (GTK_CONTAINER(boxitem), align_box);
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
+}
+
+void
+pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
+{
+	GList *list;
+	GtkWidget *children;
+
+	list = gtk_container_get_children (GTK_CONTAINER(toolbar->extention_box));
+	if(list) {
+		children = list->data;
+		gtk_container_remove(GTK_CONTAINER(toolbar->extention_box), children);
+		gtk_widget_destroy(GTK_WIDGET(children));
+		g_list_free(list);
+	}
+	gtk_container_add(GTK_CONTAINER(toolbar->extention_box), widget);
 }
 
 PraghaAlbumArt *
