@@ -636,6 +636,12 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 }
 
+PraghaAlbumArt *
+pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
+{
+	return toolbar->albumart;
+}
+
 GtkWidget *
 pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 {

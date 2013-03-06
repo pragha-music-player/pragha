@@ -506,6 +506,8 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 {
 	gchar *artUrl_uri = NULL;
 	GVariantBuilder b;
+	PraghaAlbumArt *albumart;
+	const gchar *arturl;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
 
@@ -517,13 +519,14 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		/* Append the album art url metadata. */
-		/* TODO: Add temp var or convert uri on album art set properties..*/
-		/*if (pragha_album_art_get_path(cwin->toolbar->albumart) != NULL) {
-			artUrl_uri = g_filename_to_uri(pragha_album_art_get_path(cwin->toolbar->albumart), NULL, NULL);
+		albumart = pragha_toolbar_get_album_art(cwin->toolbar);
+		arturl = pragha_album_art_get_path(albumart);
+		if (string_is_not_empty(arturl)) {
+			artUrl_uri = g_filename_to_uri(arturl, NULL, NULL);
 			g_variant_builder_add (&b, "{sv}", "mpris:artUrl",
 				g_variant_new_string(artUrl_uri));
 			g_free(artUrl_uri);
-		}*/
+		}
 	}
 	else {
 		g_variant_builder_add (&b, "{sv}", "mpris:trackid",
