@@ -428,8 +428,10 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 	if(cwin->related_timeout_id)
 		g_source_remove(cwin->related_timeout_id);
 
-	if(state != ST_PLAYING)
+	if(state != ST_PLAYING) {
+		gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
 		return;
+	}
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
