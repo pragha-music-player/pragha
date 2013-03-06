@@ -19,6 +19,7 @@
 #include "pragha.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
+#include "pragha-musicobject-mgmt.h"
 
 /*
  * Track properties dialog

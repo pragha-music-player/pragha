@@ -21,6 +21,16 @@
 
 #include "pragha.h"
 
+/* Flags to control tags changed. */
+
+#define TAG_TNO_CHANGED     1<<0
+#define TAG_TITLE_CHANGED   1<<1
+#define TAG_ARTIST_CHANGED  1<<2
+#define TAG_ALBUM_CHANGED   1<<3
+#define TAG_GENRE_CHANGED   1<<4
+#define TAG_YEAR_CHANGED    1<<5
+#define TAG_COMMENT_CHANGED 1<<6
+
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);
 PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
 PraghaMusicobject* new_musicobject_from_cdda(struct con_win *cwin, gint track_no);
