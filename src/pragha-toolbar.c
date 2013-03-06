@@ -21,6 +21,7 @@
 #include "pragha-playback.h"
 #include "pragha-lastfm.h"
 #include "pragha-utils.h"
+#include "pragha-debug.h"
 
 struct _PraghaToolbar {
 	GtkWidget *widget;

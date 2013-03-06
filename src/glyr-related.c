@@ -21,6 +21,7 @@
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
+#include "pragha-debug.h"
 
 #ifdef HAVE_LIBGLYR
 

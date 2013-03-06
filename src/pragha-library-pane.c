@@ -26,6 +26,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-debug.h"
 #include <stdlib.h>
 
 struct _PraghaLibraryPane {

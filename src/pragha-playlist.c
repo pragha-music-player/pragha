@@ -27,6 +27,7 @@
 #include "glyr-related.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-debug.h"
 #include <stdlib.h>
 
 /**

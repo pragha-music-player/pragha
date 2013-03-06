@@ -19,6 +19,7 @@
 #include "pragha.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-debug.h"
 
 static gint cddb_add_tracks(struct con_win *cwin)
 {

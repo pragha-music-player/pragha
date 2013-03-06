@@ -23,6 +23,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-debug.h"
 #include "xml_helper.h"
 
 #ifdef HAVE_LIBCLASTFM
