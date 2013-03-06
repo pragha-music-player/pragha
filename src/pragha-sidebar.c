@@ -17,6 +17,16 @@
 
 #include "pragha-sidebar.h"
 
+struct _PraghaSidebar {
+	GtkWidget *widget;
+	GtkWidget *container;
+	GtkWidget *header;
+	GtkWidget *menu_button;
+	GtkWidget *close_button;
+	GtkWidget *label;
+	GtkMenu *popup_menu;
+};
+
 /*
  * Public Api.
  */

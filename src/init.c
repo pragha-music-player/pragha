@@ -852,7 +852,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* TODO: Move it to Widgets construction. */
 	g_object_bind_property (cwin->preferences, "lateral-panel",
-	                        cwin->sidebar->widget, "visible",
+	                        pragha_sidebar_get_widget(cwin->sidebar), "visible",
 	                        binding_flags);
 	g_object_bind_property (cwin->preferences, "show-status-bar",
 	                        cwin->statusbar, "visible",
