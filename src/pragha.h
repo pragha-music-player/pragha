@@ -141,16 +141,6 @@ enum dnd_target {
 	TARGET_PLAIN_TEXT
 };
 
-/* Playlist management */
-
-enum playlist_mgmt {
-	NEW_PLAYLIST,
-	APPEND_PLAYLIST,
-	EXPORT_PLAYLIST,
-	SAVE_COMPLETE,
-	SAVE_SELECTED
-};
-
 typedef struct {
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;

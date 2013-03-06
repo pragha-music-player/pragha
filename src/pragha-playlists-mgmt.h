@@ -19,6 +19,20 @@
 #ifndef PRAGHA_PLAYLISTS_MGMT_H
 #define PRAGHA_PLAYLISTS_MGMT_H
 
+#include "pragha.h"
+#include "pragha-database.h"
+#include "pragha-playlist.h"
+
+/* Playlist management */
+
+enum playlist_mgmt {
+	NEW_PLAYLIST,
+	APPEND_PLAYLIST,
+	EXPORT_PLAYLIST,
+	SAVE_COMPLETE,
+	SAVE_SELECTED
+};
+
 gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);
 GList * add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
