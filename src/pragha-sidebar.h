@@ -20,15 +20,7 @@
 
 #include <gtk/gtk.h>
 
-typedef struct {
-	GtkWidget *widget;
-	GtkWidget *container;
-	GtkWidget *header;
-	GtkWidget *menu_button;
-	GtkWidget *close_button;
-	GtkWidget *label;
-	GtkMenu *popup_menu;
-} PraghaSidebar;
+typedef struct _PraghaSidebar PraghaSidebar;
 
 void           pragha_sidebar_header_set_text (PraghaSidebar *sidebar, const gchar *text);
 void           pragha_sidebar_attach_menu     (PraghaSidebar *sidebar, GtkMenu *menu);
