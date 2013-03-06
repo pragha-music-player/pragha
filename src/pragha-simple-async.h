@@ -20,12 +20,7 @@
 
 #include <glib.h>
 
-typedef struct {
-	gpointer userdata;
-	gpointer finished_data;
-	GThreadFunc func_w;
-	GSourceFunc func_f;
-} AsyncSimple;
+typedef struct _AsyncSimple AsyncSimple;
 
 #if GLIB_CHECK_VERSION (2, 32, 0)
 #define PRAGHA_MUTEX(mtx) GMutex mtx
