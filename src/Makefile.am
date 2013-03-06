@@ -29,6 +29,8 @@ pragha_SOURCES = \
 		pragha-database.h \
 		pragha-dbus.c \
 		pragha-dbus.h \
+		pragha-debug.c \
+		pragha-debug.h \
 		pragha-equalizer.c \
 		pragha-file-utils.c \
 		pragha-file-utils.h \

@@ -26,6 +26,7 @@
 #include "pragha-window.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-preferences-dialog.h"
+#include "pragha-debug.h"
 
 #ifdef HAVE_LIBXFCE4UI
 #include <libxfce4ui/libxfce4ui.h>

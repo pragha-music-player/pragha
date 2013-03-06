@@ -125,16 +125,6 @@
 #define TAG_YEAR_CHANGED	1<<5
 #define TAG_COMMENT_CHANGED	1<<6
 
-enum debug_level {
-	DBG_BACKEND = 1,
-	DBG_INFO,
-	DBG_LASTFM,
-	DBG_MPRIS,
-	DBG_MOBJ,
-	DBG_DB,
-	DBG_VERBOSE,
-};
-
 enum dnd_target {
 	TARGET_REF_LIBRARY,
 	TARGET_URI_LIST,
@@ -272,14 +262,6 @@ struct con_win {
 	guint related_timeout_id;
 	DBusConnection *con_dbus;
 };
-
-/* Debugging */
-
-extern gint debug_level;
-
-#define CDEBUG(_lvl, _fmt, ...)			\
-	if (G_UNLIKELY(_lvl <= debug_level))	\
-		g_debug(_fmt, ##__VA_ARGS__);
 
 /* Info bar import music */
 
