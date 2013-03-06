@@ -67,6 +67,7 @@
 #include "pragha-database.h"
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
+#include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
@@ -123,48 +124,6 @@ enum dnd_target {
 	TARGET_PLAIN_TEXT
 };
 
-typedef struct {
-	GtkWidget *audio_device_w;
-	GtkWidget *audio_cd_device_w;
-	GtkWidget *audio_sink_combo_w;
-	GtkWidget *soft_mixer_w;
-
-	GtkWidget *use_hint_w;
-	GtkWidget *album_art_w;
-	GtkWidget *album_art_size_w;
-	GtkWidget *album_art_pattern_w;
-
-	GtkWidget *library_view_w;
-	GtkWidget *fuse_folders_w;
-	GtkWidget *sort_by_year_w;
-
-	GtkWidget *instant_filter_w;
-	GtkWidget *aproximate_search_w;
-	GtkWidget *window_state_combo_w;
-	GtkWidget *restore_playlist_w;
-	GtkWidget *show_icon_tray_w;
-	GtkWidget *close_to_tray_w;
-	GtkWidget *add_recursively_w;
-
-	GtkWidget *show_osd_w;
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray_w;
-#endif
-	GtkWidget *albumart_in_osd_w;
-	GtkWidget *actions_in_osd_w;
-
-#ifdef HAVE_LIBCLASTFM
-	GtkWidget *lastfm_w;
-	GtkWidget *lastfm_uname_w;
-	GtkWidget *lastfm_pass_w;
-#endif
-#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art_w;
-#endif
-	GtkWidget *use_cddb_w;
-	GtkWidget *use_mpris2_w;
-}PreferencesWidgets;
-
 struct con_pref {
 	gchar *installed_version;
 	gchar *album_art_pattern;
@@ -196,7 +155,6 @@ struct con_pref {
 	gchar *lastfm_pass;
 #endif
 };
-
 
 /**
  * struct con_state - Pertains to the current state of the player

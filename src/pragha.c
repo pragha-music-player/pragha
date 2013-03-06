@@ -35,6 +35,27 @@ gint debug_level;
 GThread *pragha_main_thread = NULL;
 #endif
 
+/*
+ * Here temporarily.
+ * Port the rest of the preferences to PraghaPreferences and then delete this.
+ */
+
+static void preferences_free (struct con_pref *cpref)
+{
+#ifdef HAVE_LIBCLASTFM
+	g_free(cpref->lastfm_user);
+	g_free(cpref->lastfm_pass);
+#endif
+#ifdef HAVE_LIBGLYR
+	g_free(cpref->cache_folder);
+#endif
+	g_free(cpref->installed_version);
+	g_free(cpref->album_art_pattern);
+	g_free(cpref->start_mode);
+
+	g_slice_free(struct con_pref, cpref);
+}
+
 /* FIXME: Cleanup track refs */
 static void common_cleanup(struct con_win *cwin)
 {
