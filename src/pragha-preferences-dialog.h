@@ -19,8 +19,11 @@
 #ifndef PRAGHA_PREFERENCES_DIALOG_H
 #define PRAGHA_PREFERENCES_DIALOG_H
 
+#include "pragha.h"
+
+typedef struct _PreferencesWidgets PreferencesWidgets;
+
 void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
-void preferences_free(struct con_pref *cpref);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

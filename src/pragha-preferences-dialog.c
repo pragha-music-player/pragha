@@ -26,6 +26,48 @@
 #include "pragha-simple-widgets.h"
 #include "pragha-debug.h"
 
+struct _PreferencesWidgets {
+	GtkWidget *audio_device_w;
+	GtkWidget *audio_cd_device_w;
+	GtkWidget *audio_sink_combo_w;
+	GtkWidget *soft_mixer_w;
+
+	GtkWidget *use_hint_w;
+	GtkWidget *album_art_w;
+	GtkWidget *album_art_size_w;
+	GtkWidget *album_art_pattern_w;
+
+	GtkWidget *library_view_w;
+	GtkWidget *fuse_folders_w;
+	GtkWidget *sort_by_year_w;
+
+	GtkWidget *instant_filter_w;
+	GtkWidget *aproximate_search_w;
+	GtkWidget *window_state_combo_w;
+	GtkWidget *restore_playlist_w;
+	GtkWidget *show_icon_tray_w;
+	GtkWidget *close_to_tray_w;
+	GtkWidget *add_recursively_w;
+
+	GtkWidget *show_osd_w;
+#if !NOTIFY_CHECK_VERSION (0, 7, 0)
+	GtkWidget *osd_in_systray_w;
+#endif
+	GtkWidget *albumart_in_osd_w;
+	GtkWidget *actions_in_osd_w;
+
+#ifdef HAVE_LIBCLASTFM
+	GtkWidget *lastfm_w;
+	GtkWidget *lastfm_uname_w;
+	GtkWidget *lastfm_pass_w;
+#endif
+#ifdef HAVE_LIBGLYR
+	GtkWidget *get_album_art_w;
+#endif
+	GtkWidget *use_cddb_w;
+	GtkWidget *use_mpris2_w;
+};
+
 const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
 Wildcards are not accepted as of now ( patches welcome :-) ).");
@@ -1535,20 +1577,4 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_dialog_set_default_response(GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog);
-}
-
-void preferences_free (struct con_pref *cpref)
-{
-#ifdef HAVE_LIBCLASTFM
-	g_free(cpref->lastfm_user);
-	g_free(cpref->lastfm_pass);
-#endif
-#ifdef HAVE_LIBGLYR
-	g_free(cpref->cache_folder);
-#endif
-	g_free(cpref->installed_version);
-	g_free(cpref->album_art_pattern);
-	g_free(cpref->start_mode);
-
-	g_slice_free(struct con_pref, cpref);
 }
