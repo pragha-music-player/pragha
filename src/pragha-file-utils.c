@@ -19,7 +19,7 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 
-#include "pragha.h" //new_musicobject_from_file()
+//#include "pragha.h" //new_musicobject_from_file()
 #include "pragha-file-utils.h"
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
