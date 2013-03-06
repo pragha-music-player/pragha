@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include "pragha.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-file-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-tags-mgmt.h"

@@ -19,9 +19,9 @@
 
 #include <sqlite3.h>
 
-#include "pragha.h"
 #include "pragha-database.h"
 #include "pragha-prepared-statement-private.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
 
