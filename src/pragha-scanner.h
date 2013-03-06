@@ -18,32 +18,7 @@
 #ifndef PRAGHA_SCANNER_H
 #define PRAGHA_SCANNER_H
 
-#include "pragha.h"
-#include "pragha-simple-async.h"
-
-typedef struct {
-	/* Widgets */
-	GtkWidget         *hbox;
-	GtkWidget         *progress_bar;
-	/* Cache */
-	GHashTable        *tracks_table;
-	GSList            *folder_list;
-	GSList            *folder_scanned;
-	GTimeVal          last_update;
-	/* Threads */
-	GThread           *no_files_thread;
-	GThread           *worker_thread;
-	/* Mutex to protect progress */
-	PRAGHA_MUTEX      (no_files_mutex);
-	PRAGHA_MUTEX      (files_scanned_mutex);
-	/* Progress of threads */
-	guint              no_files;
-	guint              files_scanned;
-	/* Cancellation safe */
-	GCancellable      *cancellable;
-	/* Timeout of update progress, also used as operating flag*/
-	guint              update_timeout;
-} PraghaScanner;
+typedef struct _PraghaScanner PraghaScanner;
 
 void
 pragha_scanner_update_library(PraghaScanner *scanner);
