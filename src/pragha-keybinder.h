@@ -24,8 +24,8 @@
 
 #ifdef HAVE_LIBKEYBINDER
 
-#include <keybinder.h>
-#include "pragha.h"
+/* pragha.h */
+struct con_win;
 
 gint init_keybinder (struct con_win *cwin);
 void keybinder_free ();

@@ -16,10 +16,10 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include <stdlib.h>
 #include "pragha-cmdline.h"
 #include "pragha-dbus.h"
-#include <stdlib.h>
+#include "pragha.h"
 
 /* Handler for 'version' option on the cmdline */
 

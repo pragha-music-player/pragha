@@ -19,6 +19,9 @@
 #ifndef PRAGHA_TAGS_DIALOG_H
 #define PRAGHA_TAGS_DIALOG_H
 
+/* pragha.h */
+struct con_win;
+
 gint tag_edit_dialog(PraghaMusicobject *omobj, gint prechanged, PraghaMusicobject *nmobj, struct con_win *cwin);
 
 #endif /* PRAGHA_TAGS_DIALOG_H */

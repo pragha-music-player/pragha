@@ -19,6 +19,11 @@
 #ifndef PRAGHA_CMDLINE_H
 #define PRAGHA_CMDLINE_H
 
+#include <glib.h>
+
+/* pragha.h */
+struct con_win;
+
 gboolean cmd_version(const gchar *opt_name, const gchar *val,
 		     struct con_win *cwin, GError **error);
 gboolean cmd_play(const gchar *opt_name, const gchar *val,

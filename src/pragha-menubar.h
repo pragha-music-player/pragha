@@ -19,7 +19,10 @@
 #ifndef PRAGHA_MENU_H
 #define PRAGHA_MENU_H
 
-#include "pragha.h"
+#include <gtk/gtk.h>
+
+/* pragha.h */
+struct con_win;
 
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);

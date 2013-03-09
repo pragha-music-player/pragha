@@ -19,6 +19,12 @@
 #ifndef PRAGHA_TAGS_MGMT_H
 #define PRAGHA_TAGS_MGMT_H
 
+#include <gtk/gtk.h>
+#include "pragha-musicobject.h"
+
+/* pragha.h */
+struct con_win;
+
 gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
 gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);
 gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent);

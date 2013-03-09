@@ -15,13 +15,13 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "glyr-related.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 #ifdef HAVE_LIBGLYR
 

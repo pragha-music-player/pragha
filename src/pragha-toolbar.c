@@ -16,12 +16,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-toolbar.h"
 #include "pragha-playback.h"
 #include "pragha-lastfm.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 struct _PraghaToolbar {
 	GtkWidget *widget;

@@ -19,7 +19,12 @@
 #ifndef PRAGHA_PLAYLIST_H
 #define PRAGHA_PLAYLIST_H
 
-#include "pragha.h"
+#include <gtk/gtk.h>
+#include "pragha-backend.h"
+#include "pragha-database.h"
+
+/* pragha.h */
+struct con_win;
 
 typedef struct _PraghaPlaylist PraghaPlaylist;
 

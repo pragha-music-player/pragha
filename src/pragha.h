@@ -114,8 +114,6 @@
 
 #define MIN_DATABASE_VERSION	"0.8.0"
 
-#define SAVE_PLAYLIST_STATE         "con_playlist"
-
 #define WAIT_UPDATE 5
 
 enum dnd_target {

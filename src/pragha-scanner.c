@@ -15,6 +15,15 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #include "pragha-scanner.h"
 #include "pragha-database.h"
 #include "pragha-file-utils.h"

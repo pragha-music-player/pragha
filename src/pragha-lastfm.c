@@ -15,7 +15,6 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
 #include "pragha-library-pane.h"
@@ -25,8 +24,11 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "xml_helper.h"
+#include "pragha.h"
 
 #ifdef HAVE_LIBCLASTFM
+
+#include <clastfm.h>
 
 typedef struct {
 	GList *list;

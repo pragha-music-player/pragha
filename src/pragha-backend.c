@@ -16,12 +16,16 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 #if GST_CHECK_VERSION (1, 0, 0)

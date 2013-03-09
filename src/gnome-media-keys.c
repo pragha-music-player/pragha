@@ -18,9 +18,9 @@
 
 //based on code from Totem movie player
 
-#include "pragha.h"
 #include "pragha-playback.h"
 #include "gnome-media-keys.h"
+#include "pragha.h"
 
 #define PLAYER_NAME "Pragha"
 

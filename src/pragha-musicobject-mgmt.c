@@ -16,12 +16,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-file-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)

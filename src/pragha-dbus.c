@@ -16,12 +16,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-dbus.h"
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-notify.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 static void dbus_play_handler(struct con_win *cwin)
 {

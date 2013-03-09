@@ -19,7 +19,8 @@
 #ifndef PRAGHA_GNOME_MEDIA_KEYS_H
 #define PRAGHA_GNOME_MEDIA_KEYS_H
 
-#include "pragha.h"
+/* pragha.h */
+struct con_win;
 
 typedef struct _con_gnome_media_keys con_gnome_media_keys;
 

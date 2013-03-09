@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include <stdlib.h>
 #include "pragha-playlist.h"
 #include "pragha-lastfm.h"
 #include "pragha-file-utils.h"
@@ -28,7 +28,7 @@
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
-#include <stdlib.h>
+#include "pragha.h"
 
 /**
  * PraghaPlaylist - Pertains to the current state of the playlist

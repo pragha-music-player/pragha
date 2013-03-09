@@ -17,7 +17,6 @@
 
 #include "pragha-musicobject.h"
 #include "pragha-file-utils.h"
-#include "pragha.h"
 
 G_DEFINE_TYPE(PraghaMusicobject, pragha_musicobject, G_TYPE_OBJECT)
 

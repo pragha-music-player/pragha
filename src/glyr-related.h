@@ -18,6 +18,9 @@
 #ifndef PRAGHA_GLYR_RELATED_H
 #define PRAGHA_GLYR_RELATED_H
 
+/* pragha.h */
+struct con_win;
+
 #ifdef HAVE_LIBGLYR
 
 void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);

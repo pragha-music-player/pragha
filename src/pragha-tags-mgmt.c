@@ -16,7 +16,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include <tag_c.h>
+
 #include "pragha-tags-mgmt.h"
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
@@ -24,8 +25,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
-
-#include <tag_c.h>
+#include "pragha.h"
 
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)

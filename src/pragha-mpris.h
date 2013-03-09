@@ -19,7 +19,11 @@
 #ifndef PRAGHA_MPRIS_H
 #define PRAGHA_MPRIS_H
 
-#include "pragha.h"
+#include <gtk/gtk.h>
+#include "pragha-musicobject.h"
+
+/* pragha.h */
+struct con_win;
 
 typedef struct _PraghaMpris2 PraghaMpris2;
 
