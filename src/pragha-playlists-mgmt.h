@@ -19,9 +19,11 @@
 #ifndef PRAGHA_PLAYLISTS_MGMT_H
 #define PRAGHA_PLAYLISTS_MGMT_H
 
-#include "pragha.h"
 #include "pragha-database.h"
 #include "pragha-playlist.h"
+
+/* pragha.h */
+struct con_win;
 
 /* Playlist management */
 
@@ -32,6 +34,8 @@ enum playlist_mgmt {
 	SAVE_COMPLETE,
 	SAVE_SELECTED
 };
+
+#define SAVE_PLAYLIST_STATE         "con_playlist"
 
 gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);
 void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin);

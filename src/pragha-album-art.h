@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 #define PRAGHA_IS_ALBUM_ART_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_ALBUM_ART))
 #define PRAGHA_ALBUM_ART_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_ALBUM_ART, PraghaAlbumArtClass))
 
-
 typedef struct _PraghaAlbumArt PraghaAlbumArt;
 typedef struct _PraghaAlbumArtClass PraghaAlbumArtClass;
 typedef struct _PraghaAlbumArtPrivate PraghaAlbumArtPrivate;

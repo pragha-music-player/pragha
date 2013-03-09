@@ -19,6 +19,11 @@
 #ifndef PRAGHA_NOTIFY_H
 #define PRAGHA_NOTIFY_H
 
+#include <glib.h>
+
+/* pragha.h */
+struct con_win;
+
 gboolean can_support_actions(void);
 void show_osd(struct con_win *cwin);
 gint init_notify(struct con_win *cwin);

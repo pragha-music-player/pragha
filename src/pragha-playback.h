@@ -18,7 +18,10 @@
 #ifndef PRAGHA_PLAYBACK_H
 #define PRAGHA_PLAYBACK_H
 
-#include "pragha.h"
+#include "pragha-backend.h"
+
+/* pragha.h */
+struct con_win;
 
 void pragha_playback_notificate_new_track (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin);
 

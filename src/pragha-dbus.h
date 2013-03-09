@@ -19,6 +19,11 @@
 #ifndef PRAGHA_DBUS_H
 #define PRAGHA_DBUS_H
 
+#include <glib.h>
+
+/* pragha.h */
+struct con_win;
+
 #define DBUS_PATH      "/org/pragha/DBus"
 #define DBUS_NAME      "org.pragha.DBus"
 #define DBUS_INTERFACE "org.pragha.DBus"

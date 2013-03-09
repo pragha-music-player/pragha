@@ -18,6 +18,7 @@
 #include "pragha-filter-dialog.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
+#include "pragha.h"
 
 typedef struct {
 	GtkWidget *filter_view;

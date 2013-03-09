@@ -18,7 +18,8 @@
 #ifndef PRAGHA_FILTER_DIALOG_H
 #define PRAGHA_FILTER_DIALOG_H
 
-#include "pragha.h"
+/* pragha.h */
+struct con_win;
 
 void
 pragha_filter_dialog (struct con_win *cwin);

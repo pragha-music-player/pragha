@@ -16,9 +16,9 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-playback.h"
 #include "pragha-window.h"
+#include "pragha.h"
 
 /*****************/
 /* Playlist Tree */

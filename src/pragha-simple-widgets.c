@@ -15,14 +15,14 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha-simple-widgets.h"
-#include "pragha-utils.h"
-
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
 #endif
+
+#include "pragha-simple-widgets.h"
+#include "pragha-utils.h"
 
 /* Generic search entry, valid to library tree, and jump dialog. */
 

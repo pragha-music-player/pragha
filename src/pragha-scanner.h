@@ -18,6 +18,8 @@
 #ifndef PRAGHA_SCANNER_H
 #define PRAGHA_SCANNER_H
 
+#define PROGRESS_BAR_WIDTH         300
+
 typedef struct _PraghaScanner PraghaScanner;
 
 void

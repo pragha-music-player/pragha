@@ -19,7 +19,13 @@
 #ifndef PRAGHA_TOOLBAR_H
 #define PRAGHA_TOOLBAR_H
 
-#include "pragha.h"
+#include <gtk/gtk.h>
+
+#include "pragha-musicobject.h"
+#include "pragha-album-art.h"
+
+/* pragha.h */
+struct con_win;
 
 typedef struct _PraghaToolbar PraghaToolbar;
 

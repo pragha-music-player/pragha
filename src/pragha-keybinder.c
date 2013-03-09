@@ -15,7 +15,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "keybinder.h"
+#include <keybinder.h>
 #include "pragha-playback.h"
 #include "pragha-tags-dialog.h"
 #include "pragha.h"

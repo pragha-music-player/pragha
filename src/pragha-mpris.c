@@ -16,7 +16,6 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-mpris.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
@@ -25,6 +24,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 struct _PraghaMpris2 {
 	struct con_win *cwin;

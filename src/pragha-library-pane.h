@@ -19,7 +19,10 @@
 #ifndef PRAGHA_LIBRARY_PANE_H
 #define PRAGHA_LIBRARY_PANE_H
 
-#include "pragha.h"
+#include <gtk/gtk.h>
+
+/* pragha.h */
+struct con_win;
 
 typedef struct _PraghaLibraryPane PraghaLibraryPane;
 

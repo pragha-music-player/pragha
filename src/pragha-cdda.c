@@ -16,10 +16,10 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
+#include "pragha.h"
 
 static gint cddb_add_tracks(struct con_win *cwin)
 {

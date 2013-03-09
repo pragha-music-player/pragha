@@ -16,7 +16,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#include <locale.h> /* require LC_ALL */
+
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
@@ -27,8 +28,7 @@
 #include "pragha-preferences-dialog.h"
 #include "glyr-related.h"
 #include "pragha-debug.h"
-
-#include <locale.h> /* require LC_ALL */
+#include "pragha.h"
 
 gint debug_level;
 #ifdef DEBUG

@@ -16,17 +16,21 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_PLPARSER
+#include <totem-pl-parser.h>
+#endif
+
 #include "pragha-playlists-mgmt.h"
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
-
-#ifdef HAVE_PLPARSER
-#include <totem-pl-parser.h>
-#endif
+#include "pragha.h"
 
 /* Build a dialog to get a new playlist name */
 

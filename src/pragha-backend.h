@@ -19,13 +19,14 @@
 #ifndef PRAGHA_BACKEND_H
 #define PRAGHA_BACKEND_H
 
-G_BEGIN_DECLS
-
 #include <gst/gst.h>
+#include <glib-object.h>
 #include "pragha-musicobject.h"
 
-//forward declarations
+/* pragha.h */
 struct con_win;
+
+G_BEGIN_DECLS
 
 enum player_state {
 	ST_PLAYING = 1,

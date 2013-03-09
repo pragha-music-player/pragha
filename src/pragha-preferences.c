@@ -15,11 +15,18 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h" // LAST_LIBRARY_STYLE and FOLDERS
+#include <stdio.h> /* TODO: Port this to glib!!. */
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "pragha-preferences.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-//#include "pragha-library-pane.h" // LAST_LIBRARY_STYLE and FOLDERS
+#include "pragha-library-pane.h"
 #include "pragha-debug.h"
 
 G_DEFINE_TYPE(PraghaPreferences, pragha_preferences, G_TYPE_OBJECT)

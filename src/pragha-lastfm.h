@@ -18,11 +18,20 @@
 #ifndef PRAGHA_LASTFM_H
 #define PRAGHA_LASTFM_H
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifdef HAVE_LIBCLASTFM
 
 #include <clastfm.h>
+#include <gtk/gtk.h>
+
 #include "pragha-simple-async.h"
-#include "pragha.h"
+#include "pragha-musicobject.h"
+
+/* pragha.h */
+struct con_win;
 
 #define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"

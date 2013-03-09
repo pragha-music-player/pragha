@@ -19,6 +19,9 @@
 #ifndef PRAGHA_WINDOW_H
 #define PRAGHA_WINDOW_H
 
+#include <gtk/gtk.h>
+#include "pragha-backend.h"
+
 GtkWidget* create_main_region(struct con_win *cwin);
 GtkWidget* create_info_box(struct con_win *cwin);
 GtkWidget* create_paned_region(struct con_win *cwin);
@@ -29,6 +32,5 @@ void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
 void gui_free(struct con_win *cwin);
 void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
 void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
-
 
 #endif /* PRAGHA_WINDOW_H */

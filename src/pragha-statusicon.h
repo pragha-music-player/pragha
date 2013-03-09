@@ -19,6 +19,9 @@
 #ifndef PRAGHA_STATUSICON_H
 #define PRAGHA_STATUSICON_H
 
+/* pragha.h */
+struct con_win;
+
 void create_status_icon         (struct con_win *cwin);
 
 #endif /* PRAGHA_STATUSICON_H */

@@ -16,7 +16,6 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
 #include "pragha-menubar.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
@@ -30,6 +29,7 @@
 #include "pragha-preferences-dialog.h"
 #include "glyr-related.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha.h"
 
 static gchar *license = "This program is free software: "
 	"you can redistribute it and/or modify\n"

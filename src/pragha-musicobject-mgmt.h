@@ -19,7 +19,11 @@
 #ifndef PRAGHA_MUSICOBJECT_MGMT_H
 #define PRAGHA_MUSICOBJECT_MGMT_H
 
-#include "pragha.h"
+#include "pragha-musicobject.h"
+#include "pragha-database.h"
+
+/* pragha.h */
+struct con_win;
 
 /* Flags to control tags changed. */
 
