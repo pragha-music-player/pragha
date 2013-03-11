@@ -36,6 +36,9 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin);
 
 void pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget);
 
+const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
+const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);
+
 PraghaAlbumArt *pragha_toolbar_get_album_art (PraghaToolbar *toolbar);
 GtkWidget      *pragha_toolbar_get_widget    (PraghaToolbar *toolbar);
 

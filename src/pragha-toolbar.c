@@ -632,6 +632,18 @@ pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(toolbar->extention_box), widget);
 }
 
+const gchar*
+pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)
+{
+	return gtk_label_get_text (GTK_LABEL(toolbar->track_time_label));
+}
+
+const gchar*
+pragha_toolbar_get_length_text(PraghaToolbar *toolbar)
+{
+	return gtk_label_get_text (GTK_LABEL(toolbar->track_length_label));
+}
+
 PraghaAlbumArt *
 pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
 {
