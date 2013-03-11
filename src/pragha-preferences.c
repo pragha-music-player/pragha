@@ -16,7 +16,6 @@
 /*************************************************************************/
 
 #include <stdio.h> /* TODO: Port this to glib!!. */
-#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 
@@ -919,7 +918,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	if (g_file_test(pragha_config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE) {
 		if (g_mkdir_with_parents (pragha_config_dir, S_IRWXU) == -1) {
 			g_free(pragha_config_dir);
-			g_critical("Unable to create preferences directory, err: %s", strerror(errno));
+			g_critical("Unable to create preferences directory, err: %s", g_strerror(errno));
 			return;
 		}
 		CDEBUG(DBG_INFO, "Created .config/pragha folder");
@@ -934,7 +933,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		if (g_creat(priv->rc_filepath, S_IRWXU) == -1) {
 			g_free(priv->rc_filepath);
 			priv->rc_filepath = NULL;
-			g_critical("Unable to create config file, err: %s", strerror(errno));
+			g_critical("Unable to create config file, err: %s", g_strerror(errno));
 			return;
 		}
 		CDEBUG(DBG_INFO, "Created .config/pragha/config file");
