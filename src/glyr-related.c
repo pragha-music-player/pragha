@@ -430,7 +430,8 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 		g_source_remove(cwin->related_timeout_id);
 
 	if(state != ST_PLAYING) {
-		gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
+		if(cwin->clastfm->ntag_lastfm_button)
+			gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
 		return;
 	}
 
