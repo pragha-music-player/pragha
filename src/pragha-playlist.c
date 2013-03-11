@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include <stdlib.h>
+#include <gdk/gdkkeysyms.h>
 #include "pragha-playlist.h"
 #include "pragha-lastfm.h"
 #include "pragha-file-utils.h"

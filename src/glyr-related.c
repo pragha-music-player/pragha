@@ -15,6 +15,14 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_LIBGLYR
+#include <glyr/glyr.h>
+#include <glyr/cache.h>
+#endif
 #include "glyr-related.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"

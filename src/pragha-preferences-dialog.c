@@ -16,6 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <gdk/gdkkeysyms.h>
 #include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
