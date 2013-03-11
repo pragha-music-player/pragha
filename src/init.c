@@ -16,7 +16,14 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include "pragha.h"
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_LIBXFCE4UI
+#include <libxfce4ui/libxfce4ui.h>
+#endif
+#include <tag_c.h>
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
@@ -27,11 +34,7 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-preferences-dialog.h"
 #include "pragha-debug.h"
-
-#ifdef HAVE_LIBXFCE4UI
-#include <libxfce4ui/libxfce4ui.h>
-#endif
-#include <tag_c.h>
+#include "pragha.h"
 
 static gchar *audio_backend = NULL;
 static gchar *audio_device = NULL;
@@ -861,8 +864,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	init_menu_actions(cwin);
 	update_playlist_changes_on_menu(cwin);
-
-	//gtk_widget_grab_focus(GTK_WIDGET(cwin->toolbar->play_button));
 
 	g_signal_connect(cwin->backend,
 			 "error",
