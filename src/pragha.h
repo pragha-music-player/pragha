@@ -28,27 +28,14 @@
 #endif
 
 #ifdef HAVE_LIBGLYR
-#include <glyr/glyr.h>
 #include <glyr/cache.h>
 #endif
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <errno.h>
-//#include <string.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-#include <fcntl.h>
-//#include <unistd.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-//#include <gio/gio.h>
-//#include <dbus/dbus.h>
-//#include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>

@@ -17,6 +17,7 @@
 /*************************************************************************/
 
 #include <stdlib.h>
+#include <gdk/gdkkeysyms.h>
 #include "pragha-library-pane.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"

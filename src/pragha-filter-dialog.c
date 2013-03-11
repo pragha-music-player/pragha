@@ -15,6 +15,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <gdk/gdkkeysyms.h>
 #include "pragha-filter-dialog.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"

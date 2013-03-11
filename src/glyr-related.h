@@ -18,6 +18,8 @@
 #ifndef PRAGHA_GLYR_RELATED_H
 #define PRAGHA_GLYR_RELATED_H
 
+#include <gtk/gtk.h>
+
 /* pragha.h */
 struct con_win;
 
