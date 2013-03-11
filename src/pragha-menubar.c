@@ -227,7 +227,7 @@ static GtkToggleActionEntry toggles_entries[] = {
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
 	{"Status bar", NULL, N_("Status bar"),
-	 "", "Status bar", G_CALLBACK(status_bar_action),
+	 "", "Status bar", NULL,
 	TRUE}
 };
 
@@ -748,28 +748,14 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 
 	if(fullscreen){
 		gtk_window_fullscreen(GTK_WINDOW(cwin->mainwindow));
-		//gtk_widget_show(GTK_WIDGET(cwin->toolbar->unfull_button));
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
 		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen(GTK_WINDOW(cwin->mainwindow));
-		//gtk_widget_hide(GTK_WIDGET(cwin->toolbar->unfull_button));
 		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
-}
-
-/* Handler for the 'Status bar' item in the Edit menu */
-
-void
-status_bar_action (GtkAction *action, struct con_win *cwin)
-{
-	/*gboolean show_status_bar;
-	show_status_bar = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	pragha_preferences_set_show_status_bar (cwin->preferences,
-	                                        show_status_bar);*/
 }
 
 /* Handler for the 'Show_controls_below_action' item in the view menu */

@@ -39,7 +39,6 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin);
 void pref_action(GtkAction *action, struct con_win *cwin);
 void fullscreen_action (GtkAction *action, struct con_win *cwin);
 void playlists_pane_action (GtkAction *action, struct con_win *cwin);
-void status_bar_action (GtkAction *action, struct con_win *cwin);
 void show_controls_below_action (GtkAction *action, struct con_win *cwin);
 void jump_to_playing_song_action (GtkAction *action, struct con_win *cwin);
 void show_equalizer_action(GtkAction *action, struct con_win *cwin);
