@@ -108,9 +108,8 @@ status_get_tooltip_cb (GtkWidget        *widget,
 			_("Title"), pragha_musicobject_get_title(cwin->cstate->curr_mobj),
 			_("Artist"), pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
 			_("Album"), pragha_musicobject_get_album(cwin->cstate->curr_mobj),
-			_("Length"), "0", "0");
-			/*gtk_label_get_text (GTK_LABEL(cwin->toolbar->track_time_label)),
-			gtk_label_get_text (GTK_LABEL(cwin->toolbar->track_length_label)));*/
+			_("Length"), pragha_toolbar_get_progress_text(cwin->toolbar),
+			pragha_toolbar_get_length_text(cwin->toolbar));
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 	gtk_tooltip_set_markup (tooltip, markup_text);
