@@ -19,6 +19,12 @@
 #include <config.h>
 #endif
 
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
 #include <glyr/cache.h>

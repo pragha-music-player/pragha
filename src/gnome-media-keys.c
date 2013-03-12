@@ -39,22 +39,22 @@ static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
     if (pragha_backend_emitted_error (cwin->backend))
         return;
 
-    if (strcmp("Play", key) == 0)
+    if (g_strcmp0("Play", key) == 0)
         pragha_playback_play_pause_resume(cwin);
-    else if (strcmp("Pause", key) == 0)
+    else if (g_strcmp0("Pause", key) == 0)
         pragha_backend_pause(cwin->backend);
-    else if (strcmp("Stop", key) == 0)
+    else if (g_strcmp0("Stop", key) == 0)
         pragha_playback_stop(cwin);
-    else if (strcmp("Previous", key) == 0)
+    else if (g_strcmp0("Previous", key) == 0)
         pragha_playback_prev_track(cwin);
-    else if (strcmp("Next", key) == 0)
+    else if (g_strcmp0("Next", key) == 0)
         pragha_playback_next_track(cwin);
-    else if (strcmp("Repeat", key) == 0)
+    else if (g_strcmp0("Repeat", key) == 0)
     {
         gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
         pragha_preferences_set_repeat(cwin->preferences, !repeat);
     }
-    else if (strcmp("Shuffle", key) == 0)
+    else if (g_strcmp0("Shuffle", key) == 0)
     {
         gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
         pragha_preferences_set_shuffle(cwin->preferences, !shuffle);

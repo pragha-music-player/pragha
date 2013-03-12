@@ -20,6 +20,12 @@
 #include <config.h>
 #endif
 
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #ifdef HAVE_PLPARSER
 #include <totem-pl-parser.h>
 #endif
