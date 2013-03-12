@@ -37,12 +37,6 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 
-#if defined(GETTEXT_PACKAGE)
-#include <glib/gi18n-lib.h>
-#else
-#include <glib/gi18n.h>
-#endif
-
 /* Some definitions to solve different versions of the libraries. */
 
 #ifndef NOTIFY_CHECK_VERSION
