@@ -180,7 +180,7 @@ gint init_config(struct con_win *cwin)
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
-	gboolean show_osd_f, osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
+	gboolean osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
 	gboolean use_cddb_f, use_mpris2_f;
 	gboolean all_f;
 
@@ -188,7 +188,7 @@ gint init_config(struct con_win *cwin)
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
-	show_osd_f = osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
+	osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
 	use_cddb_f = use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
@@ -346,17 +346,6 @@ gint init_config(struct con_win *cwin)
 
 		/* Retrieve Notification preferences */
 
-		cwin->cpref->show_osd =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SHOW_OSD,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			show_osd_f = TRUE;
-		}
-
 		cwin->cpref->osd_in_systray =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
@@ -482,8 +471,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
-	if (all_f || show_osd_f)
-		cwin->cpref->show_osd = TRUE;
 	if (all_f || osd_in_systray_f)
 		cwin->cpref->osd_in_systray = TRUE;
 	if (all_f || albumart_in_osd_f)

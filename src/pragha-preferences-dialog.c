@@ -314,14 +314,14 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						   cwin->preferences_w->show_osd_w));
 		if (osd) {
-			cwin->cpref->show_osd = TRUE;
+			pragha_preferences_set_show_osd(cwin->preferences, TRUE);
 			if (!notify_is_initted()) {
 				if (!notify_init(PACKAGE_NAME))
-					cwin->cpref->show_osd = FALSE;
+					pragha_preferences_set_show_osd(cwin->preferences, FALSE);
 			}
 		}
 		else
-			cwin->cpref->show_osd = FALSE;
+			pragha_preferences_set_show_osd(cwin->preferences, FALSE);
 
 #if !NOTIFY_CHECK_VERSION (0, 7, 0)
 		cwin->cpref->osd_in_systray =
@@ -790,7 +790,7 @@ static void update_preferences(struct con_win *cwin)
 
 	/* Notifications options */
 
-	if (cwin->cpref->show_osd)
+	if (pragha_preferences_get_show_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->show_osd_w),
 					     TRUE);
@@ -911,10 +911,6 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save show OSD option */
 
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_OSD,
-			       cwin->cpref->show_osd);
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
 			       KEY_OSD_IN_TRAY,

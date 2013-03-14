@@ -330,6 +330,12 @@ void
 pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
                                             gboolean add_recursively);
 
+gboolean
+pragha_preferences_get_show_osd (PraghaPreferences *preferences);
+void
+pragha_preferences_set_show_osd (PraghaPreferences *preferences,
+                                 gboolean show_osd);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */
