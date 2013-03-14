@@ -97,7 +97,7 @@ show_osd (struct con_win *cwin)
 	gint length;
 
 	/* Check if OSD is enabled in preferences */
-	if (!cwin->cpref->show_osd || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
+	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
@@ -184,7 +184,7 @@ show_osd (struct con_win *cwin)
 gint
 init_notify (struct con_win *cwin)
 {
-	if (cwin->cpref->show_osd) {
+	if (pragha_preferences_get_show_osd(cwin->preferences)) {
 		if (!notify_init(PACKAGE_NAME))
 			return -1;
 	}

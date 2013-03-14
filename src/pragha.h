@@ -115,7 +115,6 @@ struct con_pref {
 #ifdef HAVE_LIBGLYR
 	gchar *cache_folder;
 #endif
-	gboolean show_osd;
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
