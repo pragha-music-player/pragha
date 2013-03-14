@@ -20,6 +20,12 @@
 #include <config.h>
 #endif
 
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #ifdef HAVE_LIBXFCE4UI
 #include <libxfce4ui/libxfce4ui.h>
 #endif
