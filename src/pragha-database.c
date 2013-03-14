@@ -1008,12 +1008,26 @@ pragha_database_get_last_error (PraghaDatabase *database)
 }
 
 static void
+pragha_database_print_stats (PraghaDatabase *database)
+{
+	PraghaDatabasePrivate *priv = database->priv;
+	int current = 0, high = 0;
+
+	sqlite3_db_status (priv->sqlitedb, SQLITE_DBSTATUS_STMT_USED, &current, &high, 0);
+	gchar *formatted = g_format_size_full (current, G_FORMAT_SIZE_IEC_UNITS);
+	CDEBUG (DBG_DB, "statements in cache: %i, mem used: %s",
+			g_hash_table_size (priv->statements_cache),
+			formatted);
+	g_free (formatted);
+}
+
+static void
 pragha_database_finalize (GObject *object)
 {
 	PraghaDatabase *database = PRAGHA_DATABASE(object);
 	PraghaDatabasePrivate *priv = database->priv;
 
-	CDEBUG (DBG_DB, "statements in cache: %i", g_hash_table_size (priv->statements_cache));
+	pragha_database_print_stats (database);
 
 	g_hash_table_destroy (priv->statements_cache);
 
