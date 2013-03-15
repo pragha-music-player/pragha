@@ -24,7 +24,6 @@ pragha_SOURCES = \
 		pragha-cdda.c \
 		pragha-cdda.h \
 		pragha-cmdline.c \
-		pragha-cmdline.h \
 		pragha-database.c \
 		pragha-database.h \
 		pragha-dbus.c \
