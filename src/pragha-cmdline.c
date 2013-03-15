@@ -16,23 +16,36 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #include <stdlib.h>
-#include "pragha-cmdline.h"
 #include "pragha-dbus.h"
+#include "pragha-debug.h"
 #include "pragha.h"
 
-/* Handler for 'version' option on the cmdline */
+static gchar *audio_backend = NULL;
+static gchar *audio_device = NULL;
+static gchar *audio_mixer = NULL;
+static gchar *logfile = NULL;
 
-gboolean cmd_version(const gchar *opt_name, const gchar *val,
-		     struct con_win *cwin, GError **error)
+static gboolean
+cmd_version (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	g_print("pragha %s\n", PACKAGE_VERSION);
 
 	exit(0);
 }
 
-gboolean cmd_play(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error)
+static gboolean
+cmd_play (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PLAY, cwin);
@@ -41,8 +54,8 @@ gboolean cmd_play(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_stop(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error)
+static gboolean
+cmd_stop (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_STOP, cwin);
@@ -51,8 +64,8 @@ gboolean cmd_stop(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_pause(const gchar *opt_name, const gchar *val,
-		   struct con_win *cwin, GError **error)
+static gboolean
+cmd_pause (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PAUSE, cwin);
@@ -61,8 +74,8 @@ gboolean cmd_pause(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_prev(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error)
+static gboolean
+cmd_prev (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PREV, cwin);
@@ -71,8 +84,8 @@ gboolean cmd_prev(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_next(const gchar *opt_name, const gchar *val,
-		  struct con_win *cwin, GError **error)
+static gboolean
+cmd_next (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_NEXT, cwin);
@@ -81,8 +94,8 @@ gboolean cmd_next(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_shuffle(const gchar *opt_name, const gchar *val,
-		     struct con_win *cwin, GError **error)
+static gboolean
+cmd_shuffle (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHUFFLE, cwin);
@@ -91,8 +104,8 @@ gboolean cmd_shuffle(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_repeat(const gchar *opt_name, const gchar *val,
-		    struct con_win *cwin, GError **error)
+static gboolean
+cmd_repeat (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_REPEAT, cwin);
@@ -101,8 +114,8 @@ gboolean cmd_repeat(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_inc_volume(const gchar *opt_name, const gchar *val,
-			struct con_win *cwin, GError **error)
+static gboolean
+cmd_inc_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_INC_VOL, cwin);
@@ -111,8 +124,8 @@ gboolean cmd_inc_volume(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
-			struct con_win *cwin, GError **error)
+static gboolean
+cmd_dec_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_DEC_VOL, cwin);
@@ -121,8 +134,8 @@ gboolean cmd_dec_volume(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error)
+static gboolean
+cmd_show_osd (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHOW_OSD, cwin);
@@ -131,8 +144,8 @@ gboolean cmd_show_osd(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error)
+static gboolean
+cmd_toggle_view (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	if (!cwin->cstate->unique_instance) {
 		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
@@ -141,8 +154,8 @@ gboolean cmd_toggle_view(const gchar *opt_name, const gchar *val,
 	return FALSE;
 }
 
-gboolean cmd_current_state(const gchar *opt_name, const gchar *val,
-			   struct con_win *cwin, GError **error)
+static gboolean
+cmd_current_state (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
@@ -230,8 +243,8 @@ exit:
 		return ret;
 }
 
-gboolean cmd_add_file(const gchar *opt_name, const gchar *val,
-		      struct con_win *cwin, GError **error)
+static gboolean
+cmd_add_file (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
@@ -269,3 +282,81 @@ exit:
 	return ret;
 }
 
+static const GOptionEntry cmd_entries[] = {
+	{"version", 'v', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_version, "Version", NULL},
+	{"debug", 'e', 0, G_OPTION_ARG_INT,
+	 &debug_level, "Enable Debug ( Levels: 1,2,3,4 )", NULL},
+	{ "log-file", 'l', 0, G_OPTION_ARG_FILENAME,
+	&logfile, "Redirects console warnings to the specified FILENAME", N_("FILENAME")},
+	{"play", 'p', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_play, "Play", NULL},
+	{"stop", 's', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_stop, "Stop", NULL},
+	{"pause", 't', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_pause, "Play/Pause/Resume", NULL},
+	{"prev", 'r', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_prev, "Prev", NULL},
+	{"next", 'n', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_next, "Next", NULL},
+	{"shuffle", 'f', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_shuffle, "Shuffle", NULL},
+	{"repeat", 'u', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_repeat, "Repeat", NULL},
+	{"inc_vol", 'i', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_inc_volume, "Increase volume by 1", NULL},
+	{"dec_vol", 'd', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_dec_volume, "Decrease volume by 1", NULL},
+	{"show_osd", 'o', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_show_osd, "Show OSD notification", NULL},
+	{"toggle_view", 'x', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_toggle_view, "Toggle player visibility", NULL},
+	{"current_state", 'c', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK,
+	 cmd_current_state, "Get current player state", NULL},
+	{"audio_backend", 'a', 0, G_OPTION_ARG_STRING,
+	 &audio_backend, "Audio backend (valid options: alsa/oss)", NULL},
+	{"audio_device", 'g', 0, G_OPTION_ARG_STRING,
+	 &audio_device, "Audio Device (For ALSA: hw:0,0 etc.., For OSS: /dev/dsp etc..)", NULL},
+	{"audio_mixer", 'm', 0, G_OPTION_ARG_STRING,
+	 &audio_mixer, "Mixer Element (For ALSA: Master, PCM, etc.., For OSS: /dev/mixer, etc...)", NULL},
+	{G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME, G_OPTION_ARG_CALLBACK,
+	 cmd_add_file, "", "[FILE1 [FILE2...]]"},
+	{NULL}
+};
+
+gint
+init_options (struct con_win *cwin, int argc, char **argv)
+{
+	GError *error = NULL;
+	GOptionContext *context;
+	GOptionGroup *group;
+
+	CDEBUG(DBG_INFO, "Initializing Command line options");
+
+	context = g_option_context_new("- A lightweight music player");
+	group = g_option_group_new("General", "General", "General Options", cwin, NULL);
+	g_option_group_add_entries(group, cmd_entries);
+	g_option_context_set_main_group(context, group);
+	g_option_context_add_group(context, gtk_get_option_group(TRUE));
+	#ifdef HAVE_LIBXFCE4UI
+	g_option_context_add_group (context, xfce_sm_client_get_option_group (argc, argv));
+	#endif
+
+	if (!g_option_context_parse(context, &argc, &argv, &error)) {
+		gchar *txt;
+
+		g_message("Unable to parse options. Some options need another instance of pragha running.");
+		txt = g_option_context_get_help(context, TRUE, NULL);
+		g_print("%s", txt);
+		g_free(txt);
+		g_option_context_free(context);
+		g_error_free(error);
+		return -1;
+	}
+
+	if (logfile)
+		g_log_set_default_handler (pragha_log_to_file, (gpointer)logfile);
+
+	g_option_context_free(context);
+	return 0;
+}
