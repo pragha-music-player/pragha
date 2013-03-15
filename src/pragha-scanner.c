@@ -116,8 +116,6 @@ pragha_scanner_count_no_files_worker(gpointer data)
 		pragha_mutex_unlock (scanner->no_files_mutex);
 	}
 
-	g_thread_exit(NULL);
-
 	return NULL;
 }
 
