@@ -50,7 +50,7 @@ pragha_async_set_idle_message (gpointer user_data)
  * function (finish_func) in the main loop using the information returned by
  * the asynchronous operation. */
 
-gboolean
+static gboolean
 pragha_async_finished(gpointer data)
 {
 	AsyncSimple *as = data;
@@ -61,7 +61,7 @@ pragha_async_finished(gpointer data)
 	return FALSE;
 }
 
-gpointer
+static gpointer
 pragha_async_worker(gpointer data)
 {
 	AsyncSimple *as = data;
