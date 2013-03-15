@@ -19,7 +19,7 @@
 
 /* Update the dialog. */
 
-gboolean
+static gboolean
 pragha_scanner_update_progress(gpointer user_data)
 {
 	gdouble fraction = 0.0;
@@ -58,7 +58,7 @@ pragha_scanner_update_progress(gpointer user_data)
 
 /* Thread that counts all files in the library */
 
-gpointer
+static gpointer
 pragha_scanner_count_no_files_worker(gpointer data)
 {
 	GSList *list;
@@ -121,7 +121,7 @@ pragha_scanner_finished_dialog_delete (GtkDialog *dialog, GdkEvent  *event, gpoi
 	return FALSE;
 }
 
-gboolean
+static gboolean
 pragha_scanner_worker_finished (gpointer data)
 {
 	GtkWidget *msg_dialog;
@@ -224,7 +224,7 @@ pragha_scanner_worker_finished (gpointer data)
 
 /* Function that analyzes all files of library recursively */
 
-void
+static void
 pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 {
 	GDir *dir;
@@ -274,7 +274,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 /* Thread that analyze all files in the library */
 
-gpointer
+static gpointer
 pragha_scanner_scan_worker(gpointer data)
 {
 	GSList *list;
@@ -293,7 +293,7 @@ pragha_scanner_scan_worker(gpointer data)
 
 /* Function that analyzes all files of library recursively */
 
-void
+static void
 pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 {
 	GDir *dir;
@@ -359,7 +359,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 /* Thread that analyze all files in the library */
 
-gpointer
+static gpointer
 pragha_scanner_update_worker(gpointer data)
 {
 	GSList *list;
@@ -557,7 +557,7 @@ pragha_scanner_free(PraghaScanner *scanner)
 	g_slice_free (PraghaScanner, scanner);
 }
 
-void
+static void
 scanner_cancel_click_handler(GtkButton *button,
                              PraghaScanner *scanner)
 {
