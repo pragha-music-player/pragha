@@ -661,24 +661,29 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 	GPtrArray *file_arr = NULL;
 	GArray *loc_arr = NULL;
 	gint location_id, changed = 0;
-	const gchar *file;
+	const gchar *file, *cfile;
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(changed) {
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+			file = pragha_musicobject_get_file(nmobj);
 
-		 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-			pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-			pragha_playlist_update_current_track(cwin->cplaylist, changed);
-		 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+			 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+			 	cfile = pragha_musicobject_get_file(nmobj);
+				if(g_ascii_strcasecmp(file, cfile) == 0) {
+					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+					pragha_playlist_update_current_track(cwin->cplaylist, changed);
+				}
+			 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-			__update_current_song_info(cwin);
-			mpris_update_metadata_changed(cwin);
+				__update_current_song_info(cwin);
+				mpris_update_metadata_changed(cwin);
+			}
 
 			if(pragha_musicobject_is_local_file (nmobj)) {
 				loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-				file = pragha_musicobject_get_file(nmobj);
 				location_id = pragha_database_find_location (cwin->cdbase, file);
 				if (location_id) {
 					g_array_append_val(loc_arr, location_id);
@@ -695,7 +700,6 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 			}
 		}
 	}
-
 	gtk_widget_destroy (dialog);
 }
 
