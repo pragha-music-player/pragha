@@ -26,10 +26,443 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-tags-dialog.h"
+#include "pragha-musicobject.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
+
+static void pragha_tags_dialog_finalize (GObject *object);
+
+struct _PraghaTagsDialogClass {
+	GtkDialogClass __parent__;
+};
+
+struct _PraghaTagsDialog {
+	GtkDialog __parent__;
+
+	GtkWidget         *title_entry;
+	GtkWidget         *artist_entry;
+	GtkWidget         *album_entry;
+	GtkWidget         *genre_entry;
+	GtkWidget         *track_no_entry;
+	GtkWidget         *year_entry;
+	GtkWidget         *comment_entry;
+	GtkWidget         *file_entry;
+
+	GtkWidget         *title_check_change;
+	GtkWidget         *artist_check_change;
+	GtkWidget         *album_check_change;
+	GtkWidget         *genre_check_change;
+	GtkWidget         *track_no_check_change;
+	GtkWidget         *year_check_change;
+	GtkWidget         *comment_check_change;
+
+	PraghaMusicobject *mobj;
+
+	/* Needed due cwin->completion */
+	struct con_win    *cwin;
+};
+
+G_DEFINE_TYPE (PraghaTagsDialog, pragha_tags_dialog, GTK_TYPE_DIALOG);
+
+static void
+pragha_tags_dialog_class_init (PraghaTagsDialogClass *klass)
+{
+  GObjectClass   *gobject_class;
+  //GtkWidgetClass *gtkwidget_class;
+
+  gobject_class = G_OBJECT_CLASS (klass);
+  gobject_class->finalize = pragha_tags_dialog_finalize;
+
+  /*gtkwidget_class = GTK_WIDGET_CLASS (klass);
+  gtkwidget_class->unrealize = pragha_tags_dialog_unrealize;*/
+}
+
+static void
+pragha_tags_dialog_init (PraghaTagsDialog *dialog)
+{
+	GtkWidget *tag_table;
+	GtkWidget *label_title, *label_artist, *label_album, *label_genre, *label_tno, *label_year, *label_comment, *label_file;
+	GtkWidget *chk_title, *chk_artist, *chk_album, *chk_genre, *chk_tno, *chk_year, *chk_comment;
+	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment, *entry_file;
+	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
+	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
+
+	/* Set dialog properties */
+
+	gtk_window_set_title (GTK_WINDOW (dialog), _("Edit tags"));
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 300);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
+
+	/* Create table */
+
+	tag_table = gtk_table_new(8, 2, FALSE);
+
+	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 5);
+	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(tag_table), 5);
+
+	/* Create labels */
+
+	label_title = gtk_label_new(_("Title"));
+	label_artist = gtk_label_new(_("Artist"));
+	label_album = gtk_label_new(_("Album"));
+	label_genre = gtk_label_new(_("Genre"));
+	label_tno = gtk_label_new(_("Track No"));
+	label_year = gtk_label_new(_("Year"));
+	label_comment = gtk_label_new(_("Comment"));
+	label_file = gtk_label_new(_("File"));
+
+	gtk_misc_set_alignment(GTK_MISC (label_title), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_artist), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_album), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_genre), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_tno), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_year), 1, 0.5);
+	gtk_misc_set_alignment(GTK_MISC (label_comment), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_file), 1, 0.5);
+
+	gtk_label_set_attribute_bold(GTK_LABEL(label_title));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_artist));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_album));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_genre));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_tno));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_year));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_comment));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_file));
+
+	/* Create entry fields */
+
+	entry_title = gtk_entry_new();
+	entry_artist = gtk_entry_new();
+	entry_album = gtk_entry_new();
+	entry_genre = gtk_entry_new();
+
+	entry_tno = gtk_spin_button_new_with_range (0, 2030, 1);
+	entry_year = gtk_spin_button_new_with_range (0, 2030, 1);
+
+	entry_comment = gtk_text_view_new();
+	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (entry_comment), FALSE);
+
+	entry_file = gtk_entry_new();
+
+	gtk_entry_set_max_length(GTK_ENTRY(entry_title), TAG_MAX_LEN);
+	gtk_entry_set_max_length(GTK_ENTRY(entry_artist), TAG_MAX_LEN);
+	gtk_entry_set_max_length(GTK_ENTRY(entry_album), TAG_MAX_LEN);
+	gtk_entry_set_max_length(GTK_ENTRY(entry_genre), TAG_MAX_LEN);
+
+	/*gtk_entry_set_completion(GTK_ENTRY(entry_artist), cwin->completion[0]);
+	gtk_entry_set_completion(GTK_ENTRY(entry_album), cwin->completion[1]);
+	gtk_entry_set_completion(GTK_ENTRY(entry_genre), cwin->completion[2]);*/
+
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_DIRECTORY);
+	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_JUMP_TO);
+
+	gtk_editable_set_editable (GTK_EDITABLE(entry_file), FALSE);
+
+	/* Create checkboxes. */
+
+	chk_title = gtk_check_button_new();
+	chk_artist = gtk_check_button_new();
+	chk_album = gtk_check_button_new();
+	chk_genre = gtk_check_button_new();
+	chk_year = gtk_check_button_new();
+	chk_tno = gtk_check_button_new();
+	chk_comment = gtk_check_button_new();
+
+	hbox_title = gtk_hbox_new(FALSE, 0);
+	hbox_artist = gtk_hbox_new(FALSE, 0);
+	hbox_album = gtk_hbox_new(FALSE, 0);
+	hbox_genre = gtk_hbox_new(FALSE, 0);
+	hbox_year = gtk_hbox_new(FALSE, 0);
+	hbox_tno = gtk_hbox_new(FALSE, 0);
+	hbox_comment = gtk_hbox_new(FALSE, 0);
+
+	hbox_spins = gtk_hbox_new(FALSE, 5);
+
+	/* Create hobxs(ENTRY CHECHK) and attach in table */
+
+	gtk_box_pack_start(GTK_BOX(hbox_title), entry_title,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_title), chk_title,
+	                   FALSE, FALSE, 0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_title,
+	                 0, 1, 0, 1,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_title,
+	                 1, 2, 0, 1,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_artist), entry_artist,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_artist), chk_artist,
+	                   FALSE, FALSE, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_artist,
+	                 0, 1, 1, 2,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_artist,
+	                 1, 2, 1, 2,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_album), entry_album,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_album), chk_album,
+	                   FALSE, FALSE, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_album,
+	                 0, 1, 2, 3,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_album,
+	                 1, 2, 2, 3,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_genre), entry_genre,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_genre), chk_genre,
+	                   FALSE, FALSE, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_genre,
+	                 0, 1, 3, 4,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_genre,
+	                 1, 2, 3, 4,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_tno), entry_tno,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_tno), chk_tno,
+	                   FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_year), label_year,
+	                   FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox_year), entry_year,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_year), chk_year,
+	                   FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(hbox_spins), hbox_tno,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_spins), hbox_year,
+	                   TRUE, TRUE, 0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_tno,
+	                 0, 1, 4, 5,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_spins,
+	                 1, 2, 4, 5,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	comment_view_scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(comment_view_scroll),
+	                               GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(comment_view_scroll),
+	                                    GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(comment_view_scroll), entry_comment);
+
+	chk_alignment = gtk_alignment_new(0.5, 0, 0, 0);
+	gtk_container_add(GTK_CONTAINER(chk_alignment), chk_comment);
+
+	gtk_box_pack_start(GTK_BOX(hbox_comment), comment_view_scroll,
+	                   TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_comment), chk_alignment,
+	                   FALSE, FALSE, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), label_comment,
+	                 0, 1, 5, 7,
+	                 GTK_FILL, GTK_FILL|GTK_EXPAND,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), hbox_comment,
+	                 1, 2, 5, 7,
+	                 GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND,
+	                 0, 0);
+
+	gtk_table_attach(GTK_TABLE (tag_table), label_file,
+	                 0, 1, 7, 8,
+	                 GTK_FILL, GTK_SHRINK,
+	                 0, 0);
+	gtk_table_attach(GTK_TABLE (tag_table), entry_file,
+	                 1, 2, 7, 8,
+	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
+	                 0, 0);
+
+	/* Save changes when press enter. */
+	
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_title), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_artist), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_album), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_genre), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_tno), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(entry_year), TRUE);
+
+	/* Storage widgets and its to dialog. */
+
+	dialog->title_entry = entry_title;
+	dialog->artist_entry = entry_artist;
+	dialog->album_entry = entry_album;
+	dialog->genre_entry = entry_genre;
+	dialog->track_no_entry = entry_tno;
+	dialog->year_entry = entry_year;
+	dialog->comment_entry = entry_comment;
+	dialog->file_entry = entry_file;
+
+	dialog->title_check_change = chk_title;
+	dialog->artist_check_change = chk_artist;
+	dialog->album_check_change = chk_album;
+	dialog->genre_check_change = chk_genre;
+	dialog->track_no_check_change = chk_tno;
+	dialog->year_check_change = chk_year;
+	dialog->comment_check_change = chk_comment;
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
+	gtk_widget_show_all(tag_table);
+}
+
+void
+pragha_tags_dialog_set_changed(PraghaTagsDialog *dialog, gint changed)
+{
+	if(changed & TAG_TNO_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->track_no_check_change), TRUE);
+	if(changed & TAG_TITLE_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->title_check_change), TRUE);
+	if(changed & TAG_ARTIST_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->artist_check_change), TRUE);
+	if(changed & TAG_ALBUM_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->album_check_change), TRUE);
+	if(changed & TAG_GENRE_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->genre_check_change), TRUE);
+	if(changed & TAG_YEAR_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->year_check_change), TRUE);
+	if(changed & TAG_COMMENT_CHANGED)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->comment_check_change), TRUE);
+}
+
+gint
+pragha_tags_dialog_get_changed(PraghaTagsDialog *dialog)
+{
+	gint changed = 0;
+
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->track_no_check_change)))
+		changed |= TAG_TNO_CHANGED;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->title_check_change)))
+		changed |= TAG_TITLE_CHANGED;
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->artist_check_change)))
+		changed |= TAG_ARTIST_CHANGED;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->album_check_change)))
+		changed |= TAG_ALBUM_CHANGED;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->genre_check_change)))
+		changed |= TAG_GENRE_CHANGED;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->year_check_change)))
+		changed |= TAG_YEAR_CHANGED;
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->comment_check_change)))
+		changed |= TAG_COMMENT_CHANGED;
+
+	return changed;
+}
+
+void
+pragha_tags_dialog_set_musicobject(PraghaTagsDialog *dialog, PraghaMusicobject *mobj)
+{
+	const gchar *title, *artist, *album, *genre, *comment, *file;
+	gint track_no, year;
+	GtkTextBuffer *buffer;
+
+	dialog->mobj = pragha_musicobject_dup (mobj);
+
+	title = pragha_musicobject_get_title(mobj);
+	artist = pragha_musicobject_get_artist(mobj);
+	album = pragha_musicobject_get_album(mobj);
+	genre = pragha_musicobject_get_genre(mobj);
+	track_no = pragha_musicobject_get_track_no(mobj);
+	year = pragha_musicobject_get_year(mobj);
+	comment = pragha_musicobject_get_comment(mobj);
+	file = pragha_musicobject_get_file(mobj);
+
+	gtk_entry_set_text(GTK_ENTRY(dialog->title_entry), title);
+	gtk_entry_set_text(GTK_ENTRY(dialog->artist_entry), artist);
+	gtk_entry_set_text(GTK_ENTRY(dialog->album_entry), album);
+	gtk_entry_set_text(GTK_ENTRY(dialog->genre_entry), genre);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->track_no_entry), track_no);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->year_entry), year);
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dialog->comment_entry));
+	gtk_text_buffer_set_text (buffer, comment, -1);
+
+	if (string_is_empty(file))
+		gtk_widget_set_sensitive(GTK_WIDGET(dialog->file_entry), FALSE);
+	else {
+		gtk_entry_set_text(GTK_ENTRY(dialog->file_entry), file);
+	}
+}
+
+PraghaMusicobject *
+pragha_tags_dialog_get_musicobject(PraghaTagsDialog *dialog)
+{
+	GtkTextBuffer *buffer;
+	GtkTextIter start, end;
+
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->track_no_check_change)))
+		pragha_musicobject_set_track_no(dialog->mobj,
+		                                gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(dialog->track_no_entry)));
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->title_check_change)))
+		pragha_musicobject_set_title(dialog->mobj,
+		                             gtk_entry_get_text (GTK_ENTRY(dialog->title_entry)));
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->artist_check_change)))
+		pragha_musicobject_set_artist(dialog->mobj,
+		                              gtk_entry_get_text (GTK_ENTRY(dialog->artist_entry)));
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->album_check_change)))
+		pragha_musicobject_set_album(dialog->mobj,
+		                             gtk_entry_get_text (GTK_ENTRY(dialog->album_entry)));
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->genre_check_change)))
+		pragha_musicobject_set_genre(dialog->mobj,
+		                             gtk_entry_get_text (GTK_ENTRY(dialog->genre_entry)));
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->year_check_change)))
+		pragha_musicobject_set_year(dialog->mobj,
+		                            gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(dialog->year_entry)));
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->comment_check_change))) {
+		buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dialog->comment_entry));
+		gtk_text_buffer_get_start_iter (buffer, &start);
+		gtk_text_buffer_get_end_iter (buffer, &end);
+		pragha_musicobject_set_comment(dialog->mobj,
+		                               gtk_text_buffer_get_text (buffer, &start, &end, FALSE));
+	}
+
+	return dialog->mobj;
+}
+
+static void
+pragha_tags_dialog_finalize (GObject *object)
+{
+	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
+
+	g_object_unref(dialog->mobj);
+
+	(*G_OBJECT_CLASS (pragha_tags_dialog_parent_class)->finalize) (object);
+}
+
+
+GtkWidget *
+pragha_tags_dialog_new (void)
+{
+  return g_object_new (PRAGHA_TYPE_TAGS_DIALOG, NULL);
+}
+
 
 /*
  * Track properties dialog
