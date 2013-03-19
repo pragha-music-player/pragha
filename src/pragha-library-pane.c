@@ -2537,6 +2537,8 @@ pragha_library_tree_context_menu_new(struct con_win *cwin)
 				   gtk_ui_manager_get_accel_group(context_menu));
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
+	g_object_unref (context_actions);
+
 	return context_menu;
 }
 
@@ -2566,6 +2568,8 @@ pragha_library_pane_header_context_menu_new(struct con_win *cwin)
 	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
 				   gtk_ui_manager_get_accel_group(context_menu));
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+
+	g_object_unref (context_actions);
 
 	return context_menu;
 }
