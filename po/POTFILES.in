@@ -1,8 +1,8 @@
-src/glyr-related.c
 src/info-bar-import-music.c
 src/init.c
 src/pragha-equalizer.c
 src/pragha-filter-dialog.c
+src/pragha-glyr.c
 src/pragha-lastfm.c
 src/pragha-library-pane.c
 src/pragha-menubar.c

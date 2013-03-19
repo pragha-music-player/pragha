@@ -15,8 +15,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_GLYR_RELATED_H
-#define PRAGHA_GLYR_RELATED_H
+#ifndef PRAGHA_GLYR_H
+#define PRAGHA_GLYR_H
 
 #include <gtk/gtk.h>
 
@@ -35,4 +35,4 @@ void glyr_related_free (struct con_win *cwin);
 
 #endif
 
-#endif /* PRAGHA_GLYR_RELATED_H */
+#endif /* PRAGHA_GLYR_H */

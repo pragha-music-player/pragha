@@ -38,7 +38,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-preferences-dialog.h"
-#include "glyr-related.h"
+#include "pragha-glyr.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
 
