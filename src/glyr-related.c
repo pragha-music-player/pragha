@@ -143,7 +143,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 /* Manages the results of glyr threads. */
 
-void
+static void
 glyr_finished_successfully(glyr_struct *glyr_info)
 {
 	gchar *title_header = NULL, *subtitle_header = NULL;
@@ -172,7 +172,7 @@ glyr_finished_successfully(glyr_struct *glyr_info)
 	glyr_free_list(glyr_info->head);
 }
 
-void
+static void
 glyr_finished_incorrectly(glyr_struct *glyr_info)
 {
 	switch (glyr_info->query.type) {
