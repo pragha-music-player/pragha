@@ -39,6 +39,12 @@
 
 #ifdef HAVE_LIBGLYR
 
+struct _PraghaGlyr {
+	struct con_win *cwin;
+	GlyrDatabase *cache_db;
+	gchar *cache_folder;
+};
+
 typedef struct
 {
 	struct con_win	*cwin;
@@ -46,7 +52,6 @@ typedef struct
 	GlyrMemCache	*head;
 }
 glyr_struct;
-
 
 /* Use the download info on glyr thread and show a dialog. */
 
@@ -123,10 +128,8 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	artist = glyr_info->query.artist;
 	album = glyr_info->query.album;
 
-	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
-					cwin->cpref->cache_folder,
-					artist,
-					album);
+	album_art_path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
+
 	if(glyr_info->head->data)
 		album_art = vgdk_pixbuf_new_from_memory(glyr_info->head->data, glyr_info->head->size);
 
@@ -269,7 +272,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 		break;
 	}
 
-	glyr_opt_lookup_db(&glyr_info->query, cwin->cache_db);
+	glyr_opt_lookup_db (&glyr_info->query, cwin->glyr->cache_db);
 	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
 
 	glyr_info->cwin = cwin;
@@ -383,10 +386,7 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (string_is_empty(artist) || string_is_empty(album))
 		goto exit;
 
-	album_art_path = g_strdup_printf("%s/album-%s-%s.jpeg",
-					cwin->cpref->cache_folder,
-					artist,
-					album);
+	album_art_path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
 
 	if (g_file_test(album_art_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == TRUE)
 		goto exists;
@@ -468,21 +468,40 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 			update_related_handler, cwin, NULL);
 }
 
-void glyr_related_free (struct con_win *cwin)
+gchar *
+pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const gchar *album)
 {
+	return g_strdup_printf ("%s/album-%s-%s.jpeg", glyr->cache_folder, artist, album);
+}
+
+void
+pragha_glyr_free (PraghaGlyr *glyr)
+{
+	struct con_win *cwin = glyr->cwin;
 	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
-	glyr_db_destroy(cwin->cache_db);
+	glyr_db_destroy (glyr->cache_db);
+	g_free (glyr->cache_folder);
+	g_slice_free (PraghaGlyr, glyr);
+
 	glyr_cleanup ();
 }
 
-int init_glyr_related (struct con_win *cwin)
+PraghaGlyr *
+pragha_glyr_new (struct con_win *cwin)
 {
-	glyr_init();
+	gchar *cache_folder = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
+	g_mkdir_with_parents (cache_folder, S_IRWXU);
 
-	cwin->cache_db = glyr_db_init(cwin->cpref->cache_folder);
+	glyr_init ();
+
+	PraghaGlyr *glyr = g_slice_new (PraghaGlyr);
+
+	glyr->cwin = cwin;
+	glyr->cache_db = glyr_db_init (cache_folder);
+	glyr->cache_folder = cache_folder;
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
 
-	return 0;
+	return glyr;
 }
 #endif

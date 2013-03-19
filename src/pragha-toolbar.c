@@ -55,12 +55,7 @@ struct _PraghaToolbar {
 static gchar*
 get_image_path_from_cache (const gchar *artist, const gchar *album, struct con_win *cwin)
 {
-	gchar *path = NULL;
-
-	path = g_strdup_printf("%s/album-%s-%s.jpeg",
-				cwin->cpref->cache_folder,
-				artist,
-				album);
+	gchar *path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
 
 	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		g_free(path);
