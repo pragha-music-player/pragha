@@ -965,5 +965,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
+	g_object_unref (main_actions);
+
 	return main_menu;
 }

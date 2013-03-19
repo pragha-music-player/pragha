@@ -3108,6 +3108,8 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
 	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
+	g_object_unref (context_actions);
+
 	return context_menu;
 }
 
