@@ -29,7 +29,7 @@
 #include <glyr/glyr.h>
 #include <glyr/cache.h>
 #endif
-#include "glyr-related.h"
+#include "pragha-glyr.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
