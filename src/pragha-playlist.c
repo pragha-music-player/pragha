@@ -4016,6 +4016,7 @@ pragha_playlist_free(PraghaPlaylist* cplaylist)
 
 	free_str_list(cplaylist->columns);
 	g_slist_free(cplaylist->column_widths);
+	g_object_unref(cplaylist->playlist_context_menu);
 	g_rand_free(cplaylist->rand);
 
 	g_object_unref(cplaylist->playing_pixbuf);
