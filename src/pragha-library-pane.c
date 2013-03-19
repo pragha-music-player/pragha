@@ -2709,6 +2709,9 @@ pragha_library_pane_free(PraghaLibraryPane *librarypane)
 
 	g_slist_free(librarypane->library_tree_nodes);
 
+	g_object_unref(librarypane->library_pane_context_menu);
+	g_object_unref(librarypane->library_tree_context_menu);
+
 	g_slice_free(PraghaLibraryPane, librarypane);
 }
 

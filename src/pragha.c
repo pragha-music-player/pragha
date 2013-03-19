@@ -89,6 +89,9 @@ static void common_cleanup(struct con_win *cwin)
 		keybinder_free ();
 #endif
 
+	g_object_unref (cwin->bar_context_menu);
+	g_object_unref (cwin->systray_menu);
+
 	g_slice_free(struct con_win, cwin);
 }
 
