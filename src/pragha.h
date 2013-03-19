@@ -27,10 +27,6 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_LIBGLYR
-#include <glyr/cache.h>
-#endif
-
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <dbus/dbus-glib-lowlevel.h>
@@ -46,6 +42,7 @@
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
+#include "pragha-glyr.h"
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
 #include "pragha-preferences-dialog.h"
@@ -112,9 +109,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-#ifdef HAVE_LIBGLYR
-	gchar *cache_folder;
-#endif
 	gboolean osd_in_systray;
 	gboolean albumart_in_osd;
 	gboolean actions_in_osd;
@@ -185,7 +179,7 @@ struct con_win {
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 #ifdef HAVE_LIBGLYR
-	GlyrDatabase *cache_db;
+	PraghaGlyr *glyr;
 #endif
 	guint related_timeout_id;
 	DBusConnection *con_dbus;

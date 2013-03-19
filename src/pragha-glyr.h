@@ -18,20 +18,27 @@
 #ifndef PRAGHA_GLYR_H
 #define PRAGHA_GLYR_H
 
+#ifdef HAVE_LIBGLYR
+
 #include <gtk/gtk.h>
 
 /* pragha.h */
 struct con_win;
 
-#ifdef HAVE_LIBGLYR
+G_BEGIN_DECLS
+
+typedef struct _PraghaGlyr PraghaGlyr;
 
 void related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin);
 void related_get_artist_info_action(GtkAction *action, struct con_win *cwin);
 void related_get_lyric_action(GtkAction *action, struct con_win *cwin);
 
-int init_glyr_related (struct con_win *cwin);
-void glyr_related_free (struct con_win *cwin);
+gchar * pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const gchar *album);
+PraghaGlyr * pragha_glyr_new (struct con_win *cwin);
+void pragha_glyr_free (PraghaGlyr *glyr);
+
+G_END_DECLS
 
 #endif
 

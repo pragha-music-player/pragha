@@ -47,9 +47,6 @@ static void preferences_free (struct con_pref *cpref)
 	g_free(cpref->lastfm_user);
 	g_free(cpref->lastfm_pass);
 #endif
-#ifdef HAVE_LIBGLYR
-	g_free(cpref->cache_folder);
-#endif
 	g_free(cpref->installed_version);
 	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
@@ -69,7 +66,7 @@ static void common_cleanup(struct con_win *cwin)
 	pragha_sidebar_free(cwin->sidebar);
 	pragha_toolbar_free(cwin->toolbar);
 #ifdef HAVE_LIBGLYR
-	glyr_related_free (cwin);
+	pragha_glyr_free (cwin->glyr);
 #endif
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
@@ -192,9 +189,7 @@ gint main(gint argc, gchar *argv[])
 	}
 
 	#ifdef HAVE_LIBGLYR
-	if (init_glyr_related(cwin) == -1) {
-		g_critical("Unable to initialize libglyr");
-	}
+	cwin->glyr = pragha_glyr_new (cwin);
 	#endif
 
 	if (mpris_init(cwin) == -1) {
