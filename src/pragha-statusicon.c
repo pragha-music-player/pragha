@@ -230,6 +230,8 @@ create_systray_menu (struct con_win *cwin)
 				   gtk_ui_manager_get_accel_group(menu));
 	gtk_ui_manager_insert_action_group(menu, actions, 0);
 
+	g_object_unref (actions);
+
 	return menu;
 }
 

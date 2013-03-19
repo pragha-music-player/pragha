@@ -972,5 +972,7 @@ GtkUIManager* create_menu(struct con_win *cwin)
 
 	gtk_widget_show_all(gtk_ui_manager_get_widget(main_menu, "/Menubar"));
 
+	g_object_unref (main_actions);
+
 	return main_menu;
 }
