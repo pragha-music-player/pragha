@@ -191,10 +191,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	#ifdef HAVE_LIBGLYR
-	cwin->glyr = pragha_glyr_new (cwin);
-	#endif
-
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return -1;
@@ -203,6 +199,10 @@ gint main(gint argc, gchar *argv[])
 	/* Init the gui after bancked to sink volume. */
 
 	init_gui(argc, argv, cwin);
+
+	#ifdef HAVE_LIBGLYR
+	cwin->glyr = pragha_glyr_new (cwin);
+	#endif
 
 	/* Init_gnome_media_keys requires constructed main window. */
 	if (gnome_media_keys_will_be_useful()) {

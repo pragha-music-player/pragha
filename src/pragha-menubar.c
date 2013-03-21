@@ -97,8 +97,7 @@ static const gchar *main_menu_xml = "<ui>					\
 			<separator/>						\
 			<menuitem action=\"Equalizer\"/>			\
 			<separator/>						\
-			<menuitem action=\"Search lyric\"/>			\
-			<menuitem action=\"Search artist info\"/>		\
+			<placeholder name=\"pragha-glyr-placeholder\"/>		\
 			<separator/>						\
 			<menu action=\"Lastfm\">				\
 				<menuitem action=\"Love track\"/>		\
@@ -168,17 +167,6 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	#ifdef HAVE_LIBGLYR
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(related_get_artist_info_action)},
-	#else
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", NULL},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", NULL},
-	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
 	{"Love track", NULL, N_("Love track"),
@@ -267,14 +255,6 @@ update_menubar_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer 
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	#ifdef HAVE_LIBGLYR
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-	#endif
 
 	#ifdef HAVE_LIBCLASTFM
 	update_menubar_lastfm_state (cwin);

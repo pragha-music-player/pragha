@@ -43,6 +43,10 @@ struct _PraghaGlyr {
 	struct con_win *cwin;
 	GlyrDatabase *cache_db;
 	gchar *cache_folder;
+	GtkActionGroup *action_group_main_menu;
+	guint merge_id_main_menu;
+	GtkActionGroup *action_group_playlist;
+	guint merge_id_playlist;
 };
 
 typedef struct
@@ -52,6 +56,48 @@ typedef struct
 	GlyrMemCache	*head;
 }
 glyr_struct;
+
+static void get_lyric_action (GtkAction *action, PraghaGlyr *glyr);
+static void get_artist_info_action (GtkAction *action, PraghaGlyr *glyr);
+
+static const GtkActionEntry main_menu_actions [] = {
+	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
+	 "<Control>Y", "Search lyric", G_CALLBACK(get_lyric_action)},
+	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
+	 "", "Search artist info", G_CALLBACK(get_artist_info_action)},
+};
+
+static const gchar *main_menu_xml = "<ui>					\
+	<menubar name=\"Menubar\">						\
+		<menu action=\"ToolsMenu\">					\
+			<placeholder name=\"pragha-glyr-placeholder\">		\
+				<menuitem action=\"Search lyric\"/>		\
+				<menuitem action=\"Search artist info\"/>	\
+			</placeholder>						\
+		</menu>								\
+	</menubar>								\
+</ui>";
+
+static void get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr);
+static void get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr);
+
+static const GtkActionEntry playlist_actions [] = {
+	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
+	 "", "Search lyric", G_CALLBACK(get_lyric_current_playlist_action)},
+	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
+	 "", "Search artist info", G_CALLBACK(get_artist_info_current_playlist_action)},
+};
+
+static const gchar *playlist_xml = "<ui>					\
+	<popup name=\"SelectionPopup\">		   				\
+	<menu action=\"ToolsMenu\">						\
+		<placeholder name=\"pragha-glyr-placeholder\">			\
+			<menuitem action=\"Search lyric\"/>			\
+			<menuitem action=\"Search artist info\"/>		\
+		</placeholder>							\
+	</menu>									\
+	</popup>				    				\
+</ui>";
 
 /* Use the download info on glyr thread and show a dialog. */
 
@@ -281,10 +327,10 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 
-/* Handlers to get lyric and artist bio of current song. */
-
-void related_get_artist_info_action (GtkAction *action, struct con_win *cwin)
+static void
+get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	struct con_win *cwin = glyr->cwin;
 	gchar *artist = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
@@ -307,8 +353,10 @@ exit:
 	g_free(artist);
 }
 
-void related_get_lyric_action(GtkAction *action, struct con_win *cwin)
+static void
+get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	struct con_win *cwin = glyr->cwin;
 	gchar *artist = NULL, *title = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
@@ -333,11 +381,11 @@ exit:
 	g_free(title);
 }
 
-/* Handlers to get lyric and artist bio of current playlist selection. */
-
-void
-related_get_artist_info_current_playlist_action(GtkAction *action, struct con_win *cwin)
+static void
+get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	struct con_win *cwin = glyr->cwin;
+
 	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 
@@ -349,9 +397,11 @@ related_get_artist_info_current_playlist_action(GtkAction *action, struct con_wi
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
 }
 
-void
-related_get_lyric_current_playlist_action(GtkAction *action, struct con_win *cwin)
+static void
+get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	struct con_win *cwin = glyr->cwin;
+
 	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 	const gchar *title = pragha_musicobject_get_title(mobj);
@@ -436,7 +486,15 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 {
 	struct con_win *cwin = user_data;
 	enum player_state state = pragha_backend_get_state (cwin->backend);
+	gboolean playing = (state != ST_STOPPED);
 	gint file_type = 0;
+	GtkAction *action;
+
+	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search lyric");
+	gtk_action_set_sensitive (action, playing);
+
+	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search artist info");
+	gtk_action_set_sensitive (action, playing);
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
 
@@ -468,6 +526,63 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 			update_related_handler, cwin, NULL);
 }
 
+static void
+setup_main_menu (PraghaGlyr *glyr)
+{
+	GError *error = NULL;
+	GtkAction *action;
+
+	glyr->action_group_main_menu = gtk_action_group_new ("PraghaGlyrMainMenuActions");
+	gtk_action_group_set_translation_domain (glyr->action_group_main_menu, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (glyr->action_group_main_menu,
+				      main_menu_actions,
+				      G_N_ELEMENTS (main_menu_actions),
+				      glyr);
+
+	GtkUIManager *ui_manager = glyr->cwin->bar_context_menu;
+	gtk_ui_manager_insert_action_group (ui_manager, glyr->action_group_main_menu, -1);
+	glyr->merge_id_main_menu = gtk_ui_manager_add_ui_from_string (ui_manager,
+	                                                              main_menu_xml,
+	                                                              -1,
+	                                                              &error);
+
+	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search lyric");
+	gtk_action_set_sensitive (action, FALSE);
+
+	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search artist info");
+	gtk_action_set_sensitive (action, FALSE);
+
+	if (error) {
+		g_warning ("glyr: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
+setup_playlist (PraghaGlyr *glyr)
+{
+	GError *error = NULL;
+
+	glyr->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
+	gtk_action_group_set_translation_domain (glyr->action_group_playlist, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (glyr->action_group_playlist,
+				      playlist_actions,
+				      G_N_ELEMENTS (playlist_actions),
+				      glyr);
+
+	GtkUIManager *ui_manager = pragha_playlist_get_context_menu (glyr->cwin->cplaylist);
+	gtk_ui_manager_insert_action_group (ui_manager, glyr->action_group_playlist, -1);
+	glyr->merge_id_playlist = gtk_ui_manager_add_ui_from_string (ui_manager,
+	                                                             playlist_xml,
+	                                                             -1,
+	                                                             &error);
+
+	if (error) {
+		g_warning ("glyr: %s", error->message);
+		g_error_free (error);
+	}
+}
+
 gchar *
 pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const gchar *album)
 {
@@ -481,6 +596,10 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 	g_free (glyr->cache_folder);
+	gtk_ui_manager_remove_ui (cwin->bar_context_menu, glyr->merge_id_main_menu);
+	g_object_unref (glyr->action_group_main_menu);
+	gtk_ui_manager_remove_ui (cwin->bar_context_menu, glyr->merge_id_playlist);
+	g_object_unref (glyr->action_group_playlist);
 	g_slice_free (PraghaGlyr, glyr);
 
 	glyr_cleanup ();
@@ -499,6 +618,9 @@ pragha_glyr_new (struct con_win *cwin)
 	glyr->cwin = cwin;
 	glyr->cache_db = glyr_db_init (cache_folder);
 	glyr->cache_folder = cache_folder;
+
+	setup_main_menu (glyr);
+	setup_playlist (glyr);
 
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
 

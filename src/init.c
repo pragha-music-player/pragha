@@ -530,19 +530,6 @@ void init_menu_actions(struct con_win *cwin)
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
 
-#ifndef HAVE_LIBGLYR
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist),"/SelectionPopup/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist),"/SelectionPopup/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-#endif
 #ifndef HAVE_LIBCLASTFM
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
 	gtk_action_set_sensitive(action, FALSE);

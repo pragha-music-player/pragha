@@ -92,8 +92,7 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<menuitem action=\"Save selection\"/>					\
 	<separator/>				    				\
 	<menu action=\"ToolsMenu\">						\
-		<menuitem action=\"Search lyric\"/>				\
-		<menuitem action=\"Search artist info\"/>			\
+		<placeholder name=\"pragha-glyr-placeholder\"/>			\
 		<separator/>							\
 		<menuitem action=\"Love track\"/>				\
 		<menuitem action=\"Unlove track\"/>				\
@@ -132,17 +131,6 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
-	#ifdef HAVE_LIBGLYR
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "", "Search lyric", G_CALLBACK(related_get_lyric_current_playlist_action)},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(related_get_artist_info_current_playlist_action)},
-	#else
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "", "Search lyric", NULL},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", NULL},
-	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
 	{"Love track", NULL, N_("Love track"),
