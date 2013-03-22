@@ -28,6 +28,9 @@
 
 #ifdef HAVE_PLPARSER
 #include <totem-pl-parser.h>
+#else
+#include <fcntl.h>
+#include "xml_helper.h"
 #endif
 
 #include "pragha-playlists-mgmt.h"
