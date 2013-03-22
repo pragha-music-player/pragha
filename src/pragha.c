@@ -61,13 +61,13 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_playback_stop(cwin);
 
+#ifdef HAVE_LIBGLYR
+	pragha_glyr_free (cwin->glyr);
+#endif
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
 	pragha_toolbar_free(cwin->toolbar);
-#ifdef HAVE_LIBGLYR
-	pragha_glyr_free (cwin->glyr);
-#endif
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	gui_free (cwin);

@@ -592,14 +592,23 @@ pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const 
 void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
+	GtkUIManager *ui_manager;
 	struct con_win *cwin = glyr->cwin;
+
 	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 	g_free (glyr->cache_folder);
-	gtk_ui_manager_remove_ui (cwin->bar_context_menu, glyr->merge_id_main_menu);
+
+	ui_manager = cwin->bar_context_menu;
+	gtk_ui_manager_remove_ui (ui_manager, glyr->merge_id_main_menu);
+	gtk_ui_manager_remove_action_group (ui_manager, glyr->action_group_main_menu);
 	g_object_unref (glyr->action_group_main_menu);
-	gtk_ui_manager_remove_ui (cwin->bar_context_menu, glyr->merge_id_playlist);
+
+	ui_manager = pragha_playlist_get_context_menu (cwin->cplaylist);
+	gtk_ui_manager_remove_ui (ui_manager, glyr->merge_id_playlist);
+	gtk_ui_manager_remove_action_group (ui_manager, glyr->action_group_playlist);
 	g_object_unref (glyr->action_group_playlist);
+
 	g_slice_free (PraghaGlyr, glyr);
 
 	glyr_cleanup ();
