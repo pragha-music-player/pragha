@@ -1746,6 +1746,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Playlists"),
+			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   L_MACH, FALSE,
 			   L_VISIBILE, TRUE,
@@ -1761,6 +1762,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Radios"),
+			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   L_MACH, FALSE,
 			   L_VISIBILE, TRUE,
@@ -1776,6 +1778,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 			   L_PIXBUF, clibrary->pixbuf_dir,
 			   L_NODE_DATA, _("Library"),
+			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
 			   L_NODE_TYPE, NODE_CATEGORY,
 			   L_MACH, FALSE,
 			   L_VISIBILE, TRUE,
@@ -2249,11 +2252,9 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 					split_album = g_strsplit(node_data, " - ", 2);
 					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
 					pragha_musicobject_set_album(omobj, split_album[1]);
-
 				}
 				else {
 					pragha_musicobject_set_album(omobj, node_data);
-
 				}
 				break;
 			case NODE_GENRE:
@@ -2514,6 +2515,7 @@ pragha_library_pane_store_new()
 	store = gtk_tree_store_new(N_L_COLUMNS,
 	                           GDK_TYPE_PIXBUF, /* Pixbuf */
 	                           G_TYPE_STRING,   /* Node */
+	                           G_TYPE_INT,      /* Bold */
 	                           G_TYPE_INT,      /* Node type : Artist / Album / Track */
 	                           G_TYPE_INT,      /* Location id (valid only for Track) */
 	                           G_TYPE_BOOLEAN,  /* Flag to save mach when filtering */
@@ -2559,6 +2561,7 @@ pragha_library_pane_tree_new(PraghaLibraryPane *clibrary)
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_set_attributes(column, renderer,
 					    "text", L_NODE_DATA,
+					    "weight", L_NODE_BOLD,
 					    NULL);
 	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 
