@@ -26,6 +26,10 @@
 #include <glib/gi18n.h>
 #endif
 
+#ifdef HAVE_LIBXFCE4UI
+#include <libxfce4ui/libxfce4ui.h>
+#endif
+
 #include <stdlib.h>
 #include "pragha-dbus.h"
 #include "pragha-debug.h"
