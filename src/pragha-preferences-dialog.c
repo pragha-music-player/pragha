@@ -368,10 +368,10 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->preferences_w->use_cddb_w)));
 
-		cwin->cpref->use_mpris2 =
+		pragha_preferences_set_use_mpris2(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_mpris2_w));
-		if(!cwin->cpref->use_mpris2) {
+						     cwin->preferences_w->use_mpris2_w)));
+		if(!pragha_preferences_get_use_mpris2(cwin->preferences)) {
 			mpris_close(cwin->cmpris2);
 		}
 		else {
@@ -812,7 +812,7 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_cddb_w),
 					     TRUE);
-	if (cwin->cpref->use_mpris2)
+	if (pragha_preferences_get_use_mpris2(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_mpris2_w),
 					     TRUE);
@@ -1029,13 +1029,6 @@ void save_preferences(struct con_win *cwin)
 					      cwin->cpref->lastfm_pass);
 	}
 #endif
-
-	/* Save allow MPRIS2 server option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_ALLOW_MPRIS2,
-			       cwin->cpref->use_mpris2);
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)

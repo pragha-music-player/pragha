@@ -67,6 +67,7 @@ struct _PraghaPreferencesPrivate
 	/* Services preferences */
 	gboolean   use_cddb;
 	gboolean   download_album_art;
+	gboolean   use_mpris2;
 };
 
 enum
@@ -97,6 +98,7 @@ enum
 	PROP_ACTIONS_IN_OSD,
 	PROP_USE_CDDB,
 	PROP_DOWNLOAD_ALBUM_ART,
+	PROP_USE_MPRIS2,
 	LAST_PROP
 };
 
@@ -1040,6 +1042,33 @@ pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_DOWNLOAD_ALBUM_ART]);
 }
 
+/**
+ * pragha_preferences_get_use_mpris2:
+ *
+ */
+gboolean
+pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->use_mpris2;
+}
+
+/**
+ * pragha_preferences_set_use_mpris2:
+ *
+ */
+void
+pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
+                                   gboolean use_mpris2)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->use_mpris2 = use_mpris2;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_MPRIS2]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
@@ -1047,7 +1076,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd;
-	gboolean use_cddb, download_album_art;
+	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
@@ -1400,6 +1429,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_download_album_art(preferences, download_album_art);
 	}
 
+	use_mpris2 = g_key_file_get_boolean(priv->rc_keyfile,
+	                                    GROUP_SERVICES,
+	                                    KEY_ALLOW_MPRIS2,
+	                                    &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_use_mpris2(preferences, use_mpris2);
+	}
+
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
@@ -1527,6 +1568,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_SERVICES,
 	                       KEY_GET_ALBUM_ART,
 	                       priv->download_album_art);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_ALLOW_MPRIS2,
+	                       priv->use_mpris2);
 
 	/* Save to key file */
 
@@ -1625,6 +1670,12 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_USE_CDDB:
 			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
 			break;
+		case PROP_DOWNLOAD_ALBUM_ART:
+			g_value_set_boolean (value, pragha_preferences_get_download_album_art(preferences));
+			break;
+		case PROP_USE_MPRIS2:
+			g_value_set_boolean (value, pragha_preferences_get_use_mpris2(preferences));
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -1710,6 +1761,12 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_USE_CDDB:
 			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_DOWNLOAD_ALBUM_ART:
+			pragha_preferences_set_download_album_art(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_USE_MPRIS2:
+			pragha_preferences_set_use_mpris2(preferences, g_value_get_boolean(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -2001,6 +2058,26 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("use-cddb",
 		                     "UseCddb",
 		                     "Use Cddb Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+	/**
+	  * PraghaPreferences:download_album_art:
+	  *
+	  */
+	gParamSpecs[PROP_DOWNLOAD_ALBUM_ART] =
+		g_param_spec_boolean("download-album-art",
+		                     "DownloadAlbumArt",
+		                     "Download Album Art Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+	/**
+	  * PraghaPreferences:use_cddb:
+	  *
+	  */
+	gParamSpecs[PROP_USE_MPRIS2] =
+		g_param_spec_boolean("use-mpris2",
+		                     "UseMpris2",
+		                     "Use Mpris2 Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
