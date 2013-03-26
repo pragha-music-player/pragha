@@ -102,14 +102,14 @@ gint init_config(struct con_win *cwin)
 
 	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
-	gboolean use_cddb_f, use_mpris2_f;
+	gboolean use_mpris2_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
-	use_cddb_f = use_mpris2_f = FALSE;
+	use_mpris2_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
 	#endif
@@ -308,16 +308,6 @@ gint init_config(struct con_win *cwin)
 			get_album_art_f = TRUE;
 		}
 		#endif
-		cwin->cpref->use_cddb =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_USE_CDDB,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			use_cddb_f = TRUE;
-		}
 		cwin->cpref->use_mpris2 =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
@@ -365,8 +355,6 @@ gint init_config(struct con_win *cwin)
 	if (all_f || get_album_art_f)
 		cwin->cpref->get_album_art = FALSE;
 	#endif
-	if (all_f || use_cddb_f)
-		cwin->cpref->use_cddb = TRUE;
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;
 

@@ -364,9 +364,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						     cwin->preferences_w->get_album_art_w));
 #endif
-		cwin->cpref->use_cddb =
+		pragha_preferences_set_use_cddb(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_cddb_w));
+						     cwin->preferences_w->use_cddb_w)));
 
 		cwin->cpref->use_mpris2 =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -808,7 +808,7 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->get_album_art_w),
 					     TRUE);
 #endif
-	if (cwin->cpref->use_cddb)
+	if (pragha_preferences_get_use_cddb(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_cddb_w),
 					     TRUE);
@@ -1037,13 +1037,6 @@ void save_preferences(struct con_win *cwin)
 			       KEY_GET_ALBUM_ART,
 			       cwin->cpref->get_album_art);
 #endif
-	/* Save use CDDB server option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_USE_CDDB,
-			       cwin->cpref->use_cddb);
-
 	/* Save allow MPRIS2 server option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,

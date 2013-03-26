@@ -348,6 +348,12 @@ void
 pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
                                        gboolean actions_in_osd);
 
+gboolean
+pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
+void
+pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
+                                 gboolean use_cddb);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */
