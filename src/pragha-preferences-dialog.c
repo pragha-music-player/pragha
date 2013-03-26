@@ -332,9 +332,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		pragha_preferences_set_album_art_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->albumart_in_osd_w)));
-		cwin->cpref->actions_in_osd =
+		pragha_preferences_set_actions_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->actions_in_osd_w));
+						  cwin->preferences_w->actions_in_osd_w)));
 
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
@@ -803,7 +803,7 @@ static void update_preferences(struct con_win *cwin)
 					     TRUE);
 	if (!can_support_actions())
 		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, FALSE);
-	else if (cwin->cpref->actions_in_osd)
+	else if (pragha_preferences_get_actions_in_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->actions_in_osd_w),
 					     TRUE);
@@ -912,10 +912,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_OSD_IN_TRAY,
 			       cwin->cpref->osd_in_systray);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ACTIONS_OSD,
-			       cwin->cpref->actions_in_osd);
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
 
