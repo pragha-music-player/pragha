@@ -538,9 +538,6 @@ static void toggle_show_icon_tray(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->preferences_w->show_icon_tray_w));
 
-	if (!is_active)
-		gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, FALSE);
-
 	gtk_status_icon_set_visible(cwin->status_icon, is_active);
 }
 
