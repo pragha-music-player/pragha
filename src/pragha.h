@@ -110,7 +110,6 @@ struct con_pref {
 	gint window_y;
 	GKeyFile *configrc_keyfile;
 	gboolean osd_in_systray;
-	gboolean actions_in_osd;
 #ifdef HAVE_LIBGLYR
 	gboolean get_album_art;
 #endif

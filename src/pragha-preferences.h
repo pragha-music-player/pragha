@@ -342,6 +342,12 @@ void
 pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
                                          gboolean album_art_in_osd);
 
+gboolean
+pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences);
+void
+pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
+                                       gboolean actions_in_osd);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

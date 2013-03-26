@@ -128,7 +128,7 @@ show_osd (struct con_win *cwin)
 		cwin->osd_notify = notify_notification_new(summary, body, NULL);
 
 		if(can_support_actions() &&
-		   cwin->cpref->actions_in_osd == TRUE) {
+		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
 			notify_notification_add_action(
 				cwin->osd_notify, "media-prev", _("Prev Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
@@ -144,7 +144,7 @@ show_osd (struct con_win *cwin)
 	else {
 		notify_notification_update (cwin->osd_notify, summary, body, NULL);
 
-		if(cwin->cpref->actions_in_osd == FALSE)
+		if(pragha_preferences_get_actions_in_osd (cwin->preferences) == FALSE)
 			notify_notification_clear_actions (cwin->osd_notify);
 	}
 	#else

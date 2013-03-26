@@ -64,6 +64,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   timer_remaining_mode;
 	gboolean   show_osd;
 	gboolean   album_art_in_osd;
+	gboolean   actions_in_osd;
 };
 
 enum
@@ -91,6 +92,7 @@ enum
 	PROP_TIMER_REMAINING_MODE,
 	PROP_SHOW_OSD,
 	PROP_ALBUM_ART_IN_OSD,
+	PROP_ACTIONS_IN_OSD,
 	LAST_PROP
 };
 
@@ -953,13 +955,40 @@ pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ALBUM_ART_IN_OSD]);
 }
 
+/**
+ * pragha_preferences_get_actions_in_osd:
+ *
+ */
+gboolean
+pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->actions_in_osd;
+}
+
+/**
+ * pragha_preferences_set_actions_in_osd:
+ *
+ */
+void
+pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
+                                       gboolean actions_in_osd)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->actions_in_osd = actions_in_osd;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ACTIONS_IN_OSD]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar;
-	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd;
+	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
@@ -1276,6 +1305,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_album_art_in_osd(preferences, album_art_in_osd);
 	}
 
+	actions_in_osd = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_GENERAL,
+	                                        KEY_SHOW_ACTIONS_OSD,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_actions_in_osd(preferences, actions_in_osd);
+	}
+
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
@@ -1390,6 +1431,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_GENERAL,
 	                       KEY_SHOW_ALBUM_ART_OSD,
 	                       priv->album_art_in_osd);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_SHOW_ACTIONS_OSD,
+	                       priv->actions_in_osd);
 
 	/* Save to key file */
 
@@ -1482,6 +1527,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_ALBUM_ART_IN_OSD:
 			g_value_set_boolean (value, pragha_preferences_get_album_art_in_osd(preferences));
 			break;
+		case PROP_ACTIONS_IN_OSD:
+			g_value_set_boolean (value, pragha_preferences_get_actions_in_osd(preferences));
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -1561,6 +1609,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_ALBUM_ART_IN_OSD:
 			pragha_preferences_set_album_art_in_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_ACTIONS_IN_OSD:
+			pragha_preferences_set_actions_in_osd(preferences, g_value_get_boolean(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1832,6 +1883,16 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("album-art-in-osd",
 		                     "AlbumArtInOSD",
 		                     "Show Album Art In OSD Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+	/**
+	  * PraghaPreferences:actions_in_osd:
+	  *
+	  */
+	gParamSpecs[PROP_ACTIONS_IN_OSD] =
+		g_param_spec_boolean("actions-in-osd",
+		                     "ActionsInOSD",
+		                     "Show Actions In OSD Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
