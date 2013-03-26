@@ -61,9 +61,6 @@ struct _PreferencesWidgets {
 	GtkWidget *add_recursively_w;
 
 	GtkWidget *show_osd_w;
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray_w;
-#endif
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
 
@@ -323,12 +320,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		else
 			pragha_preferences_set_show_osd(cwin->preferences, FALSE);
 
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-		cwin->cpref->osd_in_systray =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->osd_in_systray_w));
-#endif
-
 		pragha_preferences_set_album_art_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->albumart_in_osd_w)));
@@ -550,9 +541,6 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->preferences_w->show_osd_w));
 
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	gtk_widget_set_sensitive(cwin->preferences_w->osd_in_systray_w, is_active);
-	#endif
 	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
 	if (can_support_actions())
 		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, is_active);
@@ -791,12 +779,6 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->show_osd_w),
 					     TRUE);
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	if (cwin->cpref->osd_in_systray)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->osd_in_systray_w),
-					     TRUE);
-#endif
 	if (pragha_preferences_get_album_art_in_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->albumart_in_osd_w),
@@ -905,13 +887,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_CLOSE_TO_TRAY,
 			       cwin->cpref->close_to_tray);
-
-	/* Save show OSD option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_OSD_IN_TRAY,
-			       cwin->cpref->osd_in_systray);
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
 
@@ -1364,9 +1339,6 @@ pref_create_desktop_page(struct con_win *cwin)
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
 	GtkWidget *show_osd, *albumart_in_osd, *actions_in_osd;
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray;
-	#endif
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -1383,11 +1355,6 @@ pref_create_desktop_page(struct con_win *cwin)
 
 	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, show_osd);
-
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, osd_in_systray);
-	#endif
 
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
@@ -1407,9 +1374,6 @@ pref_create_desktop_page(struct con_win *cwin)
 	cwin->preferences_w->show_icon_tray_w = show_icon_tray;
 	cwin->preferences_w->close_to_tray_w = close_to_tray;
 	cwin->preferences_w->show_osd_w = show_osd;
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	cwin->preferences_w->osd_in_systray_w = osd_in_systray;
-	#endif
 	cwin->preferences_w->albumart_in_osd_w = albumart_in_osd;
 	cwin->preferences_w->actions_in_osd_w = actions_in_osd;
 

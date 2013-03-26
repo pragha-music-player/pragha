@@ -33,12 +33,6 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 
-/* Some definitions to solve different versions of the libraries. */
-
-#ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
-#endif
-
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
@@ -109,7 +103,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-	gboolean osd_in_systray;
 #ifdef HAVE_LIBGLYR
 	gboolean get_album_art;
 #endif
