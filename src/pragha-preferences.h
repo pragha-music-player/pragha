@@ -316,6 +316,13 @@ void
 pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
                                          gboolean show_status_icon);
 
+gboolean
+pragha_preferences_get_controls_below (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_controls_below (PraghaPreferences *preferences,
+                                       gboolean controls_below);
+
 gint
 pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 

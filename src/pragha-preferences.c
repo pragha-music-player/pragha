@@ -59,6 +59,7 @@ struct _PraghaPreferencesPrivate
 	gint       album_art_size;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
+	gboolean   controls_below;
 	/* Misc preferences. */
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
@@ -94,6 +95,7 @@ enum
 	PROP_ALBUM_ART_SIZE,
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
+	PROP_CONTROLS_BELOW,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	PROP_SHOW_OSD,
@@ -885,6 +887,33 @@ pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_controls_below:
+ *
+ */
+gboolean
+pragha_preferences_get_controls_below (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->controls_below;
+}
+
+/**
+ * pragha_preferences_set_controls_below:
+ *
+ */
+void
+pragha_preferences_set_controls_below (PraghaPreferences *preferences,
+                                       gboolean controls_below)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->controls_below = controls_below;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_CONTROLS_BELOW]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -1132,7 +1161,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon;
+	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
@@ -1415,6 +1444,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_status_icon(preferences, show_status_icon);
 	}
 
+	controls_below = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_WINDOW,
+	                                        KEY_CONTROLS_BELOW,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_controls_below(preferences, controls_below);
+	}
+
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_GENERAL,
 	                                         KEY_ADD_RECURSIVELY_FILES,
@@ -1623,7 +1664,11 @@ pragha_preferences_finalize (GObject *object)
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_SHOW_ICON_TRAY,
-	                       priv->show_status_bar);
+	                       priv->show_status_icon);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_CONTROLS_BELOW,
+	                       priv->controls_below);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
@@ -1745,6 +1790,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SHOW_STATUS_ICON:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_icon(preferences));
 			break;
+		case PROP_CONTROLS_BELOW:
+			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
+			break;
 		case PROP_ADD_RECURSIVELY:
 			g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
 			break;
@@ -1842,6 +1890,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_CONTROLS_BELOW:
+			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -2055,6 +2106,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show Lateral Panel Preference",
 		                     TRUE,
 		                     PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:sidebar_size:
 	  *
@@ -2067,6 +2119,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  G_MAXINT,
 		                  DEFAULT_SIDEBAR_SIZE,
 		                  PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:show_album_art:
 	  *
@@ -2077,6 +2130,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "show Album Art Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:album_art_size:
 	  *
@@ -2089,6 +2143,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  128,
 		                  DEFAULT_ALBUM_ART_SIZE,
 		                  PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:show_status_bar:
 	  *
@@ -2099,6 +2154,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show Status Bar Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:show_status_icon:
 	  *
@@ -2108,6 +2164,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "ShowStatusIcon",
 		                     "Show Status Icon Preference",
 		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:controls_below:
+	  *
+	  */
+	gParamSpecs[PROP_CONTROLS_BELOW] =
+		g_param_spec_boolean("controls-below",
+		                     "ControlsBelow",
+		                     "Controls Below Preference",
+		                      FALSE,
 		                      PRAGHA_PREF_PARAMS);
 
 	/**

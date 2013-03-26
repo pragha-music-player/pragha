@@ -754,12 +754,13 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
-	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	pragha_preferences_set_controls_below (cwin->preferences,
+		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
 	GtkWidget *toolbar = pragha_toolbar_get_widget(cwin->toolbar);
 	GtkWidget *parent = gtk_widget_get_parent(toolbar);
 
-	gint position = cwin->cpref->controls_below ? 3 : 1;
+	gint position = pragha_preferences_get_controls_below(cwin->preferences) ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), toolbar, position);
 }
