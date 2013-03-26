@@ -113,9 +113,6 @@ gint init_config(struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
 	#endif
-	#ifdef HAVE_LIBGLYR
-	gboolean get_album_art_f = FALSE;
-	#endif
 
 	all_f = FALSE;
 
@@ -296,18 +293,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 		}
 		#endif
-		#ifdef HAVE_LIBGLYR
-		cwin->cpref->get_album_art =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_GET_ALBUM_ART,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			get_album_art_f = TRUE;
-		}
-		#endif
 		cwin->cpref->use_mpris2 =
 			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
 					       GROUP_SERVICES,
@@ -350,10 +335,6 @@ gint init_config(struct con_win *cwin)
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lastfm_support = FALSE;
-	#endif
-	#ifdef HAVE_LIBGLYR
-	if (all_f || get_album_art_f)
-		cwin->cpref->get_album_art = FALSE;
 	#endif
 	if (all_f || use_mpris2_f)
 		cwin->cpref->use_mpris2 = TRUE;

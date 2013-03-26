@@ -103,9 +103,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-#ifdef HAVE_LIBGLYR
-	gboolean get_album_art;
-#endif
 	gboolean use_mpris2;
 	gboolean show_icon_tray;
 	gboolean close_to_tray;
