@@ -353,12 +353,18 @@ pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
 void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
+
 gboolean
 pragha_preferences_get_download_album_art (PraghaPreferences *preferences);
 void
 pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
                                            gboolean download_album_art);
 
+gboolean
+pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);
+void
+pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
+                                   gboolean use_mpris2);
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

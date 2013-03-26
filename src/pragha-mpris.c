@@ -1240,7 +1240,7 @@ any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 
 gint mpris_init(struct con_win *cwin)
 {
-	if (!cwin->cpref->use_mpris2)
+	if (!pragha_preferences_get_use_mpris2(cwin->preferences))
 		return 0;
 
 	if(NULL != cwin->cmpris2->dbus_connection)
