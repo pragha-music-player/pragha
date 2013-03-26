@@ -309,6 +309,13 @@ void
 pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
                                        gboolean show_status_bar);
 
+gboolean
+pragha_preferences_get_show_status_icon (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
+                                         gboolean show_status_icon);
+
 gint
 pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 
@@ -332,36 +339,42 @@ pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
 
 gboolean
 pragha_preferences_get_show_osd (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_show_osd (PraghaPreferences *preferences,
                                  gboolean show_osd);
 
 gboolean
 pragha_preferences_get_album_art_in_osd (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
                                          gboolean album_art_in_osd);
 
 gboolean
 pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
                                        gboolean actions_in_osd);
 
 gboolean
 pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
 
 gboolean
 pragha_preferences_get_download_album_art (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
                                            gboolean download_album_art);
 
 gboolean
 pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
                                    gboolean use_mpris2);

@@ -103,7 +103,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-	gboolean show_icon_tray;
 	gboolean close_to_tray;
 	gboolean remember_window_state;
 	gboolean controls_below;

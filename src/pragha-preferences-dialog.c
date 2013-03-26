@@ -269,9 +269,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		pragha_preferences_set_restore_playlist(cwin->preferences, restore_playlist);
 
 
-		cwin->cpref->show_icon_tray =
+		pragha_preferences_set_show_status_icon(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->show_icon_tray_w));
+						  cwin->preferences_w->show_icon_tray_w)));
 
 		cwin->cpref->close_to_tray =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -703,7 +703,7 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->restore_playlist_w),
 					     TRUE);
 
-	if (cwin->cpref->show_icon_tray)
+	if (pragha_preferences_get_show_status_icon(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->show_icon_tray_w),
 					     TRUE);
@@ -873,13 +873,6 @@ void save_preferences(struct con_win *cwin)
 				      KEY_ALBUM_ART_PATTERN,
 				      cwin->cpref->album_art_pattern);
 	}
-
-	/* Save show status icon option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ICON_TRAY,
-			       cwin->cpref->show_icon_tray);
 
 	/* Save close to tray option */
 
