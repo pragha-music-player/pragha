@@ -329,9 +329,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						  cwin->preferences_w->osd_in_systray_w));
 #endif
 
-		cwin->cpref->albumart_in_osd =
+		pragha_preferences_set_album_art_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->albumart_in_osd_w));
+						  cwin->preferences_w->albumart_in_osd_w)));
 		cwin->cpref->actions_in_osd =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->actions_in_osd_w));
@@ -797,7 +797,7 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->osd_in_systray_w),
 					     TRUE);
 #endif
-	if (cwin->cpref->albumart_in_osd)
+	if (pragha_preferences_get_album_art_in_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->albumart_in_osd_w),
 					     TRUE);
@@ -912,10 +912,6 @@ void save_preferences(struct con_win *cwin)
 			       GROUP_GENERAL,
 			       KEY_OSD_IN_TRAY,
 			       cwin->cpref->osd_in_systray);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ALBUM_ART_OSD,
-			       cwin->cpref->albumart_in_osd);
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
 			       GROUP_GENERAL,
 			       KEY_SHOW_ACTIONS_OSD,
