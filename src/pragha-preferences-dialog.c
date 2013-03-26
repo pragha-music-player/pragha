@@ -273,9 +273,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						  cwin->preferences_w->show_icon_tray_w)));
 
-		cwin->cpref->close_to_tray =
+		pragha_preferences_set_hide_instead_close(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->close_to_tray_w));
+						  cwin->preferences_w->close_to_tray_w)));
 
 		add_recursively =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -708,7 +708,7 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->show_icon_tray_w),
 					     TRUE);
 
-	if (cwin->cpref->close_to_tray)
+	if (pragha_preferences_get_hide_instead_close(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->close_to_tray_w),
 					     TRUE);
@@ -873,13 +873,6 @@ void save_preferences(struct con_win *cwin)
 				      KEY_ALBUM_ART_PATTERN,
 				      cwin->cpref->album_art_pattern);
 	}
-
-	/* Save close to tray option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_CLOSE_TO_TRAY,
-			       cwin->cpref->close_to_tray);
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
 

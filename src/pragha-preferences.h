@@ -359,6 +359,13 @@ pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
                                        gboolean actions_in_osd);
 
 gboolean
+pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
+                                           gboolean hide_instead_close);
+
+gboolean
 pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
 
 void

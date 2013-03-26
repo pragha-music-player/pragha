@@ -120,7 +120,7 @@ GtkWidget* create_info_box(struct con_win *cwin)
 
 gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if(cwin->cpref->close_to_tray) {
+	if(pragha_preferences_get_hide_instead_close(cwin->preferences)) {
 		if(pragha_preferences_get_show_status_icon(cwin->preferences) &&
 		   gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
 			toogle_main_window(cwin, FALSE);
