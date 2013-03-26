@@ -295,14 +295,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
 
-			if (album_art_pattern) {
+			if (string_is_not_empty(album_art_pattern)) {
 				if (!validate_album_art_pattern(album_art_pattern)) {
 					album_art_pattern_helper(dialog, cwin);
 					return;
 				}
 				/* Proper pattern, store in preferences */
-				g_free(cwin->cpref->album_art_pattern);
-				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
+				pragha_preferences_set_album_art_pattern (cwin->preferences,
+				                                          album_art_pattern);
+				
 			}
 		}
 
@@ -726,9 +727,8 @@ static void update_preferences(struct con_win *cwin)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
 	                           pragha_preferences_get_album_art_size(cwin->preferences));
 
-	if (cwin->cpref->album_art_pattern)
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
-				   cwin->cpref->album_art_pattern);
+	gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
+	                   pragha_preferences_get_album_art_pattern(cwin->preferences));
 
 	/* Lbrary Options */
 
@@ -850,28 +850,6 @@ void save_preferences(struct con_win *cwin)
 				      KEY_LAST_FOLDER,
 				      u_file);
 		g_free(u_file);
-	}
-
-	/* Save album art pattern */
-
-	if (string_is_empty(cwin->cpref->album_art_pattern)) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_GENERAL) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_GENERAL,
-				       KEY_ALBUM_ART_PATTERN,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_ALBUM_ART_PATTERN,
-					      &error);
-		}
-	}
-	else {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_GENERAL,
-				      KEY_ALBUM_ART_PATTERN,
-				      cwin->cpref->album_art_pattern);
 	}
 
 	pragha_playlist_save_preferences(cwin->cplaylist);

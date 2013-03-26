@@ -100,13 +100,13 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean last_folder_f, album_art_pattern_f;
+	gboolean last_folder_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = album_art_pattern_f = FALSE;
+	last_folder_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
@@ -192,17 +192,6 @@ gint init_config(struct con_win *cwin)
 			start_mode_f = TRUE;
 		}
 
-		cwin->cpref->album_art_pattern =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_ALBUM_ART_PATTERN,
-					      &error);
-		if (!cwin->cpref->album_art_pattern) {
-			g_error_free(error);
-			error = NULL;
-			album_art_pattern_f = TRUE;
-		}
-
 		u_file = g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					       GROUP_GENERAL,
 					       KEY_LAST_FOLDER,
@@ -273,8 +262,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || album_art_pattern_f)
-		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || remember_window_state_f)
