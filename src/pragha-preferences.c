@@ -57,6 +57,7 @@ struct _PraghaPreferencesPrivate
 	gint       sidebar_size;
 	gboolean   show_album_art;
 	gint       album_art_size;
+	gchar     *album_art_pattern;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
 	gboolean   controls_below;
@@ -93,6 +94,7 @@ enum
 	PROP_SIDEBAR_SIZE,
 	PROP_SHOW_ALBUM_ART,
 	PROP_ALBUM_ART_SIZE,
+	PROP_ALBUM_ART_PATTERN,
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
 	PROP_CONTROLS_BELOW,
@@ -833,6 +835,34 @@ pragha_preferences_set_album_art_size (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_album_art_pattern:
+ *
+ */
+const gchar *
+pragha_preferences_get_album_art_pattern (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return preferences->priv->album_art_pattern;
+}
+
+/**
+ * pragha_preferences_setalbum_art_pattern:
+ *
+ */
+void
+pragha_preferences_set_album_art_pattern (PraghaPreferences *preferences,
+                                          const gchar *album_art_pattern)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_free(preferences->priv->album_art_pattern);
+	preferences->priv->album_art_pattern = g_strdup(album_art_pattern);
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ALBUM_ART_PATTERN]);
+}
+
+/**
  * pragha_preferences_get_show_status_bar:
  *
  */
@@ -1162,6 +1192,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below;
+	gchar *album_art_pattern;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
@@ -1420,6 +1451,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_album_art_size(preferences, album_art_size);
 	}
 
+	album_art_pattern = g_key_file_get_string(priv->rc_keyfile,
+	                                         GROUP_GENERAL,
+	                                         KEY_ALBUM_ART_PATTERN,
+	                                         &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_album_art_pattern(preferences, album_art_pattern);
+	}
+
 	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_WINDOW,
 	                                         KEY_STATUS_BAR,
@@ -1567,6 +1610,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
+	g_free(album_art_pattern);
 }
 
 static void
@@ -1657,6 +1701,15 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_WINDOW,
 	                       KEY_ALBUM_ART_SIZE,
 	                       priv->album_art_size);
+	if (string_is_not_empty(priv->album_art_pattern))
+		g_key_file_set_string(priv->rc_keyfile,
+		                      GROUP_GENERAL,
+		                      KEY_ALBUM_ART_PATTERN,
+		                      priv->album_art_pattern);
+	else
+		pragha_preferences_remove_key(preferences,
+		                              GROUP_AUDIO,
+		                              KEY_ALBUM_ART_PATTERN);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
 	                       KEY_STATUS_BAR,
@@ -1720,6 +1773,7 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->audio_sink);
 	g_free(priv->audio_device);
 	g_free(priv->audio_cd_device);
+	g_free(priv->album_art_pattern);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
@@ -1783,6 +1837,9 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_ALBUM_ART_SIZE:
 			g_value_set_int (value, pragha_preferences_get_album_art_size(preferences));
+			break;
+		case PROP_ALBUM_ART_PATTERN:
+			g_value_set_string (value, pragha_preferences_get_album_art_pattern(preferences));
 			break;
 		case PROP_SHOW_STATUS_BAR:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_bar(preferences));
@@ -1884,6 +1941,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_ALBUM_ART_SIZE:
 			pragha_preferences_set_album_art_size(preferences, g_value_get_int(value));
+			break;
+		case PROP_ALBUM_ART_PATTERN:
+			pragha_preferences_set_album_art_pattern(preferences, g_value_get_string(value));
 			break;
 		case PROP_SHOW_STATUS_BAR:
 			pragha_preferences_set_show_status_bar(preferences, g_value_get_boolean(value));
@@ -2143,6 +2203,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  128,
 		                  DEFAULT_ALBUM_ART_SIZE,
 		                  PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:album_art_pattern:
+	  *
+	  */
+	gParamSpecs[PROP_ALBUM_ART_PATTERN] =
+		g_param_spec_string("album-art-pattern",
+		                    "AlbumArtPattern",
+		                    "Album Art Pattern Preferences",
+		                    "",
+		                    PRAGHA_PREF_PARAMS);
 
 	/**
 	  * PraghaPreferences:show_status_bar:

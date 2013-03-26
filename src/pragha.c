@@ -48,7 +48,6 @@ static void preferences_free (struct con_pref *cpref)
 	g_free(cpref->lastfm_pass);
 #endif
 	g_free(cpref->installed_version);
-	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
 
 	g_slice_free(struct con_pref, cpref);

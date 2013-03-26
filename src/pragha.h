@@ -96,7 +96,6 @@ enum dnd_target {
 
 struct con_pref {
 	gchar *installed_version;
-	gchar *album_art_pattern;
 	gchar *start_mode;
 	gint window_width;
 	gint window_height;
