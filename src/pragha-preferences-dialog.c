@@ -962,14 +962,6 @@ void save_preferences(struct con_win *cwin)
 	pragha_preferences_set_sidebar_size(cwin->preferences,
 		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 
-
-	/* Save show controls below option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_CONTROLS_BELOW,
-			       cwin->cpref->controls_below);
-
 	/* Services internet */
 	/* Save last.fm option */
 #ifdef HAVE_LIBCLASTFM

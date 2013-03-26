@@ -101,13 +101,13 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0;
 
 	gboolean last_folder_f, album_art_pattern_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
+	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = album_art_pattern_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
+	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
 	#endif
@@ -166,17 +166,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			window_position_f = TRUE;
-		}
-
-		cwin->cpref->controls_below =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_CONTROLS_BELOW,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			controls_below_f = TRUE;
 		}
 
 		/* Retrieve General preferences */
@@ -292,8 +281,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
-	if (all_f || controls_below_f)
-		cwin->cpref->controls_below = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lastfm_support = FALSE;
@@ -415,7 +402,7 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
 
 #ifndef HAVE_LIBCLASTFM
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");

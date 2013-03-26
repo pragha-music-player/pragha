@@ -104,7 +104,6 @@ struct con_pref {
 	gint window_y;
 	GKeyFile *configrc_keyfile;
 	gboolean remember_window_state;
-	gboolean controls_below;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
