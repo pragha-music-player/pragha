@@ -58,13 +58,14 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_album_art;
 	gint       album_art_size;
 	gboolean   show_status_bar;
-
 	/* Misc preferences. */
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
 	gboolean   show_osd;
 	gboolean   album_art_in_osd;
 	gboolean   actions_in_osd;
+	/* Services preferences */
+	gboolean   use_cddb;
 };
 
 enum
@@ -93,6 +94,7 @@ enum
 	PROP_SHOW_OSD,
 	PROP_ALBUM_ART_IN_OSD,
 	PROP_ACTIONS_IN_OSD,
+	PROP_USE_CDDB,
 	LAST_PROP
 };
 
@@ -982,6 +984,33 @@ pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ACTIONS_IN_OSD]);
 }
 
+/**
+ * pragha_preferences_get_use_cddb:
+ *
+ */
+gboolean
+pragha_preferences_get_use_cddb (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->use_cddb;
+}
+
+/**
+ * pragha_preferences_set_use_cddb:
+ *
+ */
+void
+pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
+                                 gboolean use_cddb)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->use_cddb = use_cddb;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
@@ -989,6 +1018,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd;
+	gboolean use_cddb;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
@@ -1317,6 +1347,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_actions_in_osd(preferences, actions_in_osd);
 	}
 
+	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
+	                                  GROUP_SERVICES,
+	                                  KEY_USE_CDDB,
+	                                  &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_use_cddb(preferences, use_cddb);
+	}
+
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
@@ -1436,6 +1478,11 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_SHOW_ACTIONS_OSD,
 	                       priv->actions_in_osd);
 
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_USE_CDDB,
+	                       priv->use_cddb);
+
 	/* Save to key file */
 
 	data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -1530,6 +1577,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_ACTIONS_IN_OSD:
 			g_value_set_boolean (value, pragha_preferences_get_actions_in_osd(preferences));
 			break;
+		case PROP_USE_CDDB:
+			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -1612,6 +1662,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_ACTIONS_IN_OSD:
 			pragha_preferences_set_actions_in_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_USE_CDDB:
+			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1893,6 +1946,16 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("actions-in-osd",
 		                     "ActionsInOSD",
 		                     "Show Actions In OSD Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+	/**
+	  * PraghaPreferences:use_cddb:
+	  *
+	  */
+	gParamSpecs[PROP_USE_CDDB] =
+		g_param_spec_boolean("use-cddb",
+		                     "UseCddb",
+		                     "Use Cddb Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 

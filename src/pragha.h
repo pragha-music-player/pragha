@@ -106,7 +106,6 @@ struct con_pref {
 #ifdef HAVE_LIBGLYR
 	gboolean get_album_art;
 #endif
-	gboolean use_cddb;
 	gboolean use_mpris2;
 	gboolean show_icon_tray;
 	gboolean close_to_tray;

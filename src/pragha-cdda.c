@@ -130,7 +130,7 @@ void add_audio_cd(struct con_win *cwin)
 		return;
 	}
 
-	if (cwin->cpref->use_cddb) {
+	if (pragha_preferences_get_use_cddb(cwin->preferences)) {
 		/* Clean earlier CDDB state */
 		if (cwin->cstate->cddb_disc) {
 			cddb_disc_destroy(cwin->cstate->cddb_disc);
