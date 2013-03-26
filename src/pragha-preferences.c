@@ -66,6 +66,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   actions_in_osd;
 	/* Services preferences */
 	gboolean   use_cddb;
+	gboolean   download_album_art;
 };
 
 enum
@@ -95,6 +96,7 @@ enum
 	PROP_ALBUM_ART_IN_OSD,
 	PROP_ACTIONS_IN_OSD,
 	PROP_USE_CDDB,
+	PROP_DOWNLOAD_ALBUM_ART,
 	LAST_PROP
 };
 
@@ -1011,6 +1013,33 @@ pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
 }
 
+/**
+ * pragha_preferences_get_download_album_art:
+ *
+ */
+gboolean
+pragha_preferences_get_download_album_art (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->download_album_art;
+}
+
+/**
+ * pragha_preferences_set_download_album_art:
+ *
+ */
+void
+pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
+                                           gboolean download_album_art)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->download_album_art = download_album_art;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_DOWNLOAD_ALBUM_ART]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
@@ -1018,7 +1047,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd;
-	gboolean use_cddb;
+	gboolean use_cddb, download_album_art;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
@@ -1359,6 +1388,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_use_cddb(preferences, use_cddb);
 	}
 
+	download_album_art = g_key_file_get_boolean(priv->rc_keyfile,
+	                                            GROUP_SERVICES,
+	                                            KEY_GET_ALBUM_ART,
+	                                            &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_download_album_art(preferences, download_album_art);
+	}
+
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
@@ -1482,6 +1523,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_SERVICES,
 	                       KEY_USE_CDDB,
 	                       priv->use_cddb);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_GET_ALBUM_ART,
+	                       priv->download_album_art);
 
 	/* Save to key file */
 

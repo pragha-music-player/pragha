@@ -475,7 +475,7 @@ update_related_handler (gpointer data)
 		lastfm_now_playing_handler(cwin);
 #endif
 #ifdef HAVE_LIBGLYR
-	if (cwin->cpref->get_album_art)
+	if (pragha_preferences_get_download_album_art(cwin->preferences))
 		related_get_album_art_handler(cwin);
 #endif
 	return FALSE;

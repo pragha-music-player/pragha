@@ -360,9 +360,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		}
 #endif
 #ifdef HAVE_LIBGLYR
-		cwin->cpref->get_album_art =
+		pragha_preferences_set_download_album_art(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->get_album_art_w));
+						     cwin->preferences_w->get_album_art_w)));
 #endif
 		pragha_preferences_set_use_cddb(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -803,7 +803,7 @@ static void update_preferences(struct con_win *cwin)
 	}
 #endif
 #ifdef HAVE_LIBGLYR
-	if(cwin->cpref->get_album_art)
+	if(pragha_preferences_get_download_album_art(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->get_album_art_w),
 					     TRUE);
@@ -1030,13 +1030,6 @@ void save_preferences(struct con_win *cwin)
 	}
 #endif
 
-	/* Save get album art option */
-#ifdef HAVE_LIBGLYR
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_GET_ALBUM_ART,
-			       cwin->cpref->get_album_art);
-#endif
 	/* Save allow MPRIS2 server option */
 
 	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
