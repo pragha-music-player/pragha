@@ -65,6 +65,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_osd;
 	gboolean   album_art_in_osd;
 	gboolean   actions_in_osd;
+	gboolean   hide_instead_close;
 	/* Services preferences */
 	gboolean   use_cddb;
 	gboolean   download_album_art;
@@ -98,6 +99,7 @@ enum
 	PROP_SHOW_OSD,
 	PROP_ALBUM_ART_IN_OSD,
 	PROP_ACTIONS_IN_OSD,
+	PROP_HIDE_INSTEAD_CLOSE,
 	PROP_USE_CDDB,
 	PROP_DOWNLOAD_ALBUM_ART,
 	PROP_USE_MPRIS2,
@@ -1018,6 +1020,33 @@ pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_hide_instead_close:
+ *
+ */
+gboolean
+pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->hide_instead_close;
+}
+
+/**
+ * pragha_preferences_set_hide_instead_close:
+ *
+ */
+void
+pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
+                                           gboolean hide_instead_close)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->hide_instead_close = hide_instead_close;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_HIDE_INSTEAD_CLOSE]);
+}
+
+/**
  * pragha_preferences_get_use_cddb:
  *
  */
@@ -1104,7 +1133,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon;
-	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd;
+	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gint library_style, sidebar_size, album_art_size;
@@ -1446,6 +1475,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_actions_in_osd(preferences, actions_in_osd);
 	}
 
+	hide_instead_close = g_key_file_get_boolean(priv->rc_keyfile,
+	                                            GROUP_GENERAL,
+	                                            KEY_CLOSE_TO_TRAY,
+	                                            &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_hide_instead_close(preferences, hide_instead_close);
+	}
+
 	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
 	                                  GROUP_SERVICES,
 	                                  KEY_USE_CDDB,
@@ -1604,6 +1645,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_GENERAL,
 	                       KEY_SHOW_ACTIONS_OSD,
 	                       priv->actions_in_osd);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_CLOSE_TO_TRAY,
+	                       priv->hide_instead_close);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_SERVICES,
@@ -1715,6 +1760,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_ACTIONS_IN_OSD:
 			g_value_set_boolean (value, pragha_preferences_get_actions_in_osd(preferences));
 			break;
+		case PROP_HIDE_INSTEAD_CLOSE:
+			g_value_set_boolean (value, pragha_preferences_get_hide_instead_close(preferences));
+			break;
 		case PROP_USE_CDDB:
 			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
 			break;
@@ -1809,6 +1857,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_ACTIONS_IN_OSD:
 			pragha_preferences_set_actions_in_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_HIDE_INSTEAD_CLOSE:
+			pragha_preferences_set_hide_instead_close(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_USE_CDDB:
 			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
@@ -2091,6 +2142,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show OSD Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:album_art_in_osd:
 	  *
@@ -2101,6 +2153,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show Album Art In OSD Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:actions_in_osd:
 	  *
@@ -2111,6 +2164,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show Actions In OSD Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:hide_instead_close:
+	  *
+	  */
+	gParamSpecs[PROP_HIDE_INSTEAD_CLOSE] =
+		g_param_spec_boolean("hide-instead-close",
+		                     "HideInsteadClose",
+		                     "Hide Instead Close Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:use_cddb:
 	  *
@@ -2121,6 +2186,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Use Cddb Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:download_album_art:
 	  *
@@ -2131,6 +2197,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Download Album Art Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:use_cddb:
 	  *

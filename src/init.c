@@ -100,13 +100,13 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean last_folder_f, album_art_pattern_f, close_to_tray_f;
+	gboolean last_folder_f, album_art_pattern_f;
 	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = album_art_pattern_f = close_to_tray_f = FALSE;
+	last_folder_f = album_art_pattern_f = FALSE;
 	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
@@ -203,17 +203,6 @@ gint init_config(struct con_win *cwin)
 			start_mode_f = TRUE;
 		}
 
-		cwin->cpref->close_to_tray =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_CLOSE_TO_TRAY,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			close_to_tray_f = TRUE;
-		}
-
 		cwin->cpref->album_art_pattern =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_GENERAL,
@@ -303,8 +292,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
-	if (all_f || close_to_tray_f)
-		cwin->cpref->close_to_tray = TRUE;
 	if (all_f || controls_below_f)
 		cwin->cpref->controls_below = FALSE;
 	#ifdef HAVE_LIBCLASTFM
