@@ -101,13 +101,13 @@ gint init_config(struct con_win *cwin)
 	gsize cnt = 0;
 
 	gboolean last_folder_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f;
+	gboolean start_mode_f, window_size_f, window_position_f, album_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	last_folder_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = FALSE;
+	start_mode_f = window_size_f = window_position_f = album_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
 	#endif
@@ -169,17 +169,6 @@ gint init_config(struct con_win *cwin)
 		}
 
 		/* Retrieve General preferences */
-
-		cwin->cpref->remember_window_state =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_REMEMBER_STATE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			remember_window_state_f = TRUE;
-		}
 
 		cwin->cpref->start_mode =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
@@ -264,8 +253,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
-	if (all_f || remember_window_state_f)
-		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 	#ifdef HAVE_LIBCLASTFM
