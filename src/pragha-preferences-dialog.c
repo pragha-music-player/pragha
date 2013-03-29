@@ -235,21 +235,22 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->window_state_combo_w));
 
 		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
 		}
-		else 	cwin->cpref->remember_window_state = TRUE;
+		else
+			pragha_preferences_set_remember_state(cwin->preferences, TRUE);
 
 		g_free(window_state_sink);
 
@@ -671,7 +672,7 @@ static void update_preferences(struct con_win *cwin)
 
 	/* General Options */
 
-	if(cwin->cpref->remember_window_state)
+	if(pragha_preferences_get_remember_state(cwin->preferences))
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 0);
 	else{
 		if(cwin->cpref->start_mode){
@@ -866,14 +867,8 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save last window state */
 
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_REMEMBER_STATE,
-			       cwin->cpref->remember_window_state);
-
-	state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
-
-	if(cwin->cpref->remember_window_state) {
+	if(pragha_preferences_get_remember_state(cwin->preferences)) {
+		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_WINDOW,

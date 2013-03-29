@@ -337,6 +337,13 @@ void
 pragha_preferences_set_controls_below (PraghaPreferences *preferences,
                                        gboolean controls_below);
 
+gboolean
+pragha_preferences_get_remember_state (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_remember_state (PraghaPreferences *preferences,
+                                       gboolean remember_state);
+
 gint
 pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 

@@ -62,6 +62,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
 	gboolean   controls_below;
+	gboolean   remember_state;
 	/* Misc preferences. */
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
@@ -100,6 +101,7 @@ enum
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
 	PROP_CONTROLS_BELOW,
+	PROP_REMEMBER_STATE,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	PROP_SHOW_OSD,
@@ -973,6 +975,33 @@ pragha_preferences_set_controls_below (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_remember_state:
+ *
+ */
+gboolean
+pragha_preferences_get_remember_state (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->remember_state;
+}
+
+/**
+ * pragha_preferences_set_remember_state:
+ *
+ */
+void
+pragha_preferences_set_remember_state (PraghaPreferences *preferences,
+                                       gboolean remember_state)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->remember_state = remember_state;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_REMEMBER_STATE]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -1220,7 +1249,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below;
+	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
@@ -1541,6 +1570,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_controls_below(preferences, controls_below);
 	}
 
+	remember_state = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_WINDOW,
+	                                        KEY_REMEMBER_STATE,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_remember_state(preferences, remember_state);
+	}
+
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_GENERAL,
 	                                         KEY_ADD_RECURSIVELY_FILES,
@@ -1768,6 +1809,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_WINDOW,
 	                       KEY_CONTROLS_BELOW,
 	                       priv->controls_below);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_REMEMBER_STATE,
+	                       priv->remember_state);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
@@ -1899,6 +1944,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_CONTROLS_BELOW:
 			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
 			break;
+		case PROP_REMEMBER_STATE:
+			g_value_set_boolean (value, pragha_preferences_get_remember_state(preferences));
+			break;
 		case PROP_ADD_RECURSIVELY:
 			g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
 			break;
@@ -2003,8 +2051,8 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
 			break;
-		case PROP_CONTROLS_BELOW:
-			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
+		case PROP_REMEMBER_STATE:
+			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -2311,6 +2359,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "ControlsBelow",
 		                     "Controls Below Preference",
 		                      FALSE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:remember_state:
+	  *
+	  */
+	gParamSpecs[PROP_REMEMBER_STATE] =
+		g_param_spec_boolean("remember-state",
+		                     "RememberState",
+		                     "Remember State Preference",
+		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
 	/**
