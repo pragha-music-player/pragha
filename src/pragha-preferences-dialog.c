@@ -854,16 +854,13 @@ void save_preferences(struct con_win *cwin)
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
 
-	/* Audio Options */
+	/* Save software volume */
 
-	/* Save volume */
-
-	if (pragha_preferences_get_software_mixer(cwin->preferences)) {
-		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_SOFTWARE_VOLUME,
-				       pragha_backend_get_volume (cwin->backend));
-	}
+	if (pragha_preferences_get_software_mixer(cwin->preferences))
+		pragha_preferences_set_software_volume(cwin->preferences,
+		                                       pragha_backend_get_volume (cwin->backend));
+	else
+		pragha_preferences_set_software_volume(cwin->preferences, -1.0);
 
 	/* Window Option */
 

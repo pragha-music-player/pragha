@@ -51,6 +51,7 @@ struct _PraghaPreferencesPrivate
 	gchar     *audio_sink;
 	gchar     *audio_device;
 	gboolean   software_mixer;
+	gdouble    software_volume;
 	gchar     *audio_cd_device;
 	/* Window preferences. */
 	gboolean   lateral_panel;
@@ -89,6 +90,7 @@ enum
 	PROP_AUDIO_SINK,
 	PROP_AUDIO_DEVICE,
 	PROP_SOFTWARE_MIXER,
+	PROP_SOFTWARE_VOLUME,
 	PROP_AUDIO_CD_DEVICE,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
@@ -699,6 +701,33 @@ pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_software_volume:
+ *
+ */
+gdouble
+pragha_preferences_get_software_volume (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), -1.0);
+
+	return preferences->priv->software_volume;
+}
+
+/**
+ * pragha_preferences_set_software_volume:
+ *
+ */
+void
+pragha_preferences_set_software_volume (PraghaPreferences *preferences,
+                                        gdouble software_volume)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->software_volume = software_volume;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_VOLUME]);
+}
+
+/**
  * pragha_preferences_get_audio_cd_device:
  *
  */
@@ -1196,6 +1225,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
+	gdouble software_volume;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
 	const gchar *user_config_dir;
@@ -1389,6 +1419,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_software_mixer(preferences, software_mixer);
+	}
+
+	software_volume = g_key_file_get_double(priv->rc_keyfile,
+	                                        GROUP_AUDIO,
+	                                        KEY_SOFTWARE_VOLUME,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_software_volume(preferences, software_volume);
 	}
 
 	audio_cd_device = g_key_file_get_string(priv->rc_keyfile,
@@ -1675,6 +1717,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_AUDIO,
 	                       KEY_SOFTWARE_MIXER,
 	                       priv->software_mixer);
+	g_key_file_set_double(priv->rc_keyfile,
+	                      GROUP_AUDIO,
+	                      KEY_SOFTWARE_VOLUME,
+	                      priv->software_volume);
 	if (string_is_not_empty(priv->audio_cd_device))
 		g_key_file_set_string(priv->rc_keyfile,
 		                      GROUP_AUDIO,
@@ -1823,6 +1869,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SOFTWARE_MIXER:
 			g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
 			break;
+		case PROP_SOFTWARE_VOLUME:
+			g_value_set_double (value, pragha_preferences_get_software_volume(preferences));
+			break;
 		case PROP_AUDIO_CD_DEVICE:
 			g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
 			break;
@@ -1926,6 +1975,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SOFTWARE_MIXER:
 			pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_SOFTWARE_VOLUME:
+			pragha_preferences_set_software_volume(preferences, g_value_get_double(value));
 			break;
 		case PROP_AUDIO_CD_DEVICE:
 			pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
@@ -2143,6 +2195,19 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "SoftwareMixer",
 		                     "Use Software Mixer",
 		                     FALSE,
+		                     PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:software_volume:
+	  *
+	  */
+	gParamSpecs[PROP_SOFTWARE_VOLUME] =
+		g_param_spec_double ("software-volume",
+		                     "SoftwareVolume",
+		                     "Software Volume Preferences",
+		                     -1.0,
+		                      1.0,
+		                     -1.0,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**

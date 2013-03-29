@@ -1012,7 +1012,10 @@ gint backend_init (struct con_win *cwin)
 	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
 	gst_object_unref (bus);
 
-	pragha_backend_set_soft_volume (backend, pragha_preferences_get_software_mixer (priv->preferences));
+	if(pragha_preferences_get_software_mixer (priv->preferences)) {
+		pragha_backend_set_soft_volume (backend, TRUE);
+		pragha_backend_set_volume(backend, pragha_preferences_get_software_volume (priv->preferences));
+	}
 	pragha_backend_init_equalizer_preset (backend);
 
 	gst_element_set_state(priv->pipeline, GST_STATE_READY);
