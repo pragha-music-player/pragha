@@ -2051,6 +2051,9 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
 			break;
+		case PROP_CONTROLS_BELOW:
+			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
+			break;
 		case PROP_REMEMBER_STATE:
 			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
 			break;
