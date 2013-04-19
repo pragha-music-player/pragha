@@ -524,7 +524,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
-	pragha_playlist_update_current_track(cwin->cplaylist, changed);
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 	gst_tag_list_free(tag_list);
 }
