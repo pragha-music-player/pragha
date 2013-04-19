@@ -311,7 +311,8 @@ pragha_update_mobj_list_change_tag(GList *list, gint changed, PraghaMusicobject 
 
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
-	GList *rlist, *mlist, *tlist;
+	GList *rlist, *mlist;
+	gboolean need_update;
 
 	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
@@ -324,14 +325,17 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 	pragha_update_mobj_list_change_tag(mlist, changed, omobj);
 
 	/* Update the view. */
-	pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
+	need_update = pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
 	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 
 	/* If change current song, update gui and mpris. */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	tlist = g_list_find (mlist, cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-	if(tlist) {
+
+	if(need_update) {
+		/* Update the public mobj */
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+		pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, omobj);
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
 			mpris_update_metadata_changed(cwin);
@@ -352,8 +356,9 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 {
 	PraghaMusicobject *omobj = NULL, *nmobj;
-	GList *rlist, *mlist, *tlist;
+	GList *rlist, *mlist;
 	gint sel = 0, changed = 0;
+	gboolean need_update;
 
 	/* Get a list of references and music objects selected. */
 	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
@@ -402,13 +407,15 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	pragha_update_mobj_list_change_tag(mlist, changed, nmobj);
 
 	/* Update the view. */
-	pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
+	need_update = pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
 
 	/* If change current song, update gui and mpris. */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	tlist = g_list_find (mlist, cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-	if(tlist) {
+	if(need_update) {
+		/* Update the public mobj */
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+		pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
 			mpris_update_metadata_changed(cwin);
