@@ -18,6 +18,7 @@
 #include "pragha-playback.h"
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -236,4 +237,29 @@ void
 pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
 {
 	pragha_advance_playback(cwin);
+}
+
+void
+pragha_backend_tags_changed (PraghaBackend *backend, struct con_win *cwin)
+{
+	PraghaMusicobject *nmobj;
+	gint changed = 0;
+
+	if(pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	nmobj = pragha_backend_get_musicobject(backend);
+	changed = TAG_TITLE_CHANGED | TAG_ARTIST_CHANGED;
+
+	/* Update the public mobj */
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	/* Update change on gui */
+	__update_current_song_info(cwin);
+	mpris_update_metadata_changed(cwin);
+
+	/* Update the playlist */
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 }

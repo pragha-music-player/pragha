@@ -571,6 +571,9 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	g_signal_connect(cwin->backend,
 	                 "finished",
 	                 G_CALLBACK(pragha_backend_finished_song), cwin);
+	g_signal_connect(cwin->backend,
+	                 "tags-changed",
+	                 G_CALLBACK(pragha_backend_tags_changed), cwin);
 
 	/* Init window state */
 
