@@ -215,6 +215,23 @@ pragha_backend_set_soft_volume (PraghaBackend *backend, gboolean value)
 	g_object_set (priv->pipeline, "flags", flags, NULL);
 }
 
+static void
+pragha_backend_optimize_audio_flags (PraghaBackend *backend)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+	GstPlayFlags flags;
+
+	g_object_get (priv->pipeline, "flags", &flags, NULL);
+
+	/* Disable all video features */
+	flags &= ~GST_PLAY_FLAG_VIDEO;
+	flags &= ~GST_PLAY_FLAG_TEXT;
+	flags &= ~GST_PLAY_FLAG_VIS;
+	flags &= ~GST_PLAY_FLAG_NATIVE_VIDEO;
+
+	g_object_set (priv->pipeline, "flags", flags, NULL);
+}
+
 gdouble
 pragha_backend_get_volume (PraghaBackend *backend)
 {
@@ -983,6 +1000,9 @@ pragha_backend_init (PraghaBackend *backend)
 		priv->equalizer = NULL;
 		g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 	}
+
+	/* Disable all video features */
+	pragha_backend_optimize_audio_flags(backend);
 
 	GstBus *bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
 	gst_bus_add_signal_watch (bus);
