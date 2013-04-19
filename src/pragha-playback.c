@@ -82,8 +82,15 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
-	pragha_backend_start(cwin->backend, mobj);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+
+	/* FIXME: Temporaly move here*/
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	cwin->cstate->curr_mobj = g_object_ref(mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 
 	gtk_tree_path_free(path);
 }
@@ -135,8 +142,16 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
 		pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-		mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
-		pragha_backend_start(cwin->backend, mobj);
+		mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+
+		/* FIXME: Temporaly move here*/
+		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+		cwin->cstate->curr_mobj = g_object_ref(mobj);
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+		pragha_backend_set_musicobject (cwin->backend, mobj);
+		pragha_backend_play(cwin->backend);
+
 		gtk_tree_path_free(path);
 		break;
 	default:
@@ -183,7 +198,14 @@ void pragha_advance_playback (struct con_win *cwin)
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
-	pragha_backend_start (cwin->backend, mobj);
+
+	/* FIXME: Temporaly move here*/
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	cwin->cstate->curr_mobj = g_object_ref(mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 
 	gtk_tree_path_free (path);
 }

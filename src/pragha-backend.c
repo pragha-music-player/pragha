@@ -70,6 +70,7 @@ struct PraghaBackendPrivate {
 	GError *error;
 	GstState target_state;
 	enum player_state state;
+	PraghaMusicobject *mobj;
 };
 
 #define PRAGHA_BACKEND_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), PRAGHA_TYPE_BACKEND, PraghaBackendPrivate))
@@ -107,14 +108,14 @@ emit_tick_cb (gpointer user_data)
 }
 
 static void
-pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
+pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
 	GObject *source;
 	gint file_type = 0;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	PraghaBackendPrivate *priv = backend->priv;
+
+	file_type = pragha_musicobject_get_file_type(priv->mobj);
 
 	if(file_type != FILE_CDDA)
 		return;
@@ -122,9 +123,9 @@ pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win
 	g_object_get (obj, "source", &source, NULL);
 
 	if (source) {
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
+		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(priv->preferences);
 		if (audio_cd_device) {
-			g_object_set (source,  "device", audio_cd_device, NULL);
+			g_object_set (source, "device", audio_cd_device, NULL);
 		}
 		g_object_unref (source);
 	}
@@ -374,16 +375,15 @@ void
 pragha_backend_stop (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	if(cwin->cstate->curr_mobj)
-		g_object_unref(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
+
+	if(priv->mobj) {
+		g_object_unref(priv->mobj);
+		priv->mobj = NULL;
+	}
 }
 
 void
@@ -487,9 +487,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	gchar *str = NULL;
 	gint changed = 0, file_type = 0;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	file_type = pragha_musicobject_get_file_type(priv->mobj);
 
 	if(file_type != FILE_HTTP)
 		return;
@@ -513,10 +511,15 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 		g_free(str);
 	}
 
+	/* Update the backend mobj */
+	pragha_update_musicobject_change_tag(priv->mobj, changed, nmobj);
+
+	/* Update the public mobj */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
+	/* Update change on gui */
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
@@ -526,10 +529,10 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 }
 
 void
-pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
+pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
+
 	CDEBUG(DBG_BACKEND, "Starting playback");
 
 	if (!mobj) {
@@ -542,27 +545,20 @@ pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
 		pragha_backend_stop(backend);
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	cwin->cstate->curr_mobj = g_object_ref(mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-	pragha_backend_play(backend);
+	priv->mobj = pragha_musicobject_dup(mobj);
 }
 
 void
 pragha_backend_play (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	gchar *file = NULL, *uri = NULL;
 	gboolean local_file;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
+	g_object_get(priv->mobj,
 	             "file", &file,
 	             NULL);
-	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	local_file = pragha_musicobject_is_local_file (priv->mobj);
 
 	if (string_is_empty(file))
 		goto exit;
@@ -931,7 +927,7 @@ gint backend_init (struct con_win *cwin)
 	g_signal_connect (priv->pipeline, "notify::volume",
 			  G_CALLBACK (volume_notify_cb), backend);
 	g_signal_connect (priv->pipeline, "notify::source",
-			  G_CALLBACK (pragha_backend_source_notify_cb), cwin);
+			  G_CALLBACK (pragha_backend_source_notify_cb), backend);
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
