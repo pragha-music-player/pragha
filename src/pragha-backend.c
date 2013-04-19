@@ -57,7 +57,6 @@ typedef enum {
 } GstPlayFlags;
 
 struct PraghaBackendPrivate {
-	struct con_win *cwin;
 	PraghaPreferences *preferences;
 	GstElement *pipeline;
 	GstElement *audio_sink;
@@ -91,6 +90,7 @@ enum {
 	SIGNAL_BUFFERING,
 	SIGNAL_FINISHED,
 	SIGNAL_ERROR,
+	SIGNAL_TAGS_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -482,49 +482,28 @@ static void
 pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	PraghaMusicobject *nmobj;
 	gchar *str = NULL;
-	gint changed = 0, file_type = 0;
 
-	file_type = pragha_musicobject_get_file_type(priv->mobj);
-
-	if(file_type != FILE_HTTP)
+	if(pragha_musicobject_get_file_type(priv->mobj) != FILE_HTTP)
 		return;
 
 	CDEBUG(DBG_BACKEND, "Parse message tag");
-
-	nmobj = pragha_musicobject_new();
 
 	gst_message_parse_tag(message, &tag_list);
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
-		changed |= TAG_TITLE_CHANGED;
-		pragha_musicobject_set_title(nmobj, str);
+		pragha_musicobject_set_title(priv->mobj, str);
 		g_free(str);
 	}
 	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
 	{
-		changed |= TAG_ARTIST_CHANGED;
-		pragha_musicobject_set_artist(nmobj, str);
+		pragha_musicobject_set_artist(priv->mobj, str);
 		g_free(str);
 	}
 
-	/* Update the backend mobj */
-	pragha_update_musicobject_change_tag(priv->mobj, changed, nmobj);
-
-	/* Update the public mobj */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-	/* Update change on gui */
-	__update_current_song_info(cwin);
-	mpris_update_metadata_changed(cwin);
-
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+	g_signal_emit (backend, signals[SIGNAL_TAGS_CHANGED], 0);
 
 	gst_tag_list_free(tag_list);
 }
@@ -898,6 +877,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                               g_cclosure_marshal_VOID__POINTER,
                                               G_TYPE_NONE, 1, G_TYPE_POINTER);
 
+	signals[SIGNAL_TAGS_CHANGED] = g_signal_new ("tags-changed",
+	                                             G_TYPE_FROM_CLASS (gobject_class),
+	                                             G_SIGNAL_RUN_LAST,
+	                                             G_STRUCT_OFFSET (PraghaBackendClass, tags_changed),
+	                                             NULL, NULL,
+	                                             g_cclosure_marshal_VOID__VOID,
+	                                             G_TYPE_NONE, 0);
+
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
 
@@ -924,7 +911,7 @@ gint backend_init (struct con_win *cwin)
 	gboolean can_set_device = TRUE;
 	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
 	PraghaBackendPrivate *priv = backend->priv;
-	priv->cwin = cwin;
+
 	cwin->backend = backend;
 
 	gst_init(NULL, NULL);

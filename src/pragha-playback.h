@@ -31,5 +31,6 @@ void pragha_advance_playback              (struct con_win *cwin);
 
 void pragha_backend_notificate_new_state  (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin);
 void pragha_backend_finished_song         (PraghaBackend *backend, struct con_win *cwin);
+void pragha_backend_tags_changed          (PraghaBackend *backend, struct con_win *cwin);
 
 #endif /* PRAGHA_PLAYBACK_H */
