@@ -567,7 +567,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	g_signal_connect(cwin->backend,
 			 "notify::state",
-			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
+			 G_CALLBACK(pragha_backend_notificate_new_state), cwin);
+	g_signal_connect(cwin->backend,
+	                 "finished",
+	                 G_CALLBACK(pragha_backend_finished_song), cwin);
 
 	/* Init window state */
 

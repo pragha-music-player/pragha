@@ -89,6 +89,7 @@ enum {
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
+	SIGNAL_FINISHED,
 	SIGNAL_ERROR,
 	LAST_SIGNAL
 };
@@ -548,6 +549,14 @@ pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj)
 	priv->mobj = pragha_musicobject_dup(mobj);
 }
 
+PraghaMusicobject *
+pragha_backend_get_musicobject(PraghaBackend *backend)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+
+	return priv->mobj;
+}
+
 void
 pragha_backend_play (PraghaBackend *backend)
 {
@@ -656,9 +665,7 @@ pragha_backend_message_error (GstBus *bus, GstMessage *msg, PraghaBackend *backe
 static void
 pragha_backend_message_eos (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = backend->priv;
-
-	pragha_advance_playback (priv->cwin);
+	g_signal_emit (backend, signals[SIGNAL_FINISHED], 0);
 }
 
 static void
@@ -874,6 +881,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                   NULL, NULL,
                                                   g_cclosure_marshal_VOID__INT,
                                                   G_TYPE_NONE, 1, G_TYPE_INT);
+
+	signals[SIGNAL_FINISHED] = g_signal_new ("finished",
+	                                         G_TYPE_FROM_CLASS (gobject_class),
+	                                         G_SIGNAL_RUN_LAST,
+	                                         G_STRUCT_OFFSET (PraghaBackendClass, finished),
+	                                         NULL, NULL,
+	                                         g_cclosure_marshal_VOID__VOID,
+	                                         G_TYPE_NONE, 0);
 
 	signals[SIGNAL_ERROR] = g_signal_new ("error",
                                               G_TYPE_FROM_CLASS (gobject_class),
