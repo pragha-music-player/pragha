@@ -74,7 +74,7 @@ void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
 void pragha_backend_stop (PraghaBackend *backend);
-void pragha_backend_start (PraghaBackend *backend, PraghaMusicobject *mobj);
+void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
 gint backend_init(struct con_win *cwin);

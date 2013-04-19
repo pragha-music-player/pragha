@@ -2047,7 +2047,15 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	pragha_backend_start(cwin->backend, mobj);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+
+	/* FIXME: Temporaly move here*/
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	cwin->cstate->curr_mobj = g_object_ref(mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 }
 
 void
