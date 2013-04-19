@@ -1013,7 +1013,7 @@ pragha_backend_init (PraghaBackend *backend)
 }
 
 PraghaBackend *
-pragha_backend_new (struct con_win *cwin)
+pragha_backend_new ()
 {
 	gst_init (NULL, NULL);
 

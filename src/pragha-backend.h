@@ -23,9 +23,6 @@
 #include <glib-object.h>
 #include "pragha-musicobject.h"
 
-/* pragha.h */
-struct con_win;
-
 G_BEGIN_DECLS
 
 enum player_state {
@@ -80,7 +77,7 @@ void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *
 PraghaMusicobject *pragha_backend_get_musicobject(PraghaBackend *backend);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
-PraghaBackend * pragha_backend_new (struct con_win *cwin);
+PraghaBackend * pragha_backend_new ();
 
 G_END_DECLS
 
