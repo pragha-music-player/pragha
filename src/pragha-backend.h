@@ -54,6 +54,7 @@ typedef struct {
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
+	void (*finished) (PraghaBackend *backend);
 	void (*error) (PraghaBackend *backend, const GError *error);
 } PraghaBackendClass;
 
@@ -75,6 +76,7 @@ void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
 void pragha_backend_stop (PraghaBackend *backend);
 void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj);
+PraghaMusicobject *pragha_backend_get_musicobject(PraghaBackend *backend);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
 gint backend_init(struct con_win *cwin);
