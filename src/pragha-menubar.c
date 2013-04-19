@@ -643,29 +643,32 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
-	g_object_get(omobj, "file", &file, NULL);
-
-	/* A temp mobj to not block the entire dialog and other where to place the new tag */
-	tmobj = pragha_musicobject_dup (omobj);
-	nmobj = pragha_musicobject_new();
+	/* Set the initial tags. */
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Get new tags. */
+	nmobj = pragha_musicobject_new();
 	changed = tag_edit_dialog(tmobj, 0, nmobj, cwin);
 
 	if (!changed)
 		goto exit;
+
+	// TODO: Add a compare mobj function to verify tmobj!!.
 
 	/* Update public current song */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	/* Update public current song on playlist */
+	/* Update current song on playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
-	/* Update public current song on backend */
+	/* Update current song on backend */
+	omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
 	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
+	g_object_unref(omobj);
 
 	/* Update gui and mpris */
 	__update_current_song_info(cwin);
@@ -675,6 +678,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 	if (G_LIKELY(pragha_musicobject_is_local_file (tmobj))) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+		g_object_get(tmobj, "file", &file, NULL);
 		location_id = pragha_database_find_location (cwin->cdbase, file);
 		if (location_id) {
 			g_array_append_val(loc_arr, location_id);
@@ -688,13 +692,10 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		g_ptr_array_add(file_arr, g_strdup(file));
 		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
 		g_ptr_array_free(file_arr, TRUE);
+		g_free(file);
 	}
 
 exit:
-	g_free(file);
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_unref(omobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	g_object_unref(nmobj);
 	g_object_unref(tmobj);
 }
