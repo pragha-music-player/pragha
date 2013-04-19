@@ -103,7 +103,7 @@ void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
 void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed);
 gboolean pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed);
-void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed);
+void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
 pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);

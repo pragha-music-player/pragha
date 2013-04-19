@@ -638,24 +638,16 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	GPtrArray *file_arr = NULL;
 	gchar *file;
 	gint location_id, changed = 0;
-	gboolean local_file;
 	PraghaMusicobject *omobj, *nmobj, *tmobj;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	/* Set the initial tags. */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	omobj = g_object_ref(cwin->cstate->curr_mobj);
-	g_object_get(omobj,
-	             "file", &file,
-	             NULL);
-	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
-	/* A temp Musicobject to not block the entire dialog */
-	tmobj = pragha_musicobject_dup (omobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+	g_object_get(omobj, "file", &file, NULL);
 
-	/* New mobj where to place the new tag */
+	/* A temp mobj to not block the entire dialog and other where to place the new tag */
+	tmobj = pragha_musicobject_dup (omobj);
 	nmobj = pragha_musicobject_new();
 
 	/* Get new tags. */
@@ -664,20 +656,24 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	/* Update the music object, the gui and them mpris */
-
+	/* Update public current song */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-	pragha_playlist_update_current_track(cwin->cplaylist, changed);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-	__update_current_song_info(cwin);
+	/* Update public current song on playlist */
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
+	/* Update public current song on backend */
+	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
+
+	/* Update gui and mpris */
+	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
 	/* Store the new tags */
 
-	if (G_LIKELY(local_file)) {
+	if (G_LIKELY(pragha_musicobject_is_local_file (tmobj))) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		location_id = pragha_database_find_location (cwin->cdbase, file);
 		if (location_id) {

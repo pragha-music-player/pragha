@@ -203,7 +203,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	/* FIXME: Ugly hack... */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	if(omobj == cwin->cstate->curr_mobj) {
-		pragha_playlist_update_current_track(cwin->cplaylist, changed);
+		pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		__update_current_song_info(cwin);

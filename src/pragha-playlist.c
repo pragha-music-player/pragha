@@ -1605,19 +1605,24 @@ pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *lis
 }
 
 void
-pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed)
+pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
+	PraghaMusicobject *mobj = NULL;
 
 	path = current_playlist_get_actual(cplaylist);
 
 	if(!path)
 		return;
 
-	if (gtk_tree_model_get_iter(model, &iter, path))
+	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+		pragha_update_musicobject_change_tag(mobj, changed, nmobj);
+
 		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
+	}
 
 	gtk_tree_path_free(path);
 }
