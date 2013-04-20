@@ -655,8 +655,14 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	// TODO: Add a compare mobj function to verify tmobj!!.
-
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	if(pragha_musicobject_compare(tmobj, cwin->cstate->curr_mobj)) {
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+		goto disksave;
+	}
+	else
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	
 	/* Update public current song */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
@@ -674,8 +680,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
+disksave:
 	/* Store the new tags */
-
 	if (G_LIKELY(pragha_musicobject_is_local_file (tmobj))) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		g_object_get(tmobj, "file", &file, NULL);

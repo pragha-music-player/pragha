@@ -121,6 +121,22 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 }
 
 /**
+ * pragha_musicobject_compare:
+ *
+ */
+gint
+pragha_musicobject_compare (PraghaMusicobject *a, PraghaMusicobject *b)
+{
+	/* First compare the pointers */
+	if(a == b)
+		return 0;
+
+	/* Then compare filenames. */
+	return g_strcmp0(pragha_musicobject_get_file(a),
+	                 pragha_musicobject_get_file(b));
+}
+
+/**
  * pragha_musicobject_get_file:
  *
  */

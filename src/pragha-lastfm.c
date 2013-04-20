@@ -121,7 +121,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 static void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
-	PraghaMusicobject *omobj, *nmobj, *tmobj;
+	PraghaMusicobject *omobj, *nmobj, *tmobj, *bmobj;
 	gchar *file = NULL, *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
 	gint location_id, changed = 0, prechanged = 0;
@@ -169,27 +169,33 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	// TODO: Add a compare mobj function to verify tmobj!!.
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	if(pragha_musicobject_compare(omobj, cwin->cstate->curr_mobj)) {
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+		goto disksave;
+	}
+	else
+		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update public current song */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, tmobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update current song on playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 	/* Update current song on backend */
-	omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
-	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-	g_object_unref(omobj);
+	bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+	pragha_update_musicobject_change_tag(bmobj, changed, tmobj);
+	g_object_unref(bmobj);
 
 	/* Update gui and mpris */
 	__update_current_song_info(cwin);
 	mpris_update_metadata_changed(cwin);
 
+disksave:
 	/* Store the new tags */
-
 	if (G_LIKELY(pragha_musicobject_is_local_file (omobj))) {
 		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 		g_object_get(omobj, "file", &file, NULL);
