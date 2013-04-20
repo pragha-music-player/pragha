@@ -240,16 +240,14 @@ pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
 }
 
 void
-pragha_backend_tags_changed (PraghaBackend *backend, struct con_win *cwin)
+pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_win *cwin)
 {
 	PraghaMusicobject *nmobj;
-	gint changed = 0;
 
 	if(pragha_backend_get_state (backend) != ST_PLAYING)
 		return;
 
 	nmobj = pragha_backend_get_musicobject(backend);
-	changed = TAG_TITLE_CHANGED | TAG_ARTIST_CHANGED;
 
 	/* Update the public mobj */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);

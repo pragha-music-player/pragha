@@ -503,6 +503,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	PraghaBackendPrivate *priv = backend->priv;
 	GstTagList *tag_list;
 	gchar *str = NULL;
+	gint changed = 0;
 
 	if(pragha_musicobject_get_file_type(priv->mobj) != FILE_HTTP)
 		return;
@@ -513,16 +514,18 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
+		changed |= TAG_TITLE_CHANGED;
 		pragha_musicobject_set_title(priv->mobj, str);
 		g_free(str);
 	}
 	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
 	{
+		changed |= TAG_ARTIST_CHANGED;
 		pragha_musicobject_set_artist(priv->mobj, str);
 		g_free(str);
 	}
 
-	g_signal_emit (backend, signals[SIGNAL_TAGS_CHANGED], 0);
+	g_signal_emit (backend, signals[SIGNAL_TAGS_CHANGED], 0, changed);
 
 	gst_tag_list_free(tag_list);
 }
@@ -931,8 +934,8 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 	                                             G_SIGNAL_RUN_LAST,
 	                                             G_STRUCT_OFFSET (PraghaBackendClass, tags_changed),
 	                                             NULL, NULL,
-	                                             g_cclosure_marshal_VOID__VOID,
-	                                             G_TYPE_NONE, 0);
+	                                             g_cclosure_marshal_VOID__INT,
+	                                             G_TYPE_NONE, 1, G_TYPE_INT);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
