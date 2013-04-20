@@ -27,6 +27,8 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
+#include <stdlib.h>
+
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 #if GST_CHECK_VERSION (1, 0, 0)
 #include <gst/audio/streamvolume.h>
