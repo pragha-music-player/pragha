@@ -61,9 +61,6 @@ struct _PreferencesWidgets {
 	GtkWidget *add_recursively_w;
 
 	GtkWidget *show_osd_w;
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray_w;
-#endif
 	GtkWidget *albumart_in_osd_w;
 	GtkWidget *actions_in_osd_w;
 
@@ -238,21 +235,22 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->window_state_combo_w));
 
 		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
-			cwin->cpref->remember_window_state = FALSE;
+			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
 			g_free(cwin->cpref->start_mode);
 			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
 		}
-		else 	cwin->cpref->remember_window_state = TRUE;
+		else
+			pragha_preferences_set_remember_state(cwin->preferences, TRUE);
 
 		g_free(window_state_sink);
 
@@ -272,13 +270,13 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		pragha_preferences_set_restore_playlist(cwin->preferences, restore_playlist);
 
 
-		cwin->cpref->show_icon_tray =
+		pragha_preferences_set_show_status_icon(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->show_icon_tray_w));
+						  cwin->preferences_w->show_icon_tray_w)));
 
-		cwin->cpref->close_to_tray =
+		pragha_preferences_set_hide_instead_close(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->close_to_tray_w));
+						  cwin->preferences_w->close_to_tray_w)));
 
 		add_recursively =
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
@@ -298,14 +296,15 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		if (show_album_art) {
 			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
 
-			if (album_art_pattern) {
+			if (string_is_not_empty(album_art_pattern)) {
 				if (!validate_album_art_pattern(album_art_pattern)) {
 					album_art_pattern_helper(dialog, cwin);
 					return;
 				}
 				/* Proper pattern, store in preferences */
-				g_free(cwin->cpref->album_art_pattern);
-				cwin->cpref->album_art_pattern = g_strdup(album_art_pattern);
+				pragha_preferences_set_album_art_pattern (cwin->preferences,
+				                                          album_art_pattern);
+				
 			}
 		}
 
@@ -323,18 +322,12 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		else
 			pragha_preferences_set_show_osd(cwin->preferences, FALSE);
 
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-		cwin->cpref->osd_in_systray =
+		pragha_preferences_set_album_art_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->osd_in_systray_w));
-#endif
-
-		cwin->cpref->albumart_in_osd =
+						  cwin->preferences_w->albumart_in_osd_w)));
+		pragha_preferences_set_actions_in_osd (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->albumart_in_osd_w));
-		cwin->cpref->actions_in_osd =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->actions_in_osd_w));
+						  cwin->preferences_w->actions_in_osd_w)));
 
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
@@ -369,18 +362,18 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		}
 #endif
 #ifdef HAVE_LIBGLYR
-		cwin->cpref->get_album_art =
+		pragha_preferences_set_download_album_art(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->get_album_art_w));
+						     cwin->preferences_w->get_album_art_w)));
 #endif
-		cwin->cpref->use_cddb =
+		pragha_preferences_set_use_cddb(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_cddb_w));
+						     cwin->preferences_w->use_cddb_w)));
 
-		cwin->cpref->use_mpris2 =
+		pragha_preferences_set_use_mpris2(cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_mpris2_w));
-		if(!cwin->cpref->use_mpris2) {
+						     cwin->preferences_w->use_mpris2_w)));
+		if(!pragha_preferences_get_use_mpris2(cwin->preferences)) {
 			mpris_close(cwin->cmpris2);
 		}
 		else {
@@ -538,9 +531,6 @@ static void toggle_show_icon_tray(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->preferences_w->show_icon_tray_w));
 
-	if (!is_active)
-		gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, FALSE);
-
 	gtk_status_icon_set_visible(cwin->status_icon, is_active);
 }
 
@@ -553,9 +543,6 @@ static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 						 cwin->preferences_w->show_osd_w));
 
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	gtk_widget_set_sensitive(cwin->preferences_w->osd_in_systray_w, is_active);
-	#endif
 	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
 	if (can_support_actions())
 		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, is_active);
@@ -685,7 +672,7 @@ static void update_preferences(struct con_win *cwin)
 
 	/* General Options */
 
-	if(cwin->cpref->remember_window_state)
+	if(pragha_preferences_get_remember_state(cwin->preferences))
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 0);
 	else{
 		if(cwin->cpref->start_mode){
@@ -718,12 +705,12 @@ static void update_preferences(struct con_win *cwin)
 					     cwin->preferences_w->restore_playlist_w),
 					     TRUE);
 
-	if (cwin->cpref->show_icon_tray)
+	if (pragha_preferences_get_show_status_icon(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->show_icon_tray_w),
 					     TRUE);
 
-	if (cwin->cpref->close_to_tray)
+	if (pragha_preferences_get_hide_instead_close(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->close_to_tray_w),
 					     TRUE);
@@ -741,9 +728,8 @@ static void update_preferences(struct con_win *cwin)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
 	                           pragha_preferences_get_album_art_size(cwin->preferences));
 
-	if (cwin->cpref->album_art_pattern)
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
-				   cwin->cpref->album_art_pattern);
+	gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
+	                   pragha_preferences_get_album_art_pattern(cwin->preferences));
 
 	/* Lbrary Options */
 
@@ -794,19 +780,13 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->show_osd_w),
 					     TRUE);
-#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	if (cwin->cpref->osd_in_systray)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->osd_in_systray_w),
-					     TRUE);
-#endif
-	if (cwin->cpref->albumart_in_osd)
+	if (pragha_preferences_get_album_art_in_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->albumart_in_osd_w),
 					     TRUE);
 	if (!can_support_actions())
 		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, FALSE);
-	else if (cwin->cpref->actions_in_osd)
+	else if (pragha_preferences_get_actions_in_osd(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->actions_in_osd_w),
 					     TRUE);
@@ -824,16 +804,16 @@ static void update_preferences(struct con_win *cwin)
 	}
 #endif
 #ifdef HAVE_LIBGLYR
-	if(cwin->cpref->get_album_art)
+	if(pragha_preferences_get_download_album_art(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->get_album_art_w),
 					     TRUE);
 #endif
-	if (cwin->cpref->use_cddb)
+	if (pragha_preferences_get_use_cddb(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_cddb_w),
 					     TRUE);
-	if (cwin->cpref->use_mpris2)
+	if (pragha_preferences_get_use_mpris2(cwin->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_mpris2_w),
 					     TRUE);
@@ -873,82 +853,22 @@ void save_preferences(struct con_win *cwin)
 		g_free(u_file);
 	}
 
-	/* Save album art pattern */
-
-	if (string_is_empty(cwin->cpref->album_art_pattern)) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_GENERAL) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_GENERAL,
-				       KEY_ALBUM_ART_PATTERN,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_ALBUM_ART_PATTERN,
-					      &error);
-		}
-	}
-	else {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_GENERAL,
-				      KEY_ALBUM_ART_PATTERN,
-				      cwin->cpref->album_art_pattern);
-	}
-
-	/* Save show status icon option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ICON_TRAY,
-			       cwin->cpref->show_icon_tray);
-
-	/* Save close to tray option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_CLOSE_TO_TRAY,
-			       cwin->cpref->close_to_tray);
-
-	/* Save show OSD option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_OSD_IN_TRAY,
-			       cwin->cpref->osd_in_systray);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ALBUM_ART_OSD,
-			       cwin->cpref->albumart_in_osd);
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_GENERAL,
-			       KEY_SHOW_ACTIONS_OSD,
-			       cwin->cpref->actions_in_osd);
-
 	pragha_playlist_save_preferences(cwin->cplaylist);
 
-	/* Audio Options */
+	/* Save software volume */
 
-	/* Save volume */
-
-	if (pragha_preferences_get_software_mixer(cwin->preferences)) {
-		g_key_file_set_integer(cwin->cpref->configrc_keyfile,
-				       GROUP_AUDIO,
-				       KEY_SOFTWARE_VOLUME,
-				       pragha_backend_get_volume (cwin->backend));
-	}
+	if (pragha_preferences_get_software_mixer(cwin->preferences))
+		pragha_preferences_set_software_volume(cwin->preferences,
+		                                       pragha_backend_get_volume (cwin->backend));
+	else
+		pragha_preferences_set_software_volume(cwin->preferences, -1.0);
 
 	/* Window Option */
 
 	/* Save last window state */
 
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_REMEMBER_STATE,
-			       cwin->cpref->remember_window_state);
-
-	state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
-
-	if(cwin->cpref->remember_window_state) {
+	if(pragha_preferences_get_remember_state(cwin->preferences)) {
+		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
 		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_WINDOW,
@@ -1012,14 +932,6 @@ void save_preferences(struct con_win *cwin)
 	pragha_preferences_set_sidebar_size(cwin->preferences,
 		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 
-
-	/* Save show controls below option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_WINDOW,
-			       KEY_CONTROLS_BELOW,
-			       cwin->cpref->controls_below);
-
 	/* Services internet */
 	/* Save last.fm option */
 #ifdef HAVE_LIBCLASTFM
@@ -1065,27 +977,6 @@ void save_preferences(struct con_win *cwin)
 					      cwin->cpref->lastfm_pass);
 	}
 #endif
-
-	/* Save get album art option */
-#ifdef HAVE_LIBGLYR
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_GET_ALBUM_ART,
-			       cwin->cpref->get_album_art);
-#endif
-	/* Save use CDDB server option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_USE_CDDB,
-			       cwin->cpref->use_cddb);
-
-	/* Save allow MPRIS2 server option */
-
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_ALLOW_MPRIS2,
-			       cwin->cpref->use_mpris2);
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
@@ -1375,9 +1266,6 @@ pref_create_desktop_page(struct con_win *cwin)
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
 	GtkWidget *show_osd, *albumart_in_osd, *actions_in_osd;
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	GtkWidget *osd_in_systray;
-	#endif
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -1394,11 +1282,6 @@ pref_create_desktop_page(struct con_win *cwin)
 
 	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, show_osd);
-
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	osd_in_systray = gtk_check_button_new_with_label(_("Associate notifications to system tray"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, osd_in_systray);
-	#endif
 
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
@@ -1418,9 +1301,6 @@ pref_create_desktop_page(struct con_win *cwin)
 	cwin->preferences_w->show_icon_tray_w = show_icon_tray;
 	cwin->preferences_w->close_to_tray_w = close_to_tray;
 	cwin->preferences_w->show_osd_w = show_osd;
-	#if !NOTIFY_CHECK_VERSION (0, 7, 0)
-	cwin->preferences_w->osd_in_systray_w = osd_in_systray;
-	#endif
 	cwin->preferences_w->albumart_in_osd_w = albumart_in_osd;
 	cwin->preferences_w->actions_in_osd_w = actions_in_osd;
 

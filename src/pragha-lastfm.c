@@ -123,33 +123,42 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
                                             gint            response_id,
                                             struct con_win *cwin)
 {
-	PraghaMusicobject *nmobj;
+	PraghaMusicobject *nmobj, *bmobj;
 	GPtrArray *file_arr = NULL;
 	GArray *loc_arr = NULL;
 	gint location_id, changed = 0;
-	const gchar *file, *cfile;
+	const gchar *file;
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(changed) {
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-			file = pragha_musicobject_get_file(nmobj);
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-			 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-			 	cfile = pragha_musicobject_get_file(nmobj);
-				if(g_ascii_strcasecmp(file, cfile) == 0) {
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
+					/* Update public current song */
 					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-					pragha_playlist_update_current_track(cwin->cplaylist, changed);
-				}
-			 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-				__update_current_song_info(cwin);
-				mpris_update_metadata_changed(cwin);
+					/* Update current song on playlist */
+					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+
+					/* Update current song on backend */
+					bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
+					g_object_unref(bmobj);
+
+					__update_current_song_info(cwin);
+					mpris_update_metadata_changed(cwin);
+				}
+				else
+					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 			}
 
-			if(pragha_musicobject_is_local_file (nmobj)) {
+			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
 				loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+				file = pragha_musicobject_get_file(nmobj);
 				location_id = pragha_database_find_location (cwin->cdbase, file);
 				if (location_id) {
 					g_array_append_val(loc_arr, location_id);
@@ -172,7 +181,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 static void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
-	PraghaMusicobject *tmobj;
+	PraghaMusicobject *tmobj, *nmobj;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
 	gint prechanged = 0;
@@ -183,23 +192,28 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Get all info of current track */
 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	tmobj = pragha_musicobject_dup(cwin->cstate->curr_mobj);
+	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
 	g_object_get(tmobj,
 	             "title", &otitle,
 	             "artist", &oartist,
 	             "album", &oalbum,
 	             NULL);
 
-	/* Get all info of suggestions */
+	/* Get all info of suggestions
+	 * Temp Musicobject to not block tag edit dialog */
 	pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
-	g_object_get(cwin->clastfm->nmobj,
+	nmobj = pragha_musicobject_dup(cwin->clastfm->nmobj);
+	pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
+
+	g_object_get(nmobj,
 	             "title", &ntitle,
 	             "artist", &nartist,
 	             "album", &nalbum,
 	             NULL);
-	pragha_mutex_unlock (cwin->clastfm->nmobj_mutex);
 
+	/* Compare original mobj and suggested from lastfm */
 	if(g_ascii_strcasecmp(otitle, ntitle)) {
 		pragha_musicobject_set_title(tmobj, ntitle);
 		prechanged |= TAG_TITLE_CHANGED;
@@ -214,6 +228,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	}
 
 	dialog = pragha_tags_dialog_new();
+
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_corrected_by_lastfm_dialog_response), cwin);
 
@@ -221,18 +236,6 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	pragha_tags_dialog_set_changed(PRAGHA_TAGS_DIALOG(dialog), prechanged);
 
 	gtk_widget_show (dialog);
-
-	gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
-
-	g_object_unref(tmobj);
-
-	g_free(otitle);
-	g_free(oartist);
-	g_free(oalbum);
-
-	g_free(ntitle);
-	g_free(nartist);
-	g_free(nalbum);
 }
 
 static GtkWidget*

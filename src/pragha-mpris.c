@@ -1022,7 +1022,7 @@ void mpris_update_any(struct con_win *cwin)
 	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
 	gchar *newtitle = NULL;
-	gdouble curr_vol = pragha_backend_get_volume (cwin->backend);
+	gdouble curr_vol;
 
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
@@ -1031,9 +1031,10 @@ void mpris_update_any(struct con_win *cwin)
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-		g_object_get(cwin->cstate->curr_mobj,
-		             "file", &newtitle,
-		              NULL);
+		if(cwin->cstate->curr_mobj)
+			g_object_get(cwin->cstate->curr_mobj,
+				         "file", &newtitle,
+				          NULL);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 
@@ -1059,6 +1060,7 @@ void mpris_update_any(struct con_win *cwin)
 		cwin->cmpris2->saved_playbackstatus = repeat;
 		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, cwin));
 	}
+	curr_vol = pragha_backend_get_volume (cwin->backend);
 	if(cwin->cmpris2->volume != curr_vol)
 	{
 		change_detected = TRUE;
@@ -1240,7 +1242,7 @@ any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 
 gint mpris_init(struct con_win *cwin)
 {
-	if (!cwin->cpref->use_mpris2)
+	if (!pragha_preferences_get_use_mpris2(cwin->preferences))
 		return 0;
 
 	if(NULL != cwin->cmpris2->dbus_connection)

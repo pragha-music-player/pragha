@@ -27,7 +27,7 @@
 #include "pragha-window.h"
 #include "pragha-notify.h"
 #include "pragha-preferences-dialog.h"
-#include "glyr-related.h"
+#include "pragha-glyr.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -47,11 +47,7 @@ static void preferences_free (struct con_pref *cpref)
 	g_free(cpref->lastfm_user);
 	g_free(cpref->lastfm_pass);
 #endif
-#ifdef HAVE_LIBGLYR
-	g_free(cpref->cache_folder);
-#endif
 	g_free(cpref->installed_version);
-	g_free(cpref->album_art_pattern);
 	g_free(cpref->start_mode);
 
 	g_slice_free(struct con_pref, cpref);
@@ -64,13 +60,13 @@ static void common_cleanup(struct con_win *cwin)
 
 	pragha_playback_stop(cwin);
 
+#ifdef HAVE_LIBGLYR
+	pragha_glyr_free (cwin->glyr);
+#endif
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
 	pragha_toolbar_free(cwin->toolbar);
-#ifdef HAVE_LIBGLYR
-	glyr_related_free (cwin);
-#endif
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
@@ -91,6 +87,9 @@ static void common_cleanup(struct con_win *cwin)
 	else
 		keybinder_free ();
 #endif
+
+	g_object_unref (cwin->bar_context_menu);
+	g_object_unref (cwin->systray_menu);
 
 	g_slice_free(struct con_win, cwin);
 }
@@ -186,16 +185,7 @@ gint main(gint argc, gchar *argv[])
 	}
 	#endif
 
-	if (backend_init(cwin) == -1) {
-		g_critical("Unable to initialize gstreamer");
-		return -1;
-	}
-
-	#ifdef HAVE_LIBGLYR
-	if (init_glyr_related(cwin) == -1) {
-		g_critical("Unable to initialize libglyr");
-	}
-	#endif
+	cwin->backend = pragha_backend_new (cwin);
 
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
@@ -205,6 +195,10 @@ gint main(gint argc, gchar *argv[])
 	/* Init the gui after bancked to sink volume. */
 
 	init_gui(argc, argv, cwin);
+
+	#ifdef HAVE_LIBGLYR
+	cwin->glyr = pragha_glyr_new (cwin);
+	#endif
 
 	/* Init_gnome_media_keys requires constructed main window. */
 	if (gnome_media_keys_will_be_useful()) {

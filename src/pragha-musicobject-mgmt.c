@@ -130,7 +130,7 @@ new_musicobject_from_cdda(struct con_win *cwin,
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
-	if (cwin->cpref->use_cddb && cwin->cstate->cddb_disc) {
+	if (pragha_preferences_get_use_cddb(cwin->preferences) && cwin->cstate->cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
 		gint year;

@@ -45,6 +45,7 @@ enum node_type {
 enum library_columns {
 	L_PIXBUF,
 	L_NODE_DATA,
+	L_NODE_BOLD,
 	L_NODE_TYPE,
 	L_LOCATION_ID,
 	L_MACH,

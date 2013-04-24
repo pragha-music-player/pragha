@@ -35,7 +35,7 @@
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "gtkcellrendererbubble.h"
-#include "glyr-related.h"
+#include "pragha-glyr.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
@@ -92,8 +92,7 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<menuitem action=\"Save selection\"/>					\
 	<separator/>				    				\
 	<menu action=\"ToolsMenu\">						\
-		<menuitem action=\"Search lyric\"/>				\
-		<menuitem action=\"Search artist info\"/>			\
+		<placeholder name=\"pragha-glyr-placeholder\"/>			\
 		<separator/>							\
 		<menuitem action=\"Love track\"/>				\
 		<menuitem action=\"Unlove track\"/>				\
@@ -132,17 +131,6 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
-	#ifdef HAVE_LIBGLYR
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "", "Search lyric", G_CALLBACK(related_get_lyric_current_playlist_action)},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(related_get_artist_info_current_playlist_action)},
-	#else
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "", "Search lyric", NULL},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", NULL},
-	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
 	{"Love track", NULL, N_("Love track"),
@@ -1586,42 +1574,55 @@ void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *i
 
 /* Get all music objects of references list and update tags */
 
-void
+gboolean
 pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *list, gint changed)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeRowReference *ref;
-	GtkTreePath *path = NULL;
+	GtkTreePath *path = NULL, *apath;
 	GtkTreeIter iter;
 	GList *i;
+	gboolean update_current_song = FALSE;
+
+	apath = current_playlist_get_actual(cplaylist);
 
 	for (i = list; i != NULL; i = i->next) {
 		ref = i->data;
 		path = gtk_tree_row_reference_get_path(ref);
 
-		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path)))
+		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path))) {
+			if(apath && gtk_tree_path_compare(path, apath) == 0)
+				update_current_song = TRUE;
 			gtk_tree_path_free(path);
+		}
 		else
 			continue;
 
 		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
 	}
+
+	return update_current_song;
 }
 
 void
-pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed)
+pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
+	PraghaMusicobject *mobj = NULL;
 
 	path = current_playlist_get_actual(cplaylist);
 
 	if(!path)
 		return;
 
-	if (gtk_tree_model_get_iter(model, &iter, path))
+	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+		pragha_update_musicobject_change_tag(mobj, changed, nmobj);
+
 		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
+	}
 
 	gtk_tree_path_free(path);
 }
@@ -2059,7 +2060,9 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	pragha_backend_start(cwin->backend, mobj);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 }
 
 void
@@ -3197,6 +3200,8 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
 	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
+	g_object_unref (context_actions);
+
 	return context_menu;
 }
 
@@ -4016,6 +4021,7 @@ pragha_playlist_free(PraghaPlaylist* cplaylist)
 
 	free_str_list(cplaylist->columns);
 	g_slist_free(cplaylist->column_widths);
+	g_object_unref(cplaylist->playlist_context_menu);
 	g_rand_free(cplaylist->rand);
 
 	g_object_unref(cplaylist->playing_pixbuf);

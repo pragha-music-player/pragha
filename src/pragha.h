@@ -27,25 +27,16 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_LIBGLYR
-#include <glyr/cache.h>
-#endif
-
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 
-/* Some definitions to solve different versions of the libraries. */
-
-#ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
-#endif
-
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
+#include "pragha-glyr.h"
 #include "pragha-musicobject.h"
 #include "pragha-preferences.h"
 #include "pragha-preferences-dialog.h"
@@ -105,28 +96,12 @@ enum dnd_target {
 
 struct con_pref {
 	gchar *installed_version;
-	gchar *album_art_pattern;
 	gchar *start_mode;
 	gint window_width;
 	gint window_height;
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-#ifdef HAVE_LIBGLYR
-	gchar *cache_folder;
-#endif
-	gboolean osd_in_systray;
-	gboolean albumart_in_osd;
-	gboolean actions_in_osd;
-#ifdef HAVE_LIBGLYR
-	gboolean get_album_art;
-#endif
-	gboolean use_cddb;
-	gboolean use_mpris2;
-	gboolean show_icon_tray;
-	gboolean close_to_tray;
-	gboolean remember_window_state;
-	gboolean controls_below;
 #ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_support;
 	gchar *lastfm_user;
@@ -185,7 +160,7 @@ struct con_win {
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 #ifdef HAVE_LIBGLYR
-	GlyrDatabase *cache_db;
+	PraghaGlyr *glyr;
 #endif
 	guint related_timeout_id;
 	DBusConnection *con_dbus;

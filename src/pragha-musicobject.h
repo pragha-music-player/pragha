@@ -54,6 +54,8 @@ PraghaMusicobject *
 pragha_musicobject_dup (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_clean (PraghaMusicobject *musicobject);
+gint
+pragha_musicobject_compare (PraghaMusicobject *a, PraghaMusicobject *b);
 
 GType pragha_musicobject_get_type (void) G_GNUC_CONST;
 

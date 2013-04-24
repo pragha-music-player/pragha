@@ -38,7 +38,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-preferences-dialog.h"
-#include "glyr-related.h"
+#include "pragha-glyr.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
 
@@ -97,8 +97,7 @@ static const gchar *main_menu_xml = "<ui>					\
 			<separator/>						\
 			<menuitem action=\"Equalizer\"/>			\
 			<separator/>						\
-			<menuitem action=\"Search lyric\"/>			\
-			<menuitem action=\"Search artist info\"/>		\
+			<placeholder name=\"pragha-glyr-placeholder\"/>		\
 			<separator/>						\
 			<menu action=\"Lastfm\">				\
 				<menuitem action=\"Love track\"/>		\
@@ -168,17 +167,6 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	#ifdef HAVE_LIBGLYR
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", G_CALLBACK(related_get_lyric_action)},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(related_get_artist_info_action)},
-	#else
-	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", NULL},
-	{"Search artist info", GTK_STOCK_INFO, N_("Search _artist info"),
-	 "", "Search artist info", NULL},
-	#endif
 	{"Lastfm", NULL, N_("_Lastfm")},
 	#ifdef HAVE_LIBCLASTFM
 	{"Love track", NULL, N_("Love track"),
@@ -267,14 +255,6 @@ update_menubar_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer 
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	#ifdef HAVE_LIBGLYR
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-	#endif
 
 	#ifdef HAVE_LIBCLASTFM
 	update_menubar_lastfm_state (cwin);
@@ -657,33 +637,42 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   gint            response_id,
                                   struct con_win *cwin)
 {
-	PraghaMusicobject *nmobj;
+	PraghaMusicobject *nmobj, *bmobj;
 	GPtrArray *file_arr = NULL;
 	GArray *loc_arr = NULL;
 	gint location_id, changed = 0;
-	const gchar *file, *cfile;
+	const gchar *file;
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(changed) {
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-			file = pragha_musicobject_get_file(nmobj);
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-			 	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-			 	cfile = pragha_musicobject_get_file(nmobj);
-				if(g_ascii_strcasecmp(file, cfile) == 0) {
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
+					/* Update public current song */
 					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-					pragha_playlist_update_current_track(cwin->cplaylist, changed);
-				}
-			 	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-				__update_current_song_info(cwin);
-				mpris_update_metadata_changed(cwin);
+					/* Update current song on playlist */
+					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+
+					/* Update current song on backend */
+					bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
+					g_object_unref(bmobj);
+
+					__update_current_song_info(cwin);
+					mpris_update_metadata_changed(cwin);
+				}
+				else
+					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 			}
 
-			if(pragha_musicobject_is_local_file (nmobj)) {
+			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
 				loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
+				file = pragha_musicobject_get_file(nmobj);
 				location_id = pragha_database_find_location (cwin->cdbase, file);
 				if (location_id) {
 					g_array_append_val(loc_arr, location_id);
@@ -774,12 +763,13 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
-	cwin->cpref->controls_below = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
+	pragha_preferences_set_controls_below (cwin->preferences,
+		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
 	GtkWidget *toolbar = pragha_toolbar_get_widget(cwin->toolbar);
 	GtkWidget *parent = gtk_widget_get_parent(toolbar);
 
-	gint position = cwin->cpref->controls_below ? 3 : 1;
+	gint position = pragha_preferences_get_controls_below(cwin->preferences) ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), toolbar, position);
 }
@@ -971,6 +961,8 @@ GtkUIManager* create_menu(struct con_win *cwin)
 	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_menubar_playback_state_cb), cwin);
 
 	gtk_widget_show_all(gtk_ui_manager_get_widget(main_menu, "/Menubar"));
+
+	g_object_unref (main_actions);
 
 	return main_menu;
 }

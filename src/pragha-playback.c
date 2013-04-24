@@ -18,42 +18,9 @@
 #include "pragha-playback.h"
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "pragha.h"
-
-/* Update gui, mpris on new track playback */
-
-void
-pragha_playback_notificate_new_track (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
-{
-	enum player_state state = pragha_backend_get_state (backend);
-
-	if(state != ST_PLAYING)
-		return;
-
-	/* New song playback. */
-	if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
-		CDEBUG(DBG_BACKEND, "Definitely play a new song: %s", pragha_musicobject_get_file(cwin->cstate->curr_mobj));
-
-		/* Update current song info */
-		__update_current_song_info(cwin);
-		__update_progress_song_info(cwin, 0);
-
-		/* Update and jump in current playlist */
-		update_current_playlist_view_new_track(cwin->cplaylist, backend);
-
-		/* Update album art */
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-		update_album_art(cwin->cstate->curr_mobj, cwin);
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-		/* Show osd, and inform new album art. */
-		show_osd(cwin);
-		mpris_update_metadata_changed(cwin);
-
-		pragha_playlist_report_finished_action(cwin->cplaylist);
-	}
-}
 
 /**********************/
 /* Playback functions */
@@ -82,8 +49,9 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-	mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
-	pragha_backend_start(cwin->backend, mobj);
+	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 
 	gtk_tree_path_free(path);
 }
@@ -135,8 +103,11 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
 		pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
-		mobj = current_playlist_mobj_at_path(path, cwin->cplaylist);
-		pragha_backend_start(cwin->backend, mobj);
+		mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+
+		pragha_backend_set_musicobject (cwin->backend, mobj);
+		pragha_backend_play(cwin->backend);
+
 		gtk_tree_path_free(path);
 		break;
 	default:
@@ -183,7 +154,8 @@ void pragha_advance_playback (struct con_win *cwin)
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
-	pragha_backend_start (cwin->backend, mobj);
+	pragha_backend_set_musicobject (cwin->backend, mobj);
+	pragha_backend_play(cwin->backend);
 
 	gtk_tree_path_free (path);
 }
@@ -200,4 +172,92 @@ void pragha_playback_next_track(struct con_win *cwin)
 
 	/* Play a new song */
 	pragha_advance_playback(cwin);
+}
+
+/******************************************/
+/* Update playback state based on backend */
+/******************************************/
+
+void
+pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
+{
+	enum player_state state = pragha_backend_get_state (backend);
+
+	switch (state) {
+		case ST_PLAYING:
+			/* New song?. */
+			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
+				/* Set public musicobject based on backend. */
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				cwin->cstate->curr_mobj = pragha_musicobject_dup(pragha_backend_get_musicobject(backend));
+				g_object_ref(cwin->cstate->curr_mobj);
+				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
+				                     pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+				/* Update current song info */
+				__update_current_song_info(cwin);
+				__update_progress_song_info(cwin, 0);
+
+				/* Update and jump in current playlist */
+				update_current_playlist_view_new_track(cwin->cplaylist, backend);
+
+				/* Update album art */
+				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+				update_album_art(cwin->cstate->curr_mobj, cwin);
+				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+				/* Show osd, and inform new album art. */
+				show_osd(cwin);
+				mpris_update_metadata_changed(cwin);
+
+				pragha_playlist_report_finished_action(cwin->cplaylist);
+			}
+			break;
+		case ST_PAUSED:
+			/* Nothing here. */
+			break;
+		case ST_STOPPED:
+			pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+			if(cwin->cstate->curr_mobj) {
+				g_object_unref(cwin->cstate->curr_mobj);
+				cwin->cstate->curr_mobj = NULL;
+			}
+			pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+			break;
+		default:
+			break;
+	}
+}
+
+void
+pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
+{
+	pragha_advance_playback(cwin);
+}
+
+void
+pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_win *cwin)
+{
+	PraghaMusicobject *nmobj;
+
+	if(pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	nmobj = pragha_backend_get_musicobject(backend);
+
+	/* Update the public mobj */
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	/* Update change on gui */
+	__update_current_song_info(cwin);
+	mpris_update_metadata_changed(cwin);
+
+	/* Update the playlist */
+	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 }

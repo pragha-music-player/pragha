@@ -27,6 +27,8 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
+#include <stdlib.h>
+
 #if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 #if GST_CHECK_VERSION (1, 0, 0)
 #include <gst/audio/streamvolume.h>
@@ -57,7 +59,6 @@ typedef enum {
 } GstPlayFlags;
 
 struct PraghaBackendPrivate {
-	struct con_win *cwin;
 	PraghaPreferences *preferences;
 	GstElement *pipeline;
 	GstElement *audio_sink;
@@ -70,6 +71,7 @@ struct PraghaBackendPrivate {
 	GError *error;
 	GstState target_state;
 	enum player_state state;
+	PraghaMusicobject *mobj;
 };
 
 #define PRAGHA_BACKEND_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), PRAGHA_TYPE_BACKEND, PraghaBackendPrivate))
@@ -88,7 +90,9 @@ enum {
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
+	SIGNAL_FINISHED,
 	SIGNAL_ERROR,
+	SIGNAL_TAGS_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -107,14 +111,14 @@ emit_tick_cb (gpointer user_data)
 }
 
 static void
-pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win *cwin)
+pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
 	GObject *source;
 	gint file_type = 0;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	PraghaBackendPrivate *priv = backend->priv;
+
+	file_type = pragha_musicobject_get_file_type(priv->mobj);
 
 	if(file_type != FILE_CDDA)
 		return;
@@ -122,9 +126,9 @@ pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, struct con_win
 	g_object_get (obj, "source", &source, NULL);
 
 	if (source) {
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
+		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(priv->preferences);
 		if (audio_cd_device) {
-			g_object_set (source,  "device", audio_cd_device, NULL);
+			g_object_set (source, "device", audio_cd_device, NULL);
 		}
 		g_object_unref (source);
 	}
@@ -209,6 +213,23 @@ pragha_backend_set_soft_volume (PraghaBackend *backend, gboolean value)
 		flags |= GST_PLAY_FLAG_SOFT_VOLUME;
 	else
 		flags &= ~GST_PLAY_FLAG_SOFT_VOLUME;
+
+	g_object_set (priv->pipeline, "flags", flags, NULL);
+}
+
+static void
+pragha_backend_optimize_audio_flags (PraghaBackend *backend)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+	GstPlayFlags flags;
+
+	g_object_get (priv->pipeline, "flags", &flags, NULL);
+
+	/* Disable all video features */
+	flags &= ~GST_PLAY_FLAG_VIDEO;
+	flags &= ~GST_PLAY_FLAG_TEXT;
+	flags &= ~GST_PLAY_FLAG_VIS;
+	flags &= ~GST_PLAY_FLAG_NATIVE_VIDEO;
 
 	g_object_set (priv->pipeline, "flags", flags, NULL);
 }
@@ -374,16 +395,15 @@ void
 pragha_backend_stop (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	if(cwin->cstate->curr_mobj)
-		g_object_unref(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
+
+	if(priv->mobj) {
+		g_object_unref(priv->mobj);
+		priv->mobj = NULL;
+	}
 }
 
 void
@@ -481,55 +501,40 @@ static void
 pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	GstTagList *tag_list;
-	PraghaMusicobject *nmobj;
 	gchar *str = NULL;
-	gint changed = 0, file_type = 0;
+	gint changed = 0;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-	if(file_type != FILE_HTTP)
+	if(pragha_musicobject_get_file_type(priv->mobj) != FILE_HTTP)
 		return;
 
 	CDEBUG(DBG_BACKEND, "Parse message tag");
-
-	nmobj = pragha_musicobject_new();
 
 	gst_message_parse_tag(message, &tag_list);
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
 		changed |= TAG_TITLE_CHANGED;
-		pragha_musicobject_set_title(nmobj, str);
+		pragha_musicobject_set_title(priv->mobj, str);
 		g_free(str);
 	}
 	if (gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &str))
 	{
 		changed |= TAG_ARTIST_CHANGED;
-		pragha_musicobject_set_artist(nmobj, str);
+		pragha_musicobject_set_artist(priv->mobj, str);
 		g_free(str);
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
-	__update_current_song_info(cwin);
-	mpris_update_metadata_changed(cwin);
-
-	pragha_playlist_update_current_track(cwin->cplaylist, changed);
+	g_signal_emit (backend, signals[SIGNAL_TAGS_CHANGED], 0, changed);
 
 	gst_tag_list_free(tag_list);
 }
 
 void
-pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
+pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
+
 	CDEBUG(DBG_BACKEND, "Starting playback");
 
 	if (!mobj) {
@@ -542,27 +547,28 @@ pragha_backend_start (PraghaBackend *backend,PraghaMusicobject *mobj)
 		pragha_backend_stop(backend);
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	cwin->cstate->curr_mobj = g_object_ref(mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	priv->mobj = pragha_musicobject_dup(mobj);
+}
 
-	pragha_backend_play(backend);
+PraghaMusicobject *
+pragha_backend_get_musicobject(PraghaBackend *backend)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+
+	return priv->mobj;
 }
 
 void
 pragha_backend_play (PraghaBackend *backend)
 {
 	PraghaBackendPrivate *priv = backend->priv;
-	struct con_win *cwin = priv->cwin;
 	gchar *file = NULL, *uri = NULL;
 	gboolean local_file;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
+	g_object_get(priv->mobj,
 	             "file", &file,
 	             NULL);
-	local_file = pragha_musicobject_is_local_file (cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	local_file = pragha_musicobject_is_local_file (priv->mobj);
 
 	if (string_is_empty(file))
 		goto exit;
@@ -660,9 +666,7 @@ pragha_backend_message_error (GstBus *bus, GstMessage *msg, PraghaBackend *backe
 static void
 pragha_backend_message_eos (GstBus *bus, GstMessage *msg, PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = backend->priv;
-
-	pragha_advance_playback (priv->cwin);
+	g_signal_emit (backend, signals[SIGNAL_FINISHED], 0);
 }
 
 static void
@@ -786,6 +790,36 @@ pragha_backend_init_equalizer_preset (PraghaBackend *backend)
 	}
 }
 
+static GstElement *
+make_audio_sink (PraghaPreferences *preferences)
+{
+	const gchar *audiosink;
+	const gchar *sink_pref = pragha_preferences_get_audio_sink (preferences);
+
+	if (!g_ascii_strcasecmp (sink_pref, ALSA_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Alsa like audio sink");
+		audiosink = "alsasink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, OSS4_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Oss4 like audio sink");
+		audiosink = "oss4sink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, OSS_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Oss like audio sink");
+		audiosink = "osssink";
+	}
+	else if (!g_ascii_strcasecmp (sink_pref, PULSE_SINK)) {
+		CDEBUG (DBG_BACKEND, "Setting Pulseaudio like audio sink");
+		audiosink = "pulsesink";
+	}
+	else {
+		CDEBUG (DBG_BACKEND, "Setting autoaudiosink like audio sink");
+		audiosink = "autoaudiosink";
+	}
+
+	return gst_element_factory_make (audiosink, "audio-sink");
+}
+
 static void
 pragha_backend_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
@@ -879,6 +913,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                   g_cclosure_marshal_VOID__INT,
                                                   G_TYPE_NONE, 1, G_TYPE_INT);
 
+	signals[SIGNAL_FINISHED] = g_signal_new ("finished",
+	                                         G_TYPE_FROM_CLASS (gobject_class),
+	                                         G_SIGNAL_RUN_LAST,
+	                                         G_STRUCT_OFFSET (PraghaBackendClass, finished),
+	                                         NULL, NULL,
+	                                         g_cclosure_marshal_VOID__VOID,
+	                                         G_TYPE_NONE, 0);
+
 	signals[SIGNAL_ERROR] = g_signal_new ("error",
                                               G_TYPE_FROM_CLASS (gobject_class),
                                               G_SIGNAL_RUN_LAST,
@@ -886,6 +928,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                               NULL, NULL,
                                               g_cclosure_marshal_VOID__POINTER,
                                               G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+	signals[SIGNAL_TAGS_CHANGED] = g_signal_new ("tags-changed",
+	                                             G_TYPE_FROM_CLASS (gobject_class),
+	                                             G_SIGNAL_RUN_LAST,
+	                                             G_STRUCT_OFFSET (PraghaBackendClass, tags_changed),
+	                                             NULL, NULL,
+	                                             g_cclosure_marshal_VOID__INT,
+	                                             G_TYPE_NONE, 1, G_TYPE_INT);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }
@@ -903,20 +953,6 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
-	/* FIXME */
-}
-
-gint backend_init (struct con_win *cwin)
-{
-	GstBus *bus;
-	const gchar *audiosink = NULL;
-	gboolean can_set_device = TRUE;
-	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
-	PraghaBackendPrivate *priv = backend->priv;
-	priv->cwin = cwin;
-	cwin->backend = backend;
-
-	gst_init(NULL, NULL);
 
 #if GST_CHECK_VERSION (1, 0, 0)
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
@@ -924,50 +960,22 @@ gint backend_init (struct con_win *cwin)
 	priv->pipeline = gst_element_factory_make("playbin2", "playbin");
 #endif
 
-	if (priv->pipeline == NULL)
-		return -1;
-
-	//notify::volume is emitted from gstreamer worker thread
-	g_signal_connect (priv->pipeline, "notify::volume",
-			  G_CALLBACK (volume_notify_cb), backend);
-	g_signal_connect (priv->pipeline, "notify::source",
-			  G_CALLBACK (pragha_backend_source_notify_cb), cwin);
+	if (priv->pipeline == NULL) {
+		g_critical ("Failed to create playbin element. Please check your GStreamer installation.");
+		exit (1);
+	}
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
-
-	const gchar *sink_pref = pragha_preferences_get_audio_sink (priv->preferences);
-
-	if (!g_ascii_strcasecmp(sink_pref, ALSA_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Alsa like audio sink");
-		audiosink = "alsasink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, OSS4_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Oss4 like audio sink");
-		audiosink = "oss4sink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, OSS_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Oss like audio sink");
-		audiosink = "osssink";
-	}
-	else if (!g_ascii_strcasecmp(sink_pref, PULSE_SINK)) {
-		CDEBUG(DBG_BACKEND, "Setting Pulseaudio like audio sink");
-		audiosink = "pulsesink";
-	}
-	else {
-		CDEBUG(DBG_BACKEND, "Setting autoaudiosink like audio sink");
-		can_set_device = FALSE;
-		audiosink = "autoaudiosink";
-	}
-
-	priv->audio_sink = gst_element_factory_make (audiosink, "audio-sink");
-
-	const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
+	priv->audio_sink = make_audio_sink (priv->preferences);
 
 	if (priv->audio_sink != NULL) {
+		const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
+		gboolean can_set_device = g_object_class_find_property (G_OBJECT_GET_CLASS (priv->audio_sink), "device") != NULL;
+
 		/* Set the audio device to use. */
-		if (can_set_device && string_is_not_empty(audio_device_pref))
-			g_object_set(priv->audio_sink, "device", audio_device_pref, NULL);
+		if (can_set_device && string_is_not_empty (audio_device_pref))
+			g_object_set (priv->audio_sink, "device", audio_device_pref, NULL);
 
 		/* Test 10bands equalizer and test it. */
 		priv->equalizer = gst_element_factory_make ("equalizer-10bands", "equalizer");
@@ -975,49 +983,66 @@ gint backend_init (struct con_win *cwin)
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
 
-			bin = gst_bin_new("audiobin");
+			bin = gst_bin_new ("audiobin");
 			gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, NULL);
 			gst_element_link_many (priv->equalizer, priv->audio_sink, NULL);
 
 			pad = gst_element_get_static_pad (priv->equalizer, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
 			gst_pad_set_active (ghost_pad, TRUE);
-			gst_element_add_pad (GST_ELEMENT(bin), ghost_pad);
+			gst_element_add_pad (bin, ghost_pad);
 			gst_object_unref (pad);
 
-			g_object_set(priv->pipeline, "audio-sink", bin, NULL);
-		}
-		else {
-			g_warning("Failed to create the 10bands equalizer element. Not use it.");
+			g_object_set (priv->pipeline, "audio-sink", bin, NULL);
+		} else {
+			g_warning ("Failed to create the 10bands equalizer element. Not use it.");
 
-			g_object_set(priv->pipeline, "audio-sink", priv->audio_sink, NULL);
+			g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 		}
-	}
-	else {
-		g_warning("Failed to create audio-sink element. Use default sink, without equalizer. ");
+	} else {
+		g_warning ("Failed to create audio-sink element. Use default sink, without equalizer.");
 
 		priv->equalizer = NULL;
-		g_object_set(priv->pipeline, "audio-sink", priv->audio_sink, NULL);
+		g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 	}
 
-	bus = gst_pipeline_get_bus(GST_PIPELINE(priv->pipeline));
+	/* Disable all video features */
+	pragha_backend_optimize_audio_flags(backend);
 
-	gst_bus_add_signal_watch(bus);
-	g_signal_connect(G_OBJECT(bus), "message::error", (GCallback)pragha_backend_message_error, backend);
-	g_signal_connect(G_OBJECT(bus), "message::eos", (GCallback)pragha_backend_message_eos, backend);
-	g_signal_connect(G_OBJECT(bus), "message::state-changed", (GCallback)pragha_backend_message_state_changed, backend);
-	g_signal_connect(G_OBJECT(bus), "message::async-done", (GCallback)pragha_backend_message_async_done, backend);
-	g_signal_connect(G_OBJECT(bus), "message::buffering", (GCallback)pragha_backend_message_buffering, backend);
-	g_signal_connect(G_OBJECT(bus), "message::clock-lost", (GCallback)pragha_backend_message_clock_lost, backend);
-	g_signal_connect(G_OBJECT(bus), "message::tag", (GCallback)pragha_backend_message_tag, backend);
+	GstBus *bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
+	gst_bus_add_signal_watch (bus);
+	g_signal_connect (bus, "message::error", G_CALLBACK (pragha_backend_message_error), backend);
+	g_signal_connect (bus, "message::eos", G_CALLBACK (pragha_backend_message_eos), backend);
+	g_signal_connect (bus, "message::state-changed", G_CALLBACK (pragha_backend_message_state_changed), backend);
+	g_signal_connect (bus, "message::async-done", G_CALLBACK (pragha_backend_message_async_done), backend);
+	g_signal_connect (bus, "message::buffering", G_CALLBACK (pragha_backend_message_buffering), backend);
+	g_signal_connect (bus, "message::clock-lost", G_CALLBACK (pragha_backend_message_clock_lost), backend);
+	g_signal_connect (bus, "message::tag", G_CALLBACK (pragha_backend_message_tag), backend);
 	gst_object_unref (bus);
 
-	pragha_backend_set_soft_volume (backend, pragha_preferences_get_software_mixer (priv->preferences));
+	if(pragha_preferences_get_software_mixer (priv->preferences)) {
+		pragha_backend_set_soft_volume (backend, TRUE);
+		pragha_backend_set_volume(backend, pragha_preferences_get_software_volume (priv->preferences));
+	}
 	pragha_backend_init_equalizer_preset (backend);
 
-	gst_element_set_state(priv->pipeline, GST_STATE_READY);
+	//notify::volume is emitted from gstreamer worker thread
+	g_signal_connect (priv->pipeline, "notify::volume",
+			  G_CALLBACK (volume_notify_cb), backend);
+	g_signal_connect (priv->pipeline, "notify::source",
+			  G_CALLBACK (pragha_backend_source_notify_cb), backend);
 
-	CDEBUG(DBG_BACKEND, "Pipeline construction complete");
+	gst_element_set_state (priv->pipeline, GST_STATE_READY);
 
-	return 0;
+	CDEBUG (DBG_BACKEND, "Pipeline construction completed");
+}
+
+PraghaBackend *
+pragha_backend_new ()
+{
+	gst_init (NULL, NULL);
+
+	PraghaBackend *backend = g_object_new (PRAGHA_TYPE_BACKEND, NULL);
+
+	return backend;
 }

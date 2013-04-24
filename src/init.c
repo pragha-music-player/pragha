@@ -100,24 +100,16 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean last_folder_f, album_art_pattern_f, show_icon_tray_f, close_to_tray_f;
-	gboolean remember_window_state_f, start_mode_f, window_size_f, window_position_f, album_f, controls_below_f;
-	gboolean osd_in_systray_f, albumart_in_osd_f, actions_in_osd_f;
-	gboolean use_cddb_f, use_mpris2_f;
+	gboolean last_folder_f;
+	gboolean start_mode_f, window_size_f, window_position_f, album_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = album_art_pattern_f = show_icon_tray_f = close_to_tray_f = FALSE;
-	remember_window_state_f = start_mode_f = window_size_f = window_position_f = album_f = controls_below_f = FALSE;
-	osd_in_systray_f = albumart_in_osd_f = actions_in_osd_f = FALSE;
-	use_cddb_f = use_mpris2_f = FALSE;
+	last_folder_f = FALSE;
+	start_mode_f = window_size_f = window_position_f = album_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
-	#endif
-	#ifdef HAVE_LIBGLYR
-	gboolean get_album_art_f = FALSE;
-	gchar *cache_folder = NULL;
 	#endif
 
 	all_f = FALSE;
@@ -176,29 +168,7 @@ gint init_config(struct con_win *cwin)
 			window_position_f = TRUE;
 		}
 
-		cwin->cpref->controls_below =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_CONTROLS_BELOW,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			controls_below_f = TRUE;
-		}
-
 		/* Retrieve General preferences */
-
-		cwin->cpref->remember_window_state =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_WINDOW,
-					       KEY_REMEMBER_STATE,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			remember_window_state_f = TRUE;
-		}
 
 		cwin->cpref->start_mode =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
@@ -209,39 +179,6 @@ gint init_config(struct con_win *cwin)
 			g_error_free(error);
 			error = NULL;
 			start_mode_f = TRUE;
-		}
-
-		cwin->cpref->show_icon_tray =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SHOW_ICON_TRAY,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			show_icon_tray_f = TRUE;
-		}
-
-		cwin->cpref->close_to_tray =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_CLOSE_TO_TRAY,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			close_to_tray_f = TRUE;
-		}
-
-		cwin->cpref->album_art_pattern =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_ALBUM_ART_PATTERN,
-					      &error);
-		if (!cwin->cpref->album_art_pattern) {
-			g_error_free(error);
-			error = NULL;
-			album_art_pattern_f = TRUE;
 		}
 
 		u_file = g_key_file_get_string(cwin->cpref->configrc_keyfile,
@@ -264,40 +201,6 @@ gint init_config(struct con_win *cwin)
 				last_folder_f = TRUE;
 			}
 			g_free(u_file);
-		}
-
-		/* Retrieve Notification preferences */
-
-		cwin->cpref->osd_in_systray =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_OSD_IN_TRAY,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			osd_in_systray_f = TRUE;
-		}
-
-		cwin->cpref->albumart_in_osd =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SHOW_ALBUM_ART_OSD,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			albumart_in_osd_f = TRUE;
-		}
-		cwin->cpref->actions_in_osd =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_SHOW_ACTIONS_OSD,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			actions_in_osd_f = TRUE;
 		}
 
 		/* Retrieve Services Internet preferences */
@@ -333,51 +236,10 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 		}
 		#endif
-		#ifdef HAVE_LIBGLYR
-		cwin->cpref->get_album_art =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_GET_ALBUM_ART,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			get_album_art_f = TRUE;
-		}
-		#endif
-		cwin->cpref->use_cddb =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_USE_CDDB,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			use_cddb_f = TRUE;
-		}
-		cwin->cpref->use_mpris2 =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_ALLOW_MPRIS2,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			use_mpris2_f = TRUE;
-		}
 	}
 	else {
 		err = TRUE;
 	}
-
-	/* Get cache of downloaded albums arts */
-	#ifdef HAVE_LIBGLYR
-	cache_folder = g_build_path(G_DIR_SEPARATOR_S, g_get_user_cache_dir(), "/pragha", NULL);
-
-	if (g_file_test(cache_folder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) == FALSE)
-		g_mkdir_with_parents (cache_folder, S_IRWXU);
-	cwin->cpref->cache_folder = cache_folder;
-	#endif
 
 	/* Fill up with failsafe defaults */
 
@@ -389,38 +251,14 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || album_art_pattern_f)
-		cwin->cpref->album_art_pattern = NULL;
 	if (all_f || last_folder_f)
 		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
-	if (all_f || osd_in_systray_f)
-		cwin->cpref->osd_in_systray = TRUE;
-	if (all_f || albumart_in_osd_f)
-		cwin->cpref->albumart_in_osd = TRUE;
-	if (all_f || actions_in_osd_f)
-		cwin->cpref->actions_in_osd = FALSE;
-	if (all_f || remember_window_state_f)
-		cwin->cpref->remember_window_state = TRUE;
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
-	if (all_f || show_icon_tray_f)
-		cwin->cpref->show_icon_tray = TRUE;
-	if (all_f || close_to_tray_f)
-		cwin->cpref->close_to_tray = TRUE;
-	if (all_f || controls_below_f)
-		cwin->cpref->controls_below = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	if (all_f || lastfm_f)
 		cwin->cpref->lastfm_support = FALSE;
 	#endif
-	#ifdef HAVE_LIBGLYR
-	if (all_f || get_album_art_f)
-		cwin->cpref->get_album_art = FALSE;
-	#endif
-	if (all_f || use_cddb_f)
-		cwin->cpref->use_cddb = TRUE;
-	if (all_f || use_mpris2_f)
-		cwin->cpref->use_mpris2 = TRUE;
 
 	if (err)
 		return -1;
@@ -538,21 +376,8 @@ void init_menu_actions(struct con_win *cwin)
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), cwin->cpref->controls_below);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
 
-#ifndef HAVE_LIBGLYR
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist),"/SelectionPopup/ToolsMenu/Search lyric");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist),"/SelectionPopup/ToolsMenu/Search artist info");
-	gtk_action_set_sensitive(action, FALSE);
-#endif
 #ifndef HAVE_LIBCLASTFM
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
 	gtk_action_set_sensitive(action, FALSE);
@@ -742,7 +567,13 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	g_signal_connect(cwin->backend,
 			 "notify::state",
-			 G_CALLBACK(pragha_playback_notificate_new_track), cwin);
+			 G_CALLBACK(pragha_backend_notificate_new_state), cwin);
+	g_signal_connect(cwin->backend,
+	                 "finished",
+	                 G_CALLBACK(pragha_backend_finished_song), cwin);
+	g_signal_connect(cwin->backend,
+	                 "tags-changed",
+	                 G_CALLBACK(pragha_backend_tags_changed), cwin);
 
 	/* Init window state */
 

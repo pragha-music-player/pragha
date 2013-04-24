@@ -51,18 +51,29 @@ struct _PraghaPreferencesPrivate
 	gchar     *audio_sink;
 	gchar     *audio_device;
 	gboolean   software_mixer;
+	gdouble    software_volume;
 	gchar     *audio_cd_device;
 	/* Window preferences. */
 	gboolean   lateral_panel;
 	gint       sidebar_size;
 	gboolean   show_album_art;
 	gint       album_art_size;
+	gchar     *album_art_pattern;
 	gboolean   show_status_bar;
-
+	gboolean   show_status_icon;
+	gboolean   controls_below;
+	gboolean   remember_state;
 	/* Misc preferences. */
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
 	gboolean   show_osd;
+	gboolean   album_art_in_osd;
+	gboolean   actions_in_osd;
+	gboolean   hide_instead_close;
+	/* Services preferences */
+	gboolean   use_cddb;
+	gboolean   download_album_art;
+	gboolean   use_mpris2;
 };
 
 enum
@@ -80,15 +91,26 @@ enum
 	PROP_AUDIO_SINK,
 	PROP_AUDIO_DEVICE,
 	PROP_SOFTWARE_MIXER,
+	PROP_SOFTWARE_VOLUME,
 	PROP_AUDIO_CD_DEVICE,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
 	PROP_SHOW_ALBUM_ART,
 	PROP_ALBUM_ART_SIZE,
+	PROP_ALBUM_ART_PATTERN,
 	PROP_SHOW_STATUS_BAR,
+	PROP_SHOW_STATUS_ICON,
+	PROP_CONTROLS_BELOW,
+	PROP_REMEMBER_STATE,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	PROP_SHOW_OSD,
+	PROP_ALBUM_ART_IN_OSD,
+	PROP_ACTIONS_IN_OSD,
+	PROP_HIDE_INSTEAD_CLOSE,
+	PROP_USE_CDDB,
+	PROP_DOWNLOAD_ALBUM_ART,
+	PROP_USE_MPRIS2,
 	LAST_PROP
 };
 
@@ -681,6 +703,33 @@ pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_software_volume:
+ *
+ */
+gdouble
+pragha_preferences_get_software_volume (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), -1.0);
+
+	return preferences->priv->software_volume;
+}
+
+/**
+ * pragha_preferences_set_software_volume:
+ *
+ */
+void
+pragha_preferences_set_software_volume (PraghaPreferences *preferences,
+                                        gdouble software_volume)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->software_volume = software_volume;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_VOLUME]);
+}
+
+/**
  * pragha_preferences_get_audio_cd_device:
  *
  */
@@ -817,6 +866,34 @@ pragha_preferences_set_album_art_size (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_album_art_pattern:
+ *
+ */
+const gchar *
+pragha_preferences_get_album_art_pattern (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return preferences->priv->album_art_pattern;
+}
+
+/**
+ * pragha_preferences_setalbum_art_pattern:
+ *
+ */
+void
+pragha_preferences_set_album_art_pattern (PraghaPreferences *preferences,
+                                          const gchar *album_art_pattern)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_free(preferences->priv->album_art_pattern);
+	preferences->priv->album_art_pattern = g_strdup(album_art_pattern);
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ALBUM_ART_PATTERN]);
+}
+
+/**
  * pragha_preferences_get_show_status_bar:
  *
  */
@@ -841,6 +918,87 @@ pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
 	preferences->priv->show_status_bar = show_status_bar;
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_STATUS_BAR]);
+}
+
+/**
+ * pragha_preferences_get_show_status_icon:
+ *
+ */
+gboolean
+pragha_preferences_get_show_status_icon (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->show_status_icon;
+}
+
+/**
+ * pragha_preferences_set_show_status_icon:
+ *
+ */
+void
+pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
+                                         gboolean show_status_icon)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->show_status_icon = show_status_icon;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_STATUS_ICON]);
+}
+
+/**
+ * pragha_preferences_get_controls_below:
+ *
+ */
+gboolean
+pragha_preferences_get_controls_below (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->controls_below;
+}
+
+/**
+ * pragha_preferences_set_controls_below:
+ *
+ */
+void
+pragha_preferences_set_controls_below (PraghaPreferences *preferences,
+                                       gboolean controls_below)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->controls_below = controls_below;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_CONTROLS_BELOW]);
+}
+
+/**
+ * pragha_preferences_get_remember_state:
+ *
+ */
+gboolean
+pragha_preferences_get_remember_state (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->remember_state;
+}
+
+/**
+ * pragha_preferences_set_remember_state:
+ *
+ */
+void
+pragha_preferences_set_remember_state (PraghaPreferences *preferences,
+                                       gboolean remember_state)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->remember_state = remember_state;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_REMEMBER_STATE]);
 }
 
 /**
@@ -923,14 +1081,180 @@ pragha_preferences_set_show_osd (PraghaPreferences *preferences,
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_OSD]);
 }
+
+/**
+ * pragha_preferences_get_album_art_in_osd:
+ *
+ */
+gboolean
+pragha_preferences_get_album_art_in_osd (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->album_art_in_osd;
+}
+
+/**
+ * pragha_preferences_set_album_art_in_osd:
+ *
+ */
+void
+pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
+                                         gboolean album_art_in_osd)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->album_art_in_osd = album_art_in_osd;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ALBUM_ART_IN_OSD]);
+}
+
+/**
+ * pragha_preferences_get_actions_in_osd:
+ *
+ */
+gboolean
+pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->actions_in_osd;
+}
+
+/**
+ * pragha_preferences_set_actions_in_osd:
+ *
+ */
+void
+pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
+                                       gboolean actions_in_osd)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->actions_in_osd = actions_in_osd;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ACTIONS_IN_OSD]);
+}
+
+/**
+ * pragha_preferences_get_hide_instead_close:
+ *
+ */
+gboolean
+pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->hide_instead_close;
+}
+
+/**
+ * pragha_preferences_set_hide_instead_close:
+ *
+ */
+void
+pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
+                                           gboolean hide_instead_close)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->hide_instead_close = hide_instead_close;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_HIDE_INSTEAD_CLOSE]);
+}
+
+/**
+ * pragha_preferences_get_use_cddb:
+ *
+ */
+gboolean
+pragha_preferences_get_use_cddb (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->use_cddb;
+}
+
+/**
+ * pragha_preferences_set_use_cddb:
+ *
+ */
+void
+pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
+                                 gboolean use_cddb)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->use_cddb = use_cddb;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
+}
+
+/**
+ * pragha_preferences_get_download_album_art:
+ *
+ */
+gboolean
+pragha_preferences_get_download_album_art (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->download_album_art;
+}
+
+/**
+ * pragha_preferences_set_download_album_art:
+ *
+ */
+void
+pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
+                                           gboolean download_album_art)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->download_album_art = download_album_art;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_DOWNLOAD_ALBUM_ART]);
+}
+
+/**
+ * pragha_preferences_get_use_mpris2:
+ *
+ */
+gboolean
+pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->use_mpris2;
+}
+
+/**
+ * pragha_preferences_set_use_mpris2:
+ *
+ */
+void
+pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
+                                   gboolean use_mpris2)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->use_mpris2 = use_mpris2;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_MPRIS2]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, show_album_art, show_status_bar;
-	gboolean add_recursively, timer_remaining_mode, show_osd;
+	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
+	gchar *album_art_pattern;
+	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
+	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
+	gdouble software_volume;
 	gint library_style, sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
 	const gchar *user_config_dir;
@@ -1126,6 +1450,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_software_mixer(preferences, software_mixer);
 	}
 
+	software_volume = g_key_file_get_double(priv->rc_keyfile,
+	                                        GROUP_AUDIO,
+	                                        KEY_SOFTWARE_VOLUME,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_software_volume(preferences, software_volume);
+	}
+
 	audio_cd_device = g_key_file_get_string(priv->rc_keyfile,
 	                                        GROUP_AUDIO,
 	                                        KEY_AUDIO_CD_DEVICE,
@@ -1186,6 +1522,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_album_art_size(preferences, album_art_size);
 	}
 
+	album_art_pattern = g_key_file_get_string(priv->rc_keyfile,
+	                                         GROUP_GENERAL,
+	                                         KEY_ALBUM_ART_PATTERN,
+	                                         &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_album_art_pattern(preferences, album_art_pattern);
+	}
+
 	show_status_bar = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_WINDOW,
 	                                         KEY_STATUS_BAR,
@@ -1196,6 +1544,42 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_show_status_bar(preferences, show_status_bar);
+	}
+
+	show_status_icon = g_key_file_get_boolean(priv->rc_keyfile,
+	                                          GROUP_GENERAL,
+	                                          KEY_SHOW_ICON_TRAY,
+	                                          &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_show_status_icon(preferences, show_status_icon);
+	}
+
+	controls_below = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_WINDOW,
+	                                        KEY_CONTROLS_BELOW,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_controls_below(preferences, controls_below);
+	}
+
+	remember_state = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_WINDOW,
+	                                        KEY_REMEMBER_STATE,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_remember_state(preferences, remember_state);
 	}
 
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
@@ -1234,9 +1618,82 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_osd(preferences, show_osd);
 	}
 
+	album_art_in_osd = g_key_file_get_boolean(priv->rc_keyfile,
+	                                          GROUP_GENERAL,
+	                                          KEY_SHOW_ALBUM_ART_OSD,
+	                                          &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_album_art_in_osd(preferences, album_art_in_osd);
+	}
+
+	actions_in_osd = g_key_file_get_boolean(priv->rc_keyfile,
+	                                        GROUP_GENERAL,
+	                                        KEY_SHOW_ACTIONS_OSD,
+	                                        &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_actions_in_osd(preferences, actions_in_osd);
+	}
+
+	hide_instead_close = g_key_file_get_boolean(priv->rc_keyfile,
+	                                            GROUP_GENERAL,
+	                                            KEY_CLOSE_TO_TRAY,
+	                                            &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_hide_instead_close(preferences, hide_instead_close);
+	}
+
+	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
+	                                  GROUP_SERVICES,
+	                                  KEY_USE_CDDB,
+	                                  &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_use_cddb(preferences, use_cddb);
+	}
+
+	download_album_art = g_key_file_get_boolean(priv->rc_keyfile,
+	                                            GROUP_SERVICES,
+	                                            KEY_GET_ALBUM_ART,
+	                                            &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_download_album_art(preferences, download_album_art);
+	}
+
+	use_mpris2 = g_key_file_get_boolean(priv->rc_keyfile,
+	                                    GROUP_SERVICES,
+	                                    KEY_ALLOW_MPRIS2,
+	                                    &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_use_mpris2(preferences, use_mpris2);
+	}
+
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
+	g_free(album_art_pattern);
 }
 
 static void
@@ -1301,6 +1758,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_AUDIO,
 	                       KEY_SOFTWARE_MIXER,
 	                       priv->software_mixer);
+	g_key_file_set_double(priv->rc_keyfile,
+	                      GROUP_AUDIO,
+	                      KEY_SOFTWARE_VOLUME,
+	                      priv->software_volume);
 	if (string_is_not_empty(priv->audio_cd_device))
 		g_key_file_set_string(priv->rc_keyfile,
 		                      GROUP_AUDIO,
@@ -1327,10 +1788,31 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_WINDOW,
 	                       KEY_ALBUM_ART_SIZE,
 	                       priv->album_art_size);
+	if (string_is_not_empty(priv->album_art_pattern))
+		g_key_file_set_string(priv->rc_keyfile,
+		                      GROUP_GENERAL,
+		                      KEY_ALBUM_ART_PATTERN,
+		                      priv->album_art_pattern);
+	else
+		pragha_preferences_remove_key(preferences,
+		                              GROUP_AUDIO,
+		                              KEY_ALBUM_ART_PATTERN);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
 	                       KEY_STATUS_BAR,
 	                       priv->show_status_bar);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_SHOW_ICON_TRAY,
+	                       priv->show_status_icon);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_CONTROLS_BELOW,
+	                       priv->controls_below);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_REMEMBER_STATE,
+	                       priv->remember_state);
 
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
@@ -1344,6 +1826,31 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_GENERAL,
 	                       KEY_SHOW_OSD,
 	                       priv->show_osd);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_SHOW_ALBUM_ART_OSD,
+	                       priv->album_art_in_osd);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_SHOW_ACTIONS_OSD,
+	                       priv->actions_in_osd);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_GENERAL,
+	                       KEY_CLOSE_TO_TRAY,
+	                       priv->hide_instead_close);
+
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_USE_CDDB,
+	                       priv->use_cddb);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_GET_ALBUM_ART,
+	                       priv->download_album_art);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_SERVICES,
+	                       KEY_ALLOW_MPRIS2,
+	                       priv->use_mpris2);
 
 	/* Save to key file */
 
@@ -1357,6 +1864,7 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->audio_sink);
 	g_free(priv->audio_device);
 	g_free(priv->audio_cd_device);
+	g_free(priv->album_art_pattern);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
@@ -1406,6 +1914,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SOFTWARE_MIXER:
 			g_value_set_boolean (value, pragha_preferences_get_software_mixer(preferences));
 			break;
+		case PROP_SOFTWARE_VOLUME:
+			g_value_set_double (value, pragha_preferences_get_software_volume(preferences));
+			break;
 		case PROP_AUDIO_CD_DEVICE:
 			g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
 			break;
@@ -1421,8 +1932,20 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_ALBUM_ART_SIZE:
 			g_value_set_int (value, pragha_preferences_get_album_art_size(preferences));
 			break;
+		case PROP_ALBUM_ART_PATTERN:
+			g_value_set_string (value, pragha_preferences_get_album_art_pattern(preferences));
+			break;
 		case PROP_SHOW_STATUS_BAR:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_bar(preferences));
+			break;
+		case PROP_SHOW_STATUS_ICON:
+			g_value_set_boolean (value, pragha_preferences_get_show_status_icon(preferences));
+			break;
+		case PROP_CONTROLS_BELOW:
+			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
+			break;
+		case PROP_REMEMBER_STATE:
+			g_value_set_boolean (value, pragha_preferences_get_remember_state(preferences));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
@@ -1432,6 +1955,24 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_SHOW_OSD:
 			g_value_set_boolean (value, pragha_preferences_get_show_osd(preferences));
+			break;
+		case PROP_ALBUM_ART_IN_OSD:
+			g_value_set_boolean (value, pragha_preferences_get_album_art_in_osd(preferences));
+			break;
+		case PROP_ACTIONS_IN_OSD:
+			g_value_set_boolean (value, pragha_preferences_get_actions_in_osd(preferences));
+			break;
+		case PROP_HIDE_INSTEAD_CLOSE:
+			g_value_set_boolean (value, pragha_preferences_get_hide_instead_close(preferences));
+			break;
+		case PROP_USE_CDDB:
+			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
+			break;
+		case PROP_DOWNLOAD_ALBUM_ART:
+			g_value_set_boolean (value, pragha_preferences_get_download_album_art(preferences));
+			break;
+		case PROP_USE_MPRIS2:
+			g_value_set_boolean (value, pragha_preferences_get_use_mpris2(preferences));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1483,6 +2024,9 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SOFTWARE_MIXER:
 			pragha_preferences_set_software_mixer(preferences, g_value_get_boolean(value));
 			break;
+		case PROP_SOFTWARE_VOLUME:
+			pragha_preferences_set_software_volume(preferences, g_value_get_double(value));
+			break;
 		case PROP_AUDIO_CD_DEVICE:
 			pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
 			break;
@@ -1498,8 +2042,20 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_ALBUM_ART_SIZE:
 			pragha_preferences_set_album_art_size(preferences, g_value_get_int(value));
 			break;
+		case PROP_ALBUM_ART_PATTERN:
+			pragha_preferences_set_album_art_pattern(preferences, g_value_get_string(value));
+			break;
 		case PROP_SHOW_STATUS_BAR:
 			pragha_preferences_set_show_status_bar(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_SHOW_STATUS_ICON:
+			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_CONTROLS_BELOW:
+			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_REMEMBER_STATE:
+			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -1509,6 +2065,24 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SHOW_OSD:
 			pragha_preferences_set_show_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_ALBUM_ART_IN_OSD:
+			pragha_preferences_set_album_art_in_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_ACTIONS_IN_OSD:
+			pragha_preferences_set_actions_in_osd(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_HIDE_INSTEAD_CLOSE:
+			pragha_preferences_set_hide_instead_close(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_USE_CDDB:
+			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_DOWNLOAD_ALBUM_ART:
+			pragha_preferences_set_download_album_art(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_USE_MPRIS2:
+			pragha_preferences_set_use_mpris2(preferences, g_value_get_boolean(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1675,6 +2249,19 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     PRAGHA_PREF_PARAMS);
 
 	/**
+	  * PraghaPreferences:software_volume:
+	  *
+	  */
+	gParamSpecs[PROP_SOFTWARE_VOLUME] =
+		g_param_spec_double ("software-volume",
+		                     "SoftwareVolume",
+		                     "Software Volume Preferences",
+		                     -1.0,
+		                      1.0,
+		                     -1.0,
+		                     PRAGHA_PREF_PARAMS);
+
+	/**
 	  * PraghaPreferences:audio_cd_device:
 	  *
 	  */
@@ -1695,6 +2282,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Show Lateral Panel Preference",
 		                     TRUE,
 		                     PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:sidebar_size:
 	  *
@@ -1707,6 +2295,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  G_MAXINT,
 		                  DEFAULT_SIDEBAR_SIZE,
 		                  PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:show_album_art:
 	  *
@@ -1717,6 +2306,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "show Album Art Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:album_art_size:
 	  *
@@ -1729,6 +2319,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  128,
 		                  DEFAULT_ALBUM_ART_SIZE,
 		                  PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:album_art_pattern:
+	  *
+	  */
+	gParamSpecs[PROP_ALBUM_ART_PATTERN] =
+		g_param_spec_string("album-art-pattern",
+		                    "AlbumArtPattern",
+		                    "Album Art Pattern Preferences",
+		                    "",
+		                    PRAGHA_PREF_PARAMS);
+
 	/**
 	  * PraghaPreferences:show_status_bar:
 	  *
@@ -1737,6 +2339,39 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("show-status-bar",
 		                     "ShowStatusBar",
 		                     "Show Status Bar Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:show_status_icon:
+	  *
+	  */
+	gParamSpecs[PROP_SHOW_STATUS_ICON] =
+		g_param_spec_boolean("show-status-icon",
+		                     "ShowStatusIcon",
+		                     "Show Status Icon Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:controls_below:
+	  *
+	  */
+	gParamSpecs[PROP_CONTROLS_BELOW] =
+		g_param_spec_boolean("controls-below",
+		                     "ControlsBelow",
+		                     "Controls Below Preference",
+		                      FALSE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:remember_state:
+	  *
+	  */
+	gParamSpecs[PROP_REMEMBER_STATE] =
+		g_param_spec_boolean("remember-state",
+		                     "RememberState",
+		                     "Remember State Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
@@ -1770,6 +2405,72 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("show-osd",
 		                     "ShowOSD",
 		                     "Show OSD Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:album_art_in_osd:
+	  *
+	  */
+	gParamSpecs[PROP_ALBUM_ART_IN_OSD] =
+		g_param_spec_boolean("album-art-in-osd",
+		                     "AlbumArtInOSD",
+		                     "Show Album Art In OSD Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:actions_in_osd:
+	  *
+	  */
+	gParamSpecs[PROP_ACTIONS_IN_OSD] =
+		g_param_spec_boolean("actions-in-osd",
+		                     "ActionsInOSD",
+		                     "Show Actions In OSD Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:hide_instead_close:
+	  *
+	  */
+	gParamSpecs[PROP_HIDE_INSTEAD_CLOSE] =
+		g_param_spec_boolean("hide-instead-close",
+		                     "HideInsteadClose",
+		                     "Hide Instead Close Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:use_cddb:
+	  *
+	  */
+	gParamSpecs[PROP_USE_CDDB] =
+		g_param_spec_boolean("use-cddb",
+		                     "UseCddb",
+		                     "Use Cddb Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:download_album_art:
+	  *
+	  */
+	gParamSpecs[PROP_DOWNLOAD_ALBUM_ART] =
+		g_param_spec_boolean("download-album-art",
+		                     "DownloadAlbumArt",
+		                     "Download Album Art Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:use_cddb:
+	  *
+	  */
+	gParamSpecs[PROP_USE_MPRIS2] =
+		g_param_spec_boolean("use-mpris2",
+		                     "UseMpris2",
+		                     "Use Mpris2 Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
