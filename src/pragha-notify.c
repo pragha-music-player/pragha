@@ -31,6 +31,10 @@
 #include "pragha-utils.h"
 #include "pragha.h"
 
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#endif
+
 static void
 notify_closed_cb (NotifyNotification *osd,
                   struct con_win *cwin)
@@ -123,12 +127,16 @@ show_osd (struct con_win *cwin)
 	                               slength);
 
 	/* Create notification instance */
-	#if NOTIFY_CHECK_VERSION (0, 7, 0)
+
 	if (cwin->osd_notify == NULL) {
+		#if NOTIFY_CHECK_VERSION (0, 7, 1)
 		cwin->osd_notify = notify_notification_new(summary, body, NULL);
+		#else
+		cwin->osd_notify = notify_notification_new(summary, body, NULL, NULL);
+		#endif
 
 		if(can_support_actions() &&
-		   cwin->cpref->actions_in_osd == TRUE) {
+		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
 			notify_notification_add_action(
 				cwin->osd_notify, "media-prev", _("Prev Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
@@ -144,19 +152,9 @@ show_osd (struct con_win *cwin)
 	else {
 		notify_notification_update (cwin->osd_notify, summary, body, NULL);
 
-		if(cwin->cpref->actions_in_osd == FALSE)
+		if(pragha_preferences_get_actions_in_osd (cwin->preferences) == FALSE)
 			notify_notification_clear_actions (cwin->osd_notify);
 	}
-	#else
-	if(cwin->cpref->osd_in_systray && gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
-		cwin->osd_notify = notify_notification_new_with_status_icon(summary,
-								body, NULL,
-								GTK_STATUS_ICON(cwin->status_icon));
-	}
-	else {
-		cwin->osd_notify = notify_notification_new(summary, body, NULL, NULL);
-	}
-	#endif
 
 	notify_notification_set_timeout(cwin->osd_notify, OSD_TIMEOUT);
 

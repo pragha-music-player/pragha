@@ -9,8 +9,6 @@ AM_CPPFLAGS =								\
 	-I$(top_srcdir)
 
 pragha_SOURCES = \
-		glyr-related.c \
-		glyr-related.h \
 		init.c \
 		info-bar-import-music.c \
 		gnome-media-keys.c \
@@ -35,6 +33,8 @@ pragha_SOURCES = \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
 		pragha-filter-dialog.h \
+		pragha-glyr.c \
+		pragha-glyr.h \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \

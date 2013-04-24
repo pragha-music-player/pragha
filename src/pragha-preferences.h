@@ -274,6 +274,13 @@ void
 pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
                                        gboolean software_mixer);
 
+gdouble
+pragha_preferences_get_software_volume (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_software_volume (PraghaPreferences *preferences,
+                                        gdouble software_volume);
+
 const gchar *
 pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences);
 
@@ -302,12 +309,40 @@ void
 pragha_preferences_set_album_art_size (PraghaPreferences *preferences,
                                        gint album_art_size);
 
+const gchar *
+pragha_preferences_get_album_art_pattern (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_album_art_pattern (PraghaPreferences *preferences,
+                                          const gchar *album_art_pattern);
+
 gboolean
 pragha_preferences_get_show_status_bar (PraghaPreferences *preferences);
 
 void
 pragha_preferences_set_show_status_bar (PraghaPreferences *preferences,
                                        gboolean show_status_bar);
+
+gboolean
+pragha_preferences_get_show_status_icon (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
+                                         gboolean show_status_icon);
+
+gboolean
+pragha_preferences_get_controls_below (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_controls_below (PraghaPreferences *preferences,
+                                       gboolean controls_below);
+
+gboolean
+pragha_preferences_get_remember_state (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_remember_state (PraghaPreferences *preferences,
+                                       gboolean remember_state);
 
 gint
 pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
@@ -332,10 +367,52 @@ pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
 
 gboolean
 pragha_preferences_get_show_osd (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_show_osd (PraghaPreferences *preferences,
                                  gboolean show_osd);
 
+gboolean
+pragha_preferences_get_album_art_in_osd (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
+                                         gboolean album_art_in_osd);
+
+gboolean
+pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
+                                       gboolean actions_in_osd);
+
+gboolean
+pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_hide_instead_close (PraghaPreferences *preferences,
+                                           gboolean hide_instead_close);
+
+gboolean
+pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
+                                 gboolean use_cddb);
+
+gboolean
+pragha_preferences_get_download_album_art (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
+                                           gboolean download_album_art);
+
+gboolean
+pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
+                                   gboolean use_mpris2);
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

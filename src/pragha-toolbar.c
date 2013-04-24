@@ -55,12 +55,7 @@ struct _PraghaToolbar {
 static gchar*
 get_image_path_from_cache (const gchar *artist, const gchar *album, struct con_win *cwin)
 {
-	gchar *path = NULL;
-
-	path = g_strdup_printf("%s/album-%s-%s.jpeg",
-				cwin->cpref->cache_folder,
-				artist,
-				album);
+	gchar *path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
 
 	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
 		g_free(path);
@@ -142,7 +137,7 @@ get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
 
 	/* Now, run the preferred patterns through them */
 
-	pattern = g_strsplit(cwin->cpref->album_art_pattern, ";",
+	pattern = g_strsplit(pragha_preferences_get_album_art_pattern(cwin->preferences), ";",
 			     ALBUM_ART_NO_PATTERNS);
 	while (pattern[i]) {
 		if (is_present_str_list(pattern[i], file_list)) {
@@ -360,7 +355,7 @@ void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
 			#endif
 			if (album_path == NULL) {
 				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
-				if (cwin->cpref->album_art_pattern) {
+				if (string_is_not_empty(pragha_preferences_get_album_art_pattern(cwin->preferences))) {
 					album_path = get_pref_image_path_dir(path, cwin);
 					if (!album_path)
 						album_path = get_image_path_from_dir(path);

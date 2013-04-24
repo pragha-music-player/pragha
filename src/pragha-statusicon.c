@@ -230,6 +230,8 @@ create_systray_menu (struct con_win *cwin)
 				   gtk_ui_manager_get_accel_group(menu));
 	gtk_ui_manager_insert_action_group(menu, actions, 0);
 
+	g_object_unref (actions);
+
 	return menu;
 }
 
@@ -251,7 +253,7 @@ void create_status_icon (struct con_win *cwin)
 			G_CALLBACK(status_get_tooltip_cb),
 			cwin);
 
-	gtk_status_icon_set_visible(status_icon, cwin->cpref->show_icon_tray);
+	gtk_status_icon_set_visible(status_icon, pragha_preferences_get_show_status_icon(cwin->preferences));
 
 	/* Systray right click menu */
 
