@@ -60,6 +60,7 @@ struct _PraghaTagsDialog {
 	GtkWidget         *comment_check_change;
 
 	PraghaMusicobject *mobj;
+	GList             *rlist;
 
 	/* Needed due cwin->completion */
 	struct con_win    *cwin;
@@ -332,6 +333,10 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), tag_table, TRUE, TRUE, 0);
 	gtk_widget_show_all(tag_table);
+
+	/* Init flags */
+	dialog->rlist = NULL;
+	dialog->mobj = pragha_musicobject_new();
 }
 
 void
@@ -383,6 +388,7 @@ pragha_tags_dialog_set_musicobject(PraghaTagsDialog *dialog, PraghaMusicobject *
 	gint track_no, year;
 	GtkTextBuffer *buffer;
 
+	g_object_unref(dialog->mobj);
 	dialog->mobj = pragha_musicobject_dup (mobj);
 
 	title = pragha_musicobject_get_title(mobj);
@@ -444,6 +450,18 @@ pragha_tags_dialog_get_musicobject(PraghaTagsDialog *dialog)
 	}
 
 	return dialog->mobj;
+}
+
+void
+pragha_tags_dialog_set_ref_playlist(PraghaTagsDialog *dialog, GList *rlist)
+{
+	dialog->rlist = rlist;
+}
+
+GList *
+pragha_tags_dialog_get_ref_playlist(PraghaTagsDialog *dialog)
+{
+	return dialog->rlist;
 }
 
 static void

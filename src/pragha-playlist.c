@@ -1529,6 +1529,55 @@ current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
 
 /* Update a track to the current playlist */
 
+void pragha_playlist_update_track_change_tag(GtkTreeModel *model, GtkTreeIter *iter, gint changed, PraghaMusicobject *nmobj)
+{
+	PraghaMusicobject *mobj = NULL;
+	gchar *ch_track_no = NULL, *ch_year = NULL, *ch_title = NULL;
+
+	if (!changed)
+		return;
+
+	CDEBUG(DBG_VERBOSE, "Track Updates: 0x%x", changed);
+
+	gtk_tree_model_get(model, iter, P_MOBJ_PTR, &mobj, -1);
+
+	if (changed & TAG_TNO_CHANGED) {
+		pragha_musicobject_set_track_no(mobj, pragha_musicobject_get_track_no(nmobj));
+		ch_track_no = g_strdup_printf("%d", pragha_musicobject_get_track_no(nmobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TRACK_NO, ch_track_no, -1);
+		g_free(ch_track_no);
+	}
+	if (changed & TAG_TITLE_CHANGED) {
+		const gchar *title = pragha_musicobject_get_title(mobj);
+		pragha_musicobject_set_title(mobj, pragha_musicobject_get_title(nmobj));
+		ch_title = string_is_not_empty(title) ? g_strdup(title) : get_display_name(mobj);
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_TITLE, ch_title, -1);
+		g_free(ch_title);
+	}
+	if (changed & TAG_ARTIST_CHANGED) {
+		pragha_musicobject_set_artist(mobj, pragha_musicobject_get_artist(nmobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ARTIST, pragha_musicobject_get_artist(mobj),-1);
+	}
+	if (changed & TAG_ALBUM_CHANGED) {
+		pragha_musicobject_set_title(mobj, pragha_musicobject_get_title(nmobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_ALBUM, pragha_musicobject_get_album(mobj),-1);
+	}
+	if (changed & TAG_GENRE_CHANGED) {
+		pragha_musicobject_set_genre(mobj, pragha_musicobject_get_genre(nmobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_GENRE, pragha_musicobject_get_genre(mobj),-1);
+	}
+	if (changed & TAG_YEAR_CHANGED) {
+		pragha_musicobject_set_year(mobj, pragha_musicobject_get_year(nmobj));
+		ch_year = g_strdup_printf("%d", pragha_musicobject_get_year(mobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_YEAR, ch_year, -1);
+		g_free(ch_year);
+	}
+	if (changed & TAG_COMMENT_CHANGED) {
+		pragha_musicobject_set_comment(mobj, pragha_musicobject_get_comment(nmobj));
+		gtk_list_store_set(GTK_LIST_STORE(model), iter, P_COMMENT, pragha_musicobject_get_comment(mobj),-1);
+	}
+}
+
 void pragha_playlist_update_change_tag(PraghaPlaylist *cplaylist, GtkTreeIter *iter, gint changed)
 {
 	GtkTreeModel *model = cplaylist->model;
@@ -1599,6 +1648,35 @@ pragha_playlist_update_ref_list_change_tag(PraghaPlaylist *cplaylist, GList *lis
 			continue;
 
 		pragha_playlist_update_change_tag(cplaylist, &iter, changed);
+	}
+
+	return update_current_song;
+}
+
+gboolean
+pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *list, gint changed, PraghaMusicobject *nmobj)
+{
+	GtkTreeRowReference *ref;
+	GtkTreePath *path = NULL, *apath;
+	GtkTreeIter iter;
+	GList *i;
+	gboolean update_current_song = FALSE;
+
+	apath = current_playlist_get_actual(cplaylist);
+
+	for (i = list; i != NULL; i = i->next) {
+		ref = i->data;
+		path = gtk_tree_row_reference_get_path(ref);
+
+		if (G_LIKELY(gtk_tree_model_get_iter(cplaylist->model, &iter, path))) {
+			if(apath && gtk_tree_path_compare(path, apath) == 0)
+				update_current_song = TRUE;
+			gtk_tree_path_free(path);
+		}
+		else
+			continue;
+
+		pragha_playlist_update_track_change_tag(cplaylist->model, &iter, changed, nmobj);
 	}
 
 	return update_current_song;
