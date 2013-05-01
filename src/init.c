@@ -44,8 +44,6 @@
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
-	init_tag_completion(cwin);
-
 	pragha_library_pane_init_view(cwin->clibrary, cwin);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
@@ -61,10 +59,6 @@ static void init_gui_state(struct con_win *cwin)
 static gboolean _init_gui_state(gpointer data)
 {
 	struct con_win *cwin = data;
-
-	if (pragha_process_gtk_events ())
-		return TRUE;
-	init_tag_completion(cwin);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
@@ -311,38 +305,6 @@ void state_free (struct con_state *cstate)
 	pragha_mutex_free(cstate->curr_mobj_mutex);
 
 	g_slice_free(struct con_state, cstate);
-}
-
-void init_tag_completion(struct con_win *cwin)
-{
-	GtkListStore *artist_tag_model, *album_tag_model, *genre_tag_model;
-
-	/* Artist */
-
-	artist_tag_model = gtk_list_store_new(1, G_TYPE_STRING);
-	cwin->completion[0] = gtk_entry_completion_new();
-	gtk_entry_completion_set_model(cwin->completion[0],
-				       GTK_TREE_MODEL(artist_tag_model));
-	gtk_entry_completion_set_text_column(cwin->completion[0], 0);
-	g_object_unref(artist_tag_model);
-
-	/* Album */
-
-	album_tag_model = gtk_list_store_new(1, G_TYPE_STRING);
-	cwin->completion[1] = gtk_entry_completion_new();
-	gtk_entry_completion_set_model(cwin->completion[1],
-				       GTK_TREE_MODEL(album_tag_model));
-	gtk_entry_completion_set_text_column(cwin->completion[1], 0);
-	g_object_unref(album_tag_model);
-
-	/* Genre */
-
-	genre_tag_model = gtk_list_store_new(1, G_TYPE_STRING);
-	cwin->completion[2] = gtk_entry_completion_new();
-	gtk_entry_completion_set_model(cwin->completion[2],
-				       GTK_TREE_MODEL(genre_tag_model));
-	gtk_entry_completion_set_text_column(cwin->completion[2], 0);
-	g_object_unref(genre_tag_model);
 }
 
 void init_menu_actions(struct con_win *cwin)

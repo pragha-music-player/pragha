@@ -1941,10 +1941,7 @@ update_library_tracks_changes(PraghaDatabase *database, struct con_win *cwin)
 	 * Rework to olny update library tree!!!.
 	 **/
 	library_pane_view_reload(cwin->clibrary);
-
-	/* Refresh tag completion entries */
-
-	refresh_tag_completion_entries(cwin);}
+}
 
 /*************************************/
 /* All menu handlers of library pane */

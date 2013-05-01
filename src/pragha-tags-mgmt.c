@@ -156,15 +156,6 @@ exit:
 /* Tag Editing */
 /***************/
 
-static void
-add_entry_tag_completion (const gchar *entry, GtkTreeModel *model)
-{
-	GtkTreeIter iter;
-
-	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, entry, -1);
-}
-
 gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent)
 {
 	GtkWidget *dialog;
@@ -489,49 +480,4 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), cwin);
 
 	gtk_widget_show (dialog);
-}
-
-void refresh_tag_completion_entries(struct con_win *cwin)
-{
-	GtkTreeModel *artist_tag_model, *album_tag_model, *genre_tag_model;
-	const gchar *sql;
-	PraghaPreparedStatement *statement;
-
-	artist_tag_model = gtk_entry_completion_get_model(cwin->completion[0]);
-	album_tag_model = gtk_entry_completion_get_model(cwin->completion[1]);
-	genre_tag_model = gtk_entry_completion_get_model(cwin->completion[2]);
-
-	gtk_list_store_clear(GTK_LIST_STORE(artist_tag_model));
-	gtk_list_store_clear(GTK_LIST_STORE(album_tag_model));
-	gtk_list_store_clear(GTK_LIST_STORE(genre_tag_model));
-
-	sql = "SELECT name FROM ARTIST";
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
-
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
-		add_entry_tag_completion (name, artist_tag_model);
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	sql = "SELECT name FROM ALBUM";
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
-
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
-		add_entry_tag_completion (name, album_tag_model);
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	sql = "SELECT name FROM GENRE";
-	statement = pragha_database_create_statement (cwin->cdbase, sql);
-
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
-		add_entry_tag_completion (name, genre_tag_model);
-	}
-
-	pragha_prepared_statement_free (statement);
 }
