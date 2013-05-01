@@ -37,6 +37,7 @@ static void pragha_tags_dialog_finalize (GObject *object);
 
 static void     pragha_tag_entry_change               (GtkEntry *entry, GtkCheckButton *check);
 static void     pragha_tag_entry_clear_pressed        (GtkEntry *entry, gint position, GdkEventButton *event);
+static void     pragha_tag_entry_directory_pressed    (GtkEntry *entry, gint position, GdkEventButton *event, gpointer user_data);
 static gboolean pragha_tag_entry_select_text_on_click (GtkWidget *widget, GdkEvent  *event, gpointer user_data);
 
 struct _PraghaTagsDialogClass {
@@ -221,6 +222,9 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	g_signal_connect(G_OBJECT(entry_genre),
 	                 "icon-press",
 	                 G_CALLBACK(pragha_tag_entry_clear_pressed), NULL);
+	g_signal_connect(G_OBJECT(entry_file),
+	                 "icon-press",
+	                 G_CALLBACK(pragha_tag_entry_directory_pressed), dialog);
 
 	g_signal_connect(G_OBJECT(entry_tno),
 	                 "button-release-event",
@@ -757,6 +761,27 @@ pragha_tag_entry_clear_pressed (GtkEntry       *entry,
 	}
 }
 
+static void
+pragha_tag_entry_directory_pressed (GtkEntry       *entry,
+                                    gint            position,
+                                    GdkEventButton *event,
+                                    gpointer        user_data)
+{
+	PraghaMusicobject *mobj;
+	GtkWidget *toplevel;
+
+	PraghaTagsDialog *dialog = user_data;
+
+	if (position == GTK_ENTRY_ICON_SECONDARY) {
+		mobj = pragha_tags_dialog_get_musicobject(dialog);
+		toplevel = gtk_widget_get_toplevel(GTK_WIDGET(entry));
+
+		gchar *uri = path_get_dir_as_uri (pragha_musicobject_get_file(mobj));
+		open_url(uri, toplevel);
+		g_free (uri);
+	}
+}
+
 static gboolean
 pragha_tag_entry_select_text_on_click (GtkWidget *widget,
                                        GdkEvent  *event,
@@ -765,22 +790,6 @@ pragha_tag_entry_select_text_on_click (GtkWidget *widget,
 	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
 
 	return FALSE;
-}
-
-static void
-directory_pressed (GtkEntry       *entry,
-                   gint            position,
-                   GdkEventButton *event,
-                   gchar const *data)
-{
-	GtkWidget  *toplevel;
-	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(entry));
-
-	if (position == GTK_ENTRY_ICON_SECONDARY) {
-		gchar *uri = path_get_dir_as_uri (data);
-		open_url(uri, toplevel);
-		g_free (uri);
-	}
 }
 
 static void
