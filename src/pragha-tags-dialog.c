@@ -41,6 +41,8 @@ static void     pragha_tag_entry_directory_pressed    (GtkEntry *entry, gint pos
 static gboolean pragha_tag_entry_select_text_on_click (GtkWidget *widget, GdkEvent  *event, gpointer user_data);
 static void     pragha_file_entry_populate_menu       (GtkEntry *entry, GtkMenu *menu, gpointer user_data);
 
+GtkEntryCompletion *pragha_tags_get_entry_completion_from_table (const gchar *table);
+
 struct _PraghaTagsDialogClass {
 	GtkDialogClass __parent__;
 };
@@ -68,9 +70,6 @@ struct _PraghaTagsDialog {
 	PraghaMusicobject *mobj;
 	GList             *rlist;
 	GArray            *loc_arr;
-
-	/* Needed due cwin->completion */
-	struct con_win    *cwin;
 };
 
 G_DEFINE_TYPE (PraghaTagsDialog, pragha_tags_dialog, GTK_TYPE_DIALOG);
@@ -97,6 +96,7 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	GtkWidget *entry_title, *entry_artist, *entry_album, *entry_genre,  *entry_tno, *entry_year, *entry_comment, *entry_file;
 	GtkWidget *hbox_title, *hbox_artist, *hbox_album, *hbox_genre, *hbox_tno, *hbox_year, *hbox_comment;
 	GtkWidget *hbox_spins, *comment_view_scroll, *chk_alignment;
+	GtkEntryCompletion *completion;
 
 	/* Set dialog properties */
 
@@ -163,9 +163,14 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	gtk_entry_set_max_length(GTK_ENTRY(entry_album), TAG_MAX_LEN);
 	gtk_entry_set_max_length(GTK_ENTRY(entry_genre), TAG_MAX_LEN);
 
-	/*gtk_entry_set_completion(GTK_ENTRY(entry_artist), cwin->completion[0]);
-	gtk_entry_set_completion(GTK_ENTRY(entry_album), cwin->completion[1]);
-	gtk_entry_set_completion(GTK_ENTRY(entry_genre), cwin->completion[2]);*/
+	completion = pragha_tags_get_entry_completion_from_table ("ARTIST");
+	gtk_entry_set_completion(GTK_ENTRY(entry_artist), completion);
+
+	completion = pragha_tags_get_entry_completion_from_table ("ALBUM");
+	gtk_entry_set_completion(GTK_ENTRY(entry_album), completion);
+
+	completion = pragha_tags_get_entry_completion_from_table ("GENRE");
+	gtk_entry_set_completion(GTK_ENTRY(entry_genre), completion);
 
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
@@ -563,6 +568,21 @@ pragha_tags_dialog_finalize (GObject *object)
 {
 	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
 
+	GtkEntryCompletion *completion;
+	GtkTreeModel *completion_model;
+
+	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->artist_entry));
+	completion_model = gtk_entry_completion_get_model(completion);
+	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
+
+	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->album_entry));
+	completion_model = gtk_entry_completion_get_model(completion);
+	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
+
+	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->genre_entry));
+	completion_model = gtk_entry_completion_get_model(completion);
+	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
+
 	g_object_unref(dialog->mobj);
 
 	(*G_OBJECT_CLASS (pragha_tags_dialog_parent_class)->finalize) (object);
@@ -938,4 +958,38 @@ pragha_file_entry_populate_menu (GtkEntry *entry, GtkMenu *menu, gpointer user_d
 	                  G_CALLBACK (pragha_file_entry_open_folder), dialog);
 	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
 	gtk_widget_show (item);
+}
+
+GtkEntryCompletion *
+pragha_tags_get_entry_completion_from_table(const gchar *table)
+{
+	PraghaDatabase *cdbase;
+	PraghaPreparedStatement *statement;
+	gchar *sql;
+	GtkEntryCompletion *completion;
+	GtkListStore *model;
+	GtkTreeIter iter;
+
+	cdbase = pragha_database_get ();
+
+	model = gtk_list_store_new(1, G_TYPE_STRING);
+
+	sql = g_strdup_printf("SELECT name FROM %s ORDER BY name DESC", table);
+	statement = pragha_database_create_statement (cdbase, sql);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+
+		gtk_list_store_prepend(GTK_LIST_STORE(model), &iter);
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, name, -1);
+	}
+	pragha_prepared_statement_free (statement);
+	g_object_unref(G_OBJECT(cdbase));
+	g_free(sql);
+
+	completion = gtk_entry_completion_new();
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(model));
+	gtk_entry_completion_set_text_column(completion, 0);
+	g_object_unref(model);
+
+	return completion;
 }
