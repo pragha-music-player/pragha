@@ -2274,8 +2274,68 @@ exit:
 /*
  * library_tree_context_menu_xml calbacks
  */
+
+static void
+pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
+                                                gint            response_id,
+                                                struct con_win *cwin)
+{
+	PraghaMusicobject *nmobj;
+	GPtrArray *file_arr = NULL;
+	GArray *loc_arr = NULL;
+	gint changed = 0, elem = 0, ielem;
+	gchar *file;
+
+	if (response_id == GTK_RESPONSE_OK) {
+		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
+		if(!changed)
+			goto no_change;
+
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		loc_arr = pragha_tags_dialog_get_local_array(PRAGHA_TAGS_DIALOG(dialog));
+
+		/* Updata the db changes */
+		if(loc_arr) {
+			if (changed & TAG_TNO_CHANGED) {
+				if (loc_arr->len > 1) {
+					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
+						return;
+				}
+			}
+			if (changed & TAG_TITLE_CHANGED) {
+				if (loc_arr->len > 1) {
+					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
+						return;
+				}
+			}
+
+			pragha_database_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
+			if(pragha_library_need_update(cwin->clibrary, changed))
+				pragha_database_change_tracks_done(cwin->cdbase);
+
+			/* Get a array of files and update it */
+			file_arr = g_ptr_array_new();
+			for(ielem = 0; ielem < loc_arr->len; ielem++) {
+				elem = g_array_index(loc_arr, gint, ielem);
+				if (elem) {
+					file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
+					if(file)
+						g_ptr_array_add(file_arr, file);
+				}
+			}
+			pragha_update_local_files_change_tag(file_arr, changed, nmobj);
+			g_ptr_array_free(file_arr, TRUE);
+			g_array_free(loc_arr, TRUE);
+		}
+	}
+
+no_change:
+	gtk_widget_destroy (dialog);
+}
+
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 {
+	GtkWidget *dialog;
 	enum node_type node_type = 0;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2283,12 +2343,12 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	GtkTreeIter iter;
 	GList *list, *i;
 	GArray *loc_arr = NULL;
-	GPtrArray *file_arr = NULL;
-	gint sel, location_id, changed = 0;
-	gchar *node_data = NULL, **split_album = NULL, *file = NULL;
-	gint elem = 0, ielem;
+	gint sel, location_id;
+	gchar *node_data = NULL, **split_album = NULL;
 
-	PraghaMusicobject *omobj = NULL, *nmobj = NULL;
+	PraghaMusicobject *omobj = NULL;
+
+	dialog = pragha_tags_dialog_new();
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
@@ -2335,73 +2395,29 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				break;
 			}
 		}
-	} else {
-		omobj = pragha_musicobject_new ();
 	}
 
-	nmobj = pragha_musicobject_new();
-	changed = tag_edit_dialog(omobj, 0, nmobj, cwin);
-
-	if (!changed)
-		goto exit;
-
-	/* Store the new tags */
+	if (omobj)
+		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), omobj);
 
 	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-
 	for (i=list; i != NULL; i = i->next) {
 		path = i->data;
 		/* Form an array of location ids */
 		get_location_ids(path, loc_arr, model, cwin->clibrary);
 	}
+	pragha_tags_dialog_set_local_array (PRAGHA_TAGS_DIALOG(dialog), loc_arr);
 
-	/* Check if user is trying to set the same track no for multiple tracks */
-	if (changed & TAG_TNO_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
-				goto exit;
-		}
-	}
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_library_panel_edit_tags_dialog_response), cwin);
 
-	/* Check if user is trying to set the same title/track no for
-	   multiple tracks */
-	if (changed & TAG_TITLE_CHANGED) {
-		if (loc_arr->len > 1) {
-			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
-				goto exit;
-		}
-	}
-
-	/* Updata the db changes */
-	pragha_database_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
-	if(pragha_library_need_update(cwin->clibrary, changed))
-		pragha_database_change_tracks_done(cwin->cdbase);
-
-	/* Get a array of files and update it */
-	file_arr = g_ptr_array_new();
-	for(ielem = 0; ielem < loc_arr->len; ielem++) {
-		elem = g_array_index(loc_arr, gint, ielem);
-		if (elem) {
-			file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
-			if(file)
-				g_ptr_array_add(file_arr, file);
-		}
-	}
-	pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-	g_ptr_array_free(file_arr, TRUE);
-	g_array_free(loc_arr, TRUE);
+	gtk_widget_show (dialog);
 
 exit:
-	/* Cleanup */
-
 	g_free(node_data);
 	g_strfreev (split_album);
-
-	if (nmobj)
-		g_object_unref (nmobj);
 	if (omobj)
 		g_object_unref (omobj);
-		
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
