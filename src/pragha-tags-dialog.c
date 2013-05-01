@@ -35,6 +35,10 @@
 
 static void pragha_tags_dialog_finalize (GObject *object);
 
+static void     pragha_tag_entry_change               (GtkEntry *entry, GtkCheckButton *check);
+static void     pragha_tag_entry_clear_pressed        (GtkEntry *entry, gint position, GdkEventButton *event);
+static gboolean pragha_tag_entry_select_text_on_click (GtkWidget *widget, GdkEvent  *event, gpointer user_data);
+
 struct _PraghaTagsDialogClass {
 	GtkDialogClass __parent__;
 };
@@ -180,6 +184,52 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	chk_year = gtk_check_button_new();
 	chk_tno = gtk_check_button_new();
 	chk_comment = gtk_check_button_new();
+
+	/* Connect signals. */
+
+	g_signal_connect(G_OBJECT(entry_title),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_title);
+	g_signal_connect(G_OBJECT(entry_artist),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_artist);
+	g_signal_connect(G_OBJECT(entry_album),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_album);
+	g_signal_connect(G_OBJECT(entry_genre),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_genre);
+	g_signal_connect(G_OBJECT(entry_tno),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_tno);
+	g_signal_connect(G_OBJECT(entry_year),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_year);
+	g_signal_connect(G_OBJECT(gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry_comment))),
+	                 "changed",
+	                 G_CALLBACK(pragha_tag_entry_change), chk_comment);
+
+	g_signal_connect(G_OBJECT(entry_title),
+	                 "icon-press",
+	                 G_CALLBACK(pragha_tag_entry_clear_pressed), NULL);
+	g_signal_connect(G_OBJECT(entry_artist),
+	                 "icon-press",
+	                 G_CALLBACK(pragha_tag_entry_clear_pressed), NULL);
+	g_signal_connect(G_OBJECT(entry_album),
+	                 "icon-press",
+	                 G_CALLBACK(pragha_tag_entry_clear_pressed), NULL);
+	g_signal_connect(G_OBJECT(entry_genre),
+	                 "icon-press",
+	                 G_CALLBACK(pragha_tag_entry_clear_pressed), NULL);
+
+	g_signal_connect(G_OBJECT(entry_tno),
+	                 "button-release-event",
+	                 G_CALLBACK(pragha_tag_entry_select_text_on_click), NULL);
+	g_signal_connect(G_OBJECT(entry_year),
+	                 "button-release-event",
+	                 G_CALLBACK(pragha_tag_entry_select_text_on_click), NULL);
+
+	/* Create boxs and package all. */
 
 	hbox_title = gtk_hbox_new(FALSE, 0);
 	hbox_artist = gtk_hbox_new(FALSE, 0);
@@ -402,15 +452,36 @@ pragha_tags_dialog_set_musicobject(PraghaTagsDialog *dialog, PraghaMusicobject *
 	comment = pragha_musicobject_get_comment(mobj);
 	file = pragha_musicobject_get_file(mobj);
 
+	/* Block changed signal, and force text. */
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->title_entry), pragha_tag_entry_change, dialog->title_check_change);
 	gtk_entry_set_text(GTK_ENTRY(dialog->title_entry), title);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->title_entry), pragha_tag_entry_change, dialog->title_check_change);
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->artist_entry), pragha_tag_entry_change, dialog->artist_check_change);
 	gtk_entry_set_text(GTK_ENTRY(dialog->artist_entry), artist);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->artist_entry), pragha_tag_entry_change, dialog->artist_check_change);
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->album_entry), pragha_tag_entry_change, dialog->album_check_change);
 	gtk_entry_set_text(GTK_ENTRY(dialog->album_entry), album);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->album_entry), pragha_tag_entry_change, dialog->album_check_change);
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->genre_entry), pragha_tag_entry_change, dialog->genre_check_change);
 	gtk_entry_set_text(GTK_ENTRY(dialog->genre_entry), genre);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->genre_entry), pragha_tag_entry_change, dialog->genre_check_change);
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->track_no_entry), pragha_tag_entry_change, dialog->track_no_check_change);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->track_no_entry), track_no);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->track_no_entry), pragha_tag_entry_change, dialog->track_no_check_change);
+
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->year_entry), pragha_tag_entry_change, dialog->year_check_change);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->year_entry), year);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->year_entry), pragha_tag_entry_change, dialog->year_check_change);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dialog->comment_entry));
+	g_signal_handlers_block_by_func(G_OBJECT(dialog->comment_entry), pragha_tag_entry_change, dialog->comment_check_change);
 	gtk_text_buffer_set_text (buffer, comment, -1);
+	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->comment_entry), pragha_tag_entry_change, dialog->comment_check_change);
 
 	if (string_is_empty(file))
 		gtk_widget_set_sensitive(GTK_WIDGET(dialog->file_entry), FALSE);
@@ -669,20 +740,31 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
  * Track tags editing dialog.
  */
 
-void check_entry(GtkEntry *entry, GtkCheckButton *check)
+static void
+pragha_tag_entry_change (GtkEntry *entry, GtkCheckButton *check)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
 }
 
 static void
-clear_pressed (GtkEntry       *entry,
-		gint            position,
-		GdkEventButton *event)
+pragha_tag_entry_clear_pressed (GtkEntry       *entry,
+                                gint            position,
+                                GdkEventButton *event)
 {
 	if (position == GTK_ENTRY_ICON_SECONDARY) {
 		gtk_entry_set_text (entry, "");
 		gtk_widget_grab_focus(GTK_WIDGET(entry));
 	}
+}
+
+static gboolean
+pragha_tag_entry_select_text_on_click (GtkWidget *widget,
+                                       GdkEvent  *event,
+                                       gpointer   user_data)
+{
+	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+	return FALSE;
 }
 
 static void
@@ -864,14 +946,4 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_open_folder), storage);
 	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
 	gtk_widget_show (item);
-}
-
-static gboolean
-select_all_on_click(GtkWidget *widget,
-                    GdkEvent  *event,
-                    gpointer   user_data)
-{
-	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
-
-	return FALSE;
 }
