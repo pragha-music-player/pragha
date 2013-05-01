@@ -39,6 +39,7 @@ static void     pragha_tag_entry_change               (GtkEntry *entry, GtkCheck
 static void     pragha_tag_entry_clear_pressed        (GtkEntry *entry, gint position, GdkEventButton *event);
 static void     pragha_tag_entry_directory_pressed    (GtkEntry *entry, gint position, GdkEventButton *event, gpointer user_data);
 static gboolean pragha_tag_entry_select_text_on_click (GtkWidget *widget, GdkEvent  *event, gpointer user_data);
+static void     pragha_file_entry_populate_menu       (GtkEntry *entry, GtkMenu *menu, gpointer user_data);
 
 struct _PraghaTagsDialogClass {
 	GtkDialogClass __parent__;
@@ -232,6 +233,10 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	g_signal_connect(G_OBJECT(entry_year),
 	                 "button-release-event",
 	                 G_CALLBACK(pragha_tag_entry_select_text_on_click), NULL);
+
+	g_signal_connect (G_OBJECT(entry_file),
+	                  "populate-popup",
+	                  G_CALLBACK (pragha_file_entry_populate_menu), dialog);
 
 	/* Create boxs and package all. */
 
@@ -792,131 +797,98 @@ pragha_tag_entry_select_text_on_click (GtkWidget *widget,
 	return FALSE;
 }
 
-static void
-popup_menu_open_folder (GtkMenuItem *menuitem, gpointer storage)
+gchar *
+pragha_tag_entry_get_selected_text(GtkWidget *entry)
 {
-	GtkWidget *entry_file, *toplevel;
+	gint start_sel, end_sel;
+
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry), &start_sel, &end_sel))
+		return NULL;
+
+	return gtk_editable_get_chars (GTK_EDITABLE(entry), start_sel, end_sel);
+}
+
+static void
+pragha_tag_entry_set_text(GtkWidget *entry, const gchar *text)
+{
+	gtk_entry_set_text(GTK_ENTRY(entry), text);
+	gtk_widget_grab_focus(GTK_WIDGET(entry));
+}
+
+static void
+pragha_file_entry_open_folder (GtkMenuItem *menuitem, PraghaTagsDialog *dialog)
+{
+	GtkWidget *toplevel;
 	const gchar *file;
 	gchar *uri;
 
-	entry_file = g_object_get_data (storage, "entry_file");
-	file = gtk_entry_get_text (GTK_ENTRY(entry_file));
+	file = gtk_entry_get_text (GTK_ENTRY(dialog->file_entry));
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(dialog->file_entry));
+
 	uri = path_get_dir_as_uri (file);
-
-	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(entry_file));
-
 	open_url(uri, toplevel);
 	g_free (uri);
 }
 
 static void
-popup_menu_selection_to_title (GtkMenuItem *menuitem, gpointer storage)
+pragha_file_entry_selection_to_title (GtkMenuItem *menuitem,PraghaTagsDialog *dialog)
 {
-	GtkWidget *entry_file, *entry_title;
-	gint start_sel, end_sel;
-	gchar *clip = NULL;
-
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
-		return;
-	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
-
-	entry_title = g_object_get_data (storage, "entry_title");
-	gtk_entry_set_text(GTK_ENTRY(entry_title), clip);
-
-	gtk_widget_grab_focus(GTK_WIDGET(entry_title));
-
-	g_free(clip);
+	gchar *text = pragha_tag_entry_get_selected_text(dialog->file_entry);
+	if(text) {
+		pragha_tag_entry_set_text(dialog->title_entry, text);
+		g_free(text);
+	}
 }
 
 static void
-popup_menu_selection_to_artist (GtkMenuItem *menuitem, gpointer storage)
+pragha_file_entry_selection_to_artist (GtkMenuItem *menuitem, PraghaTagsDialog *dialog)
 {
-	GtkWidget *entry_file, *entry_artist;
-	gint start_sel, end_sel;
-	gchar *clip = NULL;
-
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
-		return;
-	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
-
-	entry_artist = g_object_get_data (storage, "entry_artist");
-	gtk_entry_set_text (GTK_ENTRY(entry_artist), clip);
-
-	gtk_widget_grab_focus(GTK_WIDGET(entry_artist));
-
-	g_free (clip);
+	gchar *text = pragha_tag_entry_get_selected_text(dialog->file_entry);
+	if(text) {
+		pragha_tag_entry_set_text(dialog->artist_entry, text);
+		g_free(text);
+	}
 }
 
 static void
-popup_menu_selection_to_album (GtkMenuItem *menuitem, gpointer storage)
+pragha_file_entry_selection_to_album (GtkMenuItem *menuitem, PraghaTagsDialog *dialog)
 {
-	GtkWidget *entry_file, *entry_album;
-	gint start_sel, end_sel;
-	gchar *clip = NULL;
-
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
-		return;
-	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
-
-	entry_album = g_object_get_data (storage, "entry_album");
-	gtk_entry_set_text (GTK_ENTRY(entry_album), clip);
-
-	gtk_widget_grab_focus(GTK_WIDGET(entry_album));
-
-	g_free (clip);
+	gchar *text = pragha_tag_entry_get_selected_text(dialog->file_entry);
+	if(text) {
+		pragha_tag_entry_set_text(dialog->album_entry, text);
+		g_free(text);
+	}
 }
 
 static void
-popup_menu_selection_to_genre (GtkMenuItem *menuitem, gpointer storage)
+pragha_file_entry_selection_to_genre (GtkMenuItem *menuitem, PraghaTagsDialog *dialog)
 {
-	GtkWidget *entry_file, *entry_genre;
-	gint start_sel, end_sel;
-	gchar *clip = NULL;
-
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
-		return;
-	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
-
-	entry_genre = g_object_get_data (storage, "entry_genre");
-	gtk_entry_set_text (GTK_ENTRY(entry_genre), clip);
-
-	gtk_widget_grab_focus(GTK_WIDGET(entry_genre));
-
-	g_free(clip);
+	gchar *text = pragha_tag_entry_get_selected_text(dialog->file_entry);
+	if(text) {
+		pragha_tag_entry_set_text(dialog->genre_entry, text);
+		g_free(text);
+	}
 }
 
 static void
-popup_menu_selection_to_comment (GtkMenuItem *menuitem, gpointer storage)
+pragha_file_entry_selection_to_comment (GtkMenuItem *menuitem, PraghaTagsDialog *dialog)
 {
-	GtkWidget *entry_file, *entry_comment;
 	GtkTextBuffer *buffer;
-	gint start_sel, end_sel;
-	gchar *clip = NULL;
 
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), &start_sel, &end_sel))
-		return;
-	clip = gtk_editable_get_chars (GTK_EDITABLE(entry_file), start_sel, end_sel);
-
-	entry_comment = g_object_get_data (storage, "entry_comment");
-	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (entry_comment));
-
-	gtk_text_buffer_set_text (buffer, clip, -1);
-
-	gtk_widget_grab_focus(GTK_WIDGET(entry_comment));
-
-	g_free(clip);
+	gchar *text = pragha_tag_entry_get_selected_text(dialog->file_entry);
+	if(text) {
+		buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dialog->comment_entry));
+		gtk_text_buffer_set_text (buffer, text, -1);
+		g_free(text);
+	}
 }
 
 static void
-file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
+pragha_file_entry_populate_menu (GtkEntry *entry, GtkMenu *menu, gpointer user_data)
 {
 	GtkWidget *submenu, *item;
-	GtkWidget *entry_file;
+
+	PraghaTagsDialog *dialog = user_data;
 
 	item = gtk_separator_menu_item_new ();
 	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
@@ -930,29 +902,40 @@ file_entry_populate_popup (GtkEntry *entry, GtkMenu *menu, gpointer storage)
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
 	item = gtk_menu_item_new_with_label (_("Title"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_title), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_selection_to_title), dialog);
 	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
 	item = gtk_menu_item_new_with_label (_("Artist"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_artist), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_selection_to_artist), dialog);
 	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
 	item = gtk_menu_item_new_with_label (_("Album"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_album), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_selection_to_album), dialog);
 	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
 	item = gtk_menu_item_new_with_label (_("Genre"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_genre), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_selection_to_genre), dialog);
 	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
 	item = gtk_menu_item_new_with_label (_("Comment"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_selection_to_comment), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_selection_to_comment), dialog);
 	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), item);
 
 	gtk_widget_show_all (submenu);
 
-	entry_file = g_object_get_data (storage, "entry_file");
-	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(entry_file), NULL, NULL))
+	if (!gtk_editable_get_selection_bounds (GTK_EDITABLE(dialog->file_entry), NULL, NULL))
 		gtk_widget_set_sensitive (submenu, FALSE);
 
 	item = gtk_menu_item_new_with_mnemonic (_("Open folder"));
-	g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (popup_menu_open_folder), storage);
+	g_signal_connect (G_OBJECT (item),
+	                  "activate",
+	                  G_CALLBACK (pragha_file_entry_open_folder), dialog);
 	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
 	gtk_widget_show (item);
 }
