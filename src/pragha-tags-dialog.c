@@ -33,6 +33,7 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
 
+static void     pragha_tags_dialog_dispose            (GObject *object);
 static void     pragha_tags_dialog_finalize           (GObject *object);
 static void     pragha_tags_dialog_unrealize          (GtkWidget* widget);
 
@@ -82,6 +83,7 @@ pragha_tags_dialog_class_init (PraghaTagsDialogClass *klass)
   GtkWidgetClass *gtkwidget_class;
 
   gobject_class = G_OBJECT_CLASS (klass);
+  gobject_class->dispose = pragha_tags_dialog_dispose;
   gobject_class->finalize = pragha_tags_dialog_finalize;
 
   gtkwidget_class = GTK_WIDGET_CLASS (klass);
@@ -565,11 +567,26 @@ pragha_tags_dialog_get_local_array(PraghaTagsDialog *dialog)
 }
 
 static void
+pragha_tags_dialog_dispose (GObject *object)
+{
+	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
+
+	if(dialog->mobj) {
+		g_object_unref(dialog->mobj);
+		dialog->mobj = NULL;
+	}
+
+	(*G_OBJECT_CLASS (pragha_tags_dialog_parent_class)->dispose) (object);
+}
+
+static void
 pragha_tags_dialog_finalize (GObject *object)
 {
 	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
 
-	g_object_unref(dialog->mobj);
+	/*
+	 * Need free dialog->loc_arr or dialog->rlist?
+	 */
 
 	(*G_OBJECT_CLASS (pragha_tags_dialog_parent_class)->finalize) (object);
 }
