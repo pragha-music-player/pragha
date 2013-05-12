@@ -175,6 +175,8 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 			}
 		}
 	}
+
+	gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
 	gtk_widget_destroy (dialog);
 }
 
