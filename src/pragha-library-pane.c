@@ -2288,7 +2288,6 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 	PraghaTagger *tagger;
 	GArray *loc_arr = NULL;
 	gint changed = 0, elem = 0, ielem;
-	gchar *file;
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
@@ -2317,11 +2316,8 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 			/* Get a array of files and update it */
 			for(ielem = 0; ielem < loc_arr->len; ielem++) {
 				elem = g_array_index(loc_arr, gint, ielem);
-				if (elem) {
-					file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
-					if(file)
-						pragha_tagger_add_file (tagger, file);
-				}
+				if (G_LIKELY(elem))
+					pragha_tagger_add_location_id(tagger, elem);
 			}
 			pragha_tagger_set_changes(tagger, nmobj, changed);
 			pragha_tagger_apply_changes (tagger);

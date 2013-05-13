@@ -57,13 +57,29 @@ pragha_tagger_add_file(PraghaTagger *tagger, const gchar *file)
 }
 
 void
+pragha_tagger_add_location_id(PraghaTagger *tagger, gint location_id)
+{
+	gchar *file = NULL;
+
+	PraghaTaggerPrivate *priv = tagger->priv;
+
+	g_array_append_val(priv->loc_arr, location_id);
+
+	file = pragha_database_get_filename_from_location_id(priv->cdbase, location_id);
+	if (G_LIKELY(file))
+		g_ptr_array_add(priv->file_arr, file);
+}
+
+void
 pragha_tagger_apply_changes(PraghaTagger *tagger)
 {
 	PraghaPreferences *preferences;
 
 	PraghaTaggerPrivate *priv = tagger->priv;
 
-	pragha_update_local_files_change_tag(priv->file_arr, priv->changed, priv->mobj);
+	if(priv->file_arr->len)
+		pragha_update_local_files_change_tag(priv->file_arr, priv->changed, priv->mobj);
+
 	if(priv->loc_arr->len) {
 		pragha_database_update_local_files_change_tag(priv->cdbase, priv->loc_arr, priv->changed, priv->mobj);
 
