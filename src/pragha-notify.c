@@ -136,11 +136,11 @@ show_osd (struct con_win *cwin)
 		if(can_support_actions() &&
 		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
 			notify_notification_add_action(
-				cwin->osd_notify, "media-prev", _("Prev Track"),
+				cwin->osd_notify, "media-skip-backward", _("Prev Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
 				NULL);
 			notify_notification_add_action(
-				cwin->osd_notify, "media-next", _("Next Track" ),
+				cwin->osd_notify, "media-skip-forward", _("Next Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
 				NULL);
 		}
