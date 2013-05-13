@@ -48,9 +48,10 @@ struct _PraghaTaggerClass
 	GObjectClass parent_class;
 };
 
-void pragha_tagger_set_changes   (PraghaTagger *tagger, PraghaMusicobject *mobj, gint changed);
-void pragha_tagger_add_file      (PraghaTagger *tagger, const gchar *file);
-void pragha_tagger_apply_changes (PraghaTagger *tagger);
+void pragha_tagger_set_changes     (PraghaTagger *tagger, PraghaMusicobject *mobj, gint changed);
+void pragha_tagger_add_file        (PraghaTagger *tagger, const gchar *file);
+void pragha_tagger_add_location_id (PraghaTagger *tagger, gint location_id);
+void pragha_tagger_apply_changes   (PraghaTagger *tagger);
 
 PraghaTagger *pragha_tagger_new (void);
 
