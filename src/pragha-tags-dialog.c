@@ -70,7 +70,6 @@ struct _PraghaTagsDialog {
 	GtkWidget         *comment_check_change;
 
 	PraghaMusicobject *mobj;
-	GList             *rlist;
 };
 
 G_DEFINE_TYPE (PraghaTagsDialog, pragha_tags_dialog, GTK_TYPE_DIALOG);
@@ -402,7 +401,6 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	gtk_widget_show_all(tag_table);
 
 	/* Init flags */
-	dialog->rlist = NULL;
 	dialog->mobj = pragha_musicobject_new();
 }
 
@@ -538,18 +536,6 @@ pragha_tags_dialog_get_musicobject(PraghaTagsDialog *dialog)
 	}
 
 	return dialog->mobj;
-}
-
-void
-pragha_tags_dialog_set_ref_playlist(PraghaTagsDialog *dialog, GList *rlist)
-{
-	dialog->rlist = rlist;
-}
-
-GList *
-pragha_tags_dialog_get_ref_playlist(PraghaTagsDialog *dialog)
-{
-	return dialog->rlist;
 }
 
 static void
