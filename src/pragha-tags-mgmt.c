@@ -29,6 +29,7 @@
 #include <tag_c.h>
 
 #include "pragha-tags-mgmt.h"
+#include "pragha-tagger.h"
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
@@ -247,94 +248,48 @@ void
 pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint changed, PraghaMusicobject *nmobj)
 {
 	PraghaMusicobject *mobj = NULL;
-	gint location_id;
-	gchar *tfile;
-	GArray *loc_arr = NULL;
-	GPtrArray *file_arr = NULL;
+	PraghaTagger *tagger;
 	GList *i;
 
-	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_ptr_array_new_with_free_func(g_free);
-
+	tagger = pragha_tagger_new();
 	for (i = list; i != NULL; i = i->next) {
 		mobj = i->data;
-
-		if (G_LIKELY(pragha_musicobject_is_local_file(mobj))) {
-			location_id = pragha_database_find_location(cwin->cdbase, pragha_musicobject_get_file(mobj));
-			if (G_LIKELY(location_id))
-				g_array_append_val(loc_arr, location_id);
-
-			tfile = g_strdup(pragha_musicobject_get_file(mobj));
-			g_ptr_array_add(file_arr, tfile);
-		}
+		if (G_LIKELY(pragha_musicobject_is_local_file(mobj)))
+			pragha_tagger_add_file (tagger, pragha_musicobject_get_file(mobj));
 	}
-
-	/* Save new tags in db */
-	if(loc_arr->len) {
-		pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-		if(pragha_library_need_update(cwin->clibrary, changed))
-			pragha_database_change_tracks_done(cwin->cdbase);
-	}
-
-	/* Save new tags in files */
-	if(file_arr->len)
-		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-
-	g_array_free(loc_arr, TRUE);
-	g_ptr_array_free(file_arr, TRUE);
+	pragha_tagger_set_changes(tagger, nmobj, changed);
+	pragha_tagger_apply_changes (tagger);
+	g_object_unref(tagger);
 }
 
 void
 pragha_save_disk_ref_list_change_tags(struct con_win *cwin, GList *list, gint changed, PraghaMusicobject *nmobj)
 {
 	PraghaMusicobject *mobj = NULL;
+	PraghaTagger *tagger;
 	GtkTreeModel *model;
 	GtkTreeRowReference *ref;
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
-	gint location_id;
-	gchar *tfile;
-	GArray *loc_arr = NULL;
-	GPtrArray *file_arr = NULL;
 	GList *i;
 
-	loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-	file_arr = g_ptr_array_new_with_free_func(g_free);
+	tagger = pragha_tagger_new();
 
 	model = pragha_playlist_get_model(cwin->cplaylist);
-
 	for (i = list; i != NULL; i = i->next) {
 		ref = i->data;
 		path = gtk_tree_row_reference_get_path(ref);
 
 		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path))) {
 			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-
-			if (G_LIKELY(pragha_musicobject_is_local_file(mobj))) {
-				location_id = pragha_database_find_location(cwin->cdbase, pragha_musicobject_get_file(mobj));
-				if (G_LIKELY(location_id))
-					g_array_append_val(loc_arr, location_id);
-
-				tfile = g_strdup(pragha_musicobject_get_file(mobj));
-				g_ptr_array_add(file_arr, tfile);
-			}
+			if (G_LIKELY(pragha_musicobject_is_local_file(mobj)))
+				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(mobj));
 		}
 		gtk_tree_path_free(path);
 	}
-
-	/* Save new tags in db */
-	if(loc_arr->len) {
-		pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-		if(pragha_library_need_update(cwin->clibrary, changed))
-			pragha_database_change_tracks_done(cwin->cdbase);
-	}
-
-	/* Save new tags in files */
-	if(file_arr->len)
-		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-
-	g_array_free(loc_arr, TRUE);
-	g_ptr_array_free(file_arr, TRUE);
+	pragha_tagger_set_changes(tagger, nmobj, changed);
+	pragha_tagger_apply_changes (tagger);
+	g_object_unref(tagger);
 }
 
 /* Update tag change to a list of mobj. */
