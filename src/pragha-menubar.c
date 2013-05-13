@@ -35,6 +35,7 @@
 #include "pragha-utils.h"
 #include "pragha-filter-dialog.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-preferences-dialog.h"
@@ -638,10 +639,8 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   struct con_win *cwin)
 {
 	PraghaMusicobject *nmobj, *bmobj;
-	GPtrArray *file_arr = NULL;
-	GArray *loc_arr = NULL;
-	gint location_id, changed = 0;
-	const gchar *file;
+	PraghaTagger *tagger;
+	gint changed = 0;
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
@@ -671,21 +670,11 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 			}
 
 			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
-				loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-				file = pragha_musicobject_get_file(nmobj);
-				location_id = pragha_database_find_location (cwin->cdbase, file);
-				if (location_id) {
-					g_array_append_val(loc_arr, location_id);
-					pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-					if(pragha_library_need_update(cwin->clibrary, changed))
-						pragha_database_change_tracks_done(cwin->cdbase);
-				}
-				g_array_free(loc_arr, TRUE);
-
-				file_arr = g_ptr_array_new();
-				g_ptr_array_add(file_arr, g_strdup(file));
-				pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-				g_ptr_array_free(file_arr, TRUE);
+				tagger = pragha_tagger_new();
+				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
+				pragha_tagger_set_changes(tagger, nmobj, changed);
+				pragha_tagger_apply_changes (tagger);
+				g_object_unref(tagger);
 			}
 		}
 	}
