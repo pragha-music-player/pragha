@@ -547,7 +547,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 			    cwin);
 }
 
-gpointer
+static gpointer
 do_lastfm_get_similar_action (gpointer user_data)
 {
 	AddMusicObjectListData *data;
@@ -589,7 +589,7 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 			    cwin);
 }
 
-gpointer
+static gpointer
 do_lastfm_current_song_love (gpointer data)
 {
 	gchar *title = NULL, *artist = NULL;
@@ -630,7 +630,7 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 			    cwin);
 }
 
-gpointer
+static gpointer
 do_lastfm_current_song_unlove (gpointer data)
 {
 	gchar *title = NULL, *artist = NULL;
@@ -671,7 +671,7 @@ lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 			    cwin);
 }
 
-gpointer
+static gpointer
 do_lastfm_scrob (gpointer data)
 {
 	gint rv;
@@ -759,7 +759,7 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 	return FALSE;
 }
 
-gpointer
+static gpointer
 do_lastfm_now_playing (gpointer data)
 {
 	PraghaMusicobject *tmobj;
