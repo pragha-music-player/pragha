@@ -2320,7 +2320,7 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 				if (elem) {
 					file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
 					if(file)
-						pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
+						pragha_tagger_add_file (tagger, file);
 				}
 			}
 			pragha_tagger_set_changes(tagger, nmobj, changed);
