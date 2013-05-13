@@ -34,6 +34,7 @@
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-simple-widgets.h"
+#include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
@@ -1401,11 +1402,11 @@ void clear_library_search(PraghaLibraryPane *clibrary)
  */
 
 gboolean
-pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
+pragha_library_need_update_view(PraghaPreferences *preferences, gint changed)
 {
 	gboolean need_update = FALSE;
 
-	switch (pragha_preferences_get_library_style(clibrary->preferences)) {
+	switch (pragha_preferences_get_library_style(preferences)) {
 		case FOLDERS:
 			break;
 		case ARTIST:
@@ -1415,7 +1416,7 @@ pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
 			break;
 		case ALBUM:
 			need_update = ((changed & TAG_ALBUM_CHANGED) ||
-			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (pragha_preferences_get_sort_by_year(preferences) && (changed & TAG_YEAR_CHANGED)) ||
 			               (changed & TAG_TITLE_CHANGED));
 			break;
 		case GENRE:
@@ -1425,7 +1426,7 @@ pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
 		case ARTIST_ALBUM:
 			need_update = ((changed & TAG_ARTIST_CHANGED) ||
 			               (changed & TAG_ALBUM_CHANGED) ||
-			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (pragha_preferences_get_sort_by_year(preferences) && (changed & TAG_YEAR_CHANGED)) ||
 			               (changed & TAG_TITLE_CHANGED));
 			break;
 		case GENRE_ARTIST:
@@ -1436,14 +1437,14 @@ pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
 		case GENRE_ALBUM:
 			need_update = ((changed & TAG_GENRE_CHANGED) ||
 			               (changed & TAG_ALBUM_CHANGED) ||
-			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (pragha_preferences_get_sort_by_year(preferences) && (changed & TAG_YEAR_CHANGED)) ||
 			               (changed & TAG_TITLE_CHANGED));
 			break;
 		case GENRE_ARTIST_ALBUM:
 			need_update = ((changed & TAG_GENRE_CHANGED) ||
 			               (changed & TAG_ARTIST_CHANGED) ||
 			               (changed & TAG_ALBUM_CHANGED) ||
-			               (pragha_preferences_get_sort_by_year(clibrary->preferences) && (changed & TAG_YEAR_CHANGED)) ||
+			               (pragha_preferences_get_sort_by_year(preferences) && (changed & TAG_YEAR_CHANGED)) ||
 			               (changed & TAG_TITLE_CHANGED));
 			break;
 		default:
@@ -1451,6 +1452,12 @@ pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
 	}
 
 	return need_update;
+}
+
+gboolean
+pragha_library_need_update(PraghaLibraryPane *clibrary, gint changed)
+{
+	return pragha_library_need_update_view(clibrary->preferences, changed);
 }
 
 /********************************/
@@ -2278,7 +2285,7 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
                                                 struct con_win *cwin)
 {
 	PraghaMusicobject *nmobj;
-	GPtrArray *file_arr = NULL;
+	PraghaTagger *tagger;
 	GArray *loc_arr = NULL;
 	gint changed = 0, elem = 0, ielem;
 	gchar *file;
@@ -2306,23 +2313,19 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 				}
 			}
 
-			pragha_database_update_local_files_change_tag(cwin->clibrary->cdbase, loc_arr, changed, nmobj);
-			if(pragha_library_need_update(cwin->clibrary, changed))
-				pragha_database_change_tracks_done(cwin->cdbase);
-
+			tagger = pragha_tagger_new();
 			/* Get a array of files and update it */
-			file_arr = g_ptr_array_new();
 			for(ielem = 0; ielem < loc_arr->len; ielem++) {
 				elem = g_array_index(loc_arr, gint, ielem);
 				if (elem) {
 					file = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, elem);
 					if(file)
-						g_ptr_array_add(file_arr, file);
+						pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
 				}
 			}
-			pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-			g_ptr_array_free(file_arr, TRUE);
-			g_array_free(loc_arr, TRUE);
+			pragha_tagger_set_changes(tagger, nmobj, changed);
+			pragha_tagger_apply_changes (tagger);
+			g_object_unref(tagger);
 		}
 	}
 

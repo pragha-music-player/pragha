@@ -18,6 +18,7 @@
 #include "pragha-tagger.h"
 #include "pragha-musicobject.h"
 #include "pragha-database.h"
+#include "pragha-library-pane.h"
 #include "pragha-tags-mgmt.h"
 
 G_DEFINE_TYPE(PraghaTagger, pragha_tagger, G_TYPE_OBJECT)
@@ -58,14 +59,19 @@ pragha_tagger_add_file(PraghaTagger *tagger, const gchar *file)
 void
 pragha_tagger_apply_changes(PraghaTagger *tagger)
 {
+	PraghaPreferences *preferences;
+
 	PraghaTaggerPrivate *priv = tagger->priv;
 
-	pragha_database_update_local_files_change_tag(priv->cdbase, priv->loc_arr, priv->changed, priv->mobj);
-	/* FIXME: Port it to preferences.
-	 * if(pragha_library_need_update(cwin->clibrary, changed))
-		pragha_database_change_tracks_done(priv->cdbase);
-	}*/
 	pragha_update_local_files_change_tag(priv->file_arr, priv->changed, priv->mobj);
+	if(priv->loc_arr->len) {
+		pragha_database_update_local_files_change_tag(priv->cdbase, priv->loc_arr, priv->changed, priv->mobj);
+
+		preferences = pragha_preferences_get();
+		if(pragha_library_need_update_view(preferences, priv->changed))
+			pragha_database_change_tracks_done(priv->cdbase);
+		g_object_unref(preferences);
+	}
 }
 
 static void
