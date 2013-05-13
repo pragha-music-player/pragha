@@ -2289,13 +2289,14 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 	GArray *loc_arr = NULL;
 	gint changed = 0, elem = 0, ielem;
 
+	loc_arr = g_object_get_data (G_OBJECT (dialog), "local-array");
+
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(!changed)
 			goto no_change;
 
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		loc_arr = pragha_tags_dialog_get_local_array(PRAGHA_TAGS_DIALOG(dialog));
 
 		/* Updata the db changes */
 		if(loc_arr) {
@@ -2326,6 +2327,7 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 	}
 
 no_change:
+	g_array_free (loc_arr, TRUE);
 	gtk_widget_destroy (dialog);
 }
 
@@ -2402,7 +2404,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 		/* Form an array of location ids */
 		get_location_ids(path, loc_arr, model, cwin->clibrary);
 	}
-	pragha_tags_dialog_set_local_array (PRAGHA_TAGS_DIALOG(dialog), loc_arr);
+	g_object_set_data (G_OBJECT (dialog), "local-array", loc_arr);
 
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_library_panel_edit_tags_dialog_response), cwin);
