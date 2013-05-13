@@ -242,93 +242,26 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 	}
 }
 
-/* Save tag change on db and disk. */
-
-void
-pragha_save_mobj_list_change_tags(struct con_win *cwin, GList *list, gint changed, PraghaMusicobject *nmobj)
-{
-	PraghaMusicobject *mobj = NULL;
-	PraghaTagger *tagger;
-	GList *i;
-
-	tagger = pragha_tagger_new();
-	for (i = list; i != NULL; i = i->next) {
-		mobj = i->data;
-		if (G_LIKELY(pragha_musicobject_is_local_file(mobj)))
-			pragha_tagger_add_file (tagger, pragha_musicobject_get_file(mobj));
-	}
-	pragha_tagger_set_changes(tagger, nmobj, changed);
-	pragha_tagger_apply_changes (tagger);
-	g_object_unref(tagger);
-}
-
-void
-pragha_save_disk_ref_list_change_tags(struct con_win *cwin, GList *list, gint changed, PraghaMusicobject *nmobj)
-{
-	PraghaMusicobject *mobj = NULL;
-	PraghaTagger *tagger;
-	GtkTreeModel *model;
-	GtkTreeRowReference *ref;
-	GtkTreePath *path = NULL;
-	GtkTreeIter iter;
-	GList *i;
-
-	tagger = pragha_tagger_new();
-
-	model = pragha_playlist_get_model(cwin->cplaylist);
-	for (i = list; i != NULL; i = i->next) {
-		ref = i->data;
-		path = gtk_tree_row_reference_get_path(ref);
-
-		if (G_LIKELY(gtk_tree_model_get_iter(model, &iter, path))) {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-			if (G_LIKELY(pragha_musicobject_is_local_file(mobj)))
-				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(mobj));
-		}
-		gtk_tree_path_free(path);
-	}
-	pragha_tagger_set_changes(tagger, nmobj, changed);
-	pragha_tagger_apply_changes (tagger);
-	g_object_unref(tagger);
-}
-
-/* Update tag change to a list of mobj. */
-
-void
-pragha_update_mobj_list_change_tag(GList *list, gint changed, PraghaMusicobject *nmobj)
-{
-	PraghaMusicobject *mobj = NULL;
-	GList *i;
-
-	for (i = list; i != NULL; i = i->next) {
-		mobj = i->data;
-		pragha_update_musicobject_change_tag(mobj, changed, nmobj);
-	}
-}
-
 /* Copy a tag change to all selected songs. */
 
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
-	GList *rlist, *mlist;
+	GList *rlist;
 	gboolean need_update;
+	PraghaMusicobject *tmobj;
 
 	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
 	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
+
 	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
-	mlist = pragha_playlist_get_selection_mobj_list(cwin->cplaylist);
+	tmobj = pragha_musicobject_dup(omobj);
 
-	/* Update all mobj selected minus which provide the information. */
-	mlist = g_list_remove (mlist, omobj);
-	pragha_update_mobj_list_change_tag(mlist, changed, omobj);
-
-	/* Update the view. */
-	need_update = pragha_playlist_update_ref_list_change_tag(cwin->cplaylist, rlist, changed);
+	/* Update the view and save tag change on db and disk.*/
+	need_update = pragha_playlist_update_ref_list_change_tags(cwin->cplaylist, rlist, changed, tmobj);
 	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
 
 	/* If change current song, update gui and mpris. */
-
 	if(need_update) {
 		/* Update the public mobj */
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
@@ -341,13 +274,9 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 		}
 	}
 
-	/* Save tag change on db and disk. */
-	pragha_save_mobj_list_change_tags(cwin, mlist, changed, omobj);
-
+	g_object_unref(tmobj);
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
 	g_list_free (rlist);
-
-	g_list_free (mlist);
 }
 
 /* Edit tags for selected track(s) */
@@ -362,13 +291,14 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 	GList *rlist = NULL;
 	gboolean need_update = FALSE;
 
+	rlist = g_object_get_data (G_OBJECT (dialog), "reference-list");
+
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(!changed)
 			goto no_change;
 
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		rlist = pragha_tags_dialog_get_ref_playlist(PRAGHA_TAGS_DIALOG(dialog));
 
 		if(rlist) {
 			if (changed & TAG_TNO_CHANGED) {
@@ -386,10 +316,6 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 			clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
 			need_update = pragha_playlist_update_ref_list_change_tags(cwin->cplaylist, rlist, changed, nmobj);
-			pragha_save_disk_ref_list_change_tags(cwin, rlist, changed, nmobj);
-
-			g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-			g_list_free (rlist);
 		}
 
 		if(need_update) {
@@ -411,6 +337,9 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 	}
 
 no_change:
+	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free (rlist);
+
 	gtk_widget_destroy (dialog);
 }
 
@@ -424,13 +353,12 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 
 	/* Get a list of references and music objects selected. */
 	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
-	pragha_tags_dialog_set_ref_playlist(PRAGHA_TAGS_DIALOG(dialog), rlist);
-
 	if(g_list_length(rlist) == 1) {
 		mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
 		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), mobj);
 	}
-
+	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);
+ 
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), cwin);
 
