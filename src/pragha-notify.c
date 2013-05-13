@@ -52,7 +52,6 @@ notify_Prev_Callback (NotifyNotification *osd,
                       struct con_win *cwin)
 {
 	g_assert (action != NULL);
-	g_assert (strcmp (action, "media-prev") == 0);
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_playback_prev_track(cwin);
@@ -64,7 +63,6 @@ notify_Next_Callback (NotifyNotification *osd,
                       struct con_win *cwin)
 {
 	g_assert (action != NULL);
-	g_assert (strcmp (action, "media-next") == 0);
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_playback_next_track(cwin);
