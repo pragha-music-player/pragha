@@ -46,9 +46,6 @@ gint               pragha_tags_dialog_get_changed     (PraghaTagsDialog *dialog)
 void               pragha_tags_dialog_set_ref_playlist(PraghaTagsDialog *dialog, GList *rlist);
 GList             *pragha_tags_dialog_get_ref_playlist(PraghaTagsDialog *dialog);
 
-void               pragha_tags_dialog_set_local_array (PraghaTagsDialog *dialog, GArray *loc_arr);
-GArray            *pragha_tags_dialog_get_local_array (PraghaTagsDialog *dialog);
-
 GtkWidget          *pragha_tags_dialog_new            (void);
 
 G_END_DECLS

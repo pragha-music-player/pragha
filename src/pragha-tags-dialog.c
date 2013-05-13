@@ -71,7 +71,6 @@ struct _PraghaTagsDialog {
 
 	PraghaMusicobject *mobj;
 	GList             *rlist;
-	GArray            *loc_arr;
 };
 
 G_DEFINE_TYPE (PraghaTagsDialog, pragha_tags_dialog, GTK_TYPE_DIALOG);
@@ -404,7 +403,6 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	/* Init flags */
 	dialog->rlist = NULL;
-	dialog->loc_arr = NULL;
 	dialog->mobj = pragha_musicobject_new();
 }
 
@@ -552,18 +550,6 @@ GList *
 pragha_tags_dialog_get_ref_playlist(PraghaTagsDialog *dialog)
 {
 	return dialog->rlist;
-}
-
-void
-pragha_tags_dialog_set_local_array(PraghaTagsDialog *dialog, GArray *loc_arr)
-{
-	dialog->loc_arr = loc_arr;
-}
-
-GArray *
-pragha_tags_dialog_get_local_array(PraghaTagsDialog *dialog)
-{
-	return dialog->loc_arr;
 }
 
 static void
