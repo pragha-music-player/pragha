@@ -284,13 +284,13 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 		if(rlist) {
 			if (changed & TAG_TNO_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), NULL))
+					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
 						return;
 				}
 			}
 			if (changed & TAG_TITLE_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), NULL))
+					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
 						return;
 				}
 			}
