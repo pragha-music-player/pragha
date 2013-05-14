@@ -500,6 +500,8 @@ pragha_tags_dialog_set_musicobject(PraghaTagsDialog *dialog, PraghaMusicobject *
 		gtk_widget_set_sensitive(GTK_WIDGET(dialog->file_entry), FALSE);
 	else {
 		gtk_entry_set_text(GTK_ENTRY(dialog->file_entry), file);
+		gtk_editable_set_position(GTK_EDITABLE(dialog->file_entry), g_utf8_strlen(file, -1));
+		gtk_dialog_add_button(GTK_DIALOG(dialog), _("Details"), GTK_RESPONSE_HELP);
 	}
 }
 
@@ -608,7 +610,7 @@ pragha_track_properties_response(GtkDialog *dialog,
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static void
+void
 pragha_track_properties_dialog(PraghaMusicobject *mobj,
                                GtkWidget *parent)
 {
@@ -745,7 +747,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 
 	dialog = gtk_dialog_new_with_buttons(_("Details"),
 					     GTK_WINDOW(parent),
-					     GTK_DIALOG_MODAL,
+					     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
 					     NULL);
