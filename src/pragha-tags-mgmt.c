@@ -157,64 +157,41 @@ exit:
 /* Tag Editing */
 /***************/
 
-gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent)
+gboolean
+confirm_tno_multiple_tracks(gint tno, GtkWidget *parent)
 {
 	GtkWidget *dialog;
-	gint result;
-	gboolean ret = FALSE;
+	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_QUESTION,
-				GTK_BUTTONS_YES_NO,
-				_("Do you want to set the track number of ALL of the selected tracks to: %d ?"),
-				tno);
+	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                GTK_MESSAGE_QUESTION,
+	                                GTK_BUTTONS_YES_NO,
+	                                _("Do you want to set the track number of ALL of the selected tracks to: %d ?"), tno);
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	switch(result) {
-	case GTK_RESPONSE_YES:
-		ret = TRUE;
-		break;
-	case GTK_RESPONSE_NO:
-		ret = FALSE;
-		break;
-	default:
-		break;
-	}
+	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
 
-	return ret;
+	return (response == GTK_RESPONSE_YES);
 }
 
-gboolean confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent)
+gboolean
+confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent)
 {
 	GtkWidget *dialog;
-	gint result;
-	gboolean ret = FALSE;
+	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_QUESTION,
-				GTK_BUTTONS_YES_NO,
-				_("Do you want to set the title tag of ALL of the selected tracks to: %s ?"),
-				title);
+	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                GTK_MESSAGE_QUESTION,
+	                                GTK_BUTTONS_YES_NO, _("Do you want to set the title tag of ALL of the selected tracks to: %s ?"), title);
 
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-	switch(result) {
-	case GTK_RESPONSE_YES:
-		ret = TRUE;
-		break;
-	case GTK_RESPONSE_NO:
-		ret = FALSE;
-		break;
-	default:
-		break;
-	}
+	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
 
-	return ret;
+	return (response == GTK_RESPONSE_YES);
 }
 
 void
