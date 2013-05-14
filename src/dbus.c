@@ -110,20 +110,33 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+		const char *file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
+		const char *title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
+		const char *artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
+		const char *album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
+		const char *genre = pragha_musicobject_get_genre(cwin->cstate->curr_mobj);
+		guint year = pragha_musicobject_get_year(cwin->cstate->curr_mobj);
+		guint track_no = pragha_musicobject_get_track_no(cwin->cstate->curr_mobj);
+		const char *comment = pragha_musicobject_get_comment(cwin->cstate->curr_mobj);
+		gint length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+		gint bitrate = pragha_musicobject_get_bitrate(cwin->cstate->curr_mobj);
+		gint channels = pragha_musicobject_get_channels(cwin->cstate->curr_mobj);
+		gint samplerate = pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj);
+
 		dbus_message_append_args(reply_msg,
 			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,
-			 DBUS_TYPE_STRING, pragha_musicobject_get_file(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_STRING, pragha_musicobject_get_title(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_STRING, pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_STRING, pragha_musicobject_get_album(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_STRING, pragha_musicobject_get_genre(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_year(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_track_no(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_STRING, pragha_musicobject_get_comment(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_length(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_bitrate(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_channels(cwin->cstate->curr_mobj),
-			 DBUS_TYPE_INT32, pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj),
+			 DBUS_TYPE_STRING, &file,
+			 DBUS_TYPE_STRING, &title,
+			 DBUS_TYPE_STRING, &artist,
+			 DBUS_TYPE_STRING, &album,
+			 DBUS_TYPE_STRING, &genre,
+			 DBUS_TYPE_INT32, &year,
+			 DBUS_TYPE_INT32, &track_no,
+			 DBUS_TYPE_STRING, &comment,
+			 DBUS_TYPE_INT32, &length,
+			 DBUS_TYPE_INT32, &bitrate,
+			 DBUS_TYPE_INT32, &channels,
+			 DBUS_TYPE_INT32, &samplerate,
 			 DBUS_TYPE_INVALID);
 		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	} else {
