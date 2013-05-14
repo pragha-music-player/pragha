@@ -129,7 +129,6 @@ struct con_state {
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
 	PraghaMusicobject *curr_mobj;
-	PRAGHA_MUTEX (curr_mobj_mutex);
 };
 
 struct con_win {

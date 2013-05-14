@@ -654,11 +654,9 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
 					/* Update public current song */
 					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 					/* Update current song on playlist */
 					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
@@ -671,8 +669,6 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 					__update_current_song_info(cwin);
 					mpris_update_metadata_changed(cwin);
 				}
-				else
-					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 			}
 
 			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
@@ -699,11 +695,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_edit_tags_dialog_response), cwin);
 
-	/* Set the initial tags. */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
-
+	
 	gtk_widget_show (dialog);
 }
 

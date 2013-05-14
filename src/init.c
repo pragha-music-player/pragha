@@ -273,8 +273,6 @@ gint init_threads(struct con_win *cwin)
 	g_type_init ();
 	#endif
 
-	pragha_mutex_create(cwin->cstate->curr_mobj_mutex);
-
 	return 0;
 }
 
@@ -301,8 +299,6 @@ void state_free (struct con_state *cstate)
 	}
 
 	g_free(cstate->last_folder);
-
-	pragha_mutex_free(cstate->curr_mobj_mutex);
 
 	g_slice_free(struct con_state, cstate);
 }
