@@ -155,7 +155,6 @@ struct con_win {
 	GtkWidget *paned;
 	GtkStatusIcon *status_icon;
 	NotifyNotification *osd_notify;
-	GtkEntryCompletion *completion[3];
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 #ifdef HAVE_LIBGLYR
@@ -181,7 +180,6 @@ gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
 gint init_first_state(struct con_win *cwin);
 void state_free(struct con_state *cstate);
-void init_tag_completion(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Others */

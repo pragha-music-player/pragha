@@ -72,6 +72,8 @@ pragha_SOURCES = \
 		pragha-statusbar.h \
 		pragha-statusicon.c \
 		pragha-statusicon.h \
+		pragha-tagger.c \
+		pragha-tagger.h \
 		pragha-tags-dialog.c \
 		pragha-tags-dialog.h \
 		pragha-tags-mgmt.c \

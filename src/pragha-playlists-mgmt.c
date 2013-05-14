@@ -136,31 +136,19 @@ static gboolean
 overwrite_existing_playlist(const gchar *playlist, GtkWidget *parent)
 {
 	GtkWidget *dialog;
-	gboolean choice = FALSE;
-	gint ret;
+	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_QUESTION,
-				GTK_BUTTONS_YES_NO,
-				_("Do you want to overwrite the playlist: %s ?"),
-				playlist);
+	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                GTK_MESSAGE_QUESTION,
+	                                GTK_BUTTONS_YES_NO,
+	                                _("Do you want to overwrite the playlist: %s ?"), playlist);
 
-	ret = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch(ret) {
-	case GTK_RESPONSE_YES:
-		choice = TRUE;
-		break;
-	case GTK_RESPONSE_NO:
-		choice = FALSE;
-		break;
-	default:
-		break;
-	}
+	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
-	return choice;
+
+	return (response == GTK_RESPONSE_YES);
 }
 
 GIOChannel*
@@ -254,6 +242,132 @@ exit_list:
 	return ret;
 }
 
+#ifdef HAVE_PLPARSER
+typedef struct {
+	TotemPlPlaylist *playlist;
+	gchar           *folder_saved;
+} PraghaPlParser;
+
+static void
+pragha_parser_append_foreach_playlist (GtkTreeModel *model,
+                                       GtkTreePath  *path,
+                                       GtkTreeIter  *iter,
+                                       gpointer      data)
+{
+	TotemPlPlaylistIter pl_iter;
+	PraghaMusicobject *mobj;
+	const gchar *filename;
+	gchar *base_uri = NULL, *uri = NULL;
+
+	PraghaPlParser *parser = data;
+
+	gtk_tree_model_get (model, iter, P_MOBJ_PTR, &mobj, -1);
+
+	filename = pragha_musicobject_get_file(mobj);
+	base_uri = get_display_filename(filename, TRUE);
+
+	if (g_ascii_strcasecmp(base_uri, parser->folder_saved) == 0)
+		uri = get_display_filename(filename, FALSE);
+	else
+		uri = g_strdup(filename);
+
+	totem_pl_playlist_append (parser->playlist, &pl_iter);
+	totem_pl_playlist_set (parser->playlist, &pl_iter,
+	                       TOTEM_PL_PARSER_FIELD_URI, uri,
+	                       NULL);
+
+	g_free(uri);
+	g_free(base_uri);
+}
+ 
+static gboolean
+pragha_parser_append_foreach_track_list (GtkTreeModel *model,
+                                         GtkTreePath  *path,
+                                         GtkTreeIter  *iter,
+                                         gpointer      data)
+{
+	pragha_parser_append_foreach_playlist (model,
+		                                   path,
+		                                   iter,
+		                                   data);
+	return FALSE;
+}
+
+static gboolean
+pragha_parser_save_full_track_list(PraghaPlaylist *cplaylist, gchar *filename)
+{
+	PraghaPlParser *parser;
+	TotemPlPlaylist *playlist;
+	TotemPlParser *pl;
+	GFile *file;
+	gboolean ret = TRUE;
+
+	pl = totem_pl_parser_new ();
+	playlist = totem_pl_playlist_new ();
+	file = g_file_new_for_path (filename);
+
+	parser = g_slice_new (PraghaPlParser);
+	parser->playlist = playlist;
+	parser->folder_saved = get_display_filename(filename, TRUE);
+
+	gtk_tree_model_foreach(pragha_playlist_get_model(cplaylist),
+	                       pragha_parser_append_foreach_track_list,
+	                       parser);
+
+	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
+        g_error ("Playlist writing failed.");
+        ret = FALSE;
+    }
+
+	g_free(parser->folder_saved);
+	g_slice_free (PraghaPlParser, parser);
+
+	g_object_unref (playlist);
+	g_object_unref (pl);
+	g_object_unref (file);
+
+	return ret;
+}
+
+static gboolean
+pragha_parser_save_selection_track_list(PraghaPlaylist *cplaylist, gchar *filename)
+{
+	PraghaPlParser *parser;
+	TotemPlPlaylist *playlist;
+	TotemPlParser *pl;
+	GtkTreeSelection *selection;
+	GFile *file;
+	gboolean ret = TRUE;
+
+	pl = totem_pl_parser_new ();
+	playlist = totem_pl_playlist_new ();
+	file = g_file_new_for_path (filename);
+
+	parser = g_slice_new (PraghaPlParser);
+	parser->playlist = playlist;
+	parser->folder_saved = get_display_filename(filename, TRUE);
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(pragha_playlist_get_view(cplaylist)));
+	gtk_tree_selection_selected_foreach(selection,
+	                                    pragha_parser_append_foreach_playlist,
+	                                    parser);
+
+	if (totem_pl_parser_save (pl, playlist, file, "Title", TOTEM_PL_PARSER_M3U, NULL) != TRUE) {
+        g_error ("Playlist writing failed.");
+        ret = FALSE;
+    }
+
+	g_free(parser->folder_saved);
+	g_slice_free (PraghaPlParser, parser);
+
+	g_object_unref (playlist);
+	g_object_unref (pl);
+	g_object_unref (file);
+
+	return ret;
+}
+
+#else
 static gint
 save_complete_m3u_playlist(PraghaPlaylist* cplaylist, GIOChannel *chan, gchar *filename)
 {
@@ -285,6 +399,7 @@ save_selected_to_m3u_playlist(PraghaPlaylist* cplaylist, GIOChannel *chan, gchar
 
 	return ret;
 }
+#endif
 
 gint
 save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase)
@@ -512,6 +627,30 @@ playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 	return filename;
 }
 
+#ifdef HAVE_PLPARSER
+void export_playlist (PraghaPlaylist* cplaylist, gint choice)
+{
+	gchar *filename = NULL;
+
+	filename = playlist_export_dialog_get_filename(_("Playlists"),
+	                                               gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist))));
+	if (!filename)
+		return;
+
+	switch(choice) {
+	case SAVE_COMPLETE:
+		if (pragha_parser_save_full_track_list(cplaylist, filename) == FALSE)
+			g_warning("Unable to save M3U playlist: %s", filename);
+		break;
+	case SAVE_SELECTED:
+		if (pragha_parser_save_selection_track_list(cplaylist, filename) == FALSE)
+			g_warning("Unable to save M3U playlist: %s", filename);
+		break;
+	}
+
+	g_free(filename);
+}
+#else
 void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 {
 	gchar *filename = NULL;
@@ -559,6 +698,7 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 exit:
 	g_free(filename);
 }
+#endif
 
 #ifdef HAVE_PLPARSER
 static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,

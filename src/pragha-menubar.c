@@ -35,6 +35,7 @@
 #include "pragha-utils.h"
 #include "pragha-filter-dialog.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-preferences-dialog.h"
@@ -632,70 +633,71 @@ void next_action (GtkAction *action, struct con_win *cwin)
 	pragha_playback_next_track(cwin);
 }
 
+static void
+pragha_edit_tags_dialog_response (GtkWidget      *dialog,
+                                  gint            response_id,
+                                  struct con_win *cwin)
+{
+	PraghaMusicobject *nmobj, *bmobj;
+	PraghaTagger *tagger;
+	gint changed = 0;
+
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		return;
+	}
+
+	if (response_id == GTK_RESPONSE_OK) {
+		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
+		if(changed) {
+			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+
+			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
+					/* Update public current song */
+					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+
+					/* Update current song on playlist */
+					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+
+					/* Update current song on backend */
+					bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
+					g_object_unref(bmobj);
+
+					__update_current_song_info(cwin);
+					mpris_update_metadata_changed(cwin);
+				}
+			}
+
+			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
+				tagger = pragha_tagger_new();
+				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
+				pragha_tagger_set_changes(tagger, nmobj, changed);
+				pragha_tagger_apply_changes (tagger);
+				g_object_unref(tagger);
+			}
+		}
+	}
+	gtk_widget_destroy (dialog);
+}
+
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
-	GArray *loc_arr = NULL;
-	GPtrArray *file_arr = NULL;
-	gchar *file;
-	gint location_id, changed = 0;
-	PraghaMusicobject *omobj, *nmobj, *tmobj;
+	GtkWidget *dialog;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	/* Set the initial tags. */
-	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
+	dialog = pragha_tags_dialog_new();
 
-	/* Get new tags. */
-	nmobj = pragha_musicobject_new();
-	changed = tag_edit_dialog(tmobj, 0, nmobj, cwin);
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_edit_tags_dialog_response), cwin);
 
-	if (!changed)
-		goto exit;
-
-	if(pragha_musicobject_compare(tmobj, cwin->cstate->curr_mobj)) {
-		goto disksave;
-	}
+	pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), cwin->cstate->curr_mobj);
 	
-	/* Update public current song */
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-
-	/* Update current song on playlist */
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
-
-	/* Update current song on backend */
-	omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
-	pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-	g_object_unref(omobj);
-
-	/* Update gui and mpris */
-	__update_current_song_info(cwin);
-	mpris_update_metadata_changed(cwin);
-
-disksave:
-	/* Store the new tags */
-	if (G_LIKELY(pragha_musicobject_is_local_file (tmobj))) {
-		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		g_object_get(tmobj, "file", &file, NULL);
-		location_id = pragha_database_find_location (cwin->cdbase, file);
-		if (location_id) {
-			g_array_append_val(loc_arr, location_id);
-			pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, nmobj);
-			if(pragha_library_need_update(cwin->clibrary, changed))
-				pragha_database_change_tracks_done(cwin->cdbase);
-		}
-		g_array_free(loc_arr, TRUE);
-
-		file_arr = g_ptr_array_new();
-		g_ptr_array_add(file_arr, g_strdup(file));
-		pragha_update_local_files_change_tag(file_arr, changed, nmobj);
-		g_ptr_array_free(file_arr, TRUE);
-		g_free(file);
-	}
-
-exit:
-	g_object_unref(nmobj);
-	g_object_unref(tmobj);
+	gtk_widget_show (dialog);
 }
 
 /* Handler for the 'Quit' item in the pragha menu */

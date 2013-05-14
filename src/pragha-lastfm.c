@@ -29,6 +29,7 @@
 #include "pragha-simple-async.h"
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
+#include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
@@ -140,22 +141,74 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 /* Set correction basedm on lastfm now playing segestion.. */
 
 static void
+pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
+                                            gint            response_id,
+                                            struct con_win *cwin)
+{
+	PraghaMusicobject *nmobj, *bmobj;
+	PraghaTagger *tagger;
+	gint changed = 0;
+
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		return;
+	}
+
+	if (response_id == GTK_RESPONSE_OK) {
+		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
+		if(changed) {
+			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+
+			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
+					/* Update public current song */
+					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+
+					/* Update current song on playlist */
+					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+
+					/* Update current song on backend */
+					bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
+					g_object_unref(bmobj);
+
+					__update_current_song_info(cwin);
+					mpris_update_metadata_changed(cwin);
+				}
+			}
+
+			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
+				tagger = pragha_tagger_new();
+				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
+				pragha_tagger_set_changes(tagger, nmobj, changed);
+				pragha_tagger_apply_changes (tagger);
+				g_object_unref(tagger);
+			}
+		}
+	}
+
+	gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
+	gtk_widget_destroy (dialog);
+}
+
+static void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
-	PraghaMusicobject *omobj, *nmobj, *tmobj, *bmobj;
-	gchar *file = NULL, *otitle = NULL, *oartist = NULL, *oalbum = NULL;
+	PraghaMusicobject *tmobj, *nmobj;
+	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
-	gint location_id, changed = 0, prechanged = 0;
-	GPtrArray *file_arr = NULL;
-	GArray *loc_arr = NULL;
+	gint prechanged = 0;
+	GtkWidget *dialog;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
 	/* Get all info of current track */
-	omobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
 
-	g_object_get(omobj,
+	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
+
+	g_object_get(tmobj,
 	             "title", &otitle,
 	             "artist", &oartist,
 	             "album", &oalbum,
@@ -174,74 +227,28 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	             NULL);
 
 	/* Compare original mobj and suggested from lastfm */
-	if(g_ascii_strcasecmp(otitle, ntitle))
+	if(g_ascii_strcasecmp(otitle, ntitle)) {
+		pragha_musicobject_set_title(tmobj, ntitle);
 		prechanged |= TAG_TITLE_CHANGED;
-	if(g_ascii_strcasecmp(oartist, nartist))
+	}
+	if(g_ascii_strcasecmp(oartist, nartist)) {
+		pragha_musicobject_set_artist(tmobj, nartist);
 		prechanged |= TAG_ARTIST_CHANGED;
-	if(g_ascii_strcasecmp(oalbum, nalbum))
+	}
+	if(g_ascii_strcasecmp(oalbum, nalbum)) {
+		pragha_musicobject_set_album(tmobj, nalbum);
 		prechanged |= TAG_ALBUM_CHANGED;
-
-	/* Temp Musicobject to get new tags */
-	tmobj = pragha_musicobject_new();
-	changed = tag_edit_dialog(nmobj, prechanged, tmobj, cwin);
-
-	if (!changed)
-		goto exit;
-
-	if(pragha_musicobject_compare(omobj, cwin->cstate->curr_mobj)) {
-		goto disksave;
 	}
 
-	/* Update public current song */
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, tmobj);
+	dialog = pragha_tags_dialog_new();
 
-	/* Update current song on playlist */
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_corrected_by_lastfm_dialog_response), cwin);
 
-	/* Update current song on backend */
-	bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
-	pragha_update_musicobject_change_tag(bmobj, changed, tmobj);
-	g_object_unref(bmobj);
+	pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), tmobj);
+	pragha_tags_dialog_set_changed(PRAGHA_TAGS_DIALOG(dialog), prechanged);
 
-	/* Update gui and mpris */
-	__update_current_song_info(cwin);
-	mpris_update_metadata_changed(cwin);
-
-disksave:
-	/* Store the new tags */
-	if (G_LIKELY(pragha_musicobject_is_local_file (omobj))) {
-		loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
-		g_object_get(omobj, "file", &file, NULL);
-		location_id = pragha_database_find_location(cwin->cdbase, file);
-		if (location_id) {
-			g_array_append_val(loc_arr, location_id);
-			pragha_database_update_local_files_change_tag(cwin->cdbase, loc_arr, changed, tmobj);
-			if(pragha_library_need_update(cwin->clibrary, changed))
-				pragha_database_change_tracks_done(cwin->cdbase);
-		}
-		g_array_free(loc_arr, TRUE);
-
-		file_arr = g_ptr_array_new();
-		g_ptr_array_add(file_arr, g_strdup(file));
-		pragha_update_local_files_change_tag(file_arr, changed, tmobj);
-		g_ptr_array_free(file_arr, TRUE);
-		g_free(file);
-	}
-
-exit:
-	gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
-
-	g_object_unref(omobj);
-	g_object_unref(nmobj);
-	g_object_unref(tmobj);
-
-	g_free(otitle);
-	g_free(oartist);
-	g_free(oalbum);
-
-	g_free(ntitle);
-	g_free(nartist);
-	g_free(nalbum);
+	gtk_widget_show (dialog);
 }
 
 static GtkWidget*
