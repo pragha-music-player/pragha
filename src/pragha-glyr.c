@@ -161,7 +161,6 @@ static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
 	const gchar *artist = NULL, *album = NULL;
-	gchar *lartist = NULL, *lalbum = NULL;
 	gchar *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
 	GError *error = NULL;
@@ -182,23 +181,15 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-				g_object_get(cwin->cstate->curr_mobj,
-				             "artist", &lartist,
-				             "album", &lalbum,
-				             NULL);
-				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+				const gchar *lartist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
+				const gchar *lalbum = pragha_musicobject_get_album (cwin->cstate->curr_mobj);
 
 				if((0 == g_strcmp0(artist, lartist)) &&
 				   (0 == g_strcmp0(album, lalbum))) {
-					pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 					update_album_art(cwin->cstate->curr_mobj, cwin);
-					pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 					mpris_update_metadata_changed(cwin);
 				}
-				g_free(lartist);
-				g_free(lalbum);
 			}
 		}
 		else {
@@ -331,54 +322,37 @@ static void
 get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 {
 	struct con_win *cwin = glyr->cwin;
-	gchar *artist = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
-	             "artist", &artist,
-	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
 
 	if (string_is_empty(artist))
-		goto exit;
+		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
-
-exit:
-	g_free(artist);
 }
 
 static void
 get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 {
 	struct con_win *cwin = glyr->cwin;
-	gchar *artist = NULL, *title = NULL;
 
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
-	             "title", &title,
-	             "artist", &artist,
-	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
+	const gchar *title = pragha_musicobject_get_title (cwin->cstate->curr_mobj);
 
 	if (string_is_empty(artist) || string_is_empty(title))
-		goto exit;
+		return;
 
 	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
-
-exit:
-	g_free(artist);
-	g_free(title);
 }
 
 static void
@@ -418,7 +392,6 @@ static void
 related_get_album_art_handler (struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
-	gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
@@ -426,15 +399,11 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
-	             "artist", &artist,
-	             "album", &album,
-	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
+	const gchar *album = pragha_musicobject_get_album (cwin->cstate->curr_mobj);
 
 	if (string_is_empty(artist) || string_is_empty(album))
-		goto exit;
+		return;
 
 	album_art_path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
 
@@ -457,9 +426,6 @@ related_get_album_art_handler (struct con_win *cwin)
 
 exists:
 	g_free(album_art_path);
-exit:
-	g_free(artist);
-	g_free(album);
 }
 
 static gboolean
@@ -509,9 +475,7 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 		return;
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if(file_type == FILE_HTTP)
 		return;

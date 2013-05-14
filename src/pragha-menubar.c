@@ -644,9 +644,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 		return;
 
 	/* Set the initial tags. */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Get new tags. */
 	nmobj = pragha_musicobject_new();
@@ -655,18 +653,12 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	if(pragha_musicobject_compare(tmobj, cwin->cstate->curr_mobj)) {
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 		goto disksave;
 	}
-	else
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	
 	/* Update public current song */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update current song on playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
