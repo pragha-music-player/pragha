@@ -113,14 +113,12 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
 			_("Title"), pragha_musicobject_get_title(cwin->cstate->curr_mobj),
 			_("Artist"), pragha_musicobject_get_artist(cwin->cstate->curr_mobj),
 			_("Album"), pragha_musicobject_get_album(cwin->cstate->curr_mobj),
 			_("Length"), pragha_toolbar_get_progress_text(cwin->toolbar),
 			pragha_toolbar_get_length_text(cwin->toolbar));
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 	gtk_tooltip_set_markup (tooltip, markup_text);
 	g_free(markup_text);
