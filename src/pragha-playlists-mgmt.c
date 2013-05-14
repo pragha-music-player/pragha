@@ -136,31 +136,19 @@ static gboolean
 overwrite_existing_playlist(const gchar *playlist, GtkWidget *parent)
 {
 	GtkWidget *dialog;
-	gboolean choice = FALSE;
-	gint ret;
+	gint response;
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_QUESTION,
-				GTK_BUTTONS_YES_NO,
-				_("Do you want to overwrite the playlist: %s ?"),
-				playlist);
+	                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                GTK_MESSAGE_QUESTION,
+	                                GTK_BUTTONS_YES_NO,
+	                                _("Do you want to overwrite the playlist: %s ?"), playlist);
 
-	ret = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch(ret) {
-	case GTK_RESPONSE_YES:
-		choice = TRUE;
-		break;
-	case GTK_RESPONSE_NO:
-		choice = FALSE;
-		break;
-	default:
-		break;
-	}
+	response = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	gtk_widget_destroy(dialog);
-	return choice;
+
+	return (response == GTK_RESPONSE_YES);
 }
 
 GIOChannel*
