@@ -57,9 +57,7 @@ pragha_lastfm_async_data_new (struct con_win *cwin)
 {
 	PraghaLastfmAsyncData *data = g_slice_new (PraghaLastfmAsyncData);
 	data->cwin = cwin;
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	data->mobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	return data;
 }
 
@@ -155,9 +153,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 		return;
 
 	/* Get all info of current track */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	omobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	g_object_get(omobj,
 	             "title", &otitle,
@@ -192,18 +188,12 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 	if (!changed)
 		goto exit;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	if(pragha_musicobject_compare(omobj, cwin->cstate->curr_mobj)) {
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 		goto disksave;
 	}
-	else
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update public current song */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, tmobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update current song on playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
@@ -821,11 +811,9 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 		pragha_toolbar_add_extention_widget(cwin->toolbar, cwin->clastfm->ntag_lastfm_button);
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_get(cwin->cstate->curr_mobj,
 	             "file", &cfile,
 	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	pragha_mutex_lock (cwin->clastfm->nmobj_mutex);
 	g_object_get(cwin->clastfm->nmobj,
@@ -939,13 +927,11 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	g_object_get(cwin->cstate->curr_mobj,
 	             "title", &title,
 	             "artist", &artist,
 	             "length", &length,
 	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (string_is_empty(title) || string_is_empty(artist) || (length < 30))
 		goto exit;

@@ -188,15 +188,11 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 			/* New song?. */
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
 				/* Set public musicobject based on backend. */
-				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 				cwin->cstate->curr_mobj = pragha_musicobject_dup(pragha_backend_get_musicobject(backend));
 				g_object_ref(cwin->cstate->curr_mobj);
-				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
-				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
 				                     pragha_musicobject_get_file(cwin->cstate->curr_mobj));
-				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 				/* Update current song info */
 				__update_current_song_info(cwin);
@@ -206,9 +202,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 				/* Update album art */
-				pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 				update_album_art(cwin->cstate->curr_mobj, cwin);
-				pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 				/* Show osd, and inform new album art. */
 				show_osd(cwin);
@@ -221,12 +215,10 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 			/* Nothing here. */
 			break;
 		case ST_STOPPED:
-			pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 			if(cwin->cstate->curr_mobj) {
 				g_object_unref(cwin->cstate->curr_mobj);
 				cwin->cstate->curr_mobj = NULL;
 			}
-			pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 			break;
 		default:
 			break;
@@ -250,9 +242,7 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update the public mobj */
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	/* Update change on gui */
 	__update_current_song_info(cwin);

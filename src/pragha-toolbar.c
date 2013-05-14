@@ -169,9 +169,7 @@ void __update_progress_song_info(struct con_win *cwin, gint progress)
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(cwin->toolbar->track_time_label), str_cur_pos);
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (length == 0 || !pragha_preferences_get_timer_remaining_mode (cwin->preferences)) {
 		tot_length = convert_length_str(length);
@@ -203,16 +201,11 @@ void update_current_song_info(struct con_win *cwin)
 void __update_current_song_info(struct con_win *cwin)
 {
 	gchar *str = NULL, *str_title = NULL;
-	gchar *file = NULL, *title = NULL, *artist = NULL, *album = NULL;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
-	             "file", &file,
-	             "title", &title,
-	             "artist", &artist,
-	             "album", &album,
-	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	const gchar *file = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
+	const gchar *title = pragha_musicobject_get_title (cwin->cstate->curr_mobj);
+	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
+	const gchar *album = pragha_musicobject_get_album (cwin->cstate->curr_mobj);
 
 	if(string_is_not_empty(title))
 		str_title = g_strdup(title);
@@ -237,10 +230,6 @@ void __update_current_song_info(struct con_win *cwin)
 
 	gtk_label_set_markup(GTK_LABEL(cwin->toolbar->now_playing_label), str);
 
-	g_free(file);
-	g_free(title);
-	g_free(artist);
-	g_free(album);
 	g_free(str_title);
 	g_free(str);
 }
@@ -260,9 +249,7 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 {
 	gdouble fraction = 0;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	gint length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (length > 0) {
 		fraction = (gdouble)progress / (gdouble)length;
@@ -272,9 +259,7 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 	}
 	else {
 		gint nlength = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend));
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		pragha_musicobject_set_length(cwin->cstate->curr_mobj, nlength);
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 	}
 }
 
@@ -319,9 +304,7 @@ pragha_toolbar_progress_bar_event_seek(GtkWidget *widget,
 	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
 		return;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 	if (length == 0)
 		return;

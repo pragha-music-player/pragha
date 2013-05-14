@@ -207,15 +207,10 @@ void
 gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data)
 {
 	GtkWidget *dialog;
-	gchar *file = NULL;
 
 	struct con_win *cwin = user_data;
 
-	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
-	g_object_get(cwin->cstate->curr_mobj,
-	             "file", &file,
-	             NULL);
-	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+	const gchar *file = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
 
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -234,8 +229,6 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 			 cwin);
 
 	gtk_widget_show_all(dialog);
-
-	g_free(file);
 }
 
 void

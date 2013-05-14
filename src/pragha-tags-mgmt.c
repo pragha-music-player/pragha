@@ -332,9 +332,7 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 
 	if(need_update) {
 		/* Update the public mobj */
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, omobj);
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
@@ -412,9 +410,7 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	/* If change current song, update gui and mpris. */
 	if(need_update) {
 		/* Update the public mobj */
-		pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
 		pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-		pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
