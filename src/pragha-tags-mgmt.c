@@ -268,6 +268,12 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 	GList *rlist = NULL;
 	gboolean need_update = FALSE;
 
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		return;
+	}
+
 	rlist = g_object_get_data (G_OBJECT (dialog), "reference-list");
 
 	if (response_id == GTK_RESPONSE_OK) {

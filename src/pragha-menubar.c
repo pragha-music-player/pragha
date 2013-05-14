@@ -642,6 +642,12 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 	PraghaTagger *tagger;
 	gint changed = 0;
 
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		return;
+	}
+
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(changed) {

@@ -2289,6 +2289,12 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 	GArray *loc_arr = NULL;
 	gint changed = 0, elem = 0, ielem;
 
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		return;
+	}
+
 	loc_arr = g_object_get_data (G_OBJECT (dialog), "local-array");
 
 	if (response_id == GTK_RESPONSE_OK) {

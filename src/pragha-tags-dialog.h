@@ -45,6 +45,8 @@ gint               pragha_tags_dialog_get_changed     (PraghaTagsDialog *dialog)
 
 GtkWidget          *pragha_tags_dialog_new            (void);
 
+void                pragha_track_properties_dialog    (PraghaMusicobject *mobj, GtkWidget *parent);
+
 G_END_DECLS
 
 #endif /* PRAGHA_TAGS_DIALOG_H */
