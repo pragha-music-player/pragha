@@ -189,7 +189,6 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
 				/* Set public musicobject based on backend. */
 				cwin->cstate->curr_mobj = pragha_musicobject_dup(pragha_backend_get_musicobject(backend));
-				g_object_ref(cwin->cstate->curr_mobj);
 
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
 				                     pragha_musicobject_get_file(cwin->cstate->curr_mobj));
