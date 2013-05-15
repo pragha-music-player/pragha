@@ -35,7 +35,6 @@
 
 static void     pragha_tags_dialog_dispose            (GObject *object);
 static void     pragha_tags_dialog_finalize           (GObject *object);
-static void     pragha_tags_dialog_unrealize          (GtkWidget* widget);
 
 static void     pragha_tag_entry_change               (GtkEntry *entry, GtkCheckButton *check);
 static void     pragha_tag_entry_clear_pressed        (GtkEntry *entry, gint position, GdkEventButton *event);
@@ -78,14 +77,10 @@ static void
 pragha_tags_dialog_class_init (PraghaTagsDialogClass *klass)
 {
   GObjectClass   *gobject_class;
-  GtkWidgetClass *gtkwidget_class;
 
   gobject_class = G_OBJECT_CLASS (klass);
   gobject_class->dispose = pragha_tags_dialog_dispose;
   gobject_class->finalize = pragha_tags_dialog_finalize;
-
-  gtkwidget_class = GTK_WIDGET_CLASS (klass);
-  gtkwidget_class->unrealize = pragha_tags_dialog_unrealize;
 }
 
 static void
@@ -166,12 +161,15 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	completion = pragha_tags_get_entry_completion_from_table ("ARTIST");
 	gtk_entry_set_completion(GTK_ENTRY(entry_artist), completion);
+	g_object_unref (completion);
 
 	completion = pragha_tags_get_entry_completion_from_table ("ALBUM");
 	gtk_entry_set_completion(GTK_ENTRY(entry_album), completion);
+	g_object_unref (completion);
 
 	completion = pragha_tags_get_entry_completion_from_table ("GENRE");
 	gtk_entry_set_completion(GTK_ENTRY(entry_genre), completion);
+	g_object_unref (completion);
 
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
@@ -563,32 +561,6 @@ pragha_tags_dialog_finalize (GObject *object)
 	 */
 
 	(*G_OBJECT_CLASS (pragha_tags_dialog_parent_class)->finalize) (object);
-}
-
-static void
-pragha_tags_dialog_unrealize (GtkWidget* widget)
-{
-	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (widget);
-
-	GtkEntryCompletion *completion;
-	GtkTreeModel *completion_model;
-
-	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->artist_entry));
-	completion_model = gtk_entry_completion_get_model(completion);
-	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
-	g_object_unref(completion_model);
-
-	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->album_entry));
-	completion_model = gtk_entry_completion_get_model(completion);
-	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
-	g_object_unref(completion_model);
-
-	completion = gtk_entry_get_completion(GTK_ENTRY(dialog->genre_entry));
-	completion_model = gtk_entry_completion_get_model(completion);
-	gtk_list_store_clear(GTK_LIST_STORE(completion_model));
-	g_object_unref(completion_model);
-
-	(*GTK_WIDGET_CLASS (pragha_tags_dialog_parent_class)->unrealize) (widget);
 }
 
 GtkWidget *
