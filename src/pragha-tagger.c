@@ -91,16 +91,31 @@ pragha_tagger_apply_changes(PraghaTagger *tagger)
 }
 
 static void
+pragha_tagger_dispose (GObject *object)
+{
+	PraghaTagger *tagger = PRAGHA_TAGGER (object);
+	PraghaTaggerPrivate *priv = tagger->priv;
+
+	if (priv->mobj) {
+		g_object_unref (priv->mobj);
+		priv->mobj = NULL;
+	}
+	if (priv->cdbase) {
+		g_object_unref (priv->cdbase);
+		priv->cdbase = NULL;
+	}
+
+	G_OBJECT_CLASS (pragha_tagger_parent_class)->dispose (object);
+}
+
+static void
 pragha_tagger_finalize (GObject *object)
 {
 	PraghaTagger *tagger = PRAGHA_TAGGER(object);
 	PraghaTaggerPrivate *priv = tagger->priv;
 
-	g_object_unref(priv->mobj);
 	g_array_free(priv->loc_arr, TRUE);
 	g_ptr_array_free(priv->file_arr, TRUE);
-
-	g_object_unref(priv->cdbase);
 
 	G_OBJECT_CLASS(pragha_tagger_parent_class)->finalize(object);
 }
@@ -111,6 +126,7 @@ pragha_tagger_class_init (PraghaTaggerClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS(klass);
+	object_class->dispose = pragha_tagger_dispose;
 	object_class->finalize = pragha_tagger_finalize;
 
 	g_type_class_add_private(object_class, sizeof(PraghaTaggerPrivate));
