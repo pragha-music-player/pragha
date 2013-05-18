@@ -114,18 +114,19 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 	}
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-		const char *file = pragha_musicobject_get_file(cwin->cstate->curr_mobj);
-		const char *title = pragha_musicobject_get_title(cwin->cstate->curr_mobj);
-		const char *artist = pragha_musicobject_get_artist(cwin->cstate->curr_mobj);
-		const char *album = pragha_musicobject_get_album(cwin->cstate->curr_mobj);
-		const char *genre = pragha_musicobject_get_genre(cwin->cstate->curr_mobj);
-		guint year = pragha_musicobject_get_year(cwin->cstate->curr_mobj);
-		guint track_no = pragha_musicobject_get_track_no(cwin->cstate->curr_mobj);
-		const char *comment = pragha_musicobject_get_comment(cwin->cstate->curr_mobj);
-		gint length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
-		gint bitrate = pragha_musicobject_get_bitrate(cwin->cstate->curr_mobj);
-		gint channels = pragha_musicobject_get_channels(cwin->cstate->curr_mobj);
-		gint samplerate = pragha_musicobject_get_samplerate(cwin->cstate->curr_mobj);
+		PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+		const char *file = pragha_musicobject_get_file (mobj);
+		const char *title = pragha_musicobject_get_title (mobj);
+		const char *artist = pragha_musicobject_get_artist (mobj);
+		const char *album = pragha_musicobject_get_album (mobj);
+		const char *genre = pragha_musicobject_get_genre (mobj);
+		guint year = pragha_musicobject_get_year (mobj);
+		guint track_no = pragha_musicobject_get_track_no (mobj);
+		const char *comment = pragha_musicobject_get_comment (mobj);
+		gint length = pragha_musicobject_get_length (mobj);
+		gint bitrate = pragha_musicobject_get_bitrate (mobj);
+		gint channels = pragha_musicobject_get_channels (mobj);
+		gint samplerate = pragha_musicobject_get_samplerate (mobj);
 
 		dbus_message_append_args(reply_msg,
 			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,

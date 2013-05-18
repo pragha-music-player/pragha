@@ -58,7 +58,7 @@ pragha_lastfm_async_data_new (struct con_win *cwin)
 {
 	PraghaLastfmAsyncData *data = g_slice_new (PraghaLastfmAsyncData);
 	data->cwin = cwin;
-	data->mobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
+	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (cwin->backend));
 	return data;
 }
 
@@ -161,9 +161,10 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				if(pragha_musicobject_compare(nmobj, cwin->cstate->curr_mobj) == 0) {
+				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
 					/* Update public current song */
-					pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
+					pragha_update_musicobject_change_tag(current_mobj, changed, nmobj);
 
 					/* Update current song on playlist */
 					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
@@ -206,7 +207,7 @@ edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 
 	/* Get all info of current track */
 
-	tmobj = pragha_musicobject_dup (cwin->cstate->curr_mobj);
+	tmobj = pragha_musicobject_dup (pragha_backend_get_musicobject (cwin->backend));
 
 	g_object_get(tmobj,
 	             "title", &otitle,
@@ -818,7 +819,7 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 		pragha_toolbar_add_extention_widget(cwin->toolbar, cwin->clastfm->ntag_lastfm_button);
 	}
 
-	g_object_get(cwin->cstate->curr_mobj,
+	g_object_get(pragha_backend_get_musicobject (cwin->backend),
 	             "file", &cfile,
 	             NULL);
 
@@ -934,7 +935,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	g_object_get(cwin->cstate->curr_mobj,
+	g_object_get(pragha_backend_get_musicobject (cwin->backend),
 	             "title", &title,
 	             "artist", &artist,
 	             "length", &length,

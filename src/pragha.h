@@ -118,7 +118,6 @@ struct con_pref {
  * @filter_entry: Search entry for filtering library
  * @cdda_drive: Global handle for the audio cd
  * @cddb_conn: libcddb connection
- * @curr_mobj: musicobject of currently playing track
  */
 
 struct con_state {
@@ -128,7 +127,6 @@ struct con_state {
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;
-	PraghaMusicobject *curr_mobj;
 };
 
 struct con_win {

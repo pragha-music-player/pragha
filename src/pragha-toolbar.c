@@ -169,7 +169,7 @@ void __update_progress_song_info(struct con_win *cwin, gint progress)
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(cwin->toolbar->track_time_label), str_cur_pos);
 
-	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (cwin->backend));
 
 	if (length == 0 || !pragha_preferences_get_timer_remaining_mode (cwin->preferences)) {
 		tot_length = convert_length_str(length);
@@ -202,10 +202,11 @@ void __update_current_song_info(struct con_win *cwin)
 {
 	gchar *str = NULL, *str_title = NULL;
 
-	const gchar *file = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
-	const gchar *title = pragha_musicobject_get_title (cwin->cstate->curr_mobj);
-	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
-	const gchar *album = pragha_musicobject_get_album (cwin->cstate->curr_mobj);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	const gchar *file = pragha_musicobject_get_file (mobj);
+	const gchar *title = pragha_musicobject_get_title (mobj);
+	const gchar *artist = pragha_musicobject_get_artist (mobj);
+	const gchar *album = pragha_musicobject_get_album (mobj);
 
 	if(string_is_not_empty(title))
 		str_title = g_strdup(title);
@@ -249,7 +250,8 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 {
 	gdouble fraction = 0;
 
-	gint length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	gint length = pragha_musicobject_get_length (mobj);
 
 	if (length > 0) {
 		fraction = (gdouble)progress / (gdouble)length;
@@ -259,7 +261,7 @@ static void __update_track_progress_bar(struct con_win *cwin, gint progress)
 	}
 	else {
 		gint nlength = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(cwin->backend));
-		pragha_musicobject_set_length(cwin->cstate->curr_mobj, nlength);
+		pragha_musicobject_set_length (mobj, nlength);
 	}
 }
 
@@ -304,7 +306,7 @@ pragha_toolbar_progress_bar_event_seek(GtkWidget *widget,
 	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
 		return;
 
-	length = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (cwin->backend));
 
 	if (length == 0)
 		return;
@@ -329,7 +331,7 @@ update_album_art (struct con_win *cwin)
 
 	gchar *album_path = NULL, *path = NULL;
 
-	PraghaMusicobject *mobj = cwin->cstate->curr_mobj;
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
 
 	if (pragha_preferences_get_show_album_art(cwin->preferences)) {
 		if (G_LIKELY(mobj &&

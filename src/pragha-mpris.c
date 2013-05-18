@@ -303,7 +303,7 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	gint64 curr_pos = pragha_backend_get_current_position (cwin->backend) / GST_USECOND;
 	gint64 seek = (curr_pos + param) / GST_MSECOND;
 
-	seek = CLAMP (seek, 0, pragha_musicobject_get_length(cwin->cstate->curr_mobj));
+	seek = CLAMP (seek, 0, pragha_musicobject_get_length (pragha_backend_get_musicobject (cwin->backend)));
 
 	pragha_backend_seek(cwin->backend, seek);
 
@@ -321,10 +321,11 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 	g_free(track_id);
 
 	/* FIXME: Ugly hack... */
-	if(mobj != NULL && mobj == cwin->cstate->curr_mobj) {
+	PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+	if(mobj != NULL && mobj == current_mobj) {
 		gint seek = (param / 1000000);
-		if (seek >= pragha_musicobject_get_length(cwin->cstate->curr_mobj))
-			seek = pragha_musicobject_get_length(cwin->cstate->curr_mobj);
+		if (seek >= pragha_musicobject_get_length(current_mobj))
+			seek = pragha_musicobject_get_length(current_mobj);
 
 		pragha_backend_seek(cwin->backend, seek);
 
@@ -518,7 +519,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("a{sv}"));
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-		handle_get_metadata(cwin->cstate->curr_mobj, &b);
+		handle_get_metadata(pragha_backend_get_musicobject(cwin->backend), &b);
 
 		/* Append the album art url metadata. */
 		albumart = pragha_toolbar_get_album_art(cwin->toolbar);
@@ -1021,8 +1022,7 @@ void mpris_update_any(struct con_win *cwin)
 	CDEBUG(DBG_MPRIS, "MPRIS update any");
 
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-		if(cwin->cstate->curr_mobj)
-			newtitle = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
+		newtitle = pragha_musicobject_get_file (pragha_backend_get_musicobject (cwin->backend));
 	}
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
@@ -1210,7 +1210,7 @@ void mpris_update_tracklist_replaced(struct con_win *cwin)
 	}
 
 	g_variant_builder_close(&b);
-	g_variant_builder_add_value(&b, handle_get_trackid(cwin->cstate->curr_mobj));
+	g_variant_builder_add_value(&b, handle_get_trackid(pragha_backend_get_musicobject(cwin->backend)));
 	g_dbus_connection_emit_signal(cwin->cmpris2->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.TrackList", "TrackListReplaced",
 		g_variant_builder_end(&b), NULL);
