@@ -201,7 +201,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 				/* Update album art */
-				update_album_art(cwin->cstate->curr_mobj, cwin);
+				update_album_art (cwin);
 
 				/* Show osd, and inform new album art. */
 				show_osd(cwin);

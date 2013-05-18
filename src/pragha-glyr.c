@@ -186,7 +186,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 				if((0 == g_strcmp0(artist, lartist)) &&
 				   (0 == g_strcmp0(album, lalbum))) {
-					update_album_art(cwin->cstate->curr_mobj, cwin);
+					update_album_art (cwin);
 
 					mpris_update_metadata_changed(cwin);
 				}
