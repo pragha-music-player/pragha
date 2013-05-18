@@ -32,7 +32,7 @@ typedef struct _PraghaToolbar PraghaToolbar;
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
 
-void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin);
+void update_album_art (struct con_win *cwin);
 
 void pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget);
 

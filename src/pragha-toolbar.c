@@ -322,11 +322,14 @@ pragha_toolbar_progress_bar_event_seek(GtkWidget *widget,
 	pragha_backend_seek(cwin->backend, seek);
 }
 
-void update_album_art(PraghaMusicobject *mobj, struct con_win *cwin)
+void
+update_album_art (struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
 
 	gchar *album_path = NULL, *path = NULL;
+
+	PraghaMusicobject *mobj = cwin->cstate->curr_mobj;
 
 	if (pragha_preferences_get_show_album_art(cwin->preferences)) {
 		if (G_LIKELY(mobj &&
