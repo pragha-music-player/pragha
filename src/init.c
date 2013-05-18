@@ -280,8 +280,6 @@ gint init_first_state(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing state");
 
-	cwin->cstate->curr_mobj = NULL;
-
 	cwin->osd_notify = NULL;
 
 	return 0;

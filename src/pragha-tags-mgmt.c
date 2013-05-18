@@ -241,7 +241,8 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 	/* If change current song, update gui and mpris. */
 	if(need_update) {
 		/* Update the public mobj */
-		pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, omobj);
+		PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 			__update_current_song_info(cwin);
@@ -261,7 +262,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
                                            gint            response_id,
                                            struct con_win *cwin)
 {
-	PraghaMusicobject *nmobj, *omobj;
+	PraghaMusicobject *nmobj;
 	gint changed = 0;
 	GList *rlist = NULL;
 	gboolean need_update = FALSE;
@@ -301,12 +302,8 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 
 		if(need_update) {
 			/* Update the public mobj */
-			pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
-
-			/* Update current song on backend */
-			omobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
-			pragha_update_musicobject_change_tag(omobj, changed, nmobj);
-			g_object_unref(omobj);
+			PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				__update_current_song_info(cwin);

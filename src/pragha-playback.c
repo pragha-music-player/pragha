@@ -187,11 +187,8 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 		case ST_PLAYING:
 			/* New song?. */
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
-				/* Set public musicobject based on backend. */
-				cwin->cstate->curr_mobj = pragha_musicobject_dup(pragha_backend_get_musicobject(backend));
-
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
-				                     pragha_musicobject_get_file(cwin->cstate->curr_mobj));
+				                     pragha_musicobject_get_file(pragha_backend_get_musicobject(cwin->backend)));
 
 				/* Update current song info */
 				__update_current_song_info(cwin);
@@ -214,10 +211,6 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 			/* Nothing here. */
 			break;
 		case ST_STOPPED:
-			if(cwin->cstate->curr_mobj) {
-				g_object_unref(cwin->cstate->curr_mobj);
-				cwin->cstate->curr_mobj = NULL;
-			}
 			break;
 		default:
 			break;
@@ -239,9 +232,6 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 		return;
 
 	nmobj = pragha_backend_get_musicobject(backend);
-
-	/* Update the public mobj */
-	pragha_update_musicobject_change_tag(cwin->cstate->curr_mobj, changed, nmobj);
 
 	/* Update change on gui */
 	__update_current_song_info(cwin);

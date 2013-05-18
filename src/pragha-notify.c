@@ -100,11 +100,12 @@ show_osd (struct con_win *cwin)
 	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
 		return;
 
-	const gchar *file = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
-	const gchar *title = pragha_musicobject_get_title (cwin->cstate->curr_mobj);
-	const gchar *artist = pragha_musicobject_get_artist (cwin->cstate->curr_mobj);
-	const gchar *album = pragha_musicobject_get_album (cwin->cstate->curr_mobj);
-	gint length = pragha_musicobject_get_length (cwin->cstate->curr_mobj);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	const gchar *file = pragha_musicobject_get_file (mobj);
+	const gchar *title = pragha_musicobject_get_title (mobj);
+	const gchar *artist = pragha_musicobject_get_artist (mobj);
+	const gchar *album = pragha_musicobject_get_album (mobj);
+	gint length = pragha_musicobject_get_length (mobj);
 
 	if(string_is_not_empty(title))
 		summary = g_strdup(title);

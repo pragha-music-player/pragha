@@ -210,7 +210,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 
 	struct con_win *cwin = user_data;
 
-	const gchar *file = pragha_musicobject_get_file (cwin->cstate->curr_mobj);
+	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (cwin->backend));
 
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
