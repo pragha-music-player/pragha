@@ -90,17 +90,14 @@ gint init_config(struct con_win *cwin)
 {
 	GError *error = NULL;
 	gint *win_size, *win_position;
-	gchar *u_file;
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean last_folder_f;
 	gboolean start_mode_f, window_size_f, window_position_f, album_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	last_folder_f = FALSE;
 	start_mode_f = window_size_f = window_position_f = album_f = FALSE;
 	#ifdef HAVE_LIBCLASTFM
 	gboolean lastfm_f = FALSE;
@@ -175,28 +172,6 @@ gint init_config(struct con_win *cwin)
 			start_mode_f = TRUE;
 		}
 
-		u_file = g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					       GROUP_GENERAL,
-					       KEY_LAST_FOLDER,
-					       &error);
-		if (!u_file) {
-			g_error_free(error);
-			error = NULL;
-			last_folder_f = TRUE;
-		} else {
-			cwin->cstate->last_folder = g_filename_from_utf8(u_file,
-							   -1, NULL, NULL, &error);
-			if (!cwin->cstate->last_folder) {
-				g_warning("Unable to get filename "
-					  "from UTF-8 string: %s",
-					  u_file);
-				g_error_free(error);
-				error = NULL;
-				last_folder_f = TRUE;
-			}
-			g_free(u_file);
-		}
-
 		/* Retrieve Services Internet preferences */
 		#ifdef HAVE_LIBCLASTFM
 		cwin->cpref->lastfm_support =
@@ -245,8 +220,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || last_folder_f)
-		cwin->cstate->last_folder = g_strdup (g_get_home_dir());
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 	#ifdef HAVE_LIBCLASTFM
@@ -295,8 +268,6 @@ void state_free (struct con_state *cstate)
 		cddb_destroy(cstate->cddb_conn);
 		libcddb_shutdown();
 	}
-
-	g_free(cstate->last_folder);
 
 	g_slice_free(struct con_state, cstate);
 }

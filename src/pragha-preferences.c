@@ -64,6 +64,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   controls_below;
 	gboolean   remember_state;
 	/* Misc preferences. */
+	gchar     *last_folder;
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
 	gboolean   show_osd;
@@ -102,6 +103,7 @@ enum
 	PROP_SHOW_STATUS_ICON,
 	PROP_CONTROLS_BELOW,
 	PROP_REMEMBER_STATE,
+	PROP_LAST_FOLDER,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
 	PROP_SHOW_OSD,
@@ -1002,6 +1004,34 @@ pragha_preferences_set_remember_state (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_last_folder:
+ *
+ */
+const gchar *
+pragha_preferences_get_last_folder (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return preferences->priv->last_folder;
+}
+
+/**
+ * pragha_preferences_set_last_folder:
+ *
+ */
+void
+pragha_preferences_set_last_folder (PraghaPreferences *preferences,
+                                    const gchar *last_folder)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_free(preferences->priv->last_folder);
+	preferences->priv->last_folder = g_strdup(last_folder);
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LAST_FOLDER]);
+}
+
+/**
  * pragha_preferences_get_add_recursively:
  *
  */
@@ -1251,6 +1281,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
+	gchar *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
@@ -1582,6 +1613,26 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_remember_state(preferences, remember_state);
 	}
 
+	last_folder = g_key_file_get_string(priv->rc_keyfile,
+	                                    GROUP_GENERAL,
+	                                    KEY_LAST_FOLDER,
+	                                    &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		last_folder_converted = g_filename_from_utf8(last_folder, -1, NULL, NULL, &error);
+		if (error) {
+			g_warning("Unable to get filename from UTF-8 string: %s", error->message);
+			g_error_free(error);
+			error = NULL;
+		}
+		else {
+			pragha_preferences_set_last_folder(preferences, last_folder_converted);
+		}
+	}
+
 	add_recursively = g_key_file_get_boolean(priv->rc_keyfile,
 	                                         GROUP_GENERAL,
 	                                         KEY_ADD_RECURSIVELY_FILES,
@@ -1694,6 +1745,8 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	g_free(audio_device);
 	g_free(audio_cd_device);
 	g_free(album_art_pattern);
+	g_free(last_folder);
+	g_free(last_folder_converted);
 }
 
 static void
@@ -1814,6 +1867,23 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_REMEMBER_STATE,
 	                       priv->remember_state);
 
+	gchar *last_folder_converted = g_filename_to_utf8(priv->last_folder, -1, NULL, NULL, &error);
+	if (error) {
+		g_warning("Unable to convert filename to UTF-8: %s", error->message);
+		g_error_free(error);
+		error = NULL;
+	}
+	if (string_is_not_empty(last_folder_converted))
+		g_key_file_set_string(priv->rc_keyfile,
+		                      GROUP_GENERAL,
+		                      KEY_LAST_FOLDER,
+		                      last_folder_converted);
+	else
+		pragha_preferences_remove_key(preferences,
+		                              GROUP_GENERAL,
+		                              KEY_LAST_FOLDER);
+	g_free(last_folder_converted);
+
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_ADD_RECURSIVELY_FILES,
@@ -1865,6 +1935,7 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->audio_device);
 	g_free(priv->audio_cd_device);
 	g_free(priv->album_art_pattern);
+	g_free(priv->last_folder);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
@@ -1946,6 +2017,9 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_REMEMBER_STATE:
 			g_value_set_boolean (value, pragha_preferences_get_remember_state(preferences));
+			break;
+		case PROP_LAST_FOLDER:
+			g_value_set_string (value, pragha_preferences_get_last_folder(preferences));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			g_value_set_boolean (value, pragha_preferences_get_add_recursively(preferences));
@@ -2056,6 +2130,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_REMEMBER_STATE:
 			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_LAST_FOLDER:
+			pragha_preferences_set_last_folder(preferences, g_value_get_string(value));
 			break;
 		case PROP_ADD_RECURSIVELY:
 			pragha_preferences_set_add_recursively(preferences, g_value_get_boolean(value));
@@ -2374,6 +2451,18 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Remember State Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:last_folder:
+	  *
+	  */
+	gParamSpecs[PROP_LAST_FOLDER] =
+		g_param_spec_string("last-folder",
+		                    "LastFolder",
+		                    "Last folder used in file chooser",
+		                    g_get_home_dir(),
+		                    PRAGHA_PREF_PARAMS);
+
 
 	/**
 	  * PraghaPreferences:add_recursively:
