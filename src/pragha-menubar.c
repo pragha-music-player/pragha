@@ -284,8 +284,10 @@ add_button_cb(GtkWidget *widget, gpointer data)
 
 	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
 	pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
-	g_free (cwin->cstate->last_folder);
-	cwin->cstate->last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
+
+	gchar *last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
+	pragha_preferences_set_last_folder (cwin->preferences, last_folder);
+	g_free (last_folder);
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
 
@@ -343,9 +345,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
 
-	if (cwin->cstate->last_folder)
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser),
-		cwin->cstate->last_folder);
+	const gchar *last_folder = pragha_preferences_get_last_folder (cwin->preferences);
+	if (string_is_not_empty(last_folder))
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
 
 	hbox = gtk_hbox_new(FALSE, 0);
 

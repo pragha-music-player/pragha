@@ -821,10 +821,8 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gchar *u_file = NULL;
 	gint *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y;
-	GError *error = NULL;
 	GdkWindowState state;
 
 	/* General options*/
@@ -835,23 +833,6 @@ void save_preferences(struct con_win *cwin)
 			      GROUP_GENERAL,
 			      KEY_INSTALLED_VERSION,
 			      PACKAGE_VERSION);
-
-	/* Save last folder used in file chooser */
-
-	u_file = g_filename_to_utf8(cwin->cstate->last_folder, -1,
-				    NULL, NULL, &error);
-	if (!u_file) {
-		g_warning("Unable to convert file to UTF-8: %s",
-			  cwin->cstate->last_folder);
-		g_error_free(error);
-		error = NULL;
-	} else {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_GENERAL,
-				      KEY_LAST_FOLDER,
-				      u_file);
-		g_free(u_file);
-	}
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
 

@@ -114,7 +114,6 @@ struct con_pref {
  *
  * @unique_instance: If current invocation of app is unique
  * @view_change: If library view change is in progress
- * @last_folder: Last polder used in file chooser
  * @filter_entry: Search entry for filtering library
  * @cdda_drive: Global handle for the audio cd
  * @cddb_conn: libcddb connection
@@ -123,7 +122,6 @@ struct con_pref {
 struct con_state {
 	gboolean unique_instance;
 	gboolean first_run;
-	gchar *last_folder;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
 	cddb_disc_t *cddb_disc;

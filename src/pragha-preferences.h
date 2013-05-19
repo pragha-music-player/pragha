@@ -351,6 +351,13 @@ void
 pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
                                      gint sidebar_size);
 
+const gchar *
+pragha_preferences_get_last_folder (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_last_folder (PraghaPreferences *preferences,
+                                    const gchar *last_folder);
+
 gboolean
 pragha_preferences_get_add_recursively (PraghaPreferences *preferences);
 
