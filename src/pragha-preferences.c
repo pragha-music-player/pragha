@@ -1795,7 +1795,7 @@ pragha_preferences_finalize (GObject *object)
 		                      priv->album_art_pattern);
 	else
 		pragha_preferences_remove_key(preferences,
-		                              GROUP_AUDIO,
+		                              GROUP_GENERAL,
 		                              KEY_ALBUM_ART_PATTERN);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
