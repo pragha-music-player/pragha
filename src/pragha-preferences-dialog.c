@@ -922,28 +922,12 @@ void save_preferences(struct con_win *cwin)
 			       cwin->cpref->lastfm_support);
 
 	if (!cwin->cpref->lastfm_support) {
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_SERVICES) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_SERVICES,
-				       KEY_LASTFM_USER,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_USER,
-					      &error);
-		}
-		if (g_key_file_has_group(cwin->cpref->configrc_keyfile,
-					 GROUP_SERVICES) &&
-		    g_key_file_has_key(cwin->cpref->configrc_keyfile,
-				       GROUP_SERVICES,
-				       KEY_LASTFM_PASS,
-				       &error)) {
-			g_key_file_remove_key(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_PASS,
-					      &error);
-		}
+		pragha_preferences_remove_key(cwin->preferences,
+		                              GROUP_SERVICES,
+		                              KEY_LASTFM_USER);
+		pragha_preferences_remove_key(cwin->preferences,
+		                              GROUP_SERVICES,
+		                              KEY_LASTFM_PASS);
 	}
 	else {
 		if (cwin->cpref->lastfm_user)
