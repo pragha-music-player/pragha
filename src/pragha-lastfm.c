@@ -145,7 +145,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
                                             gint            response_id,
                                             struct con_win *cwin)
 {
-	PraghaMusicobject *nmobj, *bmobj;
+	PraghaMusicobject *nmobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
 
