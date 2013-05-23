@@ -1560,8 +1560,8 @@ pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *li
 				g_free(ch_track_no);
 			}
 			if (changed & TAG_TITLE_CHANGED) {
-				const gchar *title = pragha_musicobject_get_title(mobj);
-				pragha_musicobject_set_title(mobj, pragha_musicobject_get_title(nmobj));
+				const gchar *title = pragha_musicobject_get_title(nmobj);
+				pragha_musicobject_set_title(mobj, title);
 				ch_title = string_is_not_empty(title) ? g_strdup(title) : get_display_name(mobj);
 				gtk_list_store_set(GTK_LIST_STORE(cplaylist->model), &iter, P_TITLE, ch_title, -1);
 				g_free(ch_title);
