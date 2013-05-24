@@ -118,7 +118,7 @@ struct con_pref {
  */
 
 struct con_state {
-	gboolean first_run;
+	char dummy;
 };
 
 struct con_win {
@@ -148,6 +148,7 @@ struct con_win {
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 	gboolean unique_instance;
+	gboolean first_run;
 #ifdef HAVE_LIBGLYR
 	PraghaGlyr *glyr;
 #endif

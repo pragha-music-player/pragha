@@ -120,7 +120,7 @@ gint init_config(struct con_win *cwin)
 					      KEY_INSTALLED_VERSION,
 					      &error);
 		if (!cwin->cpref->installed_version) {
-			cwin->cstate->first_run = TRUE;
+			cwin->first_run = TRUE;
 			g_error_free(error);
 			error = NULL;
 		}
