@@ -32,4 +32,6 @@
 #include <cdio/cd_types.h>
 #include <cddb/cddb.h>
 
+void pragha_cdda_free ();
+
 #endif /* CDDA_H */
