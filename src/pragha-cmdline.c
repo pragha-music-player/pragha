@@ -51,7 +51,7 @@ cmd_version (const gchar *opt_name, const gchar *val, struct con_win *cwin, GErr
 static gboolean
 cmd_play (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PLAY, cwin);
 		exit(0);
 	}
@@ -61,7 +61,7 @@ cmd_play (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError 
 static gboolean
 cmd_stop (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_STOP, cwin);
 		exit(0);
 	}
@@ -71,7 +71,7 @@ cmd_stop (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError 
 static gboolean
 cmd_pause (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PAUSE, cwin);
 		exit(0);
 	}
@@ -81,7 +81,7 @@ cmd_pause (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError
 static gboolean
 cmd_prev (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_PREV, cwin);
 		exit(0);
 	}
@@ -91,7 +91,7 @@ cmd_prev (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError 
 static gboolean
 cmd_next (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_NEXT, cwin);
 		exit(0);
 	}
@@ -101,7 +101,7 @@ cmd_next (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError 
 static gboolean
 cmd_shuffle (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHUFFLE, cwin);
 		exit(0);
 	}
@@ -111,7 +111,7 @@ cmd_shuffle (const gchar *opt_name, const gchar *val, struct con_win *cwin, GErr
 static gboolean
 cmd_repeat (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_REPEAT, cwin);
 		exit(0);
 	}
@@ -121,7 +121,7 @@ cmd_repeat (const gchar *opt_name, const gchar *val, struct con_win *cwin, GErro
 static gboolean
 cmd_inc_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_INC_VOL, cwin);
 		exit(0);
 	}
@@ -131,7 +131,7 @@ cmd_inc_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, G
 static gboolean
 cmd_dec_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_DEC_VOL, cwin);
 		exit(0);
 	}
@@ -141,7 +141,7 @@ cmd_dec_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, G
 static gboolean
 cmd_show_osd (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_SHOW_OSD, cwin);
 		exit(0);
 	}
@@ -151,7 +151,7 @@ cmd_show_osd (const gchar *opt_name, const gchar *val, struct con_win *cwin, GEr
 static gboolean
 cmd_toggle_view (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
 {
-	if (!cwin->cstate->unique_instance) {
+	if (!cwin->unique_instance) {
 		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
 		exit(0);
 	}
@@ -170,7 +170,7 @@ cmd_current_state (const gchar *opt_name, const gchar *val, struct con_win *cwin
 
 	year = track_no = length = bitrate = channels = samplerate = 0;
 
-	if (cwin->cstate->unique_instance) {
+	if (cwin->unique_instance) {
 		ret = FALSE;
 		goto exit;
 	}

@@ -120,7 +120,6 @@ struct con_pref {
  */
 
 struct con_state {
-	gboolean unique_instance;
 	gboolean first_run;
 	cdrom_drive_t *cdda_drive;
 	cddb_conn_t *cddb_conn;
@@ -153,6 +152,7 @@ struct con_win {
 	GtkStatusIcon *status_icon;
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
+	gboolean unique_instance;
 #ifdef HAVE_LIBGLYR
 	PraghaGlyr *glyr;
 #endif
