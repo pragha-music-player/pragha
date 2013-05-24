@@ -153,7 +153,7 @@ gint main(gint argc, gchar *argv[])
 
 	/* Allow only one instance */
 
-	if (!cwin->cstate->unique_instance)
+	if (!cwin->unique_instance)
 		return 0;
 
 	cwin->preferences = pragha_preferences_get();

@@ -278,9 +278,9 @@ gint init_dbus(struct con_win *cwin)
 	}
 
 	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-		cwin->cstate->unique_instance = TRUE;
+		cwin->unique_instance = TRUE;
 	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
-		cwin->cstate->unique_instance = FALSE;
+		cwin->unique_instance = FALSE;
 
 	dbus_connection_setup_with_g_main(conn, NULL);
 	cwin->con_dbus = conn;
