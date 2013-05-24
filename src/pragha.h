@@ -109,18 +109,6 @@ struct con_pref {
 #endif
 };
 
-/**
- * struct con_state - Pertains to the current state of the player
- *
- * @unique_instance: If current invocation of app is unique
- * @view_change: If library view change is in progress
- * @filter_entry: Search entry for filtering library
- */
-
-struct con_state {
-	char dummy;
-};
-
 struct con_win {
 	struct con_pref *cpref;
 	struct con_state *cstate;
@@ -170,8 +158,6 @@ gint init_taglib(struct con_win *cwin);
 gint init_config(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
 gint init_threads(struct con_win *cwin);
-gint init_first_state(struct con_win *cwin);
-void state_free(struct con_state *cstate);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Others */

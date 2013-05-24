@@ -70,7 +70,6 @@ static void common_cleanup(struct con_win *cwin)
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	gui_free (cwin);
-	state_free (cwin->cstate);
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	preferences_free (cwin->cpref);
@@ -118,14 +117,10 @@ gint main(gint argc, gchar *argv[])
 
 	cwin = g_slice_new0(struct con_win);
 	cwin->cpref = g_slice_new0(struct con_pref);
-	cwin->cstate = g_slice_new0(struct con_state);
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 #endif
 	cwin->cmpris2 = pragha_mpris_new();
-
-	if(init_first_state(cwin) == -1)
-		return -1;
 
 	debug_level = 0;
 

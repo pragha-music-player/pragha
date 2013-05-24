@@ -249,18 +249,6 @@ gint init_threads(struct con_win *cwin)
 	return 0;
 }
 
-gint init_first_state(struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Initializing state");
-
-	return 0;
-}
-
-void state_free (struct con_state *cstate)
-{
-	g_slice_free(struct con_state, cstate);
-}
-
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
