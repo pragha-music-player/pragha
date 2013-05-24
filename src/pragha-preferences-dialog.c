@@ -314,8 +314,9 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 						   cwin->preferences_w->show_osd_w));
 		if (osd) {
 			pragha_preferences_set_show_osd(cwin->preferences, TRUE);
-			if (!notify_is_initted()) {
-				if (!notify_init(PACKAGE_NAME))
+			if (!cwin->notify) {
+				cwin->notify = pragha_notify_new (cwin);
+				if (!cwin->notify)
 					pragha_preferences_set_show_osd(cwin->preferences, FALSE);
 			}
 		}
