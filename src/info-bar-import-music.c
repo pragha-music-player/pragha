@@ -30,7 +30,7 @@
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 {
-	return cwin->cstate->first_run && g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
+	return cwin->first_run && g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
 }
 
 static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
