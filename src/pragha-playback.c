@@ -201,7 +201,8 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				update_album_art (cwin);
 
 				/* Show osd, and inform new album art. */
-				show_osd(cwin);
+				if (cwin->notify)
+					pragha_notify_show_osd (cwin->notify);
 				mpris_update_metadata_changed(cwin);
 
 				pragha_playlist_report_finished_action(cwin->cplaylist);

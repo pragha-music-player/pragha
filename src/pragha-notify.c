@@ -26,6 +26,8 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <libnotify/notify.h>
+
 #include "pragha-notify.h"
 #include "pragha-playback.h"
 #include "pragha-utils.h"
@@ -35,14 +37,21 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
+struct PraghaNotify {
+	NotifyNotification *osd_notify;
+	struct con_win *cwin;
+};
+
 static void
 notify_closed_cb (NotifyNotification *osd,
                   struct con_win *cwin)
 {
+	PraghaNotify *notify = cwin->notify;
+
 	g_object_unref (G_OBJECT(osd));
 
-	if (cwin->osd_notify == osd) {
-		cwin->osd_notify = NULL;
+	if (notify->osd_notify == osd) {
+		notify->osd_notify = NULL;
 	}
 }
 
@@ -91,8 +100,9 @@ can_support_actions ()
 }
 
 void
-show_osd (struct con_win *cwin)
+pragha_notify_show_osd (PraghaNotify *notify)
 {
+	struct con_win *cwin = notify->cwin;
 	GError *error = NULL;
 	gchar *summary, *body, *slength;
 
@@ -121,42 +131,42 @@ show_osd (struct con_win *cwin)
 
 	/* Create notification instance */
 
-	if (cwin->osd_notify == NULL) {
+	if (notify->osd_notify == NULL) {
 		#if NOTIFY_CHECK_VERSION (0, 7, 1)
-		cwin->osd_notify = notify_notification_new(summary, body, NULL);
+		notify->osd_notify = notify_notification_new(summary, body, NULL);
 		#else
-		cwin->osd_notify = notify_notification_new(summary, body, NULL, NULL);
+		notify->osd_notify = notify_notification_new(summary, body, NULL, NULL);
 		#endif
 
 		if(can_support_actions() &&
 		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
 			notify_notification_add_action(
-				cwin->osd_notify, "media-skip-backward", _("Prev Track"),
+				notify->osd_notify, "media-skip-backward", _("Prev Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
 				NULL);
 			notify_notification_add_action(
-				cwin->osd_notify, "media-skip-forward", _("Next Track"),
+				notify->osd_notify, "media-skip-forward", _("Next Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
 				NULL);
 		}
-		notify_notification_set_hint (cwin->osd_notify, "transient", g_variant_new_boolean (TRUE));
-		g_signal_connect(cwin->osd_notify, "closed", G_CALLBACK (notify_closed_cb), cwin);
+		notify_notification_set_hint (notify->osd_notify, "transient", g_variant_new_boolean (TRUE));
+		g_signal_connect (notify->osd_notify, "closed", G_CALLBACK (notify_closed_cb), cwin);
 	}
 	else {
-		notify_notification_update (cwin->osd_notify, summary, body, NULL);
+		notify_notification_update (notify->osd_notify, summary, body, NULL);
 
 		if(pragha_preferences_get_actions_in_osd (cwin->preferences) == FALSE)
-			notify_notification_clear_actions (cwin->osd_notify);
+			notify_notification_clear_actions (notify->osd_notify);
 	}
 
-	notify_notification_set_timeout(cwin->osd_notify, OSD_TIMEOUT);
+	notify_notification_set_timeout (notify->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
-	notify_notification_set_icon_from_pixbuf(cwin->osd_notify,
+	notify_notification_set_icon_from_pixbuf (notify->osd_notify,
 		pragha_album_art_get_pixbuf(pragha_toolbar_get_album_art(cwin->toolbar)));
 
 	/* Show OSD */
-	if (!notify_notification_show(cwin->osd_notify, &error)) {
+	if (!notify_notification_show (notify->osd_notify, &error)) {
 		g_warning("Unable to show OSD notification: %s", error->message);
 		g_error_free (error);
 	}
@@ -168,20 +178,27 @@ show_osd (struct con_win *cwin)
 	g_free(slength);
 }
 
-gint
-init_notify (struct con_win *cwin)
+PraghaNotify *
+pragha_notify_new (struct con_win *cwin)
 {
-	if (pragha_preferences_get_show_osd(cwin->preferences)) {
-		if (!notify_init(PACKAGE_NAME))
-			return -1;
-	}
+	if (!notify_init (PACKAGE_NAME))
+		return NULL;
 
-	return 0;
+	PraghaNotify *notify = g_slice_new (PraghaNotify);
+
+	notify->osd_notify = NULL;
+	notify->cwin = cwin;
+
+	return notify;
 }
 
 void
-notify_free ()
+pragha_notify_free (PraghaNotify *notify)
 {
-	if (notify_is_initted())
-		notify_uninit();
+	if (notify->osd_notify)
+		g_object_unref (notify->osd_notify);
+
+	g_slice_free (PraghaNotify, notify);
+
+	notify_uninit ();
 }

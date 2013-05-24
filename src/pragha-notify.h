@@ -24,9 +24,11 @@
 /* pragha.h */
 struct con_win;
 
-gboolean can_support_actions(void);
-void show_osd(struct con_win *cwin);
-gint init_notify(struct con_win *cwin);
-void notify_free();
+typedef struct PraghaNotify PraghaNotify;
+
+gboolean       can_support_actions    (void);
+PraghaNotify * pragha_notify_new      (struct con_win *cwin);
+void           pragha_notify_show_osd (PraghaNotify *notify);
+void           pragha_notify_free     (PraghaNotify *notify);
 
 #endif /* PRAGHA_NOTIFY_H */

@@ -30,7 +30,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <dbus/dbus-glib-lowlevel.h>
-#include <libnotify/notify.h>
 #include <gtk/gtk.h>
 
 #include "pragha-album-art.h"
@@ -38,6 +37,7 @@
 #include "pragha-database.h"
 #include "pragha-glyr.h"
 #include "pragha-musicobject.h"
+#include "pragha-notify.h"
 #include "pragha-preferences.h"
 #include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
@@ -145,12 +145,12 @@ struct con_win {
 	#endif
 	PraghaMpris2 *cmpris2;
 	con_gnome_media_keys *cgnome_media_keys;
+	PraghaNotify *notify;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 	GtkWidget *info_box;
 	GtkWidget *paned;
 	GtkStatusIcon *status_icon;
-	NotifyNotification *osd_notify;
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 #ifdef HAVE_LIBGLYR

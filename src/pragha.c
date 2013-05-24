@@ -79,7 +79,8 @@ static void common_cleanup(struct con_win *cwin)
 	lastfm_free (cwin->clastfm);
 #endif
 	dbus_handlers_free (cwin);
-	notify_free ();
+	if (cwin->notify)
+		pragha_notify_free (cwin->notify);
 
 	if (cwin->cgnome_media_keys)
 		gnome_media_keys_free (cwin->cgnome_media_keys);
@@ -174,10 +175,10 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	if (init_notify(cwin) == -1) {
-		g_critical("Unable to initialize libnotify");
-		return -1;
-	}
+	if (pragha_preferences_get_show_osd (cwin->preferences))
+		cwin->notify = pragha_notify_new (cwin);
+	else
+		cwin->notify = NULL;
 
 	#ifdef HAVE_LIBCLASTFM
 	if (init_lastfm(cwin) == -1) {
