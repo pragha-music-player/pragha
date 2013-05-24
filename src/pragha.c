@@ -88,6 +88,7 @@ static void common_cleanup(struct con_win *cwin)
 	else
 		keybinder_free ();
 #endif
+	pragha_cdda_free ();
 
 	g_object_unref (cwin->bar_context_menu);
 	g_object_unref (cwin->systray_menu);

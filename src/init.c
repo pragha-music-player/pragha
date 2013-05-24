@@ -258,15 +258,6 @@ gint init_first_state(struct con_win *cwin)
 
 void state_free (struct con_state *cstate)
 {
-	if (cstate->cdda_drive)
-		cdio_cddap_close(cstate->cdda_drive);
-	if (cstate->cddb_disc)
-		cddb_disc_destroy(cstate->cddb_disc);
-	if (cstate->cddb_conn) {
-		cddb_destroy(cstate->cddb_conn);
-		libcddb_shutdown();
-	}
-
 	g_slice_free(struct con_state, cstate);
 }
 

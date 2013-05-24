@@ -114,6 +114,8 @@ AND LOCATION.id = ?";
 
 PraghaMusicobject *
 new_musicobject_from_cdda(struct con_win *cwin,
+                          cdrom_drive_t *cdda_drive,
+                          cddb_disc_t *cddb_disc,
                           gint track_no)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -123,19 +125,19 @@ new_musicobject_from_cdda(struct con_win *cwin,
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from cdda: %d",
 	       track_no);
 
-	channels = cdio_get_track_channels(cwin->cstate->cdda_drive->p_cdio,
+	channels = cdio_get_track_channels(cdda_drive->p_cdio,
 					   track_no);
-	start = cdio_cddap_track_firstsector(cwin->cstate->cdda_drive, track_no);
-	end = cdio_cddap_track_lastsector(cwin->cstate->cdda_drive, track_no);
+	start = cdio_cddap_track_firstsector(cdda_drive, track_no);
+	end = cdio_cddap_track_lastsector(cdda_drive, track_no);
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
-	if (pragha_preferences_get_use_cddb(cwin->preferences) && cwin->cstate->cddb_disc) {
+	if (pragha_preferences_get_use_cddb(cwin->preferences) && cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
 		gint year;
 
-		track = cddb_disc_get_track(cwin->cstate->cddb_disc, track_no - 1);
+		track = cddb_disc_get_track(cddb_disc, track_no - 1);
 		if (track) {
 			title = cddb_track_get_title(track);
 			if (title)
@@ -145,15 +147,15 @@ new_musicobject_from_cdda(struct con_win *cwin,
 			if(artist)
 				pragha_musicobject_set_artist(mobj, artist);
 
-			album = cddb_disc_get_title(cwin->cstate->cddb_disc);
+			album = cddb_disc_get_title(cddb_disc);
 			if(album)
 				pragha_musicobject_set_album(mobj, album);
 
-			year = cddb_disc_get_year(cwin->cstate->cddb_disc);
+			year = cddb_disc_get_year(cddb_disc);
 			if(year)
 				pragha_musicobject_set_year(mobj, year);
 
-			genre = cddb_disc_get_genre(cwin->cstate->cddb_disc);
+			genre = cddb_disc_get_genre(cddb_disc);
 			if(genre)
 				pragha_musicobject_set_genre(mobj, genre);
 		}

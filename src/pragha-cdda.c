@@ -21,45 +21,45 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
-static gint cddb_add_tracks(struct con_win *cwin)
+static gint cddb_add_tracks(cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 {
 	cddb_track_t *track;
 	lba_t lba;
 	gint num_tracks, first_track, i = 0;
 
-	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);
+	num_tracks = cdio_cddap_tracks(cdda_drive);
 	if (!num_tracks)
 		return -1;
 
-	first_track = cdio_get_first_track_num(cwin->cstate->cdda_drive->p_cdio);
+	first_track = cdio_get_first_track_num(cdda_drive->p_cdio);
 	for (i = first_track; i <= num_tracks; i++) {
 		track = cddb_track_new();
 		if (!track)
 			return -1;
 
-		lba = cdio_get_track_lba(cwin->cstate->cdda_drive->p_cdio, i);
+		lba = cdio_get_track_lba(cdda_drive->p_cdio, i);
 		if (lba == CDIO_INVALID_LBA)
 			return -1;
 
-		cddb_disc_add_track(cwin->cstate->cddb_disc, track);
+		cddb_disc_add_track(cddb_disc, track);
 		cddb_track_set_frame_offset(track, lba);
 	}
 
 	return 0;
 }
 
-static void add_audio_cd_tracks(struct con_win *cwin)
+static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 {
 	PraghaMusicobject *mobj;
 	gint num_tracks = 0, i = 0;
 	GList *list = NULL;
 
-	num_tracks = cdio_cddap_tracks(cwin->cstate->cdda_drive);
+	num_tracks = cdio_cddap_tracks(cdda_drive);
 	if (!num_tracks)
 		return;
 
 	for (i = 1; i <= num_tracks; i++) {
-		mobj = new_musicobject_from_cdda(cwin, i);
+		mobj = new_musicobject_from_cdda(cwin, cdda_drive, cddb_disc, i);
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 
@@ -114,77 +114,69 @@ void add_audio_cd(struct con_win *cwin)
 {
 	lba_t lba;
 	gint matches;
+	cddb_disc_t *cddb_disc = NULL;
+	cddb_conn_t *cddb_conn = NULL;
 
-	/* Clean earlier CDDA state */
-	if (cwin->cstate->cdda_drive) {
-		cdio_cddap_close(cwin->cstate->cdda_drive);
-		cwin->cstate->cdda_drive = NULL;
-	}
-
-	cwin->cstate->cdda_drive = find_audio_cd(cwin);
-	if (!cwin->cstate->cdda_drive)
+	cdrom_drive_t *cdda_drive = find_audio_cd(cwin);
+	if (!cdda_drive)
 		return;
 
-	if (cdio_cddap_open(cwin->cstate->cdda_drive)) {
+	if (cdio_cddap_open(cdda_drive)) {
 		g_warning("Unable to open Audio CD");
 		return;
 	}
 
 	if (pragha_preferences_get_use_cddb(cwin->preferences)) {
-		/* Clean earlier CDDB state */
-		if (cwin->cstate->cddb_disc) {
-			cddb_disc_destroy(cwin->cstate->cddb_disc);
-			cwin->cstate->cddb_disc = NULL;
-		}
+		cddb_conn = cddb_new ();
+		if (!cddb_conn)
+			goto add;
 
-		if (!cwin->cstate->cddb_conn) {
-			cwin->cstate->cddb_conn = cddb_new();
-			if (!cwin->cstate->cddb_conn)
-				goto cddb_clean;
-		}
+		cddb_disc = cddb_disc_new();
+		if (!cddb_disc)
+			goto add;
 
-		cwin->cstate->cddb_disc = cddb_disc_new();
-		if (!cwin->cstate->cddb_disc)
-			goto cddb_clean;
-
-		lba = cdio_get_track_lba(cwin->cstate->cdda_drive->p_cdio,
+		lba = cdio_get_track_lba(cdda_drive->p_cdio,
 					 CDIO_CDROM_LEADOUT_TRACK);
 		if (lba == CDIO_INVALID_LBA)
-			goto cddb_clean;
+			goto add;
 
-		cddb_disc_set_length(cwin->cstate->cddb_disc, FRAMES_TO_SECONDS(lba));
-		if (cddb_add_tracks(cwin) < 0)
-			goto cddb_clean;
+		cddb_disc_set_length(cddb_disc, FRAMES_TO_SECONDS(lba));
+		if (cddb_add_tracks(cdda_drive, cddb_disc) < 0)
+			goto add;
 
-		if (!cddb_disc_calc_discid(cwin->cstate->cddb_disc))
-			goto cddb_clean;
+		if (!cddb_disc_calc_discid(cddb_disc))
+			goto add;
 
-		cddb_disc_set_category(cwin->cstate->cddb_disc, CDDB_CAT_MISC);
+		cddb_disc_set_category(cddb_disc, CDDB_CAT_MISC);
 
-		matches = cddb_query(cwin->cstate->cddb_conn, cwin->cstate->cddb_disc);
+		matches = cddb_query(cddb_conn, cddb_disc);
 		if (matches == -1)
-			goto cddb_clean;
+			goto add;
 
-		if (!cddb_read(cwin->cstate->cddb_conn,
-			       cwin->cstate->cddb_disc)) {
-			cddb_error_print(cddb_errno(cwin->cstate->cddb_conn));
-			goto cddb_clean;
+		if (!cddb_read(cddb_conn,
+			       cddb_disc)) {
+			cddb_error_print(cddb_errno(cddb_conn));
+			goto add;
 		}
 
 		CDEBUG(DBG_INFO, "Successfully initialized CDDB");
 		goto add;
 	}
 
-cddb_clean:
-	if (cwin->cstate->cddb_disc) {
-		cddb_disc_destroy(cwin->cstate->cddb_disc);
-		cwin->cstate->cddb_disc = NULL;
-	}
-	if (cwin->cstate->cddb_conn) {
-		cddb_destroy(cwin->cstate->cddb_conn);
-		cwin->cstate->cddb_conn = NULL;
-	}
 add:
-	add_audio_cd_tracks(cwin);
+	add_audio_cd_tracks(cwin, cdda_drive, cddb_disc);
 	CDEBUG(DBG_INFO, "Successfully opened Audio CD device");
+
+	if (cdda_drive)
+		cdio_cddap_close(cdda_drive);
+	if (cddb_disc)
+		cddb_disc_destroy(cddb_disc);
+	if (cddb_conn)
+		cddb_destroy(cddb_conn);
+}
+
+void
+pragha_cdda_free ()
+{
+	libcddb_shutdown ();
 }
