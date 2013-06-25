@@ -441,7 +441,7 @@ update_related_handler (gpointer data)
 	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
 
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lastfm_support)
+	if (pragha_preferences_get_lastfm_support (cwin->preferences))
 		lastfm_now_playing_handler(cwin);
 #endif
 #ifdef HAVE_LIBGLYR

@@ -420,6 +420,21 @@ pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);
 void
 pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
                                    gboolean use_mpris2);
+
+gboolean
+pragha_preferences_get_lastfm_support (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_lastfm_support (PraghaPreferences *preferences,
+                                       gboolean lastfm_support);
+
+const gchar *
+pragha_preferences_get_lastfm_user (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_lastfm_user (PraghaPreferences *preferences,
+                                    const gchar *lastfm_user);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

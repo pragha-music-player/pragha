@@ -99,9 +99,6 @@ gint init_config(struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
 	start_mode_f = window_size_f = window_position_f = album_f = FALSE;
-	#ifdef HAVE_LIBCLASTFM
-	gboolean lastfm_f = FALSE;
-	#endif
 
 	all_f = FALSE;
 
@@ -174,27 +171,6 @@ gint init_config(struct con_win *cwin)
 
 		/* Retrieve Services Internet preferences */
 		#ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lastfm_support =
-			g_key_file_get_boolean(cwin->cpref->configrc_keyfile,
-					       GROUP_SERVICES,
-					       KEY_LASTFM,
-					       &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			lastfm_f = TRUE;
-		}
-
-		cwin->cpref->lastfm_user =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_USER,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-		}
-
 		cwin->cpref->lastfm_pass =
 			g_key_file_get_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
@@ -222,10 +198,6 @@ gint init_config(struct con_win *cwin)
 	}
 	if (all_f || start_mode_f)
 		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
-	#ifdef HAVE_LIBCLASTFM
-	if (all_f || lastfm_f)
-		cwin->cpref->lastfm_support = FALSE;
-	#endif
 
 	if (err)
 		return -1;

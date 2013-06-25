@@ -44,7 +44,6 @@ GThread *pragha_main_thread = NULL;
 static void preferences_free (struct con_pref *cpref)
 {
 #ifdef HAVE_LIBCLASTFM
-	g_free(cpref->lastfm_user);
 	g_free(cpref->lastfm_pass);
 #endif
 	g_free(cpref->installed_version);
