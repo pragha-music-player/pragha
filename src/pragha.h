@@ -103,8 +103,6 @@ struct con_pref {
 	gint window_y;
 	GKeyFile *configrc_keyfile;
 #ifdef HAVE_LIBCLASTFM
-	gboolean lastfm_support;
-	gchar *lastfm_user;
 	gchar *lastfm_pass;
 #endif
 };

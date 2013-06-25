@@ -77,7 +77,7 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && string_is_not_empty(cwin->cpref->lastfm_user);
+	gboolean has_user = lfm_inited && string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences));
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
@@ -587,9 +587,9 @@ do_lastfm_add_favorites_action (gpointer user_data)
 
 	do {
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
-						     cwin->cpref->lastfm_user,
-						     cpage,
-						     &results);
+		                                      pragha_preferences_get_lastfm_user(cwin->preferences),
+		                                      cpage,
+		                                      &results);
 
 		for(li=results; li; li=li->next) {
 			track = li->data;
@@ -615,7 +615,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
 	if ((cwin->clastfm->session_id == NULL) ||
-	    string_is_empty(cwin->cpref->lastfm_user)) {
+	    string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences))) {
 		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
 		return;
 	}
@@ -921,7 +921,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if(string_is_empty(cwin->cpref->lastfm_user) ||
+	if(string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) ||
 	   string_is_empty(cwin->cpref->lastfm_pass))
 		return;
 
@@ -975,10 +975,10 @@ do_just_init_lastfm(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if(string_is_not_empty(cwin->cpref->lastfm_user) &&
+		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
 		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lastfm_user,
+			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
 							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -999,7 +999,7 @@ do_just_init_lastfm(gpointer data)
 gint
 just_init_lastfm (struct con_win *cwin)
 {
-	if (cwin->cpref->lastfm_support) {
+	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 		g_idle_add (do_just_init_lastfm, cwin);
 	}
@@ -1017,10 +1017,10 @@ do_init_lastfm_idle(gpointer data)
 	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (cwin->clastfm->session_id != NULL) {
-		if(string_is_not_empty(cwin->cpref->lastfm_user) &&
+		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
 		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-							      cwin->cpref->lastfm_user,
+			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
 							      cwin->cpref->lastfm_pass);
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK)
@@ -1049,7 +1049,7 @@ init_lastfm(struct con_win *cwin)
 
 	/* Test internet and launch threads.*/
 
-	if (cwin->cpref->lastfm_support) {
+	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 #if GLIB_CHECK_VERSION(2,32,0)

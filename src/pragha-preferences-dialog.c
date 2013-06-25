@@ -332,23 +332,18 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lastfm_support =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->lastfm_w));
+		pragha_preferences_set_lastfm_support (cwin->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w)));
 
-		if (cwin->cpref->lastfm_user) {
-			g_free(cwin->cpref->lastfm_user);
-			cwin->cpref->lastfm_user = NULL;
-		}
 		if (cwin->cpref->lastfm_pass) {
 			g_free(cwin->cpref->lastfm_pass);
 			cwin->cpref->lastfm_pass = NULL;
 		}
 
-		if (cwin->cpref->lastfm_support) {
-			cwin->cpref->lastfm_user =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->preferences_w->lastfm_uname_w)));
+		if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
+			pragha_preferences_set_lastfm_user (cwin->preferences,
+				gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w)));
+
 			cwin->cpref->lastfm_pass =
 				g_strdup(gtk_entry_get_text(GTK_ENTRY(
 					    cwin->preferences_w->lastfm_pass_w)));
@@ -794,14 +789,13 @@ static void update_preferences(struct con_win *cwin)
 
 	/* Service Internet Option */
 #ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lastfm_support) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->lastfm_w),
-					     TRUE);
+	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w), TRUE);
+
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w),
-				   cwin->cpref->lastfm_user);
+		                   pragha_preferences_get_lastfm_user (cwin->preferences));
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w),
-				   cwin->cpref->lastfm_pass);
+		                   cwin->cpref->lastfm_pass);
 	}
 #endif
 #ifdef HAVE_LIBGLYR
@@ -917,25 +911,12 @@ void save_preferences(struct con_win *cwin)
 	/* Services internet */
 	/* Save last.fm option */
 #ifdef HAVE_LIBCLASTFM
-	g_key_file_set_boolean(cwin->cpref->configrc_keyfile,
-			       GROUP_SERVICES,
-			       KEY_LASTFM,
-			       cwin->cpref->lastfm_support);
-
-	if (!cwin->cpref->lastfm_support) {
-		pragha_preferences_remove_key(cwin->preferences,
-		                              GROUP_SERVICES,
-		                              KEY_LASTFM_USER);
+	if (!pragha_preferences_get_lastfm_support (cwin->preferences)) {
 		pragha_preferences_remove_key(cwin->preferences,
 		                              GROUP_SERVICES,
 		                              KEY_LASTFM_PASS);
 	}
 	else {
-		if (cwin->cpref->lastfm_user)
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_USER,
-					      cwin->cpref->lastfm_user);
 		if (cwin->cpref->lastfm_pass)
 			g_key_file_set_string(cwin->cpref->configrc_keyfile,
 					      GROUP_SERVICES,
