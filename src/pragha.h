@@ -19,10 +19,6 @@
 #ifndef PRAGHA_H
 #define PRAGHA_H
 
-#ifndef HAVE_PARANOIA_NEW_INCLUDES
-#include "pragha-cdda.h" // Should be before config.h, libcdio 0.83 issue
-#endif
-
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -50,11 +46,6 @@
 #include "pragha-toolbar.h"
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
-
-/* With libcio 0.83 should be before config.h. libcdio issue */
-#ifdef HAVE_PARANOIA_NEW_INCLUDES
-#include "pragha-cdda.h"
-#endif
 
 /* Some default preferences. */
 

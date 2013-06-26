@@ -71,14 +71,8 @@ XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([DBUS], [dbus-1], [1.1])
 XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [0.84])
 XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
-XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
-XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
-
-dnl Test for new paranoia headers location
-AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
-	AC_DEFINE(HAVE_PARANOIA_NEW_INCLUDES, 1, [Define to 1 if cdio/paranoia/paranoia.h is present]) ])
 
 dnl Check min taglib to add monkeyaudio support
 TAGLIB_1_7_FOUND="no"
@@ -93,6 +87,12 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
                        [gstreamer-audio-1.0], [$GSTREAMER_REQUIRED],
                        [gstreamer-audio],
                        [gstreamer-audio], [yes])
+
+GSTREAMER_PBUTILS_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_PBUTILS],
+                       [gstreamer-pbutils-1.0], [$GSTREAMER_REQUIRED],
+                       [gstreamer-pbutils],
+                       [gstreamer-pbutils], [yes])
 
 dnl Check global keyboard shortcuts support
 LIBKEYBINDER_FOUND="no"
@@ -149,6 +149,7 @@ echo "  Prefix.............: ${prefix}"
 echo "  Debug enabled......: $debug"
 echo ""
 echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"
+echo "  Audio CD support.........................(Need gstreamer-plugins-base).: $GSTREAMER_PBUTILS_FOUND"
 AS_IF([test "x$with_gtk3" != xno],
 	[echo "  Use multimedia key without gnome-media-keys.......(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"],
 	[echo "  Use multimedia key without gnome-media-keys..(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"])
