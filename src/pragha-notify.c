@@ -44,10 +44,8 @@ struct PraghaNotify {
 
 static void
 notify_closed_cb (NotifyNotification *osd,
-                  struct con_win *cwin)
+                  PraghaNotify *notify)
 {
-	PraghaNotify *notify = cwin->notify;
-
 	g_object_unref (G_OBJECT(osd));
 
 	if (notify->osd_notify == osd) {
@@ -58,9 +56,11 @@ notify_closed_cb (NotifyNotification *osd,
 static void
 notify_Prev_Callback (NotifyNotification *osd,
                       const char *action,
-                      struct con_win *cwin)
+                      PraghaNotify *notify)
 {
 	g_assert (action != NULL);
+
+	struct con_win *cwin = notify->cwin;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_playback_prev_track(cwin);
@@ -69,9 +69,11 @@ notify_Prev_Callback (NotifyNotification *osd,
 static void
 notify_Next_Callback (NotifyNotification *osd,
                       const char *action,
-                      struct con_win *cwin)
+                      PraghaNotify *notify)
 {
 	g_assert (action != NULL);
+
+	struct con_win *cwin = notify->cwin;
 
 	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
 		pragha_playback_next_track(cwin);
@@ -142,15 +144,15 @@ pragha_notify_show_osd (PraghaNotify *notify)
 		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
 			notify_notification_add_action(
 				notify->osd_notify, "media-skip-backward", _("Prev Track"),
-				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), cwin,
+				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), notify,
 				NULL);
 			notify_notification_add_action(
 				notify->osd_notify, "media-skip-forward", _("Next Track"),
-				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), cwin,
+				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), notify,
 				NULL);
 		}
 		notify_notification_set_hint (notify->osd_notify, "transient", g_variant_new_boolean (TRUE));
-		g_signal_connect (notify->osd_notify, "closed", G_CALLBACK (notify_closed_cb), cwin);
+		g_signal_connect (notify->osd_notify, "closed", G_CALLBACK (notify_closed_cb), notify);
 	}
 	else {
 		notify_notification_update (notify->osd_notify, summary, body, NULL);
