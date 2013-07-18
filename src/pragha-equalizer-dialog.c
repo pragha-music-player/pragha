@@ -212,7 +212,8 @@ pragha_equalizer_dialog_response (GtkWidget *w_dialog,
 {
 	PraghaEqualizerDialog *dialog = data;
 
-	pragha_equalizer_dialog_save_preset (dialog);
+	if(dialog->equalizer != NULL)
+		pragha_equalizer_dialog_save_preset (dialog);
 
 	g_object_unref (dialog->preferences);
 	gtk_widget_destroy(dialog->widget);
@@ -242,8 +243,6 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 		g_signal_connect(G_OBJECT(dialog->vscales[i]), "query-tooltip",
 		                 G_CALLBACK(pragha_equalizer_band_get_tooltip),
 		                 NULL);
-
-		band_bind_to_backend(GTK_RANGE(dialog->vscales[i]), dialog->equalizer, i);
 	}
 
 	/* Create the db scale */
@@ -317,12 +316,15 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog->widget))), mhbox, TRUE, TRUE, 0);
 
-	if (dialog->equalizer == NULL) {
+	if (dialog->equalizer != NULL) {
+		for (i = 0; i < NUM_BANDS; i++)
+			band_bind_to_backend(GTK_RANGE(dialog->vscales[i]), dialog->equalizer, i);
+		pragha_equalizer_dialog_init_bands (dialog);
+	}
+	else {
 		gtk_widget_set_sensitive(GTK_WIDGET(hbox), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(dialog->preset_combobox), FALSE);
 	}
-
-	pragha_equalizer_dialog_init_bands (dialog);
 
 	gtk_widget_show_all(dialog->widget);
 
