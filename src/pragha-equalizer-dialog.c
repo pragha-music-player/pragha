@@ -285,7 +285,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	dialog->widget = gtk_dialog_new_with_buttons (_("Equalizer"),
 	                                              GTK_WINDOW(cwin->mainwindow),
-	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                              GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                              GTK_STOCK_OK,
 	                                              GTK_RESPONSE_OK,
 	                                              NULL);
