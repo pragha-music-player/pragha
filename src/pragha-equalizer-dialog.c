@@ -220,7 +220,7 @@ pragha_equalizer_dialog_response (GtkWidget *w_dialog,
 	g_slice_free(PraghaEqualizerDialog, dialog);
 }
 
-void show_equalizer_action(GtkAction *action, struct con_win *cwin)
+void pragha_equalizer_dialog_show(struct con_win *cwin)
 {
 	PraghaEqualizerDialog *dialog;
 	GtkWidget *mhbox, *hbox, *dbvbox, *label;

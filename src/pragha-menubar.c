@@ -41,6 +41,7 @@
 #include "pragha-preferences-dialog.h"
 #include "pragha-glyr.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-equalizer-dialog.h"
 #include "pragha.h"
 
 static gchar *license = "This program is free software: "
@@ -775,6 +776,15 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 
 	gtk_tree_path_free(path);
 }
+
+/* Handler for the 'Equalizer' item in the Tools menu */
+
+void
+show_equalizer_action(GtkAction *action, struct con_win *cwin)
+{
+	pragha_equalizer_dialog_show(cwin);
+}
+
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
 
