@@ -31,7 +31,6 @@
 #define NUM_BANDS 10
 
 struct _PraghaEqualizerDialog {
-	GtkWidget         *widget;
 	GtkWidget         *vscales[NUM_BANDS];
 	GtkWidget         *preset_combobox;
 	PraghaPreferences *preferences;
