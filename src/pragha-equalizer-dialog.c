@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012 matias <mati86dl@gmail.com>                        */
+/* Copyright (C) 2012-2013 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -24,9 +24,18 @@
 #else
 #include <glib/gi18n.h>
 #endif
+
+#include "pragha-equalizer-dialog.h"
 #include "pragha.h"
 
 #define NUM_BANDS 10
+
+struct _PraghaEqualizerDialog {
+	GtkWidget         *widget;
+	GtkWidget         *vscales[NUM_BANDS];
+	PraghaPreferences *preferences;
+	GstElement        *equalizer;
+};
 
 static const gchar *presets_names[] = {
 	N_("Disabled"),
@@ -207,25 +216,26 @@ band_bind_to_backend (GtkRange *range, GstElement *equalizer, gint i)
 
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
-	GtkWidget *dialog;
+	PraghaEqualizerDialog *dialog;
 	GtkWidget *mhbox, *hbox, *dbvbox, *label, *eq_combobox;
-	GtkWidget *vscales[NUM_BANDS];
 	gint i, result;
 
-	GstElement *equalizer = pragha_backend_get_equalizer (cwin->backend);
+	dialog = g_slice_new0 (PraghaEqualizerDialog);
+	dialog->equalizer = pragha_backend_get_equalizer (cwin->backend);
 
 	/* Create vertical scales band to equalizer */
 
 	for (i = 0; i < NUM_BANDS; i++) {
-		vscales[i] = gtk_vscale_new_with_range(-24.0, 12.0, 0.1);
-		gtk_range_set_inverted(GTK_RANGE(vscales[i]), TRUE);
-		gtk_scale_set_draw_value (GTK_SCALE(vscales[i]), FALSE);
-		g_object_set (G_OBJECT(vscales[i]), "has-tooltip", TRUE, NULL);
-		g_signal_connect(G_OBJECT(vscales[i]), "query-tooltip",
+		dialog->vscales[i] = gtk_vscale_new_with_range(-24.0, 12.0, 0.1);
+		gtk_range_set_inverted(GTK_RANGE(dialog->vscales[i]), TRUE);
+		gtk_scale_set_draw_value (GTK_SCALE(dialog->vscales[i]), FALSE);
+
+		g_object_set (G_OBJECT(dialog->vscales[i]), "has-tooltip", TRUE, NULL);
+		g_signal_connect(G_OBJECT(dialog->vscales[i]), "query-tooltip",
 		                 G_CALLBACK(pragha_equalizer_band_get_tooltip),
 		                 NULL);
 
-		band_bind_to_backend(GTK_RANGE(vscales[i]), equalizer, i);
+		band_bind_to_backend(GTK_RANGE(dialog->vscales[i]), dialog->equalizer, i);
 	}
 
 	/* Create the db scale */
@@ -255,7 +265,7 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 		gtk_label_set_angle(GTK_LABEL(label), 90);
 		gtk_misc_set_alignment (GTK_MISC(label), 1, 1);
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-		gtk_box_pack_start(GTK_BOX(hbox), vscales[i], FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(hbox), dialog->vscales[i], FALSE, FALSE, 0);
 	}
 
 	/* Add the widgets */
@@ -265,16 +275,16 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	/* Create the dialog */
 
-	dialog = gtk_dialog_new_with_buttons(_("Equalizer"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_DIALOG_MODAL,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_OK,
-					     NULL);
+	dialog->widget = gtk_dialog_new_with_buttons (_("Equalizer"),
+	                                              GTK_WINDOW(cwin->mainwindow),
+	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                              GTK_STOCK_OK,
+	                                              GTK_RESPONSE_OK,
+	                                              NULL);
 
-	gtk_window_set_default_size(GTK_WINDOW (dialog), -1, 200);
+	gtk_window_set_default_size(GTK_WINDOW (dialog->widget), -1, 200);
 
-	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
 
 	/* Append list of default presets */
 
@@ -286,34 +296,34 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 	/* Conect the signals */
 
 	for (i = 0; i < NUM_BANDS; i++) {
-		g_signal_connect(vscales[i], "change-value",
+		g_signal_connect(dialog->vscales[i], "change-value",
 				 G_CALLBACK(vscales_eq_set_by_user), eq_combobox);
 	}
 	g_signal_connect(G_OBJECT(eq_combobox), "changed",
-			 G_CALLBACK(eq_combobox_activated_cb), vscales);
+			 G_CALLBACK(eq_combobox_activated_cb), dialog->vscales);
 
 	/* Append and show the dialog */
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))), eq_combobox, FALSE, FALSE, 0);
-	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))), eq_combobox, TRUE);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), eq_combobox, FALSE, FALSE, 0);
+	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), eq_combobox, TRUE);
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), mhbox, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog->widget))), mhbox, TRUE, TRUE, 0);
 
-	if (equalizer == NULL) {
+	if (dialog->equalizer == NULL) {
 		gtk_widget_set_sensitive(GTK_WIDGET(hbox), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(eq_combobox), FALSE);
 	}
 
-	pragha_equalizer_init_bands (eq_combobox, vscales);
+	pragha_equalizer_init_bands (eq_combobox, dialog->vscales);
 
-	gtk_widget_show_all(dialog);
+	gtk_widget_show_all(dialog->widget);
 
-	while ((result = gtk_dialog_run (GTK_DIALOG (dialog))) &&
+	while ((result = gtk_dialog_run (GTK_DIALOG (dialog->widget))) &&
 		(result != GTK_RESPONSE_OK) &&
 		(result != GTK_RESPONSE_DELETE_EVENT)) {
 	}
 
-	pragha_equalizer_save_preset (eq_combobox, vscales);
+	pragha_equalizer_save_preset (eq_combobox, dialog->vscales);
 
-	gtk_widget_destroy(dialog);
+	gtk_widget_destroy(dialog->widget);
 }
