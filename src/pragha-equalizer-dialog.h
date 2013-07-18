@@ -26,4 +26,6 @@ struct con_win;
 
 typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
 
+void pragha_equalizer_dialog_show(struct con_win *cwin);
+
 #endif /* PRAGHA_EQUALIZER_DIALOG_H */
