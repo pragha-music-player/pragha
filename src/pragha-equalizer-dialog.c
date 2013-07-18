@@ -205,11 +205,26 @@ band_bind_to_backend (GtkRange *range, GstElement *equalizer, gint i)
 	g_free (eq_property);
 }
 
+static void
+pragha_equalizer_dialog_response (GtkWidget *w_dialog,
+                                  gint       response_id,
+                                  gpointer   data)
+{
+	PraghaEqualizerDialog *dialog = data;
+
+	pragha_equalizer_dialog_save_preset (dialog);
+
+	g_object_unref (dialog->preferences);
+	gtk_widget_destroy(dialog->widget);
+
+	g_slice_free(PraghaEqualizerDialog, dialog);
+}
+
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
 	PraghaEqualizerDialog *dialog;
 	GtkWidget *mhbox, *hbox, *dbvbox, *label;
-	gint i, result;
+	gint i;
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
 
@@ -311,13 +326,6 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_widget_show_all(dialog->widget);
 
-	while ((result = gtk_dialog_run (GTK_DIALOG (dialog->widget))) &&
-		(result != GTK_RESPONSE_OK) &&
-		(result != GTK_RESPONSE_DELETE_EVENT)) {
-	}
-
-	pragha_equalizer_dialog_save_preset (dialog);
-
-	g_object_unref (dialog->preferences);
-	gtk_widget_destroy(dialog->widget);
+	g_signal_connect (G_OBJECT (dialog->widget), "response",
+	                  G_CALLBACK (pragha_equalizer_dialog_response), dialog);
 }
