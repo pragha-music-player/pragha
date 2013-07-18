@@ -142,6 +142,11 @@ struct con_win {
 	DBusConnection *con_dbus;
 };
 
+/* Functions to access private members */
+
+PraghaBackend *pragha_get_backend (struct con_win *cwin);
+GtkWidget     *pragha_get_window (struct con_win *cwin);
+
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);

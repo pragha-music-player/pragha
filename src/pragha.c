@@ -36,6 +36,19 @@ gint debug_level;
 GThread *pragha_main_thread = NULL;
 #endif
 
+PraghaBackend *
+pragha_get_backend(struct con_win *cwin)
+{
+	return cwin->backend;
+}
+
+GtkWidget *
+pragha_get_window(struct con_win *cwin)
+{
+	return cwin->mainwindow;
+}
+
+
 /*
  * Here temporarily.
  * Port the rest of the preferences to PraghaPreferences and then delete this.
