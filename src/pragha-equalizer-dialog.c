@@ -33,6 +33,7 @@
 struct _PraghaEqualizerDialog {
 	GtkWidget         *widget;
 	GtkWidget         *vscales[NUM_BANDS];
+	GtkWidget         *preset_combobox;
 	PraghaPreferences *preferences;
 	GstElement        *equalizer;
 };
@@ -114,36 +115,33 @@ eq_combobox_activated_cb (GtkComboBox *widget, gpointer user_data)
 }
 
 static void
-pragha_equalizer_init_bands (GtkWidget *eq_combobox, GtkWidget **vscales)
+pragha_equalizer_dialog_init_bands (PraghaEqualizerDialog *dialog)
 {
-	PraghaPreferences *preferences;
 	gchar *eq_preset = NULL;
 	gdouble *saved_bands;
 	gint i;
 
-	preferences = pragha_preferences_get ();
-	
-	eq_preset = pragha_preferences_get_string (preferences,
+	eq_preset = pragha_preferences_get_string (dialog->preferences,
 	                                           GROUP_AUDIO,
 	                                           KEY_EQ_PRESET);
 
 	if(eq_preset != NULL) {
 		if (g_ascii_strcasecmp(eq_preset, "Custom") == 0) {
-			saved_bands = pragha_preferences_get_double_list (preferences,
+			saved_bands = pragha_preferences_get_double_list (dialog->preferences,
 			                                                  GROUP_AUDIO,
 			                                                  KEY_EQ_10_BANDS);
 			if (saved_bands != NULL) {
 				for (i = 0; i < NUM_BANDS; i++)
-					gtk_range_set_value(GTK_RANGE(vscales[i]), saved_bands[i]);
+					gtk_range_set_value(GTK_RANGE(dialog->vscales[i]), saved_bands[i]);
 
 				g_free(saved_bands);
 			}
-			gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), G_N_ELEMENTS(presets_names) - 1);
+			gtk_combo_box_set_active (GTK_COMBO_BOX(dialog->preset_combobox), G_N_ELEMENTS(presets_names) - 1);
 		}
 		else {
 			for (i = 0; i < G_N_ELEMENTS(presets_names); i++) {
 				if (g_ascii_strcasecmp(eq_preset, presets_names[i]) == 0) {
-					gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), i);
+					gtk_combo_box_set_active (GTK_COMBO_BOX(dialog->preset_combobox), i);
 					break;
 				}
 			}
@@ -151,38 +149,31 @@ pragha_equalizer_init_bands (GtkWidget *eq_combobox, GtkWidget **vscales)
 		g_free(eq_preset);
 	}
 	else {
-		gtk_combo_box_set_active (GTK_COMBO_BOX(eq_combobox), 0);
+		gtk_combo_box_set_active (GTK_COMBO_BOX(dialog->preset_combobox), 0);
 	}
-
-	g_object_unref (preferences);
 }
 
 static void
-pragha_equalizer_save_preset (GtkWidget *eq_combobox, GtkWidget **vscales)
+pragha_equalizer_dialog_save_preset (PraghaEqualizerDialog *dialog)
 {
-	PraghaPreferences *preferences;
 	gdouble bands[NUM_BANDS];
 	gint i, preset;
 
-	preferences = pragha_preferences_get ();
-
-	preset = gtk_combo_box_get_active (GTK_COMBO_BOX (eq_combobox));
+	preset = gtk_combo_box_get_active (GTK_COMBO_BOX (dialog->preset_combobox));
 
 	for (i = 0; i < NUM_BANDS; i++)
-		bands[i] = gtk_range_get_value(GTK_RANGE(vscales[i]));
+		bands[i] = gtk_range_get_value(GTK_RANGE(dialog->vscales[i]));
 
-	pragha_preferences_set_string(preferences,
+	pragha_preferences_set_string(dialog->preferences,
 	                              GROUP_AUDIO,
 	                              KEY_EQ_PRESET,
 	                              presets_names[preset]);
 
-	pragha_preferences_set_double_list(preferences,
+	pragha_preferences_set_double_list(dialog->preferences,
 	                                   GROUP_AUDIO,
 	                                   KEY_EQ_10_BANDS,
 	                                   bands,
 	                                   NUM_BANDS);
-
-	g_object_unref (preferences);
 }
 
 static gboolean
@@ -217,11 +208,13 @@ band_bind_to_backend (GtkRange *range, GstElement *equalizer, gint i)
 void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 {
 	PraghaEqualizerDialog *dialog;
-	GtkWidget *mhbox, *hbox, *dbvbox, *label, *eq_combobox;
+	GtkWidget *mhbox, *hbox, *dbvbox, *label;
 	gint i, result;
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
+
 	dialog->equalizer = pragha_backend_get_equalizer (cwin->backend);
+	dialog->preferences = pragha_preferences_get ();
 
 	/* Create vertical scales band to equalizer */
 
@@ -288,33 +281,33 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 	/* Append list of default presets */
 
-	eq_combobox = gtk_combo_box_text_new ();
+	dialog->preset_combobox = gtk_combo_box_text_new ();
 
 	for (i = 0; i < G_N_ELEMENTS(presets_names); i++)
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(eq_combobox), _(presets_names[i]));
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(dialog->preset_combobox), _(presets_names[i]));
 
 	/* Conect the signals */
 
 	for (i = 0; i < NUM_BANDS; i++) {
 		g_signal_connect(dialog->vscales[i], "change-value",
-				 G_CALLBACK(vscales_eq_set_by_user), eq_combobox);
+				 G_CALLBACK(vscales_eq_set_by_user), dialog->preset_combobox);
 	}
-	g_signal_connect(G_OBJECT(eq_combobox), "changed",
+	g_signal_connect(G_OBJECT(dialog->preset_combobox), "changed",
 			 G_CALLBACK(eq_combobox_activated_cb), dialog->vscales);
 
 	/* Append and show the dialog */
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), eq_combobox, FALSE, FALSE, 0);
-	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), eq_combobox, TRUE);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), dialog->preset_combobox, FALSE, FALSE, 0);
+	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), dialog->preset_combobox, TRUE);
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog->widget))), mhbox, TRUE, TRUE, 0);
 
 	if (dialog->equalizer == NULL) {
 		gtk_widget_set_sensitive(GTK_WIDGET(hbox), FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(eq_combobox), FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(dialog->preset_combobox), FALSE);
 	}
 
-	pragha_equalizer_init_bands (eq_combobox, dialog->vscales);
+	pragha_equalizer_dialog_init_bands (dialog);
 
 	gtk_widget_show_all(dialog->widget);
 
@@ -323,7 +316,8 @@ void show_equalizer_action(GtkAction *action, struct con_win *cwin)
 		(result != GTK_RESPONSE_DELETE_EVENT)) {
 	}
 
-	pragha_equalizer_save_preset (eq_combobox, dialog->vscales);
+	pragha_equalizer_dialog_save_preset (dialog);
 
+	g_object_unref (dialog->preferences);
 	gtk_widget_destroy(dialog->widget);
 }
