@@ -28,7 +28,8 @@ pragha_SOURCES = \
 		pragha-dbus.h \
 		pragha-debug.c \
 		pragha-debug.h \
-		pragha-equalizer.c \
+		pragha-equalizer-dialog.c \
+		pragha-equalizer-dialog.h \
 		pragha-file-utils.c \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
