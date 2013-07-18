@@ -216,7 +216,7 @@ pragha_equalizer_dialog_response (GtkWidget *w_dialog,
 		pragha_equalizer_dialog_save_preset (dialog);
 
 	g_object_unref (dialog->preferences);
-	gtk_widget_destroy(dialog->widget);
+	gtk_widget_destroy(w_dialog);
 
 	g_slice_free(PraghaEqualizerDialog, dialog);
 }
@@ -224,7 +224,7 @@ pragha_equalizer_dialog_response (GtkWidget *w_dialog,
 void pragha_equalizer_dialog_show(struct con_win *cwin)
 {
 	PraghaEqualizerDialog *dialog;
-	GtkWidget *mhbox, *hbox, *dbvbox, *label;
+	GtkWidget *w_dialog, *mhbox, *hbox, *dbvbox, *label;
 	gint i;
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
@@ -282,16 +282,16 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 
 	/* Create the dialog */
 
-	dialog->widget = gtk_dialog_new_with_buttons (_("Equalizer"),
-	                                              GTK_WINDOW(cwin->mainwindow),
-	                                              GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                              GTK_STOCK_OK,
-	                                              GTK_RESPONSE_OK,
-	                                              NULL);
+	w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
+	                                        GTK_WINDOW(cwin->mainwindow),
+	                                        GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                        GTK_STOCK_OK,
+	                                        GTK_RESPONSE_OK,
+	                                        NULL);
 
-	gtk_window_set_default_size(GTK_WINDOW (dialog->widget), -1, 200);
+	gtk_window_set_default_size(GTK_WINDOW (w_dialog), -1, 200);
 
-	gtk_dialog_set_default_response (GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response (GTK_DIALOG (w_dialog), GTK_RESPONSE_OK);
 
 	/* Append list of default presets */
 
@@ -311,10 +311,10 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 
 	/* Append and show the dialog */
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), dialog->preset_combobox, FALSE, FALSE, 0);
-	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog->widget))), dialog->preset_combobox, TRUE);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(w_dialog))), dialog->preset_combobox, FALSE, FALSE, 0);
+	gtk_button_box_set_child_secondary(GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(w_dialog))), dialog->preset_combobox, TRUE);
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog->widget))), mhbox, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(w_dialog))), mhbox, TRUE, TRUE, 0);
 
 	if (dialog->equalizer != NULL) {
 		for (i = 0; i < NUM_BANDS; i++)
@@ -326,8 +326,8 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 		gtk_widget_set_sensitive(GTK_WIDGET(dialog->preset_combobox), FALSE);
 	}
 
-	gtk_widget_show_all(dialog->widget);
+	gtk_widget_show_all(w_dialog);
 
-	g_signal_connect (G_OBJECT (dialog->widget), "response",
+	g_signal_connect (G_OBJECT (w_dialog), "response",
 	                  G_CALLBACK (pragha_equalizer_dialog_response), dialog);
 }
