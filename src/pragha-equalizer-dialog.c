@@ -193,15 +193,24 @@ pragha_equalizer_band_get_tooltip (GtkWidget  *vscale,
 }
 
 static void
-band_bind_to_backend (GtkRange *range, GstElement *equalizer, gint i)
+pragha_equalizer_dialog_bind_bands_to_backend (PraghaEqualizerDialog *dialog)
 {
-	gchar *eq_property = g_strdup_printf ("band%i", i);
-	GtkAdjustment *adj = gtk_range_get_adjustment (range);
+	gchar *eq_property;
+	GtkAdjustment *adjustment;
+	gint i;
+
 	GBindingFlags flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	g_object_bind_property (equalizer, eq_property, adj, "value", flags);
+	for (i = 0; i < NUM_BANDS; i++) {
+		eq_property = g_strdup_printf ("band%i", i);
+		adjustment = gtk_range_get_adjustment (GTK_RANGE(dialog->vscales[i]));
 
-	g_free (eq_property);
+		g_object_bind_property (dialog->equalizer, eq_property,
+		                        adjustment, "value",
+		                        flags);
+
+		g_free (eq_property);
+	}
 }
 
 static void
@@ -316,8 +325,7 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(w_dialog))), mhbox, TRUE, TRUE, 0);
 
 	if (dialog->equalizer != NULL) {
-		for (i = 0; i < NUM_BANDS; i++)
-			band_bind_to_backend(GTK_RANGE(dialog->vscales[i]), dialog->equalizer, i);
+		pragha_equalizer_dialog_bind_bands_to_backend (dialog);
 		pragha_equalizer_dialog_init_bands (dialog);
 	}
 	else {
