@@ -69,6 +69,35 @@ pragha_lastfm_async_data_free (PraghaLastfmAsyncData *data)
 	g_slice_free (PraghaLastfmAsyncData, data);
 }
 
+
+/* Save a get the lastfm password.
+ * TODO: Implement any basic crypto.
+ */
+
+void
+pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass)
+{
+	if (string_is_not_empty(pass))
+		pragha_preferences_set_string (preferences,
+		                               GROUP_SERVICES,
+		                               KEY_LASTFM_PASS,
+		                               pass);
+	else
+ 		pragha_preferences_remove_key (preferences,
+		                               GROUP_SERVICES,
+		                               KEY_LASTFM_PASS);
+}
+
+const gchar *
+pragha_lastfm_get_password (PraghaPreferences *preferences)
+{
+	return pragha_preferences_get_string (preferences,
+	                                      GROUP_SERVICES,
+	                                      KEY_LASTFM_PASS);
+}
+
+/* Upadate lastfm menubar acording lastfm state */
+
 void
 update_menubar_lastfm_state (struct con_win *cwin)
 {
@@ -100,7 +129,6 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Add similar");
 	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
 }
-
 
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
@@ -922,7 +950,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 
 	if(string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) ||
-	   string_is_empty(cwin->cpref->lastfm_pass))
+	   string_is_empty(pragha_lastfm_get_password (cwin->preferences)))
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -976,10 +1004,10 @@ do_just_init_lastfm(gpointer data)
 
 	if (cwin->clastfm->session_id != NULL) {
 		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
-		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
+		   string_is_not_empty(pragha_lastfm_get_password(cwin->preferences))) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
 			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
-							      cwin->cpref->lastfm_pass);
+			                                      pragha_lastfm_get_password (cwin->preferences));
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
@@ -1018,10 +1046,10 @@ do_init_lastfm_idle(gpointer data)
 
 	if (cwin->clastfm->session_id != NULL) {
 		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
-		   string_is_not_empty(cwin->cpref->lastfm_pass)) {
+		   string_is_not_empty(pragha_lastfm_get_password(cwin->preferences))) {
 			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
 			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
-							      cwin->cpref->lastfm_pass);
+			                                      pragha_lastfm_get_password (cwin->preferences));
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK)
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");

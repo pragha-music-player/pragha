@@ -102,9 +102,6 @@ struct con_pref {
 	gint window_x;
 	gint window_y;
 	GKeyFile *configrc_keyfile;
-#ifdef HAVE_LIBCLASTFM
-	gchar *lastfm_pass;
-#endif
 };
 
 struct con_win {

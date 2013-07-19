@@ -335,18 +335,12 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		pragha_preferences_set_lastfm_support (cwin->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w)));
 
-		if (cwin->cpref->lastfm_pass) {
-			g_free(cwin->cpref->lastfm_pass);
-			cwin->cpref->lastfm_pass = NULL;
-		}
-
 		if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
 			pragha_preferences_set_lastfm_user (cwin->preferences,
 				gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w)));
 
-			cwin->cpref->lastfm_pass =
-				g_strdup(gtk_entry_get_text(GTK_ENTRY(
-					    cwin->preferences_w->lastfm_pass_w)));
+			pragha_lastfm_set_password(cwin->preferences,
+				gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w)));
 
 			if (cwin->clastfm->session_id != NULL) {
 				LASTFM_dinit(cwin->clastfm->session_id);
@@ -795,7 +789,7 @@ static void update_preferences(struct con_win *cwin)
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w),
 		                   pragha_preferences_get_lastfm_user (cwin->preferences));
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w),
-		                   cwin->cpref->lastfm_pass);
+		                   pragha_lastfm_get_password(cwin->preferences));
 	}
 #endif
 #ifdef HAVE_LIBGLYR
@@ -907,23 +901,6 @@ void save_preferences(struct con_win *cwin)
 
 	pragha_preferences_set_sidebar_size(cwin->preferences,
 		gtk_paned_get_position(GTK_PANED(cwin->paned)));
-
-	/* Services internet */
-	/* Save last.fm option */
-#ifdef HAVE_LIBCLASTFM
-	if (!pragha_preferences_get_lastfm_support (cwin->preferences)) {
-		pragha_preferences_remove_key(cwin->preferences,
-		                              GROUP_SERVICES,
-		                              KEY_LASTFM_PASS);
-	}
-	else {
-		if (cwin->cpref->lastfm_pass)
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_PASS,
-					      cwin->cpref->lastfm_pass);
-	}
-#endif
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
