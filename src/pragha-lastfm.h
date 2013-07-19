@@ -29,6 +29,7 @@
 
 #include "pragha-simple-async.h"
 #include "pragha-musicobject.h"
+#include "pragha-preferences.h"
 
 /* pragha.h */
 struct con_win;
@@ -50,6 +51,9 @@ enum LASTFM_QUERY_TYPE {
 	LASTFM_GET_SIMILAR,
 	LASTFM_GET_LOVED
 };
+
+void         pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass);
+const gchar *pragha_lastfm_get_password (PraghaPreferences *preferences);
 
 void update_menubar_lastfm_state (struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);

@@ -93,12 +93,12 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean start_mode_f, window_size_f, window_position_f, album_f;
+	gboolean start_mode_f, window_size_f, window_position_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	start_mode_f = window_size_f = window_position_f = album_f = FALSE;
+	start_mode_f = window_size_f = window_position_f = FALSE;
 
 	all_f = FALSE;
 
@@ -168,19 +168,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			start_mode_f = TRUE;
 		}
-
-		/* Retrieve Services Internet preferences */
-		#ifdef HAVE_LIBCLASTFM
-		cwin->cpref->lastfm_pass =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_SERVICES,
-					      KEY_LASTFM_PASS,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-		}
-		#endif
 	}
 	else {
 		err = TRUE;

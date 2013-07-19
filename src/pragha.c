@@ -48,7 +48,6 @@ pragha_get_window(struct con_win *cwin)
 	return cwin->mainwindow;
 }
 
-
 /*
  * Here temporarily.
  * Port the rest of the preferences to PraghaPreferences and then delete this.
@@ -56,9 +55,6 @@ pragha_get_window(struct con_win *cwin)
 
 static void preferences_free (struct con_pref *cpref)
 {
-#ifdef HAVE_LIBCLASTFM
-	g_free(cpref->lastfm_pass);
-#endif
 	g_free(cpref->installed_version);
 	g_free(cpref->start_mode);
 
