@@ -1,18 +1,18 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>			 */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>			 */
-/* 									 */
-/* This program is free software: you can redistribute it and/or modify	 */
-/* it under the terms of the GNU General Public License as published by	 */
-/* the Free Software Foundation, either version 3 of the License, or	 */
-/* (at your option) any later version.					 */
-/* 									 */
-/* This program is distributed in the hope that it will be useful,	 */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of	 */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	 */
-/* GNU General Public License for more details.				 */
-/* 									 */
-/* You should have received a copy of the GNU General Public License	 */
+/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/*                                                                       */
+/* This program is free software: you can redistribute it and/or modify  */
+/* it under the terms of the GNU General Public License as published by  */
+/* the Free Software Foundation, either version 3 of the License, or     */
+/* (at your option) any later version.                                   */
+/*                                                                       */
+/* This program is distributed in the hope that it will be useful,       */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/* GNU General Public License for more details.                          */
+/*                                                                       */
+/* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
@@ -107,20 +107,11 @@ gint init_config(struct con_win *cwin)
 	cwin->cpref->configrc_keyfile = pragha_preferences_share_key_file(cwin->preferences);
 	const gchar *configrc_file = pragha_preferences_share_filepath(cwin->preferences);
 
-	if (cwin->cpref->configrc_keyfile != NULL &&
-	    configrc_file != NULL) {
+	if (cwin->cpref->configrc_keyfile != NULL && configrc_file != NULL) {
 		/* Retrieve version */
 
-		cwin->cpref->installed_version =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_GENERAL,
-					      KEY_INSTALLED_VERSION,
-					      &error);
-		if (!cwin->cpref->installed_version) {
+		if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
 			cwin->first_run = TRUE;
-			g_error_free(error);
-			error = NULL;
-		}
 
 		/* Retrieve Window preferences */
 

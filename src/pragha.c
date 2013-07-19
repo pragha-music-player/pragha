@@ -55,7 +55,6 @@ pragha_get_window(struct con_win *cwin)
 
 static void preferences_free (struct con_pref *cpref)
 {
-	g_free(cpref->installed_version);
 	g_free(cpref->start_mode);
 
 	g_slice_free(struct con_pref, cpref);

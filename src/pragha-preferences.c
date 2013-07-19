@@ -35,6 +35,8 @@ struct _PraghaPreferencesPrivate
 	GKeyFile  *rc_keyfile;
 	gchar     *rc_filepath;
 
+	/* Useful to pragha. */
+	gchar     *installed_version;
 	/* Search preferences. */
 	gboolean   instant_search;
 	gboolean   approximate_search;
@@ -379,6 +381,32 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
 		                      group_name,
 		                      key,
 		                      NULL);
+}
+
+/**
+ * pragha_preferences_get_installed_version:
+ *
+ */
+const gchar *
+pragha_preferences_get_installed_version (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return preferences->priv->installed_version;
+}
+
+/**
+ * pragha_preferences_set_installed_version:
+ *
+ */
+static void
+pragha_preferences_set_installed_version (PraghaPreferences *preferences,
+                                          const gchar *installed_version)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_free(preferences->priv->installed_version);
+	preferences->priv->installed_version = g_strdup(installed_version);
 }
 
 /**
@@ -1336,6 +1364,7 @@ pragha_preferences_set_lastfm_user (PraghaPreferences *preferences,
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
+	gchar *installed_version;
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
@@ -1394,6 +1423,21 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		g_error_free(error);
 		return;
 	}
+
+	/* Installed version used as flag to detect the first run. */
+
+	installed_version = g_key_file_get_string(priv->rc_keyfile,
+	                                          GROUP_GENERAL,
+	                                          KEY_INSTALLED_VERSION,
+	                                          &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_installed_version(preferences, installed_version);
+	}
+
 
 	/* Open last preferences */
 
@@ -1825,6 +1869,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_lastfm_user(preferences, lastfm_user);
 	}
 
+	g_free(installed_version);
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
@@ -1846,10 +1891,15 @@ pragha_preferences_finalize (GObject *object)
 
 	/* Store new preferences */
 
+	g_key_file_set_string(priv->rc_keyfile,
+	                      GROUP_GENERAL,
+	                      KEY_INSTALLED_VERSION,
+	                      PACKAGE_VERSION);
+
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_INSTANT_SEARCH,
-	                        priv->instant_search);
+	                       priv->instant_search);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_APPROXIMATE_SEARCH,

@@ -127,7 +127,7 @@ struct _PraghaPreferencesClass
 #define ALBUM_ART_NO_PATTERNS      6
 
 /*
- * Public Api.
+ * Generic api to accessing other preferences.
  */
 
 GKeyFile*
@@ -198,6 +198,13 @@ void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
                                const gchar *group_name,
                                const gchar *key);
+
+/*
+ * Public api.
+ */
+
+const gchar *
+pragha_preferences_get_installed_version (PraghaPreferences *preferences);
 
 void
 pragha_preferences_set_approximate_search (PraghaPreferences *prefernces,
