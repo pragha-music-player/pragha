@@ -29,7 +29,6 @@
 #ifdef HAVE_LIBXFCE4UI
 #include <libxfce4ui/libxfce4ui.h>
 #endif
-#include <tag_c.h>
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
@@ -78,29 +77,6 @@ static gboolean _init_gui_state(gpointer data)
 	return TRUE;
 }
 #endif
-
-gint init_taglib(struct con_win *cwin)
-{
-	taglib_set_strings_unicode(TRUE);
-
-	return 0;
-}
-
-gint init_threads(struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Initializing threads");
-
-	#if !GLIB_CHECK_VERSION(2,31,0)
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-	#endif
-
-	#if !GLIB_CHECK_VERSION(2,35,1)
-	g_type_init ();
-	#endif
-
-	return 0;
-}
 
 void init_menu_actions(struct con_win *cwin)
 {
