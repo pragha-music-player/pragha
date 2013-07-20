@@ -28,6 +28,7 @@
 #include "pragha-notify.h"
 #include "pragha-preferences-dialog.h"
 #include "pragha-glyr.h"
+#include "pragha-utils.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -46,16 +47,6 @@ GtkWidget *
 pragha_get_window(struct con_win *cwin)
 {
 	return cwin->mainwindow;
-}
-
-/*
- * Here temporarily.
- * Port the rest of the preferences to PraghaPreferences and then delete this.
- */
-
-static void preferences_free (struct con_pref *cpref)
-{
-	g_slice_free(struct con_pref, cpref);
 }
 
 /* FIXME: Cleanup track refs */
@@ -77,7 +68,6 @@ static void common_cleanup(struct con_win *cwin)
 	gui_free (cwin);
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
-	preferences_free (cwin->cpref);
 	g_object_unref(cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
 	lastfm_free (cwin->clastfm);
@@ -121,7 +111,6 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	cwin = g_slice_new0(struct con_win);
-	cwin->cpref = g_slice_new0(struct con_pref);
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 #endif
@@ -158,12 +147,9 @@ gint main(gint argc, gchar *argv[])
 		return 0;
 
 	cwin->preferences = pragha_preferences_get();
-	/* TODO: Port everiting to PraghaPreferences
-	 *       Search a better condition o errors!!. */
-	if (init_config(cwin) == -1) {
-		g_critical("Unable to init configuration");
-		return -1;
-	}
+
+	if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
+		cwin->first_run = TRUE;
 
 	if (init_taglib(cwin) == -1) {
 		g_critical("Unable to init taglib");

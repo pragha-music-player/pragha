@@ -132,17 +132,13 @@ struct _PraghaPreferencesClass
 #define FULLSCREEN_STATE           "fullscreen"
 #define ICONIFIED_STATE            "iconified"
 
-/*
- * Generic api to accessing other preferences.
- */
-
-GKeyFile*
-pragha_preferences_share_key_file(PraghaPreferences *preferences);
-gchar*
-pragha_preferences_share_filepath(PraghaPreferences *preferences);
 
 PraghaPreferences* pragha_preferences_get (void);
 GType pragha_preferences_get_type (void) G_GNUC_CONST;
+
+/*
+ * Generic api to accessing other preferences.
+ */
 
 gint *
 pragha_preferences_get_integer_list (PraghaPreferences *preferences,
