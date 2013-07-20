@@ -126,6 +126,12 @@ struct _PraghaPreferencesClass
 
 #define ALBUM_ART_NO_PATTERNS      6
 
+/* Some useful macros. */
+
+#define NORMAL_STATE               "normal"
+#define FULLSCREEN_STATE           "fullscreen"
+#define ICONIFIED_STATE            "iconified"
+
 /*
  * Generic api to accessing other preferences.
  */
@@ -357,6 +363,13 @@ pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 void
 pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
                                      gint sidebar_size);
+
+const gchar *
+pragha_preferences_get_start_mode (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_start_mode (PraghaPreferences *preferences,
+                                   const gchar *start_mode);
 
 const gchar *
 pragha_preferences_get_last_folder (PraghaPreferences *preferences);

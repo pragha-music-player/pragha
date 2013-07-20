@@ -65,6 +65,7 @@ struct _PraghaPreferencesPrivate
 	gboolean   show_status_icon;
 	gboolean   controls_below;
 	gboolean   remember_state;
+	gchar     *start_mode;
 	/* Misc preferences. */
 	gchar     *last_folder;
 	gboolean   add_recursively;
@@ -107,6 +108,7 @@ enum
 	PROP_SHOW_STATUS_ICON,
 	PROP_CONTROLS_BELOW,
 	PROP_REMEMBER_STATE,
+	PROP_START_MODE,
 	PROP_LAST_FOLDER,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
@@ -1036,6 +1038,34 @@ pragha_preferences_set_remember_state (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_start_mode:
+ *
+ */
+const gchar *
+pragha_preferences_get_start_mode (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return preferences->priv->start_mode;
+}
+
+/**
+ * pragha_preferences_set_start_mode:
+ *
+ */
+void
+pragha_preferences_set_start_mode (PraghaPreferences *preferences,
+                                   const gchar *start_mode)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_free(preferences->priv->start_mode);
+	preferences->priv->start_mode = g_strdup(start_mode);
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_START_MODE]);
+}
+
+/**
  * pragha_preferences_get_last_folder:
  *
  */
@@ -1369,7 +1399,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
-	gchar *last_folder, *last_folder_converted = NULL;
+	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
 	gboolean use_cddb, download_album_art, use_mpris2, lastfm_support;
 	gchar *lastfm_user;
@@ -1717,6 +1747,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_remember_state(preferences, remember_state);
 	}
 
+	start_mode = g_key_file_get_string(priv->rc_keyfile,
+	                                   GROUP_WINDOW,
+	                                   KEY_START_MODE,
+	                                   &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_start_mode(preferences, NORMAL_STATE);
+	}
+
 	last_folder = g_key_file_get_string(priv->rc_keyfile,
 	                                    GROUP_GENERAL,
 	                                    KEY_LAST_FOLDER,
@@ -1875,6 +1917,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	g_free(audio_cd_device);
 	g_free(album_art_pattern);
 	g_free(lastfm_user);
+	g_free(start_mode);
 	g_free(last_folder);
 	g_free(last_folder_converted);
 }
@@ -2001,6 +2044,10 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_WINDOW,
 	                       KEY_REMEMBER_STATE,
 	                       priv->remember_state);
+	g_key_file_set_string(priv->rc_keyfile,
+	                      GROUP_WINDOW,
+	                      KEY_START_MODE,
+	                      priv->start_mode);
 
 	gchar *last_folder_converted = g_filename_to_utf8(priv->last_folder, -1, NULL, NULL, &error);
 	if (error) {
@@ -2085,6 +2132,7 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->audio_device);
 	g_free(priv->audio_cd_device);
 	g_free(priv->album_art_pattern);
+	g_free(priv->start_mode);
 	g_free(priv->last_folder);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
@@ -2167,6 +2215,9 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_REMEMBER_STATE:
 			g_value_set_boolean (value, pragha_preferences_get_remember_state(preferences));
+			break;
+		case PROP_START_MODE:
+			g_value_set_string (value, pragha_preferences_get_start_mode(preferences));
 			break;
 		case PROP_LAST_FOLDER:
 			g_value_set_string (value, pragha_preferences_get_last_folder(preferences));
@@ -2286,6 +2337,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_REMEMBER_STATE:
 			pragha_preferences_set_remember_state(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_START_MODE:
+			pragha_preferences_set_start_mode(preferences, g_value_get_string(value));
 			break;
 		case PROP_LAST_FOLDER:
 			pragha_preferences_set_last_folder(preferences, g_value_get_string(value));
@@ -2615,6 +2669,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                      PRAGHA_PREF_PARAMS);
 
 	/**
+	  * PraghaPreferences:start_mode:
+	  *
+	  */
+	gParamSpecs[PROP_START_MODE] =
+		g_param_spec_string("start-mode",
+		                    "StartMode",
+		                    "Start Mode Preference",
+		                    NORMAL_STATE,
+		                    PRAGHA_PREF_PARAMS);
+
+	/**
 	  * PraghaPreferences:last_folder:
 	  *
 	  */
@@ -2624,7 +2689,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                    "Last folder used in file chooser",
 		                    g_get_home_dir(),
 		                    PRAGHA_PREF_PARAMS);
-
 
 	/**
 	  * PraghaPreferences:add_recursively:

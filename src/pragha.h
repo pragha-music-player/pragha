@@ -76,10 +76,6 @@
 #define P_FOLDER_STR        "Folder"	/* Containing folder */
 #define P_BASENAME_STR      "Basename"	/* Base name of the file */
 
-#define NORMAL_STATE		"normal"
-#define FULLSCREEN_STATE	"fullscreen"
-#define ICONIFIED_STATE		"iconified"
-
 #define PANE_LIBRARY		"library"
 #define PANE_PLAYLISTS		"playlists"
 #define PANE_NONE		"none"
