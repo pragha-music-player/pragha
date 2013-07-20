@@ -2823,18 +2823,6 @@ pragha_preferences_init (PraghaPreferences *preferences)
 	                                                PraghaPreferencesPrivate);
 }
 
-GKeyFile*
-pragha_preferences_share_key_file(PraghaPreferences *preferences)
-{
-	return preferences->priv->rc_keyfile;
-}
-
-gchar*
-pragha_preferences_share_filepath(PraghaPreferences *preferences)
-{
-	return preferences->priv->rc_filepath;
-}
-
 /**
  * pragha_preferences_get:
  *
@@ -2851,6 +2839,9 @@ pragha_preferences_get (void)
 	static PraghaPreferences *preferences = NULL;
 
 	if (G_UNLIKELY (preferences == NULL)) {
+
+		CDEBUG(DBG_INFO, "Creating a new PraghaPreferences instance");
+
 		preferences = g_object_new(PRAGHA_TYPE_PREFERENCES, NULL);
 		g_object_add_weak_pointer(G_OBJECT (preferences),
 		                          (gpointer) &preferences);

@@ -855,17 +855,18 @@ void save_preferences(struct con_win *cwin)
 		window_position[0] = win_x;
 		window_position[1] = win_y;
 
-		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_WINDOW,
-					    KEY_WINDOW_SIZE,
-					    window_size,
-					    2);
+		pragha_preferences_set_integer_list (cwin->preferences,
+		                                     GROUP_WINDOW,
+		                                     KEY_WINDOW_SIZE,
+		                                     window_size,
+		                                     2);
 
-		g_key_file_set_integer_list(cwin->cpref->configrc_keyfile,
-					    GROUP_WINDOW,
-					    KEY_WINDOW_POSITION,
-					    window_position,
-					    2);
+		pragha_preferences_set_integer_list (cwin->preferences,
+		                                     GROUP_WINDOW,
+		                                     KEY_WINDOW_POSITION,
+		                                     window_position,
+		                                     2);
+
 		g_free(window_size);
 		g_free(window_position);
 	}

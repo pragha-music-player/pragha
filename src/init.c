@@ -86,88 +86,6 @@ gint init_taglib(struct con_win *cwin)
 	return 0;
 }
 
-gint init_config(struct con_win *cwin)
-{
-	GError *error = NULL;
-	gint *win_size, *win_position;
-	gboolean err = FALSE;
-	gsize cnt = 0;
-
-	gboolean window_size_f, window_position_f;
-	gboolean all_f;
-
-	CDEBUG(DBG_INFO, "Initializing configuration");
-
-	window_size_f = window_position_f = FALSE;
-
-	all_f = FALSE;
-
-	/* Share keyfile with PraghaPreferences */
-
-	cwin->cpref->configrc_keyfile = pragha_preferences_share_key_file(cwin->preferences);
-	const gchar *configrc_file = pragha_preferences_share_filepath(cwin->preferences);
-
-	if (cwin->cpref->configrc_keyfile != NULL && configrc_file != NULL) {
-		/* Retrieve version */
-
-		if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
-			cwin->first_run = TRUE;
-
-		/* Retrieve Window preferences */
-
-		win_size = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
-						       GROUP_WINDOW,
-						       KEY_WINDOW_SIZE,
-						       &cnt,
-						       &error);
-		if (win_size) {
-			cwin->cpref->window_width = win_size[0];
-			cwin->cpref->window_height = win_size[1];
-			g_free(win_size);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			window_size_f = TRUE;
-		}
-
-		win_position = g_key_file_get_integer_list(cwin->cpref->configrc_keyfile,
-							   GROUP_WINDOW,
-							   KEY_WINDOW_POSITION,
-							   &cnt,
-							   &error);
-		if (win_position) {
-			cwin->cpref->window_x = win_position[0];
-			cwin->cpref->window_y = win_position[1];
-			g_free(win_position);
-		}
-		else {
-			g_error_free(error);
-			error = NULL;
-			window_position_f = TRUE;
-		}
-	}
-	else {
-		err = TRUE;
-	}
-
-	/* Fill up with failsafe defaults */
-
-	if (all_f || window_size_f) {
-		cwin->cpref->window_width = MIN_WINDOW_WIDTH;
-		cwin->cpref->window_height = MIN_WINDOW_HEIGHT;
-	}
-	if (all_f || window_position_f) {
-		cwin->cpref->window_x = -1;
-		cwin->cpref->window_y = -1;
-	}
-
-	if (err)
-		return -1;
-	else
-		return 0;
-}
-
 gint init_threads(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Initializing threads");
@@ -301,6 +219,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *info_box, *hbox_main, *menu_bar;
+	gint *win_size, *win_position;
+	gsize cnt = 0;
 	const gchar *start_mode;
 
 	const GBindingFlags binding_flags =
@@ -347,20 +267,38 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Set Default Size */
 
-	gtk_window_set_default_size(GTK_WINDOW(cwin->mainwindow),
-				    cwin->cpref->window_width,
-				    cwin->cpref->window_height);
+	win_size = pragha_preferences_get_integer_list (cwin->preferences,
+	                                                GROUP_WINDOW,
+	                                                KEY_WINDOW_SIZE,
+	                                                &cnt);
+	if (win_size) {
+		gtk_window_set_default_size(GTK_WINDOW(cwin->mainwindow),
+		                            win_size[0],
+		                            win_size[1]);
+		g_free(win_size);
+	}
+	else {
+		gtk_window_set_default_size(GTK_WINDOW(cwin->mainwindow),
+		                            MIN_WINDOW_WIDTH,
+		                            MIN_WINDOW_HEIGHT);
+	}
 
 	/* Set Position */
 
-	if (cwin->cpref->window_x != -1) {
+	win_position = pragha_preferences_get_integer_list (cwin->preferences,
+	                                                    GROUP_WINDOW,
+	                                                    KEY_WINDOW_POSITION,
+	                                                    &cnt);
+
+	if (win_position) {
 		gtk_window_move(GTK_WINDOW(cwin->mainwindow),
-				cwin->cpref->window_x,
-				cwin->cpref->window_y);
+		                win_position[0],
+		                win_position[1]);
+		g_free(win_position);
 	}
 	else {
 		gtk_window_set_position(GTK_WINDOW(cwin->mainwindow),
-					GTK_WIN_POS_CENTER);
+		                        GTK_WIN_POS_CENTER);
 	}
 
 	/* Systray */

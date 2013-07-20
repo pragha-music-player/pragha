@@ -90,22 +90,16 @@ enum dnd_target {
 	TARGET_PLAIN_TEXT
 };
 
-struct con_pref {
-	gchar *start_mode;
-	gint window_width;
-	gint window_height;
-	gint window_x;
-	gint window_y;
-	GKeyFile *configrc_keyfile;
-};
-
 struct con_win {
-	struct con_pref *cpref;
-	struct con_state *cstate;
 	PraghaPlaylist *cplaylist;
 	PraghaLibraryPane *clibrary;
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
+#ifdef HAVE_LIBGLYR
+	PraghaGlyr *glyr;
+#endif
+	PraghaMpris2 *cmpris2;
+	PraghaNotify *notify;
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
 	PraghaStatusbar *statusbar;
@@ -115,9 +109,7 @@ struct con_win {
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
 	#endif
-	PraghaMpris2 *cmpris2;
 	con_gnome_media_keys *cgnome_media_keys;
-	PraghaNotify *notify;
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 	GtkWidget *info_box;
@@ -127,9 +119,6 @@ struct con_win {
 	GtkUIManager *systray_menu;
 	gboolean unique_instance;
 	gboolean first_run;
-#ifdef HAVE_LIBGLYR
-	PraghaGlyr *glyr;
-#endif
 	guint related_timeout_id;
 	DBusConnection *con_dbus;
 };
