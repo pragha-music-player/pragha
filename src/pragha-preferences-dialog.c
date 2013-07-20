@@ -234,20 +234,17 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->window_state_combo_w));
 
-		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))){
+		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))) {
 			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
+			pragha_preferences_set_start_mode(cwin->preferences, NORMAL_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
 			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(FULLSCREEN_STATE);
+			pragha_preferences_set_start_mode(cwin->preferences, FULLSCREEN_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
 			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			g_free(cwin->cpref->start_mode);
-			cwin->cpref->start_mode = g_strdup(ICONIFIED_STATE);
+			pragha_preferences_set_start_mode(cwin->preferences, ICONIFIED_STATE);
 		}
 		else
 			pragha_preferences_set_remember_state(cwin->preferences, TRUE);
@@ -608,10 +605,11 @@ static void update_preferences(struct con_win *cwin)
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
 	const gchar *audio_device = pragha_preferences_get_audio_device(cwin->preferences);
 	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
+	const gchar *start_mode = pragha_preferences_get_start_mode(cwin->preferences);
 
 	/* Audio Options */
 
-	if (audio_sink) {
+	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
 						 cwin->preferences_w->audio_sink_combo_w),
@@ -634,7 +632,7 @@ static void update_preferences(struct con_win *cwin)
 						 0);
 	}
 
-	if (audio_sink) {
+	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			update_audio_device_alsa(cwin);
 		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
@@ -647,11 +645,11 @@ static void update_preferences(struct con_win *cwin)
 			update_audio_device_default(cwin);
 	}
 
-	if (audio_device)
+	if (string_is_not_empty(audio_device))
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_device_w),
 				   audio_device);
 
-	if (audio_cd_device)
+	if (string_is_not_empty(audio_cd_device))
 		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
 				   audio_cd_device);
 
@@ -664,13 +662,13 @@ static void update_preferences(struct con_win *cwin)
 
 	if(pragha_preferences_get_remember_state(cwin->preferences))
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 0);
-	else{
-		if(cwin->cpref->start_mode){
-			if (!g_ascii_strcasecmp(cwin->cpref->start_mode, NORMAL_STATE))
+	else {
+		if(string_is_not_empty(start_mode)) {
+			if (!g_ascii_strcasecmp(start_mode, NORMAL_STATE))
 				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 1);
-			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+			else if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
 				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 2);
-			else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE))
+			else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE))
 				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 3);
 		}
 	}
@@ -816,13 +814,6 @@ void save_preferences(struct con_win *cwin)
 
 	/* General options*/
 
-	/* Save version */
-
-	g_key_file_set_string(cwin->cpref->configrc_keyfile,
-			      GROUP_GENERAL,
-			      KEY_INSTALLED_VERSION,
-			      PACKAGE_VERSION);
-
 	pragha_playlist_save_preferences(cwin->cplaylist);
 
 	/* Save software volume */
@@ -837,32 +828,14 @@ void save_preferences(struct con_win *cwin)
 
 	/* Save last window state */
 
-	if(pragha_preferences_get_remember_state(cwin->preferences)) {
+	if (pragha_preferences_get_remember_state(cwin->preferences)) {
 		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
-		if(state & GDK_WINDOW_STATE_FULLSCREEN) {
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      FULLSCREEN_STATE);
-		}
-		else if(state & GDK_WINDOW_STATE_WITHDRAWN) {
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      ICONIFIED_STATE);
-		}
-		else {
-			g_key_file_set_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      NORMAL_STATE);
-		}
-	}
-	else {
-		g_key_file_set_string(cwin->cpref->configrc_keyfile,
-				      GROUP_WINDOW,
-				      KEY_START_MODE,
-				      cwin->cpref->start_mode);
+		if (state & GDK_WINDOW_STATE_FULLSCREEN)
+			pragha_preferences_set_start_mode(cwin->preferences, FULLSCREEN_STATE);
+		else if(state & GDK_WINDOW_STATE_WITHDRAWN)
+			pragha_preferences_set_start_mode(cwin->preferences, ICONIFIED_STATE);
+		else
+			pragha_preferences_set_start_mode(cwin->preferences, NORMAL_STATE);
 	}
 
 	/* Save geometry only if window is not maximized or fullscreened */

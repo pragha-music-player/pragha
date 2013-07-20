@@ -93,12 +93,12 @@ gint init_config(struct con_win *cwin)
 	gboolean err = FALSE;
 	gsize cnt = 0;
 
-	gboolean start_mode_f, window_size_f, window_position_f;
+	gboolean window_size_f, window_position_f;
 	gboolean all_f;
 
 	CDEBUG(DBG_INFO, "Initializing configuration");
 
-	start_mode_f = window_size_f = window_position_f = FALSE;
+	window_size_f = window_position_f = FALSE;
 
 	all_f = FALSE;
 
@@ -146,19 +146,6 @@ gint init_config(struct con_win *cwin)
 			error = NULL;
 			window_position_f = TRUE;
 		}
-
-		/* Retrieve General preferences */
-
-		cwin->cpref->start_mode =
-			g_key_file_get_string(cwin->cpref->configrc_keyfile,
-					      GROUP_WINDOW,
-					      KEY_START_MODE,
-					      &error);
-		if (error) {
-			g_error_free(error);
-			error = NULL;
-			start_mode_f = TRUE;
-		}
 	}
 	else {
 		err = TRUE;
@@ -174,8 +161,6 @@ gint init_config(struct con_win *cwin)
 		cwin->cpref->window_x = -1;
 		cwin->cpref->window_y = -1;
 	}
-	if (all_f || start_mode_f)
-		cwin->cpref->start_mode = g_strdup(NORMAL_STATE);
 
 	if (err)
 		return -1;
@@ -204,6 +189,7 @@ void init_menu_actions(struct con_win *cwin)
 	GtkAction *action = NULL;
 	gboolean shuffle, repeat;
 	const gchar *user_config_dir;
+	const gchar *start_mode;
 	gchar *pragha_accels_path = NULL;
 
 	/* First init menu accelerators edited */
@@ -224,7 +210,9 @@ void init_menu_actions(struct con_win *cwin)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), repeat);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
-	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE))
+
+	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
+	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
@@ -313,6 +301,8 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
 	GtkUIManager *menu;
 	GtkWidget *vbox, *info_box, *hbox_main, *menu_bar;
+	const gchar *start_mode;
+
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
@@ -431,10 +421,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Init window state */
 
-	if(!g_ascii_strcasecmp(cwin->cpref->start_mode, FULLSCREEN_STATE)) {
+	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
+	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE)) {
 		gtk_widget_show(cwin->mainwindow);
 	}
-	else if(!g_ascii_strcasecmp(cwin->cpref->start_mode, ICONIFIED_STATE)) {
+	else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE)) {
 		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
 			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
 		}
