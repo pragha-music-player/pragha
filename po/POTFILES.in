@@ -1,6 +1,6 @@
 src/info-bar-import-music.c
 src/init.c
-src/pragha-equalizer.c
+src/pragha-equalizer-dialog.c
 src/pragha-filter-dialog.c
 src/pragha-glyr.c
 src/pragha-lastfm.c
