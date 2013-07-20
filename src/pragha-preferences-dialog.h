@@ -22,6 +22,11 @@
 /* pragha.h */
 struct con_win;
 
+#define LASTFM_UNAME_LEN           256
+#define LASTFM_PASS_LEN            512
+#define ALBUM_ART_PATTERN_LEN      1024
+#define AUDIO_CD_DEVICE_ENTRY_LEN  32
+
 typedef struct _PreferencesWidgets PreferencesWidgets;
 
 void save_preferences(struct con_win *cwin);

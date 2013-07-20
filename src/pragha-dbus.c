@@ -20,6 +20,7 @@
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-notify.h"
+#include "pragha-window.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 

@@ -33,4 +33,6 @@ void gui_free(struct con_win *cwin);
 void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
 void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
 
+void toogle_main_window(struct con_win *cwin, gboolean ignoreActivity);
+
 #endif /* PRAGHA_WINDOW_H */
