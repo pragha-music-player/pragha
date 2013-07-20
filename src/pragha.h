@@ -31,6 +31,7 @@
 #include <glib/gstdio.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <gtk/gtk.h>
+#include <tag_c.h>
 
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
@@ -119,9 +120,7 @@ GtkWidget* create_info_bar_update_music(struct con_win *cwin);
 
 gint init_dbus(struct con_win *cwin);
 gint init_options(struct con_win *cwin, int argc, char **argv);
-gint init_taglib(struct con_win *cwin);
 gint init_audio(struct con_win *cwin);
-gint init_threads(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Others */

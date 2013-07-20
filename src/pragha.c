@@ -123,10 +123,14 @@ gint main(gint argc, gchar *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	if (init_threads(cwin) == -1) {
-		g_critical("Unable to init threads");
-		return -1;
-	}
+#if !GLIB_CHECK_VERSION(2,31,0)
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+#endif
+
+#if !GLIB_CHECK_VERSION(2,35,1)
+	g_type_init ();
+#endif
 
 	if (init_dbus(cwin) == -1) {
 		g_critical("Unable to init dbus connection");
@@ -151,10 +155,7 @@ gint main(gint argc, gchar *argv[])
 	if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
 		cwin->first_run = TRUE;
 
-	if (init_taglib(cwin) == -1) {
-		g_critical("Unable to init taglib");
-		return -1;
-	}
+	taglib_set_strings_unicode(TRUE);
 
 	cwin->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
