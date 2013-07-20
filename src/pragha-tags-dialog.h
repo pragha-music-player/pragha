@@ -32,6 +32,8 @@ G_BEGIN_DECLS
 #define PRAGHA_IS_TAGS_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHAL_TYPE_TAGS_DIALOG))
 #define PRAGHA_TAGS_DIALOG_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_TAGS_DIALOG, PraghaTagsDialogClass))
 
+#define TAG_MAX_LEN                256
+
 typedef struct _PraghaTagsDialogClass PraghaTagsDialogClass;
 typedef struct _PraghaTagsDialog      PraghaTagsDialog;
 

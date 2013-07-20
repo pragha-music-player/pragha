@@ -24,6 +24,8 @@
 /* pragha.h */
 struct con_win;
 
+#define OSD_TIMEOUT                5000
+
 typedef struct PraghaNotify PraghaNotify;
 
 gboolean       can_support_actions    (void);

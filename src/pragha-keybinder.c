@@ -18,6 +18,7 @@
 #include <keybinder.h>
 #include "pragha-playback.h"
 #include "pragha-tags-dialog.h"
+#include "pragha-window.h"
 #include "pragha.h"
 
 static void keybind_prev_handler (const char *keystring, gpointer data)
