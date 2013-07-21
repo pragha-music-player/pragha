@@ -37,6 +37,7 @@
 #include "pragha-window.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-preferences-dialog.h"
+#include "pragha-session.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -137,45 +138,6 @@ void init_pixbufs(struct con_win *cwin)
 	if (!cwin->pixbuf_app)
 		g_warning("Unable to load pragha png");
 }
-
-#if HAVE_LIBXFCE4UI
-static void
-pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
-{
-	gtk_main_quit();
-}
-
-void
-pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
-{
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		save_current_playlist_state(cwin->cplaylist);
-	save_preferences(cwin);
-}
-
-gint init_session_support(struct con_win *cwin)
-{
-	XfceSMClient *client;
-	GError *error = NULL;
- 
-	client =  xfce_sm_client_get ();
-	xfce_sm_client_set_priority (client, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
-	xfce_sm_client_set_restart_style (client, XFCE_SM_CLIENT_RESTART_NORMAL);
-	xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
-
-	g_signal_connect (G_OBJECT (client), "quit",
-			  G_CALLBACK (pragha_session_quit), cwin);
-	g_signal_connect (G_OBJECT (client), "save-state",
-			  G_CALLBACK (pragha_session_save_state), cwin);
-
-	if(!xfce_sm_client_connect (client, &error)) {
-		g_warning ("Failed to connect to session manager: %s", error->message);
-		g_error_free (error);
-	}
-
-	return 0;
-}
-#endif
 
 static gboolean
 window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_win *cwin)
@@ -372,14 +334,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			 "error",
 			 G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
 
-	#if HAVE_LIBXFCE4UI
-	init_session_support(cwin);
-	#else
-	/* set a unique role on each window (for session management) */
-	gchar *role = g_strdup_printf ("Pragha-%p-%d-%d", cwin->mainwindow, (gint) getpid (), (gint) time (NULL));
-	gtk_window_set_role (GTK_WINDOW (cwin->mainwindow), role);
-	g_free (role);
-	#endif
+	pragha_init_session_support(cwin);
 
 	#if GTK_CHECK_VERSION (3, 0, 0)
 	init_gui_state(cwin);
