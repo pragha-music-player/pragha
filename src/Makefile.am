@@ -64,6 +64,8 @@ pragha_SOURCES = \
 		pragha-prepared-statement-private.h \
 		pragha-scanner.c \
 		pragha-scanner.h \
+		pragha-session.c \
+		pragha-session.h \
 		pragha-sidebar.c \
 		pragha-simple-async.c \
 		pragha-simple-async.h \
