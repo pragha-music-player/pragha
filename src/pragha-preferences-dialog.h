@@ -29,7 +29,6 @@ struct con_win;
 
 typedef struct _PreferencesWidgets PreferencesWidgets;
 
-void save_preferences(struct con_win *cwin);
 void preferences_dialog(struct con_win *cwin);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

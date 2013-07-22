@@ -38,7 +38,6 @@ pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
 {
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		save_current_playlist_state(cwin->cplaylist);
-	save_preferences(cwin);
 }
 
 void

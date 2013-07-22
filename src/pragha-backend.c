@@ -263,6 +263,9 @@ pragha_backend_set_volume (PraghaBackend *backend, gdouble volume)
 #endif
 
 	g_object_set (priv->pipeline, "volume", volume, NULL);
+
+	if (pragha_preferences_get_software_mixer (priv->preferences))
+		pragha_preferences_set_software_volume (priv->preferences, volume);
 }
 
 void
