@@ -808,10 +808,6 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	gint *window_size, *window_position;
-	gint win_width, win_height, win_x, win_y;
-	GdkWindowState state;
-
 	/* General options*/
 
 	pragha_playlist_save_preferences(cwin->cplaylist);
@@ -823,58 +819,6 @@ void save_preferences(struct con_win *cwin)
 		                                       pragha_backend_get_volume (cwin->backend));
 	else
 		pragha_preferences_set_software_volume(cwin->preferences, -1.0);
-
-	/* Window Option */
-
-	/* Save last window state */
-
-	if (pragha_preferences_get_remember_state(cwin->preferences)) {
-		state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
-		if (state & GDK_WINDOW_STATE_FULLSCREEN)
-			pragha_preferences_set_start_mode(cwin->preferences, FULLSCREEN_STATE);
-		else if(state & GDK_WINDOW_STATE_WITHDRAWN)
-			pragha_preferences_set_start_mode(cwin->preferences, ICONIFIED_STATE);
-		else
-			pragha_preferences_set_start_mode(cwin->preferences, NORMAL_STATE);
-	}
-
-	/* Save geometry only if window is not maximized or fullscreened */
-
-	if (!(state & GDK_WINDOW_STATE_MAXIMIZED) || !(state & GDK_WINDOW_STATE_FULLSCREEN)) {
-		window_size = g_new0(gint, 2);
-		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
-				    &win_width,
-				    &win_height);
-		window_size[0] = win_width;
-		window_size[1] = win_height;
-
-		window_position = g_new0(gint, 2);
-		gtk_window_get_position(GTK_WINDOW(cwin->mainwindow),
-					&win_x,
-					&win_y);
-		window_position[0] = win_x;
-		window_position[1] = win_y;
-
-		pragha_preferences_set_integer_list (cwin->preferences,
-		                                     GROUP_WINDOW,
-		                                     KEY_WINDOW_SIZE,
-		                                     window_size,
-		                                     2);
-
-		pragha_preferences_set_integer_list (cwin->preferences,
-		                                     GROUP_WINDOW,
-		                                     KEY_WINDOW_POSITION,
-		                                     window_position,
-		                                     2);
-
-		g_free(window_size);
-		g_free(window_position);
-	}
-
-	/* Save sidebar size */
-
-	pragha_preferences_set_sidebar_size(cwin->preferences,
-		gtk_paned_get_position(GTK_PANED(cwin->paned)));
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
