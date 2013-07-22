@@ -92,9 +92,6 @@ static void common_cleanup(struct con_win *cwin)
 
 void exit_pragha(GtkWidget *widget, struct con_win *cwin)
 {
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		save_current_playlist_state(cwin->cplaylist);
-
 	gtk_main_quit();
 
 	CDEBUG(DBG_INFO, "Halt.");
