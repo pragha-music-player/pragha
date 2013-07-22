@@ -2896,7 +2896,8 @@ pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
 
 /* Save current playlist state on exit */
 
-void save_current_playlist_state(PraghaPlaylist* cplaylist)
+static void
+pragha_playlist_save_playlist_state (PraghaPlaylist* cplaylist)
 {
 	GtkTreePath *path = NULL;
 	GtkTreeIter iter;
@@ -4043,6 +4044,8 @@ pragha_playlist_free(PraghaPlaylist* cplaylist)
 {
 	g_signal_handlers_disconnect_by_func(cplaylist->preferences, shuffle_changed_cb, cplaylist);
 
+	if (pragha_preferences_get_restore_playlist(cplaylist->preferences))
+		pragha_playlist_save_playlist_state(cplaylist);
 	pragha_playlist_save_preferences(cplaylist);
 
 	g_object_unref(cplaylist->model);

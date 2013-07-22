@@ -129,7 +129,6 @@ GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
 PraghaMusicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
-void save_current_playlist_state(PraghaPlaylist *cplaylist);
 void init_current_playlist_view(PraghaPlaylist *cplaylist);
 void playlist_track_column_change_cb(GtkCheckMenuItem *item,
 				     PraghaPlaylist* cplaylist);
