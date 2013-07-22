@@ -366,9 +366,6 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		else {
 			mpris_init(cwin);
 		}
-
-		save_preferences(cwin);
-
 		break;
 	default:
 		break;
@@ -804,17 +801,6 @@ static void update_preferences(struct con_win *cwin)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					     cwin->preferences_w->use_mpris2_w),
 					     TRUE);
-}
-
-void save_preferences(struct con_win *cwin)
-{
-	/* Save software volume */
-
-	if (pragha_preferences_get_software_mixer(cwin->preferences))
-		pragha_preferences_set_software_volume(cwin->preferences,
-		                                       pragha_backend_get_volume (cwin->backend));
-	else
-		pragha_preferences_set_software_volume(cwin->preferences, -1.0);
 }
 
 int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
