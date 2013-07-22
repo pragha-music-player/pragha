@@ -81,7 +81,7 @@ static void dbus_show_osd_handler(struct con_win *cwin)
 
 static void dbus_toggle_handler(struct con_win *cwin)
 {
-	toogle_main_window(cwin, TRUE);
+	pragha_window_toggle_state(cwin, TRUE);
 }
 
 static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)

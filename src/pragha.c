@@ -90,7 +90,7 @@ static void common_cleanup(struct con_win *cwin)
 	g_slice_free(struct con_win, cwin);
 }
 
-void exit_pragha(GtkWidget *widget, struct con_win *cwin)
+void pragha_quit(struct con_win *cwin)
 {
 	gtk_main_quit();
 

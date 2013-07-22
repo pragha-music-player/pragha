@@ -708,7 +708,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 void quit_action(GtkAction *action, struct con_win *cwin)
 {
-	exit_pragha(NULL, cwin);
+	pragha_quit (cwin);
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */

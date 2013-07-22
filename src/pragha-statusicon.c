@@ -87,7 +87,7 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *c
 	GtkWidget *popup_menu;
 	switch (event->button)
 	{
-		case 1: toogle_main_window (cwin, FALSE);
+		case 1: pragha_window_toggle_state(cwin, FALSE);
 			break;
 		case 2:	pragha_playback_play_pause_resume(cwin);
 			break;
@@ -180,7 +180,7 @@ systray_next_action (GtkAction *action, struct con_win *cwin)
 static void
 systray_quit (GtkAction *action, struct con_win *cwin)
 {
-	exit_pragha(NULL, cwin);
+	pragha_quit (cwin);
 }
 
 static void

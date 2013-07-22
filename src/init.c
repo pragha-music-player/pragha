@@ -198,10 +198,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 			 G_CALLBACK(window_state_event), cwin);
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "delete_event",
-			 G_CALLBACK(exit_gui), cwin);
+			 G_CALLBACK(pragha_close_window), cwin);
 	g_signal_connect(G_OBJECT(cwin->mainwindow),
 			 "destroy",
-			 G_CALLBACK(exit_pragha), cwin);
+			 G_CALLBACK(pragha_destroy_window), cwin);
 
 	/* Set Default Size */
 
