@@ -180,8 +180,6 @@ GtkWidget      *pragha_playlist_get_widget (PraghaPlaylist* cplaylist);
 GtkUIManager   *pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist);
 PraghaDatabase *pragha_playlist_get_database(PraghaPlaylist* cplaylist);
 
-void pragha_playlist_save_preferences (PraghaPlaylist* cplaylist);
-
 void            pragha_playlist_free (PraghaPlaylist *cplaylist);
 PraghaPlaylist *pragha_playlist_new  (struct con_win *cwin);
 
