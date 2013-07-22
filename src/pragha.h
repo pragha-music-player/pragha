@@ -118,9 +118,7 @@ GtkWidget* create_info_bar_update_music(struct con_win *cwin);
 
 /* Init */
 
-gint init_dbus(struct con_win *cwin);
 gint init_options(struct con_win *cwin, int argc, char **argv);
-gint init_audio(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Close */
