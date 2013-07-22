@@ -46,6 +46,8 @@ struct con_win;
 
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 void dbus_handlers_free(struct con_win *cwin);
+
+gint init_dbus(struct con_win *cwin);
 gint init_dbus_handlers(struct con_win *cwin);
 
 #endif /* PRAGHA_DBUS_H */
