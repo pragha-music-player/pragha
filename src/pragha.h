@@ -123,8 +123,8 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 gint init_audio(struct con_win *cwin);
 void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
-/* Others */
+/* Close */
 
-void exit_pragha(GtkWidget *widget, struct con_win *cwin);
+void pragha_quit(struct con_win *cwin);
 
 #endif /* PRAGHA_H */

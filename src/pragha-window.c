@@ -118,22 +118,30 @@ GtkWidget* create_info_box(struct con_win *cwin)
 	return info_box;
 }
 
-gboolean exit_gui(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
+gboolean
+pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
 	if(pragha_preferences_get_hide_instead_close(cwin->preferences)) {
 		if(pragha_preferences_get_show_status_icon(cwin->preferences) &&
 		   gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
-			toogle_main_window(cwin, FALSE);
+			pragha_window_toggle_state(cwin, FALSE);
 		else
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 	}
 	else {
-		exit_pragha(widget, cwin);
+		pragha_quit(cwin);
 	}
 	return TRUE;
 }
 
-void toogle_main_window (struct con_win *cwin, gboolean ignoreActivity)
+void
+pragha_destroy_window(GtkWidget *widget, struct con_win *cwin)
+{
+	pragha_quit(cwin);
+}
+
+void
+pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity)
 {
 	gint x = 0, y = 0;
 

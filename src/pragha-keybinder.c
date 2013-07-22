@@ -57,7 +57,7 @@ static void keybind_media_handler (const char *keystring, gpointer data)
 {
 	struct con_win *cwin = data;
 
-	toogle_main_window (cwin, FALSE);
+	pragha_window_toggle_state (cwin, FALSE);
 }
 
 gint init_keybinder(struct con_win *cwin)
