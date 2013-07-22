@@ -3968,7 +3968,7 @@ pragha_playlist_get_database(PraghaPlaylist* cplaylist)
 	return cplaylist->cdbase;
 }
 
-void
+static void
 pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 {
 	GtkTreeViewColumn *col;
@@ -3977,9 +3977,6 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 	gint cnt = 0, i = 0, *col_widths;
 	GSList *list;
 	GList *cols, *j;
-	PraghaPreferences *preferences;
-
-	preferences = pragha_preferences_get();
 
 	/* Save list of columns visible in current playlist */
 
@@ -3993,11 +3990,11 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 			list = list->next;
 		}
 
-		pragha_preferences_set_string_list(preferences,
-						   GROUP_PLAYLIST,
-						   KEY_PLAYLIST_COLUMNS,
-						   (const gchar **)columns,
-						   cnt);
+		pragha_preferences_set_string_list (cplaylist->preferences,
+		                                    GROUP_PLAYLIST,
+		                                    KEY_PLAYLIST_COLUMNS,
+		                                    (const gchar **)columns,
+		                                    cnt);
 		g_free(columns);
 	}
 
@@ -4015,16 +4012,14 @@ pragha_playlist_save_preferences(PraghaPlaylist* cplaylist)
 				col_widths[i++] =
 					gtk_tree_view_column_get_width(col);
 		}
-		pragha_preferences_set_integer_list(preferences,
-						    GROUP_PLAYLIST,
-						    KEY_PLAYLIST_COLUMN_WIDTHS,
-						    col_widths,
-						    i);
+		pragha_preferences_set_integer_list (cplaylist->preferences,
+		                                     GROUP_PLAYLIST,
+		                                     KEY_PLAYLIST_COLUMN_WIDTHS,
+		                                     col_widths,
+		                                     i);
 		g_list_free(cols);
 		g_free(col_widths);
 	}
-
-	g_object_unref(G_OBJECT(preferences));
 }
 
 static void
@@ -4047,6 +4042,8 @@ void
 pragha_playlist_free(PraghaPlaylist* cplaylist)
 {
 	g_signal_handlers_disconnect_by_func(cplaylist->preferences, shuffle_changed_cb, cplaylist);
+
+	pragha_playlist_save_preferences(cplaylist);
 
 	g_object_unref(cplaylist->model);
 

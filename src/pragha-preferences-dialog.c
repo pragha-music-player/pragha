@@ -808,10 +808,6 @@ static void update_preferences(struct con_win *cwin)
 
 void save_preferences(struct con_win *cwin)
 {
-	/* General options*/
-
-	pragha_playlist_save_preferences(cwin->cplaylist);
-
 	/* Save software volume */
 
 	if (pragha_preferences_get_software_mixer(cwin->preferences))
