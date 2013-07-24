@@ -24,6 +24,8 @@
 /* pragha.h */
 struct con_win;
 
+void pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data);
+
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
 void add_location_action(GtkAction *action, struct con_win *cwin);
@@ -52,6 +54,6 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
-GtkUIManager* create_menu(struct con_win *cwin);
+GtkUIManager* pragha_menubar_new (struct con_win *cwin);
 
 #endif /* PRAGHA_MENU_H */

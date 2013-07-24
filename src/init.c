@@ -82,27 +82,9 @@ static gboolean _init_gui_state(gpointer data)
 void init_menu_actions(struct con_win *cwin)
 {
 	GtkAction *action = NULL;
-	gboolean shuffle, repeat;
-	const gchar *user_config_dir;
 	const gchar *start_mode;
-	gchar *pragha_accels_path = NULL;
-
-	/* First init menu accelerators edited */
-
-	user_config_dir = g_get_user_config_dir();
-	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/accels.scm", NULL);
-	gtk_accel_map_load (pragha_accels_path);
 
 	/* Init state of menus */
-
-	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
-	repeat = pragha_preferences_get_repeat(cwin->preferences);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Shuffle");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), shuffle);
-
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/PlaybackMenu/Repeat");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), repeat);
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
 
@@ -114,22 +96,6 @@ void init_menu_actions(struct con_win *cwin)
 
 	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
-
-#ifndef HAVE_LIBCLASTFM
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ToolsMenu/Lastfm");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Love track");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Unlove track");
-	gtk_action_set_sensitive(action, FALSE);
-
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Add similar");
-	gtk_action_set_sensitive(action, FALSE);
-#endif
-
-	g_free(pragha_accels_path);
 }
 
 void init_pixbufs(struct con_win *cwin)
@@ -155,7 +121,6 @@ window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_wi
 
 void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 {
-	GtkUIManager *menu;
 	GtkWidget *vbox, *info_box, *hbox_main, *menu_bar;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
@@ -251,7 +216,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	/* Create hboxen */
 
-	menu = create_menu(cwin);
+	cwin->bar_context_menu = pragha_menubar_new(cwin);
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
+
 	info_box = create_info_box(cwin);
 
 	cwin->sidebar = pragha_sidebar_new(cwin);
@@ -264,7 +232,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	                           GTK_MENU(gtk_ui_manager_get_widget(pragha_library_pane_get_pane_context_menu(cwin->clibrary), "/popup")));
 
 	hbox_main = create_main_region(cwin);
-	menu_bar = gtk_ui_manager_get_widget(menu, "/Menubar");
+	menu_bar = gtk_ui_manager_get_widget(cwin->bar_context_menu, "/Menubar");
 
 	/* Pack all hboxen into vbox */
 
