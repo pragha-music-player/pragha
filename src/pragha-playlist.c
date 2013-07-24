@@ -3229,6 +3229,18 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	                                     cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
+	/* Disable last.fm menus when no support it. */
+#ifndef HAVE_LIBCLASTFM
+	GtkAction *action_love = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Love track");
+	gtk_action_set_sensitive(action_love, FALSE);
+
+	GtkAction *action_unlove = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Unlove track");
+	gtk_action_set_sensitive(action_unlove, FALSE);
+
+	GtkAction *action_add_similar = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Add similar");
+	gtk_action_set_sensitive(action_add_similar, FALSE);
+#endif
+
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
 	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
