@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-statusbar.h"
+#include "pragha-preferences.h"
 
 struct _PraghaStatusbarClass
 {
@@ -40,8 +41,19 @@ pragha_statusbar_class_init (PraghaStatusbarClass *klass)
 static void
 pragha_statusbar_init (PraghaStatusbar *statusbar)
 {
+	PraghaPreferences *preferences;
+
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
 	statusbar->main_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Main text");
 	statusbar->misc_context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (statusbar), "Misc info text");
+
+	preferences = pragha_preferences_get();
+	g_object_bind_property (preferences, "show-status-bar",
+	                        GTK_WIDGET(statusbar), "visible",
+	                        binding_flags);
+	g_object_unref (G_OBJECT(preferences));
 }
 
 /**

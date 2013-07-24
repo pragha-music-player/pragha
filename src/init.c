@@ -283,11 +283,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 		gtk_widget_show(cwin->mainwindow);
 	}
 
-	/* TODO: Move it to Widgets construction. */
-	g_object_bind_property (cwin->preferences, "show-status-bar",
-	                        cwin->statusbar, "visible",
-	                        binding_flags);
-
 	init_menu_actions(cwin);
 	update_playlist_changes_on_menu(cwin);
 
