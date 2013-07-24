@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-sidebar.h"
+#include "pragha-preferences.h"
 
 struct _PraghaSidebar {
 	GtkWidget *widget;
@@ -261,6 +262,8 @@ pragha_sidebar_widget_new(PraghaSidebar *sidebar)
 	                   TRUE,
 	                   0);
 
+	gtk_widget_show_all(vbox);
+
 	return vbox;
 }
 
@@ -271,9 +274,13 @@ pragha_sidebar_free(PraghaSidebar *sidebar)
 }
 
 PraghaSidebar *
-pragha_sidebar_new()
+pragha_sidebar_new(void)
 {
 	PraghaSidebar *sidebar;
+	PraghaPreferences *preferences;
+
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	sidebar = g_slice_new0(PraghaSidebar);
 
@@ -287,6 +294,12 @@ pragha_sidebar_new()
 	sidebar->widget = pragha_sidebar_widget_new(sidebar);
 
 	sidebar->popup_menu = NULL;
+
+	preferences = pragha_preferences_get();
+	g_object_bind_property (preferences, "lateral-panel",
+	                        sidebar->widget, "visible",
+	                        binding_flags);
+	g_object_unref (G_OBJECT(preferences));
 
 	return sidebar;
 }

@@ -222,7 +222,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	info_box = create_info_box(cwin);
 
-	cwin->sidebar = pragha_sidebar_new(cwin);
+	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
 	cwin->toolbar = pragha_toolbar_new(cwin);
 
@@ -284,9 +284,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	}
 
 	/* TODO: Move it to Widgets construction. */
-	g_object_bind_property (cwin->preferences, "lateral-panel",
-	                        pragha_sidebar_get_widget(cwin->sidebar), "visible",
-	                        binding_flags);
 	g_object_bind_property (cwin->preferences, "show-status-bar",
 	                        cwin->statusbar, "visible",
 	                        binding_flags);

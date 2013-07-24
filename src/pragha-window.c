@@ -64,6 +64,8 @@ create_playlist_pane_view(struct con_win *cwin)
 	cwin->cplaylist = cplaylist;
 	cwin->statusbar = statusbar;
 
+	gtk_widget_show(vbox);
+
 	return vbox;
 }
 
@@ -102,7 +104,7 @@ GtkWidget* create_main_region(struct con_win *cwin)
 
 	cwin->paned = hpane;
 
-	gtk_widget_show_all(hpane);
+	gtk_widget_show(hpane);
 
 	return hpane;
 }

@@ -28,6 +28,6 @@ void           pragha_sidebar_add_pane        (PraghaSidebar *sidebar, GtkWidget
 GtkWidget     *pragha_sidebar_get_widget      (PraghaSidebar *sidebar);
 
 void           pragha_sidebar_free            (PraghaSidebar *sidebar);
-PraghaSidebar *pragha_sidebar_new             ();
+PraghaSidebar *pragha_sidebar_new             (void);
 
 #endif /* PRAGHA_SIDEBAR_H */
