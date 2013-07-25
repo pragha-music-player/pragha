@@ -16,6 +16,17 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
+#include <glib.h>
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 
@@ -31,6 +42,7 @@
 #include "pragha-preferences-dialog.h"
 #include "pragha-glyr.h"
 #include "pragha-utils.h"
+#include "pragha-dbus.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -51,8 +63,16 @@ pragha_get_window(struct con_win *cwin)
 	return cwin->mainwindow;
 }
 
+void pragha_quit(struct con_win *cwin)
+{
+	gtk_main_quit();
+
+	CDEBUG(DBG_INFO, "Halt.");
+}
+
 /* FIXME: Cleanup track refs */
-static void common_cleanup(struct con_win *cwin)
+static void
+pragha_aplication_free(struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
@@ -92,76 +112,50 @@ static void common_cleanup(struct con_win *cwin)
 	g_slice_free(struct con_win, cwin);
 }
 
-void pragha_quit(struct con_win *cwin)
-{
-	gtk_main_quit();
-
-	CDEBUG(DBG_INFO, "Halt.");
-}
-
-gint main(gint argc, gchar *argv[])
+static struct con_win *
+pragha_aplication_new (gint argc, gchar *argv[])
 {
 	struct con_win *cwin;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-#ifdef DEBUG
-	g_print ("debug enabled\n");
-	pragha_main_thread = g_thread_self ();
-#endif
-
+	/* Alocate the main structure. */
 	cwin = g_slice_new0(struct con_win);
+
+	/* Allocate memory for simple structures */
 #ifdef HAVE_LIBCLASTFM
 	cwin->clastfm = g_slice_new0(struct con_lastfm);
 #endif
 	cwin->cmpris2 = pragha_mpris_new();
 
-	debug_level = 0;
-
-	setlocale (LC_ALL, "");
-	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
-
-#if !GLIB_CHECK_VERSION(2,31,0)
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-#endif
-
-#if !GLIB_CHECK_VERSION(2,35,1)
-	g_type_init ();
-#endif
-
-	if (init_dbus(cwin) == -1) {
+	cwin->con_dbus = pragha_init_dbus(cwin);
+	if (!cwin->con_dbus) {
 		g_critical("Unable to init dbus connection");
-		return -1;
+		return NULL;
 	}
-
-	if (init_dbus_handlers(cwin) == -1) {
+	if (pragha_init_dbus_handlers(cwin) == -1) {
 		g_critical("Unable to initialize DBUS filter handlers");
-		return -1;
+		return NULL;
 	}
 
+	/* Parse command line arguments */
 	if (init_options(cwin, argc, argv) == -1)
-		return -1;
+		return NULL;
 
 	/* Allow only one instance */
-
 	if (!cwin->unique_instance)
-		return 0;
+		return cwin;
 
 	cwin->preferences = pragha_preferences_get();
 
 	if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
 		cwin->first_run = TRUE;
 
-	taglib_set_strings_unicode(TRUE);
-
 	cwin->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
 		g_critical("Unable to init music dbase");
-		return -1;
+		return NULL;
 	}
 
 	if (pragha_preferences_get_show_osd (cwin->preferences))
@@ -169,11 +163,11 @@ gint main(gint argc, gchar *argv[])
 	else
 		cwin->notify = NULL;
 
-	#ifdef HAVE_LIBCLASTFM
+#ifdef HAVE_LIBCLASTFM
 	if (init_lastfm(cwin) == -1) {
 		g_critical("Unable to initialize lastfm");
 	}
-	#endif
+#endif
 
 	cwin->backend = pragha_backend_new (cwin);
 
@@ -201,12 +195,12 @@ gint main(gint argc, gchar *argv[])
 
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
-		return -1;
+		return NULL;
 	}
 
 	/* Init the gui after bancked to sink volume. */
 
-	init_gui(argc, argv, cwin);
+	init_gui(0, NULL, cwin);
 
 	/* Bind properties to widgets after create it. */
 	g_object_bind_property (cwin->backend, "volume",
@@ -221,21 +215,67 @@ gint main(gint argc, gchar *argv[])
 	if (gnome_media_keys_will_be_useful()) {
 		if (init_gnome_media_keys(cwin) == -1) {
 			g_critical("Unable to initialize gnome media keys");
-			return -1;
+			return NULL;
 		}
 	}
 	#ifdef HAVE_LIBKEYBINDER
 	else if (init_keybinder(cwin) == -1) {
 		g_critical("Unable to initialize keybinder");
-		return -1;
+		return NULL;
 	}
 	#endif
 
-	CDEBUG(DBG_INFO, "Init done. Running ...");
+	return cwin;
+}
 
-	gtk_main();
+gint main(gint argc, gchar *argv[])
+{
+	struct con_win *cwin;
+#ifdef DEBUG
+	g_print ("debug enabled\n");
+	pragha_main_thread = g_thread_self ();
+#endif
+	debug_level = 0;
 
-	common_cleanup(cwin);
+	/* setup translation domain */
+	setlocale (LC_ALL, "");
+	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
+
+	/* Force unicode to taglib. */
+	taglib_set_strings_unicode(TRUE);
+
+	/* Setup application name and pulseaudio role */
+	g_set_application_name(_("Pragha Music Player"));
+	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
+
+  /* Initialize the GThread system */
+#if !GLIB_CHECK_VERSION(2,31,0)
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+#endif
+#if !GLIB_CHECK_VERSION(2,35,1)
+	g_type_init ();
+#endif
+
+	/* Initialize GTK+ */
+	gtk_init(&argc, &argv);
+
+	/* Get a instanse of pragha */
+	cwin = pragha_aplication_new(argc, argv);
+	if (cwin) {
+		if (cwin->unique_instance) {
+			/* Runs the main loop */
+			CDEBUG(DBG_INFO, "Init done. Running ...");
+			gtk_main();
+
+			/* Close.. So, free memory and quit. */
+			pragha_aplication_free(cwin);
+		}
+	}
+	else
+		return -1;
 
 	return 0;
 }

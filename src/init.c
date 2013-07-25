@@ -128,11 +128,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
-	gtk_init(&argc, &argv);
-
-	g_set_application_name(_("Pragha Music Player"));
-	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
-
 	init_pixbufs(cwin);
 
 	/* Main window */
