@@ -20,6 +20,7 @@
 #define PRAGHA_DBUS_H
 
 #include <glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 /* pragha.h */
 struct con_win;
@@ -47,7 +48,7 @@ struct con_win;
 void dbus_send_signal(const gchar *signal, struct con_win *cwin);
 void dbus_handlers_free(struct con_win *cwin);
 
-gint init_dbus(struct con_win *cwin);
-gint init_dbus_handlers(struct con_win *cwin);
+DBusConnection *pragha_init_dbus          (struct con_win *cwin);
+gint            pragha_init_dbus_handlers (struct con_win *cwin);
 
 #endif /* PRAGHA_DBUS_H */

@@ -255,7 +255,8 @@ exit:
 	dbus_message_unref(msg);
 }
 
-gint init_dbus(struct con_win *cwin)
+DBusConnection *
+pragha_init_dbus(struct con_win *cwin)
 {
 	DBusConnection *conn = NULL;
 	DBusError error;
@@ -268,14 +269,14 @@ gint init_dbus(struct con_win *cwin)
 	if (!conn) {
 		g_critical("Unable to get a DBUS connection");
 		dbus_error_free(&error);
-		return -1;
+		return NULL;
 	}
 
 	ret = dbus_bus_request_name(conn, DBUS_NAME, 0, &error);
 	if (ret == -1) {
 		g_critical("Unable to request for DBUS service name");
 		dbus_error_free(&error);
-		return -1;
+		return NULL;
 	}
 
 	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
@@ -284,12 +285,12 @@ gint init_dbus(struct con_win *cwin)
 		cwin->unique_instance = FALSE;
 
 	dbus_connection_setup_with_g_main(conn, NULL);
-	cwin->con_dbus = conn;
 
-	return 0;
+	return conn;
 }
 
-gint init_dbus_handlers(struct con_win *cwin)
+gint
+pragha_init_dbus_handlers(struct con_win *cwin)
 {
 	DBusError error;
 
