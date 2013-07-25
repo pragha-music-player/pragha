@@ -52,18 +52,19 @@ GThread *pragha_main_thread = NULL;
 #endif
 
 PraghaBackend *
-pragha_get_backend(struct con_win *cwin)
+pragha_application_get_backend (struct con_win *cwin)
 {
 	return cwin->backend;
 }
 
 GtkWidget *
-pragha_get_window(struct con_win *cwin)
+pragha_application_get_window (struct con_win *cwin)
 {
 	return cwin->mainwindow;
 }
 
-void pragha_quit(struct con_win *cwin)
+void
+pragha_application_quit (struct con_win *cwin)
 {
 	gtk_main_quit();
 
@@ -72,7 +73,7 @@ void pragha_quit(struct con_win *cwin)
 
 /* FIXME: Cleanup track refs */
 static void
-pragha_aplication_free(struct con_win *cwin)
+pragha_application_free (struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
@@ -113,7 +114,7 @@ pragha_aplication_free(struct con_win *cwin)
 }
 
 static struct con_win *
-pragha_aplication_new (gint argc, gchar *argv[])
+pragha_application_new (gint argc, gchar *argv[])
 {
 	struct con_win *cwin;
 
@@ -263,7 +264,7 @@ gint main(gint argc, gchar *argv[])
 	gtk_init(&argc, &argv);
 
 	/* Get a instanse of pragha */
-	cwin = pragha_aplication_new(argc, argv);
+	cwin = pragha_application_new (argc, argv);
 	if (cwin) {
 		if (cwin->unique_instance) {
 			/* Runs the main loop */
@@ -271,7 +272,7 @@ gint main(gint argc, gchar *argv[])
 			gtk_main();
 
 			/* Close.. So, free memory and quit. */
-			pragha_aplication_free(cwin);
+			pragha_application_free (cwin);
 		}
 	}
 	else

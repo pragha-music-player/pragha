@@ -107,8 +107,8 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaBackend *pragha_get_backend (struct con_win *cwin);
-GtkWidget     *pragha_get_window (struct con_win *cwin);
+PraghaBackend *pragha_application_get_backend (struct con_win *cwin);
+GtkWidget     *pragha_application_get_window  (struct con_win *cwin);
 
 /* Info bar import music */
 
@@ -123,6 +123,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin);
 
 /* Close */
 
-void pragha_quit(struct con_win *cwin);
+void pragha_application_quit (struct con_win *cwin);
 
 #endif /* PRAGHA_H */

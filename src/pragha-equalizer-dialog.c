@@ -237,7 +237,7 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
 
-	dialog->equalizer = pragha_backend_get_equalizer (pragha_get_backend(cwin));
+	dialog->equalizer = pragha_backend_get_equalizer (pragha_application_get_backend(cwin));
 	dialog->preferences = pragha_preferences_get ();
 
 	/* Create vertical scales band to equalizer */
@@ -291,7 +291,7 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 	/* Create the dialog */
 
 	w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
-	                                        GTK_WINDOW(pragha_get_window(cwin)),
+	                                        GTK_WINDOW(pragha_application_get_window(cwin)),
 	                                        GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                        GTK_STOCK_OK,
 	                                        GTK_RESPONSE_OK,

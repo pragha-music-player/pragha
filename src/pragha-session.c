@@ -67,7 +67,7 @@ pragha_init_session_support(struct con_win *cwin)
 	GtkWidget *window;
 	gchar *role;
 
-	window = pragha_get_window(cwin);
+	window = pragha_application_get_window(cwin);
 
 	/* set a unique role on each window (for session management) */
 	role = g_strdup_printf ("Pragha-%p-%d-%d", window, (gint) getpid (), (gint) time (NULL));
