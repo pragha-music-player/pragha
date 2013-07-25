@@ -180,7 +180,7 @@ systray_next_action (GtkAction *action, struct con_win *cwin)
 static void
 systray_quit (GtkAction *action, struct con_win *cwin)
 {
-	pragha_quit (cwin);
+	pragha_application_quit (cwin);
 }
 
 static void

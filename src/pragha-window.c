@@ -131,7 +131,7 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 	}
 	else {
-		pragha_quit(cwin);
+		pragha_application_quit (cwin);
 	}
 	return TRUE;
 }
@@ -139,7 +139,7 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 void
 pragha_destroy_window(GtkWidget *widget, struct con_win *cwin)
 {
-	pragha_quit(cwin);
+	pragha_application_quit (cwin);
 }
 
 void
