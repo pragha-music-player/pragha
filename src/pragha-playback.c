@@ -83,7 +83,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_backend_resume(cwin->backend);
 		break;
 	case ST_STOPPED:
-		if(pragha_playlist_is_changing(cwin->cplaylist))
+		if (pragha_playlist_is_changing(cwin->cplaylist) ||
+		    pragha_playlist_get_no_tracks(cwin->cplaylist) == 0)
 			break;
 		if(pragha_playlist_has_queue(cwin->cplaylist))
 			path = get_next_queue_track(cwin->cplaylist);

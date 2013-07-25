@@ -21,6 +21,8 @@
 
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
+#include "pragha-menubar.h"
+#include "pragha-toolbar.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
 #include "pragha-dbus.h"
@@ -101,6 +103,9 @@ gint main(gint argc, gchar *argv[])
 {
 	struct con_win *cwin;
 
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
 #ifdef DEBUG
 	g_print ("debug enabled\n");
 	pragha_main_thread = g_thread_self ();
@@ -172,6 +177,28 @@ gint main(gint argc, gchar *argv[])
 
 	cwin->backend = pragha_backend_new (cwin);
 
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK(pragha_backend_notificate_new_state), cwin);
+	g_signal_connect (cwin->backend, "finished",
+	                  G_CALLBACK(pragha_backend_finished_song), cwin);
+	g_signal_connect (cwin->backend, "tags-changed",
+	                  G_CALLBACK(pragha_backend_tags_changed), cwin);
+
+	g_signal_connect (cwin->backend, "error",
+	                 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
+	g_signal_connect (cwin->backend, "error",
+	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
+
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
+
+	g_signal_connect (cwin->backend, "tick",
+	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin);
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin);
+	g_signal_connect (cwin->backend, "buffering",
+	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin);
+
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return -1;
@@ -180,6 +207,11 @@ gint main(gint argc, gchar *argv[])
 	/* Init the gui after bancked to sink volume. */
 
 	init_gui(argc, argv, cwin);
+
+	/* Bind properties to widgets after create it. */
+	g_object_bind_property (cwin->backend, "volume",
+	                        pragha_toolbar_get_volume_button(cwin->toolbar), "value",
+	                        binding_flags);
 
 	#ifdef HAVE_LIBGLYR
 	cwin->glyr = pragha_glyr_new (cwin);
