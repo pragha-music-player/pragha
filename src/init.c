@@ -126,9 +126,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	gsize cnt = 0;
 	const gchar *start_mode;
 
-	const GBindingFlags binding_flags =
-		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
-
 	CDEBUG(DBG_INFO, "Initializing gui");
 
 	gtk_init(&argc, &argv);
@@ -217,9 +214,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Create hboxen */
 
 	cwin->bar_context_menu = pragha_menubar_new(cwin);
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
-
 	info_box = create_info_box(cwin);
 
 	cwin->sidebar = pragha_sidebar_new();
@@ -251,18 +245,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	gtk_widget_show(vbox);
 
-	/* Send notifications on gui, OSD and mpris of new songs */
-
-	g_signal_connect(cwin->backend,
-			 "notify::state",
-			 G_CALLBACK(pragha_backend_notificate_new_state), cwin);
-	g_signal_connect(cwin->backend,
-	                 "finished",
-	                 G_CALLBACK(pragha_backend_finished_song), cwin);
-	g_signal_connect(cwin->backend,
-	                 "tags-changed",
-	                 G_CALLBACK(pragha_backend_tags_changed), cwin);
-
 	/* Init window state */
 
 	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
@@ -285,14 +267,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	init_menu_actions(cwin);
 	update_playlist_changes_on_menu(cwin);
-
-	g_signal_connect(cwin->backend,
-			 "error",
-			 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
-
-	g_signal_connect(cwin->backend,
-			 "error",
-			 G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
 
 	pragha_init_session_support(cwin);
 

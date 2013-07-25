@@ -429,14 +429,15 @@ next_button_handler(GtkButton *button, struct con_win *cwin)
 /*
  * Callbacks that response to gstreamer signals.
  */
-static void
+void
 pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
 {
-	PraghaToolbar *toolbar = user_data;
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), (gdouble)percent/100);
+	struct con_win *cwin = user_data;
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->toolbar->track_progress_bar), (gdouble)percent/100);
 }
 
-static void
+void
 pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
@@ -449,7 +450,7 @@ pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_da
 	}
 }
 
-static void
+void
 pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
@@ -644,6 +645,12 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
 }
 
 GtkWidget *
+pragha_toolbar_get_volume_button(PraghaToolbar *toolbar)
+{
+	return toolbar->vol_button;
+}
+
+GtkWidget *
 pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 {
 	return toolbar->widget;
@@ -789,15 +796,6 @@ pragha_toolbar_new(struct con_win *cwin)
 	                 G_CALLBACK(panel_button_key_press), cwin);
 	g_signal_connect(G_OBJECT (vol_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), cwin);
-
-	g_signal_connect(cwin->backend, "tick",
-	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin);
-	g_signal_connect(cwin->backend, "notify::state",
-	                 G_CALLBACK(pragha_toolbar_playback_state_cb), cwin);
-	g_signal_connect(cwin->backend, "buffering",
-	                 G_CALLBACK(pragha_toolbar_update_buffering_cb), pragha_toolbar);
-
-	g_object_bind_property (cwin->backend, "volume", vol_button, "value",  binding_flags);
 
 	g_object_bind_property(cwin->preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(cwin->preferences, "repeat", repeat_button, "active", binding_flags);

@@ -23,6 +23,8 @@
 
 #include "pragha-musicobject.h"
 #include "pragha-album-art.h"
+/*TODO: HACK!. Remove it!. */
+#include "pragha-backend.h"
 
 /* pragha.h */
 struct con_win;
@@ -32,6 +34,10 @@ typedef struct _PraghaToolbar PraghaToolbar;
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
 
+void pragha_toolbar_update_buffering_cb      (PraghaBackend *backend, gint percent, gpointer user_data);
+void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer user_data);
+void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
+
 void update_album_art (struct con_win *cwin);
 
 void pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget);
@@ -39,7 +45,9 @@ void pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widg
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
 const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);
 
-PraghaAlbumArt *pragha_toolbar_get_album_art (PraghaToolbar *toolbar);
+PraghaAlbumArt *pragha_toolbar_get_album_art     (PraghaToolbar *toolbar);
+GtkWidget      *pragha_toolbar_get_volume_button (PraghaToolbar *toolbar);
+
 GtkWidget      *pragha_toolbar_get_widget    (PraghaToolbar *toolbar);
 
 void           pragha_toolbar_free       (PraghaToolbar *toolbar);
