@@ -967,7 +967,7 @@ pragha_menubar_new(struct con_win *cwin)
 	/* Disable last.fm menus when no support it. */
 #ifndef HAVE_LIBCLASTFM
 	GtkAction *action_lastfm = gtk_ui_manager_get_action(main_menu,"/Menubar/ToolsMenu/Lastfm");
-	gtk_action_set_sensitive(action, FALSE);
+	gtk_action_set_sensitive(action_lastfm, FALSE);
 #endif
 
 	/* Load menu accelerators edited */
