@@ -27,8 +27,8 @@ struct con_win;
 #define ALBUM_ART_PATTERN_LEN      1024
 #define AUDIO_CD_DEVICE_ENTRY_LEN  32
 
-typedef struct _PreferencesWidgets PreferencesWidgets;
+typedef struct _PreferencesDialog PreferencesDialog;
 
-void preferences_dialog(struct con_win *cwin);
+void pragha_preferences_dialog_show (struct con_win *cwin);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

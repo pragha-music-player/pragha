@@ -722,7 +722,7 @@ void search_playlist_action(GtkAction *action, struct con_win *cwin)
 
 void pref_action(GtkAction *action, struct con_win *cwin)
 {
-	preferences_dialog(cwin);
+	pragha_preferences_dialog_show (cwin);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */
