@@ -37,7 +37,12 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
-struct _PreferencesWidgets {
+struct _PreferencesDialog {
+	struct con_win *cwin;
+	PraghaPreferences *preferences;
+
+	GtkWidget *widget;
+
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_cd_device_w;
 	GtkWidget *audio_sink_combo_w;
@@ -108,8 +113,8 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 
 /* Handler for the preferences dialog */
 
-static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
-			   struct con_win *cwin)
+static void
+pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	GError *error = NULL;
 	gboolean ret, osd, test_change;
@@ -127,31 +132,29 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		break;
 	case GTK_RESPONSE_OK:
 		/* Audio preferences */
-		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->audio_sink_combo_w));
+		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dialog->audio_sink_combo_w));
 		if(audio_sink) {
-			pragha_preferences_set_audio_sink(cwin->preferences, audio_sink);
+			pragha_preferences_set_audio_sink(dialog->preferences, audio_sink);
 			g_free(audio_sink);
 		}
 
-		audio_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_device_w));
+		audio_device = gtk_entry_get_text(GTK_ENTRY(dialog->audio_device_w));
 		if(audio_device) {
-			pragha_preferences_set_audio_device(cwin->preferences, audio_device);
+			pragha_preferences_set_audio_device(dialog->preferences, audio_device);
 		}
 
-		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w));
+		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(dialog->audio_cd_device_w));
 		if (audio_cd_device) {
-			pragha_preferences_set_audio_cd_device(cwin->preferences, audio_cd_device);
+			pragha_preferences_set_audio_cd_device(dialog->preferences, audio_cd_device);
 		}
 
-		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->soft_mixer_w));
-		pragha_preferences_set_software_mixer(cwin->preferences, software_mixer);
-		pragha_backend_set_soft_volume(cwin->backend, software_mixer);
+		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w));
+		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
+		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->cwin), software_mixer);
 
 		/* Library Preferences */
 
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->preferences_w->library_view_w));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
 		ret = gtk_tree_model_get_iter_first(model, &iter);
 
 		while (ret) {
@@ -177,17 +180,17 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		/* Save new library folders */
 
-		pragha_preferences_set_filename_list(cwin->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_DIR,
-			                             library_dir);
+		pragha_preferences_set_filename_list (dialog->preferences,
+		                                      GROUP_LIBRARY,
+		                                      KEY_LIBRARY_DIR,
+		                                      library_dir);
 
 		/* Get scanded folders and compare. If changed show infobar */
 
 		folder_scanned =
-			pragha_preferences_get_filename_list(cwin->preferences,
-				                             GROUP_LIBRARY,
-				                             KEY_LIBRARY_SCANNED);
+			pragha_preferences_get_filename_list (dialog->preferences,
+			                                      GROUP_LIBRARY,
+			                                      KEY_LIBRARY_SCANNED);
 
 		test_change = FALSE;
 		for(list = folder_scanned; list != NULL; list = list->next) {
@@ -204,102 +207,94 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		}
 
 		if(test_change) {
-			infobar = create_info_bar_update_music(cwin);
-			pragha_window_add_widget_to_infobox(cwin->window, infobar);
+			infobar = create_info_bar_update_music(dialog->cwin);
+			pragha_window_add_widget_to_infobox(dialog->cwin->window, infobar);
 		}
 
 		free_str_list(library_dir);
 		free_str_list(folder_scanned);
 
-		if (pragha_preferences_get_library_style(cwin->preferences) == FOLDERS) {
-			test_change = pragha_preferences_get_fuse_folders(cwin->preferences);
+		if (pragha_preferences_get_library_style(dialog->preferences) == FOLDERS) {
+			test_change = pragha_preferences_get_fuse_folders(dialog->preferences);
 
-			pragha_preferences_set_fuse_folders(cwin->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
+			pragha_preferences_set_fuse_folders(dialog->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w)));
 
-			if (pragha_preferences_get_fuse_folders(cwin->preferences) != test_change)
-				library_pane_view_reload(cwin->clibrary);
+			if (pragha_preferences_get_fuse_folders(dialog->preferences) != test_change)
+				library_pane_view_reload(dialog->cwin->clibrary);
 		}
 		else {
-			test_change = pragha_preferences_get_sort_by_year(cwin->preferences);
+			test_change = pragha_preferences_get_sort_by_year(dialog->preferences);
 
-			pragha_preferences_set_sort_by_year(cwin->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)));
+			pragha_preferences_set_sort_by_year(dialog->preferences,
+			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w)));
 
-			if (pragha_preferences_get_sort_by_year(cwin->preferences) != test_change)
-				library_pane_view_reload(cwin->clibrary);
+			if (pragha_preferences_get_sort_by_year(dialog->preferences) != test_change)
+				library_pane_view_reload(dialog->cwin->clibrary);
 		}
 
 		/* General preferences */
 
-		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(cwin->preferences_w->window_state_combo_w));
+		window_state_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dialog->window_state_combo_w));
 
 		if (!g_ascii_strcasecmp(window_state_sink, _("Start normal"))) {
-			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			pragha_preferences_set_start_mode(cwin->preferences, NORMAL_STATE);
+			pragha_preferences_set_remember_state(dialog->preferences, FALSE);
+			pragha_preferences_set_start_mode(dialog->preferences, NORMAL_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start fullscreen"))){
-			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			pragha_preferences_set_start_mode(cwin->preferences, FULLSCREEN_STATE);
+			pragha_preferences_set_remember_state(dialog->preferences, FALSE);
+			pragha_preferences_set_start_mode(dialog->preferences, FULLSCREEN_STATE);
 		}
 		else if (!g_ascii_strcasecmp(window_state_sink, _("Start in system tray"))){
-			pragha_preferences_set_remember_state(cwin->preferences, FALSE);
-			pragha_preferences_set_start_mode(cwin->preferences, ICONIFIED_STATE);
+			pragha_preferences_set_remember_state(dialog->preferences, FALSE);
+			pragha_preferences_set_start_mode(dialog->preferences, ICONIFIED_STATE);
 		}
 		else
-			pragha_preferences_set_remember_state(cwin->preferences, TRUE);
+			pragha_preferences_set_remember_state(dialog->preferences, TRUE);
 
 		g_free(window_state_sink);
 
 		instant_search =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->instant_filter_w));
-		pragha_preferences_set_instant_search(cwin->preferences, instant_search);
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->instant_filter_w));
+		pragha_preferences_set_instant_search(dialog->preferences, instant_search);
 
 		approximate_search =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->aproximate_search_w));
-		pragha_preferences_set_approximate_search(cwin->preferences, approximate_search);
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->aproximate_search_w));
+		pragha_preferences_set_approximate_search(dialog->preferences, approximate_search);
 
 		restore_playlist =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->restore_playlist_w));
-		pragha_preferences_set_restore_playlist(cwin->preferences, restore_playlist);
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->restore_playlist_w));
+		pragha_preferences_set_restore_playlist(dialog->preferences, restore_playlist);
 
 
-		pragha_preferences_set_show_status_icon(cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->show_icon_tray_w)));
+		pragha_preferences_set_show_status_icon(dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_icon_tray_w)));
 
-		pragha_preferences_set_hide_instead_close(cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->close_to_tray_w)));
+		pragha_preferences_set_hide_instead_close(dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->close_to_tray_w)));
 
 		add_recursively =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->add_recursively_w));
-		pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->add_recursively_w));
+		pragha_preferences_set_add_recursively(dialog->preferences, add_recursively);
 
 		show_album_art =
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->album_art_w));
-		pragha_preferences_set_show_album_art(cwin->preferences, show_album_art);
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->album_art_w));
+		pragha_preferences_set_show_album_art(dialog->preferences, show_album_art);
 
 		album_art_size =
-			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
-						cwin->preferences_w->album_art_size_w));
-		pragha_preferences_set_album_art_size(cwin->preferences, album_art_size);
+			gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dialog->album_art_size_w));
+		pragha_preferences_set_album_art_size(dialog->preferences, album_art_size);
 
 		if (show_album_art) {
-			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w));
+			album_art_pattern = gtk_entry_get_text(GTK_ENTRY(dialog->album_art_pattern_w));
 
 			if (string_is_not_empty(album_art_pattern)) {
 				if (!validate_album_art_pattern(album_art_pattern)) {
-					album_art_pattern_helper(dialog, cwin);
+					album_art_pattern_helper(GTK_DIALOG(dialog->widget), dialog->cwin);
 					return;
 				}
 				/* Proper pattern, store in preferences */
-				pragha_preferences_set_album_art_pattern (cwin->preferences,
+				pragha_preferences_set_album_art_pattern (dialog->preferences,
 				                                          album_art_pattern);
 				
 			}
@@ -307,80 +302,75 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		/* Notification preferences */
 
-		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						   cwin->preferences_w->show_osd_w));
+		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
 		if (osd) {
-			pragha_preferences_set_show_osd(cwin->preferences, TRUE);
-			if (!cwin->notify) {
-				cwin->notify = pragha_notify_new (cwin);
-				if (!cwin->notify)
-					pragha_preferences_set_show_osd(cwin->preferences, FALSE);
+			pragha_preferences_set_show_osd(dialog->preferences, TRUE);
+			if (!dialog->cwin->notify) {
+				dialog->cwin->notify = pragha_notify_new (dialog->cwin);
+				if (!dialog->cwin->notify)
+					pragha_preferences_set_show_osd(dialog->preferences, FALSE);
 			}
 		}
 		else
-			pragha_preferences_set_show_osd(cwin->preferences, FALSE);
+			pragha_preferences_set_show_osd(dialog->preferences, FALSE);
 
-		pragha_preferences_set_album_art_in_osd (cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->albumart_in_osd_w)));
-		pragha_preferences_set_actions_in_osd (cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						  cwin->preferences_w->actions_in_osd_w)));
+		pragha_preferences_set_album_art_in_osd (dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->albumart_in_osd_w)));
+		pragha_preferences_set_actions_in_osd (dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->actions_in_osd_w)));
 
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
-		pragha_preferences_set_lastfm_support (cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w)));
+		pragha_preferences_set_lastfm_support (dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w)));
 
-		if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
-			pragha_preferences_set_lastfm_user (cwin->preferences,
-				gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w)));
+		if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
+			pragha_preferences_set_lastfm_user (dialog->preferences,
+				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_uname_w)));
 
-			pragha_lastfm_set_password(cwin->preferences,
-				gtk_entry_get_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w)));
+			pragha_lastfm_set_password(dialog->preferences,
+				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
 
-			if (cwin->clastfm->session_id != NULL) {
-				LASTFM_dinit(cwin->clastfm->session_id);
+			if (dialog->cwin->clastfm->session_id != NULL) {
+				LASTFM_dinit(dialog->cwin->clastfm->session_id);
 
-				cwin->clastfm->session_id = NULL;
-				cwin->clastfm->status = LASTFM_STATUS_INVALID;
+				dialog->cwin->clastfm->session_id = NULL;
+				dialog->cwin->clastfm->status = LASTFM_STATUS_INVALID;
 			}
-			just_init_lastfm(cwin);
+			just_init_lastfm(dialog->cwin);
 		}
 #endif
 #ifdef HAVE_LIBGLYR
-		pragha_preferences_set_download_album_art(cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->get_album_art_w)));
+		pragha_preferences_set_download_album_art(dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w)));
 #endif
-		pragha_preferences_set_use_cddb(cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_cddb_w)));
+		pragha_preferences_set_use_cddb(dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
 
-		pragha_preferences_set_use_mpris2(cwin->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						     cwin->preferences_w->use_mpris2_w)));
-		if(!pragha_preferences_get_use_mpris2(cwin->preferences)) {
-			mpris_close(cwin->cmpris2);
+		pragha_preferences_set_use_mpris2(dialog->preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
+
+		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
+			mpris_close(dialog->cwin->cmpris2);
 		}
 		else {
-			mpris_init(cwin);
+			mpris_init(dialog->cwin);
 		}
 		break;
 	default:
 		break;
 	}
 
-	g_slice_free(PreferencesWidgets, cwin->preferences_w);
+	g_object_unref(dialog->preferences);
 
-	gtk_widget_destroy(GTK_WIDGET(dialog));
+	gtk_widget_destroy(GTK_WIDGET(dialog->widget));
+
+	g_slice_free(PreferencesDialog, dialog);
 }
 
 /* Handler for adding a new library */
 static void
-library_add_cb_response(GtkDialog *dialog,
-			gint response,
-			struct con_win *cwin)
+library_add_cb_response (GtkDialog *add_dialog, gint response, PreferencesDialog *dialog)
 {
 	gchar *u_folder, *folder;
 	GtkTreeIter iter;
@@ -389,9 +379,8 @@ library_add_cb_response(GtkDialog *dialog,
 
 	switch (response) {
 	case GTK_RESPONSE_ACCEPT:
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->preferences_w->library_view_w));
-		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
+		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(add_dialog));
 		if (!folder)
 			break;
 
@@ -417,40 +406,40 @@ library_add_cb_response(GtkDialog *dialog,
 	default:
 		break;
 	}
-	gtk_widget_destroy(GTK_WIDGET(dialog));
+	gtk_widget_destroy(GTK_WIDGET(add_dialog));
 }
 
-static void library_add_cb(GtkButton *button, struct con_win *cwin)
+static void
+library_add_cb (GtkButton *button, PreferencesDialog *dialog)
 {
-	GtkWidget *dialog;
+	GtkWidget *add_dialog;
 
 	/* Create a folder chooser dialog */
 
-	dialog = gtk_file_chooser_dialog_new(_("Select a folder to add to library"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-					     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-					     NULL);
+	add_dialog = gtk_file_chooser_dialog_new (_("Select a folder to add to library"),
+	                                      GTK_WINDOW(dialog->widget),
+	                                      GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+	gtk_window_set_modal(GTK_WINDOW(add_dialog), TRUE);
 
-	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(library_add_cb_response), cwin);
+	g_signal_connect (G_OBJECT(add_dialog), "response",
+	                  G_CALLBACK(library_add_cb_response), dialog);
 
-	gtk_widget_show_all (dialog);
+	gtk_widget_show_all (add_dialog);
 }
 
 /* Handler for removing a library */
 
-static void library_remove_cb(GtkButton *button, struct con_win *cwin)
+static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-						cwin->preferences_w->library_view_w));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dialog->library_view_w));
 
 	if (gtk_tree_selection_get_selected(selection, &model, &iter))
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
@@ -458,139 +447,135 @@ static void library_remove_cb(GtkButton *button, struct con_win *cwin)
 
 /* Toggle displaying last.fm username/password widgets */
 #ifdef HAVE_LIBCLASTFM
-static void toggle_lastfm(GtkToggleButton *button, struct con_win *cwin)
+static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	gboolean is_active;
 
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->preferences_w->lastfm_w));
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w));
 
-	gtk_widget_set_sensitive(cwin->preferences_w->lastfm_uname_w, is_active);
-	gtk_widget_set_sensitive(cwin->preferences_w->lastfm_pass_w, is_active);
+	gtk_widget_set_sensitive(dialog->lastfm_uname_w, is_active);
+	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
 
-	if(!is_active && cwin->clastfm->session_id) {
+	if(!is_active && dialog->cwin->clastfm->session_id) {
 		CDEBUG(DBG_INFO, "Shutdown LASTFM");
 
-		LASTFM_dinit(cwin->clastfm->session_id);
+		LASTFM_dinit(dialog->cwin->clastfm->session_id);
 
-		cwin->clastfm->session_id = NULL;
-		cwin->clastfm->status = LASTFM_STATUS_INVALID;
+		dialog->cwin->clastfm->session_id = NULL;
+		dialog->cwin->clastfm->status = LASTFM_STATUS_INVALID;
 	}
 	/* Insensitive lastfm menus. */
-	update_menubar_lastfm_state (cwin);
+	update_menubar_lastfm_state (dialog->cwin);
 }
 #endif
 
 /* Toggle hint of playlist */
 
-static void toggle_use_hint (GtkToggleButton *button, struct con_win *cwin)
+static void toggle_use_hint (GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	gboolean use_hint;
 	use_hint = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 
-	pragha_preferences_set_use_hint(cwin->preferences, use_hint);
+	pragha_preferences_set_use_hint(dialog->preferences, use_hint);
 }
 
 /* Toggle album art pattern */
 
-static void toggle_album_art(GtkToggleButton *button, struct con_win *cwin)
+static void toggle_album_art(GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	gboolean is_active;
 
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->preferences_w->album_art_w));
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->album_art_w));
 
-	gtk_widget_set_sensitive(cwin->preferences_w->album_art_pattern_w, is_active);
-	gtk_widget_set_sensitive(cwin->preferences_w->album_art_size_w, is_active);
+	gtk_widget_set_sensitive(dialog->album_art_pattern_w, is_active);
+	gtk_widget_set_sensitive(dialog->album_art_size_w, is_active);
 
-	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
+	gtk_widget_set_sensitive(dialog->albumart_in_osd_w, is_active);
 }
 
 /* Toggle show status icon. */
 
-static void toggle_show_icon_tray(GtkToggleButton *button, struct con_win *cwin)
+static void toggle_show_icon_tray(GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	gboolean is_active;
 
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->preferences_w->show_icon_tray_w));
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_icon_tray_w));
 
-	gtk_status_icon_set_visible(cwin->status_icon, is_active);
+	gtk_status_icon_set_visible(dialog->cwin->status_icon, is_active);
 }
 
 /* Toggle album art pattern */
 
-static void toggle_show_osd(GtkToggleButton *button, struct con_win *cwin)
+static void toggle_show_osd(GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	gboolean is_active;
 
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-						 cwin->preferences_w->show_osd_w));
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
 
-	gtk_widget_set_sensitive(cwin->preferences_w->albumart_in_osd_w, is_active);
+	gtk_widget_set_sensitive(dialog->albumart_in_osd_w, is_active);
 	if (can_support_actions())
-		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, is_active);
+		gtk_widget_set_sensitive(dialog->actions_in_osd_w, is_active);
 }
 
-static void update_audio_device_alsa(struct con_win *cwin)
+static void update_audio_device_alsa(PreferencesDialog *dialog)
 {
-	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_oss4(struct con_win *cwin)
+static void update_audio_device_oss4(PreferencesDialog *dialog)
 {
-	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_oss(struct con_win *cwin)
+static void update_audio_device_oss(PreferencesDialog *dialog)
 {
-	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, TRUE);
-	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, TRUE);
+	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
+	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
 }
 
-static void update_audio_device_pulse(struct con_win *cwin)
+static void update_audio_device_pulse(PreferencesDialog *dialog)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
-	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
-	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
-	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
+	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
+	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
-static void update_audio_device_default(struct con_win *cwin)
+static void update_audio_device_default(PreferencesDialog *dialog)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->soft_mixer_w), FALSE);
-	gtk_widget_set_sensitive(cwin->preferences_w->audio_device_w, FALSE);
-	gtk_widget_set_sensitive(cwin->preferences_w->soft_mixer_w, FALSE);
-	pragha_preferences_set_software_mixer(cwin->preferences, FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
+	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
+	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
+	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
 /* The enumerated audio devices have to be changed here */
 
-static void change_audio_sink(GtkComboBox *combo, gpointer udata)
+static void
+change_audio_sink(GtkComboBox *combo, PreferencesDialog *dialog)
 {
-	struct con_win *cwin = udata;
 	gchar *audio_sink;
 
-	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(
-					      cwin->preferences_w->audio_sink_combo_w));
+	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dialog->audio_sink_combo_w));
 
 	if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
-		update_audio_device_alsa(cwin);
+		update_audio_device_alsa(dialog);
 	else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
-		update_audio_device_oss4(cwin);
+		update_audio_device_oss4(dialog);
 	else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
-		update_audio_device_oss(cwin);
+		update_audio_device_oss(dialog);
 	else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
-		update_audio_device_pulse(cwin);
+		update_audio_device_pulse(dialog);
 	else
-		update_audio_device_default(cwin);
+		update_audio_device_default(dialog);
 
 	g_free(audio_sink);
 }
 
-static void update_preferences(struct con_win *cwin)
+static void
+pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 {
 	gint cnt = 0, i;
 	GSList *list;
@@ -599,133 +584,103 @@ static void update_preferences(struct con_win *cwin)
 	GError *error = NULL;
 	GSList *library_dir = NULL;
 
-	const gchar *audio_sink = pragha_preferences_get_audio_sink(cwin->preferences);
-	const gchar *audio_device = pragha_preferences_get_audio_device(cwin->preferences);
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
-	const gchar *start_mode = pragha_preferences_get_start_mode(cwin->preferences);
+	const gchar *audio_sink = pragha_preferences_get_audio_sink(dialog->preferences);
+	const gchar *audio_device = pragha_preferences_get_audio_device(dialog->preferences);
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(dialog->preferences);
+	const gchar *start_mode = pragha_preferences_get_start_mode(dialog->preferences);
 
 	/* Audio Options */
 
 	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->preferences_w->audio_sink_combo_w),
-						 1);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 1);
 		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->preferences_w->audio_sink_combo_w),
-						 2);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 2);
 		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->preferences_w->audio_sink_combo_w),
-						 3);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 3);
 		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->preferences_w->audio_sink_combo_w),
-						 4);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 4);
 		else
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						 cwin->preferences_w->audio_sink_combo_w),
-						 0);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 0);
 	}
 
 	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
-			update_audio_device_alsa(cwin);
+			update_audio_device_alsa(dialog);
 		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
-			update_audio_device_oss4(cwin);
+			update_audio_device_oss4(dialog);
 		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
-			update_audio_device_oss(cwin);
+			update_audio_device_oss(dialog);
 		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
-			update_audio_device_pulse(cwin);
+			update_audio_device_pulse(dialog);
 		else
-			update_audio_device_default(cwin);
+			update_audio_device_default(dialog);
 	}
 
 	if (string_is_not_empty(audio_device))
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_device_w),
-				   audio_device);
+		gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w), audio_device);
 
 	if (string_is_not_empty(audio_cd_device))
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->audio_cd_device_w),
+		gtk_entry_set_text(GTK_ENTRY(dialog->audio_cd_device_w),
 				   audio_cd_device);
 
-	if (pragha_preferences_get_software_mixer(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->soft_mixer_w),
-					     TRUE);
+	if (pragha_preferences_get_software_mixer(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
 
 	/* General Options */
 
-	if(pragha_preferences_get_remember_state(cwin->preferences))
-		gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 0);
+	if(pragha_preferences_get_remember_state(dialog->preferences))
+		gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 0);
 	else {
 		if(string_is_not_empty(start_mode)) {
 			if (!g_ascii_strcasecmp(start_mode, NORMAL_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 1);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 1);
 			else if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 2);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 2);
 			else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(cwin->preferences_w->window_state_combo_w), 3);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 3);
 		}
 	}
 
-	if (pragha_preferences_get_use_hint(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->use_hint_w),
-					     TRUE);
+	if (pragha_preferences_get_use_hint(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
 
-	if (pragha_preferences_get_instant_search(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->instant_filter_w),
-					     TRUE);
+	if (pragha_preferences_get_instant_search(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->instant_filter_w), TRUE);
 
-	if (pragha_preferences_get_approximate_search(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->aproximate_search_w),
-					     TRUE);
+	if (pragha_preferences_get_approximate_search(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->aproximate_search_w), TRUE);
 
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->restore_playlist_w),
-					     TRUE);
+	if (pragha_preferences_get_restore_playlist(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->restore_playlist_w), TRUE);
 
-	if (pragha_preferences_get_show_status_icon(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->show_icon_tray_w),
-					     TRUE);
+	if (pragha_preferences_get_show_status_icon(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->show_icon_tray_w), TRUE);
 
-	if (pragha_preferences_get_hide_instead_close(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->close_to_tray_w),
-					     TRUE);
+	if (pragha_preferences_get_hide_instead_close(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->close_to_tray_w), TRUE);
 
-	if (pragha_preferences_get_add_recursively(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->add_recursively_w),
-					     TRUE);
+	if (pragha_preferences_get_add_recursively(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->add_recursively_w), TRUE);
 
-	if (pragha_preferences_get_show_album_art(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-		                             cwin->preferences_w->album_art_w),
-		                             TRUE);
+	if (pragha_preferences_get_show_album_art(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->album_art_w), TRUE);
 
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cwin->preferences_w->album_art_size_w),
-	                           pragha_preferences_get_album_art_size(cwin->preferences));
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(dialog->album_art_size_w),
+	                           pragha_preferences_get_album_art_size(dialog->preferences));
 
-	gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->album_art_pattern_w),
-	                   pragha_preferences_get_album_art_pattern(cwin->preferences));
+	gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
+	                   pragha_preferences_get_album_art_pattern(dialog->preferences));
 
 	/* Lbrary Options */
 
 	library_dir =
-		pragha_preferences_get_filename_list(cwin->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_DIR);
+		pragha_preferences_get_filename_list (dialog->preferences,
+		                                      GROUP_LIBRARY,
+		                                      KEY_LIBRARY_DIR);
 
 	if (library_dir) {
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(
-						cwin->preferences_w->library_view_w));
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
 
 		cnt = g_slist_length(library_dir);
 		list = library_dir;
@@ -750,77 +705,63 @@ static void update_preferences(struct con_win *cwin)
 		free_str_list(library_dir);
 	}
 
-	if (pragha_preferences_get_fuse_folders(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->fuse_folders_w),
-					     TRUE);
-	if (pragha_preferences_get_sort_by_year(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->sort_by_year_w),
-					     TRUE);
+	if (pragha_preferences_get_fuse_folders(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
+	if (pragha_preferences_get_sort_by_year(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
 
 	/* Notifications options */
 
-	if (pragha_preferences_get_show_osd(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->show_osd_w),
-					     TRUE);
-	if (pragha_preferences_get_album_art_in_osd(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->albumart_in_osd_w),
-					     TRUE);
+	if (pragha_preferences_get_show_osd(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w), TRUE);
+	if (pragha_preferences_get_album_art_in_osd(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->albumart_in_osd_w), TRUE);
 	if (!can_support_actions())
-		gtk_widget_set_sensitive(cwin->preferences_w->actions_in_osd_w, FALSE);
-	else if (pragha_preferences_get_actions_in_osd(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->actions_in_osd_w),
-					     TRUE);
+		gtk_widget_set_sensitive(dialog->actions_in_osd_w, FALSE);
+	else if (pragha_preferences_get_actions_in_osd(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->actions_in_osd_w), TRUE);
 
 	/* Service Internet Option */
 #ifdef HAVE_LIBCLASTFM
-	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w), TRUE);
+	if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w), TRUE);
 
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_uname_w),
-		                   pragha_preferences_get_lastfm_user (cwin->preferences));
-		gtk_entry_set_text(GTK_ENTRY(cwin->preferences_w->lastfm_pass_w),
-		                   pragha_lastfm_get_password(cwin->preferences));
+		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_uname_w),
+		                   pragha_preferences_get_lastfm_user (dialog->preferences));
+		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_pass_w),
+		                   pragha_lastfm_get_password(dialog->preferences));
 	}
 #endif
 #ifdef HAVE_LIBGLYR
-	if(pragha_preferences_get_download_album_art(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->get_album_art_w),
-					     TRUE);
+	if(pragha_preferences_get_download_album_art(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w), TRUE);
 #endif
-	if (pragha_preferences_get_use_cddb(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->use_cddb_w),
-					     TRUE);
-	if (pragha_preferences_get_use_mpris2(cwin->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-					     cwin->preferences_w->use_mpris2_w),
-					     TRUE);
+	if (pragha_preferences_get_use_cddb(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
+	if (pragha_preferences_get_use_mpris2(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w), TRUE);
 }
 
-int library_view_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
 {
-	if (event->state != 0
-			&& ((event->state & GDK_CONTROL_MASK)
-			|| (event->state & GDK_MOD1_MASK)
-			|| (event->state & GDK_MOD3_MASK)
-			|| (event->state & GDK_MOD4_MASK)
-			|| (event->state & GDK_MOD5_MASK)))
+	if (event->state != 0 &&
+	    ((event->state & GDK_CONTROL_MASK) ||
+	     (event->state & GDK_MOD1_MASK) ||
+	     (event->state & GDK_MOD3_MASK) ||
+	     (event->state & GDK_MOD4_MASK) ||
+	     (event->state & GDK_MOD5_MASK))) {
 		return FALSE;
-	if (event->keyval == GDK_KEY_Delete){
-		library_remove_cb(NULL, cwin);
+	}
+	if (event->keyval == GDK_KEY_Delete) {
+		library_remove_cb(NULL, dialog);
 		return TRUE;
 	}
+
 	return FALSE;
 }
 
 static GtkWidget*
-pref_create_audio_page(struct con_win *cwin)
+pref_create_audio_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, \
@@ -877,15 +818,15 @@ pref_create_audio_page(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->preferences_w->audio_sink_combo_w = audio_sink_combo;
-	cwin->preferences_w->audio_device_w = audio_device_entry;
-	cwin->preferences_w->audio_cd_device_w = audio_cd_device_entry;
-	cwin->preferences_w->soft_mixer_w = soft_mixer;
+	dialog->audio_sink_combo_w = audio_sink_combo;
+	dialog->audio_device_w = audio_device_entry;
+	dialog->audio_cd_device_w = audio_cd_device_entry;
+	dialog->soft_mixer_w = soft_mixer;
 
 	/* Setup signal handlers */
 
-	g_signal_connect(G_OBJECT(audio_sink_combo), "changed",
-			 G_CALLBACK(change_audio_sink), cwin);
+	g_signal_connect (G_OBJECT(audio_sink_combo), "changed",
+	                  G_CALLBACK(change_audio_sink), dialog);
 
 	pragha_hig_workarea_table_finish(table, &row);
 
@@ -893,7 +834,7 @@ pref_create_audio_page(struct con_win *cwin)
 }
 
 static GtkWidget*
-pref_create_library_page(struct con_win *cwin)
+pref_create_library_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
@@ -914,20 +855,21 @@ pref_create_library_page(struct con_win *cwin)
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("Folders"),
-							  renderer,
-							  "text",
-							  0,
-							  NULL);
+	column = gtk_tree_view_column_new_with_attributes (_("Folders"),
+	                                                   renderer,
+	                                                   "text",
+	                                                   0,
+	                                                   NULL);
+
 	gtk_tree_view_column_set_resizable(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(library_view), column);
 
 	library_view_scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_view_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(library_view_scroll),
+	                                GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_view_scroll),
-					GTK_SHADOW_IN);
+	                                     GTK_SHADOW_IN);
 	gtk_container_add(GTK_CONTAINER(library_view_scroll), library_view);
 
 	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
@@ -935,29 +877,18 @@ pref_create_library_page(struct con_win *cwin)
 	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
 	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
 
-	gtk_box_pack_start(GTK_BOX(library_bbox),
-			   library_add,
-			   FALSE,
-			   FALSE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(library_bbox),
-			   library_remove,
-			   FALSE,
-			   FALSE,
-			   0);
+	gtk_box_pack_start (GTK_BOX(library_bbox), library_add,
+	                    FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(library_bbox), library_remove,
+	                    FALSE, FALSE, 0);
 
 	gtk_container_add(GTK_CONTAINER(library_bbox_align), library_bbox);
 
-	gtk_box_pack_start(GTK_BOX(hbox_library),
-			   library_view_scroll,
-			   TRUE,
-			   TRUE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(hbox_library),
-			   library_bbox_align,
-			   FALSE,
-			   FALSE,
-			   0);
+	gtk_box_pack_start (GTK_BOX(hbox_library), library_view_scroll,
+	                    TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_library), library_bbox_align,
+	                    FALSE, FALSE, 0);
+
 	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
 	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
@@ -968,18 +899,18 @@ pref_create_library_page(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->preferences_w->library_view_w = library_view;
-	cwin->preferences_w->fuse_folders_w = fuse_folders;
-	cwin->preferences_w->sort_by_year_w = sort_by_year;
+	dialog->library_view_w = library_view;
+	dialog->fuse_folders_w = fuse_folders;
+	dialog->sort_by_year_w = sort_by_year;
 
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(library_add), "clicked",
-			 G_CALLBACK(library_add_cb), cwin);
+			 G_CALLBACK(library_add_cb), dialog);
 	g_signal_connect(G_OBJECT(library_remove), "clicked",
-			 G_CALLBACK(library_remove_cb), cwin);
+			 G_CALLBACK(library_remove_cb), dialog);
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
-			  G_CALLBACK(library_view_key_press), cwin);
+			  G_CALLBACK(library_view_key_press), dialog);
 
 	pragha_hig_workarea_table_finish(table, &row);
 
@@ -987,7 +918,7 @@ pref_create_library_page(struct con_win *cwin)
 }
 
 static GtkWidget*
-pref_create_appearance_page(struct con_win *cwin)
+pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
@@ -1020,17 +951,17 @@ pref_create_appearance_page(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->preferences_w->use_hint_w = use_hint;
-	cwin->preferences_w->album_art_w = album_art;
-	cwin->preferences_w->album_art_size_w = album_art_size;
-	cwin->preferences_w->album_art_pattern_w = album_art_pattern;
+	dialog->use_hint_w = use_hint;
+	dialog->album_art_w = album_art;
+	dialog->album_art_size_w = album_art_size;
+	dialog->album_art_pattern_w = album_art_pattern;
 
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(use_hint), "toggled",
-			 G_CALLBACK(toggle_use_hint), cwin);
+			 G_CALLBACK(toggle_use_hint), dialog);
 	g_signal_connect(G_OBJECT(album_art), "toggled",
-			 G_CALLBACK(toggle_album_art), cwin);
+			 G_CALLBACK(toggle_album_art), dialog);
 
 	pragha_hig_workarea_table_finish(table, &row);
 
@@ -1038,7 +969,7 @@ pref_create_appearance_page(struct con_win *cwin)
 }
 
 static GtkWidget*
-pref_create_general_page(struct con_win *cwin)
+pref_create_general_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *instant_filter, *aproximate_search, *window_state_combo, *restore_playlist, *add_recursively;
@@ -1073,11 +1004,11 @@ pref_create_general_page(struct con_win *cwin)
 
 	/* Store references */
 
-	cwin->preferences_w->instant_filter_w = instant_filter;
-	cwin->preferences_w->aproximate_search_w = aproximate_search;
-	cwin->preferences_w->window_state_combo_w = window_state_combo;
-	cwin->preferences_w->restore_playlist_w = restore_playlist;
-	cwin->preferences_w->add_recursively_w = add_recursively;
+	dialog->instant_filter_w = instant_filter;
+	dialog->aproximate_search_w = aproximate_search;
+	dialog->window_state_combo_w = window_state_combo;
+	dialog->restore_playlist_w = restore_playlist;
+	dialog->add_recursively_w = add_recursively;
 
 	pragha_hig_workarea_table_finish(table, &row);
 
@@ -1085,7 +1016,7 @@ pref_create_general_page(struct con_win *cwin)
 }
 
 static GtkWidget*
-pref_create_desktop_page(struct con_win *cwin)
+pref_create_desktop_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
@@ -1116,17 +1047,17 @@ pref_create_desktop_page(struct con_win *cwin)
 	/* Setup signal handlers */
 
 	g_signal_connect(G_OBJECT(show_icon_tray), "toggled",
-			 G_CALLBACK(toggle_show_icon_tray), cwin);
+			 G_CALLBACK(toggle_show_icon_tray), dialog);
 	g_signal_connect(G_OBJECT(show_osd), "toggled",
-			 G_CALLBACK(toggle_show_osd), cwin);
+			 G_CALLBACK(toggle_show_osd), dialog);
 
 	/* Store references. */
 
-	cwin->preferences_w->show_icon_tray_w = show_icon_tray;
-	cwin->preferences_w->close_to_tray_w = close_to_tray;
-	cwin->preferences_w->show_osd_w = show_osd;
-	cwin->preferences_w->albumart_in_osd_w = albumart_in_osd;
-	cwin->preferences_w->actions_in_osd_w = actions_in_osd;
+	dialog->show_icon_tray_w = show_icon_tray;
+	dialog->close_to_tray_w = close_to_tray;
+	dialog->show_osd_w = show_osd;
+	dialog->albumart_in_osd_w = albumart_in_osd;
+	dialog->actions_in_osd_w = actions_in_osd;
 
 	pragha_hig_workarea_table_finish(table, &row);
 
@@ -1134,7 +1065,7 @@ pref_create_desktop_page(struct con_win *cwin)
 }
 
 static GtkWidget*
-pref_create_services_page(struct con_win *cwin)
+pref_create_services_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	#ifdef HAVE_LIBCLASTFM
@@ -1184,20 +1115,20 @@ pref_create_services_page(struct con_win *cwin)
 	/* Store references. */
 
 	#ifdef HAVE_LIBCLASTFM
-	cwin->preferences_w->lastfm_w = lastfm_check;
-	cwin->preferences_w->lastfm_uname_w = lastfm_uname;
-	cwin->preferences_w->lastfm_pass_w = lastfm_pass;
-	g_signal_connect(G_OBJECT(lastfm_check), "toggled",
-			 G_CALLBACK(toggle_lastfm), cwin);
+	dialog->lastfm_w = lastfm_check;
+	dialog->lastfm_uname_w = lastfm_uname;
+	dialog->lastfm_pass_w = lastfm_pass;
+	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
+	                  G_CALLBACK(toggle_lastfm), dialog);
 	#endif
 	#ifdef HAVE_LIBGLYR
-	cwin->preferences_w->get_album_art_w = get_album_art;
+	dialog->get_album_art_w = get_album_art;
 	#endif
-	cwin->preferences_w->use_cddb_w = use_cddb;
-	cwin->preferences_w->use_mpris2_w = use_mpris2;
+	dialog->use_cddb_w = use_cddb;
+	dialog->use_mpris2_w = use_mpris2;
 
 	#ifdef HAVE_LIBCLASTFM
-	toggle_lastfm(GTK_TOGGLE_BUTTON(cwin->preferences_w->lastfm_w), cwin);
+	toggle_lastfm(GTK_TOGGLE_BUTTON(dialog->lastfm_w), dialog);
 	#endif
 
 	pragha_hig_workarea_table_finish(table, &row);
@@ -1205,25 +1136,28 @@ pref_create_services_page(struct con_win *cwin)
 	return table;
 }
 
-void preferences_dialog(struct con_win *cwin)
+void
+pragha_preferences_dialog_show (struct con_win *cwin)
 {
-	GtkWidget *dialog, *header, *pref_notebook;
+	PreferencesDialog *dialog;
+	GtkWidget *header, *pref_notebook;
 
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
 	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
 
-	cwin->preferences_w = g_slice_new0(PreferencesWidgets);
+	dialog = g_slice_new0(PreferencesDialog);
+
+	dialog->cwin = cwin;
+	dialog->preferences = pragha_preferences_get();
 
 	/* The main preferences dialog */
 
-	dialog = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
-					     GTK_WINDOW(cwin->mainwindow),
-					     GTK_DIALOG_MODAL,
-					     GTK_STOCK_CANCEL,
-					     GTK_RESPONSE_CANCEL,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_OK,
-					     NULL);
+	dialog->widget = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
+	                                             GTK_WINDOW(cwin->mainwindow),
+	                                             GTK_DIALOG_MODAL,
+	                                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+	                                             GTK_STOCK_OK, GTK_RESPONSE_OK,
+	                                              NULL);
 
 	/* Labels */
 
@@ -1246,46 +1180,40 @@ void preferences_dialog(struct con_win *cwin)
 
 	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
 
-	audio_vbox = pref_create_audio_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), audio_vbox,
-				 label_audio);
+	audio_vbox = pref_create_audio_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), audio_vbox, label_audio);
 
-	appearance_vbox = pref_create_appearance_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox,
-				 label_appearance);
+	appearance_vbox = pref_create_appearance_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox, label_appearance);
 
-	library_vbox = pref_create_library_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox,
-				 label_library);
+	library_vbox = pref_create_library_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
 
-	general_vbox = pref_create_general_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox,
-				 label_general);
+	general_vbox = pref_create_general_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox, label_general);
 
-	desktop_vbox = pref_create_desktop_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), desktop_vbox,
-				 label_desktop);
+	desktop_vbox = pref_create_desktop_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), desktop_vbox, label_desktop);
 
-	services_vbox = pref_create_services_page(cwin);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox,
-				 label_services);
+	services_vbox = pref_create_services_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox, label_services);
 
 	/* Add to dialog */
 
 	header = sokoke_xfce_header_new (_("Preferences of Pragha"), "pragha");
 
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), pref_notebook, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), pref_notebook, TRUE, TRUE, 0);
 
 	/* Setup signal handlers */
 
-	g_signal_connect(G_OBJECT(dialog), "response",
-			 G_CALLBACK(pref_dialog_cb), cwin);
+	g_signal_connect (G_OBJECT(dialog->widget), "response",
+	                  G_CALLBACK(pragha_preferences_dialog_response), dialog);
 
-	update_preferences(cwin);
+	pragha_preferences_dialog_init_settings(dialog);
 
-	toggle_album_art(GTK_TOGGLE_BUTTON(cwin->preferences_w->album_art_w), cwin);
+	toggle_album_art(GTK_TOGGLE_BUTTON(dialog->album_art_w), dialog);
 
-	gtk_dialog_set_default_response(GTK_DIALOG (dialog), GTK_RESPONSE_OK);
-	gtk_widget_show_all(dialog);
+	gtk_dialog_set_default_response(GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
+	gtk_widget_show_all(dialog->widget);
 }
