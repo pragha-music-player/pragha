@@ -870,21 +870,27 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 
 void about_widget(struct con_win *cwin)
 {
+	GtkWidget *mainwindow;
+	GdkPixbuf *pixbuf_app;
+
+	mainwindow = pragha_application_get_mainwindow (cwin);
+	pixbuf_app = pragha_application_get_pixbuf_app (cwin);
+
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
 		"matias ( mati86dl@gmail.com )",
 		NULL};
 
-	gtk_show_about_dialog(GTK_WINDOW(cwin->mainwindow),
-				"logo", cwin->pixbuf_app,
-				"authors", authors,
-				"translator-credits", _("translator-credits"),
-				"comments", "A lightweight GTK+ music player",
-				"copyright", "(C) 2007-2009 Sujith\n(C) 2009-2013 Matias",
-				"license", license,
-				"name", PACKAGE_NAME,
-				"version", PACKAGE_VERSION,
-				NULL);
+	gtk_show_about_dialog(GTK_WINDOW(mainwindow),
+	                      "logo", pixbuf_app,
+	                      "authors", authors,
+	                      "translator-credits", _("translator-credits"),
+	                      "comments", "A lightweight GTK+ music player",
+	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2013 Matias",
+	                      "license", license,
+	                      "name", PACKAGE_NAME,
+	                      "version", PACKAGE_VERSION,
+	                      NULL);
 }
 
 void home_action(GtkAction *action, struct con_win *cwin)

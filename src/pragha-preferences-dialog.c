@@ -205,7 +205,7 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 
 		if(test_change) {
 			infobar = create_info_bar_update_music(cwin);
-			mainwindow_add_widget_to_info_box(cwin, infobar);
+			pragha_window_add_widget_to_infobox(cwin->window, infobar);
 		}
 
 		free_str_list(library_dir);

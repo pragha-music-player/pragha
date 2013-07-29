@@ -239,9 +239,11 @@ void create_status_icon (struct con_win *cwin)
 {
 	GtkStatusIcon *status_icon;
 	GtkUIManager *systray_menu;
+	GdkPixbuf *pixbuf_app;
 
-	if (cwin->pixbuf_app)
-		status_icon = gtk_status_icon_new_from_pixbuf(cwin->pixbuf_app);
+	pixbuf_app = pragha_application_get_pixbuf_app(cwin);
+	if (pixbuf_app)
+		status_icon = gtk_status_icon_new_from_pixbuf(pixbuf_app);
 	else
 		status_icon = gtk_status_icon_new_from_stock(GTK_STOCK_NEW);
 
