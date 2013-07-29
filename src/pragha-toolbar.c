@@ -429,6 +429,7 @@ next_button_handler(GtkButton *button, struct con_win *cwin)
 /*
  * Callbacks that response to gstreamer signals.
  */
+
 void
 pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpointer user_data)
 {
@@ -476,139 +477,22 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 }
 
 /*
- * Toolbar creation.
+ * Show the unfullscreen button according to the state of the window.
  */
 
-GtkWidget* create_playing_box(PraghaToolbar *toolbar, struct con_win *cwin)
+static gboolean
+pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar)
 {
-	GtkWidget *now_playing_label,*track_length_label,*track_time_label;
-	GtkWidget *track_progress_bar;
-	GtkWidget *track_length_align, *track_time_align, *track_progress_align, *vbox_align;
-	GtkWidget *pack_vbox, *playing_hbox, *time_hbox;
-	GtkWidget *track_length_event_box, *track_playing_event_box;
-	GtkWidget *extention_box;
+	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
+		gtk_widget_set_visible(GTK_WIDGET(toolbar->unfull_button), (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
+	}
 
-	#if GTK_CHECK_VERSION (3, 0, 0)
-	GtkWidget *track_progress_event_box;
-	#endif
-
-	playing_hbox = gtk_hbox_new(FALSE, 2);
-
-	track_playing_event_box = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(track_playing_event_box), FALSE);
-
-	g_signal_connect (G_OBJECT(track_playing_event_box), "button-press-event",
-			G_CALLBACK(pragha_toolbar_song_label_event_edit), cwin);
-
-	now_playing_label = gtk_label_new(NULL);
-	gtk_label_set_ellipsize (GTK_LABEL(now_playing_label), PANGO_ELLIPSIZE_END);
-	gtk_label_set_markup(GTK_LABEL(now_playing_label),_("<b>Not playing</b>"));
-	gtk_misc_set_alignment (GTK_MISC(now_playing_label), 0, 1);
-
-	gtk_container_add(GTK_CONTAINER(track_playing_event_box), now_playing_label);
-
-	extention_box = gtk_vbox_new(FALSE, 0);
-
-	gtk_box_pack_start(GTK_BOX(playing_hbox),
-			   GTK_WIDGET(track_playing_event_box),
-			   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(playing_hbox),
-			   GTK_WIDGET(extention_box),
-			   FALSE, FALSE, 0);
-
-	time_hbox = gtk_hbox_new(FALSE, 2);
-
-	/* Setup track progress */
-
-	track_progress_align = gtk_alignment_new(0, 0.5, 1, 0);
-
-	#if GTK_CHECK_VERSION (3, 0, 0)
-	track_progress_event_box = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(track_progress_event_box), FALSE);
-	#endif
-
-	track_progress_bar = gtk_progress_bar_new();
-
-	gtk_widget_set_size_request(GTK_WIDGET(track_progress_bar), -1, 12);
-
-	#if GTK_CHECK_VERSION (3, 0, 0)
-	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_event_box);
-	gtk_container_add(GTK_CONTAINER(track_progress_event_box), track_progress_bar);
-
-	g_signal_connect(G_OBJECT(track_progress_event_box), "button-press-event",
-			 G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
-	#else
-	gtk_container_add(GTK_CONTAINER(track_progress_align), track_progress_bar);
-	gtk_widget_set_events(track_progress_bar, GDK_BUTTON_PRESS_MASK);
-
-	g_signal_connect(G_OBJECT(track_progress_bar), "button-press-event",
-			 G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
-	#endif
-
-	track_time_label = gtk_label_new(NULL);
-	track_length_label = gtk_label_new(NULL);
-
-	track_time_align = gtk_alignment_new(1, 0.5, 0, 0);
-	track_length_align = gtk_alignment_new(0, 0.5, 0, 0);
-
-	gtk_container_add(GTK_CONTAINER(track_time_align), track_time_label);
-	gtk_container_add(GTK_CONTAINER(track_length_align), track_length_label);
-
-	gtk_label_set_markup(GTK_LABEL(track_length_label),"<small>--:--</small>");
-	gtk_label_set_markup(GTK_LABEL(track_time_label),"<small>00:00</small>");
-
-	track_length_event_box = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(track_length_event_box), FALSE);
-
-	g_signal_connect (G_OBJECT(track_length_event_box), "button-press-event",
-			G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), cwin);
-	gtk_container_add(GTK_CONTAINER(track_length_event_box), track_length_align);
-
-	toolbar->track_progress_bar = 	track_progress_bar;
-	toolbar->now_playing_label = 	now_playing_label;
-	toolbar->track_time_label =	track_time_label;
-	toolbar->track_length_label = 	track_length_label;
-	toolbar->extention_box = extention_box;
-
-	gtk_box_pack_start(GTK_BOX(time_hbox),
-			   GTK_WIDGET(track_time_align),
-			   FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(time_hbox),
- 			   GTK_WIDGET(track_progress_align),
- 			   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(time_hbox),
-			   GTK_WIDGET(track_length_event_box),
-			   FALSE, FALSE, 3);
-
-	pack_vbox = gtk_vbox_new(FALSE, 1);
-
-	gtk_box_pack_start(GTK_BOX(pack_vbox),
-			   GTK_WIDGET(playing_hbox),
-			   FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pack_vbox),
-			   GTK_WIDGET(time_hbox),
-			   FALSE, FALSE, 0);
-
-	vbox_align = gtk_alignment_new(0.5, 0.5, 1, 0);
-	gtk_container_add(GTK_CONTAINER(vbox_align), pack_vbox);
-
-	return vbox_align;
+	return FALSE;
 }
 
-static void
-gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
-{
-	GtkWidget *align_box;
-	GtkToolItem *boxitem;
-
-	boxitem = gtk_tool_item_new ();
-
-	align_box = gtk_alignment_new(0, 0.5, 0, 0);
-	gtk_container_add(GTK_CONTAINER(align_box), item);
-
-	gtk_container_add (GTK_CONTAINER(boxitem), align_box);
-	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
-}
+/*
+ * Public api.
+ */
 
 void
 pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
@@ -656,22 +540,158 @@ pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 	return toolbar->widget;
 }
 
+/*
+ * Pragha toolbar creation and destruction.
+ */
+
+GtkWidget*
+pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar, struct con_win *cwin)
+{
+	GtkWidget *title_extention_hbox, *title, *title_event_box, *extention_box;
+	GtkWidget *progress_hbox, *time_label, *time_align, *progress_bar, *length_label, *length_align, *length_event_box;
+	GtkWidget *track_info_vbox, *track_info_align;
+
+	/* The title widget. */
+
+	title = gtk_label_new(NULL);
+	gtk_label_set_ellipsize (GTK_LABEL(title), PANGO_ELLIPSIZE_END);
+	gtk_label_set_markup(GTK_LABEL(title),_("<b>Not playing</b>"));
+	gtk_misc_set_alignment(GTK_MISC(title), 0, 0.5);
+
+	title_event_box = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(title_event_box), FALSE);
+
+	g_signal_connect (G_OBJECT(title_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_song_label_event_edit), cwin);
+
+	gtk_container_add (GTK_CONTAINER(title_event_box), title);
+
+	/* Another vbox to add extentions widgets. */
+	
+	extention_box = gtk_vbox_new(FALSE, 0);
+
+	/* Pack widgets: [Title]-[extentions] */
+
+	title_extention_hbox = gtk_hbox_new(FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX(title_extention_hbox),
+	                    GTK_WIDGET(title_event_box),
+	                    TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(title_extention_hbox),
+	                    GTK_WIDGET(extention_box),
+	                    FALSE, FALSE, 0);
+
+	/* Time progress widget. */
+
+	time_label = gtk_label_new(NULL);
+	time_align = gtk_alignment_new(1, 0.5, 0, 0);
+	gtk_label_set_markup(GTK_LABEL(time_label),"<small>00:00</small>");
+	gtk_container_add(GTK_CONTAINER(time_align), time_label);
+
+	/* Progress bar widget. */
+
+	progress_bar = gtk_progress_bar_new();
+	gtk_widget_set_size_request(GTK_WIDGET(progress_bar), -1, 12);
+
+	#if GTK_CHECK_VERSION (3, 0, 0)
+	GtkWidget *progress_bar_event_box = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(progress_bar_event_box), FALSE);
+
+	gtk_container_add(GTK_CONTAINER(progress_bar_event_box), progress_bar);
+
+	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
+	#else
+	gtk_widget_set_events(progress_bar, GDK_BUTTON_PRESS_MASK);
+
+	g_signal_connect (G_OBJECT(progress_bar), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);
+	#endif
+
+	/* Length and remaining time widget. */
+
+	length_label = gtk_label_new(NULL);
+	length_align = gtk_alignment_new(0, 0.5, 0, 0);
+	gtk_label_set_markup(GTK_LABEL(length_label),"<small>--:--</small>");
+	gtk_container_add(GTK_CONTAINER(length_align), length_label);
+
+	length_event_box = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(length_event_box), FALSE);
+
+	g_signal_connect (G_OBJECT(length_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), cwin);
+
+	gtk_container_add(GTK_CONTAINER(length_event_box), length_align);
+
+	/* Pack widgets: [Time]-[ProgressBar]-[Length] */
+
+	progress_hbox = gtk_hbox_new(FALSE, 2);
+
+	gtk_box_pack_start (GTK_BOX(progress_hbox),
+	                    GTK_WIDGET(time_align),
+	                    FALSE, FALSE, 3);
+	gtk_box_pack_start (GTK_BOX(progress_hbox),
+	                    #if GTK_CHECK_VERSION (3, 0, 0)
+	                    GTK_WIDGET(progress_bar_event_box),
+	                    #else
+	                    GTK_WIDGET(progress_bar),
+	                    #endif
+	                    TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(progress_hbox),
+	                    GTK_WIDGET(length_event_box),
+	                    FALSE, FALSE, 3);
+
+	/* Pack widgets:
+	 * [Title         ]-[extentions]
+	 * [Time]-[ProgressBar]-[Length]
+	 */
+
+	track_info_vbox = gtk_vbox_new(FALSE, 1);
+
+	gtk_box_pack_start (GTK_BOX(track_info_vbox),
+	                    GTK_WIDGET(title_extention_hbox),
+	                    FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(track_info_vbox),
+	                    GTK_WIDGET(progress_hbox),
+	                    FALSE, FALSE, 0);
+
+	/* Center widgets. */
+
+	track_info_align = gtk_alignment_new(0.5, 0.5, 1, 0);
+	gtk_container_add(GTK_CONTAINER(track_info_align), track_info_vbox);
+
+	/* Save references. */
+
+	toolbar->track_progress_bar = progress_bar;
+	toolbar->now_playing_label  = title;
+	toolbar->track_time_label   = time_label;
+	toolbar->track_length_label = length_label;
+	toolbar->extention_box      = extention_box;
+
+	return track_info_align;
+}
+
+static void
+gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
+{
+	GtkWidget *align_box;
+	GtkToolItem *boxitem;
+
+	boxitem = gtk_tool_item_new ();
+
+	align_box = gtk_alignment_new(0, 0.5, 0, 0);
+	gtk_container_add(GTK_CONTAINER(align_box), item);
+
+	gtk_container_add (GTK_CONTAINER(boxitem), align_box);
+	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
+}
+
 void
 pragha_toolbar_free(PraghaToolbar *toolbar)
 {
 	gtk_widget_destroy(GTK_WIDGET(toolbar->albumart));
 
 	g_slice_free(PraghaToolbar, toolbar);
-}
-
-static gboolean
-pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar)
-{
-	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
-		gtk_widget_set_visible(GTK_WIDGET(toolbar->unfull_button), (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
-	}
-
-	return FALSE;
 }
 
 PraghaToolbar *
@@ -737,7 +757,7 @@ pragha_toolbar_new(struct con_win *cwin)
 	gtk_tool_item_set_expand (boxitem, TRUE);
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
 
-	playing = create_playing_box(pragha_toolbar, cwin);
+	playing = pragha_toolbar_create_track_info_bar(pragha_toolbar, cwin);
 
 	box = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(box), playing, TRUE, TRUE, 5);
