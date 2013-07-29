@@ -110,10 +110,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	 */
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	/* Systray */
-
-	create_status_icon(cwin);
-
 	cwin->bar_context_menu = pragha_menubar_new(cwin);
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
@@ -132,6 +128,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	 *  * gtk_window_add_accel_group()
 	 */
 	/*cwin->mainwindow = pragha_window_get_mainwindow (cwin->window);*/
+
+	/* Systray */
+
+	create_status_icon(cwin);
+
 
 	/* Init window state */
 
