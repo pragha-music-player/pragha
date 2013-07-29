@@ -60,6 +60,19 @@ static void keybind_media_handler (const char *keystring, gpointer data)
 	pragha_window_toggle_state (cwin, FALSE);
 }
 
+gboolean keybinder_will_be_useful ()
+{
+#ifdef GDK_WINDOWING_X11
+	#if GTK_CHECK_VERSION (3, 0, 0)
+		return GDK_IS_X11_DISPLAY (gdk_display_get_default ());
+	#else
+		return TRUE;
+	#endif
+#else
+	return FALSE;
+#endif
+}
+
 gint init_keybinder(struct con_win *cwin)
 {
 	keybinder_init ();
@@ -69,6 +82,8 @@ gint init_keybinder(struct con_win *cwin)
 	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, cwin);
 	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, cwin);
 	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, cwin);
+
+	cwin->keybinder = TRUE;
 
 	return 0;
 }
