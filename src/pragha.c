@@ -102,7 +102,7 @@ pragha_application_free (struct con_win *cwin)
 	if (cwin->cgnome_media_keys)
 		gnome_media_keys_free (cwin->cgnome_media_keys);
 #ifdef HAVE_LIBKEYBINDER
-	else
+	else if (cwin->keybinder)
 		keybinder_free ();
 #endif
 	pragha_cdda_free ();
@@ -220,9 +220,11 @@ pragha_application_new (gint argc, gchar *argv[])
 		}
 	}
 	#ifdef HAVE_LIBKEYBINDER
-	else if (init_keybinder(cwin) == -1) {
-		g_critical("Unable to initialize keybinder");
-		return NULL;
+	else if (keybinder_will_be_useful()) {
+		if (init_keybinder(cwin) == -1) {
+			g_critical("Unable to initialize keybinder");
+			return NULL;
+		}
 	}
 	#endif
 

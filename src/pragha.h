@@ -92,6 +92,9 @@ struct con_win {
 	struct con_lastfm *clastfm;
 	#endif
 	con_gnome_media_keys *cgnome_media_keys;
+#ifdef HAVE_LIBKEYBINDER
+	gboolean keybinder;
+#endif
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 	GtkWidget *info_box;
