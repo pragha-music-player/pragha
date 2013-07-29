@@ -291,7 +291,7 @@ void pragha_equalizer_dialog_show(struct con_win *cwin)
 	/* Create the dialog */
 
 	w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
-	                                        GTK_WINDOW(pragha_application_get_window(cwin)),
+	                                        GTK_WINDOW(pragha_application_get_mainwindow(cwin)),
 	                                        GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                        GTK_STOCK_OK,
 	                                        GTK_RESPONSE_OK,

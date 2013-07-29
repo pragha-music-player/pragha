@@ -49,6 +49,7 @@
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 #include "pragha-toolbar.h"
+#include "pragha-window.h"
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
 
@@ -73,6 +74,7 @@ enum dnd_target {
 };
 
 struct con_win {
+	PraghaWindow *window;
 	PraghaPlaylist *cplaylist;
 	PraghaLibraryPane *clibrary;
 	PraghaBackend *backend;
@@ -96,9 +98,6 @@ struct con_win {
 	gboolean keybinder;
 #endif
 	GtkWidget *mainwindow;
-	GdkPixbuf *pixbuf_app;
-	GtkWidget *info_box;
-	GtkWidget *paned;
 	GtkStatusIcon *status_icon;
 	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
@@ -110,8 +109,9 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaBackend *pragha_application_get_backend (struct con_win *cwin);
-GtkWidget     *pragha_application_get_window  (struct con_win *cwin);
+PraghaBackend *pragha_application_get_backend    (struct con_win *cwin);
+GtkWidget     *pragha_application_get_mainwindow (struct con_win *cwin);
+GdkPixbuf     *pragha_application_get_pixbuf_app (struct con_win *cwin);
 
 /* Info bar import music */
 

@@ -22,20 +22,24 @@
 #include <gtk/gtk.h>
 #include "pragha-backend.h"
 
-GtkWidget* create_main_region(struct con_win *cwin);
-GtkWidget* create_info_box(struct con_win *cwin);
-GtkWidget* create_paned_region(struct con_win *cwin);
-GtkWidget* create_search_bar(struct con_win *cwin);
-GtkWidget* create_combo_order(struct con_win *cwin);
+/* pragha.h */
+struct con_win;
+
+typedef struct _PraghaWindow PraghaWindow;
 
 gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
 void     pragha_destroy_window      (GtkWidget *widget, struct con_win *cwin);
 void     pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity);
 
-void mainwindow_add_widget_to_info_box(struct con_win *cwin, GtkWidget *widget);
-void gui_free(struct con_win *cwin);
 void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
 void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
 
+void       pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget);
+
+GtkWidget *pragha_window_get_mainwindow        (PraghaWindow *window);
+GdkPixbuf *pragha_window_get_pixbuf_app        (PraghaWindow *window);
+
+void          pragha_window_free (PraghaWindow *window);
+PraghaWindow *pragha_window_new  (struct con_win *cwin);
 
 #endif /* PRAGHA_WINDOW_H */

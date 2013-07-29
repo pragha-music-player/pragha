@@ -30,6 +30,7 @@
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 
+#include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
@@ -58,9 +59,15 @@ pragha_application_get_backend (struct con_win *cwin)
 }
 
 GtkWidget *
-pragha_application_get_window (struct con_win *cwin)
+pragha_application_get_mainwindow (struct con_win *cwin)
 {
-	return cwin->mainwindow;
+	return pragha_window_get_mainwindow(cwin->window);
+}
+
+GdkPixbuf *
+pragha_application_get_pixbuf_app (struct con_win *cwin)
+{
+	return pragha_window_get_pixbuf_app(cwin->window);
 }
 
 void
@@ -88,7 +95,7 @@ pragha_application_free (struct con_win *cwin)
 	pragha_toolbar_free(cwin->toolbar);
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
-	gui_free (cwin);
+	pragha_window_free (cwin->window);
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	g_object_unref(cwin->cdbase);
