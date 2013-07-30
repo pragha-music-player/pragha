@@ -91,7 +91,6 @@ pragha_application_free (struct con_win *cwin)
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
-	g_object_unref(G_OBJECT(cwin->toolbar));
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	pragha_window_free (cwin->window);
