@@ -19,6 +19,7 @@
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-utils.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -265,4 +266,18 @@ void
 pragha_playback_next_song (GObject *object, struct con_win *cwin)
 {
 	pragha_playback_next_track (cwin);
+}
+
+void
+pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
+{
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		PraghaAlbumArt *albumart = pragha_toolbar_get_album_art (cwin->toolbar);
+		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (albumart), NULL, NULL);
+
+		open_url(uri, cwin->mainwindow);
+		g_free (uri);
+	}
 }
