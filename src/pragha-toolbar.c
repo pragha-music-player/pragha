@@ -304,38 +304,6 @@ pragha_toolbar_timer_label_event_change_mode(GtkWidget *w,
 		update_current_song_info(cwin);
 }
 
-static void
-pragha_toolbar_progress_bar_event_seek(GtkWidget *widget,
-                                       GdkEventButton *event,
-                                       struct con_win *cwin)
-{
-	gint seek = 0, length = 0;
-	gdouble fraction = 0;
-
-	if (event->button != 1)
-		return;
-
-	if (pragha_backend_get_state (cwin->backend) != ST_PLAYING)
-		return;
-
-	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (cwin->backend));
-
-	if (length == 0)
-		return;
-
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(widget, &allocation);
-
-	seek = (length * event->x) / allocation.width;
-	if (seek >= length)
-		seek = length;
-
-	fraction = (gdouble) event->x / allocation.width;
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cwin->toolbar->track_progress_bar), fraction);
-
-	pragha_backend_seek(cwin->backend, seek);
-}
-
 void
 update_album_art (struct con_win *cwin)
 {
@@ -452,6 +420,24 @@ pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
 		g_signal_emit (toolbar, signals[TRACK_INFO_ACTIVATED], 0);
 
 	return TRUE;
+}
+
+static void
+pragha_toolbar_progress_bar_event_seek (GtkWidget *widget,
+                                        GdkEventButton *event,
+                                        PraghaToolbar *toolbar)
+{
+	GtkAllocation allocation;
+	gdouble fraction = 0;
+
+	if (event->button != 1)
+		return;
+
+	gtk_widget_get_allocation(widget, &allocation);
+
+	fraction = (gdouble) event->x / allocation.width;
+
+	g_signal_emit (toolbar, signals[TRACK_PROGRESS_ACTIVATED], 0, fraction);
 }
 
 /*
@@ -627,13 +613,13 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 
 	gtk_container_add(GTK_CONTAINER(progress_bar_event_box), progress_bar);
 
-	/*g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);*/
+	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
 	#else
 	gtk_widget_set_events(progress_bar, GDK_BUTTON_PRESS_MASK);
 
-	/*g_signal_connect (G_OBJECT(progress_bar), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), cwin);*/
+	g_signal_connect (G_OBJECT(progress_bar), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
 	#endif
 
 	/* Length and remaining time widget. */
@@ -765,6 +751,13 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	                                              NULL, NULL,
 	                                              g_cclosure_marshal_VOID__VOID,
 	                                              G_TYPE_NONE, 0);
+	signals[TRACK_PROGRESS_ACTIVATED] = g_signal_new ("track-progress-activated",
+	                                                  G_TYPE_FROM_CLASS (gobject_class),
+	                                                  G_SIGNAL_RUN_LAST,
+	                                                  G_STRUCT_OFFSET (PraghaToolbarClass, track_progress_activated),
+	                                                  NULL, NULL,
+	                                                  g_cclosure_marshal_VOID__DOUBLE,
+	                                                  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 
 	/* TODO: Add the rest of signals.. */
 }

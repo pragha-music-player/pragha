@@ -291,3 +291,26 @@ pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
 		edit_tags_playing_action(NULL, cwin);
 	}
 }
+
+void
+pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin)
+{
+	gint seek = 0, length = 0;
+
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (backend));
+
+	if (length == 0)
+		return;
+
+	seek = (length * fraction);
+
+	if (seek >= length)
+		seek = length;
+
+	pragha_backend_seek(backend, seek);
+}
