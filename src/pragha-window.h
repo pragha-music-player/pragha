@@ -34,6 +34,8 @@ void     pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivi
 void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
 void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
 
+void       pragha_window_unfullscreen          (GObject *object, struct con_win *cwin);
+
 void       pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget);
 
 GtkWidget *pragha_window_get_mainwindow        (PraghaWindow *window);

@@ -47,6 +47,7 @@ typedef struct {
 	void (*album_art_activated) (PraghaToolbar *toolbar);
 	void (*track_info_activated) (PraghaToolbar *toolbar);
 	void (*track_progress_activated) (PraghaToolbar *toolbar, gdouble fraction);
+	void (*unfull) (PraghaToolbar *toolbar);
 } PraghaToolbarClass;
 
 void pragha_toolbar_set_title               (PraghaToolbar *toolbar, PraghaMusicobject *mobj);
@@ -59,7 +60,8 @@ void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec
 
 void update_album_art (struct con_win *cwin);
 
-void pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget);
+gboolean pragha_toolbar_window_state_event  (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
+void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
 const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);

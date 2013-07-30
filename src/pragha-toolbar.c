@@ -325,18 +325,6 @@ panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin
 	return ret;
 }
 
-/* Handler for buttons on toolbar. */
-
-static void
-unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
-{
-	GtkAction *action_fullscreen;
-
-	action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
-
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
-}
-
 /*
  * Emit signals..
  */
@@ -369,6 +357,14 @@ static gboolean
 next_button_handler(GtkButton *button, PraghaToolbar *toolbar)
 {
 	g_signal_emit (toolbar, signals[NEXT_ACTIVATED], 0);
+
+	return TRUE;
+}
+
+static gboolean
+unfull_button_handler (GtkButton *button, PraghaToolbar *toolbar)
+{
+	g_signal_emit (toolbar, signals[UNFULL_ACTIVATED], 0);
 
 	return TRUE;
 }
@@ -482,7 +478,7 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
  * Show the unfullscreen button according to the state of the window.
  */
 
-static gboolean
+gboolean
 pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar)
 {
 	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
@@ -762,6 +758,9 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	gobject_class->get_property = pragha_toolbar_get_property;
 	gobject_class->finalize = pragha_toolbar_finalize;
 
+	/*
+	 * Properties:
+	 */
 	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Volume showed on toolbar",
 	                                               0.0, 1.0, 0.5,
 	                                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -771,7 +770,9 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
-	/* signals */
+	/*
+	 * Signals:
+	 */
 	signals[PREV_ACTIVATED] = g_signal_new ("prev",
 	                                        G_TYPE_FROM_CLASS (gobject_class),
 	                                        G_SIGNAL_RUN_LAST,
@@ -821,8 +822,13 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	                                                  NULL, NULL,
 	                                                  g_cclosure_marshal_VOID__DOUBLE,
 	                                                  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
-
-	/* TODO: Add the rest of signals.. */
+	signals[UNFULL_ACTIVATED] = g_signal_new ("unfull-activated",
+	                                          G_TYPE_FROM_CLASS (gobject_class),
+	                                          G_SIGNAL_RUN_LAST,
+	                                          G_STRUCT_OFFSET (PraghaToolbarClass, unfull),
+	                                          NULL, NULL,
+	                                          g_cclosure_marshal_VOID__VOID,
+	                                          G_TYPE_NONE, 0);
 }
 
 static void
@@ -930,8 +936,8 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	                 G_CALLBACK(next_button_handler), toolbar);
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
 	                 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
-	/*g_signal_connect(G_OBJECT(unfull_button), "clicked",
-	                 G_CALLBACK(unfull_button_handler), toolbar);*/
+	g_signal_connect(G_OBJECT(unfull_button), "clicked",
+	                 G_CALLBACK(unfull_button_handler), toolbar);
 
 	/*g_signal_connect(G_OBJECT (prev_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), toolbar);
@@ -963,9 +969,6 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
 
 	g_object_bind_property(preferences, "show-album-art", albumart, "visible", binding_flags);
-
-	/*g_signal_connect(G_OBJECT(cwin->mainwindow), "window-state-event",
-	                 G_CALLBACK(pragha_toolbar_window_state_event), pragha_toolbar);*/
 
 	g_object_unref(preferences);
 }

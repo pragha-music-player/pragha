@@ -125,12 +125,17 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	                  G_CALLBACK(pragha_playback_stop_song), cwin);
 	g_signal_connect (cwin->toolbar, "next",
 	                  G_CALLBACK(pragha_playback_next_song), cwin);
+	g_signal_connect (cwin->toolbar, "unfull-activated",
+	                  G_CALLBACK(pragha_window_unfullscreen), cwin);
 	g_signal_connect (cwin->toolbar, "album-art-activated",
 	                  G_CALLBACK(pragha_playback_show_current_album_art), cwin);
 	g_signal_connect (cwin->toolbar, "track-info-activated",
 	                  G_CALLBACK(pragha_playback_edit_current_track), cwin);
 	g_signal_connect (cwin->toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
+
+	g_signal_connect(G_OBJECT(cwin->mainwindow), "window-state-event",
+	                 G_CALLBACK(pragha_toolbar_window_state_event), cwin->toolbar);
 
 	cwin->statusbar = pragha_statusbar_get();
 	cwin->cplaylist = pragha_playlist_new(cwin);
