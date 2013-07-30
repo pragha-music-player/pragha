@@ -55,16 +55,16 @@ struct _PraghaToolbar {
 
 enum
 {
-  PREV_ACTIVATED,
-  PLAY_ACTIVATED,
-  STOP_ACTIVATED,
-  NEXT_ACTIVATED,
-  ALBUM_ART_ACTIVATED,
-  TRACK_INFO_ACTIVATED,
-  TRACK_PROGRESS_ACTIVATED,
-  UNFULL_ACTIVATED,
-  TRACK_TIME_ACTIVATED,
-  LAST_SIGNAL
+	PREV_ACTIVATED,
+	PLAY_ACTIVATED,
+	STOP_ACTIVATED,
+	NEXT_ACTIVATED,
+	ALBUM_ART_ACTIVATED,
+	TRACK_INFO_ACTIVATED,
+	TRACK_PROGRESS_ACTIVATED,
+	UNFULL_ACTIVATED,
+	TRACK_TIME_ACTIVATED,
+	LAST_SIGNAL
 };
 
 static int signals[LAST_SIGNAL] = { 0 };
@@ -398,15 +398,10 @@ panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin
 static gboolean
 pragha_toolbar_album_art_activated (GtkWidget      *event_box,
                                     GdkEventButton *event,
-                                    struct con_win *cwin)
+                                    PraghaToolbar *toolbar)
 {
-	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED &&
-	   (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS))
-	{
-		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (cwin->toolbar->albumart), NULL, NULL);
-		open_url(uri, cwin->mainwindow);
-		g_free (uri);
-	}
+	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+		g_signal_emit (toolbar, signals[ALBUM_ART_ACTIVATED], 0);
 
 	return TRUE;
 }
@@ -752,6 +747,13 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	                                        NULL, NULL,
 	                                        g_cclosure_marshal_VOID__VOID,
 	                                        G_TYPE_NONE, 0);
+	signals[ALBUM_ART_ACTIVATED] = g_signal_new ("album-art-activated",
+	                                             G_TYPE_FROM_CLASS (gobject_class),
+	                                             G_SIGNAL_RUN_LAST,
+	                                             G_STRUCT_OFFSET (PraghaToolbarClass, album_art_activated),
+	                                             NULL, NULL,
+	                                             g_cclosure_marshal_VOID__VOID,
+	                                             G_TYPE_NONE, 0);
 
 	/* TODO: Add the rest of signals.. */
 }
@@ -866,10 +868,10 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_signal_connect(G_OBJECT(next_button), "clicked",
 	                 G_CALLBACK(next_button_handler), toolbar);
 	/*g_signal_connect(G_OBJECT (next_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);
+	                 G_CALLBACK(panel_button_key_press), toolbar);*/
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
 	                 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
-	g_signal_connect(G_OBJECT(unfull_button), "clicked",
+	/*g_signal_connect(G_OBJECT(unfull_button), "clicked",
 	                 G_CALLBACK(unfull_button_handler), toolbar);
 	g_signal_connect(G_OBJECT (unfull_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), toolbar);
