@@ -153,6 +153,15 @@ pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct
 	return FALSE;
 }
 
+void
+pragha_window_unfullscreen (GObject *object, struct con_win *cwin)
+{
+	GtkAction *action_fullscreen;
+	action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
+}
+
 /*
  * Public api.
  */
