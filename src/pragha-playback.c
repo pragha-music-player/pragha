@@ -242,3 +242,27 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	/* Update the playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 }
+
+void
+pragha_playback_prev_song (GObject *object, struct con_win *cwin)
+{
+	pragha_playback_prev_track (cwin);
+}
+
+void
+pragha_playback_play_song (GObject *object, struct con_win *cwin)
+{
+	pragha_playback_play_pause_resume (cwin);
+}
+
+void
+pragha_playback_stop_song (GObject *object, struct con_win *cwin)
+{
+	pragha_playback_stop (cwin);
+}
+
+void
+pragha_playback_next_song (GObject *object, struct con_win *cwin)
+{
+	pragha_playback_next_track (cwin);
+}

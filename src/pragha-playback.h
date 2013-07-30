@@ -33,4 +33,9 @@ void pragha_backend_notificate_new_state  (PraghaBackend *backend, GParamSpec *p
 void pragha_backend_finished_song         (PraghaBackend *backend, struct con_win *cwin);
 void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, struct con_win *cwin);
 
+void pragha_playback_prev_song            (GObject *object, struct con_win *cwin);
+void pragha_playback_play_song            (GObject *object, struct con_win *cwin);
+void pragha_playback_stop_song            (GObject *object, struct con_win *cwin);
+void pragha_playback_next_song            (GObject *object, struct con_win *cwin);
+
 #endif /* PRAGHA_PLAYBACK_H */
