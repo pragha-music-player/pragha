@@ -41,4 +41,6 @@ void pragha_playback_next_song            (GObject *object, struct con_win *cwin
 void pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin);
 void pragha_playback_edit_current_track     (GObject *object, struct con_win *cwin);
 
+void pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin);
+
 #endif /* PRAGHA_PLAYBACK_H */
