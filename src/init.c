@@ -113,7 +113,19 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	cwin->bar_context_menu = pragha_menubar_new(cwin);
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
-	cwin->toolbar = pragha_toolbar_new(cwin);
+
+	/* Toolbar */
+
+	cwin->toolbar = pragha_toolbar_new();
+	g_signal_connect (cwin->toolbar, "prev",
+	                  G_CALLBACK(pragha_playback_prev_song), cwin);
+	g_signal_connect (cwin->toolbar, "play",
+	                  G_CALLBACK(pragha_playback_play_song), cwin);
+	g_signal_connect (cwin->toolbar, "stop",
+	                  G_CALLBACK(pragha_playback_stop_song), cwin);
+	g_signal_connect (cwin->toolbar, "next",
+	                  G_CALLBACK(pragha_playback_next_song), cwin);
+
 	cwin->statusbar = pragha_statusbar_get();
 	cwin->cplaylist = pragha_playlist_new(cwin);
 

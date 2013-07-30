@@ -29,7 +29,22 @@
 /* pragha.h */
 struct con_win;
 
+#define PRAGHA_TYPE_TOOLBAR                  (pragha_toolbar_get_type ())
+#define PRAGHA_TOOLBAR(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_TOOLBAR, PraghaToolbar))
+#define PRAGHA_IS_TOOLBAR(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_TOOLBAR))
+#define PRAGHA_TOOLBAR_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_TOOLBAR, PraghaToolbarClass))
+#define PRAGHA_IS_TOOLBAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_TOOLBAR))
+#define PRAGHA_TOOLBAR_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_TOOLBAR, PraghaToolbarClass))
+
 typedef struct _PraghaToolbar PraghaToolbar;
+
+typedef struct {
+	GtkToolbarClass __parent__;
+	void (*prev) (PraghaToolbar *toolbar);
+	void (*play) (PraghaToolbar *toolbar);
+	void (*stop) (PraghaToolbar *toolbar);
+	void (*next) (PraghaToolbar *toolbar);
+} PraghaToolbarClass;
 
 void __update_progress_song_info(struct con_win *cwin, gint length);
 void __update_current_song_info(struct con_win *cwin);
@@ -50,7 +65,6 @@ GtkWidget      *pragha_toolbar_get_volume_button (PraghaToolbar *toolbar);
 
 GtkWidget      *pragha_toolbar_get_widget    (PraghaToolbar *toolbar);
 
-void           pragha_toolbar_free       (PraghaToolbar *toolbar);
-PraghaToolbar *pragha_toolbar_new        (struct con_win *cwin);
+PraghaToolbar *pragha_toolbar_new        (void);
 
 #endif /* PRAGHA_TOOLBAR_H */
