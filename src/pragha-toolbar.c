@@ -53,6 +53,14 @@ struct _PraghaToolbar {
 	GtkWidget      *extention_box;
 };
 
+enum {
+	PROP_0,
+	PROP_VOLUME,
+	PROP_LAST
+};
+
+static GParamSpec *properties[PROP_LAST] = { 0 };
+
 enum
 {
 	PREV_ACTIVATED,
@@ -701,12 +709,69 @@ gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 }
 
 static void
+vol_button_value_changed (GtkVolumeButton *button, gdouble value, PraghaToolbar *toolbar)
+{
+	g_object_notify_by_pspec (G_OBJECT (toolbar), properties[PROP_VOLUME]);
+}
+
+static void
+pragha_toolbar_set_volume (PraghaToolbar *toolbar, gdouble volume)
+{
+	gtk_scale_button_set_value (GTK_SCALE_BUTTON(toolbar->vol_button), volume);
+}
+
+gdouble
+pragha_toolbar_get_volume (PraghaToolbar *toolbar)
+{
+	return gtk_scale_button_get_value (GTK_SCALE_BUTTON(toolbar->vol_button));
+}
+
+static void
+pragha_toolbar_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
+	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
+
+	switch (property_id)
+	{
+		case PROP_VOLUME:
+			pragha_toolbar_set_volume (toolbar, g_value_get_double (value));
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
+pragha_toolbar_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
+	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
+
+	switch (property_id)
+	{
+		case PROP_VOLUME:
+			g_value_set_double (value, pragha_toolbar_get_volume (toolbar));
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
 pragha_toolbar_class_init (PraghaToolbarClass *klass)
 {
 	GObjectClass  *gobject_class;
 
 	gobject_class = G_OBJECT_CLASS (klass);
+	gobject_class->set_property = pragha_toolbar_set_property;
+	gobject_class->get_property = pragha_toolbar_get_property;
 	gobject_class->finalize = pragha_toolbar_finalize;
+
+	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Volume showed on toolbar",
+	                                               0.0, 1.0, 0.5,
+	                                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
 	/* signals */
 	signals[PREV_ACTIVATED] = g_signal_new ("prev",
@@ -888,6 +953,9 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	                 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (vol_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), toolbar);*/
+
+	g_signal_connect (G_OBJECT (vol_button), "value-changed",
+	                  G_CALLBACK (vol_button_value_changed), toolbar);
 
 	g_object_bind_property(preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(preferences, "repeat", repeat_button, "active", binding_flags);
