@@ -197,7 +197,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 					/* Update current song on playlist */
 					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
-					__update_current_song_info(cwin);
+					pragha_toolbar_set_title(cwin->toolbar, current_mobj);
 					mpris_update_metadata_changed(cwin);
 				}
 			}

@@ -189,16 +189,8 @@ pragha_application_new (gint argc, gchar *argv[])
 	                 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
 	g_signal_connect (cwin->backend, "error",
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
-
 	g_signal_connect (cwin->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
-
-	g_signal_connect (cwin->backend, "tick",
-	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin);
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin);
-	g_signal_connect (cwin->backend, "buffering",
-	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin);
 
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
@@ -208,6 +200,13 @@ pragha_application_new (gint argc, gchar *argv[])
 	/* Init the gui after bancked to sink volume. */
 
 	init_gui(0, NULL, cwin);
+
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin->toolbar);
+	g_signal_connect (cwin->backend, "tick",
+	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin->toolbar);
+	g_signal_connect (cwin->backend, "buffering",
+	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin->toolbar);
 
 	/* Bind properties to widgets after create it. */
 	g_object_bind_property (cwin->backend, "volume",

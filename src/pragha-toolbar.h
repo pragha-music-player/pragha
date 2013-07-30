@@ -49,8 +49,8 @@ typedef struct {
 	void (*track_progress_activated) (PraghaToolbar *toolbar, gdouble fraction);
 } PraghaToolbarClass;
 
-void __update_progress_song_info(struct con_win *cwin, gint length);
-void __update_current_song_info(struct con_win *cwin);
+void pragha_toolbar_set_title (PraghaToolbar *toolbar, PraghaMusicobject *mobj);
+void pragha_toolbar_update_progress_counter (PraghaBackend *backend, PraghaToolbar *toolbar, gint progress);
 
 void pragha_toolbar_update_buffering_cb      (PraghaBackend *backend, gint percent, gpointer user_data);
 void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer user_data);

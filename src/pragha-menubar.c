@@ -670,7 +670,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
 					g_object_unref(bmobj);
 
-					__update_current_song_info(cwin);
+					pragha_toolbar_set_title(cwin->toolbar, current_mobj);
 					mpris_update_metadata_changed(cwin);
 				}
 			}

@@ -193,8 +193,9 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				                     pragha_musicobject_get_file(pragha_backend_get_musicobject(cwin->backend)));
 
 				/* Update current song info */
-				__update_current_song_info(cwin);
-				__update_progress_song_info(cwin, 0);
+				pragha_toolbar_set_title(cwin->toolbar,
+					pragha_backend_get_musicobject(cwin->backend));
+				pragha_toolbar_update_progress_counter(cwin->backend, cwin->toolbar, 0);
 
 				/* Update and jump in current playlist */
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
@@ -237,7 +238,7 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	__update_current_song_info(cwin);
+	pragha_toolbar_set_title(cwin->toolbar, nmobj);
 	mpris_update_metadata_changed(cwin);
 
 	/* Update the playlist */

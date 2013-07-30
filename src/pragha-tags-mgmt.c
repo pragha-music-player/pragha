@@ -245,7 +245,7 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-			__update_current_song_info(cwin);
+			pragha_toolbar_set_title(cwin->toolbar, current_mobj);
 			mpris_update_metadata_changed(cwin);
 		}
 	}
@@ -306,7 +306,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				__update_current_song_info(cwin);
+				pragha_toolbar_set_title(cwin->toolbar, current_mobj);
 				mpris_update_metadata_changed(cwin);
 			}
 		}
