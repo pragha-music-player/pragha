@@ -184,18 +184,20 @@ void
 pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
 {
 	enum player_state state = pragha_backend_get_state (backend);
+	PraghaMusicobject *mobj = NULL;
 
 	switch (state) {
 		case ST_PLAYING:
 			/* New song?. */
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
+				mobj = pragha_backend_get_musicobject (cwin->backend);
+
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
-				                     pragha_musicobject_get_file(pragha_backend_get_musicobject(cwin->backend)));
+				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				pragha_toolbar_set_title(cwin->toolbar,
-					pragha_backend_get_musicobject(cwin->backend));
-				pragha_toolbar_update_progress_counter(cwin->backend, cwin->toolbar, 0);
+				pragha_toolbar_set_title(cwin->toolbar, mobj);
+				pragha_toolbar_update_progress_counter(cwin->toolbar, pragha_musicobject_get_length(mobj), 0);
 
 				/* Update and jump in current playlist */
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);

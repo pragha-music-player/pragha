@@ -36,6 +36,10 @@
 
 static void pragha_toolbar_finalize (GObject *object);
 
+static void pragha_toolbar_set_remaning_mode (PraghaToolbar *toolbar, gboolean remaning_mode);
+gboolean    pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar);
+
+
 struct _PraghaToolbar {
 	GtkToolbar   __parent__;
 
@@ -51,11 +55,14 @@ struct _PraghaToolbar {
 	GtkWidget      *track_time_label;
 	GtkWidget      *now_playing_label;
 	GtkWidget      *extention_box;
+
+	gboolean       remaning_mode;
 };
 
 enum {
 	PROP_0,
 	PROP_VOLUME,
+	PROP_REMANING_MODE,
 	PROP_LAST
 };
 
@@ -187,28 +194,19 @@ get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
 }
 
 void
-pragha_toolbar_update_progress_counter (PraghaBackend *backend, PraghaToolbar *toolbar, gint progress)
+pragha_toolbar_update_progress_counter (PraghaToolbar *toolbar, gint length, gint progress)
 {
-	PraghaPreferences *preferences;
 	gchar *tot_length = NULL, *cur_pos = NULL, *str_length = NULL, *str_cur_pos = NULL;
-	gint length = 0;
-
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
-		return;
-
-	preferences = pragha_preferences_get();
 
 	cur_pos = convert_length_str(progress);
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
 	gtk_label_set_markup (GTK_LABEL(toolbar->track_time_label), str_cur_pos);
 
-	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (backend));
-
-	if (length == 0 || !pragha_preferences_get_timer_remaining_mode (preferences)) {
+	if (length == 0 || !pragha_toolbar_get_remaning_mode (toolbar)) {
 		tot_length = convert_length_str(length);
 		str_length = g_markup_printf_escaped ("<small>%s</small>", tot_length);
 	}
-	else{
+	else {
 		tot_length = convert_length_str(length - progress);
 		str_length = g_markup_printf_escaped ("<small>- %s</small>", tot_length);
 	}
@@ -216,20 +214,12 @@ pragha_toolbar_update_progress_counter (PraghaBackend *backend, PraghaToolbar *t
 	gtk_label_set_markup (GTK_LABEL(toolbar->track_length_label), str_length);
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (toolbar->track_length_label));
-	g_object_unref(preferences);
 
 	g_free(cur_pos);
 	g_free(str_cur_pos);
 
 	g_free(tot_length);
 	g_free(str_length);
-}
-
-void update_current_song_info(struct con_win *cwin)
-{
-	gint newsec = GST_TIME_AS_SECONDS(pragha_backend_get_current_position(cwin->backend));
-
-	pragha_toolbar_update_progress_counter(cwin->backend, cwin->toolbar, newsec);
 }
 
 void
@@ -286,15 +276,12 @@ pragha_toolbar_unset_progress_bar(PraghaToolbar *toolbar)
 }
 
 static void
-pragha_toolbar_timer_label_event_change_mode(GtkWidget *w,
-                                             GdkEventButton* event,
-                                             struct con_win *cwin)
+pragha_toolbar_timer_label_event_change_mode (GtkWidget      *widget,
+                                              GdkEventButton *event,
+                                              PraghaToolbar  *toolbar)
 {
-	gboolean mode = pragha_preferences_get_timer_remaining_mode (cwin->preferences);
-	pragha_preferences_set_timer_remaining_mode (cwin->preferences, !mode);
-
-	if(pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-		update_current_song_info(cwin);
+	pragha_toolbar_set_remaning_mode (toolbar,
+		!pragha_toolbar_get_remaning_mode (toolbar));
 }
 
 void
@@ -469,7 +456,7 @@ pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_da
 			gint nlength = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(backend));
 			pragha_musicobject_set_length (mobj, nlength);
 		}
-		pragha_toolbar_update_progress_counter(backend, toolbar, newsec);
+		pragha_toolbar_update_progress_counter (toolbar, length, newsec);
 	}
 }
 
@@ -634,8 +621,8 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 	length_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(length_event_box), FALSE);
 
-	/*g_signal_connect (G_OBJECT(length_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), cwin);*/
+	g_signal_connect (G_OBJECT(length_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_timer_label_event_change_mode), toolbar);
 
 	gtk_container_add(GTK_CONTAINER(length_event_box), length_align);
 
@@ -721,6 +708,20 @@ pragha_toolbar_get_volume (PraghaToolbar *toolbar)
 }
 
 static void
+pragha_toolbar_set_remaning_mode (PraghaToolbar *toolbar, gboolean remaning_mode)
+{
+	toolbar->remaning_mode = remaning_mode;
+
+	g_object_notify_by_pspec(G_OBJECT(toolbar), properties[PROP_REMANING_MODE]);
+}
+
+gboolean
+pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar)
+{
+	return toolbar->remaning_mode;
+}
+
+static void
 pragha_toolbar_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
 	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
@@ -729,6 +730,9 @@ pragha_toolbar_set_property (GObject *object, guint property_id, const GValue *v
 	{
 		case PROP_VOLUME:
 			pragha_toolbar_set_volume (toolbar, g_value_get_double (value));
+			break;
+		case PROP_REMANING_MODE:
+			pragha_toolbar_set_remaning_mode (toolbar, g_value_get_boolean (value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -745,6 +749,9 @@ pragha_toolbar_get_property (GObject *object, guint property_id, GValue *value, 
 	{
 		case PROP_VOLUME:
 			g_value_set_double (value, pragha_toolbar_get_volume (toolbar));
+			break;
+		case PROP_REMANING_MODE:
+			g_value_set_boolean (value, pragha_toolbar_get_remaning_mode (toolbar));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -765,6 +772,10 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Volume showed on toolbar",
 	                                               0.0, 1.0, 0.5,
 	                                               G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	properties[PROP_REMANING_MODE] = g_param_spec_boolean ("timer-remaining-mode", "TimerRemainingMode", "Show Remaining Time",
+	                                                       FALSE,
+	                                                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
 	/* signals */
