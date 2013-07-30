@@ -34,7 +34,6 @@
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
-#include "pragha-toolbar.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
 #include "pragha-dbus.h"
