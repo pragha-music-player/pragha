@@ -976,10 +976,6 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 static void
 pragha_toolbar_finalize (GObject *object)
 {
-	PraghaToolbar *toolbar = PRAGHA_TOOLBAR (object);
-
-	gtk_widget_destroy(GTK_WIDGET(toolbar->albumart));
-
 	(*G_OBJECT_CLASS (pragha_toolbar_parent_class)->finalize) (object);
 }
 
