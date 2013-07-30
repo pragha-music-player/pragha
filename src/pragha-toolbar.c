@@ -32,6 +32,9 @@
 #include "pragha-lastfm.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
+#ifdef HAVE_LIBGLYR
+#include "pragha-glyr.h"
+#endif
 #include "pragha.h"
 
 static void pragha_toolbar_finalize (GObject *object);
@@ -85,22 +88,6 @@ enum
 static int signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_TOOLBAR)
-
-/* Search the album art on cache and create a pixbuf of that file */
-#ifdef HAVE_LIBGLYR
-static gchar*
-get_image_path_from_cache (const gchar *artist, const gchar *album, struct con_win *cwin)
-{
-	gchar *path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
-
-	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-		g_free(path);
-		return NULL;
-	}
-
-	return path;
-}
-#endif
 
 /* Get the first image file from the directory and create a pixbuf of that file */
 
@@ -285,6 +272,12 @@ pragha_toolbar_timer_label_event_change_mode (GtkWidget      *widget,
 }
 
 void
+pragha_toolbar_set_image_album_art (PraghaToolbar *toolbar, const gchar *uri)
+{
+	pragha_album_art_set_path (toolbar->albumart, uri);
+}
+
+void
 update_album_art (struct con_win *cwin)
 {
 	CDEBUG(DBG_INFO, "Update album art");
@@ -297,9 +290,9 @@ update_album_art (struct con_win *cwin)
 		if (G_LIKELY(mobj &&
 		    pragha_musicobject_is_local_file(mobj))) {
 			#ifdef HAVE_LIBGLYR
-			album_path = get_image_path_from_cache(pragha_musicobject_get_artist(mobj),
-			                                       pragha_musicobject_get_album(mobj),
-			                                       cwin);
+			album_path = pragha_glyr_get_image_path_from_cache (cwin->glyr,
+			                                                    pragha_musicobject_get_artist(mobj),
+			                                                    pragha_musicobject_get_album(mobj));
 			#endif
 			if (album_path == NULL) {
 				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
@@ -311,7 +304,7 @@ update_album_art (struct con_win *cwin)
 				else album_path = get_image_path_from_dir(path);
 				g_free(path);
 			}
-			pragha_album_art_set_path(cwin->toolbar->albumart, album_path);
+			pragha_toolbar_set_image_album_art(cwin->toolbar, album_path);
 			g_free(album_path);
 		}
 	}
