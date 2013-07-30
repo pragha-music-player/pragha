@@ -551,12 +551,6 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
 }
 
 GtkWidget *
-pragha_toolbar_get_volume_button(PraghaToolbar *toolbar)
-{
-	return toolbar->vol_button;
-}
-
-GtkWidget *
 pragha_toolbar_get_widget(PraghaToolbar *toolbar)
 {
 	return GTK_WIDGET(toolbar);
