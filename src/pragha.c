@@ -213,6 +213,10 @@ pragha_application_new (gint argc, gchar *argv[])
 	                        cwin->toolbar, "volume",
 	                        binding_flags);
 
+	g_object_bind_property (cwin->preferences, "timer-remaining-mode",
+	                        cwin->toolbar, "timer-remaining-mode",
+	                        binding_flags);
+
 	#ifdef HAVE_LIBGLYR
 	cwin->glyr = pragha_glyr_new (cwin);
 	#endif
