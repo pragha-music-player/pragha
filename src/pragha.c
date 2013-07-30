@@ -212,7 +212,7 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	/* Bind properties to widgets after create it. */
 	g_object_bind_property (cwin->backend, "volume",
-	                        pragha_toolbar_get_volume_button(cwin->toolbar), "value",
+	                        cwin->toolbar, "volume",
 	                        binding_flags);
 
 	#ifdef HAVE_LIBGLYR
