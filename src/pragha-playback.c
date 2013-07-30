@@ -281,3 +281,13 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 		g_free (uri);
 	}
 }
+
+void
+pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
+{
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		edit_tags_playing_action(NULL, cwin);
+	}
+}

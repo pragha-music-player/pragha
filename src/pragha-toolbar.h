@@ -45,6 +45,7 @@ typedef struct {
 	void (*stop) (PraghaToolbar *toolbar);
 	void (*next) (PraghaToolbar *toolbar);
 	void (*album_art_activated) (PraghaToolbar *toolbar);
+	void (*track_info_activated) (PraghaToolbar *toolbar);
 } PraghaToolbarClass;
 
 void __update_progress_song_info(struct con_win *cwin, gint length);

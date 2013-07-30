@@ -293,15 +293,6 @@ pragha_toolbar_unset_progress_bar(struct con_win *cwin)
 }
 
 static void
-pragha_toolbar_song_label_event_edit(GtkWidget *w,
-                                     GdkEventButton* event,
-                                     struct con_win *cwin)
-{
-	if (event->type==GDK_2BUTTON_PRESS || event->type==GDK_3BUTTON_PRESS)
-		edit_tags_playing_action(NULL, cwin);
-}
-
-static void
 pragha_toolbar_timer_label_event_change_mode(GtkWidget *w,
                                              GdkEventButton* event,
                                              struct con_win *cwin)
@@ -393,19 +384,6 @@ panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin
 	return ret;
 }
 
-/* Handler for show album art on viewer. */
-
-static gboolean
-pragha_toolbar_album_art_activated (GtkWidget      *event_box,
-                                    GdkEventButton *event,
-                                    PraghaToolbar *toolbar)
-{
-	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
-		g_signal_emit (toolbar, signals[ALBUM_ART_ACTIVATED], 0);
-
-	return TRUE;
-}
-
 /* Handler for buttons on toolbar. */
 
 static void
@@ -417,6 +395,10 @@ unfull_button_handler (GtkToggleToolButton *button, struct con_win *cwin)
 
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
+
+/*
+ * Emit signals..
+ */
 
 static gboolean
 play_button_handler(GtkButton *button, PraghaToolbar *toolbar)
@@ -446,6 +428,28 @@ static gboolean
 next_button_handler(GtkButton *button, PraghaToolbar *toolbar)
 {
 	g_signal_emit (toolbar, signals[NEXT_ACTIVATED], 0);
+
+	return TRUE;
+}
+
+static gboolean
+pragha_toolbar_album_art_activated (GtkWidget      *event_box,
+                                    GdkEventButton *event,
+                                    PraghaToolbar  *toolbar)
+{
+	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+		g_signal_emit (toolbar, signals[ALBUM_ART_ACTIVATED], 0);
+
+	return TRUE;
+}
+
+static gboolean
+pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
+                                      GdkEventButton *event,
+                                      PraghaToolbar  *toolbar)
+{
+	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+		g_signal_emit (toolbar, signals[TRACK_INFO_ACTIVATED], 0);
 
 	return TRUE;
 }
@@ -585,8 +589,8 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 	title_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(title_event_box), FALSE);
 
-	/*g_signal_connect (G_OBJECT(title_event_box), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_song_label_event_edit), cwin);*/
+	g_signal_connect (G_OBJECT(title_event_box), "button-press-event",
+	                  G_CALLBACK(pragha_toolbar_song_label_event_edit), toolbar);
 
 	gtk_container_add (GTK_CONTAINER(title_event_box), title);
 
@@ -754,6 +758,13 @@ pragha_toolbar_class_init (PraghaToolbarClass *klass)
 	                                             NULL, NULL,
 	                                             g_cclosure_marshal_VOID__VOID,
 	                                             G_TYPE_NONE, 0);
+	signals[TRACK_INFO_ACTIVATED] = g_signal_new ("track-info-activated",
+	                                              G_TYPE_FROM_CLASS (gobject_class),
+	                                              G_SIGNAL_RUN_LAST,
+	                                              G_STRUCT_OFFSET (PraghaToolbarClass, track_info_activated),
+	                                              NULL, NULL,
+	                                              g_cclosure_marshal_VOID__VOID,
+	                                              G_TYPE_NONE, 0);
 
 	/* TODO: Add the rest of signals.. */
 }
@@ -855,24 +866,27 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	g_signal_connect(G_OBJECT(prev_button), "clicked",
 	                 G_CALLBACK(prev_button_handler), toolbar);
-	/*g_signal_connect(G_OBJECT (prev_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);*/
 	g_signal_connect(G_OBJECT(play_button), "clicked",
 	                 G_CALLBACK(play_button_handler), toolbar);
-	/*g_signal_connect(G_OBJECT (play_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);*/
 	g_signal_connect(G_OBJECT(stop_button), "clicked",
 	                 G_CALLBACK(stop_button_handler), toolbar);
-	/*g_signal_connect(G_OBJECT (stop_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);*/
 	g_signal_connect(G_OBJECT(next_button), "clicked",
 	                 G_CALLBACK(next_button_handler), toolbar);
-	/*g_signal_connect(G_OBJECT (next_button), "key-press-event",
-	                 G_CALLBACK(panel_button_key_press), toolbar);*/
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
 	                 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
 	/*g_signal_connect(G_OBJECT(unfull_button), "clicked",
-	                 G_CALLBACK(unfull_button_handler), toolbar);
+	                 G_CALLBACK(unfull_button_handler), toolbar);*/
+
+	/*g_signal_connect(G_OBJECT (prev_button), "key-press-event",
+	                 G_CALLBACK(panel_button_key_press), toolbar);
+	g_signal_connect(G_OBJECT (play_button), "key-press-event",
+	                 G_CALLBACK(panel_button_key_press), toolbar);
+	g_signal_connect(G_OBJECT (stop_button), "key-press-event",
+	                 G_CALLBACK(panel_button_key_press), toolbar);
+	g_signal_connect(G_OBJECT (next_button), "key-press-event",
+	                 G_CALLBACK(panel_button_key_press), toolbar);
+	g_signal_connect(G_OBJECT (next_button), "key-press-event",
+	                 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (unfull_button), "key-press-event",
 	                 G_CALLBACK(panel_button_key_press), toolbar);
 	g_signal_connect(G_OBJECT (shuffle_button), "key-press-event",
