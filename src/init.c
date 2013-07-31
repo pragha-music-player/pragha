@@ -134,8 +134,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	g_signal_connect (cwin->toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
 
-	g_signal_connect(G_OBJECT(cwin->mainwindow), "window-state-event",
-	                 G_CALLBACK(pragha_toolbar_window_state_event), cwin->toolbar);
+	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
+	                  G_CALLBACK(pragha_toolbar_window_state_event), cwin->toolbar);
+	g_signal_connect (G_OBJECT(cwin->toolbar), "notify::timer-remaining-mode",
+	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), cwin->backend);
 
 	cwin->statusbar = pragha_statusbar_get();
 	cwin->cplaylist = pragha_playlist_new(cwin);
