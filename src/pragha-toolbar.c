@@ -181,13 +181,13 @@ get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
 }
 
 void
-pragha_toolbar_update_progress_counter (PraghaToolbar *toolbar, gint length, gint progress)
+pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progress)
 {
+	gdouble fraction = 0;
 	gchar *tot_length = NULL, *cur_pos = NULL, *str_length = NULL, *str_cur_pos = NULL;
 
 	cur_pos = convert_length_str(progress);
 	str_cur_pos = g_markup_printf_escaped ("<small>%s</small>", cur_pos);
-	gtk_label_set_markup (GTK_LABEL(toolbar->track_time_label), str_cur_pos);
 
 	if (length == 0 || !pragha_toolbar_get_remaning_mode (toolbar)) {
 		tot_length = convert_length_str(length);
@@ -198,9 +198,13 @@ pragha_toolbar_update_progress_counter (PraghaToolbar *toolbar, gint length, gin
 		str_length = g_markup_printf_escaped ("<small>- %s</small>", tot_length);
 	}
 
+	gtk_label_set_markup (GTK_LABEL(toolbar->track_time_label), str_cur_pos);
 	gtk_label_set_markup (GTK_LABEL(toolbar->track_length_label), str_length);
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (toolbar->track_length_label));
+
+	fraction = (gdouble) progress / (gdouble)length;
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
 
 	g_free(cur_pos);
 	g_free(str_cur_pos);
@@ -424,7 +428,6 @@ pragha_toolbar_update_buffering_cb (PraghaBackend *backend, gint percent, gpoint
 void
 pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_data)
 {
-	gdouble fraction = 0;
 	gint length = 0, newsec = 0;
 	PraghaMusicobject *mobj = NULL;
 
@@ -437,15 +440,12 @@ pragha_toolbar_update_playback_progress(PraghaBackend *backend, gpointer user_da
 		length = pragha_musicobject_get_length (mobj);
 
 		if (length > 0) {
-			fraction = (gdouble)newsec / (gdouble)length;
-
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
+			pragha_toolbar_update_progress (toolbar, length, newsec);
 		}
 		else {
 			gint nlength = GST_TIME_AS_SECONDS(pragha_backend_get_current_length(backend));
 			pragha_musicobject_set_length (mobj, nlength);
 		}
-		pragha_toolbar_update_progress_counter (toolbar, length, newsec);
 	}
 }
 

@@ -52,7 +52,7 @@ typedef struct {
 
 void pragha_toolbar_set_title               (PraghaToolbar *toolbar, PraghaMusicobject *mobj);
 void pragha_toolbar_set_image_album_art     (PraghaToolbar *toolbar, const gchar *uri);
-void pragha_toolbar_update_progress_counter (PraghaToolbar *toolbar, gint length, gint progress);
+void pragha_toolbar_update_progress         (PraghaToolbar *toolbar, gint length, gint progress);
 
 void pragha_toolbar_update_buffering_cb      (PraghaBackend *backend, gint percent, gpointer user_data);
 void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer user_data);

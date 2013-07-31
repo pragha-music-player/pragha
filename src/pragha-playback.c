@@ -197,7 +197,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 
 				/* Update current song info */
 				pragha_toolbar_set_title(cwin->toolbar, mobj);
-				pragha_toolbar_update_progress_counter(cwin->toolbar, pragha_musicobject_get_length(mobj), 0);
+				pragha_toolbar_update_progress(cwin->toolbar, pragha_musicobject_get_length(mobj), 0);
 
 				/* Update and jump in current playlist */
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
@@ -315,5 +315,6 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 	if (seek >= length)
 		seek = length;
 
-	pragha_backend_seek(backend, seek);
+	pragha_toolbar_update_progress (cwin->toolbar, length, seek);
+	pragha_backend_seek (backend, seek);
 }
