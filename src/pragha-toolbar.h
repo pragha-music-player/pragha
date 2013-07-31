@@ -57,6 +57,7 @@ void pragha_toolbar_update_progress         (PraghaToolbar *toolbar, gint length
 void pragha_toolbar_update_buffering_cb      (PraghaBackend *backend, gint percent, gpointer user_data);
 void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer user_data);
 void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
+void pragha_toolbar_show_ramaning_time_cb    (PraghaToolbar *toolbar, GParamSpec *pspec, gpointer user_data);
 
 void update_album_art (struct con_win *cwin);
 

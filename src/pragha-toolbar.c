@@ -474,6 +474,13 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 	}
 }
 
+void
+pragha_toolbar_show_ramaning_time_cb (PraghaToolbar *toolbar, GParamSpec *pspec, gpointer user_data)
+{
+	PraghaBackend *backend = user_data;
+	pragha_toolbar_update_playback_progress (backend, toolbar);
+}
+
 /*
  * Show the unfullscreen button according to the state of the window.
  */
