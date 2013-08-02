@@ -117,14 +117,14 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	/* Toolbar */
 
 	cwin->toolbar = pragha_toolbar_new();
-	g_signal_connect (cwin->toolbar, "prev",
-	                  G_CALLBACK(pragha_playback_prev_song), cwin);
-	g_signal_connect (cwin->toolbar, "play",
-	                  G_CALLBACK(pragha_playback_play_song), cwin);
-	g_signal_connect (cwin->toolbar, "stop",
-	                  G_CALLBACK(pragha_playback_stop_song), cwin);
-	g_signal_connect (cwin->toolbar, "next",
-	                  G_CALLBACK(pragha_playback_next_song), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "prev",
+	                          G_CALLBACK(pragha_playback_prev_track), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "play",
+	                          G_CALLBACK(pragha_playback_play_pause_resume), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "stop",
+	                          G_CALLBACK(pragha_playback_stop), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "next",
+	                          G_CALLBACK(pragha_playback_next_track), cwin);
 	g_signal_connect (cwin->toolbar, "unfull-activated",
 	                  G_CALLBACK(pragha_window_unfullscreen), cwin);
 	g_signal_connect (cwin->toolbar, "album-art-activated",
