@@ -89,97 +89,6 @@ static int signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_TOOLBAR)
 
-/* Get the first image file from the directory and create a pixbuf of that file */
-
-static gchar*
-get_image_path_from_dir (const gchar *path)
-{
-	GError *error = NULL;
-	GDir *dir = NULL;
-	const gchar *next_file = NULL;
-	gchar *ab_file = NULL;
-	gchar *result = NULL;
-
-	dir = g_dir_open(path, 0, &error);
-	if (!dir) {
-		g_critical("Unable to open dir: %s", path);
-		g_error_free(error);
-		return NULL;
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		ab_file = g_strconcat(path, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR) &&
-		    is_image_file(ab_file)) {
-			result = ab_file;
-			goto exit;
-		}
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-
-exit:
-	g_dir_close(dir);
-	return result;
-}
-
-/* Find out if any of the preferred album art files are present in the given dir.
-   Runs through the patterns in sequence */
-
-static gchar*
-get_pref_image_path_dir (const gchar *path, struct con_win *cwin)
-{
-	GError *error = NULL;
-	GDir *dir = NULL;
-	const gchar *next_file = NULL;
-	gchar *ab_file = NULL, **pattern;
-	GSList *file_list = NULL;
-	gint i = 0;
-
-	/* Form a list of all files in the given dir */
-
-	dir = g_dir_open(path, 0, &error);
-	if (!dir) {
-		g_critical("Unable to open dir: %s", path);
-		g_error_free(error);
-		return NULL;
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		ab_file = g_strconcat(path, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR)) {
-			file_list = g_slist_append(file_list, g_strdup(next_file));
-
-		}
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-	g_dir_close(dir);
-
-	/* Now, run the preferred patterns through them */
-
-	pattern = g_strsplit(pragha_preferences_get_album_art_pattern(cwin->preferences), ";",
-			     ALBUM_ART_NO_PATTERNS);
-	while (pattern[i]) {
-		if (is_present_str_list(pattern[i], file_list)) {
-			ab_file = g_strconcat(path, "/", pattern[i], NULL);
-			if (is_image_file(ab_file))
-				return ab_file;
-			g_free(ab_file);
-		}
-		i++;
-	}
-
-	/* Cleanup */
-
-	g_slist_free_full(file_list, g_free);
-	g_strfreev(pattern);
-
-	return NULL;
-}
-
 void
 pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progress)
 {
@@ -275,39 +184,6 @@ void
 pragha_toolbar_set_image_album_art (PraghaToolbar *toolbar, const gchar *uri)
 {
 	pragha_album_art_set_path (toolbar->albumart, uri);
-}
-
-void
-update_album_art (struct con_win *cwin)
-{
-	CDEBUG(DBG_INFO, "Update album art");
-
-	gchar *album_path = NULL, *path = NULL;
-
-	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
-
-	if (pragha_preferences_get_show_album_art(cwin->preferences)) {
-		if (G_LIKELY(mobj &&
-		    pragha_musicobject_is_local_file(mobj))) {
-			#ifdef HAVE_LIBGLYR
-			album_path = pragha_glyr_get_image_path_from_cache (cwin->glyr,
-			                                                    pragha_musicobject_get_artist(mobj),
-			                                                    pragha_musicobject_get_album(mobj));
-			#endif
-			if (album_path == NULL) {
-				path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
-				if (string_is_not_empty(pragha_preferences_get_album_art_pattern(cwin->preferences))) {
-					album_path = get_pref_image_path_dir(path, cwin);
-					if (!album_path)
-						album_path = get_image_path_from_dir(path);
-				}
-				else album_path = get_image_path_from_dir(path);
-				g_free(path);
-			}
-			pragha_toolbar_set_image_album_art(cwin->toolbar, album_path);
-			g_free(album_path);
-		}
-	}
 }
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */

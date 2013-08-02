@@ -56,7 +56,6 @@ void remove_watch_cursor (GtkWidget *widget);
 
 GdkPixbuf *vgdk_pixbuf_new_from_memory (const char *data, size_t size);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
-gboolean is_image_file(const gchar *file);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);
 GSList* delete_from_str_list(const gchar *str, GSList *list);

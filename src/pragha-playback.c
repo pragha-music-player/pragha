@@ -19,9 +19,12 @@
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
 #include "pragha.h"
+
+static void pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj);
 
 /**********************/
 /* Playback functions */
@@ -69,12 +72,12 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	/* New action is based on the current state */
 
 	/************************************/
-        /* State     Action		    */
-	/* 				    */
-	/* Playing   Pause playback	    */
-	/* Paused    Resume playback	    */
-	/* Stopped   Start playback	    */
-        /************************************/
+	/* State     Action                 */
+	/*                                  */
+	/* Playing   Pause playback         */
+	/* Paused    Resume playback        */
+	/* Stopped   Start playback         */
+	/************************************/
 
 	switch (pragha_backend_get_state (cwin->backend)) {
 	case ST_PLAYING:
@@ -203,7 +206,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 				/* Update album art */
-				update_album_art (cwin);
+				pragha_playback_update_current_album_art (cwin, mobj);
 
 				/* Show osd, and inform new album art. */
 				if (cwin->notify)
@@ -245,6 +248,41 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 
 	/* Update the playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+}
+
+static void
+pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj)
+{
+	gchar *album_path = NULL, *path = NULL;
+
+	CDEBUG(DBG_INFO, "Update album art");
+
+	if (G_UNLIKELY(!mobj))
+		return;
+
+	if (!pragha_musicobject_is_local_file(mobj))
+		return;
+
+	if (!pragha_preferences_get_show_album_art(cwin->preferences))
+		return;
+
+	#ifdef HAVE_LIBGLYR
+	album_path = pragha_glyr_get_image_path_from_cache (cwin->glyr,
+	                                                    pragha_musicobject_get_artist(mobj),
+	                                                    pragha_musicobject_get_album(mobj));
+	#endif
+	if (album_path == NULL) {
+		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
+
+		album_path = get_pref_image_path_dir(cwin->preferences, path);
+		if (!album_path)
+			album_path = get_image_path_from_dir(path);
+
+		g_free(path);
+	}
+
+	pragha_toolbar_set_image_album_art(cwin->toolbar, album_path);
+	g_free(album_path);
 }
 
 void
