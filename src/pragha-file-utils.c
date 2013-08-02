@@ -169,7 +169,8 @@ pragha_pl_parser_guess_format_from_extension (const gchar *filename)
 
 /* Return true if given file is an image */
 
-gboolean is_image_file(const gchar *file)
+static gboolean
+is_image_file(const gchar *file)
 {
 	gboolean uncertain = FALSE, ret = FALSE;
 	gchar *result = NULL;
@@ -252,6 +253,103 @@ gboolean is_dir_and_accessible(const gchar *dir)
 	return ret;
 }
 
+/* Get the first image file from the directory */
+
+gchar*
+get_image_path_from_dir (const gchar *path)
+{
+	GError *error = NULL;
+	GDir *dir = NULL;
+	const gchar *next_file = NULL;
+	gchar *ab_file = NULL;
+	gchar *result = NULL;
+
+	dir = g_dir_open(path, 0, &error);
+	if (!dir) {
+		g_critical("Unable to open dir: %s", path);
+		g_error_free(error);
+		return NULL;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		ab_file = g_strconcat(path, "/", next_file, NULL);
+		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR) &&
+		    is_image_file(ab_file)) {
+			result = ab_file;
+			goto exit;
+		}
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+
+exit:
+	g_dir_close(dir);
+	return result;
+}
+
+/* Find out if any of the preferred album art files are present in the given dir.
+   Runs through the patterns in sequence */
+
+gchar*
+get_pref_image_path_dir (PraghaPreferences *preferences, const gchar *path)
+{
+	GError *error = NULL;
+	GDir *dir = NULL;
+	const gchar *next_file = NULL;
+	gchar *ab_file = NULL, **pattern;
+	const gchar *patterns = NULL;
+	GSList *file_list = NULL;
+	gint i = 0;
+
+	patterns = pragha_preferences_get_album_art_pattern(preferences);
+
+	if (string_is_empty(patterns))
+		return NULL;
+
+	/* Form a list of all files in the given dir */
+
+	dir = g_dir_open(path, 0, &error);
+	if (!dir) {
+		g_critical("Unable to open dir: %s", path);
+		g_error_free(error);
+		return NULL;
+	}
+
+	next_file = g_dir_read_name(dir);
+	while (next_file) {
+		ab_file = g_strconcat(path, "/", next_file, NULL);
+		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR))
+			file_list = g_slist_append(file_list, g_strdup(next_file));
+
+		g_free(ab_file);
+		next_file = g_dir_read_name(dir);
+	}
+	g_dir_close(dir);
+
+	/* Now, run the preferred patterns through them */
+
+	pattern = g_strsplit(patterns, ";", ALBUM_ART_NO_PATTERNS);
+	while (pattern[i]) {
+		if (is_present_str_list(pattern[i], file_list)) {
+			ab_file = g_strconcat(path, "/", pattern[i], NULL);
+			if (is_image_file(ab_file))
+				return ab_file;
+			g_free(ab_file);
+		}
+		i++;
+	}
+
+	/* Cleanup */
+
+	g_slist_free_full(file_list, g_free);
+	g_strfreev(pattern);
+
+	return NULL;
+}
+
+/* Count files on a folder. */
+
 gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable)
 {
 	gint file_count = 0;
@@ -283,41 +381,6 @@ gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable)
 
 	g_dir_close(dir);
 
-	return file_count;
-}
-
-gint dir_file_count(const gchar *dir_name, gint call_recur)
-{
-	static gint file_count = 0;
-	GDir *dir;
-	const gchar *next_file = NULL;
-	gchar *ab_file;
-	GError *error = NULL;
-
-	/* Reinitialize static variable if called from rescan_library_action */
-
-	if (call_recur)
-		file_count = 0;
-
-	dir = g_dir_open(dir_name, 0, &error);
-	if (!dir) {
-		g_warning("Unable to open library : %s", dir_name);
-		return file_count;
-	}
-
-	next_file = g_dir_read_name(dir);
-	while (next_file) {
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
-		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
-			dir_file_count(ab_file, 0);
-		else {
-			file_count++;
-		}
-		g_free(ab_file);
-		next_file = g_dir_read_name(dir);
-	}
-
-	g_dir_close(dir);
 	return file_count;
 }
 
