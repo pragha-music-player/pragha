@@ -258,12 +258,8 @@ pragha_toolbar_unset_song_info(PraghaToolbar *toolbar)
 	gtk_label_set_markup(GTK_LABEL(toolbar->track_time_label),    "<small>00:00</small>");
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
-}
 
-static void
-pragha_toolbar_unset_progress_bar(PraghaToolbar *toolbar)
-{
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), 0);
+	pragha_album_art_set_path(toolbar->albumart, NULL);
 }
 
 static void
@@ -316,7 +312,7 @@ update_album_art (struct con_win *cwin)
 
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
 
-static gboolean
+/*static gboolean
 panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
 {
 	gboolean ret = FALSE;
@@ -327,7 +323,7 @@ panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin
 	}
 
 	return ret;
-}
+}*/
 
 /*
  * Emit signals..
@@ -467,11 +463,8 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
 
-	if (playing == FALSE) {
+	if (playing == FALSE)
 		pragha_toolbar_unset_song_info(toolbar);
-		pragha_toolbar_unset_progress_bar(toolbar);
-		pragha_album_art_set_path(toolbar->albumart, NULL);
-	}
 }
 
 void
