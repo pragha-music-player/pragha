@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include "pragha-preferences.h"
 
 /* File music types */
 
@@ -69,8 +70,12 @@ extern const gchar *mime_dual[];
 gboolean is_playable_file(const gchar *file);
 enum file_type get_file_type(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
+
+gchar    *get_image_path_from_dir (const gchar *path);
+gchar    *get_pref_image_path_dir (PraghaPreferences *preferences, const gchar *path);
+
 gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable);
-gint dir_file_count(const gchar *dir_name, gint call_recur);
+
 GList *append_mobj_list_from_folder(GList *list, gchar *dir_name);
 GList *append_mobj_list_from_unknown_filename(GList *list, gchar *filename);
 

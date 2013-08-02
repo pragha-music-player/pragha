@@ -113,7 +113,32 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	cwin->bar_context_menu = pragha_menubar_new(cwin);
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
-	cwin->toolbar = pragha_toolbar_new(cwin);
+
+	/* Toolbar */
+
+	cwin->toolbar = pragha_toolbar_new();
+	g_signal_connect_swapped (cwin->toolbar, "prev",
+	                          G_CALLBACK(pragha_playback_prev_track), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "play",
+	                          G_CALLBACK(pragha_playback_play_pause_resume), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "stop",
+	                          G_CALLBACK(pragha_playback_stop), cwin);
+	g_signal_connect_swapped (cwin->toolbar, "next",
+	                          G_CALLBACK(pragha_playback_next_track), cwin);
+	g_signal_connect (cwin->toolbar, "unfull-activated",
+	                  G_CALLBACK(pragha_window_unfullscreen), cwin);
+	g_signal_connect (cwin->toolbar, "album-art-activated",
+	                  G_CALLBACK(pragha_playback_show_current_album_art), cwin);
+	g_signal_connect (cwin->toolbar, "track-info-activated",
+	                  G_CALLBACK(pragha_playback_edit_current_track), cwin);
+	g_signal_connect (cwin->toolbar, "track-progress-activated",
+	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
+
+	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
+	                  G_CALLBACK(pragha_toolbar_window_state_event), cwin->toolbar);
+	g_signal_connect (G_OBJECT(cwin->toolbar), "notify::timer-remaining-mode",
+	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), cwin->backend);
+
 	cwin->statusbar = pragha_statusbar_get();
 	cwin->cplaylist = pragha_playlist_new(cwin);
 

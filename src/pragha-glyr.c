@@ -30,6 +30,7 @@
 #include <glyr/cache.h>
 #endif
 #include "pragha-glyr.h"
+#include "pragha-toolbar.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -59,6 +60,8 @@ glyr_struct;
 
 static void get_lyric_action (GtkAction *action, PraghaGlyr *glyr);
 static void get_artist_info_action (GtkAction *action, PraghaGlyr *glyr);
+
+static gchar *pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const gchar *album);
 
 static const GtkActionEntry main_menu_actions [] = {
 	{"Search lyric", GTK_STOCK_JUSTIFY_FILL, N_("Search _lyric"),
@@ -187,8 +190,8 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 				if((0 == g_strcmp0(artist, lartist)) &&
 				   (0 == g_strcmp0(album, lalbum))) {
-					update_album_art (cwin);
-
+					/* TODO: Emit a signal to update the album art and mpris. */
+					pragha_toolbar_set_image_album_art(cwin->toolbar, album_art_path);
 					mpris_update_metadata_changed(cwin);
 				}
 			}
@@ -551,10 +554,23 @@ setup_playlist (PraghaGlyr *glyr)
 	}
 }
 
-gchar *
+static gchar *
 pragha_glyr_build_cached_art_path (PraghaGlyr *glyr, const gchar *artist, const gchar *album)
 {
 	return g_strdup_printf ("%s/album-%s-%s.jpeg", glyr->cache_folder, artist, album);
+}
+
+gchar *
+pragha_glyr_get_image_path_from_cache (PraghaGlyr *glyr, const gchar *artist, const gchar *album)
+{
+	gchar *path = pragha_glyr_build_cached_art_path (glyr, artist, album);
+
+	if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		g_free(path);
+		return NULL;
+	}
+
+	return path;
 }
 
 void

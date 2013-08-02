@@ -34,7 +34,6 @@
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
-#include "pragha-toolbar.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
 #include "pragha-dbus.h"
@@ -92,7 +91,6 @@ pragha_application_free (struct con_win *cwin)
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
-	pragha_toolbar_free(cwin->toolbar);
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	pragha_window_free (cwin->window);
@@ -190,16 +188,8 @@ pragha_application_new (gint argc, gchar *argv[])
 	                 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
 	g_signal_connect (cwin->backend, "error",
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
-
 	g_signal_connect (cwin->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
-
-	g_signal_connect (cwin->backend, "tick",
-	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin);
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin);
-	g_signal_connect (cwin->backend, "buffering",
-	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin);
 
 	if (mpris_init(cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
@@ -210,9 +200,20 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	init_gui(0, NULL, cwin);
 
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin->toolbar);
+	g_signal_connect (cwin->backend, "tick",
+	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin->toolbar);
+	g_signal_connect (cwin->backend, "buffering",
+	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin->toolbar);
+
 	/* Bind properties to widgets after create it. */
 	g_object_bind_property (cwin->backend, "volume",
-	                        pragha_toolbar_get_volume_button(cwin->toolbar), "value",
+	                        cwin->toolbar, "volume",
+	                        binding_flags);
+
+	g_object_bind_property (cwin->preferences, "timer-remaining-mode",
+	                        cwin->toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
 	#ifdef HAVE_LIBGLYR

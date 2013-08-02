@@ -33,4 +33,9 @@ void pragha_backend_notificate_new_state  (PraghaBackend *backend, GParamSpec *p
 void pragha_backend_finished_song         (PraghaBackend *backend, struct con_win *cwin);
 void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, struct con_win *cwin);
 
+void pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin);
+void pragha_playback_edit_current_track     (GObject *object, struct con_win *cwin);
+
+void pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin);
+
 #endif /* PRAGHA_PLAYBACK_H */

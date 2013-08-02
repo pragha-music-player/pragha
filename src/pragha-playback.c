@@ -19,8 +19,12 @@
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-file-utils.h"
+#include "pragha-utils.h"
 #include "pragha-debug.h"
 #include "pragha.h"
+
+static void pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj);
 
 /**********************/
 /* Playback functions */
@@ -68,12 +72,12 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	/* New action is based on the current state */
 
 	/************************************/
-        /* State     Action		    */
-	/* 				    */
-	/* Playing   Pause playback	    */
-	/* Paused    Resume playback	    */
-	/* Stopped   Start playback	    */
-        /************************************/
+	/* State     Action                 */
+	/*                                  */
+	/* Playing   Pause playback         */
+	/* Paused    Resume playback        */
+	/* Stopped   Start playback         */
+	/************************************/
 
 	switch (pragha_backend_get_state (cwin->backend)) {
 	case ST_PLAYING:
@@ -183,23 +187,26 @@ void
 pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
 {
 	enum player_state state = pragha_backend_get_state (backend);
+	PraghaMusicobject *mobj = NULL;
 
 	switch (state) {
 		case ST_PLAYING:
 			/* New song?. */
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
+				mobj = pragha_backend_get_musicobject (cwin->backend);
+
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
-				                     pragha_musicobject_get_file(pragha_backend_get_musicobject(cwin->backend)));
+				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				__update_current_song_info(cwin);
-				__update_progress_song_info(cwin, 0);
+				pragha_toolbar_set_title(cwin->toolbar, mobj);
+				pragha_toolbar_update_progress(cwin->toolbar, pragha_musicobject_get_length(mobj), 0);
 
 				/* Update and jump in current playlist */
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 				/* Update album art */
-				update_album_art (cwin);
+				pragha_playback_update_current_album_art (cwin, mobj);
 
 				/* Show osd, and inform new album art. */
 				if (cwin->notify)
@@ -236,9 +243,92 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	__update_current_song_info(cwin);
+	pragha_toolbar_set_title(cwin->toolbar, nmobj);
 	mpris_update_metadata_changed(cwin);
 
 	/* Update the playlist */
 	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+}
+
+static void
+pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj)
+{
+	gchar *album_path = NULL, *path = NULL;
+
+	CDEBUG(DBG_INFO, "Update album art");
+
+	if (G_UNLIKELY(!mobj))
+		return;
+
+	if (!pragha_musicobject_is_local_file(mobj))
+		return;
+
+	if (!pragha_preferences_get_show_album_art(cwin->preferences))
+		return;
+
+	#ifdef HAVE_LIBGLYR
+	album_path = pragha_glyr_get_image_path_from_cache (cwin->glyr,
+	                                                    pragha_musicobject_get_artist(mobj),
+	                                                    pragha_musicobject_get_album(mobj));
+	#endif
+	if (album_path == NULL) {
+		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
+
+		album_path = get_pref_image_path_dir(cwin->preferences, path);
+		if (!album_path)
+			album_path = get_image_path_from_dir(path);
+
+		g_free(path);
+	}
+
+	pragha_toolbar_set_image_album_art(cwin->toolbar, album_path);
+	g_free(album_path);
+}
+
+void
+pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
+{
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		PraghaAlbumArt *albumart = pragha_toolbar_get_album_art (cwin->toolbar);
+		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (albumart), NULL, NULL);
+
+		open_url(uri, cwin->mainwindow);
+		g_free (uri);
+	}
+}
+
+void
+pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
+{
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		edit_tags_playing_action(NULL, cwin);
+	}
+}
+
+void
+pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin)
+{
+	gint seek = 0, length = 0;
+
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	length = pragha_musicobject_get_length (pragha_backend_get_musicobject (backend));
+
+	if (length == 0)
+		return;
+
+	seek = (length * fraction);
+
+	if (seek >= length)
+		seek = length;
+
+	pragha_toolbar_update_progress (cwin->toolbar, length, seek);
+	pragha_backend_seek (backend, seek);
 }
