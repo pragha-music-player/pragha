@@ -248,30 +248,6 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 }
 
 void
-pragha_playback_prev_song (GObject *object, struct con_win *cwin)
-{
-	pragha_playback_prev_track (cwin);
-}
-
-void
-pragha_playback_play_song (GObject *object, struct con_win *cwin)
-{
-	pragha_playback_play_pause_resume (cwin);
-}
-
-void
-pragha_playback_stop_song (GObject *object, struct con_win *cwin)
-{
-	pragha_playback_stop (cwin);
-}
-
-void
-pragha_playback_next_song (GObject *object, struct con_win *cwin)
-{
-	pragha_playback_next_track (cwin);
-}
-
-void
 pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 {
 	PraghaBackend *backend = pragha_application_get_backend (cwin);
