@@ -554,7 +554,7 @@ pragha_tags_dialog_dispose (GObject *object)
 static void
 pragha_tags_dialog_finalize (GObject *object)
 {
-	PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
+	//PraghaTagsDialog *dialog = PRAGHA_TAGS_DIALOG (object);
 
 	/*
 	 * Need free dialog->loc_arr or dialog->rlist?
