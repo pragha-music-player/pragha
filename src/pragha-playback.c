@@ -300,15 +300,21 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 
 	PraghaBackend *backend = pragha_application_get_backend (cwin);
 
-	if (pragha_backend_get_state (backend) != ST_STOPPED) {
-		window = pragha_application_get_window(cwin);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
 
-		albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar(window));
-		uri = g_filename_to_uri (pragha_album_art_get_path (albumart), NULL, NULL);
+	window = pragha_application_get_window(cwin);
 
-		open_url(uri, pragha_window_get_mainwindow (window));
-		g_free (uri);
-	}
+	albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar (window));
+
+	const gchar *albumart_path = pragha_album_art_get_path (albumart);
+
+	if (!albumart_path)
+		return;
+
+	uri = g_filename_to_uri (albumart_path, NULL, NULL);
+	open_url(uri, pragha_window_get_mainwindow (window));
+	g_free (uri);
 }
 
 void
