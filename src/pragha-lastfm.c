@@ -130,6 +130,17 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
 }
 
+/*
+ * Advise not connect with lastfm.
+ */
+static void pragha_lastfm_no_connection_advice (void)
+{
+	PraghaStatusbar *statusbar = pragha_statusbar_get ();
+
+	pragha_statusbar_set_misc_text (statusbar, _("No connection Last.fm has been established."));
+	g_object_unref (statusbar);
+}
+
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 static GList *
@@ -358,7 +369,7 @@ lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cw
 	CDEBUG(DBG_LASTFM, "Love handler to current playlist");
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -388,7 +399,7 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 	CDEBUG(DBG_LASTFM, "Unlove Handler to current playlist");
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -400,6 +411,7 @@ void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_
 static gboolean
 append_mobj_list_current_playlist_idle(gpointer user_data)
 {
+	PraghaStatusbar *statusbar;
 	gchar *summary = NULL;
 	guint songs_added = 0;
 
@@ -440,7 +452,9 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	}
 
 	if (summary != NULL) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, summary);
+		statusbar = pragha_statusbar_get ();
+		pragha_statusbar_set_misc_text (statusbar, summary);
+		g_object_unref (statusbar);
 		g_free(summary);
 	}
 
@@ -510,7 +524,7 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 	CDEBUG(DBG_LASTFM, "Get similar action to current playlist");
 
 	if(cwin->clastfm->session_id == NULL) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -527,6 +541,7 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 				gint response,
 				struct con_win *cwin)
 {
+	PraghaStatusbar *statusbar;
 	XMLNode *xml = NULL, *xi, *xc, *xt;
 	gchar *contents, *summary;
 	gint try = 0, added = 0;
@@ -569,7 +584,11 @@ lastfm_import_xspf_response(GtkDialog *dialog,
 		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
-	pragha_statusbar_set_misc_text(cwin->statusbar, summary);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_misc_text (statusbar, summary);
+	g_object_unref (statusbar);
+
 	g_free(summary);
 
 	xmlnode_free(xml);
@@ -648,7 +667,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 
 	if ((cwin->clastfm->session_id == NULL) ||
 	    string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences))) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -686,7 +705,7 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 
 	if(cwin->clastfm->session_id == NULL) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -724,7 +743,7 @@ lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -761,7 +780,7 @@ lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -822,7 +841,7 @@ lastfm_scrob_handler(gpointer data)
 		return FALSE;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return FALSE;
 	}
 
@@ -962,7 +981,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
+		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
@@ -1018,14 +1037,14 @@ do_just_init_lastfm(gpointer data)
 			                                      pragha_lastfm_get_password (cwin->preferences));
 
 			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+				pragha_lastfm_no_connection_advice ();
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
-				pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
 			}
 		}
 	}
 	else {
+		pragha_lastfm_no_connection_advice ();
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
-		pragha_statusbar_set_misc_text(cwin->statusbar, _("No connection Last.fm has been established."));
 	}
 	update_menubar_lastfm_state (cwin);
 

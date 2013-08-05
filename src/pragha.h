@@ -85,7 +85,6 @@ struct con_win {
 	PraghaNotify *notify;
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
-	PraghaStatusbar *statusbar;
 	PraghaPreferences *preferences;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;

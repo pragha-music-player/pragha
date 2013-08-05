@@ -35,12 +35,12 @@ struct _PraghaWindow {
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 	PraghaToolbar *toolbar;
+	PraghaStatusbar *statusbar;
 	GtkWidget *menubar;
 	GtkWidget *infobox;
 	GtkWidget *pane;
 	GtkWidget *sidebar;
 	GtkWidget *playlist;
-	GtkWidget *statusbar;
 };
 
 /********************************/
@@ -365,7 +365,7 @@ pragha_window_new(struct con_win *cwin)
 	window->toolbar = pragha_toolbar_new ();
 	window->sidebar = pragha_sidebar_get_widget(cwin->sidebar);
 	window->playlist = pragha_playlist_get_widget(cwin->cplaylist);
-	window->statusbar = GTK_WIDGET(cwin->statusbar);
+	window->statusbar = pragha_statusbar_get();
 
 	window->pane = gtk_hpaned_new();
 	window->infobox = gtk_vbox_new(FALSE, 0);
@@ -378,7 +378,7 @@ pragha_window_new(struct con_win *cwin)
 
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), window->playlist,
 	                    TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), window->statusbar,
+	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(window->statusbar),
 	                    FALSE, FALSE, 0);
 
 	/* Pack widgets: [Sidebar][ Playlist ]

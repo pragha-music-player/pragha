@@ -242,17 +242,20 @@ glyr_finished_successfully(glyr_struct *glyr_info)
 static void
 glyr_finished_incorrectly(glyr_struct *glyr_info)
 {
+	PraghaStatusbar *statusbar = pragha_statusbar_get ();
+
 	switch (glyr_info->query.type) {
-	case GLYR_GET_LYRICS:
-		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Lyrics not found."));
-		break;
-	case GLYR_GET_ARTIST_BIO:
-		pragha_statusbar_set_misc_text(glyr_info->cwin->statusbar, _("Artist information not found."));
-		break;
-	case GLYR_GET_COVERART:
-	default:
-		break;
+		case GLYR_GET_LYRICS:
+			pragha_statusbar_set_misc_text (statusbar, _("Lyrics not found."));
+			break;
+		case GLYR_GET_ARTIST_BIO:
+			pragha_statusbar_set_misc_text (statusbar, _("Artist information not found."));
+			break;
+		case GLYR_GET_COVERART:
+		default:
+			break;
 	}
+	g_object_unref (statusbar);
 }
 
 static gboolean
