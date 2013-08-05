@@ -1015,6 +1015,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	GList *mlist = NULL;
 	gchar *summary;
 	gint try = 0, added = 0;
+	PraghaStatusbar *statusbar;
 	PraghaMusicobject *mobj;
 
 #ifdef HAVE_PLPARSER
@@ -1041,7 +1042,11 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
-	pragha_statusbar_set_misc_text(cwin->statusbar, summary);
+
+	statusbar = pragha_statusbar_get ();
+	pragha_statusbar_set_misc_text (statusbar, summary);
+	g_object_unref (statusbar);
+
 	g_free(summary);
 
 	g_slist_free(list);

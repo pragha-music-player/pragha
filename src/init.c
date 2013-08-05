@@ -113,8 +113,6 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	cwin->bar_context_menu = pragha_menubar_new(cwin);
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
-
-	cwin->statusbar = pragha_statusbar_get();
 	cwin->cplaylist = pragha_playlist_new(cwin);
 
 	pragha_sidebar_add_pane(cwin->sidebar,
