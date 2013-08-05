@@ -54,6 +54,8 @@ void wiki_action(GtkAction *action, struct con_win *cwin);
 void translate_action(GtkAction *action, struct con_win *cwin);
 void about_action(GtkAction *action, struct con_win *cwin);
 
-GtkUIManager* pragha_menubar_new (struct con_win *cwin);
+void pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *cwin);
+
+GtkUIManager* pragha_menubar_new (void);
 
 #endif /* PRAGHA_MENU_H */

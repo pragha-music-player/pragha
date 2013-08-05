@@ -110,7 +110,10 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	 */
 	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	cwin->bar_context_menu = pragha_menubar_new(cwin);
+	cwin->bar_context_menu = pragha_menubar_new ();
+	
+	pragha_menubar_connect_signals (cwin->bar_context_menu, cwin);
+
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
 	cwin->cplaylist = pragha_playlist_new(cwin);

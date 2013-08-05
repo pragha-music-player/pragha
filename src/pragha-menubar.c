@@ -928,59 +928,69 @@ void about_action(GtkAction *action, struct con_win *cwin)
 	about_widget(cwin);
 }
 
+void
+pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *cwin)
+{
+	GtkActionGroup *main_actions;
+
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+ 
+	main_actions = gtk_action_group_new("Main Actions");
+
+	gtk_action_group_set_translation_domain (main_actions, GETTEXT_PACKAGE);
+
+	gtk_action_group_add_actions (main_actions,
+	                              main_aentries,
+	                              G_N_ELEMENTS(main_aentries),
+	                              (gpointer)cwin);
+	gtk_action_group_add_toggle_actions (main_actions,
+	                                     toggles_entries,
+	                                     G_N_ELEMENTS(toggles_entries),
+	                                     cwin);
+
+	gtk_window_add_accel_group (GTK_WINDOW(cwin->mainwindow),
+	                            gtk_ui_manager_get_accel_group(menu_ui_manager));
+
+	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
+
+
+	/* Binding properties to Actions. */
+
+	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
+	g_object_bind_property (cwin->preferences, "shuffle", action_shuffle, "active", binding_flags);
+
+	GtkAction *action_repeat = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/PlaybackMenu/Repeat");
+	g_object_bind_property (cwin->preferences, "repeat", action_repeat, "active", binding_flags);
+
+	GtkAction *action_lateral = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel");
+	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
+
+	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
+	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
+
+	/* Disable last.fm menus when no support it. */
+#ifndef HAVE_LIBCLASTFM
+	GtkAction *action_lastfm = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/ToolsMenu/Lastfm");
+	gtk_action_set_sensitive(action_lastfm, FALSE);
+#endif
+
+	g_object_unref (main_actions);
+}
+
 GtkUIManager*
-pragha_menubar_new(struct con_win *cwin)
+pragha_menubar_new (void)
 {
 	GtkUIManager *main_menu = NULL;
-	GtkActionGroup *main_actions;
 	gchar *pragha_accels_path = NULL;
 	GError *error = NULL;
 
-	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
-
-	main_actions = gtk_action_group_new("Main Actions");
 	main_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (main_actions, GETTEXT_PACKAGE);
 
 	if (!gtk_ui_manager_add_ui_from_string(main_menu, main_menu_xml, -1, &error)) {
 		g_critical("Unable to create main menu, err : %s",
 			   error->message);
 	}
-
-	gtk_action_group_add_actions(main_actions,
-				     main_aentries,
-				     G_N_ELEMENTS(main_aentries),
-				     (gpointer)cwin);
-	gtk_action_group_add_toggle_actions (main_actions,
-					toggles_entries, G_N_ELEMENTS(toggles_entries),
-					cwin);
-
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(main_menu));
-	gtk_ui_manager_insert_action_group(main_menu, main_actions, 0);
-
-	g_object_unref (main_actions);
-
-	/* Binding properties to Actions. */
-
-	GtkAction *action_shuffle = gtk_ui_manager_get_action(main_menu, "/Menubar/PlaybackMenu/Shuffle");
-	g_object_bind_property (cwin->preferences, "shuffle", action_shuffle, "active", binding_flags);
-
-	GtkAction *action_repeat = gtk_ui_manager_get_action(main_menu,"/Menubar/PlaybackMenu/Repeat");
-	g_object_bind_property (cwin->preferences, "repeat", action_repeat, "active", binding_flags);
-
-	GtkAction *action_lateral = gtk_ui_manager_get_action(main_menu, "/Menubar/ViewMenu/Lateral panel");
-	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
-
-	GtkAction *action_status_bar = gtk_ui_manager_get_action(main_menu, "/Menubar/ViewMenu/Status bar");
-	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
-
-	/* Disable last.fm menus when no support it. */
-#ifndef HAVE_LIBCLASTFM
-	GtkAction *action_lastfm = gtk_ui_manager_get_action(main_menu,"/Menubar/ToolsMenu/Lastfm");
-	gtk_action_set_sensitive(action_lastfm, FALSE);
-#endif
 
 	/* Load menu accelerators edited */
 
