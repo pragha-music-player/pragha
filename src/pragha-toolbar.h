@@ -69,8 +69,6 @@ const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);
 
 PraghaAlbumArt *pragha_toolbar_get_album_art     (PraghaToolbar *toolbar);
 
-GtkWidget      *pragha_toolbar_get_widget    (PraghaToolbar *toolbar);
-
 PraghaToolbar *pragha_toolbar_new        (void);
 
 #endif /* PRAGHA_TOOLBAR_H */

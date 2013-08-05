@@ -163,6 +163,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
+	PraghaToolbar *toolbar;
 	const gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path = NULL;
 	GdkPixbuf *album_art = NULL;
@@ -191,7 +192,8 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 				if((0 == g_strcmp0(artist, lartist)) &&
 				   (0 == g_strcmp0(album, lalbum))) {
 					/* TODO: Emit a signal to update the album art and mpris. */
-					pragha_toolbar_set_image_album_art(cwin->toolbar, album_art_path);
+					toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+					pragha_toolbar_set_image_album_art (toolbar, album_art_path);
 					mpris_update_metadata_changed(cwin);
 				}
 			}

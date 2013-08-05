@@ -509,9 +509,10 @@ static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 
 static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
+	PraghaAlbumArt *albumart;
 	gchar *artUrl_uri = NULL;
 	GVariantBuilder b;
-	PraghaAlbumArt *albumart;
 	const gchar *arturl;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
@@ -521,8 +522,9 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		handle_get_metadata(pragha_backend_get_musicobject(cwin->backend), &b);
 
-		/* Append the album art url metadata. */
-		albumart = pragha_toolbar_get_album_art(cwin->toolbar);
+		toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+		albumart = pragha_toolbar_get_album_art (toolbar);
+
 		arturl = pragha_album_art_get_path(albumart);
 		if (string_is_not_empty(arturl)) {
 			artUrl_uri = g_filename_to_uri(arturl, NULL, NULL);

@@ -109,24 +109,30 @@ status_get_tooltip_cb (GtkWidget        *widget,
                        GtkTooltip       *tooltip,
                        struct con_win   *cwin)
 {
+	PraghaToolbar *toolbar;
+	PraghaMusicobject *mobj;
 	gchar *markup_text;
+
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
 
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
-		PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
-		markup_text = g_markup_printf_escaped("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
-			_("Title"), pragha_musicobject_get_title (mobj),
-			_("Artist"), pragha_musicobject_get_artist (mobj),
-			_("Album"), pragha_musicobject_get_album (mobj),
-			_("Length"), pragha_toolbar_get_progress_text(cwin->toolbar),
-			pragha_toolbar_get_length_text(cwin->toolbar));
-	}
-	gtk_tooltip_set_markup (tooltip, markup_text);
-	g_free(markup_text);
+		mobj = pragha_backend_get_musicobject (cwin->backend);
 
+		markup_text = g_markup_printf_escaped ("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
+		                                       _("Title"), pragha_musicobject_get_title (mobj),
+		                                       _("Artist"), pragha_musicobject_get_artist (mobj),
+		                                       _("Album"), pragha_musicobject_get_album (mobj),
+		                                       _("Length"), pragha_toolbar_get_progress_text (toolbar),
+		                                       pragha_toolbar_get_length_text (toolbar));
+	}
+
+	gtk_tooltip_set_markup (tooltip, markup_text);
 	gtk_tooltip_set_icon (tooltip,
-		pragha_album_art_get_pixbuf(pragha_toolbar_get_album_art(cwin->toolbar)));
+		pragha_album_art_get_pixbuf(pragha_toolbar_get_album_art(toolbar)));
+
+	g_free(markup_text);
 
 	return TRUE;
 }

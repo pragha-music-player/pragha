@@ -57,6 +57,12 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
+PraghaWindow *
+pragha_application_get_window (struct con_win *cwin)
+{
+	return cwin->window;
+}
+
 GtkWidget *
 pragha_application_get_mainwindow (struct con_win *cwin)
 {
@@ -121,6 +127,8 @@ pragha_application_free (struct con_win *cwin)
 static struct con_win *
 pragha_application_new (gint argc, gchar *argv[])
 {
+	PraghaWindow *window;
+	PraghaToolbar *toolbar;
 	struct con_win *cwin;
 
 	const GBindingFlags binding_flags =
@@ -200,20 +208,46 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	init_gui(0, NULL, cwin);
 
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK(pragha_toolbar_playback_state_cb), cwin->toolbar);
-	g_signal_connect (cwin->backend, "tick",
-	                 G_CALLBACK(pragha_toolbar_update_playback_progress), cwin->toolbar);
-	g_signal_connect (cwin->backend, "buffering",
-	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), cwin->toolbar);
+	window = pragha_application_get_window (cwin);
 
-	/* Bind properties to widgets after create it. */
+	/* Toolbar Signals and Bindings. */
+
+	toolbar = pragha_window_get_toolbar (window);
+	g_signal_connect_swapped (toolbar, "prev",
+	                          G_CALLBACK(pragha_playback_prev_track), cwin);
+	g_signal_connect_swapped (toolbar, "play",
+	                          G_CALLBACK(pragha_playback_play_pause_resume), cwin);
+	g_signal_connect_swapped (toolbar, "stop",
+	                          G_CALLBACK(pragha_playback_stop), cwin);
+	g_signal_connect_swapped (toolbar, "next",
+	                          G_CALLBACK(pragha_playback_next_track), cwin);
+	g_signal_connect (toolbar, "unfull-activated",
+	                  G_CALLBACK(pragha_window_unfullscreen), cwin);
+	g_signal_connect (toolbar, "album-art-activated",
+	                  G_CALLBACK(pragha_playback_show_current_album_art), cwin);
+	g_signal_connect (toolbar, "track-info-activated",
+	                  G_CALLBACK(pragha_playback_edit_current_track), cwin);
+	g_signal_connect (toolbar, "track-progress-activated",
+	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
+
+	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
+	                  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
+	g_signal_connect (G_OBJECT(toolbar), "notify::timer-remaining-mode",
+	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), cwin->backend);
+
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK(pragha_toolbar_playback_state_cb), toolbar);
+	g_signal_connect (cwin->backend, "tick",
+	                 G_CALLBACK(pragha_toolbar_update_playback_progress), toolbar);
+	g_signal_connect (cwin->backend, "buffering",
+	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), toolbar);
+
 	g_object_bind_property (cwin->backend, "volume",
-	                        cwin->toolbar, "volume",
+	                        toolbar, "volume",
 	                        binding_flags);
 
 	g_object_bind_property (cwin->preferences, "timer-remaining-mode",
-	                        cwin->toolbar, "timer-remaining-mode",
+	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
 	#ifdef HAVE_LIBGLYR

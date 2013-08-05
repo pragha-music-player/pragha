@@ -48,7 +48,6 @@
 #include "pragha-sidebar.h"
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
-#include "pragha-toolbar.h"
 #include "pragha-window.h"
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
@@ -87,7 +86,6 @@ struct con_win {
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
 	PraghaStatusbar *statusbar;
-	PraghaToolbar *toolbar;
 	PraghaPreferences *preferences;
 	#ifdef HAVE_LIBCLASTFM
 	struct con_lastfm *clastfm;
@@ -109,6 +107,7 @@ struct con_win {
 /* Functions to access private members */
 
 PraghaBackend *pragha_application_get_backend    (struct con_win *cwin);
+PraghaWindow  *pragha_application_get_window     (struct con_win *cwin);
 GtkWidget     *pragha_application_get_mainwindow (struct con_win *cwin);
 GdkPixbuf     *pragha_application_get_pixbuf_app (struct con_win *cwin);
 
