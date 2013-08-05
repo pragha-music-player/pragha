@@ -186,6 +186,7 @@ void pragha_playback_next_track(struct con_win *cwin)
 void
 pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	enum player_state state = pragha_backend_get_state (backend);
 	PraghaMusicobject *mobj = NULL;
 
@@ -199,8 +200,9 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				pragha_toolbar_set_title(cwin->toolbar, mobj);
-				pragha_toolbar_update_progress(cwin->toolbar, pragha_musicobject_get_length(mobj), 0);
+				toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+				pragha_toolbar_set_title (toolbar, mobj);
+				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
 
 				/* Update and jump in current playlist */
 				update_current_playlist_view_new_track(cwin->cplaylist, backend);
@@ -235,6 +237,7 @@ pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
 void
 pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj;
 
 	if(pragha_backend_get_state (backend) != ST_PLAYING)
@@ -243,7 +246,8 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	pragha_toolbar_set_title(cwin->toolbar, nmobj);
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	pragha_toolbar_set_title(toolbar, nmobj);
 	mpris_update_metadata_changed(cwin);
 
 	/* Update the playlist */
@@ -253,6 +257,7 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 static void
 pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj)
 {
+	PraghaToolbar *toolbar;
 	gchar *album_path = NULL, *path = NULL;
 
 	CDEBUG(DBG_INFO, "Update album art");
@@ -281,20 +286,27 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 		g_free(path);
 	}
 
-	pragha_toolbar_set_image_album_art(cwin->toolbar, album_path);
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	pragha_toolbar_set_image_album_art (toolbar, album_path);
 	g_free(album_path);
 }
 
 void
 pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 {
+	PraghaWindow *window;
+	PraghaAlbumArt *albumart;
+	gchar *uri = NULL;
+
 	PraghaBackend *backend = pragha_application_get_backend (cwin);
 
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
-		PraghaAlbumArt *albumart = pragha_toolbar_get_album_art (cwin->toolbar);
-		gchar *uri = g_filename_to_uri (pragha_album_art_get_path (albumart), NULL, NULL);
+		window = pragha_application_get_window(cwin);
 
-		open_url(uri, cwin->mainwindow);
+		albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar(window));
+		uri = g_filename_to_uri (pragha_album_art_get_path (albumart), NULL, NULL);
+
+		open_url(uri, pragha_window_get_mainwindow (window));
 		g_free (uri);
 	}
 }
@@ -312,6 +324,7 @@ pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
 void
 pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	gint seek = 0, length = 0;
 
 	PraghaBackend *backend = pragha_application_get_backend (cwin);
@@ -329,6 +342,7 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 	if (seek >= length)
 		seek = length;
 
-	pragha_toolbar_update_progress (cwin->toolbar, length, seek);
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	pragha_toolbar_update_progress (toolbar, length, seek);
 	pragha_backend_seek (backend, seek);
 }

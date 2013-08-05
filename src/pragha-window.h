@@ -21,6 +21,7 @@
 
 #include <gtk/gtk.h>
 #include "pragha-backend.h"
+#include "pragha-toolbar.h"
 
 /* pragha.h */
 struct con_win;
@@ -38,8 +39,9 @@ void       pragha_window_unfullscreen          (GObject *object, struct con_win 
 
 void       pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget);
 
-GtkWidget *pragha_window_get_mainwindow        (PraghaWindow *window);
-GdkPixbuf *pragha_window_get_pixbuf_app        (PraghaWindow *window);
+GtkWidget     *pragha_window_get_mainwindow    (PraghaWindow *window);
+PraghaToolbar *pragha_window_get_toolbar       (PraghaWindow *window);
+GdkPixbuf     *pragha_window_get_pixbuf_app    (PraghaWindow *window);
 
 void          pragha_window_free (PraghaWindow *window);
 PraghaWindow *pragha_window_new  (struct con_win *cwin);

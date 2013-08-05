@@ -223,6 +223,7 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	GList *rlist;
 	gboolean need_update;
 	PraghaMusicobject *tmobj;
@@ -245,7 +246,8 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
 
 		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-			pragha_toolbar_set_title(cwin->toolbar, current_mobj);
+			toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+			pragha_toolbar_set_title (toolbar, current_mobj);
 			mpris_update_metadata_changed(cwin);
 		}
 	}
@@ -262,6 +264,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
                                            gint            response_id,
                                            struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj;
 	gint changed = 0;
 	GList *rlist = NULL;
@@ -306,7 +309,8 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				pragha_toolbar_set_title(cwin->toolbar, current_mobj);
+				toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+				pragha_toolbar_set_title (toolbar, current_mobj);
 				mpris_update_metadata_changed(cwin);
 			}
 		}

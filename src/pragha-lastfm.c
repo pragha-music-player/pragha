@@ -173,6 +173,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
                                             gint            response_id,
                                             struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
@@ -191,13 +192,16 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
 				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
+					toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+
 					/* Update public current song */
 					pragha_update_musicobject_change_tag(current_mobj, changed, nmobj);
 
 					/* Update current song on playlist */
 					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
-					pragha_toolbar_set_title(cwin->toolbar, current_mobj);
+					pragha_toolbar_set_title(toolbar, current_mobj);
+
 					mpris_update_metadata_changed(cwin);
 				}
 			}
@@ -831,15 +835,19 @@ lastfm_scrob_handler(gpointer data)
 static gboolean
 show_lastfm_sugest_corrrection_button (gpointer user_data)
 {
+	PraghaToolbar *toolbar;
 	gchar *cfile = NULL, *nfile = NULL;
 
 	struct con_win *cwin = user_data;
 
 	/* Hack to safe!.*/
 	if(!cwin->clastfm->ntag_lastfm_button) {
+		toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+
 		cwin->clastfm->ntag_lastfm_button =
 			pragha_lastfm_tag_suggestion_button_new(cwin);
-		pragha_toolbar_add_extention_widget(cwin->toolbar, cwin->clastfm->ntag_lastfm_button);
+
+		pragha_toolbar_add_extention_widget(toolbar, cwin->clastfm->ntag_lastfm_button);
 	}
 
 	g_object_get(pragha_backend_get_musicobject (cwin->backend),

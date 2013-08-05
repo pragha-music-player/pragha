@@ -402,12 +402,6 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
 	return toolbar->albumart;
 }
 
-GtkWidget *
-pragha_toolbar_get_widget(PraghaToolbar *toolbar)
-{
-	return GTK_WIDGET(toolbar);
-}
-
 /*
  * Pragha toolbar creation and destruction.
  */

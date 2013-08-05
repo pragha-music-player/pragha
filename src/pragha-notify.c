@@ -104,6 +104,7 @@ can_support_actions ()
 void
 pragha_notify_show_osd (PraghaNotify *notify)
 {
+	PraghaToolbar *toolbar;
 	struct con_win *cwin = notify->cwin;
 	GError *error = NULL;
 	gchar *summary, *body, *slength;
@@ -164,8 +165,9 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	notify_notification_set_timeout (notify->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
 	notify_notification_set_icon_from_pixbuf (notify->osd_notify,
-		pragha_album_art_get_pixbuf(pragha_toolbar_get_album_art(cwin->toolbar)));
+		pragha_album_art_get_pixbuf (pragha_toolbar_get_album_art(toolbar)));
 
 	/* Show OSD */
 	if (!notify_notification_show (notify->osd_notify, &error)) {

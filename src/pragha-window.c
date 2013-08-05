@@ -34,8 +34,8 @@
 struct _PraghaWindow {
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
+	PraghaToolbar *toolbar;
 	GtkWidget *menubar;
-	GtkWidget *toolbar;
 	GtkWidget *infobox;
 	GtkWidget *pane;
 	GtkWidget *sidebar;
@@ -188,6 +188,12 @@ GtkWidget *
 pragha_window_get_mainwindow (PraghaWindow *window)
 {
 	return window->mainwindow;
+}
+
+PraghaToolbar *
+pragha_window_get_toolbar (PraghaWindow *window)
+{
+	return window->toolbar;
 }
 
 GdkPixbuf *
@@ -356,7 +362,7 @@ pragha_window_new(struct con_win *cwin)
 	/* Collect widgets. */
 
 	window->menubar = gtk_ui_manager_get_widget(cwin->bar_context_menu, "/Menubar");
-	window->toolbar = pragha_toolbar_get_widget(cwin->toolbar);
+	window->toolbar = pragha_toolbar_new ();
 	window->sidebar = pragha_sidebar_get_widget(cwin->sidebar);
 	window->playlist = pragha_playlist_get_widget(cwin->cplaylist);
 	window->statusbar = GTK_WIDGET(cwin->statusbar);
@@ -397,7 +403,7 @@ pragha_window_new(struct con_win *cwin)
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), window->menubar,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), window->toolbar,
+	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(window->toolbar),
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), window->infobox,
 	                    FALSE, FALSE, 0);
@@ -411,7 +417,7 @@ pragha_window_new(struct con_win *cwin)
 	gtk_widget_show(vbox_main);
 
 	gtk_widget_show(window->menubar);
-	gtk_widget_show(window->toolbar);
+	gtk_widget_show(GTK_WIDGET(window->toolbar));
 	gtk_widget_show(window->infobox);
 	gtk_widget_show(window->pane);
 

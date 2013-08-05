@@ -641,6 +641,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   gint            response_id,
                                   struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj, *bmobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
@@ -659,6 +660,8 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
+					toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+
 					/* Update public current song */
 					pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
@@ -670,7 +673,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
 					g_object_unref(bmobj);
 
-					pragha_toolbar_set_title(cwin->toolbar, current_mobj);
+					pragha_toolbar_set_title(toolbar, current_mobj);
 					mpris_update_metadata_changed(cwin);
 				}
 			}
@@ -755,15 +758,18 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaToolbar *toolbar;
+	GtkWidget *parent;
+
 	pragha_preferences_set_controls_below (cwin->preferences,
 		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
-	GtkWidget *toolbar = pragha_toolbar_get_widget(cwin->toolbar);
-	GtkWidget *parent = gtk_widget_get_parent(toolbar);
+	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
 
 	gint position = pragha_preferences_get_controls_below(cwin->preferences) ? 3 : 1;
 
-	gtk_box_reorder_child(GTK_BOX(parent), toolbar, position);
+	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
 }
 
 void
