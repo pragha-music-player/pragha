@@ -330,7 +330,6 @@ pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
 void
 pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin)
 {
-	PraghaToolbar *toolbar;
 	gint seek = 0, length = 0;
 
 	PraghaBackend *backend = pragha_application_get_backend (cwin);
@@ -348,7 +347,5 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 	if (seek >= length)
 		seek = length;
 
-	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
-	pragha_toolbar_update_progress (toolbar, length, seek);
 	pragha_backend_seek (backend, seek);
 }
