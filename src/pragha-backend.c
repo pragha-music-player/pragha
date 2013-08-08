@@ -678,6 +678,7 @@ pragha_backend_message_async_done (GstBus *bus, GstMessage *msg, PraghaBackend *
 	if (priv->seeking) {
 		priv->seeking = FALSE;
 		g_signal_emit (backend, signals[SIGNAL_SEEKED], 0);
+		g_signal_emit (backend, signals[SIGNAL_TICK], 0);
 	}
 }
 
