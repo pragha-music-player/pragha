@@ -996,6 +996,7 @@ pragha_menubar_new (void)
 
 	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(), "/pragha/accels.scm", NULL);
 	gtk_accel_map_load (pragha_accels_path);
+	g_free (pragha_accels_path);
 
 	return main_menu;
 }
