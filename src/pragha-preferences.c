@@ -2127,6 +2127,7 @@ pragha_preferences_finalize (GObject *object)
 
 	g_free(data);
 	g_key_file_free(priv->rc_keyfile);
+	g_free(priv->installed_version);
 	g_free(priv->rc_filepath);
 	g_free(priv->audio_sink);
 	g_free(priv->audio_device);
@@ -2134,6 +2135,7 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->album_art_pattern);
 	g_free(priv->start_mode);
 	g_free(priv->last_folder);
+	g_free(priv->lastfm_user);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
