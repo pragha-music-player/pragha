@@ -38,6 +38,7 @@ struct con_win;
 #define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
 
 struct con_lastfm {
+	struct con_win *cwin;
 	LASTFM_SESSION *session_id;
 	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
