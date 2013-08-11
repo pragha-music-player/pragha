@@ -474,16 +474,12 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search artist info");
 	gtk_action_set_sensitive (action, playing);
 
-	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
+	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
 	if(cwin->related_timeout_id)
 		g_source_remove(cwin->related_timeout_id);
 
 	if(state != ST_PLAYING) {
-	#ifdef HAVE_LIBCLASTFM
-		if(cwin->clastfm->ntag_lastfm_button)
-			gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
-	#endif
 		return;
 	}
 
@@ -491,11 +487,6 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 
 	if(file_type == FILE_HTTP)
 		return;
-
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->clastfm->status == LASTFM_STATUS_OK)
-		time(&cwin->clastfm->playback_started);
-	#endif
 
 	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,

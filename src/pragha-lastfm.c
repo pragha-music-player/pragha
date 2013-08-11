@@ -1020,6 +1020,30 @@ exit:
 	return;
 }
 
+static void
+backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
+	gint file_type = 0;
+
+	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
+
+	if (state != ST_PLAYING) {
+		if (cwin->clastfm->ntag_lastfm_button)
+			gtk_widget_hide(cwin->clastfm->ntag_lastfm_button);
+		return;
+	}
+
+	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (cwin->backend));
+
+	if (file_type == FILE_HTTP)
+		return;
+
+	if (cwin->clastfm->status == LASTFM_STATUS_OK)
+		time(&cwin->clastfm->playback_started);
+}
+
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
 gint
@@ -1049,7 +1073,11 @@ do_init_lastfm_idle(gpointer data)
 			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
 			                                      pragha_lastfm_get_password (cwin->preferences));
 
-			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+
+			if (cwin->clastfm->status == LASTFM_STATUS_OK) {
+				g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
+			}
+			else {
 				pragha_lastfm_no_connection_advice ();
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
 			}
@@ -1070,6 +1098,7 @@ init_lastfm(struct con_win *cwin)
 {
 	/* Init struct flags */
 
+	cwin->clastfm->cwin = cwin;
 	cwin->clastfm->session_id = NULL;
 	cwin->clastfm->status = LASTFM_STATUS_INVALID;
 	cwin->clastfm->nmobj = pragha_musicobject_new();
@@ -1099,6 +1128,8 @@ init_lastfm(struct con_win *cwin)
 void
 lastfm_free(struct con_lastfm *clastfm)
 {
+	g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
+
 	if (clastfm->session_id)
 		LASTFM_dinit(clastfm->session_id);
 
