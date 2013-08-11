@@ -1022,41 +1022,12 @@ exit:
 
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
-gboolean
-do_just_init_lastfm(gpointer data)
-{
-	struct con_win *cwin = data;
-
-	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
-
-	if (cwin->clastfm->session_id != NULL) {
-		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
-		   string_is_not_empty(pragha_lastfm_get_password(cwin->preferences))) {
-			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
-			                                      pragha_lastfm_get_password (cwin->preferences));
-
-			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
-				pragha_lastfm_no_connection_advice ();
-				CDEBUG(DBG_INFO, "Failure to login on lastfm");
-			}
-		}
-	}
-	else {
-		pragha_lastfm_no_connection_advice ();
-		CDEBUG(DBG_INFO, "Failure to init libclastfm");
-	}
-	update_menubar_lastfm_state (cwin);
-
-	return FALSE;
-}
-
 gint
 just_init_lastfm (struct con_win *cwin)
 {
 	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
-		g_idle_add (do_just_init_lastfm, cwin);
+		g_idle_add (do_init_lastfm_idle, cwin);
 	}
 	return 0;
 }
@@ -1078,11 +1049,14 @@ do_init_lastfm_idle(gpointer data)
 			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
 			                                      pragha_lastfm_get_password (cwin->preferences));
 
-			if(cwin->clastfm->status != LASTFM_STATUS_OK)
+			if(cwin->clastfm->status != LASTFM_STATUS_OK) {
+				pragha_lastfm_no_connection_advice ();
 				CDEBUG(DBG_INFO, "Failure to login on lastfm");
+			}
 		}
 	}
 	else {
+		pragha_lastfm_no_connection_advice ();
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 	}
 
