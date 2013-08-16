@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-file-utils.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
 #include "pragha-library-pane.h"
@@ -1044,22 +1045,7 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 		time(&cwin->clastfm->playback_started);
 }
 
-/* Init lastfm with a simple thread when change preferences and show error messages. */
-
-gint
-just_init_lastfm (struct con_win *cwin)
-{
-	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
-		CDEBUG(DBG_INFO, "Initializing LASTFM");
-		g_idle_add (do_init_lastfm_idle, cwin);
-	}
-	return 0;
-}
-
-/* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
- * And no show any error. */
-
-gboolean
+static gboolean
 do_init_lastfm_idle(gpointer data)
 {
 	struct con_win *cwin = data;
@@ -1092,6 +1078,21 @@ do_init_lastfm_idle(gpointer data)
 
 	return FALSE;
 }
+
+/* Init lastfm with a simple thread when change preferences and show error messages. */
+
+gint
+just_init_lastfm (struct con_win *cwin)
+{
+	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
+		CDEBUG(DBG_INFO, "Initializing LASTFM");
+		g_idle_add (do_init_lastfm_idle, cwin);
+	}
+	return 0;
+}
+
+/* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
+ * And no show any error. */
 
 gint
 init_lastfm(struct con_win *cwin)
