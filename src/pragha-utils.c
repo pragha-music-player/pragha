@@ -249,25 +249,25 @@ remove_watch_cursor (GtkWidget *widget)
 		gdk_window_set_cursor (gtk_widget_get_window (toplevel), NULL);
 }
 
-/* Obtain Pixbuf of lastfm. Based on Amatory code. */
-
-GdkPixbuf *vgdk_pixbuf_new_from_memory(const char *data, size_t size)
+GdkPixbuf *
+pragha_gdk_pixbuf_new_from_memory (gpointer data, gsize size)
 {
-	GInputStream *buffer_stream=NULL;
-	GdkPixbuf *buffer_pix=NULL;
-	GError *err = NULL;
+	GError *error = NULL;
 
-	buffer_stream = g_memory_input_stream_new_from_data (data, size, NULL);
-	
-	buffer_pix = gdk_pixbuf_new_from_stream(buffer_stream, NULL, &err);
-	g_input_stream_close(buffer_stream, NULL, NULL);
-	g_object_unref(buffer_stream);
+	GdkPixbufLoader *loader = gdk_pixbuf_loader_new ();
+	gdk_pixbuf_loader_write (loader, data, size, &error);
+	GdkPixbuf *pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
+	if (pixbuf)
+		g_object_ref (pixbuf);
+	gdk_pixbuf_loader_close (loader, NULL);
+	g_object_unref (loader);
 
-	if(buffer_pix == NULL){
-		g_warning("vgdk_pixbuf_new_from_memory: %s\n",err->message);
-		g_error_free (err);	
+	if (error) {
+		g_warning ("pragha_gdk_pixbuf_new_from_memory: %s\n", error->message);
+		g_error_free (error);
 	}
-	return buffer_pix;
+
+	return pixbuf;
 }
 
 /* NB: Have to take care of longer lengths .. */

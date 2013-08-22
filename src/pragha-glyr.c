@@ -180,7 +180,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	album_art_path = pragha_glyr_build_cached_art_path (cwin->glyr, artist, album);
 
 	if(glyr_info->head->data)
-		album_art = vgdk_pixbuf_new_from_memory(glyr_info->head->data, glyr_info->head->size);
+		album_art = pragha_gdk_pixbuf_new_from_memory (glyr_info->head->data, glyr_info->head->size);
 
 	if (album_art) {
 		if (gdk_pixbuf_save(album_art, album_art_path, "jpeg", &error, "quality", "100", NULL)) {
