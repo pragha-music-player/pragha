@@ -29,12 +29,8 @@
 #include <gdk/gdkkeysyms.h>
 #include "pragha-toolbar.h"
 #include "pragha-playback.h"
-#include "pragha-lastfm.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
-#ifdef HAVE_LIBGLYR
-#include "pragha-glyr.h"
-#endif
 #include "pragha.h"
 
 static void pragha_toolbar_finalize (GObject *object);
