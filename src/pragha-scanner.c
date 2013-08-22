@@ -29,6 +29,7 @@
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-playlists-mgmt.h"
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 
@@ -40,6 +41,8 @@ struct _PraghaScanner {
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
+	GSList            *playlists;
+
 	GTimeVal          last_update;
 	/* Threads */
 	GThread           *no_files_thread;
@@ -138,6 +141,40 @@ pragha_scanner_add_track_db(gpointer key,
 }
 
 static void
+pragha_scanner_import_playlist (PraghaDatabase *database,
+                                const gchar *playlist_file)
+{
+	gchar *playlist = NULL;
+	gint playlist_id = 0;
+	GSList *list = NULL, *i = NULL;
+
+	playlist = get_display_filename(playlist_file, FALSE);
+
+	if (pragha_database_find_playlist(database, playlist))
+		goto duplicated;
+
+#ifdef HAVE_PLPARSER
+	gchar *uri = g_filename_to_uri (playlist_file, NULL, NULL);
+	list = pragha_totem_pl_parser_parse_from_uri(uri);
+	g_free (uri);
+#else
+	list = pragha_pl_parser_parse_from_file_by_extension (playlist_file);
+#endif
+
+	playlist_id = pragha_database_add_new_playlist (database, playlist);
+	if(list) {
+		for (i=list; i != NULL; i = i->next) {
+			pragha_database_add_playlist_track (database, playlist_id, i->data);
+			g_free(i->data);
+		}
+		g_slist_free(list);
+	}
+
+duplicated:
+	g_free(playlist);
+}
+
+static void
 pragha_scanner_finished_dialog_response_cb (GtkDialog *dialog, gint response, gpointer data)
 {
 	PraghaScanner *scanner = data;
@@ -165,6 +202,7 @@ pragha_scanner_worker_finished (gpointer data)
 	gchar *last_scan_time = NULL;
 	PraghaPreferences *preferences;
 	PraghaDatabase *database;
+	GSList *list;
 
 	PraghaScanner *scanner = data;
 
@@ -183,9 +221,9 @@ pragha_scanner_worker_finished (gpointer data)
 		msg_dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(scanner->hbox))),
 		                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		                                    GTK_MESSAGE_INFO,
-						    GTK_BUTTONS_OK,
-						    "%s",
-						    _("Library scan complete"));
+		                                    GTK_BUTTONS_OK,
+		                                    "%s",
+		                                    _("Library scan complete"));
 
 		g_signal_connect(G_OBJECT(msg_dialog), "response",
 		                 G_CALLBACK(pragha_scanner_finished_dialog_response_cb),
@@ -210,6 +248,12 @@ pragha_scanner_worker_finished (gpointer data)
 		g_hash_table_foreach (scanner->tracks_table,
 		                      pragha_scanner_add_track_db,
 		                      database);
+
+
+		/* Import playlist detected. */
+
+		for (list = scanner->playlists ; list != NULL; list = list->next)
+			pragha_scanner_import_playlist(database, list->data);
 
 		pragha_database_commit_transaction (database);
 
@@ -250,6 +294,10 @@ pragha_scanner_worker_finished (gpointer data)
 	scanner->folder_list = NULL;
 	free_str_list(scanner->folder_scanned);
 	scanner->folder_scanned = NULL;
+
+	free_str_list(scanner->playlists);
+	scanner->playlists = NULL;
+
 	scanner->no_files = 0;
 	scanner->files_scanned = 0;
 
@@ -296,6 +344,9 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 					 g_hash_table_insert(scanner->tracks_table,
 					                     g_strdup(pragha_musicobject_get_file(mobj)),
 					                     mobj);
+			}
+			else if (pragha_pl_parser_guess_format_from_extension(ab_file) != PL_FORMAT_UNKNOWN) {
+				scanner->playlists = g_slist_prepend (scanner->playlists, g_strdup(ab_file));
 			}
 
 			pragha_mutex_lock (scanner->files_scanned_mutex);
