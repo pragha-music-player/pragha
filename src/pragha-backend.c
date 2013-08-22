@@ -20,6 +20,7 @@
 #include <config.h>
 #endif
 
+#include "pragha-art-cache.h"
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -56,6 +57,7 @@ typedef enum {
 
 struct PraghaBackendPrivate {
 	PraghaPreferences *preferences;
+	PraghaArtCache *art_cache;
 	GstElement *pipeline;
 	GstElement *audio_sink;
 	GstElement *equalizer;
@@ -487,6 +489,46 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 }
 
 static void
+save_embedded_art (PraghaBackend *backend, const GstTagList *taglist)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+	GstSample *sample = NULL;
+
+	gst_tag_list_get_sample_index (taglist, GST_TAG_IMAGE, 0, &sample);
+	if (!sample) //try harder
+		gst_tag_list_get_sample_index (taglist, GST_TAG_PREVIEW_IMAGE, 0, &sample);
+
+	if (!sample)
+		goto out;
+
+	//got art, now check if we need it
+
+	const gchar *artist = pragha_musicobject_get_artist (priv->mobj);
+	const gchar *album = pragha_musicobject_get_album (priv->mobj);
+
+	if (pragha_art_cache_contains (priv->art_cache, artist, album))
+		goto out;
+
+	//ok, we need it
+
+	GstBuffer *buf = gst_sample_get_buffer (sample);
+	if (!buf)
+		goto out;
+
+	GstMapInfo info;
+	if (!gst_buffer_map (buf, &info, GST_MAP_READ))
+		goto out;
+
+	pragha_art_cache_put (priv->art_cache, artist, album, info.data, info.size);
+
+	gst_buffer_unmap (buf, &info);
+
+out:
+	if (sample)
+		gst_sample_unref (sample);
+}
+
+static void
 pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 {
 	PraghaBackendPrivate *priv = backend->priv;
@@ -494,12 +536,14 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	gchar *str = NULL;
 	gint changed = 0;
 
-	if(pragha_musicobject_get_file_type(priv->mobj) != FILE_HTTP)
-		return;
-
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
 	gst_message_parse_tag(message, &tag_list);
+
+	save_embedded_art (backend, tag_list);
+
+	if (pragha_musicobject_get_file_type (priv->mobj) != FILE_HTTP)
+		goto out;
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
 	{
@@ -516,6 +560,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 
 	g_signal_emit (backend, signals[SIGNAL_TAGS_CHANGED], 0, changed);
 
+out:
 	gst_tag_list_free(tag_list);
 }
 
@@ -727,6 +772,8 @@ pragha_backend_finalize (GObject *object)
 {
 	PraghaBackend *backend = PRAGHA_BACKEND (object);
 	PraghaBackendPrivate *priv = backend->priv;
+
+	pragha_art_cache_free (priv->art_cache);
 
 	if (priv->error)
 		g_error_free (priv->error);
@@ -943,6 +990,7 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
+	priv->art_cache = pragha_art_cache_new (); //XXX use global instance?
 
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
 
