@@ -99,6 +99,7 @@ pragha_application_free (struct con_win *cwin)
 	pragha_sidebar_free(cwin->sidebar);
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
+	pragha_art_cache_free (cwin->art_cache);
 	pragha_window_free (cwin->window);
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
@@ -182,6 +183,8 @@ pragha_application_new (gint argc, gchar *argv[])
 		g_critical("Unable to initialize lastfm");
 	}
 #endif
+
+	cwin->art_cache = pragha_art_cache_new ();
 
 	cwin->backend = pragha_backend_new (cwin);
 

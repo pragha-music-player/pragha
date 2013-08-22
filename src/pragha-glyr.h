@@ -29,8 +29,6 @@ G_BEGIN_DECLS
 
 typedef struct _PraghaGlyr PraghaGlyr;
 
-gchar *pragha_glyr_get_image_path_from_cache (PraghaGlyr *glyr, const gchar *artist, const gchar *album);
-
 PraghaGlyr * pragha_glyr_new (struct con_win *cwin);
 void pragha_glyr_free (PraghaGlyr *glyr);
 
