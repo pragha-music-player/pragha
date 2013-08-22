@@ -54,7 +54,7 @@ gboolean nm_is_online ();
 void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 
-GdkPixbuf * pragha_gdk_pixbuf_new_from_memory (gpointer data, gsize size);
+GdkPixbuf * pragha_gdk_pixbuf_new_from_memory (gconstpointer data, gsize size);
 enum playlist_type pragha_pl_parser_guess_format_from_extension (const gchar *filename);
 gchar* convert_length_str(gint length);
 gboolean is_present_str_list(const gchar *str, GSList *list);

@@ -250,7 +250,7 @@ remove_watch_cursor (GtkWidget *widget)
 }
 
 GdkPixbuf *
-pragha_gdk_pixbuf_new_from_memory (gpointer data, gsize size)
+pragha_gdk_pixbuf_new_from_memory (gconstpointer data, gsize size)
 {
 	GError *error = NULL;
 
