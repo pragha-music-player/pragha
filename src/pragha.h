@@ -34,6 +34,7 @@
 #include <tag_c.h>
 
 #include "pragha-album-art.h"
+#include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-glyr.h"
@@ -81,6 +82,7 @@ struct con_win {
 #ifdef HAVE_LIBGLYR
 	PraghaGlyr *glyr;
 #endif
+	PraghaArtCache *art_cache;
 	PraghaMpris2 *cmpris2;
 	PraghaNotify *notify;
 	PraghaScanner  *scanner;

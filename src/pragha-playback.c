@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-playback.h"
+#include "pragha-art-cache.h"
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
 #include "pragha-musicobject-mgmt.h"
@@ -271,11 +272,11 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 	if (!pragha_preferences_get_show_album_art(cwin->preferences))
 		return;
 
-	#ifdef HAVE_LIBGLYR
-	album_path = pragha_glyr_get_image_path_from_cache (cwin->glyr,
-	                                                    pragha_musicobject_get_artist(mobj),
-	                                                    pragha_musicobject_get_album(mobj));
-	#endif
+
+	album_path = pragha_art_cache_get (cwin->art_cache,
+	                                   pragha_musicobject_get_artist(mobj),
+	                                   pragha_musicobject_get_album(mobj));
+
 	if (album_path == NULL) {
 		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
 

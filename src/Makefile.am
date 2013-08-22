@@ -17,6 +17,8 @@ pragha_SOURCES = \
 		pragha.h \
 		pragha-album-art.c \
 		pragha-album-art.h \
+		pragha-art-cache.c \
+		pragha-art-cache.h \
 		pragha-backend.c \
 		pragha-backend.h \
 		pragha-cdda.c \
