@@ -3959,7 +3959,7 @@ cplaylist_new(struct con_win *cwin)
 	init_playlist_dnd(cplaylist);
 
 	cplaylist->rand = g_rand_new();
-	cplaylist->changing = TRUE;
+	cplaylist->changing = FALSE;
 	cplaylist->dragging = FALSE;
 	cplaylist->rand_track_refs = NULL;
 	cplaylist->queue_track_refs = NULL;

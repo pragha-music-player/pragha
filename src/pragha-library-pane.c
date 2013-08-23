@@ -2750,7 +2750,7 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	clibrary->filter_entry = NULL;
 	clibrary->dragging = FALSE;
-	clibrary->view_change = TRUE;
+	clibrary->view_change = FALSE;
 	clibrary->timeout_id = 0;
 	clibrary->library_tree_nodes = NULL;
 
