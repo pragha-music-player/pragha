@@ -156,21 +156,20 @@ static void pref_dialog_cb(GtkDialog *dialog, gint response_id,
 		if (pragha_preferences_get_library_style(cwin->preferences) == FOLDERS) {
 			test_change = pragha_preferences_get_fuse_folders(cwin->preferences);
 
-			pragha_preferences_set_fuse_folders(cwin->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
-
-			if (pragha_preferences_get_fuse_folders(cwin->preferences) != test_change)
+			if (test_change != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)))
 				library_pane_view_reload(cwin->clibrary);
 		}
 		else {
 			test_change = pragha_preferences_get_sort_by_year(cwin->preferences);
 
-			pragha_preferences_set_sort_by_year(cwin->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)));
-
-			if (pragha_preferences_get_sort_by_year(cwin->preferences) != test_change)
+			if (test_change != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)))
 				library_pane_view_reload(cwin->clibrary);
 		}
+
+		pragha_preferences_set_fuse_folders (cwin->preferences,
+		                                     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->fuse_folders_w)));
+		pragha_preferences_set_sort_by_year (cwin->preferences,
+		                                     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cwin->preferences_w->sort_by_year_w)));
 
 		/* General preferences */
 
