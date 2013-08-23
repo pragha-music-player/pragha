@@ -1,7 +1,8 @@
 ==============================================================
-Overview of changes in Pragha 1.1.2 since 1.1.1
+Overview of changes in Pragha 1.1.2.1 since 1.1.1
 ==============================================================
-  
+
+V1.1.2
 News:
 	Improved indexing of the library. Also allows continue listening music while analyzing. [1]
 	The database uses prepared statements, improving the general performance of Pragha.
@@ -41,8 +42,26 @@ Updates Translations:
 	Update Ukrainian translation thanks to paul.rufous.
 
 Notes:
-[1] Sorry, but also adds a regression. Stop importing playlists.
+[1] Sorry, but also adds a regression. Stop importing playlists. [Fixed on V1.1.2.1]
 [2] To compile, have to comment the line 23 of Pragha.h
+
+V.1.1.2.1
+News:
+	Highlight the headers on library view.
+	Disable all video features of playbin.
+
+Bugs fixed:
+	Fix unable to automatically play another song in pragha.
+	Fix regression on 1.1.2: Return to import playlists.
+	Fix save fuse_folders option when not set folder structure view.
+	No insensitive albumart_in_osd toggle button when change show sytray option.
+	Fix wrong min glib version. g_thread_unref need 2.31
+	Fix updating library view after rescan.
+	Dbus: fix crash on get current state.
+	Drop unneeded ref from GtkActionGroups.
+	Free GtkUIManagers.
+	Notify: change actoin ids to well known.
+	Notify: delete stragne asserts
 
 ==============================================================
 OTHERS REALESES:
