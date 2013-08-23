@@ -41,7 +41,12 @@ pragha_art_cache_free (PraghaArtCache *cache)
 static gchar *
 pragha_art_cache_build_path (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
-	return g_strdup_printf ("%s/album-%s-%s.jpeg", cache->cache_dir, artist, album);
+	gchar *artist_escaped = pragha_escape_slashes (artist);
+	gchar *album_escaped = pragha_escape_slashes (album);
+	gchar *result = g_strdup_printf ("%s/album-%s-%s.jpeg", cache->cache_dir, artist_escaped, album_escaped);
+	g_free (album_escaped);
+	g_free (artist_escaped);
+	return result;
 }
 
 gchar *
