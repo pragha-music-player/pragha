@@ -433,6 +433,19 @@ gint compare_utf8_str(const gchar *str1, const gchar *str2)
 	return ret;
 }
 
+gchar *
+pragha_escape_slashes (const gchar *str)
+{
+	gchar *dup = g_strdup (str);
+	gchar *i = dup;
+	while (*i) {
+		if (*i == '/' || *i == '\\')
+			*i = '|';
+		i = g_utf8_next_char (i);
+	}
+	return dup;
+}
+
 gboolean validate_album_art_pattern(const gchar *pattern)
 {
 	gchar **tokens;
