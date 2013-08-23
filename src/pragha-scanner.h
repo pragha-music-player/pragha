@@ -25,6 +25,8 @@ typedef struct {
 	GHashTable        *tracks_table;
 	GSList            *folder_list;
 	GSList            *folder_scanned;
+	GSList            *playlists;
+
 	GTimeVal          last_update;
 	/* Threads */
 	GThread           *no_files_thread;
