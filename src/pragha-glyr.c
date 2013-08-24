@@ -448,7 +448,7 @@ update_related_handler (gpointer data)
 }
 
 static void
-update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
 	enum player_state state = pragha_backend_get_state (cwin->backend);
@@ -544,7 +544,7 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	GtkUIManager *ui_manager;
 	struct con_win *cwin = glyr->cwin;
 
-	g_signal_handlers_disconnect_by_func (cwin->backend, update_related_state_cb, cwin);
+	g_signal_handlers_disconnect_by_func (cwin->backend, backend_changed_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 
 	ui_manager = cwin->bar_context_menu;
@@ -580,7 +580,7 @@ pragha_glyr_new (struct con_win *cwin)
 	setup_main_menu (glyr);
 	setup_playlist (glyr);
 
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
 
 	return glyr;
 }
