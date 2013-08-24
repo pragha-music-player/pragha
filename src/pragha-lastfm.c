@@ -1021,6 +1021,19 @@ exit:
 	return;
 }
 
+static gboolean
+update_related_handler (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_INFO, "Updating Lastm depending preferences");
+
+	if (pragha_preferences_get_lastfm_support (cwin->preferences))
+		lastfm_now_playing_handler(cwin);
+
+	return FALSE;
+}
+
 static void
 backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
@@ -1029,6 +1042,9 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 	gint file_type = 0;
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
+
+	if (cwin->related_timeout_id)
+		g_source_remove (cwin->related_timeout_id);
 
 	if (state != ST_PLAYING) {
 		if (cwin->clastfm->ntag_lastfm_button)
@@ -1043,6 +1059,10 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 
 	if (cwin->clastfm->status == LASTFM_STATUS_OK)
 		time(&cwin->clastfm->playback_started);
+
+	cwin->related_timeout_id = g_timeout_add_seconds_full(
+			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
+			update_related_handler, cwin, NULL);
 }
 
 static gboolean

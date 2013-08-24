@@ -428,25 +428,6 @@ exists:
 	g_free(album_art_path);
 }
 
-static gboolean
-update_related_handler (gpointer data)
-{
-#if HAVE_LIBCLASTFM || HAVE_LIBGLYR
-	struct con_win *cwin = data;
-#endif
-	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
-
-#ifdef HAVE_LIBCLASTFM
-	if (pragha_preferences_get_lastfm_support (cwin->preferences))
-		lastfm_now_playing_handler(cwin);
-#endif
-#ifdef HAVE_LIBGLYR
-	if (pragha_preferences_get_download_album_art(cwin->preferences))
-		related_get_album_art_handler(cwin);
-#endif
-	return FALSE;
-}
-
 static void
 backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
@@ -464,9 +445,6 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
-	if(cwin->related_timeout_id)
-		g_source_remove(cwin->related_timeout_id);
-
 	if(state != ST_PLAYING) {
 		return;
 	}
@@ -476,9 +454,8 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 	if(file_type == FILE_HTTP)
 		return;
 
-	cwin->related_timeout_id = g_timeout_add_seconds_full(
-			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
-			update_related_handler, cwin, NULL);
+	if (pragha_preferences_get_download_album_art (cwin->preferences))
+		related_get_album_art_handler (cwin);
 }
 
 static void
