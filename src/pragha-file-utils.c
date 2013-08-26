@@ -167,6 +167,47 @@ pragha_pl_parser_guess_format_from_extension (const gchar *filename)
 	return PL_FORMAT_UNKNOWN;
 }
 
+/* Determine if the any file is useful to pragha. */
+
+enum generic_type
+pragha_file_get_generic_type (const gchar *filename)
+{
+	gint ret = MEDIA_TYPE_UNKNOWN;
+	gchar *result = NULL;
+
+	if (!filename)
+		return -1;
+
+	result = get_mime_type(filename);
+
+	if (result) {
+		if (is_valid_mime(result, mime_flac) ||
+		    is_valid_mime(result, mime_mpeg) ||
+		    is_valid_mime(result, mime_ogg) ||
+		    is_valid_mime(result, mime_wav) ||
+		    is_valid_mime(result, mime_asf) ||
+		    is_valid_mime(result, mime_mp4) ||
+		    is_valid_mime(result, mime_ape))
+			ret = MEDIA_TYPE_AUDIO;
+		#ifdef HAVE_PLPARSER
+		else if (is_valid_mime(result, mime_playlist))
+		#else
+		else if (g_str_has_suffix (filename, ".m3u") || g_str_has_suffix (filename, ".M3U") ||
+		         g_str_has_suffix (filename, ".pls") || g_str_has_suffix (filename, ".PLS") ||
+		         g_str_has_suffix (filename, ".xspf") || g_str_has_suffix (filename, ".XSPF") ||
+		         g_str_has_suffix (filename, ".asx") || g_str_has_suffix (filename, ".ASX") ||
+		         g_str_has_suffix (filename, ".wax") || g_str_has_suffix (filename, ".WAX"))
+		#endif
+			ret = MEDIA_TYPE_PLAYLIST;
+		else if (is_valid_mime(result, mime_image))
+			ret = MEDIA_TYPE_IMAGE;
+	}
+
+	g_free(result);
+
+	return ret;
+}
+
 /* Return true if given file is an image */
 
 static gboolean
