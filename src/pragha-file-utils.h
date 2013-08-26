@@ -52,6 +52,13 @@ enum playlist_type {
 	PL_FORMAT_XSPF
 };
 
+enum generic_type {
+	MEDIA_TYPE_UNKNOWN,
+	MEDIA_TYPE_AUDIO,
+	MEDIA_TYPE_PLAYLIST,
+	MEDIA_TYPE_IMAGE
+};
+
 extern const gchar *mime_mpeg[];
 extern const gchar *mime_wav[];
 extern const gchar *mime_flac[];
@@ -68,6 +75,7 @@ extern const gchar *mime_dual[];
 #endif
 
 gboolean is_playable_file(const gchar *file);
+enum generic_type pragha_file_get_generic_type (const gchar *filename);
 enum file_type get_file_type(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
 
