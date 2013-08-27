@@ -1156,12 +1156,17 @@ pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 	PraghaWindow  *window;
 	GtkUIManager *ui_manager;
 
+	if(!clastfm->merge_id_main_menu)
+		return;
+
 	window = pragha_application_get_window (clastfm->cwin);
 
 	ui_manager = pragha_window_get_menu_ui_manager (window);
 	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_main_menu);
 	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_main_menu);
 	g_object_unref (clastfm->action_group_main_menu);
+
+	clastfm->merge_id_main_menu = 0;
 }
 
 static gboolean
@@ -1195,6 +1200,7 @@ pragha_lastfm_connect_idle(gpointer data)
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 	}
 
+	pragha_menubar_append_lastfm (clastfm);
 	update_menubar_lastfm_state (cwin);
 
 	return FALSE;
@@ -1217,6 +1223,11 @@ pragha_lastfm_disconnect (PraghaLastfm *clastfm)
 {
 	if (clastfm->session_id != NULL) {
 		CDEBUG(DBG_INFO, "Disconnecting LASTFM");
+
+		if (clastfm->status == LASTFM_STATUS_OK)
+			g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
+
+		pragha_menubar_remove_lastfm (clastfm);
 
 		LASTFM_dinit(clastfm->session_id);
 
@@ -1261,23 +1272,16 @@ pragha_lastfm_new (struct con_win *cwin)
 			                            pragha_lastfm_connect_idle, clastfm, NULL);
 	}
 
-	pragha_menubar_append_lastfm (clastfm);
-
 	return clastfm;
 }
 
 void
 pragha_lastfm_free (PraghaLastfm *clastfm)
 {
-	g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
-
-	if (clastfm->session_id)
-		LASTFM_dinit(clastfm->session_id);
+	pragha_lastfm_disconnect (clastfm);
 
 	g_object_unref(clastfm->nmobj);
 	pragha_mutex_free(clastfm->nmobj_mutex);
-
-	pragha_menubar_remove_lastfm (clastfm);
 
 	g_slice_free(PraghaLastfm, clastfm);
 }
