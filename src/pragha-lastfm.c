@@ -42,6 +42,38 @@
 
 #include <clastfm.h>
 
+static const GtkActionEntry main_menu_actions [] = {
+	{"Lastfm", NULL, N_("_Lastfm")},
+	{"Love track", NULL, N_("Love track"),
+	 "", "Love track", G_CALLBACK(lastfm_track_love_action)},
+	{"Unlove track", NULL, N_("Unlove track"),
+	 "", "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
+	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
+	 "", "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
+	{"Add favorites", NULL, N_("Add favorites"),
+	 "", "Add favorites", G_CALLBACK(lastfm_add_favorites_action)},
+	{"Add similar", NULL, N_("Add similar"),
+	 "", "Add similar", G_CALLBACK(lastfm_get_similar_action)},
+};
+
+static const gchar *main_menu_xml = "<ui>					\
+	<menubar name=\"Menubar\">						\
+		<menu action=\"ToolsMenu\">					\
+			<placeholder name=\"pragha-plugins-placeholder\">		\
+				<separator/>						\
+				<menu action=\"Lastfm\">				\
+					<menuitem action=\"Love track\"/>		\
+					<menuitem action=\"Unlove track\"/>		\
+					<separator/>					\
+					<menuitem action=\"Import a XSPF playlist\"/>	\
+					<menuitem action=\"Add favorites\"/>		\
+					<menuitem action=\"Add similar\"/>		\
+				</menu>							\
+			</placeholder>						\
+		</menu>								\
+	</menubar>								\
+</ui>";
+
 typedef struct {
 	GList *list;
 	guint query_type;
@@ -102,27 +134,10 @@ pragha_lastfm_get_password (PraghaPreferences *preferences)
 void
 update_menubar_lastfm_state (struct con_win *cwin)
 {
-	PraghaWindow  *window;
 	GtkAction *action;
 
-	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
 	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences));
-
-	window = pragha_application_get_window (cwin);
-
-	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Love track");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
-
-	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Unlove track");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
-
-	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Add favorites");
-	gtk_action_set_sensitive (GTK_ACTION (action), has_user);
-
-	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Add similar");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing && lfm_inited);
 
 	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), logged);
@@ -1041,10 +1056,33 @@ static void
 backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
-	enum player_state state = pragha_backend_get_state (cwin->backend);
 	gint file_type = 0;
+	GtkAction *action;
+
+	enum player_state state = pragha_backend_get_state (cwin->backend);
+
+	/* Update menu sensitivies.*/
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
+
+	gboolean playing = state != ST_STOPPED;
+	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
+	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
+	gboolean has_user = lfm_inited && string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences));
+
+	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Love track");
+	gtk_action_set_sensitive (action, playing && logged);
+
+	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Unlove track");
+	gtk_action_set_sensitive (action, playing && logged);
+
+	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Add favorites");
+	gtk_action_set_sensitive (action, has_user);
+
+	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Add similar");
+	gtk_action_set_sensitive (action, playing && lfm_inited);
+
+	/* Update thread. */
 
 	if (cwin->related_timeout_id)
 		g_source_remove (cwin->related_timeout_id);
@@ -1066,6 +1104,38 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
 			update_related_handler, cwin, NULL);
+}
+
+static void
+pragha_menubar_append_lastfm (struct con_lastfm *clastfm)
+{
+	PraghaWindow *window;
+	GtkAction *action;
+
+	clastfm->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
+	gtk_action_group_set_translation_domain (clastfm->action_group_main_menu, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (clastfm->action_group_main_menu,
+	                              main_menu_actions,
+	                              G_N_ELEMENTS (main_menu_actions),
+	                              clastfm->cwin);
+
+	window = pragha_application_get_window (clastfm->cwin);
+
+	clastfm->merge_id_main_menu = pragha_menubar_append_plugin_action (window,
+	                                                                   clastfm->action_group_main_menu,
+	                                                                   main_menu_xml);
+
+	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Love track");
+	gtk_action_set_sensitive (action, FALSE);
+
+	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Unlove track");
+	gtk_action_set_sensitive (action, FALSE);
+
+	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Add favorites");
+	gtk_action_set_sensitive (action, FALSE);
+
+	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Add similar");
+	gtk_action_set_sensitive (action, FALSE);
 }
 
 static gboolean
@@ -1146,16 +1216,28 @@ init_lastfm(struct con_win *cwin)
 					do_init_lastfm_idle, cwin, NULL);
 	}
 
+	pragha_menubar_append_lastfm (cwin->clastfm);
+
 	return 0;
 }
 
 void
 lastfm_free(struct con_lastfm *clastfm)
 {
+	PraghaWindow  *window;
+	GtkUIManager *ui_manager;
+
 	g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
 
 	if (clastfm->session_id)
 		LASTFM_dinit(clastfm->session_id);
+
+	window = pragha_application_get_window (clastfm->cwin);
+
+	ui_manager = pragha_window_get_menu_ui_manager (window);
+	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_main_menu);
+	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_main_menu);
+	g_object_unref (clastfm->action_group_main_menu);
 
 	g_object_unref(clastfm->nmobj);
 	pragha_mutex_free(clastfm->nmobj_mutex);

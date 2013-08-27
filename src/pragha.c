@@ -177,12 +177,6 @@ pragha_application_new (gint argc, gchar *argv[])
 	else
 		cwin->notify = NULL;
 
-#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm(cwin) == -1) {
-		g_critical("Unable to initialize lastfm");
-	}
-#endif
-
 	cwin->art_cache = pragha_art_cache_new ();
 
 	cwin->backend = pragha_backend_new (cwin);
@@ -254,6 +248,11 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	#ifdef HAVE_LIBGLYR
 	cwin->glyr = pragha_glyr_new (cwin);
+	#endif
+	#ifdef HAVE_LIBCLASTFM
+	if (init_lastfm(cwin) == -1) {
+		g_critical("Unable to initialize lastfm");
+	}
 	#endif
 
 	/* Init_gnome_media_keys requires constructed main window. */

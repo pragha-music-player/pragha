@@ -45,6 +45,8 @@ struct con_lastfm {
 	GtkWidget *ntag_lastfm_button;
 	PraghaMusicobject *nmobj;
 	PRAGHA_MUTEX (nmobj_mutex);
+	GtkActionGroup *action_group_main_menu;
+	guint merge_id_main_menu;
 };
 
 enum LASTFM_QUERY_TYPE {
