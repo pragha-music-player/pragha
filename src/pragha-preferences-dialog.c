@@ -331,13 +331,8 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_set_password(dialog->preferences,
 				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
 
-			if (dialog->cwin->clastfm->session_id != NULL) {
-				LASTFM_dinit(dialog->cwin->clastfm->session_id);
-
-				dialog->cwin->clastfm->session_id = NULL;
-				dialog->cwin->clastfm->status = LASTFM_STATUS_INVALID;
-			}
-			just_init_lastfm(dialog->cwin);
+			pragha_lastfm_disconnect (dialog->cwin->clastfm);
+			pragha_lastfm_connect (dialog->cwin->clastfm);
 		}
 #endif
 #ifdef HAVE_LIBGLYR
@@ -456,14 +451,10 @@ static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 	gtk_widget_set_sensitive(dialog->lastfm_uname_w, is_active);
 	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
 
-	if(!is_active && dialog->cwin->clastfm->session_id) {
-		CDEBUG(DBG_INFO, "Shutdown LASTFM");
-
-		LASTFM_dinit(dialog->cwin->clastfm->session_id);
-
-		dialog->cwin->clastfm->session_id = NULL;
-		dialog->cwin->clastfm->status = LASTFM_STATUS_INVALID;
+	if(!is_active) {
+		pragha_lastfm_disconnect (dialog->cwin->clastfm);
 	}
+
 	/* Insensitive lastfm menus. */
 	update_menubar_lastfm_state (dialog->cwin);
 }

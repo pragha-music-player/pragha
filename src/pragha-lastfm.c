@@ -42,6 +42,18 @@
 
 #include <clastfm.h>
 
+struct _PraghaLastfm {
+	struct con_win *cwin;
+	LASTFM_SESSION *session_id;
+	enum LASTFM_STATUS_CODES status;
+	time_t playback_started;
+	GtkWidget *ntag_lastfm_button;
+	PraghaMusicobject *nmobj;
+	PRAGHA_MUTEX (nmobj_mutex);
+	GtkActionGroup *action_group_main_menu;
+	guint merge_id_main_menu;
+};
+
 static const GtkActionEntry main_menu_actions [] = {
 	{"Lastfm", NULL, N_("_Lastfm")},
 	{"Love track", NULL, N_("Love track"),
@@ -1107,7 +1119,7 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 }
 
 static void
-pragha_menubar_append_lastfm (struct con_lastfm *clastfm)
+pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 {
 	PraghaWindow *window;
 	GtkAction *action;
@@ -1138,22 +1150,38 @@ pragha_menubar_append_lastfm (struct con_lastfm *clastfm)
 	gtk_action_set_sensitive (action, FALSE);
 }
 
-static gboolean
-do_init_lastfm_idle(gpointer data)
+static void
+pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 {
-	struct con_win *cwin = data;
+	PraghaWindow  *window;
+	GtkUIManager *ui_manager;
 
-	cwin->clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+	window = pragha_application_get_window (clastfm->cwin);
 
-	if (cwin->clastfm->session_id != NULL) {
+	ui_manager = pragha_window_get_menu_ui_manager (window);
+	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_main_menu);
+	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_main_menu);
+	g_object_unref (clastfm->action_group_main_menu);
+}
+
+static gboolean
+pragha_lastfm_connect_idle(gpointer data)
+{
+	PraghaLastfm *clastfm = data;
+
+	struct con_win *cwin = clastfm->cwin;
+
+	clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+
+	if (clastfm->session_id != NULL) {
 		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
 		   string_is_not_empty(pragha_lastfm_get_password(cwin->preferences))) {
-			cwin->clastfm->status = LASTFM_login (cwin->clastfm->session_id,
-			                                      pragha_preferences_get_lastfm_user(cwin->preferences),
-			                                      pragha_lastfm_get_password (cwin->preferences));
+			clastfm->status = LASTFM_login (clastfm->session_id,
+			                                pragha_preferences_get_lastfm_user(cwin->preferences),
+			                                pragha_lastfm_get_password (cwin->preferences));
 
 
-			if (cwin->clastfm->status == LASTFM_STATUS_OK) {
+			if (clastfm->status == LASTFM_STATUS_OK) {
 				g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
 			}
 			else {
@@ -1175,29 +1203,47 @@ do_init_lastfm_idle(gpointer data)
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
 gint
-just_init_lastfm (struct con_win *cwin)
+pragha_lastfm_connect (PraghaLastfm *clastfm)
 {
-	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
-		CDEBUG(DBG_INFO, "Initializing LASTFM");
-		g_idle_add (do_init_lastfm_idle, cwin);
-	}
+	CDEBUG(DBG_INFO, "Connecting LASTFM");
+
+	g_idle_add (pragha_lastfm_connect_idle, clastfm);
+
 	return 0;
+}
+
+void
+pragha_lastfm_disconnect (PraghaLastfm *clastfm)
+{
+	if (clastfm->session_id != NULL) {
+		CDEBUG(DBG_INFO, "Disconnecting LASTFM");
+
+		LASTFM_dinit(clastfm->session_id);
+
+		clastfm->session_id = NULL;
+		clastfm->status = LASTFM_STATUS_INVALID;
+	}
 }
 
 /* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
  * And no show any error. */
 
-gint
-init_lastfm(struct con_win *cwin)
+PraghaLastfm *
+pragha_lastfm_new (struct con_win *cwin)
 {
+	PraghaLastfm *clastfm;
+
+	clastfm = g_slice_new0(PraghaLastfm);
+
 	/* Init struct flags */
 
-	cwin->clastfm->cwin = cwin;
-	cwin->clastfm->session_id = NULL;
-	cwin->clastfm->status = LASTFM_STATUS_INVALID;
-	cwin->clastfm->nmobj = pragha_musicobject_new();
-	pragha_mutex_create(cwin->clastfm->nmobj_mutex);
-	cwin->clastfm->ntag_lastfm_button = NULL;
+	clastfm->session_id = NULL;
+	clastfm->status = LASTFM_STATUS_INVALID;
+	clastfm->nmobj = pragha_musicobject_new();
+	pragha_mutex_create (clastfm->nmobj_mutex);
+	clastfm->ntag_lastfm_button = NULL;
+
+	clastfm->cwin = cwin;
 
 	/* Test internet and launch threads.*/
 
@@ -1207,41 +1253,32 @@ init_lastfm(struct con_win *cwin)
 #if GLIB_CHECK_VERSION(2,32,0)
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
 #else
-		if(nm_is_online () == TRUE)
+		if (nm_is_online () == TRUE)
 #endif
-			g_idle_add (do_init_lastfm_idle, cwin);
+			g_idle_add (pragha_lastfm_connect_idle, clastfm);
 		else
-			g_timeout_add_seconds_full(
-					G_PRIORITY_DEFAULT_IDLE, 30,
-					do_init_lastfm_idle, cwin, NULL);
+			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
+			                            pragha_lastfm_connect_idle, clastfm, NULL);
 	}
 
-	pragha_menubar_append_lastfm (cwin->clastfm);
+	pragha_menubar_append_lastfm (clastfm);
 
-	return 0;
+	return clastfm;
 }
 
 void
-lastfm_free(struct con_lastfm *clastfm)
+pragha_lastfm_free (PraghaLastfm *clastfm)
 {
-	PraghaWindow  *window;
-	GtkUIManager *ui_manager;
-
 	g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
 
 	if (clastfm->session_id)
 		LASTFM_dinit(clastfm->session_id);
 
-	window = pragha_application_get_window (clastfm->cwin);
-
-	ui_manager = pragha_window_get_menu_ui_manager (window);
-	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_main_menu);
-	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_main_menu);
-	g_object_unref (clastfm->action_group_main_menu);
-
 	g_object_unref(clastfm->nmobj);
 	pragha_mutex_free(clastfm->nmobj_mutex);
 
-	g_slice_free(struct con_lastfm, clastfm);
+	pragha_menubar_remove_lastfm (clastfm);
+
+	g_slice_free(PraghaLastfm, clastfm);
 }
 #endif

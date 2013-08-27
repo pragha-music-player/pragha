@@ -105,7 +105,7 @@ pragha_application_free (struct con_win *cwin)
 	g_object_unref(G_OBJECT(cwin->preferences));
 	g_object_unref(cwin->cdbase);
 #ifdef HAVE_LIBCLASTFM
-	lastfm_free (cwin->clastfm);
+	pragha_lastfm_free (cwin->clastfm);
 #endif
 	dbus_handlers_free (cwin);
 	if (cwin->notify)
@@ -138,9 +138,7 @@ pragha_application_new (gint argc, gchar *argv[])
 	cwin = g_slice_new0(struct con_win);
 
 	/* Allocate memory for simple structures */
-#ifdef HAVE_LIBCLASTFM
-	cwin->clastfm = g_slice_new0(struct con_lastfm);
-#endif
+
 	cwin->cmpris2 = pragha_mpris_new();
 
 	cwin->con_dbus = pragha_init_dbus(cwin);
@@ -250,9 +248,7 @@ pragha_application_new (gint argc, gchar *argv[])
 	cwin->glyr = pragha_glyr_new (cwin);
 	#endif
 	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm(cwin) == -1) {
-		g_critical("Unable to initialize lastfm");
-	}
+	cwin->clastfm = pragha_lastfm_new(cwin);
 	#endif
 
 	/* Init_gnome_media_keys requires constructed main window. */
