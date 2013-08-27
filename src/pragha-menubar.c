@@ -941,12 +941,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *c
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
 	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
-	/* Disable last.fm menus when no support it. */
-#ifndef HAVE_LIBCLASTFM
-	GtkAction *action_lastfm = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/ToolsMenu/Lastfm");
-	gtk_action_set_sensitive(action_lastfm, FALSE);
-#endif
-
 	g_object_unref (main_actions);
 }
 
