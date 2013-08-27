@@ -503,7 +503,6 @@ void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
 	PraghaWindow  *window;
-	GtkUIManager *ui_manager;
 
 	struct con_win *cwin = glyr->cwin;
 
@@ -511,16 +510,13 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	glyr_db_destroy (glyr->cache_db);
 
 	window = pragha_application_get_window (cwin);
+	pragha_menubar_remove_plugin_action (window,
+	                                     glyr->action_group_main_menu,
+	                                     glyr->merge_id_main_menu);
 
-	ui_manager = pragha_window_get_menu_ui_manager (window);
-	gtk_ui_manager_remove_ui (ui_manager, glyr->merge_id_main_menu);
-	gtk_ui_manager_remove_action_group (ui_manager, glyr->action_group_main_menu);
-	g_object_unref (glyr->action_group_main_menu);
-
-	ui_manager = pragha_playlist_get_context_menu (cwin->cplaylist);
-	gtk_ui_manager_remove_ui (ui_manager, glyr->merge_id_playlist);
-	gtk_ui_manager_remove_action_group (ui_manager, glyr->action_group_playlist);
-	g_object_unref (glyr->action_group_playlist);
+	pragha_playlist_remove_plugin_action (cwin->cplaylist,
+	                                      glyr->action_group_playlist,
+	                                      glyr->merge_id_playlist);
 
 	g_slice_free (PraghaGlyr, glyr);
 

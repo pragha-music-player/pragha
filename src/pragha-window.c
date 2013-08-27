@@ -218,6 +218,17 @@ pragha_menubar_append_plugin_action (PraghaWindow *window,
 	return merge_id;
 }
 
+void
+pragha_menubar_remove_plugin_action (PraghaWindow *window,
+                                     GtkActionGroup *action_group,
+                                     gint merge_id)
+{
+	gtk_ui_manager_remove_ui (window->menu_ui_manager, merge_id);
+	gtk_ui_manager_remove_action_group (window->menu_ui_manager, action_group);
+	g_object_unref (action_group);
+}
+
+
 GtkAction *
 pragha_window_get_menu_action (PraghaWindow *window, const gchar *path)
 {
