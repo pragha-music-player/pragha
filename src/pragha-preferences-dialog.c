@@ -783,8 +783,8 @@ pref_create_audio_page (PreferencesDialog *dialog)
 	gtk_misc_set_alignment(GTK_MISC (audio_device_label), 0, 0);
 
 	audio_device_entry = gtk_entry_new();
-	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_device_entry),
-				    _("Restart Required"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(audio_device_entry), _("Restart Required"));
+	gtk_entry_set_activates_default (GTK_ENTRY(audio_device_entry), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, audio_device_label, audio_device_entry);
 
@@ -799,8 +799,8 @@ pref_create_audio_page (PreferencesDialog *dialog)
 	gtk_misc_set_alignment(GTK_MISC (audio_cd_device_label), 0, 0);
 
 	audio_cd_device_entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry),
-				 AUDIO_CD_DEVICE_ENTRY_LEN);
+	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry), AUDIO_CD_DEVICE_ENTRY_LEN);
+	gtk_entry_set_activates_default (GTK_ENTRY(audio_cd_device_entry), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
 
@@ -930,9 +930,11 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	pragha_hig_workarea_table_add_row (table, &row, album_art_size_label, album_art_size);
 
 	album_art_pattern_label = gtk_label_new(_("Album art file pattern"));
+
 	album_art_pattern = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern),
-				 ALBUM_ART_PATTERN_LEN);
+	gtk_entry_set_max_length(GTK_ENTRY(album_art_pattern), ALBUM_ART_PATTERN_LEN);
+	gtk_entry_set_activates_default (GTK_ENTRY(album_art_pattern), TRUE);
+
 	gtk_widget_set_tooltip_text(album_art_pattern, album_art_pattern_info);
 
 	pragha_hig_workarea_table_add_row (table, &row, album_art_pattern_label, album_art_pattern);
@@ -1076,6 +1078,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 	lastfm_ulabel = gtk_label_new(_("Username"));
 	lastfm_uname = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
+	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_uname), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
 
@@ -1084,6 +1087,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
 	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
 	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
+	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
 
 	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
 	#endif
