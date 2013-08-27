@@ -193,6 +193,31 @@ pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(window->infobox), widget);
 }
 
+gint
+pragha_menubar_append_plugin_action (PraghaWindow *window,
+                                     GtkActionGroup *action_group,
+                                     const gchar *menu_xml)
+{
+	GtkUIManager *ui_manager;
+	GError *error = NULL;
+	gint merge_id;
+
+	ui_manager = pragha_window_get_menu_ui_manager(window);
+	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
+
+	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
+	                                              menu_xml,
+	                                              -1,
+	                                              &error);
+
+	if (error) {
+		g_warning ("Adding plugin to menubar: %s", error->message);
+		g_error_free (error);
+	}
+
+	return merge_id;
+}
+
 GtkAction *
 pragha_window_get_menu_action (PraghaWindow *window, const gchar *path)
 {

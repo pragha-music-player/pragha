@@ -99,16 +99,7 @@ static const gchar *main_menu_xml = "<ui>					\
 			<separator/>						\
 			<menuitem action=\"Equalizer\"/>			\
 			<separator/>						\
-			<placeholder name=\"pragha-glyr-placeholder\"/>		\
-			<separator/>						\
-			<menu action=\"Lastfm\">				\
-				<menuitem action=\"Love track\"/>		\
-				<menuitem action=\"Unlove track\"/>		\
-				<separator/>					\
-				<menuitem action=\"Import a XSPF playlist\"/>	\
-				<menuitem action=\"Add favorites\"/>		\
-				<menuitem action=\"Add similar\"/>		\
-			</menu>							\
+			<placeholder name=\"pragha-plugins-placeholder\"/>		\
 			<separator/>						\
 			<menuitem action=\"Rescan library\"/>			\
 			<menuitem action=\"Update library\"/>			\
@@ -169,30 +160,6 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	{"Lastfm", NULL, N_("_Lastfm")},
-	#ifdef HAVE_LIBCLASTFM
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", G_CALLBACK(lastfm_track_love_action)},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
-	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
-	 "", "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
-	{"Add favorites", NULL, N_("Add favorites"),
-	 "", "Add favorites", G_CALLBACK(lastfm_add_favorites_action)},
-	{"Add similar", NULL, N_("Add similar"),
-	 "", "Add similar", G_CALLBACK(lastfm_get_similar_action)},
-	#else
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", NULL},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", NULL},
-	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
-	 "", "Import a XSPF playlist", NULL},
-	{"Add favorites", NULL, N_("Add favorites"),
-	 "", "Add favorites", NULL},
-	{"Add similar", NULL, N_("Add similar"),
-	 "", "Add similar", NULL},
-	#endif
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
 	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),

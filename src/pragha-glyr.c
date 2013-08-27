@@ -71,7 +71,7 @@ static const GtkActionEntry main_menu_actions [] = {
 static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
 		<menu action=\"ToolsMenu\">					\
-			<placeholder name=\"pragha-glyr-placeholder\">		\
+			<placeholder name=\"pragha-plugins-placeholder\">		\
 				<menuitem action=\"Search lyric\"/>		\
 				<menuitem action=\"Search artist info\"/>	\
 			</placeholder>						\
@@ -462,8 +462,6 @@ static void
 setup_main_menu (PraghaGlyr *glyr)
 {
 	PraghaWindow *window;
-	GtkUIManager *ui_manager;
-	GError *error = NULL;
 	GtkAction *action;
 
 	glyr->action_group_main_menu = gtk_action_group_new ("PraghaGlyrMainMenuActions");
@@ -474,24 +472,16 @@ setup_main_menu (PraghaGlyr *glyr)
 	                              glyr);
 
 	window = pragha_application_get_window (glyr->cwin);
-	ui_manager = pragha_window_get_menu_ui_manager(window);
 
-	gtk_ui_manager_insert_action_group (ui_manager, glyr->action_group_main_menu, -1);
-	glyr->merge_id_main_menu = gtk_ui_manager_add_ui_from_string (ui_manager,
-	                                                              main_menu_xml,
-	                                                              -1,
-	                                                              &error);
+	glyr->merge_id_main_menu = pragha_menubar_append_plugin_action (window,
+	                                                                glyr->action_group_main_menu,
+	                                                                main_menu_xml);
 
 	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search lyric");
 	gtk_action_set_sensitive (action, FALSE);
 
 	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search artist info");
 	gtk_action_set_sensitive (action, FALSE);
-
-	if (error) {
-		g_warning ("glyr: %s", error->message);
-		g_error_free (error);
-	}
 }
 
 static void
