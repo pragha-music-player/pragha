@@ -1119,6 +1119,10 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
 
+	/* Update gui. */
+
+	pragha_lastfm_update_menu_actions (cwin->clastfm);
+
 	/* Update thread. */
 
 	if (cwin->related_timeout_id)
