@@ -120,11 +120,15 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
 
 dnl Check libxfce4ui
 AS_IF([test "x$with_gtk3" != xno],
-	[libxfce4ui_version="4.11.0"],
+	[libxfce4ui_name="libxfce4ui-2"],
+	[libxfce4ui_name="libxfce4ui-1"])
+AS_IF([test "x$with_gtk3" != xno],
+	[libxfce4ui_version="4.10.0"],
 	[libxfce4ui_version="4.8.0"])
+
 LIBXFCE4UI_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
-                       [libxfce4ui-1], [$libxfce4ui_version],
+                       [$libxfce4ui_name], [$libxfce4ui_version],
                        [libxfce4ui],
                        [libxfce4ui library], [yes])
 
