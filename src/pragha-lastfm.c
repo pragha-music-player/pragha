@@ -1195,27 +1195,24 @@ static void
 pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 {
 	PraghaWindow  *window;
-	GtkUIManager *ui_manager;
 
 	if(!clastfm->merge_id_main_menu)
 		return;
 
 	window = pragha_application_get_window (clastfm->cwin);
 
-	ui_manager = pragha_window_get_menu_ui_manager (window);
-	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_main_menu);
-	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_main_menu);
-	g_object_unref (clastfm->action_group_main_menu);
+	pragha_menubar_remove_plugin_action (window,
+	                                     clastfm->action_group_main_menu,
+	                                     clastfm->merge_id_main_menu);
 
 	clastfm->merge_id_main_menu = 0;
 
 	if (!clastfm->merge_id_playlist)
 		return;
 
-	ui_manager = pragha_playlist_get_context_menu (clastfm->cwin->cplaylist);
-	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_playlist);
-	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_playlist);
-	g_object_unref (clastfm->action_group_playlist);
+	pragha_playlist_remove_plugin_action (clastfm->cwin->cplaylist,
+	                                      clastfm->action_group_playlist,
+	                                      clastfm->merge_id_playlist);
 
 	clastfm->merge_id_playlist = 0;
 }

@@ -39,8 +39,10 @@ void       pragha_window_unfullscreen          (GObject *object, struct con_win 
 
 void       pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget);
 
-GtkAction     *pragha_window_get_menu_action     (PraghaWindow *window, const gchar *path);
 gint           pragha_menubar_append_plugin_action (PraghaWindow *window, GtkActionGroup *action_group, const gchar *menu_xml);
+void           pragha_menubar_remove_plugin_action (PraghaWindow *window, GtkActionGroup *action_group, gint merge_id);
+
+GtkAction     *pragha_window_get_menu_action     (PraghaWindow *window, const gchar *path);
 GtkUIManager  *pragha_window_get_menu_ui_manager (PraghaWindow *window);
 
 GtkWidget     *pragha_window_get_menubar       (PraghaWindow *window);

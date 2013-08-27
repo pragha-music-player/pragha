@@ -3967,6 +3967,16 @@ pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
 	return merge_id;
 }
 
+void
+pragha_playlist_remove_plugin_action (PraghaPlaylist *cplaylist,
+                                      GtkActionGroup *action_group,
+                                      gint merge_id)
+{
+	gtk_ui_manager_remove_ui (cplaylist->playlist_context_menu, merge_id);
+	gtk_ui_manager_remove_action_group (cplaylist->playlist_context_menu, action_group);
+	g_object_unref (action_group);
+}
+
 PraghaDatabase *
 pragha_playlist_get_database(PraghaPlaylist* cplaylist)
 {
