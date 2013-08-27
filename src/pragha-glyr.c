@@ -487,26 +487,16 @@ setup_main_menu (PraghaGlyr *glyr)
 static void
 setup_playlist (PraghaGlyr *glyr)
 {
-	GError *error = NULL;
-
 	glyr->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (glyr->action_group_playlist, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (glyr->action_group_playlist,
-				      playlist_actions,
-				      G_N_ELEMENTS (playlist_actions),
-				      glyr);
+	                              playlist_actions,
+	                              G_N_ELEMENTS (playlist_actions),
+	                              glyr);
 
-	GtkUIManager *ui_manager = pragha_playlist_get_context_menu (glyr->cwin->cplaylist);
-	gtk_ui_manager_insert_action_group (ui_manager, glyr->action_group_playlist, -1);
-	glyr->merge_id_playlist = gtk_ui_manager_add_ui_from_string (ui_manager,
-	                                                             playlist_xml,
-	                                                             -1,
-	                                                             &error);
-
-	if (error) {
-		g_warning ("glyr: %s", error->message);
-		g_error_free (error);
-	}
+	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (glyr->cwin->cplaylist,
+	                                                                glyr->action_group_playlist,
+	                                                                playlist_xml);
 }
 
 void

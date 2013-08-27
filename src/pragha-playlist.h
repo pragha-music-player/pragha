@@ -177,6 +177,7 @@ GtkTreeModel *pragha_playlist_get_model (PraghaPlaylist* cplaylist);
 
 GtkWidget      *pragha_playlist_get_widget (PraghaPlaylist* cplaylist);
 GtkUIManager   *pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist);
+gint            pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist, GtkActionGroup *action_group, const gchar *menu_xml);
 PraghaDatabase *pragha_playlist_get_database(PraghaPlaylist* cplaylist);
 
 void            pragha_playlist_free (PraghaPlaylist *cplaylist);

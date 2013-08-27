@@ -227,10 +227,6 @@ pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gp
 
 	action = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	#ifdef HAVE_LIBCLASTFM
-	update_menubar_lastfm_state (cwin);
-	#endif
 }
 
 /* Add Files a folders to play list based on Audacius code.*/

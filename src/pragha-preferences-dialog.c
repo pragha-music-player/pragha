@@ -454,9 +454,6 @@ static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 	if(!is_active) {
 		pragha_lastfm_disconnect (dialog->cwin->clastfm);
 	}
-
-	/* Insensitive lastfm menus. */
-	update_menubar_lastfm_state (dialog->cwin);
 }
 #endif
 

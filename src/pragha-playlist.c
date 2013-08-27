@@ -93,12 +93,7 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<menuitem action=\"Save selection\"/>					\
 	<separator/>				    				\
 	<menu action=\"ToolsMenu\">						\
-		<placeholder name=\"pragha-glyr-placeholder\"/>			\
-		<separator/>							\
-		<menuitem action=\"Love track\"/>				\
-		<menuitem action=\"Unlove track\"/>				\
-		<separator/>							\
-		<menuitem action=\"Add similar\"/>				\
+		<placeholder name=\"pragha-plugins-placeholder\"/>			\
 	</menu>									\
 	<separator/>				    				\
 	<menuitem action=\"Copy tag to selection\"/>				\
@@ -132,22 +127,6 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
-	{"Lastfm", NULL, N_("_Lastfm")},
-	#ifdef HAVE_LIBCLASTFM
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", G_CALLBACK(lastfm_track_current_playlist_love_action)},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", G_CALLBACK(lastfm_track_current_playlist_unlove_action)},
-	{"Add similar", NULL, N_("Add similar"),
-	 "", "Add similar", G_CALLBACK(lastfm_get_similar_current_playlist_action)},
-	#else
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", NULL},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", NULL},
-	{"Add similar", NULL, N_("Add similar"),
-	 "", "Add similar", NULL},
-	#endif
 	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
 	 "", "Copy tag to selection", G_CALLBACK(copy_tags_to_selection_action)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
@@ -3229,18 +3208,6 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	                                     cwin);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
-	/* Disable last.fm menus when no support it. */
-#ifndef HAVE_LIBCLASTFM
-	GtkAction *action_love = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Love track");
-	gtk_action_set_sensitive(action_love, FALSE);
-
-	GtkAction *action_unlove = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Unlove track");
-	gtk_action_set_sensitive(action_unlove, FALSE);
-
-	GtkAction *action_add_similar = gtk_ui_manager_get_action(context_menu, "/SelectionPopup/ToolsMenu/Add similar");
-	gtk_action_set_sensitive(action_add_similar, FALSE);
-#endif
-
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
 	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
@@ -3973,6 +3940,31 @@ GtkUIManager *
 pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist)
 {
 	return cplaylist->playlist_context_menu;
+}
+
+gint
+pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
+                                      GtkActionGroup *action_group,
+                                      const gchar *menu_xml)
+{
+	GtkUIManager *ui_manager;
+	GError *error = NULL;
+	gint merge_id;
+
+	ui_manager = cplaylist->playlist_context_menu;
+	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
+
+	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
+	                                              menu_xml,
+	                                              -1,
+	                                              &error);
+
+	if (error) {
+		g_warning ("Adding plugin to playlist menu: %s", error->message);
+		g_error_free (error);
+	}
+
+	return merge_id;
 }
 
 PraghaDatabase *

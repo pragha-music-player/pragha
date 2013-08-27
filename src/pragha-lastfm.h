@@ -48,7 +48,6 @@ enum LASTFM_QUERY_TYPE {
 void         pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass);
 const gchar *pragha_lastfm_get_password (PraghaPreferences *preferences);
 
-void update_menubar_lastfm_state (struct con_win *cwin);
 void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);
