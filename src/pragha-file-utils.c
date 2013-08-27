@@ -476,20 +476,28 @@ GList *
 append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
 {
 	PraghaMusicobject *mobj;
+	enum generic_type file_type;
 
 	if (is_dir_and_accessible(filename)) {
-		list = append_mobj_list_from_folder(list, filename);
-	}
-	else if (pragha_pl_parser_guess_format_from_extension(filename) != PL_FORMAT_UNKNOWN) {
-		list = pragha_pl_parser_append_mobj_list_by_extension(list, filename);
+		list = append_mobj_list_from_folder (list, filename);
 	}
 	else {
-		if (is_playable_file(filename)) {
-			mobj = new_musicobject_from_file(filename);
-			if (G_LIKELY(mobj)) {
-				list = g_list_append(list, mobj);
-				add_recent_file(filename);
-			}
+		file_type = pragha_file_get_generic_type (filename);
+		switch (file_type) {
+			case MEDIA_TYPE_AUDIO:
+				mobj = new_musicobject_from_file (filename);
+				if (G_LIKELY(mobj)) {
+					list = g_list_append(list, mobj);
+					add_recent_file(filename);
+				}
+				break;
+			case MEDIA_TYPE_PLAYLIST:
+				list = pragha_pl_parser_append_mobj_list_by_extension (list, filename);
+				break;
+			case MEDIA_TYPE_IMAGE:
+			case MEDIA_TYPE_UNKNOWN:
+			default:
+				break;
 		}
 	}
 
