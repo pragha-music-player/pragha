@@ -39,6 +39,10 @@ void       pragha_window_unfullscreen          (GObject *object, struct con_win 
 
 void       pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget);
 
+GtkAction     *pragha_window_get_menu_action     (PraghaWindow *window, const gchar *path);
+GtkUIManager  *pragha_window_get_menu_ui_manager (PraghaWindow *window);
+
+GtkWidget     *pragha_window_get_menubar       (PraghaWindow *window);
 GtkWidget     *pragha_window_get_mainwindow    (PraghaWindow *window);
 PraghaToolbar *pragha_window_get_toolbar       (PraghaWindow *window);
 GdkPixbuf     *pragha_window_get_pixbuf_app    (PraghaWindow *window);

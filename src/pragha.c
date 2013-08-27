@@ -119,7 +119,6 @@ pragha_application_free (struct con_win *cwin)
 #endif
 	pragha_cdda_free ();
 
-	g_object_unref (cwin->bar_context_menu);
 	g_object_unref (cwin->systray_menu);
 
 	g_slice_free(struct con_win, cwin);
@@ -209,7 +208,7 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	/* Init the gui after bancked to sink volume. */
 
-	init_gui(0, NULL, cwin);
+	init_gui (0, NULL, cwin);
 
 	window = pragha_application_get_window (cwin);
 
