@@ -43,15 +43,25 @@
 #include <clastfm.h>
 
 struct _PraghaLastfm {
-	struct con_win *cwin;
-	LASTFM_SESSION *session_id;
-	enum LASTFM_STATUS_CODES status;
+	/* Last session status. */
+	LASTFM_SESSION           *session_id;
+	enum LASTFM_STATUS_CODES  status;
+	gboolean                  has_user;
+	gboolean                  has_pass;
+
+	/* Elapsed Time*/
 	time_t playback_started;
-	GtkWidget *ntag_lastfm_button;
+
+	GtkWidget         *ntag_lastfm_button;
 	PraghaMusicobject *nmobj;
-	PRAGHA_MUTEX (nmobj_mutex);
+	PRAGHA_MUTEX      (nmobj_mutex);
+
+	/* Menu options */
 	GtkActionGroup *action_group_main_menu;
-	guint merge_id_main_menu;
+	guint           merge_id_main_menu;
+
+	/* Future PraghaAplication */
+	struct con_win *cwin;
 };
 
 static const GtkActionEntry main_menu_actions [] = {
@@ -696,8 +706,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 {
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
-	if ((cwin->clastfm->session_id == NULL) ||
-	    string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences))) {
+	if ((cwin->clastfm->session_id == NULL) || !cwin->clastfm->has_user) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
@@ -1007,8 +1016,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		return;
 
-	if(string_is_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) ||
-	   string_is_empty(pragha_lastfm_get_password (cwin->preferences)))
+	if (!cwin->clastfm->has_user || !cwin->clastfm->has_pass)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -1077,10 +1085,10 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
 
-	gboolean playing = state != ST_STOPPED;
-	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
-	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
-	gboolean has_user = lfm_inited && string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences));
+	gboolean playing = (state != ST_STOPPED);
+	gboolean logged = (cwin->clastfm->status == LASTFM_STATUS_OK);
+	gboolean lfm_inited = (cwin->clastfm->session_id != NULL);
+	gboolean has_user = (lfm_inited && !cwin->clastfm->has_user);
 
 	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Love track");
 	gtk_action_set_sensitive (action, playing && logged);
@@ -1172,19 +1180,28 @@ pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 static gboolean
 pragha_lastfm_connect_idle(gpointer data)
 {
+	const gchar *user;
+	const gchar *pass;
+
 	PraghaLastfm *clastfm = data;
 
 	struct con_win *cwin = clastfm->cwin;
 
+	clastfm->has_user = FALSE;
+	clastfm->has_pass = FALSE;
+
 	clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (clastfm->session_id != NULL) {
-		if(string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences)) &&
-		   string_is_not_empty(pragha_lastfm_get_password(cwin->preferences))) {
-			clastfm->status = LASTFM_login (clastfm->session_id,
-			                                pragha_preferences_get_lastfm_user(cwin->preferences),
-			                                pragha_lastfm_get_password (cwin->preferences));
+		user = pragha_preferences_get_lastfm_user (cwin->preferences);
+		pass = pragha_lastfm_get_password (cwin->preferences);
 
+		clastfm->has_user = string_is_not_empty(user);
+		clastfm->has_pass = string_is_not_empty(pass);
+
+		if(clastfm->has_user && clastfm->has_pass) {
+			clastfm->status = LASTFM_login (clastfm->session_id,
+			                                user, pass);
 
 			if (clastfm->status == LASTFM_STATUS_OK) {
 				g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
@@ -1233,6 +1250,8 @@ pragha_lastfm_disconnect (PraghaLastfm *clastfm)
 
 		clastfm->session_id = NULL;
 		clastfm->status = LASTFM_STATUS_INVALID;
+		clastfm->has_user = FALSE;
+		clastfm->has_pass = FALSE;
 	}
 }
 
@@ -1253,6 +1272,9 @@ pragha_lastfm_new (struct con_win *cwin)
 	clastfm->nmobj = pragha_musicobject_new();
 	pragha_mutex_create (clastfm->nmobj_mutex);
 	clastfm->ntag_lastfm_button = NULL;
+
+	clastfm->has_user = FALSE;
+	clastfm->has_pass = FALSE;
 
 	clastfm->cwin = cwin;
 
