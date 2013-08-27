@@ -237,25 +237,28 @@ static GtkToggleActionEntry toggles_entries[] = {
 void
 pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	PraghaWindow  *window;
 	struct con_win *cwin = user_data;
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 	GtkAction *action;
 
 	gboolean playing = (state != ST_STOPPED);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Prev");
+	window = pragha_application_get_window (cwin);
+
+	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Stop");
+	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Next");
+	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/PlaybackMenu/Edit tags");
+	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Jump to playing song");
+	action = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
 	#ifdef HAVE_LIBCLASTFM
@@ -733,11 +736,13 @@ void pref_action(GtkAction *action, struct con_win *cwin)
 void
 fullscreen_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaWindow  *window;
 	GtkWidget *menu_bar;
 	gboolean fullscreen;
 	GdkWindowState state;
 
-	menu_bar = gtk_ui_manager_get_widget(cwin->bar_context_menu, "/Menubar");
+	window = pragha_application_get_window (cwin);
+	menu_bar = pragha_window_get_menubar (window);
 
 	fullscreen = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
@@ -988,8 +993,7 @@ pragha_menubar_new (void)
 	main_menu = gtk_ui_manager_new();
 
 	if (!gtk_ui_manager_add_ui_from_string(main_menu, main_menu_xml, -1, &error)) {
-		g_critical("Unable to create main menu, err : %s",
-			   error->message);
+		g_critical("Unable to create main menu, err : %s", error->message);
 	}
 
 	/* Load menu accelerators edited */

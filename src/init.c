@@ -81,12 +81,13 @@ static gboolean _init_gui_state(gpointer data)
 
 void init_menu_actions(struct con_win *cwin)
 {
+	PraghaWindow  *window;
 	GtkAction *action = NULL;
 	const gchar *start_mode;
 
-	/* Init state of menus */
+	window = pragha_application_get_window (cwin);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Fullscreen");
+	action = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Fullscreen");
 
 	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
@@ -94,7 +95,7 @@ void init_menu_actions(struct con_win *cwin)
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu,"/Menubar/ViewMenu/Playback controls below");
+	action = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
 }
 
@@ -104,32 +105,15 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Initializing gui");
 
-	/* HACK:
-	 * All menus require the window created:
-	 *  * gtk_window_add_accel_group()
-	 */
-	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-	cwin->bar_context_menu = pragha_menubar_new ();
-	
-	pragha_menubar_connect_signals (cwin->bar_context_menu, cwin);
-
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new(cwin);
 	cwin->cplaylist = pragha_playlist_new(cwin);
-
 	pragha_sidebar_add_pane(cwin->sidebar,
 	                        pragha_library_pane_get_widget(cwin->clibrary));
 	pragha_sidebar_attach_menu(cwin->sidebar,
 	                           GTK_MENU(gtk_ui_manager_get_widget(pragha_library_pane_get_pane_context_menu(cwin->clibrary), "/popup")));
 
 	cwin->window = pragha_window_new(cwin);
-
-	/* HACK:
-	 * All menus require the window created:
-	 *  * gtk_window_add_accel_group()
-	 */
-	/*cwin->mainwindow = pragha_window_get_mainwindow (cwin->window);*/
 
 	/* Systray */
 

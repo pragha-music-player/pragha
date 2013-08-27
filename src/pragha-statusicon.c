@@ -232,8 +232,6 @@ create_systray_menu (struct con_win *cwin)
 				     systray_menu_aentries,
 				     G_N_ELEMENTS(systray_menu_aentries),
 				     (gpointer)cwin);
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow),
-				   gtk_ui_manager_get_accel_group(menu));
 	gtk_ui_manager_insert_action_group(menu, actions, 0);
 
 	g_object_unref (actions);

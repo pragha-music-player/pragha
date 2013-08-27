@@ -102,6 +102,7 @@ pragha_lastfm_get_password (PraghaPreferences *preferences)
 void
 update_menubar_lastfm_state (struct con_win *cwin)
 {
+	PraghaWindow  *window;
 	GtkAction *action;
 
 	gboolean playing = pragha_backend_get_state (cwin->backend) != ST_STOPPED;
@@ -109,16 +110,18 @@ update_menubar_lastfm_state (struct con_win *cwin)
 	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
 	gboolean has_user = lfm_inited && string_is_not_empty(pragha_preferences_get_lastfm_user(cwin->preferences));
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Love track");
+	window = pragha_application_get_window (cwin);
+
+	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Love track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Unlove track");
+	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Unlove track");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && logged);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add favorites");
+	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Add favorites");
 	gtk_action_set_sensitive (GTK_ACTION (action), has_user);
 
-	action = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ToolsMenu/Lastfm/Add similar");
+	action = pragha_window_get_menu_action (window, "/Menubar/ToolsMenu/Lastfm/Add similar");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing && lfm_inited);
 
 	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Love track");

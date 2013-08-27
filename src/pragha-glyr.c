@@ -461,17 +461,21 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 static void
 setup_main_menu (PraghaGlyr *glyr)
 {
+	PraghaWindow *window;
+	GtkUIManager *ui_manager;
 	GError *error = NULL;
 	GtkAction *action;
 
 	glyr->action_group_main_menu = gtk_action_group_new ("PraghaGlyrMainMenuActions");
 	gtk_action_group_set_translation_domain (glyr->action_group_main_menu, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (glyr->action_group_main_menu,
-				      main_menu_actions,
-				      G_N_ELEMENTS (main_menu_actions),
-				      glyr);
+	                              main_menu_actions,
+	                              G_N_ELEMENTS (main_menu_actions),
+	                              glyr);
 
-	GtkUIManager *ui_manager = glyr->cwin->bar_context_menu;
+	window = pragha_application_get_window (glyr->cwin);
+	ui_manager = pragha_window_get_menu_ui_manager(window);
+
 	gtk_ui_manager_insert_action_group (ui_manager, glyr->action_group_main_menu, -1);
 	glyr->merge_id_main_menu = gtk_ui_manager_add_ui_from_string (ui_manager,
 	                                                              main_menu_xml,
@@ -518,13 +522,17 @@ setup_playlist (PraghaGlyr *glyr)
 void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
+	PraghaWindow  *window;
 	GtkUIManager *ui_manager;
+
 	struct con_win *cwin = glyr->cwin;
 
 	g_signal_handlers_disconnect_by_func (cwin->backend, backend_changed_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 
-	ui_manager = cwin->bar_context_menu;
+	window = pragha_application_get_window (cwin);
+
+	ui_manager = pragha_window_get_menu_ui_manager (window);
 	gtk_ui_manager_remove_ui (ui_manager, glyr->merge_id_main_menu);
 	gtk_ui_manager_remove_action_group (ui_manager, glyr->action_group_main_menu);
 	g_object_unref (glyr->action_group_main_menu);

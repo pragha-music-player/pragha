@@ -26,6 +26,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-menubar.h"
 #include "pragha-playback.h"
 #include "pragha-window.h"
 #include "pragha-debug.h"
@@ -41,6 +42,7 @@ struct _PraghaWindow {
 	GtkWidget *pane;
 	GtkWidget *sidebar;
 	GtkWidget *playlist;
+	GtkUIManager *menu_ui_manager;
 };
 
 /********************************/
@@ -141,10 +143,13 @@ gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GErr
 static gboolean
 pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct con_win *cwin)
 {
+	PraghaWindow  *window;
 	GtkAction *action_fullscreen;
 
  	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
-		action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
+		window = pragha_application_get_window (cwin);
+
+		action_fullscreen = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Fullscreen");
 
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen),
 		                              (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
@@ -156,8 +161,12 @@ pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct
 void
 pragha_window_unfullscreen (GObject *object, struct con_win *cwin)
 {
+	PraghaWindow  *window;
 	GtkAction *action_fullscreen;
-	action_fullscreen = gtk_ui_manager_get_action(cwin->bar_context_menu, "/Menubar/ViewMenu/Fullscreen");
+
+	window = pragha_application_get_window (cwin);
+
+	action_fullscreen = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Fullscreen");
 
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
@@ -182,6 +191,24 @@ pragha_window_add_widget_to_infobox (PraghaWindow *window, GtkWidget *widget)
 	}
 		
 	gtk_container_add(GTK_CONTAINER(window->infobox), widget);
+}
+
+GtkAction *
+pragha_window_get_menu_action (PraghaWindow *window, const gchar *path)
+{
+	return gtk_ui_manager_get_action (window->menu_ui_manager, path);
+}
+
+GtkUIManager *
+pragha_window_get_menu_ui_manager (PraghaWindow *window)
+{
+	return window->menu_ui_manager;
+}
+
+GtkWidget *
+pragha_window_get_menubar (PraghaWindow *window)
+{
+	return window->menubar;
 }
 
 GtkWidget *
@@ -278,6 +305,8 @@ pragha_window_free (PraghaWindow *window)
 	if (window->pixbuf_app)
 		g_object_unref(window->pixbuf_app);
 
+	g_object_unref (window->menu_ui_manager);
+
 	g_object_unref(preferences);
 	g_slice_free(PraghaWindow, window);
 	g_free(pragha_accels_path);
@@ -297,11 +326,10 @@ pragha_window_new(struct con_win *cwin)
 
 	/* Main window */
 
-	/* HACK:
-	 * All menus require the window created:
-	 *  * gtk_window_add_accel_group()
-	 */
-	window->mainwindow = cwin->mainwindow;
+	window->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+	/* Compatibility */
+	cwin->mainwindow = window->mainwindow;
 
 	window->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
 	if (!window->pixbuf_app)
@@ -361,7 +389,11 @@ pragha_window_new(struct con_win *cwin)
 
 	/* Collect widgets. */
 
-	window->menubar = gtk_ui_manager_get_widget(cwin->bar_context_menu, "/Menubar");
+	window->menu_ui_manager = pragha_menubar_new ();
+	/* TODO: Gobjetivice library_tree and pragha_toolbar to dispense of cwin */
+	pragha_menubar_connect_signals (window->menu_ui_manager, cwin);
+	window->menubar = gtk_ui_manager_get_widget (window->menu_ui_manager, "/Menubar");
+
 	window->toolbar = pragha_toolbar_new ();
 	window->sidebar = pragha_sidebar_get_widget(cwin->sidebar);
 	window->playlist = pragha_playlist_get_widget(cwin->cplaylist);

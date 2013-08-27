@@ -1364,12 +1364,17 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 static void
 update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 {
+	PraghaWindow *window;
 	GtkWidget *submenu, *menuitem;
+	GtkUIManager *ui_manager;
 	GtkAccelGroup* accel_group;
+
+	window = pragha_application_get_window (cwin);
+	ui_manager = pragha_window_get_menu_ui_manager (window);
 
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Save playlist")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(ui_manager, "/Menubar/PlaylistMenu/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
@@ -1409,12 +1414,17 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 static void
 update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 {
+	PraghaWindow *window;
 	GtkWidget *submenu, *menuitem;
+	GtkUIManager *ui_manager;
 	GtkAccelGroup* accel_group;
-	
+
+	window = pragha_application_get_window (cwin);
+	ui_manager = pragha_window_get_menu_ui_manager (window);
+
 	submenu = gtk_menu_new ();
 
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(cwin->bar_context_menu,"/Menubar/PlaylistMenu/Save selection")), submenu);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM(gtk_ui_manager_get_widget(ui_manager,"/Menubar/PlaylistMenu/Save selection")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));

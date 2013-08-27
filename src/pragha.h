@@ -97,7 +97,6 @@ struct con_win {
 #endif
 	GtkWidget *mainwindow;
 	GtkStatusIcon *status_icon;
-	GtkUIManager *bar_context_menu;
 	GtkUIManager *systray_menu;
 	gboolean unique_instance;
 	gboolean first_run;
