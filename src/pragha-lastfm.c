@@ -60,6 +60,9 @@ struct _PraghaLastfm {
 	GtkActionGroup *action_group_main_menu;
 	guint           merge_id_main_menu;
 
+	GtkActionGroup *action_group_playlist;
+	guint merge_id_playlist;
+
 	/* Future PraghaAplication */
 	struct con_win *cwin;
 };
@@ -94,6 +97,28 @@ static const gchar *main_menu_xml = "<ui>					\
 			</placeholder>						\
 		</menu>								\
 	</menubar>								\
+</ui>";
+
+static const GtkActionEntry playlist_actions [] = {
+	{"Love track", NULL, N_("Love track"),
+	 "", "Love track", G_CALLBACK(lastfm_track_current_playlist_love_action)},
+	{"Unlove track", NULL, N_("Unlove track"),
+	 "", "Unlove track", G_CALLBACK(lastfm_track_current_playlist_unlove_action)},
+	{"Add similar", NULL, N_("Add similar"),
+	 "", "Add similar", G_CALLBACK(lastfm_get_similar_current_playlist_action)},
+};
+
+static const gchar *playlist_xml = "<ui>					\
+	<popup name=\"SelectionPopup\">		   				\
+	<menu action=\"ToolsMenu\">						\
+		<placeholder name=\"pragha-plugins-placeholder\">			\
+			<menuitem action=\"Love track\"/>				\
+			<menuitem action=\"Unlove track\"/>				\
+			<separator/>							\
+			<menuitem action=\"Add similar\"/>				\
+		</placeholder>							\
+	</menu>									\
+	</popup>				    				\
 </ui>";
 
 typedef struct {
@@ -154,21 +179,33 @@ pragha_lastfm_get_password (PraghaPreferences *preferences)
 /* Upadate lastfm menubar acording lastfm state */
 
 void
-update_menubar_lastfm_state (struct con_win *cwin)
+pragha_action_group_set_sensitive (GtkActionGroup *group, const gchar *name, gboolean sensitive)
 {
 	GtkAction *action;
+	action = gtk_action_group_get_action (group, name);
+	gtk_action_set_sensitive (action, sensitive);
+}
 
-	gboolean logged = cwin->clastfm->status == LASTFM_STATUS_OK;
-	gboolean lfm_inited = cwin->clastfm->session_id != NULL;
+void
+pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
+{
+	struct con_win *cwin = clastfm->cwin;
 
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Love track");
-	gtk_action_set_sensitive (GTK_ACTION (action), logged);
+	enum player_state state = pragha_backend_get_state (cwin->backend);
 
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Unlove track");
-	gtk_action_set_sensitive (GTK_ACTION (action), logged);
+	gboolean playing    = (state != ST_STOPPED);
+	gboolean logged     = (clastfm->status == LASTFM_STATUS_OK);
+	gboolean lfm_inited = (clastfm->session_id != NULL);
+	gboolean has_user   = (lfm_inited && !clastfm->has_user);
 
-	action = gtk_ui_manager_get_action(pragha_playlist_get_context_menu(cwin->cplaylist), "/SelectionPopup/ToolsMenu/Add similar");
-	gtk_action_set_sensitive (GTK_ACTION (action), lfm_inited);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", playing && logged);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", playing && logged);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", has_user);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", playing && lfm_inited);
+
+	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Love track", logged);
+	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Unlove track", logged);
+	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Add similar", lfm_inited);
 }
 
 /*
@@ -1077,30 +1114,10 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 {
 	struct con_win *cwin = user_data;
 	gint file_type = 0;
-	GtkAction *action;
 
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 
-	/* Update menu sensitivies.*/
-
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
-
-	gboolean playing = (state != ST_STOPPED);
-	gboolean logged = (cwin->clastfm->status == LASTFM_STATUS_OK);
-	gboolean lfm_inited = (cwin->clastfm->session_id != NULL);
-	gboolean has_user = (lfm_inited && !cwin->clastfm->has_user);
-
-	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Love track");
-	gtk_action_set_sensitive (action, playing && logged);
-
-	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Unlove track");
-	gtk_action_set_sensitive (action, playing && logged);
-
-	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Add favorites");
-	gtk_action_set_sensitive (action, has_user);
-
-	action = gtk_action_group_get_action (cwin->clastfm->action_group_main_menu, "Add similar");
-	gtk_action_set_sensitive (action, playing && lfm_inited);
 
 	/* Update thread. */
 
@@ -1156,6 +1173,18 @@ pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 
 	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Add similar");
 	gtk_action_set_sensitive (action, FALSE);
+
+
+	clastfm->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
+	gtk_action_group_set_translation_domain (clastfm->action_group_playlist, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (clastfm->action_group_playlist,
+	                              playlist_actions,
+	                              G_N_ELEMENTS (playlist_actions),
+	                              clastfm->cwin);
+
+	clastfm->merge_id_playlist = pragha_playlist_append_plugin_action (clastfm->cwin->cplaylist,
+	                                                                   clastfm->action_group_playlist,
+	                                                                   playlist_xml);
 }
 
 static void
@@ -1175,6 +1204,16 @@ pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 	g_object_unref (clastfm->action_group_main_menu);
 
 	clastfm->merge_id_main_menu = 0;
+
+	if (!clastfm->merge_id_playlist)
+		return;
+
+	ui_manager = pragha_playlist_get_context_menu (clastfm->cwin->cplaylist);
+	gtk_ui_manager_remove_ui (ui_manager, clastfm->merge_id_playlist);
+	gtk_ui_manager_remove_action_group (ui_manager, clastfm->action_group_playlist);
+	g_object_unref (clastfm->action_group_playlist);
+
+	clastfm->merge_id_playlist = 0;
 }
 
 static gboolean
@@ -1218,7 +1257,8 @@ pragha_lastfm_connect_idle(gpointer data)
 	}
 
 	pragha_menubar_append_lastfm (clastfm);
-	update_menubar_lastfm_state (cwin);
+	pragha_lastfm_update_menu_actions (clastfm);
+
 
 	return FALSE;
 }
