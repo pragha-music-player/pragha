@@ -89,7 +89,7 @@ struct con_win {
 	PraghaSidebar *sidebar;
 	PraghaPreferences *preferences;
 	#ifdef HAVE_LIBCLASTFM
-	struct con_lastfm *clastfm;
+	PraghaLastfm *clastfm;
 	#endif
 	con_gnome_media_keys *cgnome_media_keys;
 #ifdef HAVE_LIBKEYBINDER

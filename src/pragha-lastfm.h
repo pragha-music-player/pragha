@@ -37,17 +37,7 @@ struct con_win;
 #define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
 
-struct con_lastfm {
-	struct con_win *cwin;
-	LASTFM_SESSION *session_id;
-	enum LASTFM_STATUS_CODES status;
-	time_t playback_started;
-	GtkWidget *ntag_lastfm_button;
-	PraghaMusicobject *nmobj;
-	PRAGHA_MUTEX (nmobj_mutex);
-	GtkActionGroup *action_group_main_menu;
-	guint merge_id_main_menu;
-};
+typedef struct _PraghaLastfm PraghaLastfm;
 
 enum LASTFM_QUERY_TYPE {
 	LASTFM_NONE = 0,
@@ -68,9 +58,12 @@ void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
 void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
 void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
 void lastfm_now_playing_handler (struct con_win *cwin);
-gint just_init_lastfm (struct con_win *cwin);
-gint init_lastfm(struct con_win *cwin);
-void lastfm_free(struct con_lastfm *clastfm);
+
+gint pragha_lastfm_connect    (PraghaLastfm *clastfm);
+void pragha_lastfm_disconnect (PraghaLastfm *clastfm);
+
+PraghaLastfm * pragha_lastfm_new  (struct con_win *cwin);
+void           pragha_lastfm_free (PraghaLastfm *clastfm);
 
 #endif
 
