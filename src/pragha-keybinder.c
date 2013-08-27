@@ -20,6 +20,9 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-window.h"
 #include "pragha.h"
+#if GTK_CHECK_VERSION (3, 0, 0)
+#include <gdk/gdkx.h>
+#endif
 
 static void keybind_prev_handler (const char *keystring, gpointer data)
 {
