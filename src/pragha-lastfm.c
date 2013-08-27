@@ -1151,7 +1151,6 @@ static void
 pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 {
 	PraghaWindow *window;
-	GtkAction *action;
 
 	clastfm->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
 	gtk_action_group_set_translation_domain (clastfm->action_group_main_menu, GETTEXT_PACKAGE);
@@ -1166,18 +1165,10 @@ pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 	                                                                   clastfm->action_group_main_menu,
 	                                                                   main_menu_xml);
 
-	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Love track");
-	gtk_action_set_sensitive (action, FALSE);
-
-	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Unlove track");
-	gtk_action_set_sensitive (action, FALSE);
-
-	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Add favorites");
-	gtk_action_set_sensitive (action, FALSE);
-
-	action = gtk_action_group_get_action (clastfm->action_group_main_menu, "Add similar");
-	gtk_action_set_sensitive (action, FALSE);
-
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", FALSE);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", FALSE);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", FALSE);
+	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", FALSE);
 
 	clastfm->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
 	gtk_action_group_set_translation_domain (clastfm->action_group_playlist, GETTEXT_PACKAGE);
