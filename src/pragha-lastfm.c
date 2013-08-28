@@ -196,7 +196,7 @@ pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
 	gboolean playing    = (state != ST_STOPPED);
 	gboolean logged     = (clastfm->status == LASTFM_STATUS_OK);
 	gboolean lfm_inited = (clastfm->session_id != NULL);
-	gboolean has_user   = (lfm_inited && !clastfm->has_user);
+	gboolean has_user   = (lfm_inited && clastfm->has_user);
 
 	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", playing && logged);
 	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", playing && logged);
