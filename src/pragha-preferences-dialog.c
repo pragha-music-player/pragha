@@ -719,6 +719,10 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_pass_w),
 		                   pragha_lastfm_get_password(dialog->preferences));
 	}
+	else {
+		gtk_widget_set_sensitive(dialog->lastfm_uname_w, FALSE);
+		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
+	}
 #endif
 #ifdef HAVE_LIBGLYR
 	if(pragha_preferences_get_download_album_art(dialog->preferences))
@@ -1118,10 +1122,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	#endif
 	dialog->use_cddb_w = use_cddb;
 	dialog->use_mpris2_w = use_mpris2;
-
-	#ifdef HAVE_LIBCLASTFM
-	toggle_lastfm(GTK_TOGGLE_BUTTON(dialog->lastfm_w), dialog);
-	#endif
 
 	pragha_hig_workarea_table_finish(table, &row);
 
