@@ -94,6 +94,9 @@ pragha_application_free (struct con_win *cwin)
 #ifdef HAVE_LIBGLYR
 	pragha_glyr_free (cwin->glyr);
 #endif
+#ifdef HAVE_LIBCLASTFM
+	pragha_lastfm_free (cwin->clastfm);
+#endif
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
@@ -104,9 +107,6 @@ pragha_application_free (struct con_win *cwin)
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	g_object_unref(cwin->cdbase);
-#ifdef HAVE_LIBCLASTFM
-	pragha_lastfm_free (cwin->clastfm);
-#endif
 	dbus_handlers_free (cwin);
 	if (cwin->notify)
 		pragha_notify_free (cwin->notify);
