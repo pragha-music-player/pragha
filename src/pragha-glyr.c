@@ -513,10 +513,13 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	pragha_menubar_remove_plugin_action (window,
 	                                     glyr->action_group_main_menu,
 	                                     glyr->merge_id_main_menu);
+	glyr->merge_id_main_menu = 0;
 
 	pragha_playlist_remove_plugin_action (cwin->cplaylist,
 	                                      glyr->action_group_playlist,
 	                                      glyr->merge_id_playlist);
+
+	glyr->merge_id_playlist = 0;
 
 	g_slice_free (PraghaGlyr, glyr);
 
