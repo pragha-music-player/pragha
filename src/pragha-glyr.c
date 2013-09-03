@@ -74,6 +74,7 @@ static const gchar *main_menu_xml = "<ui>					\
 			<placeholder name=\"pragha-plugins-placeholder\">		\
 				<menuitem action=\"Search lyric\"/>		\
 				<menuitem action=\"Search artist info\"/>	\
+				<separator/>						\
 			</placeholder>						\
 		</menu>								\
 	</menubar>								\
@@ -95,6 +96,7 @@ static const gchar *playlist_xml = "<ui>					\
 		<placeholder name=\"pragha-glyr-placeholder\">			\
 			<menuitem action=\"Search lyric\"/>			\
 			<menuitem action=\"Search artist info\"/>		\
+			<separator/>						\
 		</placeholder>							\
 	</menu>									\
 	</popup>				    				\

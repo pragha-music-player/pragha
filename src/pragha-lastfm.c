@@ -85,7 +85,6 @@ static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
 		<menu action=\"ToolsMenu\">					\
 			<placeholder name=\"pragha-plugins-placeholder\">		\
-				<separator/>						\
 				<menu action=\"Lastfm\">				\
 					<menuitem action=\"Love track\"/>		\
 					<menuitem action=\"Unlove track\"/>		\
@@ -94,6 +93,7 @@ static const gchar *main_menu_xml = "<ui>					\
 					<menuitem action=\"Add favorites\"/>		\
 					<menuitem action=\"Add similar\"/>		\
 				</menu>							\
+				<separator/>						\
 			</placeholder>						\
 		</menu>								\
 	</menubar>								\
@@ -116,6 +116,7 @@ static const gchar *playlist_xml = "<ui>					\
 			<menuitem action=\"Unlove track\"/>				\
 			<separator/>							\
 			<menuitem action=\"Add similar\"/>				\
+			<separator/>						\
 		</placeholder>							\
 	</menu>									\
 	</popup>				    				\
@@ -1250,7 +1251,6 @@ pragha_lastfm_connect_idle(gpointer data)
 
 	pragha_menubar_append_lastfm (clastfm);
 	pragha_lastfm_update_menu_actions (clastfm);
-
 
 	return FALSE;
 }
