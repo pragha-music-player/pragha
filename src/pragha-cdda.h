@@ -32,6 +32,10 @@
 #include <cdio/cd_types.h>
 #include <cddb/cddb.h>
 
+/* pragha.h */
+struct con_win;
+
 void pragha_cdda_free ();
+void add_audio_cd(struct con_win *cwin);
 
 #endif /* CDDA_H */

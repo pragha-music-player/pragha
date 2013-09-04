@@ -30,6 +30,8 @@ pragha_SOURCES = \
 		pragha-dbus.h \
 		pragha-debug.c \
 		pragha-debug.h \
+		pragha-devices.c \
+		pragha-devices.h \
 		pragha-equalizer-dialog.c \
 		pragha-equalizer-dialog.h \
 		pragha-file-utils.c \
@@ -156,3 +158,7 @@ pragha_CFLAGS += $(PLPARSER_CFLAGS)
 pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
+if HAVE_GUDEV
+pragha_CFLAGS += $(GUDEV_CFLAGS)
+pragha_LDADD += $(GUDEV_LIBS)
+endif

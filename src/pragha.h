@@ -53,6 +53,10 @@
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
 
+#ifdef HAVE_GUDEV
+#include "pragha-devices.h"
+#endif
+
 /* With libcio 0.83 should be before config.h. libcdio issue */
 #ifdef HAVE_PARANOIA_NEW_INCLUDES
 #include "pragha-cdda.h"
@@ -88,9 +92,12 @@ struct con_win {
 	PraghaScanner  *scanner;
 	PraghaSidebar *sidebar;
 	PraghaPreferences *preferences;
-	#ifdef HAVE_LIBCLASTFM
+#ifdef HAVE_LIBCLASTFM
 	PraghaLastfm *clastfm;
-	#endif
+#endif
+#ifdef HAVE_GUDEV
+	PraghaDevices *devices;
+#endif
 	con_gnome_media_keys *cgnome_media_keys;
 #ifdef HAVE_LIBKEYBINDER
 	gboolean keybinder;

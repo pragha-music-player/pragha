@@ -76,6 +76,12 @@ XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
+GUDEV_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
+                           [gudev-1.0], [145],
+                           [gudev-1.0],
+                           [gudev-1.0 library], [yes])
+
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
 	AC_DEFINE(HAVE_PARANOIA_NEW_INCLUDES, 1, [Define to 1 if cdio/paranoia/paranoia.h is present]) ])
@@ -162,5 +168,6 @@ AS_IF([test "x$with_gtk3" != xno],
 echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
+echo "  Management removable devices...................(Need gudev-1.0 >= 145).: $GUDEV_FOUND"
 echo ""
 

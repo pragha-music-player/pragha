@@ -31,6 +31,7 @@
 #include <libintl.h>
 
 #include "pragha-window.h"
+#include "pragha-devices.h"
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
@@ -45,6 +46,10 @@
 #include "pragha-dbus.h"
 #include "pragha-debug.h"
 #include "pragha.h"
+
+#ifdef HAVE_GUDEV
+#include "pragha-devices.h"
+#endif
 
 gint debug_level;
 #ifdef DEBUG
@@ -96,6 +101,9 @@ pragha_application_free (struct con_win *cwin)
 #endif
 #ifdef HAVE_LIBCLASTFM
 	pragha_lastfm_free (cwin->clastfm);
+#endif
+#ifdef HAVE_GUDEV
+	pragha_devices_free (cwin->devices);
 #endif
 	pragha_playlist_free(cwin->cplaylist);
 	pragha_library_pane_free(cwin->clibrary);
@@ -175,6 +183,9 @@ pragha_application_new (gint argc, gchar *argv[])
 	else
 		cwin->notify = NULL;
 
+#ifdef HAVE_GUDEV
+	cwin->devices = pragha_devices_new(cwin);
+#endif
 	cwin->art_cache = pragha_art_cache_new ();
 
 	cwin->backend = pragha_backend_new (cwin);
