@@ -91,7 +91,6 @@ pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
 }
 
 /* Extentions copy of Thunar-volman code.
- * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c
  * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
 
 gchar *
@@ -223,7 +222,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaD
 	}
 
 	if(error != NULL) {
-		g_message("Mount FAALLL!. %s", error->message);
+		// TODO: Check G_IO_ERROR_ALREADY_MOUNTED and ignore it..
 		pragha_gudev_clear_hook_devices(devices);
 	}
 
@@ -257,12 +256,6 @@ pragha_block_device_mount (gpointer data)
 			                devices);
 			g_object_unref (mount_operation);
 		}
-		else {
-			g_message("Unable to mount the devices");
-		}
-	}
-	else {
-		g_message("Could not detect the volume corresponding to the devices.");
 	}
 
 	return FALSE;
@@ -347,7 +340,6 @@ pragha_devices_moutable_added (PraghaDevices *devices, GUdevDevice *device)
 	devices->bus_hooked = busnum;
 	devices->device_hooked = devnum;
 
-	g_message("Device mountable added... . .\n");
 	g_timeout_add_seconds(5, pragha_block_device_mount, devices);
 }
 
@@ -389,8 +381,6 @@ pragha_gudev_device_added (PraghaDevices *devices, GUdevDevice *device)
 static void
 pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 {
-	g_message("Device handled removed... . .\n");
-
 	g_object_unref (devices->device);
 
 	devices->bus_hooked = 0;
@@ -437,8 +427,8 @@ gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, Pr
 void
 pragha_devices_free(PraghaDevices *devices)
 {
-	if(devices->bus_hooked == 0 &&
-	   devices->device_hooked == 0)
+	if(devices->bus_hooked != 0 &&
+	   devices->device_hooked != 0)
 		pragha_gudev_clear_hook_devices (devices);
 
 	g_object_unref(devices->gudev_client);
