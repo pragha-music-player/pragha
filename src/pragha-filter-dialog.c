@@ -144,7 +144,7 @@ static gboolean
 simple_filter_search_keyrelease_handler(GtkEntry *entry,
 					PraghaFilterDialog *fdialog)
 {
-	gchar *text = NULL;
+	const gchar *text = NULL;
 	gchar *u_str = NULL;
 	gboolean has_text;
 
@@ -156,7 +156,7 @@ simple_filter_search_keyrelease_handler(GtkEntry *entry,
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
 	if (has_text) {
-		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		text = gtk_entry_get_text (entry);
 		u_str = g_utf8_strdown (text, -1);
 		fdialog->filter_string = u_str;
 	}
