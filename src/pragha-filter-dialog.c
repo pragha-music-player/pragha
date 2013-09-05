@@ -293,12 +293,12 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 		break;
 	}
 
+	gtk_widget_grab_focus (pragha_playlist_get_view (fdialog->cplaylist));
+	gtk_widget_destroy (GTK_WIDGET(dialog));
+
 	g_free(fdialog->filter_string);
 	g_object_unref(G_OBJECT(fdialog->preferences));
 	g_slice_free(PraghaFilterDialog, fdialog);
-
-	gtk_widget_grab_focus (pragha_playlist_get_view(fdialog->cplaylist));
-	gtk_widget_destroy (GTK_WIDGET(dialog));
 }
 
 void
