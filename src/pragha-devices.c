@@ -50,7 +50,11 @@ static const gchar * gudev_subsystems[] =
 
 static void pragha_gudev_clear_hook_devices(PraghaDevices *devices);
 
-gint
+/*
+ * Generic dialog to get some action to responce to udev events.
+ */
+
+static gint
 pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
                           const gchar *first_button_text, gint first_button_response)
@@ -90,10 +94,15 @@ pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
 	return response;
 }
 
-/* Extentions copy of Thunar-volman code.
+/*
+ * Some functions to mount block devices.
+ */
+
+/* Decode the ID_FS_LABEL_ENC of block device.
+ * Extentions copy of Thunar-volman code.
  * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
 
-gchar *
+static gchar *
 tvm_notify_decode (const gchar *str)
 {
 	GString     *string;
@@ -125,7 +134,7 @@ tvm_notify_decode (const gchar *str)
 	return result;
 }
 
-GVolume *
+static GVolume *
 tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
                                           const gchar    *kind,
                                           const gchar    *identifier)
@@ -229,7 +238,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaD
 	g_object_unref (volume);
 }
 
-gboolean
+static gboolean
 pragha_block_device_mount (gpointer data)
 {
 	GVolumeMonitor  *monitor;
@@ -261,9 +270,11 @@ pragha_block_device_mount (gpointer data)
 	return FALSE;
 }
 
-/* Functions that manage to "add" and "remove" devicess events. */
+/*
+ * Check the type of device that listens udev to act accordingly.
+ */
 
-gint
+static gint
 pragha_gudev_get_device_type (GUdevDevice *device)
 {
 	const gchar *devtype;
@@ -310,6 +321,25 @@ pragha_gudev_get_device_type (GUdevDevice *device)
 }
 
 static void
+pragha_devices_moutable_added (PraghaDevices *devices, GUdevDevice *device)
+{
+	guint64 busnum = 0;
+	guint64 devnum = 0;
+
+	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+
+	devices->device = g_object_ref (device);
+	devices->bus_hooked = busnum;
+	devices->device_hooked = devnum;
+
+	/*
+	 * HACK: We're listening udev. Then wait 5 seconds, to ensure that GVolume also detects the device.
+	 */
+	g_timeout_add_seconds(5, pragha_block_device_mount, devices);
+}
+
+static void
 pragha_devices_audio_cd_added (PraghaDevices *devices)
 {
 	gint response;
@@ -328,31 +358,21 @@ pragha_devices_audio_cd_added (PraghaDevices *devices)
 }
 
 static void
-pragha_devices_moutable_added (PraghaDevices *devices, GUdevDevice *device)
+pragha_devices_mtp_added (PraghaDevices *devices)
 {
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-
-	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
-
-	devices->device = g_object_ref (device);
-	devices->bus_hooked = busnum;
-	devices->device_hooked = devnum;
-
-	g_timeout_add_seconds(5, pragha_block_device_mount, devices);
+	g_message("MTP Added... . .\n");
 }
 
 static void
-pragha_gudev_device_changed (PraghaDevices *devices, GUdevDevice *device)
+pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 {
-	gint device_type = 0;
+	g_object_unref (devices->device);
 
-	device_type = pragha_gudev_get_device_type (device);
-
-	if (device_type == PRAGHA_DEVICE_AUDIO_CD)
-		pragha_devices_audio_cd_added (devices);
+	devices->bus_hooked = 0;
+	devices->device_hooked = 0;
 }
+
+/* Functions that manage to "add" "change" and "remove" devices events. */
 
 static void
 pragha_gudev_device_added (PraghaDevices *devices, GUdevDevice *device)
@@ -371,7 +391,7 @@ pragha_gudev_device_added (PraghaDevices *devices, GUdevDevice *device)
 			pragha_devices_audio_cd_added (devices);
 			break;
 		case PRAGHA_DEVICE_MTP:
-			g_message("MTP Added... . .\n");
+			pragha_devices_mtp_added (devices);
 		case PRAGHA_DEVICE_UNKNOWN:
 		default:
 			break;
@@ -379,12 +399,14 @@ pragha_gudev_device_added (PraghaDevices *devices, GUdevDevice *device)
 }
 
 static void
-pragha_gudev_clear_hook_devices (PraghaDevices *devices)
+pragha_gudev_device_changed (PraghaDevices *devices, GUdevDevice *device)
 {
-	g_object_unref (devices->device);
+	gint device_type = 0;
 
-	devices->bus_hooked = 0;
-	devices->device_hooked = 0;
+	device_type = pragha_gudev_get_device_type (device);
+
+	if (device_type == PRAGHA_DEVICE_AUDIO_CD)
+		pragha_devices_audio_cd_added (devices);
 }
 
 static void
@@ -406,7 +428,7 @@ pragha_gudev_device_removed (PraghaDevices *devices, GUdevDevice *device)
 	}
 }
 
-/* Main devicess function that listen udev events. */
+/* Main devices functions that listen udev events. */
 
 static void
 gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, PraghaDevices *devices)
