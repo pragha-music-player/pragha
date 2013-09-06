@@ -30,6 +30,7 @@
 #include "pragha.h"
 #include "pragha-devices.h"
 #include "pragha-utils.h"
+#include "pragha-debug.h"
 
 struct _PraghaDevices {
 	struct con_win *cwin;
@@ -206,6 +207,7 @@ pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
 		default:
 			break;
 	}
+
 	g_free (decoded_name);
 	g_free (message);
 }
@@ -326,12 +328,18 @@ pragha_devices_moutable_added (PraghaDevices *devices, GUdevDevice *device)
 	guint64 busnum = 0;
 	guint64 devnum = 0;
 
+	if (devices->bus_hooked != 0 &&
+	    devices->device_hooked != 0)
+		return;
+
 	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 
 	devices->device = g_object_ref (device);
 	devices->bus_hooked = busnum;
 	devices->device_hooked = devnum;
+
+	CDEBUG(DBG_INFO, "Hook a new mountable device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
 
 	/*
 	 * HACK: We're listening udev. Then wait 5 seconds, to ensure that GVolume also detects the device.
@@ -358,14 +366,30 @@ pragha_devices_audio_cd_added (PraghaDevices *devices)
 }
 
 static void
-pragha_devices_mtp_added (PraghaDevices *devices)
+pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 {
-	g_message("MTP Added... . .\n");
+	guint64 busnum = 0;
+	guint64 devnum = 0;
+
+	if (devices->bus_hooked != 0 &&
+	    devices->device_hooked != 0)
+		return;
+
+	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
+	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
+
+	devices->device = g_object_ref (device);
+	devices->bus_hooked = busnum;
+	devices->device_hooked = devnum;
+
+	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
 }
 
 static void
 pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 {
+	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
+
 	g_object_unref (devices->device);
 
 	devices->bus_hooked = 0;
@@ -383,15 +407,13 @@ pragha_gudev_device_added (PraghaDevices *devices, GUdevDevice *device)
 
 	switch (device_type) {
 		case PRAGHA_DEVICE_MOUNTABLE:
-			if (devices->bus_hooked == 0 &&
-				devices->device_hooked == 0)
-				pragha_devices_moutable_added (devices, device);
+			pragha_devices_moutable_added (devices, device);
 			break;
 		case PRAGHA_DEVICE_AUDIO_CD:
 			pragha_devices_audio_cd_added (devices);
 			break;
 		case PRAGHA_DEVICE_MTP:
-			pragha_devices_mtp_added (devices);
+			pragha_devices_mtp_added (devices, device);
 		case PRAGHA_DEVICE_UNKNOWN:
 		default:
 			break;
@@ -422,8 +444,8 @@ pragha_gudev_device_removed (PraghaDevices *devices, GUdevDevice *device)
 	busnum = g_udev_device_get_property_as_uint64 (device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64 (device, "DEVNUM");
 
-	if(devices->bus_hooked == busnum &&
-	   devices->device_hooked == devnum) {
+	if (devices->bus_hooked == busnum &&
+	    devices->device_hooked == devnum) {
 		pragha_gudev_clear_hook_devices (devices);
 	}
 }
