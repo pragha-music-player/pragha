@@ -81,6 +81,12 @@ XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
                            [gudev-1.0], [145],
                            [gudev-1.0],
                            [gudev-1.0 library], [yes])
+LIBMTP_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
+                           [libmtp], [1.1.0],
+                           [libmtp],
+                           [libmtp library], [yes])
+
 
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [

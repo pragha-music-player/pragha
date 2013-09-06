@@ -39,6 +39,9 @@ enum file_type {
 	FILE_APE,
 	FILE_CDDA,
 	FILE_HTTP,
+#if HAVE_LIBMTP
+	FILE_MTP,
+#endif
 	LAST_FILE_TYPE
 };
 

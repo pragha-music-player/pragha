@@ -26,9 +26,11 @@
 #endif
 
 #include <gudev/gudev.h>
+#include <libmtp.h>
 
 #include "pragha.h"
 #include "pragha-devices.h"
+#include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
 
@@ -365,11 +367,52 @@ pragha_devices_audio_cd_added (PraghaDevices *devices)
 	}
 }
 
+PraghaMusicobject *
+new_musicobject_from_mtp (LIBMTP_track_t *track)
+{
+	PraghaMusicobject *mobj = NULL;
+	gchar *uri = NULL;
+	
+	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
+
+	uri = g_strdup_printf ("mtp://%d", track->item_id);
+
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     "file", uri,
+	                     "file-type", FILE_MTP,
+	                     NULL);
+	if (track->title)
+		pragha_musicobject_set_title (mobj, track->title);
+	if (track->artist)
+		pragha_musicobject_set_artist (mobj, track->artist);
+	if (track->album)
+		pragha_musicobject_set_album (mobj, track->album);
+	if (track->genre)
+		pragha_musicobject_set_genre (mobj, track->genre);
+	if (track->duration)
+		pragha_musicobject_set_length (mobj, track->duration/1000);
+	if (track->tracknumber)
+		pragha_musicobject_set_track_no (mobj, track->tracknumber);
+	if (track->samplerate)
+		pragha_musicobject_set_samplerate (mobj, track->samplerate);
+	if (track->nochannels)
+		pragha_musicobject_set_channels (mobj, track->nochannels);
+
+	g_free(uri);
+
+	return mobj;
+}
+
 static void
 pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 {
+	LIBMTP_raw_device_t *device_list, *raw_device;
+	LIBMTP_mtpdevice_t *mtp_device;
+	LIBMTP_track_t *tracks, *track, *tmp;
+	PraghaMusicobject *mobj = NULL;
 	guint64 busnum = 0;
 	guint64 devnum = 0;
+	gint numdevs = 0;
 
 	if (devices->bus_hooked != 0 &&
 	    devices->device_hooked != 0)
@@ -378,9 +421,43 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
 	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
 
+	/* Get devices.. */
+
+	if (LIBMTP_Detect_Raw_Devices (&device_list, &numdevs) != LIBMTP_ERROR_NONE)
+		return;
+
+	if (device_list == NULL || numdevs == 0)
+		return;
+
+	raw_device = &device_list[0];
+
+	if (raw_device->devnum != devnum && raw_device->bus_location != busnum)
+		goto bad;
+
+	/* Get mtp_device and load track list.. */
+
+	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
+	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, NULL, NULL);
+	if (tracks) {
+		track = tracks;
+		while (track != NULL) {
+			mobj = new_musicobject_from_mtp (track);
+			pragha_playlist_append_single_song (devices->cwin->cplaylist, mobj);
+
+			tmp = track;
+			track = track->next;
+			LIBMTP_destroy_track_t(tmp);
+		}
+	}
+
+	/* Device handled. */
+
 	devices->device = g_object_ref (device);
 	devices->bus_hooked = busnum;
 	devices->device_hooked = devnum;
+
+bad:
+	g_free(raw_device);
 
 	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
 }
@@ -492,6 +569,8 @@ pragha_devices_new (struct con_win *cwin)
 	devices->device_hooked = 0;
 
 	devices->gudev_client = g_udev_client_new(gudev_subsystems);
+
+	LIBMTP_Init();
 
 	g_signal_connect (devices->gudev_client, "uevent", G_CALLBACK(gudev_uevent_cb), devices);
 
