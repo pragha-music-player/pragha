@@ -37,15 +37,172 @@
 #include "pragha-utils.h"
 #include "pragha-debug.h"
 
+static void pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices);
+
+static const GtkActionEntry mtp_actions [] = {
+	{"Send to MTP", NULL, N_("Send to MTP device"),
+	 "", "Send to MTP", G_CALLBACK(pragha_mtp_action_send_to_device)},
+};
+
+static const gchar *mtp_sendto_xml = "<ui>					\
+	<popup name=\"SelectionPopup\">		   				\
+	<menu action=\"SendToMenu\">						\
+		<placeholder name=\"pragha-sendto-placeholder\">			\
+			<menuitem action=\"Send to MTP\"/>				\
+			<separator/>						\
+		</placeholder>							\
+	</menu>									\
+	</popup>				    				\
+</ui>";
+
+LIBMTP_track_t *
+get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj)
+{
+	LIBMTP_track_t *tr;
+	LIBMTP_filetype_t filetype;
+	gchar *filename;
+	struct stat sbuf;
+
+	switch (pragha_musicobject_get_file_type(mobj)) {
+		case FILE_WAV:
+			filetype = LIBMTP_FILETYPE_WAV;
+			break;
+		case FILE_MP3:
+			filetype = LIBMTP_FILETYPE_MP3;
+			break;
+		case FILE_FLAC:
+			filetype = LIBMTP_FILETYPE_FLAC;
+			break;
+		case FILE_OGGVORBIS:
+			filetype = LIBMTP_FILETYPE_OGG;
+			break;
+		case FILE_ASF:
+			filetype = LIBMTP_FILETYPE_WMA;
+			break;
+		case FILE_MP4:
+			filetype = LIBMTP_FILETYPE_MP4;
+			break;
+		case FILE_APE:
+		case FILE_CDDA:
+		case FILE_HTTP:
+		case FILE_MTP:
+		default:
+			filetype = LIBMTP_FILETYPE_UNKNOWN;
+	  		break;
+	}
+
+	if (filetype == LIBMTP_FILETYPE_UNKNOWN)
+		return NULL;
+
+	filename = g_strdup(pragha_musicobject_get_file(mobj));
+    if (g_stat(filename, &sbuf) == -1) {
+        g_free(filename);
+        return NULL;
+    }
+
+	tr = LIBMTP_new_track_t();
+
+	/* Minimun data. */
+
+    tr->filesize = (uint64_t) sbuf.st_size;
+    tr->filename = get_display_name(mobj);
+    tr->filetype = filetype;
+
+	/* Metadata. */
+
+    tr->title = g_strdup(pragha_musicobject_get_title(mobj));
+    tr->artist = g_strdup(pragha_musicobject_get_artist(mobj));
+    tr->album = g_strdup(pragha_musicobject_get_album(mobj));
+    tr->duration = (1000 * pragha_musicobject_get_length(mobj));
+    tr->genre = g_strdup(pragha_musicobject_get_genre (mobj));
+    tr->date = g_strdup_printf("%d", pragha_musicobject_get_year (mobj));
+
+	/* Storage data. */
+
+	tr->parent_id = mtp_device->default_music_folder;
+	tr->storage_id = 0;
+
+    g_free(filename);
+
+    return tr;
+}
+
+static void
+pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices)
+{
+	LIBMTP_mtpdevice_t *mtp_device;
+	LIBMTP_track_t *mtp_track;
+	LIBMTP_error_t *stack;
+	PraghaMusicobject *mobj = NULL;
+	const gchar *file;
+	gint ret;
+
+	struct con_win *cwin = pragha_device_get_aplication (devices);
+
+	mobj = pragha_playlist_get_selected_musicobject (cwin->cplaylist);
+	if (!mobj)
+		CDEBUG(DBG_INFO,"BAD mobj");
+
+	mtp_device = pragha_device_get_mtp_device(devices);
+
+	file = pragha_musicobject_get_file (mobj);
+	mtp_track = get_mtp_track_from_musicobject(mtp_device, mobj);
+
+	ret = LIBMTP_Send_Track_From_File (mtp_device, file, mtp_track, NULL, NULL);
+	LIBMTP_destroy_track_t(mtp_track);
+
+	if (ret != 0) {
+		stack = LIBMTP_Get_Errorstack (mtp_device);
+		CDEBUG(DBG_INFO, "unable to send track: %s", stack->error_text);
+
+		if (stack->errornumber == LIBMTP_ERROR_STORAGE_FULL) {
+			CDEBUG(DBG_INFO, "No space left on MTP device");
+		}
+		else {
+			CDEBUG(DBG_INFO, "Unable to send file to MTP device: %s", file);
+		}
+
+		LIBMTP_Dump_Errorstack(mtp_device);
+		LIBMTP_Clear_Errorstack(mtp_device);
+	}
+	else {
+		CDEBUG(DBG_INFO, "Added %s to MTP device", file);
+	}
+}
+
+static void
+pragha_playlist_append_mtp_action (PraghaDevices *devices)
+{
+	GtkActionGroup *action_group;
+	GtkAction *action;
+	gchar *friend_label = NULL;
+
+	action_group = gtk_action_group_new ("PraghaPlaylistMtpActions");
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+
+	gtk_action_group_add_actions (action_group,
+	                              mtp_actions,
+	                              G_N_ELEMENTS (mtp_actions),
+	                              devices);
+
+	action = gtk_action_group_get_action (action_group, "Send to MTP");
+
+	friend_label = LIBMTP_Get_Friendlyname (pragha_device_get_mtp_device(devices));
+	gtk_action_set_label(GTK_ACTION(action), friend_label);
+	g_free(friend_label);
+
+	pragha_devices_append_playlist_action (devices, action_group, mtp_sendto_xml);
+}
+
 static PraghaMusicobject *
 new_musicobject_from_mtp (LIBMTP_track_t *track)
 {
 	PraghaMusicobject *mobj = NULL;
 	gchar *uri = NULL;
 	
-	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
-
 	uri = g_strdup_printf ("mtp://%i-%s", track->item_id, track->filename);
+
+	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
@@ -168,6 +325,8 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
 
 	pragha_gudev_set_hook_device (devices, device, mtp_device, busnum, devnum);
+
+	pragha_playlist_append_mtp_action (devices);
 
 	pragha_devices_add_detected_device (devices);
 

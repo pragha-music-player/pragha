@@ -43,6 +43,10 @@ struct _PraghaDevices {
 	LIBMTP_mtpdevice_t *mtp_device;
 	guint64 bus_hooked;
 	guint64 device_hooked;
+
+	GtkActionGroup *action_group_playlist;
+	guint merge_id_playlist;
+
 };
 
 static const gchar * gudev_subsystems[] =
@@ -262,6 +266,8 @@ pragha_gudev_device_removed (PraghaDevices *devices, GUdevDevice *device)
 	if (devices->bus_hooked == busnum &&
 	    devices->device_hooked == devnum) {
 		pragha_gudev_clear_hook_devices (devices);
+
+		pragha_devices_remove_playlist_action (devices);
 	}
 }
 
@@ -279,6 +285,30 @@ gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, Pr
 	else if (g_str_equal (action, "remove")) {
 		pragha_gudev_device_removed (devices, device);
 	}
+}
+
+/* Add send to menu option.. */
+
+void
+pragha_devices_append_playlist_action (PraghaDevices *devices, GtkActionGroup *action_group, const gchar *menu_xml)
+{
+	devices->action_group_playlist = action_group;
+	devices->merge_id_playlist = pragha_playlist_append_plugin_action (devices->cwin->cplaylist,
+	                                                                   devices->action_group_playlist,
+	                                                                   menu_xml);
+}
+
+void
+pragha_devices_remove_playlist_action (PraghaDevices *devices)
+{
+	if (!devices->merge_id_playlist)
+		return;
+
+	pragha_playlist_remove_plugin_action (devices->cwin->cplaylist,
+	                                      devices->action_group_playlist,
+	                                      devices->merge_id_playlist);
+
+	devices->merge_id_playlist = 0;
 }
 
 /* Init gudev subsysten, and listen events. */

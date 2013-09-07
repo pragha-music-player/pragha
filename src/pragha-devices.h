@@ -56,6 +56,9 @@ pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
                           const gchar *first_button_text, gint first_button_response);
 
+void           pragha_devices_append_playlist_action (PraghaDevices *devices, GtkActionGroup *action_group, const gchar *menu_xml);
+void           pragha_devices_remove_playlist_action (PraghaDevices *devices);
+
 void           pragha_devices_free (PraghaDevices *devices);
 PraghaDevices *pragha_devices_new  (struct con_win *cwin);
 
