@@ -118,6 +118,24 @@ pragha_device_mtp_append_tracks (PraghaDevices *devices)
 }
 
 void
+pragha_devices_add_detected_device (PraghaDevices *devices)
+{
+	gint response;
+	response = pragha_gudev_show_dialog (_("MTP Device"), "gnome-dev-cdrom-audio",
+	                                     _("Was inserted an MTP Device"), NULL,
+	                                     _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+	switch (response)
+	{
+		case PRAGHA_DEVICE_RESPONSE_PLAY:
+			pragha_device_mtp_append_tracks (devices);
+			break;
+		case PRAGHA_DEVICE_RESPONSE_NONE:
+		default:
+			break;
+	}
+}
+
+void
 pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 {
 	LIBMTP_raw_device_t *device_list, *raw_device;
@@ -151,7 +169,7 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 
 	pragha_gudev_set_hook_device (devices, device, mtp_device, busnum, devnum);
 
-	pragha_device_mtp_append_tracks (devices);
+	pragha_devices_add_detected_device (devices);
 
 	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", busnum, devnum);
 
