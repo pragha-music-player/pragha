@@ -160,6 +160,12 @@ if HAVE_GUDEV
 if HAVE_LIBMTP
 pragha_SOURCES += pragha-devices.c
 pragha_SOURCES += pragha-devices.h
+pragha_SOURCES += pragha-devices-block.c
+pragha_SOURCES += pragha-devices-block.h
+pragha_SOURCES += pragha-devices-cd.c
+pragha_SOURCES += pragha-devices-cd.h
+pragha_SOURCES += pragha-devices-mtp.c
+pragha_SOURCES += pragha-devices-mtp.h
 pragha_CFLAGS += $(GUDEV_CFLAGS)
 pragha_LDADD += $(GUDEV_LIBS)
 pragha_CFLAGS += $(LIBMTP_CFLAGS)

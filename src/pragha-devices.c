@@ -25,12 +25,13 @@
 #include <glib/gi18n.h>
 #endif
 
-#include <gudev/gudev.h>
-#include <libmtp.h>
 #include <stdlib.h>
 
 #include "pragha.h"
 #include "pragha-devices.h"
+#include "pragha-devices-block.h"
+#include "pragha-devices-cd.h"
+#include "pragha-devices-mtp.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-debug.h"
@@ -51,15 +52,49 @@ static const gchar * gudev_subsystems[] =
 	NULL,
 };
 
-/* Headers. */
+gboolean
+pragha_device_already_is_busy (PraghaDevices *devices)
+{
+	if (devices->bus_hooked != 0 &&
+	    devices->device_hooked != 0)
+		return TRUE;
 
-static void pragha_gudev_clear_hook_devices(PraghaDevices *devices);
+	return FALSE;
+}
+
+gboolean
+pragha_device_already_is_idle (PraghaDevices *devices)
+{
+	if (devices->bus_hooked == 0 &&
+	    devices->device_hooked == 0)
+		return TRUE;
+
+	return FALSE;
+}
+
+GUdevDevice *
+pragha_device_get_udev_device (PraghaDevices *devices)
+{
+	return devices->device;
+}
+
+LIBMTP_mtpdevice_t *
+pragha_device_get_mtp_device (PraghaDevices *devices)
+{
+	return devices->mtp_device;
+}
+
+struct con_win *
+pragha_device_get_aplication (PraghaDevices *devices)
+{
+	return devices->cwin;
+}
 
 /*
  * Generic dialog to get some action to responce to udev events.
  */
 
-static gint
+gint
 pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
                           const gchar *first_button_text, gint first_button_response)
@@ -97,183 +132,6 @@ pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
 	gtk_widget_destroy (dialog);
 
 	return response;
-}
-
-/*
- * Some functions to mount block devices.
- */
-
-/* Decode the ID_FS_LABEL_ENC of block device.
- * Extentions copy of Thunar-volman code.
- * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
-
-static gchar *
-tvm_notify_decode (const gchar *str)
-{
-	GString     *string;
-	const gchar *p;
-	gchar       *result;
-	gchar        decoded_c;
-
-	if (str == NULL)
-		return NULL;
-
-	if (!g_utf8_validate (str, -1, NULL))
-		return NULL;
-
-	string = g_string_new (NULL);
-
-	for (p = str; p != NULL && *p != '\0'; ++p) {
-		if (*p == '\\' && p[1] == 'x' && g_ascii_isalnum (p[2]) && g_ascii_isalnum (p[3])) {
-			decoded_c = (g_ascii_xdigit_value (p[2]) << 4) | g_ascii_xdigit_value (p[3]);
-			g_string_append_c (string, decoded_c);
-			p = p + 3;
-		}
-		else
-			g_string_append_c (string, *p);
-	}
-
-	result = string->str;
-	g_string_free (string, FALSE);
-
-	return result;
-}
-
-static GVolume *
-tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
-                                          const gchar    *kind,
-                                          const gchar    *identifier)
-{
-	GVolume *volume = NULL;
-	GList   *volumes;
-	GList   *lp;
-	gchar   *value;
-
-	g_return_val_if_fail (G_IS_VOLUME_MONITOR (monitor), NULL);
-	g_return_val_if_fail (kind != NULL && *kind != '\0', NULL);
-	g_return_val_if_fail (identifier != NULL && *identifier != '\0', NULL);
-
-	volumes = g_volume_monitor_get_volumes (monitor);
-
-	for (lp = volumes; volume == NULL && lp != NULL; lp = lp->next) {
-		value = g_volume_get_identifier (lp->data, kind);
-		if (value == NULL)
-			continue;
-		if (g_strcmp0 (value, identifier) == 0)
-			volume = g_object_ref (lp->data);
-		g_free (value);
-	}
-	g_list_foreach (volumes, (GFunc)g_object_unref, NULL);
-	g_list_free (volumes);
-
-	return volume;
-}
-
-/* The next funtions allow to handle block devicess.
- * The most of code is inspired in:
- * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-block-devices.c */
-
-static void
-pragha_block_device_mounted (GUdevDevice *device, GMount *mount, GError **error)
-{
-	const gchar *volume_name;
-	gchar       *decoded_name;
-	gchar       *message;
-	GFile       *mount_point;
-	gchar       *mount_path;
-	gint         response;
-
-	g_return_if_fail (G_IS_MOUNT (mount));
-	g_return_if_fail (error == NULL || *error == NULL);
-
-	volume_name = g_udev_device_get_property (device, "ID_FS_LABEL_ENC");
-	decoded_name = tvm_notify_decode (volume_name);
-  
-	if (decoded_name != NULL)
-		message = g_strdup_printf (_("The volume \"%s\" was mounted automatically"), decoded_name);
-	else
-		message = g_strdup_printf (_("The inserted volume was mounted automatically"));
-
-	response = pragha_gudev_show_dialog (_("Audio/Data CD"), "gnome-fs-executable",
-	                                     message, NULL,
-	                                     _("Open folder"), PRAGHA_DEVICE_RESPONSE_BROWSE);
-	switch (response)
-	{
-		case PRAGHA_DEVICE_RESPONSE_BROWSE:
-			mount_point = g_mount_get_root (mount);
-			mount_path = g_file_get_path (mount_point);
-
-			open_url (mount_path, NULL);
-
-			g_object_unref (mount_point);
-			break;
-		case PRAGHA_DEVICE_RESPONSE_NONE:
-		default:
-			break;
-	}
-
-	g_free (decoded_name);
-	g_free (message);
-}
-
-static void
-pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaDevices *devices)
-{
-	GMount *mount;
-	GError *error = NULL;
-  
-	g_return_if_fail (G_IS_VOLUME (volume));
-	g_return_if_fail (G_IS_ASYNC_RESULT (result));
-
-	/* finish mounting the volume */
-	if (g_volume_mount_finish (volume, result, &error)) {
-		/* get the moint point of the volume */
-		mount = g_volume_get_mount (volume);
-
-		if (mount != NULL) {
-			pragha_block_device_mounted (devices->device, mount, &error);
-			g_object_unref (mount);
-		}
-	}
-
-	if(error != NULL) {
-		// TODO: Check G_IO_ERROR_ALREADY_MOUNTED and ignore it..
-		pragha_gudev_clear_hook_devices(devices);
-	}
-
-	g_object_unref (volume);
-}
-
-static gboolean
-pragha_block_device_mount (gpointer data)
-{
-	GVolumeMonitor  *monitor;
-	GMountOperation *mount_operation;
-	GVolume         *volume;
-
-	PraghaDevices *devices = data;
-
-	monitor = g_volume_monitor_get ();
-
-	/* determine the GVolume corresponding to the udev devices */
-	volume = tvm_g_volume_monitor_get_volume_for_kind (monitor,
-	                                                   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE,
-	                                                   g_udev_device_get_device_file (devices->device));
-	g_object_unref (monitor);
-
-	/* check if we have a volume */
-	if (volume != NULL) {
-		if (g_volume_can_mount (volume)) {
-			/* try to mount the volume asynchronously */
-			mount_operation = gtk_mount_operation_new (NULL);
-			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
-			                NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish,
-			                devices);
-			g_object_unref (mount_operation);
-		}
-	}
-
-	return FALSE;
 }
 
 /*
@@ -326,146 +184,7 @@ pragha_gudev_get_device_type (GUdevDevice *device)
 	return PRAGHA_DEVICE_UNKNOWN;
 }
 
-static void
-pragha_devices_moutable_added (PraghaDevices *devices, GUdevDevice *device)
-{
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-
-	if (devices->bus_hooked != 0 &&
-	    devices->device_hooked != 0)
-		return;
-
-	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
-
-	devices->device = g_object_ref (device);
-	devices->bus_hooked = busnum;
-	devices->device_hooked = devnum;
-
-	CDEBUG(DBG_INFO, "Hook a new mountable device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
-
-	/*
-	 * HACK: We're listening udev. Then wait 5 seconds, to ensure that GVolume also detects the device.
-	 */
-	g_timeout_add_seconds(5, pragha_block_device_mount, devices);
-}
-
-static void
-pragha_devices_audio_cd_added (PraghaDevices *devices)
-{
-	gint response;
-	response = pragha_gudev_show_dialog (_("Audio/Data CD"), "gnome-dev-cdrom-audio",
-	                                     _("Was inserted an Audio Cd."), NULL,
-	                                     _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
-	switch (response)
-	{
-		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			add_audio_cd (devices->cwin);
-			break;
-		case PRAGHA_DEVICE_RESPONSE_NONE:
-		default:
-			break;
-	}
-}
-
-PraghaMusicobject *
-new_musicobject_from_mtp (LIBMTP_track_t *track)
-{
-	PraghaMusicobject *mobj = NULL;
-	gchar *uri = NULL;
-	
-	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
-
-	uri = g_strdup_printf ("mtp://%i-%s", track->item_id, track->filename);
-
-	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-	                     "file", uri,
-	                     "file-type", FILE_MTP,
-	                     NULL);
-	if (track->title)
-		pragha_musicobject_set_title (mobj, track->title);
-	if (track->artist)
-		pragha_musicobject_set_artist (mobj, track->artist);
-	if (track->album)
-		pragha_musicobject_set_album (mobj, track->album);
-	if (track->genre)
-		pragha_musicobject_set_genre (mobj, track->genre);
-	if (track->duration)
-		pragha_musicobject_set_length (mobj, track->duration/1000);
-	if (track->tracknumber)
-		pragha_musicobject_set_track_no (mobj, track->tracknumber);
-	if (track->samplerate)
-		pragha_musicobject_set_samplerate (mobj, track->samplerate);
-	if (track->nochannels)
-		pragha_musicobject_set_channels (mobj, track->nochannels);
-
-	g_free(uri);
-
-	return mobj;
-}
-
-static void
-pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
-{
-	LIBMTP_raw_device_t *device_list, *raw_device;
-	LIBMTP_mtpdevice_t *mtp_device;
-	LIBMTP_track_t *tracks, *track, *tmp;
-	PraghaMusicobject *mobj = NULL;
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-	gint numdevs = 0;
-
-	if (devices->bus_hooked != 0 &&
-	    devices->device_hooked != 0)
-		return;
-
-	busnum = g_udev_device_get_property_as_uint64(device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64(device, "DEVNUM");
-
-	/* Get devices.. */
-
-	if (LIBMTP_Detect_Raw_Devices (&device_list, &numdevs) != LIBMTP_ERROR_NONE)
-		return;
-
-	if (device_list == NULL || numdevs == 0)
-		return;
-
-	raw_device = &device_list[0];
-
-	if (raw_device->devnum != devnum && raw_device->bus_location != busnum)
-		goto bad;
-
-	/* Get mtp_device and load track list.. */
-
-	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
-	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, NULL, NULL);
-	if (tracks) {
-		track = tracks;
-		while (track != NULL) {
-			mobj = new_musicobject_from_mtp (track);
-			pragha_playlist_append_single_song (devices->cwin->cplaylist, mobj);
-
-			tmp = track;
-			track = track->next;
-			LIBMTP_destroy_track_t(tmp);
-		}
-	}
-
-	/* Device handled. */
-
-	devices->device = g_object_ref (device);
-	devices->mtp_device = mtp_device;
-	devices->bus_hooked = busnum;
-	devices->device_hooked = devnum;
-
-bad:
-	g_free(raw_device);
-
-	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
-}
-
-static void
+void
 pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 {
 	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
@@ -474,6 +193,15 @@ pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 
 	devices->bus_hooked = 0;
 	devices->device_hooked = 0;
+}
+
+void
+pragha_gudev_set_hook_device (PraghaDevices *devices, GUdevDevice *device, LIBMTP_mtpdevice_t *mtp_device, guint64 busnum, guint64 devnum)
+{
+	devices->device = g_object_ref (device);
+	devices->mtp_device = mtp_device;
+	devices->bus_hooked = busnum;
+	devices->device_hooked = devnum;
 }
 
 /* Functions that manage to "add" "change" and "remove" devices events. */
@@ -546,33 +274,6 @@ gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, Pr
 	}
 }
 
-void
-pragha_devices_prepare_mtp_temp_file (PraghaBackend *backend, gpointer user_data)
-{
-	PraghaMusicobject *mobj;
-	const gchar *track_id;
-	const gchar *file;
-	gchar *tmp_uri = NULL;
-
-	PraghaDevices *devices = user_data;
-
-	mobj = pragha_backend_get_musicobject (backend);
-
-	file = pragha_musicobject_get_file (mobj);
-
-	if (g_str_has_prefix (file, "mtp://") == FALSE)
-		return;
-
-	track_id = file + strlen ("mtp://");
-
-	tmp_uri = g_strdup_printf ("/tmp/%s", track_id);
-	if (!LIBMTP_Get_Track_To_File (devices->mtp_device, atoi(track_id), tmp_uri, NULL, NULL)) {
-		gchar *uri = g_filename_to_uri (tmp_uri, NULL, NULL);
-		pragha_backend_set_tmp_uri (backend, uri);
-		g_free(uri);
-	}
-}
-
 /* Init gudev subsysten, and listen events. */
 
 void
@@ -597,6 +298,9 @@ pragha_devices_new (struct con_win *cwin)
 	devices->cwin = cwin;
 	devices->bus_hooked = 0;
 	devices->device_hooked = 0;
+
+	devices->device = NULL;
+	devices->mtp_device = NULL;
 
 	devices->gudev_client = g_udev_client_new(gudev_subsystems);
 
