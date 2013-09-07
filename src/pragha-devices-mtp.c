@@ -88,25 +88,25 @@ get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobjec
 		case FILE_MTP:
 		default:
 			filetype = LIBMTP_FILETYPE_UNKNOWN;
-	  		break;
+			break;
 	}
 
 	if (filetype == LIBMTP_FILETYPE_UNKNOWN)
 		return NULL;
 
 	filename = g_strdup(pragha_musicobject_get_file(mobj));
-    if (g_stat(filename, &sbuf) == -1) {
-        g_free(filename);
-        return NULL;
-    }
+	if (g_stat(filename, &sbuf) == -1) {
+		g_free(filename);
+		return NULL;
+	}
 
 	tr = LIBMTP_new_track_t();
 
 	/* Minimun data. */
 
-    tr->filesize = (uint64_t) sbuf.st_size;
-    tr->filename = get_display_name(mobj);
-    tr->filetype = filetype;
+	tr->filesize = (uint64_t) sbuf.st_size;
+	tr->filename = get_display_name(mobj);
+	tr->filetype = filetype;
 
 	/* Metadata. */
 
@@ -141,7 +141,7 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices)
 
 	mobj = pragha_playlist_get_selected_musicobject (cwin->cplaylist);
 	if (!mobj)
-		CDEBUG(DBG_INFO,"BAD mobj");
+		return;
 
 	mtp_device = pragha_device_get_mtp_device(devices);
 
