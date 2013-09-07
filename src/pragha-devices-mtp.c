@@ -73,13 +73,55 @@ new_musicobject_from_mtp (LIBMTP_track_t *track)
 	return mobj;
 }
 
+int progressfunc (uint64_t const sent, uint64_t const total, void const *const data)
+{
+	/* Have to give control to GTK periodically ... */
+	if (pragha_process_gtk_events ())
+		return -1;
+
+	return 0;
+}
+
+void
+pragha_device_mtp_append_tracks (PraghaDevices *devices)
+{
+	LIBMTP_mtpdevice_t *mtp_device;
+	LIBMTP_track_t *tracks, *track, *tmp;
+	PraghaMusicobject *mobj = NULL;
+	GList *list = NULL;
+
+	if (pragha_device_already_is_idle (devices))
+		return;
+
+	mtp_device = pragha_device_get_mtp_device (devices);
+
+	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, NULL, NULL);
+	if (tracks) {
+		track = tracks;
+		while (track != NULL) {
+			mobj = new_musicobject_from_mtp (track);
+			if (G_LIKELY(mobj))
+				list = g_list_append(list, mobj);
+
+			tmp = track;
+			track = track->next;
+			LIBMTP_destroy_track_t(tmp);
+
+			/* Have to give control to GTK periodically ... */
+			if (pragha_process_gtk_events ())
+				return;
+		}
+	}
+
+	pragha_playlist_append_mobj_list (pragha_device_get_aplication(devices)->cplaylist, list);
+	g_list_free(list);
+}
+
 void
 pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 {
 	LIBMTP_raw_device_t *device_list, *raw_device;
 	LIBMTP_mtpdevice_t *mtp_device;
-	LIBMTP_track_t *tracks, *track, *tmp;
-	PraghaMusicobject *mobj = NULL;
 	guint64 busnum = 0;
 	guint64 devnum = 0;
 	gint numdevs = 0;
@@ -103,25 +145,13 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 	if (raw_device->devnum != devnum && raw_device->bus_location != busnum)
 		goto bad;
 
-	/* Get mtp_device and load track list.. */
-
-	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
-	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, NULL, NULL);
-	if (tracks) {
-		track = tracks;
-		while (track != NULL) {
-			mobj = new_musicobject_from_mtp (track);
-			pragha_playlist_append_single_song (pragha_device_get_aplication(devices)->cplaylist, mobj);
-
-			tmp = track;
-			track = track->next;
-			LIBMTP_destroy_track_t(tmp);
-		}
-	}
-
 	/* Device handled. */
 
+	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
+
 	pragha_gudev_set_hook_device (devices, device, mtp_device, busnum, devnum);
+
+	pragha_device_mtp_append_tracks (devices);
 
 	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", busnum, devnum);
 
