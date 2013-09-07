@@ -189,7 +189,14 @@ pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 {
 	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", devices->bus_hooked, devices->device_hooked);
 
-	g_object_unref (devices->device);
+	if (devices->device) {
+		g_object_unref (devices->device);
+		devices->device = NULL;
+	}
+	if (devices->mtp_device) {
+		LIBMTP_Release_Device(devices->mtp_device);
+		devices->mtp_device = NULL;
+	}
 
 	devices->bus_hooked = 0;
 	devices->device_hooked = 0;
