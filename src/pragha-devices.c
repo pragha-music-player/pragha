@@ -27,6 +27,7 @@
 
 #include <gudev/gudev.h>
 #include <libmtp.h>
+#include <stdlib.h>
 
 #include "pragha.h"
 #include "pragha-devices.h"
@@ -38,6 +39,7 @@ struct _PraghaDevices {
 	struct con_win *cwin;
 	GUdevClient *gudev_client;
 	GUdevDevice *device;
+	LIBMTP_mtpdevice_t *mtp_device;
 	guint64 bus_hooked;
 	guint64 device_hooked;
 };
@@ -375,7 +377,7 @@ new_musicobject_from_mtp (LIBMTP_track_t *track)
 	
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
 
-	uri = g_strdup_printf ("mtp://%d", track->item_id);
+	uri = g_strdup_printf ("mtp://%i-%s", track->item_id, track->filename);
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
@@ -453,6 +455,7 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 	/* Device handled. */
 
 	devices->device = g_object_ref (device);
+	devices->mtp_device = mtp_device;
 	devices->bus_hooked = busnum;
 	devices->device_hooked = devnum;
 
@@ -543,6 +546,33 @@ gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, Pr
 	}
 }
 
+void
+pragha_devices_prepare_mtp_temp_file (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaMusicobject *mobj;
+	const gchar *track_id;
+	const gchar *file;
+	gchar *tmp_uri = NULL;
+
+	PraghaDevices *devices = user_data;
+
+	mobj = pragha_backend_get_musicobject (backend);
+
+	file = pragha_musicobject_get_file (mobj);
+
+	if (g_str_has_prefix (file, "mtp://") == FALSE)
+		return;
+
+	track_id = file + strlen ("mtp://");
+
+	tmp_uri = g_strdup_printf ("/tmp/%s", track_id);
+	if (!LIBMTP_Get_Track_To_File (devices->mtp_device, atoi(track_id), tmp_uri, NULL, NULL)) {
+		gchar *uri = g_filename_to_uri (tmp_uri, NULL, NULL);
+		pragha_backend_set_tmp_uri (backend, uri);
+		g_free(uri);
+	}
+}
+
 /* Init gudev subsysten, and listen events. */
 
 void
@@ -573,6 +603,8 @@ pragha_devices_new (struct con_win *cwin)
 	LIBMTP_Init();
 
 	g_signal_connect (devices->gudev_client, "uevent", G_CALLBACK(gudev_uevent_cb), devices);
+
+	g_signal_connect (cwin->backend, "prepare-source", G_CALLBACK(pragha_devices_prepare_mtp_temp_file), devices);
 
 	return devices;
 }

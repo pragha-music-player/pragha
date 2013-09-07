@@ -183,9 +183,6 @@ pragha_application_new (gint argc, gchar *argv[])
 	else
 		cwin->notify = NULL;
 
-#ifdef HAVE_GUDEV
-	cwin->devices = pragha_devices_new(cwin);
-#endif
 	cwin->art_cache = pragha_art_cache_new ();
 
 	cwin->backend = pragha_backend_new (cwin);
@@ -254,6 +251,10 @@ pragha_application_new (gint argc, gchar *argv[])
 	g_object_bind_property (cwin->preferences, "timer-remaining-mode",
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
+
+	#ifdef HAVE_GUDEV
+	cwin->devices = pragha_devices_new(cwin);
+	#endif
 
 	#ifdef HAVE_LIBGLYR
 	cwin->glyr = pragha_glyr_new (cwin);

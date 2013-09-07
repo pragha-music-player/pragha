@@ -61,6 +61,7 @@ struct PraghaBackendPrivate {
 	GstElement *pipeline;
 	GstElement *audio_sink;
 	GstElement *equalizer;
+	gchar *tmp_uri;
 	guint timer;
 	gboolean is_live;
 	gboolean can_seek;
@@ -85,6 +86,7 @@ enum {
 static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
+	SIGNAL_PREPARE_SOURCE,
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
@@ -385,6 +387,8 @@ pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
 void
 pragha_backend_stop (PraghaBackend *backend)
 {
+	gchar *filename = NULL;
+
 	PraghaBackendPrivate *priv = backend->priv;
 
 	CDEBUG(DBG_BACKEND, "Stopping playback");
@@ -394,6 +398,15 @@ pragha_backend_stop (PraghaBackend *backend)
 	if(priv->mobj) {
 		g_object_unref(priv->mobj);
 		priv->mobj = NULL;
+	}
+
+	if (priv->tmp_uri) {
+		filename = g_filename_from_uri (priv->tmp_uri, NULL, NULL);
+		g_free (priv->tmp_uri);
+		priv->tmp_uri = NULL;
+
+		g_unlink (filename);
+		g_free (filename);
 	}
 }
 
@@ -565,6 +578,16 @@ out:
 }
 
 void
+pragha_backend_set_tmp_uri (PraghaBackend *backend, const gchar *uri)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+
+	CDEBUG(DBG_BACKEND, "Setting temp uri: %s", uri);
+
+	priv->tmp_uri = g_strdup(uri);
+}
+
+void
 pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj)
 {
 	PraghaBackendPrivate *priv = backend->priv;
@@ -602,20 +625,28 @@ pragha_backend_play (PraghaBackend *backend)
 	g_object_get(priv->mobj,
 	             "file", &file,
 	             NULL);
-	local_file = pragha_musicobject_is_local_file (priv->mobj);
 
 	if (string_is_empty(file))
 		goto exit;
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
-	if (local_file) {
-		uri = g_filename_to_uri (file, NULL, NULL);
-		g_object_set (priv->pipeline, "uri", uri, NULL);
-		g_free (uri);
+	g_signal_emit (backend, signals[SIGNAL_PREPARE_SOURCE], 0);
+
+	if (priv->tmp_uri) {
+		g_object_set (priv->pipeline, "uri", priv->tmp_uri, NULL);
 	}
 	else {
-		g_object_set (priv->pipeline, "uri", file, NULL);
+		local_file = pragha_musicobject_is_local_file (priv->mobj);
+
+		if (local_file) {
+			uri = g_filename_to_uri (file, NULL, NULL);
+			g_object_set (priv->pipeline, "uri", uri, NULL);
+			g_free (uri);
+		}
+		else {
+			g_object_set (priv->pipeline, "uri", file, NULL);
+		}
 	}
 
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);
@@ -925,6 +956,14 @@ pragha_backend_class_init (PraghaBackendClass *klass)
                                                    G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
+
+	signals[SIGNAL_PREPARE_SOURCE] = g_signal_new ("prepare-source",
+	                                               G_TYPE_FROM_CLASS (gobject_class),
+	                                               G_SIGNAL_RUN_LAST,
+	                                               G_STRUCT_OFFSET (PraghaBackendClass, prepare_source),
+	                                               NULL, NULL,
+	                                               g_cclosure_marshal_VOID__VOID,
+	                                               G_TYPE_NONE, 0);
 
 	signals[SIGNAL_TICK] = g_signal_new ("tick",
                                              G_TYPE_FROM_CLASS (gobject_class),

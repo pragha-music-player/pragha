@@ -48,6 +48,7 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+	void (*prepare_source) (PraghaBackend *backend);
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
@@ -73,6 +74,7 @@ void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
 void pragha_backend_stop (PraghaBackend *backend);
+void pragha_backend_set_tmp_uri (PraghaBackend *backend, const gchar *uri);
 void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj);
 PraghaMusicobject *pragha_backend_get_musicobject(PraghaBackend *backend);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
