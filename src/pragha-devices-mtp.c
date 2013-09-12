@@ -40,6 +40,8 @@
 static void pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices);
 static void pragha_mtp_action_append_songs   (GtkAction *action, PraghaDevices *devices);
 
+static PraghaMusicobject *new_musicobject_from_mtp (LIBMTP_track_t *track);
+
 static const GtkActionEntry mtp_sendto_actions [] = {
 	{"Send to MTP", "multimedia-player", "Fake MTP device",
 	 "", "Send to MTP", G_CALLBACK(pragha_mtp_action_send_to_device)},
@@ -170,7 +172,6 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices)
 	mtp_track = get_mtp_track_from_musicobject(mtp_device, mobj);
 
 	ret = LIBMTP_Send_Track_From_File (mtp_device, file, mtp_track, NULL, NULL);
-	LIBMTP_destroy_track_t(mtp_track);
 
 	if (ret != 0) {
 		stack = LIBMTP_Get_Errorstack (mtp_device);
@@ -187,8 +188,14 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices)
 		LIBMTP_Clear_Errorstack(mtp_device);
 	}
 	else {
+		mobj = new_musicobject_from_mtp (mtp_track);
+		if (G_LIKELY(mobj))
+			pragha_device_cache_insert_track (devices, mobj);
+
 		CDEBUG(DBG_INFO, "Added %s to MTP device", file);
 	}
+
+	LIBMTP_destroy_track_t(mtp_track);
 }
 static void
 pragha_mtp_action_append_songs (GtkAction *action, PraghaDevices *devices)
