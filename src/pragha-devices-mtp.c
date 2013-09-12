@@ -286,18 +286,14 @@ int progressfunc (uint64_t const sent, uint64_t const total, void const *const d
 }
 
 void
-pragha_device_mtp_append_tracks (PraghaDevices *devices)
+pragha_device_mtp_cache_tracks (PraghaDevices *devices)
 {
 	LIBMTP_mtpdevice_t *mtp_device;
 	LIBMTP_track_t *tracks, *track, *tmp;
 	PraghaMusicobject *mobj = NULL;
 
-	if (pragha_device_already_is_idle (devices))
-		return;
-
 	mtp_device = pragha_device_get_mtp_device (devices);
-
-	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, NULL, NULL);
+	tracks = LIBMTP_Get_Tracklisting_With_Callback (mtp_device, progressfunc, NULL); // Slow!.
 	if (tracks) {
 		track = tracks;
 		while (track != NULL) {
@@ -314,6 +310,13 @@ pragha_device_mtp_append_tracks (PraghaDevices *devices)
 				return;
 		}
 	}
+}
+
+void
+pragha_device_mtp_append_tracks (PraghaDevices *devices)
+{
+	if (pragha_device_already_is_idle (devices))
+		return;
 
 	pragha_device_cache_append_tracks (devices);
 }
@@ -366,12 +369,16 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 
 	/* Device handled. */
 
-	mtp_device = LIBMTP_Open_Raw_Device(raw_device);
-
+	mtp_device = LIBMTP_Open_Raw_Device(raw_device); // Slow!.
 	pragha_gudev_set_hook_device (devices, device, mtp_device, busnum, devnum);
 
+	/* Cache song of device. */
+	pragha_device_mtp_cache_tracks (devices); // Slow!.
+
+	/* Add action to menubar and playlist. */
 	pragha_playlist_append_mtp_action (devices);
 
+	/* Show dialog to append songs. */
 	pragha_devices_add_detected_device (devices);
 
 	CDEBUG(DBG_INFO, "Hook a new MTP device, Bus: %ld, Dev: %ld", busnum, devnum);
