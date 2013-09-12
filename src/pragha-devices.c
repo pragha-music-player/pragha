@@ -38,11 +38,15 @@
 
 struct _PraghaDevices {
 	struct con_win *cwin;
+
 	GUdevClient *gudev_client;
 	GUdevDevice *device;
+
 	LIBMTP_mtpdevice_t *mtp_device;
 	guint64 bus_hooked;
 	guint64 device_hooked;
+
+	GHashTable        *tracks_table;
 
 	GtkActionGroup *action_group_playlist;
 	guint merge_id_playlist;
@@ -55,6 +59,54 @@ static const gchar * gudev_subsystems[] =
 	"usb",
 	NULL,
 };
+
+/* */
+
+void
+pragha_device_cache_append_tracks (PraghaDevices *devices)
+{
+	GHashTableIter iter;
+	gpointer key, value;
+	PraghaMusicobject *mobj = NULL;
+	GList *list = NULL;
+
+	g_hash_table_iter_init (&iter, devices->tracks_table);
+	while (g_hash_table_iter_next (&iter, &key, &value)) {
+		mobj = value;
+		if (G_LIKELY(mobj)) {
+			list = g_list_append (list, mobj);
+			g_object_ref (mobj);
+		}
+
+		/* Have to give control to GTK periodically ... */
+		if (pragha_process_gtk_events ())
+			return;
+	}
+
+	pragha_playlist_append_mobj_list (pragha_device_get_aplication(devices)->cplaylist, list);
+	g_list_free(list);
+}
+
+void
+pragha_device_cache_clear (PraghaDevices *devices)
+{
+	g_hash_table_remove_all (devices->tracks_table);
+}
+
+void
+pragha_device_cache_insert_track (PraghaDevices *devices, PraghaMusicobject *mobj)
+{
+	const gchar *file = pragha_musicobject_get_file(mobj);
+
+	if (string_is_empty(file))
+		return;
+
+	g_hash_table_insert (devices->tracks_table,
+	                     g_strdup(file),
+	                     mobj);
+}
+
+/**/
 
 gboolean
 pragha_device_already_is_busy (PraghaDevices *devices)
@@ -202,6 +254,8 @@ pragha_gudev_clear_hook_devices (PraghaDevices *devices)
 		devices->mtp_device = NULL;
 	}
 
+	pragha_device_cache_clear (devices);
+
 	devices->bus_hooked = 0;
 	devices->device_hooked = 0;
 }
@@ -320,6 +374,8 @@ pragha_devices_free(PraghaDevices *devices)
 	   devices->device_hooked != 0)
 		pragha_gudev_clear_hook_devices (devices);
 
+	g_hash_table_destroy(devices->tracks_table);
+
 	g_object_unref(devices->gudev_client);
 
 	g_slice_free (PraghaDevices, devices);
@@ -338,6 +394,11 @@ pragha_devices_new (struct con_win *cwin)
 
 	devices->device = NULL;
 	devices->mtp_device = NULL;
+
+	devices->tracks_table = g_hash_table_new_full (g_str_hash,
+	                                               g_str_equal,
+	                                               g_free,
+	                                               g_object_unref);
 
 	devices->gudev_client = g_udev_client_new(gudev_subsystems);
 

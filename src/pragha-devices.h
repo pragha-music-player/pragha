@@ -41,6 +41,10 @@ enum
 	PRAGHA_DEVICE_UNKNOWN,
 };
 
+void pragha_device_cache_append_tracks (PraghaDevices *devices);
+void pragha_device_cache_clear         (PraghaDevices *devices);
+void pragha_device_cache_insert_track  (PraghaDevices *devices, PraghaMusicobject *mobj);
+
 gboolean            pragha_device_already_is_busy   (PraghaDevices *devices);
 gboolean            pragha_device_already_is_idle   (PraghaDevices *devices);
 

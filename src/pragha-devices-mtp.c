@@ -245,7 +245,6 @@ pragha_device_mtp_append_tracks (PraghaDevices *devices)
 	LIBMTP_mtpdevice_t *mtp_device;
 	LIBMTP_track_t *tracks, *track, *tmp;
 	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
 
 	if (pragha_device_already_is_idle (devices))
 		return;
@@ -258,7 +257,7 @@ pragha_device_mtp_append_tracks (PraghaDevices *devices)
 		while (track != NULL) {
 			mobj = new_musicobject_from_mtp (track);
 			if (G_LIKELY(mobj))
-				list = g_list_append(list, mobj);
+				pragha_device_cache_insert_track (devices, mobj);
 
 			tmp = track;
 			track = track->next;
@@ -270,8 +269,7 @@ pragha_device_mtp_append_tracks (PraghaDevices *devices)
 		}
 	}
 
-	pragha_playlist_append_mobj_list (pragha_device_get_aplication(devices)->cplaylist, list);
-	g_list_free(list);
+	pragha_device_cache_append_tracks (devices);
 }
 
 void
