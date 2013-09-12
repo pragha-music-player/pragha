@@ -38,9 +38,10 @@
 #include "pragha-debug.h"
 
 static void pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices);
+static void pragha_mtp_action_append_songs   (GtkAction *action, PraghaDevices *devices);
 
-static const GtkActionEntry mtp_actions [] = {
-	{"Send to MTP", NULL, N_("Send to MTP device"),
+static const GtkActionEntry mtp_sendto_actions [] = {
+	{"Send to MTP", "multimedia-player", "Fake MTP device",
 	 "", "Send to MTP", G_CALLBACK(pragha_mtp_action_send_to_device)},
 };
 
@@ -54,6 +55,26 @@ static const gchar *mtp_sendto_xml = "<ui>					\
 	</menu>									\
 	</popup>				    				\
 </ui>";
+
+static const GtkActionEntry mtp_menu_actions [] = {
+	{"MtpDevice", "multimedia-player", "Fake MTP device"},
+	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
+	"", "Add all the library", G_CALLBACK(pragha_mtp_action_append_songs)},
+};
+
+static const gchar *mtp_menu_xml = "<ui>					\
+	<menubar name=\"Menubar\">						\
+		<menu action=\"ToolsMenu\">					\
+			<placeholder name=\"pragha-plugins-placeholder\">		\
+				<menu action=\"MtpDevice\">				\
+					<menuitem action=\"Add the library\"/>		\
+				</menu>							\
+				<separator/>						\
+			</placeholder>						\
+		</menu>								\
+	</menubar>								\
+</ui>";
+
 
 LIBMTP_track_t *
 get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj)
@@ -169,6 +190,11 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices)
 		CDEBUG(DBG_INFO, "Added %s to MTP device", file);
 	}
 }
+static void
+pragha_mtp_action_append_songs (GtkAction *action, PraghaDevices *devices)
+{
+	pragha_device_cache_append_tracks (devices);
+}
 
 static void
 pragha_playlist_append_mtp_action (PraghaDevices *devices)
@@ -177,21 +203,41 @@ pragha_playlist_append_mtp_action (PraghaDevices *devices)
 	GtkAction *action;
 	gchar *friend_label = NULL;
 
+	friend_label = LIBMTP_Get_Friendlyname (pragha_device_get_mtp_device(devices));
+
+	/* Menubar tools. */
+
+	action_group = gtk_action_group_new ("PraghaMenubarMtpActions");
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+
+	gtk_action_group_add_actions (action_group,
+	                              mtp_menu_actions,
+	                              G_N_ELEMENTS (mtp_menu_actions),
+	                              devices);
+
+	action = gtk_action_group_get_action (action_group, "MtpDevice");
+	gtk_action_set_label(GTK_ACTION(action), friend_label);
+
+	pragha_devices_append_menu_action (devices, action_group, mtp_menu_xml);
+
+	/* Playlist sendto */
+
 	action_group = gtk_action_group_new ("PraghaPlaylistMtpActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 
 	gtk_action_group_add_actions (action_group,
-	                              mtp_actions,
-	                              G_N_ELEMENTS (mtp_actions),
+	                              mtp_sendto_actions,
+	                              G_N_ELEMENTS (mtp_sendto_actions),
 	                              devices);
 
 	action = gtk_action_group_get_action (action_group, "Send to MTP");
 
 	friend_label = LIBMTP_Get_Friendlyname (pragha_device_get_mtp_device(devices));
 	gtk_action_set_label(GTK_ACTION(action), friend_label);
-	g_free(friend_label);
 
 	pragha_devices_append_playlist_action (devices, action_group, mtp_sendto_xml);
+
+	g_free(friend_label);
 }
 
 static PraghaMusicobject *

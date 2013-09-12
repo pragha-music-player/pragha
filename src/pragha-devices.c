@@ -48,9 +48,11 @@ struct _PraghaDevices {
 
 	GHashTable        *tracks_table;
 
+	GtkActionGroup *action_group_menu;
+	guint merge_id_menu;
+
 	GtkActionGroup *action_group_playlist;
 	guint merge_id_playlist;
-
 };
 
 static const gchar * gudev_subsystems[] =
@@ -355,6 +357,15 @@ pragha_devices_append_playlist_action (PraghaDevices *devices, GtkActionGroup *a
 void
 pragha_devices_remove_playlist_action (PraghaDevices *devices)
 {
+	if (!devices->merge_id_menu)
+		return;
+
+	pragha_menubar_remove_plugin_action (devices->cwin->window,
+	                                     devices->action_group_menu,
+	                                     devices->merge_id_menu);
+
+	devices->merge_id_menu = 0;
+
 	if (!devices->merge_id_playlist)
 		return;
 
@@ -363,6 +374,36 @@ pragha_devices_remove_playlist_action (PraghaDevices *devices)
 	                                      devices->merge_id_playlist);
 
 	devices->merge_id_playlist = 0;
+}
+
+void
+pragha_devices_append_menu_action (PraghaDevices *devices, GtkActionGroup *action_group, const gchar *menu_xml)
+{
+	PraghaWindow *window;
+
+	window = pragha_application_get_window (devices->cwin);
+
+	devices->action_group_menu = action_group;
+	devices->merge_id_menu     = pragha_menubar_append_plugin_action (window,
+	                                                                  action_group,
+	                                                                  menu_xml);
+}
+
+void
+pragha_devices_remove_menu_action (PraghaDevices *devices)
+{
+	PraghaWindow  *window;
+
+	if (!devices->merge_id_menu)
+		return;
+
+	window = pragha_application_get_window (devices->cwin);
+
+	pragha_menubar_remove_plugin_action (window,
+	                                     devices->action_group_menu,
+	                                     devices->merge_id_menu);
+
+	devices->merge_id_menu = 0;
 }
 
 /* Init gudev subsysten, and listen events. */
