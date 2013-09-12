@@ -374,9 +374,13 @@ pragha_devices_mtp_added (PraghaDevices *devices, GUdevDevice *device)
 	if (raw_device->devnum != devnum && raw_device->bus_location != busnum)
 		goto bad;
 
-	/* Device handled. */
+	/* Get device and reorder by free space. */
 
 	mtp_device = LIBMTP_Open_Raw_Device(raw_device); // Slow!.
+	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
+
+	/* Device handled. */
+
 	pragha_gudev_set_hook_device (devices, device, mtp_device, busnum, devnum);
 
 	/* Cache song of device. */
