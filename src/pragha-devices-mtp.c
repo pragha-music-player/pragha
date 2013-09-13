@@ -35,10 +35,13 @@
 #include "pragha-devices-block.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+#include "pragha-simple-widgets.h"
+#include "pragha-hig.h"
 #include "pragha-debug.h"
 
-static void pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevices *devices);
-static void pragha_mtp_action_append_songs   (GtkAction *action, PraghaDevices *devices);
+static void pragha_mtp_action_send_to_device   (GtkAction *action, PraghaDevices *devices);
+static void pragha_mtp_action_append_songs     (GtkAction *action, PraghaDevices *devices);
+static void pragha_mtp_action_show_device_info (GtkAction *action, PraghaDevices *devices);
 
 static PraghaMusicobject *new_musicobject_from_mtp (LIBMTP_track_t *track);
 
@@ -62,6 +65,8 @@ static const GtkActionEntry mtp_menu_actions [] = {
 	{"MtpDevice", "multimedia-player", "Fake MTP device"},
 	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
 	"", "Add all the library", G_CALLBACK(pragha_mtp_action_append_songs)},
+	{"Show device info", GTK_STOCK_INFO, N_("Show device info"),
+	"", "Show device info", G_CALLBACK(pragha_mtp_action_show_device_info)},
 };
 
 static const gchar *mtp_menu_xml = "<ui>					\
@@ -70,13 +75,14 @@ static const gchar *mtp_menu_xml = "<ui>					\
 			<placeholder name=\"pragha-plugins-placeholder\">		\
 				<menu action=\"MtpDevice\">				\
 					<menuitem action=\"Add the library\"/>		\
+					<separator/>						\
+					<menuitem action=\"Show device info\"/>		\
 				</menu>							\
 				<separator/>						\
 			</placeholder>						\
 		</menu>								\
 	</menubar>								\
 </ui>";
-
 
 LIBMTP_track_t *
 get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj)
@@ -201,6 +207,65 @@ static void
 pragha_mtp_action_append_songs (GtkAction *action, PraghaDevices *devices)
 {
 	pragha_device_cache_append_tracks (devices);
+}
+
+static void
+pragha_mtp_action_show_device_info (GtkAction *action, PraghaDevices *devices)
+{
+	GtkWidget *dialog, *header, *table, *label;
+	LIBMTP_mtpdevice_t *mtp_device;
+    LIBMTP_devicestorage_t *storage;
+	gchar *friend_label = NULL;
+	gchar *storage_size = NULL;
+	gchar *storage_free = NULL;
+	gchar *storage_string = NULL;
+	guint row = 0;
+
+	mtp_device = pragha_device_get_mtp_device (devices);
+	struct con_win *cwin = pragha_device_get_aplication (devices);
+
+	friend_label = LIBMTP_Get_Friendlyname (mtp_device);
+
+	dialog = gtk_dialog_new_with_buttons (friend_label,
+	                                      GTK_WINDOW(cwin->mainwindow),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      GTK_STOCK_OK, GTK_RESPONSE_OK,
+	                                      NULL);
+
+	header = sokoke_xfce_header_new (friend_label, "multimedia-player");
+
+	table = pragha_hig_workarea_table_new ();
+
+	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
+	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
+		pragha_hig_workarea_table_add_section_title (table, &row, storage->StorageDescription);
+
+		storage_free = g_format_size (storage->FreeSpaceInBytes);
+		storage_size = g_format_size (storage->MaxCapacity);
+
+		storage_string = g_strdup_printf (_("%s free of %s (%d%% used)"),
+		                                  storage_free, storage_size,
+		                                  (gint) ((storage->MaxCapacity - storage->FreeSpaceInBytes) * 100 / storage->MaxCapacity));
+
+		label = gtk_label_new_with_mnemonic (storage_string);
+
+		pragha_hig_workarea_table_add_wide_control (table, &row, label);
+
+		g_free (storage_free);
+		g_free (storage_size);
+		g_free (storage_string);
+	}
+	pragha_hig_workarea_table_finish (table, &row);
+
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), table, TRUE, TRUE, 0);
+
+	g_signal_connect (G_OBJECT(dialog), "response",
+	                  G_CALLBACK(gtk_widget_destroy), NULL);
+
+	gtk_widget_show_all (dialog);
+
+	g_free (friend_label);
 }
 
 static void
