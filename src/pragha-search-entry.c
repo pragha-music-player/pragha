@@ -73,6 +73,16 @@ pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
 	}
 }
 
+static void
+changed_cb (GtkEditable *editable, gpointer user_data)
+{
+	GtkEntry *entry = GTK_ENTRY (editable);
+
+	gboolean has_text = gtk_entry_get_text_length (entry) > 0;
+
+	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, has_text);
+}
+
 GtkWidget *
 pragha_search_entry_new (PraghaPreferences *preferences)
 {
@@ -85,10 +95,8 @@ pragha_search_entry_new (PraghaPreferences *preferences)
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
 
-	/* Signal handlers */
-
-	g_signal_connect (G_OBJECT(search_entry), "icon-press",
-			G_CALLBACK (pragha_search_bar_icon_pressed_cb), preferences);
+	g_signal_connect (search_entry, "icon-press", G_CALLBACK (pragha_search_bar_icon_pressed_cb), preferences);
+	g_signal_connect (search_entry, "changed", G_CALLBACK (changed_cb), NULL);
 
 	return search_entry;
 }

@@ -112,10 +112,6 @@ simple_filter_search_activate_handler(GtkEntry *entry,
 
 	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER(fdialog->filter_model));
 
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
-				GTK_ENTRY_ICON_SECONDARY,
-				has_text);
-
 	return FALSE;
 }
 
@@ -158,10 +154,6 @@ simple_filter_search_keyrelease_handler(GtkEntry *entry,
 		u_str = g_utf8_strdown (text, -1);
 		fdialog->filter_string = u_str;
 	}
-
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
-				GTK_ENTRY_ICON_SECONDARY,
-				has_text);
 
 	if (!pragha_preferences_get_instant_search(fdialog->preferences))
 		return FALSE;

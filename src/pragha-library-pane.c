@@ -1311,10 +1311,6 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 		clear_library_search (clibrary);
 	}
 
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
-				GTK_ENTRY_ICON_SECONDARY,
-				has_text);
-
 	return FALSE;
 }
 
@@ -1340,9 +1336,6 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 	else {
 		clear_library_search (clibrary);
 	}
-	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
-				GTK_ENTRY_ICON_SECONDARY,
-				has_text);
 
 	return FALSE;
 }
