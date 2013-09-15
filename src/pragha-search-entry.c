@@ -28,29 +28,10 @@
 /* Generic search entry, valid to library tree, and jump dialog. */
 
 static void
-search_entry_instant_option_toggled (GtkCheckMenuItem *item, PraghaPreferences *preferences)
-{
-	gboolean instant_search;
-
-	instant_search = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
-
-	pragha_preferences_set_instant_search (preferences, instant_search);
-}
-
-static void
-search_entry_approximate_option_toggled (GtkCheckMenuItem *item, PraghaPreferences *preferences)
-{
-	gboolean approximate_search;
-	approximate_search = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
-
-	pragha_preferences_set_approximate_search (preferences, approximate_search);
-}
-
-static void
 seach_entry_populate_popup (GtkEntry *entry, PraghaPreferences *preferences)
 {
 	GtkWidget *popup_menu, *item;
-	gboolean instant_search, approximate_search;
+	const GBindingFlags binding_flags = G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	popup_menu = gtk_menu_new ();
 
@@ -58,22 +39,14 @@ seach_entry_populate_popup (GtkEntry *entry, PraghaPreferences *preferences)
 
 	item = gtk_check_menu_item_new_with_label (_("Refine the search while writing"));
 	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
-
-	instant_search = pragha_preferences_get_instant_search(preferences);
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), instant_search);
-	g_signal_connect (G_OBJECT (item), "toggled",
-				G_CALLBACK (search_entry_instant_option_toggled), preferences);
+	g_object_bind_property (preferences, "instant-search", item, "active", binding_flags);
 	gtk_widget_show (item);
 
 	/* Aproximate search. */
 
 	item = gtk_check_menu_item_new_with_label (_("Search approximate words"));
 	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
-
-	approximate_search = pragha_preferences_get_approximate_search(preferences);
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), approximate_search);
-	g_signal_connect (G_OBJECT (item), "toggled",
-				G_CALLBACK (search_entry_approximate_option_toggled), preferences);
+	g_object_bind_property (preferences, "approximate-searches", item, "active", binding_flags);
 	gtk_widget_show (item);
 
 	gtk_menu_attach_to_widget(GTK_MENU(popup_menu), GTK_WIDGET(entry), NULL);
