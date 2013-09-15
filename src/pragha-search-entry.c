@@ -27,8 +27,8 @@
 
 /* Generic search entry, valid to library tree, and jump dialog. */
 
-void
-search_entry_instant_option_toggled(GtkCheckMenuItem *item, PraghaPreferences *preferences)
+static void
+search_entry_instant_option_toggled (GtkCheckMenuItem *item, PraghaPreferences *preferences)
 {
 	gboolean instant_search;
 
@@ -37,8 +37,8 @@ search_entry_instant_option_toggled(GtkCheckMenuItem *item, PraghaPreferences *p
 	pragha_preferences_set_instant_search (preferences, instant_search);
 }
 
-void
-search_entry_approximate_option_toggled(GtkCheckMenuItem *item, PraghaPreferences *preferences)
+static void
+search_entry_approximate_option_toggled (GtkCheckMenuItem *item, PraghaPreferences *preferences)
 {
 	gboolean approximate_search;
 	approximate_search = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
@@ -83,7 +83,7 @@ seach_entry_populate_popup (GtkEntry *entry, PraghaPreferences *preferences)
 			0, gtk_get_current_event_time());
 }
 
-void
+static void
 pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
                                    gint            position,
                                    GdkEventButton *event,
@@ -100,7 +100,8 @@ pragha_search_bar_icon_pressed_cb (GtkEntry       *entry,
 	}
 }
 
-GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences)
+GtkWidget *
+pragha_search_entry_new (PraghaPreferences *preferences)
 {
 	GtkWidget *search_entry;
 
