@@ -19,9 +19,7 @@
 #define PRAGHA_SIMPLE_WIDGETS_H
 
 #include <gtk/gtk.h>
-#include "pragha-preferences.h"
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
-GtkWidget* pragha_search_entry_new(PraghaPreferences *preferences);
 
 #endif /* PRAGHA_SIMPLE_WIDGETS_H */

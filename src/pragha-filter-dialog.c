@@ -28,7 +28,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "pragha-filter-dialog.h"
 #include "pragha-utils.h"
-#include "pragha-simple-widgets.h"
+#include "pragha-search-entry.h"
 #include "pragha.h"
 
 typedef struct {
