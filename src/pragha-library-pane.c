@@ -1288,7 +1288,7 @@ void queue_refilter (PraghaLibraryPane *clibrary)
 gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 						  PraghaLibraryPane *clibrary)
 {
-	gchar *text = NULL;
+	const gchar *text = NULL;
 	gboolean has_text;
 	
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
@@ -1302,7 +1302,7 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
 
 	if (has_text) {
-		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		text = gtk_entry_get_text (entry);
 		clibrary->filter_entry = g_utf8_strdown (text, -1);
 
 		queue_refilter(clibrary);
@@ -1314,7 +1314,6 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
-	g_free (text);
 
 	return FALSE;
 }
@@ -1322,7 +1321,7 @@ gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
 gboolean simple_library_search_activate_handler(GtkEntry *entry,
 						PraghaLibraryPane *clibrary)
 {
-	gchar *text = NULL;
+	const gchar *text = NULL;
 	gboolean has_text;
 
 	has_text = gtk_entry_get_text_length (GTK_ENTRY(entry)) > 0;
@@ -1333,7 +1332,7 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 	}
 
 	if (has_text) {
-		text = gtk_editable_get_chars (GTK_EDITABLE(entry), 0, -1);
+		text = gtk_entry_get_text (entry);
 		clibrary->filter_entry = g_utf8_strdown (text, -1);
 
 		do_refilter (clibrary);
@@ -1344,7 +1343,6 @@ gboolean simple_library_search_activate_handler(GtkEntry *entry,
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(entry),
 				GTK_ENTRY_ICON_SECONDARY,
 				has_text);
-	g_free (text);
 
 	return FALSE;
 }
