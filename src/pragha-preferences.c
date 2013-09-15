@@ -2153,7 +2153,7 @@ pragha_preferences_get_property (GObject *object,
 			g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
 			break;
 		case PROP_APPROXIMATE_SEARCH:
-			g_value_set_boolean (value, pragha_preferences_get_instant_search(preferences));
+			g_value_set_boolean (value, pragha_preferences_get_approximate_search(preferences));
 			break;
 		case PROP_LIBRARY_STYLE:
 			g_value_set_int (value, pragha_preferences_get_library_style(preferences));
