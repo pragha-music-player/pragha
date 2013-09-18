@@ -465,15 +465,14 @@ gboolean validate_album_art_pattern(const gchar *pattern)
 
 	/* Check if more than six patterns are given */
 
-	if (i > ALBUM_ART_NO_PATTERNS) {
+	if (i <= ALBUM_ART_NO_PATTERNS) {
+		ret = TRUE;
+	}
+	else {
 		g_warning("More than six patterns");
-		goto exit;
 	}
 
-	ret = TRUE;
-exit:
-	if (tokens)
-		g_strfreev(tokens);
+	g_strfreev(tokens);
 
 	return ret;
 }
