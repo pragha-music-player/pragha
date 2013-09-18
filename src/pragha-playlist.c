@@ -983,21 +983,24 @@ current_playlist_mobj_at_path(GtkTreePath *path,
 
 /* Return path of musicobject already in tree */
 
-GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
-					   PraghaPlaylist *cplaylist)
+GtkTreePath*
+current_playlist_path_at_mobj (PraghaMusicobject *mobj,
+                               PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	PraghaMusicobject *ptr = NULL;
-	
-	gtk_tree_model_get_iter_first(model, &iter);
-	do {
+	gboolean ret;
+
+	ret = gtk_tree_model_get_iter_first (model, &iter);
+	while(ret) {
 		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &ptr, -1);
 		if (ptr == mobj) {
 			return gtk_tree_model_get_path(model, &iter);
 		}
-	} while(gtk_tree_model_iter_next(model, &iter));
-	
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+
 	return NULL;
 }
 
