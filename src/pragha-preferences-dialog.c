@@ -111,19 +111,47 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 	gtk_widget_show_all (dialog);
 }
 
+static GSList *
+pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GSList *library_list = NULL;
+	gchar *u_folder = NULL, *folder = NULL;
+	GError *error = NULL;
+	gboolean ret;
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
+
+	ret = gtk_tree_model_get_iter_first(model, &iter);
+	while (ret) {
+		gtk_tree_model_get (model, &iter, 0, &u_folder, -1);
+		if (u_folder) {
+			folder = g_filename_from_utf8 (u_folder, -1, NULL, NULL, &error);
+			if (!folder) {
+				g_warning ("Unable to get filename from UTF-8 string: %s", u_folder);
+				g_error_free(error);
+			}
+			else {
+				library_list = g_slist_append(library_list, folder);
+			}
+			g_free (u_folder);
+		}
+		ret = gtk_tree_model_iter_next(model, &iter);
+	}
+	return library_list;
+}
+
 /* Handler for the preferences dialog */
 
 static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
-	GError *error = NULL;
-	gboolean ret, osd, test_change;
-	gchar *u_folder = NULL, *audio_sink = NULL, *window_state_sink = NULL, *folder = NULL;
+	gboolean osd, test_change;
+	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
-	GtkTreeIter iter;
-	GtkTreeModel *model;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
 	GtkWidget *infobar;
 
@@ -152,38 +180,21 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
 		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->cwin), software_mixer);
 
-		/* Library Preferences */
-
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(dialog->library_view_w));
-		ret = gtk_tree_model_get_iter_first(model, &iter);
-
-		while (ret) {
-			gtk_tree_model_get(model, &iter, 0, &u_folder, -1);
-			if (u_folder) {
-				folder = g_filename_from_utf8(u_folder, -1,
-							      NULL, NULL, &error);
-				if (!folder) {
-					g_warning("Unable to get filename from "
-						  "UTF-8 string: %s",
-						  u_folder);
-					g_error_free(error);
-					g_free(u_folder);
-					ret = gtk_tree_model_iter_next(model,
-								       &iter);
-					continue;
-				}
-				library_dir = g_slist_append(library_dir, folder);
-			}
-			g_free(u_folder);
-			ret = gtk_tree_model_iter_next(model, &iter);
-		}
 
 		/* Save new library folders */
 
-		pragha_preferences_set_filename_list (dialog->preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_DIR,
-		                                      library_dir);
+		library_dir = pragha_preferences_dialog_get_library_list (dialog);
+		if (library_dir) {
+			pragha_preferences_set_filename_list (dialog->preferences,
+				                                  GROUP_LIBRARY,
+				                                  KEY_LIBRARY_DIR,
+				                                  library_dir);
+		}
+		else {
+			pragha_preferences_remove_key (dialog->preferences,
+			                               GROUP_LIBRARY,
+			                               KEY_LIBRARY_DIR);
+		}
 
 		/* Get scanded folders and compare. If changed show infobar */
 
@@ -192,27 +203,31 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			                                      GROUP_LIBRARY,
 			                                      KEY_LIBRARY_SCANNED);
 
-		test_change = FALSE;
-		for(list = folder_scanned; list != NULL; list = list->next) {
-			if(is_present_str_list(list->data, library_dir))
-				continue;
-			test_change = TRUE;
-			break;
-		}
-		for(list = library_dir; list != NULL; list = list->next) {
-			if(is_present_str_list(list->data, folder_scanned))
-				continue;
-			test_change = TRUE;
-			break;
+		if (folder_scanned && library_dir) {
+			test_change = FALSE;
+			for(list = folder_scanned; list != NULL; list = list->next) {
+				if(is_present_str_list(list->data, library_dir))
+					continue;
+				test_change = TRUE;
+				break;
+			}
+			for(list = library_dir; list != NULL; list = list->next) {
+				if(is_present_str_list(list->data, folder_scanned))
+					continue;
+				test_change = TRUE;
+				break;
+			}
+
+			if(test_change) {
+				infobar = create_info_bar_update_music(dialog->cwin);
+				pragha_window_add_widget_to_infobox(dialog->cwin->window, infobar);
+			}
 		}
 
-		if(test_change) {
-			infobar = create_info_bar_update_music(dialog->cwin);
-			pragha_window_add_widget_to_infobox(dialog->cwin->window, infobar);
-		}
-
-		free_str_list(library_dir);
-		free_str_list(folder_scanned);
+		if (library_dir)
+			free_str_list(library_dir);
+		if (folder_scanned)
+			free_str_list(folder_scanned);
 
 		if (pragha_preferences_get_library_style(dialog->preferences) == FOLDERS) {
 			test_change = pragha_preferences_get_fuse_folders(dialog->preferences);
