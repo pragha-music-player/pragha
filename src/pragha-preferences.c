@@ -1427,23 +1427,19 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	g_free(pragha_config_dir);
 
-	/* Does /pragha/config exist ? */
-
-	priv->rc_filepath = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/config", NULL);
-
-	if (g_file_test(priv->rc_filepath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
-		if (g_creat(priv->rc_filepath, S_IRWXU) == -1) {
-			g_free(priv->rc_filepath);
-			priv->rc_filepath = NULL;
-			g_critical("Unable to create config file, err: %s", g_strerror(errno));
-			return;
-		}
-		CDEBUG(DBG_INFO, "Created .config/pragha/config file");
-	}
-
 	/* Open the preferences storage file */
 
 	priv->rc_keyfile = g_key_file_new();
+	priv->rc_filepath = g_build_path(G_DIR_SEPARATOR_S, user_config_dir, "/pragha/config", NULL);
+
+	/* Does /pragha/config exist ? */
+
+	if (g_file_test(priv->rc_filepath, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR) == FALSE) {
+		CDEBUG(DBG_INFO, "First init of pragha. Use default settings.");
+		return;
+	}
+
+	/* Open the preferences key file */
 
 	if (!g_key_file_load_from_file(priv->rc_keyfile,
 	                               priv->rc_filepath,
