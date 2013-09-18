@@ -1160,12 +1160,6 @@ pragha_preferences_dialog_show (struct con_win *cwin)
 	label_desktop = gtk_label_new(_("Desktop"));
 	label_services = gtk_label_new(_("Services"));
 
-	/* Boxes */
-
-	appearance_vbox = gtk_vbox_new(FALSE, 2);
-	library_vbox = gtk_vbox_new(FALSE, 2);
-	general_vbox = gtk_vbox_new(FALSE, 2);
-
 	/* Notebook, pages et al. */
 
 	pref_notebook = gtk_notebook_new();
