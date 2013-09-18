@@ -283,8 +283,9 @@ pragha_window_free (PraghaWindow *window)
 
 	/* Save last window state */
 
+	state = gdk_window_get_state (gtk_widget_get_window (window->mainwindow));
+
 	if (pragha_preferences_get_remember_state(preferences)) {
-		state = gdk_window_get_state (gtk_widget_get_window (window->mainwindow));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
 			pragha_preferences_set_start_mode(preferences, FULLSCREEN_STATE);
 		else if(state & GDK_WINDOW_STATE_WITHDRAWN)
