@@ -108,8 +108,10 @@ pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progre
 
 	gtk_tooltip_trigger_tooltip_query(gtk_widget_get_display (toolbar->track_length_label));
 
-	fraction = (gdouble) progress / (gdouble)length;
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
+	if(length) {
+		fraction = (gdouble) progress / (gdouble)length;
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(toolbar->track_progress_bar), fraction);
+	}
 
 	g_free(cur_pos);
 	g_free(str_cur_pos);
