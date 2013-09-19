@@ -490,9 +490,9 @@ pragha_tags_dialog_set_musicobject(PraghaTagsDialog *dialog, PraghaMusicobject *
 	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->year_entry), pragha_tag_entry_change, dialog->year_check_change);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dialog->comment_entry));
-	g_signal_handlers_block_by_func(G_OBJECT(dialog->comment_entry), pragha_tag_entry_change, dialog->comment_check_change);
+	g_signal_handlers_block_by_func(G_OBJECT(buffer), pragha_tag_entry_change, dialog->comment_check_change);
 	gtk_text_buffer_set_text (buffer, comment, -1);
-	g_signal_handlers_unblock_by_func(G_OBJECT(dialog->comment_entry), pragha_tag_entry_change, dialog->comment_check_change);
+	g_signal_handlers_unblock_by_func(G_OBJECT(buffer), pragha_tag_entry_change, dialog->comment_check_change);
 
 	if (string_is_empty(file))
 		gtk_widget_set_sensitive(GTK_WIDGET(dialog->file_entry), FALSE);
