@@ -835,9 +835,13 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 					n_artists,
 					_("Total Albums:"),
 					n_albums);
+
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Statistics"));
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+
+	g_signal_connect (dialog, "response",
+	                  G_CALLBACK (gtk_widget_destroy), NULL);
+
+	gtk_widget_show_all(dialog);
 }
 
 /* Handler for the 'About' action in the Help menu */
