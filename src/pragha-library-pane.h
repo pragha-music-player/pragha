@@ -80,17 +80,6 @@ typedef enum {
 
 /* Functions */
 
-void expand_all_action(GtkAction *action, struct con_win *cwin);
-void collapse_all_action(GtkAction *action, struct con_win *cwin);
-void folders_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_library_tree(GtkAction *action, struct con_win *cwin);
-void album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_library_tree(GtkAction *action, struct con_win *cwin);
-void artist_album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_album_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_library_tree(GtkAction *action, struct con_win *cwin);
-void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin);
-
 void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
 void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
