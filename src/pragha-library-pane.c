@@ -112,6 +112,8 @@ static void pragha_library_pane_rename_item_action                 (GtkAction *a
 static void pragha_library_pane_remove_item_action                 (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_export_playlist_action             (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_edit_tags_action                   (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_delete_from_hdd_action             (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_delete_from_db_action              (GtkAction *action, PraghaLibraryPane *library);
 
 /*
  * Menus definitions
@@ -205,11 +207,11 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Export", GTK_STOCK_SAVE, N_("Export"),
 	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
-	 "", "Edit tags", G_CALLBACK(pragha_library_pane_edit_tags_action)}/*,
+	 "", "Edit tags", G_CALLBACK(pragha_library_pane_edit_tags_action)},
 	{"Move to trash", "user-trash", N_("Move to _trash"),
-	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
+	 "", "Move to trash", G_CALLBACK(pragha_library_pane_delete_from_hdd_action)},
 	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
-	 "", "Delete from library", G_CALLBACK(library_tree_delete_db)},
+	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)}/*,
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
 	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
@@ -768,8 +770,8 @@ delete_row_from_db(PraghaDatabase *cdbase,
 	}
 }
 
-static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
-				struct con_win *cwin)
+static void
+trash_or_unlink_row (GArray *loc_arr, gboolean unlink, PraghaLibraryPane *library)
 {
 	GtkWidget *question_dialog;
 	gchar *primary, *secondary, *filename = NULL;
@@ -785,7 +787,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 	for(i = 0; i < loc_arr->len; i++) {
 		location_id = g_array_index(loc_arr, gint, i);
 		if (location_id) {
-			filename = pragha_database_get_filename_from_location_id(cwin->clibrary->cdbase, location_id);
+			filename = pragha_database_get_filename_from_location_id (library->cdbase, location_id);
 			if (filename && g_file_test(filename, G_FILE_TEST_EXISTS)) {
 				file = g_file_new_for_path(filename);
 
@@ -794,7 +796,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 					secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
 									g_file_get_basename (file), error->message);
 
-					question_dialog = gtk_message_dialog_new (GTK_WINDOW (cwin->mainwindow),
+					question_dialog = gtk_message_dialog_new (GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(library))),
 				                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 				                                                GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", primary);
 					gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (question_dialog), "%s", secondary);
@@ -839,7 +841,7 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 				g_object_unref(G_OBJECT(file));
 			}
 			if (deleted) {
-				pragha_database_forget_location(cwin->clibrary->cdbase, location_id);
+				pragha_database_forget_location (library->cdbase, location_id);
 			}
 		}
 	}
@@ -885,7 +887,7 @@ library_tree_row_activated_cb (GtkTreeView *library_tree,
 	}
 }
 
-int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+static int library_tree_key_press (GtkWidget *win, GdkEventKey *event, PraghaLibraryPane *library)
 {
 	if (event->state != 0
 			&& ((event->state & GDK_CONTROL_MASK)
@@ -895,7 +897,7 @@ int library_tree_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *
 			|| (event->state & GDK_MOD5_MASK)))
 		return FALSE;
 	if (event->keyval == GDK_KEY_Delete){
-		library_tree_delete_db(NULL, cwin);
+		pragha_library_pane_delete_from_db_action (NULL, library);
 		return TRUE;
 	}
 	return FALSE;
@@ -2446,7 +2448,8 @@ exit:
 	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 }
 
-void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkWidget *dialog;
 	GtkWidget *toggle_unlink;
@@ -2458,15 +2461,15 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 	GArray *loc_arr;
 	gboolean unlink = FALSE;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-						GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-						GTK_MESSAGE_QUESTION,
-						GTK_BUTTONS_YES_NO,
-						_("Really want to move the files to trash?"));
+		dialog = gtk_message_dialog_new (GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(library))),
+		                                 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+		                                 GTK_MESSAGE_QUESTION,
+		                                 GTK_BUTTONS_YES_NO,
+		                                 _("Really want to move the files to trash?"));
 
 		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
 		gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), toggle_unlink, TRUE, TRUE, 0);
@@ -2479,29 +2482,30 @@ void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin)
 		if(result == GTK_RESPONSE_YES){
 			loc_arr = g_array_new(TRUE, TRUE, sizeof(gint));
 
-			pragha_database_begin_transaction(cwin->clibrary->cdbase);
+			pragha_database_begin_transaction(library->cdbase);
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				get_location_ids(path, loc_arr, model, cwin->clibrary);
-				trash_or_unlink_row(loc_arr, unlink, cwin);
+				get_location_ids(path, loc_arr, model, library);
+				trash_or_unlink_row(loc_arr, unlink, library);
 
 				/* Have to give control to GTK periodically ... */
 				if (pragha_process_gtk_events ())
 					return;
 			}
-			pragha_database_commit_transaction(cwin->clibrary->cdbase);
+			pragha_database_commit_transaction(library->cdbase);
 
 			g_array_free(loc_arr, TRUE);
 
-			pragha_database_flush_stale_entries (cwin->clibrary->cdbase);
-			pragha_database_change_tracks_done(cwin->cdbase);
+			pragha_database_flush_stale_entries (library->cdbase);
+			pragha_database_change_tracks_done(library->cdbase);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
 	}
 }
 
-void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkWidget *dialog;
 	GtkTreeModel *model;
@@ -2510,16 +2514,16 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 	GList *list, *i;
 	gint result;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
-		dialog = gtk_message_dialog_new(GTK_WINDOW(cwin->mainwindow),
-					GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_MESSAGE_QUESTION,
-					GTK_BUTTONS_YES_NO,
-					_("Are you sure you want to delete current file from library?\n\n"
-					"Warning: To recover we must rescan the entire library."));
+		dialog = gtk_message_dialog_new (GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(library))),
+		                                 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+		                                 GTK_MESSAGE_QUESTION,
+		                                 GTK_BUTTONS_YES_NO,
+		                                 _("Are you sure you want to delete current file from library?\n\n"
+		                                 "Warning: To recover we must rescan the entire library."));
 
 		result = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
@@ -2527,21 +2531,21 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 		if( result == GTK_RESPONSE_YES ){
 			/* Delete all the rows */
 
-			pragha_database_begin_transaction (cwin->clibrary->cdbase);
+			pragha_database_begin_transaction (library->cdbase);
 
 			for (i=list; i != NULL; i = i->next) {
 				path = i->data;
-				delete_row_from_db(cwin->clibrary->cdbase, path, model);
+				delete_row_from_db(library->cdbase, path, model);
 
 				/* Have to give control to GTK periodically ... */
 				if (pragha_process_gtk_events ())
 					return;
 			}
 
-			pragha_database_commit_transaction (cwin->clibrary->cdbase);
+			pragha_database_commit_transaction (library->cdbase);
 
-			pragha_database_flush_stale_entries (cwin->clibrary->cdbase);
-			pragha_database_change_tracks_done(cwin->cdbase);
+			pragha_database_flush_stale_entries (library->cdbase);
+			pragha_database_change_tracks_done(library->cdbase);
 		}
 
 		g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
@@ -2855,15 +2859,15 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 	                  G_CALLBACK(library_tree_button_press_cb), library);
 	g_signal_connect (G_OBJECT(library->library_tree), "button-release-event",
 	                  G_CALLBACK(library_tree_button_release_cb), library);
+	g_signal_connect (G_OBJECT (library->library_tree), "key-press-event",
+	                  G_CALLBACK(library_tree_key_press), library);
 
 	g_signal_connect (library->cdbase, "PlaylistsChanged",
 	                  G_CALLBACK (update_library_playlist_changes), library);
 	g_signal_connect (library->cdbase, "TracksChanged",
 	                  G_CALLBACK (update_library_tracks_changes), library);
 
-	/*g_signal_connect(G_OBJECT (clibrary->library_tree), "key-press-event",
-	                 G_CALLBACK(library_tree_key_press), cwin);
-	g_signal_connect(clibrary->preferences, "notify::library-style",
+	/*g_signal_connect(clibrary->preferences, "notify::library-style",
 	                 G_CALLBACK (library_pane_change_style), cwin);*/
 
 	gtk_widget_show_all (GTK_WIDGET(library));
