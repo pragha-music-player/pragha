@@ -139,7 +139,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
 	dialog = gtk_dialog_new_with_buttons(title_header,
-					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
 					     GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
@@ -253,7 +253,7 @@ glyr_finished_thread_update (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
-	remove_watch_cursor (glyr_info->cwin->mainwindow);
+	remove_watch_cursor (pragha_window_get_mainwindow(glyr_info->cwin));
 	if(glyr_info->head != NULL)
 		glyr_finished_successfully(glyr_info);
 	else
@@ -313,7 +313,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 	glyr_info->cwin = cwin;
 
-	set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (pragha_window_get_mainwindow(cwin));
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 

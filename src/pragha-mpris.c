@@ -180,7 +180,7 @@ get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
 /* org.mpris.MediaPlayer2 */
 static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	gtk_window_present(GTK_WINDOW(cwin->mainwindow));
+	gtk_window_present(GTK_WINDOW(pragha_window_get_mainwindow(cwin)));
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 

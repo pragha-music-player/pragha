@@ -270,7 +270,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		pragha_track_properties_dialog(nmobj, pragha_window_get_mainwindow(cwin));
 		return;
 	}
 
@@ -507,7 +507,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 		g_list_free(list);
 	}
 	else {
-		remove_watch_cursor (cwin->mainwindow);
+		remove_watch_cursor (pragha_window_get_mainwindow(cwin));
 	}
 
 	switch(data->query_type) {
@@ -607,7 +607,7 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 		return;
 	}
 
-	set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (pragha_window_get_mainwindow(cwin));
 	pragha_async_launch(do_lastfm_get_similar_current_playlist_action,
 			    append_mobj_list_current_playlist_idle,
 			    cwin);
@@ -686,7 +686,7 @@ lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	GtkFileFilter *media_filter;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
-				      GTK_WINDOW(cwin->mainwindow),
+				      GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
 				      GTK_FILE_CHOOSER_ACTION_OPEN,
 				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -749,7 +749,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (pragha_window_get_mainwindow(cwin));
 	pragha_async_launch(do_lastfm_add_favorites_action,
 			    append_mobj_list_current_playlist_idle,
 			    cwin);
@@ -787,7 +787,7 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (pragha_window_get_mainwindow(cwin));
 	pragha_async_launch(do_lastfm_get_similar_action,
 			    append_mobj_list_current_playlist_idle,
 			    pragha_lastfm_async_data_new (cwin));

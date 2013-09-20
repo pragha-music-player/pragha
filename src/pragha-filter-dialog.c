@@ -363,7 +363,7 @@ pragha_filter_dialog (struct con_win *cwin)
 	/* The search dialog */
 
 	dialog = gtk_dialog_new_with_buttons (_("Search in playlist"),
-					     GTK_WINDOW(cwin->mainwindow),
+					     GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
 					     GTK_DIALOG_MODAL,
 					     GTK_STOCK_CLOSE,
 					     GTK_RESPONSE_CANCEL,

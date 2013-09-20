@@ -110,7 +110,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	gchar *summary, *body, *slength;
 
 	/* Check if OSD is enabled in preferences */
-	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (cwin->mainwindow)))
+	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (pragha_window_get_mainwindow(cwin))))
 		return;
 
 	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);

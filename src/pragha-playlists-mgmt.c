@@ -1379,7 +1379,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cwin->cplaylist);
 
 	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow), accel_group);
+	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
 	gtk_accel_map_add_entry ("<SubMenu>/New playlist", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK);
 	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/New playlist");
@@ -1427,7 +1427,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin->cplaylist);
 
 	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(cwin->mainwindow), accel_group);
+	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
 	gtk_accel_map_add_entry ("<SubMenu>/Save selection", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK+GDK_SHIFT_MASK);
 	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/Save selection");
