@@ -62,6 +62,19 @@ struct _PraghaLibraryPane {
 	GtkUIManager *library_tree_context_menu;
 };
 
+/* */
+
+static void pragha_library_pane_expand_all_action                  (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_collapse_all_action                (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_folders_view_action            (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_artist_view_action             (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_album_view_action              (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_genre_view_action              (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_artist_album_view_action       (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_genre_album_view_action        (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_genre_artist_action            (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library);
+
 /*
  * Menus definitions
  *
@@ -88,25 +101,25 @@ gchar *library_pane_context_menu_xml = "<ui>			\
 
 GtkActionEntry library_pane_context_aentries[] = {
 	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
-	 "", "Expand the library", G_CALLBACK(expand_all_action)},
+	 "", "Expand the library", G_CALLBACK(pragha_library_pane_expand_all_action)},
 	{"Collapse library", GTK_STOCK_REMOVE, N_("_Collapse library"),
-	 "", "Collapse the library", G_CALLBACK(collapse_all_action)},
+	 "", "Collapse the library", G_CALLBACK(pragha_library_pane_collapse_all_action)},
 	{"folders", GTK_STOCK_REFRESH, N_("Folders structure"),
-	 "", "Folders structure", G_CALLBACK(folders_library_tree)},
+	 "", "Folders structure", G_CALLBACK(pragha_library_pane_set_folders_view_action)},
 	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
-	 "", "Artist", G_CALLBACK(artist_library_tree)},
+	 "", "Artist", G_CALLBACK(pragha_library_pane_set_artist_view_action)},
 	{"album", GTK_STOCK_REFRESH, N_("Album"),
-	 "", "Album", G_CALLBACK(album_library_tree)},
+	 "", "Album", G_CALLBACK(pragha_library_pane_set_album_view_action)},
 	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
-	 "", "Genre", G_CALLBACK(genre_library_tree)},
+	 "", "Genre", G_CALLBACK(pragha_library_pane_set_genre_view_action)},
 	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
-	 "", "Artist / Album", G_CALLBACK(artist_album_library_tree)},
+	 "", "Artist / Album", G_CALLBACK(pragha_library_pane_set_artist_album_view_action)},
 	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
-	 "", "Genre / Album", G_CALLBACK(genre_album_library_tree)},
+	 "", "Genre / Album", G_CALLBACK(pragha_library_pane_set_genre_album_view_action)},
 	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
-	 "", "Genre / Artist", G_CALLBACK(genre_artist_library_tree)},
+	 "", "Genre / Artist", G_CALLBACK(pragha_library_pane_set_genre_artist_action)},
 	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
-	 "", "Genre / Artist / Album", G_CALLBACK(genre_artist_album_library_tree)}
+	 "", "Genre / Artist / Album", G_CALLBACK(pragha_library_pane_set_genre_artist_album_view_action)}
 };
 
 gchar *library_tree_context_menu_xml = "<ui>		\
@@ -1948,54 +1961,65 @@ update_library_tracks_changes(PraghaDatabase *database, struct con_win *cwin)
 /*
  * library_pane_context_menu calbacks
  */
-void expand_all_action(GtkAction *action, struct con_win *cwin)
+
+static void
+pragha_library_pane_expand_all_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	gtk_tree_view_expand_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(library->library_tree));
 }
 
-void collapse_all_action(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_collapse_all_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	gtk_tree_view_collapse_all(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	gtk_tree_view_collapse_all(GTK_TREE_VIEW(library->library_tree));
 }
 
-void folders_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_folders_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, FOLDERS);
+	pragha_preferences_set_library_style(library->preferences, FOLDERS);
 }
 
-void artist_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_artist_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST);
+	pragha_preferences_set_library_style(library->preferences, ARTIST);
 }
 
-void album_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_album_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ALBUM);
+	pragha_preferences_set_library_style(library->preferences, ALBUM);
 }
 
-void genre_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_genre_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE);
+	pragha_preferences_set_library_style(library->preferences, GENRE);
 }
 
-void artist_album_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, ARTIST_ALBUM);
+	pragha_preferences_set_library_style(library->preferences, ARTIST_ALBUM);
 }
 
-void genre_album_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_genre_album_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ALBUM);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ALBUM);
 }
 
-void genre_artist_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_genre_artist_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST);
 }
 
-void genre_artist_album_library_tree(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library)
 {
-	pragha_preferences_set_library_style(cwin->clibrary->preferences, GENRE_ARTIST_ALBUM);
+	pragha_preferences_set_library_style(library->preferences, GENRE_ARTIST_ALBUM);
 }
 
 /*
@@ -2552,8 +2576,8 @@ pragha_library_tree_context_menu_new(struct con_win *cwin)
 	return context_menu;
 }
 
-static GtkUIManager*
-pragha_library_pane_header_context_menu_new(struct con_win *cwin)
+static GtkUIManager *
+pragha_library_pane_header_context_menu_new (PraghaLibraryPane *library)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2564,18 +2588,18 @@ pragha_library_pane_header_context_menu_new(struct con_win *cwin)
 
 	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
 
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       library_pane_context_menu_xml,
-					       -1, &error)) {
-		g_critical("(%s): Unable to create header library tree context menu, err : %s",
-			   __func__, error->message);
+	if (!gtk_ui_manager_add_ui_from_string (context_menu,
+	                                        library_pane_context_menu_xml,
+	                                        -1, &error)) {
+		g_critical ("(%s): Unable to create header library tree context menu, err : %s",
+		            __func__, error->message);
 	}
 
-	gtk_action_group_add_actions(context_actions,
-				     library_pane_context_aentries,
-				     G_N_ELEMENTS(library_pane_context_aentries),
-				     (gpointer)cwin);
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+	gtk_action_group_add_actions (context_actions,
+	                              library_pane_context_aentries,
+	                              G_N_ELEMENTS(library_pane_context_aentries),
+	                              (gpointer) library);
+	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
 
 	g_object_unref (context_actions);
 
@@ -2838,7 +2862,7 @@ pragha_library_pane_new(struct con_win *cwin)
 
 	/* Create context menus */
 
-	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new(cwin);
+	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new (clibrary);
 	clibrary->library_tree_context_menu = pragha_library_tree_context_menu_new(cwin);
 
 	/* Init the rest of flags */
