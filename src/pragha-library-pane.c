@@ -42,28 +42,55 @@
 #include "pragha.h"
 
 struct _PraghaLibraryPane {
-	PraghaDatabase *cdbase;
+	GtkBox           __parent__;
+
+	/* Global database and preferences instances */
+	PraghaDatabase    *cdbase;
 	PraghaPreferences *preferences;
-	GtkTreeStore *library_store;
-	GtkWidget *search_entry;
-	GtkWidget *library_tree;
-	GtkWidget *widget;
-	gboolean dragging;
-	gboolean view_change;
-	gchar *filter_entry;
-	guint timeout_id;
-	GSList *library_tree_nodes;
-	GdkPixbuf *pixbuf_artist;
-	GdkPixbuf *pixbuf_album;
-	GdkPixbuf *pixbuf_track;
-	GdkPixbuf *pixbuf_genre;
-	GdkPixbuf *pixbuf_dir;
-	GtkUIManager *library_pane_context_menu;
-	GtkUIManager *library_tree_context_menu;
+
+	/* Tree view */
+	GtkTreeStore      *library_store;
+	GtkWidget         *library_tree;
+	GtkWidget         *search_entry;
+
+	/* Tree view order. TODO: Rework and remove it. */
+	GSList            *library_tree_nodes;
+
+	/* Useful flags */
+	gboolean           dragging;
+	gboolean           view_change;
+
+	/* Filter stuff */
+	gchar             *filter_entry;
+	guint              timeout_id;
+
+	/* Fixbuf used on library tree. */
+	GdkPixbuf         *pixbuf_artist;
+	GdkPixbuf         *pixbuf_album;
+	GdkPixbuf         *pixbuf_track;
+	GdkPixbuf         *pixbuf_genre;
+	GdkPixbuf         *pixbuf_dir;
+
+	/* Menu */
+	GtkUIManager      *library_pane_context_menu;
+	GtkUIManager      *library_tree_context_menu;
 };
 
-/* */
+enum
+{
+	LIBRARY_APPEND_PLAYLIST,
+	LIBRARY_REPLACE_PLAYLIST,
+	LIBRARY_REPLACE_PLAYLIST_AND_PLAY,
+	LAST_SIGNAL
+};
 
+static int signals[LAST_SIGNAL] = { 0 };
+
+G_DEFINE_TYPE(PraghaLibraryPane, pragha_library_pane, GTK_TYPE_VBOX)
+
+/*
+ * library_pane_context_menu calbacks
+ */
 static void pragha_library_pane_expand_all_action                  (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_collapse_all_action                (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_set_folders_view_action            (GtkAction *action, PraghaLibraryPane *library);
@@ -74,6 +101,13 @@ static void pragha_library_pane_set_artist_album_view_action       (GtkAction *a
 static void pragha_library_pane_set_genre_album_view_action        (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_set_genre_artist_action            (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, PraghaLibraryPane *library);
+
+/*
+ * library_tree_context_menu calbacks
+ */
+static void library_tree_add_to_playlist_action   (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_replace_playlist_action  (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_replace_and_play         (GtkAction *action, PraghaLibraryPane *library);
 
 /*
  * Menus definitions
@@ -159,7 +193,7 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Replace current playlist", NULL, N_("_Replace current playlist"),
 	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
 	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)}/*,
 	{"Rename", NULL, N_("Rename"),
 	 "", "Rename", G_CALLBACK(playlist_tree_rename)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
@@ -175,8 +209,29 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
 	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
-	 "", "Update library", G_CALLBACK(update_library_action)}
+	 "", "Update library", G_CALLBACK(update_library_action)}*/
 };
+
+/*
+ * library_tree_context_menu calbacks
+ */
+static void
+library_tree_add_to_playlist_action(GtkAction *action, PraghaLibraryPane *library)
+{
+	g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
+}
+
+static void
+library_tree_replace_playlist_action(GtkAction *action, PraghaLibraryPane *library)
+{
+	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST], 0);
+}
+
+static void
+library_tree_replace_and_play(GtkAction *action, PraghaLibraryPane *library)
+{
+	g_signal_emit (library, signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY], 0);
+}
 
 /* Returns TRUE if any of the childs of p_iter matches node_data. iter
  * and p_iter must be created outside this function */
@@ -790,19 +845,19 @@ static void trash_or_unlink_row(GArray *loc_arr, gboolean unlink,
 /* Event handlers */
 /******************/
 
-void library_tree_row_activated_cb(GtkTreeView *library_tree,
-				   GtkTreePath *path,
-				   GtkTreeViewColumn *column,
-				   struct con_win *cwin)
+static void
+library_tree_row_activated_cb (GtkTreeView *library_tree,
+                               GtkTreePath *path,
+                               GtkTreeViewColumn *column,
+                               PraghaLibraryPane *library)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model;
 	enum node_type node_type;
-	GList *list = NULL;
 
-	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	gtk_tree_model_get_iter(filter_model, &iter, path);
-	gtk_tree_model_get(filter_model, &iter, L_NODE_TYPE, &node_type, -1);
+	filter_model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
+	gtk_tree_model_get_iter (filter_model, &iter, path);
+	gtk_tree_model_get (filter_model, &iter, L_NODE_TYPE, &node_type, -1);
 
 	switch(node_type) {
 	case NODE_CATEGORY:
@@ -810,23 +865,16 @@ void library_tree_row_activated_cb(GtkTreeView *library_tree,
 	case NODE_ALBUM:
 	case NODE_GENRE:
 	case NODE_FOLDER:
-		if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(cwin->clibrary->library_tree),
-						path))
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(cwin->clibrary->library_tree),
-						 path,
-						 TRUE);
+		if (!gtk_tree_view_row_expanded (GTK_TREE_VIEW(library->library_tree), path))
+			gtk_tree_view_expand_row (GTK_TREE_VIEW(library->library_tree), path, TRUE);
 		else
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(cwin->clibrary->library_tree),
-						   path);
+			gtk_tree_view_collapse_row (GTK_TREE_VIEW(library->library_tree), path);
 		break;
 	case NODE_TRACK:
 	case NODE_BASENAME:
 	case NODE_PLAYLIST:
 	case NODE_RADIO:
-		list = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, filter_model, list);
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 list);
-		g_list_free(list);
+		g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
 		break;
 	default:
 		break;
@@ -877,9 +925,10 @@ pragha_library_pane_selection_func_false(GtkTreeSelection *selection,
 }
 
 
-gboolean library_tree_button_press_cb(GtkWidget *widget,
-				     GdkEventButton *event,
-				     struct con_win *cwin)
+static gboolean
+library_tree_button_press_cb (GtkWidget *widget,
+                              GdkEventButton *event,
+                              PraghaLibraryPane *library)
 {
 	GtkWidget *popup_menu, *item_widget;
 	GtkTreeModel *model;
@@ -889,10 +938,9 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	gboolean many_selected = FALSE;
 	enum node_type node_type;
 	gint n_select = 0;
-	GList *list = NULL;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL)){
 		switch(event->button) {
@@ -900,22 +948,18 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			if (gtk_tree_selection_path_is_selected(selection, path)
 			    && !(event->state & GDK_CONTROL_MASK)
 			    && !(event->state & GDK_SHIFT_MASK)) {
-				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_false, cwin, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_false, NULL, NULL);
 			}
 			else {
-				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
+				gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, NULL, NULL);
 			}
 			break;
 		case 2:
-			if (!gtk_tree_selection_path_is_selected(selection, path)){
+			if (!gtk_tree_selection_path_is_selected(selection, path)) {
 				gtk_tree_selection_unselect_all(selection);
 				gtk_tree_selection_select_path(selection, path);
 			}
-
-			list = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, list);
-
-			if(list)
-				pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+			g_signal_emit (library, signals[LIBRARY_APPEND_PLAYLIST], 0);
 			break;
 		case 3:
 			if (!(gtk_tree_selection_path_is_selected(selection, path))){
@@ -929,20 +973,20 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			n_select = gtk_tree_selection_count_selected_rows(selection);
 
 			if (node_type == NODE_PLAYLIST || node_type == NODE_RADIO) {
-				popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+				popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									"/PlaylistPopup");
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									"/PlaylistPopup/Rename");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 && gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									"/PlaylistPopup/Delete");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  gtk_tree_path_get_depth(path) > 1);
 
-				item_widget = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+				item_widget = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									"/PlaylistPopup/Export");
 				gtk_widget_set_sensitive (GTK_WIDGET(item_widget),
 							  n_select == 1 &&
@@ -951,10 +995,10 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 			}
 			else {
 				if (gtk_tree_path_get_depth(path) > 1)
-					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+					popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									       "/LibraryPopup");
 				else
-					popup_menu = gtk_ui_manager_get_widget(cwin->clibrary->library_tree_context_menu,
+					popup_menu = gtk_ui_manager_get_widget(library->library_tree_context_menu,
 									       "/CategoriesPopup");
 			}
 
@@ -979,25 +1023,26 @@ gboolean library_tree_button_press_cb(GtkWidget *widget,
 	return many_selected;
 }
 
-gboolean library_tree_button_release_cb(GtkWidget *widget,
-				     GdkEventButton *event,
-				     struct con_win *cwin)
+static gboolean
+library_tree_button_release_cb (GtkWidget *widget,
+                                GdkEventButton *event,
+                                PraghaLibraryPane *library)
 {
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 
-	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (cwin->clibrary->dragging == TRUE) || (event->button!=1)){
-		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
-		cwin->clibrary->dragging = FALSE;
+	if((event->state & GDK_CONTROL_MASK) || (event->state & GDK_SHIFT_MASK) || (library->dragging == TRUE) || (event->button!=1)){
+		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, NULL, NULL);
+		library->dragging = FALSE;
 		return FALSE;
 	}
 
 	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), (gint) event->x,(gint) event->y, &path, NULL, NULL, NULL);
 
 	if (path){
-		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, cwin, NULL);
+		gtk_tree_selection_set_select_function(selection, &pragha_library_pane_selection_func_true, NULL, NULL);
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_path(selection, path);
 		gtk_tree_path_free(path);
@@ -1061,7 +1106,7 @@ dnd_library_tree_get(GtkWidget *widget,
 	case TARGET_REF_LIBRARY:
 		rlist = g_string_new (NULL);
 
-		set_watch_cursor (clibrary->widget);
+		set_watch_cursor (GTK_WIDGET(clibrary));
 		clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
@@ -1077,7 +1122,7 @@ dnd_library_tree_get(GtkWidget *widget,
 		}
 
 		clibrary->view_change = FALSE;
-		remove_watch_cursor (clibrary->widget);
+		remove_watch_cursor (GTK_WIDGET(clibrary));
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
@@ -1087,7 +1132,7 @@ dnd_library_tree_get(GtkWidget *widget,
  	case TARGET_URI_LIST:
 		rlist = g_string_new (NULL);
 
-		set_watch_cursor (clibrary->widget);
+		set_watch_cursor (GTK_WIDGET(clibrary));
 		clibrary->view_change = TRUE;
 
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
@@ -1102,7 +1147,7 @@ dnd_library_tree_get(GtkWidget *widget,
 		}
 
 		clibrary->view_change = FALSE;
-		remove_watch_cursor (clibrary->widget);
+		remove_watch_cursor (GTK_WIDGET(clibrary));
 
 		gtk_selection_data_set_pragha_uris(data, rlist);
 
@@ -1808,14 +1853,14 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	clibrary->view_change = TRUE;
 
-	set_watch_cursor (clibrary->widget);
+	set_watch_cursor (GTK_WIDGET(clibrary));
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
 	g_object_ref(filter_model);
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_WIDGET(clibrary)), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
 
 	gtk_tree_store_clear(GTK_TREE_STORE(model));
@@ -1875,7 +1920,7 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	/* Sensitive, set model and filter */
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_WIDGET(clibrary)), TRUE);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
@@ -1885,29 +1930,28 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 	else
 		pragha_library_expand_categories(clibrary);
 
-	remove_watch_cursor (clibrary->widget);
+	remove_watch_cursor (GTK_WIDGET(clibrary));
 
 	clibrary->view_change = FALSE;
 }
 
 static void
-update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
+update_library_playlist_changes (PraghaDatabase *database,
+                                 PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter c_iter, iter;
 
-	PraghaLibraryPane *clibrary = cwin->clibrary;
-
 	clibrary->view_change = TRUE;
 
-	set_watch_cursor (clibrary->widget);
+	set_watch_cursor (GTK_WIDGET(clibrary));
 
 	filter_model = gtk_tree_view_get_model(GTK_TREE_VIEW(clibrary->library_tree));
 	model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter_model));
 
 	g_object_ref(filter_model);
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_WIDGET(clibrary)), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), NULL);
 
 	if(find_child_node(_("Playlists"), &c_iter, NULL, model)) {
@@ -1928,7 +1972,7 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 				           clibrary);
 	}
 
-	gtk_widget_set_sensitive(GTK_WIDGET(clibrary->widget), TRUE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_WIDGET(clibrary)), TRUE);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(clibrary->library_tree), filter_model);
 	g_object_unref(filter_model);
@@ -1938,20 +1982,18 @@ update_library_playlist_changes(PraghaDatabase *database, struct con_win *cwin)
 	else
 		pragha_library_expand_categories(clibrary);
 
-	remove_watch_cursor (clibrary->widget);
+	remove_watch_cursor (GTK_WIDGET(clibrary));
 
 	clibrary->view_change = FALSE;
-
-	update_playlist_changes_on_menu(cwin);
 }
 
 static void
-update_library_tracks_changes(PraghaDatabase *database, struct con_win *cwin)
+update_library_tracks_changes(PraghaDatabase *database, PraghaLibraryPane *library)
 {
 	/*
 	 * Rework to olny update library tree!!!.
 	 **/
-	library_pane_view_reload(cwin->clibrary);
+	library_pane_view_reload(library);
 }
 
 /*************************************/
@@ -2025,83 +2067,33 @@ pragha_library_pane_set_genre_artist_album_view_action (GtkAction *action, Pragh
 /*
  * library_tree_context_menu calbacks
  */
-void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin)
+GList *
+pragha_library_pane_get_mobj_list (PraghaLibraryPane *library)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;
 	GList *mlist = NULL, *list, *i;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
+	list = gtk_tree_selection_get_selected_rows (selection, &model);
 
 	if (list) {
 		/* Add all the rows to the current playlist */
 
-		for (i=list; i != NULL; i = i->next) {
+		for (i = list; i != NULL; i = i->next) {
 			path = i->data;
-			mlist = append_library_row_to_mobj_list(cwin->clibrary->cdbase, path, model, mlist);
-			gtk_tree_path_free(path);
+			mlist = append_library_row_to_mobj_list (library->cdbase, path, model, mlist);
+			gtk_tree_path_free (path);
 
 			/* Have to give control to GTK periodically ... */
 			if (pragha_process_gtk_events ())
-				return;
+				return NULL;
 		}
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 mlist);
-
-		g_list_free(list);
-		g_list_free(mlist);
+		g_list_free (list);
 	}
-}
 
-static void
-library_tree_replace_playlist (struct con_win *cwin)
-{
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreePath *path;
-	GList *mlist = NULL, *list, *i;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
-
-	if (list) {
-		pragha_playlist_remove_all (cwin->cplaylist);
-
-		/* Add all the rows to the current playlist */
-
-		for (i=list; i != NULL; i = i->next) {
-			path = i->data;
-			mlist = append_library_row_to_mobj_list (cwin->clibrary->cdbase, path, model, mlist);
-			gtk_tree_path_free(path);
-
-			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return;
-		}
-
-		pragha_playlist_append_mobj_list(cwin->cplaylist,
-						 mlist);
-
-		g_list_free(list);
-		g_list_free(mlist);
-	}
-}
-
-void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin)
-{
-	library_tree_replace_playlist (cwin);
-}
-
-void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin)
-{
-	library_tree_replace_playlist (cwin);
-
-	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-		pragha_playback_next_track(cwin);
-	else
-		pragha_playback_play_pause_resume(cwin);
+	return mlist;
 }
 
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
@@ -2546,8 +2538,8 @@ void library_tree_delete_db(GtkAction *action, struct con_win *cwin)
 /* Construction menus of library pane */
 /**************************************/
 
-static GtkUIManager*
-pragha_library_tree_context_menu_new(struct con_win *cwin)
+static GtkUIManager *
+pragha_library_tree_context_menu_new (PraghaLibraryPane *library)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -2558,18 +2550,19 @@ pragha_library_tree_context_menu_new(struct con_win *cwin)
 
 	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
 
-	if (!gtk_ui_manager_add_ui_from_string(context_menu,
-					       library_tree_context_menu_xml,
-					       -1, &error)) {
-		g_critical("Unable to create library tree context menu, err : %s",
-			   error->message);
+	if (!gtk_ui_manager_add_ui_from_string (context_menu,
+	                                       library_tree_context_menu_xml,
+	                                       -1, &error)) {
+		g_critical ("Unable to create library tree context menu, err : %s",
+		            error->message);
 	}
 
-	gtk_action_group_add_actions(context_actions,
-				     library_tree_context_aentries,
-				     G_N_ELEMENTS(library_tree_context_aentries),
-				     (gpointer)cwin);
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
+	gtk_action_group_add_actions (context_actions,
+	                              library_tree_context_aentries,
+	                              G_N_ELEMENTS(library_tree_context_aentries),
+	                              (gpointer) library);
+
+	gtk_ui_manager_insert_action_group (context_menu, context_actions, 0);
 
 	g_object_unref (context_actions);
 
@@ -2693,64 +2686,28 @@ pragha_library_pane_search_entry_new(PraghaLibraryPane *clibrary)
 	return search_entry;
 }
 
-static GtkWidget*
-pragha_library_pane_create_widget(PraghaLibraryPane *clibrary)
+static void
+pragha_library_pane_create_widget (PraghaLibraryPane *library)
 {
-	GtkWidget *vbox_lib;
 	GtkWidget *library_tree_scroll;
 
-	vbox_lib = gtk_vbox_new(FALSE, 2);
-
 	library_tree_scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(library_tree_scroll),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(library_tree_scroll),
+	                                GTK_POLICY_AUTOMATIC,
+	                                GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(library_tree_scroll),
-					GTK_SHADOW_IN);
-	gtk_container_set_border_width(GTK_CONTAINER(library_tree_scroll), 2);
+	                                     GTK_SHADOW_IN);
+	gtk_container_set_border_width (GTK_CONTAINER(library_tree_scroll), 2);
 
 	/* Package all */
 
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-	                   clibrary->search_entry,
-	                   FALSE,
-	                   FALSE,
-	                   0);
-	gtk_container_add(GTK_CONTAINER(library_tree_scroll),
-	                  clibrary->library_tree);
-	gtk_box_pack_start(GTK_BOX(vbox_lib),
-	                   library_tree_scroll,
-	                   TRUE,
-	                   TRUE,
-	                   0);
+	gtk_box_pack_start (GTK_BOX(library), library->search_entry,
+	                    FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(library), library_tree_scroll,
+	                    TRUE, TRUE, 0);
 
-	return vbox_lib;
-}
-
-void
-pragha_library_pane_free(PraghaLibraryPane *librarypane)
-{
-	if (librarypane->pixbuf_dir)
-		g_object_unref(librarypane->pixbuf_dir);
-	if (librarypane->pixbuf_artist)
-		g_object_unref(librarypane->pixbuf_artist);
-	if (librarypane->pixbuf_album)
-		g_object_unref(librarypane->pixbuf_album);
-	if (librarypane->pixbuf_track)
-		g_object_unref(librarypane->pixbuf_track);
-	if (librarypane->pixbuf_genre)
-		g_object_unref(librarypane->pixbuf_genre);
-
-	g_object_unref(librarypane->cdbase);
-	g_object_unref(librarypane->preferences);
-	g_object_unref(librarypane->library_store);
-
-	g_slist_free(librarypane->library_tree_nodes);
-
-	g_object_unref(librarypane->library_pane_context_menu);
-	g_object_unref(librarypane->library_tree_context_menu);
-
-	g_slice_free(PraghaLibraryPane, librarypane);
+	gtk_container_add (GTK_CONTAINER(library_tree_scroll),
+	                   library->library_tree);
 }
 
 static void
@@ -2825,7 +2782,7 @@ pragha_library_pane_init_view(PraghaLibraryPane *clibrary, struct con_win *cwin)
 GtkWidget *
 pragha_library_pane_get_widget(PraghaLibraryPane *librarypane)
 {
-	return librarypane->widget;
+	return GTK_WIDGET(librarypane);
 }
 
 GtkUIManager *
@@ -2834,73 +2791,134 @@ pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
 	return clibrary->library_pane_context_menu;
 }
 
-
-PraghaLibraryPane *
-pragha_library_pane_new(struct con_win *cwin)
+static void
+pragha_library_pane_init (PraghaLibraryPane *library)
 {
-	PraghaLibraryPane *clibrary;
-
-	clibrary = g_slice_new0(PraghaLibraryPane);
-
 	/* Get usefuls instances */
 
-	clibrary->cdbase = pragha_database_get();
-	clibrary->preferences = pragha_preferences_get();
+	library->cdbase = pragha_database_get ();
+	library->preferences = pragha_preferences_get ();
 
 	/* Create the store */
 
-	clibrary->library_store = pragha_library_pane_store_new();
+	library->library_store = pragha_library_pane_store_new();
 
 	/* Create the widgets */
 
-	clibrary->search_entry = pragha_library_pane_search_entry_new(clibrary);
-	clibrary->library_tree = pragha_library_pane_tree_new(clibrary);
+	library->search_entry = pragha_library_pane_search_entry_new (library);
+	library->library_tree = pragha_library_pane_tree_new (library);
 
 	/* Create main widget */
 
-	clibrary->widget = pragha_library_pane_create_widget(clibrary);
+	pragha_library_pane_create_widget (library);
 
 	/* Create context menus */
 
-	clibrary->library_pane_context_menu = pragha_library_pane_header_context_menu_new (clibrary);
-	clibrary->library_tree_context_menu = pragha_library_tree_context_menu_new(cwin);
+	library->library_pane_context_menu = pragha_library_pane_header_context_menu_new (library);
+	library->library_tree_context_menu = pragha_library_tree_context_menu_new (library);
 
 	/* Init the rest of flags */
 
-	clibrary->filter_entry = NULL;
-	clibrary->dragging = FALSE;
-	clibrary->view_change = FALSE;
-	clibrary->timeout_id = 0;
-	clibrary->library_tree_nodes = NULL;
+	library->filter_entry = NULL;
+	library->dragging = FALSE;
+	library->view_change = FALSE;
+	library->timeout_id = 0;
+	library->library_tree_nodes = NULL;
 
 	/* Init drag and drop */
 
-	library_pane_init_dnd(clibrary);
+	library_pane_init_dnd (library);
 
 	/* Init pixbufs */
 
-	pragha_library_pane_init_pixbufs(clibrary);
+	pragha_library_pane_init_pixbufs (library);
 
 	/* Conect signals */
 
-	g_signal_connect(G_OBJECT(clibrary->library_tree), "row-activated",
-	                 G_CALLBACK(library_tree_row_activated_cb), cwin);
-	g_signal_connect(G_OBJECT (clibrary->library_tree), "key-press-event",
+	g_signal_connect (G_OBJECT(library->library_tree), "row-activated",
+	                  G_CALLBACK(library_tree_row_activated_cb), library);
+	g_signal_connect (G_OBJECT(library->library_tree), "button-press-event",
+	                  G_CALLBACK(library_tree_button_press_cb), library);
+	g_signal_connect (G_OBJECT(library->library_tree), "button-release-event",
+	                  G_CALLBACK(library_tree_button_release_cb), library);
+
+	g_signal_connect (library->cdbase, "PlaylistsChanged",
+	                  G_CALLBACK (update_library_playlist_changes), library);
+	g_signal_connect (library->cdbase, "TracksChanged",
+	                  G_CALLBACK (update_library_tracks_changes), library);
+
+	/*g_signal_connect(G_OBJECT (clibrary->library_tree), "key-press-event",
 	                 G_CALLBACK(library_tree_key_press), cwin);
-	g_signal_connect(G_OBJECT(clibrary->library_tree), "button-press-event",
-	                 G_CALLBACK(library_tree_button_press_cb), cwin);
-	g_signal_connect(G_OBJECT(clibrary->library_tree), "button-release-event",
-	                 G_CALLBACK(library_tree_button_release_cb), cwin);
-
-	g_signal_connect(clibrary->cdbase, "PlaylistsChanged",
-	                 G_CALLBACK (update_library_playlist_changes), cwin);
-	g_signal_connect(clibrary->cdbase, "TracksChanged",
-	                 G_CALLBACK (update_library_tracks_changes), cwin);
-
 	g_signal_connect(clibrary->preferences, "notify::library-style",
-	                 G_CALLBACK (library_pane_change_style), cwin);
+	                 G_CALLBACK (library_pane_change_style), cwin);*/
 
-	gtk_widget_show_all(clibrary->widget);
+	gtk_widget_show_all (GTK_WIDGET(library));
+}
 
-	return clibrary;
+static void
+pragha_library_pane_finalize (GObject *object)
+{
+	PraghaLibraryPane *library = PRAGHA_LIBRARY_PANE (object);
+
+	if (library->pixbuf_dir)
+		g_object_unref (library->pixbuf_dir);
+	if (library->pixbuf_artist)
+		g_object_unref (library->pixbuf_artist);
+	if (library->pixbuf_album)
+		g_object_unref (library->pixbuf_album);
+	if (library->pixbuf_track)
+		g_object_unref (library->pixbuf_track);
+	if (library->pixbuf_genre)
+		g_object_unref (library->pixbuf_genre);
+
+	g_object_unref (library->cdbase);
+	g_object_unref (library->preferences);
+	g_object_unref (library->library_store);
+
+	g_slist_free (library->library_tree_nodes);
+
+	g_object_unref (library->library_pane_context_menu);
+	g_object_unref (library->library_tree_context_menu);
+
+	(*G_OBJECT_CLASS (pragha_library_pane_parent_class)->finalize) (object);
+}
+
+static void
+pragha_library_pane_class_init (PraghaLibraryPaneClass *klass)
+{
+	GObjectClass  *gobject_class;
+
+	gobject_class = G_OBJECT_CLASS (klass);
+	gobject_class->finalize = pragha_library_pane_finalize;
+
+	/*
+	 * Signals:
+	 */
+	signals[LIBRARY_APPEND_PLAYLIST] = g_signal_new ("library-append-playlist",
+	                                                 G_TYPE_FROM_CLASS (gobject_class),
+	                                                 G_SIGNAL_RUN_LAST,
+	                                                 G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_append_playlist),
+	                                                 NULL, NULL,
+	                                                 g_cclosure_marshal_VOID__VOID,
+	                                                 G_TYPE_NONE, 0);
+	signals[LIBRARY_REPLACE_PLAYLIST] = g_signal_new ("library-replace-playlist",
+	                                                  G_TYPE_FROM_CLASS (gobject_class),
+	                                                  G_SIGNAL_RUN_LAST,
+	                                                  G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist),
+	                                                  NULL, NULL,
+	                                                  g_cclosure_marshal_VOID__VOID,
+	                                                  G_TYPE_NONE, 0);
+	signals[LIBRARY_REPLACE_PLAYLIST_AND_PLAY] = g_signal_new ("library-replace-playlist-and-play",
+	                                                           G_TYPE_FROM_CLASS (gobject_class),
+	                                                           G_SIGNAL_RUN_LAST,
+	                                                           G_STRUCT_OFFSET (PraghaLibraryPaneClass, library_replace_playlist_and_play),
+	                                                           NULL, NULL,
+	                                                           g_cclosure_marshal_VOID__VOID,
+	                                                           G_TYPE_NONE, 0);
+}
+
+PraghaLibraryPane *
+pragha_library_pane_new (void)
+{
+	return g_object_new (PRAGHA_TYPE_LIBRARY_PANE, NULL);
 }

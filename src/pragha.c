@@ -51,6 +51,59 @@ gint debug_level;
 GThread *pragha_main_thread = NULL;
 #endif
 
+/*
+ * Some calbacks..
+ */
+static void
+pragha_library_pane_append_tracks (PraghaLibraryPane *library, struct con_win *cwin)
+{
+	GList *list = NULL;
+	list = pragha_library_pane_get_mobj_list (library);
+	if (list) {
+		pragha_playlist_append_mobj_list (cwin->cplaylist,
+			                              list);
+		g_list_free(list);
+	}
+}
+
+static void
+pragha_library_pane_replace_tracks (PraghaLibraryPane *library, struct con_win *cwin)
+{
+	GList *list = NULL;
+	list = pragha_library_pane_get_mobj_list (library);
+	if (list) {
+		pragha_playlist_remove_all (cwin->cplaylist);
+
+		pragha_playlist_append_mobj_list (cwin->cplaylist,
+			                              list);
+		g_list_free(list);
+	}
+}
+
+static void
+pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, struct con_win *cwin)
+{
+	GList *list = NULL;
+	list = pragha_library_pane_get_mobj_list (library);
+	if (list) {
+		pragha_playlist_remove_all (cwin->cplaylist);
+
+		pragha_playlist_append_mobj_list (cwin->cplaylist,
+			                              list);
+
+		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
+			pragha_playback_next_track(cwin);
+		else
+			pragha_playback_play_pause_resume(cwin);
+
+		g_list_free(list);
+	}
+}
+
+/*
+ * Some public actions.
+ */
+
 PraghaBackend *
 pragha_application_get_backend (struct con_win *cwin)
 {
@@ -98,7 +151,6 @@ pragha_application_free (struct con_win *cwin)
 	pragha_lastfm_free (cwin->clastfm);
 #endif
 	pragha_playlist_free(cwin->cplaylist);
-	pragha_library_pane_free(cwin->clibrary);
 	pragha_sidebar_free(cwin->sidebar);
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
@@ -223,6 +275,13 @@ pragha_application_new (gint argc, gchar *argv[])
 	                  G_CALLBACK(pragha_playback_edit_current_track), cwin);
 	g_signal_connect (toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
+
+	g_signal_connect (cwin->clibrary, "library-append-playlist",
+	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);
+	g_signal_connect (cwin->clibrary, "library-replace-playlist",
+	                  G_CALLBACK(pragha_library_pane_replace_tracks), cwin);
+	g_signal_connect (cwin->clibrary, "library-replace-playlist-and-play",
+	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), cwin);
 
 	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
 	                  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
