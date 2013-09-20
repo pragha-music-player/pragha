@@ -522,7 +522,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 		handle_get_metadata(pragha_backend_get_musicobject(cwin->backend), &b);
 
-		toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+		toolbar = pragha_window_get_toolbar (cwin);
 		albumart = pragha_toolbar_get_album_art (toolbar);
 
 		arturl = pragha_album_art_get_path(albumart);

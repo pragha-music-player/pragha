@@ -113,7 +113,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	PraghaMusicobject *mobj;
 	gchar *markup_text;
 
-	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	toolbar = pragha_window_get_toolbar (cwin);
 
 	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));

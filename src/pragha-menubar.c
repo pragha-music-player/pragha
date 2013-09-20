@@ -204,28 +204,25 @@ static GtkToggleActionEntry toggles_entries[] = {
 void
 pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
-	PraghaWindow  *window;
 	struct con_win *cwin = user_data;
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 	GtkAction *action;
 
 	gboolean playing = (state != ST_STOPPED);
 
-	window = pragha_application_get_window (cwin);
-
-	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Prev");
+	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Stop");
+	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Next");
+	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_window_get_menu_action (window, "/Menubar/PlaybackMenu/Edit tags");
+	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_window_get_menu_action (window, "/Menubar/ViewMenu/Jump to playing song");
+	action = pragha_window_get_menu_action (cwin, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
@@ -626,7 +623,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
-					toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+					toolbar = pragha_window_get_toolbar (cwin);
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
@@ -699,13 +696,11 @@ void pref_action(GtkAction *action, struct con_win *cwin)
 void
 fullscreen_action (GtkAction *action, struct con_win *cwin)
 {
-	PraghaWindow  *window;
 	GtkWidget *menu_bar;
 	gboolean fullscreen;
 	GdkWindowState state;
 
-	window = pragha_application_get_window (cwin);
-	menu_bar = pragha_window_get_menubar (window);
+	menu_bar = pragha_window_get_menubar (cwin);
 
 	fullscreen = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
@@ -732,7 +727,7 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 	pragha_preferences_set_controls_below (cwin->preferences,
 		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
-	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	toolbar = pragha_window_get_toolbar (cwin);
 	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
 
 	gint position = pragha_preferences_get_controls_below(cwin->preferences) ? 3 : 1;
