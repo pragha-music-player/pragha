@@ -110,12 +110,6 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
-GdkPixbuf *
-pragha_application_get_pixbuf_app (struct con_win *cwin)
-{
-	return cwin->pixbuf_app;
-}
-
 void
 pragha_application_quit (struct con_win *cwin)
 {
