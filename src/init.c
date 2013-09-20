@@ -44,7 +44,7 @@
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
-	pragha_library_pane_init_view(cwin->clibrary, cwin);
+	pragha_library_pane_init_view (cwin->clibrary);
 
 	if (pragha_preferences_get_restore_playlist(cwin->preferences))
 		init_current_playlist_view(cwin->cplaylist);
@@ -62,7 +62,7 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	pragha_library_pane_init_view(cwin->clibrary, cwin);
+	pragha_library_pane_init_view (cwin->clibrary);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
@@ -108,10 +108,11 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new();
 	cwin->cplaylist = pragha_playlist_new(cwin);
-	pragha_sidebar_add_pane(cwin->sidebar,
-	                        pragha_library_pane_get_widget(cwin->clibrary));
-	pragha_sidebar_attach_menu(cwin->sidebar,
-	                           GTK_MENU(gtk_ui_manager_get_widget(pragha_library_pane_get_pane_context_menu(cwin->clibrary), "/popup")));
+
+	pragha_sidebar_attach_plugin (cwin->sidebar,
+		                          pragha_library_pane_get_widget(cwin->clibrary),
+		                          pragha_library_pane_get_pane_title(cwin->clibrary),
+		                          pragha_library_pane_get_popup_menu (cwin->clibrary));
 
 	cwin->window = pragha_window_new(cwin);
 

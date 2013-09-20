@@ -22,9 +22,12 @@
 
 typedef struct _PraghaSidebar PraghaSidebar;
 
-void           pragha_sidebar_header_set_text (PraghaSidebar *sidebar, const gchar *text);
-void           pragha_sidebar_attach_menu     (PraghaSidebar *sidebar, GtkMenu *menu);
-void           pragha_sidebar_add_pane        (PraghaSidebar *sidebar, GtkWidget *widget);
+void
+pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
+                              GtkWidget     *widget,
+                              GtkWidget     *title,
+                              GtkMenu       *popup_menu);
+
 GtkWidget     *pragha_sidebar_get_widget      (PraghaSidebar *sidebar);
 
 void           pragha_sidebar_free            (PraghaSidebar *sidebar);
