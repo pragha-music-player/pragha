@@ -106,7 +106,7 @@ void init_gui(gint argc, gchar **argv, struct con_win *cwin)
 	CDEBUG(DBG_INFO, "Initializing gui");
 
 	cwin->sidebar = pragha_sidebar_new();
-	cwin->clibrary = pragha_library_pane_new(cwin);
+	cwin->clibrary = pragha_library_pane_new();
 	cwin->cplaylist = pragha_playlist_new(cwin);
 	pragha_sidebar_add_pane(cwin->sidebar,
 	                        pragha_library_pane_get_widget(cwin->clibrary));
