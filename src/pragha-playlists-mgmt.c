@@ -1364,13 +1364,11 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 static void
 update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 {
-	PraghaWindow *window;
 	GtkWidget *submenu, *menuitem;
 	GtkUIManager *ui_manager;
 	GtkAccelGroup* accel_group;
 
-	window = pragha_application_get_window (cwin);
-	ui_manager = pragha_window_get_menu_ui_manager (window);
+	ui_manager = pragha_window_get_menu_ui_manager (cwin);
 
 	submenu = gtk_menu_new ();
 
@@ -1414,13 +1412,11 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 static void
 update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 {
-	PraghaWindow *window;
 	GtkWidget *submenu, *menuitem;
 	GtkUIManager *ui_manager;
 	GtkAccelGroup* accel_group;
 
-	window = pragha_application_get_window (cwin);
-	ui_manager = pragha_window_get_menu_ui_manager (window);
+	ui_manager = pragha_window_get_menu_ui_manager (cwin);
 
 	submenu = gtk_menu_new ();
 

@@ -74,40 +74,61 @@ enum dnd_target {
 };
 
 struct con_win {
-	PraghaWindow *window;
-	PraghaPlaylist *cplaylist;
-	PraghaLibraryPane *clibrary;
-	PraghaBackend *backend;
-	PraghaDatabase *cdbase;
-#ifdef HAVE_LIBGLYR
-	PraghaGlyr *glyr;
-#endif
-	PraghaArtCache *art_cache;
-	PraghaMpris2 *cmpris2;
-	PraghaNotify *notify;
-	PraghaScanner  *scanner;
-	PraghaSidebar *sidebar;
+	/* Main window and icon */
+
+	GtkWidget         *mainwindow;
+	GdkPixbuf         *pixbuf_app;
+
+	/* Main stuff */
+
+	PraghaBackend     *backend;
 	PraghaPreferences *preferences;
-	#ifdef HAVE_LIBCLASTFM
-	PraghaLastfm *clastfm;
-	#endif
-	con_gnome_media_keys *cgnome_media_keys;
-#ifdef HAVE_LIBKEYBINDER
-	gboolean keybinder;
+	PraghaDatabase    *cdbase;
+	PraghaArtCache    *art_cache;
+	DBusConnection    *con_dbus;
+
+	PraghaScanner     *scanner;
+
+	/* Main widgets */
+
+	GtkUIManager      *menu_ui_manager;
+	PraghaToolbar     *toolbar;
+	GtkWidget         *infobox;
+	GtkWidget         *pane;
+	PraghaSidebar     *sidebar;
+	PraghaLibraryPane *clibrary;
+	PraghaPlaylist    *cplaylist;
+	PraghaStatusbar   *statusbar;
+
+	GtkStatusIcon     *status_icon;
+	GtkUIManager      *systray_menu;
+
+	/* Plugins?. */
+
+	PraghaNotify      *notify;
+#ifdef HAVE_LIBGLYR
+	PraghaGlyr        *glyr;
 #endif
-	GtkWidget *mainwindow;
-	GtkStatusIcon *status_icon;
-	GtkUIManager *systray_menu;
-	gboolean unique_instance;
-	gboolean first_run;
-	guint related_timeout_id;
-	DBusConnection *con_dbus;
+#ifdef HAVE_LIBCLASTFM
+	PraghaLastfm      *clastfm;
+#endif
+	PraghaMpris2      *cmpris2;
+	con_gnome_media_keys *cgnome_media_keys;
+
+#ifdef HAVE_LIBKEYBINDER
+	gboolean           keybinder;
+#endif
+
+	/* Flags */
+
+	gboolean           unique_instance;
+	gboolean           first_run;
+	guint              related_timeout_id;
 };
 
 /* Functions to access private members */
 
 PraghaBackend *pragha_application_get_backend    (struct con_win *cwin);
-PraghaWindow  *pragha_application_get_window     (struct con_win *cwin);
 GtkWidget     *pragha_application_get_mainwindow (struct con_win *cwin);
 GdkPixbuf     *pragha_application_get_pixbuf_app (struct con_win *cwin);
 

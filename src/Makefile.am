@@ -9,7 +9,6 @@ AM_CPPFLAGS =								\
 	-I$(top_srcdir)
 
 pragha_SOURCES = \
-		init.c \
 		info-bar-import-music.c \
 		gnome-media-keys.c \
 		gnome-media-keys.h \

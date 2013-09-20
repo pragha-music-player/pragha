@@ -201,7 +201,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+				toolbar = pragha_window_get_toolbar (cwin);
 				pragha_toolbar_set_title (toolbar, mobj);
 				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
 
@@ -247,7 +247,7 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	toolbar = pragha_window_get_toolbar (cwin);
 	pragha_toolbar_set_title(toolbar, nmobj);
 	mpris_update_metadata_changed(cwin);
 
@@ -287,7 +287,7 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 		g_free(path);
 	}
 
-	toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+	toolbar = pragha_window_get_toolbar (cwin);
 	pragha_toolbar_set_image_album_art (toolbar, album_path);
 	g_free(album_path);
 }
@@ -295,7 +295,6 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 void
 pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 {
-	PraghaWindow *window;
 	PraghaAlbumArt *albumart;
 	gchar *uri = NULL;
 
@@ -304,9 +303,7 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	window = pragha_application_get_window(cwin);
-
-	albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar (window));
+	albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar (cwin));
 
 	const gchar *albumart_path = pragha_album_art_get_path (albumart);
 
@@ -314,7 +311,7 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 		return;
 
 	uri = g_filename_to_uri (albumart_path, NULL, NULL);
-	open_url(uri, pragha_window_get_mainwindow (window));
+	open_url(uri, pragha_window_get_mainwindow (cwin));
 	g_free (uri);
 }
 

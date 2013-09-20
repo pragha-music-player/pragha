@@ -220,7 +220,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 
 			if(test_change) {
 				infobar = create_info_bar_update_music(dialog->cwin);
-				pragha_window_add_widget_to_infobox(dialog->cwin->window, infobar);
+				pragha_window_add_widget_to_infobox(dialog->cwin, infobar);
 			}
 		}
 

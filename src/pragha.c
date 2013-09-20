@@ -110,22 +110,16 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
-PraghaWindow *
-pragha_application_get_window (struct con_win *cwin)
-{
-	return cwin->window;
-}
-
 GtkWidget *
 pragha_application_get_mainwindow (struct con_win *cwin)
 {
-	return pragha_window_get_mainwindow(cwin->window);
+	return cwin->mainwindow;
 }
 
 GdkPixbuf *
 pragha_application_get_pixbuf_app (struct con_win *cwin)
 {
-	return pragha_window_get_pixbuf_app(cwin->window);
+	return cwin->pixbuf_app;
 }
 
 void
@@ -155,7 +149,7 @@ pragha_application_free (struct con_win *cwin)
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
 	pragha_art_cache_free (cwin->art_cache);
-	pragha_window_free (cwin->window);
+	pragha_window_free (cwin);
 	pragha_scanner_free(cwin->scanner);
 	g_object_unref(G_OBJECT(cwin->preferences));
 	g_object_unref(cwin->cdbase);
@@ -179,7 +173,6 @@ pragha_application_free (struct con_win *cwin)
 static struct con_win *
 pragha_application_new (gint argc, gchar *argv[])
 {
-	PraghaWindow *window;
 	PraghaToolbar *toolbar;
 	struct con_win *cwin;
 
@@ -252,13 +245,11 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	/* Init the gui after bancked to sink volume. */
 
-	init_gui (0, NULL, cwin);
-
-	window = pragha_application_get_window (cwin);
+	pragha_window_new (cwin);
 
 	/* Toolbar Signals and Bindings. */
 
-	toolbar = pragha_window_get_toolbar (window);
+	toolbar = pragha_window_get_toolbar (cwin);
 	g_signal_connect_swapped (toolbar, "prev",
 	                          G_CALLBACK(pragha_playback_prev_track), cwin);
 	g_signal_connect_swapped (toolbar, "play",

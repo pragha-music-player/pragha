@@ -189,7 +189,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 			if ((0 == g_strcmp0 (artist, lartist)) &&
 			    (0 == g_strcmp0 (album, lalbum))) {
 				/* TODO: Emit a signal to update the album art and mpris. */
-				toolbar = pragha_window_get_toolbar (pragha_application_get_window (cwin));
+				toolbar = pragha_window_get_toolbar (cwin);
 				pragha_toolbar_set_image_album_art (toolbar, album_art_path);
 				mpris_update_metadata_changed (cwin);
 			}
@@ -463,7 +463,6 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 static void
 setup_main_menu (PraghaGlyr *glyr)
 {
-	PraghaWindow *window;
 	GtkAction *action;
 
 	glyr->action_group_main_menu = gtk_action_group_new ("PraghaGlyrMainMenuActions");
@@ -473,9 +472,7 @@ setup_main_menu (PraghaGlyr *glyr)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              glyr);
 
-	window = pragha_application_get_window (glyr->cwin);
-
-	glyr->merge_id_main_menu = pragha_menubar_append_plugin_action (window,
+	glyr->merge_id_main_menu = pragha_menubar_append_plugin_action (glyr->cwin,
 	                                                                glyr->action_group_main_menu,
 	                                                                main_menu_xml);
 
@@ -504,15 +501,12 @@ setup_playlist (PraghaGlyr *glyr)
 void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
-	PraghaWindow  *window;
-
 	struct con_win *cwin = glyr->cwin;
 
 	g_signal_handlers_disconnect_by_func (cwin->backend, backend_changed_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 
-	window = pragha_application_get_window (cwin);
-	pragha_menubar_remove_plugin_action (window,
+	pragha_menubar_remove_plugin_action (cwin,
 	                                     glyr->action_group_main_menu,
 	                                     glyr->merge_id_main_menu);
 	glyr->merge_id_main_menu = 0;

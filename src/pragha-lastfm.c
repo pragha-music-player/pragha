@@ -282,7 +282,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
 				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
-					toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+					toolbar = pragha_window_get_toolbar (cwin);
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag(current_mobj, changed, nmobj);
@@ -939,7 +939,7 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 
 	/* Hack to safe!.*/
 	if(!cwin->clastfm->ntag_lastfm_button) {
-		toolbar = pragha_window_get_toolbar (pragha_application_get_window(cwin));
+		toolbar = pragha_window_get_toolbar (cwin);
 
 		cwin->clastfm->ntag_lastfm_button =
 			pragha_lastfm_tag_suggestion_button_new(cwin);
@@ -1151,8 +1151,6 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 static void
 pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 {
-	PraghaWindow *window;
-
 	clastfm->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
 	gtk_action_group_set_translation_domain (clastfm->action_group_main_menu, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (clastfm->action_group_main_menu,
@@ -1160,9 +1158,7 @@ pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              clastfm->cwin);
 
-	window = pragha_application_get_window (clastfm->cwin);
-
-	clastfm->merge_id_main_menu = pragha_menubar_append_plugin_action (window,
+	clastfm->merge_id_main_menu = pragha_menubar_append_plugin_action (clastfm->cwin,
 	                                                                   clastfm->action_group_main_menu,
 	                                                                   main_menu_xml);
 
@@ -1186,14 +1182,10 @@ pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 static void
 pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 {
-	PraghaWindow  *window;
-
 	if(!clastfm->merge_id_main_menu)
 		return;
 
-	window = pragha_application_get_window (clastfm->cwin);
-
-	pragha_menubar_remove_plugin_action (window,
+	pragha_menubar_remove_plugin_action (clastfm->cwin,
 	                                     clastfm->action_group_main_menu,
 	                                     clastfm->merge_id_main_menu);
 
