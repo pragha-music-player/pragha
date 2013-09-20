@@ -1143,14 +1143,11 @@ update_related_handler (gpointer data)
 }
 
 static void
-backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	PraghaBackend *backend;
 	struct con_win *cwin = user_data;
 	gint file_type = 0;
 	enum player_state state = 0;
-
-	backend = pragha_application_get_backend (cwin);
 
 	state = pragha_backend_get_state (backend);
 

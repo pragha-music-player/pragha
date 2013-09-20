@@ -442,15 +442,12 @@ exists:
 }
 
 static void
-backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
-	PraghaBackend *backend;
 	gint file_type = 0;
 	enum player_state state = 0;
 	GtkAction *action;
-
-	backend = pragha_application_get_backend (cwin);
 
 	state = pragha_backend_get_state (backend);
 	gboolean playing = (state != ST_STOPPED);

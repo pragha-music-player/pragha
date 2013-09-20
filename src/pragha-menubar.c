@@ -202,15 +202,13 @@ static GtkToggleActionEntry toggles_entries[] = {
 /* Sentitive menubar actions depending on the playback status. */
 
 void
-pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	PraghaBackend *backend;
 	GtkAction *action;
 	gboolean playing = FALSE;
 
 	struct con_win *cwin = user_data;
 
-	backend = pragha_application_get_backend (cwin);
 	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
 
 	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Prev");
