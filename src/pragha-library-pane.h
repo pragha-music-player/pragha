@@ -94,9 +94,6 @@ typedef enum {
 
 /* Functions */
 
-void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
-void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
-
 GList * pragha_library_pane_get_mobj_list (PraghaLibraryPane *library);
 
 gboolean
