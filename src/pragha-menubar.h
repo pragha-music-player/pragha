@@ -20,11 +20,12 @@
 #define PRAGHA_MENU_H
 
 #include <gtk/gtk.h>
+#include "pragha-backend.h"
 
 /* pragha.h */
 struct con_win;
 
-void pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data);
+void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 
 void open_file_action(GtkAction *action, struct con_win *cwin);
 void add_audio_cd_action(GtkAction *action, struct con_win *cwin);
