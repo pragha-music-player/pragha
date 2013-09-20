@@ -847,7 +847,7 @@ void about_widget(struct con_win *cwin)
 	GdkPixbuf *pixbuf_app;
 
 	mainwindow = pragha_window_get_mainwindow (cwin);
-	pixbuf_app = pragha_application_get_pixbuf_app (cwin);
+	pixbuf_app = pragha_window_get_pixbuf_app (cwin);
 
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
