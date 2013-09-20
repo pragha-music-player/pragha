@@ -94,10 +94,6 @@ typedef enum {
 
 /* Functions */
 
-void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
-void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
-void playlist_tree_export(GtkAction *action, struct con_win *cwin);
-
 void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);

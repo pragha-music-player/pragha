@@ -105,9 +105,13 @@ static void pragha_library_pane_set_genre_artist_album_view_action (GtkAction *a
 /*
  * library_tree_context_menu calbacks
  */
-static void library_tree_add_to_playlist_action   (GtkAction *action, PraghaLibraryPane *library);
-static void library_tree_replace_playlist_action  (GtkAction *action, PraghaLibraryPane *library);
-static void library_tree_replace_and_play         (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_add_to_playlist_action                    (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_replace_playlist_action                   (GtkAction *action, PraghaLibraryPane *library);
+static void library_tree_replace_and_play                          (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_rename_item_action                 (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_remove_item_action                 (GtkAction *action, PraghaLibraryPane *library);
+static void pragha_library_pane_export_playlist_action             (GtkAction *action, PraghaLibraryPane *library);
+
 
 /*
  * Menus definitions
@@ -193,13 +197,13 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Replace current playlist", NULL, N_("_Replace current playlist"),
 	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
 	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
-	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)}/*,
+	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
 	{"Rename", NULL, N_("Rename"),
-	 "", "Rename", G_CALLBACK(playlist_tree_rename)},
+	 "", "Rename", G_CALLBACK(pragha_library_pane_rename_item_action)},
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
-	 "", "Delete", G_CALLBACK(playlist_tree_delete)},
+	 "", "Delete", G_CALLBACK(pragha_library_pane_remove_item_action)},
 	{"Export", GTK_STOCK_SAVE, N_("Export"),
-	 "", "Export", G_CALLBACK(playlist_tree_export)},
+	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)}/*,
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
 	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
 	{"Move to trash", "user-trash", N_("Move to _trash"),
@@ -2096,7 +2100,8 @@ pragha_library_pane_get_mobj_list (PraghaLibraryPane *library)
 	return mlist;
 }
 
-void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_rename_item_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2106,7 +2111,7 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	gchar *playlist = NULL, *n_playlist = NULL;
 	gint node_type;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
@@ -2115,16 +2120,17 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get_iter(model, &iter, path);
 			gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-			n_playlist = rename_playlist_dialog (playlist, cwin->mainwindow);
+			n_playlist = rename_playlist_dialog (playlist,
+			                                     gtk_widget_get_toplevel(GTK_WIDGET(library)));
 			if(n_playlist != NULL) {
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
 
 				if(node_type == NODE_PLAYLIST)
-					pragha_database_update_playlist_name (cwin->cdbase, playlist, n_playlist);
+					pragha_database_update_playlist_name (library->cdbase, playlist, n_playlist);
 				else if (node_type == NODE_RADIO)
-					pragha_database_update_radio_name (cwin->cdbase, playlist, n_playlist);
+					pragha_database_update_radio_name (library->cdbase, playlist, n_playlist);
 
-				pragha_database_change_playlists_done(cwin->cdbase);
+				pragha_database_change_playlists_done(library->cdbase);
 
 				g_free(n_playlist);
 			}
@@ -2135,7 +2141,8 @@ void playlist_tree_rename(GtkAction *action, struct con_win *cwin)
 	g_list_free(list);
 }
 
-void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_remove_item_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2146,42 +2153,43 @@ void playlist_tree_delete(GtkAction *action, struct con_win *cwin)
 	gint node_type;
 	gboolean removed = FALSE;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	list = gtk_tree_selection_get_selected_rows(selection, &model);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
+	list = gtk_tree_selection_get_selected_rows (selection, &model);
 
 	if (list) {
 		/* Delete selected playlists */
 
-		for (i=list; i != NULL; i = i->next) {
+		for (i = list; i != NULL; i = i->next) {
 			path = i->data;
 			if (gtk_tree_path_get_depth(path) > 1) {
 				gtk_tree_model_get_iter(model, &iter, path);
 				gtk_tree_model_get(model, &iter, L_NODE_TYPE, &node_type, -1);
-				gtk_tree_model_get(model, &iter, L_NODE_DATA,
-						   &playlist, -1);
+				gtk_tree_model_get(model, &iter, L_NODE_DATA, &playlist, -1);
 
-				if(delete_existing_item_dialog(playlist, cwin->mainwindow)) {
+				if (delete_existing_item_dialog(playlist, gtk_widget_get_toplevel(GTK_WIDGET(library)))) {
 					if(node_type == NODE_PLAYLIST) {
-						pragha_database_delete_playlist(cwin->cdbase, playlist);
+						pragha_database_delete_playlist (library->cdbase, playlist);
 					}
 					else if (node_type == NODE_RADIO) {
-						pragha_database_delete_radio(cwin->cdbase, playlist);
+						pragha_database_delete_radio (library->cdbase, playlist);
 					}
 					removed = TRUE;
 				}
-				g_free(playlist);
+				g_free (playlist);
 			}
-			gtk_tree_path_free(path);
+			gtk_tree_path_free (path);
 		}
-		g_list_free(list);
+		g_list_free (list);
 	}
 
-	if(removed)
-		pragha_database_change_playlists_done(cwin->cdbase);
+	if (removed)
+		pragha_database_change_playlists_done (library->cdbase);
 }
 
-void playlist_tree_export(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_export_playlist_action (GtkAction *action, PraghaLibraryPane *library)
 {
+	GtkWidget *toplevel;
 	GIOChannel *chan = NULL;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -2193,8 +2201,8 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	gchar *filename = NULL, *playlist = NULL, *playlistpath = NULL;
 	gint node_type;
 
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(cwin->clibrary->library_tree));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(library->library_tree));
 	cnt = (gtk_tree_selection_count_selected_rows(selection));
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
@@ -2218,7 +2226,9 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 		}
 	}
 
-	filename = playlist_export_dialog_get_filename(playlistpath, cwin->mainwindow);
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(library));
+
+	filename = playlist_export_dialog_get_filename(playlistpath, toplevel);
 
 	if (!filename)
 		goto exit;
@@ -2229,7 +2239,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 		goto exit;
 	}
 
-	set_watch_cursor (cwin->mainwindow);
+	set_watch_cursor (toplevel);
 
 	list = gtk_tree_selection_get_selected_rows(selection, NULL);
 
@@ -2243,7 +2253,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 				gtk_tree_model_get(model, &iter, L_NODE_DATA,
 						   &playlist, -1);
 				if (save_m3u_playlist(chan, playlist,
-						      filename, cwin->cdbase) < 0) {
+						      filename, library->cdbase) < 0) {
 					g_warning("Unable to save M3U playlist: %s",
 						  filename);
 					g_free(playlist);
@@ -2273,7 +2283,7 @@ void playlist_tree_export(GtkAction *action, struct con_win *cwin)
 	}
 
 exit_list:
-	remove_watch_cursor (cwin->mainwindow);
+	remove_watch_cursor (toplevel);
 
 	if (list)
 		g_list_free(list);
