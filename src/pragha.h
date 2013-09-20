@@ -128,7 +128,8 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaBackend *pragha_application_get_backend    (struct con_win *cwin);
+PraghaBackend *pragha_application_get_backend         (struct con_win *cwin);
+GtkUIManager  *pragha_application_get_menu_ui_manager (struct con_win *cwin);
 
 /* Info bar import music */
 

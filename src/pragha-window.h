@@ -40,8 +40,8 @@ void       pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget 
 gint           pragha_menubar_append_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, const gchar *menu_xml);
 void           pragha_menubar_remove_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, gint merge_id);
 
-GtkAction     *pragha_window_get_menu_action     (struct con_win *cwin, const gchar *path);
-GtkUIManager  *pragha_window_get_menu_ui_manager (struct con_win *cwin);
+GtkAction     *pragha_window_get_menu_action        (struct con_win *cwin, const gchar *path);
+GtkWidget     *pragha_window_get_menu_action_widget (struct con_win *cwin, const gchar *path);
 
 GtkWidget     *pragha_window_get_menubar       (struct con_win *cwin);
 GtkWidget     *pragha_window_get_mainwindow    (struct con_win *cwin);
