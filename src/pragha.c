@@ -110,6 +110,12 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
+GtkUIManager *
+pragha_application_get_menu_ui_manager (struct con_win *cwin)
+{
+	return cwin->menu_ui_manager;
+}
+
 void
 pragha_application_quit (struct con_win *cwin)
 {

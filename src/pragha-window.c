@@ -187,7 +187,7 @@ pragha_menubar_append_plugin_action (struct con_win *cwin,
 	GError *error = NULL;
 	gint merge_id;
 
-	ui_manager = pragha_window_get_menu_ui_manager(cwin);
+	ui_manager = pragha_application_get_menu_ui_manager (cwin);
 	gtk_ui_manager_insert_action_group (ui_manager, action_group, -1);
 
 	merge_id = gtk_ui_manager_add_ui_from_string (ui_manager,
@@ -208,8 +208,10 @@ pragha_menubar_remove_plugin_action (struct con_win *cwin,
                                      GtkActionGroup *action_group,
                                      gint merge_id)
 {
-	gtk_ui_manager_remove_ui (cwin->menu_ui_manager, merge_id);
-	gtk_ui_manager_remove_action_group (cwin->menu_ui_manager, action_group);
+	GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	gtk_ui_manager_remove_ui (ui_manager, merge_id);
+	gtk_ui_manager_remove_action_group (ui_manager, action_group);
 	g_object_unref (action_group);
 }
 
@@ -217,19 +219,25 @@ pragha_menubar_remove_plugin_action (struct con_win *cwin,
 GtkAction *
 pragha_window_get_menu_action (struct con_win *cwin, const gchar *path)
 {
-	return gtk_ui_manager_get_action (cwin->menu_ui_manager, path);
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_action (ui_manager, path);
 }
 
-GtkUIManager *
-pragha_window_get_menu_ui_manager (struct con_win *cwin)
+GtkWidget *
+pragha_window_get_menu_action_widget (struct con_win *cwin, const gchar *path)
 {
-	return cwin->menu_ui_manager;
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_widget (ui_manager, path);
 }
 
 GtkWidget *
 pragha_window_get_menubar (struct con_win *cwin)
 {
-	return gtk_ui_manager_get_widget (cwin->menu_ui_manager, "/Menubar");
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
 GtkWidget *
