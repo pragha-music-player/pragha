@@ -26,33 +26,45 @@
 
 static void keybind_prev_handler (const char *keystring, gpointer data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = data;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_prev_track(cwin);
 }
 
 static void keybind_play_handler (const char *keystring, gpointer data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = data;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_play_pause_resume(cwin);
 }
 
 static void keybind_stop_handler (const char *keystring, gpointer data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = data;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_stop(cwin);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = data;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_next_track(cwin);
 }
 

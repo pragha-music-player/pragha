@@ -166,6 +166,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	PraghaToolbar *toolbar;
 	const gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path = NULL;
+	PraghaBackend *backend;
 
 	if(glyr_info->head == NULL)
 		return;
@@ -181,8 +182,9 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	album_art_path = pragha_art_cache_get (cwin->art_cache, artist, album);
 
 	if (album_art_path) {
-		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-			PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+		backend = pragha_application_get_backend (cwin);
+		if (pragha_backend_get_state (backend) != ST_STOPPED) {
+			PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 			const gchar *lartist = pragha_musicobject_get_artist (mobj);
 			const gchar *lalbum = pragha_musicobject_get_album (mobj);
 
@@ -320,14 +322,17 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 static void
 get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = glyr->cwin;
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	CDEBUG(DBG_INFO, "Get Artist info Action");
 
-	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 
 	if (string_is_empty(artist))
@@ -339,14 +344,17 @@ get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = glyr->cwin;
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	CDEBUG(DBG_INFO, "Get lyrics Action");
 
-	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 	const gchar *title = pragha_musicobject_get_title (mobj);
 
@@ -394,13 +402,16 @@ related_get_album_art_handler (struct con_win *cwin)
 {
 	glyr_struct *glyr_info;
 	gchar *album_art_path;
+	PraghaBackend *backend;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 	const gchar *album = pragha_musicobject_get_album (mobj);
 
@@ -434,10 +445,15 @@ static void
 backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
 	struct con_win *cwin = user_data;
-	enum player_state state = pragha_backend_get_state (cwin->backend);
-	gboolean playing = (state != ST_STOPPED);
+	PraghaBackend *backend;
 	gint file_type = 0;
+	enum player_state state = 0;
 	GtkAction *action;
+
+	backend = pragha_application_get_backend (cwin);
+
+	state = pragha_backend_get_state (backend);
+	gboolean playing = (state != ST_STOPPED);
 
 	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search lyric");
 	gtk_action_set_sensitive (action, playing);
@@ -451,7 +467,7 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 		return;
 	}
 
-	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (cwin->backend));
+	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
 	if(file_type == FILE_HTTP)
 		return;
@@ -503,7 +519,8 @@ pragha_glyr_free (PraghaGlyr *glyr)
 {
 	struct con_win *cwin = glyr->cwin;
 
-	g_signal_handlers_disconnect_by_func (cwin->backend, backend_changed_state_cb, cwin);
+	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (cwin),
+	                                      backend_changed_state_cb, cwin);
 	glyr_db_destroy (glyr->cache_db);
 
 	pragha_menubar_remove_plugin_action (cwin,
@@ -540,7 +557,8 @@ pragha_glyr_new (struct con_win *cwin)
 	setup_main_menu (glyr);
 	setup_playlist (glyr);
 
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
+	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+	                  G_CALLBACK (backend_changed_state_cb), cwin);
 
 	return glyr;
 }

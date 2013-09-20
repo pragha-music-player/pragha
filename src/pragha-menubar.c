@@ -204,11 +204,14 @@ static GtkToggleActionEntry toggles_entries[] = {
 void
 pragha_menubar_update_playback_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
-	struct con_win *cwin = user_data;
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+	PraghaBackend *backend;
 	GtkAction *action;
+	gboolean playing = FALSE;
 
-	gboolean playing = (state != ST_STOPPED);
+	struct con_win *cwin = user_data;
+
+	backend = pragha_application_get_backend (cwin);
+	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
 
 	action = pragha_window_get_menu_action (cwin, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
@@ -604,6 +607,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   gint            response_id,
                                   struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj, *bmobj;
 	PraghaTagger *tagger;
@@ -620,8 +624,10 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 		if(changed) {
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
-			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+			backend = pragha_application_get_backend (cwin);
+
+			if(pragha_backend_get_state (backend) != ST_STOPPED) {
+				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
 					toolbar = pragha_window_get_toolbar (cwin);
 
@@ -632,7 +638,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
 
 					/* Update current song on backend */
-					bmobj = g_object_ref(pragha_backend_get_musicobject(cwin->backend));
+					bmobj = g_object_ref(pragha_backend_get_musicobject(backend));
 					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
 					g_object_unref(bmobj);
 
@@ -655,9 +661,12 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	GtkWidget *dialog;
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	dialog = pragha_tags_dialog_new();
@@ -665,7 +674,8 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	g_signal_connect (G_OBJECT (dialog), "response",
 	                  G_CALLBACK (pragha_edit_tags_dialog_response), cwin);
 
-	pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), pragha_backend_get_musicobject (cwin->backend));
+	pragha_tags_dialog_set_musicobject (PRAGHA_TAGS_DIALOG(dialog),
+	                                    pragha_backend_get_musicobject (backend));
 	
 	gtk_widget_show (dialog);
 }

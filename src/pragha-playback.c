@@ -35,6 +35,7 @@ static void pragha_playback_update_current_album_art (struct con_win *cwin, Prag
 
 void pragha_playback_prev_track(struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	GtkTreePath *path;
 	PraghaMusicobject *mobj = NULL;
 
@@ -47,16 +48,18 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	if (!path)
 		return;
 
+	backend = pragha_application_get_backend (cwin);
+
 	/* Stop currently playing track */
-	pragha_backend_stop(cwin->backend);
+	pragha_backend_stop (backend);
 
 	/* Start playing new track */
 	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
-	pragha_backend_set_musicobject (cwin->backend, mobj);
-	pragha_backend_play(cwin->backend);
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play (backend);
 
 	gtk_tree_path_free(path);
 }
@@ -65,6 +68,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 
 void pragha_playback_play_pause_resume(struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaMusicobject *mobj = NULL;
 	GtkTreePath *path=NULL;
 
@@ -80,12 +84,14 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	/* Stopped   Start playback         */
 	/************************************/
 
-	switch (pragha_backend_get_state (cwin->backend)) {
+	backend = pragha_application_get_backend (cwin);
+
+	switch (pragha_backend_get_state (backend)) {
 	case ST_PLAYING:
-		pragha_backend_pause(cwin->backend);
+		pragha_backend_pause (backend);
 		break;
 	case ST_PAUSED:
-		pragha_backend_resume(cwin->backend);
+		pragha_backend_resume (backend);
 		break;
 	case ST_STOPPED:
 		if (pragha_playlist_is_changing(cwin->cplaylist) ||
@@ -111,8 +117,8 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 
 		mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 
-		pragha_backend_set_musicobject (cwin->backend, mobj);
-		pragha_backend_play(cwin->backend);
+		pragha_backend_set_musicobject (backend, mobj);
+		pragha_backend_play (backend);
 
 		gtk_tree_path_free(path);
 		break;
@@ -125,25 +131,33 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 
 void pragha_playback_stop(struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	CDEBUG(DBG_BACKEND, "Stopping the current song");
 
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	pragha_backend_stop(cwin->backend);
+	pragha_backend_stop (backend);
 }
 
 /* Play next song when terminate a song. */
 
 void pragha_advance_playback (struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	GtkTreePath *path = NULL;
 	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
+	backend = pragha_application_get_backend (cwin);
+
 	/* Stop to set ready and clear all info */
-	pragha_backend_stop(cwin->backend);
+
+	pragha_backend_stop (backend);
 
 	if(pragha_playlist_is_changing(cwin->cplaylist))
 		return;
@@ -160,8 +174,8 @@ void pragha_advance_playback (struct con_win *cwin)
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
-	pragha_backend_set_musicobject (cwin->backend, mobj);
-	pragha_backend_play(cwin->backend);
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play (backend);
 
 	gtk_tree_path_free (path);
 }
@@ -170,10 +184,14 @@ void pragha_advance_playback (struct con_win *cwin)
 
 void pragha_playback_next_track(struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	CDEBUG(DBG_BACKEND, "Want to advancing to next track");
 
 	/* Are we playing right now ? */
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+
+	backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	/* Play a new song */
@@ -195,7 +213,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 		case ST_PLAYING:
 			/* New song?. */
 			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
-				mobj = pragha_backend_get_musicobject (cwin->backend);
+				mobj = pragha_backend_get_musicobject (backend);
 
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
 				                     pragha_musicobject_get_file(mobj));

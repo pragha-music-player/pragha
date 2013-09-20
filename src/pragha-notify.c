@@ -58,11 +58,14 @@ notify_Prev_Callback (NotifyNotification *osd,
                       const char *action,
                       PraghaNotify *notify)
 {
+	PraghaBackend *backend;
+
 	g_assert (action != NULL);
 
 	struct con_win *cwin = notify->cwin;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_prev_track(cwin);
 }
 
@@ -71,11 +74,14 @@ notify_Next_Callback (NotifyNotification *osd,
                       const char *action,
                       PraghaNotify *notify)
 {
+	PraghaBackend *backend;
+
 	g_assert (action != NULL);
 
 	struct con_win *cwin = notify->cwin;
 
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_next_track(cwin);
 }
 
@@ -104,16 +110,21 @@ can_support_actions ()
 void
 pragha_notify_show_osd (PraghaNotify *notify)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
-	struct con_win *cwin = notify->cwin;
+	PraghaMusicobject *mobj = NULL;
 	GError *error = NULL;
 	gchar *summary, *body, *slength;
+
+	struct con_win *cwin = notify->cwin;
 
 	/* Check if OSD is enabled in preferences */
 	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (pragha_window_get_mainwindow(cwin))))
 		return;
 
-	PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	backend = pragha_application_get_backend (cwin);
+
+	mobj = pragha_backend_get_musicobject (backend);
 	const gchar *file = pragha_musicobject_get_file (mobj);
 	const gchar *title = pragha_musicobject_get_title (mobj);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);

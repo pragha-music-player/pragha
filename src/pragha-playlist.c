@@ -2048,6 +2048,7 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 				  GtkTreeViewColumn *column,
 				  struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	GtkTreeIter iter;
 	GtkTreeModel *model = cwin->cplaylist->model;
 	PraghaMusicobject *mobj;
@@ -2055,8 +2056,10 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 
+	backend = pragha_application_get_backend (cwin);
+
 	if (pragha_preferences_get_shuffle(cwin->preferences)) {
-		if (pragha_backend_get_state (cwin->backend) == ST_STOPPED) {
+		if (pragha_backend_get_state (backend) == ST_STOPPED) {
 			clear_rand_track_refs(cwin->cplaylist);
 			current_playlist_clear_dirty_all(cwin->cplaylist);
 		}
@@ -2066,16 +2069,16 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 	}
 
 	/* Stop to set ready and clear all info */
-	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-		pragha_backend_stop(cwin->backend);
+	if (pragha_backend_get_state (backend) != ST_STOPPED)
+		pragha_backend_stop(backend);
 
 	/* Start playing new track */
 	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
 	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
 
 	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
-	pragha_backend_set_musicobject (cwin->backend, mobj);
-	pragha_backend_play(cwin->backend);
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play(backend);
 }
 
 void
@@ -4122,7 +4125,8 @@ pragha_playlist_new(struct con_win *cwin)
 
 	g_signal_connect(cplaylist->preferences, "notify::shuffle", G_CALLBACK (shuffle_changed_cb), cplaylist);
 
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_current_playlist_view_playback_state_cb), cplaylist);
+	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+	                  G_CALLBACK (update_current_playlist_view_playback_state_cb), cplaylist);
 
 	gtk_widget_show_all(cplaylist->widget);
 
