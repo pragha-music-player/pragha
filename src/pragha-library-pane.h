@@ -25,7 +25,21 @@
 /* pragha.h */
 struct con_win;
 
+#define PRAGHA_TYPE_LIBRARY_PANE                  (pragha_library_pane_get_type ())
+#define PRAGHA_LIBRARY_PANE(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_LIBRARY_PANE, PraghaLibraryPane))
+#define PRAGHA_IS_LIBRARY_PANE(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_LIBRARY_PANE))
+#define PRAGHA_LIBRARY_PANE_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_LIBRARY_PANE, PraghaLibraryPaneClass))
+#define PRAGHA_IS_LIBRARY_PANE_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_LIBRARY_PANE))
+#define PRAGHA_LIBRARY_PANE_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_LIBRARY_PANE, PraghaLibraryPaneClass))
+
 typedef struct _PraghaLibraryPane PraghaLibraryPane;
+
+typedef struct {
+	GtkVBoxClass __parent__;
+	void (*library_append_playlist) (PraghaLibraryPane *toolbar);
+	void (*library_replace_playlist) (PraghaLibraryPane *toolbar);
+	void (*library_replace_playlist_and_play) (PraghaLibraryPane *toolbar);
+} PraghaLibraryPaneClass;
 
 /* Node types in library view */
 
@@ -80,9 +94,6 @@ typedef enum {
 
 /* Functions */
 
-void library_tree_add_to_playlist_action(GtkAction *action, struct con_win *cwin);
-void library_tree_replace_playlist_action(GtkAction *action, struct con_win *cwin);
-void library_tree_replace_and_play(GtkAction *action, struct con_win *cwin);
 void playlist_tree_rename(GtkAction *action, struct con_win *cwin);
 void playlist_tree_delete(GtkAction *action, struct con_win *cwin);
 void playlist_tree_export(GtkAction *action, struct con_win *cwin);
@@ -91,19 +102,8 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_hdd(GtkAction *action, struct con_win *cwin);
 void library_tree_delete_db(GtkAction *action, struct con_win *cwin);
 
-void
-library_tree_row_activated_cb(GtkTreeView *library_tree,
-                              GtkTreePath *path,
-                              GtkTreeViewColumn *column,
-                              struct con_win *cwin);
-gboolean
-library_tree_button_press_cb(GtkWidget *widget,
-                             GdkEventButton *event,
-                             struct con_win *cwin);
-gboolean
-library_tree_button_release_cb(GtkWidget *widget,
-                               GdkEventButton *event,
-                               struct con_win *cwin);
+GList * pragha_library_pane_get_mobj_list (PraghaLibraryPane *library);
+
 gboolean
 library_page_right_click_cb(GtkWidget *widget,
                             GdkEventButton *event,
@@ -122,7 +122,6 @@ void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary, struct con_
 GtkWidget         *pragha_library_pane_get_widget (PraghaLibraryPane *librarypane);
 GtkUIManager      *pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary);
 
-void               pragha_library_pane_free       (PraghaLibraryPane *librarypane);
-PraghaLibraryPane *pragha_library_pane_new        (struct con_win *cwin);
+PraghaLibraryPane *pragha_library_pane_new        (void);
 
 #endif /* PRAGHA_LIBRARY_PANE_H */
