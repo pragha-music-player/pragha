@@ -272,7 +272,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		pragha_track_properties_dialog(nmobj, pragha_window_get_mainwindow(cwin));
 		return;
 	}
 
@@ -288,13 +288,13 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 		if(rlist) {
 			if (changed & TAG_TNO_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
+					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), pragha_window_get_mainwindow(cwin)))
 						return;
 				}
 			}
 			if (changed & TAG_TITLE_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
+					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), pragha_window_get_mainwindow(cwin)))
 						return;
 				}
 			}

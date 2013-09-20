@@ -2089,14 +2089,14 @@ copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin)
 
 	/* Check if user is trying to set the same track no for multiple tracks */
 	if (changed & TAG_TNO_CHANGED) {
-		if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), cwin->mainwindow))
+		if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), pragha_window_get_mainwindow(cwin)))
 			return;
 	}
 
 	/* Check if user is trying to set the same title/track no for
 	   multiple tracks */
 	if (changed & TAG_TITLE_CHANGED) {
-		if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), cwin->mainwindow))
+		if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), pragha_window_get_mainwindow(cwin)))
 			return;
 	}
 

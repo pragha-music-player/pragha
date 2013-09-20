@@ -262,7 +262,7 @@ gint init_gnome_media_keys(struct con_win *cwin)
                                      gmk,
                                      NULL);
 
-    gmk->handler_id = g_signal_connect(G_OBJECT(cwin->mainwindow), "focus-in-event",
+    gmk->handler_id = g_signal_connect(G_OBJECT(pragha_window_get_mainwindow(cwin)), "focus-in-event",
                                        G_CALLBACK(on_window_focus_in_event), gmk);
 
     cwin->cgnome_media_keys = gmk;
@@ -277,7 +277,7 @@ void gnome_media_keys_free(con_gnome_media_keys *gmk)
     g_bus_unwatch_name(gmk->watch_id);
 
     if (gmk->handler_id != 0)
-        g_signal_handler_disconnect(G_OBJECT(cwin->mainwindow), gmk->handler_id);
+        g_signal_handler_disconnect(G_OBJECT(pragha_window_get_mainwindow(cwin)), gmk->handler_id);
 
     if (gmk->proxy != NULL)
         g_object_unref(gmk->proxy);

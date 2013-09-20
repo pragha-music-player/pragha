@@ -110,12 +110,6 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
-GtkWidget *
-pragha_application_get_mainwindow (struct con_win *cwin)
-{
-	return cwin->mainwindow;
-}
-
 GdkPixbuf *
 pragha_application_get_pixbuf_app (struct con_win *cwin)
 {
