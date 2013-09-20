@@ -137,9 +137,15 @@ typedef struct {
 static PraghaLastfmAsyncData *
 pragha_lastfm_async_data_new (struct con_win *cwin)
 {
-	PraghaLastfmAsyncData *data = g_slice_new (PraghaLastfmAsyncData);
+	PraghaBackend *backend;
+	PraghaLastfmAsyncData *data;
+
+	backend = pragha_application_get_backend (cwin);
+
+	data = g_slice_new (PraghaLastfmAsyncData);
 	data->cwin = cwin;
-	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (cwin->backend));
+	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
+
 	return data;
 }
 
@@ -190,9 +196,13 @@ pragha_action_group_set_sensitive (GtkActionGroup *group, const gchar *name, gbo
 void
 pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
 {
-	struct con_win *cwin = clastfm->cwin;
+	PraghaBackend *backend;
+	enum player_state state = 0;
 
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+	struct con_win *cwin = clastfm->cwin;
+	
+	backend = pragha_application_get_backend (cwin);
+	state = pragha_backend_get_state (backend);
 
 	gboolean playing    = (state != ST_STOPPED);
 	gboolean logged     = (clastfm->status == LASTFM_STATUS_OK);
@@ -263,6 +273,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
                                             gint            response_id,
                                             struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj;
 	PraghaTagger *tagger;
@@ -277,10 +288,12 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if(changed) {
+			backend = pragha_application_get_backend (cwin);
+
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
-			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+			if(pragha_backend_get_state (backend) != ST_STOPPED) {
+				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
 					toolbar = pragha_window_get_toolbar (cwin);
 
@@ -313,18 +326,21 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 static void
 edit_tags_corrected_by_lastfm(GtkButton *button, struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaMusicobject *tmobj, *nmobj;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
 	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
 	gint prechanged = 0;
 	GtkWidget *dialog;
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	/* Get all info of current track */
 
-	tmobj = pragha_musicobject_dup (pragha_backend_get_musicobject (cwin->backend));
+	tmobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
 
 	g_object_get(tmobj,
 	             "title", &otitle,
@@ -777,9 +793,12 @@ do_lastfm_get_similar_action (gpointer user_data)
 void
 lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->session_id == NULL) {
@@ -815,9 +834,12 @@ do_lastfm_current_song_love (gpointer data)
 void
 lastfm_track_love_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	CDEBUG(DBG_LASTFM, "Love Handler");
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -852,9 +874,12 @@ do_lastfm_current_song_unlove (gpointer data)
 void
 lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	CDEBUG(DBG_LASTFM, "Unlove Handler");
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -911,11 +936,13 @@ do_lastfm_scrob (gpointer data)
 gboolean
 lastfm_scrob_handler(gpointer data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return FALSE;
 
 	if(cwin->clastfm->status != LASTFM_STATUS_OK) {
@@ -933,6 +960,7 @@ static gboolean
 show_lastfm_sugest_corrrection_button (gpointer user_data)
 {
 	PraghaToolbar *toolbar;
+	PraghaBackend *backend;
 	gchar *cfile = NULL, *nfile = NULL;
 
 	struct con_win *cwin = user_data;
@@ -947,7 +975,8 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 		pragha_toolbar_add_extention_widget(toolbar, cwin->clastfm->ntag_lastfm_button);
 	}
 
-	g_object_get(pragha_backend_get_musicobject (cwin->backend),
+	backend = pragha_application_get_backend (cwin);
+	g_object_get(pragha_backend_get_musicobject (backend),
 	             "file", &cfile,
 	             NULL);
 
@@ -1046,12 +1075,15 @@ do_lastfm_now_playing (gpointer data)
 void
 lastfm_now_playing_handler (struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	gchar *title = NULL, *artist = NULL;
 	gint length;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
 
-	if(pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	if (!cwin->clastfm->has_user || !cwin->clastfm->has_pass)
@@ -1062,7 +1094,7 @@ lastfm_now_playing_handler (struct con_win *cwin)
 		return;
 	}
 
-	g_object_get(pragha_backend_get_musicobject (cwin->backend),
+	g_object_get(pragha_backend_get_musicobject (backend),
 	             "title", &title,
 	             "artist", &artist,
 	             "length", &length,
@@ -1113,10 +1145,14 @@ update_related_handler (gpointer data)
 static void
 backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
+	PraghaBackend *backend;
 	struct con_win *cwin = user_data;
 	gint file_type = 0;
+	enum player_state state = 0;
 
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+	backend = pragha_application_get_backend (cwin);
+
+	state = pragha_backend_get_state (backend);
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
 
@@ -1135,7 +1171,7 @@ backend_changed_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_dat
 		return;
 	}
 
-	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (cwin->backend));
+	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
 	if (file_type == FILE_HTTP)
 		return;
@@ -1228,7 +1264,8 @@ pragha_lastfm_connect_idle(gpointer data)
 			                                user, pass);
 
 			if (clastfm->status == LASTFM_STATUS_OK) {
-				g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (backend_changed_state_cb), cwin);
+				g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+				                  G_CALLBACK (backend_changed_state_cb), cwin);
 			}
 			else {
 				pragha_lastfm_no_connection_advice ();
@@ -1266,7 +1303,8 @@ pragha_lastfm_disconnect (PraghaLastfm *clastfm)
 		CDEBUG(DBG_INFO, "Disconnecting LASTFM");
 
 		if (clastfm->status == LASTFM_STATUS_OK)
-			g_signal_handlers_disconnect_by_func (clastfm->cwin->backend, backend_changed_state_cb, clastfm->cwin);
+			g_signal_handlers_disconnect_by_func (pragha_application_get_backend (clastfm->cwin),
+			                                      backend_changed_state_cb, clastfm->cwin);
 
 		pragha_menubar_remove_lastfm (clastfm);
 

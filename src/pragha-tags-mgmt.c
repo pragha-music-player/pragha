@@ -223,10 +223,11 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
+	PraghaMusicobject *tmobj, *current_mobj = NULL;
 	GList *rlist;
 	gboolean need_update;
-	PraghaMusicobject *tmobj;
 
 	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
 
@@ -242,10 +243,11 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 	/* If change current song, update gui and mpris. */
 	if(need_update) {
 		/* Update the public mobj */
-		PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+		backend = pragha_application_get_backend (cwin);
+		current_mobj = pragha_backend_get_musicobject (backend);
 		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
 
-		if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+		if(pragha_backend_get_state (backend) != ST_STOPPED) {
 			toolbar = pragha_window_get_toolbar (cwin);
 			pragha_toolbar_set_title (toolbar, current_mobj);
 			mpris_update_metadata_changed(cwin);
@@ -264,8 +266,9 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
                                            gint            response_id,
                                            struct con_win *cwin)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
-	PraghaMusicobject *nmobj;
+	PraghaMusicobject *current_mobj = NULL, *nmobj;
 	gint changed = 0;
 	GList *rlist = NULL;
 	gboolean need_update = FALSE;
@@ -305,10 +308,11 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 
 		if(need_update) {
 			/* Update the public mobj */
-			PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (cwin->backend);
+			backend = pragha_application_get_backend (cwin);
+			current_mobj = pragha_backend_get_musicobject (backend);
 			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
-			if(pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
+			if(pragha_backend_get_state (backend) != ST_STOPPED) {
 				toolbar = pragha_window_get_toolbar (cwin);
 				pragha_toolbar_set_title (toolbar, current_mobj);
 				mpris_update_metadata_changed(cwin);

@@ -63,12 +63,18 @@ static void dbus_repeat_handler(struct con_win *cwin)
 
 static void dbus_inc_vol_handler(struct con_win *cwin)
 {
-	pragha_backend_set_delta_volume (cwin->backend, +0.05);
+	PraghaBackend *backend;
+	backend = pragha_application_get_backend (cwin);
+
+	pragha_backend_set_delta_volume (backend, +0.05);
 }
 
 static void dbus_dec_vol_handler(struct con_win *cwin)
 {
-	pragha_backend_set_delta_volume (cwin->backend, -0.05);
+	PraghaBackend *backend;
+	backend = pragha_application_get_backend (cwin);
+
+	pragha_backend_set_delta_volume (backend, -0.05);
 }
 
 static void dbus_show_osd_handler(struct con_win *cwin)
@@ -110,6 +116,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 	const char *playing_str = "Playing";
 	const char *paused_str = "Paused";
 	const char *stopped_str = "Stopped";
+	PraghaBackend *backend;
 
 	reply_msg = dbus_message_new_method_return(msg);
 	if (!reply_msg) {
@@ -117,8 +124,11 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	if (pragha_backend_get_state (cwin->backend) != ST_STOPPED) {
-		PraghaMusicobject *mobj = pragha_backend_get_musicobject (cwin->backend);
+	backend = pragha_application_get_backend (cwin);
+
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
+
 		const char *file = pragha_musicobject_get_file (mobj);
 		const char *title = pragha_musicobject_get_title (mobj);
 		const char *artist = pragha_musicobject_get_artist (mobj);
@@ -133,7 +143,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 		gint samplerate = pragha_musicobject_get_samplerate (mobj);
 
 		dbus_message_append_args(reply_msg,
-			 DBUS_TYPE_STRING, (pragha_backend_get_state (cwin->backend) == ST_PLAYING) ? &playing_str : &paused_str,
+			 DBUS_TYPE_STRING, (pragha_backend_get_state (backend) == ST_PLAYING) ? &playing_str : &paused_str,
 			 DBUS_TYPE_STRING, &file,
 			 DBUS_TYPE_STRING, &title,
 			 DBUS_TYPE_STRING, &artist,

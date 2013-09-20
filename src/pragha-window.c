@@ -91,7 +91,7 @@ backend_error_dialog_response_cb (GtkDialog *dialog, gint response, struct con_w
 		case GTK_RESPONSE_ACCEPT:
 		case GTK_RESPONSE_DELETE_EVENT:
 		default: {
-			pragha_backend_stop (cwin->backend);
+			pragha_backend_stop (pragha_application_get_backend (cwin));
 			break;
 		}
 	}
@@ -105,7 +105,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 
 	struct con_win *cwin = user_data;
 
-	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (cwin->backend));
+	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 
 	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
 	                                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,

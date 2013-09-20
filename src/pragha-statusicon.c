@@ -109,16 +109,18 @@ status_get_tooltip_cb (GtkWidget        *widget,
                        GtkTooltip       *tooltip,
                        struct con_win   *cwin)
 {
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *mobj;
 	gchar *markup_text;
 
 	toolbar = pragha_window_get_toolbar (cwin);
 
-	if (pragha_backend_get_state (cwin->backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
-		mobj = pragha_backend_get_musicobject (cwin->backend);
+		mobj = pragha_backend_get_musicobject (backend);
 
 		markup_text = g_markup_printf_escaped ("<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s\n<b>%s</b>: %s / %s",
 		                                       _("Title"), pragha_musicobject_get_title (mobj),
@@ -140,15 +142,19 @@ status_get_tooltip_cb (GtkWidget        *widget,
 static void
 systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin)
 {
+	PraghaBackend *backend;
+
 	if (event->type != GDK_SCROLL)
 		return;
 
+	backend = pragha_application_get_backend (cwin);
+
 	switch (event->direction){
 		case GDK_SCROLL_UP:
-			pragha_backend_set_delta_volume (cwin->backend, +0.02);
+			pragha_backend_set_delta_volume (backend, +0.02);
 			break;
 		case GDK_SCROLL_DOWN:
-			pragha_backend_set_delta_volume (cwin->backend, -0.02);
+			pragha_backend_set_delta_volume (backend, -0.02);
 			break;
 		default:
 			break;
@@ -158,28 +164,32 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 static void
 systray_play_pause_action (GtkAction *action, struct con_win *cwin)
 {
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_play_pause_resume(cwin);
 }
 
 static void
 systray_stop_action (GtkAction *action, struct con_win *cwin)
 {
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_stop(cwin);
 }
 
 static void
 systray_prev_action (GtkAction *action, struct con_win *cwin)
 {
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_prev_track(cwin);
 }
 
 static void
 systray_next_action (GtkAction *action, struct con_win *cwin)
 {
-	if (pragha_backend_emitted_error (cwin->backend) == FALSE)
+	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_next_track(cwin);
 }
 
@@ -190,24 +200,25 @@ systray_quit (GtkAction *action, struct con_win *cwin)
 }
 
 static void
-update_systray_menu_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+update_systray_menu_cb (PraghaBackend *backend, GParamSpec *pspec, GtkUIManager *systray_menu)
 {
 	GtkAction *action;
-	struct con_win *cwin = user_data;
-	enum player_state state = pragha_backend_get_state (cwin->backend);
+	enum player_state state = 0;
+
+	state = pragha_backend_get_state (backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Prev");
+	action = gtk_ui_manager_get_action (systray_menu, "/popup/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Stop");
+	action = gtk_ui_manager_get_action (systray_menu, "/popup/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Next");
+	action = gtk_ui_manager_get_action (systray_menu, "/popup/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action(cwin->systray_menu, "/popup/Edit tags");
+	action = gtk_ui_manager_get_action (systray_menu, "/popup/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
@@ -270,5 +281,6 @@ void create_status_icon (struct con_win *cwin)
 	cwin->status_icon = status_icon;
 	cwin->systray_menu = systray_menu;
 
-	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_systray_menu_cb), cwin);
+	g_signal_connect (pragha_application_get_backend (cwin),
+	                  "notify::state", G_CALLBACK (update_systray_menu_cb), systray_menu);
 }

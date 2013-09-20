@@ -34,15 +34,18 @@ struct _con_gnome_media_keys {
 static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
                                         const gchar *key)
 {
+	PraghaBackend *backend;
     struct con_win *cwin = gmk->cwin;
 
-    if (pragha_backend_emitted_error (cwin->backend))
+	backend = pragha_application_get_backend (cwin);
+
+    if (pragha_backend_emitted_error (backend))
         return;
 
     if (g_strcmp0("Play", key) == 0)
         pragha_playback_play_pause_resume(cwin);
     else if (g_strcmp0("Pause", key) == 0)
-        pragha_backend_pause(cwin->backend);
+        pragha_backend_pause (backend);
     else if (g_strcmp0("Stop", key) == 0)
         pragha_playback_stop(cwin);
     else if (g_strcmp0("Previous", key) == 0)
