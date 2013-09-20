@@ -24,7 +24,7 @@ struct _PraghaSidebar {
 	GtkWidget *header;
 	GtkWidget *menu_button;
 	GtkWidget *close_button;
-	GtkWidget *label;
+	GtkWidget *title_box;
 	GtkMenu *popup_menu;
 };
 
@@ -33,26 +33,26 @@ struct _PraghaSidebar {
  */
 
 void
-pragha_sidebar_header_set_text(PraghaSidebar *sidebar, const gchar *text)
+pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
+                              GtkWidget     *widget,
+                              GtkWidget     *title,
+                              GtkMenu       *popup_menu)
 {
-	gtk_label_set_text (GTK_LABEL(sidebar->label), text);
-}
+	if (!widget || !title)
+		return;
 
-void
-pragha_sidebar_attach_menu(PraghaSidebar *sidebar, GtkMenu *popup_menu)
-{
-	gtk_menu_attach_to_widget(GTK_MENU(popup_menu), sidebar->menu_button, NULL);
+	gtk_notebook_insert_page (GTK_NOTEBOOK(sidebar->container),
+	                          widget,
+	                          NULL,
+	                          0);
 
-	sidebar->popup_menu = popup_menu;
-}
+	gtk_container_add (GTK_CONTAINER(sidebar->title_box), title);
 
-void
-pragha_sidebar_add_pane(PraghaSidebar *sidebar, GtkWidget *pane)
-{
-	gtk_notebook_insert_page(GTK_NOTEBOOK(sidebar->container),
-	                         pane,
-	                         NULL,
-	                         0);
+	if (popup_menu) {
+		gtk_menu_attach_to_widget(GTK_MENU(popup_menu), title, NULL);
+		sidebar->popup_menu = popup_menu;
+	}
+	gtk_widget_show_all (title);
 }
 
 GtkWidget *
@@ -147,19 +147,9 @@ pragha_sidebar_right_click_cb(GtkWidget *widget,
  * Construction:
  **/
 
-GtkWidget *
-praga_sidebar_label_new()
-{
-	GtkWidget *label;
-
-	label = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-
-	return label;
-}
 
 GtkWidget *
-praga_sidebar_menu_button_new(PraghaSidebar *sidebar)
+praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 {
 	GtkWidget *button, *hbox, *arrow;
 
@@ -170,16 +160,12 @@ praga_sidebar_menu_button_new(PraghaSidebar *sidebar)
 
 	arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
 
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   sidebar->label,
-			   TRUE,
-			   TRUE,
-			   0);
-	gtk_box_pack_start(GTK_BOX(hbox),
-			   arrow,
-			   FALSE,
-			   FALSE,
-			   0);
+	gtk_box_pack_start (GTK_BOX(hbox),
+	                    sidebar->title_box,
+	                    TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox),
+	                    arrow,
+	                    FALSE, FALSE, 0);
 
 	gtk_container_add (GTK_CONTAINER(button), hbox);
 
@@ -284,7 +270,7 @@ pragha_sidebar_new(void)
 
 	sidebar = g_slice_new0(PraghaSidebar);
 
-	sidebar->label = praga_sidebar_label_new();
+	sidebar->title_box = gtk_vbox_new(FALSE, 0);
 	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar);
 	sidebar->close_button = pragha_sidebar_close_button_new(sidebar);
 

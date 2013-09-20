@@ -96,11 +96,6 @@ typedef enum {
 
 GList * pragha_library_pane_get_mobj_list (PraghaLibraryPane *library);
 
-gboolean
-library_page_right_click_cb(GtkWidget *widget,
-                            GdkEventButton *event,
-                            struct con_win *cwin);
-
 void     simple_library_search_keyrelease         (struct con_win *cwin);
 gboolean simple_library_search_keyrelease_handler (GtkEntry *entry, PraghaLibraryPane *clibrary);
 gboolean simple_library_search_activate_handler   (GtkEntry *entry, PraghaLibraryPane *clibrary);
@@ -109,9 +104,12 @@ void     clear_library_search                     (PraghaLibraryPane *clibrary);
 gboolean pragha_library_need_update_view (PraghaPreferences *preferences, gint changed);
 gboolean pragha_library_need_update    (PraghaLibraryPane *clibrary, gint changed);
 void     library_pane_view_reload      (PraghaLibraryPane *clibrary);
-void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary, struct con_win *cwin);
+void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary);
 
-GtkWidget         *pragha_library_pane_get_widget (PraghaLibraryPane *librarypane);
+GtkWidget         *pragha_library_pane_get_widget     (PraghaLibraryPane *librarypane);
+GtkWidget         *pragha_library_pane_get_pane_title (PraghaLibraryPane *library);
+GtkMenu           *pragha_library_pane_get_popup_menu (PraghaLibraryPane *library);
+
 GtkUIManager      *pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary);
 
 PraghaLibraryPane *pragha_library_pane_new        (void);
