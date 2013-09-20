@@ -111,7 +111,7 @@ static void library_tree_replace_and_play                          (GtkAction *a
 static void pragha_library_pane_rename_item_action                 (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_remove_item_action                 (GtkAction *action, PraghaLibraryPane *library);
 static void pragha_library_pane_export_playlist_action             (GtkAction *action, PraghaLibraryPane *library);
-
+static void pragha_library_pane_edit_tags_action                   (GtkAction *action, PraghaLibraryPane *library);
 
 /*
  * Menus definitions
@@ -203,9 +203,9 @@ GtkActionEntry library_tree_context_aentries[] = {
 	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
 	 "", "Delete", G_CALLBACK(pragha_library_pane_remove_item_action)},
 	{"Export", GTK_STOCK_SAVE, N_("Export"),
-	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)}/*,
+	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
-	 "", "Edit tags", G_CALLBACK(library_tree_edit_tags)},
+	 "", "Edit tags", G_CALLBACK(pragha_library_pane_edit_tags_action)}/*,
 	{"Move to trash", "user-trash", N_("Move to _trash"),
 	 "", "Move to trash", G_CALLBACK(library_tree_delete_hdd)},
 	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
@@ -2297,18 +2297,21 @@ exit:
  */
 
 static void
-pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
-                                                gint            response_id,
-                                                struct con_win *cwin)
+pragha_library_pane_edit_tags_dialog_response (GtkWidget      *dialog,
+                                               gint            response_id,
+                                               PraghaLibraryPane *library)
 {
 	PraghaMusicobject *nmobj;
 	PraghaTagger *tagger;
 	GArray *loc_arr = NULL;
 	gint changed = 0, elem = 0, ielem;
+	GtkWidget  *toplevel;
+
+	toplevel = gtk_widget_get_toplevel (GTK_WIDGET(library));
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, cwin->mainwindow);
+		pragha_track_properties_dialog(nmobj, toplevel);
 		return;
 	}
 
@@ -2325,13 +2328,13 @@ pragha_library_panel_edit_tags_dialog_response (GtkWidget      *dialog,
 		if(loc_arr) {
 			if (changed & TAG_TNO_CHANGED) {
 				if (loc_arr->len > 1) {
-					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), cwin->mainwindow))
+					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), toplevel))
 						return;
 				}
 			}
 			if (changed & TAG_TITLE_CHANGED) {
 				if (loc_arr->len > 1) {
-					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), cwin->mainwindow))
+					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), toplevel))
 						return;
 				}
 			}
@@ -2354,7 +2357,8 @@ no_change:
 	gtk_widget_destroy (dialog);
 }
 
-void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
+static void
+pragha_library_pane_edit_tags_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkWidget *dialog;
 	enum node_type node_type = 0;
@@ -2371,7 +2375,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 
 	dialog = pragha_tags_dialog_new();
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cwin->clibrary->library_tree));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(library->library_tree));
 	sel = gtk_tree_selection_count_selected_rows(selection);
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
@@ -2389,7 +2393,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 			gtk_tree_model_get(model, &iter,
 					   L_LOCATION_ID, &location_id, -1);
 
-			omobj = new_musicobject_from_db(cwin->clibrary->cdbase, location_id);
+			omobj = new_musicobject_from_db(library->cdbase, location_id);
 		}
 		else {
 			omobj = pragha_musicobject_new();
@@ -2400,7 +2404,7 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 				pragha_musicobject_set_artist(omobj, node_data);
 				break;
 			case NODE_ALBUM:
-				if (pragha_preferences_get_sort_by_year(cwin->clibrary->preferences)) {
+				if (pragha_preferences_get_sort_by_year(library->preferences)) {
 					split_album = g_strsplit(node_data, " - ", 2);
 					pragha_musicobject_set_year(omobj, atoi (split_album[0]));
 					pragha_musicobject_set_album(omobj, split_album[1]);
@@ -2425,12 +2429,12 @@ void library_tree_edit_tags(GtkAction *action, struct con_win *cwin)
 	for (i=list; i != NULL; i = i->next) {
 		path = i->data;
 		/* Form an array of location ids */
-		get_location_ids(path, loc_arr, model, cwin->clibrary);
+		get_location_ids(path, loc_arr, model, library);
 	}
 	g_object_set_data (G_OBJECT (dialog), "local-array", loc_arr);
 
 	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_library_panel_edit_tags_dialog_response), cwin);
+	                  G_CALLBACK (pragha_library_pane_edit_tags_dialog_response), library);
 
 	gtk_widget_show (dialog);
 
