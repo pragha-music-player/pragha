@@ -34,6 +34,7 @@
 #include "pragha-playback.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
+#include "pragha-statusicon.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
 #include "pragha-dbus.h"
@@ -104,10 +105,28 @@ pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, struct 
  * Some public actions.
  */
 
+PraghaPreferences *
+pragha_application_get_preferences (struct con_win *cwin)
+{
+	return cwin->preferences;
+}
+
 PraghaBackend *
 pragha_application_get_backend (struct con_win *cwin)
 {
 	return cwin->backend;
+}
+
+GtkWidget *
+pragha_application_get_window (struct con_win *cwin)
+{
+	return cwin->mainwindow;
+}
+
+GdkPixbuf *
+pragha_application_get_pixbuf_app (struct con_win *cwin)
+{
+	return cwin->pixbuf_app;
 }
 
 PraghaPlaylist *
@@ -116,10 +135,58 @@ pragha_application_get_playlist (struct con_win *cwin)
 	return cwin->playlist;
 }
 
+PraghaLibraryPane *
+pragha_application_get_library (struct con_win *cwin)
+{
+	return cwin->clibrary;
+}
+
+PraghaToolbar *
+pragha_application_get_toolbar (struct con_win *cwin)
+{
+	return cwin->toolbar;
+}
+
+PraghaSidebar *
+pragha_application_get_sidebar (struct con_win *cwin)
+{
+	return cwin->sidebar;
+}
+
+PraghaStatusbar *
+pragha_application_get_statusbar (struct con_win *cwin)
+{
+	return cwin->statusbar;
+}
+
 GtkUIManager *
 pragha_application_get_menu_ui_manager (struct con_win *cwin)
 {
 	return cwin->menu_ui_manager;
+}
+
+GtkAction *
+pragha_application_get_menu_action (struct con_win *cwin, const gchar *path)
+{
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_action (ui_manager, path);
+}
+
+GtkWidget *
+pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path)
+{
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_widget (ui_manager, path);
+}
+
+GtkWidget *
+pragha_application_get_menubar (struct con_win *cwin)
+{
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+
+	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
 void
@@ -128,6 +195,47 @@ pragha_application_quit (struct con_win *cwin)
 	gtk_main_quit();
 
 	CDEBUG(DBG_INFO, "Halt.");
+}
+
+/*
+ *
+ */
+static void
+pragha_application_construct_window (struct con_win *cwin)
+{
+	/* Main window */
+
+	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+	cwin->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
+	if (!cwin->pixbuf_app)
+		g_warning("Unable to load pragha png");
+	else
+		gtk_window_set_icon (GTK_WINDOW(cwin->mainwindow),
+		                     cwin->pixbuf_app);
+	
+	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
+
+	/* Get all widgets instances */
+
+	cwin->menu_ui_manager = pragha_menubar_new ();
+	cwin->toolbar = pragha_toolbar_new ();
+	cwin->infobox = gtk_vbox_new (FALSE, 0);
+	cwin->pane = gtk_hpaned_new ();
+	cwin->sidebar = pragha_sidebar_new ();
+	cwin->clibrary = pragha_library_pane_new ();
+	cwin->playlist = pragha_playlist_new ();
+	cwin->statusbar = pragha_statusbar_get ();
+
+	pragha_menubar_connect_signals (cwin->menu_ui_manager, cwin);
+
+	/* Systray */
+
+	create_status_icon(cwin);
+
+	/* Contruct the window. */
+
+	pragha_window_new (cwin);
 }
 
 /* FIXME: Cleanup track refs */
@@ -242,13 +350,15 @@ pragha_application_new (gint argc, gchar *argv[])
 		return NULL;
 	}
 
-	/* Init the gui after bancked to sink volume. */
+	/*
+	 * Collect widgets and construct the window.
+	 */
 
-	pragha_window_new (cwin);
+	pragha_application_construct_window (cwin);
 
-	/* Toolbar Signals and Bindings. */
+	/* Connect Signals and Bindings. */
 
-	toolbar = pragha_window_get_toolbar (cwin);
+	toolbar = cwin->toolbar;
 	g_signal_connect_swapped (toolbar, "prev",
 	                          G_CALLBACK(pragha_playback_prev_track), cwin);
 	g_signal_connect_swapped (toolbar, "play",

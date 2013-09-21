@@ -251,7 +251,7 @@ void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed
 		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
 
 		if(pragha_backend_get_state (backend) != ST_STOPPED) {
-			toolbar = pragha_window_get_toolbar (cwin);
+			toolbar = pragha_application_get_toolbar (cwin);
 			pragha_toolbar_set_title (toolbar, current_mobj);
 			mpris_update_metadata_changed(cwin);
 		}
@@ -279,7 +279,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_window_get_mainwindow(cwin));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(cwin));
 		return;
 	}
 
@@ -295,13 +295,13 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 		if(rlist) {
 			if (changed & TAG_TNO_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), pragha_window_get_mainwindow(cwin)))
+					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), pragha_application_get_window(cwin)))
 						return;
 				}
 			}
 			if (changed & TAG_TITLE_CHANGED) {
 				if (g_list_length(rlist) > 1) {
-					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), pragha_window_get_mainwindow(cwin)))
+					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), pragha_application_get_window(cwin)))
 						return;
 				}
 			}
@@ -318,7 +318,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 			if(pragha_backend_get_state (backend) != ST_STOPPED) {
-				toolbar = pragha_window_get_toolbar (cwin);
+				toolbar = pragha_application_get_toolbar (cwin);
 				pragha_toolbar_set_title (toolbar, current_mobj);
 				mpris_update_metadata_changed(cwin);
 			}
