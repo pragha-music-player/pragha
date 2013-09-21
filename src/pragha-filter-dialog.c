@@ -294,6 +294,7 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 void
 pragha_filter_dialog (struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *dialog, *scrollwin, *vbox, *search_entry;
 	GtkWidget *filter_view = NULL;
 	GtkListStore *filter_store;
@@ -303,6 +304,8 @@ pragha_filter_dialog (struct con_win *cwin)
 
 	PraghaFilterDialog *fdialog;
 	fdialog = g_slice_new0(PraghaFilterDialog);
+
+	playlist = pragha_application_get_playlist (cwin);
 
 	/* Crete the filter entry */
 
@@ -331,7 +334,7 @@ pragha_filter_dialog (struct con_win *cwin)
 
 	/* Fill the filter tree view with current playlist */
 
-	pragha_filter_dialog_fill_model(filter_store, cwin->cplaylist);
+	pragha_filter_dialog_fill_model (filter_store, playlist);
 
 	filter_model = gtk_tree_model_filter_new(GTK_TREE_MODEL(filter_store), NULL);
 	g_object_unref(filter_store);
@@ -357,7 +360,7 @@ pragha_filter_dialog (struct con_win *cwin)
 	fdialog->filter_model = filter_model;
 	fdialog->filter_string = NULL;
 	fdialog->timeout_id = 0;
-	fdialog->cplaylist = cwin->cplaylist;
+	fdialog->cplaylist = playlist;
 	fdialog->preferences = pragha_preferences_get();
 
 	/* The search dialog */

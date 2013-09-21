@@ -128,7 +128,10 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 void
 gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin)
 {
-	update_current_playlist_view_new_track (cwin->cplaylist, backend);
+	PraghaPlaylist *playlist;
+	playlist = pragha_application_get_playlist (cwin);
+
+	update_current_playlist_view_new_track (playlist, backend);
 }
 
 static gboolean
@@ -344,10 +347,13 @@ pragha_window_free (struct con_win *cwin)
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	pragha_library_pane_init_view (cwin->clibrary);
 
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin->cplaylist);
+	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+		playlist = pragha_application_get_playlist (cwin);
+		init_current_playlist_view (playlist);
+	}
 
 	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -358,6 +364,7 @@ static void init_gui_state(struct con_win *cwin)
 #else
 static gboolean _init_gui_state(gpointer data)
 {
+	PraghaPlaylist *playlist;
 	struct con_win *cwin = data;
 
 	if (pragha_process_gtk_events ())
@@ -366,8 +373,10 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin->cplaylist);
+	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+		playlist = pragha_application_get_playlist (cwin);
+		init_current_playlist_view (playlist);
+	}
 
 	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -438,6 +447,7 @@ pragha_window_init (struct con_win *cwin)
 void
 pragha_window_new (struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
@@ -513,8 +523,10 @@ pragha_window_new (struct con_win *cwin)
 	cwin->pane = gtk_hpaned_new();
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new();
-	cwin->cplaylist = pragha_playlist_new ();
+	cwin->playlist = pragha_playlist_new ();
 	cwin->statusbar = pragha_statusbar_get();
+
+	playlist = pragha_application_get_playlist(cwin);
 
 	/* Systray */
 
@@ -526,7 +538,7 @@ pragha_window_new (struct con_win *cwin)
 
 	playlist_statusbar_vbox = gtk_vbox_new(FALSE, 2);
 
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), pragha_playlist_get_widget(cwin->cplaylist),
+	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(playlist),
 	                    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(cwin->statusbar),
 	                    FALSE, FALSE, 0);
@@ -579,7 +591,7 @@ pragha_window_new (struct con_win *cwin)
 	gtk_widget_show(cwin->pane);
 
 	gtk_widget_show(playlist_statusbar_vbox);
-	gtk_widget_show_all(pragha_playlist_get_widget(cwin->cplaylist));
+	gtk_widget_show_all (GTK_WIDGET(playlist));
 
 	/* Pack everyting on the main window. */
 

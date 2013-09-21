@@ -251,6 +251,7 @@ close_button_cb(GtkWidget *widget, gpointer data)
 static void
 add_button_cb(GtkWidget *widget, gpointer data)
 {
+	PraghaPlaylist *playlist;
 	GSList *files = NULL, *l;
 	gboolean add_recursively;
 	GList *mlist = NULL;
@@ -277,7 +278,9 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		}
 		g_slist_free_full(files, g_free);
 
-		pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list (playlist, mlist);
+		g_list_free (mlist);
 	}
 }
 
@@ -501,6 +504,7 @@ totem_open_location_set_from_clipboard (GtkWidget *open_location)
 
 void add_location_action(GtkAction *action, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *dialog;
 	GtkWidget *vbox, *hbox;
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
@@ -567,10 +571,11 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name);
 
-			pragha_playlist_append_single_song(cwin->cplaylist, mobj);
+			playlist = pragha_application_get_playlist (cwin);
+			pragha_playlist_append_single_song (playlist, mobj);
 
 			if (name) {
-				new_radio(cwin->cplaylist, uri, name);
+				new_radio (playlist, uri, name);
 				pragha_database_change_playlists_done(cwin->cdbase);
 			}
 		}
@@ -620,6 +625,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *nmobj, *bmobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
@@ -641,12 +647,14 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
 					toolbar = pragha_window_get_toolbar (cwin);
+					playlist = pragha_application_get_playlist (cwin);
+
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 					/* Update current song on playlist */
-					pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+					pragha_playlist_update_current_track(playlist, changed, nmobj);
 
 					/* Update current song on backend */
 					bmobj = g_object_ref(pragha_backend_get_musicobject(backend));
@@ -759,10 +767,14 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkTreePath *path = NULL;
-	path = current_playlist_get_actual(cwin->cplaylist);
 
-	jump_to_path_on_current_playlist (cwin->cplaylist, path, TRUE);
+	playlist = pragha_application_get_playlist (cwin);
+
+	/* TODO: Mmm.. it can be merged in e singe function.*/
+	path = current_playlist_get_actual (playlist);
+	jump_to_path_on_current_playlist (playlist, path, TRUE);
 
 	gtk_tree_path_free(path);
 }
@@ -794,6 +806,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 
 void add_libary_action(GtkAction *action, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GList *list = NULL;
 	PraghaMusicobject *mobj;
 
@@ -823,28 +836,39 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 
 	remove_watch_cursor (pragha_window_get_mainwindow(cwin));
 
-	list = g_list_reverse(list);
-	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-
-	g_list_free(list);
+	if (list) {
+		list = g_list_reverse(list);
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list (playlist, list);
+		g_list_free(list);
+	}
 }
 
 static void
 pragha_menubar_remove_playlist_action (GtkAction *action, struct con_win *cwin)
 {
-	pragha_playlist_remove_selection (cwin->cplaylist);
+	PraghaPlaylist *playlist;
+
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_remove_selection (playlist);
 }
 
 static void
 pragha_menubar_crop_playlist_action (GtkAction *action, struct con_win *cwin)
 {
-	pragha_playlist_crop_selection (cwin->cplaylist);
+	PraghaPlaylist *playlist;
+
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_crop_selection (playlist);
 }
 
 static void
 pragha_menubar_clear_playlist_action (GtkAction *action, struct con_win *cwin)
 {
-	pragha_playlist_remove_all (cwin->cplaylist);
+	PraghaPlaylist *playlist;
+
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_remove_all (playlist);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */

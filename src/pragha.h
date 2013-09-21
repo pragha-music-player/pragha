@@ -97,7 +97,7 @@ struct con_win {
 	GtkWidget         *pane;
 	PraghaSidebar     *sidebar;
 	PraghaLibraryPane *clibrary;
-	PraghaPlaylist    *cplaylist;
+	PraghaPlaylist    *playlist;
 	PraghaStatusbar   *statusbar;
 
 	GtkStatusIcon     *status_icon;
@@ -128,7 +128,9 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaBackend *pragha_application_get_backend         (struct con_win *cwin);
+PraghaBackend  *pragha_application_get_backend         (struct con_win *cwin);
+PraghaPlaylist *pragha_application_get_playlist        (struct con_win *cwin);
+
 GtkUIManager  *pragha_application_get_menu_ui_manager (struct con_win *cwin);
 
 /* Info bar import music */
