@@ -703,7 +703,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 void quit_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_application_quit (cwin);
+	pragha_application_quit ();
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
@@ -802,47 +802,7 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 	pragha_scanner_update_library(cwin->scanner);
 }
 
-/* Handler for 'Add All' action in the Tools menu */
-
-void add_libary_action(GtkAction *action, struct con_win *cwin)
-{
-	PraghaPlaylist *playlist;
-	GList *list = NULL;
-	PraghaMusicobject *mobj;
-
-	/* Query and insert entries */
-
-	set_watch_cursor (pragha_application_get_window(cwin));
-
-	const gchar *sql = "SELECT id FROM LOCATION";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
-
-	while (pragha_prepared_statement_step (statement)) {
-		gint location_id = pragha_prepared_statement_get_int (statement, 0);
-		mobj = new_musicobject_from_db (cwin->cdbase, location_id);
-
-		if (!mobj)
-			g_warning ("Unable to retrieve details for"
-				   " location_id : %d",
-				   location_id);
-		else {
-			list = g_list_prepend (list, mobj);
-		}
-
-		pragha_process_gtk_events ();
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	remove_watch_cursor (pragha_application_get_window(cwin));
-
-	if (list) {
-		list = g_list_reverse(list);
-		playlist = pragha_application_get_playlist (cwin);
-		pragha_playlist_append_mobj_list (playlist, list);
-		g_list_free(list);
-	}
-}
+/* Handler for remove, crop and clear action in the Tools menu */
 
 static void
 pragha_menubar_remove_playlist_action (GtkAction *action, struct con_win *cwin)

@@ -100,6 +100,13 @@ struct _PraghaPlaylist {
 G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 
 /*
+ * Prototypes
+ */
+
+static void pragha_playlist_queue_handler   (PraghaPlaylist *cplaylist);
+static void pragha_playlist_dequeue_handler (PraghaPlaylist *cplaylist);
+
+/*
  * playlist_context_menu calbacks
  */
 static void queue_current_playlist        (GtkAction *action, PraghaPlaylist *playlist);
@@ -176,6 +183,40 @@ static GtkToggleActionEntry playlist_context_toggles_entries[] = {
 	 "", "Lateral panel", NULL,
 	TRUE}
 };
+
+/*
+ * Menu action callbacks.
+ */
+
+static void
+queue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+{
+	pragha_playlist_queue_handler (playlist);
+}
+
+static void
+dequeue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+{
+	pragha_playlist_dequeue_handler (playlist);
+}
+
+static void
+remove_from_playlist (GtkAction *action, PraghaPlaylist *playlist)
+{
+	pragha_playlist_remove_selection (playlist);
+}
+
+static void
+crop_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+{
+	pragha_playlist_crop_selection (playlist);
+}
+
+static void
+current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
+{
+	pragha_playlist_remove_all (playlist);
+}
 
 /* Update playback state pixbuf */
 
@@ -1182,7 +1223,8 @@ GtkTreePath* current_playlist_get_actual(PraghaPlaylist *cplaylist)
 
 /* Dequeue selected rows from current playlist */
 
-void pragha_playlist_dequeue_handler(PraghaPlaylist *cplaylist)
+static void
+pragha_playlist_dequeue_handler (PraghaPlaylist *cplaylist)
 {
 	GtkTreeSelection *selection;
 	GList *list;
@@ -1196,16 +1238,10 @@ void pragha_playlist_dequeue_handler(PraghaPlaylist *cplaylist)
 }
 
 
-/* Dequeue selected rows from current playlist */
-
-void dequeue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
-{
-	pragha_playlist_dequeue_handler (playlist);
-}
-
 /* Queue selected rows from current playlist */
 
-void pragha_playlist_queue_handler(PraghaPlaylist *cplaylist)
+static void
+pragha_playlist_queue_handler (PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1233,13 +1269,6 @@ void pragha_playlist_queue_handler(PraghaPlaylist *cplaylist)
 	}
 	requeue_track_refs(cplaylist);
 	g_list_free (list);
-}
-
-/* Queue selected rows from current playlist */
-
-void queue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
-{
-	pragha_playlist_queue_handler (playlist);
 }
 
 /* Toglle queue state of selection on current playlist. */
@@ -1352,11 +1381,6 @@ pragha_playlist_remove_selection (PraghaPlaylist *playlist)
 	pragha_playlist_update_statusbar_playtime (playlist);
 }
 
-static void remove_from_playlist (GtkAction *action, PraghaPlaylist *playlist)
-{
-	pragha_playlist_remove_selection (playlist);
-}
-
 /* Crop selected rows from current playlist */
 
 void
@@ -1431,11 +1455,6 @@ pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 	pragha_playlist_update_statusbar_playtime (playlist);
 
 	g_slist_free(to_delete);
-}
-
-void crop_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
-{
-	pragha_playlist_crop_selection (playlist);
 }
 
 /* Handle key press on current playlist view.
@@ -1528,12 +1547,6 @@ pragha_playlist_remove_all (PraghaPlaylist *playlist)
 	playlist->unplayed_tracks = 0;
 
 	pragha_playlist_update_statusbar_playtime (playlist);
-}
-
-void
-current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
-{
-	pragha_playlist_remove_all (playlist);
 }
 
 /* Update a list of references in the current playlist */
