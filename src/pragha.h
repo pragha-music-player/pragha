@@ -128,10 +128,21 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaBackend  *pragha_application_get_backend         (struct con_win *cwin);
-PraghaPlaylist *pragha_application_get_playlist        (struct con_win *cwin);
+PraghaPreferences *pragha_application_get_preferences     (struct con_win *cwin);
+PraghaBackend     *pragha_application_get_backend         (struct con_win *cwin);
+GtkWidget         *pragha_application_get_window          (struct con_win *cwin);
+GdkPixbuf         *pragha_application_get_pixbuf_app      (struct con_win *cwin);
+PraghaPlaylist    *pragha_application_get_playlist        (struct con_win *cwin);
+PraghaLibraryPane *pragha_application_get_library         (struct con_win *cwin);
+PraghaToolbar     *pragha_application_get_toolbar         (struct con_win *cwin);
+PraghaSidebar     *pragha_application_get_sidebar         (struct con_win *cwin);
+PraghaStatusbar   *pragha_application_get_statusbar       (struct con_win *cwin);
 
-GtkUIManager  *pragha_application_get_menu_ui_manager (struct con_win *cwin);
+
+GtkUIManager      *pragha_application_get_menu_ui_manager    (struct con_win *cwin);
+GtkAction         *pragha_application_get_menu_action        (struct con_win *cwin, const gchar *path);
+GtkWidget         *pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path);
+GtkWidget         *pragha_application_get_menubar            (struct con_win *cwin);
 
 /* Info bar import music */
 

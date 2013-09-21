@@ -285,7 +285,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_window_get_mainwindow(cwin));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(cwin));
 		return;
 	}
 
@@ -299,7 +299,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 			if(pragha_backend_get_state (backend) != ST_STOPPED) {
 				current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
-					toolbar = pragha_window_get_toolbar (cwin);
+					toolbar = pragha_application_get_toolbar (cwin);
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag(current_mobj, changed, nmobj);
@@ -533,7 +533,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 		g_list_free(list);
 	}
 	else {
-		remove_watch_cursor (pragha_window_get_mainwindow(cwin));
+		remove_watch_cursor (pragha_application_get_window(cwin));
 	}
 
 	switch(data->query_type) {
@@ -635,7 +635,7 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *c
 		return;
 	}
 
-	set_watch_cursor (pragha_window_get_mainwindow(cwin));
+	set_watch_cursor (pragha_application_get_window(cwin));
 	pragha_async_launch(do_lastfm_get_similar_current_playlist_action,
 			    append_mobj_list_current_playlist_idle,
 			    cwin);
@@ -717,7 +717,7 @@ lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 	GtkFileFilter *media_filter;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
-				      GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
+				      GTK_WINDOW(pragha_application_get_window(cwin)),
 				      GTK_FILE_CHOOSER_ACTION_OPEN,
 				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -780,7 +780,7 @@ lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	set_watch_cursor (pragha_window_get_mainwindow(cwin));
+	set_watch_cursor (pragha_application_get_window(cwin));
 	pragha_async_launch(do_lastfm_add_favorites_action,
 			    append_mobj_list_current_playlist_idle,
 			    cwin);
@@ -821,7 +821,7 @@ lastfm_get_similar_action (GtkAction *action, struct con_win *cwin)
 		return;
 	}
 
-	set_watch_cursor (pragha_window_get_mainwindow(cwin));
+	set_watch_cursor (pragha_application_get_window(cwin));
 	pragha_async_launch(do_lastfm_get_similar_action,
 			    append_mobj_list_current_playlist_idle,
 			    pragha_lastfm_async_data_new (cwin));
@@ -982,7 +982,7 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 
 	/* Hack to safe!.*/
 	if(!cwin->clastfm->ntag_lastfm_button) {
-		toolbar = pragha_window_get_toolbar (cwin);
+		toolbar = pragha_application_get_toolbar (cwin);
 
 		cwin->clastfm->ntag_lastfm_button =
 			pragha_lastfm_tag_suggestion_button_new(cwin);

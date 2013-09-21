@@ -30,25 +30,17 @@ gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, struct 
 void     pragha_destroy_window      (GtkWidget *widget, struct con_win *cwin);
 void     pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity);
 
-void gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
-void gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
+void     gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
+void     gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
 
-void       pragha_window_unfullscreen          (GObject *object, struct con_win *cwin);
+void     pragha_window_unfullscreen          (GObject *object, struct con_win *cwin);
 
-void       pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget *widget);
+void     pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget *widget);
 
-gint           pragha_menubar_append_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, const gchar *menu_xml);
-void           pragha_menubar_remove_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, gint merge_id);
+gint     pragha_menubar_append_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, const gchar *menu_xml);
+void     pragha_menubar_remove_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, gint merge_id);
 
-GtkAction     *pragha_window_get_menu_action        (struct con_win *cwin, const gchar *path);
-GtkWidget     *pragha_window_get_menu_action_widget (struct con_win *cwin, const gchar *path);
-
-GtkWidget     *pragha_window_get_menubar       (struct con_win *cwin);
-GtkWidget     *pragha_window_get_mainwindow    (struct con_win *cwin);
-PraghaToolbar *pragha_window_get_toolbar       (struct con_win *cwin);
-GdkPixbuf     *pragha_window_get_pixbuf_app    (struct con_win *cwin);
-
-void          pragha_window_free (struct con_win *cwin);
-void          pragha_window_new  (struct con_win *cwin);
+void     pragha_window_free (struct con_win *cwin);
+void     pragha_window_new  (struct con_win *cwin);
 
 #endif /* PRAGHA_WINDOW_H */

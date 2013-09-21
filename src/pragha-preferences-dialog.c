@@ -1160,7 +1160,7 @@ pragha_preferences_dialog_show (struct con_win *cwin)
 	/* The main preferences dialog */
 
 	dialog->widget = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
-	                                             GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
+	                                             GTK_WINDOW(pragha_application_get_window(cwin)),
 	                                             GTK_DIALOG_MODAL,
 	                                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 	                                             GTK_STOCK_OK, GTK_RESPONSE_OK,

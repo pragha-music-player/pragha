@@ -1378,7 +1378,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 
 	submenu = gtk_menu_new ();
 
-	place = pragha_window_get_menu_action_widget (cwin, "/Menubar/PlaylistMenu/Save playlist");
+	place = pragha_application_get_menu_action_widget (cwin, "/Menubar/PlaylistMenu/Save playlist");
 
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
 
@@ -1387,7 +1387,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
+	gtk_window_add_accel_group(GTK_WINDOW(pragha_application_get_window(cwin)), accel_group);
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
 	gtk_accel_map_add_entry ("<SubMenu>/New playlist", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK);
 	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/New playlist");
@@ -1428,7 +1428,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 
 	submenu = gtk_menu_new ();
 
-	place = pragha_window_get_menu_action_widget (cwin, "/Menubar/PlaylistMenu/Save selection");
+	place = pragha_application_get_menu_action_widget (cwin, "/Menubar/PlaylistMenu/Save selection");
 
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
 
@@ -1437,7 +1437,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
+	gtk_window_add_accel_group(GTK_WINDOW(pragha_application_get_window(cwin)), accel_group);
 	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
 	gtk_accel_map_add_entry ("<SubMenu>/Save selection", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK+GDK_SHIFT_MASK);
 	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/Save selection");

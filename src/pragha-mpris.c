@@ -180,7 +180,7 @@ get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
 /* org.mpris.MediaPlayer2 */
 static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	gtk_window_present(GTK_WINDOW(pragha_window_get_mainwindow(cwin)));
+	gtk_window_present(GTK_WINDOW(pragha_application_get_window(cwin)));
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -560,7 +560,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
 		handle_get_metadata(pragha_backend_get_musicobject(backend), &b);
 
-		toolbar = pragha_window_get_toolbar (cwin);
+		toolbar = pragha_application_get_toolbar (cwin);
 		albumart = pragha_toolbar_get_album_art (toolbar);
 
 		arturl = pragha_album_art_get_path(albumart);

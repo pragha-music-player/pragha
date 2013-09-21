@@ -114,7 +114,7 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	PraghaMusicobject *mobj;
 	gchar *markup_text;
 
-	toolbar = pragha_window_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (cwin);
 
 	backend = pragha_application_get_backend (cwin);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
@@ -256,7 +256,7 @@ void create_status_icon (struct con_win *cwin)
 	GtkUIManager *systray_menu;
 	GdkPixbuf *pixbuf_app;
 
-	pixbuf_app = pragha_window_get_pixbuf_app(cwin);
+	pixbuf_app = pragha_application_get_pixbuf_app(cwin);
 	if (pixbuf_app)
 		status_icon = gtk_status_icon_new_from_pixbuf(pixbuf_app);
 	else
