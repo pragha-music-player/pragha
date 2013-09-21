@@ -513,7 +513,7 @@ pragha_window_new (struct con_win *cwin)
 	cwin->pane = gtk_hpaned_new();
 	cwin->sidebar = pragha_sidebar_new();
 	cwin->clibrary = pragha_library_pane_new();
-	cwin->cplaylist = pragha_playlist_new(cwin);
+	cwin->cplaylist = pragha_playlist_new ();
 	cwin->statusbar = pragha_statusbar_get();
 
 	/* Systray */

@@ -138,7 +138,6 @@ pragha_application_free (struct con_win *cwin)
 #ifdef HAVE_LIBCLASTFM
 	pragha_lastfm_free (cwin->clastfm);
 #endif
-	pragha_playlist_free(cwin->cplaylist);
 	pragha_sidebar_free(cwin->sidebar);
 	mpris_free (cwin->cmpris2);
 	g_object_unref (cwin->backend);
