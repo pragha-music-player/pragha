@@ -20,13 +20,25 @@
 #define PRAGHA_PLAYLIST_H
 
 #include <gtk/gtk.h>
+#include <glib-object.h>
 #include "pragha-backend.h"
 #include "pragha-database.h"
 
 /* pragha.h */
 struct con_win;
 
+#define PRAGHA_TYPE_PLAYLIST                  (pragha_playlist_get_type ())
+#define PRAGHA_PLAYLIST(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylist))
+#define PRAGHA_IS_PLAYLIST(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_PLAYLIST))
+#define PRAGHA_PLAYLIST_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_PLAYLIST, PraghaPlaylistClass))
+#define PRAGHA_IS_PLAYLIST_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_PLAYLIST))
+#define PRAGHA_PLAYLIST_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylistClass))
+
 typedef struct _PraghaPlaylist PraghaPlaylist;
+
+typedef struct {
+	GtkScrolledWindowClass __parent__;
+} PraghaPlaylistClass;
 
 /* Columns in current playlist view */
 
@@ -183,8 +195,7 @@ void            pragha_playlist_remove_plugin_action (PraghaPlaylist *cplaylist,
 
 PraghaDatabase *pragha_playlist_get_database(PraghaPlaylist* cplaylist);
 
-void            pragha_playlist_free (PraghaPlaylist *cplaylist);
-PraghaPlaylist *pragha_playlist_new  (struct con_win *cwin);
+PraghaPlaylist *pragha_playlist_new  (void);
 
 
 #endif /* PRAGHA_PLAYLIST_H */
