@@ -190,7 +190,7 @@ pragha_application_get_menubar (struct con_win *cwin)
 }
 
 void
-pragha_application_quit (struct con_win *cwin)
+pragha_application_quit (void)
 {
 	gtk_main_quit();
 

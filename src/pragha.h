@@ -156,6 +156,6 @@ gint init_options(struct con_win *cwin, int argc, char **argv);
 
 /* Close */
 
-void pragha_application_quit (struct con_win *cwin);
+void pragha_application_quit (void);
 
 #endif /* PRAGHA_H */

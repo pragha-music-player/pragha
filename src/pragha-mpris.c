@@ -186,7 +186,7 @@ static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* param
 
 static void mpris_Root_Quit (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	pragha_application_quit (cwin);
+	pragha_application_quit ();
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
