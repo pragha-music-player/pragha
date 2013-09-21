@@ -99,6 +99,15 @@ struct _PraghaPlaylist {
 
 G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 
+/*
+ * playlist_context_menu calbacks
+ */
+static void queue_current_playlist        (GtkAction *action, PraghaPlaylist *playlist);
+static void dequeue_current_playlist      (GtkAction *action, PraghaPlaylist *playlist);
+static void remove_from_playlist          (GtkAction *action, PraghaPlaylist *playlist);
+static void crop_current_playlist         (GtkAction *action, PraghaPlaylist *playlist);
+static void current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist);
+
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\
 	<menuitem action=\"Queue track\"/>					\
@@ -142,7 +151,7 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
 	 "", "Remove no telected tracks of playlist", G_CALLBACK(crop_current_playlist)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
-	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
+	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)}/*,
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
@@ -159,7 +168,7 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
 	"", "Add all the library", G_CALLBACK(add_libary_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
-	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}
+	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)}*/
 };
 
 static GtkToggleActionEntry playlist_context_toggles_entries[] = {
@@ -1189,9 +1198,9 @@ void pragha_playlist_dequeue_handler(PraghaPlaylist *cplaylist)
 
 /* Dequeue selected rows from current playlist */
 
-void dequeue_current_playlist(GtkAction *action, struct con_win *cwin)
+void dequeue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
 {
-	pragha_playlist_dequeue_handler(cwin->cplaylist);
+	pragha_playlist_dequeue_handler (playlist);
 }
 
 /* Queue selected rows from current playlist */
@@ -1228,9 +1237,9 @@ void pragha_playlist_queue_handler(PraghaPlaylist *cplaylist)
 
 /* Queue selected rows from current playlist */
 
-void queue_current_playlist(GtkAction *action, struct con_win *cwin)
+void queue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
 {
-	pragha_playlist_queue_handler(cwin->cplaylist);
+	pragha_playlist_queue_handler (playlist);
 }
 
 /* Toglle queue state of selection on current playlist. */
@@ -1269,7 +1278,7 @@ void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist)
 /* Remove selected rows from current playlist */
 
 void
-pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
+pragha_playlist_remove_selection (PraghaPlaylist *playlist)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1280,15 +1289,15 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 	PraghaMusicobject *mobj = NULL;
 	gboolean played = FALSE;
 
-	set_watch_cursor (GTK_WIDGET(cplaylist));
+	set_watch_cursor (GTK_WIDGET(playlist));
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(playlist->view));
 	list = gtk_tree_selection_get_selected_rows(selection, &model);
 
 	if (list) {
 		/* Select the next row to the last selected */
 
-		gtk_tree_view_get_cursor(GTK_TREE_VIEW(cplaylist->view), &next, NULL);
+		gtk_tree_view_get_cursor (GTK_TREE_VIEW(playlist->view), &next, NULL);
 		do {
 			if(gtk_tree_selection_path_is_selected(selection, next) == FALSE)
 				break;
@@ -1296,7 +1305,7 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 			gtk_tree_path_next(next);
 		}
 		while(next != NULL);
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW(cplaylist->view), next, NULL, FALSE);
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW(playlist->view), next, NULL, FALSE);
 		gtk_tree_path_free (next);
 
 		/* Get references from the paths and store them in the 'data'
@@ -1316,18 +1325,18 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 		for (i=list; i != NULL; i = i->next) {
 			ref = i->data;
 			path = gtk_tree_row_reference_get_path(ref);
-			delete_rand_track_refs(path, cplaylist);
-			delete_queue_track_refs(path, cplaylist);
-			test_clear_curr_seq_ref(path, cplaylist);
+			delete_rand_track_refs (path, playlist);
+			delete_queue_track_refs (path, playlist);
+			test_clear_curr_seq_ref (path, playlist);
 
 			if (gtk_tree_model_get_iter(model, &iter, path)) {
 				gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
 				g_object_unref(mobj);
 				gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
 				gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
-				cplaylist->no_tracks--;
+				playlist->no_tracks--;
 				if (!played)
-					cplaylist->unplayed_tracks--;
+					playlist->unplayed_tracks--;
 			}
 			gtk_tree_path_free(path);
 			gtk_tree_row_reference_free(ref);
@@ -1336,24 +1345,23 @@ pragha_playlist_remove_selection(PraghaPlaylist *cplaylist)
 		g_list_free(list);
 	}
 
-	requeue_track_refs (cplaylist);
+	requeue_track_refs (playlist);
 
-	remove_watch_cursor (GTK_WIDGET(cplaylist));
+	remove_watch_cursor (GTK_WIDGET(playlist));
 
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	pragha_playlist_update_statusbar_playtime (playlist);
 }
 
-void remove_from_playlist(GtkAction *action, struct con_win *cwin)
+static void remove_from_playlist (GtkAction *action, PraghaPlaylist *playlist)
 {
-	pragha_playlist_remove_selection(cwin->cplaylist);
+	pragha_playlist_remove_selection (playlist);
 }
 
 /* Crop selected rows from current playlist */
 
 void
-pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
+pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 {
-	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	PraghaMusicobject *mobj = NULL;
 	gboolean ret, played = FALSE;
@@ -1362,9 +1370,9 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 	GtkTreePath *path;
 	GSList *to_delete = NULL, *i = NULL;
 
-	set_watch_cursor (GTK_WIDGET(cplaylist));
+	set_watch_cursor (GTK_WIDGET(playlist));
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(playlist->view));
 
 	/* At least one row must be selected */
 
@@ -1373,38 +1381,38 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 
 	/* Get a reference to all the nodes that are _not_ selected */
 
-	ret = gtk_tree_model_get_iter_first(model, &iter);
+	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
 
 	while (ret) {
 		if (gtk_tree_selection_iter_is_selected(selection, &iter) == FALSE) {
-			path = gtk_tree_model_get_path(model, &iter);
-			ref = gtk_tree_row_reference_new(model, path);
+			path = gtk_tree_model_get_path (playlist->model, &iter);
+			ref = gtk_tree_row_reference_new (playlist->model, path);
 			to_delete = g_slist_prepend(to_delete, ref);
 			gtk_tree_path_free(path);
 		}
-		ret = gtk_tree_model_iter_next(model, &iter);
+		ret = gtk_tree_model_iter_next (playlist->model, &iter);
 	}
 
 	/* Delete the referenced nodes */
 
-	pragha_playlist_set_changing(cplaylist, TRUE);
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), NULL);
+	pragha_playlist_set_changing (playlist, TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(playlist->view), NULL);
 
 	for (i=to_delete; i != NULL; i = i->next) {
 		ref = i->data;
 		path = gtk_tree_row_reference_get_path(ref);
-		delete_rand_track_refs(path, cplaylist);
-		delete_queue_track_refs(path, cplaylist);
-		test_clear_curr_seq_ref(path, cplaylist);
+		delete_rand_track_refs (path, playlist);
+		delete_queue_track_refs (path, playlist);
+		test_clear_curr_seq_ref (path, playlist);
 
-		if (gtk_tree_model_get_iter(model, &iter, path)) {
-			gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+		if (gtk_tree_model_get_iter (playlist->model, &iter, path)) {
+			gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
 			g_object_unref(mobj);
-			gtk_tree_model_get(model, &iter, P_PLAYED, &played, -1);
-			gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
-			cplaylist->no_tracks--;
+			gtk_tree_model_get (playlist->model, &iter, P_PLAYED, &played, -1);
+			gtk_list_store_remove (GTK_LIST_STORE(playlist->model), &iter);
+			playlist->no_tracks--;
 			if (!played)
-				cplaylist->unplayed_tracks--;
+				playlist->unplayed_tracks--;
 
 			/* Have to give control to GTK periodically ... */
 			if (pragha_process_gtk_events ())
@@ -1414,20 +1422,20 @@ pragha_playlist_crop_selection(PraghaPlaylist *cplaylist)
 		gtk_tree_row_reference_free(ref);
 	}
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cplaylist->view), model);
-	pragha_playlist_set_changing(cplaylist, FALSE);
+	gtk_tree_view_set_model (GTK_TREE_VIEW(playlist->view), playlist->model);
+	pragha_playlist_set_changing (playlist, FALSE);
 
-	requeue_track_refs (cplaylist);
+	requeue_track_refs (playlist);
 
-	remove_watch_cursor (GTK_WIDGET(cplaylist));
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	remove_watch_cursor (GTK_WIDGET(playlist));
+	pragha_playlist_update_statusbar_playtime (playlist);
 
 	g_slist_free(to_delete);
 }
 
-void crop_current_playlist(GtkAction *action, struct con_win *cwin)
+void crop_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
 {
-	pragha_playlist_crop_selection(cwin->cplaylist);
+	pragha_playlist_crop_selection (playlist);
 }
 
 /* Handle key press on current playlist view.
@@ -1492,41 +1500,40 @@ current_playlist_key_press (GtkWidget *win, GdkEventKey *event, PraghaPlaylist *
 }
 
 void
-pragha_playlist_remove_all (PraghaPlaylist *cplaylist)
+pragha_playlist_remove_all (PraghaPlaylist *playlist)
 {
-	GtkTreeModel *model = cplaylist->model;
 	GtkTreeIter iter;
 	PraghaMusicobject *mobj = NULL;
 	gboolean ret;
 
-	set_watch_cursor (GTK_WIDGET(cplaylist));
+	set_watch_cursor (GTK_WIDGET(playlist));
 
-	clear_rand_track_refs(cplaylist);
-	clear_queue_track_refs(cplaylist);
-	clear_curr_seq_ref(cplaylist);
+	clear_rand_track_refs(playlist);
+	clear_queue_track_refs(playlist);
+	clear_curr_seq_ref(playlist);
 
-	ret = gtk_tree_model_get_iter_first(model, &iter);
+	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
 
 	while (ret) {
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+		gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
 		g_object_unref(mobj);
-		ret = gtk_tree_model_iter_next(model, &iter);
+		ret = gtk_tree_model_iter_next (playlist->model, &iter);
 	}
 
-	gtk_list_store_clear(GTK_LIST_STORE(model));
+	gtk_list_store_clear (GTK_LIST_STORE(playlist->model));
 
-	remove_watch_cursor (GTK_WIDGET(cplaylist));
+	remove_watch_cursor (GTK_WIDGET(playlist));
 
-	cplaylist->no_tracks = 0;
-	cplaylist->unplayed_tracks = 0;
+	playlist->no_tracks = 0;
+	playlist->unplayed_tracks = 0;
 
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	pragha_playlist_update_statusbar_playtime (playlist);
 }
 
 void
-current_playlist_clear_action (GtkAction *action, struct con_win *cwin)
+current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
 {
-	pragha_playlist_remove_all (cwin->cplaylist);
+	pragha_playlist_remove_all (playlist);
 }
 
 /* Update a list of references in the current playlist */
@@ -3207,8 +3214,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 }
 
 static GtkUIManager*
-pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
-                                 struct con_win *cwin)
+pragha_playlist_context_menu_new (PraghaPlaylist *playlist)
 {
 	GtkUIManager *context_menu = NULL;
 	GtkActionGroup *context_actions;
@@ -3226,15 +3232,15 @@ pragha_playlist_context_menu_new(PraghaPlaylist *cplaylist,
 	gtk_action_group_add_actions(context_actions,
 	                             playlist_context_aentries,
 	                             G_N_ELEMENTS(playlist_context_aentries),
-	                             (gpointer)cwin);
+	                             (gpointer) playlist);
 	gtk_action_group_add_toggle_actions (context_actions,
 	                                     playlist_context_toggles_entries,
 	                                     G_N_ELEMENTS(playlist_context_toggles_entries),
-	                                     cwin);
+	                                     (gpointer) playlist);
 	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
 
 	GtkAction *action_lateral = gtk_ui_manager_get_action(context_menu, "/EmptyPlaylistPopup/Lateral panel");
-	g_object_bind_property (cplaylist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
+	g_object_bind_property (playlist->preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	g_object_unref (context_actions);
 
@@ -4097,7 +4103,7 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	/* Create menus */
 
 	playlist->header_context_menu = create_header_context_menu (playlist);
-	playlist->playlist_context_menu = pragha_playlist_context_menu_new (playlist, NULL);
+	playlist->playlist_context_menu = pragha_playlist_context_menu_new (playlist);
 
 	/* Init the rest of flags */
 
