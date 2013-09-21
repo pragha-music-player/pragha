@@ -56,6 +56,19 @@ static gchar *license = "This program is free software: "
 	"You should have received a copy of the GNU General Public License\n"
 	"along with this program.  If not, see <http://www.gnu.org/licenses/>.";
 
+
+/*
+ * Menubar callbacks.
+ */
+
+static void pragha_menubar_remove_playlist_action      (GtkAction *action, struct con_win *cwin);
+static void pragha_menubar_crop_playlist_action        (GtkAction *action, struct con_win *cwin);
+static void pragha_menubar_clear_playlist_action       (GtkAction *action, struct con_win *cwin);
+
+/*
+ * Menu bar ui definition.
+ */
+
 static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
 		<menu action=\"PlaybackMenu\">					\
@@ -145,11 +158,11 @@ static GtkActionEntry main_aentries[] = {
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
-	 "", "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
+	 "", "Remove selection from playlist", G_CALLBACK(pragha_menubar_remove_playlist_action)},
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
-	 "<Control>C", "Crop playlist", G_CALLBACK(crop_current_playlist)},
+	 "<Control>C", "Crop playlist", G_CALLBACK(pragha_menubar_crop_playlist_action)},
 	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
-	 "<Control>L", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
+	 "<Control>L", "Clear the current playlist", G_CALLBACK(pragha_menubar_clear_playlist_action)},
 	{"Save playlist", GTK_STOCK_SAVE_AS, N_("Save playlist")},
 	{"Save selection", NULL, N_("Save selection")},
 	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
@@ -814,6 +827,24 @@ void add_libary_action(GtkAction *action, struct con_win *cwin)
 	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
 
 	g_list_free(list);
+}
+
+static void
+pragha_menubar_remove_playlist_action (GtkAction *action, struct con_win *cwin)
+{
+	pragha_playlist_remove_selection (cwin->cplaylist);
+}
+
+static void
+pragha_menubar_crop_playlist_action (GtkAction *action, struct con_win *cwin)
+{
+	pragha_playlist_crop_selection (cwin->cplaylist);
+}
+
+static void
+pragha_menubar_clear_playlist_action (GtkAction *action, struct con_win *cwin)
+{
+	pragha_playlist_remove_all (cwin->cplaylist);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */

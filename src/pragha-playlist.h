@@ -82,6 +82,10 @@ enum playlist_action {
 	PLAYLIST_PREV
 };
 
+void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
+void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
+void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
+
 void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
@@ -105,14 +109,9 @@ GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist);
 GtkTreePath* get_next_queue_track(PraghaPlaylist *cplaylist);
 gchar* get_ref_current_track(struct con_win *cwin);
-void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
-void queue_current_playlist(GtkAction *action, struct con_win *cwin);
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
-void remove_from_playlist(GtkAction *action, struct con_win *cwin);
-void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
-void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
 gboolean pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *list, gint changed, PraghaMusicobject *nmobj);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
