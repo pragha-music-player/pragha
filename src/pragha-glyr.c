@@ -367,9 +367,15 @@ get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *mobj;
+
 	struct con_win *cwin = glyr->cwin;
 
-	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+
+	mobj = pragha_playlist_get_selected_musicobject(playlist);
+
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
@@ -383,9 +389,13 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *mobj;
 	struct con_win *cwin = glyr->cwin;
 
-	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	mobj = pragha_playlist_get_selected_musicobject (playlist);
+
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 	const gchar *title = pragha_musicobject_get_title(mobj);
 
@@ -499,6 +509,9 @@ setup_main_menu (PraghaGlyr *glyr)
 static void
 setup_playlist (PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	struct con_win *cwin = glyr->cwin;
+
 	glyr->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (glyr->action_group_playlist, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (glyr->action_group_playlist,
@@ -506,7 +519,8 @@ setup_playlist (PraghaGlyr *glyr)
 	                              G_N_ELEMENTS (playlist_actions),
 	                              glyr);
 
-	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (glyr->cwin->cplaylist,
+	playlist = pragha_application_get_playlist (cwin);
+	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
 	                                                                glyr->action_group_playlist,
 	                                                                playlist_xml);
 }
@@ -514,6 +528,7 @@ setup_playlist (PraghaGlyr *glyr)
 void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
 	struct con_win *cwin = glyr->cwin;
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (cwin),
@@ -525,7 +540,8 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	                                     glyr->merge_id_main_menu);
 	glyr->merge_id_main_menu = 0;
 
-	pragha_playlist_remove_plugin_action (cwin->cplaylist,
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_remove_plugin_action (playlist,
 	                                      glyr->action_group_playlist,
 	                                      glyr->merge_id_playlist);
 

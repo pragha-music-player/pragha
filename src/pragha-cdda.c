@@ -50,7 +50,9 @@ static gint cddb_add_tracks(cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 
 static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 {
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
+
 	gint num_tracks = 0, i = 0;
 	GList *list = NULL;
 
@@ -66,9 +68,11 @@ static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive,
 		if (pragha_process_gtk_events ())
 			return;
 	}
-
-	pragha_playlist_append_mobj_list(cwin->cplaylist, list);
-	g_list_free(list);
+	if (list) {
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list(playlist, list);
+		g_list_free (list);
+	}
 }
 
 static cdrom_drive_t* find_audio_cd(struct con_win *cwin)

@@ -60,7 +60,7 @@ pragha_library_pane_append_tracks (PraghaLibraryPane *library, struct con_win *c
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_append_mobj_list (cwin->cplaylist,
+		pragha_playlist_append_mobj_list (cwin->playlist,
 			                              list);
 		g_list_free(list);
 	}
@@ -72,9 +72,9 @@ pragha_library_pane_replace_tracks (PraghaLibraryPane *library, struct con_win *
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_remove_all (cwin->cplaylist);
+		pragha_playlist_remove_all (cwin->playlist);
 
-		pragha_playlist_append_mobj_list (cwin->cplaylist,
+		pragha_playlist_append_mobj_list (cwin->playlist,
 			                              list);
 		g_list_free(list);
 	}
@@ -86,9 +86,9 @@ pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, struct 
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_remove_all (cwin->cplaylist);
+		pragha_playlist_remove_all (cwin->playlist);
 
-		pragha_playlist_append_mobj_list (cwin->cplaylist,
+		pragha_playlist_append_mobj_list (cwin->playlist,
 			                              list);
 
 		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
@@ -108,6 +108,12 @@ PraghaBackend *
 pragha_application_get_backend (struct con_win *cwin)
 {
 	return cwin->backend;
+}
+
+PraghaPlaylist *
+pragha_application_get_playlist (struct con_win *cwin)
+{
+	return cwin->playlist;
 }
 
 GtkUIManager *

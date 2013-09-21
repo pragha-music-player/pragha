@@ -224,21 +224,24 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *tmobj, *current_mobj = NULL;
 	GList *rlist;
 	gboolean need_update;
 
-	clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
 
-	pragha_playlist_set_changing(cwin->cplaylist, TRUE);
+	clear_sort_current_playlist_cb (NULL, playlist);
 
-	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
+	pragha_playlist_set_changing (playlist, TRUE);
+
+	rlist = pragha_playlist_get_selection_ref_list (playlist);
 	tmobj = pragha_musicobject_dup(omobj);
 
 	/* Update the view and save tag change on db and disk.*/
-	need_update = pragha_playlist_update_ref_list_change_tags(cwin->cplaylist, rlist, changed, tmobj);
-	pragha_playlist_set_changing(cwin->cplaylist, FALSE);
+	need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, tmobj);
+	pragha_playlist_set_changing (playlist, FALSE);
 
 	/* If change current song, update gui and mpris. */
 	if(need_update) {
@@ -267,6 +270,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
                                            struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *current_mobj = NULL, *nmobj;
 	gint changed = 0;
@@ -301,9 +305,10 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 						return;
 				}
 			}
-			clear_sort_current_playlist_cb(NULL, cwin->cplaylist);
+			playlist = pragha_application_get_playlist (cwin);
+			clear_sort_current_playlist_cb (NULL, playlist);
 
-			need_update = pragha_playlist_update_ref_list_change_tags(cwin->cplaylist, rlist, changed, nmobj);
+			need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, nmobj);
 		}
 
 		if(need_update) {
@@ -329,6 +334,7 @@ no_change:
 
 void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *dialog;
 	GList *rlist = NULL;
 	PraghaMusicobject *mobj;
@@ -336,9 +342,11 @@ void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
 	dialog = pragha_tags_dialog_new();
 
 	/* Get a list of references and music objects selected. */
-	rlist = pragha_playlist_get_selection_ref_list(cwin->cplaylist);
+
+	playlist = pragha_application_get_playlist (cwin);
+	rlist = pragha_playlist_get_selection_ref_list (playlist);
 	if(g_list_length(rlist) == 1) {
-		mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+		mobj = pragha_playlist_get_selected_musicobject (playlist);
 		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), mobj);
 	}
 	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);

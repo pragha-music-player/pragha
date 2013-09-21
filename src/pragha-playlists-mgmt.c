@@ -425,14 +425,17 @@ save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaData
 
 /* Append the given playlist to the current playlist */
 
-void add_playlist_current_playlist(gchar *playlist, struct con_win *cwin)
+void add_playlist_current_playlist(gchar *splaylist, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GList *list = NULL;
 
-	list = add_playlist_to_mobj_list(cwin->cdbase, playlist, list);
+	list = add_playlist_to_mobj_list(cwin->cdbase, splaylist, list);
 
-	if(list)
-		pragha_playlist_append_mobj_list(cwin->cplaylist, list);
+	if(list) {
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list (playlist, list);
+	}
 }
 
 /* Append the given playlist to the mobj list. */
@@ -633,7 +636,7 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 	gchar *filename = NULL;
 
 	filename = playlist_export_dialog_get_filename(_("Playlists"),
-	                                               gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist))));
+	                                               gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
 	if (!filename)
 		return;
 
@@ -658,7 +661,7 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 	GError *err = NULL;
 
 	filename = playlist_export_dialog_get_filename(_("Playlists"),
-	                                               gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist))));
+	                                               gtk_widget_get_toplevel(GTK_WIDGET(cplaylist)));
 
 	if (!filename)
 		goto exit;
@@ -1011,6 +1014,7 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 
 void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GSList *list = NULL, *i = NULL;
 	GList *mlist = NULL;
 	gchar *summary;
@@ -1039,7 +1043,9 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, struct con
 
 		g_free(i->data);
 	}
-	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
+
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_append_mobj_list (playlist, mlist);
 
 	summary = g_strdup_printf(_("Added %d songs from %d of the imported playlist."), added, try);
 
@@ -1130,7 +1136,7 @@ new_playlist(PraghaPlaylist* cplaylist,
 	}
 
 	if ((playlist_id = pragha_database_find_playlist (pragha_playlist_get_database(cplaylist), playlist))) {
-		if (overwrite_existing_playlist(playlist, gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist)))))
+		if (overwrite_existing_playlist(playlist, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))))
 			pragha_database_delete_playlist (pragha_playlist_get_database(cplaylist), playlist);
 		else
 			return;
@@ -1169,7 +1175,7 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 	}
 
 	if ((radio_id = pragha_database_find_radio (pragha_playlist_get_database(cplaylist), name))) {
-		if (overwrite_existing_playlist(name, gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist)))))
+		if (overwrite_existing_playlist(name, gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))))
 			pragha_database_delete_radio (pragha_playlist_get_database(cplaylist), name);
 		else
 			return;
@@ -1209,7 +1215,7 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, gint 
 	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
-			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(pragha_playlist_get_widget(cplaylist)))),
+			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
@@ -1364,8 +1370,11 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 static void
 update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *submenu, *menuitem, *place;
 	GtkAccelGroup* accel_group;
+
+	playlist = pragha_application_get_playlist (cwin);
 
 	submenu = gtk_menu_new ();
 
@@ -1375,7 +1384,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cwin->cplaylist);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
 	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
@@ -1386,7 +1395,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), cwin->cplaylist);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), playlist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1399,7 +1408,7 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_complete_playlist), cwin->cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_complete_playlist), playlist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1411,8 +1420,11 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 static void
 update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GtkWidget *submenu, *menuitem, *place;
 	GtkAccelGroup* accel_group;
+
+	playlist = pragha_application_get_playlist (cwin);
 
 	submenu = gtk_menu_new ();
 
@@ -1422,7 +1434,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cwin->cplaylist);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
 	gtk_window_add_accel_group(GTK_WINDOW(pragha_window_get_mainwindow(cwin)), accel_group);
@@ -1433,7 +1445,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), cwin->cplaylist);
+	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), playlist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_separator_menu_item_new ();
@@ -1446,7 +1458,7 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 	while (pragha_prepared_statement_step (statement)) {
 		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
 		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_selection), cwin->cplaylist);
+		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_selection), playlist);
 		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
 	}
 
@@ -1457,11 +1469,14 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 
 void update_playlist_changes_on_menu(struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
+
 	/* Update main menu. */
 	update_playlist_changes_save_playlist_mainmenu(cwin);
 	update_playlist_changes_save_selection_mainmenu(cwin);
 
 	/* Update playlist pupup menu. */
-	update_playlist_changes_save_playlist_popup_playlist(cwin->cplaylist);
-	update_playlist_changes_save_selection_popup_playlist(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	update_playlist_changes_save_playlist_popup_playlist (playlist);
+	update_playlist_changes_save_selection_popup_playlist (playlist);
 }

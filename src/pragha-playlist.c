@@ -2076,7 +2076,7 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 {
 	PraghaBackend *backend;
 	GtkTreeIter iter;
-	GtkTreeModel *model = cwin->cplaylist->model;
+	GtkTreeModel *model = cwin->playlist->model;
 	PraghaMusicobject *mobj;
 
 	gtk_tree_model_get_iter(model, &iter, path);
@@ -2086,11 +2086,11 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 
 	if (pragha_preferences_get_shuffle(cwin->preferences)) {
 		if (pragha_backend_get_state (backend) == ST_STOPPED) {
-			clear_rand_track_refs(cwin->cplaylist);
-			current_playlist_clear_dirty_all(cwin->cplaylist);
+			clear_rand_track_refs(cwin->playlist);
+			current_playlist_clear_dirty_all(cwin->playlist);
 		}
 		else {
-			trim_down_rand_track_refs(cwin->cplaylist);
+			trim_down_rand_track_refs(cwin->playlist);
 		}
 	}
 
@@ -2099,10 +2099,10 @@ current_playlist_row_activated_cb(GtkTreeView *current_playlist,
 		pragha_backend_stop(backend);
 
 	/* Start playing new track */
-	cwin->cplaylist->current_update_action = PLAYLIST_CURR;
-	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
+	cwin->playlist->current_update_action = PLAYLIST_CURR;
+	pragha_playlist_update_current_playlist_state(cwin->playlist, path);
 
-	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+	mobj = current_playlist_mobj_at_path (path, cwin->playlist);
 	pragha_backend_set_musicobject (backend, mobj);
 	pragha_backend_play(backend);
 }
@@ -2982,9 +2982,10 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 
 	pragha_prepared_statement_free (statement);
 
-	pragha_playlist_append_mobj_list(cplaylist, list);
-
-	g_list_free(list);
+	if (list) {
+		pragha_playlist_append_mobj_list(cplaylist, list);
+		g_list_free (list);
+	}
 }
 
 void init_current_playlist_view(PraghaPlaylist *cplaylist)
@@ -3943,12 +3944,6 @@ GtkTreeModel *
 pragha_playlist_get_model(PraghaPlaylist* cplaylist)
 {
 	return cplaylist->model;
-}
-
-GtkWidget *
-pragha_playlist_get_widget(PraghaPlaylist* cplaylist)
-{
-	return GTK_WIDGET(cplaylist);
 }
 
 GtkUIManager *
