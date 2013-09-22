@@ -130,7 +130,7 @@ gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GErr
 	PraghaPlaylist *playlist;
 	playlist = pragha_application_get_playlist (cwin);
 
-	update_current_playlist_view_new_track (playlist, backend);
+	pragha_playlist_set_track_error (playlist, pragha_backend_get_error (backend));
 }
 
 static gboolean

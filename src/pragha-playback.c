@@ -191,9 +191,6 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				pragha_toolbar_set_title (toolbar, mobj);
 				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
 
-				/* Update and jump in current playlist */
-				update_current_playlist_view_new_track (playlist, backend);
-
 				/* Update album art */
 				pragha_playback_update_current_album_art (cwin, mobj);
 
