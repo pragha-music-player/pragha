@@ -86,29 +86,27 @@ void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
 void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
 void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
 
-void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
+PraghaMusicobject *pragha_playlist_get_prev_track     (PraghaPlaylist *playlist);
+PraghaMusicobject *pragha_playlist_get_any_track      (PraghaPlaylist *playlist);
+PraghaMusicobject *pragha_playlist_get_next_track     (PraghaPlaylist *playlist);
+
+void               pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, gint state, GError *error);
+void               pragha_playlist_show_current_track (PraghaPlaylist *playlist);
+
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
-void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
 void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
+void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
+
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
 					   PraghaPlaylist *cplaylist);
-void
-pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path);
-GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_actual(PraghaPlaylist *cplaylist);
-GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist);
-GtkTreePath* get_next_queue_track(PraghaPlaylist *cplaylist);
-gchar* get_ref_current_track(struct con_win *cwin);
+
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
