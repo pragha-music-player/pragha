@@ -90,16 +90,14 @@ PraghaMusicobject *pragha_playlist_get_prev_track     (PraghaPlaylist *playlist)
 PraghaMusicobject *pragha_playlist_get_any_track      (PraghaPlaylist *playlist);
 PraghaMusicobject *pragha_playlist_get_next_track     (PraghaPlaylist *playlist);
 
-void               pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, gint state, GError *error);
 void               pragha_playlist_show_current_track (PraghaPlaylist *playlist);
+void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist, GError *error);
 
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
-void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
-void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
 void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
 
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,

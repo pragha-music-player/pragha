@@ -86,6 +86,7 @@ struct _PraghaPlaylist {
 	gboolean             changing;
 	gboolean             dragging;
 	gint                 no_tracks;
+	GError              *track_error;
 
 	/* Pixbuf used on library tree. */
 
@@ -358,7 +359,7 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 /* Update playback state pixbuf */
 
 void
-pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, gint state, GError *error)
+pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, gint state)
 {
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *pixbuf = NULL;
@@ -367,10 +368,10 @@ pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path,
 	if (pragha_playlist_is_changing (playlist))
 		return;
 
-	if (error) {
+	if (playlist->track_error) {
 		icon_theme = gtk_icon_theme_get_default ();
 
-		if(error->code == GST_RESOURCE_ERROR_NOT_FOUND)
+		if(playlist->track_error->code == GST_RESOURCE_ERROR_NOT_FOUND)
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
 		else
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
@@ -391,7 +392,7 @@ pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path,
 	if (gtk_tree_model_get_iter (playlist->model, &iter, path))
 		gtk_list_store_set (GTK_LIST_STORE(playlist->model), &iter, P_STATUS_PIXBUF, pixbuf, -1);
 
-	if (error)
+	if (playlist->track_error)
 		g_object_unref (pixbuf);
 }
 
@@ -410,6 +411,22 @@ pragha_playlist_show_current_track (PraghaPlaylist *playlist)
 		shuffle = pragha_preferences_get_shuffle (playlist->preferences);
 
 		pragha_playlist_select_path (playlist, path, shuffle);
+		gtk_tree_path_free (path);
+	}
+}
+
+void
+pragha_playlist_set_track_error (PraghaPlaylist *playlist, GError *error)
+{
+	GtkTreePath *path;
+
+	CDEBUG(DBG_VERBOSE, "Set error on current playlist");
+
+	playlist->track_error = g_error_copy (error);
+
+	path = get_current_track (playlist);
+	if(path) {
+		pragha_playlist_update_track_state (playlist, path, ST_STOPPED);
 		gtk_tree_path_free (path);
 	}
 }
@@ -1106,29 +1123,42 @@ pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist)
 }
 
 void
-pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path)
+pragha_playlist_update_current_playlist_state (PraghaPlaylist *playlist, GtkTreePath *path)
 {
 	GtkTreeRowReference *rand_ref;
-	GtkTreeModel *model = cplaylist->model;
+	GtkTreePath *opath = NULL;
+	gboolean shuffle = FALSE;
 
 	CDEBUG(DBG_VERBOSE, "Update the state from current playlist");
+
+	opath = get_current_track (playlist);
+	if (opath) {
+		pragha_playlist_update_track_state (playlist, opath, ST_STOPPED);
+		gtk_tree_path_free (opath);
+	}
+
+	if (playlist->track_error) {
+		g_error_free (playlist->track_error);
+		playlist->track_error = NULL;
+	}
 
 	/* Append the new reference to the list of played track references
 	   to retrace the sequence */
 
-	if (!pragha_preferences_get_shuffle(cplaylist->preferences)) {
-		gtk_tree_row_reference_free(cplaylist->curr_seq_ref);
-		cplaylist->curr_seq_ref = gtk_tree_row_reference_new(model, path);
+	shuffle = pragha_preferences_get_shuffle (playlist->preferences);
+
+	if (!shuffle) {
+		gtk_tree_row_reference_free(playlist->curr_seq_ref);
+		playlist->curr_seq_ref = gtk_tree_row_reference_new (playlist->model, path);
 	}
 
-	if (pragha_preferences_get_shuffle(cplaylist->preferences)) {
-		switch (cplaylist->current_update_action) {
+	if (shuffle) {
+		switch (playlist->current_update_action) {
 			/* If 'Prev', get the previous node from the track references */
 			case PLAYLIST_PREV:
-				if (cplaylist->curr_rand_ref) {
-					cplaylist->curr_rand_ref =
-						get_rand_ref_prev(cplaylist->curr_rand_ref,
-								  cplaylist);
+				if (playlist->curr_rand_ref) {
+				    playlist->curr_rand_ref =
+						get_rand_ref_prev (playlist->curr_rand_ref, playlist);
 				}
 			break;
 
@@ -1136,23 +1166,21 @@ pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTree
 			/* Do this only if the current track and the
 			   last node don't match */
 			case PLAYLIST_NEXT:
-				if (cplaylist->curr_rand_ref) {
-					if (cplaylist->curr_rand_ref !=
-					    (g_list_last(cplaylist->rand_track_refs)->data)) {
-						cplaylist->curr_rand_ref =
-							get_rand_ref_next(cplaylist->curr_rand_ref,
-									  cplaylist);
+				if (playlist->curr_rand_ref) {
+					if (playlist->curr_rand_ref !=
+					    (g_list_last(playlist->rand_track_refs)->data)) {
+						playlist->curr_rand_ref =
+							get_rand_ref_next (playlist->curr_rand_ref, playlist);
 						break;
 					}
 				}
 
 			/* Append a new ref of the track to the track references */
 			case PLAYLIST_CURR:
-				rand_ref = gtk_tree_row_reference_new(model, path);
-				cplaylist->rand_track_refs =
-					g_list_append(cplaylist->rand_track_refs,
-						      rand_ref);
-				cplaylist->curr_rand_ref = rand_ref;
+				rand_ref = gtk_tree_row_reference_new (playlist->model, path);
+				playlist->rand_track_refs =
+					g_list_append (playlist->rand_track_refs, rand_ref);
+				playlist->curr_rand_ref = rand_ref;
 				break;
 			default:
 				break;
@@ -1161,35 +1189,21 @@ pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTree
 
 	/* Mark the track as dirty */
 
-	current_playlist_set_dirty_track(cplaylist, path);
-}
+	current_playlist_set_dirty_track (playlist, path);
 
-void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
-{
-	GtkTreePath *path;
-	gboolean shuffle = FALSE;
-
-	path = get_current_track (cplaylist);
-	if(path) {
-		pragha_playlist_update_track_state (cplaylist, path, ST_PLAYING, NULL);
-
-		shuffle = pragha_preferences_get_shuffle (cplaylist->preferences);
-		pragha_playlist_select_path (cplaylist, path, shuffle);
-
-		gtk_tree_path_free(path);
-	}
+	pragha_playlist_update_track_state (playlist, path, ST_PLAYING);
+	pragha_playlist_select_path (playlist, path, shuffle);
 }
 
 void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
 {
 	GtkTreePath *path;
+	enum player_state state;
 
 	path = get_current_track (cplaylist);
 	if(path) {
-		pragha_playlist_update_track_state (cplaylist,
-		                                    path,
-		                                    pragha_backend_get_state (backend),
-		                                    pragha_backend_get_error (backend));
+		state = pragha_backend_get_state (backend);
+		pragha_playlist_update_track_state (cplaylist, path, state);
 		gtk_tree_path_free(path);
 	}
 }
@@ -4209,6 +4223,7 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	playlist->rand = g_rand_new();
 	playlist->changing = FALSE;
 	playlist->dragging = FALSE;
+	playlist->track_error = NULL;
 	playlist->rand_track_refs = NULL;
 	playlist->queue_track_refs = NULL;
 	playlist->current_update_action = PLAYLIST_NONE;
@@ -4239,6 +4254,9 @@ pragha_playlist_finalize (GObject *object)
 	if (pragha_preferences_get_restore_playlist (playlist->preferences))
 		pragha_playlist_save_playlist_state (playlist);
 	pragha_playlist_save_preferences (playlist);
+
+	if (playlist->track_error)
+		g_error_free (playlist->track_error);
 
 	g_object_unref (playlist->model);
 
