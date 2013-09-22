@@ -768,15 +768,9 @@ void
 jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
-	GtkTreePath *path = NULL;
-
 	playlist = pragha_application_get_playlist (cwin);
 
-	/* TODO: Mmm.. it can be merged in e singe function.*/
-	path = current_playlist_get_actual (playlist);
-	jump_to_path_on_current_playlist (playlist, path, TRUE);
-
-	gtk_tree_path_free(path);
+	pragha_playlist_show_current_track (playlist);
 }
 
 /* Handler for the 'Equalizer' item in the Tools menu */

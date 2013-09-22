@@ -395,6 +395,9 @@ pragha_application_new (gint argc, gchar *argv[])
 	g_signal_connect (cwin->backend, "buffering",
 	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), toolbar);
 
+	g_signal_connect (cwin->backend, "notify::state",
+	                  G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin->playlist);
+
 	g_object_bind_property (cwin->backend, "volume",
 	                        toolbar, "volume",
 	                        binding_flags);
