@@ -38,6 +38,7 @@
 #include "pragha-glyr.h"
 #include "pragha-tagger.h"
 #include "pragha-tags-mgmt.h"
+#include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "pragha.h"
@@ -132,6 +133,8 @@ static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylis
 
 static void         pragha_playlist_select_path        (PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 
+static void         pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
+
 /*
  * playlist_context_menu calbacks
  */
@@ -141,6 +144,7 @@ static void remove_from_playlist          (GtkAction *action, PraghaPlaylist *pl
 static void crop_current_playlist         (GtkAction *action, PraghaPlaylist *playlist);
 static void current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist);
 static void pragha_playlist_copy_tags     (GtkAction *action, PraghaPlaylist *playlist);
+static void pragha_playlist_edit_tags     (GtkAction *action, PraghaPlaylist *playlist);
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\
@@ -190,9 +194,9 @@ static GtkActionEntry playlist_context_aentries[] = {
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
-	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)}/*,
+	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)},
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
-	 "", "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)},
+	 "", "Edit information for this track", G_CALLBACK(pragha_playlist_edit_tags)}/*,
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
 	 "", N_("Open a media file"), G_CALLBACK(open_file_action)},
 	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
@@ -248,46 +252,80 @@ current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
 static void
 pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
 {
-	GtkWidget *toplevel;
-	PraghaMusicobject *mobj = NULL, *tmobj = NULL;
-	gboolean need_update;
+	PraghaMusicobject *mobj = NULL;
 	gint changed = 0;
 	GList *rlist;
 
-	mobj = g_object_get_data (G_OBJECT(action), "mobj");
+	mobj    = g_object_get_data (G_OBJECT(action), "mobj");
 	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
+	rlist   = pragha_playlist_get_selection_ref_list (playlist);
+
+	pragha_playlist_change_ref_list_tags (playlist, rlist, changed, mobj);
+
+	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free (rlist);
+}
+
+static void
+pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
+                                           gint            response_id,
+                                           PraghaPlaylist *playlist)
+{
+	GtkWidget *toplevel;
+	PraghaMusicobject *nmobj = NULL;
+	gint changed = 0;
+	GList *rlist = NULL;
 
 	toplevel = gtk_widget_get_toplevel (GTK_WIDGET(playlist));
 
-	/* Check if user is trying to set the same track no for multiple tracks */
-	if (changed & TAG_TNO_CHANGED) {
-		if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), toplevel))
-			return;
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog (nmobj, toplevel);
+		return;
 	}
 
-	/* Check if user is trying to set the same title/track no for
-	   multiple tracks */
-	if (changed & TAG_TITLE_CHANGED) {
-		if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), toplevel))
-			return;
+	rlist = g_object_get_data (G_OBJECT (dialog), "reference-list");
+
+	if (response_id == GTK_RESPONSE_OK) {
+		changed = pragha_tags_dialog_get_changed (PRAGHA_TAGS_DIALOG(dialog));
+		if(!changed)
+			goto no_change;
+
+		nmobj = pragha_tags_dialog_get_musicobject (PRAGHA_TAGS_DIALOG(dialog));
+
+		if (rlist)
+			pragha_playlist_change_ref_list_tags (playlist, rlist, changed, nmobj);
 	}
 
-	clear_sort_current_playlist_cb (NULL, playlist);
-	pragha_playlist_set_changing (playlist, TRUE);
-
-	rlist = pragha_playlist_get_selection_ref_list (playlist);
-	tmobj = pragha_musicobject_dup (mobj);
-
-	/* Update the view and save tag change on db and disk.*/
-	need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, tmobj);
-	pragha_playlist_set_changing (playlist, FALSE);
-
-	if (need_update)
-		g_signal_emit (playlist, signals[PLAYLIST_CHANGE_TAGS], 0, changed, mobj);
-
-	g_object_unref(tmobj);
+no_change:
 	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
 	g_list_free (rlist);
+
+	gtk_widget_destroy (dialog);
+}
+
+static void
+pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
+{
+	GtkWidget *dialog;
+	GList *rlist = NULL;
+	PraghaMusicobject *mobj;
+
+	dialog = pragha_tags_dialog_new();
+
+	/* Get a list of references and music objects selected. */
+
+	rlist = pragha_playlist_get_selection_ref_list (playlist);
+	if(g_list_length(rlist) == 1) {
+		mobj = pragha_playlist_get_selected_musicobject (playlist);
+		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), mobj);
+	}
+	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);
+ 
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), playlist);
+
+	gtk_widget_show (dialog);
 }
 
 /*
@@ -1711,7 +1749,7 @@ pragha_playlist_remove_all (PraghaPlaylist *playlist)
 
 /* Update a list of references in the current playlist */
 
-gboolean
+static gboolean
 pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *list, gint changed, PraghaMusicobject *nmobj)
 {
 	PraghaMusicobject *mobj = NULL;
@@ -1782,6 +1820,43 @@ pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *li
 	g_object_unref(tagger);
 
 	return update_current_song;
+}
+
+static void
+pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj)
+{
+	GtkWidget *toplevel;
+	PraghaMusicobject *tmobj = NULL;
+	gboolean need_update;
+
+	toplevel = gtk_widget_get_toplevel (GTK_WIDGET(playlist));
+
+	/* Check if user is trying to set the same title ot track no for multiple tracks */
+	if (g_list_length(rlist) > 1) {
+		if (changed & TAG_TNO_CHANGED) {
+			if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), toplevel))
+				return;
+		}
+		if (changed & TAG_TITLE_CHANGED) {
+			if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), toplevel))
+				return;
+		}
+	}
+
+	clear_sort_current_playlist_cb (NULL, playlist);
+	pragha_playlist_set_changing (playlist, TRUE);
+
+	rlist = pragha_playlist_get_selection_ref_list (playlist);
+	tmobj = pragha_musicobject_dup (mobj);
+
+	/* Update the view and save tag change on db and disk.*/
+	need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, tmobj);
+	pragha_playlist_set_changing (playlist, FALSE);
+
+	if (need_update)
+		g_signal_emit (playlist, signals[PLAYLIST_CHANGE_TAGS], 0, changed, mobj);
+
+	g_object_unref(tmobj);
 }
 
 void
