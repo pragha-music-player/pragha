@@ -333,3 +333,19 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 
 	pragha_backend_seek (backend, seek);
 }
+
+void
+pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, struct con_win *cwin)
+{
+	PraghaBackend *backend;
+
+	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
+
+	backend = pragha_application_get_backend (cwin);
+
+	/* Stop to set ready and clear all info */
+	pragha_backend_stop (backend);
+
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play (backend);
+}

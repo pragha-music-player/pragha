@@ -281,6 +281,7 @@ static struct con_win *
 pragha_application_new (gint argc, gchar *argv[])
 {
 	PraghaToolbar *toolbar;
+	PraghaPlaylist *playlist;
 	struct con_win *cwin;
 
 	const GBindingFlags binding_flags =
@@ -376,6 +377,10 @@ pragha_application_new (gint argc, gchar *argv[])
 	g_signal_connect (toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
 
+	playlist = cwin->playlist;
+	g_signal_connect (playlist, "playlist-set-track",
+	                  G_CALLBACK(pragha_playback_set_playlist_track), cwin);
+		
 	g_signal_connect (cwin->clibrary, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);
 	g_signal_connect (cwin->clibrary, "library-replace-playlist",
