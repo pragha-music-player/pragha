@@ -101,6 +101,7 @@ struct _PraghaPlaylist {
 enum
 {
 	PLAYLIST_SET_TRACK,
+	PLAYLIST_CHANGE_TAGS,
 	LAST_SIGNAL
 };
 
@@ -139,6 +140,7 @@ static void dequeue_current_playlist      (GtkAction *action, PraghaPlaylist *pl
 static void remove_from_playlist          (GtkAction *action, PraghaPlaylist *playlist);
 static void crop_current_playlist         (GtkAction *action, PraghaPlaylist *playlist);
 static void current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist);
+static void pragha_playlist_copy_tags     (GtkAction *action, PraghaPlaylist *playlist);
 
 static const gchar *playlist_context_menu_xml = "<ui>				\
 	<popup name=\"SelectionPopup\">		   				\
@@ -186,9 +188,9 @@ static GtkActionEntry playlist_context_aentries[] = {
 	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
 	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
 	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
-	{"ToolsMenu", NULL, N_("_Tools")}/*,
+	{"ToolsMenu", NULL, N_("_Tools")},
 	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
-	 "", "Copy tag to selection", G_CALLBACK(copy_tags_to_selection_action)},
+	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)}/*,
 	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
 	 "", "Edit information for this track", G_CALLBACK(edit_tags_current_playlist)},
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
@@ -241,6 +243,51 @@ static void
 current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
 {
 	pragha_playlist_remove_all (playlist);
+}
+
+static void
+pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
+{
+	GtkWidget *toplevel;
+	PraghaMusicobject *mobj = NULL, *tmobj = NULL;
+	gboolean need_update;
+	gint changed = 0;
+	GList *rlist;
+
+	mobj = g_object_get_data (G_OBJECT(action), "mobj");
+	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
+
+	toplevel = gtk_widget_get_toplevel (GTK_WIDGET(playlist));
+
+	/* Check if user is trying to set the same track no for multiple tracks */
+	if (changed & TAG_TNO_CHANGED) {
+		if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), toplevel))
+			return;
+	}
+
+	/* Check if user is trying to set the same title/track no for
+	   multiple tracks */
+	if (changed & TAG_TITLE_CHANGED) {
+		if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), toplevel))
+			return;
+	}
+
+	clear_sort_current_playlist_cb (NULL, playlist);
+	pragha_playlist_set_changing (playlist, TRUE);
+
+	rlist = pragha_playlist_get_selection_ref_list (playlist);
+	tmobj = pragha_musicobject_dup (mobj);
+
+	/* Update the view and save tag change on db and disk.*/
+	need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, tmobj);
+	pragha_playlist_set_changing (playlist, FALSE);
+
+	if (need_update)
+		g_signal_emit (playlist, signals[PLAYLIST_CHANGE_TAGS], 0, changed, mobj);
+
+	g_object_unref(tmobj);
+	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free (rlist);
 }
 
 /*
@@ -2226,31 +2273,6 @@ pragha_playlist_row_activated_cb (GtkTreeView *current_playlist,
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
 	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
-}
-
-void
-copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin)
-{
-	PraghaMusicobject *mobj = NULL;
-	gint changed = 0;
-
-	mobj = g_object_get_data (G_OBJECT(action), "mobj");
-	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
-
-	/* Check if user is trying to set the same track no for multiple tracks */
-	if (changed & TAG_TNO_CHANGED) {
-		if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(mobj), pragha_application_get_window(cwin)))
-			return;
-	}
-
-	/* Check if user is trying to set the same title/track no for
-	   multiple tracks */
-	if (changed & TAG_TITLE_CHANGED) {
-		if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(mobj), pragha_application_get_window(cwin)))
-			return;
-	}
-
-	copy_tags_selection_current_playlist(mobj, changed, cwin);
 }
 
 static void
@@ -4296,6 +4318,13 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 	                                            NULL, NULL,
 	                                            g_cclosure_marshal_VOID__POINTER,
 	                                            G_TYPE_NONE, 1, G_TYPE_POINTER);
+	signals[PLAYLIST_CHANGE_TAGS] = g_signal_new ("playlist-change-tags",
+	                                              G_TYPE_FROM_CLASS (gobject_class),
+	                                              G_SIGNAL_RUN_LAST,
+	                                              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_change_tags),
+	                                              NULL, NULL,
+	                                              g_cclosure_marshal_VOID__UINT_POINTER,
+	                                              G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
 }
 
 PraghaPlaylist *

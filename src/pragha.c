@@ -32,6 +32,7 @@
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-library-pane.h"
 #include "pragha-menubar.h"
 #include "pragha-statusicon.h"
@@ -98,6 +99,26 @@ pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, struct 
 			pragha_playback_play_pause_resume(cwin);
 
 		g_list_free(list);
+	}
+}
+
+static void
+pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, PraghaMusicobject *mobj, struct con_win *cwin)
+{
+	PraghaBackend *backend;
+	PraghaToolbar *toolbar;
+	PraghaMusicobject *cmobj = NULL;
+
+	backend = pragha_application_get_backend (cwin);
+
+	if(pragha_backend_get_state (backend) != ST_STOPPED) {
+		cmobj = pragha_backend_get_musicobject (backend);
+		pragha_update_musicobject_change_tag (cmobj, changed, mobj);
+
+		toolbar = pragha_application_get_toolbar (cwin);
+		pragha_toolbar_set_title (toolbar, cmobj);
+
+		mpris_update_metadata_changed (cwin);
 	}
 }
 
@@ -380,6 +401,8 @@ pragha_application_new (gint argc, gchar *argv[])
 	playlist = cwin->playlist;
 	g_signal_connect (playlist, "playlist-set-track",
 	                  G_CALLBACK(pragha_playback_set_playlist_track), cwin);
+	g_signal_connect (playlist, "playlist-change-tags",
+	                  G_CALLBACK(pragha_playlist_update_change_tags), cwin);
 		
 	g_signal_connect (cwin->clibrary, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);

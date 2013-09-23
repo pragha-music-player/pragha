@@ -39,6 +39,7 @@ typedef struct _PraghaPlaylist PraghaPlaylist;
 typedef struct {
 	GtkScrolledWindowClass __parent__;
 	void (*playlist_set_track) (PraghaPlaylist *playlist, PraghaMusicobject *mobj);
+	void (*playlist_change_tags) (PraghaPlaylist *playlist, gint changes, PraghaMusicobject *mobj);
 } PraghaPlaylistClass;
 
 /* Columns in current playlist view */
@@ -132,7 +133,6 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void jump_to_playing_song(struct con_win *cwin);
-void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
