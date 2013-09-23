@@ -98,6 +98,14 @@ struct _PraghaPlaylist {
 	GtkUIManager        *playlist_context_menu;
 };
 
+enum
+{
+	PLAYLIST_SET_TRACK,
+	LAST_SIGNAL
+};
+
+static int signals[LAST_SIGNAL] = { 0 };
+
 G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 
 /*
@@ -2187,42 +2195,37 @@ void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist)
 /* Handler for row double click / kboard enter */
 
 static void
-current_playlist_row_activated_cb(GtkTreeView *current_playlist,
-				  GtkTreePath *path,
-				  GtkTreeViewColumn *column,
-				  struct con_win *cwin)
+pragha_playlist_row_activated_cb (GtkTreeView *current_playlist,
+                                  GtkTreePath *path,
+                                  GtkTreeViewColumn *column,
+                                  PraghaPlaylist *playlist)
 {
-	PraghaBackend *backend;
+	PraghaMusicobject *mobj = NULL;
+	gboolean shuffle = FALSE;
 	GtkTreeIter iter;
-	GtkTreeModel *model = cwin->playlist->model;
-	PraghaMusicobject *mobj;
 
-	gtk_tree_model_get_iter(model, &iter, path);
-	gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
+	gtk_tree_model_get_iter (playlist->model, &iter, path);
+	gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
 
-	backend = pragha_application_get_backend (cwin);
+	if (!mobj)
+		return;
 
-	if (pragha_preferences_get_shuffle(cwin->preferences)) {
-		if (pragha_backend_get_state (backend) == ST_STOPPED) {
-			clear_rand_track_refs(cwin->playlist);
-			current_playlist_clear_dirty_all(cwin->playlist);
+	shuffle = pragha_preferences_get_shuffle (playlist->preferences);
+	if (shuffle) {
+		if (!playlist->rand_track_refs) {
+			clear_rand_track_refs (playlist);
+			current_playlist_clear_dirty_all (playlist);
 		}
 		else {
-			trim_down_rand_track_refs(cwin->playlist);
+			trim_down_rand_track_refs (playlist);
 		}
 	}
 
-	/* Stop to set ready and clear all info */
-	if (pragha_backend_get_state (backend) != ST_STOPPED)
-		pragha_backend_stop(backend);
-
 	/* Start playing new track */
-	cwin->playlist->current_update_action = PLAYLIST_CURR;
-	pragha_playlist_update_current_playlist_state(cwin->playlist, path);
+	playlist->current_update_action = PLAYLIST_NEXT;
+	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	mobj = current_playlist_mobj_at_path (path, cwin->playlist);
-	pragha_backend_set_musicobject (backend, mobj);
-	pragha_backend_play(backend);
+	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
 }
 
 void
@@ -4178,7 +4181,6 @@ pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 		gtk_icon_theme_load_icon (icontheme,
 					  "media-playback-pause",
 					  16, 0, NULL);
-
 }
 
 static void
@@ -4233,8 +4235,8 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	g_signal_connect (playlist->preferences, "notify::shuffle",
 	                  G_CALLBACK (shuffle_changed_cb), playlist);
 
-	/*g_signal_connect (G_OBJECT(playlist->view), "row-activated",
-	                  G_CALLBACK(current_playlist_row_activated_cb), cwin);*/
+	g_signal_connect (G_OBJECT(playlist->view), "row-activated",
+	                  G_CALLBACK(pragha_playlist_row_activated_cb), playlist);
 
 	g_signal_connect (G_OBJECT(playlist->view), "button-press-event",
 	                  G_CALLBACK(current_playlist_button_press_cb), playlist);
@@ -4283,6 +4285,17 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 
 	gobject_class = G_OBJECT_CLASS (klass);
 	gobject_class->finalize = pragha_playlist_finalize;
+
+	/*
+	 * Signals:
+	 */
+	signals[PLAYLIST_SET_TRACK] = g_signal_new ("playlist-set-track",
+	                                            G_TYPE_FROM_CLASS (gobject_class),
+	                                            G_SIGNAL_RUN_LAST,
+	                                            G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_set_track),
+	                                            NULL, NULL,
+	                                            g_cclosure_marshal_VOID__POINTER,
+	                                            G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 PraghaPlaylist *

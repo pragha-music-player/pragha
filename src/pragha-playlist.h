@@ -38,6 +38,7 @@ typedef struct _PraghaPlaylist PraghaPlaylist;
 
 typedef struct {
 	GtkScrolledWindowClass __parent__;
+	void (*playlist_set_track) (PraghaPlaylist *playlist, PraghaMusicobject *mobj);
 } PraghaPlaylistClass;
 
 /* Columns in current playlist view */
