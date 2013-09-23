@@ -110,7 +110,6 @@ GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
-gboolean pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *list, gint changed, PraghaMusicobject *nmobj);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void

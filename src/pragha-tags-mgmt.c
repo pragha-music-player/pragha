@@ -33,7 +33,6 @@
 #include "pragha-hig.h"
 #include "pragha-library-pane.h"
 #include "pragha-utils.h"
-#include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "pragha.h"
@@ -217,99 +216,4 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 				(void)pragha_musicobject_save_tags_to_file(elem, mobj, changed);
 		}
 	}
-}
-
-/* Edit tags for selected track(s) */
-
-static void
-pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
-                                           gint            response_id,
-                                           struct con_win *cwin)
-{
-	PraghaBackend *backend;
-	PraghaPlaylist *playlist;
-	PraghaToolbar *toolbar;
-	PraghaMusicobject *current_mobj = NULL, *nmobj;
-	gint changed = 0;
-	GList *rlist = NULL;
-	gboolean need_update = FALSE;
-
-	if (response_id == GTK_RESPONSE_HELP) {
-		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_application_get_window(cwin));
-		return;
-	}
-
-	rlist = g_object_get_data (G_OBJECT (dialog), "reference-list");
-
-	if (response_id == GTK_RESPONSE_OK) {
-		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
-		if(!changed)
-			goto no_change;
-
-		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-
-		if(rlist) {
-			if (changed & TAG_TNO_CHANGED) {
-				if (g_list_length(rlist) > 1) {
-					if (!confirm_tno_multiple_tracks(pragha_musicobject_get_track_no(nmobj), pragha_application_get_window(cwin)))
-						return;
-				}
-			}
-			if (changed & TAG_TITLE_CHANGED) {
-				if (g_list_length(rlist) > 1) {
-					if (!confirm_title_multiple_tracks(pragha_musicobject_get_title(nmobj), pragha_application_get_window(cwin)))
-						return;
-				}
-			}
-			playlist = pragha_application_get_playlist (cwin);
-			clear_sort_current_playlist_cb (NULL, playlist);
-
-			need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, nmobj);
-		}
-
-		if(need_update) {
-			/* Update the public mobj */
-			backend = pragha_application_get_backend (cwin);
-			current_mobj = pragha_backend_get_musicobject (backend);
-			pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
-
-			if(pragha_backend_get_state (backend) != ST_STOPPED) {
-				toolbar = pragha_application_get_toolbar (cwin);
-				pragha_toolbar_set_title (toolbar, current_mobj);
-				mpris_update_metadata_changed(cwin);
-			}
-		}
-	}
-
-no_change:
-	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-	g_list_free (rlist);
-
-	gtk_widget_destroy (dialog);
-}
-
-void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin)
-{
-	PraghaPlaylist *playlist;
-	GtkWidget *dialog;
-	GList *rlist = NULL;
-	PraghaMusicobject *mobj;
-
-	dialog = pragha_tags_dialog_new();
-
-	/* Get a list of references and music objects selected. */
-
-	playlist = pragha_application_get_playlist (cwin);
-	rlist = pragha_playlist_get_selection_ref_list (playlist);
-	if(g_list_length(rlist) == 1) {
-		mobj = pragha_playlist_get_selected_musicobject (playlist);
-		pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), mobj);
-	}
-	g_object_set_data (G_OBJECT (dialog), "reference-list", rlist);
- 
-	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_edit_tags_playlist_dialog_response), cwin);
-
-	gtk_widget_show (dialog);
 }
