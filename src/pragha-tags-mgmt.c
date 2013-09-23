@@ -219,49 +219,6 @@ pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMu
 	}
 }
 
-/* Copy a tag change to all selected songs. */
-
-void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changed, struct con_win *cwin)
-{
-	PraghaBackend *backend;
-	PraghaPlaylist *playlist;
-	PraghaToolbar *toolbar;
-	PraghaMusicobject *tmobj, *current_mobj = NULL;
-	GList *rlist;
-	gboolean need_update;
-
-	playlist = pragha_application_get_playlist (cwin);
-
-	clear_sort_current_playlist_cb (NULL, playlist);
-
-	pragha_playlist_set_changing (playlist, TRUE);
-
-	rlist = pragha_playlist_get_selection_ref_list (playlist);
-	tmobj = pragha_musicobject_dup(omobj);
-
-	/* Update the view and save tag change on db and disk.*/
-	need_update = pragha_playlist_update_ref_list_change_tags (playlist, rlist, changed, tmobj);
-	pragha_playlist_set_changing (playlist, FALSE);
-
-	/* If change current song, update gui and mpris. */
-	if(need_update) {
-		/* Update the public mobj */
-		backend = pragha_application_get_backend (cwin);
-		current_mobj = pragha_backend_get_musicobject (backend);
-		pragha_update_musicobject_change_tag (current_mobj, changed, omobj);
-
-		if(pragha_backend_get_state (backend) != ST_STOPPED) {
-			toolbar = pragha_application_get_toolbar (cwin);
-			pragha_toolbar_set_title (toolbar, current_mobj);
-			mpris_update_metadata_changed(cwin);
-		}
-	}
-
-	g_object_unref(tmobj);
-	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-	g_list_free (rlist);
-}
-
 /* Edit tags for selected track(s) */
 
 static void
