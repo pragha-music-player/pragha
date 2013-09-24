@@ -103,6 +103,7 @@ enum
 {
 	PLAYLIST_SET_TRACK,
 	PLAYLIST_CHANGE_TAGS,
+	PLAYLIST_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -527,60 +528,6 @@ pragha_playlist_set_track_error (PraghaPlaylist *playlist, GError *error)
 /*
  * Private api..
  */
-
-static gint get_total_playtime(PraghaPlaylist *cplaylist)
-{
-	GtkTreeModel *model = cplaylist->model;
-	GtkTreeIter iter;
-	gint total_playtime = 0;
-	PraghaMusicobject *mobj = NULL;
-	gboolean ret;
-
-	if(cplaylist->changing)
-		return 0;
-
-	ret = gtk_tree_model_get_iter_first(model, &iter);
-
-	while (ret) {
-		gtk_tree_model_get(model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (mobj)
-			total_playtime += pragha_musicobject_get_length(mobj);
-		ret = gtk_tree_model_iter_next(model, &iter);
-	}
-
-	return total_playtime;
-}
-
-/* Update status bar */
-
-void
-pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist)
-{
-	PraghaStatusbar *statusbar;
-	gint total_playtime = 0, no_tracks = 0;
-	gchar *str, *tot_str;
-
-	if(pragha_playlist_is_changing(cplaylist))
-		return;
-
-	total_playtime = get_total_playtime(cplaylist);
-	no_tracks = pragha_playlist_get_no_tracks(cplaylist);
-
-	tot_str = convert_length_str(total_playtime);
-	str = g_strdup_printf("%i %s - %s",
-			      no_tracks,
-			      ngettext("Track", "Tracks", no_tracks),
-			      tot_str);
-
-	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
-
-	statusbar = pragha_statusbar_get ();
-	pragha_statusbar_set_main_text(statusbar, str);
-	g_object_unref(G_OBJECT(statusbar));
-
-	g_free(tot_str);
-	g_free(str);
-}
 
 /* Clear current seq ref */
 
@@ -1576,7 +1523,7 @@ pragha_playlist_remove_selection (PraghaPlaylist *playlist)
 
 	remove_watch_cursor (GTK_WIDGET(playlist));
 
-	pragha_playlist_update_statusbar_playtime (playlist);
+	g_signal_emit (playlist, signals[PLAYLIST_CHANGED], 0);
 }
 
 /* Crop selected rows from current playlist */
@@ -1650,7 +1597,7 @@ pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 	requeue_track_refs (playlist);
 
 	remove_watch_cursor (GTK_WIDGET(playlist));
-	pragha_playlist_update_statusbar_playtime (playlist);
+	g_signal_emit (playlist, signals[PLAYLIST_CHANGED], 0);
 
 	g_slist_free(to_delete);
 }
@@ -1744,7 +1691,7 @@ pragha_playlist_remove_all (PraghaPlaylist *playlist)
 	playlist->no_tracks = 0;
 	playlist->unplayed_tracks = 0;
 
-	pragha_playlist_update_statusbar_playtime (playlist);
+	g_signal_emit (playlist, signals[PLAYLIST_CHANGED], 0);
 }
 
 /* Update a list of references in the current playlist */
@@ -2074,7 +2021,7 @@ pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject 
 {
 	append_current_playlist(cplaylist, mobj);
 
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
 }
 
 void
@@ -2086,6 +2033,9 @@ pragha_playlist_append_mobj_and_play(PraghaPlaylist *cplaylist, PraghaMusicobjec
 
 	if(path) {
 		pragha_playlist_activate_path(cplaylist, path);
+
+		g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
+
 		gtk_tree_path_free(path);
 	}
 }
@@ -2116,7 +2066,7 @@ pragha_playlist_insert_mobj_list(PraghaPlaylist *cplaylist,
 	pragha_playlist_set_changing(cplaylist, FALSE);
 	remove_watch_cursor (GTK_WIDGET(cplaylist));
 
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
 }
 
 /* Append a list of mobj to the current playlist */
@@ -2147,7 +2097,7 @@ pragha_playlist_append_mobj_list(PraghaPlaylist *cplaylist, GList *list)
 	pragha_playlist_set_changing(cplaylist, FALSE);
 	remove_watch_cursor (GTK_WIDGET(cplaylist));
 
-	pragha_playlist_update_statusbar_playtime(cplaylist);
+	g_signal_emit (cplaylist, signals[PLAYLIST_CHANGED], 0);
 
 	if(gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(cplaylist->model),
 	                                        &column, &order))
@@ -4096,9 +4046,31 @@ pragha_playlist_activate_unique_mobj(PraghaPlaylist* cplaylist, PraghaMusicobjec
 }
 
 gint
-pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist)
+pragha_playlist_get_no_tracks (PraghaPlaylist *playlist)
 {
-	return cplaylist->no_tracks;
+	return playlist->no_tracks;
+}
+
+gint pragha_playlist_get_total_playtime (PraghaPlaylist *playlist)
+{
+	GtkTreeIter iter;
+	gint total_playtime = 0;
+	PraghaMusicobject *mobj = NULL;
+	gboolean ret;
+
+	if(playlist->changing)
+		return 0;
+
+	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
+
+	while (ret) {
+		gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
+		if (mobj)
+			total_playtime += pragha_musicobject_get_length (mobj);
+		ret = gtk_tree_model_iter_next (playlist->model, &iter);
+	}
+
+	return total_playtime;
 }
 
 gboolean
@@ -4400,6 +4372,13 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 	                                              NULL, NULL,
 	                                              g_cclosure_marshal_VOID__UINT_POINTER,
 	                                              G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
+	signals[PLAYLIST_CHANGED] = g_signal_new ("playlist-changed",
+	                                          G_TYPE_FROM_CLASS (gobject_class),
+	                                          G_SIGNAL_RUN_LAST,
+	                                          G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_changed),
+	                                          NULL, NULL,
+	                                          g_cclosure_marshal_VOID__VOID,
+	                                          G_TYPE_NONE, 0);
 }
 
 PraghaPlaylist *

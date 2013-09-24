@@ -40,6 +40,7 @@ typedef struct {
 	GtkScrolledWindowClass __parent__;
 	void (*playlist_set_track) (PraghaPlaylist *playlist, PraghaMusicobject *mobj);
 	void (*playlist_change_tags) (PraghaPlaylist *playlist, gint changes, PraghaMusicobject *mobj);
+	void (*playlist_changed) (PraghaPlaylist *playlist);
 } PraghaPlaylistClass;
 
 /* Columns in current playlist view */
@@ -96,7 +97,7 @@ void               pragha_playlist_show_current_track (PraghaPlaylist *playlist)
 void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist, GError *error);
 
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
-void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
+
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
@@ -172,7 +173,8 @@ gboolean pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey 
 void pragha_playlist_activate_path        (PraghaPlaylist* cplaylist, GtkTreePath *path);
 void pragha_playlist_activate_unique_mobj (PraghaPlaylist* cplaylist, PraghaMusicobject *mobj);
 
-gint pragha_playlist_get_no_tracks(PraghaPlaylist* cplaylist);
+gint pragha_playlist_get_no_tracks      (PraghaPlaylist *playlist);
+gint pragha_playlist_get_total_playtime (PraghaPlaylist *playlist);
 
 gboolean pragha_playlist_has_queue(PraghaPlaylist* cplaylist);
 
