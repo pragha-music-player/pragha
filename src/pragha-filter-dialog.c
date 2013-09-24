@@ -295,6 +295,7 @@ void
 pragha_filter_dialog (struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaPreferences *preferences;
 	GtkWidget *dialog, *scrollwin, *vbox, *search_entry;
 	GtkWidget *filter_view = NULL;
 	GtkListStore *filter_store;
@@ -306,10 +307,11 @@ pragha_filter_dialog (struct con_win *cwin)
 	fdialog = g_slice_new0(PraghaFilterDialog);
 
 	playlist = pragha_application_get_playlist (cwin);
+	preferences = pragha_application_get_preferences (cwin);
 
 	/* Crete the filter entry */
 
-	search_entry = pragha_search_entry_new(cwin->preferences);
+	search_entry = pragha_search_entry_new(preferences);
 
 	g_signal_connect (G_OBJECT(search_entry), "changed",
 			 G_CALLBACK(simple_filter_search_keyrelease_handler), fdialog);

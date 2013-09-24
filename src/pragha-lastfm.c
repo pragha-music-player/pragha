@@ -737,6 +737,7 @@ lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin)
 gpointer
 do_lastfm_add_favorites_action (gpointer user_data)
 {
+	PraghaPreferences *preferences;
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track;
 	gint rpages = 0, cpage = 0;
@@ -747,8 +748,9 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	struct con_win *cwin = user_data;
 
 	do {
+		preferences = pragha_application_get_preferences (cwin);
 		rpages = LASTFM_user_get_loved_tracks(cwin->clastfm->session_id,
-		                                      pragha_preferences_get_lastfm_user(cwin->preferences),
+		                                      pragha_preferences_get_lastfm_user (preferences),
 		                                      cpage,
 		                                      &results);
 
@@ -1147,11 +1149,13 @@ exit:
 static gboolean
 update_related_handler (gpointer data)
 {
+	PraghaPreferences *preferences;
 	struct con_win *cwin = data;
 
 	CDEBUG(DBG_INFO, "Updating Lastm depending preferences");
 
-	if (pragha_preferences_get_lastfm_support (cwin->preferences))
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_lastfm_support (preferences))
 		lastfm_now_playing_handler(cwin);
 
 	return FALSE;
@@ -1260,6 +1264,7 @@ pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 static gboolean
 pragha_lastfm_connect_idle(gpointer data)
 {
+	PraghaPreferences *preferences;
 	const gchar *user;
 	const gchar *pass;
 
@@ -1273,8 +1278,9 @@ pragha_lastfm_connect_idle(gpointer data)
 	clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
 	if (clastfm->session_id != NULL) {
-		user = pragha_preferences_get_lastfm_user (cwin->preferences);
-		pass = pragha_lastfm_get_password (cwin->preferences);
+		preferences = pragha_application_get_preferences (cwin);
+		user = pragha_preferences_get_lastfm_user (preferences);
+		pass = pragha_lastfm_get_password (preferences);
 
 		clastfm->has_user = string_is_not_empty(user);
 		clastfm->has_pass = string_is_not_empty(pass);
@@ -1344,6 +1350,7 @@ PraghaLastfm *
 pragha_lastfm_new (struct con_win *cwin)
 {
 	PraghaLastfm *clastfm;
+	PraghaPreferences *preferences;
 
 	clastfm = g_slice_new0(PraghaLastfm);
 
@@ -1362,7 +1369,8 @@ pragha_lastfm_new (struct con_win *cwin)
 
 	/* Test internet and launch threads.*/
 
-	if (pragha_preferences_get_lastfm_support (cwin->preferences)) {
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_lastfm_support (preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 #if GLIB_CHECK_VERSION(2,32,0)

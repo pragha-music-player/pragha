@@ -79,7 +79,10 @@ static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(cwin->preferences);
+	PraghaPreferences *preferences;
+
+	preferences = pragha_application_get_preferences (cwin);
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(preferences);
 
 	if (!audio_cd_device) {
 		cdda_devices = cdio_get_devices_with_cap(NULL, CDIO_FS_AUDIO,
@@ -120,6 +123,7 @@ void add_audio_cd(struct con_win *cwin)
 	gint matches;
 	cddb_disc_t *cddb_disc = NULL;
 	cddb_conn_t *cddb_conn = NULL;
+	PraghaPreferences *preferences;
 
 	cdrom_drive_t *cdda_drive = find_audio_cd(cwin);
 	if (!cdda_drive)
@@ -130,7 +134,8 @@ void add_audio_cd(struct con_win *cwin)
 		return;
 	}
 
-	if (pragha_preferences_get_use_cddb(cwin->preferences)) {
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_use_cddb (preferences)) {
 		cddb_conn = cddb_new ();
 		if (!cddb_conn)
 			goto add;

@@ -252,6 +252,7 @@ create_systray_menu (struct con_win *cwin)
 
 void create_status_icon (struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	GtkStatusIcon *status_icon;
 	GtkUIManager *systray_menu;
 	GdkPixbuf *pixbuf_app;
@@ -270,7 +271,8 @@ void create_status_icon (struct con_win *cwin)
 			G_CALLBACK(status_get_tooltip_cb),
 			cwin);
 
-	gtk_status_icon_set_visible(status_icon, pragha_preferences_get_show_status_icon(cwin->preferences));
+	preferences = pragha_application_get_preferences (cwin);
+	gtk_status_icon_set_visible (status_icon, pragha_preferences_get_show_status_icon (preferences));
 
 	/* Systray right click menu */
 

@@ -261,11 +261,13 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
 	struct con_win *cwin = g_object_get_data(data, "cwin");
 
+	PraghaPreferences *preferences = pragha_application_get_preferences (cwin);
+
 	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
-	pragha_preferences_set_add_recursively(cwin->preferences, add_recursively);
+	pragha_preferences_set_add_recursively (preferences, add_recursively);
 
 	gchar *last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
-	pragha_preferences_set_last_folder (cwin->preferences, last_folder);
+	pragha_preferences_set_last_folder (preferences, last_folder);
 	g_free (last_folder);
 
 	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
@@ -301,10 +303,12 @@ open_file_on_keypress(GtkWidget *dialog,
 
 void open_file_action(GtkAction *action, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
 	gpointer storage;
 	gint i=0;
 	GtkFileFilter *media_filter, *playlist_filter, *all_filter;
+	const gchar *last_folder = NULL;
 
 	/* Create a file chooser dialog */
 
@@ -326,14 +330,15 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
 
-	const gchar *last_folder = pragha_preferences_get_last_folder (cwin->preferences);
+	preferences = pragha_application_get_preferences (cwin);
+	last_folder = pragha_preferences_get_last_folder (preferences);
 	if (string_is_not_empty(last_folder))
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
 
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
-	if(pragha_preferences_get_add_recursively(cwin->preferences))
+	if(pragha_preferences_get_add_recursively (preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
 
 	bbox = gtk_hbutton_box_new();
@@ -750,16 +755,19 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 void
 show_controls_below_action (GtkAction *action, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	PraghaToolbar *toolbar;
 	GtkWidget *parent;
 
-	pragha_preferences_set_controls_below (cwin->preferences,
+	preferences = pragha_application_get_preferences (cwin);
+
+	pragha_preferences_set_controls_below (preferences,
 		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
 	toolbar = pragha_application_get_toolbar (cwin);
 	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
 
-	gint position = pragha_preferences_get_controls_below(cwin->preferences) ? 3 : 1;
+	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
 
 	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
 }
@@ -915,6 +923,7 @@ void about_action(GtkAction *action, struct con_win *cwin)
 void
 pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	GtkActionGroup *main_actions;
 
 	const GBindingFlags binding_flags =
@@ -941,17 +950,19 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *c
 
 	/* Binding properties to Actions. */
 
+	preferences = pragha_application_get_preferences (cwin);
+
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
-	g_object_bind_property (cwin->preferences, "shuffle", action_shuffle, "active", binding_flags);
+	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);
 
 	GtkAction *action_repeat = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/PlaybackMenu/Repeat");
-	g_object_bind_property (cwin->preferences, "repeat", action_repeat, "active", binding_flags);
+	g_object_bind_property (preferences, "repeat", action_repeat, "active", binding_flags);
 
 	GtkAction *action_lateral = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel");
-	g_object_bind_property (cwin->preferences, "lateral-panel", action_lateral, "active", binding_flags);
+	g_object_bind_property (preferences, "lateral-panel", action_lateral, "active", binding_flags);
 
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
-	g_object_bind_property (cwin->preferences, "show-status-bar", action_status_bar, "active", binding_flags);
+	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
 
 	g_object_unref (main_actions);
 }

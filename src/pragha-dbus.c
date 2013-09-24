@@ -51,14 +51,20 @@ static void dbus_prev_handler(struct con_win *cwin)
 
 static void dbus_shuffle_handler(struct con_win *cwin)
 {
-	gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
-	pragha_preferences_set_shuffle(cwin->preferences, !shuffle);
+	PraghaPreferences *preferences;
+	preferences = pragha_application_get_preferences (cwin);
+
+	gboolean shuffle = pragha_preferences_get_shuffle (preferences);
+	pragha_preferences_set_shuffle (preferences, !shuffle);
 }
 
 static void dbus_repeat_handler(struct con_win *cwin)
 {
-	gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
-	pragha_preferences_set_repeat(cwin->preferences, !repeat);
+	PraghaPreferences *preferences;
+	preferences = pragha_application_get_preferences (cwin);
+
+	gboolean repeat = pragha_preferences_get_repeat (preferences);
+	pragha_preferences_set_repeat (preferences, !repeat);
 }
 
 static void dbus_inc_vol_handler(struct con_win *cwin)

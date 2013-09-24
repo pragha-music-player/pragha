@@ -111,6 +111,7 @@ void
 pragha_notify_show_osd (PraghaNotify *notify)
 {
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *mobj = NULL;
 	GError *error = NULL;
@@ -119,7 +120,9 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	struct con_win *cwin = notify->cwin;
 
 	/* Check if OSD is enabled in preferences */
-	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(cwin))))
+
+	preferences = pragha_application_get_preferences (cwin);
+	if (!pragha_preferences_get_show_osd (preferences) || gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(cwin))))
 		return;
 
 	backend = pragha_application_get_backend (cwin);
@@ -153,7 +156,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 		#endif
 
 		if(can_support_actions() &&
-		   pragha_preferences_get_actions_in_osd (cwin->preferences) == TRUE) {
+		   pragha_preferences_get_actions_in_osd (preferences) == TRUE) {
 			notify_notification_add_action(
 				notify->osd_notify, "media-skip-backward", _("Prev Track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), notify,
@@ -169,7 +172,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	else {
 		notify_notification_update (notify->osd_notify, summary, body, NULL);
 
-		if(pragha_preferences_get_actions_in_osd (cwin->preferences) == FALSE)
+		if(pragha_preferences_get_actions_in_osd (preferences) == FALSE)
 			notify_notification_clear_actions (notify->osd_notify);
 	}
 
