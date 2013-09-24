@@ -450,17 +450,11 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	/* Init_gnome_media_keys requires constructed main window. */
 	if (gnome_media_keys_will_be_useful()) {
-		if (init_gnome_media_keys(cwin) == -1) {
-			g_critical("Unable to initialize gnome media keys");
-			return NULL;
-		}
+	    cwin->cgnome_media_keys = init_gnome_media_keys (cwin);
 	}
 	#ifdef HAVE_LIBKEYBINDER
 	else if (keybinder_will_be_useful()) {
-		if (init_keybinder(cwin) == -1) {
-			g_critical("Unable to initialize keybinder");
-			return NULL;
-		}
+		cwin->keybinder = init_keybinder (cwin);
 	}
 	#endif
 

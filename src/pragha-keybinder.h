@@ -28,7 +28,7 @@
 struct con_win;
 
 gboolean keybinder_will_be_useful ();
-gint init_keybinder (struct con_win *cwin);
+gboolean init_keybinder (struct con_win *cwin);
 void keybinder_free ();
 
 #endif

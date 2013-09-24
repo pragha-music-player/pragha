@@ -35,9 +35,12 @@ static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
                                         const gchar *key)
 {
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
+
     struct con_win *cwin = gmk->cwin;
 
 	backend = pragha_application_get_backend (cwin);
+	preferences = pragha_application_get_preferences (cwin);
 
     if (pragha_backend_emitted_error (backend))
         return;
@@ -54,13 +57,13 @@ static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
         pragha_playback_next_track(cwin);
     else if (g_strcmp0("Repeat", key) == 0)
     {
-        gboolean repeat = pragha_preferences_get_repeat(cwin->preferences);
-        pragha_preferences_set_repeat(cwin->preferences, !repeat);
+        gboolean repeat = pragha_preferences_get_repeat (preferences);
+        pragha_preferences_set_repeat (preferences, !repeat);
     }
     else if (g_strcmp0("Shuffle", key) == 0)
     {
-        gboolean shuffle = pragha_preferences_get_shuffle(cwin->preferences);
-        pragha_preferences_set_shuffle(cwin->preferences, !shuffle);
+        gboolean shuffle = pragha_preferences_get_shuffle (preferences);
+        pragha_preferences_set_shuffle (preferences, !shuffle);
     }
 
     //XXX missed buttons: "Rewind" and "FastForward"
@@ -251,7 +254,8 @@ out:
     return result;
 }
 
-gint init_gnome_media_keys(struct con_win *cwin)
+con_gnome_media_keys *
+init_gnome_media_keys (struct con_win *cwin)
 {
     con_gnome_media_keys *gmk = g_slice_new0(con_gnome_media_keys);
 
@@ -268,9 +272,7 @@ gint init_gnome_media_keys(struct con_win *cwin)
     gmk->handler_id = g_signal_connect(G_OBJECT(pragha_application_get_window(cwin)), "focus-in-event",
                                        G_CALLBACK(on_window_focus_in_event), gmk);
 
-    cwin->cgnome_media_keys = gmk;
-
-    return 0;
+    return gmk;
 }
 
 void gnome_media_keys_free(con_gnome_media_keys *gmk)
