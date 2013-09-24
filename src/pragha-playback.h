@@ -19,6 +19,7 @@
 #define PRAGHA_PLAYBACK_H
 
 #include "pragha-backend.h"
+#include "pragha-playlist.h"
 
 /* pragha.h */
 struct con_win;
@@ -37,5 +38,6 @@ void pragha_playback_show_current_album_art (GObject *object, struct con_win *cw
 void pragha_playback_edit_current_track     (GObject *object, struct con_win *cwin);
 
 void pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin);
+void pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, struct con_win *cwin);
 
 #endif /* PRAGHA_PLAYBACK_H */

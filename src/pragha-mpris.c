@@ -180,13 +180,13 @@ get_mobj_at_mpris2_track_id(struct con_win *cwin, const gchar *track_id)
 /* org.mpris.MediaPlayer2 */
 static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	gtk_window_present(GTK_WINDOW(pragha_window_get_mainwindow(cwin)));
+	gtk_window_present(GTK_WINDOW(pragha_application_get_window(cwin)));
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static void mpris_Root_Quit (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
-	pragha_application_quit (cwin);
+	pragha_application_quit ();
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -380,6 +380,7 @@ seeked_cb (PraghaBackend *backend, gpointer user_data)
 
 static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	gchar *uri = NULL, *path = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gboolean happened = FALSE;
@@ -395,8 +396,10 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 		if(path && is_playable_file(path)) {
 			mobj = new_musicobject_from_file(path);
 			if(mobj) {
-				pragha_playlist_append_mobj_and_play(cwin->cplaylist, mobj);
-				pragha_playlist_update_statusbar_playtime(cwin->cplaylist);
+				playlist = pragha_application_get_playlist (cwin);
+
+				pragha_playlist_append_mobj_and_play(playlist, mobj);
+				pragha_playlist_update_statusbar_playtime(playlist);
 				happened = TRUE;
 			}
 		}
@@ -557,7 +560,7 @@ static GVariant* mpris_Player_get_Metadata (GError **error, struct con_win *cwin
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
 		handle_get_metadata(pragha_backend_get_musicobject(backend), &b);
 
-		toolbar = pragha_window_get_toolbar (cwin);
+		toolbar = pragha_application_get_toolbar (cwin);
 		albumart = pragha_toolbar_get_album_art (toolbar);
 
 		arturl = pragha_album_art_get_path(albumart);
@@ -652,6 +655,7 @@ static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cw
 static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	gchar *get_playlist = NULL, *test_playlist = NULL, *found_playlist = NULL;
 	gchar **db_playlists = NULL;
 	gint i = 0;
@@ -675,7 +679,8 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	if(found_playlist) {
-		pragha_playlist_remove_all (cwin->cplaylist);
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_remove_all (playlist);
 
 		add_playlist_current_playlist(found_playlist, cwin);
 
@@ -793,6 +798,7 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 
 static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	gchar *uri;
 	gchar *after_track; //TODO use this
 	gboolean set_as_current; //TODO use this
@@ -806,9 +812,13 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 		g_warning("Invalid uri: %s", uri);
 		goto exit;
 	}
-	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 
-	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
+	mlist = append_mobj_list_from_unknown_filename(mlist, file);
+	if (mlist) {
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list(playlist, mlist);
+		g_list_free (mlist);
+	}
 
 	g_free(file);
 exit:
@@ -826,6 +836,7 @@ static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVar
 
 static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
@@ -836,7 +847,8 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 	mobj = get_mobj_at_mpris2_track_id(cwin, track_id);
 
 	if (mobj) {
-		pragha_playlist_activate_unique_mobj(cwin->cplaylist, mobj);
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_activate_unique_mobj (playlist, mobj);
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	}
 	else
@@ -848,6 +860,7 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 
 static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	GVariantBuilder builder;
 	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
@@ -856,7 +869,8 @@ static GVariant* mpris_TrackList_get_Tracks (GError **error, struct con_win *cwi
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
-	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	list = pragha_playlist_get_mobj_list (playlist);
 
 	if(list != NULL) {
 		list = g_list_reverse(list);
@@ -1179,6 +1193,7 @@ void mpris_update_mobj_remove(struct con_win *cwin, PraghaMusicobject *mobj)
 
 void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkTreeIter *iter)
 {
+	PraghaPlaylist *playlist;
 	GtkTreeModel *model;
 	GtkTreePath *path = NULL;
 	PraghaMusicobject *prev = NULL;
@@ -1187,7 +1202,8 @@ void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkT
 	if(NULL == cwin->cmpris2->dbus_connection)
 		return; /* better safe than sorry */
 
-	model = pragha_playlist_get_model(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	model = pragha_playlist_get_model (playlist);
 
 	CDEBUG(DBG_MPRIS, "MPRIS update mobj added");
 
@@ -1195,7 +1211,7 @@ void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkT
 	path = gtk_tree_model_get_path(model, iter);
 
 	if (gtk_tree_path_prev(path)) {
-		prev = current_playlist_mobj_at_path(path, cwin->cplaylist);
+		prev = current_playlist_mobj_at_path(path, playlist);
 	}
 	gtk_tree_path_free(path);
 
@@ -1239,6 +1255,7 @@ void mpris_update_mobj_changed(struct con_win *cwin, PraghaMusicobject *mobj, gi
 
 void mpris_update_tracklist_replaced(struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	PraghaBackend *backend;
 	GVariantBuilder b;
 	PraghaMusicobject *mobj = NULL;
@@ -1252,7 +1269,8 @@ void mpris_update_tracklist_replaced(struct con_win *cwin)
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
 
-	list = pragha_playlist_get_mobj_list(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	list = pragha_playlist_get_mobj_list (playlist);
 
 	if(list != NULL) {
 		list = g_list_reverse(list);

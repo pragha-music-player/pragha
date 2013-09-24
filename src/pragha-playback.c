@@ -36,16 +36,18 @@ static void pragha_playback_update_current_album_art (struct con_win *cwin, Prag
 void pragha_playback_prev_track(struct con_win *cwin)
 {
 	PraghaBackend *backend;
-	GtkTreePath *path;
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
 	/* Get the next (prev) track to be played */
-	path = current_playlist_get_prev(cwin->cplaylist);
 
-	/* No more tracks */
-	if (!path)
+	playlist = pragha_application_get_playlist (cwin);
+
+	mobj = pragha_playlist_get_prev_track (playlist);
+
+	if (!mobj)
 		return;
 
 	backend = pragha_application_get_backend (cwin);
@@ -53,15 +55,8 @@ void pragha_playback_prev_track(struct con_win *cwin)
 	/* Stop currently playing track */
 	pragha_backend_stop (backend);
 
-	/* Start playing new track */
-	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_PREV);
-	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
-
-	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 	pragha_backend_set_musicobject (backend, mobj);
 	pragha_backend_play (backend);
-
-	gtk_tree_path_free(path);
 }
 
 /* Start playback of a new track, or resume playback of current track */
@@ -69,8 +64,8 @@ void pragha_playback_prev_track(struct con_win *cwin)
 void pragha_playback_play_pause_resume(struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj = NULL;
-	GtkTreePath *path=NULL;
 
 	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
 
@@ -94,33 +89,14 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_backend_resume (backend);
 		break;
 	case ST_STOPPED:
-		if (pragha_playlist_is_changing(cwin->cplaylist) ||
-		    pragha_playlist_get_no_tracks(cwin->cplaylist) == 0)
-			break;
-		if(pragha_playlist_has_queue(cwin->cplaylist))
-			path = get_next_queue_track(cwin->cplaylist);
-		if (!path)
-			path = current_playlist_get_selection(cwin->cplaylist);
+		playlist = pragha_application_get_playlist (cwin);
 
-		if(!path) {
-			if(pragha_preferences_get_shuffle(cwin->preferences))
-				path = get_first_random_track(cwin->cplaylist);
-			else
-				path = gtk_tree_path_new_first();
-		}
-
-		if (pragha_preferences_get_shuffle(cwin->preferences))
-			pragha_playlist_set_first_rand_ref(cwin->cplaylist, path);
-
-		pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_CURR);
-		pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
-
-		mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
+		mobj = pragha_playlist_get_any_track (playlist);
+		if (!mobj)
+			return;
 
 		pragha_backend_set_musicobject (backend, mobj);
 		pragha_backend_play (backend);
-
-		gtk_tree_path_free(path);
 		break;
 	default:
 		break;
@@ -148,7 +124,7 @@ void pragha_playback_stop(struct con_win *cwin)
 void pragha_advance_playback (struct con_win *cwin)
 {
 	PraghaBackend *backend;
-	GtkTreePath *path = NULL;
+	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
@@ -159,25 +135,14 @@ void pragha_advance_playback (struct con_win *cwin)
 
 	pragha_backend_stop (backend);
 
-	if(pragha_playlist_is_changing(cwin->cplaylist))
+	playlist = pragha_application_get_playlist (cwin);
+	mobj = pragha_playlist_get_next_track (playlist);
+
+	if (!mobj)
 		return;
 
-	/* Get the next track to be played */
-	path = current_playlist_get_next (cwin->cplaylist);
-
-	/* No more tracks */
-	if (!path)
-		return;
-
-	/* Start playing new track */
-	pragha_playlist_set_current_update_action(cwin->cplaylist, PLAYLIST_NEXT);
-	pragha_playlist_update_current_playlist_state(cwin->cplaylist, path);
-
-	mobj = current_playlist_mobj_at_path (path, cwin->cplaylist);
 	pragha_backend_set_musicobject (backend, mobj);
 	pragha_backend_play (backend);
-
-	gtk_tree_path_free (path);
 }
 
 /* Play next track in current_playlist */
@@ -205,26 +170,26 @@ void pragha_playback_next_track(struct con_win *cwin)
 void
 pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
-	enum player_state state = pragha_backend_get_state (backend);
 	PraghaMusicobject *mobj = NULL;
+
+	enum player_state state = pragha_backend_get_state (backend);
 
 	switch (state) {
 		case ST_PLAYING:
 			/* New song?. */
-			if(pragha_playlist_get_current_update_action(cwin->cplaylist) != PLAYLIST_NONE) {
+			playlist = pragha_application_get_playlist (cwin);
+			if(pragha_playlist_get_current_update_action (playlist) != PLAYLIST_NONE) {
 				mobj = pragha_backend_get_musicobject (backend);
 
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
 				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				toolbar = pragha_window_get_toolbar (cwin);
+				toolbar = pragha_application_get_toolbar (cwin);
 				pragha_toolbar_set_title (toolbar, mobj);
 				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
-
-				/* Update and jump in current playlist */
-				update_current_playlist_view_new_track(cwin->cplaylist, backend);
 
 				/* Update album art */
 				pragha_playback_update_current_album_art (cwin, mobj);
@@ -234,7 +199,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 					pragha_notify_show_osd (cwin->notify);
 				mpris_update_metadata_changed(cwin);
 
-				pragha_playlist_report_finished_action(cwin->cplaylist);
+				pragha_playlist_report_finished_action (playlist);
 			}
 			break;
 		case ST_PAUSED:
@@ -256,6 +221,7 @@ pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
 void
 pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *nmobj;
 
@@ -265,12 +231,14 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	toolbar = pragha_window_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (cwin);
 	pragha_toolbar_set_title(toolbar, nmobj);
 	mpris_update_metadata_changed(cwin);
 
 	/* Update the playlist */
-	pragha_playlist_update_current_track(cwin->cplaylist, changed, nmobj);
+
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_update_current_track (playlist, changed, nmobj);
 }
 
 static void
@@ -305,7 +273,7 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 		g_free(path);
 	}
 
-	toolbar = pragha_window_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (cwin);
 	pragha_toolbar_set_image_album_art (toolbar, album_path);
 	g_free(album_path);
 }
@@ -321,7 +289,7 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	albumart = pragha_toolbar_get_album_art (pragha_window_get_toolbar (cwin));
+	albumart = pragha_toolbar_get_album_art (pragha_application_get_toolbar (cwin));
 
 	const gchar *albumart_path = pragha_album_art_get_path (albumart);
 
@@ -329,7 +297,7 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 		return;
 
 	uri = g_filename_to_uri (albumart_path, NULL, NULL);
-	open_url(uri, pragha_window_get_mainwindow (cwin));
+	open_url(uri, pragha_application_get_window (cwin));
 	g_free (uri);
 }
 
@@ -364,4 +332,20 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 		seek = length;
 
 	pragha_backend_seek (backend, seek);
+}
+
+void
+pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, struct con_win *cwin)
+{
+	PraghaBackend *backend;
+
+	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
+
+	backend = pragha_application_get_backend (cwin);
+
+	/* Stop to set ready and clear all info */
+	pragha_backend_stop (backend);
+
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play (backend);
 }

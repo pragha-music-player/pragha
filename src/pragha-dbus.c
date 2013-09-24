@@ -92,6 +92,7 @@ static void dbus_toggle_handler(struct con_win *cwin)
 
 static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	gchar *file;
 	DBusError error;
 	GList *mlist = NULL;
@@ -106,8 +107,11 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 	}
 
 	mlist = append_mobj_list_from_unknown_filename(mlist, file);
-
-	pragha_playlist_append_mobj_list(cwin->cplaylist, mlist);
+	if (mlist) {
+		playlist = pragha_application_get_playlist (cwin);
+		pragha_playlist_append_mobj_list (playlist, mlist);
+		g_list_free (mlist);
+	}
 }
 
 static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)

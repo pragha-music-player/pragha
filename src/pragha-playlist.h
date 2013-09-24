@@ -20,13 +20,27 @@
 #define PRAGHA_PLAYLIST_H
 
 #include <gtk/gtk.h>
+#include <glib-object.h>
 #include "pragha-backend.h"
 #include "pragha-database.h"
 
 /* pragha.h */
 struct con_win;
 
+#define PRAGHA_TYPE_PLAYLIST                  (pragha_playlist_get_type ())
+#define PRAGHA_PLAYLIST(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylist))
+#define PRAGHA_IS_PLAYLIST(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_PLAYLIST))
+#define PRAGHA_PLAYLIST_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_PLAYLIST, PraghaPlaylistClass))
+#define PRAGHA_IS_PLAYLIST_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_PLAYLIST))
+#define PRAGHA_PLAYLIST_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylistClass))
+
 typedef struct _PraghaPlaylist PraghaPlaylist;
+
+typedef struct {
+	GtkScrolledWindowClass __parent__;
+	void (*playlist_set_track) (PraghaPlaylist *playlist, PraghaMusicobject *mobj);
+	void (*playlist_change_tags) (PraghaPlaylist *playlist, gint changes, PraghaMusicobject *mobj);
+} PraghaPlaylistClass;
 
 /* Columns in current playlist view */
 
@@ -70,38 +84,32 @@ enum playlist_action {
 	PLAYLIST_PREV
 };
 
-void jump_to_path_on_current_playlist(PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
+void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
+void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
+void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
+
+PraghaMusicobject *pragha_playlist_get_prev_track     (PraghaPlaylist *playlist);
+PraghaMusicobject *pragha_playlist_get_any_track      (PraghaPlaylist *playlist);
+PraghaMusicobject *pragha_playlist_get_next_track     (PraghaPlaylist *playlist);
+
+void               pragha_playlist_show_current_track (PraghaPlaylist *playlist);
+void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist, GError *error);
+
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 void pragha_playlist_update_statusbar_playtime(PraghaPlaylist *cplaylist);
 enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
-void pragha_playlist_set_current_update_action(PraghaPlaylist* cplaylist, enum playlist_action action);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
-void update_current_playlist_view_new_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
-void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend);
+void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
+
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
 GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
 					   PraghaPlaylist *cplaylist);
-void
-pragha_playlist_set_first_rand_ref(PraghaPlaylist *cplaylist, GtkTreePath *path);
-GtkTreePath* current_playlist_get_selection(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_next(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_prev(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_get_actual(PraghaPlaylist *cplaylist);
-GtkTreePath* get_first_random_track(PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_nth_track(gint n, PraghaPlaylist *cplaylist);
-GtkTreePath* get_next_queue_track(PraghaPlaylist *cplaylist);
-gchar* get_ref_current_track(struct con_win *cwin);
-void dequeue_current_playlist(GtkAction *action, struct con_win *cwin);
-void queue_current_playlist(GtkAction *action, struct con_win *cwin);
+
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
-void remove_from_playlist(GtkAction *action, struct con_win *cwin);
-void crop_current_playlist(GtkAction *action, struct con_win *cwin);
 void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
-void current_playlist_clear_action(GtkAction *action, struct con_win *cwin);
-gboolean pragha_playlist_update_ref_list_change_tags(PraghaPlaylist *cplaylist, GList *list, gint changed, PraghaMusicobject *nmobj);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
@@ -124,7 +132,6 @@ void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void jump_to_playing_song(struct con_win *cwin);
-void copy_tags_to_selection_action(GtkAction *action, struct con_win *cwin);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
@@ -175,7 +182,6 @@ void     pragha_playlist_set_changing (PraghaPlaylist* cplaylist, gboolean chang
 GtkWidget    *pragha_playlist_get_view  (PraghaPlaylist* cplaylist);
 GtkTreeModel *pragha_playlist_get_model (PraghaPlaylist* cplaylist);
 
-GtkWidget      *pragha_playlist_get_widget (PraghaPlaylist* cplaylist);
 GtkUIManager   *pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist);
 
 gint            pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist, GtkActionGroup *action_group, const gchar *menu_xml);
@@ -183,8 +189,7 @@ void            pragha_playlist_remove_plugin_action (PraghaPlaylist *cplaylist,
 
 PraghaDatabase *pragha_playlist_get_database(PraghaPlaylist* cplaylist);
 
-void            pragha_playlist_free (PraghaPlaylist *cplaylist);
-PraghaPlaylist *pragha_playlist_new  (struct con_win *cwin);
+PraghaPlaylist *pragha_playlist_new  (void);
 
 
 #endif /* PRAGHA_PLAYLIST_H */
