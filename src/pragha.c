@@ -122,6 +122,34 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 	}
 }
 
+static void
+pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, struct con_win *cwin)
+{
+	PraghaStatusbar *statusbar;
+	gint total_playtime = 0, no_tracks = 0;
+	gchar *str, *tot_str;
+
+	if(pragha_playlist_is_changing(playlist))
+		return;
+
+	total_playtime = pragha_playlist_get_total_playtime (playlist);
+	no_tracks = pragha_playlist_get_no_tracks (playlist);
+
+	tot_str = convert_length_str(total_playtime);
+	str = g_strdup_printf("%i %s - %s",
+	                      no_tracks,
+	                      ngettext("Track", "Tracks", no_tracks),
+	                      tot_str);
+
+	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
+
+	statusbar = pragha_application_get_statusbar (cwin);
+	pragha_statusbar_set_main_text(statusbar, str);
+
+	g_free(tot_str);
+	g_free(str);
+}
+
 /*
  * Some public actions.
  */
@@ -429,6 +457,8 @@ pragha_application_new (gint argc, gchar *argv[])
 	                  G_CALLBACK(pragha_playback_set_playlist_track), cwin);
 	g_signal_connect (playlist, "playlist-change-tags",
 	                  G_CALLBACK(pragha_playlist_update_change_tags), cwin);
+	g_signal_connect (playlist, "playlist-changed",
+	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), cwin);
 		
 	g_signal_connect (cwin->library, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);

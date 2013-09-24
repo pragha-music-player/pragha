@@ -399,7 +399,6 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 				playlist = pragha_application_get_playlist (cwin);
 
 				pragha_playlist_append_mobj_and_play(playlist, mobj);
-				pragha_playlist_update_statusbar_playtime(playlist);
 				happened = TRUE;
 			}
 		}
