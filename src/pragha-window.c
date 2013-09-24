@@ -56,12 +56,6 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 }
 
 void
-pragha_destroy_window(GtkWidget *widget, struct con_win *cwin)
-{
-	pragha_application_quit ();
-}
-
-void
 pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity)
 {
 	gint x = 0, y = 0;
@@ -444,8 +438,6 @@ pragha_window_new (struct con_win *cwin)
 	                  G_CALLBACK(pragha_window_state_event), cwin);
 	g_signal_connect (G_OBJECT(window), "delete_event",
 	                  G_CALLBACK(pragha_close_window), cwin);
-	g_signal_connect (G_OBJECT(window), "destroy",
-	                  G_CALLBACK(pragha_destroy_window), cwin);
 
 	/* Set Default Size */
 

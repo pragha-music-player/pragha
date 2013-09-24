@@ -279,8 +279,6 @@ pragha_application_free (struct con_win *cwin)
 	pragha_art_cache_free (cwin->art_cache);
 	pragha_window_free (cwin);
 	pragha_scanner_free(cwin->scanner);
-	g_object_unref(G_OBJECT(cwin->preferences));
-	g_object_unref(cwin->cdbase);
 	dbus_handlers_free (cwin);
 	if (cwin->notify)
 		pragha_notify_free (cwin->notify);
@@ -294,6 +292,15 @@ pragha_application_free (struct con_win *cwin)
 	pragha_cdda_free ();
 
 	g_object_unref (cwin->systray_menu);
+
+	/* Explicit destroy mainwindow to finalize lifecycle of childrens */
+
+	gtk_widget_destroy (cwin->mainwindow);
+
+	/* Save Preferences and database. */
+
+	g_object_unref(G_OBJECT(cwin->preferences));
+	g_object_unref(cwin->cdbase);
 
 	g_slice_free(struct con_win, cwin);
 }
