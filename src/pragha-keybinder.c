@@ -88,7 +88,7 @@ gboolean keybinder_will_be_useful ()
 #endif
 }
 
-gint init_keybinder(struct con_win *cwin)
+gboolean init_keybinder (struct con_win *cwin)
 {
 	keybinder_init ();
 
@@ -98,9 +98,7 @@ gint init_keybinder(struct con_win *cwin)
 	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, cwin);
 	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, cwin);
 
-	cwin->keybinder = TRUE;
-
-	return 0;
+	return TRUE;
 }
 
 void keybinder_free()
