@@ -428,9 +428,11 @@ save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaData
 void add_playlist_current_playlist(gchar *splaylist, struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
 	GList *list = NULL;
 
-	list = add_playlist_to_mobj_list(cwin->cdbase, splaylist, list);
+	cdbase = pragha_application_get_database (cwin);
+	list = add_playlist_to_mobj_list (cdbase, splaylist, list);
 
 	if(list) {
 		playlist = pragha_application_get_playlist (cwin);
@@ -1371,6 +1373,7 @@ static void
 update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
 	GtkWidget *submenu, *menuitem, *place;
 	GtkAccelGroup* accel_group;
 
@@ -1402,7 +1405,8 @@ update_playlist_changes_save_playlist_mainmenu (struct con_win *cwin)
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+	cdbase = pragha_application_get_database (cwin);
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
 	while (pragha_prepared_statement_step (statement)) {
@@ -1421,6 +1425,7 @@ static void
 update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
 	GtkWidget *submenu, *menuitem, *place;
 	GtkAccelGroup* accel_group;
 
@@ -1452,7 +1457,8 @@ update_playlist_changes_save_selection_mainmenu (struct con_win *cwin)
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+	cdbase = pragha_application_get_database (cwin);
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
 
 	while (pragha_prepared_statement_step (statement)) {

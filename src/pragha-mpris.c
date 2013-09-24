@@ -666,6 +666,7 @@ static GVariant* mpris_Player_get_CanControl (GError **error, struct con_win *cw
 static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaDatabase *cdbase;
 	PraghaPlaylist *playlist;
 	gchar *get_playlist = NULL, *test_playlist = NULL, *found_playlist = NULL;
 	gchar **db_playlists = NULL;
@@ -676,7 +677,8 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	g_variant_get(parameters, "(o)", &get_playlist);
 
 	if(get_playlist && g_str_has_prefix(get_playlist, MPRIS_PATH)) {
-		db_playlists = pragha_database_get_playlist_names (cwin->cdbase);
+		cdbase = pragha_application_get_database (cwin);
+		db_playlists = pragha_database_get_playlist_names (cdbase);
 		if(db_playlists) {
 			while(db_playlists[i]) {
 				test_playlist = g_strdup_printf("%s/Playlists/%d", MPRIS_PATH, i);
@@ -715,6 +717,7 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 
 static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVariant* parameters, struct con_win *cwin)
 {
+	PraghaDatabase *cdbase;
 	GVariantBuilder builder;
 	guint i = 0, start, max;
 	gchar *order;
@@ -728,7 +731,8 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("(a(oss))"));
 	g_variant_builder_open(&builder, G_VARIANT_TYPE("a(oss)"));
 
-	lists = pragha_database_get_playlist_names (cwin->cdbase);
+	cdbase = pragha_application_get_database (cwin);
+	lists = pragha_database_get_playlist_names (cdbase);
 
 	if (lists) {
 		g_variant_get(parameters, "(uusb)", &start, &max, &order, &reverse);
@@ -769,7 +773,10 @@ static GVariant* mpris_Playlists_get_Orderings (GError **error, struct con_win *
 
 static GVariant* mpris_Playlists_get_PlaylistCount (GError **error, struct con_win *cwin)
 {
-	return g_variant_new_uint32 (pragha_database_get_playlist_count (cwin->cdbase));
+	PraghaDatabase *cdbase;
+	cdbase = pragha_application_get_database (cwin);
+
+	return g_variant_new_uint32 (pragha_database_get_playlist_count (cdbase));
 }
 
 /* org.mpris.MediaPlayer2.TrackList */

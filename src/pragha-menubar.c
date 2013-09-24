@@ -510,6 +510,7 @@ totem_open_location_set_from_clipboard (GtkWidget *open_location)
 void add_location_action(GtkAction *action, struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
 	GtkWidget *dialog;
 	GtkWidget *vbox, *hbox;
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
@@ -581,7 +582,9 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			if (name) {
 				new_radio (playlist, uri, name);
-				pragha_database_change_playlists_done(cwin->cdbase);
+
+				cdbase = pragha_application_get_database (cwin);
+				pragha_database_change_playlists_done (cdbase);
 			}
 		}
 		break;
@@ -837,12 +840,15 @@ pragha_menubar_clear_playlist_action (GtkAction *action, struct con_win *cwin)
 
 void statistics_action(GtkAction *action, struct con_win *cwin)
 {
+	PraghaDatabase *cdbase;
 	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	n_artists = pragha_database_get_artist_count (cwin->cdbase);
-	n_albums = pragha_database_get_album_count (cwin->cdbase);
-	n_tracks = pragha_database_get_track_count (cwin->cdbase);
+	cdbase = pragha_application_get_database (cwin);
+
+	n_artists = pragha_database_get_artist_count (cdbase);
+	n_albums = pragha_database_get_album_count (cdbase);
+	n_tracks = pragha_database_get_track_count (cdbase);
 
 	dialog = gtk_message_dialog_new(GTK_WINDOW(pragha_application_get_window(cwin)),
 					GTK_DIALOG_DESTROY_WITH_PARENT,

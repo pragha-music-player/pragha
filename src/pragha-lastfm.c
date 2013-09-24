@@ -239,6 +239,7 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 						struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
 	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0;
 
@@ -248,19 +249,22 @@ prepend_song_with_artist_and_title_to_mobj_list(const gchar *artist,
 	   pragha_playlist_already_has_title_of_artist (playlist, title, artist))
 		return list;
 
+	cdbase = pragha_application_get_database (cwin);
+
 	const gchar *sql = "SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
 				"WHERE ARTIST.id = TRACK.artist AND LOCATION.id = TRACK.location "
 				"AND TRACK.title = ? COLLATE NOCASE "
 				"AND ARTIST.name = ? COLLATE NOCASE "
 				"ORDER BY RANDOM() LIMIT 1;";
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cwin->cdbase, sql);
+
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
 	pragha_prepared_statement_bind_string (statement, 1, title);
 	pragha_prepared_statement_bind_string (statement, 2, artist);
 
 	if (pragha_prepared_statement_step (statement)) {
 		location_id = pragha_prepared_statement_get_int (statement, 2);
-		mobj = new_musicobject_from_db (cwin->cdbase, location_id);
+		mobj = new_musicobject_from_db (cdbase, location_id);
 		list = g_list_prepend (list, mobj);
 	}
 

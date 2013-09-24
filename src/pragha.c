@@ -132,6 +132,12 @@ pragha_application_get_preferences (struct con_win *cwin)
 	return cwin->preferences;
 }
 
+PraghaDatabase *
+pragha_application_get_database (struct con_win *cwin)
+{
+	return cwin->cdbase;
+}
+
 PraghaBackend *
 pragha_application_get_backend (struct con_win *cwin)
 {
