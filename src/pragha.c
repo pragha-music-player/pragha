@@ -177,7 +177,7 @@ pragha_application_get_playlist (struct con_win *cwin)
 PraghaLibraryPane *
 pragha_application_get_library (struct con_win *cwin)
 {
-	return cwin->clibrary;
+	return cwin->library;
 }
 
 PraghaToolbar *
@@ -262,7 +262,7 @@ pragha_application_construct_window (struct con_win *cwin)
 	cwin->infobox = gtk_vbox_new (FALSE, 0);
 	cwin->pane = gtk_hpaned_new ();
 	cwin->sidebar = pragha_sidebar_new ();
-	cwin->clibrary = pragha_library_pane_new ();
+	cwin->library = pragha_library_pane_new ();
 	cwin->playlist = pragha_playlist_new ();
 	cwin->statusbar = pragha_statusbar_get ();
 	cwin->scanner = pragha_scanner_new();
@@ -430,11 +430,11 @@ pragha_application_new (gint argc, gchar *argv[])
 	g_signal_connect (playlist, "playlist-change-tags",
 	                  G_CALLBACK(pragha_playlist_update_change_tags), cwin);
 		
-	g_signal_connect (cwin->clibrary, "library-append-playlist",
+	g_signal_connect (cwin->library, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);
-	g_signal_connect (cwin->clibrary, "library-replace-playlist",
+	g_signal_connect (cwin->library, "library-replace-playlist",
 	                  G_CALLBACK(pragha_library_pane_replace_tracks), cwin);
-	g_signal_connect (cwin->clibrary, "library-replace-playlist-and-play",
+	g_signal_connect (cwin->library, "library-replace-playlist-and-play",
 	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), cwin);
 
 	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",

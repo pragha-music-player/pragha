@@ -147,6 +147,7 @@ pragha_preferences_dialog_get_library_list (PreferencesDialog *dialog)
 static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
+	PraghaLibraryPane *library;
 	gboolean osd, test_change;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
@@ -229,6 +230,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		if (folder_scanned)
 			free_str_list(folder_scanned);
 
+		library = pragha_application_get_library (dialog->cwin);
 		if (pragha_preferences_get_library_style(dialog->preferences) == FOLDERS) {
 			test_change = pragha_preferences_get_fuse_folders(dialog->preferences);
 
@@ -236,7 +238,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w)));
 
 			if (pragha_preferences_get_fuse_folders(dialog->preferences) != test_change)
-				library_pane_view_reload(dialog->cwin->clibrary);
+				library_pane_view_reload (library);
 		}
 		else {
 			test_change = pragha_preferences_get_sort_by_year(dialog->preferences);
@@ -245,7 +247,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w)));
 
 			if (pragha_preferences_get_sort_by_year(dialog->preferences) != test_change)
-				library_pane_view_reload(dialog->cwin->clibrary);
+				library_pane_view_reload (library);
 		}
 
 		/* General preferences */

@@ -96,7 +96,7 @@ struct con_win {
 	GtkWidget         *infobox;
 	GtkWidget         *pane;
 	PraghaSidebar     *sidebar;
-	PraghaLibraryPane *clibrary;
+	PraghaLibraryPane *library;
 	PraghaPlaylist    *playlist;
 	PraghaStatusbar   *statusbar;
 

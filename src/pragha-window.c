@@ -301,9 +301,11 @@ pragha_window_free (struct con_win *cwin)
 static void init_gui_state(struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaLibraryPane *library;
 	PraghaPreferences *preferences;
 
-	pragha_library_pane_init_view (cwin->clibrary);
+	library = pragha_application_get_library (cwin);
+	pragha_library_pane_init_view (library);
 
 	preferences = pragha_application_get_preferences (cwin);
 	if (pragha_preferences_get_restore_playlist (preferences)) {
@@ -320,13 +322,16 @@ static void init_gui_state(struct con_win *cwin)
 static gboolean _init_gui_state(gpointer data)
 {
 	PraghaPlaylist *playlist;
+	PraghaLibraryPane *library;
 	PraghaPreferences *preferences;
 
 	struct con_win *cwin = data;
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	pragha_library_pane_init_view (cwin->clibrary);
+
+	library = pragha_application_get_library (cwin);
+	pragha_library_pane_init_view (library);
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
