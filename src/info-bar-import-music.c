@@ -37,6 +37,7 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 {
 	GSList *library_dir = NULL;
 	PraghaPreferences *preferences;
+	PraghaScanner *scanner;
 
 	struct con_win *cwin = user_data;
 	const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
@@ -56,7 +57,8 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 			                                      library_dir);
 			free_str_list(library_dir);
 
-			pragha_scanner_scan_library(cwin->scanner);
+			scanner = pragha_application_get_scanner (cwin);
+			pragha_scanner_scan_library (scanner);
 			break;
 		default:
 			g_warn_if_reached();
@@ -93,6 +95,8 @@ GtkWidget * create_info_bar_import_music(struct con_win *cwin)
 
 static void info_bar_update_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
 {
+	PraghaScanner *scanner;
+
 	struct con_win *cwin = user_data;
 
 	gtk_widget_destroy(GTK_WIDGET(info_bar));
@@ -102,7 +106,8 @@ static void info_bar_update_response_cb(GtkInfoBar *info_bar, gint response_id, 
 		case GTK_RESPONSE_CANCEL:
 			break;
 		case GTK_RESPONSE_YES:
-			pragha_scanner_update_library(cwin->scanner);
+			scanner = pragha_application_get_scanner (cwin);
+			pragha_scanner_update_library (scanner);
 			break;
 		default:
 			g_warn_if_reached();

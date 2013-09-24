@@ -311,7 +311,6 @@ static void init_gui_state(struct con_win *cwin)
 		init_current_playlist_view (playlist);
 	}
 
-	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		pragha_window_add_widget_to_infobox(cwin, info_bar);
@@ -338,7 +337,6 @@ static gboolean _init_gui_state(gpointer data)
 		init_current_playlist_view (playlist);
 	}
 
-	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
 		GtkWidget* info_bar = create_info_bar_import_music(cwin);
 		pragha_window_add_widget_to_infobox(cwin, info_bar);

@@ -144,6 +144,12 @@ pragha_application_get_backend (struct con_win *cwin)
 	return cwin->backend;
 }
 
+PraghaScanner *
+pragha_application_get_scanner (struct con_win *cwin)
+{
+	return cwin->scanner;
+}
+
 GtkWidget *
 pragha_application_get_window (struct con_win *cwin)
 {
@@ -253,6 +259,7 @@ pragha_application_construct_window (struct con_win *cwin)
 	cwin->clibrary = pragha_library_pane_new ();
 	cwin->playlist = pragha_playlist_new ();
 	cwin->statusbar = pragha_statusbar_get ();
+	cwin->scanner = pragha_scanner_new();
 
 	pragha_menubar_connect_signals (cwin->menu_ui_manager, cwin);
 
