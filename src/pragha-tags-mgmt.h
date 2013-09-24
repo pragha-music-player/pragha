@@ -30,7 +30,5 @@ gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mo
 gboolean confirm_tno_multiple_tracks(gint tno, GtkWidget *parent);
 gboolean confirm_title_multiple_tracks(const gchar *title, GtkWidget *parent);
 void pragha_update_local_files_change_tag(GPtrArray *file_arr, gint changed, PraghaMusicobject *mobj);
-void copy_tags_selection_current_playlist(PraghaMusicobject *omobj, gint changes, struct con_win *cwin);
-void edit_tags_current_playlist(GtkAction *action, struct con_win *cwin);
 
 #endif /* PRAGHA_TAGS_MGMT_H */

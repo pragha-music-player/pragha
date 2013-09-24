@@ -119,7 +119,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	struct con_win *cwin = notify->cwin;
 
 	/* Check if OSD is enabled in preferences */
-	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (pragha_window_get_mainwindow(cwin))))
+	if (!pragha_preferences_get_show_osd(cwin->preferences) || gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(cwin))))
 		return;
 
 	backend = pragha_application_get_backend (cwin);
@@ -176,7 +176,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	notify_notification_set_timeout (notify->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
-	toolbar = pragha_window_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (cwin);
 	notify_notification_set_icon_from_pixbuf (notify->osd_notify,
 		pragha_album_art_get_pixbuf (pragha_toolbar_get_album_art(toolbar)));
 

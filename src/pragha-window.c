@@ -28,7 +28,6 @@
 
 #include "pragha-window.h"
 #include "pragha-menubar.h"
-#include "pragha-statusicon.h"
 #include "pragha-playback.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
@@ -51,15 +50,9 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
 	}
 	else {
-		pragha_application_quit (cwin);
+		pragha_application_quit ();
 	}
 	return TRUE;
-}
-
-void
-pragha_destroy_window(GtkWidget *widget, struct con_win *cwin)
-{
-	pragha_application_quit (cwin);
 }
 
 void
@@ -128,7 +121,10 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 void
 gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin)
 {
-	update_current_playlist_view_new_track (cwin->cplaylist, backend);
+	PraghaPlaylist *playlist;
+	playlist = pragha_application_get_playlist (cwin);
+
+	pragha_playlist_set_track_error (playlist, pragha_backend_get_error (backend));
 }
 
 static gboolean
@@ -137,7 +133,7 @@ pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, struct
 	GtkAction *action_fullscreen;
 
  	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
-		action_fullscreen = pragha_window_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
+		action_fullscreen = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
 
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen),
 		                              (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
@@ -151,7 +147,7 @@ pragha_window_unfullscreen (GObject *object, struct con_win *cwin)
 {
 	GtkAction *action_fullscreen;
 
-	action_fullscreen = pragha_window_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
+	action_fullscreen = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
 
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
@@ -213,49 +209,6 @@ pragha_menubar_remove_plugin_action (struct con_win *cwin,
 	gtk_ui_manager_remove_ui (ui_manager, merge_id);
 	gtk_ui_manager_remove_action_group (ui_manager, action_group);
 	g_object_unref (action_group);
-}
-
-
-GtkAction *
-pragha_window_get_menu_action (struct con_win *cwin, const gchar *path)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
-
-	return gtk_ui_manager_get_action (ui_manager, path);
-}
-
-GtkWidget *
-pragha_window_get_menu_action_widget (struct con_win *cwin, const gchar *path)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
-
-	return gtk_ui_manager_get_widget (ui_manager, path);
-}
-
-GtkWidget *
-pragha_window_get_menubar (struct con_win *cwin)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
-
-	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
-}
-
-GtkWidget *
-pragha_window_get_mainwindow (struct con_win *cwin)
-{
-	return cwin->mainwindow;
-}
-
-PraghaToolbar *
-pragha_window_get_toolbar (struct con_win *cwin)
-{
-	return cwin->toolbar;
-}
-
-GdkPixbuf *
-pragha_window_get_pixbuf_app (struct con_win *cwin)
-{
-	return cwin->pixbuf_app;
 }
 
 /*
@@ -344,10 +297,13 @@ pragha_window_free (struct con_win *cwin)
 #if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(struct con_win *cwin)
 {
+	PraghaPlaylist *playlist;
 	pragha_library_pane_init_view (cwin->clibrary);
 
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin->cplaylist);
+	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+		playlist = pragha_application_get_playlist (cwin);
+		init_current_playlist_view (playlist);
+	}
 
 	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -358,6 +314,7 @@ static void init_gui_state(struct con_win *cwin)
 #else
 static gboolean _init_gui_state(gpointer data)
 {
+	PraghaPlaylist *playlist;
 	struct con_win *cwin = data;
 
 	if (pragha_process_gtk_events ())
@@ -366,8 +323,10 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	if (pragha_preferences_get_restore_playlist(cwin->preferences))
-		init_current_playlist_view(cwin->cplaylist);
+	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+		playlist = pragha_application_get_playlist (cwin);
+		init_current_playlist_view (playlist);
+	}
 
 	cwin->scanner = pragha_scanner_new();
 	if (info_bar_import_music_will_be_useful(cwin)) {
@@ -385,7 +344,7 @@ pragha_window_init_menu_actions (struct con_win *cwin)
 	GtkAction *action = NULL;
 	const gchar *start_mode;
 
-	action = pragha_window_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
+	action = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
 
 	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
@@ -393,7 +352,7 @@ pragha_window_init_menu_actions (struct con_win *cwin)
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
-	action = pragha_window_get_menu_action (cwin, "/Menubar/ViewMenu/Playback controls below");
+	action = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Playback controls below");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
 }
 
@@ -432,93 +391,86 @@ pragha_window_init (struct con_win *cwin)
 	#else
 	gtk_init_add(_init_gui_state, cwin);
 	#endif
-
 }
 
 void
 pragha_window_new (struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
+	GtkWidget *window;
+	PraghaPlaylist *playlist;
+	PraghaLibraryPane *library;
+	PraghaSidebar *sidebar;
+	PraghaStatusbar *statusbar;
+	PraghaToolbar *toolbar;
+	GtkWidget *menubar, *pane, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
 
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
+	preferences = pragha_application_get_preferences (cwin);
+
+	/* Collect widgets. */
+
+	window    = pragha_application_get_window (cwin);
+	playlist  = pragha_application_get_playlist (cwin);
+	library   = pragha_application_get_library (cwin);
+	sidebar   = pragha_application_get_sidebar (cwin);
+	statusbar = pragha_application_get_statusbar (cwin);
+	toolbar   = pragha_application_get_toolbar (cwin);
+	menubar   = pragha_application_get_menubar (cwin);
+
+	pane      = cwin->pane;
+	infobox   = cwin->infobox;
+
 	/* Main window */
 
-	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-	cwin->pixbuf_app = gdk_pixbuf_new_from_file(PIXMAPDIR"/pragha.png", NULL);
-	if (!cwin->pixbuf_app)
-		g_warning("Unable to load pragha png");
-	else
-		gtk_window_set_icon (GTK_WINDOW(cwin->mainwindow),
-		                     cwin->pixbuf_app);
-	
-	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
-
 #if !GTK_CHECK_VERSION (3, 0, 0)
-	GdkScreen *screen = gtk_widget_get_screen(cwin->mainwindow);
+	GdkScreen *screen = gtk_widget_get_screen (window);
 	GdkColormap *colormap = gdk_screen_get_rgba_colormap (screen);
 	if (colormap && gdk_screen_is_composited (screen))
 		gtk_widget_set_default_colormap(colormap);
 #endif
 
-	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
+	g_signal_connect (G_OBJECT(window), "window-state-event",
 	                  G_CALLBACK(pragha_window_state_event), cwin);
-	g_signal_connect (G_OBJECT(cwin->mainwindow), "delete_event",
+	g_signal_connect (G_OBJECT(window), "delete_event",
 	                  G_CALLBACK(pragha_close_window), cwin);
-	g_signal_connect (G_OBJECT(cwin->mainwindow), "destroy",
-	                  G_CALLBACK(pragha_destroy_window), cwin);
 
 	/* Set Default Size */
 
-	win_size = pragha_preferences_get_integer_list (cwin->preferences,
+	win_size = pragha_preferences_get_integer_list (preferences,
 	                                                GROUP_WINDOW,
 	                                                KEY_WINDOW_SIZE,
 	                                                &cnt);
 	if (win_size) {
-		gtk_window_set_default_size(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_set_default_size(GTK_WINDOW(window),
 		                            win_size[0], win_size[1]);
 		g_free(win_size);
 	}
 	else {
-		gtk_window_set_default_size(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_set_default_size(GTK_WINDOW(window),
 		                            MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
 	}
 
 	/* Set Position */
 
-	win_position = pragha_preferences_get_integer_list (cwin->preferences,
+	win_position = pragha_preferences_get_integer_list (preferences,
 	                                                    GROUP_WINDOW,
 	                                                    KEY_WINDOW_POSITION,
 	                                                    &cnt);
 
 	if (win_position) {
-		gtk_window_move(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_move(GTK_WINDOW(window),
 		                win_position[0], win_position[1]);
 		g_free(win_position);
 	}
 	else {
-		gtk_window_set_position(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_set_position(GTK_WINDOW(window),
 		                        GTK_WIN_POS_CENTER);
 	}
-
-	/* Collect widgets. */
-
-	cwin->menu_ui_manager = pragha_menubar_new ();
-	pragha_menubar_connect_signals (cwin->menu_ui_manager, cwin);
-	cwin->toolbar = pragha_toolbar_new ();
-	cwin->infobox = gtk_vbox_new(FALSE, 0);
-	cwin->pane = gtk_hpaned_new();
-	cwin->sidebar = pragha_sidebar_new();
-	cwin->clibrary = pragha_library_pane_new();
-	cwin->cplaylist = pragha_playlist_new(cwin);
-	cwin->statusbar = pragha_statusbar_get();
-
-	/* Systray */
-
-	create_status_icon(cwin);
 
 	/* Pack widgets: [ Playlist ]
 	 *               [Status Bar]
@@ -526,20 +478,20 @@ pragha_window_new (struct con_win *cwin)
 
 	playlist_statusbar_vbox = gtk_vbox_new(FALSE, 2);
 
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), pragha_playlist_get_widget(cwin->cplaylist),
+	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(playlist),
 	                    TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(cwin->statusbar),
+	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
 	                    FALSE, FALSE, 0);
 
 	/* Pack widgets: [Sidebar][ Playlist ]
 	 *               [       ][Status Bar]
 	 */
 
-	gtk_paned_pack1 (GTK_PANED (cwin->pane), pragha_sidebar_get_widget(cwin->sidebar), FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (cwin->pane), playlist_statusbar_vbox, TRUE, FALSE);
+	gtk_paned_pack1 (GTK_PANED (pane), pragha_sidebar_get_widget(sidebar), FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane), playlist_statusbar_vbox, TRUE, FALSE);
 
-	gtk_paned_set_position (GTK_PANED (cwin->pane),
-		pragha_preferences_get_sidebar_size(cwin->preferences));
+	gtk_paned_set_position (GTK_PANED (pane),
+		pragha_preferences_get_sidebar_size (preferences));
 
 
 	/* Pack widgets: [    Menubar        ]
@@ -551,21 +503,21 @@ pragha_window_new (struct con_win *cwin)
 
 	vbox_main = gtk_vbox_new(FALSE, 2);
 
-	gtk_box_pack_start (GTK_BOX(vbox_main), pragha_window_get_menubar(cwin),
+	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(cwin->toolbar),
+	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), cwin->infobox,
+	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), cwin->pane,
+	gtk_box_pack_start (GTK_BOX(vbox_main), pane,
 	                    TRUE, TRUE, 0);
 
 	/* Add library pane to sidebar. */
 
-	pragha_sidebar_attach_plugin (cwin->sidebar,
-		                          pragha_library_pane_get_widget(cwin->clibrary),
-		                          pragha_library_pane_get_pane_title(cwin->clibrary),
-		                          pragha_library_pane_get_popup_menu (cwin->clibrary));
+	pragha_sidebar_attach_plugin (sidebar,
+		                          pragha_library_pane_get_widget (library),
+		                          pragha_library_pane_get_pane_title (library),
+		                          pragha_library_pane_get_popup_menu (library));
 
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.
@@ -573,17 +525,17 @@ pragha_window_new (struct con_win *cwin)
 
 	gtk_widget_show(vbox_main);
 
-	gtk_widget_show(pragha_window_get_menubar(cwin));
-	gtk_widget_show(GTK_WIDGET(cwin->toolbar));
-	gtk_widget_show(cwin->infobox);
-	gtk_widget_show(cwin->pane);
+	gtk_widget_show (menubar);
+	gtk_widget_show (GTK_WIDGET(toolbar));
+	gtk_widget_show (infobox);
+	gtk_widget_show (pane);
 
 	gtk_widget_show(playlist_statusbar_vbox);
-	gtk_widget_show_all(pragha_playlist_get_widget(cwin->cplaylist));
+	gtk_widget_show_all (GTK_WIDGET(playlist));
 
 	/* Pack everyting on the main window. */
 
-	gtk_container_add(GTK_CONTAINER(cwin->mainwindow), vbox_main);
+	gtk_container_add(GTK_CONTAINER(window), vbox_main);
 
 	pragha_window_init (cwin);
 }

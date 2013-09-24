@@ -139,7 +139,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
 	dialog = gtk_dialog_new_with_buttons(title_header,
-					     GTK_WINDOW(pragha_window_get_mainwindow(cwin)),
+					     GTK_WINDOW(pragha_application_get_window(cwin)),
 					     GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
@@ -191,7 +191,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 			if ((0 == g_strcmp0 (artist, lartist)) &&
 			    (0 == g_strcmp0 (album, lalbum))) {
 				/* TODO: Emit a signal to update the album art and mpris. */
-				toolbar = pragha_window_get_toolbar (cwin);
+				toolbar = pragha_application_get_toolbar (cwin);
 				pragha_toolbar_set_image_album_art (toolbar, album_art_path);
 				mpris_update_metadata_changed (cwin);
 			}
@@ -255,7 +255,7 @@ glyr_finished_thread_update (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
-	remove_watch_cursor (pragha_window_get_mainwindow(glyr_info->cwin));
+	remove_watch_cursor (pragha_application_get_window(glyr_info->cwin));
 	if(glyr_info->head != NULL)
 		glyr_finished_successfully(glyr_info);
 	else
@@ -315,7 +315,7 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 
 	glyr_info->cwin = cwin;
 
-	set_watch_cursor (pragha_window_get_mainwindow(cwin));
+	set_watch_cursor (pragha_application_get_window(cwin));
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 
@@ -367,9 +367,15 @@ get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *mobj;
+
 	struct con_win *cwin = glyr->cwin;
 
-	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+
+	mobj = pragha_playlist_get_selected_musicobject(playlist);
+
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 
 	CDEBUG(DBG_INFO, "Get Artist info Action of current playlist selection");
@@ -383,9 +389,13 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *mobj;
 	struct con_win *cwin = glyr->cwin;
 
-	PraghaMusicobject *mobj = pragha_playlist_get_selected_musicobject(cwin->cplaylist);
+	playlist = pragha_application_get_playlist (cwin);
+	mobj = pragha_playlist_get_selected_musicobject (playlist);
+
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
 	const gchar *title = pragha_musicobject_get_title(mobj);
 
@@ -499,6 +509,9 @@ setup_main_menu (PraghaGlyr *glyr)
 static void
 setup_playlist (PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
+	struct con_win *cwin = glyr->cwin;
+
 	glyr->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (glyr->action_group_playlist, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (glyr->action_group_playlist,
@@ -506,7 +519,8 @@ setup_playlist (PraghaGlyr *glyr)
 	                              G_N_ELEMENTS (playlist_actions),
 	                              glyr);
 
-	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (glyr->cwin->cplaylist,
+	playlist = pragha_application_get_playlist (cwin);
+	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
 	                                                                glyr->action_group_playlist,
 	                                                                playlist_xml);
 }
@@ -514,6 +528,7 @@ setup_playlist (PraghaGlyr *glyr)
 void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
+	PraghaPlaylist *playlist;
 	struct con_win *cwin = glyr->cwin;
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (cwin),
@@ -525,7 +540,8 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	                                     glyr->merge_id_main_menu);
 	glyr->merge_id_main_menu = 0;
 
-	pragha_playlist_remove_plugin_action (cwin->cplaylist,
+	playlist = pragha_application_get_playlist (cwin);
+	pragha_playlist_remove_plugin_action (playlist,
 	                                      glyr->action_group_playlist,
 	                                      glyr->merge_id_playlist);
 
