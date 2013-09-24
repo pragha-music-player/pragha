@@ -4263,16 +4263,21 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	playlist->view = create_current_playlist_view (playlist);
 	playlist->model = g_object_ref (gtk_tree_view_get_model(GTK_TREE_VIEW(playlist->view)));
 
-	/* Attach view to scroll window */
+	/* Setup the scrolled window */
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(playlist),
 	                                GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(playlist),
 	                                     GTK_SHADOW_IN);
+	gtk_scrolled_window_set_hadjustment (GTK_SCROLLED_WINDOW(playlist), NULL);
+	gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(playlist), NULL);
+
+	/* Attach view to scroll window */
+
 	gtk_container_add (GTK_CONTAINER(playlist), playlist->view);
 
 	/* Init columns */
+
 
 	init_current_playlist_columns (playlist);
 
