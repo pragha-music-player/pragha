@@ -164,6 +164,7 @@ static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
 	PraghaToolbar *toolbar;
+	PraghaArtCache *art_cache;
 	const gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path = NULL;
 	PraghaBackend *backend;
@@ -176,10 +177,12 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	artist = glyr_info->query.artist;
 	album = glyr_info->query.album;
 
-	if (glyr_info->head->data)
-		pragha_art_cache_put (cwin->art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
+	art_cache = pragha_application_get_art_cache (cwin);
 
-	album_art_path = pragha_art_cache_get (cwin->art_cache, artist, album);
+	if (glyr_info->head->data)
+		pragha_art_cache_put (art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
+
+	album_art_path = pragha_art_cache_get (art_cache, artist, album);
 
 	if (album_art_path) {
 		backend = pragha_application_get_backend (cwin);
@@ -410,9 +413,10 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 related_get_album_art_handler (struct con_win *cwin)
 {
+	PraghaBackend *backend;
+	PraghaArtCache *art_cache;
 	glyr_struct *glyr_info;
 	gchar *album_art_path;
-	PraghaBackend *backend;
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
@@ -428,7 +432,8 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (string_is_empty(artist) || string_is_empty(album))
 		return;
 
-	album_art_path = pragha_art_cache_get (cwin->art_cache, artist, album);
+	art_cache = pragha_application_get_art_cache (cwin);
+	album_art_path = pragha_art_cache_get (art_cache, artist, album);
 
 	if (album_art_path)
 		goto exists;
