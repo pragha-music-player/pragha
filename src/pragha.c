@@ -138,6 +138,12 @@ pragha_application_get_database (struct con_win *cwin)
 	return cwin->cdbase;
 }
 
+PraghaArtCache *
+pragha_application_get_art_cache (struct con_win *cwin)
+{
+	return cwin->art_cache;
+}
+
 PraghaBackend *
 pragha_application_get_backend (struct con_win *cwin)
 {

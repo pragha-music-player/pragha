@@ -246,6 +246,7 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 {
 	PraghaToolbar *toolbar;
 	PraghaPreferences *preferences;
+	PraghaArtCache *art_cache;
 
 	gchar *album_path = NULL, *path = NULL;
 
@@ -261,7 +262,8 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 	if (!pragha_preferences_get_show_album_art (preferences))
 		return;
 
-	album_path = pragha_art_cache_get (cwin->art_cache,
+	art_cache = pragha_application_get_art_cache (cwin);
+	album_path = pragha_art_cache_get (art_cache,
 	                                   pragha_musicobject_get_artist(mobj),
 	                                   pragha_musicobject_get_album(mobj));
 

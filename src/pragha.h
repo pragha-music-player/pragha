@@ -130,6 +130,7 @@ struct con_win {
 
 PraghaPreferences *pragha_application_get_preferences     (struct con_win *cwin);
 PraghaDatabase    *pragha_application_get_database        (struct con_win *cwin);
+PraghaArtCache    *pragha_application_get_art_cache       (struct con_win *cwin);
 
 PraghaBackend     *pragha_application_get_backend         (struct con_win *cwin);
 
