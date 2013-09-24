@@ -28,7 +28,6 @@
 
 gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 {
-	GtkWidget* entry;
 	GtkWidget* xfce_heading;
 	GtkWidget* hbox;
 	GtkWidget* vbox;
@@ -37,32 +36,34 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 	GtkWidget* separator;
 	gchar* markup;
 
-	entry = gtk_entry_new();
 	xfce_heading = gtk_event_box_new();
-
-	gtk_widget_modify_bg(xfce_heading,
-				GTK_STATE_NORMAL,
-				&gtk_widget_get_style(entry)->base[GTK_STATE_NORMAL]);
 
 	hbox = gtk_hbox_new(FALSE, 12);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
 
-        if (icon)
-            image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
-        else
-            image = gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_DIALOG);
+	if (icon)
+		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
+	else
+		image = gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_DIALOG);
 
 	label = gtk_label_new(NULL);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-	gtk_widget_modify_fg(label,
-				GTK_STATE_NORMAL,
-				&gtk_widget_get_style(entry)->text[GTK_STATE_NORMAL]);
-        markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
+	markup = g_strdup_printf("<span size='large' weight='bold'>%s</span>", header);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
 	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
 	g_free(markup);
 
+	#if GTK_CHECK_VERSION (3, 0, 0)
+	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading), GTK_STYLE_CLASS_ENTRY);
+	#else
+	GtkWidget *entry = gtk_entry_new();
+	GtkStyle *style = gtk_widget_get_style (entry);
+	gtk_widget_modify_bg (xfce_heading, GTK_STATE_NORMAL,
+		                  &style->base[GTK_STATE_NORMAL]);
+	gtk_widget_modify_fg (label, GTK_STATE_NORMAL,
+		                  &style->text[GTK_STATE_NORMAL]);
 	gtk_widget_destroy (entry);
+	#endif
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
