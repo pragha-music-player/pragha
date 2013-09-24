@@ -132,6 +132,9 @@ PraghaPreferences *pragha_application_get_preferences     (struct con_win *cwin)
 PraghaDatabase    *pragha_application_get_database        (struct con_win *cwin);
 
 PraghaBackend     *pragha_application_get_backend         (struct con_win *cwin);
+
+PraghaScanner     *pragha_application_get_scanner         (struct con_win *cwin);
+
 GtkWidget         *pragha_application_get_window          (struct con_win *cwin);
 GdkPixbuf         *pragha_application_get_pixbuf_app      (struct con_win *cwin);
 PraghaPlaylist    *pragha_application_get_playlist        (struct con_win *cwin);

@@ -797,14 +797,20 @@ show_equalizer_action(GtkAction *action, struct con_win *cwin)
 
 void rescan_library_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_scanner_scan_library(cwin->scanner);
+	PraghaScanner *scanner;
+	scanner = pragha_application_get_scanner (cwin);
+
+	pragha_scanner_scan_library (scanner);
 }
 
 /* Handler for the 'Update Library' item in the Tools menu */
 
 void update_library_action(GtkAction *action, struct con_win *cwin)
 {
-	pragha_scanner_update_library(cwin->scanner);
+	PraghaScanner *scanner;
+	scanner = pragha_application_get_scanner (cwin);
+
+	pragha_scanner_update_library (scanner);
 }
 
 /* Handler for remove, crop and clear action in the Tools menu */
