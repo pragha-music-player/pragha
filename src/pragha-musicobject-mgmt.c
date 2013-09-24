@@ -118,6 +118,7 @@ new_musicobject_from_cdda(struct con_win *cwin,
                           cddb_disc_t *cddb_disc,
                           gint track_no)
 {
+	PraghaPreferences *preferences;
 	PraghaMusicobject *mobj = NULL;
 	gint channels, start, end;
 	gchar *ntitle = NULL, *nfile = NULL;
@@ -132,7 +133,8 @@ new_musicobject_from_cdda(struct con_win *cwin,
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
-	if (pragha_preferences_get_use_cddb(cwin->preferences) && cddb_disc) {
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_use_cddb (preferences) && cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;
 		gint year;

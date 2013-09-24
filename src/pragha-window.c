@@ -42,8 +42,11 @@
 gboolean
 pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
-	if(pragha_preferences_get_hide_instead_close(cwin->preferences)) {
-		if(pragha_preferences_get_show_status_icon(cwin->preferences) &&
+	PraghaPreferences *preferences;
+	preferences = pragha_application_get_preferences (cwin);
+
+	if(pragha_preferences_get_hide_instead_close (preferences)) {
+		if(pragha_preferences_get_show_status_icon (preferences) &&
 		   gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
 			pragha_window_toggle_state(cwin, FALSE);
 		else
@@ -298,9 +301,12 @@ pragha_window_free (struct con_win *cwin)
 static void init_gui_state(struct con_win *cwin)
 {
 	PraghaPlaylist *playlist;
+	PraghaPreferences *preferences;
+
 	pragha_library_pane_init_view (cwin->clibrary);
 
-	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_restore_playlist (preferences)) {
 		playlist = pragha_application_get_playlist (cwin);
 		init_current_playlist_view (playlist);
 	}
@@ -315,6 +321,8 @@ static void init_gui_state(struct con_win *cwin)
 static gboolean _init_gui_state(gpointer data)
 {
 	PraghaPlaylist *playlist;
+	PraghaPreferences *preferences;
+
 	struct con_win *cwin = data;
 
 	if (pragha_process_gtk_events ())
@@ -323,7 +331,9 @@ static gboolean _init_gui_state(gpointer data)
 
 	if (pragha_process_gtk_events ())
 		return TRUE;
-	if (pragha_preferences_get_restore_playlist(cwin->preferences)) {
+
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_restore_playlist (preferences)) {
 		playlist = pragha_application_get_playlist (cwin);
 		init_current_playlist_view (playlist);
 	}
@@ -341,29 +351,35 @@ static gboolean _init_gui_state(gpointer data)
 static void
 pragha_window_init_menu_actions (struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	GtkAction *action = NULL;
 	const gchar *start_mode;
 
+	preferences = pragha_application_get_preferences (cwin);
+
 	action = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Fullscreen");
 
-	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
+	start_mode = pragha_preferences_get_start_mode (preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
 	else
 		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
 
 	action = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Playback controls below");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (cwin->preferences));
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (preferences));
 }
 
 static void
 pragha_window_init (struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	const gchar *start_mode;
 
 	/* Init window state */
 
-	start_mode = pragha_preferences_get_start_mode(cwin->preferences);
+	preferences = pragha_application_get_preferences (cwin);
+
+	start_mode = pragha_preferences_get_start_mode (preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE)) {
 		gtk_widget_show(cwin->mainwindow);
 	}

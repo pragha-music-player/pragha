@@ -432,20 +432,25 @@ static GVariant* mpris_Player_get_PlaybackStatus (GError **error, struct con_win
 
 static GVariant* mpris_Player_get_LoopStatus (GError **error, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	gboolean repeat;
 
-	repeat = pragha_preferences_get_repeat(cwin->preferences);
+	preferences = pragha_application_get_preferences (cwin);
+	repeat = pragha_preferences_get_repeat (preferences);
 
 	return g_variant_new_string(repeat ? "Playlist" : "None");
 }
 
 static void mpris_Player_put_LoopStatus (GVariant *value, GError **error, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
+
 	const gchar *new_loop = g_variant_get_string(value, NULL);
 
 	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
 
-	pragha_preferences_set_repeat(cwin->preferences, repeat);
+	preferences = pragha_application_get_preferences (cwin);
+	pragha_preferences_set_repeat (preferences, repeat);
 }
 
 static GVariant* mpris_Player_get_Rate (GError **error, struct con_win *cwin)
@@ -460,16 +465,22 @@ static void mpris_Player_put_Rate (GVariant *value, GError **error, struct con_w
 
 static GVariant* mpris_Player_get_Shuffle (GError **error, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	gboolean shuffle;
-	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+
+	preferences = pragha_application_get_preferences (cwin);
+	shuffle = pragha_preferences_get_shuffle (preferences);
 
 	return g_variant_new_boolean(shuffle);
 }
 
 static void mpris_Player_put_Shuffle (GVariant *value, GError **error, struct con_win *cwin)
 {
+	PraghaPreferences *preferences;
 	gboolean shuffle = g_variant_get_boolean(value);
-	pragha_preferences_set_shuffle(cwin->preferences, shuffle);
+
+	preferences = pragha_application_get_preferences (cwin);
+	pragha_preferences_set_shuffle (preferences, shuffle);
 }
 
 static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
@@ -1076,6 +1087,7 @@ on_name_lost (GDBusConnection *connection,
 void mpris_update_any(struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
 	gboolean change_detected = FALSE, shuffle, repeat;
 	GVariantBuilder b;
 	const gchar *newtitle = NULL;
@@ -1094,7 +1106,9 @@ void mpris_update_any(struct con_win *cwin)
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
 
-	shuffle = pragha_preferences_get_shuffle(cwin->preferences);
+	preferences = pragha_application_get_preferences (cwin);
+
+	shuffle = pragha_preferences_get_shuffle (preferences);
 	if(cwin->cmpris2->saved_shuffle != shuffle)
 	{
 		change_detected = TRUE;
@@ -1107,7 +1121,7 @@ void mpris_update_any(struct con_win *cwin)
 		cwin->cmpris2->state = pragha_backend_get_state (backend);
 		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, cwin));
 	}
-	repeat = pragha_preferences_get_repeat(cwin->preferences);
+	repeat = pragha_preferences_get_repeat (preferences);
 	if(cwin->cmpris2->saved_playbackstatus != repeat)
 	{
 		change_detected = TRUE;
@@ -1300,8 +1314,10 @@ any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 gint mpris_init(struct con_win *cwin)
 {
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
 
-	if (!pragha_preferences_get_use_mpris2(cwin->preferences))
+	preferences = pragha_application_get_preferences (cwin);
+	if (!pragha_preferences_get_use_mpris2 (preferences))
 		return 0;
 
 	if(NULL != cwin->cmpris2->dbus_connection)
@@ -1328,8 +1344,8 @@ gint mpris_init(struct con_win *cwin)
 				cwin,
 				NULL);
 
-	g_signal_connect (cwin->preferences, "notify::shuffle", G_CALLBACK (any_notify_cb), cwin);
-	g_signal_connect (cwin->preferences, "notify::repeat", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (preferences, "notify::shuffle", G_CALLBACK (any_notify_cb), cwin);
+	g_signal_connect (preferences, "notify::repeat", G_CALLBACK (any_notify_cb), cwin);
 
 	backend = pragha_application_get_backend (cwin);
 	g_signal_connect (backend, "notify::volume", G_CALLBACK (any_notify_cb), cwin);

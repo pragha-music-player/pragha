@@ -245,6 +245,8 @@ static void
 pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj)
 {
 	PraghaToolbar *toolbar;
+	PraghaPreferences *preferences;
+
 	gchar *album_path = NULL, *path = NULL;
 
 	CDEBUG(DBG_INFO, "Update album art");
@@ -255,9 +257,9 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 	if (!pragha_musicobject_is_local_file(mobj))
 		return;
 
-	if (!pragha_preferences_get_show_album_art(cwin->preferences))
+	preferences = pragha_application_get_preferences (cwin);
+	if (!pragha_preferences_get_show_album_art (preferences))
 		return;
-
 
 	album_path = pragha_art_cache_get (cwin->art_cache,
 	                                   pragha_musicobject_get_artist(mobj),
@@ -266,7 +268,7 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 	if (album_path == NULL) {
 		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
 
-		album_path = get_pref_image_path_dir(cwin->preferences, path);
+		album_path = get_pref_image_path_dir (preferences, path);
 		if (!album_path)
 			album_path = get_image_path_from_dir(path);
 

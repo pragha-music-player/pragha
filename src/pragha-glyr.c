@@ -454,10 +454,12 @@ exists:
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	struct con_win *cwin = user_data;
+	PraghaPreferences *preferences;
 	gint file_type = 0;
 	enum player_state state = 0;
 	GtkAction *action;
+
+	struct con_win *cwin = user_data;
 
 	state = pragha_backend_get_state (backend);
 	gboolean playing = (state != ST_STOPPED);
@@ -479,7 +481,8 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	if(file_type == FILE_HTTP)
 		return;
 
-	if (pragha_preferences_get_download_album_art (cwin->preferences))
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_download_album_art (preferences))
 		related_get_album_art_handler (cwin);
 }
 
