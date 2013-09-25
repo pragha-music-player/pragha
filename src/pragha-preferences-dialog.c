@@ -148,12 +148,13 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
-	gboolean osd, test_change;
+	gboolean osd, test_change, pref_setted, pref_toggled;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
+	enum library_style style;
 	GtkWidget *infobar;
 
 	switch(response_id) {
@@ -231,24 +232,28 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			free_str_list(folder_scanned);
 
 		library = pragha_application_get_library (dialog->cwin);
-		if (pragha_preferences_get_library_style(dialog->preferences) == FOLDERS) {
-			test_change = pragha_preferences_get_fuse_folders(dialog->preferences);
 
-			pragha_preferences_set_fuse_folders(dialog->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w)));
+		style = pragha_preferences_get_library_style (dialog->preferences);
 
-			if (pragha_preferences_get_fuse_folders(dialog->preferences) != test_change)
-				library_pane_view_reload (library);
-		}
-		else {
-			test_change = pragha_preferences_get_sort_by_year(dialog->preferences);
+		/* Save fuse folders preference, and reload view if needed */
 
-			pragha_preferences_set_sort_by_year(dialog->preferences,
-			                                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w)));
+		pref_setted = pragha_preferences_get_fuse_folders (dialog->preferences);
+		pref_toggled = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (dialog->fuse_folders_w));
 
-			if (pragha_preferences_get_sort_by_year(dialog->preferences) != test_change)
-				library_pane_view_reload (library);
-		}
+		pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
+
+		if ((style == FOLDERS) && (pref_setted != pref_toggled))
+			library_pane_view_reload (library);
+
+		/* Save sort by year preference, and reload view if needed */
+
+		pref_setted = pragha_preferences_get_sort_by_year (dialog->preferences);
+		pref_toggled = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(dialog->sort_by_year_w));
+
+		pragha_preferences_set_sort_by_year (dialog->preferences, pref_toggled);
+
+		if ((style != FOLDERS) && (pref_setted != pref_toggled))
+			library_pane_view_reload (library);
 
 		/* General preferences */
 
