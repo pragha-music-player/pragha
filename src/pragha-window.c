@@ -52,7 +52,7 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 		    gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon)))
 			pragha_window_toggle_state(cwin, FALSE);
 		else
-			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
+			gtk_window_iconify (GTK_WINDOW(pragha_application_get_window(cwin)));
 	}
 	else {
 		pragha_application_quit ();
@@ -63,18 +63,21 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 void
 pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity)
 {
+	GtkWidget *window;
 	gint x = 0, y = 0;
 
-	if (gtk_widget_get_visible (cwin->mainwindow)) {
-		if (ignoreActivity || gtk_window_is_active (GTK_WINDOW(cwin->mainwindow))){
-			gtk_window_get_position (GTK_WINDOW(cwin->mainwindow), &x, &y);
-			gtk_widget_hide (GTK_WIDGET(cwin->mainwindow));
-			gtk_window_move (GTK_WINDOW(cwin->mainwindow), x ,y);
+	window = pragha_application_get_window (cwin);
+
+	if (gtk_widget_get_visible (window)) {
+		if (ignoreActivity || gtk_window_is_active (GTK_WINDOW(window))){
+			gtk_window_get_position (GTK_WINDOW(window), &x, &y);
+			gtk_widget_hide (GTK_WIDGET(window));
+			gtk_window_move (GTK_WINDOW(window), x ,y);
 		}
-		else gtk_window_present (GTK_WINDOW(cwin->mainwindow));
+		else gtk_window_present (GTK_WINDOW(window));
 	}
 	else {
-		gtk_widget_show (GTK_WIDGET(cwin->mainwindow));
+		gtk_widget_show (GTK_WIDGET(window));
 	}
 }
 
@@ -105,7 +108,7 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 
 	const gchar *file = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
 
-	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (cwin->mainwindow),
+	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(pragha_application_get_window(cwin)),
 	                                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                             GTK_MESSAGE_QUESTION,
 	                                             GTK_BUTTONS_NONE,
@@ -224,6 +227,7 @@ void
 pragha_window_free (struct con_win *cwin)
 {
 	PraghaPreferences *preferences;
+	GtkWidget *window;
 	gint *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y;
 	GdkWindowState state;
@@ -234,7 +238,9 @@ pragha_window_free (struct con_win *cwin)
 
 	/* Save last window state */
 
-	state = gdk_window_get_state (gtk_widget_get_window (cwin->mainwindow));
+	window = pragha_application_get_window (cwin);
+
+	state = gdk_window_get_state (gtk_widget_get_window (window));
 
 	if (pragha_preferences_get_remember_state(preferences)) {
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
@@ -249,13 +255,13 @@ pragha_window_free (struct con_win *cwin)
 
 	if (!(state & GDK_WINDOW_STATE_MAXIMIZED) || !(state & GDK_WINDOW_STATE_FULLSCREEN)) {
 		window_size = g_new0(gint, 2);
-		gtk_window_get_size(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_get_size(GTK_WINDOW(window),
 		                    &win_width, &win_height);
 		window_size[0] = win_width;
 		window_size[1] = win_height;
 
 		window_position = g_new0(gint, 2);
-		gtk_window_get_position(GTK_WINDOW(cwin->mainwindow),
+		gtk_window_get_position(GTK_WINDOW(window),
 		                        &win_x, &win_y);
 		window_position[0] = win_x;
 		window_position[1] = win_y;
@@ -379,29 +385,31 @@ pragha_window_init (struct con_win *cwin)
 {
 	PraghaStatusIcon *status_icon;
 	PraghaPreferences *preferences;
+	GtkWidget *window;
 	const gchar *start_mode;
 
 	/* Init window state */
 
 	preferences = pragha_application_get_preferences (cwin);
+	window = pragha_application_get_window (cwin);
 
 	start_mode = pragha_preferences_get_start_mode (preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE)) {
-		gtk_widget_show(cwin->mainwindow);
+		gtk_widget_show(window);
 	}
 	else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE)) {
 		status_icon = pragha_application_get_status_icon (cwin);
 		if(gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon))) {
-			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
+			gtk_widget_hide(GTK_WIDGET(window));
 		}
 		else {
 			g_warning("(%s): No embedded status_icon.", __func__);
-			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
-			gtk_widget_show(cwin->mainwindow);
+			gtk_window_iconify (GTK_WINDOW(window));
+			gtk_widget_show(window);
 		}
 	}
 	else {
-		gtk_widget_show(cwin->mainwindow);
+		gtk_widget_show(window);
 	}
 
 	pragha_window_init_menu_actions(cwin);
