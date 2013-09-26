@@ -4327,10 +4327,6 @@ pragha_playlist_finalize (GObject *object)
 
 	g_signal_handlers_disconnect_by_func (playlist->preferences, shuffle_changed_cb, playlist);
 
-	if (pragha_preferences_get_restore_playlist (playlist->preferences))
-		pragha_playlist_save_playlist_state (playlist);
-	pragha_playlist_save_preferences (playlist);
-
 	if (playlist->track_error)
 		g_error_free (playlist->track_error);
 
@@ -4351,14 +4347,29 @@ pragha_playlist_finalize (GObject *object)
 	(*G_OBJECT_CLASS (pragha_playlist_parent_class)->finalize) (object);
 }
 
+static void
+pragha_playlist_unrealize (GtkWidget *widget)
+{
+	PraghaPlaylist *playlist = PRAGHA_PLAYLIST (widget);
+
+	if (pragha_preferences_get_restore_playlist (playlist->preferences))
+		pragha_playlist_save_playlist_state (playlist);
+	pragha_playlist_save_preferences (playlist);
+
+	(*GTK_WIDGET_CLASS (pragha_playlist_parent_class)->unrealize) (widget);
+}
 
 static void
 pragha_playlist_class_init (PraghaPlaylistClass *klass)
 {
 	GObjectClass  *gobject_class;
+	GtkWidgetClass *gtkobject_class;
 
 	gobject_class = G_OBJECT_CLASS (klass);
 	gobject_class->finalize = pragha_playlist_finalize;
+
+	gtkobject_class = GTK_WIDGET_CLASS (klass);
+	gtkobject_class->unrealize = pragha_playlist_unrealize;
 
 	/*
 	 * Signals:
