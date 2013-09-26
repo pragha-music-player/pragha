@@ -389,9 +389,6 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	cwin->preferences = pragha_preferences_get();
 
-	if (string_is_empty(pragha_preferences_get_installed_version(cwin->preferences)))
-		cwin->first_run = TRUE;
-
 	cwin->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
 		g_critical("Unable to init music dbase");
