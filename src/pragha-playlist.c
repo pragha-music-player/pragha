@@ -4321,28 +4321,56 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 }
 
 static void
+pragha_playlist_dispose (GObject *object)
+{
+	PraghaPlaylist *playlist = PRAGHA_PLAYLIST (object);
+
+	if (playlist->preferences) {
+		g_signal_handlers_disconnect_by_func (playlist->preferences, shuffle_changed_cb, playlist);
+		g_object_unref (playlist->preferences);
+		playlist->preferences = NULL;
+	}
+
+	if (playlist->model) {
+		g_object_unref (playlist->model);
+		playlist->model = NULL;
+	}
+
+	if (playlist->playlist_context_menu) {
+		g_object_unref (playlist->playlist_context_menu);
+		playlist->playlist_context_menu = NULL;
+	}
+
+	if (playlist->playing_pixbuf) {
+		g_object_unref (playlist->playing_pixbuf);
+		playlist->playing_pixbuf = NULL;
+	}
+
+	if (playlist->paused_pixbuf) {
+		g_object_unref (playlist->paused_pixbuf);
+		playlist->paused_pixbuf = NULL;
+	}
+
+	if (playlist->cdbase) {
+		g_object_unref (playlist->cdbase);
+		playlist->cdbase = NULL;
+	}
+
+	(*G_OBJECT_CLASS (pragha_playlist_parent_class)->dispose) (object);
+}
+
+static void
 pragha_playlist_finalize (GObject *object)
 {
 	PraghaPlaylist *playlist = PRAGHA_PLAYLIST (object);
 
-	g_signal_handlers_disconnect_by_func (playlist->preferences, shuffle_changed_cb, playlist);
-
 	if (playlist->track_error)
 		g_error_free (playlist->track_error);
-
-	g_object_unref (playlist->model);
 
 	free_str_list (playlist->columns);
 	g_slist_free (playlist->column_widths);
 
-	g_object_unref (playlist->playlist_context_menu);
 	g_rand_free (playlist->rand);
-
-	g_object_unref (playlist->playing_pixbuf);
-	g_object_unref (playlist->paused_pixbuf);
-
-	g_object_unref(playlist->preferences);
-	g_object_unref(playlist->cdbase);
 
 	(*G_OBJECT_CLASS (pragha_playlist_parent_class)->finalize) (object);
 }
@@ -4366,6 +4394,7 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 	GtkWidgetClass *gtkobject_class;
 
 	gobject_class = G_OBJECT_CLASS (klass);
+	gobject_class->dispose = pragha_playlist_dispose;
 	gobject_class->finalize = pragha_playlist_finalize;
 
 	gtkobject_class = GTK_WIDGET_CLASS (klass);
