@@ -283,6 +283,7 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
+	PraghaMpris2 *mpris2;
 	PraghaMusicobject *nmobj, *current_mobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
@@ -314,7 +315,8 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget      *dialog,
 
 					pragha_toolbar_set_title(toolbar, current_mobj);
 
-					mpris_update_metadata_changed(cwin);
+					mpris2 = pragha_application_get_mpris2 (cwin);
+					pragha_mpris_update_metadata_changed (mpris2);
 				}
 			}
 

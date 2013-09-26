@@ -148,6 +148,7 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
+	PraghaMpris2 *mpris2;
 	gboolean osd, test_change, pref_setted, pref_toggled;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
@@ -367,11 +368,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_use_mpris2(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
 
+		mpris2 = pragha_application_get_mpris2 (dialog->cwin);
 		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
-			mpris_close(dialog->cwin->cmpris2);
+			pragha_mpris_close (mpris2);
 		}
 		else {
-			mpris_init(dialog->cwin);
+			pragha_mpris_init (mpris2, dialog->cwin);
 		}
 		break;
 	default:

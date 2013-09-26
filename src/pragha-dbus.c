@@ -253,6 +253,7 @@ dbus_filter_handler(DBusConnection *conn,
 
 void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 {
+	PraghaMpris2 *mpris2;
 	DBusMessage *msg = NULL;
 
 	msg = dbus_message_new_signal(DBUS_PATH, DBUS_INTERFACE, signal);
@@ -267,8 +268,10 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 		goto exit;
 	}
 
-	if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE))
-		mpris_update_any(cwin);
+	if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE)) {
+		mpris2 = pragha_application_get_mpris2 (cwin);
+		pragha_mpris_update_any (mpris2);
+	}
 
 	dbus_connection_flush(cwin->con_dbus);
 exit:
