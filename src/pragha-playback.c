@@ -172,6 +172,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
+	PraghaNotify *notify;
 	PraghaMpris2 *mpris2;
 	PraghaMusicobject *mobj = NULL;
 
@@ -196,8 +197,9 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				pragha_playback_update_current_album_art (cwin, mobj);
 
 				/* Show osd, and inform new album art. */
-				if (cwin->notify)
-					pragha_notify_show_osd (cwin->notify);
+				notify = pragha_application_get_notify (cwin);
+				if (notify)
+					pragha_notify_show_osd (notify);
 
 				mpris2 = pragha_application_get_mpris2 (cwin);
 				pragha_mpris_update_metadata_changed (mpris2);

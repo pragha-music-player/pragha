@@ -85,8 +85,11 @@ static void dbus_dec_vol_handler(struct con_win *cwin)
 
 static void dbus_show_osd_handler(struct con_win *cwin)
 {
-	if (cwin->notify)
-		pragha_notify_show_osd (cwin->notify);
+	PraghaNotify *notify;
+	notify = pragha_application_get_notify (cwin);
+
+	if (notify)
+		pragha_notify_show_osd (notify);
 	else
 		g_warning ("Notifications are disabled");
 }

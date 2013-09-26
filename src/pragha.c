@@ -276,6 +276,18 @@ pragha_application_get_pane (struct con_win *cwin)
 	return cwin->pane;
 }
 
+PraghaNotify *
+pragha_application_get_notify (struct con_win *cwin)
+{
+	return cwin->notify;
+}
+
+void
+pragha_application_set_notify (struct con_win *cwin, PraghaNotify *notify)
+{
+	cwin->notify = notify;
+}
+
 PraghaMpris2 *
 pragha_application_get_mpris2 (struct con_win *cwin)
 {
