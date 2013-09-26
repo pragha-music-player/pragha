@@ -170,7 +170,7 @@ pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget *widget)
 	GtkWidget *infobox, *children;
 	GList *list;
 
-	infobox pragha_application_get_infobox_container (struct con_win *cwin)
+	infobox = pragha_application_get_infobox_container (cwin);
 	list = gtk_container_get_children (GTK_CONTAINER(infobox));
 
 	if(list) {
