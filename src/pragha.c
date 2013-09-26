@@ -256,6 +256,12 @@ pragha_application_get_menubar (struct con_win *cwin)
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
+gboolean
+pragha_application_is_first_run (struct con_win *cwin)
+{
+	return string_is_empty (pragha_preferences_get_installed_version (cwin->preferences));
+}
+
 void
 pragha_application_quit (void)
 {

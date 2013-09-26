@@ -149,6 +149,8 @@ GtkAction         *pragha_application_get_menu_action        (struct con_win *cw
 GtkWidget         *pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path);
 GtkWidget         *pragha_application_get_menubar            (struct con_win *cwin);
 
+gboolean           pragha_application_is_first_run           (struct con_win *cwin);
+
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);

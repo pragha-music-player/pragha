@@ -30,10 +30,8 @@
 
 gboolean info_bar_import_music_will_be_useful(struct con_win *cwin)
 {
-	PraghaPreferences *preferences = pragha_application_get_preferences (cwin);
-
-	return 	(string_is_empty(pragha_preferences_get_installed_version (preferences)) &&
-	         g_get_user_special_dir(G_USER_DIRECTORY_MUSIC));
+	return pragha_application_is_first_run (cwin) &&
+	         g_get_user_special_dir (G_USER_DIRECTORY_MUSIC);
 }
 
 static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
