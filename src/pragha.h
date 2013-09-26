@@ -122,7 +122,6 @@ struct con_win {
 	/* Flags */
 
 	gboolean           unique_instance;
-	gboolean           first_run;
 	guint              related_timeout_id;
 };
 
