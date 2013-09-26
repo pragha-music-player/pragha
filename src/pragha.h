@@ -148,6 +148,8 @@ GtkUIManager      *pragha_application_get_menu_ui_manager    (struct con_win *cw
 GtkAction         *pragha_application_get_menu_action        (struct con_win *cwin, const gchar *path);
 GtkWidget         *pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path);
 GtkWidget         *pragha_application_get_menubar            (struct con_win *cwin);
+GtkWidget         *pragha_application_get_infobox_container  (struct con_win *cwin);
+GtkWidget         *pragha_application_get_pane               (struct con_win *cwin);
 
 PraghaMpris2      *pragha_application_get_mpris2             (struct con_win *cwin);
 
