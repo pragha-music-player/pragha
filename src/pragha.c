@@ -228,6 +228,12 @@ pragha_application_get_statusbar (struct con_win *cwin)
 	return cwin->statusbar;
 }
 
+PraghaStatusIcon *
+pragha_application_get_status_icon (struct con_win *cwin)
+{
+	return cwin->status_icon;
+}
+
 GtkUIManager *
 pragha_application_get_menu_ui_manager (struct con_win *cwin)
 {
@@ -309,11 +315,9 @@ pragha_application_construct_window (struct con_win *cwin)
 	cwin->statusbar = pragha_statusbar_get ();
 	cwin->scanner = pragha_scanner_new();
 
+	cwin->status_icon = pragha_status_icon_new (cwin);
+
 	pragha_menubar_connect_signals (cwin->menu_ui_manager, cwin);
-
-	/* Systray */
-
-	create_status_icon(cwin);
 
 	/* Contruct the window. */
 
@@ -351,8 +355,6 @@ pragha_application_free (struct con_win *cwin)
 		keybinder_free ();
 #endif
 	pragha_cdda_free ();
-
-	g_object_unref (cwin->systray_menu);
 
 	/* Explicit destroy mainwindow to finalize lifecycle of childrens */
 

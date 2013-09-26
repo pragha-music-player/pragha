@@ -22,6 +22,19 @@
 /* pragha.h */
 struct con_win;
 
-void create_status_icon         (struct con_win *cwin);
+#define PRAGHA_TYPE_STATUS_ICON                  (pragha_status_icon_get_type ())
+#define PRAGHA_STATUS_ICON(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIcon))
+#define PRAGHA_IS_STATUS_ICON(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_STATUS_ICON))
+#define PRAGHA_STATUS_ICON_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIconClass))
+#define PRAGHA_IS_STATUS_ICON_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_STATUS_ICON))
+#define PRAGHA_STATUS_ICON_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIconClass))
+
+typedef struct {
+	GtkStatusIconClass __parent__;
+} PraghaStatusIconClass;
+
+typedef struct _PraghaStatusIcon PraghaStatusIcon;
+
+PraghaStatusIcon *pragha_status_icon_new (struct con_win *cwin);
 
 #endif /* PRAGHA_STATUSICON_H */

@@ -42,12 +42,14 @@
 gboolean
 pragha_close_window(GtkWidget *widget, GdkEvent *event, struct con_win *cwin)
 {
+	PraghaStatusIcon *status_icon;
 	PraghaPreferences *preferences;
-	preferences = pragha_application_get_preferences (cwin);
 
-	if(pragha_preferences_get_hide_instead_close (preferences)) {
-		if(pragha_preferences_get_show_status_icon (preferences) &&
-		   gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon)))
+	preferences = pragha_application_get_preferences (cwin);
+	if (pragha_preferences_get_hide_instead_close (preferences)) {
+		status_icon = pragha_application_get_status_icon (cwin);
+		if (pragha_preferences_get_show_status_icon (preferences) &&
+		    gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon)))
 			pragha_window_toggle_state(cwin, FALSE);
 		else
 			gtk_window_iconify (GTK_WINDOW (cwin->mainwindow));
@@ -375,6 +377,7 @@ pragha_window_init_menu_actions (struct con_win *cwin)
 static void
 pragha_window_init (struct con_win *cwin)
 {
+	PraghaStatusIcon *status_icon;
 	PraghaPreferences *preferences;
 	const gchar *start_mode;
 
@@ -387,7 +390,8 @@ pragha_window_init (struct con_win *cwin)
 		gtk_widget_show(cwin->mainwindow);
 	}
 	else if(!g_ascii_strcasecmp(start_mode, ICONIFIED_STATE)) {
-		if(gtk_status_icon_is_embedded(GTK_STATUS_ICON(cwin->status_icon))) {
+		status_icon = pragha_application_get_status_icon (cwin);
+		if(gtk_status_icon_is_embedded (GTK_STATUS_ICON(status_icon))) {
 			gtk_widget_hide(GTK_WIDGET(cwin->mainwindow));
 		}
 		else {

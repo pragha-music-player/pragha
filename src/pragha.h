@@ -49,6 +49,7 @@
 #include "pragha-sidebar.h"
 #include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
+#include "pragha-statusicon.h"
 #include "pragha-window.h"
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
@@ -100,8 +101,7 @@ struct con_win {
 	PraghaPlaylist    *playlist;
 	PraghaStatusbar   *statusbar;
 
-	GtkStatusIcon     *status_icon;
-	GtkUIManager      *systray_menu;
+	PraghaStatusIcon  *status_icon;
 
 	/* Plugins?. */
 
@@ -142,7 +142,7 @@ PraghaLibraryPane *pragha_application_get_library         (struct con_win *cwin)
 PraghaToolbar     *pragha_application_get_toolbar         (struct con_win *cwin);
 PraghaSidebar     *pragha_application_get_sidebar         (struct con_win *cwin);
 PraghaStatusbar   *pragha_application_get_statusbar       (struct con_win *cwin);
-
+PraghaStatusIcon  *pragha_application_get_status_icon     (struct con_win *cwin);
 
 GtkUIManager      *pragha_application_get_menu_ui_manager    (struct con_win *cwin);
 GtkAction         *pragha_application_get_menu_action        (struct con_win *cwin, const gchar *path);

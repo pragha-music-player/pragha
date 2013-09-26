@@ -32,11 +32,21 @@
 #include "pragha-window.h"
 #include "pragha.h"
 
-static void systray_play_pause_action(GtkAction *action, struct con_win *cwin);
-static void systray_stop_action(GtkAction *action, struct con_win *cwin);
-static void systray_prev_action(GtkAction *action, struct con_win *cwin);
-static void systray_next_action(GtkAction *action, struct con_win *cwin);
-static void systray_quit(GtkAction *action, struct con_win *cwin);
+struct _PraghaStatusIcon {
+	GtkStatusIcon __parent__;
+
+	struct con_win *cwin;
+
+	GtkUIManager   *ui_manager;
+};
+
+G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
+
+static void systray_play_pause_action (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_stop_action       (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_prev_action       (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_next_action       (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_quit              (GtkAction *action, PraghaStatusIcon *status_icon);
 
 static const gchar *systray_menu_xml =
 	"<ui>						\
@@ -82,19 +92,22 @@ static const GtkActionEntry systray_menu_aentries[] = {
 };
 
 static gboolean
-status_icon_clicked (GtkWidget *widget, GdkEventButton *event, struct con_win *cwin)
+status_icon_clicked (GtkWidget *widget, GdkEventButton *event, PraghaStatusIcon *status_icon)
 {
 	GtkWidget *popup_menu;
+
 	switch (event->button)
 	{
-		case 1: pragha_window_toggle_state(cwin, FALSE);
+		case 1:
+			pragha_window_toggle_state (status_icon->cwin, FALSE);
 			break;
-		case 2:	pragha_playback_play_pause_resume(cwin);
+		case 2:
+			pragha_playback_play_pause_resume (status_icon->cwin);
 			break;
 		case 3:
-			popup_menu = gtk_ui_manager_get_widget(cwin->systray_menu, "/popup");
-			gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
-				       event->button, gtk_get_current_event_time ());
+			popup_menu = gtk_ui_manager_get_widget(status_icon->ui_manager, "/popup");
+			gtk_menu_popup (GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
+			                event->button, gtk_get_current_event_time ());
 		default: break;
 	}
 	
@@ -107,16 +120,16 @@ status_get_tooltip_cb (GtkWidget        *widget,
                        gint              y,
                        gboolean          keyboard_mode,
                        GtkTooltip       *tooltip,
-                       struct con_win   *cwin)
+                       PraghaStatusIcon *status_icon)
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaMusicobject *mobj;
 	gchar *markup_text;
 
-	toolbar = pragha_application_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (status_icon->cwin);
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (status_icon->cwin);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
@@ -140,14 +153,14 @@ status_get_tooltip_cb (GtkWidget        *widget,
 }
 
 static void
-systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win *cwin)
+systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIcon *status_icon)
 {
 	PraghaBackend *backend;
 
 	if (event->type != GDK_SCROLL)
 		return;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (status_icon->cwin);
 
 	switch (event->direction){
 		case GDK_SCROLL_UP:
@@ -162,45 +175,45 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, struct con_win 
 }
 
 static void
-systray_play_pause_action (GtkAction *action, struct con_win *cwin)
+systray_play_pause_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(cwin);
+		pragha_playback_play_pause_resume(status_icon->cwin);
 }
 
 static void
-systray_stop_action (GtkAction *action, struct con_win *cwin)
+systray_stop_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(cwin);
+		pragha_playback_stop(status_icon->cwin);
 }
 
 static void
-systray_prev_action (GtkAction *action, struct con_win *cwin)
+systray_prev_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(cwin);
+		pragha_playback_prev_track(status_icon->cwin);
 }
 
 static void
-systray_next_action (GtkAction *action, struct con_win *cwin)
+systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(cwin);
+		pragha_playback_next_track(status_icon->cwin);
 }
 
 static void
-systray_quit (GtkAction *action, struct con_win *cwin)
+systray_quit (GtkAction *action, PraghaStatusIcon *status_icon)
 {
 	pragha_application_quit ();
 }
 
 static void
-update_systray_menu_cb (PraghaBackend *backend, GParamSpec *pspec, GtkUIManager *systray_menu)
+pragha_status_icon_update_state (PraghaBackend *backend, GParamSpec *pspec, PraghaStatusIcon *status_icon)
 {
 	GtkAction *action;
 	enum player_state state = 0;
@@ -209,80 +222,100 @@ update_systray_menu_cb (PraghaBackend *backend, GParamSpec *pspec, GtkUIManager 
 
 	gboolean playing = (state != ST_STOPPED);
 
-	action = gtk_ui_manager_get_action (systray_menu, "/popup/Prev");
+	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action (systray_menu, "/popup/Stop");
+	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action (systray_menu, "/popup/Next");
+	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = gtk_ui_manager_get_action (systray_menu, "/popup/Edit tags");
+	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
-static GtkUIManager*
-create_systray_menu (struct con_win *cwin)
-{
-	GtkUIManager *menu = NULL;
-	GtkActionGroup *actions;
-	GError *error = NULL;
-
-	actions = gtk_action_group_new("Systray Actions");
-	menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(menu, systray_menu_xml, -1, &error)) {
-		g_critical("Unable to create systray menu, err : %s",
-			   error->message);
-	}
-
-	gtk_action_group_add_actions(actions,
-				     systray_menu_aentries,
-				     G_N_ELEMENTS(systray_menu_aentries),
-				     (gpointer)cwin);
-	gtk_ui_manager_insert_action_group(menu, actions, 0);
-
-	g_object_unref (actions);
-
-	return menu;
-}
-
-void create_status_icon (struct con_win *cwin)
+static void
+pragha_status_icon_set_application (PraghaStatusIcon *status_icon, struct con_win *cwin)
 {
 	PraghaPreferences *preferences;
-	GtkStatusIcon *status_icon;
-	GtkUIManager *systray_menu;
+	GtkActionGroup *actions;
 	GdkPixbuf *pixbuf_app;
+
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	status_icon->cwin = cwin;
 
 	pixbuf_app = pragha_application_get_pixbuf_app(cwin);
 	if (pixbuf_app)
-		status_icon = gtk_status_icon_new_from_pixbuf(pixbuf_app);
-	else
-		status_icon = gtk_status_icon_new_from_stock(GTK_STOCK_NEW);
+		gtk_status_icon_set_from_pixbuf (GTK_STATUS_ICON(status_icon), pixbuf_app);
 
-	g_signal_connect (status_icon, "button-press-event", G_CALLBACK (status_icon_clicked), cwin);
-	g_signal_connect (status_icon, "scroll_event", G_CALLBACK(systray_volume_scroll), cwin);
+	actions = gtk_action_group_new ("Systray Actions");
+	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);
 
-	g_object_set (G_OBJECT(status_icon), "has-tooltip", TRUE, NULL);
-	g_signal_connect(G_OBJECT(status_icon), "query-tooltip",
-			G_CALLBACK(status_get_tooltip_cb),
-			cwin);
+	gtk_action_group_add_actions (actions,
+	                              systray_menu_aentries,
+	                              G_N_ELEMENTS(systray_menu_aentries),
+	                              (gpointer)status_icon);
+	gtk_ui_manager_insert_action_group (status_icon->ui_manager, actions, 0);
 
 	preferences = pragha_application_get_preferences (cwin);
-	gtk_status_icon_set_visible (status_icon, pragha_preferences_get_show_status_icon (preferences));
+	g_object_bind_property (preferences, "show-status-icon",
+	                        status_icon, "visible", binding_flags);
 
-	/* Systray right click menu */
+	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+	                  G_CALLBACK (pragha_status_icon_update_state), status_icon);
 
-	systray_menu = create_systray_menu(cwin);
+	g_object_unref (actions);
+}
 
-	/* Store reference */
+static void
+pragha_status_icon_finalize (GObject *object)
+{
+	PraghaStatusIcon *status_icon = PRAGHA_STATUS_ICON(object);
 
-	cwin->status_icon = status_icon;
-	cwin->systray_menu = systray_menu;
+	g_object_unref (status_icon->ui_manager);
 
-	g_signal_connect (pragha_application_get_backend (cwin),
-	                  "notify::state", G_CALLBACK (update_systray_menu_cb), systray_menu);
+	(*G_OBJECT_CLASS (pragha_status_icon_parent_class)->finalize) (object);
+}
+
+static void
+pragha_status_icon_class_init (PraghaStatusIconClass *klass)
+{
+	GObjectClass  *gobject_class;
+
+	gobject_class = G_OBJECT_CLASS (klass);
+	gobject_class->finalize = pragha_status_icon_finalize;
+}
+
+static void
+pragha_status_icon_init (PraghaStatusIcon *status_icon)
+{
+	GError *error = NULL;
+
+	status_icon->ui_manager = gtk_ui_manager_new();
+	if (!gtk_ui_manager_add_ui_from_string (status_icon->ui_manager, systray_menu_xml, -1, &error))
+		g_critical("Unable to create systray menu, err : %s", error->message);
+
+	g_signal_connect (status_icon, "button-press-event",
+	                  G_CALLBACK (status_icon_clicked), status_icon);
+	g_signal_connect (status_icon, "scroll_event",
+	                  G_CALLBACK(systray_volume_scroll), status_icon);
+
+	g_object_set (G_OBJECT(status_icon), "has-tooltip", TRUE, NULL);
+	g_signal_connect (G_OBJECT(status_icon), "query-tooltip",
+	                  G_CALLBACK(status_get_tooltip_cb), status_icon);
+}
+
+PraghaStatusIcon *
+pragha_status_icon_new (struct con_win *cwin)
+{
+	PraghaStatusIcon *status_icon;
+
+	status_icon = g_object_new (PRAGHA_TYPE_STATUS_ICON, NULL);
+
+	pragha_status_icon_set_application (status_icon, cwin);
+
+	return status_icon;
 }

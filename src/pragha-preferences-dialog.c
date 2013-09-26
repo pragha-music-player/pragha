@@ -289,7 +289,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->restore_playlist_w));
 		pragha_preferences_set_restore_playlist(dialog->preferences, restore_playlist);
 
-
 		pragha_preferences_set_show_status_icon(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_icon_tray_w)));
 
@@ -513,7 +512,7 @@ static void toggle_show_icon_tray(GtkToggleButton *button, PreferencesDialog *di
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_icon_tray_w));
 
-	gtk_status_icon_set_visible(dialog->cwin->status_icon, is_active);
+	pragha_preferences_set_show_status_icon (dialog->preferences, is_active);
 }
 
 /* Toggle album art pattern */
