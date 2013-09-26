@@ -167,19 +167,20 @@ pragha_window_unfullscreen (GObject *object, struct con_win *cwin)
 void
 pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget *widget)
 {
+	GtkWidget *infobox, *children;
 	GList *list;
-	GtkWidget *children;
 
-	list = gtk_container_get_children (GTK_CONTAINER(cwin->infobox));
+	infobox pragha_application_get_infobox_container (struct con_win *cwin)
+	list = gtk_container_get_children (GTK_CONTAINER(infobox));
 
 	if(list) {
 		children = list->data;
-		gtk_container_remove(GTK_CONTAINER(cwin->infobox), children);
+		gtk_container_remove (GTK_CONTAINER(infobox), children);
 		gtk_widget_destroy(GTK_WIDGET(children));
 		g_list_free(list);
 	}
 		
-	gtk_container_add(GTK_CONTAINER(cwin->infobox), widget);
+	gtk_container_add (GTK_CONTAINER(infobox), widget);
 }
 
 gint
@@ -227,7 +228,7 @@ void
 pragha_window_free (struct con_win *cwin)
 {
 	PraghaPreferences *preferences;
-	GtkWidget *window;
+	GtkWidget *window, *pane;
 	gint *window_size, *window_position;
 	gint win_width, win_height, win_x, win_y;
 	GdkWindowState state;
@@ -284,9 +285,9 @@ pragha_window_free (struct con_win *cwin)
 
 	/* Save sidebar size */
 
+	pane = pragha_application_get_pane (cwin);
 	pragha_preferences_set_sidebar_size(preferences,
-		gtk_paned_get_position(GTK_PANED(cwin->pane)));
-
+		gtk_paned_get_position(GTK_PANED(pane)));
 
 	/* Save menu accelerators edited */
 
@@ -295,11 +296,6 @@ pragha_window_free (struct con_win *cwin)
 	gtk_accel_map_save (pragha_accels_path);
 
 	/* Free memory */
-
-	if (cwin->pixbuf_app)
-		g_object_unref(cwin->pixbuf_app);
-
-	g_object_unref (cwin->menu_ui_manager);
 
 	g_object_unref(preferences);
 	g_free(pragha_accels_path);
@@ -452,9 +448,8 @@ pragha_window_new (struct con_win *cwin)
 	statusbar = pragha_application_get_statusbar (cwin);
 	toolbar   = pragha_application_get_toolbar (cwin);
 	menubar   = pragha_application_get_menubar (cwin);
-
-	pane      = cwin->pane;
-	infobox   = cwin->infobox;
+	pane      = pragha_application_get_pane (cwin);
+	infobox   = pragha_application_get_infobox_container (cwin);
 
 	/* Main window */
 

@@ -264,6 +264,18 @@ pragha_application_get_menubar (struct con_win *cwin)
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
+GtkWidget *
+pragha_application_get_infobox_container (struct con_win *cwin)
+{
+	return cwin->infobox;
+}
+
+GtkWidget *
+pragha_application_get_pane (struct con_win *cwin)
+{
+	return cwin->pane;
+}
+
 PraghaMpris2 *
 pragha_application_get_mpris2 (struct con_win *cwin)
 {
@@ -355,6 +367,11 @@ pragha_application_free (struct con_win *cwin)
 		keybinder_free ();
 #endif
 	pragha_cdda_free ();
+
+	if (cwin->pixbuf_app)
+		g_object_unref(cwin->pixbuf_app);
+
+	g_object_unref (cwin->menu_ui_manager);
 
 	/* Explicit destroy mainwindow to finalize lifecycle of childrens */
 
