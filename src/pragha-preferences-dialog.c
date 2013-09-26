@@ -148,6 +148,7 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
+	PraghaNotify *notify;
 	PraghaMpris2 *mpris2;
 	gboolean osd, test_change, pref_setted, pref_toggled;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
@@ -327,9 +328,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
 		if (osd) {
 			pragha_preferences_set_show_osd(dialog->preferences, TRUE);
-			if (!dialog->cwin->notify) {
-				dialog->cwin->notify = pragha_notify_new (dialog->cwin);
-				if (!dialog->cwin->notify)
+			notify = pragha_application_get_notify (dialog->cwin);
+			if (!notify) {
+				notify = pragha_notify_new (dialog->cwin);
+				if (notify)
+					pragha_application_set_notify (dialog->cwin, notify);
+				else
 					pragha_preferences_set_show_osd(dialog->preferences, FALSE);
 			}
 		}
