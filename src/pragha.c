@@ -107,6 +107,7 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
+	PraghaMpris2 *mpris2;
 	PraghaMusicobject *cmobj = NULL;
 
 	backend = pragha_application_get_backend (cwin);
@@ -118,7 +119,8 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 		toolbar = pragha_application_get_toolbar (cwin);
 		pragha_toolbar_set_title (toolbar, cmobj);
 
-		mpris_update_metadata_changed (cwin);
+		mpris2 = pragha_application_get_mpris2 (cwin);
+		pragha_mpris_update_metadata_changed (mpris2);
 	}
 }
 
@@ -256,6 +258,12 @@ pragha_application_get_menubar (struct con_win *cwin)
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
+PraghaMpris2 *
+pragha_application_get_mpris2 (struct con_win *cwin)
+{
+	return cwin->mpris2;
+}
+
 gboolean
 pragha_application_is_first_run (struct con_win *cwin)
 {
@@ -327,7 +335,7 @@ pragha_application_free (struct con_win *cwin)
 	pragha_lastfm_free (cwin->clastfm);
 #endif
 	pragha_sidebar_free(cwin->sidebar);
-	mpris_free (cwin->cmpris2);
+	pragha_mpris_free (cwin->mpris2);
 	g_object_unref (cwin->backend);
 	pragha_art_cache_free (cwin->art_cache);
 	pragha_window_free (cwin);
@@ -373,7 +381,7 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	/* Allocate memory for simple structures */
 
-	cwin->cmpris2 = pragha_mpris_new();
+	cwin->mpris2 = pragha_mpris_new();
 
 	cwin->con_dbus = pragha_init_dbus(cwin);
 	if (!cwin->con_dbus) {
@@ -424,7 +432,7 @@ pragha_application_new (gint argc, gchar *argv[])
 	g_signal_connect (cwin->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
 
-	if (mpris_init(cwin) == -1) {
+	if (pragha_mpris_init(cwin->mpris2, cwin) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return NULL;
 	}

@@ -30,15 +30,19 @@ typedef struct _PraghaMpris2 PraghaMpris2;
 #define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
 #define MPRIS_PATH "/org/mpris/MediaPlayer2"
 
-gint mpris_init(struct con_win *cwin);
-void mpris_update_any(struct con_win *cwin);
-void mpris_update_metadata_changed(struct con_win *cwin);
-void mpris_update_mobj_remove(struct con_win *cwin, PraghaMusicobject *mobj);
-void mpris_update_mobj_added(struct con_win *cwin, PraghaMusicobject *mobj, GtkTreeIter *iter);
-void mpris_update_mobj_changed(struct con_win *cwin, PraghaMusicobject *mobj, gint bitmask);
-void mpris_update_tracklist_replaced(struct con_win *cwin);
-void mpris_close(PraghaMpris2 *cmpris2);
-void mpris_free(PraghaMpris2 *cmpris2);
+void pragha_mpris_update_any                (PraghaMpris2 *mpris2);
+void pragha_mpris_update_metadata_changed   (PraghaMpris2 *mpris2);
+
+void pragha_mpris_update_mobj_remove        (PraghaMpris2 *mpris2, PraghaMusicobject *mobj);
+void pragha_mpris_update_mobj_added         (PraghaMpris2 *mpris2, PraghaMusicobject *mobj, GtkTreeIter *iter);
+
+void pragha_mpris_update_mobj_changed       (PraghaMpris2 *mpris2, PraghaMusicobject *mobj, gint bitmask);
+
+void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2);
+
+gint pragha_mpris_init                      (PraghaMpris2 *mpris2, struct con_win *cwin);
+void pragha_mpris_close                     (PraghaMpris2 *mpris2);
+void pragha_mpris_free                      (PraghaMpris2 *mpris2);
 
 PraghaMpris2 *pragha_mpris_new();
 

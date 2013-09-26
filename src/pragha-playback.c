@@ -172,6 +172,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
+	PraghaMpris2 *mpris2;
 	PraghaMusicobject *mobj = NULL;
 
 	enum player_state state = pragha_backend_get_state (backend);
@@ -197,7 +198,9 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				/* Show osd, and inform new album art. */
 				if (cwin->notify)
 					pragha_notify_show_osd (cwin->notify);
-				mpris_update_metadata_changed(cwin);
+
+				mpris2 = pragha_application_get_mpris2 (cwin);
+				pragha_mpris_update_metadata_changed (mpris2);
 
 				pragha_playlist_report_finished_action (playlist);
 			}
@@ -223,6 +226,7 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
+	PraghaMpris2 *mpris2;
 	PraghaMusicobject *nmobj;
 
 	if(pragha_backend_get_state (backend) != ST_PLAYING)
@@ -233,7 +237,9 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	/* Update change on gui */
 	toolbar = pragha_application_get_toolbar (cwin);
 	pragha_toolbar_set_title(toolbar, nmobj);
-	mpris_update_metadata_changed(cwin);
+
+	mpris2 = pragha_application_get_mpris2 (cwin);
+	pragha_mpris_update_metadata_changed (mpris2);
 
 	/* Update the playlist */
 

@@ -168,6 +168,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	const gchar *artist = NULL, *album = NULL;
 	gchar *album_art_path = NULL;
 	PraghaBackend *backend;
+	PraghaMpris2 *mpris2;
 
 	if(glyr_info->head == NULL)
 		return;
@@ -196,7 +197,9 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 				/* TODO: Emit a signal to update the album art and mpris. */
 				toolbar = pragha_application_get_toolbar (cwin);
 				pragha_toolbar_set_image_album_art (toolbar, album_art_path);
-				mpris_update_metadata_changed (cwin);
+
+				mpris2 = pragha_application_get_mpris2 (cwin);
+				pragha_mpris_update_metadata_changed (mpris2);
 			}
 		}
 		g_free (album_art_path);

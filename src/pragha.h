@@ -112,7 +112,7 @@ struct con_win {
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm      *clastfm;
 #endif
-	PraghaMpris2      *cmpris2;
+	PraghaMpris2      *mpris2;
 	con_gnome_media_keys *cgnome_media_keys;
 
 #ifdef HAVE_LIBKEYBINDER
@@ -148,6 +148,8 @@ GtkUIManager      *pragha_application_get_menu_ui_manager    (struct con_win *cw
 GtkAction         *pragha_application_get_menu_action        (struct con_win *cwin, const gchar *path);
 GtkWidget         *pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path);
 GtkWidget         *pragha_application_get_menubar            (struct con_win *cwin);
+
+PraghaMpris2      *pragha_application_get_mpris2             (struct con_win *cwin);
 
 gboolean           pragha_application_is_first_run           (struct con_win *cwin);
 
