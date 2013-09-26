@@ -470,6 +470,7 @@ pragha_application_new (gint argc, gchar *argv[])
 	                  G_CALLBACK(pragha_playlist_update_change_tags), cwin);
 	g_signal_connect (playlist, "playlist-changed",
 	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), cwin);
+	pragha_playlist_update_statusbar_playtime (playlist, cwin);
 		
 	g_signal_connect (cwin->library, "library-append-playlist",
 	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);
