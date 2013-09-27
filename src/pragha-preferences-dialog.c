@@ -150,6 +150,9 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 	PraghaLibraryPane *library;
 	PraghaNotify *notify;
 	PraghaMpris2 *mpris2;
+#ifdef HAVE_LIBCLASTFM
+	PraghaLastfm *clastfm;
+#endif
 	gboolean osd, test_change, pref_setted, pref_toggled;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
@@ -357,8 +360,9 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_set_password(dialog->preferences,
 				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
 
-			pragha_lastfm_disconnect (dialog->cwin->clastfm);
-			pragha_lastfm_connect (dialog->cwin->clastfm);
+			clastfm = pragha_application_get_lastfm (dialog->cwin);
+			pragha_lastfm_disconnect (clastfm);
+			pragha_lastfm_connect (clastfm);
 		}
 #endif
 #ifdef HAVE_LIBGLYR
@@ -471,6 +475,7 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 #ifdef HAVE_LIBCLASTFM
 static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 {
+	PraghaLastfm *clastfm;
 	gboolean is_active;
 
 	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w));
@@ -479,7 +484,8 @@ static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
 
 	if(!is_active) {
-		pragha_lastfm_disconnect (dialog->cwin->clastfm);
+		clastfm = pragha_application_get_lastfm (dialog->cwin);
+		pragha_lastfm_disconnect (clastfm);
 	}
 }
 #endif
