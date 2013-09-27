@@ -378,8 +378,8 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 
 			}
 			else {
-				g_stat(ab_file, &sbuf);
-				if(sbuf.st_mtime > scanner->last_update.tv_sec) {
+				if ((g_stat(ab_file, &sbuf) == 0) &&
+				    (sbuf.st_mtime > scanner->last_update.tv_sec)) {
 					mobj = new_musicobject_from_file(ab_file);
 					if (G_LIKELY(mobj)) {
 						g_hash_table_replace(scanner->tracks_table,
