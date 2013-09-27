@@ -295,6 +295,7 @@ get_related_info_idle_func (gpointer data)
 static void
 configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artist, const gchar *title, struct con_win *cwin)
 {
+	PraghaGlyr *glyr;
 	glyr_struct *glyr_info;
 	glyr_info = g_slice_new0 (glyr_struct);
 
@@ -316,7 +317,9 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 		break;
 	}
 
-	glyr_opt_lookup_db (&glyr_info->query, cwin->glyr->cache_db);
+	glyr = pragha_application_get_glyr (cwin);
+
+	glyr_opt_lookup_db (&glyr_info->query, glyr->cache_db);
 	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
 
 	glyr_info->cwin = cwin;
@@ -467,15 +470,18 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	enum player_state state = 0;
 	GtkAction *action;
 
-	struct con_win *cwin = user_data;
+	PraghaGlyr *glyr = user_data;
+	struct con_win *cwin = glyr->cwin;
 
 	state = pragha_backend_get_state (backend);
 	gboolean playing = (state != ST_STOPPED);
 
-	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search lyric");
+	glyr = pragha_application_get_glyr (cwin);
+
+	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search lyric");
 	gtk_action_set_sensitive (action, playing);
 
-	action = gtk_action_group_get_action (cwin->glyr->action_group_main_menu, "Search artist info");
+	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search artist info");
 	gtk_action_set_sensitive (action, playing);
 
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
@@ -543,7 +549,7 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	struct con_win *cwin = glyr->cwin;
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (cwin),
-	                                      backend_changed_state_cb, cwin);
+	                                      backend_changed_state_cb, glyr);
 	glyr_db_destroy (glyr->cache_db);
 
 	pragha_menubar_remove_plugin_action (cwin,
@@ -582,7 +588,7 @@ pragha_glyr_new (struct con_win *cwin)
 	setup_playlist (glyr);
 
 	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
-	                  G_CALLBACK (backend_changed_state_cb), cwin);
+	                  G_CALLBACK (backend_changed_state_cb), glyr);
 
 	return glyr;
 }

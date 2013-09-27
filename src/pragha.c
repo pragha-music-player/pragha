@@ -294,11 +294,21 @@ pragha_application_get_mpris2 (struct con_win *cwin)
 	return cwin->mpris2;
 }
 
+#ifdef HAVE_LIBCLASTFM
 PraghaLastfm *
 pragha_application_get_lastfm (struct con_win *cwin)
 {
 	return cwin->clastfm;
 }
+#endif
+
+#ifdef HAVE_LIBGLYR
+PraghaGlyr *
+pragha_application_get_glyr (struct con_win *cwin)
+{
+	return cwin->glyr;
+}
+#endif
 
 gboolean
 pragha_application_is_first_run (struct con_win *cwin)
