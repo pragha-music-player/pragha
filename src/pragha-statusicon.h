@@ -20,7 +20,7 @@
 #define PRAGHA_STATUSICON_H
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define PRAGHA_TYPE_STATUS_ICON                  (pragha_status_icon_get_type ())
 #define PRAGHA_STATUS_ICON(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_STATUS_ICON, PraghaStatusIcon))
@@ -35,6 +35,6 @@ typedef struct {
 
 typedef struct _PraghaStatusIcon PraghaStatusIcon;
 
-PraghaStatusIcon *pragha_status_icon_new (struct con_win *cwin);
+PraghaStatusIcon *pragha_status_icon_new (PraghaApplication *pragha);
 
 #endif /* PRAGHA_STATUSICON_H */

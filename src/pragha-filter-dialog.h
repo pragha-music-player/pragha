@@ -19,9 +19,9 @@
 #define PRAGHA_FILTER_DIALOG_H
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 void
-pragha_filter_dialog (struct con_win *cwin);
+pragha_filter_dialog (PraghaApplication *pragha);
 
 #endif /* PRAGHA_FILTER_DIALOG_H */

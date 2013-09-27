@@ -39,7 +39,7 @@
 
 struct PraghaNotify {
 	NotifyNotification *osd_notify;
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 };
 
 static void
@@ -62,11 +62,11 @@ notify_Prev_Callback (NotifyNotification *osd,
 
 	g_assert (action != NULL);
 
-	struct con_win *cwin = notify->cwin;
+	PraghaApplication *pragha = notify->pragha;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(cwin);
+		pragha_playback_prev_track(pragha);
 }
 
 static void
@@ -78,11 +78,11 @@ notify_Next_Callback (NotifyNotification *osd,
 
 	g_assert (action != NULL);
 
-	struct con_win *cwin = notify->cwin;
+	PraghaApplication *pragha = notify->pragha;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(cwin);
+		pragha_playback_next_track(pragha);
 }
 
 
@@ -117,15 +117,15 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	GError *error = NULL;
 	gchar *summary, *body, *slength;
 
-	struct con_win *cwin = notify->cwin;
+	PraghaApplication *pragha = notify->pragha;
 
 	/* Check if OSD is enabled in preferences */
 
-	preferences = pragha_application_get_preferences (cwin);
-	if (!pragha_preferences_get_show_osd (preferences) || gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(cwin))))
+	preferences = pragha_application_get_preferences (pragha);
+	if (!pragha_preferences_get_show_osd (preferences) || gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(pragha))))
 		return;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	mobj = pragha_backend_get_musicobject (backend);
 	const gchar *file = pragha_musicobject_get_file (mobj);
@@ -179,7 +179,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 	notify_notification_set_timeout (notify->osd_notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
-	toolbar = pragha_application_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (pragha);
 	notify_notification_set_icon_from_pixbuf (notify->osd_notify,
 		pragha_album_art_get_pixbuf (pragha_toolbar_get_album_art(toolbar)));
 
@@ -197,7 +197,7 @@ pragha_notify_show_osd (PraghaNotify *notify)
 }
 
 PraghaNotify *
-pragha_notify_new (struct con_win *cwin)
+pragha_notify_new (PraghaApplication *pragha)
 {
 	if (!notify_init (PACKAGE_NAME))
 		return NULL;
@@ -205,7 +205,7 @@ pragha_notify_new (struct con_win *cwin)
 	PraghaNotify *notify = g_slice_new (PraghaNotify);
 
 	notify->osd_notify = NULL;
-	notify->cwin = cwin;
+	notify->pragha = pragha;
 
 	return notify;
 }

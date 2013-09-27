@@ -61,9 +61,9 @@ static gchar *license = "This program is free software: "
  * Menubar callbacks.
  */
 
-static void pragha_menubar_remove_playlist_action      (GtkAction *action, struct con_win *cwin);
-static void pragha_menubar_crop_playlist_action        (GtkAction *action, struct con_win *cwin);
-static void pragha_menubar_clear_playlist_action       (GtkAction *action, struct con_win *cwin);
+static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_crop_playlist_action        (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_clear_playlist_action       (GtkAction *action, PraghaApplication *pragha);
 
 /*
  * Menu bar ui definition.
@@ -220,23 +220,23 @@ pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *psp
 	GtkAction *action;
 	gboolean playing = FALSE;
 
-	struct con_win *cwin = user_data;
+	PraghaApplication *pragha = user_data;
 
 	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
 
-	action = pragha_application_get_menu_action (cwin, "/Menubar/PlaybackMenu/Prev");
+	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_application_get_menu_action (cwin, "/Menubar/PlaybackMenu/Stop");
+	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Stop");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_application_get_menu_action (cwin, "/Menubar/PlaybackMenu/Next");
+	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Next");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_application_get_menu_action (cwin, "/Menubar/PlaybackMenu/Edit tags");
+	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Edit tags");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 
-	action = pragha_application_get_menu_action (cwin, "/Menubar/ViewMenu/Jump to playing song");
+	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
@@ -259,9 +259,9 @@ add_button_cb(GtkWidget *widget, gpointer data)
 	GtkWidget *window = g_object_get_data(data, "window");
 	GtkWidget *chooser = g_object_get_data(data, "chooser");
 	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
-	struct con_win *cwin = g_object_get_data(data, "cwin");
+	PraghaApplication *pragha = g_object_get_data(data, "pragha");
 
-	PraghaPreferences *preferences = pragha_application_get_preferences (cwin);
+	PraghaPreferences *preferences = pragha_application_get_preferences (pragha);
 
 	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
 	pragha_preferences_set_add_recursively (preferences, add_recursively);
@@ -280,7 +280,7 @@ add_button_cb(GtkWidget *widget, gpointer data)
 		}
 		g_slist_free_full(files, g_free);
 
-		playlist = pragha_application_get_playlist (cwin);
+		playlist = pragha_application_get_playlist (pragha);
 		pragha_playlist_append_mobj_list (playlist, mlist);
 		g_list_free (mlist);
 	}
@@ -301,7 +301,7 @@ open_file_on_keypress(GtkWidget *dialog,
 
 /* Handler for the 'Open' item in the File menu */
 
-void open_file_action(GtkAction *action, struct con_win *cwin)
+void open_file_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
@@ -330,7 +330,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	last_folder = pragha_preferences_get_last_folder (preferences);
 	if (string_is_not_empty(last_folder))
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
@@ -458,7 +458,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	g_object_set_data(storage, "window", window);
 	g_object_set_data(storage, "chooser", chooser);
 	g_object_set_data(storage, "toggle-button", toggle);
-	g_object_set_data(storage, "cwin", cwin);
+	g_object_set_data(storage, "pragha", pragha);
 
 	g_signal_connect(add_button, "clicked",
 		G_CALLBACK(add_button_cb), storage);
@@ -471,7 +471,7 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 	g_signal_connect(window, "key-press-event",
 			G_CALLBACK(open_file_on_keypress), NULL);
 
-	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(pragha_application_get_window(cwin)));
+	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(pragha_application_get_window(pragha)));
 	gtk_window_set_destroy_with_parent (GTK_WINDOW (window), TRUE);
 
 	gtk_widget_show_all(window);
@@ -479,9 +479,9 @@ void open_file_action(GtkAction *action, struct con_win *cwin)
 
 /* Handler for the 'Add Audio CD' item in the pragha menu */
 
-void add_audio_cd_action(GtkAction *action, struct con_win *cwin)
+void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
 {
-	add_audio_cd(cwin);
+	add_audio_cd(pragha);
 }
 
 /* Build a dialog to get a new playlist name */
@@ -507,7 +507,7 @@ totem_open_location_set_from_clipboard (GtkWidget *open_location)
 	return NULL;
 }
 
-void add_location_action(GtkAction *action, struct con_win *cwin)
+void add_location_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaDatabase *cdbase;
@@ -546,7 +546,7 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 	}
 
 	dialog = gtk_dialog_new_with_buttons(_("Add a location"),
-			     GTK_WINDOW(pragha_application_get_window(cwin)),
+			     GTK_WINDOW(pragha_application_get_window(pragha)),
 			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 			     GTK_STOCK_CANCEL,
 			     GTK_RESPONSE_CANCEL,
@@ -577,13 +577,13 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 			mobj = new_musicobject_from_location(uri, name);
 
-			playlist = pragha_application_get_playlist (cwin);
+			playlist = pragha_application_get_playlist (pragha);
 			pragha_playlist_append_single_song (playlist, mobj);
 
 			if (name) {
 				new_radio (playlist, uri, name);
 
-				cdbase = pragha_application_get_database (cwin);
+				cdbase = pragha_application_get_database (pragha);
 				pragha_database_change_playlists_done (cdbase);
 			}
 		}
@@ -600,36 +600,36 @@ void add_location_action(GtkAction *action, struct con_win *cwin)
 
 /* Handler for the 'Prev' item in the pragha menu */
 
-void prev_action(GtkAction *action, struct con_win *cwin)
+void prev_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_playback_prev_track(cwin);
+	pragha_playback_prev_track(pragha);
 }
 
 /* Handler for the 'Play / Pause' item in the pragha menu */
 
-void play_pause_action(GtkAction *action, struct con_win *cwin)
+void play_pause_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_playback_play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(pragha);
 }
 
 /* Handler for the 'Stop' item in the pragha menu */
 
-void stop_action(GtkAction *action, struct con_win *cwin)
+void stop_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_playback_stop(cwin);
+	pragha_playback_stop(pragha);
 }
 
 /* Handler for the 'Next' item in the pragha menu */
 
-void next_action (GtkAction *action, struct con_win *cwin)
+void next_action (GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_playback_next_track(cwin);
+	pragha_playback_next_track(pragha);
 }
 
 static void
 pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   gint            response_id,
-                                  struct con_win *cwin)
+                                  PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
@@ -641,7 +641,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_application_get_window(cwin));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(pragha));
 		return;
 	}
 
@@ -650,13 +650,13 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 		if(changed) {
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
-			backend = pragha_application_get_backend (cwin);
+			backend = pragha_application_get_backend (pragha);
 
 			if(pragha_backend_get_state (backend) != ST_STOPPED) {
 				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
-					toolbar = pragha_application_get_toolbar (cwin);
-					playlist = pragha_application_get_playlist (cwin);
+					toolbar = pragha_application_get_toolbar (pragha);
+					playlist = pragha_application_get_playlist (pragha);
 
 
 					/* Update public current song */
@@ -672,7 +672,7 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 
 					pragha_toolbar_set_title(toolbar, current_mobj);
 
-					mpris2 = pragha_application_get_mpris2 (cwin);
+					mpris2 = pragha_application_get_mpris2 (pragha);
 					pragha_mpris_update_metadata_changed (mpris2);
 				}
 			}
@@ -689,12 +689,12 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 	gtk_widget_destroy (dialog);
 }
 
-void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
+void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	GtkWidget *dialog;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
@@ -702,7 +702,7 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 	dialog = pragha_tags_dialog_new();
 
 	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_edit_tags_dialog_response), cwin);
+	                  G_CALLBACK (pragha_edit_tags_dialog_response), pragha);
 
 	pragha_tags_dialog_set_musicobject (PRAGHA_TAGS_DIALOG(dialog),
 	                                    pragha_backend_get_musicobject (backend));
@@ -712,46 +712,46 @@ void edit_tags_playing_action(GtkAction *action, struct con_win *cwin)
 
 /* Handler for the 'Quit' item in the pragha menu */
 
-void quit_action(GtkAction *action, struct con_win *cwin)
+void quit_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_application_quit ();
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
 
-void search_playlist_action(GtkAction *action, struct con_win *cwin)
+void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_filter_dialog (cwin);
+	pragha_filter_dialog (pragha);
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */
 
-void pref_action(GtkAction *action, struct con_win *cwin)
+void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_preferences_dialog_show (cwin);
+	pragha_preferences_dialog_show (pragha);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */
 
 void
-fullscreen_action (GtkAction *action, struct con_win *cwin)
+fullscreen_action (GtkAction *action, PraghaApplication *pragha)
 {
 	GtkWidget *menu_bar;
 	gboolean fullscreen;
 	GdkWindowState state;
 
-	menu_bar = pragha_application_get_menubar (cwin);
+	menu_bar = pragha_application_get_menubar (pragha);
 
 	fullscreen = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
 
 	if(fullscreen){
-		gtk_window_fullscreen(GTK_WINDOW(pragha_application_get_window(cwin)));
+		gtk_window_fullscreen(GTK_WINDOW(pragha_application_get_window(pragha)));
 		gtk_widget_hide(GTK_WIDGET(menu_bar));
 	}
 	else {
-		state = gdk_window_get_state (gtk_widget_get_window (pragha_application_get_window(cwin)));
+		state = gdk_window_get_state (gtk_widget_get_window (pragha_application_get_window(pragha)));
 		if (state & GDK_WINDOW_STATE_FULLSCREEN)
-			gtk_window_unfullscreen(GTK_WINDOW(pragha_application_get_window(cwin)));
+			gtk_window_unfullscreen(GTK_WINDOW(pragha_application_get_window(pragha)));
 		gtk_widget_show(GTK_WIDGET(menu_bar));
 	}
 }
@@ -759,18 +759,18 @@ fullscreen_action (GtkAction *action, struct con_win *cwin)
 /* Handler for the 'Show_controls_below_action' item in the view menu */
 
 void
-show_controls_below_action (GtkAction *action, struct con_win *cwin)
+show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	PraghaToolbar *toolbar;
 	GtkWidget *parent;
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 
 	pragha_preferences_set_controls_below (preferences,
 		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 
-	toolbar = pragha_application_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (pragha);
 	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
 
 	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
@@ -779,10 +779,10 @@ show_controls_below_action (GtkAction *action, struct con_win *cwin)
 }
 
 void
-jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
+jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 
 	pragha_playlist_show_current_track (playlist);
 }
@@ -790,28 +790,28 @@ jump_to_playing_song_action (GtkAction *action, struct con_win *cwin)
 /* Handler for the 'Equalizer' item in the Tools menu */
 
 void
-show_equalizer_action(GtkAction *action, struct con_win *cwin)
+show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_equalizer_dialog_show(cwin);
+	pragha_equalizer_dialog_show(pragha);
 }
 
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
 
-void rescan_library_action(GtkAction *action, struct con_win *cwin)
+void rescan_library_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaScanner *scanner;
-	scanner = pragha_application_get_scanner (cwin);
+	scanner = pragha_application_get_scanner (pragha);
 
 	pragha_scanner_scan_library (scanner);
 }
 
 /* Handler for the 'Update Library' item in the Tools menu */
 
-void update_library_action(GtkAction *action, struct con_win *cwin)
+void update_library_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaScanner *scanner;
-	scanner = pragha_application_get_scanner (cwin);
+	scanner = pragha_application_get_scanner (pragha);
 
 	pragha_scanner_update_library (scanner);
 }
@@ -819,47 +819,47 @@ void update_library_action(GtkAction *action, struct con_win *cwin)
 /* Handler for remove, crop and clear action in the Tools menu */
 
 static void
-pragha_menubar_remove_playlist_action (GtkAction *action, struct con_win *cwin)
+pragha_menubar_remove_playlist_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_remove_selection (playlist);
 }
 
 static void
-pragha_menubar_crop_playlist_action (GtkAction *action, struct con_win *cwin)
+pragha_menubar_crop_playlist_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_crop_selection (playlist);
 }
 
 static void
-pragha_menubar_clear_playlist_action (GtkAction *action, struct con_win *cwin)
+pragha_menubar_clear_playlist_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_remove_all (playlist);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */
 
-void statistics_action(GtkAction *action, struct con_win *cwin)
+void statistics_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaDatabase *cdbase;
 	gint n_artists, n_albums, n_tracks;
 	GtkWidget *dialog;
 
-	cdbase = pragha_application_get_database (cwin);
+	cdbase = pragha_application_get_database (pragha);
 
 	n_artists = pragha_database_get_artist_count (cdbase);
 	n_albums = pragha_database_get_album_count (cdbase);
 	n_tracks = pragha_database_get_track_count (cdbase);
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(pragha_application_get_window(cwin)),
+	dialog = gtk_message_dialog_new(GTK_WINDOW(pragha_application_get_window(pragha)),
 					GTK_DIALOG_DESTROY_WITH_PARENT,
 					GTK_MESSAGE_INFO,
 					GTK_BUTTONS_OK,
@@ -881,13 +881,13 @@ void statistics_action(GtkAction *action, struct con_win *cwin)
 
 /* Handler for the 'About' action in the Help menu */
 
-void about_widget(struct con_win *cwin)
+void about_widget(PraghaApplication *pragha)
 {
 	GtkWidget *mainwindow;
 	GdkPixbuf *pixbuf_app;
 
-	mainwindow = pragha_application_get_window (cwin);
-	pixbuf_app = pragha_application_get_pixbuf_app (cwin);
+	mainwindow = pragha_application_get_window (pragha);
+	pixbuf_app = pragha_application_get_pixbuf_app (pragha);
 
 	const gchar *authors[] = {
 		"sujith ( m.sujith@gmail.com )",
@@ -906,37 +906,37 @@ void about_widget(struct con_win *cwin)
 	                      NULL);
 }
 
-void home_action(GtkAction *action, struct con_win *cwin)
+void home_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri, pragha_application_get_window(cwin));
+	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void community_action(GtkAction *action, struct con_win *cwin)
+void community_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
-	open_url(uri, pragha_application_get_window(cwin));
+	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void wiki_action(GtkAction *action, struct con_win *cwin)
+void wiki_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri, pragha_application_get_window(cwin));
+	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void translate_action(GtkAction *action, struct con_win *cwin)
+void translate_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
-	open_url(uri, pragha_application_get_window(cwin));
+	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void about_action(GtkAction *action, struct con_win *cwin)
+void about_action(GtkAction *action, PraghaApplication *pragha)
 {
-	about_widget(cwin);
+	about_widget(pragha);
 }
 
 void
-pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *cwin)
+pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkActionGroup *main_actions;
@@ -951,13 +951,13 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *c
 	gtk_action_group_add_actions (main_actions,
 	                              main_aentries,
 	                              G_N_ELEMENTS(main_aentries),
-	                              (gpointer)cwin);
+	                              (gpointer)pragha);
 	gtk_action_group_add_toggle_actions (main_actions,
 	                                     toggles_entries,
 	                                     G_N_ELEMENTS(toggles_entries),
-	                                     cwin);
+	                                     pragha);
 
-	gtk_window_add_accel_group (GTK_WINDOW(pragha_application_get_window(cwin)),
+	gtk_window_add_accel_group (GTK_WINDOW(pragha_application_get_window(pragha)),
 	                            gtk_ui_manager_get_accel_group(menu_ui_manager));
 
 	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
@@ -965,7 +965,7 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, struct con_win *c
 
 	/* Binding properties to Actions. */
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
 	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);

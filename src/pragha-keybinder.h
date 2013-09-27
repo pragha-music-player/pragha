@@ -25,10 +25,10 @@
 #ifdef HAVE_LIBKEYBINDER
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 gboolean keybinder_will_be_useful ();
-gboolean init_keybinder (struct con_win *cwin);
+gboolean init_keybinder (PraghaApplication *pragha);
 void keybinder_free ();
 
 #endif

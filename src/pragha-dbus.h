@@ -23,7 +23,7 @@
 #include <dbus/dbus-glib-lowlevel.h>
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define DBUS_PATH      "/org/pragha/DBus"
 #define DBUS_NAME      "org.pragha.DBus"
@@ -45,10 +45,10 @@ struct con_win;
 #define DBUS_METHOD_CURRENT_STATE "curent_state"
 #define DBUS_EVENT_UPDATE_STATE   "update_state"
 
-void dbus_send_signal(const gchar *signal, struct con_win *cwin);
-void dbus_handlers_free(struct con_win *cwin);
+void dbus_send_signal(const gchar *signal, PraghaApplication *pragha);
+void dbus_handlers_free(PraghaApplication *pragha);
 
-DBusConnection *pragha_init_dbus          (struct con_win *cwin);
-gint            pragha_init_dbus_handlers (struct con_win *cwin);
+DBusConnection *pragha_init_dbus          (PraghaApplication *pragha);
+gint            pragha_init_dbus_handlers (PraghaApplication *pragha);
 
 #endif /* PRAGHA_DBUS_H */

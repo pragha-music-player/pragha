@@ -28,19 +28,19 @@
 
 #if HAVE_LIBXFCE4UI
 static void
-pragha_session_quit (XfceSMClient *sm_client, struct con_win *cwin)
+pragha_session_quit (XfceSMClient *sm_client, PraghaApplication *pragha)
 {
 	gtk_main_quit();
 }
 
 static void
-pragha_session_save_state (XfceSMClient *sm_client, struct con_win *cwin)
+pragha_session_save_state (XfceSMClient *sm_client, PraghaApplication *pragha)
 {
 	/* Nothing here? */
 }
 
 void
-pragha_init_session_support(struct con_win *cwin)
+pragha_init_session_support(PraghaApplication *pragha)
 {
 	XfceSMClient *client;
 	GError *error = NULL;
@@ -51,9 +51,9 @@ pragha_init_session_support(struct con_win *cwin)
 	xfce_sm_client_set_desktop_file(client, DESKTOPENTRY);
 
 	g_signal_connect (G_OBJECT (client), "quit",
-	                  G_CALLBACK (pragha_session_quit), cwin);
+	                  G_CALLBACK (pragha_session_quit), pragha);
 	g_signal_connect (G_OBJECT (client), "save-state",
-	                  G_CALLBACK (pragha_session_save_state), cwin);
+	                  G_CALLBACK (pragha_session_save_state), pragha);
 
 	if(!xfce_sm_client_connect (client, &error)) {
 		g_warning ("Failed to connect to session manager: %s", error->message);
@@ -62,12 +62,12 @@ pragha_init_session_support(struct con_win *cwin)
 }
 #else
 void
-pragha_init_session_support(struct con_win *cwin)
+pragha_init_session_support(PraghaApplication *pragha)
 {
 	GtkWidget *window;
 	gchar *role;
 
-	window = pragha_application_get_window (cwin);
+	window = pragha_application_get_window (pragha);
 
 	/* set a unique role on each window (for session management) */
 	role = g_strdup_printf ("Pragha-%p-%d-%d", window, (gint) getpid (), (gint) time (NULL));

@@ -27,7 +27,7 @@
 #include "pragha-backend.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define PRAGHA_TYPE_TOOLBAR                  (pragha_toolbar_get_type ())
 #define PRAGHA_TOOLBAR(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_TOOLBAR, PraghaToolbar))
@@ -59,7 +59,7 @@ void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer u
 void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 void pragha_toolbar_show_ramaning_time_cb    (PraghaToolbar *toolbar, GParamSpec *pspec, gpointer user_data);
 
-void update_album_art (struct con_win *cwin);
+void update_album_art (PraghaApplication *pragha);
 
 gboolean pragha_toolbar_window_state_event  (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);

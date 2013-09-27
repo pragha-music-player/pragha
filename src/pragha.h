@@ -74,7 +74,9 @@ enum dnd_target {
 	TARGET_PLAIN_TEXT
 };
 
-struct con_win {
+typedef struct _PraghaApplication PraghaApplication;
+
+struct _PraghaApplication {
 	/* Main window and icon */
 
 	GtkWidget         *mainwindow;
@@ -126,52 +128,52 @@ struct con_win {
 
 /* Functions to access private members */
 
-PraghaPreferences *pragha_application_get_preferences     (struct con_win *cwin);
-PraghaDatabase    *pragha_application_get_database        (struct con_win *cwin);
-PraghaArtCache    *pragha_application_get_art_cache       (struct con_win *cwin);
+PraghaPreferences *pragha_application_get_preferences     (PraghaApplication *pragha);
+PraghaDatabase    *pragha_application_get_database        (PraghaApplication *pragha);
+PraghaArtCache    *pragha_application_get_art_cache       (PraghaApplication *pragha);
 
-PraghaBackend     *pragha_application_get_backend         (struct con_win *cwin);
+PraghaBackend     *pragha_application_get_backend         (PraghaApplication *pragha);
 
-PraghaScanner     *pragha_application_get_scanner         (struct con_win *cwin);
+PraghaScanner     *pragha_application_get_scanner         (PraghaApplication *pragha);
 
-GtkWidget         *pragha_application_get_window          (struct con_win *cwin);
-GdkPixbuf         *pragha_application_get_pixbuf_app      (struct con_win *cwin);
-PraghaPlaylist    *pragha_application_get_playlist        (struct con_win *cwin);
-PraghaLibraryPane *pragha_application_get_library         (struct con_win *cwin);
-PraghaToolbar     *pragha_application_get_toolbar         (struct con_win *cwin);
-PraghaSidebar     *pragha_application_get_sidebar         (struct con_win *cwin);
-PraghaStatusbar   *pragha_application_get_statusbar       (struct con_win *cwin);
-PraghaStatusIcon  *pragha_application_get_status_icon     (struct con_win *cwin);
+GtkWidget         *pragha_application_get_window          (PraghaApplication *pragha);
+GdkPixbuf         *pragha_application_get_pixbuf_app      (PraghaApplication *pragha);
+PraghaPlaylist    *pragha_application_get_playlist        (PraghaApplication *pragha);
+PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pragha);
+PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
+PraghaSidebar     *pragha_application_get_sidebar         (PraghaApplication *pragha);
+PraghaStatusbar   *pragha_application_get_statusbar       (PraghaApplication *pragha);
+PraghaStatusIcon  *pragha_application_get_status_icon     (PraghaApplication *pragha);
 
-GtkUIManager      *pragha_application_get_menu_ui_manager    (struct con_win *cwin);
-GtkAction         *pragha_application_get_menu_action        (struct con_win *cwin, const gchar *path);
-GtkWidget         *pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path);
-GtkWidget         *pragha_application_get_menubar            (struct con_win *cwin);
-GtkWidget         *pragha_application_get_infobox_container  (struct con_win *cwin);
-GtkWidget         *pragha_application_get_pane               (struct con_win *cwin);
+GtkUIManager      *pragha_application_get_menu_ui_manager    (PraghaApplication *pragha);
+GtkAction         *pragha_application_get_menu_action        (PraghaApplication *pragha, const gchar *path);
+GtkWidget         *pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path);
+GtkWidget         *pragha_application_get_menubar            (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_pane               (PraghaApplication *pragha);
 
-PraghaMpris2      *pragha_application_get_mpris2             (struct con_win *cwin);
+PraghaMpris2      *pragha_application_get_mpris2             (PraghaApplication *pragha);
 #ifdef HAVE_LIBCLASTFM
-PraghaLastfm      *pragha_application_get_lastfm             (struct con_win *cwin);
+PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
 #endif
 #ifdef HAVE_LIBGLYR
-PraghaGlyr        *pragha_application_get_glyr               (struct con_win *cwin);
+PraghaGlyr        *pragha_application_get_glyr               (PraghaApplication *pragha);
 #endif
 
-PraghaNotify      *pragha_application_get_notify             (struct con_win *cwin);
-void               pragha_application_set_notify             (struct con_win *cwin, PraghaNotify *notify);
+PraghaNotify      *pragha_application_get_notify             (PraghaApplication *pragha);
+void               pragha_application_set_notify             (PraghaApplication *pragha, PraghaNotify *notify);
 
-gboolean           pragha_application_is_first_run           (struct con_win *cwin);
+gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 
 /* Info bar import music */
 
-gboolean info_bar_import_music_will_be_useful(struct con_win *cwin);
-GtkWidget* create_info_bar_import_music(struct con_win *cwin);
-GtkWidget* create_info_bar_update_music(struct con_win *cwin);
+gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha);
+GtkWidget* create_info_bar_import_music(PraghaApplication *pragha);
+GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
 
 /* Init */
 
-gint init_options(struct con_win *cwin, int argc, char **argv);
+gint init_options(PraghaApplication *pragha, int argc, char **argv);
 
 /* Close */
 

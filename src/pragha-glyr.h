@@ -23,13 +23,13 @@
 #include <gtk/gtk.h>
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 G_BEGIN_DECLS
 
 typedef struct _PraghaGlyr PraghaGlyr;
 
-PraghaGlyr * pragha_glyr_new (struct con_win *cwin);
+PraghaGlyr * pragha_glyr_new (PraghaApplication *pragha);
 void pragha_glyr_free (PraghaGlyr *glyr);
 
 G_END_DECLS

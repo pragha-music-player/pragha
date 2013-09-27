@@ -41,7 +41,7 @@ static gchar *audio_mixer = NULL;
 static gchar *logfile = NULL;
 
 static gboolean
-cmd_version (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_version (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
 	g_print("pragha %s\n", PACKAGE_VERSION);
 
@@ -49,117 +49,117 @@ cmd_version (const gchar *opt_name, const gchar *val, struct con_win *cwin, GErr
 }
 
 static gboolean
-cmd_play (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_play (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PLAY, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_PLAY, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_stop (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_stop (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_STOP, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_STOP, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_pause (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_pause (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PAUSE, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_PAUSE, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_prev (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_prev (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_PREV, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_PREV, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_next (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_next (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_NEXT, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_NEXT, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_shuffle (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_shuffle (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_SHUFFLE, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_SHUFFLE, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_repeat (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_repeat (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_REPEAT, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_REPEAT, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_inc_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_inc_volume (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_INC_VOL, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_INC_VOL, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_dec_volume (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_dec_volume (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_DEC_VOL, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_DEC_VOL, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_show_osd (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_show_osd (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_SHOW_OSD, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_SHOW_OSD, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_toggle_view (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_toggle_view (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
-	if (!cwin->unique_instance) {
-		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, cwin);
+	if (!pragha->unique_instance) {
+		dbus_send_signal(DBUS_SIG_TOGGLE_VIEW, pragha);
 		exit(0);
 	}
 	return FALSE;
 }
 
 static gboolean
-cmd_current_state (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_current_state (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
@@ -170,7 +170,7 @@ cmd_current_state (const gchar *opt_name, const gchar *val, struct con_win *cwin
 
 	year = track_no = length = bitrate = channels = samplerate = 0;
 
-	if (cwin->unique_instance) {
+	if (pragha->unique_instance) {
 		ret = FALSE;
 		goto exit;
 	}
@@ -187,7 +187,7 @@ cmd_current_state (const gchar *opt_name, const gchar *val, struct con_win *cwin
 		goto exit;
 	}
 
-	reply_msg = dbus_connection_send_with_reply_and_block(cwin->con_dbus, msg,
+	reply_msg = dbus_connection_send_with_reply_and_block(pragha->con_dbus, msg,
 							      -1, &d_error);
 	if (!reply_msg) {
 		g_critical("Unable to send DBUS message");
@@ -248,7 +248,7 @@ exit:
 }
 
 static gboolean
-cmd_add_file (const gchar *opt_name, const gchar *val, struct con_win *cwin, GError **error)
+cmd_add_file (const gchar *opt_name, const gchar *val, PraghaApplication *pragha, GError **error)
 {
 	gboolean ret = TRUE;
 	DBusMessage *msg = NULL;
@@ -271,13 +271,13 @@ cmd_add_file (const gchar *opt_name, const gchar *val, struct con_win *cwin, GEr
 	}
 	dbus_message_append_args(msg, DBUS_TYPE_STRING, &uri, DBUS_TYPE_INVALID);
 
-	if (!dbus_connection_send(cwin->con_dbus, msg, NULL)) {
+	if (!dbus_connection_send(pragha->con_dbus, msg, NULL)) {
 		g_critical("Unable to send DBUS message");
 		ret = FALSE;
 		goto bad;
 	}
 
-	dbus_connection_flush(cwin->con_dbus);
+	dbus_connection_flush(pragha->con_dbus);
 bad:
 	dbus_message_unref(msg);
 exit:
@@ -329,7 +329,7 @@ static const GOptionEntry cmd_entries[] = {
 };
 
 gint
-init_options (struct con_win *cwin, int argc, char **argv)
+init_options (PraghaApplication *pragha, int argc, char **argv)
 {
 	GError *error = NULL;
 	GOptionContext *context;
@@ -338,7 +338,7 @@ init_options (struct con_win *cwin, int argc, char **argv)
 	CDEBUG(DBG_INFO, "Initializing Command line options");
 
 	context = g_option_context_new("- A lightweight music player");
-	group = g_option_group_new("General", "General", "General Options", cwin, NULL);
+	group = g_option_group_new("General", "General", "General Options", pragha, NULL);
 	g_option_group_add_entries(group, cmd_entries);
 	g_option_context_set_main_group(context, group);
 	g_option_context_add_group(context, gtk_get_option_group(TRUE));

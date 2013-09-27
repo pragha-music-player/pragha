@@ -22,10 +22,10 @@
 #include "pragha-preferences.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
 
-void pragha_equalizer_dialog_show(struct con_win *cwin);
+void pragha_equalizer_dialog_show(PraghaApplication *pragha);
 
 #endif /* PRAGHA_EQUALIZER_DIALOG_H */

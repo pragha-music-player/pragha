@@ -113,7 +113,7 @@ AND LOCATION.id = ?";
 }
 
 PraghaMusicobject *
-new_musicobject_from_cdda(struct con_win *cwin,
+new_musicobject_from_cdda(PraghaApplication *pragha,
                           cdrom_drive_t *cdda_drive,
                           cddb_disc_t *cddb_disc,
                           gint track_no)
@@ -133,7 +133,7 @@ new_musicobject_from_cdda(struct con_win *cwin,
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_use_cddb (preferences) && cddb_disc) {
 		cddb_track_t *track;
 		const gchar *title, *artist, *album, *genre;

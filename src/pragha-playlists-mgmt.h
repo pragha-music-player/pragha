@@ -23,7 +23,7 @@
 #include "pragha-playlist.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 /* Playlist management */
 
@@ -38,7 +38,7 @@ enum playlist_mgmt {
 #define SAVE_PLAYLIST_STATE         "con_playlist"
 
 gchar *get_playlist_name(enum playlist_mgmt type, GtkWidget *parent);
-void add_playlist_current_playlist(gchar *splaylist, struct con_win *cwin);
+void add_playlist_current_playlist(gchar *splaylist, PraghaApplication *pragha);
 GList * add_playlist_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
 GList *add_radio_to_mobj_list(PraghaDatabase *cdbase, const gchar *playlist, GList *list);
 gboolean delete_existing_item_dialog(const gchar *item, GtkWidget *parent);
@@ -51,7 +51,7 @@ GList *
 pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
-void pragha_pl_parser_open_from_file_by_extension(const gchar *file, struct con_win *cwin);
+void pragha_pl_parser_open_from_file_by_extension(const gchar *file, PraghaApplication *pragha);
 void
 save_playlist(PraghaPlaylist* cplaylist,
               gint playlist_id,
@@ -62,6 +62,6 @@ new_playlist(PraghaPlaylist* cplaylist,
              enum playlist_mgmt type);
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type);
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
-void update_playlist_changes_on_menu(struct con_win *cwin);
+void update_playlist_changes_on_menu(PraghaApplication *pragha);
 
 #endif /* PRAGHA_PLAYLISTS_MGMT_H */

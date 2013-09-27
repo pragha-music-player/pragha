@@ -23,7 +23,7 @@
 #include "pragha-musicobject.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
 gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);

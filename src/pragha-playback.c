@@ -25,7 +25,7 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
-static void pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj);
+static void pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusicobject *mobj);
 
 /**********************/
 /* Playback functions */
@@ -33,7 +33,7 @@ static void pragha_playback_update_current_album_art (struct con_win *cwin, Prag
 
 /* Play prev track in current playlist */
 
-void pragha_playback_prev_track(struct con_win *cwin)
+void pragha_playback_prev_track(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
@@ -43,14 +43,14 @@ void pragha_playback_prev_track(struct con_win *cwin)
 
 	/* Get the next (prev) track to be played */
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 
 	mobj = pragha_playlist_get_prev_track (playlist);
 
 	if (!mobj)
 		return;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	/* Stop currently playing track */
 	pragha_backend_stop (backend);
@@ -61,7 +61,7 @@ void pragha_playback_prev_track(struct con_win *cwin)
 
 /* Start playback of a new track, or resume playback of current track */
 
-void pragha_playback_play_pause_resume(struct con_win *cwin)
+void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
@@ -79,7 +79,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 	/* Stopped   Start playback         */
 	/************************************/
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	switch (pragha_backend_get_state (backend)) {
 	case ST_PLAYING:
@@ -89,7 +89,7 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 		pragha_backend_resume (backend);
 		break;
 	case ST_STOPPED:
-		playlist = pragha_application_get_playlist (cwin);
+		playlist = pragha_application_get_playlist (pragha);
 
 		mobj = pragha_playlist_get_any_track (playlist);
 		if (!mobj)
@@ -105,13 +105,13 @@ void pragha_playback_play_pause_resume(struct con_win *cwin)
 
 /* Stop the playback */
 
-void pragha_playback_stop(struct con_win *cwin)
+void pragha_playback_stop(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 
 	CDEBUG(DBG_BACKEND, "Stopping the current song");
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
@@ -121,7 +121,7 @@ void pragha_playback_stop(struct con_win *cwin)
 
 /* Play next song when terminate a song. */
 
-void pragha_advance_playback (struct con_win *cwin)
+void pragha_advance_playback (PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
@@ -129,13 +129,13 @@ void pragha_advance_playback (struct con_win *cwin)
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	/* Stop to set ready and clear all info */
 
 	pragha_backend_stop (backend);
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	mobj = pragha_playlist_get_next_track (playlist);
 
 	if (!mobj)
@@ -147,7 +147,7 @@ void pragha_advance_playback (struct con_win *cwin)
 
 /* Play next track in current_playlist */
 
-void pragha_playback_next_track(struct con_win *cwin)
+void pragha_playback_next_track(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 
@@ -155,12 +155,12 @@ void pragha_playback_next_track(struct con_win *cwin)
 
 	/* Are we playing right now ? */
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	/* Play a new song */
-	pragha_advance_playback(cwin);
+	pragha_advance_playback(pragha);
 }
 
 /******************************************/
@@ -168,7 +168,7 @@ void pragha_playback_next_track(struct con_win *cwin)
 /******************************************/
 
 void
-pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin)
+pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
@@ -181,7 +181,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 	switch (state) {
 		case ST_PLAYING:
 			/* New song?. */
-			playlist = pragha_application_get_playlist (cwin);
+			playlist = pragha_application_get_playlist (pragha);
 			if(pragha_playlist_get_current_update_action (playlist) != PLAYLIST_NONE) {
 				mobj = pragha_backend_get_musicobject (backend);
 
@@ -189,19 +189,19 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 				                     pragha_musicobject_get_file(mobj));
 
 				/* Update current song info */
-				toolbar = pragha_application_get_toolbar (cwin);
+				toolbar = pragha_application_get_toolbar (pragha);
 				pragha_toolbar_set_title (toolbar, mobj);
 				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
 
 				/* Update album art */
-				pragha_playback_update_current_album_art (cwin, mobj);
+				pragha_playback_update_current_album_art (pragha, mobj);
 
 				/* Show osd, and inform new album art. */
-				notify = pragha_application_get_notify (cwin);
+				notify = pragha_application_get_notify (pragha);
 				if (notify)
 					pragha_notify_show_osd (notify);
 
-				mpris2 = pragha_application_get_mpris2 (cwin);
+				mpris2 = pragha_application_get_mpris2 (pragha);
 				pragha_mpris_update_metadata_changed (mpris2);
 
 				pragha_playlist_report_finished_action (playlist);
@@ -218,13 +218,13 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 }
 
 void
-pragha_backend_finished_song (PraghaBackend *backend, struct con_win *cwin)
+pragha_backend_finished_song (PraghaBackend *backend, PraghaApplication *pragha)
 {
-	pragha_advance_playback(cwin);
+	pragha_advance_playback(pragha);
 }
 
 void
-pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_win *cwin)
+pragha_backend_tags_changed (PraghaBackend *backend, gint changed, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
@@ -237,20 +237,20 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, struct con_wi
 	nmobj = pragha_backend_get_musicobject(backend);
 
 	/* Update change on gui */
-	toolbar = pragha_application_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (pragha);
 	pragha_toolbar_set_title(toolbar, nmobj);
 
-	mpris2 = pragha_application_get_mpris2 (cwin);
+	mpris2 = pragha_application_get_mpris2 (pragha);
 	pragha_mpris_update_metadata_changed (mpris2);
 
 	/* Update the playlist */
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_update_current_track (playlist, changed, nmobj);
 }
 
 static void
-pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobject *mobj)
+pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusicobject *mobj)
 {
 	PraghaToolbar *toolbar;
 	PraghaPreferences *preferences;
@@ -266,11 +266,11 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 	if (!pragha_musicobject_is_local_file(mobj))
 		return;
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	if (!pragha_preferences_get_show_album_art (preferences))
 		return;
 
-	art_cache = pragha_application_get_art_cache (cwin);
+	art_cache = pragha_application_get_art_cache (pragha);
 	album_path = pragha_art_cache_get (art_cache,
 	                                   pragha_musicobject_get_artist(mobj),
 	                                   pragha_musicobject_get_album(mobj));
@@ -285,23 +285,23 @@ pragha_playback_update_current_album_art (struct con_win *cwin, PraghaMusicobjec
 		g_free(path);
 	}
 
-	toolbar = pragha_application_get_toolbar (cwin);
+	toolbar = pragha_application_get_toolbar (pragha);
 	pragha_toolbar_set_image_album_art (toolbar, album_path);
 	g_free(album_path);
 }
 
 void
-pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
+pragha_playback_show_current_album_art (GObject *object, PraghaApplication *pragha)
 {
 	PraghaAlbumArt *albumart;
 	gchar *uri = NULL;
 
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	albumart = pragha_toolbar_get_album_art (pragha_application_get_toolbar (cwin));
+	albumart = pragha_toolbar_get_album_art (pragha_application_get_toolbar (pragha));
 
 	const gchar *albumart_path = pragha_album_art_get_path (albumart);
 
@@ -309,26 +309,26 @@ pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin)
 		return;
 
 	uri = g_filename_to_uri (albumart_path, NULL, NULL);
-	open_url(uri, pragha_application_get_window (cwin));
+	open_url(uri, pragha_application_get_window (pragha));
 	g_free (uri);
 }
 
 void
-pragha_playback_edit_current_track (GObject *object, struct con_win *cwin)
+pragha_playback_edit_current_track (GObject *object, PraghaApplication *pragha)
 {
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
-		edit_tags_playing_action(NULL, cwin);
+		edit_tags_playing_action(NULL, pragha);
 	}
 }
 
 void
-pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin)
+pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplication *pragha)
 {
 	gint seek = 0, length = 0;
 
-	PraghaBackend *backend = pragha_application_get_backend (cwin);
+	PraghaBackend *backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) != ST_PLAYING)
 		return;
@@ -347,13 +347,13 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win
 }
 
 void
-pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, struct con_win *cwin)
+pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 
 	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	/* Stop to set ready and clear all info */
 	pragha_backend_stop (backend);

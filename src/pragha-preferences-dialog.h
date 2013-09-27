@@ -20,7 +20,7 @@
 #define PRAGHA_PREFERENCES_DIALOG_H
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define LASTFM_UNAME_LEN           256
 #define LASTFM_PASS_LEN            512
@@ -29,6 +29,6 @@ struct con_win;
 
 typedef struct _PreferencesDialog PreferencesDialog;
 
-void pragha_preferences_dialog_show (struct con_win *cwin);
+void pragha_preferences_dialog_show (PraghaApplication *pragha);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

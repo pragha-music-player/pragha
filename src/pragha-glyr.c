@@ -42,7 +42,7 @@
 #ifdef HAVE_LIBGLYR
 
 struct _PraghaGlyr {
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 	GlyrDatabase *cache_db;
 	GtkActionGroup *action_group_main_menu;
 	guint merge_id_main_menu;
@@ -52,7 +52,7 @@ struct _PraghaGlyr {
 
 typedef struct
 {
-	struct con_win	*cwin;
+	PraghaApplication	*pragha;
 	GlyrQuery	query;
 	GlyrMemCache	*head;
 }
@@ -107,7 +107,7 @@ static const gchar *playlist_xml = "<ui>					\
 static void
 pragha_text_info_dialog_response(GtkDialog *dialog,
 				gint response,
-				struct con_win *cwin)
+				PraghaApplication *pragha)
 {
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
@@ -118,7 +118,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 	GtkWidget *dialog, *header, *view, *scrolled;
 	GtkTextBuffer *buffer;
 
-	struct con_win *cwin = glyr_info->cwin;
+	PraghaApplication *pragha = glyr_info->pragha;
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -139,7 +139,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 	gtk_container_set_border_width (GTK_CONTAINER (scrolled), 8);
 
 	dialog = gtk_dialog_new_with_buttons(title_header,
-					     GTK_WINDOW(pragha_application_get_window(cwin)),
+					     GTK_WINDOW(pragha_application_get_window(pragha)),
 					     GTK_DIALOG_DESTROY_WITH_PARENT,
 					     GTK_STOCK_OK,
 					     GTK_RESPONSE_OK,
@@ -153,7 +153,7 @@ pragha_show_related_text_info_dialog (glyr_struct *glyr_info, gchar *title_heade
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), scrolled, TRUE, TRUE, 0);
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(pragha_text_info_dialog_response), cwin);
+			G_CALLBACK(pragha_text_info_dialog_response), pragha);
 
 	gtk_widget_show_all(dialog);
 }
@@ -173,12 +173,12 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	if(glyr_info->head == NULL)
 		return;
 
-	struct con_win *cwin = glyr_info->cwin;
+	PraghaApplication *pragha = glyr_info->pragha;
 
 	artist = glyr_info->query.artist;
 	album = glyr_info->query.album;
 
-	art_cache = pragha_application_get_art_cache (cwin);
+	art_cache = pragha_application_get_art_cache (pragha);
 
 	if (glyr_info->head->data)
 		pragha_art_cache_put (art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
@@ -186,7 +186,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	album_art_path = pragha_art_cache_get (art_cache, artist, album);
 
 	if (album_art_path) {
-		backend = pragha_application_get_backend (cwin);
+		backend = pragha_application_get_backend (pragha);
 		if (pragha_backend_get_state (backend) != ST_STOPPED) {
 			PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
 			const gchar *lartist = pragha_musicobject_get_artist (mobj);
@@ -195,10 +195,10 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 			if ((0 == g_strcmp0 (artist, lartist)) &&
 			    (0 == g_strcmp0 (album, lalbum))) {
 				/* TODO: Emit a signal to update the album art and mpris. */
-				toolbar = pragha_application_get_toolbar (cwin);
+				toolbar = pragha_application_get_toolbar (pragha);
 				pragha_toolbar_set_image_album_art (toolbar, album_art_path);
 
-				mpris2 = pragha_application_get_mpris2 (cwin);
+				mpris2 = pragha_application_get_mpris2 (pragha);
 				pragha_mpris_update_metadata_changed (mpris2);
 			}
 		}
@@ -261,7 +261,7 @@ glyr_finished_thread_update (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
-	remove_watch_cursor (pragha_application_get_window(glyr_info->cwin));
+	remove_watch_cursor (pragha_application_get_window(glyr_info->pragha));
 	if(glyr_info->head != NULL)
 		glyr_finished_successfully(glyr_info);
 	else
@@ -293,7 +293,7 @@ get_related_info_idle_func (gpointer data)
 /* Configure the thrad to get the artist bio or lyric. */
 
 static void
-configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artist, const gchar *title, struct con_win *cwin)
+configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artist, const gchar *title, PraghaApplication *pragha)
 {
 	PraghaGlyr *glyr;
 	glyr_struct *glyr_info;
@@ -317,14 +317,14 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 		break;
 	}
 
-	glyr = pragha_application_get_glyr (cwin);
+	glyr = pragha_application_get_glyr (pragha);
 
 	glyr_opt_lookup_db (&glyr_info->query, glyr->cache_db);
 	glyr_opt_db_autowrite(&glyr_info->query, TRUE);
 
-	glyr_info->cwin = cwin;
+	glyr_info->pragha = pragha;
 
-	set_watch_cursor (pragha_application_get_window(cwin));
+	set_watch_cursor (pragha_application_get_window(pragha));
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 }
 
@@ -332,9 +332,9 @@ static void
 get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
@@ -347,16 +347,16 @@ get_artist_info_action (GtkAction *action, PraghaGlyr *glyr)
 	if (string_is_empty(artist))
 		return;
 
-	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, pragha);
 }
 
 static void
 get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if(pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
@@ -370,7 +370,7 @@ get_lyric_action (GtkAction *action, PraghaGlyr *glyr)
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
+	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, pragha);
 }
 
 static void
@@ -379,9 +379,9 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
 
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 
 	mobj = pragha_playlist_get_selected_musicobject(playlist);
 
@@ -392,7 +392,7 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 	if (string_is_empty(artist))
 		return;
 
-	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, cwin);
+	configure_and_launch_get_text_info_dialog(GLYR_GET_ARTISTBIO, artist, NULL, pragha);
 }
 
 static void
@@ -400,9 +400,9 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 {
 	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
 
 	const gchar *artist = pragha_musicobject_get_artist(mobj);
@@ -413,11 +413,11 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, cwin);
+	configure_and_launch_get_text_info_dialog(GLYR_GET_LYRICS, artist, title, pragha);
 }
 
 static void
-related_get_album_art_handler (struct con_win *cwin)
+related_get_album_art_handler (PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaArtCache *art_cache;
@@ -426,7 +426,7 @@ related_get_album_art_handler (struct con_win *cwin)
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
@@ -438,7 +438,7 @@ related_get_album_art_handler (struct con_win *cwin)
 	if (string_is_empty(artist) || string_is_empty(album))
 		return;
 
-	art_cache = pragha_application_get_art_cache (cwin);
+	art_cache = pragha_application_get_art_cache (pragha);
 	album_art_path = pragha_art_cache_get (art_cache, artist, album);
 
 	if (album_art_path)
@@ -454,7 +454,7 @@ related_get_album_art_handler (struct con_win *cwin)
 	glyr_opt_artist(&glyr_info->query, artist);
 	glyr_opt_album(&glyr_info->query, album);
 
-	glyr_info->cwin = cwin;
+	glyr_info->pragha = pragha;
 
 	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 
@@ -471,12 +471,12 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	GtkAction *action;
 
 	PraghaGlyr *glyr = user_data;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
 	state = pragha_backend_get_state (backend);
 	gboolean playing = (state != ST_STOPPED);
 
-	glyr = pragha_application_get_glyr (cwin);
+	glyr = pragha_application_get_glyr (pragha);
 
 	action = gtk_action_group_get_action (glyr->action_group_main_menu, "Search lyric");
 	gtk_action_set_sensitive (action, playing);
@@ -495,9 +495,9 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	if(file_type == FILE_HTTP)
 		return;
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_download_album_art (preferences))
-		related_get_album_art_handler (cwin);
+		related_get_album_art_handler (pragha);
 }
 
 static void
@@ -512,7 +512,7 @@ setup_main_menu (PraghaGlyr *glyr)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              glyr);
 
-	glyr->merge_id_main_menu = pragha_menubar_append_plugin_action (glyr->cwin,
+	glyr->merge_id_main_menu = pragha_menubar_append_plugin_action (glyr->pragha,
 	                                                                glyr->action_group_main_menu,
 	                                                                main_menu_xml);
 
@@ -527,7 +527,7 @@ static void
 setup_playlist (PraghaGlyr *glyr)
 {
 	PraghaPlaylist *playlist;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
 	glyr->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (glyr->action_group_playlist, GETTEXT_PACKAGE);
@@ -536,7 +536,7 @@ setup_playlist (PraghaGlyr *glyr)
 	                              G_N_ELEMENTS (playlist_actions),
 	                              glyr);
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	glyr->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
 	                                                                glyr->action_group_playlist,
 	                                                                playlist_xml);
@@ -546,18 +546,18 @@ void
 pragha_glyr_free (PraghaGlyr *glyr)
 {
 	PraghaPlaylist *playlist;
-	struct con_win *cwin = glyr->cwin;
+	PraghaApplication *pragha = glyr->pragha;
 
-	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (cwin),
+	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha),
 	                                      backend_changed_state_cb, glyr);
 	glyr_db_destroy (glyr->cache_db);
 
-	pragha_menubar_remove_plugin_action (cwin,
+	pragha_menubar_remove_plugin_action (pragha,
 	                                     glyr->action_group_main_menu,
 	                                     glyr->merge_id_main_menu);
 	glyr->merge_id_main_menu = 0;
 
-	playlist = pragha_application_get_playlist (cwin);
+	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_remove_plugin_action (playlist,
 	                                      glyr->action_group_playlist,
 	                                      glyr->merge_id_playlist);
@@ -570,7 +570,7 @@ pragha_glyr_free (PraghaGlyr *glyr)
 }
 
 PraghaGlyr *
-pragha_glyr_new (struct con_win *cwin)
+pragha_glyr_new (PraghaApplication *pragha)
 {
 	gchar *cache_folder = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
 	g_mkdir_with_parents (cache_folder, S_IRWXU);
@@ -579,7 +579,7 @@ pragha_glyr_new (struct con_win *cwin)
 
 	PraghaGlyr *glyr = g_slice_new (PraghaGlyr);
 
-	glyr->cwin = cwin;
+	glyr->pragha = pragha;
 	glyr->cache_db = glyr_db_init (cache_folder);
 
 	g_free (cache_folder);
@@ -587,7 +587,7 @@ pragha_glyr_new (struct con_win *cwin)
 	setup_main_menu (glyr);
 	setup_playlist (glyr);
 
-	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), glyr);
 
 	return glyr;
