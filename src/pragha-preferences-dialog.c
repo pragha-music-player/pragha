@@ -38,7 +38,7 @@
 #include "pragha.h"
 
 struct _PreferencesDialog {
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 	PraghaPreferences *preferences;
 
 	GtkWidget *widget;
@@ -88,12 +88,12 @@ Wildcards are not accepted as of now ( patches welcome :-) ).");
 static void
 album_art_pattern_helper_response(GtkDialog *dialog,
 				gint response,
-				struct con_win *cwin)
+				PraghaApplication *pragha)
 {
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
+static void album_art_pattern_helper(GtkDialog *parent, PraghaApplication *pragha)
 {
 	GtkWidget *dialog;
 
@@ -106,7 +106,7 @@ static void album_art_pattern_helper(GtkDialog *parent, struct con_win *cwin)
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Album art pattern"));
 
 	g_signal_connect(G_OBJECT(dialog), "response",
-			G_CALLBACK(album_art_pattern_helper_response), cwin);
+			G_CALLBACK(album_art_pattern_helper_response), pragha);
 
 	gtk_widget_show_all (dialog);
 }
@@ -185,7 +185,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 
 		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w));
 		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
-		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->cwin), software_mixer);
+		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
 
 
 		/* Save new library folders */
@@ -226,8 +226,8 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			}
 
 			if(test_change) {
-				infobar = create_info_bar_update_music(dialog->cwin);
-				pragha_window_add_widget_to_infobox(dialog->cwin, infobar);
+				infobar = create_info_bar_update_music(dialog->pragha);
+				pragha_window_add_widget_to_infobox(dialog->pragha, infobar);
 			}
 		}
 
@@ -236,7 +236,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		if (folder_scanned)
 			free_str_list(folder_scanned);
 
-		library = pragha_application_get_library (dialog->cwin);
+		library = pragha_application_get_library (dialog->pragha);
 
 		style = pragha_preferences_get_library_style (dialog->preferences);
 
@@ -316,7 +316,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 
 			if (string_is_not_empty(album_art_pattern)) {
 				if (!validate_album_art_pattern(album_art_pattern)) {
-					album_art_pattern_helper(GTK_DIALOG(dialog->widget), dialog->cwin);
+					album_art_pattern_helper(GTK_DIALOG(dialog->widget), dialog->pragha);
 					return;
 				}
 				/* Proper pattern, store in preferences */
@@ -331,11 +331,11 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
 		if (osd) {
 			pragha_preferences_set_show_osd(dialog->preferences, TRUE);
-			notify = pragha_application_get_notify (dialog->cwin);
+			notify = pragha_application_get_notify (dialog->pragha);
 			if (!notify) {
-				notify = pragha_notify_new (dialog->cwin);
+				notify = pragha_notify_new (dialog->pragha);
 				if (notify)
-					pragha_application_set_notify (dialog->cwin, notify);
+					pragha_application_set_notify (dialog->pragha, notify);
 				else
 					pragha_preferences_set_show_osd(dialog->preferences, FALSE);
 			}
@@ -360,7 +360,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_set_password(dialog->preferences,
 				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
 
-			clastfm = pragha_application_get_lastfm (dialog->cwin);
+			clastfm = pragha_application_get_lastfm (dialog->pragha);
 			pragha_lastfm_disconnect (clastfm);
 			pragha_lastfm_connect (clastfm);
 		}
@@ -375,12 +375,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_use_mpris2(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
 
-		mpris2 = pragha_application_get_mpris2 (dialog->cwin);
+		mpris2 = pragha_application_get_mpris2 (dialog->pragha);
 		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
 			pragha_mpris_close (mpris2);
 		}
 		else {
-			pragha_mpris_init (mpris2, dialog->cwin);
+			pragha_mpris_init (mpris2, dialog->pragha);
 		}
 		break;
 	default:
@@ -484,7 +484,7 @@ static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
 	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
 
 	if(!is_active) {
-		clastfm = pragha_application_get_lastfm (dialog->cwin);
+		clastfm = pragha_application_get_lastfm (dialog->pragha);
 		pragha_lastfm_disconnect (clastfm);
 	}
 }
@@ -1162,7 +1162,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 }
 
 void
-pragha_preferences_dialog_show (struct con_win *cwin)
+pragha_preferences_dialog_show (PraghaApplication *pragha)
 {
 	PreferencesDialog *dialog;
 	GtkWidget *header, *pref_notebook;
@@ -1172,13 +1172,13 @@ pragha_preferences_dialog_show (struct con_win *cwin)
 
 	dialog = g_slice_new0(PreferencesDialog);
 
-	dialog->cwin = cwin;
+	dialog->pragha = pragha;
 	dialog->preferences = pragha_preferences_get();
 
 	/* The main preferences dialog */
 
 	dialog->widget = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
-	                                             GTK_WINDOW(pragha_application_get_window(cwin)),
+	                                             GTK_WINDOW(pragha_application_get_window(pragha)),
 	                                             GTK_DIALOG_MODAL,
 	                                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 	                                             GTK_STOCK_OK, GTK_RESPONSE_OK,

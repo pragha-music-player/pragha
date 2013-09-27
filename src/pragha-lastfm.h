@@ -29,7 +29,7 @@
 #include "pragha-preferences.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PraghaLastfm PraghaLastfm;
 
@@ -39,7 +39,7 @@ const gchar  *pragha_lastfm_get_password (PraghaPreferences *preferences);
 gint          pragha_lastfm_connect      (PraghaLastfm *clastfm);
 void          pragha_lastfm_disconnect   (PraghaLastfm *clastfm);
 
-PraghaLastfm *pragha_lastfm_new          (struct con_win *cwin);
+PraghaLastfm *pragha_lastfm_new          (PraghaApplication *pragha);
 void          pragha_lastfm_free         (PraghaLastfm *clastfm);
 
 #endif

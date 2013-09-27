@@ -27,52 +27,52 @@
 static void keybind_prev_handler (const char *keystring, gpointer data)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = data;
+	PraghaApplication *pragha = data;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(cwin);
+		pragha_playback_prev_track(pragha);
 }
 
 static void keybind_play_handler (const char *keystring, gpointer data)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = data;
+	PraghaApplication *pragha = data;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(cwin);
+		pragha_playback_play_pause_resume(pragha);
 }
 
 static void keybind_stop_handler (const char *keystring, gpointer data)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = data;
+	PraghaApplication *pragha = data;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(cwin);
+		pragha_playback_stop(pragha);
 }
 
 static void keybind_next_handler (const char *keystring, gpointer data)
 {
 	PraghaBackend *backend;
-	struct con_win *cwin = data;
+	PraghaApplication *pragha = data;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(cwin);
+		pragha_playback_next_track(pragha);
 }
 
 static void keybind_media_handler (const char *keystring, gpointer data)
 {
-	struct con_win *cwin = data;
+	PraghaApplication *pragha = data;
 
-	pragha_window_toggle_state (cwin, FALSE);
+	pragha_window_toggle_state (pragha, FALSE);
 }
 
 gboolean keybinder_will_be_useful ()
@@ -88,15 +88,15 @@ gboolean keybinder_will_be_useful ()
 #endif
 }
 
-gboolean init_keybinder (struct con_win *cwin)
+gboolean init_keybinder (PraghaApplication *pragha)
 {
 	keybinder_init ();
 
-	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, cwin);
-	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, cwin);
-	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, cwin);
-	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, cwin);
-	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, cwin);
+	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, pragha);
+	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, pragha);
+	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, pragha);
+	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, pragha);
+	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, pragha);
 
 	return TRUE;
 }

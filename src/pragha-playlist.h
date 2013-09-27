@@ -25,7 +25,7 @@
 #include "pragha-database.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define PRAGHA_TYPE_PLAYLIST                  (pragha_playlist_get_type ())
 #define PRAGHA_PLAYLIST(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylist))
@@ -109,7 +109,7 @@ GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
 					   PraghaPlaylist *cplaylist);
 
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
-void edit_tags_playing_action(GtkAction *action, struct con_win *cwin);
+void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
@@ -132,7 +132,7 @@ void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
 void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void jump_to_playing_song(struct con_win *cwin);
+void jump_to_playing_song(PraghaApplication *pragha);
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);

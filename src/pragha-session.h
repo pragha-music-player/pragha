@@ -21,8 +21,8 @@
 #include <glib.h>
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
-void pragha_init_session_support(struct con_win *cwin);
+void pragha_init_session_support(PraghaApplication *pragha);
 
 #endif /* PRAGHA_SESSION_H */

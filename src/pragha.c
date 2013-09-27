@@ -57,75 +57,75 @@ GThread *pragha_main_thread = NULL;
  * Some calbacks..
  */
 static void
-pragha_library_pane_append_tracks (PraghaLibraryPane *library, struct con_win *cwin)
+pragha_library_pane_append_tracks (PraghaLibraryPane *library, PraghaApplication *pragha)
 {
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_append_mobj_list (cwin->playlist,
+		pragha_playlist_append_mobj_list (pragha->playlist,
 			                              list);
 		g_list_free(list);
 	}
 }
 
 static void
-pragha_library_pane_replace_tracks (PraghaLibraryPane *library, struct con_win *cwin)
+pragha_library_pane_replace_tracks (PraghaLibraryPane *library, PraghaApplication *pragha)
 {
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_remove_all (cwin->playlist);
+		pragha_playlist_remove_all (pragha->playlist);
 
-		pragha_playlist_append_mobj_list (cwin->playlist,
+		pragha_playlist_append_mobj_list (pragha->playlist,
 			                              list);
 		g_list_free(list);
 	}
 }
 
 static void
-pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, struct con_win *cwin)
+pragha_library_pane_replace_tracks_and_play (PraghaLibraryPane *library, PraghaApplication *pragha)
 {
 	GList *list = NULL;
 	list = pragha_library_pane_get_mobj_list (library);
 	if (list) {
-		pragha_playlist_remove_all (cwin->playlist);
+		pragha_playlist_remove_all (pragha->playlist);
 
-		pragha_playlist_append_mobj_list (cwin->playlist,
+		pragha_playlist_append_mobj_list (pragha->playlist,
 			                              list);
 
-		if (pragha_backend_get_state (cwin->backend) != ST_STOPPED)
-			pragha_playback_next_track(cwin);
+		if (pragha_backend_get_state (pragha->backend) != ST_STOPPED)
+			pragha_playback_next_track(pragha);
 		else
-			pragha_playback_play_pause_resume(cwin);
+			pragha_playback_play_pause_resume(pragha);
 
 		g_list_free(list);
 	}
 }
 
 static void
-pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, PraghaMusicobject *mobj, struct con_win *cwin)
+pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, PraghaMusicobject *mobj, PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaMpris2 *mpris2;
 	PraghaMusicobject *cmobj = NULL;
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if(pragha_backend_get_state (backend) != ST_STOPPED) {
 		cmobj = pragha_backend_get_musicobject (backend);
 		pragha_update_musicobject_change_tag (cmobj, changed, mobj);
 
-		toolbar = pragha_application_get_toolbar (cwin);
+		toolbar = pragha_application_get_toolbar (pragha);
 		pragha_toolbar_set_title (toolbar, cmobj);
 
-		mpris2 = pragha_application_get_mpris2 (cwin);
+		mpris2 = pragha_application_get_mpris2 (pragha);
 		pragha_mpris_update_metadata_changed (mpris2);
 	}
 }
 
 static void
-pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, struct con_win *cwin)
+pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, PraghaApplication *pragha)
 {
 	PraghaStatusbar *statusbar;
 	gint total_playtime = 0, no_tracks = 0;
@@ -145,7 +145,7 @@ pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, struct con_
 
 	CDEBUG(DBG_VERBOSE, "Updating status bar with new playtime: %s", tot_str);
 
-	statusbar = pragha_application_get_statusbar (cwin);
+	statusbar = pragha_application_get_statusbar (pragha);
 	pragha_statusbar_set_main_text(statusbar, str);
 
 	g_free(tot_str);
@@ -157,163 +157,163 @@ pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, struct con_
  */
 
 PraghaPreferences *
-pragha_application_get_preferences (struct con_win *cwin)
+pragha_application_get_preferences (PraghaApplication *pragha)
 {
-	return cwin->preferences;
+	return pragha->preferences;
 }
 
 PraghaDatabase *
-pragha_application_get_database (struct con_win *cwin)
+pragha_application_get_database (PraghaApplication *pragha)
 {
-	return cwin->cdbase;
+	return pragha->cdbase;
 }
 
 PraghaArtCache *
-pragha_application_get_art_cache (struct con_win *cwin)
+pragha_application_get_art_cache (PraghaApplication *pragha)
 {
-	return cwin->art_cache;
+	return pragha->art_cache;
 }
 
 PraghaBackend *
-pragha_application_get_backend (struct con_win *cwin)
+pragha_application_get_backend (PraghaApplication *pragha)
 {
-	return cwin->backend;
+	return pragha->backend;
 }
 
 PraghaScanner *
-pragha_application_get_scanner (struct con_win *cwin)
+pragha_application_get_scanner (PraghaApplication *pragha)
 {
-	return cwin->scanner;
+	return pragha->scanner;
 }
 
 GtkWidget *
-pragha_application_get_window (struct con_win *cwin)
+pragha_application_get_window (PraghaApplication *pragha)
 {
-	return cwin->mainwindow;
+	return pragha->mainwindow;
 }
 
 GdkPixbuf *
-pragha_application_get_pixbuf_app (struct con_win *cwin)
+pragha_application_get_pixbuf_app (PraghaApplication *pragha)
 {
-	return cwin->pixbuf_app;
+	return pragha->pixbuf_app;
 }
 
 PraghaPlaylist *
-pragha_application_get_playlist (struct con_win *cwin)
+pragha_application_get_playlist (PraghaApplication *pragha)
 {
-	return cwin->playlist;
+	return pragha->playlist;
 }
 
 PraghaLibraryPane *
-pragha_application_get_library (struct con_win *cwin)
+pragha_application_get_library (PraghaApplication *pragha)
 {
-	return cwin->library;
+	return pragha->library;
 }
 
 PraghaToolbar *
-pragha_application_get_toolbar (struct con_win *cwin)
+pragha_application_get_toolbar (PraghaApplication *pragha)
 {
-	return cwin->toolbar;
+	return pragha->toolbar;
 }
 
 PraghaSidebar *
-pragha_application_get_sidebar (struct con_win *cwin)
+pragha_application_get_sidebar (PraghaApplication *pragha)
 {
-	return cwin->sidebar;
+	return pragha->sidebar;
 }
 
 PraghaStatusbar *
-pragha_application_get_statusbar (struct con_win *cwin)
+pragha_application_get_statusbar (PraghaApplication *pragha)
 {
-	return cwin->statusbar;
+	return pragha->statusbar;
 }
 
 PraghaStatusIcon *
-pragha_application_get_status_icon (struct con_win *cwin)
+pragha_application_get_status_icon (PraghaApplication *pragha)
 {
-	return cwin->status_icon;
+	return pragha->status_icon;
 }
 
 GtkUIManager *
-pragha_application_get_menu_ui_manager (struct con_win *cwin)
+pragha_application_get_menu_ui_manager (PraghaApplication *pragha)
 {
-	return cwin->menu_ui_manager;
+	return pragha->menu_ui_manager;
 }
 
 GtkAction *
-pragha_application_get_menu_action (struct con_win *cwin, const gchar *path)
+pragha_application_get_menu_action (PraghaApplication *pragha, const gchar *path)
 {
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
 
 	return gtk_ui_manager_get_action (ui_manager, path);
 }
 
 GtkWidget *
-pragha_application_get_menu_action_widget (struct con_win *cwin, const gchar *path)
+pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path)
 {
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
 
 	return gtk_ui_manager_get_widget (ui_manager, path);
 }
 
 GtkWidget *
-pragha_application_get_menubar (struct con_win *cwin)
+pragha_application_get_menubar (PraghaApplication *pragha)
 {
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (cwin);
+	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
 
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
 GtkWidget *
-pragha_application_get_infobox_container (struct con_win *cwin)
+pragha_application_get_infobox_container (PraghaApplication *pragha)
 {
-	return cwin->infobox;
+	return pragha->infobox;
 }
 
 GtkWidget *
-pragha_application_get_pane (struct con_win *cwin)
+pragha_application_get_pane (PraghaApplication *pragha)
 {
-	return cwin->pane;
+	return pragha->pane;
 }
 
 PraghaNotify *
-pragha_application_get_notify (struct con_win *cwin)
+pragha_application_get_notify (PraghaApplication *pragha)
 {
-	return cwin->notify;
+	return pragha->notify;
 }
 
 void
-pragha_application_set_notify (struct con_win *cwin, PraghaNotify *notify)
+pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
 {
-	cwin->notify = notify;
+	pragha->notify = notify;
 }
 
 PraghaMpris2 *
-pragha_application_get_mpris2 (struct con_win *cwin)
+pragha_application_get_mpris2 (PraghaApplication *pragha)
 {
-	return cwin->mpris2;
+	return pragha->mpris2;
 }
 
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm *
-pragha_application_get_lastfm (struct con_win *cwin)
+pragha_application_get_lastfm (PraghaApplication *pragha)
 {
-	return cwin->clastfm;
+	return pragha->clastfm;
 }
 #endif
 
 #ifdef HAVE_LIBGLYR
 PraghaGlyr *
-pragha_application_get_glyr (struct con_win *cwin)
+pragha_application_get_glyr (PraghaApplication *pragha)
 {
-	return cwin->glyr;
+	return pragha->glyr;
 }
 #endif
 
 gboolean
-pragha_application_is_first_run (struct con_win *cwin)
+pragha_application_is_first_run (PraghaApplication *pragha)
 {
-	return string_is_empty (pragha_preferences_get_installed_version (cwin->preferences));
+	return string_is_empty (pragha_preferences_get_installed_version (pragha->preferences));
 }
 
 void
@@ -328,158 +328,158 @@ pragha_application_quit (void)
  *
  */
 static void
-pragha_application_construct_window (struct con_win *cwin)
+pragha_application_construct_window (PraghaApplication *pragha)
 {
 	/* Main window */
 
-	cwin->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	pragha->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	cwin->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
-	if (!cwin->pixbuf_app)
+	pragha->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
+	if (!pragha->pixbuf_app)
 		g_warning("Unable to load pragha png");
 	else
-		gtk_window_set_icon (GTK_WINDOW(cwin->mainwindow),
-		                     cwin->pixbuf_app);
+		gtk_window_set_icon (GTK_WINDOW(pragha->mainwindow),
+		                     pragha->pixbuf_app);
 	
-	gtk_window_set_title(GTK_WINDOW(cwin->mainwindow), _("Pragha Music Player"));
+	gtk_window_set_title(GTK_WINDOW(pragha->mainwindow), _("Pragha Music Player"));
 
 	/* Get all widgets instances */
 
-	cwin->menu_ui_manager = pragha_menubar_new ();
-	cwin->toolbar = pragha_toolbar_new ();
-	cwin->infobox = gtk_vbox_new (FALSE, 0);
-	cwin->pane = gtk_hpaned_new ();
-	cwin->sidebar = pragha_sidebar_new ();
-	cwin->library = pragha_library_pane_new ();
-	cwin->playlist = pragha_playlist_new ();
-	cwin->statusbar = pragha_statusbar_get ();
-	cwin->scanner = pragha_scanner_new();
+	pragha->menu_ui_manager = pragha_menubar_new ();
+	pragha->toolbar = pragha_toolbar_new ();
+	pragha->infobox = gtk_vbox_new (FALSE, 0);
+	pragha->pane = gtk_hpaned_new ();
+	pragha->sidebar = pragha_sidebar_new ();
+	pragha->library = pragha_library_pane_new ();
+	pragha->playlist = pragha_playlist_new ();
+	pragha->statusbar = pragha_statusbar_get ();
+	pragha->scanner = pragha_scanner_new();
 
-	cwin->status_icon = pragha_status_icon_new (cwin);
+	pragha->status_icon = pragha_status_icon_new (pragha);
 
-	pragha_menubar_connect_signals (cwin->menu_ui_manager, cwin);
+	pragha_menubar_connect_signals (pragha->menu_ui_manager, pragha);
 
 	/* Contruct the window. */
 
-	pragha_window_new (cwin);
+	pragha_window_new (pragha);
 }
 
 /* FIXME: Cleanup track refs */
 static void
-pragha_application_free (struct con_win *cwin)
+pragha_application_free (PraghaApplication *pragha)
 {
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	pragha_playback_stop(cwin);
+	pragha_playback_stop(pragha);
 
 #ifdef HAVE_LIBGLYR
-	pragha_glyr_free (cwin->glyr);
+	pragha_glyr_free (pragha->glyr);
 #endif
 #ifdef HAVE_LIBCLASTFM
-	pragha_lastfm_free (cwin->clastfm);
+	pragha_lastfm_free (pragha->clastfm);
 #endif
-	pragha_sidebar_free(cwin->sidebar);
-	pragha_mpris_free (cwin->mpris2);
-	g_object_unref (cwin->backend);
-	pragha_art_cache_free (cwin->art_cache);
-	pragha_window_free (cwin);
-	pragha_scanner_free(cwin->scanner);
-	dbus_handlers_free (cwin);
-	if (cwin->notify)
-		pragha_notify_free (cwin->notify);
+	pragha_sidebar_free(pragha->sidebar);
+	pragha_mpris_free (pragha->mpris2);
+	g_object_unref (pragha->backend);
+	pragha_art_cache_free (pragha->art_cache);
+	pragha_window_free (pragha);
+	pragha_scanner_free(pragha->scanner);
+	dbus_handlers_free (pragha);
+	if (pragha->notify)
+		pragha_notify_free (pragha->notify);
 
-	if (cwin->cgnome_media_keys)
-		gnome_media_keys_free (cwin->cgnome_media_keys);
+	if (pragha->cgnome_media_keys)
+		gnome_media_keys_free (pragha->cgnome_media_keys);
 #ifdef HAVE_LIBKEYBINDER
-	else if (cwin->keybinder)
+	else if (pragha->keybinder)
 		keybinder_free ();
 #endif
 	pragha_cdda_free ();
 
-	if (cwin->pixbuf_app)
-		g_object_unref(cwin->pixbuf_app);
+	if (pragha->pixbuf_app)
+		g_object_unref(pragha->pixbuf_app);
 
-	g_object_unref (cwin->menu_ui_manager);
+	g_object_unref (pragha->menu_ui_manager);
 
 	/* Explicit destroy mainwindow to finalize lifecycle of childrens */
 
-	gtk_widget_destroy (cwin->mainwindow);
+	gtk_widget_destroy (pragha->mainwindow);
 
 	/* Save Preferences and database. */
 
-	g_object_unref(G_OBJECT(cwin->preferences));
-	g_object_unref(cwin->cdbase);
+	g_object_unref(G_OBJECT(pragha->preferences));
+	g_object_unref(pragha->cdbase);
 
-	g_slice_free(struct con_win, cwin);
+	g_slice_free(PraghaApplication, pragha);
 }
 
-static struct con_win *
+static PraghaApplication *
 pragha_application_new (gint argc, gchar *argv[])
 {
 	PraghaToolbar *toolbar;
 	PraghaPlaylist *playlist;
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	/* Alocate the main structure. */
-	cwin = g_slice_new0(struct con_win);
+	pragha = g_slice_new0(PraghaApplication);
 
 	/* Allocate memory for simple structures */
 
-	cwin->mpris2 = pragha_mpris_new();
+	pragha->mpris2 = pragha_mpris_new();
 
-	cwin->con_dbus = pragha_init_dbus(cwin);
-	if (!cwin->con_dbus) {
+	pragha->con_dbus = pragha_init_dbus(pragha);
+	if (!pragha->con_dbus) {
 		g_critical("Unable to init dbus connection");
 		return NULL;
 	}
-	if (pragha_init_dbus_handlers(cwin) == -1) {
+	if (pragha_init_dbus_handlers(pragha) == -1) {
 		g_critical("Unable to initialize DBUS filter handlers");
 		return NULL;
 	}
 
 	/* Parse command line arguments */
-	if (init_options(cwin, argc, argv) == -1)
+	if (init_options(pragha, argc, argv) == -1)
 		return NULL;
 
 	/* Allow only one instance */
-	if (!cwin->unique_instance)
-		return cwin;
+	if (!pragha->unique_instance)
+		return pragha;
 
-	cwin->preferences = pragha_preferences_get();
+	pragha->preferences = pragha_preferences_get();
 
-	cwin->cdbase = pragha_database_get();
-	if (pragha_database_start_successfully(cwin->cdbase) == FALSE) {
+	pragha->cdbase = pragha_database_get();
+	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_critical("Unable to init music dbase");
 		return NULL;
 	}
 
-	if (pragha_preferences_get_show_osd (cwin->preferences))
-		cwin->notify = pragha_notify_new (cwin);
+	if (pragha_preferences_get_show_osd (pragha->preferences))
+		pragha->notify = pragha_notify_new (pragha);
 	else
-		cwin->notify = NULL;
+		pragha->notify = NULL;
 
-	cwin->art_cache = pragha_art_cache_new ();
+	pragha->art_cache = pragha_art_cache_new ();
 
-	cwin->backend = pragha_backend_new (cwin);
+	pragha->backend = pragha_backend_new (pragha);
 
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK(pragha_backend_notificate_new_state), cwin);
-	g_signal_connect (cwin->backend, "finished",
-	                  G_CALLBACK(pragha_backend_finished_song), cwin);
-	g_signal_connect (cwin->backend, "tags-changed",
-	                  G_CALLBACK(pragha_backend_tags_changed), cwin);
+	g_signal_connect (pragha->backend, "notify::state",
+	                  G_CALLBACK(pragha_backend_notificate_new_state), pragha);
+	g_signal_connect (pragha->backend, "finished",
+	                  G_CALLBACK(pragha_backend_finished_song), pragha);
+	g_signal_connect (pragha->backend, "tags-changed",
+	                  G_CALLBACK(pragha_backend_tags_changed), pragha);
 
-	g_signal_connect (cwin->backend, "error",
-	                 G_CALLBACK(gui_backend_error_show_dialog_cb), cwin);
-	g_signal_connect (cwin->backend, "error",
-	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), cwin);
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), cwin);
+	g_signal_connect (pragha->backend, "error",
+	                 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
+	g_signal_connect (pragha->backend, "error",
+	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
+	g_signal_connect (pragha->backend, "notify::state",
+	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
 
-	if (pragha_mpris_init(cwin->mpris2, cwin) == -1) {
+	if (pragha_mpris_init(pragha->mpris2, pragha) == -1) {
 		g_critical("Unable to initialize MPRIS");
 		return NULL;
 	}
@@ -488,90 +488,90 @@ pragha_application_new (gint argc, gchar *argv[])
 	 * Collect widgets and construct the window.
 	 */
 
-	pragha_application_construct_window (cwin);
+	pragha_application_construct_window (pragha);
 
 	/* Connect Signals and Bindings. */
 
-	toolbar = cwin->toolbar;
+	toolbar = pragha->toolbar;
 	g_signal_connect_swapped (toolbar, "prev",
-	                          G_CALLBACK(pragha_playback_prev_track), cwin);
+	                          G_CALLBACK(pragha_playback_prev_track), pragha);
 	g_signal_connect_swapped (toolbar, "play",
-	                          G_CALLBACK(pragha_playback_play_pause_resume), cwin);
+	                          G_CALLBACK(pragha_playback_play_pause_resume), pragha);
 	g_signal_connect_swapped (toolbar, "stop",
-	                          G_CALLBACK(pragha_playback_stop), cwin);
+	                          G_CALLBACK(pragha_playback_stop), pragha);
 	g_signal_connect_swapped (toolbar, "next",
-	                          G_CALLBACK(pragha_playback_next_track), cwin);
+	                          G_CALLBACK(pragha_playback_next_track), pragha);
 	g_signal_connect (toolbar, "unfull-activated",
-	                  G_CALLBACK(pragha_window_unfullscreen), cwin);
+	                  G_CALLBACK(pragha_window_unfullscreen), pragha);
 	g_signal_connect (toolbar, "album-art-activated",
-	                  G_CALLBACK(pragha_playback_show_current_album_art), cwin);
+	                  G_CALLBACK(pragha_playback_show_current_album_art), pragha);
 	g_signal_connect (toolbar, "track-info-activated",
-	                  G_CALLBACK(pragha_playback_edit_current_track), cwin);
+	                  G_CALLBACK(pragha_playback_edit_current_track), pragha);
 	g_signal_connect (toolbar, "track-progress-activated",
-	                  G_CALLBACK(pragha_playback_seek_fraction), cwin);
+	                  G_CALLBACK(pragha_playback_seek_fraction), pragha);
 
-	playlist = cwin->playlist;
+	playlist = pragha->playlist;
 	g_signal_connect (playlist, "playlist-set-track",
-	                  G_CALLBACK(pragha_playback_set_playlist_track), cwin);
+	                  G_CALLBACK(pragha_playback_set_playlist_track), pragha);
 	g_signal_connect (playlist, "playlist-change-tags",
-	                  G_CALLBACK(pragha_playlist_update_change_tags), cwin);
+	                  G_CALLBACK(pragha_playlist_update_change_tags), pragha);
 	g_signal_connect (playlist, "playlist-changed",
-	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), cwin);
-	pragha_playlist_update_statusbar_playtime (playlist, cwin);
+	                  G_CALLBACK(pragha_playlist_update_statusbar_playtime), pragha);
+	pragha_playlist_update_statusbar_playtime (playlist, pragha);
 		
-	g_signal_connect (cwin->library, "library-append-playlist",
-	                  G_CALLBACK(pragha_library_pane_append_tracks), cwin);
-	g_signal_connect (cwin->library, "library-replace-playlist",
-	                  G_CALLBACK(pragha_library_pane_replace_tracks), cwin);
-	g_signal_connect (cwin->library, "library-replace-playlist-and-play",
-	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), cwin);
+	g_signal_connect (pragha->library, "library-append-playlist",
+	                  G_CALLBACK(pragha_library_pane_append_tracks), pragha);
+	g_signal_connect (pragha->library, "library-replace-playlist",
+	                  G_CALLBACK(pragha_library_pane_replace_tracks), pragha);
+	g_signal_connect (pragha->library, "library-replace-playlist-and-play",
+	                  G_CALLBACK(pragha_library_pane_replace_tracks_and_play), pragha);
 
-	g_signal_connect (G_OBJECT(cwin->mainwindow), "window-state-event",
+	g_signal_connect (G_OBJECT(pragha->mainwindow), "window-state-event",
 	                  G_CALLBACK(pragha_toolbar_window_state_event), toolbar);
 	g_signal_connect (G_OBJECT(toolbar), "notify::timer-remaining-mode",
-	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), cwin->backend);
+	                  G_CALLBACK(pragha_toolbar_show_ramaning_time_cb), pragha->backend);
 
-	g_signal_connect (cwin->backend, "notify::state",
+	g_signal_connect (pragha->backend, "notify::state",
 	                  G_CALLBACK(pragha_toolbar_playback_state_cb), toolbar);
-	g_signal_connect (cwin->backend, "tick",
+	g_signal_connect (pragha->backend, "tick",
 	                 G_CALLBACK(pragha_toolbar_update_playback_progress), toolbar);
-	g_signal_connect (cwin->backend, "buffering",
+	g_signal_connect (pragha->backend, "buffering",
 	                  G_CALLBACK(pragha_toolbar_update_buffering_cb), toolbar);
 
-	g_signal_connect (cwin->backend, "notify::state",
-	                  G_CALLBACK (update_current_playlist_view_playback_state_cb), cwin->playlist);
+	g_signal_connect (pragha->backend, "notify::state",
+	                  G_CALLBACK (update_current_playlist_view_playback_state_cb), pragha->playlist);
 
-	g_object_bind_property (cwin->backend, "volume",
+	g_object_bind_property (pragha->backend, "volume",
 	                        toolbar, "volume",
 	                        binding_flags);
 
-	g_object_bind_property (cwin->preferences, "timer-remaining-mode",
+	g_object_bind_property (pragha->preferences, "timer-remaining-mode",
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
 	#ifdef HAVE_LIBGLYR
-	cwin->glyr = pragha_glyr_new (cwin);
+	pragha->glyr = pragha_glyr_new (pragha);
 	#endif
 	#ifdef HAVE_LIBCLASTFM
-	cwin->clastfm = pragha_lastfm_new(cwin);
+	pragha->clastfm = pragha_lastfm_new(pragha);
 	#endif
 
 	/* Init_gnome_media_keys requires constructed main window. */
 	if (gnome_media_keys_will_be_useful()) {
-	    cwin->cgnome_media_keys = init_gnome_media_keys (cwin);
+	    pragha->cgnome_media_keys = init_gnome_media_keys (pragha);
 	}
 	#ifdef HAVE_LIBKEYBINDER
 	else if (keybinder_will_be_useful()) {
-		cwin->keybinder = init_keybinder (cwin);
+		pragha->keybinder = init_keybinder (pragha);
 	}
 	#endif
 
-	return cwin;
+	return pragha;
 }
 
 gint main(gint argc, gchar *argv[])
 {
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 #ifdef DEBUG
 	g_print ("debug enabled\n");
 	pragha_main_thread = g_thread_self ();
@@ -604,15 +604,15 @@ gint main(gint argc, gchar *argv[])
 	gtk_init(&argc, &argv);
 
 	/* Get a instanse of pragha */
-	cwin = pragha_application_new (argc, argv);
-	if (cwin) {
-		if (cwin->unique_instance) {
+	pragha = pragha_application_new (argc, argv);
+	if (pragha) {
+		if (pragha->unique_instance) {
 			/* Runs the main loop */
 			CDEBUG(DBG_INFO, "Init done. Running ...");
 			gtk_main();
 
 			/* Close.. So, free memory and quit. */
-			pragha_application_free (cwin);
+			pragha_application_free (pragha);
 		}
 	}
 	else

@@ -22,14 +22,14 @@
 #include <glib.h>
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 #define OSD_TIMEOUT                5000
 
 typedef struct PraghaNotify PraghaNotify;
 
 gboolean       can_support_actions    (void);
-PraghaNotify * pragha_notify_new      (struct con_win *cwin);
+PraghaNotify * pragha_notify_new      (PraghaApplication *pragha);
 void           pragha_notify_show_osd (PraghaNotify *notify);
 void           pragha_notify_free     (PraghaNotify *notify);
 

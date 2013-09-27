@@ -22,22 +22,22 @@
 #include "pragha-playlist.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
-void pragha_playback_prev_track           (struct con_win *cwin);
-void pragha_playback_play_pause_resume    (struct con_win *cwin);
-void pragha_playback_stop                 (struct con_win *cwin);
-void pragha_playback_next_track           (struct con_win *cwin);
-void pragha_advance_playback              (struct con_win *cwin);
+void pragha_playback_prev_track           (PraghaApplication *pragha);
+void pragha_playback_play_pause_resume    (PraghaApplication *pragha);
+void pragha_playback_stop                 (PraghaApplication *pragha);
+void pragha_playback_next_track           (PraghaApplication *pragha);
+void pragha_advance_playback              (PraghaApplication *pragha);
 
-void pragha_backend_notificate_new_state  (PraghaBackend *backend, GParamSpec *pspec, struct con_win *cwin);
-void pragha_backend_finished_song         (PraghaBackend *backend, struct con_win *cwin);
-void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, struct con_win *cwin);
+void pragha_backend_notificate_new_state  (PraghaBackend *backend, GParamSpec *pspec, PraghaApplication *pragha);
+void pragha_backend_finished_song         (PraghaBackend *backend, PraghaApplication *pragha);
+void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, PraghaApplication *pragha);
 
-void pragha_playback_show_current_album_art (GObject *object, struct con_win *cwin);
-void pragha_playback_edit_current_track     (GObject *object, struct con_win *cwin);
+void pragha_playback_show_current_album_art (GObject *object, PraghaApplication *pragha);
+void pragha_playback_edit_current_track     (GObject *object, PraghaApplication *pragha);
 
-void pragha_playback_seek_fraction (GObject *object, gdouble fraction, struct con_win *cwin);
-void pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, struct con_win *cwin);
+void pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplication *pragha);
+void pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, PraghaApplication *pragha);
 
 #endif /* PRAGHA_PLAYBACK_H */

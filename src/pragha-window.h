@@ -24,23 +24,23 @@
 #include "pragha-toolbar.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
-gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, struct con_win *cwin);
-void     pragha_destroy_window      (GtkWidget *widget, struct con_win *cwin);
-void     pragha_window_toggle_state (struct con_win *cwin, gboolean ignoreActivity);
+gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, PraghaApplication *pragha);
+void     pragha_destroy_window      (GtkWidget *widget, PraghaApplication *pragha);
+void     pragha_window_toggle_state (PraghaApplication *pragha, gboolean ignoreActivity);
 
 void     gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, gpointer user_data);
-void     gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, struct con_win *cwin);
+void     gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GError *error, PraghaApplication *pragha);
 
-void     pragha_window_unfullscreen          (GObject *object, struct con_win *cwin);
+void     pragha_window_unfullscreen          (GObject *object, PraghaApplication *pragha);
 
-void     pragha_window_add_widget_to_infobox (struct con_win *cwin, GtkWidget *widget);
+void     pragha_window_add_widget_to_infobox (PraghaApplication *pragha, GtkWidget *widget);
 
-gint     pragha_menubar_append_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, const gchar *menu_xml);
-void     pragha_menubar_remove_plugin_action (struct con_win *cwin, GtkActionGroup *action_group, gint merge_id);
+gint     pragha_menubar_append_plugin_action (PraghaApplication *pragha, GtkActionGroup *action_group, const gchar *menu_xml);
+void     pragha_menubar_remove_plugin_action (PraghaApplication *pragha, GtkActionGroup *action_group, gint merge_id);
 
-void     pragha_window_free (struct con_win *cwin);
-void     pragha_window_new  (struct con_win *cwin);
+void     pragha_window_free (PraghaApplication *pragha);
+void     pragha_window_new  (PraghaApplication *pragha);
 
 #endif /* PRAGHA_WINDOW_H */

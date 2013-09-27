@@ -25,7 +25,7 @@
 #define PLAYER_NAME "Pragha"
 
 struct _con_gnome_media_keys {
-    struct con_win *cwin;
+    PraghaApplication *pragha;
     guint watch_id;
     guint handler_id;
     GDBusProxy *proxy;
@@ -37,24 +37,24 @@ static void on_media_player_key_pressed(con_gnome_media_keys *gmk,
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
 
-    struct con_win *cwin = gmk->cwin;
+    PraghaApplication *pragha = gmk->pragha;
 
-	backend = pragha_application_get_backend (cwin);
-	preferences = pragha_application_get_preferences (cwin);
+	backend = pragha_application_get_backend (pragha);
+	preferences = pragha_application_get_preferences (pragha);
 
     if (pragha_backend_emitted_error (backend))
         return;
 
     if (g_strcmp0("Play", key) == 0)
-        pragha_playback_play_pause_resume(cwin);
+        pragha_playback_play_pause_resume(pragha);
     else if (g_strcmp0("Pause", key) == 0)
         pragha_backend_pause (backend);
     else if (g_strcmp0("Stop", key) == 0)
-        pragha_playback_stop(cwin);
+        pragha_playback_stop(pragha);
     else if (g_strcmp0("Previous", key) == 0)
-        pragha_playback_prev_track(cwin);
+        pragha_playback_prev_track(pragha);
     else if (g_strcmp0("Next", key) == 0)
-        pragha_playback_next_track(cwin);
+        pragha_playback_next_track(pragha);
     else if (g_strcmp0("Repeat", key) == 0)
     {
         gboolean repeat = pragha_preferences_get_repeat (preferences);
@@ -255,11 +255,11 @@ out:
 }
 
 con_gnome_media_keys *
-init_gnome_media_keys (struct con_win *cwin)
+init_gnome_media_keys (PraghaApplication *pragha)
 {
     con_gnome_media_keys *gmk = g_slice_new0(con_gnome_media_keys);
 
-    gmk->cwin = cwin;
+    gmk->pragha = pragha;
 
     gmk->watch_id = g_bus_watch_name(G_BUS_TYPE_SESSION,
                                      "org.gnome.SettingsDaemon",
@@ -269,7 +269,7 @@ init_gnome_media_keys (struct con_win *cwin)
                                      gmk,
                                      NULL);
 
-    gmk->handler_id = g_signal_connect(G_OBJECT(pragha_application_get_window(cwin)), "focus-in-event",
+    gmk->handler_id = g_signal_connect(G_OBJECT(pragha_application_get_window(pragha)), "focus-in-event",
                                        G_CALLBACK(on_window_focus_in_event), gmk);
 
     return gmk;
@@ -277,12 +277,12 @@ init_gnome_media_keys (struct con_win *cwin)
 
 void gnome_media_keys_free(con_gnome_media_keys *gmk)
 {
-    struct con_win *cwin = gmk->cwin;
+    PraghaApplication *pragha = gmk->pragha;
 
     g_bus_unwatch_name(gmk->watch_id);
 
     if (gmk->handler_id != 0)
-        g_signal_handler_disconnect(G_OBJECT(pragha_application_get_window(cwin)), gmk->handler_id);
+        g_signal_handler_disconnect(G_OBJECT(pragha_application_get_window(pragha)), gmk->handler_id);
 
     if (gmk->proxy != NULL)
         g_object_unref(gmk->proxy);

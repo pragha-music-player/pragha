@@ -35,7 +35,7 @@
 struct _PraghaStatusIcon {
 	GtkStatusIcon __parent__;
 
-	struct con_win *cwin;
+	PraghaApplication *pragha;
 
 	GtkUIManager   *ui_manager;
 };
@@ -99,10 +99,10 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, PraghaStatusIcon 
 	switch (event->button)
 	{
 		case 1:
-			pragha_window_toggle_state (status_icon->cwin, FALSE);
+			pragha_window_toggle_state (status_icon->pragha, FALSE);
 			break;
 		case 2:
-			pragha_playback_play_pause_resume (status_icon->cwin);
+			pragha_playback_play_pause_resume (status_icon->pragha);
 			break;
 		case 3:
 			popup_menu = gtk_ui_manager_get_widget(status_icon->ui_manager, "/popup");
@@ -127,9 +127,9 @@ status_get_tooltip_cb (GtkWidget        *widget,
 	PraghaMusicobject *mobj;
 	gchar *markup_text;
 
-	toolbar = pragha_application_get_toolbar (status_icon->cwin);
+	toolbar = pragha_application_get_toolbar (status_icon->pragha);
 
-	backend = pragha_application_get_backend (status_icon->cwin);
+	backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		markup_text = g_strdup_printf("%s", _("<b>Not playing</b>"));
 	else {
@@ -160,7 +160,7 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 	if (event->type != GDK_SCROLL)
 		return;
 
-	backend = pragha_application_get_backend (status_icon->cwin);
+	backend = pragha_application_get_backend (status_icon->pragha);
 
 	switch (event->direction){
 		case GDK_SCROLL_UP:
@@ -177,33 +177,33 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 static void
 systray_play_pause_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(status_icon->cwin);
+		pragha_playback_play_pause_resume(status_icon->pragha);
 }
 
 static void
 systray_stop_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(status_icon->cwin);
+		pragha_playback_stop(status_icon->pragha);
 }
 
 static void
 systray_prev_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(status_icon->cwin);
+		pragha_playback_prev_track(status_icon->pragha);
 }
 
 static void
 systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->cwin);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(status_icon->cwin);
+		pragha_playback_next_track(status_icon->pragha);
 }
 
 static void
@@ -236,7 +236,7 @@ pragha_status_icon_update_state (PraghaBackend *backend, GParamSpec *pspec, Prag
 }
 
 static void
-pragha_status_icon_set_application (PraghaStatusIcon *status_icon, struct con_win *cwin)
+pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkActionGroup *actions;
@@ -245,9 +245,9 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, struct con_wi
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	status_icon->cwin = cwin;
+	status_icon->pragha = pragha;
 
-	pixbuf_app = pragha_application_get_pixbuf_app(cwin);
+	pixbuf_app = pragha_application_get_pixbuf_app(pragha);
 	if (pixbuf_app)
 		gtk_status_icon_set_from_pixbuf (GTK_STATUS_ICON(status_icon), pixbuf_app);
 
@@ -260,11 +260,11 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, struct con_wi
 	                              (gpointer)status_icon);
 	gtk_ui_manager_insert_action_group (status_icon->ui_manager, actions, 0);
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	g_object_bind_property (preferences, "show-status-icon",
 	                        status_icon, "visible", binding_flags);
 
-	g_signal_connect (pragha_application_get_backend (cwin), "notify::state",
+	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
 	                  G_CALLBACK (pragha_status_icon_update_state), status_icon);
 
 	g_object_unref (actions);
@@ -312,13 +312,13 @@ pragha_status_icon_init (PraghaStatusIcon *status_icon)
 }
 
 PraghaStatusIcon *
-pragha_status_icon_new (struct con_win *cwin)
+pragha_status_icon_new (PraghaApplication *pragha)
 {
 	PraghaStatusIcon *status_icon;
 
 	status_icon = g_object_new (PRAGHA_TYPE_STATUS_ICON, NULL);
 
-	pragha_status_icon_set_application (status_icon, cwin);
+	pragha_status_icon_set_application (status_icon, pragha);
 
 	return status_icon;
 }

@@ -187,13 +187,13 @@ pragha_toolbar_set_image_album_art (PraghaToolbar *toolbar, const gchar *uri)
 /* Grab focus on current playlist when press Up or Down and move between controls with Left or Right */
 
 /*static gboolean
-panel_button_key_press (GtkWidget *win, GdkEventKey *event, struct con_win *cwin)
+panel_button_key_press (GtkWidget *win, GdkEventKey *event, PraghaApplication *pragha)
 {
 	gboolean ret = FALSE;
 
 	if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
 	    event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down) {
-		ret = pragha_playlist_propagate_event(cwin->cplaylist, event);
+		ret = pragha_playlist_propagate_event(pragha->cplaylist, event);
 	}
 
 	return ret;

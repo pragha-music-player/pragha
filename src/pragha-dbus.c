@@ -24,69 +24,69 @@
 #include "pragha-debug.h"
 #include "pragha.h"
 
-static void dbus_play_handler(struct con_win *cwin)
+static void dbus_play_handler(PraghaApplication *pragha)
 {
-	pragha_playback_play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(pragha);
 }
 
-static void dbus_stop_handler(struct con_win *cwin)
+static void dbus_stop_handler(PraghaApplication *pragha)
 {
-	pragha_playback_stop(cwin);
+	pragha_playback_stop(pragha);
 }
 
-static void dbus_pause_handler(struct con_win *cwin)
+static void dbus_pause_handler(PraghaApplication *pragha)
 {
-	pragha_playback_play_pause_resume(cwin);
+	pragha_playback_play_pause_resume(pragha);
 }
 
-static void dbus_next_handler(struct con_win *cwin)
+static void dbus_next_handler(PraghaApplication *pragha)
 {
-	pragha_playback_next_track(cwin);
+	pragha_playback_next_track(pragha);
 }
 
-static void dbus_prev_handler(struct con_win *cwin)
+static void dbus_prev_handler(PraghaApplication *pragha)
 {
-	pragha_playback_prev_track(cwin);
+	pragha_playback_prev_track(pragha);
 }
 
-static void dbus_shuffle_handler(struct con_win *cwin)
+static void dbus_shuffle_handler(PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 
 	gboolean shuffle = pragha_preferences_get_shuffle (preferences);
 	pragha_preferences_set_shuffle (preferences, !shuffle);
 }
 
-static void dbus_repeat_handler(struct con_win *cwin)
+static void dbus_repeat_handler(PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 
 	gboolean repeat = pragha_preferences_get_repeat (preferences);
 	pragha_preferences_set_repeat (preferences, !repeat);
 }
 
-static void dbus_inc_vol_handler(struct con_win *cwin)
+static void dbus_inc_vol_handler(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	pragha_backend_set_delta_volume (backend, +0.05);
 }
 
-static void dbus_dec_vol_handler(struct con_win *cwin)
+static void dbus_dec_vol_handler(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	pragha_backend_set_delta_volume (backend, -0.05);
 }
 
-static void dbus_show_osd_handler(struct con_win *cwin)
+static void dbus_show_osd_handler(PraghaApplication *pragha)
 {
 	PraghaNotify *notify;
-	notify = pragha_application_get_notify (cwin);
+	notify = pragha_application_get_notify (pragha);
 
 	if (notify)
 		pragha_notify_show_osd (notify);
@@ -94,12 +94,12 @@ static void dbus_show_osd_handler(struct con_win *cwin)
 		g_warning ("Notifications are disabled");
 }
 
-static void dbus_toggle_handler(struct con_win *cwin)
+static void dbus_toggle_handler(PraghaApplication *pragha)
 {
-	pragha_window_toggle_state(cwin, TRUE);
+	pragha_window_toggle_state(pragha, TRUE);
 }
 
-static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
+static void dbus_add_file(DBusMessage *msg, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	gchar *file;
@@ -117,13 +117,13 @@ static void dbus_add_file(DBusMessage *msg, struct con_win *cwin)
 
 	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 	if (mlist) {
-		playlist = pragha_application_get_playlist (cwin);
+		playlist = pragha_application_get_playlist (pragha);
 		pragha_playlist_append_mobj_list (playlist, mlist);
 		g_list_free (mlist);
 	}
 }
 
-static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
+static void dbus_current_state(DBusMessage *msg, PraghaApplication *pragha)
 {
 	DBusMessage *reply_msg;
 	const char *playing_str = "Playing";
@@ -137,7 +137,7 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 		return;
 	}
 
-	backend = pragha_application_get_backend (cwin);
+	backend = pragha_application_get_backend (pragha);
 
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
 		PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
@@ -176,12 +176,12 @@ static void dbus_current_state(DBusMessage *msg, struct con_win *cwin)
 					 DBUS_TYPE_INVALID);
 	}
 
-	if (!dbus_connection_send(cwin->con_dbus, reply_msg, NULL)) {
+	if (!dbus_connection_send(pragha->con_dbus, reply_msg, NULL)) {
 		g_critical("Unable to send DBUS message");
 		goto bad;
 	}
 
-	dbus_connection_flush(cwin->con_dbus);
+	dbus_connection_flush(pragha->con_dbus);
 bad:
 	dbus_message_unref(reply_msg);
 }
@@ -254,7 +254,7 @@ dbus_filter_handler(DBusConnection *conn,
 
 /* Send a signal to a running instance */
 
-void dbus_send_signal(const gchar *signal, struct con_win *cwin)
+void dbus_send_signal(const gchar *signal, PraghaApplication *pragha)
 {
 	PraghaMpris2 *mpris2;
 	DBusMessage *msg = NULL;
@@ -266,23 +266,23 @@ void dbus_send_signal(const gchar *signal, struct con_win *cwin)
 		return;
 	}
 
-	if (!dbus_connection_send(cwin->con_dbus, msg, NULL)) {
+	if (!dbus_connection_send(pragha->con_dbus, msg, NULL)) {
 		g_critical("Unable to send DBUS message");
 		goto exit;
 	}
 
 	if(!g_strcmp0(signal, DBUS_EVENT_UPDATE_STATE)) {
-		mpris2 = pragha_application_get_mpris2 (cwin);
+		mpris2 = pragha_application_get_mpris2 (pragha);
 		pragha_mpris_update_any (mpris2);
 	}
 
-	dbus_connection_flush(cwin->con_dbus);
+	dbus_connection_flush(pragha->con_dbus);
 exit:
 	dbus_message_unref(msg);
 }
 
 DBusConnection *
-pragha_init_dbus(struct con_win *cwin)
+pragha_init_dbus(PraghaApplication *pragha)
 {
 	DBusConnection *conn = NULL;
 	DBusError error;
@@ -306,9 +306,9 @@ pragha_init_dbus(struct con_win *cwin)
 	}
 
 	if (ret & DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-		cwin->unique_instance = TRUE;
+		pragha->unique_instance = TRUE;
 	else if (ret & DBUS_REQUEST_NAME_REPLY_EXISTS)
-		cwin->unique_instance = FALSE;
+		pragha->unique_instance = FALSE;
 
 	dbus_connection_setup_with_g_main(conn, NULL);
 
@@ -316,17 +316,17 @@ pragha_init_dbus(struct con_win *cwin)
 }
 
 gint
-pragha_init_dbus_handlers(struct con_win *cwin)
+pragha_init_dbus_handlers(PraghaApplication *pragha)
 {
 	DBusError error;
 
 	dbus_error_init(&error);
-	if (!cwin->con_dbus) {
+	if (!pragha->con_dbus) {
 		g_critical("No DBUS connection");
 		return -1;
 	}
 
-	dbus_bus_add_match(cwin->con_dbus,
+	dbus_bus_add_match(pragha->con_dbus,
 			   "type='signal',path='/org/pragha/DBus'",
 			   &error);
 	if (dbus_error_is_set(&error)) {
@@ -335,7 +335,7 @@ pragha_init_dbus_handlers(struct con_win *cwin)
 		return -1;
 	}
 
-	if (!dbus_connection_add_filter(cwin->con_dbus, dbus_filter_handler, cwin, NULL)) {
+	if (!dbus_connection_add_filter(pragha->con_dbus, dbus_filter_handler, pragha, NULL)) {
 		g_critical("Unable to allocate memory for DBUS filter");
 		return -1;
 	}
@@ -343,13 +343,13 @@ pragha_init_dbus_handlers(struct con_win *cwin)
 	return 0;
 }
 
-void dbus_handlers_free (struct con_win *cwin)
+void dbus_handlers_free (PraghaApplication *pragha)
 {
-	dbus_connection_remove_filter(cwin->con_dbus,
+	dbus_connection_remove_filter(pragha->con_dbus,
 				      dbus_filter_handler,
-				      cwin);
-	dbus_bus_remove_match(cwin->con_dbus,
+				      pragha);
+	dbus_bus_remove_match(pragha->con_dbus,
 			      "type='signal',path='/org/pragha/DBus'",
 			      NULL);
-	dbus_connection_unref(cwin->con_dbus);
+	dbus_connection_unref(pragha->con_dbus);
 }

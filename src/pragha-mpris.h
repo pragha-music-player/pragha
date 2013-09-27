@@ -23,7 +23,7 @@
 #include "pragha-musicobject.h"
 
 /* pragha.h */
-struct con_win;
+typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PraghaMpris2 PraghaMpris2;
 
@@ -40,7 +40,7 @@ void pragha_mpris_update_mobj_changed       (PraghaMpris2 *mpris2, PraghaMusicob
 
 void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2);
 
-gint pragha_mpris_init                      (PraghaMpris2 *mpris2, struct con_win *cwin);
+gint pragha_mpris_init                      (PraghaMpris2 *mpris2, PraghaApplication *pragha);
 void pragha_mpris_close                     (PraghaMpris2 *mpris2);
 void pragha_mpris_free                      (PraghaMpris2 *mpris2);
 

@@ -48,7 +48,7 @@ static gint cddb_add_tracks(cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 	return 0;
 }
 
-static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
+static void add_audio_cd_tracks(PraghaApplication *pragha, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)
 {
 	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
@@ -61,7 +61,7 @@ static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive,
 		return;
 
 	for (i = 1; i <= num_tracks; i++) {
-		mobj = new_musicobject_from_cdda(cwin, cdda_drive, cddb_disc, i);
+		mobj = new_musicobject_from_cdda(pragha, cdda_drive, cddb_disc, i);
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 
@@ -69,19 +69,19 @@ static void add_audio_cd_tracks(struct con_win *cwin, cdrom_drive_t *cdda_drive,
 			return;
 	}
 	if (list) {
-		playlist = pragha_application_get_playlist (cwin);
+		playlist = pragha_application_get_playlist (pragha);
 		pragha_playlist_append_mobj_list(playlist, list);
 		g_list_free (list);
 	}
 }
 
-static cdrom_drive_t* find_audio_cd(struct con_win *cwin)
+static cdrom_drive_t* find_audio_cd(PraghaApplication *pragha)
 {
 	cdrom_drive_t *drive = NULL;
 	gchar **cdda_devices = NULL;
 	PraghaPreferences *preferences;
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(preferences);
 
 	if (!audio_cd_device) {
@@ -117,7 +117,7 @@ exit:
 	return drive;
 }
 
-void add_audio_cd(struct con_win *cwin)
+void add_audio_cd(PraghaApplication *pragha)
 {
 	lba_t lba;
 	gint matches;
@@ -125,7 +125,7 @@ void add_audio_cd(struct con_win *cwin)
 	cddb_conn_t *cddb_conn = NULL;
 	PraghaPreferences *preferences;
 
-	cdrom_drive_t *cdda_drive = find_audio_cd(cwin);
+	cdrom_drive_t *cdda_drive = find_audio_cd(pragha);
 	if (!cdda_drive)
 		return;
 
@@ -134,7 +134,7 @@ void add_audio_cd(struct con_win *cwin)
 		return;
 	}
 
-	preferences = pragha_application_get_preferences (cwin);
+	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_use_cddb (preferences)) {
 		cddb_conn = cddb_new ();
 		if (!cddb_conn)
@@ -173,7 +173,7 @@ void add_audio_cd(struct con_win *cwin)
 	}
 
 add:
-	add_audio_cd_tracks(cwin, cdda_drive, cddb_disc);
+	add_audio_cd_tracks(pragha, cdda_drive, cddb_disc);
 	CDEBUG(DBG_INFO, "Successfully opened Audio CD device");
 
 	if (cdda_drive)
