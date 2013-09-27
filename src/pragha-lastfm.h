@@ -25,44 +25,22 @@
 #ifdef HAVE_LIBCLASTFM
 
 #include <clastfm.h>
-#include <gtk/gtk.h>
 
-#include "pragha-simple-async.h"
-#include "pragha-musicobject.h"
 #include "pragha-preferences.h"
 
 /* pragha.h */
 struct con_win;
 
-#define LASTFM_API_KEY             "ecdc2d21dbfe1139b1f0da35daca9309"
-#define LASTFM_SECRET              "f3498ce387f30eeae8ea1b1023afb32b"
-
 typedef struct _PraghaLastfm PraghaLastfm;
 
-enum LASTFM_QUERY_TYPE {
-	LASTFM_NONE = 0,
-	LASTFM_GET_SIMILAR,
-	LASTFM_GET_LOVED
-};
+void          pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass);
+const gchar  *pragha_lastfm_get_password (PraghaPreferences *preferences);
 
-void         pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass);
-const gchar *pragha_lastfm_get_password (PraghaPreferences *preferences);
+gint          pragha_lastfm_connect      (PraghaLastfm *clastfm);
+void          pragha_lastfm_disconnect   (PraghaLastfm *clastfm);
 
-void lastfm_get_similar_current_playlist_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_current_playlist_love_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_current_playlist_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_add_favorites_action (GtkAction *action, struct con_win *cwin);
-void lastfm_get_similar_action (GtkAction *action, struct con_win *cwin);
-void lastfm_import_xspf_action (GtkAction *action, struct con_win *cwin);
-void lastfm_track_love_action(GtkAction *action, struct con_win *cwin);
-void lastfm_track_unlove_action (GtkAction *action, struct con_win *cwin);
-void lastfm_now_playing_handler (struct con_win *cwin);
-
-gint pragha_lastfm_connect    (PraghaLastfm *clastfm);
-void pragha_lastfm_disconnect (PraghaLastfm *clastfm);
-
-PraghaLastfm * pragha_lastfm_new  (struct con_win *cwin);
-void           pragha_lastfm_free (PraghaLastfm *clastfm);
+PraghaLastfm *pragha_lastfm_new          (struct con_win *cwin);
+void          pragha_lastfm_free         (PraghaLastfm *clastfm);
 
 #endif
 

@@ -122,7 +122,6 @@ struct con_win {
 	/* Flags */
 
 	gboolean           unique_instance;
-	guint              related_timeout_id;
 };
 
 /* Functions to access private members */
@@ -152,6 +151,7 @@ GtkWidget         *pragha_application_get_infobox_container  (struct con_win *cw
 GtkWidget         *pragha_application_get_pane               (struct con_win *cwin);
 
 PraghaMpris2      *pragha_application_get_mpris2             (struct con_win *cwin);
+PraghaLastfm      *pragha_application_get_lastfm             (struct con_win *cwin);
 
 PraghaNotify      *pragha_application_get_notify             (struct con_win *cwin);
 void               pragha_application_set_notify             (struct con_win *cwin, PraghaNotify *notify);

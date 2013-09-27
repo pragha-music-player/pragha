@@ -294,6 +294,12 @@ pragha_application_get_mpris2 (struct con_win *cwin)
 	return cwin->mpris2;
 }
 
+PraghaLastfm *
+pragha_application_get_lastfm (struct con_win *cwin)
+{
+	return cwin->clastfm;
+}
+
 gboolean
 pragha_application_is_first_run (struct con_win *cwin)
 {
