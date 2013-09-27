@@ -271,13 +271,16 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, struct con_wi
 }
 
 static void
-pragha_status_icon_finalize (GObject *object)
+pragha_status_icon_dispose (GObject *object)
 {
 	PraghaStatusIcon *status_icon = PRAGHA_STATUS_ICON(object);
 
-	g_object_unref (status_icon->ui_manager);
+	if (status_icon->ui_manager) {
+		g_object_unref (status_icon->ui_manager);
+		status_icon->ui_manager = NULL;
+	}
 
-	(*G_OBJECT_CLASS (pragha_status_icon_parent_class)->finalize) (object);
+	(*G_OBJECT_CLASS (pragha_status_icon_parent_class)->dispose) (object);
 }
 
 static void
@@ -286,7 +289,7 @@ pragha_status_icon_class_init (PraghaStatusIconClass *klass)
 	GObjectClass  *gobject_class;
 
 	gobject_class = G_OBJECT_CLASS (klass);
-	gobject_class->finalize = pragha_status_icon_finalize;
+	gobject_class->dispose = pragha_status_icon_dispose;
 }
 
 static void
