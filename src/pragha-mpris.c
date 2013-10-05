@@ -770,7 +770,7 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	PraghaDatabase *cdbase;
 	GVariantBuilder builder;
 	guint i = 0, start, max;
-	gchar *order;
+	const gchar *order;
 	gchar ** lists = NULL;
 	gchar *listpath = NULL;
 	gboolean reverse;
@@ -787,7 +787,7 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	lists = pragha_database_get_playlist_names (cdbase);
 
 	if (lists) {
-		g_variant_get(parameters, "(uusb)", &start, &max, &order, &reverse);
+		g_variant_get (parameters, "(uu&sb)", &start, &max, &order, &reverse);
 		imax = max;
 		while(lists[i]) {
 			if(i >= start && imax > 0) {
