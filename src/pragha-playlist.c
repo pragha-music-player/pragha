@@ -263,8 +263,7 @@ pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
 
 	pragha_playlist_change_ref_list_tags (playlist, rlist, changed, mobj);
 
-	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-	g_list_free (rlist);
+	g_list_free_full (rlist, (GDestroyNotify) gtk_tree_row_reference_free);
 }
 
 static void
@@ -299,8 +298,7 @@ pragha_edit_tags_playlist_dialog_response (GtkWidget      *dialog,
 	}
 
 no_change:
-	g_list_foreach (rlist, (GFunc) gtk_tree_row_reference_free, NULL);
-	g_list_free (rlist);
+	g_list_free_full (rlist, (GDestroyNotify) gtk_tree_row_reference_free);
 
 	gtk_widget_destroy (dialog);
 }
@@ -3067,8 +3065,7 @@ pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
 				g_warning("Invalid mobj pointer");
 		}
 
-		g_list_foreach (list, (GFunc) gtk_tree_path_free, NULL);
-		g_list_free (list);
+		g_list_free_full (list, (GDestroyNotify) gtk_tree_path_free);
 	}
 
 	return mobj;
