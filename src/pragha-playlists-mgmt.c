@@ -412,8 +412,7 @@ save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaData
 	if (list != NULL) {
 		ret = save_mobj_list_to_m3u_playlist(list, chan, filename);
 
-		g_list_foreach(list, (GFunc) g_object_unref, NULL);
-		g_list_free(list);
+		g_list_free_full (list, (GDestroyNotify) g_object_unref);
 	}
 
 	return ret;
