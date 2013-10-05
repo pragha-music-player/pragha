@@ -112,7 +112,6 @@ void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
 void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
 void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
-void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
 pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
 void
