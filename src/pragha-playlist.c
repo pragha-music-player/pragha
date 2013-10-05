@@ -362,7 +362,11 @@ pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 	playlist->current_update_action = PLAYLIST_PREV;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	return current_playlist_mobj_at_path (path, playlist);
+	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+
+	gtk_tree_path_free (path);
+
+	return mobj;
 }
 
 PraghaMusicobject *
@@ -394,7 +398,11 @@ pragha_playlist_get_any_track (PraghaPlaylist *playlist)
 	playlist->current_update_action = PLAYLIST_CURR;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	return current_playlist_mobj_at_path (path, playlist);
+	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+
+	gtk_tree_path_free (path);
+
+	return mobj;
 }
 
 PraghaMusicobject *
@@ -445,7 +453,11 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 	playlist->current_update_action = PLAYLIST_NEXT;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	return current_playlist_mobj_at_path (path, playlist);
+	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+
+	gtk_tree_path_free (path);
+
+	return mobj;
 }
 
 /* Update playback state pixbuf */
