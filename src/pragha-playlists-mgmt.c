@@ -436,6 +436,7 @@ void add_playlist_current_playlist(gchar *splaylist, PraghaApplication *pragha)
 	if(list) {
 		playlist = pragha_application_get_playlist (pragha);
 		pragha_playlist_append_mobj_list (playlist, list);
+		g_list_free (list);
 	}
 }
 
