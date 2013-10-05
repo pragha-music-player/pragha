@@ -2011,7 +2011,8 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	g_free(ch_filename);
 }
 
-void append_current_playlist(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
+static void
+append_current_playlist (PraghaPlaylist *cplaylist, PraghaMusicobject *mobj)
 {
 	append_current_playlist_ex(cplaylist, mobj, NULL);
 }
