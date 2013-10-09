@@ -894,6 +894,49 @@ exit:
 	return;
 }
 
+static gboolean
+update_related_handler (gpointer data)
+{
+	struct con_win *cwin = data;
+
+	CDEBUG(DBG_INFO, "Updating Lastm depending preferences");
+
+	if (cwin->cpref->lastfm_support)
+		lastfm_now_playing_handler(cwin);
+
+	return FALSE;
+}
+
+static void
+update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	struct con_win *cwin = user_data;
+	enum player_state state = pragha_backend_get_state (cwin->backend);
+	gint file_type = 0;
+
+	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
+
+	if(cwin->related_timeout_id)
+		g_source_remove(cwin->clastfm->timeout_id);
+
+	if(state != ST_PLAYING)
+		return;
+
+	pragha_mutex_lock (cwin->cstate->curr_mobj_mutex);
+	file_type = pragha_musicobject_get_file_type(cwin->cstate->curr_mobj);
+	pragha_mutex_unlock (cwin->cstate->curr_mobj_mutex);
+
+	if(file_type == FILE_HTTP)
+		return;
+
+	if (cwin->clastfm->status == LASTFM_STATUS_OK)
+		time(&cwin->clastfm->playback_started);
+
+	cwin->clastfm->timeout_id = g_timeout_add_seconds_full(
+			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
+			update_related_handler, cwin, NULL);
+}
+
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
 gboolean
@@ -991,6 +1034,8 @@ init_lastfm(struct con_win *cwin)
 					G_PRIORITY_DEFAULT_IDLE, 30,
 					do_init_lastfm_idle, cwin, NULL);
 	}
+
+	g_signal_connect (cwin->backend, "notify::state", G_CALLBACK (update_related_state_cb), cwin);
 
 	return 0;
 }

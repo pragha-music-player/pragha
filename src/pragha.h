@@ -551,6 +551,7 @@ struct con_lastfm {
 	LASTFM_SESSION *session_id;
 	enum LASTFM_STATUS_CODES status;
 	time_t playback_started;
+	guint timeout_id;
 	PraghaMusicobject *nmobj;
 	PRAGHA_MUTEX (nmobj_mutex);
 };

@@ -394,19 +394,13 @@ exit:
 static gboolean
 update_related_handler (gpointer data)
 {
-#if HAVE_LIBCLASTFM || HAVE_LIBGLYR
 	struct con_win *cwin = data;
-#endif
-	CDEBUG(DBG_INFO, "Updating Lastm and getting the cover art depending preferences");
 
-#ifdef HAVE_LIBCLASTFM
-	if (cwin->cpref->lastfm_support)
-		lastfm_now_playing_handler(cwin);
-#endif
-#ifdef HAVE_LIBGLYR
+	CDEBUG(DBG_INFO, "Getting the cover art depending preferences");
+
 	if (cwin->cpref->get_album_art)
 		related_get_album_art_handler(cwin);
-#endif
+
 	return FALSE;
 }
 
@@ -417,10 +411,12 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 	enum player_state state = pragha_backend_get_state (cwin->backend);
 	gint file_type = 0;
 
-	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm and get the cover art");
+	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
-	if(cwin->related_timeout_id)
+	if (cwin->related_timeout_id) {
 		g_source_remove(cwin->related_timeout_id);
+		cwin->related_timeout_id = 0;
+	}
 
 	if(state != ST_PLAYING)
 		return;
@@ -431,11 +427,6 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 
 	if(file_type == FILE_HTTP)
 		return;
-
-	#ifdef HAVE_LIBCLASTFM
-	if (cwin->clastfm->status == LASTFM_STATUS_OK)
-		time(&cwin->clastfm->playback_started);
-	#endif
 
 	cwin->related_timeout_id = g_timeout_add_seconds_full(
 			G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
