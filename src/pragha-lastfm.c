@@ -1246,8 +1246,10 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	/* Update thread. */
 
-	if (clastfm->timeout_id)
+	if (clastfm->timeout_id) {
 		g_source_remove (clastfm->timeout_id);
+		clastfm->timeout_id = 0;
+	}
 
 	if (state != ST_PLAYING) {
 		if (clastfm->ntag_lastfm_button)
