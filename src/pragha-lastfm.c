@@ -916,8 +916,10 @@ update_related_state_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data
 
 	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
 
-	if(cwin->related_timeout_id)
-		g_source_remove(cwin->clastfm->timeout_id);
+	if (cwin->related_timeout_id) {
+		g_source_remove (cwin->clastfm->timeout_id);
+		cwin->related_timeout_id = 0;
+	}
 
 	if(state != ST_PLAYING)
 		return;

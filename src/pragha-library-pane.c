@@ -1207,8 +1207,10 @@ gboolean do_refilter(PraghaLibraryPane *clibrary)
 
 void queue_refilter (PraghaLibraryPane *clibrary)
 {
-	if(clibrary->timeout_id)
+	if(clibrary->timeout_id) {
 		g_source_remove(clibrary->timeout_id);
+		clibrary->timeout_id = 0;
+	}
 
 	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
 }

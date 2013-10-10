@@ -120,8 +120,10 @@ do_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 static void
 queue_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 {
-	if(fdialog->timeout_id)
+	if(fdialog->timeout_id) {
 		g_source_remove(fdialog->timeout_id);
+		fdialog->timeout_id = 0;
+	}
 
 	fdialog->timeout_id = g_timeout_add(500, (GSourceFunc)do_filter_dialog_refilter, fdialog);
 }
