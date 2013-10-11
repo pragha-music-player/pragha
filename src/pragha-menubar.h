@@ -27,33 +27,50 @@ typedef struct _PraghaApplication PraghaApplication;
 
 void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 
-void open_file_action(GtkAction *action, PraghaApplication *pragha);
-void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
-void add_location_action(GtkAction *action, PraghaApplication *pragha);
+/* Playback */
+
 void prev_action(GtkAction *action, PraghaApplication *pragha);
 void play_pause_action(GtkAction *action, PraghaApplication *pragha);
 void stop_action(GtkAction *action, PraghaApplication *pragha);
 void next_action (GtkAction *action, PraghaApplication *pragha);
 void add_audio_cd(PraghaApplication *pragha);
 void quit_action(GtkAction *action, PraghaApplication *pragha);
-void expand_all_action(GtkAction *action, PraghaApplication *pragha);
-void collapse_all_action(GtkAction *action, PraghaApplication *pragha);
+
+/* Playlist */
+
+void open_file_action(GtkAction *action, PraghaApplication *pragha);
+void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
+void add_location_action(GtkAction *action, PraghaApplication *pragha);
+void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 void search_playlist_action(GtkAction *action, PraghaApplication *pragha);
-void pref_action(GtkAction *action, PraghaApplication *pragha);
+
+/* View */
+
 void fullscreen_action (GtkAction *action, PraghaApplication *pragha);
 void playlists_pane_action (GtkAction *action, PraghaApplication *pragha);
 void show_controls_below_action (GtkAction *action, PraghaApplication *pragha);
 void jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha);
+
+/* Tools */
+
 void show_equalizer_action(GtkAction *action, PraghaApplication *pragha);
 void rescan_library_action(GtkAction *action, PraghaApplication *pragha);
 void update_library_action(GtkAction *action, PraghaApplication *pragha);
-void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 void statistics_action(GtkAction *action, PraghaApplication *pragha);
+void pref_action(GtkAction *action, PraghaApplication *pragha);
+
+/* Help */
+
 void home_action(GtkAction *action, PraghaApplication *pragha);
 void community_action(GtkAction *action, PraghaApplication *pragha);
 void wiki_action(GtkAction *action, PraghaApplication *pragha);
 void translate_action(GtkAction *action, PraghaApplication *pragha);
 void about_action(GtkAction *action, PraghaApplication *pragha);
+
+/* Others */
+
+void expand_all_action(GtkAction *action, PraghaApplication *pragha);
+void collapse_all_action(GtkAction *action, PraghaApplication *pragha);
 
 void pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha);
 
