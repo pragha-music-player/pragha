@@ -222,6 +222,7 @@ GtkActionEntry library_tree_context_aentries[] = {
 /*
  * library_tree_context_menu calbacks
  */
+
 static void
 library_tree_add_to_playlist_action(GtkAction *action, PraghaLibraryPane *library)
 {

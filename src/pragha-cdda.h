@@ -21,6 +21,9 @@
 
 #include <glib.h>
 
+/* pragha.h */
+typedef struct _PraghaApplication PraghaApplication;
+
 #ifdef HAVE_PARANOIA_NEW_INCLUDES
    #include <cdio/paranoia/cdda.h>
 #else
@@ -31,6 +34,8 @@
 #endif
 #include <cdio/cd_types.h>
 #include <cddb/cddb.h>
+
+void add_audio_cd (PraghaApplication *pragha);
 
 void pragha_cdda_free ();
 
