@@ -42,11 +42,15 @@ struct _PraghaStatusIcon {
 
 G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
 
-static void systray_play_pause_action (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_stop_action       (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_prev_action       (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_next_action       (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_quit              (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_about_action        (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_open_file_action    (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_play_pause_action   (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_prev_action         (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_next_action         (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_quit                (GtkAction *action, PraghaStatusIcon *status_icon);
 
 static const gchar *systray_menu_xml =
 	"<ui>						\
@@ -70,13 +74,13 @@ static const gchar *systray_menu_xml =
 
 static const GtkActionEntry systray_menu_aentries[] = {
 	{"About", GTK_STOCK_ABOUT, N_("About"),
-	 "", NULL, G_CALLBACK(about_action)},
+	 "", NULL, G_CALLBACK(systray_about_action)},
 	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
-	 "", NULL, G_CALLBACK(open_file_action)},
+	 "", NULL, G_CALLBACK(systray_open_file_action)},
 	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
+	 "", "Append a Audio CD", G_CALLBACK(systray_add_audio_cd_action)},
 	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
-	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
+	 "", "Add a no local stream", G_CALLBACK(systray_add_location_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev Track"),
 	 "", "Prev Track", G_CALLBACK(systray_prev_action)},
 	{"Play_Pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
@@ -172,6 +176,30 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 		default:
 			break;
 	}
+}
+
+static void
+systray_about_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	about_action (action, status_icon->pragha);
+}
+
+static void
+systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	open_file_action (action, status_icon->pragha);
+}
+
+static void
+systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	add_audio_cd_action (action, status_icon->pragha);
+}
+
+static void
+systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	add_location_action (action, status_icon->pragha);
 }
 
 static void

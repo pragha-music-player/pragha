@@ -56,14 +56,51 @@ static gchar *license = "This program is free software: "
 	"You should have received a copy of the GNU General Public License\n"
 	"along with this program.  If not, see <http://www.gnu.org/licenses/>.";
 
-
 /*
  * Menubar callbacks.
  */
 
+/* Playback */
+
+static void prev_action(GtkAction *action, PraghaApplication *pragha);
+static void play_pause_action(GtkAction *action, PraghaApplication *pragha);
+static void stop_action(GtkAction *action, PraghaApplication *pragha);
+static void next_action (GtkAction *action, PraghaApplication *pragha);
+// void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
+static void quit_action(GtkAction *action, PraghaApplication *pragha);
+
+/* Playlist */
+
+// void open_file_action(GtkAction *action, PraghaApplication *pragha);
+// void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
+// void add_location_action(GtkAction *action, PraghaApplication *pragha);
+static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_crop_playlist_action        (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_clear_playlist_action       (GtkAction *action, PraghaApplication *pragha);
+static void search_playlist_action(GtkAction *action, PraghaApplication *pragha);
+
+/* View */
+
+static void fullscreen_action (GtkAction *action, PraghaApplication *pragha);
+static void show_controls_below_action (GtkAction *action, PraghaApplication *pragha);
+static void jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha);
+
+/* Tools */
+
+static void show_equalizer_action(GtkAction *action, PraghaApplication *pragha);
+static void rescan_library_action(GtkAction *action, PraghaApplication *pragha);
+static void update_library_action(GtkAction *action, PraghaApplication *pragha);
+static void statistics_action(GtkAction *action, PraghaApplication *pragha);
+static void pref_action(GtkAction *action, PraghaApplication *pragha);
+
+/* Help */
+
+static void home_action(GtkAction *action, PraghaApplication *pragha);
+static void community_action(GtkAction *action, PraghaApplication *pragha);
+static void wiki_action(GtkAction *action, PraghaApplication *pragha);
+static void translate_action(GtkAction *action, PraghaApplication *pragha);
+// void about_action(GtkAction *action, PraghaApplication *pragha);
 
 /*
  * Menu bar ui definition.
@@ -604,7 +641,7 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for 'Add All' action in the Tools menu */
 
-void add_libary_action(GtkAction *action, PraghaApplication *pragha)
+static void add_libary_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaDatabase *cdbase;
@@ -648,28 +685,28 @@ void add_libary_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Prev' item in the pragha menu */
 
-void prev_action(GtkAction *action, PraghaApplication *pragha)
+static void prev_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_playback_prev_track(pragha);
 }
 
 /* Handler for the 'Play / Pause' item in the pragha menu */
 
-void play_pause_action(GtkAction *action, PraghaApplication *pragha)
+static void play_pause_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_playback_play_pause_resume(pragha);
 }
 
 /* Handler for the 'Stop' item in the pragha menu */
 
-void stop_action(GtkAction *action, PraghaApplication *pragha)
+static void stop_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_playback_stop(pragha);
 }
 
 /* Handler for the 'Next' item in the pragha menu */
 
-void next_action (GtkAction *action, PraghaApplication *pragha)
+static void next_action (GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_playback_next_track(pragha);
 }
@@ -760,28 +797,28 @@ void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Quit' item in the pragha menu */
 
-void quit_action(GtkAction *action, PraghaApplication *pragha)
+static void quit_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_application_quit ();
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
 
-void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
+static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_filter_dialog (pragha);
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */
 
-void pref_action(GtkAction *action, PraghaApplication *pragha)
+static void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_preferences_dialog_show (pragha);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */
 
-void
+static void
 fullscreen_action (GtkAction *action, PraghaApplication *pragha)
 {
 	GtkWidget *menu_bar;
@@ -806,7 +843,7 @@ fullscreen_action (GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Show_controls_below_action' item in the view menu */
 
-void
+static void
 show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
@@ -826,7 +863,7 @@ show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
 	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
 }
 
-void
+static void
 jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
@@ -837,7 +874,7 @@ jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Equalizer' item in the Tools menu */
 
-void
+static void
 show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_equalizer_dialog_show(pragha);
@@ -846,7 +883,7 @@ show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
 
-void rescan_library_action(GtkAction *action, PraghaApplication *pragha)
+static void rescan_library_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaScanner *scanner;
 	scanner = pragha_application_get_scanner (pragha);
@@ -856,7 +893,7 @@ void rescan_library_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Update Library' item in the Tools menu */
 
-void update_library_action(GtkAction *action, PraghaApplication *pragha)
+static void update_library_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaScanner *scanner;
 	scanner = pragha_application_get_scanner (pragha);
@@ -895,7 +932,7 @@ pragha_menubar_clear_playlist_action (GtkAction *action, PraghaApplication *prag
 
 /* Handler for 'Statistics' action in the Tools menu */
 
-void statistics_action(GtkAction *action, PraghaApplication *pragha)
+static void statistics_action(GtkAction *action, PraghaApplication *pragha)
 {
 	PraghaDatabase *cdbase;
 	gint n_artists, n_albums, n_tracks;
@@ -954,25 +991,25 @@ void about_widget(PraghaApplication *pragha)
 	                      NULL);
 }
 
-void home_action(GtkAction *action, PraghaApplication *pragha)
+static void home_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void community_action(GtkAction *action, PraghaApplication *pragha)
+static void community_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void wiki_action(GtkAction *action, PraghaApplication *pragha)
+static void wiki_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://pragha.wikispaces.com/";
 	open_url(uri, pragha_application_get_window(pragha));
 }
 
-void translate_action(GtkAction *action, PraghaApplication *pragha)
+static void translate_action(GtkAction *action, PraghaApplication *pragha)
 {
 	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
 	open_url(uri, pragha_application_get_window(pragha));

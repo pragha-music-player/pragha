@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-playback.h"
+#include "pragha-menubar.h"
 #include "pragha-art-cache.h"
 #include "pragha-playlist.h"
 #include "pragha-notify.h"
