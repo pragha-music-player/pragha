@@ -89,6 +89,8 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Add files\"/>			\
 			<menuitem action=\"Add Audio CD\"/>			\
 			<menuitem action=\"Add location\"/>			\
+			<separator/>				    			\
+			<menuitem action=\"Add the library\"/>		\
 			<separator/>				    		\
 			<menuitem action=\"Remove from playlist\"/>		\
 			<menuitem action=\"Crop playlist\"/>			\
@@ -139,12 +141,6 @@ static GtkActionEntry main_aentries[] = {
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
-	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
-	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
-	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
 	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev track"),
 	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
 	{"Play_pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
@@ -157,6 +153,14 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
 	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
+	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
+	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
+	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
+	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
+	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
+	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
+	"", "Add all the library", G_CALLBACK(add_libary_action)},
 	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
 	 "", "Remove selection from playlist", G_CALLBACK(pragha_menubar_remove_playlist_action)},
 	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
@@ -596,6 +600,50 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_widget_destroy(dialog);
 
 	return;
+}
+
+/* Handler for 'Add All' action in the Tools menu */
+
+void add_libary_action(GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
+	GList *list = NULL;
+	PraghaMusicobject *mobj;
+
+	/* Query and insert entries */
+
+	set_watch_cursor (pragha_application_get_window(pragha));
+
+	cdbase = pragha_application_get_database (pragha);
+
+	const gchar *sql = "SELECT id FROM LOCATION";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+
+	while (pragha_prepared_statement_step (statement)) {
+		gint location_id = pragha_prepared_statement_get_int (statement, 0);
+		mobj = new_musicobject_from_db (cdbase, location_id);
+
+		if (G_LIKELY(mobj))
+			list = g_list_prepend (list, mobj);
+		else
+			g_warning ("Unable to retrieve details for"
+			            " location_id : %d",
+			            location_id);
+
+		pragha_process_gtk_events ();
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	remove_watch_cursor (pragha_application_get_window(pragha));
+
+	if (list) {
+		list = g_list_reverse(list);
+		playlist = pragha_application_get_playlist (pragha);
+		pragha_playlist_append_mobj_list (playlist, list);
+		g_list_free(list);
+	}
 }
 
 /* Handler for the 'Prev' item in the pragha menu */
