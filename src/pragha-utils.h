@@ -66,7 +66,7 @@ void free_str_list(GSList *list);
 gint compare_utf8_str(const gchar *str1, const gchar *str2);
 gchar * pragha_escape_slashes (const gchar *str);
 gboolean validate_album_art_pattern(const gchar *pattern);
-gboolean pragha_process_gtk_events ();
+void pragha_process_gtk_events ();
 void open_url(const gchar *url, GtkWidget *parent);
 void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 

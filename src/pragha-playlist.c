@@ -1591,8 +1591,7 @@ pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 				playlist->unplayed_tracks--;
 
 			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return;
+			pragha_process_gtk_events ();
 		}
 		gtk_tree_path_free(path);
 		gtk_tree_row_reference_free(ref);
@@ -1937,8 +1936,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	cplaylist->unplayed_tracks++;
 
 	/* Have to give control to GTK periodically ... */
-	if (pragha_process_gtk_events ())
-		return;
+	pragha_process_gtk_events ();
 
 	g_free(ch_length);
 	g_free(ch_track_no);
@@ -2847,8 +2845,7 @@ dnd_current_playlist_received_uri_list(GtkSelectionData *data)
 			}
 
 			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return NULL;
+			pragha_process_gtk_events ();
 
 			g_free(filename);
 		}
@@ -2878,8 +2875,7 @@ dnd_current_playlist_received_plain_text(GtkSelectionData *data)
 			list = g_list_append(list, mobj);
 
 		/* Have to give control to GTK periodically ... */
-		if (pragha_process_gtk_events ())
-			return NULL;
+		pragha_process_gtk_events ();
 	}
 	g_free(filename);
 

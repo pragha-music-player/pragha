@@ -331,14 +331,12 @@ static gboolean _init_gui_state(gpointer data)
 
 	PraghaApplication *pragha = data;
 
-	if (pragha_process_gtk_events ())
-		return TRUE;
+	pragha_process_gtk_events ();
 
 	library = pragha_application_get_library (pragha);
 	pragha_library_pane_init_view (library);
 
-	if (pragha_process_gtk_events ())
-		return TRUE;
+	pragha_process_gtk_events ();
 
 	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_restore_playlist (preferences)) {

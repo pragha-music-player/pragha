@@ -227,10 +227,7 @@ save_mobj_list_to_m3u_playlist(GList *list, GIOChannel *chan, gchar *filename)
 		}
 
 		/* Have to give control to GTK periodically ... */
-		if (pragha_process_gtk_events ()) {
-			g_list_free(list);
-			return 0;
-		}
+		pragha_process_gtk_events ();
 	}
 
 exit_list:
@@ -913,12 +910,7 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 		}
 		list = g_slist_append (list, uri);
 
-		if (pragha_process_gtk_events ()) {
-			g_free(filename);
-			g_free(f_file);
-			g_free(str);
-			goto exit_chan;
-		}
+		pragha_process_gtk_events ();
 
 		g_free(f_file);
 	continue_read:
@@ -1005,8 +997,7 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 		if (G_LIKELY(mobj))
 			mlist = g_list_append(mlist, mobj);
 
-		if (pragha_process_gtk_events ())
-			return NULL;
+		pragha_process_gtk_events ();
 
 		g_free(i->data);
 	}
@@ -1041,8 +1032,7 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, PraghaAppl
 			mlist = g_list_append(mlist, mobj);
 		}
 
-		if (pragha_process_gtk_events ())
-			return;
+		pragha_process_gtk_events ();
 
 		g_free(i->data);
 	}
