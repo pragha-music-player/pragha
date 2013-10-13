@@ -460,8 +460,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 		}
 
 		/* Have to give control to GTK periodically ... */
-		if (pragha_process_gtk_events ())
-			return NULL;
+		pragha_process_gtk_events ();
 
 		g_free(ab_file);
 		next_file = g_dir_read_name(dir);
