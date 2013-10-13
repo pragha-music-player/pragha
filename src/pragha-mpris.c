@@ -1461,6 +1461,8 @@ void pragha_mpris_close (PraghaMpris2 *mpris2)
 		g_object_unref (G_OBJECT (mpris2->dbus_connection));
 		mpris2->dbus_connection = NULL;
 	}
+
+	g_free (mpris2->saved_title);
 }
 
 void pragha_mpris_free (PraghaMpris2 *mpris2)
