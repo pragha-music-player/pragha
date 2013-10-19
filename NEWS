@@ -1,5 +1,5 @@
 ==============================================================
-Overview of changes in Pragha 1.1.2.1 since 1.1.1
+Overview of changes in Pragha 1.1.2.2 since 1.1.1
 ==============================================================
 
 V1.1.2
@@ -62,6 +62,16 @@ Bugs fixed:
 	Free GtkUIManagers.
 	Notify: change actoin ids to well known.
 	Notify: delete stragne asserts
+
+V.1.1.2.2
+Bugs fixed:
+	D'Oh!. Fix lastfm scrobble when compile without glyr.
+	Fix some coverity defects:
+	* Unused pointer value (UNUSED_VALUE)
+	* Unchecked return value (CHECKED_RETURN)
+	* Unchecked return value from library (CHECKED_RETURN)
+	* Dereference before null check (REVERSE_INULL)
+	Ensure set to 0 timeout_ids when remove it.
 
 ==============================================================
 OTHERS REALESES:
