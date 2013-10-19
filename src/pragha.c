@@ -149,12 +149,6 @@ gint main(gint argc, gchar *argv[])
 		return -1;
 	}
 
-	#ifdef HAVE_LIBCLASTFM
-	if (init_lastfm(cwin) == -1) {
-		g_critical("Unable to initialize lastfm");
-	}
-	#endif
-
 	if (backend_init(cwin) == -1) {
 		g_critical("Unable to initialize gstreamer");
 		return -1;
@@ -163,6 +157,12 @@ gint main(gint argc, gchar *argv[])
 	#ifdef HAVE_LIBGLYR
 	if (init_glyr_related(cwin) == -1) {
 		g_critical("Unable to initialize libglyr");
+	}
+	#endif
+
+	#ifdef HAVE_LIBCLASTFM
+	if (init_lastfm(cwin) == -1) {
+		g_critical("Unable to initialize lastfm");
 	}
 	#endif
 
