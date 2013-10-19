@@ -554,17 +554,17 @@ static void _on_pl_entry_parsed(TotemPlParser *parser, gchar *uri,
 	}
 }
 
-GSList *
-pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
+GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri)
 {
 	static TotemPlParser *pl_parser = NULL;
 	GSList *plitems = NULL;
 	gchar *base;
 
 	pl_parser = totem_pl_parser_new ();
-	g_object_set (pl_parser, "recurse", FALSE, NULL);
-	g_signal_connect (G_OBJECT(pl_parser), "entry-parsed",
-	                  G_CALLBACK(_on_pl_entry_parsed), &plitems);
+	g_object_set(pl_parser, "recurse", TRUE, NULL);
+
+	g_signal_connect(G_OBJECT(pl_parser), "entry-parsed",
+				G_CALLBACK(_on_pl_entry_parsed), &plitems);
 
 	base = get_display_filename(uri, TRUE);
 
@@ -573,7 +573,6 @@ pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 		/* An error happens while parsing */
 		goto bad;
 	}
-
 	g_object_unref (pl_parser);
 
 bad:
