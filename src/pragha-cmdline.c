@@ -162,22 +162,27 @@ process_options (PraghaApplication *pragha, GApplicationCommandLine *command_lin
 		pragha_playback_next_track (pragha);
 	}
 	if (cmdline_options.shuffle) {
-		gboolean shuffle = pragha_preferences_get_shuffle (pragha->preferences);
-		pragha_preferences_set_shuffle (pragha->preferences, !shuffle);
+		PraghaPreferences *preferences = pragha_application_get_preferences (pragha);
+		gboolean shuffle = pragha_preferences_get_shuffle (preferences);
+		pragha_preferences_set_shuffle (preferences, !shuffle);
 	}
 	if (cmdline_options.repeat) {
-		gboolean repeat = pragha_preferences_get_repeat (pragha->preferences);
-		pragha_preferences_set_repeat (pragha->preferences, !repeat);
+		PraghaPreferences *preferences = pragha_application_get_preferences (pragha);
+		gboolean repeat = pragha_preferences_get_repeat (preferences);
+		pragha_preferences_set_repeat (preferences, !repeat);
 	}
 	if (cmdline_options.inc_volume) {
-		pragha_backend_set_delta_volume (pragha->backend, +0.05);
+		PraghaBackend *backend = pragha_application_get_backend (pragha);
+		pragha_backend_set_delta_volume (backend, +0.05);
 	}
 	if (cmdline_options.dec_volume) {
-		pragha_backend_set_delta_volume (pragha->backend, -0.05);
+		PraghaBackend *backend = pragha_application_get_backend (pragha);
+		pragha_backend_set_delta_volume (backend, -0.05);
 	}
 	if (cmdline_options.show_osd) {
-		if (pragha->notify)
-			pragha_notify_show_osd (pragha->notify);
+		PraghaNotify *notify = pragha_application_get_notify (pragha);
+		if (notify)
+			pragha_notify_show_osd (notify);
 		else
 			g_warning ("Notifications are disabled");
 	}

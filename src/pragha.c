@@ -52,6 +52,53 @@ gint debug_level;
 GThread *pragha_main_thread = NULL;
 #endif
 
+struct _PraghaApplication {
+	GApplication base_instance;
+
+	/* Main window and icon */
+
+	GtkWidget         *mainwindow;
+	GdkPixbuf         *pixbuf_app;
+
+	/* Main stuff */
+
+	PraghaBackend     *backend;
+	PraghaPreferences *preferences;
+	PraghaDatabase    *cdbase;
+	PraghaArtCache    *art_cache;
+
+	PraghaScanner     *scanner;
+
+	/* Main widgets */
+
+	GtkUIManager      *menu_ui_manager;
+	PraghaToolbar     *toolbar;
+	GtkWidget         *infobox;
+	GtkWidget         *pane;
+	PraghaSidebar     *sidebar;
+	PraghaLibraryPane *library;
+	PraghaPlaylist    *playlist;
+	PraghaStatusbar   *statusbar;
+
+	PraghaStatusIcon  *status_icon;
+
+	/* Plugins?. */
+
+	PraghaNotify      *notify;
+#ifdef HAVE_LIBGLYR
+	PraghaGlyr        *glyr;
+#endif
+#ifdef HAVE_LIBCLASTFM
+	PraghaLastfm      *clastfm;
+#endif
+	PraghaMpris2      *mpris2;
+	con_gnome_media_keys *cgnome_media_keys;
+
+#ifdef HAVE_LIBKEYBINDER
+	gboolean           keybinder;
+#endif
+};
+
 G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
 
 /*
