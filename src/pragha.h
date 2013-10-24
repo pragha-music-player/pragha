@@ -29,7 +29,6 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <dbus/dbus-glib-lowlevel.h>
 #include <gtk/gtk.h>
 #include <tag_c.h>
 
@@ -77,6 +76,8 @@ enum dnd_target {
 typedef struct _PraghaApplication PraghaApplication;
 
 struct _PraghaApplication {
+	GApplication base_instance;
+
 	/* Main window and icon */
 
 	GtkWidget         *mainwindow;
@@ -88,7 +89,6 @@ struct _PraghaApplication {
 	PraghaPreferences *preferences;
 	PraghaDatabase    *cdbase;
 	PraghaArtCache    *art_cache;
-	DBusConnection    *con_dbus;
 
 	PraghaScanner     *scanner;
 
@@ -120,10 +120,6 @@ struct _PraghaApplication {
 #ifdef HAVE_LIBKEYBINDER
 	gboolean           keybinder;
 #endif
-
-	/* Flags */
-
-	gboolean           unique_instance;
 };
 
 /* Functions to access private members */
@@ -165,18 +161,27 @@ void               pragha_application_set_notify             (PraghaApplication 
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 
+gint handle_command_line (PraghaApplication *pragha, GApplicationCommandLine *command_line, gint argc, gchar **args);
+
 /* Info bar import music */
 
 gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha);
 GtkWidget* create_info_bar_import_music(PraghaApplication *pragha);
 GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
 
-/* Init */
+/* Pragha app */
 
-gint init_options(PraghaApplication *pragha, int argc, char **argv);
+#define PRAGHA_TYPE_APPLICATION            (pragha_application_get_type ())
+#define PRAGHA_APPLICATION(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), PRAGHA_TYPE_APPLICATION, PraghaApplication))
+#define PRAGHA_APPLICATION_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),  PRAGHA_TYPE_APPLICATION, PraghaApplicationClass))
+#define PRAGHA_IS_APPLICATION(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), PRAGHA_TYPE_APPLICATION))
+#define PRAGHA_IS_APPLICATION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass),  PRAGHA_TYPE_APPLICATION))
+#define PRAGHA_APPLICATION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj),  PRAGHA_TYPE_APPLICATION, PraghaApplicationClass))
 
-/* Close */
+typedef struct {
+	GApplicationClass parent_class;
+} PraghaApplicationClass;
 
-void pragha_application_quit (void);
+void pragha_application_quit (PraghaApplication *pragha);
 
 #endif /* PRAGHA_H */

@@ -65,8 +65,7 @@ static void add_audio_cd_tracks(PraghaApplication *pragha, cdrom_drive_t *cdda_d
 		if (G_LIKELY(mobj))
 			list = g_list_append(list, mobj);
 
-		if (pragha_process_gtk_events ())
-			return;
+		pragha_process_gtk_events ();
 	}
 	if (list) {
 		playlist = pragha_application_get_playlist (pragha);

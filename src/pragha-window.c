@@ -55,7 +55,7 @@ pragha_close_window(GtkWidget *widget, GdkEvent *event, PraghaApplication *pragh
 			gtk_window_iconify (GTK_WINDOW(pragha_application_get_window(pragha)));
 	}
 	else {
-		pragha_application_quit ();
+		pragha_application_quit (pragha);
 	}
 	return TRUE;
 }
@@ -301,7 +301,6 @@ pragha_window_free (PraghaApplication *pragha)
 	g_free(pragha_accels_path);
 }
 
-#if GTK_CHECK_VERSION (3, 0, 0)
 static void init_gui_state(PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
@@ -322,38 +321,6 @@ static void init_gui_state(PraghaApplication *pragha)
 		pragha_window_add_widget_to_infobox(pragha, info_bar);
 	}
 }
-#else
-static gboolean _init_gui_state(gpointer data)
-{
-	PraghaPlaylist *playlist;
-	PraghaLibraryPane *library;
-	PraghaPreferences *preferences;
-
-	PraghaApplication *pragha = data;
-
-	if (pragha_process_gtk_events ())
-		return TRUE;
-
-	library = pragha_application_get_library (pragha);
-	pragha_library_pane_init_view (library);
-
-	if (pragha_process_gtk_events ())
-		return TRUE;
-
-	preferences = pragha_application_get_preferences (pragha);
-	if (pragha_preferences_get_restore_playlist (preferences)) {
-		playlist = pragha_application_get_playlist (pragha);
-		init_current_playlist_view (playlist);
-	}
-
-	if (info_bar_import_music_will_be_useful(pragha)) {
-		GtkWidget* info_bar = create_info_bar_import_music(pragha);
-		pragha_window_add_widget_to_infobox(pragha, info_bar);
-	}
-
-	return TRUE;
-}
-#endif
 
 static void
 pragha_window_init_menu_actions (PraghaApplication *pragha)
@@ -413,11 +380,7 @@ pragha_window_init (PraghaApplication *pragha)
 
 	pragha_init_session_support(pragha);
 
-	#if GTK_CHECK_VERSION (3, 0, 0)
 	init_gui_state(pragha);
-	#else
-	gtk_init_add(_init_gui_state, pragha);
-	#endif
 }
 
 void
