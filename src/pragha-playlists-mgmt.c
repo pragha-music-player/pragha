@@ -38,7 +38,6 @@
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 /* Build a dialog to get a new playlist name */

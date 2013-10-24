@@ -21,7 +21,6 @@
 
 #include "pragha-file-utils.h"
 #include "pragha-musicobject.h"
-#include "pragha-preferences.h"
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"

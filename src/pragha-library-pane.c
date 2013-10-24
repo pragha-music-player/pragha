@@ -26,8 +26,10 @@
 #include <glib/gi18n.h>
 #endif
 
-#include <stdlib.h>
+#include <glib/gstdio.h>
 #include <gdk/gdkkeysyms.h>
+#include <stdlib.h>
+
 #include "pragha-library-pane.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
@@ -38,7 +40,6 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 struct _PraghaLibraryPane {

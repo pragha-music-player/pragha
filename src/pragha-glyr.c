@@ -24,19 +24,16 @@
 #else
 #include <glib/gi18n.h>
 #endif
+#include <glib/gstdio.h>
 
 #ifdef HAVE_LIBGLYR
 #include <glyr/glyr.h>
 #include <glyr/cache.h>
 #endif
-#include "pragha-glyr.h"
-#include "pragha-art-cache.h"
-#include "pragha-toolbar.h"
 #include "pragha-simple-async.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 #ifdef HAVE_LIBGLYR

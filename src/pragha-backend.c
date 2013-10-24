@@ -20,12 +20,9 @@
 #include <config.h>
 #endif
 
-#include "pragha-art-cache.h"
-#include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 #include <stdlib.h>

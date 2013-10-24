@@ -17,13 +17,8 @@
 
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
-#include "pragha-art-cache.h"
-#include "pragha-playlist.h"
-#include "pragha-notify.h"
-#include "pragha-musicobject-mgmt.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 static void pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusicobject *mobj);

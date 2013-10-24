@@ -33,7 +33,6 @@
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 struct _PraghaMpris2 {

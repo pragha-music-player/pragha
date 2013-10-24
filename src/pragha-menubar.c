@@ -29,8 +29,6 @@
 #include <gdk/gdkkeysyms.h>
 #include "pragha-menubar.h"
 #include "pragha-playback.h"
-#include "pragha-library-pane.h"
-#include "pragha-lastfm.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-filter-dialog.h"

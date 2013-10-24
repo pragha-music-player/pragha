@@ -23,7 +23,6 @@
 
 #include "pragha-musicobject.h"
 #include "pragha-album-art.h"
-/*TODO: HACK!. Remove it!. */
 #include "pragha-backend.h"
 
 /* pragha.h */

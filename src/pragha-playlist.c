@@ -29,18 +29,15 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include "pragha-playlist.h"
-#include "pragha-lastfm.h"
 #include "pragha-file-utils.h"
 #include "pragha-menubar.h"
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "gtkcellrendererbubble.h"
-#include "pragha-glyr.h"
 #include "pragha-tagger.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 /**

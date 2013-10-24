@@ -29,22 +29,15 @@
 #include <glib.h>
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
+#include <tag_c.h>
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-library-pane.h"
 #include "pragha-menubar.h"
-#include "pragha-statusicon.h"
-#include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
-#include "pragha-window.h"
-#include "pragha-notify.h"
-#include "pragha-preferences-dialog.h"
-#include "pragha-glyr.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 gint debug_level;

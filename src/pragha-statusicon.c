@@ -26,10 +26,9 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-statusicon.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
-#include "pragha-statusicon.h"
-#include "pragha-window.h"
 #include "pragha.h"
 
 struct _PraghaStatusIcon {

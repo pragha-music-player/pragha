@@ -28,30 +28,27 @@
 #endif
 
 #include <glib.h>
-#include <glib/gstdio.h>
 #include <gtk/gtk.h>
-#include <tag_c.h>
 
 #include "pragha-album-art.h"
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-glyr.h"
-#include "pragha-musicobject.h"
 #include "pragha-notify.h"
 #include "pragha-preferences.h"
-#include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
+#include "pragha-toolbar.h"
 #include "pragha-scanner.h"
 #include "pragha-sidebar.h"
-#include "pragha-simple-async.h"
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
 #include "pragha-window.h"
 #include "gnome-media-keys.h"
 #include "pragha-mpris.h"
+#include "pragha-debug.h"
 
 /* With libcio 0.83 should be before config.h. libcdio issue */
 #ifdef HAVE_PARANOIA_NEW_INCLUDES

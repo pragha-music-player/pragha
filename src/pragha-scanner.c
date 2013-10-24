@@ -25,7 +25,6 @@
 #endif
 
 #include "pragha-scanner.h"
-#include "pragha-database.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"

@@ -20,7 +20,6 @@
 #define PRAGHA_PLAYLIST_H
 
 #include <gtk/gtk.h>
-#include <glib-object.h>
 #include "pragha-backend.h"
 #include "pragha-database.h"
 

@@ -27,7 +27,6 @@
 #endif
 
 #include "pragha-tags-dialog.h"
-#include "pragha-musicobject.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
