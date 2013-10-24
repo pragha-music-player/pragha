@@ -1657,14 +1657,7 @@ library_view_append_playlists(GtkTreeModel *model,
 		                           NODE_PLAYLIST,
 		                           0);
 
-		#if GTK_CHECK_VERSION (3, 0, 0)
 		pragha_process_gtk_events ();
-		#else
-		if (pragha_process_gtk_events ()) {
-			pragha_prepared_statement_free (statement);
-			return;
-		}
-		#endif
 	}
 	pragha_prepared_statement_free (statement);
 }
@@ -1691,14 +1684,7 @@ library_view_append_radios(GtkTreeModel *model,
 		                           NODE_RADIO,
 		                           0);
 
-		#if GTK_CHECK_VERSION (3, 0, 0)
 		pragha_process_gtk_events ();
-		#else
-		if (pragha_process_gtk_events ()) {
-			pragha_prepared_statement_free (statement);
-			return;
-		}
-		#endif
 	}
 	pragha_prepared_statement_free (statement);
 }
@@ -1752,16 +1738,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 			                f_iter,
 			                clibrary);
 
-			#if GTK_CHECK_VERSION (3, 0, 0)
 			pragha_process_gtk_events ();
-			#else
-			if (pragha_process_gtk_events ()) {
-				pragha_prepared_statement_free (statement);
-				free_str_list(library_dir);
-				g_free(mask);
-				return;
-			}
-			#endif
 		}
 		pragha_prepared_statement_free (statement);
 		g_free(mask);
@@ -1838,14 +1815,7 @@ library_view_complete_tags_view(GtkTreeModel *model,
 		                       clibrary);
 
 		/* Have to give control to GTK periodically ... */
-		#if GTK_CHECK_VERSION (3, 0, 0)
 		pragha_process_gtk_events ();
-		#else
-		if (pragha_process_gtk_events ()) {
-			pragha_prepared_statement_free (statement);
-			return;
-		}
-		#endif
 	}
 	pragha_prepared_statement_free (statement);
 
@@ -2095,8 +2065,7 @@ pragha_library_pane_get_mobj_list (PraghaLibraryPane *library)
 			gtk_tree_path_free (path);
 
 			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ())
-				return NULL;
+			pragha_process_gtk_events ();
 		}
 		g_list_free (list);
 	}
@@ -2268,10 +2237,7 @@ pragha_library_pane_export_playlist_action (GtkAction *action, PraghaLibraryPane
 			gtk_tree_path_free(path);
 
 			/* Have to give control to GTK periodically ... */
-			if (pragha_process_gtk_events ()) {
-				g_list_free(list);
-				return;
-			}
+			pragha_process_gtk_events ();
 		}
 	}
 
@@ -2491,8 +2457,7 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 				trash_or_unlink_row(loc_arr, unlink, library);
 
 				/* Have to give control to GTK periodically ... */
-				if (pragha_process_gtk_events ())
-					return;
+				pragha_process_gtk_events ();
 			}
 			pragha_database_commit_transaction(library->cdbase);
 
@@ -2540,8 +2505,7 @@ pragha_library_pane_delete_from_db_action (GtkAction *action, PraghaLibraryPane 
 				delete_row_from_db(library->cdbase, path, model);
 
 				/* Have to give control to GTK periodically ... */
-				if (pragha_process_gtk_events ())
-					return;
+				pragha_process_gtk_events ();
 			}
 
 			pragha_database_commit_transaction (library->cdbase);

@@ -477,7 +477,7 @@ gboolean validate_album_art_pattern(const gchar *pattern)
 	return ret;
 }
 
-gboolean
+void
 pragha_process_gtk_events ()
 {
 #ifdef DEBUG
@@ -485,11 +485,9 @@ pragha_process_gtk_events ()
 	if (g_thread_self () != pragha_main_thread)
 		g_warning ("THREAD SAFETY ERROR!");
 #endif
-	while (gtk_events_pending ()) {
-		if (gtk_main_iteration_do (FALSE))
-			return TRUE;
+	while (g_main_context_pending (NULL)) {
+		g_main_context_iteration (NULL, FALSE);
 	}
-	return FALSE;
 }
 
 /* callback used to open default browser when URLs got clicked */

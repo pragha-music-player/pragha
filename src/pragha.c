@@ -38,13 +38,12 @@
 #include "pragha-statusicon.h"
 #include "pragha-lastfm.h"
 #include "pragha-keybinder.h"
-#include "pragha-dbus.h"
 #include "pragha-window.h"
 #include "pragha-notify.h"
 #include "pragha-preferences-dialog.h"
 #include "pragha-glyr.h"
+#include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha-dbus.h"
 #include "pragha-debug.h"
 #include "pragha.h"
 
@@ -52,6 +51,8 @@ gint debug_level;
 #ifdef DEBUG
 GThread *pragha_main_thread = NULL;
 #endif
+
+G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
 
 /*
  * Some calbacks..
@@ -316,23 +317,12 @@ pragha_application_is_first_run (PraghaApplication *pragha)
 	return string_is_empty (pragha_preferences_get_installed_version (pragha->preferences));
 }
 
-void
-pragha_application_quit (void)
-{
-	gtk_main_quit();
-
-	CDEBUG(DBG_INFO, "Halt.");
-}
-
-/*
- *
- */
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
 {
 	/* Main window */
 
-	pragha->mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	pragha->mainwindow = gtk_window_new (GTK_WINDOW_TOPLEVEL); //TODO GtkApplicationWindow
 
 	pragha->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
 	if (!pragha->pixbuf_app)
@@ -364,96 +354,115 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	pragha_window_new (pragha);
 }
 
-/* FIXME: Cleanup track refs */
 static void
-pragha_application_free (PraghaApplication *pragha)
+pragha_application_dispose (GObject *object)
 {
+	PraghaApplication *pragha = PRAGHA_APPLICATION (object);
+
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	pragha_playback_stop(pragha);
-
 #ifdef HAVE_LIBGLYR
-	pragha_glyr_free (pragha->glyr);
+	if (pragha->glyr) {
+		pragha_glyr_free (pragha->glyr);
+		pragha->glyr = NULL;
+	}
 #endif
 #ifdef HAVE_LIBCLASTFM
-	pragha_lastfm_free (pragha->clastfm);
+	if (pragha->clastfm) {
+		pragha_lastfm_free (pragha->clastfm);
+		pragha->clastfm = NULL;
+	}
 #endif
-	pragha_sidebar_free(pragha->sidebar);
-	pragha_mpris_free (pragha->mpris2);
-	g_object_unref (pragha->backend);
-	pragha_art_cache_free (pragha->art_cache);
-	pragha_window_free (pragha);
-	pragha_scanner_free(pragha->scanner);
-	dbus_handlers_free (pragha);
-	if (pragha->notify)
-		pragha_notify_free (pragha->notify);
-
-	if (pragha->cgnome_media_keys)
+	if (pragha->sidebar) {
+		pragha_sidebar_free (pragha->sidebar);
+		pragha->sidebar = NULL;
+	}
+	if (pragha->mpris2) {
+		pragha_mpris_free (pragha->mpris2);
+		pragha->mpris2 = NULL;
+	}
+	if (pragha->backend) {
+		pragha_playback_stop (pragha);
+		g_object_unref (pragha->backend);
+		pragha->backend = NULL;
+	}
+	if (pragha->art_cache) {
+		pragha_art_cache_free (pragha->art_cache);
+		pragha->art_cache = NULL;
+	}
+	if (pragha->cgnome_media_keys) {
 		gnome_media_keys_free (pragha->cgnome_media_keys);
+		pragha->cgnome_media_keys = NULL;
+	}
 #ifdef HAVE_LIBKEYBINDER
-	else if (pragha->keybinder)
+	if (pragha->keybinder) {
 		keybinder_free ();
+		pragha->keybinder = FALSE;
+	}
 #endif
+	if (pragha->mainwindow) {
+		pragha_window_free (pragha);
+		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
+		gtk_widget_destroy (pragha->mainwindow);
+		pragha->mainwindow = NULL;
+	}
+	if (pragha->scanner) {
+		pragha_scanner_free (pragha->scanner);
+		pragha->scanner = NULL;
+	}
+	if (pragha->notify) {
+		pragha_notify_free (pragha->notify);
+		pragha->notify = NULL;
+	}
+
 	pragha_cdda_free ();
 
-	if (pragha->pixbuf_app)
-		g_object_unref(pragha->pixbuf_app);
+	if (pragha->pixbuf_app) {
+		g_object_unref (pragha->pixbuf_app);
+		pragha->pixbuf_app = NULL;
+	}
 
-	g_object_unref (pragha->menu_ui_manager);
-
-	/* Explicit destroy mainwindow to finalize lifecycle of childrens */
-
-	gtk_widget_destroy (pragha->mainwindow);
+	if (pragha->menu_ui_manager) {
+		g_object_unref (pragha->menu_ui_manager);
+		pragha->menu_ui_manager = NULL;
+	}
 
 	/* Save Preferences and database. */
 
-	g_object_unref(G_OBJECT(pragha->preferences));
-	g_object_unref(pragha->cdbase);
+	if (pragha->preferences) {
+		g_object_unref (pragha->preferences);
+		pragha->preferences = NULL;
+	}
+	if (pragha->cdbase) {
+		g_object_unref (pragha->cdbase);
+		pragha->cdbase = NULL;
+	}
 
-	g_slice_free(PraghaApplication, pragha);
+	G_OBJECT_CLASS (pragha_application_parent_class)->dispose (object);
 }
 
-static PraghaApplication *
-pragha_application_new (gint argc, gchar *argv[])
+static void
+pragha_application_startup (GApplication *application)
 {
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
 	PraghaToolbar *toolbar;
 	PraghaPlaylist *playlist;
-	PraghaApplication *pragha;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	/* Alocate the main structure. */
-	pragha = g_slice_new0(PraghaApplication);
+	G_APPLICATION_CLASS (pragha_application_parent_class)->startup (application);
 
 	/* Allocate memory for simple structures */
 
 	pragha->mpris2 = pragha_mpris_new();
 
-	pragha->con_dbus = pragha_init_dbus(pragha);
-	if (!pragha->con_dbus) {
-		g_critical("Unable to init dbus connection");
-		return NULL;
-	}
-	if (pragha_init_dbus_handlers(pragha) == -1) {
-		g_critical("Unable to initialize DBUS filter handlers");
-		return NULL;
-	}
-
-	/* Parse command line arguments */
-	if (init_options(pragha, argc, argv) == -1)
-		return NULL;
-
-	/* Allow only one instance */
-	if (!pragha->unique_instance)
-		return pragha;
-
 	pragha->preferences = pragha_preferences_get();
 
 	pragha->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
-		g_critical("Unable to init music dbase");
-		return NULL;
+		g_error("Unable to init music dbase");
 	}
 
 	if (pragha_preferences_get_show_osd (pragha->preferences))
@@ -481,7 +490,6 @@ pragha_application_new (gint argc, gchar *argv[])
 
 	if (pragha_mpris_init(pragha->mpris2, pragha) == -1) {
 		g_critical("Unable to initialize MPRIS");
-		return NULL;
 	}
 
 	/*
@@ -566,12 +574,119 @@ pragha_application_new (gint argc, gchar *argv[])
 	}
 	#endif
 
-	return pragha;
+	g_application_hold (application); //TODO don't hold if gtkapp
+}
+
+static void
+pragha_application_activate (GApplication *application)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	gtk_window_present (GTK_WINDOW (pragha->mainwindow));
+}
+
+static void
+pragha_application_open (GApplication *application, GFile **files, gint n_files, const gchar *hint)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+	gint i;
+	GList *mlist = NULL;
+
+	for (i = 0; i < n_files; i++) {
+		gchar *path = g_file_get_path (files[i]);
+		mlist = append_mobj_list_from_unknown_filename (mlist, path);
+		g_free (path);
+	}
+
+	if (mlist) {
+		pragha_playlist_append_mobj_list (pragha->playlist, mlist);
+		g_list_free (mlist);
+	}
+
+	gtk_window_present (GTK_WINDOW (pragha->mainwindow));
+}
+
+static int
+pragha_application_command_line (GApplication *application, GApplicationCommandLine *command_line)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+	int ret = 0;
+	gint argc;
+
+	gchar **argv = g_application_command_line_get_arguments (command_line, &argc);
+
+	if (argc <= 1) {
+		pragha_application_activate (application);
+		goto exit;
+	}
+
+	ret = handle_command_line (pragha, command_line, argc, argv);
+
+exit:
+	g_strfreev (argv);
+
+	return ret;
+}
+
+//it's used for --help and --version
+static gboolean
+pragha_application_local_command_line (GApplication *application, gchar ***arguments, int *exit_status)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	gchar **argv = *arguments;
+	gint argc = g_strv_length (argv);
+
+	*exit_status = handle_command_line (pragha, NULL, argc, argv);
+
+	return FALSE;
+}
+
+//TODO consider use of GApplication::shutdown to save preferences and playlist
+
+void
+pragha_application_quit (PraghaApplication *pragha)
+{
+#if GLIB_CHECK_VERSION (2, 32, 0)
+	g_application_quit (G_APPLICATION (pragha));
+#else
+	g_application_release (G_APPLICATION (pragha));
+#endif
+}
+
+static void
+pragha_application_class_init (PraghaApplicationClass *class)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (class);
+	GApplicationClass *application_class = G_APPLICATION_CLASS (class);
+
+	object_class->dispose = pragha_application_dispose;
+
+	application_class->startup = pragha_application_startup;
+	application_class->activate = pragha_application_activate;
+	application_class->open = pragha_application_open;
+	application_class->command_line = pragha_application_command_line;
+	application_class->local_command_line = pragha_application_local_command_line;
+}
+
+static void
+pragha_application_init (PraghaApplication *pragha)
+{
+}
+
+PraghaApplication *
+pragha_application_new ()
+{
+	return g_object_new (PRAGHA_TYPE_APPLICATION,
+	                     "application-id", "org.pragha",
+	                     "flags", G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_HANDLES_OPEN,
+	                     NULL);
 }
 
 gint main(gint argc, gchar *argv[])
 {
 	PraghaApplication *pragha;
+	int status;
 #ifdef DEBUG
 	g_print ("debug enabled\n");
 	pragha_main_thread = g_thread_self ();
@@ -601,22 +716,11 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	/* Initialize GTK+ */
-	gtk_init(&argc, &argv);
+	gtk_init(&argc, &argv); //TODO delete if gtk app
 
-	/* Get a instanse of pragha */
-	pragha = pragha_application_new (argc, argv);
-	if (pragha) {
-		if (pragha->unique_instance) {
-			/* Runs the main loop */
-			CDEBUG(DBG_INFO, "Init done. Running ...");
-			gtk_main();
+	pragha = pragha_application_new ();
+	status = g_application_run (G_APPLICATION (pragha), argc, argv);
+	g_object_unref (pragha);
 
-			/* Close.. So, free memory and quit. */
-			pragha_application_free (pragha);
-		}
-	}
-	else
-		return -1;
-
-	return 0;
+	return status;
 }
