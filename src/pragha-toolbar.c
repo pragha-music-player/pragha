@@ -25,12 +25,9 @@
 #else
 #include <glib/gi18n.h>
 #endif
-
 #include <gdk/gdkkeysyms.h>
-#include "pragha-toolbar.h"
-#include "pragha-playback.h"
+
 #include "pragha-utils.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 static void pragha_toolbar_finalize (GObject *object);

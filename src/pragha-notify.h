@@ -19,8 +19,6 @@
 #ifndef PRAGHA_NOTIFY_H
 #define PRAGHA_NOTIFY_H
 
-#include <glib.h>
-
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 

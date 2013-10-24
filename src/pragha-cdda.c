@@ -18,7 +18,6 @@
 
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 static gint cddb_add_tracks(cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc)

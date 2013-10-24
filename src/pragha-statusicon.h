@@ -19,6 +19,8 @@
 #ifndef PRAGHA_STATUSICON_H
 #define PRAGHA_STATUSICON_H
 
+#include <gtk/gtk.h>
+
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 

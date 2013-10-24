@@ -27,12 +27,10 @@
 #endif
 
 #include "pragha-window.h"
-#include "pragha-menubar.h"
 #include "pragha-playback.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 /********************************/

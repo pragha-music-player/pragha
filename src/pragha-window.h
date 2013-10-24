@@ -21,7 +21,6 @@
 
 #include <gtk/gtk.h>
 #include "pragha-backend.h"
-#include "pragha-toolbar.h"
 
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;

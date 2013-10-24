@@ -15,7 +15,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <gtk/gtk.h>
+#include "pragha-hig.h"
 
 void
 gtk_label_set_attribute_bold(GtkLabel *label)

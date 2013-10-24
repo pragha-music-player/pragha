@@ -31,7 +31,6 @@
 #include "pragha-tags-mgmt.h"
 #include "pragha-tagger.h"
 #include "pragha-hig.h"
-#include "pragha-library-pane.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"

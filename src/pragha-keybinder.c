@@ -17,8 +17,6 @@
 
 #include <keybinder.h>
 #include "pragha-playback.h"
-#include "pragha-tags-dialog.h"
-#include "pragha-window.h"
 #include "pragha.h"
 #if GTK_CHECK_VERSION (3, 0, 0)
 #include <gdk/gdkx.h>

@@ -28,13 +28,11 @@
 #include "pragha-file-utils.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
-#include "pragha-library-pane.h"
 #include "pragha-utils.h"
 #include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha-debug.h"
 #include "xml_helper.h"
 #include "pragha.h"
 

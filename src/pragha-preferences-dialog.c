@@ -29,12 +29,9 @@
 #include <gdk/gdkkeysyms.h>
 #include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
-#include "pragha-library-pane.h"
 #include "pragha-utils.h"
-#include "pragha-window.h"
 #include "pragha-notify.h"
 #include "pragha-simple-widgets.h"
-#include "pragha-debug.h"
 #include "pragha.h"
 
 struct _PreferencesDialog {
