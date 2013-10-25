@@ -70,11 +70,11 @@ struct _PraghaLastfm {
 #define LASTFM_API_KEY "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET  "f3498ce387f30eeae8ea1b1023afb32b"
 
-enum LASTFM_QUERY_TYPE {
+typedef enum {
 	LASTFM_NONE = 0,
 	LASTFM_GET_SIMILAR,
 	LASTFM_GET_LOVED
-};
+} LastfmQueryType;
 
 /*
  * Prototypes
@@ -150,7 +150,7 @@ static const gchar *playlist_xml = "<ui>					\
 
 typedef struct {
 	GList *list;
-	guint query_type;
+	LastfmQueryType query_type;
 	guint query_count;
 	PraghaLastfm *clastfm;
 } AddMusicObjectListData;
