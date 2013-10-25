@@ -172,7 +172,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 	PraghaMpris2 *mpris2;
 	PraghaMusicobject *mobj = NULL;
 
-	enum player_state state = pragha_backend_get_state (backend);
+	PraghaBackendState state = pragha_backend_get_state (backend);
 
 	switch (state) {
 		case ST_PLAYING:

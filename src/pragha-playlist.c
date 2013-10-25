@@ -1242,7 +1242,7 @@ pragha_playlist_update_current_playlist_state (PraghaPlaylist *playlist, GtkTree
 void update_current_playlist_view_track(PraghaPlaylist *cplaylist, PraghaBackend *backend)
 {
 	GtkTreePath *path;
-	enum player_state state;
+	PraghaBackendState state;
 
 	path = get_current_track (cplaylist);
 	if(path) {

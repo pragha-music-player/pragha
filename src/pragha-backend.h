@@ -25,11 +25,11 @@
 
 G_BEGIN_DECLS
 
-enum player_state {
+typedef enum {
 	ST_PLAYING = 1,
 	ST_STOPPED,
 	ST_PAUSED
-};
+} PraghaBackendState;
 
 #define PRAGHA_TYPE_BACKEND                  (pragha_backend_get_type ())
 #define PRAGHA_BACKEND(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_BACKEND, PraghaBackend))
@@ -68,7 +68,7 @@ gboolean pragha_backend_is_playing(PraghaBackend *backend);
 gboolean pragha_backend_is_paused(PraghaBackend *backend);
 gboolean pragha_backend_emitted_error (PraghaBackend *backend);
 GError *pragha_backend_get_error (PraghaBackend *backend);
-enum player_state pragha_backend_get_state (PraghaBackend *backend);
+PraghaBackendState pragha_backend_get_state (PraghaBackend *backend);
 void pragha_backend_pause (PraghaBackend *backend);
 void pragha_backend_resume (PraghaBackend *backend);
 void pragha_backend_play (PraghaBackend *backend);
