@@ -940,7 +940,7 @@ exit_close:
 }
 
 GSList *
-pragha_pl_parser_parse (enum playlist_type format, const gchar *filename)
+pragha_pl_parser_parse (PraghaPlaylistType format, const gchar *filename)
 {
 	GSList *list = NULL;
 
@@ -967,7 +967,7 @@ pragha_pl_parser_parse (enum playlist_type format, const gchar *filename)
 
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename)
 {
-	enum playlist_type format = PL_FORMAT_UNKNOWN;
+	PraghaPlaylistType format = PL_FORMAT_UNKNOWN;
 	GSList *list = NULL;
 
 	if ((format = pragha_pl_parser_guess_format_from_extension (filename)) != PL_FORMAT_UNKNOWN) {

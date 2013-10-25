@@ -316,7 +316,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 	gchar *ab_file;
 	GError *error = NULL;
 	PraghaMusicobject *mobj = NULL;
-	enum generic_type file_type;
+	PraghaMediaType file_type;
 
 	if(g_cancellable_is_cancelled (scanner->cancellable))
 		return;
@@ -338,7 +338,7 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
 			pragha_scanner_scan_handler(scanner, ab_file);
 		else {
-			file_type = pragha_file_get_generic_type (ab_file);
+			file_type = pragha_file_get_media_type (ab_file);
 			switch (file_type) {
 				case MEDIA_TYPE_AUDIO:
 					mobj = new_musicobject_from_file(ab_file);
