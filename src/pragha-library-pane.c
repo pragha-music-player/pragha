@@ -40,6 +40,7 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-dnd.h"
 #include "pragha.h"
 
 struct _PraghaLibraryPane {
@@ -1138,7 +1139,7 @@ static void
 dnd_library_tree_get(GtkWidget *widget,
                      GdkDragContext *context,
                      GtkSelectionData *data,
-                     enum dnd_target info,
+                     PraghaDndTarget info,
                      guint time,
                      PraghaLibraryPane *clibrary)
 {
