@@ -65,7 +65,7 @@ struct PraghaBackendPrivate {
 	gboolean emitted_error;
 	GError *error;
 	GstState target_state;
-	enum player_state state;
+	PraghaBackendState state;
 	PraghaMusicobject *mobj;
 };
 
@@ -348,7 +348,7 @@ pragha_backend_set_target_state (PraghaBackend *backend, GstState target_state)
 }
 
 const gchar *
-pragha_playback_state_get_name(enum player_state state)
+pragha_playback_state_get_name(PraghaBackendState state)
 {
 	switch (state) {
 		case ST_PLAYING:
@@ -363,14 +363,14 @@ pragha_playback_state_get_name(enum player_state state)
 	}
 }
 
-enum player_state
+PraghaBackendState
 pragha_backend_get_state (PraghaBackend *backend)
 {
 	return backend->priv->state;
 }
 
 static void
-pragha_backend_set_state (PraghaBackend *backend, enum player_state state)
+pragha_backend_set_state (PraghaBackend *backend, PraghaBackendState state)
 {
 	backend->priv->state = state;
 

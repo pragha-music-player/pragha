@@ -464,7 +464,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 {
 	PraghaPreferences *preferences;
 	gint file_type = 0;
-	enum player_state state = 0;
+	PraghaBackendState state = 0;
 	GtkAction *action;
 
 	PraghaGlyr *glyr = user_data;

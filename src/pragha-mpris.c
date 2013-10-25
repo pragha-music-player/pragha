@@ -45,10 +45,10 @@ struct _PraghaMpris2 {
 	gboolean saved_shuffle;
 	gchar *saved_title;
 	gdouble volume;
-	enum player_state state;
+	PraghaBackendState state;
 };
 
-static const gchar mpris2xml[] = 
+static const gchar mpris2xml[] =
 "<node>"
 "        <interface name='org.mpris.MediaPlayer2'>"
 "                <method name='Raise'/>"

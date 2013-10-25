@@ -243,7 +243,7 @@ static void
 pragha_status_icon_update_state (PraghaBackend *backend, GParamSpec *pspec, PraghaStatusIcon *status_icon)
 {
 	GtkAction *action;
-	enum player_state state = 0;
+	PraghaBackendState state = 0;
 
 	state = pragha_backend_get_state (backend);
 

@@ -223,7 +223,7 @@ void
 pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
 {
 	PraghaBackend *backend;
-	enum player_state state = 0;
+	PraghaBackendState state = 0;
 
 	PraghaApplication *pragha = clastfm->pragha;
 	
@@ -1230,7 +1230,7 @@ static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	gint file_type = 0;
-	enum player_state state = 0;
+	PraghaBackendState state = 0;
 
 	PraghaLastfm *clastfm = user_data;
 

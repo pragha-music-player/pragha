@@ -320,7 +320,7 @@ void
 pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	PraghaToolbar *toolbar = user_data;
-	enum player_state state = pragha_backend_get_state (backend);
+	PraghaBackendState state = pragha_backend_get_state (backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
