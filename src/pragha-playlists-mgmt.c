@@ -40,10 +40,18 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
 
+/* Playlist management */
+
+typedef enum {
+	NEW_PLAYLIST,
+	APPEND_PLAYLIST,
+	EXPORT_PLAYLIST
+} PraghaPlaylistAction;
+
 /* Build a dialog to get a new playlist name */
 
 static gchar *
-get_playlist_dialog(enum playlist_mgmt type, GtkWidget *parent)
+get_playlist_dialog(PraghaPlaylistActionRange type, GtkWidget *parent)
 {
 	GtkWidget *dialog;
 	GtkWidget *table, *label, *entry;
@@ -105,7 +113,7 @@ get_playlist_dialog(enum playlist_mgmt type, GtkWidget *parent)
 /* Get a new playlist name that is not reserved */
 
 gchar *
-get_playlist_name(enum playlist_mgmt type, GtkWidget *parent)
+get_playlist_name(PraghaPlaylistActionRange type, GtkWidget *parent)
 {
 	gchar *playlist = NULL;
 
@@ -629,7 +637,7 @@ playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 }
 
 #ifdef HAVE_PLPARSER
-void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice)
+void export_playlist (PraghaPlaylist* cplaylist, PraghaPlaylistActionRange choice)
 {
 	gchar *filename = NULL;
 
@@ -654,7 +662,7 @@ void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice)
 	g_free(filename);
 }
 #else
-void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice)
+void export_playlist (PraghaPlaylist* cplaylist, PraghaPlaylistActionRange choice)
 {
 	gchar *filename = NULL;
 	GIOChannel *chan = NULL;
@@ -1079,7 +1087,7 @@ append_files_to_playlist(PraghaDatabase *cdbase, GSList *list, gint playlist_id)
 void
 save_playlist(PraghaPlaylist* cplaylist,
               gint playlist_id,
-              enum playlist_mgmt type)
+              PraghaPlaylistActionRange type)
 {
 	PraghaMusicobject *mobj = NULL;
 	GList *mlist = NULL, *i;
@@ -1122,7 +1130,7 @@ save_playlist(PraghaPlaylist* cplaylist,
 void
 new_playlist(PraghaPlaylist* cplaylist,
              const gchar *playlist,
-             enum playlist_mgmt type)
+             PraghaPlaylistActionRange type)
 {
 	gint playlist_id = 0;
 
@@ -1142,7 +1150,7 @@ new_playlist(PraghaPlaylist* cplaylist,
 	save_playlist(cplaylist, playlist_id, type);
 }
 
-void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, gint type)
+void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPlaylistActionRange type)
 {
 	gint playlist_id;
 
@@ -1182,15 +1190,15 @@ void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name)
 	pragha_database_add_radio_track (pragha_playlist_get_database(cplaylist), radio_id, uri);
 }
 
-enum playlist_mgmt
-replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, gint type)
+PraghaPlaylistAction
+replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, PraghaPlaylistActionRange type)
 {
 	GtkWidget *dialog;
 	GtkWidget *table, *radio_replace, *radio_add;
 	gchar *string_options = NULL;
 	gint result;
 	guint row = 0;
-	enum playlist_mgmt choise = EXPORT_PLAYLIST;
+	PraghaPlaylistAction choise = EXPORT_PLAYLIST;
 
 	/* Create dialog window */
 
@@ -1249,7 +1257,7 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, gint 
 
 void playlist_save_selection(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 {
-	enum playlist_mgmt choise;
+	PraghaPlaylistAction choise;
 	const gchar *playlist;
 
 	playlist = gtk_menu_item_get_label (menuitem);
@@ -1269,7 +1277,7 @@ void playlist_save_selection(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 
 void playlist_save_complete_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
 {
-	enum playlist_mgmt choise;
+	PraghaPlaylistAction choise;
 	const gchar *playlist;
 
 	playlist = gtk_menu_item_get_label (menuitem);
