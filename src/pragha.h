@@ -64,12 +64,6 @@
 
 #define WAIT_UPDATE 5
 
-enum dnd_target {
-	TARGET_REF_LIBRARY,
-	TARGET_URI_LIST,
-	TARGET_PLAIN_TEXT
-};
-
 typedef struct _PraghaApplication PraghaApplication;
 
 /* Functions to access private members */

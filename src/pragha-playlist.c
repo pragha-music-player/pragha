@@ -26,7 +26,6 @@
 #include <glib/gi18n.h>
 #endif
 
-#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include "pragha-playlist.h"
 #include "pragha-file-utils.h"
@@ -38,6 +37,7 @@
 #include "pragha-tags-mgmt.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-dnd.h"
 #include "pragha.h"
 
 /**
@@ -2802,115 +2802,6 @@ exit:
 	g_list_free(list);
 }
 
-static GList *
-dnd_current_playlist_received_from_library(GtkSelectionData *data,
-                                           PraghaPlaylist *cplaylist)
-{
-	gint n = 0, location_id = 0;
-	gchar *name = NULL, *uri, **uris;
-	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
-
-	CDEBUG(DBG_VERBOSE, "Dnd: Library");
-
-	uris = g_uri_list_extract_uris ((const gchar *) gtk_selection_data_get_data (data));
-	if (!uris) {
-		g_warning("No selections to process in DnD");
-		return list;
-	}
-
-	/* Dnd from the library, so will read everything from database. */
-
-	pragha_database_begin_transaction (cplaylist->cdbase);
-
-	/* Get the mobjs from the path of the library. */
-
-	for (n = 0; uris[n] != NULL; n++) {
-		uri = uris[n];
-		if (g_str_has_prefix(uri, "Location:/")) {
-			location_id = atoi(uri + strlen("Location:/"));
-			mobj = new_musicobject_from_db(cplaylist->cdbase, location_id);
-			if (G_LIKELY(mobj))
-				list = g_list_append(list, mobj);
-		}
-		else if(g_str_has_prefix(uri, "Playlist:/")) {
-			name = uri + strlen("Playlist:/");
-			list = add_playlist_to_mobj_list(cplaylist->cdbase, name, list);
-		}
-		else if(g_str_has_prefix(uri, "Radio:/")) {
-			name = uri + strlen("Radio:/");
-			list = add_radio_to_mobj_list(cplaylist->cdbase, name, list);
-		}
-	}
-	pragha_database_commit_transaction (cplaylist->cdbase);
-
-	g_strfreev(uris);
-
-	return list;
-}
-
-static GList *
-dnd_current_playlist_received_uri_list(GtkSelectionData *data)
-{
-	PraghaMusicobject *mobj = NULL;
-	gchar **uris = NULL, *filename = NULL;
-	GList *list = NULL;
-	gint i = 0;
-
-	CDEBUG(DBG_VERBOSE, "Target: URI_LIST");
-
-	uris = gtk_selection_data_get_uris(data);
-
-	if(uris){
-		for(i = 0; uris[i] != NULL; i++) {
-			filename = g_filename_from_uri(uris[i], NULL, NULL);
-			if (g_file_test(filename, G_FILE_TEST_IS_DIR)){
-				list = append_mobj_list_from_folder(list, filename);
-			}
-			else {
-				mobj = new_musicobject_from_file(filename);
-				if (G_LIKELY(mobj))
-					list = g_list_append(list, mobj);
-			}
-
-			/* Have to give control to GTK periodically ... */
-			pragha_process_gtk_events ();
-
-			g_free(filename);
-		}
-		g_strfreev(uris);
-	}
-
-	return list;
-}
-
-static GList *
-dnd_current_playlist_received_plain_text(GtkSelectionData *data)
-{
-	PraghaMusicobject *mobj = NULL;
-	gchar *filename = NULL;
-	GList *list = NULL;
-
-	CDEBUG(DBG_VERBOSE, "Target: PLAIN_TEXT");
-
-	filename = (gchar*)gtk_selection_data_get_text(data);
-
-	if (g_file_test(filename, G_FILE_TEST_IS_DIR)) {
-		list = append_mobj_list_from_folder(list, filename);
-	}
-	else {
-		mobj = new_musicobject_from_file(filename);
-		if (G_LIKELY(mobj))
-			list = g_list_append(list, mobj);
-
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-	}
-	g_free(filename);
-
-	return list;
-}
-
 /* Callback for DnD signal 'drag-data-received' */
 
 static void
@@ -2919,7 +2810,7 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 			     gint x,
 			     gint y,
 			     GtkSelectionData *data,
-			     enum dnd_target info,
+			     PraghaDndTarget info,
 			     guint time,
 			     PraghaPlaylist *cplaylist)
 {
@@ -2969,13 +2860,13 @@ dnd_current_playlist_received(GtkWidget *playlist_view,
 
 	switch(info) {
 	case TARGET_REF_LIBRARY:
-		list = dnd_current_playlist_received_from_library(data, cplaylist);
+		list = pragha_dnd_library_get_mobj_list (data, cplaylist->cdbase);
 		break;
 	case TARGET_URI_LIST:
-		list = dnd_current_playlist_received_uri_list(data);
+		list = pragha_dnd_uri_list_get_mobj_list (data);
 		break;
 	case TARGET_PLAIN_TEXT:
-		list = dnd_current_playlist_received_plain_text(data);
+		list = pragha_dnd_plain_text_get_mobj_list (data);
 		break;
 	default:
 		g_warning("Unknown DND type");
