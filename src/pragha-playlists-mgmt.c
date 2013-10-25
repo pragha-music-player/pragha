@@ -629,7 +629,7 @@ playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 }
 
 #ifdef HAVE_PLPARSER
-void export_playlist (PraghaPlaylist* cplaylist, gint choice)
+void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice)
 {
 	gchar *filename = NULL;
 
@@ -647,12 +647,14 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 		if (pragha_parser_save_selection_track_list(cplaylist, filename) == FALSE)
 			g_warning("Unable to save M3U playlist: %s", filename);
 		break;
+	default:
+		break;
 	}
 
 	g_free(filename);
 }
 #else
-void export_playlist (PraghaPlaylist* cplaylist, gint choice)
+void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice)
 {
 	gchar *filename = NULL;
 	GIOChannel *chan = NULL;
@@ -682,6 +684,8 @@ void export_playlist (PraghaPlaylist* cplaylist, gint choice)
 			g_warning("Unable to save M3U playlist: %s", filename);
 			goto exit;
 		}
+		break;
+	default:
 		break;
 	}
 
