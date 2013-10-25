@@ -178,7 +178,7 @@ pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, 
 		case ST_PLAYING:
 			/* New song?. */
 			playlist = pragha_application_get_playlist (pragha);
-			if(pragha_playlist_get_current_update_action (playlist) != PLAYLIST_NONE) {
+			if(pragha_playlist_get_update_action (playlist) != PLAYLIST_NONE) {
 				mobj = pragha_backend_get_musicobject (backend);
 
 				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
