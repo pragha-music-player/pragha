@@ -111,15 +111,15 @@ get_mime_type (const gchar *file)
 }
 
 PraghaMusicType
-get_file_type(const gchar *file)
+pragha_file_get_music_type(const gchar *filename)
 {
 	PraghaMusicType ret = FILE_NONE;
 	gchar *result = NULL;
 
-	if (!file)
+	if (!filename)
 		return ret;
 
-	result = get_mime_type(file);
+	result = get_mime_type(filename);
 
 	if (result) {
 		if(is_valid_mime(result, mime_flac))
@@ -142,7 +142,7 @@ get_file_type(const gchar *file)
 	return ret;
 }
 
-enum playlist_type
+PraghaPlaylistType
 pragha_pl_parser_guess_format_from_extension (const gchar *filename)
 {
 	if ( g_str_has_suffix (filename, ".m3u") || g_str_has_suffix (filename, ".M3U") )
@@ -165,14 +165,14 @@ pragha_pl_parser_guess_format_from_extension (const gchar *filename)
 
 /* Determine if the any file is useful to pragha. */
 
-enum generic_type
-pragha_file_get_generic_type (const gchar *filename)
+PraghaMediaType
+pragha_file_get_media_type (const gchar *filename)
 {
-	gint ret = MEDIA_TYPE_UNKNOWN;
+	PraghaMediaType ret = MEDIA_TYPE_UNKNOWN;
 	gchar *result = NULL;
 
 	if (!filename)
-		return -1;
+		return ret;
 
 	result = get_mime_type(filename);
 
@@ -267,7 +267,7 @@ gboolean is_playable_file(const gchar *file)
 		return FALSE;
 
 	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
-	    (get_file_type(file) != -1))
+	    (pragha_file_get_music_type(file) != FILE_NONE))
 		return TRUE;
 	else
 		return FALSE;
@@ -471,13 +471,13 @@ GList *
 append_mobj_list_from_unknown_filename(GList *list, gchar *filename)
 {
 	PraghaMusicobject *mobj;
-	enum generic_type file_type;
+	PraghaMediaType file_type;
 
 	if (is_dir_and_accessible(filename)) {
 		list = append_mobj_list_from_folder (list, filename);
 	}
 	else {
-		file_type = pragha_file_get_generic_type (filename);
+		file_type = pragha_file_get_media_type (filename);
 		switch (file_type) {
 			case MEDIA_TYPE_AUDIO:
 				mobj = new_musicobject_from_file (filename);

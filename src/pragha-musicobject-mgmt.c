@@ -30,7 +30,7 @@ new_musicobject_from_file(const gchar *file)
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
-	type = get_file_type(file);
+	type = pragha_file_get_music_type(file);
 	if (type == FILE_NONE)
 		return NULL;
 

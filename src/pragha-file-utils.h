@@ -30,20 +30,20 @@
 
 /* Playlist type formats */
 
-enum playlist_type {
+typedef enum {
 	PL_FORMAT_UNKNOWN,
 	PL_FORMAT_M3U,
 	PL_FORMAT_PLS,
 	PL_FORMAT_ASX,
 	PL_FORMAT_XSPF
-};
+} PraghaPlaylistType;
 
-enum generic_type {
+typedef enum {
 	MEDIA_TYPE_UNKNOWN,
 	MEDIA_TYPE_AUDIO,
 	MEDIA_TYPE_PLAYLIST,
 	MEDIA_TYPE_IMAGE
-};
+} PraghaMediaType;
 
 extern const gchar *mime_mpeg[];
 extern const gchar *mime_wav[];
@@ -61,8 +61,11 @@ extern const gchar *mime_dual[];
 #endif
 
 gboolean is_playable_file(const gchar *file);
-enum generic_type pragha_file_get_generic_type (const gchar *filename);
-PraghaMusicType get_file_type(const gchar *file);
+
+PraghaMediaType    pragha_file_get_media_type                   (const gchar *filename);
+PraghaMusicType    pragha_file_get_music_type                   (const gchar *filename);
+PraghaPlaylistType pragha_pl_parser_guess_format_from_extension (const gchar *filename);
+
 gboolean is_dir_and_accessible(const gchar *dir);
 
 gchar    *get_image_path_from_dir (const gchar *path);
