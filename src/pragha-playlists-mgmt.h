@@ -46,7 +46,7 @@ gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent);
 GIOChannel *create_m3u_playlist(gchar *file);
 gint save_m3u_playlist(GIOChannel *chan, gchar *playlist, gchar *filename, PraghaDatabase *cdbase);
 gchar *playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent);
-void export_playlist (PraghaPlaylist* cplaylist, gint choice);
+void export_playlist (PraghaPlaylist* cplaylist, enum playlist_mgmt choice);
 GList *
 pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
