@@ -156,7 +156,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
-	enum library_style style;
+	PraghaLibraryStyle style;
 	GtkWidget *infobar;
 
 	switch(response_id) {
