@@ -26,12 +26,12 @@ PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)
 {
 	PraghaMusicobject *mobj = NULL;
-	enum file_type type;
+	PraghaMusicType type;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
 	type = get_file_type(file);
-	if (type == -1)
+	if (type == FILE_NONE)
 		return NULL;
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,

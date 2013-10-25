@@ -20,7 +20,6 @@
 #include <glib/gstdio.h>
 
 #include "pragha-file-utils.h"
-#include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
@@ -111,14 +110,14 @@ get_mime_type (const gchar *file)
 	return result;
 }
 
-enum file_type
+PraghaMusicType
 get_file_type(const gchar *file)
 {
-	gint ret = -1;
+	PraghaMusicType ret = FILE_NONE;
 	gchar *result = NULL;
 
 	if (!file)
-		return -1;
+		return ret;
 
 	result = get_mime_type(file);
 
@@ -137,11 +136,9 @@ get_file_type(const gchar *file)
 			ret = FILE_MP4;
 		else if (is_valid_mime(result, mime_ape))
 			ret = FILE_APE;
-
-		else ret = -1;
 	}
-
 	g_free(result);
+
 	return ret;
 }
 

@@ -25,22 +25,8 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include "pragha-musicobject.h"
 #include "pragha-preferences.h"
-
-/* File music types */
-
-enum file_type {
-	FILE_WAV,
-	FILE_MP3,
-	FILE_FLAC,
-	FILE_OGGVORBIS,
-	FILE_ASF,
-	FILE_MP4,
-	FILE_APE,
-	FILE_CDDA,
-	FILE_HTTP,
-	LAST_FILE_TYPE
-};
 
 /* Playlist type formats */
 
@@ -76,7 +62,7 @@ extern const gchar *mime_dual[];
 
 gboolean is_playable_file(const gchar *file);
 enum generic_type pragha_file_get_generic_type (const gchar *filename);
-enum file_type get_file_type(const gchar *file);
+PraghaMusicType get_file_type(const gchar *file);
 gboolean is_dir_and_accessible(const gchar *dir);
 
 gchar    *get_image_path_from_dir (const gchar *path);

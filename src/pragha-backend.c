@@ -20,7 +20,7 @@
 #include <config.h>
 #endif
 
-#include "pragha-file-utils.h"
+#include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
@@ -109,7 +109,7 @@ static void
 pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
 	GObject *source;
-	gint file_type = 0;
+	PraghaMusicType file_type = FILE_NONE;
 
 	PraghaBackendPrivate *priv = backend->priv;
 

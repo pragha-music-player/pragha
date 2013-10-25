@@ -15,6 +15,10 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h> /* TODO: Port this to glib!!. */
 #include <errno.h>
 #include <fcntl.h>
@@ -23,7 +27,7 @@
 #include <glib/gstdio.h>
 
 #include "pragha-preferences.h"
-#include "pragha-file-utils.h"
+#include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-library-pane.h"
 #include "pragha-debug.h"
