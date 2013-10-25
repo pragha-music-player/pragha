@@ -44,18 +44,6 @@ typedef struct {
 
 /* Columns in current playlist view */
 
-#define P_TRACK_NO_STR      "#"
-#define P_TNO_FULL_STR      N_("Track No")
-#define P_TITLE_STR         N_("Title")
-#define P_ARTIST_STR        N_("Artist")
-#define P_ALBUM_STR         N_("Album")
-#define P_GENRE_STR         N_("Genre")
-#define P_BITRATE_STR       N_("Bitrate")
-#define P_YEAR_STR          N_("Year")
-#define P_COMMENT_STR       N_("Comment")
-#define P_LENGTH_STR        N_("Length")
-#define P_FILENAME_STR      N_("Filename")
-
 enum curplaylist_columns {
 	P_MOBJ_PTR,
 	P_QUEUE,
@@ -84,6 +72,11 @@ typedef enum {
 	PLAYLIST_PREV
 } PraghaUpdateAction;
 
+void save_selected_playlist   (GtkAction *action, PraghaPlaylist *cplaylist);
+void save_current_playlist    (GtkAction *action, PraghaPlaylist *cplaylist);
+void export_current_playlist  (GtkAction *action, PraghaPlaylist *cplaylist);
+void export_selected_playlist (GtkAction *action, PraghaPlaylist *cplaylist);
+
 void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
 void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
 void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
@@ -97,18 +90,17 @@ void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist,
 
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 
-PraghaUpdateAction pragha_playlist_get_update_action(PraghaPlaylist* cplaylist);
-void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
+PraghaUpdateAction pragha_playlist_get_update_action      (PraghaPlaylist* cplaylist);
+void               pragha_playlist_report_finished_action (PraghaPlaylist* cplaylist);
+
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
 
 PraghaMusicobject * current_playlist_mobj_at_path(GtkTreePath *path,
 						  PraghaPlaylist *cplaylist);
-GtkTreePath* current_playlist_path_at_mobj(PraghaMusicobject *mobj,
-					   PraghaPlaylist *cplaylist);
 
 void toggle_queue_selected_current_playlist (PraghaPlaylist *cplaylist);
-void pragha_playlist_remove_all (PraghaPlaylist *cplaylist);
+
 void pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, PraghaMusicobject *nmobj);
 void
 pragha_playlist_append_single_song(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj);
@@ -124,47 +116,13 @@ gboolean
 pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 					    const gchar *title,
 					    const gchar *artist);
-void clear_sort_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void save_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void save_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void export_current_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void export_selected_playlist(GtkAction *action, PraghaPlaylist *cplaylist);
-void jump_to_playing_song(PraghaApplication *pragha);
+
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
 PraghaMusicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
 void init_current_playlist_view(PraghaPlaylist *cplaylist);
-void playlist_track_column_change_cb(GtkCheckMenuItem *item,
-				     PraghaPlaylist* cplaylist);
-void playlist_title_column_change_cb(GtkCheckMenuItem *item,
-				     PraghaPlaylist* cplaylist);
-void playlist_artist_column_change_cb(GtkCheckMenuItem *item,
-				      PraghaPlaylist* cplaylist);
-void playlist_album_column_change_cb(GtkCheckMenuItem *item,
-				     PraghaPlaylist* cplaylist);
-void playlist_genre_column_change_cb(GtkCheckMenuItem *item,
-				     PraghaPlaylist* cplaylist);
-void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item,
-				       PraghaPlaylist* cplaylist);
-void playlist_year_column_change_cb(GtkCheckMenuItem *item,
-				    PraghaPlaylist* cplaylist);
-void playlist_length_column_change_cb(GtkCheckMenuItem *item,
-				      PraghaPlaylist* cplaylist);
-void playlist_comment_column_change_cb(GtkCheckMenuItem *item,
-				     PraghaPlaylist* cplaylist);
-void playlist_filename_column_change_cb(GtkCheckMenuItem *item,
-					PraghaPlaylist* cplaylist);
-void clear_sort_current_playlist_cb(GtkMenuItem *item,
-				    PraghaPlaylist *cplaylist);
-gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a,
-		      GtkTreeIter *b, gpointer data);
-gint compare_bitrate(GtkTreeModel *model, GtkTreeIter *a,
-		     GtkTreeIter *b, gpointer data);
-gint compare_year(GtkTreeModel *model, GtkTreeIter *a,
-		  GtkTreeIter *b, gpointer data);
-gint compare_length(GtkTreeModel *model, GtkTreeIter *a,
-		    GtkTreeIter *b, gpointer data);
+
 gboolean pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey *event);
 
 void pragha_playlist_activate_path        (PraghaPlaylist* cplaylist, GtkTreePath *path);
