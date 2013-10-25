@@ -47,6 +47,22 @@ struct _PraghaMusicobjectClass
    GObjectClass parent_class;
 };
 
+/* File music types */
+
+typedef enum {
+	FILE_NONE = -1,
+	FILE_WAV,
+	FILE_MP3,
+	FILE_FLAC,
+	FILE_OGGVORBIS,
+	FILE_ASF,
+	FILE_MP4,
+	FILE_APE,
+	FILE_CDDA,
+	FILE_HTTP,
+	LAST_FILE_TYPE
+} PraghaMusicType;
+
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS
 
 PraghaMusicobject *pragha_musicobject_new (void);
@@ -68,11 +84,11 @@ pragha_musicobject_set_file (PraghaMusicobject *musicobject,
 gboolean
 pragha_musicobject_is_local_file (PraghaMusicobject *musicobject);
 
-gint
+PraghaMusicType
 pragha_musicobject_get_file_type (PraghaMusicobject *musicobject);
 void
 pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
-                                  gint file_type);
+                                  PraghaMusicType file_type);
 
 const gchar *
 pragha_musicobject_get_title (PraghaMusicobject *musicobject);

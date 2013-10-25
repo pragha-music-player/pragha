@@ -31,7 +31,7 @@
 #include <glyr/cache.h>
 #endif
 #include "pragha-simple-async.h"
-#include "pragha-file-utils.h"
+#include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
 #include "pragha.h"
@@ -463,7 +463,7 @@ static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	PraghaPreferences *preferences;
-	gint file_type = 0;
+	PraghaMusicType file_type = FILE_NONE;
 	PraghaBackendState state = 0;
 	GtkAction *action;
 
@@ -489,7 +489,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
-	if(file_type == FILE_HTTP)
+	if(file_type == FILE_NONE || file_type == FILE_HTTP)
 		return;
 
 	preferences = pragha_application_get_preferences (pragha);

@@ -25,7 +25,7 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-file-utils.h"
+#include "pragha-musicobject.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
 #include "pragha-utils.h"
@@ -1229,7 +1229,7 @@ update_related_handler (gpointer data)
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	gint file_type = 0;
+	PraghaMusicType file_type = FILE_NONE;
 	PraghaBackendState state = 0;
 
 	PraghaLastfm *clastfm = user_data;
@@ -1257,7 +1257,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
-	if (file_type == FILE_HTTP)
+	if (file_type == FILE_NONE || file_type == FILE_HTTP)
 		return;
 
 	if (clastfm->status == LASTFM_STATUS_OK)

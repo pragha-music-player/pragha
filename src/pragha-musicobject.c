@@ -16,14 +16,13 @@
 /*************************************************************************/
 
 #include "pragha-musicobject.h"
-#include "pragha-file-utils.h"
 
 G_DEFINE_TYPE(PraghaMusicobject, pragha_musicobject, G_TYPE_OBJECT)
 
 struct _PraghaMusicobjectPrivate
 {
 	gchar *file;
-	enum file_type file_type;
+	PraghaMusicType file_type;
 	gchar *title;
 	gchar *artist;
 	gchar *album;
@@ -175,7 +174,7 @@ pragha_musicobject_is_local_file (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
 
-	enum file_type file_type = musicobject->priv->file_type;
+	PraghaMusicType file_type = musicobject->priv->file_type;
 
 	return file_type != FILE_CDDA && file_type != FILE_HTTP;
 }
@@ -184,7 +183,7 @@ pragha_musicobject_is_local_file (PraghaMusicobject *musicobject)
  * pragha_musicobject_get_file_type:
  *
  */
-gint
+PraghaMusicType
 pragha_musicobject_get_file_type (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), 0);
@@ -197,7 +196,7 @@ pragha_musicobject_get_file_type (PraghaMusicobject *musicobject)
  */
 void
 pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
-                                  gint file_type)
+                                  PraghaMusicType file_type)
 {
 	PraghaMusicobjectPrivate *priv;
 
@@ -674,9 +673,9 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		g_param_spec_int ("file-type",
 		                   "FileType",
 		                   "The File Type",
-		                   0,
+		                   FILE_NONE,
 		                   LAST_FILE_TYPE,
-		                   0,
+		                   FILE_NONE,
 		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**

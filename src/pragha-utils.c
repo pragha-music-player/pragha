@@ -28,7 +28,6 @@
 #endif
 
 #include "pragha-utils.h"
-#include "pragha-file-utils.h"
 
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
