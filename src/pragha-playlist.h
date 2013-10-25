@@ -77,12 +77,12 @@ enum curplaylist_columns {
 
 /* Current playlist movement */
 
-enum playlist_action {
+typedef enum {
 	PLAYLIST_NONE,
 	PLAYLIST_CURR,
 	PLAYLIST_NEXT,
 	PLAYLIST_PREV
-};
+} PraghaUpdateAction;
 
 void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
 void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
@@ -97,7 +97,7 @@ void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist,
 
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 
-enum playlist_action pragha_playlist_get_current_update_action(PraghaPlaylist* cplaylist);
+PraghaUpdateAction pragha_playlist_get_update_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_report_finished_action(PraghaPlaylist* cplaylist);
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
