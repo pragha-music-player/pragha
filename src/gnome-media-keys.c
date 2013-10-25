@@ -18,6 +18,8 @@
 
 //based on code from Totem movie player
 
+//Deprecated. GNOME 3.10+ can use MPRIS for handling media keys
+
 #include "pragha-playback.h"
 #include "gnome-media-keys.h"
 #include "pragha.h"
