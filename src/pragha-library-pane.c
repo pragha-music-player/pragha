@@ -90,6 +90,43 @@ static int signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE(PraghaLibraryPane, pragha_library_pane, GTK_TYPE_VBOX)
 
+/* Node types in library view */
+
+typedef enum {
+	NODE_CATEGORY,
+	NODE_FOLDER,
+	NODE_GENRE,
+	NODE_ARTIST,
+	NODE_ALBUM,
+	NODE_TRACK,
+	NODE_BASENAME,
+	NODE_PLAYLIST,
+	NODE_RADIO
+} LibraryNodeType;
+
+/* Columns in Library view */
+
+enum library_columns {
+	L_PIXBUF,
+	L_NODE_DATA,
+	L_NODE_BOLD,
+	L_NODE_TYPE,
+	L_LOCATION_ID,
+	L_MACH,
+	L_VISIBILE,
+	N_L_COLUMNS
+};
+
+typedef enum {
+	PRAGHA_RESPONSE_SKIP,
+	PRAGHA_RESPONSE_SKIP_ALL,
+	PRAGHA_RESPONSE_DELETE_ALL
+} PraghaDeleteResponseType;
+
+#define PRAGHA_BUTTON_SKIP       _("_Skip")
+#define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
+#define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
+
 /*
  * library_pane_context_menu calbacks
  */
@@ -436,7 +473,7 @@ add_child_node_by_tags (GtkTreeModel *model,
 	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL;
 	GdkPixbuf *node_pixbuf = NULL;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gint node_level = 0, tot_levels = 0;
 	gboolean need_gfree = FALSE;
 
@@ -529,7 +566,7 @@ append_pragha_uri_string_list(GtkTreeIter *r_iter,
                               GtkTreeModel *model)
 {
 	GtkTreeIter t_iter;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gint location_id;
 	gchar *data, *uri = NULL;
 	gboolean valid;
@@ -585,7 +622,7 @@ append_uri_string_list(GtkTreeIter *r_iter,
                        PraghaLibraryPane *clibrary)
 {
 	GtkTreeIter t_iter;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gint location_id;
 	gchar *filename = NULL, *uri = NULL;
 	gboolean valid;
@@ -642,7 +679,7 @@ static void get_location_ids(GtkTreePath *path,
 			     PraghaLibraryPane *clibrary)
 {
 	GtkTreeIter t_iter, r_iter;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gint location_id;
 	gint j = 0;
 
@@ -686,7 +723,7 @@ append_library_row_to_mobj_list(PraghaDatabase *cdbase,
                                 GList *list)
 {
 	GtkTreeIter t_iter, r_iter;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gint location_id;
 	PraghaMusicobject *mobj = NULL;
 	gchar *data = NULL;
@@ -740,7 +777,7 @@ delete_row_from_db(PraghaDatabase *cdbase,
                    GtkTreeModel *model)
 {
 	GtkTreeIter t_iter, r_iter;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	gboolean valid;
 	gint location_id;
 
@@ -862,7 +899,7 @@ library_tree_row_activated_cb (GtkTreeView *library_tree,
 {
 	GtkTreeIter iter;
 	GtkTreeModel *filter_model;
-	enum node_type node_type;
+	LibraryNodeType node_type;
 
 	filter_model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
 	gtk_tree_model_get_iter (filter_model, &iter, path);
@@ -945,7 +982,7 @@ library_tree_button_press_cb (GtkWidget *widget,
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gboolean many_selected = FALSE;
-	enum node_type node_type;
+	LibraryNodeType node_type;
 	gint n_select = 0;
 
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW(library->library_tree));
@@ -1219,7 +1256,7 @@ library_expand_filtered_tree_func(GtkTreeView *view,
                                   gpointer data)
 {
 	GtkTreeIter iter;
-	enum node_type node_type;
+	LibraryNodeType node_type;
 	gboolean node_mach;
 
 	GtkTreeModel *filter_model = data;
@@ -2332,7 +2369,7 @@ static void
 pragha_library_pane_edit_tags_action (GtkAction *action, PraghaLibraryPane *library)
 {
 	GtkWidget *dialog;
-	enum node_type node_type = 0;
+	LibraryNodeType node_type = 0;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreePath *path;

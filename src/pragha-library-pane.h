@@ -41,36 +41,9 @@ typedef struct {
 	void (*library_replace_playlist_and_play) (PraghaLibraryPane *toolbar);
 } PraghaLibraryPaneClass;
 
-/* Node types in library view */
-
-enum node_type {
-	NODE_CATEGORY,
-	NODE_FOLDER,
-	NODE_GENRE,
-	NODE_ARTIST,
-	NODE_ALBUM,
-	NODE_TRACK,
-	NODE_BASENAME,
-	NODE_PLAYLIST,
-	NODE_RADIO
-};
-
-/* Columns in Library view */
-
-enum library_columns {
-	L_PIXBUF,
-	L_NODE_DATA,
-	L_NODE_BOLD,
-	L_NODE_TYPE,
-	L_LOCATION_ID,
-	L_MACH,
-	L_VISIBILE,
-	N_L_COLUMNS
-};
-
 /* Library Views */
 
-enum library_style {
+typedef enum {
 	FOLDERS,
 	ARTIST,
 	ALBUM,
@@ -80,17 +53,7 @@ enum library_style {
 	GENRE_ALBUM,
 	GENRE_ARTIST_ALBUM,
 	LAST_LIBRARY_STYLE
-};
-
-typedef enum {
-	PRAGHA_RESPONSE_SKIP,
-	PRAGHA_RESPONSE_SKIP_ALL,
-	PRAGHA_RESPONSE_DELETE_ALL
-} PraghaDeleteResponseType;
-
-#define PRAGHA_BUTTON_SKIP       _("_Skip")
-#define PRAGHA_BUTTON_SKIP_ALL   _("S_kip All")
-#define PRAGHA_BUTTON_DELETE_ALL _("Delete _All")
+} PraghaLibraryStyle;
 
 /* Functions */
 
