@@ -108,6 +108,19 @@ static int signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 
+/* Columns in current playlist view */
+
+#define P_TRACK_NO_STR      "#"
+#define P_TITLE_STR         N_("Title")
+#define P_ARTIST_STR        N_("Artist")
+#define P_ALBUM_STR         N_("Album")
+#define P_GENRE_STR         N_("Genre")
+#define P_BITRATE_STR       N_("Bitrate")
+#define P_YEAR_STR          N_("Year")
+#define P_COMMENT_STR       N_("Comment")
+#define P_LENGTH_STR        N_("Length")
+#define P_FILENAME_STR      N_("Filename")
+
 /*
  * Prototypes
  */
@@ -132,6 +145,24 @@ static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylis
 static void         pragha_playlist_select_path        (PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 
 static void         pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
+
+static void playlist_track_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_title_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_artist_column_change_cb   (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_album_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_genre_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_bitrate_column_change_cb  (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_year_column_change_cb     (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_length_column_change_cb   (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_comment_column_change_cb  (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_filename_column_change_cb (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+
+static void clear_sort_current_playlist_cb (GtkMenuItem *item, PraghaPlaylist *cplaylist);
+
+static gint compare_track_no (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data);
+static gint compare_bitrate  (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data);
+static gint compare_year     (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data);
+static gint compare_length   (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data);
 
 /*
  * playlist_context_menu calbacks
@@ -1031,7 +1062,8 @@ static void clear_queue_track_refs(PraghaPlaylist *cplaylist)
 
 /* Comparison function for column names */
 
-static gint compare_playlist_column_name(gconstpointer a, gconstpointer b)
+static gint
+compare_playlist_column_name(gconstpointer a, gconstpointer b)
 {
 	const gchar *e1 = a;
 	const gchar *e2 = b;
@@ -3817,7 +3849,8 @@ playlist_column_set_visible(PraghaPlaylist* cplaylist, gint column, gboolean vis
 
 /* Callback for adding/deleting track_no column */
 
-void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3827,7 +3860,8 @@ void playlist_track_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 
 /* Callback for adding/deleting title column */
 
-void playlist_title_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_title_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3837,7 +3871,8 @@ void playlist_title_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 
 /* Callback for adding/deleting artist column */
 
-void playlist_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3847,7 +3882,8 @@ void playlist_artist_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cp
 
 /* Callback for adding/deleting album column */
 
-void playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3857,7 +3893,8 @@ void playlist_album_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 
 /* Callback for adding/deleting genre column */
 
-void playlist_genre_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_genre_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3867,7 +3904,8 @@ void playlist_genre_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpl
 
 /* Callback for adding/deleting bitrate column */
 
-void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3877,7 +3915,8 @@ void playlist_bitrate_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* c
 
 /* Callback for adding/deleting year column */
 
-void playlist_year_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_year_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3887,7 +3926,8 @@ void playlist_year_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cpla
 
 /* Callback for adding/deleting comment column */
 
-void playlist_comment_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_comment_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3897,7 +3937,8 @@ void playlist_comment_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* c
 
 /* Callback for adding/deleting length column */
 
-void playlist_length_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_length_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3907,7 +3948,8 @@ void playlist_length_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cp
 
 /* Callback for adding/deleting filename column */
 
-void playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+static void
+playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
 {
 	gboolean state;
 	state = gtk_check_menu_item_get_active(item);
@@ -3917,7 +3959,8 @@ void playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* 
 
 /* Clear sort in the current playlist */
 
-void clear_sort_current_playlist_cb(GtkMenuItem *item, PraghaPlaylist *cplaylist)
+static void
+clear_sort_current_playlist_cb(GtkMenuItem *item, PraghaPlaylist *cplaylist)
 {
 	GtkTreeModel *model = cplaylist->model;
 
@@ -3928,7 +3971,8 @@ void clear_sort_current_playlist_cb(GtkMenuItem *item, PraghaPlaylist *cplaylist
 
 /* Comparison function for track numbers */
 
-gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
+static gint
+compare_track_no(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	PraghaMusicobject *mobj_a = NULL, *mobj_b = NULL;
 
@@ -3947,7 +3991,8 @@ gint compare_track_no(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpoin
 
 /* Comparison function for bitrates */
 
-gint compare_bitrate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
+static gint
+compare_bitrate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	PraghaMusicobject *mobj_a = NULL, *mobj_b = NULL;
 
@@ -3966,7 +4011,8 @@ gint compare_bitrate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpoint
 
 /* Comparison function for years */
 
-gint compare_year(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
+static gint
+compare_year(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	PraghaMusicobject *mobj_a = NULL, *mobj_b = NULL;
 
@@ -3985,7 +4031,8 @@ gint compare_year(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer 
 
 /* Comparison function for lengths */
 
-gint compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
+static gint
+compare_length(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	PraghaMusicobject *mobj_a = NULL, *mobj_b = NULL;
 
