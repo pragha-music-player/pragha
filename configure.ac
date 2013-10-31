@@ -41,6 +41,26 @@ AC_ARG_WITH([gtk3],
             [CFLAGS="$CFLAGS -Wno-deprecated-declarations"],
             [with_gtk3=no])
 
+dnl gstreamer version
+AC_ARG_WITH([gstreamer],
+            [AS_HELP_STRING([--with-gstreamer=0.10|1.0],[which gstreamer version to compile against (default: 0.10)])],
+            [case "$with_gstreamer" in
+                0.10|1.0) ;;
+                *) AC_MSG_ERROR([invalid gstreamer version specified]) ;;
+             esac],
+            [with_gstreamer=0.10]
+)
+
+case "$with_gstreamer" in
+  0.10) GSTREAMER_API_VERSION=0.10
+       GSTREAMER_REQUIRED=0.10
+       ;;
+  1.0) GSTREAMER_API_VERSION=1.0
+       GSTREAMER_REQUIRED=0.11.90
+       ;;
+esac
+AC_DEFINE_UNQUOTED(GSTREAMER_API_VERSION, $GSTREAMER_API_VERSION, [Define the GStreamer+ API version])
+
 AC_SUBST(CFLAGS)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -58,11 +78,9 @@ LT_INIT([disable-static])
 dnl Check for i18n support
 XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
 
-GSTREAMER_REQUIRED=0.11.90
-
 dnl Check for required packages
-XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
+XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED])
+XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.28])
 AS_IF([test "x$with_gtk3" != xno],
 	[XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.0.0])],
@@ -85,10 +103,19 @@ XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
                        [taglib],
                        [taglib library to APE], [yes])
 
+dnl Check gstreamer-interfaces
+dnl need for gstreamer 0.10
+GSTREAMER_INTERFACES_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_INTERFACES],
+                       [gstreamer-interfaces-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED],
+                       [gstreamer-interfaces],
+                       [gstreamer-interfaces], [yes])
+
 dnl Check gstreamer-audio
+dnl need for gstreamer 1.0
 GSTREAMER_AUDIO_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
-                       [gstreamer-audio-1.0], [$GSTREAMER_REQUIRED],
+                       [gstreamer-audio-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED],
                        [gstreamer-audio],
                        [gstreamer-audio], [yes])
 
@@ -150,7 +177,9 @@ echo "  Gtk version used...: $GTK_VERSION"
 echo "  Prefix.............: ${prefix}"
 echo "  Debug enabled......: $debug"
 echo ""
-echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"
+AS_IF([test $GSTREAMER_API_VERSION = 1.0],
+      [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
+      [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
 AS_IF([test "x$with_gtk3" != xno],
 	[echo "  Use multimedia key without gnome-media-keys.......(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"],
 	[echo "  Use multimedia key without gnome-media-keys..(Need keybinder >= 0.2.0).: $LIBKEYBINDER_FOUND"])
