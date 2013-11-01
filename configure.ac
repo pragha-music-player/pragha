@@ -43,12 +43,12 @@ AC_ARG_WITH([gtk3],
 
 dnl gstreamer version
 AC_ARG_WITH([gstreamer],
-            [AS_HELP_STRING([--with-gstreamer=0.10|1.0],[which gstreamer version to compile against (default: 0.10)])],
+            [AS_HELP_STRING([--with-gstreamer=0.10|1.0],[which gstreamer version to compile against (default: 1.0)])],
             [case "$with_gstreamer" in
                 0.10|1.0) ;;
                 *) AC_MSG_ERROR([invalid gstreamer version specified]) ;;
              esac],
-            [with_gstreamer=0.10]
+            [with_gstreamer=1.0]
 )
 
 case "$with_gstreamer" in

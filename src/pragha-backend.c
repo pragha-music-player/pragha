@@ -499,6 +499,7 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 	g_signal_emit (backend, signals[SIGNAL_BUFFERING], 0, percent);
 }
 
+#if GST_CHECK_VERSION (1, 0, 0)
 static void
 save_embedded_art (PraghaBackend *backend, const GstTagList *taglist)
 {
@@ -538,6 +539,7 @@ out:
 	if (sample)
 		gst_sample_unref (sample);
 }
+#endif
 
 static void
 pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
@@ -550,8 +552,9 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
 	gst_message_parse_tag(message, &tag_list);
-
+#if GST_CHECK_VERSION (1, 0, 0)
 	save_embedded_art (backend, tag_list);
+#endif
 
 	if (pragha_musicobject_get_file_type (priv->mobj) != FILE_HTTP)
 		goto out;
