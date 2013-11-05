@@ -1,5 +1,5 @@
 src/info-bar-import-music.c
-src/init.c
+src/pragha-cmdline.c
 src/pragha-equalizer-dialog.c
 src/pragha-filter-dialog.c
 src/pragha-glyr.c
@@ -12,10 +12,12 @@ src/pragha-playlist.c
 src/pragha-playlists-mgmt.c
 src/pragha-preferences-dialog.c
 src/pragha-scanner.c
+src/pragha-search-entry.c
 src/pragha-statusicon.c
 src/pragha-tags-dialog.c
 src/pragha-tags-mgmt.c
 src/pragha-toolbar.c
 src/pragha-utils.c
 src/pragha-window.c
+src/pragha.c
 data/pragha.desktop.in

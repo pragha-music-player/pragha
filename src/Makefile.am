@@ -39,6 +39,7 @@ pragha_SOURCES = \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \
+		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
 		pragha-mpris.c \
@@ -69,6 +70,7 @@ pragha_SOURCES = \
 		pragha-session.c \
 		pragha-session.h \
 		pragha-sidebar.c \
+		pragha-sidebar.h \
 		pragha-simple-async.c \
 		pragha-simple-async.h \
 		pragha-simple-widgets.c \
