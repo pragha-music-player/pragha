@@ -165,6 +165,7 @@ XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
 
 AC_OUTPUT([
 Makefile
+data/Makefile
 po/Makefile.in
 src/Makefile
 ])
