@@ -741,6 +741,7 @@ gint main(gint argc, gchar *argv[])
 
 	/* Force unicode to taglib. */
 	taglib_set_strings_unicode(TRUE);
+	taglib_set_string_management_enabled(FALSE);
 
 	/* Setup application name and pulseaudio role */
 	g_set_application_name(_("Pragha Music Player"));
