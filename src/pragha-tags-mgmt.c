@@ -43,6 +43,7 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	TagLib_File *tfile = NULL;
 	TagLib_Tag *tag;
 	const TagLib_AudioProperties *audio_prop;
+	gchar *title = NULL, *artist = NULL, *album = NULL, *genre = NULL, *comment = NULL;
 
 	/* workaround for crash in taglib
 	   https://github.com/taglib/taglib/issues/78 */
@@ -73,12 +74,18 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		goto exit;
 	}
 
+	title = taglib_tag_title(tag);
+	artist = taglib_tag_artist(tag);
+	album = taglib_tag_album(tag);
+	genre = taglib_tag_genre(tag);
+	comment = taglib_tag_comment(tag);
+
 	g_object_set (mobj,
-	              "title", taglib_tag_title(tag),
-	              "artist", taglib_tag_artist(tag),
-	              "album", taglib_tag_album(tag),
-	              "genre", taglib_tag_genre(tag),
-	              "comment", taglib_tag_comment(tag),
+	              "title", title,
+	              "artist", artist,
+	              "album", album,
+	              "genre", genre,
+	              "comment", comment,
 	              "year", taglib_tag_year(tag),
 	              "track-no", taglib_tag_track(tag),
 	              "length", taglib_audioproperties_length(audio_prop),
@@ -87,8 +94,13 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "samplerate", taglib_audioproperties_samplerate(audio_prop),
 	              NULL);
 
+	g_free(title);
+	g_free(artist);
+	g_free(album);
+	g_free(genre);
+	g_free(comment);
+
 exit:
-	taglib_tag_free_strings();
 	taglib_file_free(tfile);
 
 	return ret;
