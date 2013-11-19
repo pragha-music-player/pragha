@@ -21,6 +21,7 @@
 #include <glib.h>
 
 typedef struct _AsyncSimple AsyncSimple;
+typedef struct _PraghaAsyncManager PraghaAsyncManager;
 
 #if GLIB_CHECK_VERSION (2, 32, 0)
 #define PRAGHA_MUTEX(mtx) GMutex mtx
@@ -41,5 +42,14 @@ gboolean pragha_async_set_idle_message (gpointer user_data);
 void     pragha_async_launch           (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
 
 GThread *pragha_async_launch_full      (GThreadFunc worker_func, GSourceFunc finish_func, gpointer userdata);
+
+/*
+ * A simple Async manager with queue
+ */
+
+void                pragha_async_manager_add_task (PraghaAsyncManager *async_manager, GThreadFunc worker_func, GSourceFunc finish_func, gpointer user_data);
+void                pragha_async_manager_free     (PraghaAsyncManager *async_manager);
+
+PraghaAsyncManager *pragha_async_manager_new      (void);
 
 #endif /* PRAGHA_SIMPLE_ASYNC_H */

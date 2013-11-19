@@ -39,21 +39,24 @@
 #ifdef HAVE_LIBGLYR
 
 struct _PraghaGlyr {
-	PraghaApplication *pragha;
-	GlyrDatabase *cache_db;
-	GtkActionGroup *action_group_main_menu;
-	guint merge_id_main_menu;
-	GtkActionGroup *action_group_playlist;
-	guint merge_id_playlist;
+	PraghaApplication  *pragha;
+
+	GlyrDatabase       *cache_db;
+
+	PraghaAsyncManager *async_manager;
+
+	GtkActionGroup     *action_group_main_menu;
+	guint               merge_id_main_menu;
+	GtkActionGroup     *action_group_playlist;
+	guint               merge_id_playlist;
 };
 
 typedef struct
 {
-	PraghaApplication	*pragha;
-	GlyrQuery	query;
-	GlyrMemCache	*head;
-}
-glyr_struct;
+	PraghaApplication *pragha;
+	GlyrQuery          query;
+	GlyrMemCache      *head;
+} glyr_struct;
 
 static void get_lyric_action (GtkAction *action, PraghaGlyr *glyr);
 static void get_artist_info_action (GtkAction *action, PraghaGlyr *glyr);
@@ -322,7 +325,11 @@ configure_and_launch_get_text_info_dialog(GLYR_GET_TYPE type, const gchar *artis
 	glyr_info->pragha = pragha;
 
 	set_watch_cursor (pragha_application_get_window(pragha));
-	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
+
+	pragha_async_manager_add_task (glyr->async_manager,
+	                               get_related_info_idle_func,
+	                               glyr_finished_thread_update,
+	                               glyr_info);
 }
 
 static void
@@ -416,6 +423,7 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaGlyr *glyr)
 static void
 related_get_album_art_handler (PraghaApplication *pragha)
 {
+	PraghaGlyr *glyr;
 	PraghaBackend *backend;
 	PraghaArtCache *art_cache;
 	glyr_struct *glyr_info;
@@ -453,7 +461,11 @@ related_get_album_art_handler (PraghaApplication *pragha)
 
 	glyr_info->pragha = pragha;
 
-	pragha_async_launch(get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
+	glyr = pragha_application_get_glyr (pragha);
+	pragha_async_manager_add_task (glyr->async_manager,
+	                               get_related_info_idle_func,
+	                               glyr_finished_thread_update,
+	                               glyr_info);
 
 exists:
 	g_free(album_art_path);
@@ -545,6 +557,11 @@ pragha_glyr_free (PraghaGlyr *glyr)
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = glyr->pragha;
 
+	if (glyr->async_manager) {
+		pragha_async_manager_free (glyr->async_manager);
+		glyr->async_manager = NULL;
+	}
+
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha),
 	                                      backend_changed_state_cb, glyr);
 	glyr_db_destroy (glyr->cache_db);
@@ -578,6 +595,7 @@ pragha_glyr_new (PraghaApplication *pragha)
 
 	glyr->pragha = pragha;
 	glyr->cache_db = glyr_db_init (cache_folder);
+	glyr->async_manager = pragha_async_manager_new ();
 
 	g_free (cache_folder);
 
