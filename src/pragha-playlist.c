@@ -373,6 +373,7 @@ pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 PraghaMusicobject *
 pragha_playlist_get_any_track (PraghaPlaylist *playlist)
 {
+	PraghaMusicobject *mobj = NULL;
 	GtkTreePath *path = NULL;
 	gboolean shuffle;
 
@@ -399,7 +400,7 @@ pragha_playlist_get_any_track (PraghaPlaylist *playlist)
 	playlist->update_action = PLAYLIST_CURR;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+	mobj = current_playlist_mobj_at_path (path, playlist);
 
 	gtk_tree_path_free (path);
 
@@ -459,6 +460,34 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 	gtk_tree_path_free (path);
 
 	return mobj;
+}
+
+void
+pragha_playlist_go_prev_track (PraghaPlaylist *playlist)
+{
+	PraghaMusicobject *mobj = NULL;
+	mobj = pragha_playlist_get_prev_track (playlist);
+
+	if (mobj)
+		g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
+}
+
+void
+pragha_playlist_go_any_track (PraghaPlaylist *playlist)
+{
+	PraghaMusicobject *mobj = NULL;
+	mobj = pragha_playlist_get_any_track (playlist);
+
+	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
+}
+
+void
+pragha_playlist_go_next_track (PraghaPlaylist *playlist)
+{
+	PraghaMusicobject *mobj = NULL;
+	mobj = pragha_playlist_get_next_track (playlist);
+
+	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
 }
 
 /* Update playback state pixbuf */
@@ -4336,27 +4365,32 @@ pragha_playlist_class_init (PraghaPlaylistClass *klass)
 	/*
 	 * Signals:
 	 */
-	signals[PLAYLIST_SET_TRACK] = g_signal_new ("playlist-set-track",
-	                                            G_TYPE_FROM_CLASS (gobject_class),
-	                                            G_SIGNAL_RUN_LAST,
-	                                            G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_set_track),
-	                                            NULL, NULL,
-	                                            g_cclosure_marshal_VOID__POINTER,
-	                                            G_TYPE_NONE, 1, G_TYPE_POINTER);
-	signals[PLAYLIST_CHANGE_TAGS] = g_signal_new ("playlist-change-tags",
-	                                              G_TYPE_FROM_CLASS (gobject_class),
-	                                              G_SIGNAL_RUN_LAST,
-	                                              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_change_tags),
-	                                              NULL, NULL,
-	                                              g_cclosure_marshal_VOID__UINT_POINTER,
-	                                              G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
-	signals[PLAYLIST_CHANGED] = g_signal_new ("playlist-changed",
-	                                          G_TYPE_FROM_CLASS (gobject_class),
-	                                          G_SIGNAL_RUN_LAST,
-	                                          G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_changed),
-	                                          NULL, NULL,
-	                                          g_cclosure_marshal_VOID__VOID,
-	                                          G_TYPE_NONE, 0);
+	signals[PLAYLIST_SET_TRACK] =
+		g_signal_new ("playlist-set-track",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_set_track),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+	signals[PLAYLIST_CHANGE_TAGS] =
+		g_signal_new ("playlist-change-tags",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_change_tags),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__UINT_POINTER,
+		              G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_POINTER);
+
+	signals[PLAYLIST_CHANGED] =
+		g_signal_new ("playlist-changed",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPlaylistClass, playlist_changed),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 PraghaPlaylist *

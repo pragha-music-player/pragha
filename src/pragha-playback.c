@@ -33,26 +33,17 @@ void pragha_playback_prev_track(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Want to play a song previously played");
 
-	/* Get the next (prev) track to be played */
-
-	playlist = pragha_application_get_playlist (pragha);
-
-	mobj = pragha_playlist_get_prev_track (playlist);
-
-	if (!mobj)
-		return;
+	/* Are we playing right now ? */
 
 	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
 
-	/* Stop currently playing track */
-	pragha_backend_stop (backend);
-
-	pragha_backend_set_musicobject (backend, mobj);
-	pragha_backend_play (backend);
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_go_prev_track (playlist);
 }
 
 /* Start playback of a new track, or resume playback of current track */
@@ -61,7 +52,6 @@ void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Play pause or resume a track based on the current state");
 
@@ -86,13 +76,7 @@ void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 		break;
 	case ST_STOPPED:
 		playlist = pragha_application_get_playlist (pragha);
-
-		mobj = pragha_playlist_get_any_track (playlist);
-		if (!mobj)
-			return;
-
-		pragha_backend_set_musicobject (backend, mobj);
-		pragha_backend_play (backend);
+		pragha_playlist_go_any_track (playlist);
 		break;
 	default:
 		break;
@@ -108,7 +92,6 @@ void pragha_playback_stop(PraghaApplication *pragha)
 	CDEBUG(DBG_BACKEND, "Stopping the current song");
 
 	backend = pragha_application_get_backend (pragha);
-
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
@@ -119,26 +102,12 @@ void pragha_playback_stop(PraghaApplication *pragha)
 
 void pragha_advance_playback (PraghaApplication *pragha)
 {
-	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
 
 	CDEBUG(DBG_BACKEND, "Advancing to next track");
 
-	backend = pragha_application_get_backend (pragha);
-
-	/* Stop to set ready and clear all info */
-
-	pragha_backend_stop (backend);
-
 	playlist = pragha_application_get_playlist (pragha);
-	mobj = pragha_playlist_get_next_track (playlist);
-
-	if (!mobj)
-		return;
-
-	pragha_backend_set_musicobject (backend, mobj);
-	pragha_backend_play (backend);
+	pragha_playlist_go_next_track (playlist);
 }
 
 /* Play next track in current_playlist */
@@ -156,7 +125,7 @@ void pragha_playback_next_track(PraghaApplication *pragha)
 		return;
 
 	/* Play a new song */
-	pragha_advance_playback(pragha);
+	pragha_advance_playback (pragha);
 }
 
 /******************************************/
@@ -353,6 +322,9 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 
 	/* Stop to set ready and clear all info */
 	pragha_backend_stop (backend);
+
+	if (!mobj)
+		return;
 
 	pragha_backend_set_musicobject (backend, mobj);
 	pragha_backend_play (backend);
