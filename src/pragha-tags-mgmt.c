@@ -26,6 +26,8 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <stdlib.h>
+
 #include <tag_c.h>
 
 #include "pragha-tags-mgmt.h"
@@ -94,11 +96,11 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	              "samplerate", taglib_audioproperties_samplerate(audio_prop),
 	              NULL);
 
-	g_free(title);
-	g_free(artist);
-	g_free(album);
-	g_free(genre);
-	g_free(comment);
+	free(title);
+	free(artist);
+	free(album);
+	free(genre);
+	free(comment);
 
 exit:
 	taglib_file_free(tfile);
