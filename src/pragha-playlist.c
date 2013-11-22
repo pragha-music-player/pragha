@@ -145,6 +145,7 @@ static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylis
 static void         pragha_playlist_select_path        (PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
 
 static void         pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
+static void         pragha_playlist_update_track_state    (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state);
 
 static void playlist_track_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 static void playlist_title_column_change_cb    (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
@@ -498,8 +499,14 @@ pragha_playlist_go_next_track (PraghaPlaylist *playlist)
 void
 pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
 {
+	GtkTreePath *path;
 	GtkTreeIter iter;
 	gboolean ret;
+
+	/* Clear playback icon. */
+	path = get_current_track (playlist);
+	if (path)
+		pragha_playlist_update_track_state (playlist, path, ST_STOPPED);
 
 	/* Mark all as playable */
 	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
@@ -515,12 +522,17 @@ pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
 		playlist->rand_track_refs = NULL;
 	}
 	playlist->curr_rand_ref = NULL;
+
+	if (playlist->curr_seq_ref) {
+		gtk_tree_row_reference_free (playlist->curr_seq_ref);
+		playlist->curr_seq_ref = NULL;
+	}
 }
 
 /* Update playback state pixbuf */
 
-void
-pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, gint state)
+static void
+pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state)
 {
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *pixbuf = NULL;
@@ -1238,21 +1250,6 @@ void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint pat
 /*************************/
 /* General playlist mgmt */
 /*************************/
-
-/* Update the state on 'Next', 'Prev' or selecting a new track
-   from current playlist */
-
-PraghaUpdateAction
-pragha_playlist_get_update_action(PraghaPlaylist *playlist)
-{
-	return playlist->update_action;
-}
-
-void
-pragha_playlist_report_finished_action(PraghaPlaylist* playlist)
-{
-	playlist->update_action = PLAYLIST_NONE;
-}
 
 void
 pragha_playlist_update_current_playlist_state (PraghaPlaylist *playlist, GtkTreePath *path)
