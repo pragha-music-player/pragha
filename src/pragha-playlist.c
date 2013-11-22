@@ -335,6 +335,7 @@ pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
 PraghaMusicobject *
 pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 {
+	PraghaMusicobject *mobj = NULL;
 	GtkTreePath *path = NULL;
 	gboolean repeat, shuffle, seq_first = FALSE;
 
@@ -363,7 +364,7 @@ pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 	playlist->update_action = PLAYLIST_PREV;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+	mobj = current_playlist_mobj_at_path (path, playlist);
 
 	gtk_tree_path_free (path);
 
@@ -410,6 +411,7 @@ pragha_playlist_get_any_track (PraghaPlaylist *playlist)
 PraghaMusicobject *
 pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 {
+	PraghaMusicobject *mobj = NULL;
 	GtkTreePath *path = NULL;
 	gboolean repeat, shuffle, rand_unplayed = FALSE, seq_last = FALSE;
 	GList *last;
@@ -455,7 +457,7 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 	playlist->update_action = PLAYLIST_NEXT;
 	pragha_playlist_update_current_playlist_state (playlist, path);
 
-	PraghaMusicobject *mobj = current_playlist_mobj_at_path (path, playlist);
+	mobj = current_playlist_mobj_at_path (path, playlist);
 
 	gtk_tree_path_free (path);
 
@@ -488,6 +490,31 @@ pragha_playlist_go_next_track (PraghaPlaylist *playlist)
 	mobj = pragha_playlist_get_next_track (playlist);
 
 	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
+
+	if (!mobj)
+		pragha_playlist_stopped_playback (playlist);
+}
+
+void
+pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
+{
+	GtkTreeIter iter;
+	gboolean ret;
+
+	/* Mark all as playable */
+	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
+	while(ret) {
+		gtk_list_store_set(GTK_LIST_STORE(playlist->model), &iter, P_PLAYED, FALSE, -1);
+		ret = gtk_tree_model_iter_next(playlist->model, &iter);
+	}
+	playlist->unplayed_tracks = playlist->no_tracks;
+
+	/* Remove old references */
+	if (playlist->rand_track_refs) {
+		g_list_free_full(playlist->rand_track_refs, (GDestroyNotify) gtk_tree_row_reference_free);
+		playlist->rand_track_refs = NULL;
+	}
+	playlist->curr_rand_ref = NULL;
 }
 
 /* Update playback state pixbuf */
