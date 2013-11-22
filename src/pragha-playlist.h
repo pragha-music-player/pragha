@@ -84,6 +84,7 @@ void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
 void pragha_playlist_go_prev_track    (PraghaPlaylist *playlist);
 void pragha_playlist_go_any_track     (PraghaPlaylist *playlist);
 void pragha_playlist_go_next_track    (PraghaPlaylist *playlist);
+void pragha_playlist_stopped_playback (PraghaPlaylist *playlist);
 
 void               pragha_playlist_show_current_track (PraghaPlaylist *playlist);
 void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist, GError *error);

@@ -88,6 +88,7 @@ void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 void pragha_playback_stop(PraghaApplication *pragha)
 {
 	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
 
 	CDEBUG(DBG_BACKEND, "Stopping the current song");
 
@@ -96,6 +97,9 @@ void pragha_playback_stop(PraghaApplication *pragha)
 		return;
 
 	pragha_backend_stop (backend);
+
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_stopped_playback (playlist);
 }
 
 /* Play next song when terminate a song. */
