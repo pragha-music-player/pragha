@@ -91,9 +91,6 @@ void               pragha_playlist_set_track_error    (PraghaPlaylist *playlist,
 
 void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint path_number, gboolean center);
 
-PraghaUpdateAction pragha_playlist_get_update_action      (PraghaPlaylist* cplaylist);
-void               pragha_playlist_report_finished_action (PraghaPlaylist* cplaylist);
-
 void pragha_playlist_update_current_playlist_state(PraghaPlaylist* cplaylist, GtkTreePath *path);
 void update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist);
 

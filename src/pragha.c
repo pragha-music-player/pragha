@@ -514,8 +514,6 @@ pragha_application_startup (GApplication *application)
 
 	pragha->backend = pragha_backend_new (pragha);
 
-	g_signal_connect (pragha->backend, "notify::state",
-	                  G_CALLBACK(pragha_backend_notificate_new_state), pragha);
 	g_signal_connect (pragha->backend, "finished",
 	                  G_CALLBACK(pragha_backend_finished_song), pragha);
 	g_signal_connect (pragha->backend, "tags-changed",
