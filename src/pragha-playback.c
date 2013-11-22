@@ -137,53 +137,41 @@ void pragha_playback_next_track(PraghaApplication *pragha)
 /******************************************/
 
 void
-pragha_backend_notificate_new_state (PraghaBackend *backend, GParamSpec *pspec, PraghaApplication *pragha)
+pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, PraghaApplication *pragha)
 {
-	PraghaPlaylist *playlist;
+	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaNotify *notify;
 	PraghaMpris2 *mpris2;
-	PraghaMusicobject *mobj = NULL;
 
-	PraghaBackendState state = pragha_backend_get_state (backend);
+	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
 
-	switch (state) {
-		case ST_PLAYING:
-			/* New song?. */
-			playlist = pragha_application_get_playlist (pragha);
-			if(pragha_playlist_get_update_action (playlist) != PLAYLIST_NONE) {
-				mobj = pragha_backend_get_musicobject (backend);
+	/* Stop to set ready and clear all info */
+	backend = pragha_application_get_backend (pragha);
+	pragha_backend_stop (backend);
 
-				CDEBUG(DBG_BACKEND, "Definitely play a new song: %s",
-				                     pragha_musicobject_get_file(mobj));
+	if (!mobj)
+		return;
 
-				/* Update current song info */
-				toolbar = pragha_application_get_toolbar (pragha);
-				pragha_toolbar_set_title (toolbar, mobj);
-				pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
+	/* Play new song. */
+	pragha_backend_set_musicobject (backend, mobj);
+	pragha_backend_play (backend);
 
-				/* Update album art */
-				pragha_playback_update_current_album_art (pragha, mobj);
+	/* Update current song info */
+	toolbar = pragha_application_get_toolbar (pragha);
+	pragha_toolbar_set_title (toolbar, mobj);
+	pragha_toolbar_update_progress (toolbar, pragha_musicobject_get_length(mobj), 0);
 
-				/* Show osd, and inform new album art. */
-				notify = pragha_application_get_notify (pragha);
-				if (notify)
-					pragha_notify_show_osd (notify);
+	/* Update album art */
+	pragha_playback_update_current_album_art (pragha, mobj);
 
-				mpris2 = pragha_application_get_mpris2 (pragha);
-				pragha_mpris_update_metadata_changed (mpris2);
+	/* Show osd, and inform new album art. */
+	notify = pragha_application_get_notify (pragha);
+	if (notify)
+		pragha_notify_show_osd (notify);
 
-				pragha_playlist_report_finished_action (playlist);
-			}
-			break;
-		case ST_PAUSED:
-			/* Nothing here. */
-			break;
-		case ST_STOPPED:
-			break;
-		default:
-			break;
-	}
+	mpris2 = pragha_application_get_mpris2 (pragha);
+	pragha_mpris_update_metadata_changed (mpris2);
 }
 
 void
@@ -313,23 +301,4 @@ pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplicat
 		seek = length;
 
 	pragha_backend_seek (backend, seek);
-}
-
-void
-pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject *mobj, PraghaApplication *pragha)
-{
-	PraghaBackend *backend;
-
-	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
-
-	backend = pragha_application_get_backend (pragha);
-
-	/* Stop to set ready and clear all info */
-	pragha_backend_stop (backend);
-
-	if (!mobj)
-		return;
-
-	pragha_backend_set_musicobject (backend, mobj);
-	pragha_backend_play (backend);
 }
