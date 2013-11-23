@@ -35,17 +35,16 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
 
+#define N_OBJECTS 4
+
 struct _PraghaMpris2 {
 	PraghaApplication *pragha;
 
 	guint              owner_id;
 	GDBusNodeInfo     *introspection_data;
 	GDBusConnection   *dbus_connection;
-	GQuark             interface_quarks[4];
-	guint              registration_object_id0;
-	guint              registration_object_id1;
-	guint              registration_object_id2;
-	guint              registration_object_id3;
+	GQuark             interface_quarks[N_OBJECTS];
+	guint              registration_object_ids[N_OBJECTS];
 
 	gboolean           saved_playbackstatus;
 	gboolean           saved_shuffle;
@@ -1118,52 +1117,22 @@ on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
                  gpointer         user_data)
 {
+	gint i;
 	guint registration_id;
 	PraghaMpris2 *mpris2 = user_data;
 
-	mpris2->interface_quarks[0] = g_quark_from_string(mpris2->introspection_data->interfaces[0]->name);
-	registration_id = g_dbus_connection_register_object (connection,
-	                                                     MPRIS_PATH,
-	                                                     mpris2->introspection_data->interfaces[0],
-	                                                     &interface_vtable,
-	                                                     mpris2,  /* user_data */
-	                                                     NULL,  /* user_data_free_func */
-	                                                     NULL); /* GError** */
-	mpris2->registration_object_id0 = registration_id;
-	g_assert (registration_id > 0);
-
-	mpris2->interface_quarks[1] = g_quark_from_string(mpris2->introspection_data->interfaces[1]->name);
-	registration_id = g_dbus_connection_register_object (connection,
-	                                                     MPRIS_PATH,
-	                                                     mpris2->introspection_data->interfaces[1],
-	                                                     &interface_vtable,
-	                                                     mpris2,  /* user_data */
-	                                                     NULL,  /* user_data_free_func */
-	                                                     NULL); /* GError** */
-	mpris2->registration_object_id1 = registration_id;
-	g_assert (registration_id > 0);
-
-	mpris2->interface_quarks[2] = g_quark_from_string(mpris2->introspection_data->interfaces[2]->name);
-	registration_id = g_dbus_connection_register_object (connection,
-	                                                     MPRIS_PATH,
-	                                                     mpris2->introspection_data->interfaces[2],
-	                                                     &interface_vtable,
-	                                                     mpris2,  /* user_data */
-	                                                     NULL,  /* user_data_free_func */
-	                                                     NULL); /* GError** */
-	mpris2->registration_object_id2 = registration_id;
-	g_assert (registration_id > 0);
-
-	mpris2->interface_quarks[3] = g_quark_from_string(mpris2->introspection_data->interfaces[3]->name);
-	registration_id = g_dbus_connection_register_object (connection,
-	                                                     MPRIS_PATH,
-	                                                     mpris2->introspection_data->interfaces[3],
-	                                                     &interface_vtable,
-	                                                     mpris2,  /* user_data */
-	                                                     NULL,  /* user_data_free_func */
-	                                                     NULL); /* GError** */
-	mpris2->registration_object_id3 = registration_id;
-	g_assert (registration_id > 0);
+	for (i = 0; i < N_OBJECTS; i++) {
+		mpris2->interface_quarks[i] = g_quark_from_string(mpris2->introspection_data->interfaces[i]->name);
+		registration_id = g_dbus_connection_register_object (connection,
+			                                             MPRIS_PATH,
+			                                             mpris2->introspection_data->interfaces[i],
+			                                             &interface_vtable,
+			                                             mpris2,  /* user_data */
+			                                             NULL,  /* user_data_free_func */
+			                                             NULL); /* GError** */
+		mpris2->registration_object_ids[i] = registration_id;
+		g_assert (registration_id > 0);
+	}
 
 	mpris2->dbus_connection = connection;
 	g_object_ref(G_OBJECT(mpris2->dbus_connection));
@@ -1474,6 +1443,7 @@ gint pragha_mpris_init (PraghaMpris2 *mpris2, PraghaApplication *pragha)
 
 void pragha_mpris_close (PraghaMpris2 *mpris2)
 {
+	gint i;
 	PraghaBackend *backend;
 	PraghaApplication *pragha = mpris2->pragha;
 
@@ -1482,14 +1452,10 @@ void pragha_mpris_close (PraghaMpris2 *mpris2)
 	if(NULL == mpris2->dbus_connection)
 		return;
 
-	g_dbus_connection_unregister_object (mpris2->dbus_connection,
-	                                     mpris2->registration_object_id0);
-	g_dbus_connection_unregister_object (mpris2->dbus_connection,
-	                                     mpris2->registration_object_id1);
-	g_dbus_connection_unregister_object (mpris2->dbus_connection,
-	                                     mpris2->registration_object_id2);
-	g_dbus_connection_unregister_object (mpris2->dbus_connection,
-	                                     mpris2->registration_object_id3);
+	for (i = 0; i < N_OBJECTS; i++) {
+		g_dbus_connection_unregister_object (mpris2->dbus_connection,
+			                             mpris2->registration_object_ids[i]);
+	}
 
 	g_signal_handlers_disconnect_by_func (backend, seeked_cb, mpris2);
 	g_signal_handlers_disconnect_by_func (backend, any_notify_cb, mpris2);
