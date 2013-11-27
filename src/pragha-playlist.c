@@ -72,7 +72,6 @@ struct _PraghaPlaylist {
 	/* Playback control. */
 
 	GRand               *rand;
-	PraghaUpdateAction   update_action;
 	GList               *rand_track_refs;
 	GSList              *queue_track_refs;
 	GtkTreeRowReference *curr_rand_ref;
@@ -139,6 +138,8 @@ static GtkTreePath* get_next_any_random_track          (PraghaPlaylist *playlist
 static GtkTreePath* get_nth_track                      (PraghaPlaylist *playlist, gint n);
 static GtkTreePath* get_selected_track                 (PraghaPlaylist *playlist);
 static GtkTreePath* get_current_track                  (PraghaPlaylist *playlist);
+
+static void         pragha_playlist_update_playback_sequence (PraghaPlaylist *playlist, PraghaUpdateAction update_action, GtkTreePath *path);
 
 static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylist, GtkTreePath *path);
 
@@ -362,8 +363,7 @@ pragha_playlist_get_prev_track (PraghaPlaylist *playlist)
 	if (!path)
 		return NULL;
 
-	playlist->update_action = PLAYLIST_PREV;
-	pragha_playlist_update_current_playlist_state (playlist, path);
+	pragha_playlist_update_playback_sequence (playlist, PLAYLIST_PREV, path);
 
 	mobj = current_playlist_mobj_at_path (path, playlist);
 
@@ -399,8 +399,7 @@ pragha_playlist_get_any_track (PraghaPlaylist *playlist)
 	if (shuffle)
 		pragha_playlist_set_first_rand_ref (playlist, path);
 
-	playlist->update_action = PLAYLIST_CURR;
-	pragha_playlist_update_current_playlist_state (playlist, path);
+	pragha_playlist_update_playback_sequence (playlist, PLAYLIST_CURR, path);
 
 	mobj = current_playlist_mobj_at_path (path, playlist);
 
@@ -454,8 +453,7 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 	if (!path)
 		return NULL;
 
-	playlist->update_action = PLAYLIST_NEXT;
-	pragha_playlist_update_current_playlist_state (playlist, path);
+	pragha_playlist_update_playback_sequence (playlist, PLAYLIST_NEXT, path);
 
 	mobj = current_playlist_mobj_at_path (path, playlist);
 
@@ -1244,8 +1242,8 @@ void select_numered_path_of_current_playlist(PraghaPlaylist *cplaylist, gint pat
 /* General playlist mgmt */
 /*************************/
 
-void
-pragha_playlist_update_current_playlist_state (PraghaPlaylist *playlist, GtkTreePath *path)
+static void
+pragha_playlist_update_playback_sequence (PraghaPlaylist *playlist, PraghaUpdateAction update_action, GtkTreePath *path)
 {
 	GtkTreeRowReference *rand_ref;
 	GtkTreePath *opath = NULL;
@@ -1275,7 +1273,7 @@ pragha_playlist_update_current_playlist_state (PraghaPlaylist *playlist, GtkTree
 	}
 
 	if (shuffle) {
-		switch (playlist->update_action) {
+		switch (update_action) {
 			/* If 'Prev', get the previous node from the track references */
 			case PLAYLIST_PREV:
 				if (playlist->curr_rand_ref) {
@@ -2377,8 +2375,7 @@ pragha_playlist_row_activated_cb (GtkTreeView *current_playlist,
 	}
 
 	/* Start playing new track */
-	playlist->update_action = PLAYLIST_NEXT;
-	pragha_playlist_update_current_playlist_state (playlist, path);
+	pragha_playlist_update_playback_sequence (playlist, PLAYLIST_NEXT, path);
 
 	g_signal_emit (playlist, signals[PLAYLIST_SET_TRACK], 0, mobj);
 }
@@ -3678,8 +3675,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 void
 update_current_playlist_view_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, PraghaPlaylist *cplaylist)
 {
-	if (cplaylist->update_action == PLAYLIST_NONE)
-		update_current_playlist_view_track(cplaylist, backend);
+	update_current_playlist_view_track(cplaylist, backend);
 }
 
 static GtkWidget*
@@ -4283,7 +4279,6 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	playlist->track_error = NULL;
 	playlist->rand_track_refs = NULL;
 	playlist->queue_track_refs = NULL;
-	playlist->update_action = PLAYLIST_NONE;
 
 	/* Conect signals */
 
