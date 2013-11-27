@@ -135,7 +135,7 @@ static GtkTreePath* get_next_queue_track               (PraghaPlaylist *cplaylis
 static GtkTreePath* get_next_unplayed_random_track     (PraghaPlaylist *playlist);
 static GtkTreePath* get_next_sequential_track          (PraghaPlaylist *playlist);
 static GtkTreePath* get_next_random_ref_track          (PraghaPlaylist *playlist);
-static GtkTreePath* get_next_random_track              (PraghaPlaylist *playlist);
+static GtkTreePath* get_next_any_random_track          (PraghaPlaylist *playlist);
 static GtkTreePath* get_nth_track                      (PraghaPlaylist *playlist, gint n);
 static GtkTreePath* get_selected_track                 (PraghaPlaylist *playlist);
 static GtkTreePath* get_current_track                  (PraghaPlaylist *playlist);
@@ -446,7 +446,7 @@ pragha_playlist_get_next_track (PraghaPlaylist *playlist)
 	}
 
 	if (rand_unplayed && repeat)
-		path = get_next_random_track (playlist);
+		path = get_next_any_random_track (playlist);
 
 	if (seq_last && repeat)
 		path = get_nth_track (playlist, 0);
@@ -975,7 +975,7 @@ get_next_unplayed_random_track (PraghaPlaylist *playlist)
    this is called after exhausting all unique tracks */
 
 static GtkTreePath *
-get_next_random_track (PraghaPlaylist *playlist)
+get_next_any_random_track (PraghaPlaylist *playlist)
 {
 	gint rnd;
 	GtkTreePath *path = NULL, *rpath;
