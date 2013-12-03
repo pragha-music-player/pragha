@@ -287,9 +287,16 @@ pragha_preferences_set_software_mixer (PraghaPreferences *preferences,
 gdouble
 pragha_preferences_get_software_volume (PraghaPreferences *preferences);
 
+gboolean
+pragha_preferences_get_audio_to_mono (PraghaPreferences *preferences);
+
 void
 pragha_preferences_set_software_volume (PraghaPreferences *preferences,
                                         gdouble software_volume);
+
+void
+pragha_preferences_set_audio_to_mono (PraghaPreferences *preferences,
+                                       gboolean audio_to_mono);
 
 const gchar *
 pragha_preferences_get_audio_cd_device (PraghaPreferences *preferences);
