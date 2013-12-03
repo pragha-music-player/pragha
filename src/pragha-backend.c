@@ -58,6 +58,7 @@ struct PraghaBackendPrivate {
 	GstElement *pipeline;
 	GstElement *audio_sink;
 	GstElement *equalizer;
+        GstElement *audio_converter;
 	guint timer;
 	gboolean is_live;
 	gboolean can_seek;
@@ -1013,13 +1014,41 @@ pragha_backend_init (PraghaBackend *backend)
 		if (priv->equalizer != NULL) {
 			GstElement *bin;
 			GstPad *pad, *ghost_pad;
+                        gboolean mono_enabled = false;
 
 			bin = gst_bin_new ("audiobin");
-			gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, NULL);
-			gst_element_link_many (priv->equalizer, priv->audio_sink, NULL);
+
+                        /* Add a chain to convert the audio to mono if requested by the user */
+                        if (pragha_preferences_get_audio_to_mono(priv->preferences)) {
+                                priv->audio_converter = gst_element_factory_make ("audioconvert", NULL);
+                                if (priv->audio_converter != NULL) {
+                                        gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, priv->audio_converter, NULL);
+
+                                        GstCaps *caps1 = gst_caps_new_simple("audio/x-raw", "channels", G_TYPE_INT, 1, NULL);
+                                        gst_element_link_filtered (priv->equalizer, priv->audio_converter, caps1);
+                                        gst_caps_unref(caps1);
+
+                                        GstCaps *caps2 = gst_caps_new_simple("audio/x-raw", "channels", G_TYPE_INT, 2, NULL);
+                                        gst_element_link_filtered (priv->audio_converter, priv->audio_sink, caps2);
+                                        gst_caps_unref(caps2);
+
+                                        mono_enabled = true;
+                                }
+                                else {
+                                        g_warning ("Failed to create the audioconvert element. Not use it");
+                                }
+                        }
+
+                        if (!mono_enabled) {
+                                gst_bin_add_many (GST_BIN(bin), priv->equalizer, priv->audio_sink, NULL);
+                                gst_element_link_many(priv->equalizer, priv->audio_sink, NULL);
+
+                                priv->audio_converter = NULL;
+                        }
 
 			pad = gst_element_get_static_pad (priv->equalizer, "sink");
 			ghost_pad = gst_ghost_pad_new ("sink", pad);
+
 			gst_pad_set_active (ghost_pad, TRUE);
 			gst_element_add_pad (bin, ghost_pad);
 			gst_object_unref (pad);
@@ -1030,10 +1059,13 @@ pragha_backend_init (PraghaBackend *backend)
 
 			g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 		}
+
 	} else {
 		g_warning ("Failed to create audio-sink element. Use default sink, without equalizer.");
 
 		priv->equalizer = NULL;
+                priv->audio_converter = NULL;
+
 		g_object_set (priv->pipeline, "audio-sink", priv->audio_sink, NULL);
 	}
 

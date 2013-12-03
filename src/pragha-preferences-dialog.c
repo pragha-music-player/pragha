@@ -44,6 +44,7 @@ struct _PreferencesDialog {
 	GtkWidget *audio_cd_device_w;
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
+        GtkWidget *audio_to_mono_w;
 
 	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
@@ -184,6 +185,8 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
 		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
 
+                gboolean audio_to_mono = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->audio_to_mono_w));
+                pragha_preferences_set_audio_to_mono(dialog->preferences, audio_to_mono);
 
 		/* Save new library folders */
 
@@ -539,18 +542,21 @@ static void update_audio_device_alsa(PreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
+        gtk_widget_set_sensitive(dialog->audio_to_mono_w, TRUE);
 }
 
 static void update_audio_device_oss4(PreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
+        gtk_widget_set_sensitive(dialog->audio_to_mono_w, TRUE);
 }
 
 static void update_audio_device_oss(PreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, TRUE);
+        gtk_widget_set_sensitive(dialog->audio_to_mono_w, TRUE);
 }
 
 static void update_audio_device_pulse(PreferencesDialog *dialog)
@@ -558,6 +564,7 @@ static void update_audio_device_pulse(PreferencesDialog *dialog)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
+        gtk_widget_set_sensitive(dialog->audio_to_mono_w, TRUE);
 	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
@@ -566,6 +573,7 @@ static void update_audio_device_default(PreferencesDialog *dialog)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
+        gtk_widget_set_sensitive(dialog->audio_to_mono_w, TRUE);
 	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
@@ -644,6 +652,9 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 
 	if (pragha_preferences_get_software_mixer(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
+
+        if (pragha_preferences_get_audio_to_mono(dialog->preferences)) 
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->audio_to_mono_w), TRUE);
 
 	/* General Options */
 
@@ -787,7 +798,7 @@ pref_create_audio_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, \
-		  *soft_mixer, *audio_cd_device_label,*audio_cd_device_entry;
+		  *soft_mixer, *audio_to_mono, *audio_cd_device_label,*audio_cd_device_entry;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -827,6 +838,11 @@ pref_create_audio_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_wide_control(table, &row, soft_mixer);
 
+        audio_to_mono = gtk_check_button_new_with_label(_("Mono output"));
+        gtk_widget_set_tooltip_text(GTK_WIDGET(soft_mixer), _("Restart Required"));
+
+	pragha_hig_workarea_table_add_wide_control(table, &row, audio_to_mono);
+
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
 
 	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
@@ -844,6 +860,7 @@ pref_create_audio_page (PreferencesDialog *dialog)
 	dialog->audio_device_w = audio_device_entry;
 	dialog->audio_cd_device_w = audio_cd_device_entry;
 	dialog->soft_mixer_w = soft_mixer;
+        dialog->audio_to_mono_w = audio_to_mono;
 
 	/* Setup signal handlers */
 
