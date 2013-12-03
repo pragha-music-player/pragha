@@ -27,8 +27,12 @@
 
 #include <stdlib.h>
 
-#if HAVE_GSTREAMER_AUDIO
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
+#if GST_CHECK_VERSION (1, 0, 0)
 #include <gst/audio/streamvolume.h>
+#else
+#include <gst/interfaces/streamvolume.h>
+#endif //GST_CHECK_VERSION
 #define convert_volume(from, to, val) gst_stream_volume_convert_volume((from), (to), (val))
 #define VOLUME_FORMAT_LINEAR GST_STREAM_VOLUME_FORMAT_LINEAR
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
@@ -136,10 +140,15 @@ pragha_backend_get_current_length (PraghaBackend *backend)
 	PraghaBackendPrivate *priv = backend->priv;
 	gint64 song_length;
 	gboolean result;
+	GstFormat format = GST_FORMAT_TIME;
 
-	result = gst_element_query_duration (priv->pipeline, GST_FORMAT_TIME, &song_length);
+#if GST_CHECK_VERSION (1, 0, 0)
+	result = gst_element_query_duration(priv->pipeline, format, &song_length);
+#else
+	result = gst_element_query_duration(priv->pipeline, &format, &song_length);
+#endif
 
-	if (!result)
+	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
  
 	return song_length;
@@ -151,10 +160,15 @@ pragha_backend_get_current_position (PraghaBackend *backend)
 	PraghaBackendPrivate *priv = backend->priv;
 	gint64 song_position;
 	gboolean result;
+	GstFormat format = GST_FORMAT_TIME;
 
-	result = gst_element_query_position (priv->pipeline, GST_FORMAT_TIME, &song_position);
+#if GST_CHECK_VERSION (1, 0, 0)
+	result = gst_element_query_position(priv->pipeline, format, &song_position);
+#else
+	result = gst_element_query_position(priv->pipeline, &format, &song_position);
+#endif
 
-	if (!result)
+	if (!result || format != GST_FORMAT_TIME)
 		return GST_CLOCK_TIME_NONE;
 
 	return song_position;
@@ -228,7 +242,7 @@ pragha_backend_get_volume (PraghaBackend *backend)
 
 	g_object_get (priv->pipeline, "volume", &volume, NULL);
 
-#if HAVE_GSTREAMER_AUDIO
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_LINEAR, VOLUME_FORMAT_CUBIC, volume);
 #endif
 
@@ -258,7 +272,7 @@ pragha_backend_set_volume (PraghaBackend *backend, gdouble volume)
 
 	volume = CLAMP (volume, 0.0, 1.0);
 
-#if HAVE_GSTREAMER_AUDIO
+#if HAVE_GSTREAMER_AUDIO || HAVE_GSTREAMER_INTERFACES
 	volume = convert_volume (VOLUME_FORMAT_CUBIC, VOLUME_FORMAT_LINEAR, volume);
 #endif
 
@@ -486,6 +500,7 @@ pragha_backend_parse_buffering (PraghaBackend *backend, GstMessage *message)
 	g_signal_emit (backend, signals[SIGNAL_BUFFERING], 0, percent);
 }
 
+#if GST_CHECK_VERSION (1, 0, 0)
 static void
 save_embedded_art (PraghaBackend *backend, const GstTagList *taglist)
 {
@@ -525,6 +540,7 @@ out:
 	if (sample)
 		gst_sample_unref (sample);
 }
+#endif
 
 static void
 pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
@@ -537,8 +553,9 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 	CDEBUG(DBG_BACKEND, "Parse message tag");
 
 	gst_message_parse_tag(message, &tag_list);
-
+#if GST_CHECK_VERSION (1, 0, 0)
 	save_embedded_art (backend, tag_list);
+#endif
 
 	if (pragha_musicobject_get_file_type (priv->mobj) != FILE_HTTP)
 		goto out;
@@ -990,7 +1007,11 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->preferences = pragha_preferences_get ();
 	priv->art_cache = pragha_art_cache_new (); //XXX use global instance?
 
+#if GST_CHECK_VERSION (1, 0, 0)
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
+#else
+	priv->pipeline = gst_element_factory_make("playbin2", "playbin");
+#endif
 
 	if (priv->pipeline == NULL) {
 		g_critical ("Failed to create playbin element. Please check your GStreamer installation.");
