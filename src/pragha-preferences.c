@@ -58,6 +58,7 @@ struct _PraghaPreferencesPrivate
 	gchar     *audio_device;
 	gboolean   software_mixer;
 	gdouble    software_volume;
+        gboolean   audio_to_mono;
 	gchar     *audio_cd_device;
 	/* Window preferences. */
 	gboolean   lateral_panel;
@@ -102,6 +103,7 @@ enum
 	PROP_AUDIO_DEVICE,
 	PROP_SOFTWARE_MIXER,
 	PROP_SOFTWARE_VOLUME,
+        PROP_AUDIO_TO_MONO,
 	PROP_AUDIO_CD_DEVICE,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
@@ -769,6 +771,33 @@ pragha_preferences_set_software_volume (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SOFTWARE_VOLUME]);
 }
 
+
+/**
+ * pragha_preferences_get_audio_to_mono:
+ *
+ */
+gboolean
+pragha_preferences_get_audio_to_mono (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+	return preferences->priv->audio_to_mono;
+}
+
+/**
+ * pragha_preferences_set_audio_to_mono:
+ *
+ */
+void
+pragha_preferences_set_audio_to_mono (PraghaPreferences *preferences,
+                                       gboolean audio_to_mono)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->audio_to_mono = audio_to_mono;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_AUDIO_TO_MONO]);
+}
 /**
  * pragha_preferences_get_audio_cd_device:
  *
@@ -1400,7 +1429,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
-	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
+	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer, audio_to_mono;
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
@@ -1625,6 +1654,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_software_volume(preferences, software_volume);
+	}
+
+	audio_to_mono = g_key_file_get_boolean(priv->rc_keyfile,
+	                                       GROUP_AUDIO,
+	                                       KEY_AUDIO_TO_MONO,
+	                                       &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_audio_to_mono(preferences, audio_to_mono);
 	}
 
 	audio_cd_device = g_key_file_get_string(priv->rc_keyfile,
@@ -1993,6 +2034,10 @@ pragha_preferences_finalize (GObject *object)
 	                      GROUP_AUDIO,
 	                      KEY_SOFTWARE_VOLUME,
 	                      priv->software_volume);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_AUDIO,
+	                       KEY_AUDIO_TO_MONO,
+	                       priv->audio_to_mono);
 	if (string_is_not_empty(priv->audio_cd_device))
 		g_key_file_set_string(priv->rc_keyfile,
 		                      GROUP_AUDIO,
@@ -2188,6 +2233,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SOFTWARE_VOLUME:
 			g_value_set_double (value, pragha_preferences_get_software_volume(preferences));
 			break;
+                case PROP_AUDIO_TO_MONO:
+                        g_value_set_boolean (value, pragha_preferences_get_audio_to_mono(preferences));
+                        break;
 		case PROP_AUDIO_CD_DEVICE:
 			g_value_set_string (value, pragha_preferences_get_audio_cd_device(preferences));
 			break;
@@ -2310,6 +2358,9 @@ pragha_preferences_set_property (GObject *object,
 		case PROP_SOFTWARE_VOLUME:
 			pragha_preferences_set_software_volume(preferences, g_value_get_double(value));
 			break;
+                case PROP_AUDIO_TO_MONO:
+                        pragha_preferences_set_audio_to_mono(preferences, g_value_get_boolean(value));
+                        break;
 		case PROP_AUDIO_CD_DEVICE:
 			pragha_preferences_set_audio_cd_device(preferences, g_value_get_string(value));
 			break;
@@ -2554,6 +2605,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     -1.0,
 		                      1.0,
 		                     -1.0,
+		                     PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:audio_to_mono:
+	  *
+	  */
+	gParamSpecs[PROP_AUDIO_TO_MONO] =
+		g_param_spec_boolean("audio-to-mono",
+		                     "AudioToMono",
+		                     "Mono",
+		                     FALSE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**
