@@ -153,7 +153,7 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 {
 	GtkWidget *button, *hbox, *arrow;
 
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
@@ -201,7 +201,7 @@ pragha_sidebar_header_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *hbox;
 
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gtk_box_pack_start(GTK_BOX(hbox),
 	                   sidebar->menu_button,
@@ -235,7 +235,7 @@ pragha_sidebar_widget_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *vbox;
 
-	vbox = gtk_vbox_new(FALSE, 2);
+	vbox = gtk_vbox_new (FALSE, 2);
 
 	gtk_box_pack_start(GTK_BOX(vbox),
 	                   sidebar->header,
@@ -270,7 +270,7 @@ pragha_sidebar_new(void)
 
 	sidebar = g_slice_new0(PraghaSidebar);
 
-	sidebar->title_box = gtk_vbox_new(FALSE, 0);
+	sidebar->title_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar);
 	sidebar->close_button = pragha_sidebar_close_button_new(sidebar);
 

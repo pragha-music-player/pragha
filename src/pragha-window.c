@@ -456,7 +456,7 @@ pragha_window_new (PraghaApplication *pragha)
 	 *               [Status Bar]
 	 */
 
-	playlist_statusbar_vbox = gtk_vbox_new(FALSE, 2);
+	playlist_statusbar_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(playlist),
 	                    TRUE, TRUE, 0);
@@ -481,7 +481,7 @@ pragha_window_new (PraghaApplication *pragha)
 	 *               [Sidebar][Status Bar]
 	 */
 
-	vbox_main = gtk_vbox_new(FALSE, 2);
+	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);

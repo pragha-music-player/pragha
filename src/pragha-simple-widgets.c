@@ -38,7 +38,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 
 	xfce_heading = gtk_event_box_new();
 
-	hbox = gtk_hbox_new(FALSE, 12);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 6);
 
 	if (icon)
@@ -61,7 +61,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 
 	gtk_container_add(GTK_CONTAINER(xfce_heading), hbox);
 
-	vbox = gtk_vbox_new (FALSE, 0);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
 
 	separator = gtk_hseparator_new ();

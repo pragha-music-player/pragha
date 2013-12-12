@@ -255,7 +255,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 
 	/* Create the db scale */
 
-	mhbox = gtk_hbox_new(FALSE, 0);
+	mhbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	dbvbox = gtk_vbutton_box_new  ();
 	gtk_box_set_spacing (GTK_BOX(dbvbox), 0);
@@ -274,7 +274,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 
 	/* Create the scales with frequency bands */
 
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	for (i = 0; i < G_N_ELEMENTS(label_band_frec); i++) {
 		label = gtk_label_new(label_band_frec[i]);
 		gtk_label_set_angle(GTK_LABEL(label), 90);

@@ -871,7 +871,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Library"));
 
-	hbox_library = gtk_hbox_new(FALSE, 6);
+	hbox_library = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	library_store = gtk_list_store_new(1, G_TYPE_STRING);
 	library_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(library_store));

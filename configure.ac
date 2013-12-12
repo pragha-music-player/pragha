@@ -35,14 +35,6 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 	CFLAGS="$CFLAGS -DNDEBUG"
 ])
 
-<<<<<<< Updated upstream
-dnl experimental support for gtk3
-AC_ARG_WITH([gtk3],
-            [AS_HELP_STRING([--with-gtk3],
-              [enable experimental support for gtk3])],
-            [CFLAGS="$CFLAGS -Wno-deprecated-declarations"],
-            [with_gtk3=no])
-=======
 dnl gstreamer version
 AC_ARG_WITH([gstreamer],
             [AS_HELP_STRING([--with-gstreamer=0.10|1.0],[which gstreamer version to compile against (default: 1.0)])],
@@ -62,7 +54,6 @@ case "$with_gstreamer" in
        ;;
 esac
 AC_DEFINE_UNQUOTED(GSTREAMER_API_VERSION, $GSTREAMER_API_VERSION, [Define the GStreamer+ API version])
->>>>>>> Stashed changes
 
 AC_SUBST(CFLAGS)
 
