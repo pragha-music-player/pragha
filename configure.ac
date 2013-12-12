@@ -147,6 +147,7 @@ po/Makefile.in
 src/Makefile
 src/plugins/Makefile
 src/plugins/helloworld/Makefile
+src/plugins/keybinder/Makefile
 ])
 
 echo ""

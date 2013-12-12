@@ -1,4 +1,6 @@
-SUBDIRS = helloworld
+SUBDIRS = keybinder
+
+SUBDIRS += helloworld
 
 INCLUDES =								\
 	-I$(top_srcdir)							\

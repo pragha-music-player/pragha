@@ -1,0 +1,9 @@
+[Plugin]
+Module=keybinder
+Name=Global Hotkeys
+Description=Control pragha with multimedia keys
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2013 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+
