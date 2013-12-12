@@ -33,6 +33,7 @@
 
 #include "peasdemo-hello-world-plugin.h"
 #include "peasdemo-hello-world-configurable.h"
+#include "../../pragha-window.h"
 
 static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
 
@@ -59,7 +60,7 @@ peasdemo_hello_world_plugin_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_OBJECT:
-      plugin->window = GTK_WIDGET (g_value_dup_object (value));
+      plugin->pragha = g_value_get_object (value);
       break;
 
     default:
@@ -79,7 +80,7 @@ peasdemo_hello_world_plugin_get_property (GObject    *object,
   switch (prop_id)
     {
     case PROP_OBJECT:
-      g_value_set_object (value, plugin->window);
+      g_value_set_object (value, plugin->pragha);
       break;
 
     default:
@@ -87,7 +88,6 @@ peasdemo_hello_world_plugin_get_property (GObject    *object,
       break;
     }
 }
-
 
 static void
 peasdemo_hello_world_plugin_init (PeasDemoHelloWorldPlugin *plugin)
@@ -103,15 +103,9 @@ peasdemo_hello_world_plugin_finalize (GObject *object)
   g_debug ("%s", G_STRFUNC);
 
   g_object_unref (plugin->label);
-  g_object_unref (plugin->window);
+  //g_object_unref (plugin->window);
 
   G_OBJECT_CLASS (peasdemo_hello_world_plugin_parent_class)->finalize (object);
-}
-
-static GtkBox *
-get_box (GtkWidget *window)
-{
-  return GTK_BOX (gtk_bin_get_child (GTK_BIN (window)));
 }
 
 static void
@@ -122,7 +116,9 @@ peasdemo_hello_world_plugin_activate (PeasActivatable *activatable)
   g_debug ("%s", G_STRFUNC);
 
   plugin->label = gtk_label_new ("Hello World!");
-  gtk_box_pack_start (get_box (plugin->window), plugin->label, 1, 1, 0);
+
+  pragha_window_add_widget_to_infobox (plugin->pragha, plugin->label);
+
   gtk_widget_show (plugin->label);
   g_object_ref (plugin->label);
 }
@@ -134,7 +130,7 @@ peasdemo_hello_world_plugin_deactivate (PeasActivatable *activatable)
 
   g_debug ("%s", G_STRFUNC);
 
-  gtk_container_remove (GTK_CONTAINER (get_box (plugin->window)), plugin->label);
+  pragha_window_add_widget_to_infobox (plugin->pragha, NULL);
 }
 
 static void

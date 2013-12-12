@@ -78,6 +78,7 @@ struct _PraghaApplication {
 
 	/* Plugins?. */
 	PeasEngine        *peas_engine;
+	PeasExtensionSet  *peas_exten_set;
 
 	PraghaNotify      *notify;
 #ifdef HAVE_LIBGLYR
@@ -366,6 +367,28 @@ pragha_application_is_first_run (PraghaApplication *pragha)
 	return string_is_empty (pragha_preferences_get_installed_version (pragha->preferences));
 }
 
+/* Plugin hacking...
+ * TODO: Move to own file..
+ */
+
+static void
+on_extension_added (PeasExtensionSet  *set,
+                    PeasPluginInfo    *info,
+                    PeasExtension     *exten,
+                    PraghaApplication *pragha)
+{
+	peas_activatable_activate (PEAS_ACTIVATABLE (exten));
+}
+
+static void
+on_extension_removed (PeasExtensionSet  *set,
+                      PeasPluginInfo    *info,
+                      PeasExtension     *exten,
+                      PraghaApplication *pragha)
+{
+	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
+}
+
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
 {
@@ -517,6 +540,17 @@ pragha_application_startup (GApplication *application)
 	pragha->peas_engine = peas_engine_get_default ();
 
 	peas_engine_add_search_path (pragha->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
+	pragha->peas_exten_set = peas_extension_set_new (pragha->peas_engine,
+	                                                 PEAS_TYPE_ACTIVATABLE,
+	                                                 "object", pragha,
+	                                                 NULL);
+	peas_extension_set_foreach (pragha->peas_exten_set,
+	                            (PeasExtensionSetForeachFunc) on_extension_added,
+	                            pragha);
+	g_signal_connect (pragha->peas_exten_set, "extension-added",
+	                  G_CALLBACK (on_extension_added), pragha);
+	g_signal_connect (pragha->peas_exten_set, "extension-removed",
+	                  G_CALLBACK (on_extension_removed), pragha);
 
 	if (pragha_preferences_get_show_osd (pragha->preferences))
 		pragha->notify = pragha_notify_new (pragha);
