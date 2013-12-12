@@ -13,3 +13,6 @@ INSTALL
 /mkinstalldirs
 /ltmain.sh
 /stamp-h1
+*.tar.bz2
+*.in
+*Makefile

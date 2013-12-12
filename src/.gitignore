@@ -1,7 +1,7 @@
-/.deps
-/.libs
-Makefile
-Makefile.in
+*.deps*
+*.libs*
+*.la
+*.lo
 pragha
 *.o
 *~
