@@ -25,8 +25,9 @@
 #else
 #include <glib/gi18n.h>
 #endif
-
+#include <libpeas-gtk/peas-gtk.h>
 #include <gdk/gdkkeysyms.h>
+
 #include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
@@ -1146,14 +1147,32 @@ pref_create_services_page(PreferencesDialog *dialog)
 	return table;
 }
 
+static GtkWidget*
+pref_create_plugins_page (PreferencesDialog *dialog)
+{
+	GtkWidget *table;
+	GtkWidget *manager;
+	guint row = 0;
+
+	table = pragha_hig_workarea_table_new ();
+
+	pragha_hig_workarea_table_add_section_title (table, &row, _("Plugins"));
+
+	manager = peas_gtk_plugin_manager_new (peas_engine_get_default ());
+
+	pragha_hig_workarea_table_add_wide_tall_control (table, &row, manager);
+
+	return table;
+}
+
 void
 pragha_preferences_dialog_show (PraghaApplication *pragha)
 {
 	PreferencesDialog *dialog;
 	GtkWidget *header, *pref_notebook;
 
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
-	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
+	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox, *plugins_vbox;
+	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services, *label_plugins;
 
 	dialog = g_slice_new0(PreferencesDialog);
 
@@ -1177,6 +1196,7 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 	label_general = gtk_label_new(_("General"));
 	label_desktop = gtk_label_new(_("Desktop"));
 	label_services = gtk_label_new(_("Services"));
+	label_plugins = gtk_label_new(_("Plugins"));
 
 	/* Notebook, pages et al. */
 
@@ -1201,6 +1221,9 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	services_vbox = pref_create_services_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox, label_services);
+
+	plugins_vbox = pref_create_plugins_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
 
 	/* Add to dialog */
 

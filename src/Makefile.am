@@ -5,7 +5,11 @@ AM_CPPFLAGS =								\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
 	-DDESKTOPENTRY=\""$(datadir)/applications/pragha.desktop"\"	\
+	-DLIBPLUGINDIR=\""$(libdir)/pragha/plugins/"\"	\
+	-DUSRPLUGINDIR=\""$(prefix)/share/pragha/plugins"\"	\
 	-I$(top_srcdir)
+
+SUBDIRS = plugins
 
 pragha_SOURCES = \
 		info-bar-import-music.c \
@@ -106,6 +110,8 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
+	$(LIBPEAS_CFLAGS) 						\
+	$(LIBPEAS_GTK_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
@@ -118,6 +124,8 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
+	$(LIBPEAS_LIBS)							\
+	$(LIBPEAS_GTK_LIBS)						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS)

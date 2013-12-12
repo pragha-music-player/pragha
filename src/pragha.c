@@ -30,6 +30,7 @@
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 #include <tag_c.h>
+#include <libpeas/peas.h>
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
@@ -76,6 +77,7 @@ struct _PraghaApplication {
 	PraghaStatusIcon  *status_icon;
 
 	/* Plugins?. */
+	PeasEngine        *peas_engine;
 
 	PraghaNotify      *notify;
 #ifdef HAVE_LIBGLYR
@@ -317,6 +319,13 @@ pragha_application_get_pane (PraghaApplication *pragha)
 	return pragha->pane;
 }
 
+PeasEngine *
+pragha_application_get_peas_engine (PraghaApplication *pragha)
+{
+	return pragha->peas_engine;
+}
+
+
 PraghaNotify *
 pragha_application_get_notify (PraghaApplication *pragha)
 {
@@ -504,6 +513,10 @@ pragha_application_startup (GApplication *application)
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
 	}
+
+	pragha->peas_engine = peas_engine_get_default ();
+
+	peas_engine_add_search_path (pragha->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
 
 	if (pragha_preferences_get_show_osd (pragha->preferences))
 		pragha->notify = pragha_notify_new (pragha);
