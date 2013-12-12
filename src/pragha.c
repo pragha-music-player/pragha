@@ -36,7 +36,6 @@
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-menubar.h"
-#include "pragha-keybinder.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha.h"
@@ -89,10 +88,6 @@ struct _PraghaApplication {
 #endif
 	PraghaMpris2      *mpris2;
 	con_gnome_media_keys *cgnome_media_keys;
-
-#ifdef HAVE_LIBKEYBINDER
-	gboolean           keybinder;
-#endif
 };
 
 G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
@@ -466,12 +461,6 @@ pragha_application_dispose (GObject *object)
 		gnome_media_keys_free (pragha->cgnome_media_keys);
 		pragha->cgnome_media_keys = NULL;
 	}
-#ifdef HAVE_LIBKEYBINDER
-	if (pragha->keybinder) {
-		keybinder_free ();
-		pragha->keybinder = FALSE;
-	}
-#endif
 	if (pragha->mainwindow) {
 		pragha_window_free (pragha);
 		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
@@ -653,11 +642,6 @@ pragha_application_startup (GApplication *application)
 	if (gnome_media_keys_will_be_useful()) {
 	    pragha->cgnome_media_keys = init_gnome_media_keys (pragha);
 	}
-	#ifdef HAVE_LIBKEYBINDER
-	else if (keybinder_will_be_useful()) {
-		pragha->keybinder = init_keybinder (pragha);
-	}
-	#endif
 
 	g_application_hold (application); //TODO don't hold if gtkapp
 }

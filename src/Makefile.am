@@ -135,13 +135,6 @@ pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
-if HAVE_LIBKEYBINDER
-pragha_SOURCES += pragha-keybinder.c
-pragha_SOURCES += pragha-keybinder.h
-pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
-pragha_LDADD += $(LIBKEYBINDER_LIBS)
-endif
-
 if HAVE_LIBCLASTFM
 pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
 pragha_LDADD += $(LIBCLASTFM_LIBS)
