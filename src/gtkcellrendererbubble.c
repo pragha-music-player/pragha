@@ -139,7 +139,10 @@ render (GtkCellRenderer      *cell,
   GdkColor *start;
   GdkColor *stop;
   GtkStyle *style;
-  
+  GtkStyleContext *stylec;
+  GdkRGBA color_in;
+  GdkRGBA color_out;
+
   g_return_if_fail (GTK_IS_CELL_RENDERER_BUBBLE (cell));
   
   priv = GTK_CELL_RENDERER_BUBBLE (cell)->priv;
@@ -174,8 +177,11 @@ render (GtkCellRenderer      *cell,
       
       cairo_set_source (cr, pattern);
       cairo_fill_preserve (cr);
-      
-      gdk_cairo_set_source_color (cr, &style->dark [GTK_STATE_SELECTED]);
+
+      stylec = gtk_widget_get_style_context (widget);
+      gtk_style_context_get_color (stylec, GTK_STATE_FLAG_SELECTED,
+                                   &color_in);
+      gdk_cairo_set_source_rgba (cr, &color_in);
       cairo_set_line_width (cr, 1.0);
       cairo_stroke (cr);
       
@@ -183,7 +189,10 @@ render (GtkCellRenderer      *cell,
                          cell_area->x + 1.0, cell_area->y + 2.0,
                          cell_area->width - 2.0, cell_area->height - 4.0,
                          cell_area->height / 2.5, cell_area->height / 2.5);
-      gdk_cairo_set_source_color (cr, &style->light [GTK_STATE_SELECTED]);
+
+      gtk_style_context_get_color (stylec, GTK_STATE_FLAG_SELECTED,
+                                   &color_out);
+      gdk_cairo_set_source_rgba (cr, &color_out);
       cairo_stroke (cr);
 
       cairo_pattern_destroy(pattern);
