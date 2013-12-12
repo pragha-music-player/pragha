@@ -380,7 +380,7 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	if(pragha_preferences_get_add_recursively (preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
 
-	bbox = gtk_hbutton_box_new();
+	bbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(bbox), 6);
 

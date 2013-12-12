@@ -64,7 +64,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), xfce_heading, FALSE, FALSE, 0);
 
-	separator = gtk_hseparator_new ();
+	separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, FALSE, 0);
 
 	return vbox;

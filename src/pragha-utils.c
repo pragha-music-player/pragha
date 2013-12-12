@@ -234,7 +234,7 @@ set_watch_cursor (GtkWidget *widget)
 		cursor = gdk_cursor_new (GDK_WATCH);
 
 		gdk_window_set_cursor (gtk_widget_get_window (toplevel), cursor);
-		gdk_cursor_unref (cursor);
+		g_object_unref (cursor);
 	}
 }
 
@@ -542,7 +542,7 @@ menu_position(GtkMenu *menu,
 
 	widget = GTK_WIDGET (user_data);
 
-	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+	gtk_widget_get_preferred_size (GTK_WIDGET(menu), &requisition, NULL);
 
 	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 

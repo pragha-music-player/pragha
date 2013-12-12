@@ -243,7 +243,8 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 	/* Create vertical scales band to equalizer */
 
 	for (i = 0; i < NUM_BANDS; i++) {
-		dialog->vscales[i] = gtk_vscale_new_with_range(-24.0, 12.0, 0.1);
+		dialog->vscales[i] = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL,
+		                                               -24.0, 12.0, 0.1);
 		gtk_range_set_inverted(GTK_RANGE(dialog->vscales[i]), TRUE);
 		gtk_scale_set_draw_value (GTK_SCALE(dialog->vscales[i]), FALSE);
 
@@ -257,7 +258,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 
 	mhbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-	dbvbox = gtk_vbutton_box_new  ();
+	dbvbox = gtk_button_box_new  (GTK_ORIENTATION_VERTICAL);
 	gtk_box_set_spacing (GTK_BOX(dbvbox), 0);
 	label = gtk_label_new("+12 db");
 	gtk_misc_set_alignment (GTK_MISC(label), 1, 0.5);
