@@ -103,11 +103,12 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	/* Create table */
 
-	tag_table = gtk_table_new(8, 2, FALSE);
+	tag_table = gtk_grid_new ();
 
-	gtk_table_set_col_spacings(GTK_TABLE(tag_table), 5);
-	gtk_table_set_row_spacings(GTK_TABLE(tag_table), 5);
-	gtk_container_set_border_width(GTK_CONTAINER(tag_table), 5);
+	gtk_grid_set_row_spacing (GTK_GRID(tag_table), 5);
+	gtk_grid_set_column_spacing (GTK_GRID(tag_table), 5);
+
+	gtk_container_set_border_width (GTK_CONTAINER(tag_table), 5);
 
 	/* Create labels */
 
@@ -255,84 +256,47 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	/* Create hobxs(ENTRY CHECHK) and attach in table */
 
-	gtk_box_pack_start(GTK_BOX(hbox_title), entry_title,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_title), chk_title,
-	                   FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_title), entry_title, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_title), chk_title, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand (hbox_title, TRUE);
 
-	gtk_table_attach(GTK_TABLE (tag_table), label_title,
-	                 0, 1, 0, 1,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_title,
-	                 1, 2, 0, 1,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_grid_attach (GTK_GRID(tag_table), label_title, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_title, 1, 0, 1, 1);
 
-	gtk_box_pack_start(GTK_BOX(hbox_artist), entry_artist,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_artist), chk_artist,
-	                   FALSE, FALSE, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), label_artist,
-	                 0, 1, 1, 2,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_artist,
-	                 1, 2, 1, 2,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_artist), entry_artist, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_artist), chk_artist, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand (hbox_artist, TRUE);
 
-	gtk_box_pack_start(GTK_BOX(hbox_album), entry_album,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_album), chk_album,
-	                   FALSE, FALSE, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), label_album,
-	                 0, 1, 2, 3,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_album,
-	                 1, 2, 2, 3,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_grid_attach (GTK_GRID(tag_table), label_artist, 0, 1, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_artist, 1, 1, 1, 1);
 
-	gtk_box_pack_start(GTK_BOX(hbox_genre), entry_genre,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_genre), chk_genre,
-	                   FALSE, FALSE, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), label_genre,
-	                 0, 1, 3, 4,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_genre,
-	                 1, 2, 3, 4,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_album), entry_album, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_album), chk_album, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand (hbox_album, TRUE);
 
-	gtk_box_pack_start(GTK_BOX(hbox_tno), entry_tno,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_tno), chk_tno,
-	                   FALSE, FALSE, 0);
+	gtk_grid_attach (GTK_GRID(tag_table), label_album, 0, 2, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_album, 1, 2, 1, 1);
 
-	gtk_box_pack_start(GTK_BOX(hbox_year), label_year,
-	                   FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox_year), entry_year,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_year), chk_year,
-	                   FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_genre), entry_genre, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_genre), chk_genre, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand (hbox_genre, TRUE);
 
-	gtk_box_pack_start(GTK_BOX(hbox_spins), hbox_tno,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_spins), hbox_year,
-	                   TRUE, TRUE, 0);
+	gtk_grid_attach (GTK_GRID(tag_table), label_genre, 0, 3, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_genre, 1, 3, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (tag_table), label_tno,
-	                 0, 1, 4, 5,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_spins,
-	                 1, 2, 4, 5,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_tno), entry_tno, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox_tno), chk_tno, FALSE, FALSE, 0);
+
+	gtk_box_pack_start (GTK_BOX(hbox_year), label_year, FALSE, FALSE, 5);
+	gtk_box_pack_start (GTK_BOX(hbox_year), entry_year, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_year), chk_year, FALSE, FALSE, 0);
+
+	gtk_box_pack_start (GTK_BOX(hbox_spins), hbox_tno, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_spins), hbox_year, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand (hbox_spins, TRUE);
+
+	gtk_grid_attach (GTK_GRID(tag_table), label_tno, 0, 4, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_spins, 1, 4, 1, 1);
 
 	comment_view_scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(comment_view_scroll),
@@ -344,27 +308,17 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	chk_alignment = gtk_alignment_new(0.5, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(chk_alignment), chk_comment);
 
-	gtk_box_pack_start(GTK_BOX(hbox_comment), comment_view_scroll,
-	                   TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox_comment), chk_alignment,
-	                   FALSE, FALSE, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), label_comment,
-	                 0, 1, 5, 7,
-	                 GTK_FILL, GTK_FILL|GTK_EXPAND,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), hbox_comment,
-	                 1, 2, 5, 7,
-	                 GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND,
-	                 0, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_comment), comment_view_scroll, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox_comment), chk_alignment, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand (hbox_comment, TRUE);
 
-	gtk_table_attach(GTK_TABLE (tag_table), label_file,
-	                 0, 1, 7, 8,
-	                 GTK_FILL, GTK_SHRINK,
-	                 0, 0);
-	gtk_table_attach(GTK_TABLE (tag_table), entry_file,
-	                 1, 2, 7, 8,
-	                 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-	                 0, 0);
+	gtk_grid_attach (GTK_GRID(tag_table), label_comment, 0, 5, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), hbox_comment, 1, 5, 1, 2);
+
+	gtk_widget_set_hexpand (entry_file, TRUE);
+
+	gtk_grid_attach (GTK_GRID(tag_table), label_file, 0, 7, 1, 1);
+	gtk_grid_attach (GTK_GRID(tag_table), entry_file, 1, 7, 1, 1);
 
 	/* Save changes when press enter. */
 	
@@ -606,11 +560,12 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 
 	/* Create table */
 
-	properties_table = gtk_table_new(6, 2, FALSE);
+	properties_table = gtk_grid_new ();
 
-	gtk_table_set_col_spacings(GTK_TABLE(properties_table), 5);
-	gtk_table_set_row_spacings(GTK_TABLE(properties_table), 5);
-	gtk_container_set_border_width(GTK_CONTAINER(properties_table), 5);
+	gtk_grid_set_row_spacing (GTK_GRID(properties_table), 5);
+	gtk_grid_set_column_spacing (GTK_GRID(properties_table), 5);
+
+	gtk_container_set_border_width (GTK_CONTAINER(properties_table), 5);
 
 	/* Create labels */
 
@@ -658,61 +613,32 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_label_set_selectable(GTK_LABEL(info_folder), TRUE);
 	gtk_label_set_selectable(GTK_LABEL(info_filename), TRUE);
 
+	gtk_widget_set_hexpand (GTK_WIDGET(info_length), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_bitrate), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_channels), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_samplerate), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_folder), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_filename), TRUE);
+
 	/* Attach labels */
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_length,
-			0, 1, 0, 1,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_length,
-			1, 2, 0, 1,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_length, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_length, 1, 0, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_bitrate,
-			0, 1, 1, 2,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_bitrate,
-			1, 2, 1, 2,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_bitrate, 0, 1, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_bitrate, 1, 1, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_channels,
-			0, 1, 2, 3,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_channels,
-			1, 2, 2, 3,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_channels, 0, 2, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_channels, 1, 2, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_samplerate,
-			0, 1, 3, 4,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_samplerate,
-			1, 2, 3, 4,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_samplerate, 0, 3, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_samplerate, 1, 3, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_folder,
-			0, 1, 4, 5,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_folder,
-			1, 2, 4, 5,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_folder, 0, 4, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_folder, 1, 4, 1, 1);
 
-	gtk_table_attach(GTK_TABLE (properties_table), label_filename,
-			0, 1, 5, 6,
-			GTK_FILL, GTK_SHRINK,
-			0, 0);
-	gtk_table_attach(GTK_TABLE (properties_table), info_filename,
-			1, 2, 5, 6,
-			GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			0, 0);
+	gtk_grid_attach (GTK_GRID(properties_table), label_filename, 0, 5, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_filename, 1, 5, 1, 1);
 
 	/* The main edit dialog */
 
