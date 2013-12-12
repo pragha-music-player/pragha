@@ -2850,10 +2850,8 @@ pragha_library_pane_init (PraghaLibraryPane *library)
 
 	pragha_library_pane_create_widget (library);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
 	gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET(library)),
 	                             GTK_STYLE_CLASS_SIDEBAR);
-#endif
 
 	/* Create context menus */
 

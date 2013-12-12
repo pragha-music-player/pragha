@@ -673,9 +673,8 @@ pragha_scanner_new()
 
 	progress_bar = gtk_progress_bar_new();
 	gtk_widget_set_size_request(progress_bar, PROGRESS_BAR_WIDTH, -1);
-	#if GTK_CHECK_VERSION (3, 0, 0)
+
 	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(progress_bar), TRUE);
-	#endif
 
 	button = gtk_button_new ();
 	image = gtk_image_new_from_stock (GTK_STOCK_CANCEL, GTK_ICON_SIZE_MENU);
