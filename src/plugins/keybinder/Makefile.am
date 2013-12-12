@@ -13,7 +13,9 @@ libkeybinder_la_SOURCES =      \
 
 libkeybinder_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libkeybinder_la_CFLAGS =	$(GSTREAMER_CFLAGS)					\
+libkeybinder_la_CFLAGS =						\
+	$(LIBKEYBINDER_CFLAGS)						\
+	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
 	$(GIO_CFLAGS) 							\
@@ -28,7 +30,9 @@ libkeybinder_la_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libkeybinder_la_LIBADD = $(GSTREAMER_LIBS)					\
+libkeybinder_la_LIBADD =						\
+	$(LIBKEYBINDER_LIBS) 						\
+	$(GSTREAMER_LIBS)					\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
@@ -46,29 +50,9 @@ libkeybinder_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 libkeybinder_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
-if HAVE_LIBKEYBINDER
-libkeybinder_la_CFLAGS += $(LIBKEYBINDER_CFLAGS)
-libkeybinder_la_LIBADD += $(LIBKEYBINDER_LIBS)
-endif
-
-if HAVE_LIBCLASTFM
-libkeybinder_la_CFLAGS += $(LIBCLASTFM_CFLAGS)
-libkeybinder_la_LIBADD += $(LIBCLASTFM_LIBS)
-endif
-
-if HAVE_LIBGLYR
-libkeybinder_la_CFLAGS += $(LIBGLYR_CFLAGS)
-libkeybinder_la_LIBADD += $(LIBGLYR_LIBS)
-endif
-
 if HAVE_LIBXFCE4UI
 libkeybinder_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
 libkeybinder_la_LIBADD += $(LIBXFCE4UI_LIBS)
-endif
-
-if HAVE_PLPARSER
-libkeybinder_la_CFLAGS += $(PLPARSER_CFLAGS)
-libkeybinder_la_LIBADD += $(PLPARSER_LIBS)
 endif
 
 plugin_DATA = keybinder.plugin
