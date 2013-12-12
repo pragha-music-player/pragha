@@ -85,6 +85,8 @@ XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
+XDT_CHECK_PACKAGE([LIBPEAS], [libpeas-1.0], [1.0.0])
+XDT_CHECK_PACKAGE([LIBPEAS_GTK], [libpeas-gtk-1.0], [1.0.0])
 
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
@@ -143,6 +145,8 @@ Makefile
 data/Makefile
 po/Makefile.in
 src/Makefile
+src/plugins/Makefile
+src/plugins/helloworld/Makefile
 ])
 
 echo ""

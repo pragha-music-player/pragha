@@ -29,6 +29,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <libpeas/peas.h>
 
 #include "pragha-album-art.h"
 #include "pragha-art-cache.h"
@@ -91,6 +92,8 @@ GtkWidget         *pragha_application_get_menu_action_widget (PraghaApplication 
 GtkWidget         *pragha_application_get_menubar            (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_pane               (PraghaApplication *pragha);
+
+PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
 
 PraghaMpris2      *pragha_application_get_mpris2             (PraghaApplication *pragha);
 #ifdef HAVE_LIBCLASTFM

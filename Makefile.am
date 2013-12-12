@@ -1,7 +1,8 @@
 SUBDIRS = \
 	data  \
 	po    \
-	src
+	src   \
+	src/plugins
 
 AUTOMAKE_OPTIONS = \
 	1.8            \
