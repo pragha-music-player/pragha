@@ -425,11 +425,11 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 
 	/* Another vbox to add extentions widgets. */
 	
-	extention_box = gtk_vbox_new(FALSE, 0);
+	extention_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	/* Pack widgets: [Title]-[extentions] */
 
-	title_extention_hbox = gtk_hbox_new(FALSE, 2);
+	title_extention_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 
 	gtk_box_pack_start (GTK_BOX(title_extention_hbox),
 	                    GTK_WIDGET(title_event_box),
@@ -475,7 +475,7 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 
 	/* Pack widgets: [Time]-[ProgressBar]-[Length] */
 
-	progress_hbox = gtk_hbox_new(FALSE, 2);
+	progress_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 
 	gtk_box_pack_start (GTK_BOX(progress_hbox),
 	                    GTK_WIDGET(time_align),
@@ -492,7 +492,7 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 	 * [Time]-[ProgressBar]-[Length]
 	 */
 
-	track_info_vbox = gtk_vbox_new(FALSE, 1);
+	track_info_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
 
 	gtk_box_pack_start (GTK_BOX(track_info_vbox),
 	                    GTK_WIDGET(title_extention_hbox),
@@ -733,7 +733,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	boxitem = gtk_tool_item_new ();
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
-	box = gtk_hbox_new(FALSE, 0);
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	album_art_frame = gtk_event_box_new ();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
 	gtk_container_add (GTK_CONTAINER(boxitem), box);
@@ -751,7 +751,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	playing = pragha_toolbar_create_track_info_bar(toolbar);
 
-	box = gtk_hbox_new (FALSE, 0);
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start (GTK_BOX(box), playing, TRUE, TRUE, 5);
 	gtk_container_add (GTK_CONTAINER(boxitem), box);
 

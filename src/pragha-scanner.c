@@ -669,7 +669,7 @@ pragha_scanner_new()
 	scanner = g_slice_new0(PraghaScanner);
 
 	/* Create widgets */
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	progress_bar = gtk_progress_bar_new();
 	gtk_widget_set_size_request(progress_bar, PROGRESS_BAR_WIDTH, -1);

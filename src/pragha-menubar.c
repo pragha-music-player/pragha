@@ -359,7 +359,7 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 
-	vbox = gtk_vbox_new(FALSE, 0);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
@@ -374,7 +374,7 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	if (string_is_not_empty(last_folder))
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
 
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
 	if(pragha_preferences_get_add_recursively (preferences))
@@ -559,13 +559,13 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 	gint result;
 
 	/* Create dialog window */
-	vbox = gtk_vbox_new(TRUE, 2);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
 	label_new = gtk_label_new_with_mnemonic(_("Enter the URL of an internet radio stream"));
 	uri_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(uri_entry), 255);
 
-	hbox = gtk_hbox_new(FALSE, 2);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	label_name = gtk_label_new_with_mnemonic(_("Give it a name to save"));
 	name_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY(name_entry), 255);

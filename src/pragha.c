@@ -377,7 +377,7 @@ pragha_application_construct_window (PraghaApplication *pragha)
 
 	pragha->menu_ui_manager = pragha_menubar_new ();
 	pragha->toolbar = pragha_toolbar_new ();
-	pragha->infobox = gtk_vbox_new (FALSE, 0);
+	pragha->infobox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	pragha->pane = gtk_hpaned_new ();
 	pragha->sidebar = pragha_sidebar_new ();
 	pragha->library = pragha_library_pane_new ();

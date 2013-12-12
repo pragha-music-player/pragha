@@ -243,15 +243,15 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	/* Create boxs and package all. */
 
-	hbox_title = gtk_hbox_new(FALSE, 0);
-	hbox_artist = gtk_hbox_new(FALSE, 0);
-	hbox_album = gtk_hbox_new(FALSE, 0);
-	hbox_genre = gtk_hbox_new(FALSE, 0);
-	hbox_year = gtk_hbox_new(FALSE, 0);
-	hbox_tno = gtk_hbox_new(FALSE, 0);
-	hbox_comment = gtk_hbox_new(FALSE, 0);
+	hbox_title = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_artist = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_album = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_genre = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_year = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_tno = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	hbox_comment = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-	hbox_spins = gtk_hbox_new(FALSE, 5);
+	hbox_spins = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
 	/* Create hobxs(ENTRY CHECHK) and attach in table */
 
