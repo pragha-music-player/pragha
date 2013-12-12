@@ -893,7 +893,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 	gtk_container_add(GTK_CONTAINER(library_view_scroll), library_view);
 
 	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
-	library_bbox = gtk_vbutton_box_new();
+	library_bbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
 	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
 	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
 

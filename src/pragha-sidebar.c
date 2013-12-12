@@ -78,7 +78,7 @@ pragha_sidebar_menu_position(GtkMenu *menu,
 
 	widget = GTK_WIDGET (user_data);
 
-	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+	gtk_widget_get_preferred_size (GTK_WIDGET(menu), &requisition, NULL);
 
 	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 
@@ -235,7 +235,7 @@ pragha_sidebar_widget_new(PraghaSidebar *sidebar)
 {
 	GtkWidget *vbox;
 
-	vbox = gtk_vbox_new (FALSE, 2);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
 	gtk_box_pack_start(GTK_BOX(vbox),
 	                   sidebar->header,
