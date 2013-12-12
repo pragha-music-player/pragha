@@ -25,6 +25,8 @@
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
 
+#include "../../pragha-window.h"
+
 G_BEGIN_DECLS
 
 #define PEASDEMO_TYPE_HELLO_WORLD_PLUGIN         (peasdemo_hello_world_plugin_get_type ())
@@ -40,8 +42,8 @@ typedef struct _PeasDemoHelloWorldPluginClass  PeasDemoHelloWorldPluginClass;
 struct _PeasDemoHelloWorldPlugin {
   PeasExtensionBase parent_instance;
 
-  GtkWidget *window;
-  GtkWidget *label;
+  PraghaApplication *pragha;
+  GtkWidget         *label;
 };
 
 struct _PeasDemoHelloWorldPluginClass {
