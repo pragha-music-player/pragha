@@ -74,7 +74,6 @@ get_playlist_dialog(PraghaPlaylistActionRange type, GtkWidget *parent)
 	gtk_widget_grab_focus(GTK_WIDGET(entry));
 
 	pragha_hig_workarea_table_add_row(table, &row, label, entry);
-	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
 			     GTK_WINDOW(parent),
@@ -532,8 +531,6 @@ gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent)
 	gtk_entry_set_max_length(GTK_ENTRY(entry), 255);
 	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
 	pragha_hig_workarea_table_add_wide_control(table, &row, entry);
-
-	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(_("Rename"),
 			     GTK_WINDOW(parent),
@@ -1215,8 +1212,6 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, Pragh
 	radio_add = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(radio_replace), string_options);
 	pragha_hig_workarea_table_add_wide_control(table, &row, radio_add);
 	g_free(string_options);
-
-	pragha_hig_workarea_table_finish(table, &row);
 
 	dialog = gtk_dialog_new_with_buttons(NULL,
 			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
