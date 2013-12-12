@@ -40,10 +40,7 @@ pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const 
 	gtk_misc_set_alignment(GTK_MISC(section_label), 0.0, 0.5);
 	gtk_label_set_attribute_bold(GTK_LABEL(section_label));
 
-	gtk_table_attach(GTK_TABLE(table), section_label,
-			 0, 2, *row, *row + 1,
-			 GTK_FILL|GTK_EXPAND, GTK_SHRINK,
-			 0, 0);
+	gtk_grid_attach (GTK_GRID(table), section_label, 0, *row, 2, 1);
 	++ * row;
 
 	return section_label;
@@ -52,7 +49,8 @@ pragha_hig_workarea_table_add_section_title(GtkWidget *table, guint *row, const 
 void
 pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget)
 {
-	gtk_table_attach(GTK_TABLE(table), widget, 0, 2, *row, *row + 1, GTK_FILL, 0, 12, 0);
+	gtk_grid_attach (GTK_GRID(table), widget, 0, *row, 2, 1);
+	gtk_widget_set_margin_left (GTK_WIDGET(widget), 12);
 
 	++ * row;
 }
@@ -60,10 +58,12 @@ pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidg
 void
 pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget)
 {
-	gtk_table_attach(GTK_TABLE(table), widget,
-			 0, 2, *row, *row + 1,
-			 GTK_EXPAND | GTK_SHRINK | GTK_FILL, GTK_EXPAND | GTK_SHRINK | GTK_FILL,
-			 12, 0);
+	gtk_grid_attach (GTK_GRID(table), widget, 0, *row, 2, 1);
+
+	gtk_widget_set_margin_left (GTK_WIDGET(widget), 12);
+
+	gtk_widget_set_hexpand (widget, TRUE);
+	gtk_widget_set_vexpand (widget, TRUE);
 
 	++ * row;
 }
@@ -72,9 +72,12 @@ void
 pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control)
 {
 	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_widget_set_margin_left (GTK_WIDGET(label), 12);
 
-	gtk_table_attach(GTK_TABLE(table), label, 0, 1, *row, *row + 1, GTK_FILL, GTK_FILL, 12, 0);
-	gtk_table_attach(GTK_TABLE(table), control, 1, 2, *row, *row + 1, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0, 0);
+	gtk_grid_attach (GTK_GRID(table), label, 0, *row, 1, 1);
+	gtk_grid_attach (GTK_GRID(table), control, 1, *row, 1, 1);
+
+	gtk_widget_set_hexpand (control, TRUE);
 
 	++ * row;
 }
@@ -84,18 +87,12 @@ pragha_hig_workarea_table_new()
 {
 	GtkWidget *table;
 
-	table = gtk_table_new(1, 2, FALSE);
+	table = gtk_grid_new ();
 
 	gtk_container_set_border_width(GTK_CONTAINER(table), 12);
-	gtk_table_set_col_spacing(GTK_TABLE(table), 0, 12);
 
-	gtk_table_set_row_spacings(GTK_TABLE(table), 6);
+	gtk_grid_set_row_spacing (GTK_GRID(table), 12);
+	gtk_grid_set_column_spacing (GTK_GRID(table), 6);
 
 	return table;
-}
-
-void
-pragha_hig_workarea_table_finish(GtkWidget *table, guint *row)
-{
-	gtk_table_resize(GTK_TABLE(table), *row, 2);
 }

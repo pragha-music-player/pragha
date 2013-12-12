@@ -850,8 +850,6 @@ pref_create_audio_page (PreferencesDialog *dialog)
 	g_signal_connect (G_OBJECT(audio_sink_combo), "changed",
 	                  G_CALLBACK(change_audio_sink), dialog);
 
-	pragha_hig_workarea_table_finish(table, &row);
-
 	return table;
 }
 
@@ -934,8 +932,6 @@ pref_create_library_page (PreferencesDialog *dialog)
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
 			  G_CALLBACK(library_view_key_press), dialog);
 
-	pragha_hig_workarea_table_finish(table, &row);
-
 	return table;
 }
 
@@ -987,8 +983,6 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	g_signal_connect(G_OBJECT(album_art), "toggled",
 			 G_CALLBACK(toggle_album_art), dialog);
 
-	pragha_hig_workarea_table_finish(table, &row);
-
 	return table;
 }
 
@@ -1033,8 +1027,6 @@ pref_create_general_page(PreferencesDialog *dialog)
 	dialog->window_state_combo_w = window_state_combo;
 	dialog->restore_playlist_w = restore_playlist;
 	dialog->add_recursively_w = add_recursively;
-
-	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1082,8 +1074,6 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	dialog->show_osd_w = show_osd;
 	dialog->albumart_in_osd_w = albumart_in_osd;
 	dialog->actions_in_osd_w = actions_in_osd;
-
-	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }
@@ -1152,8 +1142,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	#endif
 	dialog->use_cddb_w = use_cddb;
 	dialog->use_mpris2_w = use_mpris2;
-
-	pragha_hig_workarea_table_finish(table, &row);
 
 	return table;
 }

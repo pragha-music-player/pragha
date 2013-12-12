@@ -27,6 +27,5 @@ void       pragha_hig_workarea_table_add_wide_control      (GtkWidget *table, gu
 void       pragha_hig_workarea_table_add_wide_tall_control (GtkWidget *table, guint *row, GtkWidget *widget);
 void       pragha_hig_workarea_table_add_row               (GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control);
 GtkWidget *pragha_hig_workarea_table_new                   ();
-void       pragha_hig_workarea_table_finish                (GtkWidget *table, guint *row);
 
 #endif /* PRAGHA_HIG_H */
