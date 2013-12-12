@@ -15,12 +15,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <gdk/gdkx.h>
+
 #include <keybinder.h>
+
 #include "pragha-playback.h"
 #include "pragha.h"
-#if GTK_CHECK_VERSION (3, 0, 0)
-#include <gdk/gdkx.h>
-#endif
 
 static void keybind_prev_handler (const char *keystring, gpointer data)
 {
@@ -76,11 +76,7 @@ static void keybind_media_handler (const char *keystring, gpointer data)
 gboolean keybinder_will_be_useful ()
 {
 #ifdef GDK_WINDOWING_X11
-	#if GTK_CHECK_VERSION (3, 0, 0)
-		return GDK_IS_X11_DISPLAY (gdk_display_get_default ());
-	#else
-		return TRUE;
-	#endif
+	return GDK_IS_X11_DISPLAY (gdk_display_get_default ());
 #else
 	return FALSE;
 #endif

@@ -126,7 +126,6 @@ rounded_rectangle (cairo_t *cr,
   cairo_close_path (cr);
 }
 
-#if GTK_CHECK_VERSION (3, 0, 0)
 static void
 render (GtkCellRenderer      *cell,
         cairo_t              *cr,
@@ -134,16 +133,6 @@ render (GtkCellRenderer      *cell,
         const GdkRectangle   *background_area,
         const GdkRectangle   *cell_area,
         GtkCellRendererState  flags)
-#else
-static void
-render (GtkCellRenderer      *cell,
-        GdkDrawable          *window,
-        GtkWidget            *widget,
-        GdkRectangle         *background_area,
-        GdkRectangle         *cell_area,
-        GdkRectangle         *expose_area,
-        GtkCellRendererState  flags)
-#endif
 {
   GtkCellRendererBubblePrivate *priv;
   cairo_pattern_t *pattern;
@@ -157,12 +146,7 @@ render (GtkCellRenderer      *cell,
   
   if (priv->show_bubble)
     {
-#if GTK_CHECK_VERSION (3, 0, 0)
       cairo_save (cr);
-#else
-      cairo_t *cr = gdk_cairo_create (GDK_DRAWABLE (window));
-      g_assert (cr);
-#endif
       
       style = gtk_widget_get_style(widget);
       
@@ -204,20 +188,11 @@ render (GtkCellRenderer      *cell,
 
       cairo_pattern_destroy(pattern);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
       cairo_restore (cr);
-#else
-      cairo_destroy (cr);
-#endif
     }
   
-#if GTK_CHECK_VERSION (3, 0, 0)
   GTK_CELL_RENDERER_CLASS (gtk_cell_renderer_bubble_parent_class)->
     render (cell, cr, widget, background_area, cell_area, flags);
-#else
-  GTK_CELL_RENDERER_CLASS (gtk_cell_renderer_bubble_parent_class)->
-    render (cell, window, widget, background_area, cell_area, expose_area, flags);
-#endif
 }
 
 static void

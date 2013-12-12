@@ -53,17 +53,8 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 	gtk_misc_set_alignment (GTK_MISC(label), 0, 0.5);
 	g_free(markup);
 
-	#if GTK_CHECK_VERSION (3, 0, 0)
-	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading), GTK_STYLE_CLASS_ENTRY);
-	#else
-	GtkWidget *entry = gtk_entry_new();
-	GtkStyle *style = gtk_widget_get_style (entry);
-	gtk_widget_modify_bg (xfce_heading, GTK_STATE_NORMAL,
-		                  &style->base[GTK_STATE_NORMAL]);
-	gtk_widget_modify_fg (label, GTK_STATE_NORMAL,
-		                  &style->text[GTK_STATE_NORMAL]);
-	gtk_widget_destroy (entry);
-	#endif
+	gtk_style_context_add_class (gtk_widget_get_style_context (xfce_heading),
+	                             GTK_STYLE_CLASS_ENTRY);
 
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);

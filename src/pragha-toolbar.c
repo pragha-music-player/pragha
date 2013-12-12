@@ -405,7 +405,7 @@ GtkWidget*
 pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 {
 	GtkWidget *title_extention_hbox, *title, *title_event_box, *extention_box;
-	GtkWidget *progress_hbox, *time_label, *time_align, *progress_bar, *length_label, *length_align, *length_event_box;
+	GtkWidget *progress_bar_event_box, *progress_hbox, *time_label, *time_align, *progress_bar, *length_label, *length_align, *length_event_box;
 	GtkWidget *track_info_vbox, *track_info_align;
 
 	/* The title widget. */
@@ -450,20 +450,13 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 	progress_bar = gtk_progress_bar_new();
 	gtk_widget_set_size_request(GTK_WIDGET(progress_bar), -1, 12);
 
-	#if GTK_CHECK_VERSION (3, 0, 0)
-	GtkWidget *progress_bar_event_box = gtk_event_box_new();
+	progress_bar_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(progress_bar_event_box), FALSE);
 
 	gtk_container_add(GTK_CONTAINER(progress_bar_event_box), progress_bar);
 
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
 	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
-	#else
-	gtk_widget_set_events(progress_bar, GDK_BUTTON_PRESS_MASK);
-
-	g_signal_connect (G_OBJECT(progress_bar), "button-press-event",
-	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
-	#endif
 
 	/* Length and remaining time widget. */
 
@@ -488,11 +481,7 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 	                    GTK_WIDGET(time_align),
 	                    FALSE, FALSE, 3);
 	gtk_box_pack_start (GTK_BOX(progress_hbox),
-	                    #if GTK_CHECK_VERSION (3, 0, 0)
 	                    GTK_WIDGET(progress_bar_event_box),
-	                    #else
-	                    GTK_WIDGET(progress_bar),
-	                    #endif
 	                    TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(progress_hbox),
 	                    GTK_WIDGET(length_event_box),
@@ -706,6 +695,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	GtkToolItem *unfull_button, *shuffle_button, *repeat_button;
 	GtkWidget *vol_button;
 	PraghaAlbumArt *albumart;
+	GtkStyleContext *context;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -713,10 +703,9 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	preferences = pragha_preferences_get();
 
 	gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
-#if GTK_CHECK_VERSION (3, 0, 0)
-	GtkStyleContext * context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
+
+	context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
 	gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-#endif
 
 	/* Setup Left control buttons */
 
