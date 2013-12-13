@@ -35,7 +35,6 @@
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
-#include "pragha-glyr.h"
 #include "pragha-notify.h"
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
@@ -97,9 +96,6 @@ PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication 
 PraghaMpris2      *pragha_application_get_mpris2             (PraghaApplication *pragha);
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
-#endif
-#ifdef HAVE_LIBGLYR
-PraghaGlyr        *pragha_application_get_glyr               (PraghaApplication *pragha);
 #endif
 
 PraghaNotify      *pragha_application_get_notify             (PraghaApplication *pragha);

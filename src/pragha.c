@@ -80,9 +80,6 @@ struct _PraghaApplication {
 	PeasExtensionSet  *peas_exten_set;
 
 	PraghaNotify      *notify;
-#ifdef HAVE_LIBGLYR
-	PraghaGlyr        *glyr;
-#endif
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm      *clastfm;
 #endif
@@ -347,14 +344,6 @@ pragha_application_get_lastfm (PraghaApplication *pragha)
 }
 #endif
 
-#ifdef HAVE_LIBGLYR
-PraghaGlyr *
-pragha_application_get_glyr (PraghaApplication *pragha)
-{
-	return pragha->glyr;
-}
-#endif
-
 gboolean
 pragha_application_is_first_run (PraghaApplication *pragha)
 {
@@ -427,12 +416,6 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-#ifdef HAVE_LIBGLYR
-	if (pragha->glyr) {
-		pragha_glyr_free (pragha->glyr);
-		pragha->glyr = NULL;
-	}
-#endif
 #ifdef HAVE_LIBCLASTFM
 	if (pragha->clastfm) {
 		pragha_lastfm_free (pragha->clastfm);
@@ -626,9 +609,6 @@ pragha_application_startup (GApplication *application)
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
-	#ifdef HAVE_LIBGLYR
-	pragha->glyr = pragha_glyr_new (pragha);
-	#endif
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);
 	#endif

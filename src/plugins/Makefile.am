@@ -10,6 +10,10 @@ SUBDIRS =              \
 	gnome-media-keys \
 	helloworld
 
+if HAVE_LIBGLYR
+SUBDIRS += song-info
+endif
+
 if HAVE_LIBKEYBINDER
 SUBDIRS += keybinder
 endif

@@ -36,8 +36,6 @@ pragha_SOURCES = \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
 		pragha-filter-dialog.h \
-		pragha-glyr.c \
-		pragha-glyr.h \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \
@@ -136,11 +134,6 @@ endif
 if HAVE_LIBCLASTFM
 pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
 pragha_LDADD += $(LIBCLASTFM_LIBS)
-endif
-
-if HAVE_LIBGLYR
-pragha_CFLAGS += $(LIBGLYR_CFLAGS)
-pragha_LDADD += $(LIBGLYR_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
