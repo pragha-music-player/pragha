@@ -106,7 +106,6 @@ struct _PraghaPreferencesClass
 #define KEY_LASTFM                 "lastfm"
 #define KEY_LASTFM_USER            "lastfm_user"
 #define KEY_LASTFM_PASS            "lastfm_pass"
-#define KEY_GET_ALBUM_ART          "get_album_art"
 #define KEY_USE_CDDB               "use_cddb"
 #define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
@@ -139,6 +138,16 @@ GType pragha_preferences_get_type (void) G_GNUC_CONST;
 /*
  * Generic api to accessing other preferences.
  */
+
+gboolean
+pragha_preferences_get_boolean (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key);
+void
+pragha_preferences_set_boolean (PraghaPreferences *preferences,
+                                const gchar       *group_name,
+                                const gchar       *key,
+                                gboolean           sbool);
 
 gint *
 pragha_preferences_get_integer_list (PraghaPreferences *preferences,
@@ -422,13 +431,6 @@ pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
 void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
-
-gboolean
-pragha_preferences_get_download_album_art (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_download_album_art (PraghaPreferences *preferences,
-                                           gboolean download_album_art);
 
 gboolean
 pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);

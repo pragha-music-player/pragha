@@ -1,0 +1,9 @@
+[Plugin]
+Module=song-info
+Name=Get Artist info, Lyrics and Album arts
+Description=Get Artist info, Lyrics and Album arts of yours songs
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2013 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+

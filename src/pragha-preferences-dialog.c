@@ -72,9 +72,6 @@ struct _PreferencesDialog {
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
 #endif
-#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art_w;
-#endif
 	GtkWidget *use_cddb_w;
 	GtkWidget *use_mpris2_w;
 };
@@ -362,10 +359,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_disconnect (clastfm);
 			pragha_lastfm_connect (clastfm);
 		}
-#endif
-#ifdef HAVE_LIBGLYR
-		pragha_preferences_set_download_album_art(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w)));
 #endif
 		pragha_preferences_set_use_cddb(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
@@ -755,10 +748,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
 	}
 #endif
-#ifdef HAVE_LIBGLYR
-	if(pragha_preferences_get_download_album_art(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w), TRUE);
-#endif
 	if (pragha_preferences_get_use_cddb(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
 	if (pragha_preferences_get_use_mpris2(dialog->preferences))
@@ -1086,9 +1075,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	#ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	#endif
-	#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art;
-	#endif
 	GtkWidget *use_cddb, *use_mpris2;
 	guint row = 0;
 
@@ -1119,10 +1105,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Others services"));
 
-	#ifdef HAVE_LIBGLYR
-	get_album_art = gtk_check_button_new_with_label(_("Get album art"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, get_album_art);
-	#endif
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
 
@@ -1137,9 +1119,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	dialog->lastfm_pass_w = lastfm_pass;
 	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
 	                  G_CALLBACK(toggle_lastfm), dialog);
-	#endif
-	#ifdef HAVE_LIBGLYR
-	dialog->get_album_art_w = get_album_art;
 	#endif
 	dialog->use_cddb_w = use_cddb;
 	dialog->use_mpris2_w = use_mpris2;
