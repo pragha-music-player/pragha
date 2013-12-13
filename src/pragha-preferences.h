@@ -107,7 +107,6 @@ struct _PraghaPreferencesClass
 #define KEY_LASTFM_USER            "lastfm_user"
 #define KEY_LASTFM_PASS            "lastfm_pass"
 #define KEY_USE_CDDB               "use_cddb"
-#define KEY_ALLOW_MPRIS2           "allow_mpris2"
 
 /* Some default preferences. */
 
@@ -431,13 +430,6 @@ pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
 void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
-
-gboolean
-pragha_preferences_get_use_mpris2 (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_use_mpris2 (PraghaPreferences *preferences,
-                                   gboolean use_mpris2);
 
 gboolean
 pragha_preferences_get_lastfm_support (PraghaPreferences *preferences);

@@ -73,7 +73,6 @@ struct _PreferencesDialog {
 	GtkWidget *lastfm_pass_w;
 #endif
 	GtkWidget *use_cddb_w;
-	GtkWidget *use_mpris2_w;
 };
 
 const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
@@ -144,7 +143,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 {
 	PraghaLibraryPane *library;
 	PraghaNotify *notify;
-	PraghaMpris2 *mpris2;
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm *clastfm;
 #endif
@@ -362,17 +360,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 #endif
 		pragha_preferences_set_use_cddb(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
-
-		pragha_preferences_set_use_mpris2(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
-
-		mpris2 = pragha_application_get_mpris2 (dialog->pragha);
-		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
-			pragha_mpris_close (mpris2);
-		}
-		else {
-			pragha_mpris_init (mpris2, dialog->pragha);
-		}
 		break;
 	default:
 		break;
@@ -750,8 +737,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 #endif
 	if (pragha_preferences_get_use_cddb(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
-	if (pragha_preferences_get_use_mpris2(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w), TRUE);
 }
 
 gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
@@ -1075,7 +1060,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 	#ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	#endif
-	GtkWidget *use_cddb, *use_mpris2;
+	GtkWidget *use_cddb;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -1108,9 +1093,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
 
-	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, use_mpris2);
-
 	/* Store references. */
 
 	#ifdef HAVE_LIBCLASTFM
@@ -1121,7 +1103,6 @@ pref_create_services_page(PreferencesDialog *dialog)
 	                  G_CALLBACK(toggle_lastfm), dialog);
 	#endif
 	dialog->use_cddb_w = use_cddb;
-	dialog->use_mpris2_w = use_mpris2;
 
 	return table;
 }

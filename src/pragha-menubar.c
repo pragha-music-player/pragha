@@ -716,7 +716,6 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaPlaylist *playlist;
-	PraghaMpris2 *mpris2;
 	PraghaMusicobject *nmobj, *bmobj;
 	PraghaTagger *tagger;
 	gint changed = 0;
@@ -753,9 +752,6 @@ pragha_edit_tags_dialog_response (GtkWidget      *dialog,
 					g_object_unref(bmobj);
 
 					pragha_toolbar_set_title(toolbar, current_mobj);
-
-					mpris2 = pragha_application_get_mpris2 (pragha);
-					pragha_mpris_update_metadata_changed (mpris2);
 				}
 			}
 
