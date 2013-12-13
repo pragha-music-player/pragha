@@ -87,7 +87,6 @@ struct _PraghaApplication {
 	PraghaLastfm      *clastfm;
 #endif
 	PraghaMpris2      *mpris2;
-	con_gnome_media_keys *cgnome_media_keys;
 };
 
 G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
@@ -457,10 +456,6 @@ pragha_application_dispose (GObject *object)
 		pragha_art_cache_free (pragha->art_cache);
 		pragha->art_cache = NULL;
 	}
-	if (pragha->cgnome_media_keys) {
-		gnome_media_keys_free (pragha->cgnome_media_keys);
-		pragha->cgnome_media_keys = NULL;
-	}
 	if (pragha->mainwindow) {
 		pragha_window_free (pragha);
 		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
@@ -637,11 +632,6 @@ pragha_application_startup (GApplication *application)
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);
 	#endif
-
-	/* Init_gnome_media_keys requires constructed main window. */
-	if (gnome_media_keys_will_be_useful()) {
-	    pragha->cgnome_media_keys = init_gnome_media_keys (pragha);
-	}
 
 	g_application_hold (application); //TODO don't hold if gtkapp
 }

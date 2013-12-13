@@ -1,0 +1,9 @@
+[Plugin]
+Module=gnome-media-keys
+Name=Global Hotkeys with gnome-media-keys daemon
+Description=Control pragha with gnome-media-keys daemon
+Authors=Pavel Vasin
+Copyright=Copyright © 2012-2013 Pavel Vasin
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+

@@ -6,7 +6,9 @@ AM_CPPFLAGS =								\
 	$(WARN_CFLAGS)							\
 	$(DISABLE_DEPRECATED)
 
-SUBDIRS = helloworld
+SUBDIRS =              \
+	gnome-media-keys \
+	helloworld
 
 if HAVE_LIBKEYBINDER
 SUBDIRS += keybinder
