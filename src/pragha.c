@@ -83,7 +83,6 @@ struct _PraghaApplication {
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm      *clastfm;
 #endif
-	PraghaMpris2      *mpris2;
 };
 
 G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
@@ -142,7 +141,6 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
-	PraghaMpris2 *mpris2;
 	PraghaMusicobject *cmobj = NULL;
 
 	backend = pragha_application_get_backend (pragha);
@@ -153,9 +151,6 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 
 		toolbar = pragha_application_get_toolbar (pragha);
 		pragha_toolbar_set_title (toolbar, cmobj);
-
-		mpris2 = pragha_application_get_mpris2 (pragha);
-		pragha_mpris_update_metadata_changed (mpris2);
 	}
 }
 
@@ -330,12 +325,6 @@ pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
 	pragha->notify = notify;
 }
 
-PraghaMpris2 *
-pragha_application_get_mpris2 (PraghaApplication *pragha)
-{
-	return pragha->mpris2;
-}
-
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm *
 pragha_application_get_lastfm (PraghaApplication *pragha)
@@ -426,10 +415,6 @@ pragha_application_dispose (GObject *object)
 		pragha_sidebar_free (pragha->sidebar);
 		pragha->sidebar = NULL;
 	}
-	if (pragha->mpris2) {
-		pragha_mpris_free (pragha->mpris2);
-		pragha->mpris2 = NULL;
-	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
 		g_object_unref (pragha->backend);
@@ -495,8 +480,6 @@ pragha_application_startup (GApplication *application)
 
 	/* Allocate memory for simple structures */
 
-	pragha->mpris2 = pragha_mpris_new();
-
 	pragha->preferences = pragha_preferences_get();
 
 	pragha->cdbase = pragha_database_get();
@@ -539,10 +522,6 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
 	g_signal_connect (pragha->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
-
-	if (pragha_mpris_init(pragha->mpris2, pragha) == -1) {
-		g_critical("Unable to initialize MPRIS");
-	}
 
 	/*
 	 * Collect widgets and construct the window.

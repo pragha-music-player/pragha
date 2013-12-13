@@ -147,6 +147,7 @@ po/Makefile.in
 src/Makefile
 src/plugins/Makefile
 src/plugins/helloworld/Makefile
+src/plugins/mpris2/Makefile
 src/plugins/keybinder/Makefile
 src/plugins/gnome-media-keys/Makefile
 src/plugins/song-info/Makefile
