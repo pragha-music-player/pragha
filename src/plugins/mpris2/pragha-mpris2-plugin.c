@@ -1,6 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>                   */
-/* Copyright (C) 2011      hakan  <smultimeter@gmail.com>                */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,7 +15,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
@@ -26,32 +25,43 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-mpris.h"
-#include "pragha-playback.h"
-#include "pragha-menubar.h"
-#include "pragha-file-utils.h"
-#include "pragha-utils.h"
-#include "pragha-playlists-mgmt.h"
-#include "pragha-musicobject-mgmt.h"
-#include "pragha.h"
+#include <glib.h>
+#include <glib-object.h>
+#include <gmodule.h>
+#include <gtk/gtk.h>
 
-#define N_OBJECTS 4
+#include <stdio.h>
+#include <string.h>
 
-struct _PraghaMpris2 {
-	PraghaApplication *pragha;
+#include <libpeas/peas.h>
+#include <libpeas-gtk/peas-gtk.h>
 
-	guint              owner_id;
-	GDBusNodeInfo     *introspection_data;
-	GDBusConnection   *dbus_connection;
-	GQuark             interface_quarks[N_OBJECTS];
-	guint              registration_object_ids[N_OBJECTS];
+#include "pragha-mpris2-plugin.h"
 
-	gboolean           saved_playbackstatus;
-	gboolean           saved_shuffle;
-	gchar             *saved_title;
-	gdouble            volume;
-	PraghaBackendState state;
+#include "../../pragha-playback.h"
+#include "../../pragha-menubar.h"
+#include "../../pragha-file-utils.h"
+#include "../../pragha-utils.h"
+#include "../../pragha-playlists-mgmt.h"
+#include "../../pragha-musicobject-mgmt.h"
+#include "../../pragha.h"
+
+static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
+
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (PraghaMpris2Plugin,
+                                pragha_mpris2_plugin,
+                                PEAS_TYPE_EXTENSION_BASE,
+                                0,
+                                G_IMPLEMENT_INTERFACE_DYNAMIC (PEAS_TYPE_ACTIVATABLE,
+                                                               peas_activatable_iface_init))
+enum {
+	PROP_0,
+	PROP_OBJECT
 };
+
+/*
+ * Mpris2 debus implementation.
+ */
 
 static const gchar mpris2xml[] =
 "<node>"
@@ -153,20 +163,24 @@ static const gchar mpris2xml[] =
 
 /* some MFCisms */
 #define BEGIN_INTERFACE(x) \
-	if(g_quark_try_string(interface_name)==mpris2->interface_quarks[x]) {
+	if(g_quark_try_string(interface_name)==plugin->interface_quarks[x]) {
 #define MAP_METHOD(x,y) \
 	if(!g_strcmp0(#y, method_name)) { \
-		mpris_##x##_##y(invocation, parameters, mpris2); return; }
+		mpris_##x##_##y(invocation, parameters, plugin); return; }
 #define PROPGET(x,y) \
 	if(!g_strcmp0(#y, property_name)) \
-		return mpris_##x##_get_##y(error, mpris2);
+		return mpris_##x##_get_##y(error, plugin);
 #define PROPPUT(x,y) \
 	if(g_quark_try_string(property_name)==g_quark_from_static_string(#y)) \
-		mpris_##x##_put_##y(value, error, mpris2);
+		mpris_##x##_put_##y(value, error, plugin);
 #define END_INTERFACE }
 
+/*
+ * Mpris2 implementation.
+ */
+
 static PraghaMusicobject *
-get_mobj_at_mpris2_track_id(PraghaApplication *pragha, const gchar *track_id)
+get_mobj_at_mpris2_track_id (const gchar *track_id)
 {
 	gchar *base = NULL;
 	void *mobj_request = NULL;
@@ -181,56 +195,69 @@ get_mobj_at_mpris2_track_id(PraghaApplication *pragha, const gchar *track_id)
 	return mobj_request;
 }
 
-/* org.mpris.MediaPlayer2 */
-static void mpris_Root_Raise (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
-{
-	PraghaApplication *pragha = mpris2->pragha;
+/*
+ * org.mpris.MediaPlayer2
+ */
 
-	gtk_window_present(GTK_WINDOW(pragha_application_get_window(pragha)));
+static void
+mpris_Root_Raise (GDBusMethodInvocation *invocation,
+                  GVariant              *parameters,
+                  PraghaMpris2Plugin    *plugin)
+{
+	gtk_window_present(GTK_WINDOW(pragha_application_get_window (plugin->pragha)));
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Root_Quit (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Root_Quit (GDBusMethodInvocation *invocation,
+                 GVariant              *parameters,
+                 PraghaMpris2Plugin    *plugin)
 {
-	pragha_application_quit (mpris2->pragha);
+	pragha_application_quit (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static GVariant* mpris_Root_get_CanQuit (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_CanQuit (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_boolean(TRUE);
 }
 
-static GVariant* mpris_Root_get_CanRaise (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_CanRaise (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_boolean(TRUE);
 }
 
-static GVariant* mpris_Root_get_HasTrackList (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_HasTrackList (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_boolean(TRUE);
 }
 
-static GVariant* mpris_Root_get_Identity (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_Identity (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_string("Pragha Music Player");
 }
 
-static GVariant* mpris_Root_get_DesktopEntry (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_DesktopEntry (GError **error, PraghaMpris2Plugin *plugin)
 {
-	GVariant* ret_val = g_variant_new_string("pragha");
-	return ret_val;
+	return g_variant_new_string("pragha");
 }
 
-static GVariant* mpris_Root_get_SupportedUriSchemes (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_SupportedUriSchemes (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_parse(G_VARIANT_TYPE("as"),
 		"['file', 'cdda']", NULL, NULL, NULL);
 }
 
-static GVariant* mpris_Root_get_SupportedMimeTypes (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Root_get_SupportedMimeTypes (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_parse(G_VARIANT_TYPE("as"),
 		"['audio/x-mp3', 'audio/mpeg', 'audio/x-mpeg', 'audio/mpeg3', "
@@ -248,92 +275,102 @@ static GVariant* mpris_Root_get_SupportedMimeTypes (GError **error, PraghaMpris2
 		"'application/x-flac', 'audio/flac', 'audio/x-wav']", NULL, NULL, NULL);
 }
 
-/* org.mpris.MediaPlayer2.Player */
-static void mpris_Player_Play (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+/*
+ * org.mpris.MediaPlayer2.Player
+ */
+
+static void
+mpris_Player_Play (GDBusMethodInvocation *invocation,
+                   GVariant              *parameters,
+                   PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(pragha);
+		pragha_playback_play_pause_resume (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_Next (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_Next (GDBusMethodInvocation *invocation,
+                   GVariant              *parameters,
+                   PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(pragha);
+		pragha_playback_next_track (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_Previous (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_Previous (GDBusMethodInvocation *invocation,
+                       GVariant              *parameters,
+                       PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(pragha);
+		pragha_playback_prev_track (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_Pause (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_Pause (GDBusMethodInvocation *invocation,
+                    GVariant              *parameters,
+                    PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_backend_pause (backend);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_PlayPause (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_PlayPause (GDBusMethodInvocation *invocation,
+                        GVariant              *parameters,
+                        PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(pragha);
+		pragha_playback_play_pause_resume (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_Stop (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_Stop (GDBusMethodInvocation *invocation,
+                   GVariant              *parameters,
+                   PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(pragha);
+		pragha_playback_stop (plugin->pragha);
 
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_Seek (GDBusMethodInvocation *invocation,
+                   GVariant              *parameters,
+                   PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 
 	if(pragha_backend_get_state (backend) == ST_STOPPED) {
 		g_dbus_method_invocation_return_error_literal (invocation,
@@ -354,7 +391,10 @@ static void mpris_Player_Seek (GDBusMethodInvocation *invocation, GVariant* para
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_SetPosition (GDBusMethodInvocation *invocation,
+                          GVariant              *parameters,
+                          PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 	PraghaMusicobject *current_mobj = NULL;
@@ -362,14 +402,12 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 	PraghaMusicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	g_variant_get(parameters, "(ox)", &track_id, &param);
-	mobj = get_mobj_at_mpris2_track_id(pragha, track_id);
+	mobj = get_mobj_at_mpris2_track_id (track_id);
 	g_free(track_id);
 
 	/* FIXME: Ugly hack... */
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 	current_mobj = pragha_backend_get_musicobject (backend);
 
 	if(mobj != NULL && mobj == current_mobj) {
@@ -387,32 +425,31 @@ static void mpris_Player_SetPosition (GDBusMethodInvocation *invocation, GVarian
 static void
 seeked_cb (PraghaBackend *backend, gpointer user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	if(NULL == mpris2->dbus_connection)
+	if(NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS emit seeked signal..");
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 
 	gint64 position = pragha_backend_get_current_position (backend);
 
-	g_dbus_connection_emit_signal(mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal(plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.Player", "Seeked",
 		 g_variant_new ("(x)", GST_TIME_AS_USECONDS (position)), NULL);
 }
 
-static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Player_OpenUri (GDBusMethodInvocation *invocation,
+                      GVariant              *parameters,
+                      PraghaMpris2Plugin    *plugin)
 {
 	PraghaPlaylist *playlist;
 	gchar *uri = NULL, *path = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gboolean happened = FALSE;
-
-	PraghaApplication *pragha = mpris2->pragha;
 
 	g_variant_get(parameters, "(s)", &uri);
 
@@ -425,7 +462,7 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 		if(path && is_playable_file(path)) {
 			mobj = new_musicobject_from_file(path);
 			if(mobj) {
-				playlist = pragha_application_get_playlist (pragha);
+				playlist = pragha_application_get_playlist (plugin->pragha);
 
 				pragha_playlist_append_mobj_and_play(playlist, mobj);
 				happened = TRUE;
@@ -444,10 +481,10 @@ static void mpris_Player_OpenUri (GDBusMethodInvocation *invocation, GVariant* p
 							       "This file does not play here.");
 }
 
-static GVariant* mpris_Player_get_PlaybackStatus (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_PlaybackStatus (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	switch (pragha_backend_get_state (backend)) {
 		case ST_PLAYING:
@@ -459,76 +496,80 @@ static GVariant* mpris_Player_get_PlaybackStatus (GError **error, PraghaMpris2 *
 	}
 }
 
-static GVariant* mpris_Player_get_LoopStatus (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_LoopStatus (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaPreferences *preferences;
 	gboolean repeat;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (plugin->pragha);
 	repeat = pragha_preferences_get_repeat (preferences);
 
 	return g_variant_new_string(repeat ? "Playlist" : "None");
 }
 
-static void mpris_Player_put_LoopStatus (GVariant *value, GError **error, PraghaMpris2 *mpris2)
+static void
+mpris_Player_put_LoopStatus (GVariant            *value,
+                             GError             **error,
+                             PraghaMpris2Plugin  *plugin)
 {
 	PraghaPreferences *preferences;
-
-	PraghaApplication *pragha = mpris2->pragha;
 
 	const gchar *new_loop = g_variant_get_string(value, NULL);
 
 	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
 
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (plugin->pragha);
 	pragha_preferences_set_repeat (preferences, repeat);
 }
 
-static GVariant* mpris_Player_get_Rate (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_Rate (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_double(1.0);
 }
 
-static void mpris_Player_put_Rate (GVariant *value, GError **error, PraghaMpris2 *mpris2)
+static void
+mpris_Player_put_Rate (GVariant *value, GError **error, PraghaMpris2Plugin *plugin)
 {
 	g_set_error (error, G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "This is not alsaplayer.");
 }
 
-static GVariant* mpris_Player_get_Shuffle (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_Shuffle (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaPreferences *preferences;
 	gboolean shuffle;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (plugin->pragha);
 	shuffle = pragha_preferences_get_shuffle (preferences);
 
 	return g_variant_new_boolean(shuffle);
 }
 
-static void mpris_Player_put_Shuffle (GVariant *value, GError **error, PraghaMpris2 *mpris2)
+static void
+mpris_Player_put_Shuffle (GVariant *value, GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaPreferences *preferences;
 	gboolean shuffle = g_variant_get_boolean(value);
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (plugin->pragha);
 	pragha_preferences_set_shuffle (preferences, shuffle);
 }
 
-static GVariant * handle_get_trackid(PraghaMusicobject *mobj) {
+static GVariant *
+handle_get_trackid (PraghaMusicobject *mobj)
+{
 	gchar *o = alloca(260);
 	if(NULL == mobj)
 		return g_variant_new_object_path("/");
 	g_snprintf(o, 260, "%s/TrackList/%p", MPRIS_PATH, mobj);
+
 	return g_variant_new_object_path(o);
 }
 
-void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *val)
+static void
+handle_strings_request (GVariantBuilder *b, const gchar *tag, const gchar *val)
 {
 	GVariant *vval = g_variant_new_string(val);
 	GVariant *vvals = g_variant_new_array(G_VARIANT_TYPE_STRING, &vval, 1);
@@ -536,7 +577,8 @@ void handle_strings_request(GVariantBuilder *b, const gchar *tag, const gchar *v
 	g_variant_builder_add (b, "{sv}", tag, vvals);
 }
 
-static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
+static void
+handle_get_metadata (PraghaMusicobject *mobj, GVariantBuilder *b)
 {
 	const gchar *title, *artist, *album, *genre, *comment, *file;
 	gint track_no, year, length, bitrate, channels, samplerate;
@@ -590,7 +632,8 @@ static void handle_get_metadata(PraghaMusicobject *mobj, GVariantBuilder *b)
 	g_free(url);
 }
 
-static GVariant* mpris_Player_get_Metadata (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_Metadata (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
@@ -599,18 +642,16 @@ static GVariant* mpris_Player_get_Metadata (GError **error, PraghaMpris2 *mpris2
 	GVariantBuilder b;
 	const gchar *arturl;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("a{sv}"));
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
 		handle_get_metadata(pragha_backend_get_musicobject(backend), &b);
 
-		toolbar = pragha_application_get_toolbar (pragha);
+		toolbar = pragha_application_get_toolbar (plugin->pragha);
 		albumart = pragha_toolbar_get_album_art (toolbar);
 
 		arturl = pragha_album_art_get_path(albumart);
@@ -628,30 +669,27 @@ static GVariant* mpris_Player_get_Metadata (GError **error, PraghaMpris2 *mpris2
 	return g_variant_builder_end(&b);
 }
 
-static GVariant* mpris_Player_get_Volume (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_Volume (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	return g_variant_new_double(pragha_backend_get_volume (backend));
 }
 
-static void mpris_Player_put_Volume (GVariant *value, GError **error, PraghaMpris2 *mpris2)
+static void
+mpris_Player_put_Volume (GVariant *value, GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	gdouble volume = g_variant_get_double(value);
 	pragha_backend_set_volume (backend, volume);
 }
 
-static GVariant* mpris_Player_get_Position (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_Position (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return g_variant_new_int64(0);
@@ -659,63 +697,71 @@ static GVariant* mpris_Player_get_Position (GError **error, PraghaMpris2 *mpris2
 		return g_variant_new_int64(pragha_backend_get_current_position(backend) / 1000);
 }
 
-static GVariant* mpris_Player_get_MinimumRate (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_MinimumRate (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_double(1.0);
 }
 
-static GVariant* mpris_Player_get_MaximumRate (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_MaximumRate (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_double(1.0);
 }
 
-static GVariant* mpris_Player_get_CanGoNext (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanGoNext (GError **error, PraghaMpris2Plugin *plugin)
 {
 	// do we need to go into such detail?
 	return g_variant_new_boolean(TRUE);
 }
 
-static GVariant* mpris_Player_get_CanGoPrevious (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanGoPrevious (GError **error, PraghaMpris2Plugin *plugin)
 {
 	// do we need to go into such detail?
 	return g_variant_new_boolean(TRUE);
 }
 
-static GVariant* mpris_Player_get_CanPlay (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanPlay (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	return g_variant_new_boolean(pragha_backend_get_state (backend) == ST_PAUSED);
 }
 
-static GVariant* mpris_Player_get_CanPause (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanPause (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	return g_variant_new_boolean(pragha_backend_get_state (backend) == ST_PLAYING);
 }
 
-static GVariant* mpris_Player_get_CanSeek (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanSeek (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaApplication *pragha = mpris2->pragha;
-
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
+	PraghaBackend *backend = pragha_application_get_backend (plugin->pragha);
 
 	return g_variant_new_boolean (pragha_backend_can_seek (backend));
 }
 
-static GVariant* mpris_Player_get_CanControl (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Player_get_CanControl (GError **error, PraghaMpris2Plugin *plugin)
 {
 	// always?
 	return g_variant_new_boolean(TRUE);
 }
 
-/* org.mpris.MediaPlayer2.Playlists */
-static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+/*
+ * org.mpris.MediaPlayer2.Playlists
+ */
+
+static void
+mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
+                                  GVariant              *parameters,
+                                  PraghaMpris2Plugin    *plugin)
 {
 	PraghaBackend *backend;
 	PraghaDatabase *cdbase;
@@ -724,14 +770,12 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	gchar **db_playlists = NULL;
 	gint i = 0;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	CDEBUG(DBG_MPRIS, "MPRIS Playlists ActivatePlaylist");
 
 	g_variant_get(parameters, "(o)", &get_playlist);
 
 	if(get_playlist && g_str_has_prefix(get_playlist, MPRIS_PATH)) {
-		cdbase = pragha_application_get_database (pragha);
+		cdbase = pragha_application_get_database (plugin->pragha);
 		db_playlists = pragha_database_get_playlist_names (cdbase);
 		if(db_playlists) {
 			while(db_playlists[i]) {
@@ -746,16 +790,16 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	}
 
 	if(found_playlist) {
-		playlist = pragha_application_get_playlist (pragha);
+		playlist = pragha_application_get_playlist (plugin->pragha);
 		pragha_playlist_remove_all (playlist);
 
-		add_playlist_current_playlist(found_playlist, pragha);
+		add_playlist_current_playlist(found_playlist, plugin->pragha);
 
-		backend = pragha_application_get_backend (pragha);
+		backend = pragha_application_get_backend (plugin->pragha);
 		if(pragha_backend_get_state (backend) != ST_STOPPED)
-			pragha_playback_next_track(pragha);
+			pragha_playback_next_track (plugin->pragha);
 		else
-			pragha_playback_play_pause_resume(pragha);
+			pragha_playback_play_pause_resume (plugin->pragha);
 
 		g_free(found_playlist);
 
@@ -769,7 +813,10 @@ static void mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	g_free (get_playlist);
 }
 
-static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation,
+                              GVariant              *parameters,
+                              PraghaMpris2Plugin    *plugin)
 {
 	PraghaDatabase *cdbase;
 	GVariantBuilder builder;
@@ -780,14 +827,12 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	gboolean reverse;
 	gint imax = 0;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	CDEBUG(DBG_MPRIS, "MPRIS Playlists GetPlaylists");
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("(a(oss))"));
 	g_variant_builder_open(&builder, G_VARIANT_TYPE("a(oss)"));
 
-	cdbase = pragha_application_get_database (pragha);
+	cdbase = pragha_application_get_database (plugin->pragha);
 	lists = pragha_database_get_playlist_names (cdbase);
 
 	if (lists) {
@@ -810,7 +855,8 @@ static void mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation, GVa
 	g_dbus_method_invocation_return_value (invocation, g_variant_builder_end (&builder));
 }
 
-static GVariant* mpris_Playlists_get_ActivePlaylist (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Playlists_get_ActivePlaylist (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new("(b(oss))",
 		FALSE, "/", _("Playlists"), _("Playlists"));
@@ -821,25 +867,30 @@ static GVariant* mpris_Playlists_get_ActivePlaylist (GError **error, PraghaMpris
 		FALSE, "/", "invalid", "invalid");*/
 }
 
-static GVariant* mpris_Playlists_get_Orderings (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Playlists_get_Orderings (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_parse(G_VARIANT_TYPE("as"),
 		"['UserDefined']", NULL, NULL, NULL);
 }
 
-static GVariant* mpris_Playlists_get_PlaylistCount (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_Playlists_get_PlaylistCount (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaDatabase *cdbase;
-
-	PraghaApplication *pragha = mpris2->pragha;
-
-	cdbase = pragha_application_get_database (pragha);
+	cdbase = pragha_application_get_database (plugin->pragha);
 
 	return g_variant_new_uint32 (pragha_database_get_playlist_count (cdbase));
 }
 
-/* org.mpris.MediaPlayer2.TrackList */
-static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+/*
+ * prg.mpris.MediaPlayer2.TrackList
+ */
+
+static void
+mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation,
+                                   GVariant              *parameters,
+                                   PraghaMpris2Plugin    *plugin)
 {
 	/* In: (ao) out: aa{sv} */
 
@@ -847,8 +898,6 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 	gsize i, length;
 	GVariantBuilder b;
 	const gchar *track_id;
-
-	PraghaApplication *pragha = mpris2->pragha;
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GetTracksMetada");
 
@@ -861,7 +910,7 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 		g_variant_builder_open(&b, G_VARIANT_TYPE("a{sv}"));
 		PraghaMusicobject *mobj= NULL;
 		track_id = g_variant_get_string(g_variant_get_child_value(param1, i), NULL);
-		mobj = get_mobj_at_mpris2_track_id(pragha, track_id);
+		mobj = get_mobj_at_mpris2_track_id (track_id);
 		if (mobj) {
 			handle_get_metadata(mobj, &b);
 		} else {
@@ -875,15 +924,16 @@ static void mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation
 	g_dbus_method_invocation_return_value (invocation, g_variant_builder_end (&b));
 }
 
-static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation,
+                          GVariant              *parameters,
+                          PraghaMpris2Plugin    *plugin)
 {
 	PraghaPlaylist *playlist;
 	gchar *uri;
 	gchar *after_track; //TODO use this
 	gboolean set_as_current; //TODO use this
 	GList *mlist = NULL;
-
-	PraghaApplication *pragha = mpris2->pragha;
 
 	g_variant_get(parameters, "(sob)", &uri, &after_track, &set_as_current);
 
@@ -896,7 +946,7 @@ static void mpris_TrackList_AddTrack (GDBusMethodInvocation *invocation, GVarian
 
 	mlist = append_mobj_list_from_unknown_filename(mlist, file);
 	if (mlist) {
-		playlist = pragha_application_get_playlist (pragha);
+		playlist = pragha_application_get_playlist (plugin->pragha);
 		pragha_playlist_append_mobj_list(playlist, mlist);
 		g_list_free (mlist);
 	}
@@ -909,28 +959,32 @@ exit:
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
-static void mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_TrackList_RemoveTrack (GDBusMethodInvocation *invocation,
+                             GVariant              *parameters,
+                             PraghaMpris2Plugin    *plugin)
 {
 	g_dbus_method_invocation_return_error_literal (invocation,
 		G_DBUS_ERROR, G_DBUS_ERROR_NOT_SUPPORTED, "TrackList is read-only.");
 }
 
-static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* parameters, PraghaMpris2 *mpris2)
+static void
+mpris_TrackList_GoTo (GDBusMethodInvocation *invocation,
+                      GVariant              *parameters,
+                      PraghaMpris2Plugin    *plugin)
 {
 	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj = NULL;
 	gchar *track_id = NULL;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	g_variant_get(parameters, "(o)", &track_id);
 
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GoTo");
 
-	mobj = get_mobj_at_mpris2_track_id(pragha, track_id);
+	mobj = get_mobj_at_mpris2_track_id (track_id);
 
 	if (mobj) {
-		playlist = pragha_application_get_playlist (pragha);
+		playlist = pragha_application_get_playlist (plugin->pragha);
 		pragha_playlist_activate_unique_mobj (playlist, mobj);
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	}
@@ -941,20 +995,19 @@ static void mpris_TrackList_GoTo (GDBusMethodInvocation *invocation, GVariant* p
 	g_free (track_id);
 }
 
-static GVariant* mpris_TrackList_get_Tracks (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_TrackList_get_Tracks (GError **error, PraghaMpris2Plugin *plugin)
 {
 	PraghaPlaylist *playlist;
 	GVariantBuilder builder;
 	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
 	CDEBUG(DBG_MPRIS, "MPRIS Tracklist get Tracks");
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (plugin->pragha);
 	list = pragha_playlist_get_mobj_list (playlist);
 
 	if(list != NULL) {
@@ -969,7 +1022,8 @@ static GVariant* mpris_TrackList_get_Tracks (GError **error, PraghaMpris2 *mpris
 	return g_variant_builder_end(&builder);
 }
 
-static GVariant* mpris_TrackList_get_CanEditTracks (GError **error, PraghaMpris2 *mpris2)
+static GVariant *
+mpris_TrackList_get_CanEditTracks (GError **error, PraghaMpris2Plugin *plugin)
 {
 	return g_variant_new_boolean(FALSE);
 }
@@ -985,7 +1039,7 @@ handle_method_call (GDBusConnection       *connection,
                     GDBusMethodInvocation *invocation,
                     gpointer               user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
 	/* org.mpris.MediaPlayer2 */
 	BEGIN_INTERFACE(0)
@@ -1027,7 +1081,7 @@ handle_get_property (GDBusConnection  *connection,
                      GError          **error,
                      gpointer          user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
 	/* org.mpris.MediaPlayer2 */
 	BEGIN_INTERFACE(0)
@@ -1081,7 +1135,7 @@ handle_set_property (GDBusConnection  *connection,
                      GError          **error,
                      gpointer          user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
 	/* org.mpris.MediaPlayer2 */
 	BEGIN_INTERFACE(0)
@@ -1119,23 +1173,23 @@ on_bus_acquired (GDBusConnection *connection,
 {
 	gint i;
 	guint registration_id;
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
 	for (i = 0; i < N_OBJECTS; i++) {
-		mpris2->interface_quarks[i] = g_quark_from_string(mpris2->introspection_data->interfaces[i]->name);
+		plugin->interface_quarks[i] = g_quark_from_string(plugin->introspection_data->interfaces[i]->name);
 		registration_id = g_dbus_connection_register_object (connection,
 			                                             MPRIS_PATH,
-			                                             mpris2->introspection_data->interfaces[i],
+			                                             plugin->introspection_data->interfaces[i],
 			                                             &interface_vtable,
-			                                             mpris2,  /* user_data */
+			                                             plugin,  /* user_data */
 			                                             NULL,  /* user_data_free_func */
 			                                             NULL); /* GError** */
-		mpris2->registration_object_ids[i] = registration_id;
+		plugin->registration_object_ids[i] = registration_id;
 		g_assert (registration_id > 0);
 	}
 
-	mpris2->dbus_connection = connection;
-	g_object_ref(G_OBJECT(mpris2->dbus_connection));
+	plugin->dbus_connection = connection;
+	g_object_ref(G_OBJECT(plugin->dbus_connection));
 }
 
 static void
@@ -1151,11 +1205,11 @@ on_name_lost (GDBusConnection *connection,
               const gchar     *name,
               gpointer         user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
-	if(NULL != mpris2->dbus_connection) {
-		g_object_unref(G_OBJECT(mpris2->dbus_connection));
-		mpris2->dbus_connection = NULL;
+	if(NULL != plugin->dbus_connection) {
+		g_object_unref(G_OBJECT(plugin->dbus_connection));
+		plugin->dbus_connection = NULL;
 	}
 
 	CDEBUG(DBG_INFO, "Lost DBus name %s", name);
@@ -1163,7 +1217,8 @@ on_name_lost (GDBusConnection *connection,
 
 /* pragha callbacks */
 
-void pragha_mpris_update_any (PraghaMpris2 *mpris2)
+static void
+pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
@@ -1172,14 +1227,12 @@ void pragha_mpris_update_any (PraghaMpris2 *mpris2)
 	const gchar *newtitle = NULL;
 	gdouble curr_vol;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	if(NULL == mpris2->dbus_connection)
+	if(NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS update any");
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 
 	if (pragha_backend_get_state (backend) != ST_STOPPED) {
 		newtitle = pragha_musicobject_get_file (pragha_backend_get_musicobject (backend));
@@ -1187,77 +1240,71 @@ void pragha_mpris_update_any (PraghaMpris2 *mpris2)
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
 
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (plugin->pragha);
 
 	shuffle = pragha_preferences_get_shuffle (preferences);
-	if(mpris2->saved_shuffle != shuffle)
-	{
+	if (plugin->saved_shuffle != shuffle) {
 		change_detected = TRUE;
-		mpris2->saved_shuffle = shuffle;
-		g_variant_builder_add (&b, "{sv}", "Shuffle", mpris_Player_get_Shuffle (NULL, mpris2));
+		plugin->saved_shuffle = shuffle;
+		g_variant_builder_add (&b, "{sv}", "Shuffle", mpris_Player_get_Shuffle (NULL, plugin));
 	}
-	if(mpris2->state != pragha_backend_get_state (backend))
-	{
+	if (plugin->state != pragha_backend_get_state (backend)) {
 		change_detected = TRUE;
-		mpris2->state = pragha_backend_get_state (backend);
-		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, mpris2));
+		plugin->state = pragha_backend_get_state (backend);
+		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, plugin));
 	}
 	repeat = pragha_preferences_get_repeat (preferences);
-	if(mpris2->saved_playbackstatus != repeat)
-	{
+	if (plugin->saved_playbackstatus != repeat) {
 		change_detected = TRUE;
-		mpris2->saved_playbackstatus = repeat;
-		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, mpris2));
+		plugin->saved_playbackstatus = repeat;
+		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, plugin));
 	}
 	curr_vol = pragha_backend_get_volume (backend);
-	if(mpris2->volume != curr_vol)
-	{
+	if (plugin->volume != curr_vol) {
 		change_detected = TRUE;
-		mpris2->volume = curr_vol;
-		g_variant_builder_add (&b, "{sv}", "Volume", mpris_Player_get_Volume (NULL, mpris2));
+		plugin->volume = curr_vol;
+		g_variant_builder_add (&b, "{sv}", "Volume", mpris_Player_get_Volume (NULL, plugin));
 	}
-	if(g_strcmp0(mpris2->saved_title, newtitle))
-	{
+	if (g_strcmp0(plugin->saved_title, newtitle)) {
 		change_detected = TRUE;
-		if(mpris2->saved_title)
-			g_free(mpris2->saved_title);
+		if(plugin->saved_title)
+			g_free(plugin->saved_title);
 		if(string_is_not_empty(newtitle))
-			mpris2->saved_title = g_strdup(newtitle);
+			plugin->saved_title = g_strdup(newtitle);
 		else
-			mpris2->saved_title = NULL;
-		g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, mpris2));
+			plugin->saved_title = NULL;
+		g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, plugin));
 	}
-	if(change_detected)
-	{
+
+	if (change_detected) {
 		GVariant * tuples[] = {
 			g_variant_new_string("org.mpris.MediaPlayer2.Player"),
 			g_variant_builder_end(&b),
 			g_variant_new_strv(NULL, 0)
 		};
 
-		g_dbus_connection_emit_signal(mpris2->dbus_connection, NULL, MPRIS_PATH,
+		g_dbus_connection_emit_signal(plugin->dbus_connection, NULL, MPRIS_PATH,
 			"org.freedesktop.DBus.Properties", "PropertiesChanged",
 			g_variant_new_tuple(tuples, 3) , NULL);
 	}
-	else
-	{
+	else {
 		g_variant_builder_clear(&b);
 	}
 }
 
-void
-pragha_mpris_update_metadata_changed (PraghaMpris2 *mpris2)
+static void
+pragha_mpris_update_metadata_changed (PraghaMpris2Plugin *plugin)
 {
 	GVariantBuilder b;
 
-	if (NULL == mpris2->dbus_connection)
+	if (NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS update metadata of current track.");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
 
-	g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, mpris2));
+	g_variant_builder_add (&b, "{sv}", "Metadata", mpris_Player_get_Metadata (NULL, plugin));
 
 	GVariant * tuples[] = {
 		g_variant_new_string("org.mpris.MediaPlayer2.Player"),
@@ -1265,28 +1312,32 @@ pragha_mpris_update_metadata_changed (PraghaMpris2 *mpris2)
 		g_variant_new_strv(NULL, 0)
 	};
 
-	g_dbus_connection_emit_signal(mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal(plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.freedesktop.DBus.Properties", "PropertiesChanged",
 		g_variant_new_tuple(tuples, 3) , NULL);
 }
 
-void pragha_mpris_update_mobj_remove(PraghaMpris2 *mpris2, PraghaMusicobject *mobj)
+static void
+pragha_mpris_update_mobj_remove(PraghaMpris2Plugin *plugin, PraghaMusicobject *mobj)
 {
 	GVariant * tuples[1];
 
-	if(NULL == mpris2->dbus_connection)
+	if(NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS update mobj remove");
 
 	tuples[0] = handle_get_trackid(mobj);
 
-	g_dbus_connection_emit_signal (mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal (plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.TrackList", "TrackRemoved",
 		g_variant_new_tuple(tuples, 1), NULL);
 }
 
-void pragha_mpris_update_mobj_added (PraghaMpris2 *mpris2, PraghaMusicobject *mobj, GtkTreeIter *iter)
+static void
+pragha_mpris_update_mobj_added (PraghaMpris2Plugin *plugin,
+                                PraghaMusicobject  *mobj,
+                                GtkTreeIter        *iter)
 {
 	PraghaPlaylist *playlist;
 	GtkTreeModel *model;
@@ -1294,12 +1345,10 @@ void pragha_mpris_update_mobj_added (PraghaMpris2 *mpris2, PraghaMusicobject *mo
 	PraghaMusicobject *prev = NULL;
 	GVariantBuilder b;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	if(NULL == mpris2->dbus_connection)
+	if(NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (plugin->pragha);
 	model = pragha_playlist_get_model (playlist);
 
 	CDEBUG(DBG_MPRIS, "MPRIS update mobj added");
@@ -1323,15 +1372,17 @@ void pragha_mpris_update_mobj_added (PraghaMpris2 *mpris2, PraghaMusicobject *mo
 		// "/" is the only legal empty object path, but
 		// the spec wants an empty string. What do the others do?
 
-	g_dbus_connection_emit_signal (mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal (plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.TrackList", "TrackAdded",
 		g_variant_builder_end(&b), NULL);
 }
 
-void pragha_mpris_update_mobj_changed(PraghaMpris2 *mpris2, PraghaMusicobject *mobj, gint bitmask) {
+static void
+pragha_mpris_update_mobj_changed(PraghaMpris2Plugin *plugin, PraghaMusicobject *mobj, gint bitmask)
+{
 	GVariantBuilder b;
 
-	if(NULL == mpris2->dbus_connection)
+	if(NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS update mobj changed");
@@ -1345,12 +1396,13 @@ void pragha_mpris_update_mobj_changed(PraghaMpris2 *mpris2, PraghaMusicobject *m
 
 	g_variant_builder_close(&b);
 
-	g_dbus_connection_emit_signal(mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal(plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.TrackList", "TrackChanged",
 		g_variant_builder_end(&b), NULL);
 }
 
-void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2)
+static void
+pragha_mpris_update_tracklist_replaced (PraghaMpris2Plugin *plugin)
 {
 	PraghaPlaylist *playlist;
 	PraghaBackend *backend;
@@ -1358,9 +1410,7 @@ void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2)
 	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
 
-	PraghaApplication *pragha = mpris2->pragha;
-
-	if (NULL == mpris2->dbus_connection)
+	if (NULL == plugin->dbus_connection)
 		return; /* better safe than sorry */
 
 	CDEBUG(DBG_MPRIS, "MPRIS update tracklist changed");
@@ -1368,7 +1418,7 @@ void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2)
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (plugin->pragha);
 	list = pragha_playlist_get_mobj_list (playlist);
 
 	if(list != NULL) {
@@ -1380,11 +1430,11 @@ void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2)
 		g_list_free(list);
 	}
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->pragha);
 
 	g_variant_builder_close(&b);
 	g_variant_builder_add_value(&b, handle_get_trackid(pragha_backend_get_musicobject(backend)));
-	g_dbus_connection_emit_signal (mpris2->dbus_connection, NULL, MPRIS_PATH,
+	g_dbus_connection_emit_signal (plugin->dbus_connection, NULL, MPRIS_PATH,
 		"org.mpris.MediaPlayer2.TrackList", "TrackListReplaced",
 		g_variant_builder_end(&b), NULL);
 }
@@ -1392,101 +1442,169 @@ void pragha_mpris_update_tracklist_replaced (PraghaMpris2 *mpris2)
 static void
 any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 {
-	PraghaMpris2 *mpris2 = user_data;
+	PraghaMpris2Plugin *plugin = user_data;
 
-	pragha_mpris_update_any (mpris2);
+	pragha_mpris_update_any (plugin);
 }
 
-gint pragha_mpris_init (PraghaMpris2 *mpris2, PraghaApplication *pragha)
+/*
+ * PLugin Inteface
+ */
+
+static void
+pragha_mpris2_plugin_set_property (GObject      *object,
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
 {
-	PraghaBackend *backend;
+	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (object);
+
+	switch (prop_id) {
+		case PROP_OBJECT:
+			plugin->pragha = g_value_get_object (value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+pragha_mpris2_plugin_get_property (GObject    *object,
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
+{
+	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (object);
+
+	switch (prop_id) {
+		case PROP_OBJECT:
+			g_value_set_object (value, plugin->pragha);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+pragha_mpris2_plugin_init (PraghaMpris2Plugin *plugin)
+{
+	g_debug ("%s", G_STRFUNC);
+}
+
+static void
+pragha_mpris2_plugin_finalize (GObject *object)
+{
+	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (object);
+
+	g_debug ("%s", G_STRFUNC);
+
+	G_OBJECT_CLASS (pragha_mpris2_plugin_parent_class)->finalize (object);
+}
+
+static void
+pragha_mpris2_plugin_activate (PeasActivatable *activatable)
+{
 	PraghaPreferences *preferences;
+	PraghaBackend *backend;
+	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
 
-	preferences = pragha_application_get_preferences (pragha);
-	if (!pragha_preferences_get_use_mpris2 (preferences))
-		return 0;
+	g_debug ("%s", G_STRFUNC);
 
-	if(NULL != mpris2->dbus_connection)
-		return 0;
+	plugin->saved_shuffle = FALSE;
+	plugin->saved_playbackstatus = FALSE;
+	plugin->saved_title = NULL;
+	plugin->volume = 0;
 
-	CDEBUG(DBG_INFO, "Initializing MPRIS");
+	plugin->introspection_data = g_dbus_node_info_new_for_xml (mpris2xml, NULL);
+	g_assert (plugin->introspection_data != NULL);
 
-	mpris2->pragha = pragha;
-
-	mpris2->saved_shuffle = FALSE;
-	mpris2->saved_playbackstatus = FALSE;
-	mpris2->saved_title = NULL;
-	mpris2->volume = 0;
-
-	mpris2->introspection_data = g_dbus_node_info_new_for_xml (mpris2xml, NULL);
-	g_assert (mpris2->introspection_data != NULL);
-
-	mpris2->owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
+	plugin->owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
 	                                   MPRIS_NAME,
 	                                   G_BUS_NAME_OWNER_FLAGS_NONE,
 	                                   on_bus_acquired,
 	                                   on_name_acquired,
 	                                   on_name_lost,
-	                                   mpris2,
+	                                   plugin,
 	                                   NULL);
 
-	g_signal_connect (preferences, "notify::shuffle", G_CALLBACK (any_notify_cb), mpris2);
-	g_signal_connect (preferences, "notify::repeat", G_CALLBACK (any_notify_cb), mpris2);
+	preferences = pragha_application_get_preferences (plugin->pragha);
+	g_signal_connect (preferences, "notify::shuffle", G_CALLBACK (any_notify_cb), plugin);
+	g_signal_connect (preferences, "notify::repeat", G_CALLBACK (any_notify_cb), plugin);
 
-	backend = pragha_application_get_backend (pragha);
-	g_signal_connect (backend, "notify::volume", G_CALLBACK (any_notify_cb), mpris2);
-	g_signal_connect (backend, "notify::state", G_CALLBACK (any_notify_cb), mpris2);
-	g_signal_connect (backend, "seeked", G_CALLBACK (seeked_cb), mpris2);
-
-	return (mpris2->owner_id) ? 0 : -1;
+	backend = pragha_application_get_backend (plugin->pragha);
+	g_signal_connect (backend, "notify::volume", G_CALLBACK (any_notify_cb), plugin);
+	g_signal_connect (backend, "notify::state", G_CALLBACK (any_notify_cb), plugin);
+	g_signal_connect (backend, "seeked", G_CALLBACK (seeked_cb), plugin);
 }
 
-void pragha_mpris_close (PraghaMpris2 *mpris2)
+static void
+pragha_mpris2_plugin_deactivate (PeasActivatable *activatable)
 {
-	gint i;
 	PraghaBackend *backend;
-	PraghaApplication *pragha = mpris2->pragha;
+	gint i;
 
-	backend = pragha_application_get_backend (pragha);
+	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
 
-	if(NULL == mpris2->dbus_connection)
+	g_debug ("%s", G_STRFUNC);
+
+	backend = pragha_application_get_backend (plugin->pragha);
+
+	if (NULL == plugin->dbus_connection)
 		return;
 
 	for (i = 0; i < N_OBJECTS; i++) {
-		g_dbus_connection_unregister_object (mpris2->dbus_connection,
-			                             mpris2->registration_object_ids[i]);
+		g_dbus_connection_unregister_object (plugin->dbus_connection,
+		                                     plugin->registration_object_ids[i]);
 	}
 
-	g_signal_handlers_disconnect_by_func (backend, seeked_cb, mpris2);
-	g_signal_handlers_disconnect_by_func (backend, any_notify_cb, mpris2);
+	g_signal_handlers_disconnect_by_func (backend, seeked_cb, plugin);
+	g_signal_handlers_disconnect_by_func (backend, any_notify_cb, plugin);
 
-	g_bus_unown_name (mpris2->owner_id);
+	g_bus_unown_name (plugin->owner_id);
 
-	if(NULL != mpris2->introspection_data) {
-		g_dbus_node_info_unref (mpris2->introspection_data);
-		mpris2->introspection_data = NULL;
+	if (NULL != plugin->introspection_data) {
+		g_dbus_node_info_unref (plugin->introspection_data);
+		plugin->introspection_data = NULL;
 	}
 
-	g_object_unref (G_OBJECT (mpris2->dbus_connection));
-	mpris2->dbus_connection = NULL;
+	g_object_unref (G_OBJECT (plugin->dbus_connection));
+	plugin->dbus_connection = NULL;
 
-	g_free (mpris2->saved_title);
+	g_free (plugin->saved_title);
 }
 
-void pragha_mpris_free (PraghaMpris2 *mpris2)
+static void
+pragha_mpris2_plugin_class_init (PraghaMpris2PluginClass *klass)
 {
-	pragha_mpris_close (mpris2);
-	g_slice_free (PraghaMpris2, mpris2);
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->set_property = pragha_mpris2_plugin_set_property;
+	object_class->get_property = pragha_mpris2_plugin_get_property;
+	object_class->finalize = pragha_mpris2_plugin_finalize;
+
+	g_object_class_override_property (object_class, PROP_OBJECT, "object");
 }
 
-PraghaMpris2 *pragha_mpris_new()
+static void
+peas_activatable_iface_init (PeasActivatableInterface *iface)
 {
-	return g_slice_new0(PraghaMpris2);
+	iface->activate = pragha_mpris2_plugin_activate;
+	iface->deactivate = pragha_mpris2_plugin_deactivate;
 }
 
-// still todo:
-// * emit Playlists.PlaylistChanged signal when playlist rename is implemented
-// * provide an Icon for a playlist when e.g. 'smart playlists' are implemented
-// * emit couple of TrackList signals when drag'n drop reordering
-// * find a better object path than mobj address & remove all gtk tree model access
-// * [optional] implement tracklist edit
+static void
+pragha_mpris2_plugin_class_finalize (PraghaMpris2PluginClass *klass)
+{
+}
+
+G_MODULE_EXPORT void
+peas_register_types (PeasObjectModule *module)
+{
+	pragha_mpris2_plugin_register_type (G_TYPE_MODULE (module));
+
+	peas_object_module_register_extension_type (module,
+	                                            PEAS_TYPE_ACTIVATABLE,
+	                                            PRAGHA_TYPE_MPRIS2_PLUGIN);
+}

@@ -42,8 +42,6 @@ pragha_SOURCES = \
 		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
-		pragha-mpris.c \
-		pragha-mpris.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-musicobject-mgmt.c \

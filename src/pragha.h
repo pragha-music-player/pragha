@@ -46,7 +46,6 @@
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
 #include "pragha-window.h"
-#include "pragha-mpris.h"
 #include "pragha-debug.h"
 
 /* With libcio 0.83 should be before config.h. libcdio issue */
@@ -93,7 +92,6 @@ GtkWidget         *pragha_application_get_pane               (PraghaApplication 
 
 PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
 
-PraghaMpris2      *pragha_application_get_mpris2             (PraghaApplication *pragha);
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
 #endif
