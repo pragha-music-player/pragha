@@ -47,7 +47,6 @@
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
 #include "pragha-window.h"
-#include "gnome-media-keys.h"
 #include "pragha-mpris.h"
 #include "pragha-debug.h"
 

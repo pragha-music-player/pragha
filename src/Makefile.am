@@ -13,8 +13,6 @@ SUBDIRS = plugins
 
 pragha_SOURCES = \
 		info-bar-import-music.c \
-		gnome-media-keys.c \
-		gnome-media-keys.h \
 		pragha.c \
 		pragha.h \
 		pragha-album-art.c \
