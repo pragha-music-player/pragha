@@ -13,7 +13,7 @@ Well.. Dissonance is the project to continue developing Consonance, and its
 result is Pragha Music Manager. A New reproducer of music.. ;)
 
 Features:
- * Full integration with GTK+2 and GTK+3 support, but always completely
+ * Full integration with GTK+3, but always completely
    independent of gnome or xfce.
  * Two panel desing inspired on Amarok 1.4. Library and current playlist.
  * Library with multiple views, according tags or folder structure.
@@ -26,7 +26,7 @@ Features:
  * Native desktop notifications with libnotify.
 
 Requirements:
- * gtk+-2.0 >= 2.24, glib-2.0 >= 2.28.
+ * gtk+-3.0 >= 3.2, glib-2.0 >= 2.28.
  * gstreamer-1.0 >= 1.0, gstreamer-base-1.0 >= 1.0.
  * libcdio >= 0.80, libcdio_paranoia >= 0.80, libcddb >= 1.3.0.
  * taglib >= 1.4.
