@@ -44,7 +44,7 @@
 #include "pragha.h"
 
 struct _PraghaLibraryPane {
-	GtkBox           __parent__;
+	GtkVBox           __parent__;
 
 	/* Global database and preferences instances */
 	PraghaDatabase    *cdbase;
