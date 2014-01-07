@@ -9,8 +9,6 @@ AM_CPPFLAGS =								\
 	-DUSRPLUGINDIR=\""$(prefix)/share/pragha/plugins"\"	\
 	-I$(top_srcdir)
 
-SUBDIRS = plugins
-
 pragha_SOURCES = \
 		info-bar-import-music.c \
 		pragha.c \

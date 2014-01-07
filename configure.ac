@@ -85,8 +85,35 @@ XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
-XDT_CHECK_PACKAGE([LIBPEAS], [libpeas-1.0], [1.0.0])
+
+dnl Check peas library to plugins support
+LIBPEAS_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBPEAS],
+                           [libpeas-1.0], [1.0.0],
+                           [libpeas-1.0],
+                           [libpeas-1.0 library], [yes])
+
+if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_PACKAGE([LIBPEAS_GTK], [libpeas-gtk-1.0], [1.0.0])
+fi
+
+dnl Check global keyboard shortcuts support
+LIBKEYBINDER_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
+                           [keybinder-3.0], [0.2.0],
+                           [keybinder],
+                           [keybinder library], [yes])
+fi
+
+dnl Check libglyr
+LIBGLYR_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
+                           [libglyr], [1.0.1],
+                           [libglyr],
+                           [libglyr library], [yes])
+fi
 
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
@@ -106,13 +133,6 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
                        [gstreamer-audio],
                        [gstreamer-audio], [yes])
 
-dnl Check global keyboard shortcuts support
-LIBKEYBINDER_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
-                       [keybinder-3.0], [0.2.0],
-                       [keybinder],
-                       [keybinder library], [yes])
-
 dnl Check libclastfm
 LIBCLASTFM_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
@@ -120,12 +140,6 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
                        [libclastfm],
                        [libclastfm library], [yes])
 
-dnl Check libglyr
-LIBGLYR_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
-                       [libglyr], [1.0.1],
-                       [libglyr],
-                       [libglyr library], [yes])
 
 dnl Check libxfce4ui
 LIBXFCE4UI_FOUND="no"
@@ -134,40 +148,47 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBXFCE4UI],
                        [libxfce4ui],
                        [libxfce4ui library], [yes])
 
+dnl Check totem-pl-parser
 PLPARSER_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([PLPARSER],
                        [totem-plparser], [2.26],
                        [totem-plparser],
                        [totem-plparser library], [yes])
 
-AC_OUTPUT([
-Makefile
-data/Makefile
-po/Makefile.in
-src/Makefile
-src/plugins/Makefile
-src/plugins/helloworld/Makefile
-src/plugins/mpris2/Makefile
-src/plugins/keybinder/Makefile
-src/plugins/gnome-media-keys/Makefile
-src/plugins/song-info/Makefile
-])
+dnl Output files
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([data/Makefile])
+AC_CONFIG_FILES([po/Makefile.in])
+
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+AC_CONFIG_FILES([plugins/Makefile])
+AC_CONFIG_FILES([plugins/mpris2/Makefile])
+AC_CONFIG_FILES([plugins/keybinder/Makefile])
+AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
+AC_CONFIG_FILES([plugins/song-info/Makefile])
+fi
+AC_OUTPUT
 
 echo ""
 echo "Build Configuration for $PACKAGE version $VERSION"
 echo ""
-
-echo "  Gtk version used...: $GTK_VERSION"
-echo "  Prefix.............: ${prefix}"
-echo "  Debug enabled......: $debug"
+echo "  Gtk version used......: $GTK_VERSION"
+echo "  Prefix................: ${prefix}"
+echo "  Debug enabled.........: $debug"
 echo ""
+echo "  Plugins enabled.......: $LIBPEAS_FOUND"
+echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
+echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
+echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
+echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
+echo ""
+echo "  Others build options..:"
 AS_IF([test $GSTREAMER_API_VERSION = 1.0],
-      [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
-      [echo "  Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
-echo "  Use multimedia key without gnome-media-keys.......(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
-echo "  Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
-echo "  Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
-echo "  Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
-echo "  Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
+      [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
+      [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
+echo "   * Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
+echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
+echo "   * Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
 

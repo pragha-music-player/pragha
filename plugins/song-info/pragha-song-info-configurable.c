@@ -39,7 +39,7 @@
 
 #include "pragha-song-info-configurable.h"
 #include "pragha-song-info-plugin.h"
-#include "../../pragha-hig.h"
+#include "src/pragha-hig.h"
 
 static void peas_gtk_configurable_iface_init (PeasGtkConfigurableInterface *iface);
 

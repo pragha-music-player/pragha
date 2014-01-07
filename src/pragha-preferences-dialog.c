@@ -25,7 +25,11 @@
 #else
 #include <glib/gi18n.h>
 #endif
+
+#ifdef HAVE_LIBPEAS
 #include <libpeas-gtk/peas-gtk.h>
+#endif
+
 #include <gdk/gdkkeysyms.h>
 
 #include "pragha-preferences-dialog.h"
@@ -1107,6 +1111,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 	return table;
 }
 
+#ifdef HAVE_LIBPEAS
 static GtkWidget*
 pref_create_plugins_page (PreferencesDialog *dialog)
 {
@@ -1124,6 +1129,7 @@ pref_create_plugins_page (PreferencesDialog *dialog)
 
 	return table;
 }
+#endif
 
 void
 pragha_preferences_dialog_show (PraghaApplication *pragha)
@@ -1131,8 +1137,12 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 	PreferencesDialog *dialog;
 	GtkWidget *header, *pref_notebook;
 
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox, *plugins_vbox;
-	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services, *label_plugins;
+	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
+	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
+	#ifdef HAVE_LIBPEAS
+	GtkWidget *plugins_vbox;
+	GtkWidget *label_plugins;
+	#endif
 
 	dialog = g_slice_new0(PreferencesDialog);
 
@@ -1156,7 +1166,9 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 	label_general = gtk_label_new(_("General"));
 	label_desktop = gtk_label_new(_("Desktop"));
 	label_services = gtk_label_new(_("Services"));
+	#ifdef HAVE_LIBPEAS
 	label_plugins = gtk_label_new(_("Plugins"));
+	#endif
 
 	/* Notebook, pages et al. */
 
@@ -1182,8 +1194,10 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 	services_vbox = pref_create_services_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox, label_services);
 
+	#ifdef HAVE_LIBPEAS
 	plugins_vbox = pref_create_plugins_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
+	#endif
 
 	/* Add to dialog */
 

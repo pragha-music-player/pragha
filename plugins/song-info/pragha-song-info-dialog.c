@@ -29,7 +29,7 @@
 
 #include "pragha-song-info-dialog.h"
 
-#include "../../pragha-simple-widgets.h"
+#include "src/pragha-simple-widgets.h"
 
 /* Use the download info on glyr thread and show a dialog. */
 

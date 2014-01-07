@@ -30,7 +30,10 @@
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 #include <tag_c.h>
+
+#ifdef HAVE_LIBPEAS
 #include <libpeas/peas.h>
+#endif
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
@@ -75,9 +78,10 @@ struct _PraghaApplication {
 
 	PraghaStatusIcon  *status_icon;
 
-	/* Plugins?. */
+#ifdef HAVE_LIBPEAS
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
+#endif
 
 	PraghaNotify      *notify;
 #ifdef HAVE_LIBCLASTFM
@@ -312,12 +316,13 @@ pragha_application_get_peas_engine (PraghaApplication *pragha)
 	return pragha->peas_engine;
 }
 
-
+#ifdef HAVE_LIBPEAS
 PraghaNotify *
 pragha_application_get_notify (PraghaApplication *pragha)
 {
 	return pragha->notify;
 }
+#endif
 
 void
 pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
@@ -342,7 +347,7 @@ pragha_application_is_first_run (PraghaApplication *pragha)
 /* Plugin hacking...
  * TODO: Move to own file..
  */
-
+#ifdef HAVE_LIBPEAS
 static void
 on_extension_added (PeasExtensionSet  *set,
                     PeasPluginInfo    *info,
@@ -360,6 +365,7 @@ on_extension_removed (PeasExtensionSet  *set,
 {
 	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
 }
+#endif
 
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
@@ -487,6 +493,7 @@ pragha_application_startup (GApplication *application)
 		g_error("Unable to init music dbase");
 	}
 
+#ifdef HAVE_LIBPEAS
 	pragha->peas_engine = peas_engine_get_default ();
 
 	peas_engine_add_search_path (pragha->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
@@ -501,6 +508,7 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK (on_extension_added), pragha);
 	g_signal_connect (pragha->peas_exten_set, "extension-removed",
 	                  G_CALLBACK (on_extension_removed), pragha);
+#endif
 
 	if (pragha_preferences_get_show_osd (pragha->preferences))
 		pragha->notify = pragha_notify_new (pragha);

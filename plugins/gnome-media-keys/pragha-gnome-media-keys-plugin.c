@@ -29,8 +29,8 @@
 
 #include "pragha-gnome-media-keys-plugin.h"
 
-#include "../../pragha.h"
-#include "../../pragha-playback.h"
+#include "src/pragha.h"
+#include "src/pragha-playback.h"
 
 #define PLAYER_NAME "Pragha"
 
