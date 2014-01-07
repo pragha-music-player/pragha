@@ -38,13 +38,13 @@
 
 #include "pragha-mpris2-plugin.h"
 
-#include "../../pragha-playback.h"
-#include "../../pragha-menubar.h"
-#include "../../pragha-file-utils.h"
-#include "../../pragha-utils.h"
-#include "../../pragha-playlists-mgmt.h"
-#include "../../pragha-musicobject-mgmt.h"
-#include "../../pragha.h"
+#include "src/pragha-playback.h"
+#include "src/pragha-menubar.h"
+#include "src/pragha-file-utils.h"
+#include "src/pragha-utils.h"
+#include "src/pragha-playlists-mgmt.h"
+#include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha.h"
 
 static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
 

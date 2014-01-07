@@ -1,8 +1,0 @@
-[Plugin]
-Module=helloworld
-Name=Hello World
-Description=Inserts a box containing "Hello World" in every windows.
-Authors=Steve Frécinaux <code@istique.net>
-Copyright=Copyright © 2009 Steve Frécinaux
-Website=http://code.istique.net/
-Help=http://git.gnome.org/browse/libpeas

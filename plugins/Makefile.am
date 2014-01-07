@@ -7,9 +7,8 @@ AM_CPPFLAGS =								\
 	$(DISABLE_DEPRECATED)
 
 SUBDIRS =              \
-	mpris2
-	gnome-media-keys \
-	helloworld
+	mpris2             \
+	gnome-media-keys
 
 if HAVE_LIBGLYR
 SUBDIRS += song-info

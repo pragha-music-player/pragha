@@ -21,7 +21,7 @@
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
 
-#include "../../pragha.h"
+#include "src/pragha.h"
 
 G_BEGIN_DECLS
 

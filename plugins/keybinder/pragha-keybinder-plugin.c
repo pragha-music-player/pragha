@@ -30,8 +30,8 @@
 
 #include "pragha-keybinder-plugin.h"
 
-#include "../../pragha.h"
-#include "../../pragha-playback.h"
+#include "src/pragha.h"
+#include "src/pragha-playback.h"
 
 static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
 

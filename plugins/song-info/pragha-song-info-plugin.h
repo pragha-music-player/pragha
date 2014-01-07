@@ -30,7 +30,7 @@
 
 #include <glyr/cache.h>
 
-#include "../../pragha.h"
+#include "src/pragha.h"
 
 G_BEGIN_DECLS
 

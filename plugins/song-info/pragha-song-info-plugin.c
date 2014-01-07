@@ -34,11 +34,11 @@
 #include "pragha-song-info-dialog.h"
 #include "pragha-song-info-configurable.h"
 
-#include "../../pragha.h"
-#include "../../pragha-playback.h"
-#include "../../pragha-simple-async.h"
-#include "../../pragha-simple-widgets.h"
-#include "../../pragha-utils.h"
+#include "src/pragha.h"
+#include "src/pragha-playback.h"
+#include "src/pragha-simple-async.h"
+#include "src/pragha-simple-widgets.h"
+#include "src/pragha-utils.h"
 
 typedef struct
 {

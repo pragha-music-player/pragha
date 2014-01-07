@@ -1,8 +1,11 @@
 SUBDIRS = \
 	data  \
 	po    \
-	src   \
-	src/plugins
+	src
+
+if HAVE_LIBPEAS
+SUBDIRS += plugins
+endif
 
 AUTOMAKE_OPTIONS = \
 	1.8            \

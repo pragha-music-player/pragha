@@ -1,6 +1,6 @@
 plugindir = $(libdir)/pragha/plugins/keybinder
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir) 	\
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
