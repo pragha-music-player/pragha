@@ -1447,6 +1447,29 @@ any_notify_cb (GObject *gobject, GParamSpec *pspec, gpointer user_data)
 	pragha_mpris_update_any (plugin);
 }
 
+static void
+pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaMpris2Plugin *plugin)
+{
+	PraghaBackend *backend;
+	PraghaMusicobject *mobj = NULL;
+	gchar *album_art_path = NULL;
+	const gchar *artist = NULL, *album = NULL;
+
+	backend = pragha_application_get_backend (plugin->pragha);
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		mobj = pragha_backend_get_musicobject (backend);
+
+		artist = pragha_musicobject_get_artist (mobj);
+		album = pragha_musicobject_get_album (mobj);
+	
+		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
+		if (album_art_path) {
+			pragha_mpris_update_metadata_changed (plugin);
+			g_free (album_art_path);
+		}
+	}
+}
+
 /*
  * PLugin Inteface
  */
@@ -1508,6 +1531,8 @@ pragha_mpris2_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaPreferences *preferences;
 	PraghaBackend *backend;
+	PraghaArtCache *art_cache;
+
 	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
 
 	g_debug ("%s", G_STRFUNC);
@@ -1537,19 +1562,22 @@ pragha_mpris2_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "notify::volume", G_CALLBACK (any_notify_cb), plugin);
 	g_signal_connect (backend, "notify::state", G_CALLBACK (any_notify_cb), plugin);
 	g_signal_connect (backend, "seeked", G_CALLBACK (seeked_cb), plugin);
+
+	art_cache = pragha_application_get_art_cache (plugin->pragha);
+	g_signal_connect (art_cache, "cache-changed",
+	                  G_CALLBACK(pragha_art_cache_changed_handler), plugin);
 }
 
 static void
 pragha_mpris2_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
+	PraghaArtCache *art_cache;
 	gint i;
 
 	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
 
 	g_debug ("%s", G_STRFUNC);
-
-	backend = pragha_application_get_backend (plugin->pragha);
 
 	if (NULL == plugin->dbus_connection)
 		return;
@@ -1559,8 +1587,12 @@ pragha_mpris2_plugin_deactivate (PeasActivatable *activatable)
 		                                     plugin->registration_object_ids[i]);
 	}
 
+	backend = pragha_application_get_backend (plugin->pragha);
 	g_signal_handlers_disconnect_by_func (backend, seeked_cb, plugin);
 	g_signal_handlers_disconnect_by_func (backend, any_notify_cb, plugin);
+
+	art_cache = pragha_application_get_art_cache (plugin->pragha);
+	g_signal_handlers_disconnect_by_func (art_cache, pragha_art_cache_changed_handler, plugin);
 
 	g_bus_unown_name (plugin->owner_id);
 
