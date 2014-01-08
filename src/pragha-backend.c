@@ -760,6 +760,10 @@ pragha_backend_dispose (GObject *object)
 		g_object_unref (priv->preferences);
 		priv->preferences = NULL;
 	}
+	if (priv->art_cache) {
+		g_object_unref (priv->art_cache);
+		priv->art_cache = NULL;
+	}
 
 	G_OBJECT_CLASS (pragha_backend_parent_class)->dispose (object);
 }
@@ -769,8 +773,6 @@ pragha_backend_finalize (GObject *object)
 {
 	PraghaBackend *backend = PRAGHA_BACKEND (object);
 	PraghaBackendPrivate *priv = backend->priv;
-
-	pragha_art_cache_free (priv->art_cache);
 
 	if (priv->error)
 		g_error_free (priv->error);
@@ -987,7 +989,7 @@ pragha_backend_init (PraghaBackend *backend)
 	priv->emitted_error = FALSE;
 	priv->error = NULL;
 	priv->preferences = pragha_preferences_get ();
-	priv->art_cache = pragha_art_cache_new (); //XXX use global instance?
+	priv->art_cache = pragha_art_cache_get ();
 
 	priv->pipeline = gst_element_factory_make("playbin", "playbin");
 

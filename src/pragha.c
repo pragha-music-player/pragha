@@ -186,6 +186,32 @@ pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, PraghaAppli
 	g_free(str);
 }
 
+static void
+pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+	PraghaToolbar *toolbar;
+	PraghaMusicobject *mobj = NULL;
+	gchar *album_art_path = NULL;
+	const gchar *artist = NULL, *album = NULL;
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		mobj = pragha_backend_get_musicobject (backend);
+
+		artist = pragha_musicobject_get_artist (mobj);
+		album = pragha_musicobject_get_album (mobj);
+	
+		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
+
+		if (album_art_path) {
+			toolbar = pragha_application_get_toolbar (pragha);
+			pragha_toolbar_set_image_album_art (toolbar, album_art_path);
+			g_free (album_art_path);
+		}
+	}
+}
+
 /*
  * Some public actions.
  */
@@ -427,7 +453,7 @@ pragha_application_dispose (GObject *object)
 		pragha->backend = NULL;
 	}
 	if (pragha->art_cache) {
-		pragha_art_cache_free (pragha->art_cache);
+		g_object_unref (pragha->art_cache);
 		pragha->art_cache = NULL;
 	}
 	if (pragha->mainwindow) {
@@ -515,7 +541,9 @@ pragha_application_startup (GApplication *application)
 	else
 		pragha->notify = NULL;
 
-	pragha->art_cache = pragha_art_cache_new ();
+	pragha->art_cache = pragha_art_cache_get ();
+	g_signal_connect (pragha->art_cache, "cache-changed",
+	                  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
 
 	pragha->backend = pragha_backend_new (pragha);
 

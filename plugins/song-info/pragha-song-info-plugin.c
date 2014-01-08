@@ -115,12 +115,8 @@ static const gchar *playlist_xml = "<ui>						\
 static void
 pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 {
-	PraghaBackend *backend;
 	PraghaArtCache *art_cache;
-	PraghaToolbar *toolbar;
 	const gchar *artist = NULL, *album = NULL;
-	const gchar *lartist = NULL, *lalbum = NULL;
-	gchar *album_art_path = NULL;
 
 	if(glyr_info->head == NULL)
 		return;
@@ -134,25 +130,6 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 
 	if (glyr_info->head->data)
 		pragha_art_cache_put (art_cache, artist, album, glyr_info->head->data, glyr_info->head->size);
-
-	album_art_path = pragha_art_cache_get (art_cache, artist, album);
-
-	if (album_art_path) {
-		backend = pragha_application_get_backend (pragha);
-		if (pragha_backend_get_state (backend) != ST_STOPPED) {
-			PraghaMusicobject *mobj = pragha_backend_get_musicobject (backend);
-			artist = pragha_musicobject_get_artist (mobj);
-			album = pragha_musicobject_get_album (mobj);
-
-			if ((0 == g_strcmp0 (artist, lartist)) &&
-			    (0 == g_strcmp0 (album, lalbum))) {
-				/* TODO: Emit a signal to update the album art and mpris. */
-				toolbar = pragha_application_get_toolbar (pragha);
-				pragha_toolbar_set_image_album_art (toolbar, album_art_path);
-			}
-		}
-		g_free (album_art_path);
-	}
 }
 
 /* Manages the results of glyr threads. */
@@ -418,7 +395,7 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 		return;
 
 	art_cache = pragha_application_get_art_cache (pragha);
-	album_art_path = pragha_art_cache_get (art_cache, artist, album);
+	album_art_path = pragha_art_cache_get_uri (art_cache, artist, album);
 
 	if (album_art_path)
 		goto exists;
