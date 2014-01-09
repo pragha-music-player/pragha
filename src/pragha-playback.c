@@ -142,7 +142,6 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
 	PraghaNotify *notify;
-	PraghaMpris2 *mpris2;
 
 	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
 
@@ -169,9 +168,6 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 	notify = pragha_application_get_notify (pragha);
 	if (notify)
 		pragha_notify_show_osd (notify);
-
-	mpris2 = pragha_application_get_mpris2 (pragha);
-	pragha_mpris_update_metadata_changed (mpris2);
 }
 
 void
@@ -185,7 +181,6 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, PraghaApplica
 {
 	PraghaPlaylist *playlist;
 	PraghaToolbar *toolbar;
-	PraghaMpris2 *mpris2;
 	PraghaMusicobject *nmobj;
 
 	if(pragha_backend_get_state (backend) != ST_PLAYING)
@@ -196,9 +191,6 @@ pragha_backend_tags_changed (PraghaBackend *backend, gint changed, PraghaApplica
 	/* Update change on gui */
 	toolbar = pragha_application_get_toolbar (pragha);
 	pragha_toolbar_set_title(toolbar, nmobj);
-
-	mpris2 = pragha_application_get_mpris2 (pragha);
-	pragha_mpris_update_metadata_changed (mpris2);
 
 	/* Update the playlist */
 
@@ -228,9 +220,9 @@ pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusic
 		return;
 
 	art_cache = pragha_application_get_art_cache (pragha);
-	album_path = pragha_art_cache_get (art_cache,
-	                                   pragha_musicobject_get_artist(mobj),
-	                                   pragha_musicobject_get_album(mobj));
+	album_path = pragha_art_cache_get_uri (art_cache,
+	                                       pragha_musicobject_get_artist(mobj),
+	                                       pragha_musicobject_get_album(mobj));
 
 	if (album_path == NULL) {
 		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));

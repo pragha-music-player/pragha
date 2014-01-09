@@ -19,14 +19,30 @@
 #define PRAGHA_ART_CACHE_H
 
 #include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-typedef struct _PraghaArtCache PraghaArtCache;
+#define PRAGHA_TYPE_ART_CACHE (pragha_art_cache_get_type())
+#define PRAGHA_ART_CACHE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_ART_CACHE, PraghaArtCache))
+#define PRAGHA_ART_CACHE_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_ART_CACHE, PraghaArtCache const))
+#define PRAGHA_ART_CACHE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_ART_CACHE, PraghaArtCacheClass))
+#define PRAGHA_IS_ART_CACHE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_ART_CACHE))
+#define PRAGHA_IS_ART_CACHE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_ART_CACHE))
+#define PRAGHA_ART_CACHE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_ART_CACHE, PraghaArtCacheClass))
 
-PraghaArtCache * pragha_art_cache_new      ();
-void             pragha_art_cache_free     (PraghaArtCache *cache);
-gchar *          pragha_art_cache_get      (PraghaArtCache *cache, const gchar *artist, const gchar *album);
+typedef struct _PraghaArtCache PraghaArtCache;
+typedef struct _PraghaArtCacheClass PraghaArtCacheClass;
+
+struct _PraghaArtCacheClass
+{
+	GObjectClass parent_class;
+	void (*cache_changed)    (PraghaArtCache *cache);
+};
+
+PraghaArtCache * pragha_art_cache_get      (void);
+
+gchar *          pragha_art_cache_get_uri  (PraghaArtCache *cache, const gchar *artist, const gchar *album);
 gboolean         pragha_art_cache_contains (PraghaArtCache *cache, const gchar *artist, const gchar *album);
 void             pragha_art_cache_put      (PraghaArtCache *cache, const gchar *artist, const gchar *album, gconstpointer data, gsize size);
 

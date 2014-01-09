@@ -5,12 +5,12 @@ AM_CPPFLAGS =								\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
 	-DPIXMAPDIR=\""$(datadir)/pixmaps/pragha"\"			\
 	-DDESKTOPENTRY=\""$(datadir)/applications/pragha.desktop"\"	\
+	-DLIBPLUGINDIR=\""$(libdir)/pragha/plugins/"\"	\
+	-DUSRPLUGINDIR=\""$(prefix)/share/pragha/plugins"\"	\
 	-I$(top_srcdir)
 
 pragha_SOURCES = \
 		info-bar-import-music.c \
-		gnome-media-keys.c \
-		gnome-media-keys.h \
 		pragha.c \
 		pragha.h \
 		pragha-album-art.c \
@@ -34,16 +34,12 @@ pragha_SOURCES = \
 		pragha-file-utils.h \
 		pragha-filter-dialog.c \
 		pragha-filter-dialog.h \
-		pragha-glyr.c \
-		pragha-glyr.h \
 		pragha-hig.c \
 		pragha-hig.h \
 		pragha-library-pane.c \
 		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
-		pragha-mpris.c \
-		pragha-mpris.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-musicobject-mgmt.c \
@@ -106,6 +102,8 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
+	$(LIBPEAS_CFLAGS) 						\
+	$(LIBPEAS_GTK_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
@@ -118,6 +116,8 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
+	$(LIBPEAS_LIBS)							\
+	$(LIBPEAS_GTK_LIBS)						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS)
@@ -127,21 +127,9 @@ pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
-if HAVE_LIBKEYBINDER
-pragha_SOURCES += pragha-keybinder.c
-pragha_SOURCES += pragha-keybinder.h
-pragha_CFLAGS += $(LIBKEYBINDER_CFLAGS)
-pragha_LDADD += $(LIBKEYBINDER_LIBS)
-endif
-
 if HAVE_LIBCLASTFM
 pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
 pragha_LDADD += $(LIBCLASTFM_LIBS)
-endif
-
-if HAVE_LIBGLYR
-pragha_CFLAGS += $(LIBGLYR_CFLAGS)
-pragha_LDADD += $(LIBGLYR_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI

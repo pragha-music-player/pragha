@@ -1,0 +1,9 @@
+[Plugin]
+Module=mpris2
+Name=Mpris2
+Description=Control pragha with mpris2 interface
+Authors=Matias De lellis <mati86dl@gmail.com>
+Copyright=Copyright © 2013 Matias De lellis
+Website=https://github.com/matiasdelellis/pragha
+Help=https://github.com/matiasdelellis/pragha
+

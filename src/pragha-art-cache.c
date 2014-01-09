@@ -20,22 +20,68 @@
 #include "pragha-utils.h"
 
 struct _PraghaArtCache {
-	gchar *cache_dir;
+	GObject _parent;
+	gchar   *cache_dir;
 };
 
-PraghaArtCache *
-pragha_art_cache_new ()
+enum {
+	SIGNAL_CACHE_CHANGED,
+	LAST_SIGNAL
+};
+
+static int signals[LAST_SIGNAL] = { 0 };
+
+G_DEFINE_TYPE(PraghaArtCache, pragha_art_cache, G_TYPE_OBJECT)
+
+static void
+pragha_art_cache_finalize (GObject *object)
 {
-	PraghaArtCache *cache = g_slice_new (PraghaArtCache);
-	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
-	return cache;
+	PraghaArtCache *cache = PRAGHA_ART_CACHE(object);
+
+	g_free (cache->cache_dir);
+
+	G_OBJECT_CLASS(pragha_art_cache_parent_class)->finalize(object);
 }
 
-void
-pragha_art_cache_free (PraghaArtCache *cache)
+static void
+pragha_art_cache_class_init (PraghaArtCacheClass *klass)
 {
-	g_free (cache->cache_dir);
-	g_slice_free (PraghaArtCache, cache);
+	GObjectClass *object_class;
+
+	object_class = G_OBJECT_CLASS(klass);
+	object_class->finalize = pragha_art_cache_finalize;
+
+	signals[SIGNAL_CACHE_CHANGED] =
+		g_signal_new ("cache-changed",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaArtCacheClass, cache_changed),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+}
+
+static void
+pragha_art_cache_init (PraghaArtCache *cache)
+{
+	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
+}
+
+PraghaArtCache *
+pragha_art_cache_get (void)
+{
+	static PraghaArtCache *cache = NULL;
+
+	if (G_UNLIKELY (cache == NULL)) {
+		cache = g_object_new (PRAGHA_TYPE_ART_CACHE, NULL);
+		g_object_add_weak_pointer (G_OBJECT (cache),
+		                          (gpointer) &cache);
+	}
+	else {
+		g_object_ref (G_OBJECT(cache));
+	}
+
+	return cache;
 }
 
 static gchar *
@@ -50,7 +96,7 @@ pragha_art_cache_build_path (PraghaArtCache *cache, const gchar *artist, const g
 }
 
 gchar *
-pragha_art_cache_get (PraghaArtCache *cache, const gchar *artist, const gchar *album)
+pragha_art_cache_get_uri (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
 	gchar *path = pragha_art_cache_build_path (cache, artist, album);
 
@@ -65,7 +111,7 @@ pragha_art_cache_get (PraghaArtCache *cache, const gchar *artist, const gchar *a
 gboolean
 pragha_art_cache_contains (PraghaArtCache *cache, const gchar *artist, const gchar *album)
 {
-	gchar *path = pragha_art_cache_get (cache, artist, album);
+	gchar *path = pragha_art_cache_get_uri (cache, artist, album);
 
 	if (path) {
 		g_free (path);
@@ -92,6 +138,8 @@ pragha_art_cache_put (PraghaArtCache *cache, const gchar *artist, const gchar *a
 		g_warning ("Failed to save albumart file %s: %s\n", path, error->message);
 		g_error_free (error);
 	}
+
+	g_signal_emit (cache, signals[SIGNAL_CACHE_CHANGED], 0);
 
 	g_free (path);
 	g_object_unref (pixbuf);
