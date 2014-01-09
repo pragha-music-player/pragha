@@ -183,7 +183,7 @@ pragha_sidebar_close_button_new(PraghaSidebar *sidebar)
 	GtkWidget *button, *image;
     
 	button = gtk_button_new ();
-	image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
 	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 	gtk_container_add (GTK_CONTAINER (button), image);

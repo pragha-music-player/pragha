@@ -677,7 +677,7 @@ pragha_scanner_new()
 	gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR(progress_bar), TRUE);
 
 	button = gtk_button_new ();
-	image = gtk_image_new_from_stock (GTK_STOCK_CANCEL, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name ("process-stop", GTK_ICON_SIZE_MENU);
 	gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click (GTK_BUTTON (button), FALSE);
 	gtk_container_add (GTK_CONTAINER (button), image);

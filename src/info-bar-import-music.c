@@ -77,8 +77,8 @@ GtkWidget * create_info_bar_import_music(PraghaApplication *pragha)
 	gtk_orientable_set_orientation(GTK_ORIENTABLE(action_area), GTK_ORIENTATION_HORIZONTAL);
 
 	//GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
-	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_NO, GTK_RESPONSE_CANCEL);
-	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_YES, GTK_RESPONSE_YES);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_No"), GTK_RESPONSE_CANCEL);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_Yes"), GTK_RESPONSE_YES);
 
 	gchar *content = g_strdup_printf(_("Would you like to import %s to library?"), dir);
 
@@ -124,8 +124,8 @@ GtkWidget *create_info_bar_update_music(PraghaApplication *pragha)
 	gtk_orientable_set_orientation(GTK_ORIENTABLE(action_area), GTK_ORIENTATION_HORIZONTAL);
 
 	//GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
-	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_NO, GTK_RESPONSE_CANCEL);
-	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), GTK_STOCK_YES, GTK_RESPONSE_YES);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_No"), GTK_RESPONSE_CANCEL);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_Yes"), GTK_RESPONSE_YES);
 
 	GtkWidget *label = gtk_label_new(_("Want to upgrade your music library?"));
 	gtk_box_pack_start(GTK_BOX(content_area), label, FALSE, FALSE, 0);

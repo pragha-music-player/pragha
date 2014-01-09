@@ -121,8 +121,8 @@ pragha_search_entry_new (PraghaPreferences *preferences)
 #if GTK_CHECK_VERSION (3, 6, 0)
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "edit-find-symbolic");
 #else
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "edit-find");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 
 	gtk_entry_set_icon_sensitive (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_SECONDARY, FALSE);
 #endif

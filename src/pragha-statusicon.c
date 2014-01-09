@@ -72,25 +72,25 @@ static const gchar *systray_menu_xml =
 	</ui>";
 
 static const GtkActionEntry systray_menu_aentries[] = {
-	{"About", GTK_STOCK_ABOUT, N_("About"),
+	{"About", "help-about", N_("About"),
 	 "", NULL, G_CALLBACK(systray_about_action)},
-	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
+	{"Add files", "document-open", N_("_Add files"),
 	 "", NULL, G_CALLBACK(systray_open_file_action)},
-	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
 	 "", "Append a Audio CD", G_CALLBACK(systray_add_audio_cd_action)},
-	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
+	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(systray_add_location_action)},
-	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev Track"),
+	{"Prev", "media-skip-backward", N_("Prev Track"),
 	 "", "Prev Track", G_CALLBACK(systray_prev_action)},
-	{"Play_Pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
+	{"Play_Pause", "media-playback-start", N_("Play / Pause"),
 	 "", "Play / Pause", G_CALLBACK(systray_play_pause_action)},
-	{"Stop", GTK_STOCK_MEDIA_STOP, N_("Stop"),
+	{"Stop", "media-playback-stop", N_("Stop"),
 	 "", "Stop", G_CALLBACK(systray_stop_action)},
-	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next Track"),
+	{"Next", "media-skip-forward", N_("Next Track"),
 	 "", "Next Track", G_CALLBACK(systray_next_action)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
+	{"Edit tags", NULL, N_("Edit track information"),
 	 "", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
-	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
+	{"Quit", "application-exit", N_("_Quit"),
 	 "", "Quit", G_CALLBACK(systray_quit)}
 };
 

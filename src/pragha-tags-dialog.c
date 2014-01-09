@@ -97,8 +97,8 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 
 	gtk_window_set_title (GTK_WINDOW (dialog), _("Edit tags"));
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 300);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Cancel"), GTK_RESPONSE_CANCEL);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Ok"), GTK_RESPONSE_OK);
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
 	/* Create table */
@@ -171,13 +171,13 @@ pragha_tags_dialog_init (PraghaTagsDialog *dialog)
 	gtk_entry_set_completion(GTK_ENTRY(entry_genre), completion);
 	g_object_unref (completion);
 
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_title), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_artist), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_album), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_genre), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_DIRECTORY);
-	gtk_entry_set_icon_from_stock (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_JUMP_TO);
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_PRIMARY, "folder");
+	gtk_entry_set_icon_from_icon_name (GTK_ENTRY(entry_file), GTK_ENTRY_ICON_SECONDARY, "go-jump");
 
 	gtk_editable_set_editable (GTK_EDITABLE(entry_file), FALSE);
 
@@ -642,12 +642,11 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 
 	/* The main edit dialog */
 
-	dialog = gtk_dialog_new_with_buttons(_("Details"),
-					     GTK_WINDOW(parent),
-					     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-					     GTK_STOCK_OK,
-					     GTK_RESPONSE_OK,
-					     NULL);
+	dialog = gtk_dialog_new_with_buttons (_("Details"),
+	                                      GTK_WINDOW(parent),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Ok"), GTK_RESPONSE_OK,
+	                                      NULL);
 
 	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), properties_table);
 

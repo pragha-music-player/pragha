@@ -200,22 +200,22 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	</ui>";
 
 static GtkActionEntry playlist_context_aentries[] = {
-	{"Queue track", GTK_STOCK_ADD, N_("Add to playback queue"),
+	{"Queue track", "list-add", N_("Add to playback queue"),
 	 "", "Add to playback queue", G_CALLBACK(queue_current_playlist)},
-	{"Dequeue track", GTK_STOCK_REMOVE, N_("Remove to playback queue"),
+	{"Dequeue track", "list-remove", N_("Remove to playback queue"),
 	 "", "Remove to playback queue", G_CALLBACK(dequeue_current_playlist)},
-	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove from playlist"),
+	{"Remove from playlist", "list-remove", N_("Remove from playlist"),
 	 "", "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
-	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
+	{"Crop playlist", "list-remove", N_("Crop playlist"),
 	 "", "Remove no telected tracks of playlist", G_CALLBACK(crop_current_playlist)},
-	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
+	{"Clear playlist", "edit-clear", N_("Clear playlist"),
 	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
-	{"Save playlist", GTK_STOCK_SAVE, N_("Save playlist")},
-	{"Save selection", GTK_STOCK_SAVE_AS, N_("Save selection")},
+	{"Save playlist", "document-save", N_("Save playlist")},
+	{"Save selection", "document-save-as", N_("Save selection")},
 	{"ToolsMenu", NULL, N_("_Tools")},
-	{"Copy tag to selection", GTK_STOCK_COPY, NULL,
+	{"Copy tag to selection", "edit-copy", NULL,
 	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
+	{"Edit tags", NULL, N_("Edit track information"),
 	 "", "Edit information for this track", G_CALLBACK(pragha_playlist_edit_tags)}
 };
 
@@ -3282,7 +3282,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 
 	action_clear_sort = gtk_image_menu_item_new_with_label(_("Clear sort"));
         gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(action_clear_sort),
-                gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU));
+                gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU));
 
 	/* Add the items to the menu */
 

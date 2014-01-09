@@ -370,14 +370,13 @@ pragha_filter_dialog (PraghaApplication *pragha)
 	/* The search dialog */
 
 	dialog = gtk_dialog_new_with_buttons (_("Search in playlist"),
-					     GTK_WINDOW(pragha_application_get_window(pragha)),
-					     GTK_DIALOG_MODAL,
-					     GTK_STOCK_CLOSE,
-					     GTK_RESPONSE_CANCEL,
-					     NULL);
+	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_DIALOG_MODAL,
+	                                      _("_Close"), GTK_RESPONSE_CANCEL,
+	                                      NULL);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Add to playback queue"), GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_JUMP_TO, GTK_RESPONSE_APPLY);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Jump to"), GTK_RESPONSE_APPLY);
 
 	gtk_window_set_default_size (GTK_WINDOW (dialog), 600, 500);
 

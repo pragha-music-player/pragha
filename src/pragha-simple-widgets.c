@@ -44,7 +44,7 @@ gpointer sokoke_xfce_header_new(const gchar* header, const gchar *icon)
 	if (icon)
 		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
 	else
-		image = gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_DIALOG);
+		image = gtk_image_new_from_icon_name ("dialog-information", GTK_ICON_SIZE_DIALOG);
 
 	label = gtk_label_new(NULL);
 	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);

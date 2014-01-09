@@ -113,8 +113,8 @@ gui_backend_error_show_dialog_cb (PraghaBackend *backend, const GError *error, g
 	                                             _("<b>Error playing current track.</b>\n(%s)\n<b>Reason:</b> %s"),
 	                                             file, error->message);
 
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_STOP, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_MEDIA_NEXT, GTK_RESPONSE_APPLY);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Stop"), GTK_RESPONSE_ACCEPT);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Next"), GTK_RESPONSE_APPLY);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_APPLY);
 
