@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2012 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -15,22 +15,18 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_KEYBINDER_H
-#define PRAGHA_KEYBINDER_H
+#ifndef __PRAGHA_SONG_INFO_DIALOG_H__
+#define __PRAGHA_SONG_INFO_DIALOG_H__
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <gtk/gtk.h>
 
-#ifdef HAVE_LIBKEYBINDER
+G_BEGIN_DECLS
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+void
+pragha_show_related_text_info_dialog (GtkWidget   *widget,
+                                      const gchar *title_header,
+                                      const gchar *subtitle_header,
+                                      const gchar *text);
+G_END_DECLS
 
-gboolean keybinder_will_be_useful ();
-gboolean init_keybinder (PraghaApplication *pragha);
-void keybinder_free ();
-
-#endif
-
-#endif /* PRAGHA_KEYBINDER_H */
+#endif /* __PRAGHA_SONG_INFO_DIALOG_H__ */

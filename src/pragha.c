@@ -31,11 +31,14 @@
 #include <libintl.h>
 #include <tag_c.h>
 
+#ifdef HAVE_LIBPEAS
+#include <libpeas/peas.h>
+#endif
+
 #include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-menubar.h"
-#include "pragha-keybinder.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha.h"
@@ -75,20 +78,14 @@ struct _PraghaApplication {
 
 	PraghaStatusIcon  *status_icon;
 
-	/* Plugins?. */
+#ifdef HAVE_LIBPEAS
+	PeasEngine        *peas_engine;
+	PeasExtensionSet  *peas_exten_set;
+#endif
 
 	PraghaNotify      *notify;
-#ifdef HAVE_LIBGLYR
-	PraghaGlyr        *glyr;
-#endif
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm      *clastfm;
-#endif
-	PraghaMpris2      *mpris2;
-	con_gnome_media_keys *cgnome_media_keys;
-
-#ifdef HAVE_LIBKEYBINDER
-	gboolean           keybinder;
 #endif
 };
 
@@ -148,7 +145,6 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
-	PraghaMpris2 *mpris2;
 	PraghaMusicobject *cmobj = NULL;
 
 	backend = pragha_application_get_backend (pragha);
@@ -159,9 +155,6 @@ pragha_playlist_update_change_tags (PraghaPlaylist *playlist, gint changed, Prag
 
 		toolbar = pragha_application_get_toolbar (pragha);
 		pragha_toolbar_set_title (toolbar, cmobj);
-
-		mpris2 = pragha_application_get_mpris2 (pragha);
-		pragha_mpris_update_metadata_changed (mpris2);
 	}
 }
 
@@ -191,6 +184,32 @@ pragha_playlist_update_statusbar_playtime (PraghaPlaylist *playlist, PraghaAppli
 
 	g_free(tot_str);
 	g_free(str);
+}
+
+static void
+pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+	PraghaToolbar *toolbar;
+	PraghaMusicobject *mobj = NULL;
+	gchar *album_art_path = NULL;
+	const gchar *artist = NULL, *album = NULL;
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) != ST_STOPPED) {
+		mobj = pragha_backend_get_musicobject (backend);
+
+		artist = pragha_musicobject_get_artist (mobj);
+		album = pragha_musicobject_get_album (mobj);
+	
+		album_art_path = pragha_art_cache_get_uri (cache, artist, album);
+
+		if (album_art_path) {
+			toolbar = pragha_application_get_toolbar (pragha);
+			pragha_toolbar_set_image_album_art (toolbar, album_art_path);
+			g_free (album_art_path);
+		}
+	}
 }
 
 /*
@@ -317,22 +336,24 @@ pragha_application_get_pane (PraghaApplication *pragha)
 	return pragha->pane;
 }
 
+PeasEngine *
+pragha_application_get_peas_engine (PraghaApplication *pragha)
+{
+	return pragha->peas_engine;
+}
+
+#ifdef HAVE_LIBPEAS
 PraghaNotify *
 pragha_application_get_notify (PraghaApplication *pragha)
 {
 	return pragha->notify;
 }
+#endif
 
 void
 pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
 {
 	pragha->notify = notify;
-}
-
-PraghaMpris2 *
-pragha_application_get_mpris2 (PraghaApplication *pragha)
-{
-	return pragha->mpris2;
 }
 
 #ifdef HAVE_LIBCLASTFM
@@ -343,19 +364,67 @@ pragha_application_get_lastfm (PraghaApplication *pragha)
 }
 #endif
 
-#ifdef HAVE_LIBGLYR
-PraghaGlyr *
-pragha_application_get_glyr (PraghaApplication *pragha)
-{
-	return pragha->glyr;
-}
-#endif
-
 gboolean
 pragha_application_is_first_run (PraghaApplication *pragha)
 {
 	return string_is_empty (pragha_preferences_get_installed_version (pragha->preferences));
 }
+
+/* Plugin hacking...
+ * TODO: Move to own file..
+ */
+#ifdef HAVE_LIBPEAS
+static void
+on_extension_added (PeasExtensionSet  *set,
+                    PeasPluginInfo    *info,
+                    PeasExtension     *exten,
+                    PraghaApplication *pragha)
+{
+	peas_activatable_activate (PEAS_ACTIVATABLE (exten));
+}
+
+static void
+on_extension_removed (PeasExtensionSet  *set,
+                      PeasPluginInfo    *info,
+                      PeasExtension     *exten,
+                      PraghaApplication *pragha)
+{
+	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
+}
+
+static void
+pragha_plugins_save_activated (PraghaApplication *pragha)
+{
+	gchar **loaded_plugins = NULL;
+
+	loaded_plugins = peas_engine_get_loaded_plugins (pragha->peas_engine);
+	if (loaded_plugins) {
+		pragha_preferences_set_string_list (pragha->preferences,
+				                            "PLUGINS",
+				                            "Activated",
+				                            (const gchar * const*)loaded_plugins,
+		                                     g_strv_length(loaded_plugins));
+
+		g_strfreev(loaded_plugins);
+	}
+}
+
+static void
+pragha_plugins_activate_saved (PraghaApplication *pragha)
+{
+	gchar **loaded_plugins = NULL;
+
+	loaded_plugins = pragha_preferences_get_string_list (pragha->preferences,
+	                                                     "PLUGINS",
+	                                                     "Activated",
+	                                                     NULL);
+
+	if (loaded_plugins) {
+		peas_engine_set_loaded_plugins (pragha->peas_engine, (const gchar **) loaded_plugins);
+		g_strfreev(loaded_plugins);
+	}
+}
+#endif
 
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
@@ -401,25 +470,21 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-#ifdef HAVE_LIBGLYR
-	if (pragha->glyr) {
-		pragha_glyr_free (pragha->glyr);
-		pragha->glyr = NULL;
-	}
-#endif
 #ifdef HAVE_LIBCLASTFM
 	if (pragha->clastfm) {
 		pragha_lastfm_free (pragha->clastfm);
 		pragha->clastfm = NULL;
 	}
 #endif
+	if (pragha->peas_engine) {
+		g_object_unref (pragha->peas_engine);
+		pragha_plugins_save_activated (pragha);
+		pragha->peas_engine = NULL;
+	}
+
 	if (pragha->sidebar) {
 		pragha_sidebar_free (pragha->sidebar);
 		pragha->sidebar = NULL;
-	}
-	if (pragha->mpris2) {
-		pragha_mpris_free (pragha->mpris2);
-		pragha->mpris2 = NULL;
 	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
@@ -427,19 +492,9 @@ pragha_application_dispose (GObject *object)
 		pragha->backend = NULL;
 	}
 	if (pragha->art_cache) {
-		pragha_art_cache_free (pragha->art_cache);
+		g_object_unref (pragha->art_cache);
 		pragha->art_cache = NULL;
 	}
-	if (pragha->cgnome_media_keys) {
-		gnome_media_keys_free (pragha->cgnome_media_keys);
-		pragha->cgnome_media_keys = NULL;
-	}
-#ifdef HAVE_LIBKEYBINDER
-	if (pragha->keybinder) {
-		keybinder_free ();
-		pragha->keybinder = FALSE;
-	}
-#endif
 	if (pragha->mainwindow) {
 		pragha_window_free (pragha);
 		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
@@ -496,8 +551,6 @@ pragha_application_startup (GApplication *application)
 
 	/* Allocate memory for simple structures */
 
-	pragha->mpris2 = pragha_mpris_new();
-
 	pragha->preferences = pragha_preferences_get();
 
 	pragha->cdbase = pragha_database_get();
@@ -505,12 +558,33 @@ pragha_application_startup (GApplication *application)
 		g_error("Unable to init music dbase");
 	}
 
+#ifdef HAVE_LIBPEAS
+	pragha->peas_engine = peas_engine_get_default ();
+
+	peas_engine_add_search_path (pragha->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
+	pragha->peas_exten_set = peas_extension_set_new (pragha->peas_engine,
+	                                                 PEAS_TYPE_ACTIVATABLE,
+	                                                 "object", pragha,
+	                                                 NULL);
+	g_object_unref (pragha);
+
+	peas_extension_set_foreach (pragha->peas_exten_set,
+	                            (PeasExtensionSetForeachFunc) on_extension_added,
+	                            pragha);
+	g_signal_connect (pragha->peas_exten_set, "extension-added",
+	                  G_CALLBACK (on_extension_added), pragha);
+	g_signal_connect (pragha->peas_exten_set, "extension-removed",
+	                  G_CALLBACK (on_extension_removed), pragha);
+#endif
+
 	if (pragha_preferences_get_show_osd (pragha->preferences))
 		pragha->notify = pragha_notify_new (pragha);
 	else
 		pragha->notify = NULL;
 
-	pragha->art_cache = pragha_art_cache_new ();
+	pragha->art_cache = pragha_art_cache_get ();
+	g_signal_connect (pragha->art_cache, "cache-changed",
+	                  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
 
 	pragha->backend = pragha_backend_new (pragha);
 
@@ -525,10 +599,6 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
 	g_signal_connect (pragha->backend, "notify::state",
 	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
-
-	if (pragha_mpris_init(pragha->mpris2, pragha) == -1) {
-		g_critical("Unable to initialize MPRIS");
-	}
 
 	/*
 	 * Collect widgets and construct the window.
@@ -595,21 +665,12 @@ pragha_application_startup (GApplication *application)
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
-	#ifdef HAVE_LIBGLYR
-	pragha->glyr = pragha_glyr_new (pragha);
-	#endif
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);
 	#endif
 
-	/* Init_gnome_media_keys requires constructed main window. */
-	if (gnome_media_keys_will_be_useful()) {
-	    pragha->cgnome_media_keys = init_gnome_media_keys (pragha);
-	}
-	#ifdef HAVE_LIBKEYBINDER
-	else if (keybinder_will_be_useful()) {
-		pragha->keybinder = init_keybinder (pragha);
-	}
+	#ifdef HAVE_LIBPEAS
+	pragha_plugins_activate_saved (pragha);
 	#endif
 
 	g_application_hold (application); //TODO don't hold if gtkapp

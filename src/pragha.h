@@ -30,11 +30,14 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#ifdef HAVE_LIBPEAS
+#include <libpeas/peas.h>
+#endif
+
 #include "pragha-album-art.h"
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
-#include "pragha-glyr.h"
 #include "pragha-notify.h"
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
@@ -46,8 +49,6 @@
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
 #include "pragha-window.h"
-#include "gnome-media-keys.h"
-#include "pragha-mpris.h"
 #include "pragha-debug.h"
 
 /* With libcio 0.83 should be before config.h. libcdio issue */
@@ -92,12 +93,12 @@ GtkWidget         *pragha_application_get_menubar            (PraghaApplication 
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_pane               (PraghaApplication *pragha);
 
-PraghaMpris2      *pragha_application_get_mpris2             (PraghaApplication *pragha);
+#ifdef HAVE_LIBPEAS
+PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
+#endif
+
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
-#endif
-#ifdef HAVE_LIBGLYR
-PraghaGlyr        *pragha_application_get_glyr               (PraghaApplication *pragha);
 #endif
 
 PraghaNotify      *pragha_application_get_notify             (PraghaApplication *pragha);

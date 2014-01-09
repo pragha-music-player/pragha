@@ -26,7 +26,12 @@
 #include <glib/gi18n.h>
 #endif
 
+#ifdef HAVE_LIBPEAS
+#include <libpeas-gtk/peas-gtk.h>
+#endif
+
 #include <gdk/gdkkeysyms.h>
+
 #include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
@@ -71,11 +76,7 @@ struct _PreferencesDialog {
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
 #endif
-#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art_w;
-#endif
 	GtkWidget *use_cddb_w;
-	GtkWidget *use_mpris2_w;
 };
 
 const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
@@ -146,7 +147,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 {
 	PraghaLibraryPane *library;
 	PraghaNotify *notify;
-	PraghaMpris2 *mpris2;
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm *clastfm;
 #endif
@@ -362,23 +362,8 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_connect (clastfm);
 		}
 #endif
-#ifdef HAVE_LIBGLYR
-		pragha_preferences_set_download_album_art(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w)));
-#endif
 		pragha_preferences_set_use_cddb(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
-
-		pragha_preferences_set_use_mpris2(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
-
-		mpris2 = pragha_application_get_mpris2 (dialog->pragha);
-		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
-			pragha_mpris_close (mpris2);
-		}
-		else {
-			pragha_mpris_init (mpris2, dialog->pragha);
-		}
 		break;
 	default:
 		break;
@@ -754,14 +739,8 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
 	}
 #endif
-#ifdef HAVE_LIBGLYR
-	if(pragha_preferences_get_download_album_art(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->get_album_art_w), TRUE);
-#endif
 	if (pragha_preferences_get_use_cddb(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
-	if (pragha_preferences_get_use_mpris2(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w), TRUE);
 }
 
 gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
@@ -1085,10 +1064,7 @@ pref_create_services_page(PreferencesDialog *dialog)
 	#ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	#endif
-	#ifdef HAVE_LIBGLYR
-	GtkWidget *get_album_art;
-	#endif
-	GtkWidget *use_cddb, *use_mpris2;
+	GtkWidget *use_cddb;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -1118,15 +1094,8 @@ pref_create_services_page(PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Others services"));
 
-	#ifdef HAVE_LIBGLYR
-	get_album_art = gtk_check_button_new_with_label(_("Get album art"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, get_album_art);
-	#endif
 	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
-
-	use_mpris2 = gtk_check_button_new_with_label(_("Allow remote control with MPRIS2 interface"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, use_mpris2);
 
 	/* Store references. */
 
@@ -1137,14 +1106,30 @@ pref_create_services_page(PreferencesDialog *dialog)
 	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
 	                  G_CALLBACK(toggle_lastfm), dialog);
 	#endif
-	#ifdef HAVE_LIBGLYR
-	dialog->get_album_art_w = get_album_art;
-	#endif
 	dialog->use_cddb_w = use_cddb;
-	dialog->use_mpris2_w = use_mpris2;
 
 	return table;
 }
+
+#ifdef HAVE_LIBPEAS
+static GtkWidget*
+pref_create_plugins_page (PreferencesDialog *dialog)
+{
+	GtkWidget *table;
+	GtkWidget *manager;
+	guint row = 0;
+
+	table = pragha_hig_workarea_table_new ();
+
+	pragha_hig_workarea_table_add_section_title (table, &row, _("Plugins"));
+
+	manager = peas_gtk_plugin_manager_new (peas_engine_get_default ());
+
+	pragha_hig_workarea_table_add_wide_tall_control (table, &row, manager);
+
+	return table;
+}
+#endif
 
 void
 pragha_preferences_dialog_show (PraghaApplication *pragha)
@@ -1154,6 +1139,10 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
 	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
+	#ifdef HAVE_LIBPEAS
+	GtkWidget *plugins_vbox;
+	GtkWidget *label_plugins;
+	#endif
 
 	dialog = g_slice_new0(PreferencesDialog);
 
@@ -1177,6 +1166,9 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 	label_general = gtk_label_new(_("General"));
 	label_desktop = gtk_label_new(_("Desktop"));
 	label_services = gtk_label_new(_("Services"));
+	#ifdef HAVE_LIBPEAS
+	label_plugins = gtk_label_new(_("Plugins"));
+	#endif
 
 	/* Notebook, pages et al. */
 
@@ -1201,6 +1193,11 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	services_vbox = pref_create_services_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox, label_services);
+
+	#ifdef HAVE_LIBPEAS
+	plugins_vbox = pref_create_plugins_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
+	#endif
 
 	/* Add to dialog */
 

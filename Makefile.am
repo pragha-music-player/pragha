@@ -3,6 +3,10 @@ SUBDIRS = \
 	po    \
 	src
 
+if HAVE_LIBPEAS
+SUBDIRS += plugins
+endif
+
 AUTOMAKE_OPTIONS = \
 	1.8            \
 	dist-bzip2
