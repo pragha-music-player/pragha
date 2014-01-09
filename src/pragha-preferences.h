@@ -209,6 +209,10 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
                                const gchar *group_name,
                                const gchar *key);
 
+gchar *
+pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
+                                          const gchar       *plugin_name);
+
 /*
  * Public api.
  */

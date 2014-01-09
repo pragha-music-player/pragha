@@ -391,6 +391,39 @@ on_extension_removed (PeasExtensionSet  *set,
 {
 	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
 }
+
+static void
+pragha_plugins_save_activated (PraghaApplication *pragha)
+{
+	gchar **loaded_plugins = NULL;
+
+	loaded_plugins = peas_engine_get_loaded_plugins (pragha->peas_engine);
+	if (loaded_plugins) {
+		pragha_preferences_set_string_list (pragha->preferences,
+				                            "PLUGINS",
+				                            "Activated",
+				                            (const gchar * const*)loaded_plugins,
+		                                     g_strv_length(loaded_plugins));
+
+		g_strfreev(loaded_plugins);
+	}
+}
+
+static void
+pragha_plugins_activate_saved (PraghaApplication *pragha)
+{
+	gchar **loaded_plugins = NULL;
+
+	loaded_plugins = pragha_preferences_get_string_list (pragha->preferences,
+	                                                     "PLUGINS",
+	                                                     "Activated",
+	                                                     NULL);
+
+	if (loaded_plugins) {
+		peas_engine_set_loaded_plugins (pragha->peas_engine, (const gchar **) loaded_plugins);
+		g_strfreev(loaded_plugins);
+	}
+}
 #endif
 
 static void
@@ -443,6 +476,12 @@ pragha_application_dispose (GObject *object)
 		pragha->clastfm = NULL;
 	}
 #endif
+	if (pragha->peas_engine) {
+		g_object_unref (pragha->peas_engine);
+		pragha_plugins_save_activated (pragha);
+		pragha->peas_engine = NULL;
+	}
+
 	if (pragha->sidebar) {
 		pragha_sidebar_free (pragha->sidebar);
 		pragha->sidebar = NULL;
@@ -527,6 +566,8 @@ pragha_application_startup (GApplication *application)
 	                                                 PEAS_TYPE_ACTIVATABLE,
 	                                                 "object", pragha,
 	                                                 NULL);
+	g_object_unref (pragha);
+
 	peas_extension_set_foreach (pragha->peas_exten_set,
 	                            (PeasExtensionSetForeachFunc) on_extension_added,
 	                            pragha);
@@ -626,6 +667,10 @@ pragha_application_startup (GApplication *application)
 
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);
+	#endif
+
+	#ifdef HAVE_LIBPEAS
+	pragha_plugins_activate_saved (pragha);
 	#endif
 
 	g_application_hold (application); //TODO don't hold if gtkapp
