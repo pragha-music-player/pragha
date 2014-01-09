@@ -19,6 +19,12 @@
 #include <config.h>
 #endif
 
+#if defined(GETTEXT_PACKAGE)
+#include <glib/gi18n-lib.h>
+#else
+#include <glib/gi18n.h>
+#endif
+
 #include <glib.h>
 #include <glib-object.h>
 #include <gmodule.h>
@@ -74,8 +80,7 @@ pragha_show_related_text_info_dialog (GtkWidget   *widget,
 	dialog = gtk_dialog_new_with_buttons (title_header,
 	                                      GTK_WINDOW(widget),
 	                                      GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      GTK_STOCK_OK,
-	                                      GTK_RESPONSE_OK,
+	                                      _("_Ok"), GTK_RESPONSE_OK,
 	                                      NULL);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);

@@ -175,57 +175,57 @@ static GtkActionEntry main_aentries[] = {
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Prev", GTK_STOCK_MEDIA_PREVIOUS, N_("Prev track"),
+	{"Prev", "media-skip-backward", N_("Prev track"),
 	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
-	{"Play_pause", GTK_STOCK_MEDIA_PLAY, N_("Play / Pause"),
+	{"Play_pause", "media-playback-start", N_("Play / Pause"),
 	 "<Control>space", "Play / Pause", G_CALLBACK(play_pause_action)},
-	{"Stop", GTK_STOCK_MEDIA_STOP, N_("Stop"),
+	{"Stop", "media-playback-stop", N_("Stop"),
 	 "", "Stop", G_CALLBACK(stop_action)},
-	{"Next", GTK_STOCK_MEDIA_NEXT, N_("Next track"),
+	{"Next", "media-skip-forward", N_("Next track"),
 	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit track information"),
+	{"Edit tags", NULL, N_("Edit track information"),
 	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
-	{"Quit", GTK_STOCK_QUIT, N_("_Quit"),
+	{"Quit", "application-exit", N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
-	{"Add files", GTK_STOCK_OPEN, N_("_Add files"),
+	{"Add files", "document-open", N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Add Audio CD", GTK_STOCK_CDROM, N_("Add Audio _CD"),
+	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
 	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
-	{"Add location", GTK_STOCK_NETWORK, N_("Add _location"),
+	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
-	{"Add the library", GTK_STOCK_ADD, N_("_Add the library"),
+	{"Add the library", "list-add", N_("_Add the library"),
 	"", "Add all the library", G_CALLBACK(add_libary_action)},
-	{"Remove from playlist", GTK_STOCK_REMOVE, N_("Remove selection from playlist"),
+	{"Remove from playlist", "list-remove", N_("Remove selection from playlist"),
 	 "", "Remove selection from playlist", G_CALLBACK(pragha_menubar_remove_playlist_action)},
-	{"Crop playlist", GTK_STOCK_REMOVE, N_("Crop playlist"),
+	{"Crop playlist", "list-remove", N_("Crop playlist"),
 	 "<Control>C", "Crop playlist", G_CALLBACK(pragha_menubar_crop_playlist_action)},
-	{"Clear playlist", GTK_STOCK_CLEAR, N_("Clear playlist"),
+	{"Clear playlist", "edit-clear", N_("Clear playlist"),
 	 "<Control>L", "Clear the current playlist", G_CALLBACK(pragha_menubar_clear_playlist_action)},
-	{"Save playlist", GTK_STOCK_SAVE_AS, N_("Save playlist")},
+	{"Save playlist", "document-save-as", N_("Save playlist")},
 	{"Save selection", NULL, N_("Save selection")},
-	{"Search in playlist", GTK_STOCK_FIND, N_("_Search in playlist"),
+	{"Search in playlist", "edit-find", N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
-	{"Preferences", GTK_STOCK_PREFERENCES, N_("_Preferences"),
+	{"Preferences", "preferences-system", N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Jump to playing song", GTK_STOCK_JUMP_TO, N_("Jump to playing song"),
+	{"Jump to playing song", "go-jump", N_("Jump to playing song"),
 	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
+	{"Rescan library", "system-run", N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
-	{"Update library", GTK_STOCK_EXECUTE, N_("_Update library"),
+	{"Update library", "system-run", N_("_Update library"),
 	 "", "Update library", G_CALLBACK(update_library_action)},
-	{"Statistics", GTK_STOCK_INFO, N_("_Statistics"),
+	{"Statistics", "dialog-information", N_("_Statistics"),
 	 "", "Statistics", G_CALLBACK(statistics_action)},
-	{"Home", GTK_STOCK_HOME, N_("Homepage"),
+	{"Home", "go-home", N_("Homepage"),
 	 "", "Homepage", G_CALLBACK(home_action)},
-	{"Community", GTK_STOCK_INFO, N_("Community"),
+	{"Community", "dialog-information", N_("Community"),
 	 "", "Forum of pragha", G_CALLBACK(community_action)},
-	{"Wiki", GTK_STOCK_YES, N_("Wiki"),
+	{"Wiki", NULL, N_("Wiki"),
 	 "", "Wiki of pragha", G_CALLBACK(wiki_action)},
 	{"Translate Pragha", "preferences-desktop-locale", N_("Translate Pragha"),
 	 "", "Translate Pragha", G_CALLBACK(translate_action)},
-	{"About", GTK_STOCK_ABOUT, N_("About"),
+	{"About", "help-about", N_("About"),
 	 "", "About pragha", G_CALLBACK(about_action)},
 };
 
@@ -383,8 +383,8 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(bbox), 6);
 
-	close_button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-	add_button = gtk_button_new_from_stock(GTK_STOCK_ADD);
+	close_button = gtk_button_new_with_mnemonic (_("_Cancel"));
+	add_button = gtk_button_new_with_mnemonic (_("_Add"));
 	gtk_container_add(GTK_CONTAINER(bbox), close_button);
 	gtk_container_add(GTK_CONTAINER(bbox), add_button);
 
@@ -583,14 +583,12 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 		g_free (clipboard_location);
 	}
 
-	dialog = gtk_dialog_new_with_buttons(_("Add a location"),
-			     GTK_WINDOW(pragha_application_get_window(pragha)),
-			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			     GTK_STOCK_CANCEL,
-			     GTK_RESPONSE_CANCEL,
-			     GTK_STOCK_OK,
-			     GTK_RESPONSE_ACCEPT,
-			     NULL);
+	dialog = gtk_dialog_new_with_buttons (_("Add a location"),
+	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 

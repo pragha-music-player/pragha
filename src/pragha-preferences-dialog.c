@@ -425,11 +425,11 @@ library_add_cb (GtkButton *button, PreferencesDialog *dialog)
 	/* Create a folder chooser dialog */
 
 	add_dialog = gtk_file_chooser_dialog_new (_("Select a folder to add to library"),
-	                                      GTK_WINDOW(dialog->widget),
-	                                      GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-	                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-	                                      NULL);
+	                                          GTK_WINDOW(dialog->widget),
+	                                          GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                          _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                          _("_Open"), GTK_RESPONSE_ACCEPT,
+	                                          NULL);
 
 	gtk_window_set_modal(GTK_WINDOW(add_dialog), TRUE);
 
@@ -873,8 +873,8 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	library_bbox_align = gtk_alignment_new(0, 0, 0, 0);
 	library_bbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
-	library_add = gtk_button_new_from_stock(GTK_STOCK_ADD);
-	library_remove = gtk_button_new_from_stock(GTK_STOCK_REMOVE);
+	library_add = gtk_button_new_with_mnemonic (_("_Add"));
+	library_remove = gtk_button_new_with_mnemonic (_("_Remove"));
 
 	gtk_box_pack_start (GTK_BOX(library_bbox), library_add,
 	                    FALSE, FALSE, 0);
@@ -1151,11 +1151,11 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	/* The main preferences dialog */
 
-	dialog->widget = gtk_dialog_new_with_buttons(_("Preferences of Pragha"),
-	                                             GTK_WINDOW(pragha_application_get_window(pragha)),
-	                                             GTK_DIALOG_MODAL,
-	                                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                             GTK_STOCK_OK, GTK_RESPONSE_OK,
+	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences of Pragha"),
+	                                              GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                              GTK_DIALOG_MODAL,
+	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                              _("_Ok"), GTK_RESPONSE_OK,
 	                                              NULL);
 
 	/* Labels */

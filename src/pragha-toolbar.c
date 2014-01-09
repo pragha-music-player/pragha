@@ -326,10 +326,8 @@ pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpo
 
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->prev_button), playing);
 
-	gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON(toolbar->play_button),
-	                              (state == ST_PLAYING) ?
-	                              GTK_STOCK_MEDIA_PAUSE :
-	                              GTK_STOCK_MEDIA_PLAY);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button),
+	                               (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
 
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
@@ -709,22 +707,26 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	/* Setup Left control buttons */
 
-	prev_button = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_PREVIOUS);
+	prev_button = gtk_tool_button_new (NULL, NULL);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(prev_button), "media-skip-backward");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), _("Previous Track"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(prev_button));
 	toolbar->prev_button = prev_button;
 
-	play_button = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_PLAY);
+	play_button = gtk_tool_button_new (NULL, NULL);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(play_button), "media-playback-start");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(play_button), _("Play / Pause Track"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(play_button));
 	toolbar->play_button = play_button;
 
-	stop_button = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_STOP);
+	stop_button = gtk_tool_button_new (NULL, NULL);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(stop_button), "media-playback-stop");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), _("Stop playback"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(stop_button));
 	toolbar->stop_button = stop_button;
 
-	next_button = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_NEXT);
+	next_button = gtk_tool_button_new (NULL, NULL);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(next_button), "media-skip-forward");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(next_button));
 	toolbar->next_button = next_button;
@@ -757,7 +759,8 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	/* Setup Right control buttons */
 
-	unfull_button = gtk_tool_button_new_from_stock(GTK_STOCK_LEAVE_FULLSCREEN);
+	unfull_button = gtk_tool_button_new (NULL, NULL);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(unfull_button), "view-restore");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(unfull_button));
 	toolbar->unfull_button = unfull_button;

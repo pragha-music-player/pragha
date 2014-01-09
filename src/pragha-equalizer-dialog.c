@@ -294,8 +294,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 	w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
 	                                        GTK_WINDOW(pragha_application_get_window (pragha)),
 	                                        GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                        GTK_STOCK_OK,
-	                                        GTK_RESPONSE_OK,
+	                                        _("_Ok"), GTK_RESPONSE_OK,
 	                                        NULL);
 
 	gtk_window_set_default_size(GTK_WINDOW (w_dialog), -1, 200);

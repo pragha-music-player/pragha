@@ -75,14 +75,12 @@ get_playlist_dialog(PraghaPlaylistActionRange type, GtkWidget *parent)
 
 	pragha_hig_workarea_table_add_row(table, &row, label, entry);
 
-	dialog = gtk_dialog_new_with_buttons(NULL,
-			     GTK_WINDOW(parent),
-			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			     GTK_STOCK_CANCEL,
-			     GTK_RESPONSE_CANCEL,
-			     GTK_STOCK_OK,
-			     GTK_RESPONSE_ACCEPT,
-			     NULL);
+	dialog = gtk_dialog_new_with_buttons (NULL,
+	                                     GTK_WINDOW(parent),
+	                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                     _("_Ok"), GTK_RESPONSE_ACCEPT,
+	                                     NULL);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
@@ -532,14 +530,12 @@ gchar* rename_playlist_dialog(const gchar *oplaylist, GtkWidget *parent)
 	gtk_entry_set_activates_default (GTK_ENTRY(entry), TRUE);
 	pragha_hig_workarea_table_add_wide_control(table, &row, entry);
 
-	dialog = gtk_dialog_new_with_buttons(_("Rename"),
-			     GTK_WINDOW(parent),
-			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			     GTK_STOCK_CANCEL,
-			     GTK_RESPONSE_CANCEL,
-			     GTK_STOCK_OK,
-			     GTK_RESPONSE_ACCEPT,
-			     NULL);
+	dialog = gtk_dialog_new_with_buttons (_("Rename"),
+	                                      GTK_WINDOW(parent),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
 
@@ -606,12 +602,12 @@ playlist_export_dialog_get_filename(const gchar *prefix, GtkWidget *parent)
 	gchar *filename = NULL, *playlistm3u = NULL;
 	gint resp;
 
-	dialog = gtk_file_chooser_dialog_new(_("Export playlist to file"),
-	                                     GTK_WINDOW(parent),
-	                                     GTK_FILE_CHOOSER_ACTION_SAVE,
-	                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-	                                     NULL);
+	dialog = gtk_file_chooser_dialog_new (_("Export playlist to file"),
+	                                      GTK_WINDOW(parent),
+	                                      GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Save"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
 	                                               TRUE);
@@ -1213,14 +1209,12 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, Pragh
 	pragha_hig_workarea_table_add_wide_control(table, &row, radio_add);
 	g_free(string_options);
 
-	dialog = gtk_dialog_new_with_buttons(NULL,
-			     GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
-			     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			     GTK_STOCK_CANCEL,
-			     GTK_RESPONSE_CANCEL,
-			     GTK_STOCK_OK,
-			     GTK_RESPONSE_ACCEPT,
-			     NULL);
+	dialog = gtk_dialog_new_with_buttons (NULL,
+	                                      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(cplaylist))),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
 	if(type == SAVE_COMPLETE)
 		gtk_window_set_title (GTK_WINDOW(dialog), _("Save playlist"));
@@ -1300,12 +1294,12 @@ update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (pragha_playlist_get_context_menu(cplaylist), "/SelectionPopup/Save selection")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
@@ -1338,12 +1332,12 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (gtk_ui_manager_get_widget (pragha_playlist_get_context_menu(cplaylist), "/SelectionPopup/Save playlist")), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), cplaylist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
@@ -1383,7 +1377,8 @@ update_playlist_changes_save_playlist_mainmenu (PraghaApplication *pragha)
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem),
+	                               gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
@@ -1394,7 +1389,8 @@ update_playlist_changes_save_playlist_mainmenu (PraghaApplication *pragha)
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem),
+	                               gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), playlist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
@@ -1435,7 +1431,7 @@ update_playlist_changes_save_selection_mainmenu (PraghaApplication *pragha)
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), playlist);
 
 	accel_group = gtk_accel_group_new ();
@@ -1446,7 +1442,7 @@ update_playlist_changes_save_selection_mainmenu (PraghaApplication *pragha)
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 
 	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_stock (GTK_STOCK_FLOPPY, GTK_ICON_SIZE_MENU));
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
 	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), playlist);
 	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
 

@@ -180,25 +180,25 @@ gchar *library_pane_context_menu_xml = "<ui>			\
 	</ui>";
 
 GtkActionEntry library_pane_context_aentries[] = {
-	{"Expand library", GTK_STOCK_ADD, N_("_Expand library"),
+	{"Expand library", "list-add", N_("_Expand library"),
 	 "", "Expand the library", G_CALLBACK(pragha_library_pane_expand_all_action)},
-	{"Collapse library", GTK_STOCK_REMOVE, N_("_Collapse library"),
+	{"Collapse library", "list-remove", N_("_Collapse library"),
 	 "", "Collapse the library", G_CALLBACK(pragha_library_pane_collapse_all_action)},
-	{"folders", GTK_STOCK_REFRESH, N_("Folders structure"),
+	{"folders", "view-refresh", N_("Folders structure"),
 	 "", "Folders structure", G_CALLBACK(pragha_library_pane_set_folders_view_action)},
-	{"artist", GTK_STOCK_REFRESH, N_("Artist"),
+	{"artist", "view-refresh", N_("Artist"),
 	 "", "Artist", G_CALLBACK(pragha_library_pane_set_artist_view_action)},
-	{"album", GTK_STOCK_REFRESH, N_("Album"),
+	{"album", "view-refresh", N_("Album"),
 	 "", "Album", G_CALLBACK(pragha_library_pane_set_album_view_action)},
-	{"genre", GTK_STOCK_REFRESH, N_("Genre"),
+	{"genre", "view-refresh", N_("Genre"),
 	 "", "Genre", G_CALLBACK(pragha_library_pane_set_genre_view_action)},
-	{"artist_album", GTK_STOCK_REFRESH, N_("Artist / Album"),
+	{"artist_album", "view-refresh", N_("Artist / Album"),
 	 "", "Artist / Album", G_CALLBACK(pragha_library_pane_set_artist_album_view_action)},
-	{"genre_album", GTK_STOCK_REFRESH, N_("Genre / Album"),
+	{"genre_album", "view-refresh", N_("Genre / Album"),
 	 "", "Genre / Album", G_CALLBACK(pragha_library_pane_set_genre_album_view_action)},
-	{"genre_artist", GTK_STOCK_REFRESH, N_("Genre / Artist"),
+	{"genre_artist", "view-refresh", N_("Genre / Artist"),
 	 "", "Genre / Artist", G_CALLBACK(pragha_library_pane_set_genre_artist_action)},
-	{"genre_artist_album", GTK_STOCK_REFRESH, N_("Genre / Artist / Album"),
+	{"genre_artist_album", "view-refresh", N_("Genre / Artist / Album"),
 	 "", "Genre / Artist / Album", G_CALLBACK(pragha_library_pane_set_genre_artist_album_view_action)}
 };
 
@@ -234,23 +234,23 @@ gchar *library_tree_context_menu_xml = "<ui>		\
 
 GtkActionEntry library_tree_context_aentries[] = {
 	/* Playlist and Radio tree */
-	{"Add to current playlist", GTK_STOCK_ADD, N_("_Add to current playlist"),
+	{"Add to current playlist", "list-add", N_("_Add to current playlist"),
 	 "", "Add to current playlist", G_CALLBACK(library_tree_add_to_playlist_action)},
 	{"Replace current playlist", NULL, N_("_Replace current playlist"),
 	 "", "Replace current playlist", G_CALLBACK(library_tree_replace_playlist_action)},
-	{"Replace and play", GTK_STOCK_MEDIA_PLAY, N_("Replace and _play"),
+	{"Replace and play", "media-playback-start", N_("Replace and _play"),
 	 "", "Replace and play", G_CALLBACK(library_tree_replace_and_play)},
 	{"Rename", NULL, N_("Rename"),
 	 "", "Rename", G_CALLBACK(pragha_library_pane_rename_item_action)},
-	{"Delete", GTK_STOCK_REMOVE, N_("Delete"),
+	{"Delete", "list-remove", N_("Delete"),
 	 "", "Delete", G_CALLBACK(pragha_library_pane_remove_item_action)},
-	{"Export", GTK_STOCK_SAVE, N_("Export"),
+	{"Export", "document-save", N_("Export"),
 	 "", "Export", G_CALLBACK(pragha_library_pane_export_playlist_action)},
-	{"Edit tags", GTK_STOCK_EDIT, N_("Edit tags"),
+	{"Edit tags", NULL, N_("Edit tags"),
 	 "", "Edit tags", G_CALLBACK(pragha_library_pane_edit_tags_action)},
 	{"Move to trash", "user-trash", N_("Move to _trash"),
 	 "", "Move to trash", G_CALLBACK(pragha_library_pane_delete_from_hdd_action)},
-	{"Delete from library", GTK_STOCK_REMOVE, N_("Delete from library"),
+	{"Delete from library", "list-remove", N_("Delete from library"),
 	 "", "Delete from library", G_CALLBACK(pragha_library_pane_delete_from_db_action)}/*,
 	{"Rescan library", GTK_STOCK_EXECUTE, N_("_Rescan library"),
 	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
@@ -842,13 +842,13 @@ trash_or_unlink_row (GArray *loc_arr, gboolean unlink, PraghaLibraryPane *librar
 				                                                GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", primary);
 					gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (question_dialog), "%s", secondary);
 
-					gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+					gtk_dialog_add_button (GTK_DIALOG (question_dialog), _("_Cancel"), GTK_RESPONSE_CANCEL);
 					if (loc_arr->len > 1) {
 					        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP, PRAGHA_RESPONSE_SKIP);
 					        gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_SKIP_ALL, PRAGHA_RESPONSE_SKIP_ALL);
 			        		gtk_dialog_add_button (GTK_DIALOG (question_dialog), PRAGHA_BUTTON_DELETE_ALL, PRAGHA_RESPONSE_DELETE_ALL);
 					}
-					gtk_dialog_add_button (GTK_DIALOG (question_dialog), GTK_STOCK_DELETE, GTK_RESPONSE_ACCEPT);
+					gtk_dialog_add_button (GTK_DIALOG (question_dialog), _("_Delete"), GTK_RESPONSE_ACCEPT);
 
 					response = gtk_dialog_run (GTK_DIALOG (question_dialog));
 					gtk_widget_destroy (question_dialog);

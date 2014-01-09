@@ -432,7 +432,7 @@ pragha_lastfm_tag_suggestion_button_new (PraghaLastfm *clastfm)
 	ntag_lastfm_button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(ntag_lastfm_button), GTK_RELIEF_NONE);
 	gtk_button_set_image(GTK_BUTTON(ntag_lastfm_button),
-                         gtk_image_new_from_stock(GTK_STOCK_SPELL_CHECK, GTK_ICON_SIZE_MENU));
+                         gtk_image_new_from_icon_name("tools-check-spelling", GTK_ICON_SIZE_MENU));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(ntag_lastfm_button),
 	                            _("Last.fm suggested a tag correction"));
 
@@ -762,11 +762,11 @@ lastfm_import_xspf_action (GtkAction *action, PraghaLastfm *clastfm)
 	PraghaApplication *pragha = clastfm->pragha;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
-				      GTK_WINDOW(pragha_application_get_window(pragha)),
-				      GTK_FILE_CHOOSER_ACTION_OPEN,
-				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-				      NULL);
+	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_FILE_CHOOSER_ACTION_OPEN,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Open"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
 
 	media_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
