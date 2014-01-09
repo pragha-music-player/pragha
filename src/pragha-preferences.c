@@ -413,6 +413,23 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_plugin_group_name:
+ *
+ */
+gchar *
+pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
+                                          const gchar       *plugin_name)
+{
+	gchar *group_name = NULL, *name_upper = NULL;
+	
+	name_upper = g_ascii_strup (plugin_name, -1);
+	group_name = g_strdup_printf("PLUGIN_%s",  name_upper);
+	g_free (name_upper);
+
+	return group_name;
+}
+
+/**
  * pragha_preferences_get_installed_version:
  *
  */

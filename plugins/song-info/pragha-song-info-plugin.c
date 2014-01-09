@@ -508,7 +508,7 @@ pragha_song_info_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
-	gchar *cache_folder = NULL;
+	gchar *cache_folder = NULL, *plugin_group = NULL;
 	GtkAction *action;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
@@ -557,7 +557,10 @@ pragha_song_info_plugin_activate (PeasActivatable *activatable)
 
 
 	preferences = pragha_application_get_preferences (plugin->pragha);
-	plugin->download_album_art = pragha_preferences_get_boolean (preferences, "PLUGINS", "SongInfoDownloasAlbumArt");
+	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
+
+	plugin->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
+	g_free (plugin_group);
 }
 
 static void
@@ -565,6 +568,7 @@ pragha_song_info_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
+	gchar *plugin_group = NULL;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaApplication *pragha = plugin->pragha;
@@ -587,7 +591,10 @@ pragha_song_info_plugin_deactivate (PeasActivatable *activatable)
 	plugin->merge_id_playlist = 0;
 
 	preferences = pragha_application_get_preferences (plugin->pragha);
-	pragha_preferences_set_boolean (preferences, "PLUGINS", "SongInfoDownloasAlbumArt", plugin->download_album_art);
+	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
+
+	pragha_preferences_set_boolean (preferences, plugin_group, "DownloadAlbumArt", plugin->download_album_art);
+	g_free (plugin_group);
 
 	glyr_db_destroy (plugin->cache_db);
 
