@@ -422,11 +422,12 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
  *
  */
 void
-pragha_preferences_plugin_changed (PraghaPreferences *preferences)
+pragha_preferences_plugin_changed (PraghaPreferences *preferences,
+                                   const gchar       *key)
 {
 	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
 
-	g_signal_emit (preferences, signals[SIGNAL_PLUGINS_CHANGED], 0);
+	g_signal_emit (preferences, signals[SIGNAL_PLUGINS_CHANGED], 0, key);
 }
 
 /**
@@ -2750,16 +2751,16 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                    "",
 		                    PRAGHA_PREF_PARAMS);
 
-	signals[SIGNAL_PLUGINS_CHANGED]
-		= g_signal_new ("PluginsChanged",
-		                G_TYPE_FROM_CLASS (object_class),
-		                G_SIGNAL_RUN_LAST,
-		                G_STRUCT_OFFSET (PraghaPreferencesClass, plugins_change),
-		                NULL, NULL,
-		                g_cclosure_marshal_VOID__VOID,
-		                G_TYPE_NONE, 0);
-
 	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
+
+	signals[SIGNAL_PLUGINS_CHANGED] =
+		g_signal_new ("PluginsChanged",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPreferencesClass, plugins_change),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__STRING,
+		              G_TYPE_NONE, 1, G_TYPE_STRING);
 }
 
 static void
