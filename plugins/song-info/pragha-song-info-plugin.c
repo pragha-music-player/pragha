@@ -479,15 +479,18 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 }
 
 static void
-pragha_song_info_prefrenceces_event (PraghaPreferences *preferences, PraghaSongInfoPlugin *plugin)
+pragha_song_info_prefrenceces_event (PraghaPreferences *preferences, const gchar *key, PraghaSongInfoPlugin *plugin)
 {
+	PraghaSongInfoPluginPrivate *priv = NULL;
 	gchar *plugin_group = NULL;
 
-	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+	if (g_strcmp0(key, "DownloadAlbumArt") == 0) {
+		priv = plugin->priv;
 
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
-	priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
-	g_free (plugin_group);
+		plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+		priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
+		g_free (plugin_group);
+	}
 }
 
 static void
@@ -614,7 +617,7 @@ toggle_download_album_art (GtkToggleButton *button)
 	pragha_preferences_set_boolean (preferences,
 	                                plugin_group, "DownloadAlbumArt",
 	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
-	pragha_preferences_plugin_changed (preferences);
+	pragha_preferences_plugin_changed (preferences, "DownloadAlbumArt");
 
 	g_object_unref (G_OBJECT (preferences));
 	g_free (plugin_group);
