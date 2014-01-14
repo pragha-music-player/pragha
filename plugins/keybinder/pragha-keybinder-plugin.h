@@ -32,21 +32,13 @@ G_BEGIN_DECLS
 #define PRAGHA_IS_KEYBINDER_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_KEYBINDER_PLUGIN))
 #define PRAGHA_KEYBINDER_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_KEYBINDER_PLUGIN, PraghaKeybinderPluginClass))
 
-typedef struct _PraghaKeybinderPlugin       PraghaKeybinderPlugin;
-typedef struct _PraghaKeybinderPluginClass  PraghaKeybinderPluginClass;
+typedef struct _PraghaKeybinderPluginPrivate PraghaKeybinderPluginPrivate;
 
-struct _PraghaKeybinderPlugin {
-	PeasExtensionBase parent_instance;
-
+struct _PraghaKeybinderPluginPrivate {
 	PraghaApplication *pragha;
 };
 
-struct _PraghaKeybinderPluginClass {
-	PeasExtensionBaseClass parent_class;
-};
-
 GType                 pragha_keybinder_plugin_get_type        (void) G_GNUC_CONST;
-G_MODULE_EXPORT void  peas_register_types                     (PeasObjectModule *module);
 
 G_END_DECLS
 

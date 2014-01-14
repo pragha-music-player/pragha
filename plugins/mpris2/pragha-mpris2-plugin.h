@@ -36,12 +36,9 @@ G_BEGIN_DECLS
 #define MPRIS_NAME "org.mpris.MediaPlayer2.pragha"
 #define MPRIS_PATH "/org/mpris/MediaPlayer2"
 
-typedef struct _PraghaMpris2Plugin       PraghaMpris2Plugin;
-typedef struct _PraghaMpris2PluginClass  PraghaMpris2PluginClass;
+typedef struct _PraghaMpris2PluginPrivate PraghaMpris2PluginPrivate;
 
-struct _PraghaMpris2Plugin {
-	PeasExtensionBase parent_instance;
-
+struct _PraghaMpris2PluginPrivate {
 	PraghaApplication *pragha;
 
 	guint              owner_id;
@@ -57,12 +54,7 @@ struct _PraghaMpris2Plugin {
 	PraghaBackendState state;
 };
 
-struct _PraghaMpris2PluginClass {
-	PeasExtensionBaseClass parent_class;
-};
-
 GType                 pragha_mpris2_plugin_get_type           (void) G_GNUC_CONST;
-G_MODULE_EXPORT void  peas_register_types                     (PeasObjectModule *module);
 
 G_END_DECLS
 

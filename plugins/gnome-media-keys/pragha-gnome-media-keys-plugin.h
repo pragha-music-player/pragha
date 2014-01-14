@@ -32,21 +32,14 @@ G_BEGIN_DECLS
 #define PRAGHA_IS_GNOME_MEDIA_KEYS_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_GNOME_MEDIA_KEYS_PLUGIN))
 #define PRAGHA_GNOME_MEDIA_KEYS_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_GNOME_MEDIA_KEYS_PLUGIN, PraghaGnomeMediaKeysPluginClass))
 
-typedef struct _PraghaGnomeMediaKeysPlugin       PraghaGnomeMediaKeysPlugin;
-typedef struct _PraghaGnomeMediaKeysPluginClass  PraghaGnomeMediaKeysPluginClass;
+typedef struct _PraghaGnomeMediaKeysPluginPrivate PraghaGnomeMediaKeysPluginPrivate;
 
-struct _PraghaGnomeMediaKeysPlugin {
-	PeasExtensionBase parent_instance;
-
+struct _PraghaGnomeMediaKeysPluginPrivate {
 	PraghaApplication *pragha;
 
 	gint               watch_id;
 	guint              handler_id;
 	GDBusProxy        *proxy;
-};
-
-struct _PraghaGnomeMediaKeysPluginClass {
-	PeasExtensionBaseClass parent_class;
 };
 
 GType                 pragha_gnome_media_keys_plugin_get_type        (void) G_GNUC_CONST;
