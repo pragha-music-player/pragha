@@ -6,6 +6,9 @@ AM_CPPFLAGS =								\
 	$(WARN_CFLAGS)							\
 	$(DISABLE_DEPRECATED)
 
+pluginincludedir = $(includedir)/pragha/plugins
+plugininclude_HEADERS = pragha-plugin-macros.h
+
 SUBDIRS =              \
 	mpris2             \
 	gnome-media-keys

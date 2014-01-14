@@ -9,12 +9,8 @@ plugin_LTLIBRARIES = libsong-info.la
 
 libsong_info_la_SOURCES =						\
 	pragha-song-info-plugin.c					\
-	pragha-song-info-plugin.h					\
 	pragha-song-info-dialog.c					\
-	pragha-song-info-dialog.h					\
-	pragha-song-info-configurable.c				\
-	pragha-song-info-configurable.h
-	
+	pragha-song-info-dialog.h
 
 libsong_info_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 

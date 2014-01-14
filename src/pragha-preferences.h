@@ -44,7 +44,8 @@ struct _PraghaPreferences
 
 struct _PraghaPreferencesClass
 {
-   GObjectClass parent_class;
+	GObjectClass parent_class;
+	void (*plugins_change) (PraghaPreferences *preferences);
 };
 
 /* Defines to key preferences. */
@@ -208,6 +209,13 @@ void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
                                const gchar *group_name,
                                const gchar *key);
+
+/*
+ * Specific plugin api.
+ */
+
+void
+pragha_preferences_plugin_changed (PraghaPreferences *preferences);
 
 gchar *
 pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,

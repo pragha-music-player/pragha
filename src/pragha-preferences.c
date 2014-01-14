@@ -123,8 +123,13 @@ enum
 	PROP_LASTFM_USER,
 	LAST_PROP
 };
-
 static GParamSpec *gParamSpecs[LAST_PROP];
+
+enum {
+	SIGNAL_PLUGINS_CHANGED,
+	LAST_SIGNAL
+};
+static int signals[LAST_SIGNAL] = { 0 };
 
 gboolean
 pragha_preferences_get_boolean (PraghaPreferences *preferences,
@@ -410,6 +415,18 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
 		                      group_name,
 		                      key,
 		                      NULL);
+}
+
+/**
+ * pragha_preferences_get_plugin_group_name:
+ *
+ */
+void
+pragha_preferences_plugin_changed (PraghaPreferences *preferences)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_signal_emit (preferences, signals[SIGNAL_PLUGINS_CHANGED], 0);
 }
 
 /**
@@ -2733,6 +2750,14 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                    "",
 		                    PRAGHA_PREF_PARAMS);
 
+	signals[SIGNAL_PLUGINS_CHANGED]
+		= g_signal_new ("PluginsChanged",
+		                G_TYPE_FROM_CLASS (object_class),
+		                G_SIGNAL_RUN_LAST,
+		                G_STRUCT_OFFSET (PraghaPreferencesClass, plugins_change),
+		                NULL, NULL,
+		                g_cclosure_marshal_VOID__VOID,
+		                G_TYPE_NONE, 0);
 
 	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 }

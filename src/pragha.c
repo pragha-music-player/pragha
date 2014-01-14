@@ -336,19 +336,19 @@ pragha_application_get_pane (PraghaApplication *pragha)
 	return pragha->pane;
 }
 
+#ifdef HAVE_LIBPEAS
 PeasEngine *
 pragha_application_get_peas_engine (PraghaApplication *pragha)
 {
 	return pragha->peas_engine;
 }
+#endif
 
-#ifdef HAVE_LIBPEAS
 PraghaNotify *
 pragha_application_get_notify (PraghaApplication *pragha)
 {
 	return pragha->notify;
 }
-#endif
 
 void
 pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
@@ -378,7 +378,7 @@ static void
 on_extension_added (PeasExtensionSet  *set,
                     PeasPluginInfo    *info,
                     PeasExtension     *exten,
-                    PraghaApplication *pragha)
+                    gpointer           data)
 {
 	peas_activatable_activate (PEAS_ACTIVATABLE (exten));
 }
@@ -387,7 +387,7 @@ static void
 on_extension_removed (PeasExtensionSet  *set,
                       PeasPluginInfo    *info,
                       PeasExtension     *exten,
-                      PraghaApplication *pragha)
+                      gpointer           data)
 {
 	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
 }
@@ -476,12 +476,16 @@ pragha_application_dispose (GObject *object)
 		pragha->clastfm = NULL;
 	}
 #endif
+#ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
-		g_object_unref (pragha->peas_engine);
 		pragha_plugins_save_activated (pragha);
+
+		peas_engine_garbage_collect (pragha->peas_engine);
+
+		g_object_unref (pragha->peas_engine);
 		pragha->peas_engine = NULL;
 	}
-
+#endif
 	if (pragha->sidebar) {
 		pragha_sidebar_free (pragha->sidebar);
 		pragha->sidebar = NULL;
@@ -570,11 +574,12 @@ pragha_application_startup (GApplication *application)
 
 	peas_extension_set_foreach (pragha->peas_exten_set,
 	                            (PeasExtensionSetForeachFunc) on_extension_added,
-	                            pragha);
+	                            NULL);
+
 	g_signal_connect (pragha->peas_exten_set, "extension-added",
-	                  G_CALLBACK (on_extension_added), pragha);
+	                  G_CALLBACK (on_extension_added), NULL);
 	g_signal_connect (pragha->peas_exten_set, "extension-removed",
-	                  G_CALLBACK (on_extension_removed), pragha);
+	                  G_CALLBACK (on_extension_removed), NULL);
 #endif
 
 	if (pragha_preferences_get_show_osd (pragha->preferences))

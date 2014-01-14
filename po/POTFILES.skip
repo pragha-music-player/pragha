@@ -1,0 +1,3 @@
+plugins/mpris2/pragha-mpris2-plugin.c
+plugins/song-info/pragha-song-info-dialog.c
+plugins/song-info/pragha-song-info-plugin.c

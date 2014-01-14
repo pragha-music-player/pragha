@@ -102,8 +102,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
 	$(LIBNOTIFY_CFLAGS) 						\
-	$(LIBPEAS_CFLAGS) 						\
-	$(LIBPEAS_GTK_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
@@ -116,8 +114,6 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBNOTIFY_LIBS) 						\
-	$(LIBPEAS_LIBS)							\
-	$(LIBPEAS_GTK_LIBS)						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS)
@@ -142,3 +138,10 @@ pragha_CFLAGS += $(PLPARSER_CFLAGS)
 pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
+if HAVE_LIBPEAS
+pragha_CFLAGS += $(LIBPEAS_CFLAGS)
+pragha_LDADD += $(LIBPEAS_LIBS)
+
+pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
+pragha_LDADD += $(LIBPEAS_GTK_LIBS)
+endif
