@@ -33,20 +33,11 @@
 #include "src/pragha.h"
 #include "src/pragha-playback.h"
 
-static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
+#include "plugins/pragha-plugin-macros.h"
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (PraghaKeybinderPlugin,
-                                pragha_keybinder_plugin,
-                                PEAS_TYPE_EXTENSION_BASE,
-                                0,
-                                G_IMPLEMENT_INTERFACE_DYNAMIC (PEAS_TYPE_ACTIVATABLE,
-                                                               peas_activatable_iface_init))
-
-enum {
-	PROP_0,
-	PROP_OBJECT
-};
-
+PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_KEYBINDER_PLUGIN,
+                        PraghaKeybinderPlugin,
+                        pragha_keybinder_plugin)
 
 static void
 keybind_prev_handler (const char *keystring, gpointer data)
@@ -105,78 +96,27 @@ keybind_media_handler (const char *keystring, gpointer data)
 }
 
 static void
-pragha_keybinder_plugin_set_property (GObject      *object,
-                                      guint         prop_id,
-                                      const GValue *value,
-                                      GParamSpec   *pspec)
-{
-	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (object);
-
-	switch (prop_id) {
-		case PROP_OBJECT:
-			plugin->pragha = g_value_get_object (value);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-pragha_keybinder_plugin_get_property (GObject    *object,
-                                      guint       prop_id,
-                                      GValue     *value,
-                                      GParamSpec *pspec)
-{
-	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (object);
-
-	switch (prop_id) {
-		case PROP_OBJECT:
-			g_value_set_object (value, plugin->pragha);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-pragha_keybinder_plugin_init (PraghaKeybinderPlugin *plugin)
-{
-	g_debug ("%s", G_STRFUNC);
-}
-
-static void
-pragha_keybinder_plugin_finalize (GObject *object)
-{
-	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (object);
-
-	g_debug ("%s", G_STRFUNC);
-
-	G_OBJECT_CLASS (pragha_keybinder_plugin_parent_class)->finalize (object);
-}
-
-static void
-pragha_keybinder_plugin_activate (PeasActivatable *activatable)
+pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (activatable);
+
+	PraghaKeybinderPluginPrivate *priv = plugin->priv;
+	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	keybinder_init ();
 
 	g_debug ("%s", G_STRFUNC);
 
-	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, plugin->pragha);
-	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, plugin->pragha);
-	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, plugin->pragha);
-	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, plugin->pragha);
-	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, plugin->pragha);
+	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, priv->pragha);
+	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, priv->pragha);
+	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, priv->pragha);
+	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, priv->pragha);
+	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, priv->pragha);
 }
 
 static void
-pragha_keybinder_plugin_deactivate (PeasActivatable *activatable)
+pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (activatable);
-
 	g_debug ("%s", G_STRFUNC);
 
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
@@ -184,38 +124,4 @@ pragha_keybinder_plugin_deactivate (PeasActivatable *activatable)
 	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
 	keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
 	keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
-}
-
-static void
-pragha_keybinder_plugin_class_init (PraghaKeybinderPluginClass *klass)
-{
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-	object_class->set_property = pragha_keybinder_plugin_set_property;
-	object_class->get_property = pragha_keybinder_plugin_get_property;
-	object_class->finalize = pragha_keybinder_plugin_finalize;
-
-	g_object_class_override_property (object_class, PROP_OBJECT, "object");
-}
-
-static void
-peas_activatable_iface_init (PeasActivatableInterface *iface)
-{
-	iface->activate = pragha_keybinder_plugin_activate;
-	iface->deactivate = pragha_keybinder_plugin_deactivate;
-}
-
-static void
-pragha_keybinder_plugin_class_finalize (PraghaKeybinderPluginClass *klass)
-{
-}
-
-G_MODULE_EXPORT void
-peas_register_types (PeasObjectModule *module)
-{
-	pragha_keybinder_plugin_register_type (G_TYPE_MODULE (module));
-
-	peas_object_module_register_extension_type (module,
-	                                            PEAS_TYPE_ACTIVATABLE,
-	                                            PRAGHA_TYPE_KEYBINDER_PLUGIN);
 }

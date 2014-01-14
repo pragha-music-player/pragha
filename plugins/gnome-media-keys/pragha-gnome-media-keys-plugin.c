@@ -34,19 +34,11 @@
 
 #define PLAYER_NAME "Pragha"
 
-static void peas_activatable_iface_init     (PeasActivatableInterface    *iface);
+#include "plugins/pragha-plugin-macros.h"
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (PraghaGnomeMediaKeysPlugin,
-                                pragha_gnome_media_keys_plugin,
-                                PEAS_TYPE_EXTENSION_BASE,
-                                0,
-                                G_IMPLEMENT_INTERFACE_DYNAMIC (PEAS_TYPE_ACTIVATABLE,
-                                                               peas_activatable_iface_init))
-
-enum {
-	PROP_0,
-	PROP_OBJECT
-};
+PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_GNOME_MEDIA_KEYS_PLUGIN,
+                        PraghaGnomeMediaKeysPlugin,
+                        pragha_gnome_media_keys_plugin)
 
 static void
 on_media_player_key_pressed (PraghaGnomeMediaKeysPlugin *plugin,
@@ -55,7 +47,7 @@ on_media_player_key_pressed (PraghaGnomeMediaKeysPlugin *plugin,
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
 
-	PraghaApplication *pragha = plugin->pragha;
+	PraghaApplication *pragha = plugin->priv->pragha;
 
 	backend = pragha_application_get_backend (pragha);
 	preferences = pragha_application_get_preferences (pragha);
@@ -109,10 +101,10 @@ grab_media_player_keys_cb (GDBusProxy                 *proxy,
 static void
 grab_media_player_keys (PraghaGnomeMediaKeysPlugin *plugin)
 {
-	if (plugin->proxy == NULL)
+	if (plugin->priv->proxy == NULL)
 		return;
 
-	g_dbus_proxy_call (plugin->proxy,
+	g_dbus_proxy_call (plugin->priv->proxy,
 	                   "GrabMediaPlayerKeys",
 	                   g_variant_new("(su)", PLAYER_NAME, 0),
 	                   G_DBUS_CALL_FLAGS_NONE,
@@ -159,9 +151,9 @@ got_proxy_cb (GObject                    *source_object,
 {
 	GError *error = NULL;
 
-	plugin->proxy = g_dbus_proxy_new_for_bus_finish (res, &error);
+	plugin->priv->proxy = g_dbus_proxy_new_for_bus_finish (res, &error);
 
-	if (plugin->proxy == NULL) {
+	if (plugin->priv->proxy == NULL) {
 		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
 			g_warning("Failed to contact settings daemon: %s", error->message);
 		g_error_free(error);
@@ -170,7 +162,7 @@ got_proxy_cb (GObject                    *source_object,
 
 	grab_media_player_keys (plugin);
 
-	g_signal_connect (G_OBJECT(plugin->proxy), "g-signal",
+	g_signal_connect (G_OBJECT(plugin->priv->proxy), "g-signal",
 	                  G_CALLBACK(key_pressed), plugin);
 }
 
@@ -197,73 +189,24 @@ name_vanished_cb (GDBusConnection            *connection,
                   const gchar                *name,
                   PraghaGnomeMediaKeysPlugin *plugin)
 {
-	if (plugin->proxy != NULL) {
-		g_object_unref(plugin->proxy);
-		plugin->proxy = NULL;
+	if (plugin->priv->proxy != NULL) {
+		g_object_unref(plugin->priv->proxy);
+		plugin->priv->proxy = NULL;
 	}
 }
 
 static void
-pragha_gnome_media_keys_plugin_set_property (GObject      *object,
-                                      guint         prop_id,
-                                      const GValue *value,
-                                      GParamSpec   *pspec)
-{
-	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (object);
-
-	switch (prop_id) {
-		case PROP_OBJECT:
-			plugin->pragha = g_value_get_object (value);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-pragha_gnome_media_keys_plugin_get_property (GObject    *object,
-                                      guint       prop_id,
-                                      GValue     *value,
-                                      GParamSpec *pspec)
-{
-	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (object);
-
-	switch (prop_id) {
-		case PROP_OBJECT:
-			g_value_set_object (value, plugin->pragha);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-pragha_gnome_media_keys_plugin_init (PraghaGnomeMediaKeysPlugin *plugin)
-{
-	g_debug ("%s", G_STRFUNC);
-}
-
-static void
-pragha_gnome_media_keys_plugin_finalize (GObject *object)
-{
-	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (object);
-
-	g_debug ("%s", G_STRFUNC);
-
-	G_OBJECT_CLASS (pragha_gnome_media_keys_plugin_parent_class)->finalize (object);
-}
-
-static void
-pragha_gnome_media_keys_plugin_activate (PeasActivatable *activatable)
+pragha_plugin_activate (PeasActivatable *activatable)
 {
 	GtkWidget *window;
 	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (activatable);
 
 	g_debug ("%s", G_STRFUNC);
 
-	plugin->watch_id =
+	PraghaGnomeMediaKeysPluginPrivate *priv = plugin->priv;
+	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+
+	plugin->priv->watch_id =
 		g_bus_watch_name (G_BUS_TYPE_SESSION,
 		                  "org.gnome.SettingsDaemon",
 		                  G_BUS_NAME_WATCHER_FLAGS_NONE,
@@ -272,62 +215,28 @@ pragha_gnome_media_keys_plugin_activate (PeasActivatable *activatable)
 		                  plugin,
 		                  NULL);
 
-	window = pragha_application_get_window (plugin->pragha);
+	window = pragha_application_get_window (plugin->priv->pragha);
 
-	plugin->handler_id =
+	plugin->priv->handler_id =
 		g_signal_connect (G_OBJECT(window), "focus-in-event",
 		                  G_CALLBACK(on_window_focus_in_event), plugin);
 }
 
 static void
-pragha_gnome_media_keys_plugin_deactivate (PeasActivatable *activatable)
+pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	GtkWidget *window;
 	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (activatable);
 
 	g_debug ("%s", G_STRFUNC);
 
-	g_bus_unwatch_name (plugin->watch_id);
+	g_bus_unwatch_name (plugin->priv->watch_id);
 
-	window = pragha_application_get_window (plugin->pragha);
+	window = pragha_application_get_window (plugin->priv->pragha);
 
-	if (plugin->handler_id != 0)
-		g_signal_handler_disconnect (G_OBJECT(window), plugin->handler_id);
+	if (plugin->priv->handler_id != 0)
+		g_signal_handler_disconnect (G_OBJECT(window), plugin->priv->handler_id);
 
-	if (plugin->proxy != NULL)
-		g_object_unref(plugin->proxy);
-}
-
-static void
-pragha_gnome_media_keys_plugin_class_init (PraghaGnomeMediaKeysPluginClass *klass)
-{
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-	object_class->set_property = pragha_gnome_media_keys_plugin_set_property;
-	object_class->get_property = pragha_gnome_media_keys_plugin_get_property;
-	object_class->finalize = pragha_gnome_media_keys_plugin_finalize;
-
-	g_object_class_override_property (object_class, PROP_OBJECT, "object");
-}
-
-static void
-peas_activatable_iface_init (PeasActivatableInterface *iface)
-{
-	iface->activate = pragha_gnome_media_keys_plugin_activate;
-	iface->deactivate = pragha_gnome_media_keys_plugin_deactivate;
-}
-
-static void
-pragha_gnome_media_keys_plugin_class_finalize (PraghaGnomeMediaKeysPluginClass *klass)
-{
-}
-
-G_MODULE_EXPORT void
-peas_register_types (PeasObjectModule *module)
-{
-	pragha_gnome_media_keys_plugin_register_type (G_TYPE_MODULE (module));
-
-	peas_object_module_register_extension_type (module,
-	                                            PEAS_TYPE_ACTIVATABLE,
-	                                            PRAGHA_TYPE_GNOME_MEDIA_KEYS_PLUGIN);
+	if (plugin->priv->proxy != NULL)
+		g_object_unref(plugin->priv->proxy);
 }
