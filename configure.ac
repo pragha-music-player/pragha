@@ -80,7 +80,6 @@ XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.28])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.2.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([LIBNOTIFY], [libnotify], [0.4.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
 XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
@@ -95,6 +94,15 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBPEAS],
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 XDT_CHECK_PACKAGE([LIBPEAS_GTK], [libpeas-gtk-1.0], [1.0.0])
+fi
+
+dnl Check notify support
+LIBNOTIFY_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY],
+                           [libnotify], [0.4.4],
+                           [libnotify],
+                           [libnotify library], [yes])
 fi
 
 dnl Check global keyboard shortcuts support
@@ -167,6 +175,7 @@ AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/song-info/Makefile])
+AC_CONFIG_FILES([plugins/notify/Makefile])
 fi
 AC_OUTPUT
 
@@ -178,6 +187,7 @@ echo "  Prefix................: ${prefix}"
 echo "  Debug enabled.........: $debug"
 echo ""
 echo "  Plugins enabled.......: $LIBPEAS_FOUND"
+echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"

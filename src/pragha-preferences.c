@@ -74,9 +74,6 @@ struct _PraghaPreferencesPrivate
 	gchar     *last_folder;
 	gboolean   add_recursively;
 	gboolean   timer_remaining_mode;
-	gboolean   show_osd;
-	gboolean   album_art_in_osd;
-	gboolean   actions_in_osd;
 	gboolean   hide_instead_close;
 	/* Services preferences */
 	gboolean   use_cddb;
@@ -114,9 +111,6 @@ enum
 	PROP_LAST_FOLDER,
 	PROP_ADD_RECURSIVELY,
 	PROP_TIMER_REMAINING_MODE,
-	PROP_SHOW_OSD,
-	PROP_ALBUM_ART_IN_OSD,
-	PROP_ACTIONS_IN_OSD,
 	PROP_HIDE_INSTEAD_CLOSE,
 	PROP_USE_CDDB,
 	PROP_LASTFM_SUPPORT,
@@ -1210,87 +1204,6 @@ pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
 }
 
 /**
- * pragha_preferences_get_show_osd:
- *
- */
-gboolean
-pragha_preferences_get_show_osd (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->show_osd;
-}
-
-/**
- * pragha_preferences_set_show_osd:
- *
- */
-void
-pragha_preferences_set_show_osd (PraghaPreferences *preferences,
-                                 gboolean show_osd)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->show_osd = show_osd;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_OSD]);
-}
-
-/**
- * pragha_preferences_get_album_art_in_osd:
- *
- */
-gboolean
-pragha_preferences_get_album_art_in_osd (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->album_art_in_osd;
-}
-
-/**
- * pragha_preferences_set_album_art_in_osd:
- *
- */
-void
-pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
-                                         gboolean album_art_in_osd)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->album_art_in_osd = album_art_in_osd;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ALBUM_ART_IN_OSD]);
-}
-
-/**
- * pragha_preferences_get_actions_in_osd:
- *
- */
-gboolean
-pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->actions_in_osd;
-}
-
-/**
- * pragha_preferences_set_actions_in_osd:
- *
- */
-void
-pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
-                                       gboolean actions_in_osd)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->actions_in_osd = actions_in_osd;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_ACTIONS_IN_OSD]);
-}
-
-/**
  * pragha_preferences_get_hide_instead_close:
  *
  */
@@ -1408,7 +1321,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
-	gboolean add_recursively, timer_remaining_mode, show_osd, album_art_in_osd, actions_in_osd, hide_instead_close;
+	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
 	gboolean use_cddb, lastfm_support;
 	gchar *lastfm_user;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
@@ -1807,54 +1720,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_timer_remaining_mode(preferences, timer_remaining_mode);
 	}
 
-	show_osd = g_key_file_get_boolean(priv->rc_keyfile,
-	                                  GROUP_GENERAL,
-	                                  KEY_SHOW_OSD,
-	                                  &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_show_osd(preferences, show_osd);
-	}
-
-	album_art_in_osd = g_key_file_get_boolean(priv->rc_keyfile,
-	                                          GROUP_GENERAL,
-	                                          KEY_SHOW_ALBUM_ART_OSD,
-	                                          &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_album_art_in_osd(preferences, album_art_in_osd);
-	}
-
-	actions_in_osd = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_GENERAL,
-	                                        KEY_SHOW_ACTIONS_OSD,
-	                                        &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_actions_in_osd(preferences, actions_in_osd);
-	}
-
-	hide_instead_close = g_key_file_get_boolean(priv->rc_keyfile,
-	                                            GROUP_GENERAL,
-	                                            KEY_CLOSE_TO_TRAY,
-	                                            &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_hide_instead_close(preferences, hide_instead_close);
-	}
-
 	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
 	                                  GROUP_SERVICES,
 	                                  KEY_USE_CDDB,
@@ -2054,18 +1919,7 @@ pragha_preferences_finalize (GObject *object)
 	                       GROUP_GENERAL,
 	                       KEY_TIMER_REMAINING_MODE,
 	                       priv->timer_remaining_mode);
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_SHOW_OSD,
-	                       priv->show_osd);
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_SHOW_ALBUM_ART_OSD,
-	                       priv->album_art_in_osd);
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_SHOW_ACTIONS_OSD,
-	                       priv->actions_in_osd);
+
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_GENERAL,
 	                       KEY_CLOSE_TO_TRAY,
@@ -2202,15 +2056,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_TIMER_REMAINING_MODE:
 			g_value_set_boolean (value, pragha_preferences_get_timer_remaining_mode(preferences));
 			break;
-		case PROP_SHOW_OSD:
-			g_value_set_boolean (value, pragha_preferences_get_show_osd(preferences));
-			break;
-		case PROP_ALBUM_ART_IN_OSD:
-			g_value_set_boolean (value, pragha_preferences_get_album_art_in_osd(preferences));
-			break;
-		case PROP_ACTIONS_IN_OSD:
-			g_value_set_boolean (value, pragha_preferences_get_actions_in_osd(preferences));
-			break;
 		case PROP_HIDE_INSTEAD_CLOSE:
 			g_value_set_boolean (value, pragha_preferences_get_hide_instead_close(preferences));
 			break;
@@ -2317,15 +2162,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_TIMER_REMAINING_MODE:
 			pragha_preferences_set_timer_remaining_mode(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_SHOW_OSD:
-			pragha_preferences_set_show_osd(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_ALBUM_ART_IN_OSD:
-			pragha_preferences_set_album_art_in_osd(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_ACTIONS_IN_OSD:
-			pragha_preferences_set_actions_in_osd(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_HIDE_INSTEAD_CLOSE:
 			pragha_preferences_set_hide_instead_close(preferences, g_value_get_boolean(value));
@@ -2672,39 +2508,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "TimerRemainingMode",
 		                     "Timer Remaining Mode Preference",
 		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:show_osd:
-	  *
-	  */
-	gParamSpecs[PROP_SHOW_OSD] =
-		g_param_spec_boolean("show-osd",
-		                     "ShowOSD",
-		                     "Show OSD Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:album_art_in_osd:
-	  *
-	  */
-	gParamSpecs[PROP_ALBUM_ART_IN_OSD] =
-		g_param_spec_boolean("album-art-in-osd",
-		                     "AlbumArtInOSD",
-		                     "Show Album Art In OSD Preference",
-		                      TRUE,
-		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:actions_in_osd:
-	  *
-	  */
-	gParamSpecs[PROP_ACTIONS_IN_OSD] =
-		g_param_spec_boolean("actions-in-osd",
-		                     "ActionsInOSD",
-		                     "Show Actions In OSD Preference",
-		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 
 	/**

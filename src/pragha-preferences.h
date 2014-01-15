@@ -58,10 +58,6 @@ struct _PraghaPreferencesClass
 #define KEY_TIMER_REMAINING_MODE   "timer_remaining_mode"
 #define KEY_SHOW_ICON_TRAY         "show_icon_tray"
 #define KEY_CLOSE_TO_TRAY          "close_to_tray"
-#define KEY_SHOW_OSD               "show_osd"
-#define KEY_OSD_IN_TRAY            "osd_in_tray"
-#define KEY_SHOW_ALBUM_ART_OSD     "show_albumart_osd"
-#define KEY_SHOW_ACTIONS_OSD       "show_action_osd"
 #define KEY_INSTANT_SEARCH         "instant_filter"
 #define KEY_APPROXIMATE_SEARCH     "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
@@ -408,27 +404,6 @@ pragha_preferences_get_timer_remaining_mode (PraghaPreferences *preferences);
 void
 pragha_preferences_set_timer_remaining_mode(PraghaPreferences *preferences,
                                             gboolean add_recursively);
-
-gboolean
-pragha_preferences_get_show_osd (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_show_osd (PraghaPreferences *preferences,
-                                 gboolean show_osd);
-
-gboolean
-pragha_preferences_get_album_art_in_osd (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_album_art_in_osd (PraghaPreferences *preferences,
-                                         gboolean album_art_in_osd);
-
-gboolean
-pragha_preferences_get_actions_in_osd (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_actions_in_osd (PraghaPreferences *preferences,
-                                       gboolean actions_in_osd);
 
 gboolean
 pragha_preferences_get_hide_instead_close (PraghaPreferences *preferences);

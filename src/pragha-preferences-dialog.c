@@ -35,7 +35,6 @@
 #include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
-#include "pragha-notify.h"
 #include "pragha-simple-widgets.h"
 #include "pragha.h"
 
@@ -66,10 +65,6 @@ struct _PreferencesDialog {
 	GtkWidget *show_icon_tray_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
-
-	GtkWidget *show_osd_w;
-	GtkWidget *albumart_in_osd_w;
-	GtkWidget *actions_in_osd_w;
 
 #ifdef HAVE_LIBCLASTFM
 	GtkWidget *lastfm_w;
@@ -146,11 +141,10 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
-	PraghaNotify *notify;
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm *clastfm;
 #endif
-	gboolean osd, test_change, pref_setted, pref_toggled;
+	gboolean test_change, pref_setted, pref_toggled;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
@@ -323,28 +317,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			}
 		}
 
-		/* Notification preferences */
-
-		osd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
-		if (osd) {
-			pragha_preferences_set_show_osd(dialog->preferences, TRUE);
-			notify = pragha_application_get_notify (dialog->pragha);
-			if (!notify) {
-				notify = pragha_notify_new (dialog->pragha);
-				if (notify)
-					pragha_application_set_notify (dialog->pragha, notify);
-				else
-					pragha_preferences_set_show_osd(dialog->preferences, FALSE);
-			}
-		}
-		else
-			pragha_preferences_set_show_osd(dialog->preferences, FALSE);
-
-		pragha_preferences_set_album_art_in_osd (dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->albumart_in_osd_w)));
-		pragha_preferences_set_actions_in_osd (dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->actions_in_osd_w)));
-
 		/* Services internet preferences */
 #ifdef HAVE_LIBCLASTFM
 		pragha_preferences_set_lastfm_support (dialog->preferences,
@@ -492,8 +464,6 @@ static void toggle_album_art(GtkToggleButton *button, PreferencesDialog *dialog)
 
 	gtk_widget_set_sensitive(dialog->album_art_pattern_w, is_active);
 	gtk_widget_set_sensitive(dialog->album_art_size_w, is_active);
-
-	gtk_widget_set_sensitive(dialog->albumart_in_osd_w, is_active);
 }
 
 /* Toggle show status icon. */
@@ -507,18 +477,7 @@ static void toggle_show_icon_tray(GtkToggleButton *button, PreferencesDialog *di
 	pragha_preferences_set_show_status_icon (dialog->preferences, is_active);
 }
 
-/* Toggle album art pattern */
-
-static void toggle_show_osd(GtkToggleButton *button, PreferencesDialog *dialog)
-{
-	gboolean is_active;
-
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w));
-
-	gtk_widget_set_sensitive(dialog->albumart_in_osd_w, is_active);
-	if (can_support_actions())
-		gtk_widget_set_sensitive(dialog->actions_in_osd_w, is_active);
-}
+/* Some audios toggles handlers */
 
 static void update_audio_device_alsa(PreferencesDialog *dialog)
 {
@@ -712,17 +671,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
 	if (pragha_preferences_get_sort_by_year(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
-
-	/* Notifications options */
-
-	if (pragha_preferences_get_show_osd(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->show_osd_w), TRUE);
-	if (pragha_preferences_get_album_art_in_osd(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->albumart_in_osd_w), TRUE);
-	if (!can_support_actions())
-		gtk_widget_set_sensitive(dialog->actions_in_osd_w, FALSE);
-	else if (pragha_preferences_get_actions_in_osd(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->actions_in_osd_w), TRUE);
 
 	/* Service Internet Option */
 #ifdef HAVE_LIBCLASTFM
@@ -1015,7 +963,6 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
 	GtkWidget *show_icon_tray, *close_to_tray;
-	GtkWidget *show_osd, *albumart_in_osd, *actions_in_osd;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -1028,31 +975,10 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, close_to_tray);
 
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Notifications"));
-
-	show_osd = gtk_check_button_new_with_label(_("Show OSD for track change"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, show_osd);
-
-	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
-
-	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, actions_in_osd);
-
-	/* Setup signal handlers */
-
-	g_signal_connect(G_OBJECT(show_icon_tray), "toggled",
-			 G_CALLBACK(toggle_show_icon_tray), dialog);
-	g_signal_connect(G_OBJECT(show_osd), "toggled",
-			 G_CALLBACK(toggle_show_osd), dialog);
-
 	/* Store references. */
 
 	dialog->show_icon_tray_w = show_icon_tray;
 	dialog->close_to_tray_w = close_to_tray;
-	dialog->show_osd_w = show_osd;
-	dialog->albumart_in_osd_w = albumart_in_osd;
-	dialog->actions_in_osd_w = actions_in_osd;
 
 	return table;
 }

@@ -83,7 +83,6 @@ struct _PraghaApplication {
 	PeasExtensionSet  *peas_exten_set;
 #endif
 
-	PraghaNotify      *notify;
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm      *clastfm;
 #endif
@@ -344,18 +343,6 @@ pragha_application_get_peas_engine (PraghaApplication *pragha)
 }
 #endif
 
-PraghaNotify *
-pragha_application_get_notify (PraghaApplication *pragha)
-{
-	return pragha->notify;
-}
-
-void
-pragha_application_set_notify (PraghaApplication *pragha, PraghaNotify *notify)
-{
-	pragha->notify = notify;
-}
-
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm *
 pragha_application_get_lastfm (PraghaApplication *pragha)
@@ -509,10 +496,6 @@ pragha_application_dispose (GObject *object)
 		pragha_scanner_free (pragha->scanner);
 		pragha->scanner = NULL;
 	}
-	if (pragha->notify) {
-		pragha_notify_free (pragha->notify);
-		pragha->notify = NULL;
-	}
 
 	pragha_cdda_free ();
 
@@ -581,11 +564,6 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (pragha->peas_exten_set, "extension-removed",
 	                  G_CALLBACK (on_extension_removed), NULL);
 #endif
-
-	if (pragha_preferences_get_show_osd (pragha->preferences))
-		pragha->notify = pragha_notify_new (pragha);
-	else
-		pragha->notify = NULL;
 
 	pragha->art_cache = pragha_art_cache_get ();
 	g_signal_connect (pragha->art_cache, "cache-changed",
