@@ -141,7 +141,6 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 {
 	PraghaBackend *backend;
 	PraghaToolbar *toolbar;
-	PraghaNotify *notify;
 
 	CDEBUG(DBG_BACKEND, "Set track activated on playlist");
 
@@ -163,11 +162,6 @@ pragha_playback_set_playlist_track (PraghaPlaylist *playlist, PraghaMusicobject 
 
 	/* Update album art */
 	pragha_playback_update_current_album_art (pragha, mobj);
-
-	/* Show osd, and inform new album art. */
-	notify = pragha_application_get_notify (pragha);
-	if (notify)
-		pragha_notify_show_osd (notify);
 }
 
 void

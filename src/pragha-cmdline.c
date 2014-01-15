@@ -50,7 +50,6 @@ static struct PraghaCmdLineOptions {
 	gboolean repeat;
 	gboolean inc_volume;
 	gboolean dec_volume;
-	gboolean show_osd;
 	gboolean toggle_view;
 	gboolean current_state;
 	gchar **files;
@@ -179,13 +178,6 @@ process_options (PraghaApplication *pragha, GApplicationCommandLine *command_lin
 		PraghaBackend *backend = pragha_application_get_backend (pragha);
 		pragha_backend_set_delta_volume (backend, -0.05);
 	}
-	if (cmdline_options.show_osd) {
-		PraghaNotify *notify = pragha_application_get_notify (pragha);
-		if (notify)
-			pragha_notify_show_osd (notify);
-		else
-			g_warning ("Notifications are disabled");
-	}
 	if (cmdline_options.toggle_view) {
 		pragha_window_toggle_state (pragha, TRUE);
 	}
@@ -222,8 +214,6 @@ static const GOptionEntry cmd_entries[] = {
 	 &cmdline_options.inc_volume, "Increase volume by 1", NULL},
 	{"dec_vol", 'd', 0, G_OPTION_ARG_NONE,
 	 &cmdline_options.dec_volume, "Decrease volume by 1", NULL},
-	{"show_osd", 'o', 0, G_OPTION_ARG_NONE,
-	 &cmdline_options.show_osd, "Show OSD notification", NULL},
 	{"toggle_view", 'x', 0, G_OPTION_ARG_NONE,
 	 &cmdline_options.toggle_view, "Toggle player visibility", NULL},
 	{"current_state", 'c', 0, G_OPTION_ARG_NONE,

@@ -5,7 +5,6 @@ src/pragha-filter-dialog.c
 src/pragha-lastfm.c
 src/pragha-library-pane.c
 src/pragha-menubar.c
-src/pragha-notify.c
 src/pragha-playlist.c
 src/pragha-playlists-mgmt.c
 src/pragha-preferences-dialog.c
@@ -19,3 +18,4 @@ src/pragha-utils.c
 src/pragha-window.c
 src/pragha.c
 data/pragha.desktop.in
+plugins/notify/pragha-notify-plugin.c

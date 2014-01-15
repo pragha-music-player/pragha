@@ -21,7 +21,6 @@ libmpris2_la_CFLAGS =						\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
-	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBPEAS_CFLAGS) 						\
 	$(LIBPEAS_GTK_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
@@ -36,7 +35,6 @@ libmpris2_la_LIBADD =						\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
-	$(LIBNOTIFY_LIBS) 						\
 	$(LIBPEAS_LIBS)							\
 	$(LIBPEAS_GTK_LIBS)						\
 	$(LIBCDIO_LIBS) 						\

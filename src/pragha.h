@@ -38,7 +38,6 @@
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
-#include "pragha-notify.h"
 #include "pragha-preferences.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
@@ -100,9 +99,6 @@ PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication 
 #ifdef HAVE_LIBCLASTFM
 PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
 #endif
-
-PraghaNotify      *pragha_application_get_notify             (PraghaApplication *pragha);
-void               pragha_application_set_notify             (PraghaApplication *pragha, PraghaNotify *notify);
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 

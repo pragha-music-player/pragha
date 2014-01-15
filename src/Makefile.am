@@ -44,8 +44,6 @@ pragha_SOURCES = \
 		pragha-musicobject.h \
 		pragha-musicobject-mgmt.c \
 		pragha-musicobject-mgmt.h \
-		pragha-notify.c \
-		pragha-notify.h \
 		pragha-playback.c \
 		pragha-playback.h \
 		pragha-playlist.c \
@@ -101,7 +99,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
-	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBCDIO_CFLAGS) 						\
 	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
@@ -113,7 +110,6 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
-	$(LIBNOTIFY_LIBS) 						\
 	$(LIBCDIO_LIBS) 						\
 	$(LIBCDIO_PARANOIA_LIBS) 					\
 	$(LIBCDDB_LIBS)

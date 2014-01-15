@@ -21,3 +21,6 @@ if HAVE_LIBKEYBINDER
 SUBDIRS += keybinder
 endif
 
+if HAVE_LIBNOTIFY
+SUBDIRS += notify
+endif
