@@ -43,25 +43,6 @@ PRAGHA_PLUGIN_REGISTER_PUBLIC_HEADER (PRAGHA_TYPE_DEVICES_PLUGIN,
                                       PraghaDevicesPlugin,
                                       pragha_devices_plugin)
 
-struct _PraghaDevicesPluginPrivate {
-	PraghaApplication  *pragha;
-
-	GUdevClient        *gudev_client;
-	GUdevDevice        *device;
-
-	LIBMTP_mtpdevice_t *mtp_device;
-	guint64             bus_hooked;
-	guint64             device_hooked;
-
-	GHashTable         *tracks_table;
-
-	GtkActionGroup     *action_group_menu;
-	guint               merge_id_menu;
-
-	GtkActionGroup     *action_group_playlist;
-	guint               merge_id_playlist;
-};
-
 enum
 {
 	PRAGHA_DEVICE_RESPONSE_NONE,
@@ -70,23 +51,23 @@ enum
 };
 
 gint
-pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
+pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
                           const gchar *first_button_text, gint first_button_response);
 
-enum
-{
+typedef enum {
 	PRAGHA_DEVICE_MOUNTABLE,
 	PRAGHA_DEVICE_AUDIO_CD,
 	PRAGHA_DEVICE_MTP,
-	PRAGHA_DEVICE_UNKNOWN,
-};
+	PRAGHA_DEVICE_UNKNOWN
+} PraghaDeviceType;
 
 enum
 {
 	FILE_DEVICE_MTP
 };
 
+void                pragha_device_cache_append_tracks        (PraghaDevicesPlugin *plugin);
 void                pragha_device_cache_clear                (PraghaDevicesPlugin *plugin);
 void                pragha_device_cache_insert_track         (PraghaDevicesPlugin *plugin, PraghaMusicobject *mobj);
 
@@ -97,7 +78,7 @@ GUdevDevice        *pragha_device_get_udev_device            (PraghaDevicesPlugi
 LIBMTP_mtpdevice_t *pragha_device_get_mtp_device             (PraghaDevicesPlugin *plugin);
 PraghaApplication  *pragha_device_get_application            (PraghaDevicesPlugin *plugin);
 
-void                pragha_gudev_set_hook_device             (PraghaDevicesPlugin *plugin, GUdevDevice *device, LIBMTP_mtpdevice_t *mtp_device, guint64 busnum, guint64 devnum);
+void                pragha_gudev_set_hook_device             (PraghaDevicesPlugin *plugin, PraghaDeviceType device_type, GUdevDevice *device, LIBMTP_mtpdevice_t *mtp_device, guint64 busnum, guint64 devnum);
 void                pragha_gudev_clear_hook_devices          (PraghaDevicesPlugin *plugin);
 
 void                pragha_devices_append_playlist_action    (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml);

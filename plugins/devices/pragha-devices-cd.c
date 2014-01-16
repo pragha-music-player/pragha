@@ -39,7 +39,7 @@ void
 pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin)
 {
 	gint response;
-	response = pragha_gudev_show_dialog (_("Audio/Data CD"), "gnome-dev-cdrom-audio",
+	response = pragha_gudev_show_dialog (NULL, _("Audio/Data CD"), "media-optical",
 	                                     _("Was inserted an Audio Cd."), NULL,
 	                                     _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
 	switch (response)

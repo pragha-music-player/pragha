@@ -400,7 +400,7 @@ void
 pragha_devices_add_detected_device (PraghaDevicesPlugin *plugin)
 {
 	gint response;
-	response = pragha_gudev_show_dialog (_("MTP Device"), "gnome-dev-cdrom-audio",
+	response = pragha_gudev_show_dialog (NULL, _("MTP Device"), "multimedia-player",
 	                                     _("Was inserted an MTP Device"), NULL,
 	                                     _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
 	switch (response)
@@ -449,7 +449,7 @@ pragha_devices_mtp_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 
 	/* Device handled. */
 
-	pragha_gudev_set_hook_device (plugin, device, mtp_device, busnum, devnum);
+	pragha_gudev_set_hook_device (plugin, PRAGHA_DEVICE_MTP, device, mtp_device, busnum, devnum);
 
 	/* Cache song of device. */
 	pragha_device_mtp_cache_tracks (plugin); // Slow!.
