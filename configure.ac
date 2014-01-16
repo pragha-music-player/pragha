@@ -123,6 +123,22 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                            [libglyr library], [yes])
 fi
 
+GUDEV_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
+                           [gudev-1.0], [145],
+                           [gudev-1.0],
+                           [gudev-1.0 library], [yes])
+fi
+
+LIBMTP_FOUND="no"
+if test x"$GUDEV_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
+                           [libmtp], [1.1.0],
+                           [libmtp],
+                           [libmtp library], [yes])
+fi
+
 dnl Test for new paranoia headers location
 AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
 	AC_DEFINE(HAVE_PARANOIA_NEW_INCLUDES, 1, [Define to 1 if cdio/paranoia/paranoia.h is present]) ])
@@ -176,6 +192,7 @@ AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/song-info/Makefile])
 AC_CONFIG_FILES([plugins/notify/Makefile])
+AC_CONFIG_FILES([plugins/devices/Makefile])
 fi
 AC_OUTPUT
 
@@ -192,6 +209,7 @@ echo "   * Controls Pragha using Mpris2 interface...............................
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
+echo "   * EXPERIMENTAL management removable devices.:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
 AS_IF([test $GSTREAMER_API_VERSION = 1.0],
