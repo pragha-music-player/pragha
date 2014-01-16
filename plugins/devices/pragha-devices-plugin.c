@@ -43,6 +43,26 @@
 #include "src/pragha-utils.h"
 #include "src/pragha.h"
 
+struct _PraghaDevicesPluginPrivate {
+	PraghaApplication  *pragha;
+
+	GUdevClient        *gudev_client;
+	GUdevDevice        *device;
+	LIBMTP_mtpdevice_t *mtp_device;
+
+	guint64             bus_hooked;
+	guint64             device_hooked;
+	PraghaDeviceType    hooked_type;
+
+	GHashTable         *tracks_table;
+
+	GtkActionGroup     *action_group_menu;
+	guint               merge_id_menu;
+
+	GtkActionGroup     *action_group_playlist;
+	guint               merge_id_playlist;
+};
+
 PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE (PRAGHA_TYPE_DEVICES_PLUGIN,
                                      PraghaDevicesPlugin,
                                      pragha_devices_plugin)
@@ -159,7 +179,7 @@ pragha_device_get_application (PraghaDevicesPlugin *plugin)
  */
 
 gint
-pragha_gudev_show_dialog (const gchar *title, const gchar *icon,
+pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
                           const gchar *first_button_text, gint first_button_response)
 {
@@ -266,12 +286,14 @@ pragha_gudev_clear_hook_devices (PraghaDevicesPlugin *plugin)
 
 	pragha_device_cache_clear (plugin);
 
-	priv->bus_hooked = 0;
+	priv->hooked_type   = PRAGHA_DEVICE_UNKNOWN;
+	priv->bus_hooked    = 0;
 	priv->device_hooked = 0;
 }
 
 void
 pragha_gudev_set_hook_device (PraghaDevicesPlugin *plugin,
+                              PraghaDeviceType     device_type,
                               GUdevDevice         *device,
                               LIBMTP_mtpdevice_t  *mtp_device,
                               guint64              busnum,
@@ -279,6 +301,7 @@ pragha_gudev_set_hook_device (PraghaDevicesPlugin *plugin,
 {
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
+	priv->hooked_type   = device_type;
 	priv->device        = g_object_ref (device);
 	priv->mtp_device    = mtp_device;
 	priv->bus_hooked    = busnum;
@@ -290,7 +313,7 @@ pragha_gudev_set_hook_device (PraghaDevicesPlugin *plugin,
 static void
 pragha_gudev_device_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 {
-	gint device_type = 0;
+	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 
 	device_type = pragha_gudev_get_device_type (device);
 
@@ -460,8 +483,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_debug ("%s", G_STRFUNC);
 
-	if (priv->bus_hooked != 0 &&
-	    priv->device_hooked != 0)
+	if (pragha_device_already_is_busy(plugin))
 		pragha_gudev_clear_hook_devices (plugin);
 
 	g_hash_table_destroy (priv->tracks_table);
