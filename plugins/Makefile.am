@@ -24,3 +24,7 @@ endif
 if HAVE_LIBNOTIFY
 SUBDIRS += notify
 endif
+
+if HAVE_LIBMTP
+SUBDIRS += devices
+endif

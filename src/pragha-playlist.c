@@ -188,9 +188,12 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 	<separator/>				    				\
 	<menuitem action=\"Save playlist\"/>					\
 	<menuitem action=\"Save selection\"/>					\
+	<menu action=\"SendToMenu\">						\
+		<placeholder name=\"pragha-sendto-placeholder\"/>		\
+	</menu>									\
 	<separator/>				    				\
 	<menu action=\"ToolsMenu\">						\
-		<placeholder name=\"pragha-plugins-placeholder\"/>			\
+		<placeholder name=\"pragha-plugins-placeholder\"/>		\
 	</menu>									\
 	<separator/>				    				\
 	<menuitem action=\"Copy tag to selection\"/>				\
@@ -212,6 +215,7 @@ static GtkActionEntry playlist_context_aentries[] = {
 	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
 	{"Save playlist", "document-save", N_("Save playlist")},
 	{"Save selection", "document-save-as", N_("Save selection")},
+	{"SendToMenu", NULL, N_("_Send to")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"Copy tag to selection", "edit-copy", NULL,
 	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)},

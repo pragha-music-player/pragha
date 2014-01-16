@@ -50,17 +50,16 @@ struct _PraghaMusicobjectClass
 /* File music types */
 
 typedef enum {
-	FILE_NONE = -1,
-	FILE_WAV,
-	FILE_MP3,
-	FILE_FLAC,
-	FILE_OGGVORBIS,
-	FILE_ASF,
-	FILE_MP4,
-	FILE_APE,
-	FILE_CDDA,
-	FILE_HTTP,
-	LAST_FILE_TYPE
+	FILE_NONE      = -1,
+	FILE_WAV       = -2,
+	FILE_MP3       = -3,
+	FILE_FLAC      = -4,
+	FILE_OGGVORBIS = -5,
+	FILE_ASF       = -6,
+	FILE_MP4       = -7,
+	FILE_APE       = -8,
+	FILE_CDDA      = -9,
+	FILE_HTTP      = -10
 } PraghaMusicType;
 
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS

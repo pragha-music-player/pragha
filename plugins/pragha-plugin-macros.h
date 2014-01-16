@@ -38,7 +38,7 @@
 G_BEGIN_DECLS
 
 /**
- * _PRAGHA_PLUGIN_REGISTER:
+ * _REGISTER_PUBLIC_HEADER:
  * @TYPE_NAME: the name of the plugin type, in UPPER_CASE
  * @TypeName: the name of the plugin type, in CamelCase
  * @type_name: the name of the plugin type, in lower_case
@@ -48,7 +48,7 @@ G_BEGIN_DECLS
  * Registers a plugin with the Pragha plugin system, including registering the type specified in the parameters and declaring its activate and
  * deactivate functions.
  **/
-#define _PRAGHA_PLUGIN_REGISTER(TYPE_NAME, TypeName, type_name, TYPE_CODE, REGISTER_CODE)	\
+#define _REGISTER_PUBLIC_HEADER(TYPE_NAME, TypeName, type_name, TYPE_CODE, REGISTER_CODE)	\
 	typedef struct {							\
 		PeasExtensionBaseClass parent_class;				\
 	} TypeName##Class;							\
@@ -56,7 +56,20 @@ G_BEGIN_DECLS
 		PeasExtensionBase parent;					\
 		TypeName##Private *priv;					\
 	} TypeName;								\
-	GType type_name##_get_type (void) G_GNUC_CONST;				\
+	GType type_name##_get_type (void) G_GNUC_CONST;
+
+/**
+ * _REGISTER_PRIVATE_CODE:
+ * @TYPE_NAME: the name of the plugin type, in UPPER_CASE
+ * @TypeName: the name of the plugin type, in CamelCase
+ * @type_name: the name of the plugin type, in lower_case
+ * @TYPE_CODE: code to go in the fifth parameter to %G_DEFINE_DYNAMIC_TYPE_EXTENDED
+ * @REGISTER_CODE: code to go in the peas_register_types() exported function
+ *
+ * Registers a plugin with the Pragha plugin system, including registering the type specified in the parameters and declaring its activate and
+ * deactivate functions.
+ **/
+#define _REGISTER_PRIVATE_CODE(TYPE_NAME, TypeName, type_name, TYPE_CODE, REGISTER_CODE)	\
 	static void pragha_plugin_activate (PeasActivatable *plugin);		\
 	static void pragha_plugin_deactivate (PeasActivatable *plugin);	\
 	G_MODULE_EXPORT void peas_register_types (PeasObjectModule *module);	\
@@ -140,6 +153,30 @@ G_BEGIN_DECLS
 	}
 
 /**
+ * PRAGHA_PLUGIN_REGISTER_PUBLIC_HEADER:
+ * @TYPE_NAME: the name of the plugin type, in UPPER_CASE
+ * @TypeName: the name of the plugin type, in CamelCase
+ * @type_name: the name of the plugin type, in lower_case
+ *
+ * Registers a plugin with the Pragha plugin system, including registering the type specified in the parameters and declaring its activate and
+ * deactivate functions.
+ **/
+#define PRAGHA_PLUGIN_REGISTER_PUBLIC_HEADER(TYPE_NAME, TypeName, type_name)	\
+	_REGISTER_PUBLIC_HEADER(TYPE_NAME, TypeName, type_name,,)
+
+/**
+ * PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE:
+ * @TYPE_NAME: the name of the plugin type, in UPPER_CASE
+ * @TypeName: the name of the plugin type, in CamelCase
+ * @type_name: the name of the plugin type, in lower_case
+ *
+ * Registers a plugin with the Pragha plugin system, including registering the type specified in the parameters and declaring its activate and
+ * deactivate functions.
+ **/
+#define PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE(TYPE_NAME, TypeName, type_name)	\
+	_REGISTER_PRIVATE_CODE(TYPE_NAME, TypeName, type_name,,)
+
+/**
  * PRAGHA_PLUGIN_REGISTER:
  * @TYPE_NAME: the name of the plugin type, in UPPER_CASE
  * @TypeName: the name of the plugin type, in CamelCase
@@ -149,7 +186,8 @@ G_BEGIN_DECLS
  * deactivate functions.
  **/
 #define PRAGHA_PLUGIN_REGISTER(TYPE_NAME, TypeName, type_name)			\
-	_PRAGHA_PLUGIN_REGISTER(TYPE_NAME, TypeName, type_name,,)
+	_REGISTER_PUBLIC_HEADER(TYPE_NAME, TypeName, type_name,,)		\
+	_REGISTER_PRIVATE_CODE(TYPE_NAME, TypeName, type_name,,)
 
 /**
  * PRAGHA_PLUGIN_REGISTER_CONFIGURABLE:
@@ -163,7 +201,10 @@ G_BEGIN_DECLS
 #define PRAGHA_PLUGIN_REGISTER_CONFIGURABLE(TYPE_NAME, TypeName, type_name)	\
 	static GtkWidget *pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable); \
 	static void peas_gtk_configurable_iface_init (PeasGtkConfigurableInterface *iface); \
-	_PRAGHA_PLUGIN_REGISTER(TYPE_NAME, TypeName, type_name,			\
+	_REGISTER_PUBLIC_HEADER(TYPE_NAME, TypeName, type_name,			\
+		(G_IMPLEMENT_INTERFACE_DYNAMIC (PEAS_GTK_TYPE_CONFIGURABLE, peas_gtk_configurable_iface_init)), \
+		peas_object_module_register_extension_type (module, PEAS_GTK_TYPE_CONFIGURABLE, TYPE_NAME);) \
+	_REGISTER_PRIVATE_CODE(TYPE_NAME, TypeName, type_name,		\
 		(G_IMPLEMENT_INTERFACE_DYNAMIC (PEAS_GTK_TYPE_CONFIGURABLE, peas_gtk_configurable_iface_init)), \
 		peas_object_module_register_extension_type (module, PEAS_GTK_TYPE_CONFIGURABLE, TYPE_NAME);) \
 	static void								\

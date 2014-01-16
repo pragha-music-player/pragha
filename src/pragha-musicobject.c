@@ -674,7 +674,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                   "FileType",
 		                   "The File Type",
 		                   FILE_NONE,
-		                   LAST_FILE_TYPE,
+		                   10,
 		                   FILE_NONE,
 		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
