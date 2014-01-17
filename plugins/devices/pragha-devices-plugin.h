@@ -56,6 +56,7 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
                           const gchar *first_button_text, gint first_button_response);
 
 typedef enum {
+	PRAGHA_DEVICE_NONE = 0,
 	PRAGHA_DEVICE_MOUNTABLE,
 	PRAGHA_DEVICE_AUDIO_CD,
 	PRAGHA_DEVICE_MTP,

@@ -671,12 +671,12 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 	  */
 	gParamSpecs[PROP_FILE_TYPE] =
 		g_param_spec_int ("file-type",
-		                   "FileType",
-		                   "The File Type",
-		                   FILE_NONE,
-		                   10,
-		                   FILE_NONE,
-		                   G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+		                  "FileType",
+		                  "The File Type",
+		                  FILE_HTTP,
+		                  10,
+		                  FILE_NONE,
+		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	/**
 	  * PraghaMusicobject:title:
