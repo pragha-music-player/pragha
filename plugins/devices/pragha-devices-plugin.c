@@ -131,11 +131,7 @@ pragha_device_already_is_busy (PraghaDevicesPlugin *plugin)
 {
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	if (priv->bus_hooked != 0 &&
-	    priv->device_hooked != 0)
-		return TRUE;
-
-	return FALSE;
+	return (priv->hooked_type != PRAGHA_DEVICE_NONE);
 }
 
 gboolean
@@ -143,11 +139,7 @@ pragha_device_already_is_idle (PraghaDevicesPlugin *plugin)
 {
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	if (priv->bus_hooked == 0 &&
-	    priv->device_hooked == 0)
-		return TRUE;
-
-	return FALSE;
+	return (priv->hooked_type == PRAGHA_DEVICE_NONE);
 }
 
 GUdevDevice *
@@ -286,7 +278,7 @@ pragha_gudev_clear_hook_devices (PraghaDevicesPlugin *plugin)
 
 	pragha_device_cache_clear (plugin);
 
-	priv->hooked_type   = PRAGHA_DEVICE_UNKNOWN;
+	priv->hooked_type   = PRAGHA_DEVICE_NONE;
 	priv->bus_hooked    = 0;
 	priv->device_hooked = 0;
 }
@@ -327,6 +319,7 @@ pragha_gudev_device_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 		case PRAGHA_DEVICE_MTP:
 			pragha_devices_mtp_added (plugin, device);
 		case PRAGHA_DEVICE_UNKNOWN:
+		case PRAGHA_DEVICE_NONE:
 		default:
 			break;
 	}
@@ -351,8 +344,7 @@ pragha_gudev_device_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	if (priv->bus_hooked == 0 &&
-	    priv->device_hooked == 0)
+	if (priv->hooked_type == PRAGHA_DEVICE_NONE)
 		return;
 
 	busnum = g_udev_device_get_property_as_uint64 (device, "BUSNUM");
@@ -483,7 +475,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_debug ("%s", G_STRFUNC);
 
-	if (pragha_device_already_is_busy(plugin))
+	if (priv->hooked_type != PRAGHA_DEVICE_NONE)
 		pragha_gudev_clear_hook_devices (plugin);
 
 	g_hash_table_destroy (priv->tracks_table);
@@ -492,5 +484,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                      gudev_uevent_cb, plugin);
 
 	g_object_unref (priv->gudev_client);
+
 	priv->pragha = NULL;
 }
