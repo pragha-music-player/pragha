@@ -44,7 +44,7 @@
 #include "pragha.h"
 
 struct _PraghaLibraryPane {
-	GtkVBox           __parent__;
+	GtkBox           __parent__;
 
 	/* Global database and preferences instances */
 	PraghaDatabase    *cdbase;
@@ -89,7 +89,7 @@ enum
 
 static int signals[LAST_SIGNAL] = { 0 };
 
-G_DEFINE_TYPE(PraghaLibraryPane, pragha_library_pane, GTK_TYPE_VBOX)
+G_DEFINE_TYPE(PraghaLibraryPane, pragha_library_pane, GTK_TYPE_BOX)
 
 /* Node types in library view */
 
@@ -2830,6 +2830,8 @@ pragha_library_pane_get_pane_context_menu(PraghaLibraryPane *clibrary)
 static void
 pragha_library_pane_init (PraghaLibraryPane *library)
 {
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (library), GTK_ORIENTATION_VERTICAL);
+
 	/* Get usefuls instances */
 
 	library->cdbase = pragha_database_get ();

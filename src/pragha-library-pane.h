@@ -35,7 +35,7 @@ typedef struct _PraghaApplication PraghaApplication;
 typedef struct _PraghaLibraryPane PraghaLibraryPane;
 
 typedef struct {
-	GtkVBoxClass __parent__;
+	GtkBoxClass __parent__;
 	void (*library_append_playlist) (PraghaLibraryPane *toolbar);
 	void (*library_replace_playlist) (PraghaLibraryPane *toolbar);
 	void (*library_replace_playlist_and_play) (PraghaLibraryPane *toolbar);
