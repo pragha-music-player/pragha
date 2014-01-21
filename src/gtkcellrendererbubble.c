@@ -136,9 +136,8 @@ render (GtkCellRenderer      *cell,
 {
   GtkCellRendererBubblePrivate *priv;
   cairo_pattern_t *pattern;
-  GdkColor *start;
-  GdkColor *stop;
-  GtkStyle *style;
+  GtkStyleContext *style;
+  GdkRGBA selected;
   GtkStyleContext *stylec;
   GdkRGBA color_in;
   GdkRGBA color_out;
@@ -151,10 +150,8 @@ render (GtkCellRenderer      *cell,
     {
       cairo_save (cr);
       
-      style = gtk_widget_get_style(widget);
-      
-      start = &style->light [GTK_STATE_SELECTED];
-      stop = &style->mid [GTK_STATE_SELECTED];
+      style = gtk_widget_get_style_context (widget);
+      gtk_style_context_get_background_color (style, GTK_STATE_FLAG_SELECTED, &selected);
       
       pattern = cairo_pattern_create_linear (cell_area->x,
                                              cell_area->y,
@@ -162,13 +159,13 @@ render (GtkCellRenderer      *cell,
                                              cell_area->y + cell_area->height);
       
       cairo_pattern_add_color_stop_rgb (pattern, 0.3,
-                                        start->red / (gdouble)G_MAXUINT16,
-                                        start->green / (gdouble)G_MAXUINT16,
-                                        start->blue / (gdouble)G_MAXUINT16);
+                                        selected.red * 1.3,
+                                        selected.green * 1.3,
+                                        selected.blue * 1.3);
       cairo_pattern_add_color_stop_rgb (pattern, 0.9,
-                                        stop->red / (gdouble)G_MAXUINT16,
-                                        stop->green / (gdouble)G_MAXUINT16,
-                                        stop->blue / (gdouble)G_MAXUINT16);
+                                        selected.red * 0.7,
+                                        selected.green * 0.7,
+                                        selected.blue * 0.7);
       
       rounded_rectangle (cr,
                          cell_area->x, cell_area->y + 1,

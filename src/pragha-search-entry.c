@@ -52,7 +52,7 @@ seach_entry_populate_popup (GtkEntry *entry, PraghaPreferences *preferences)
 	gtk_menu_attach_to_widget(GTK_MENU(popup_menu), GTK_WIDGET(entry), NULL);
 
 	gtk_menu_popup(GTK_MENU(popup_menu), NULL, NULL,
-			(GtkMenuPositionFunc) menu_position, entry,
+			(GtkMenuPositionFunc) pragha_utils_set_menu_position, entry,
 			0, gtk_get_current_event_time());
 }
 
