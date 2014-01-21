@@ -67,6 +67,12 @@ gchar * pragha_escape_slashes (const gchar *str);
 gboolean validate_album_art_pattern(const gchar *pattern);
 void pragha_process_gtk_events ();
 void open_url(const gchar *url, GtkWidget *parent);
-void menu_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
+
+void
+pragha_utils_set_menu_position (GtkMenu  *menu,
+                                gint     *x,
+                                gint     *y,
+                                gboolean *push_in,
+                                gpointer  user_data);
 
 #endif /* PRAGHA_UTILS_H */

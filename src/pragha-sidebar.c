@@ -65,16 +65,17 @@ pragha_sidebar_get_widget(PraghaSidebar *sidebar)
  * Internal Calbacks.
  */
 
-void
-pragha_sidebar_menu_position(GtkMenu *menu,
-                             gint *x, gint *y,
-                             gboolean *push_in,
-                             gpointer user_data)
+static void
+pragha_sidebar_menu_position (GtkMenu  *menu,
+                              gint     *x,
+                              gint     *y,
+                              gboolean *push_in,
+                              gpointer  user_data)
 {
 	GtkWidget *widget;
+	GtkAllocation allocation;
 	GtkRequisition requisition;
-	gint menu_xpos;
-	gint menu_ypos;
+	gint menu_xpos, menu_ypos;
 
 	widget = GTK_WIDGET (user_data);
 
@@ -82,16 +83,15 @@ pragha_sidebar_menu_position(GtkMenu *menu,
 
 	gdk_window_get_origin (gtk_widget_get_window(widget), &menu_xpos, &menu_ypos);
 
-	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
 
 	menu_xpos += allocation.x;
 	menu_ypos += allocation.y;
 
 	if (menu_ypos > gdk_screen_get_height (gtk_widget_get_screen (widget)) / 2)
-		menu_ypos -= requisition.height + gtk_widget_get_style(widget)->ythickness;
+		menu_ypos -= requisition.height;
 	else
-		menu_ypos += allocation.height + gtk_widget_get_style(widget)->ythickness;
+		menu_ypos += allocation.height;
 
 	*x = menu_xpos;
 	*y = menu_ypos - 5;
