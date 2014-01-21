@@ -138,9 +138,8 @@ render (GtkCellRenderer      *cell,
   cairo_pattern_t *pattern;
   GtkStyleContext *style;
   GdkRGBA selected;
-  GtkStyleContext *stylec;
-  GdkRGBA color_in;
-  GdkRGBA color_out;
+  GdkRGBA *color_light;
+  GdkRGBA *color_dark;
 
   g_return_if_fail (GTK_IS_CELL_RENDERER_BUBBLE (cell));
   
@@ -157,15 +156,25 @@ render (GtkCellRenderer      *cell,
                                              cell_area->y,
                                              cell_area->x,
                                              cell_area->y + cell_area->height);
-      
+
+      color_light = gdk_rgba_copy(&selected);
+      color_light->red *= 1.3;
+      color_light->green *= 1.3;
+      color_light->blue *= 1.3;
+
+      color_dark = gdk_rgba_copy(&selected);
+      color_dark->red *= 0.7;
+      color_dark->green *= 0.7;
+      color_dark->blue *= 0.7;
+
       cairo_pattern_add_color_stop_rgb (pattern, 0.3,
-                                        selected.red * 1.3,
-                                        selected.green * 1.3,
-                                        selected.blue * 1.3);
+                                        color_light->red,
+                                        color_light->green,
+                                        color_light->blue);
       cairo_pattern_add_color_stop_rgb (pattern, 0.9,
-                                        selected.red * 0.7,
-                                        selected.green * 0.7,
-                                        selected.blue * 0.7);
+                                        color_dark->red,
+                                        color_dark->green,
+                                        color_dark->blue);
       
       rounded_rectangle (cr,
                          cell_area->x, cell_area->y + 1,
@@ -175,10 +184,7 @@ render (GtkCellRenderer      *cell,
       cairo_set_source (cr, pattern);
       cairo_fill_preserve (cr);
 
-      stylec = gtk_widget_get_style_context (widget);
-      gtk_style_context_get_color (stylec, GTK_STATE_FLAG_SELECTED,
-                                   &color_in);
-      gdk_cairo_set_source_rgba (cr, &color_in);
+      gdk_cairo_set_source_rgba (cr, color_dark);
       cairo_set_line_width (cr, 1.0);
       cairo_stroke (cr);
       
@@ -187,9 +193,11 @@ render (GtkCellRenderer      *cell,
                          cell_area->width - 2.0, cell_area->height - 4.0,
                          cell_area->height / 2.5, cell_area->height / 2.5);
 
-      gtk_style_context_get_color (stylec, GTK_STATE_FLAG_SELECTED,
-                                   &color_out);
-      gdk_cairo_set_source_rgba (cr, &color_out);
+      gdk_cairo_set_source_rgba (cr, color_light);
+
+      gdk_rgba_free (color_light);
+      gdk_rgba_free (color_dark);
+
       cairo_stroke (cr);
 
       cairo_pattern_destroy(pattern);
