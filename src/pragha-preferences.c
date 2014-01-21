@@ -1720,6 +1720,19 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_timer_remaining_mode(preferences, timer_remaining_mode);
 	}
 
+	hide_instead_close = g_key_file_get_boolean(priv->rc_keyfile,
+	                                            GROUP_GENERAL,
+	                                            KEY_CLOSE_TO_TRAY,
+	                                            &error);
+
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_hide_instead_close(preferences, hide_instead_close);
+	}
+
 	use_cddb = g_key_file_get_boolean(priv->rc_keyfile,
 	                                  GROUP_SERVICES,
 	                                  KEY_USE_CDDB,
