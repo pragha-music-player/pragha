@@ -16,6 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha-cdda.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
@@ -115,7 +116,7 @@ exit:
 	return drive;
 }
 
-void add_audio_cd(PraghaApplication *pragha)
+void pragha_application_append_audio_cd (PraghaApplication *pragha)
 {
 	lba_t lba;
 	gint matches;

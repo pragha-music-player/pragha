@@ -28,6 +28,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include "pragha-menubar.h"
+#include "pragha-cdda.h"
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -519,7 +520,7 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 
 void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
 {
-	add_audio_cd(pragha);
+	pragha_application_append_audio_cd (pragha);
 }
 
 /* Build a dialog to get a new playlist name */
