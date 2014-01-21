@@ -975,6 +975,11 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, close_to_tray);
 
+	/* Setup signal handlers */
+
+	g_signal_connect (G_OBJECT(show_icon_tray), "toggled",
+	                  G_CALLBACK(toggle_show_icon_tray), dialog);
+
 	/* Store references. */
 
 	dialog->show_icon_tray_w = show_icon_tray;
