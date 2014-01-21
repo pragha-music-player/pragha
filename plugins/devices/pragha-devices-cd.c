@@ -28,6 +28,7 @@
 #include <gudev/gudev.h>
 #include <stdlib.h>
 
+#include "src/pragha-cdda.h"
 #include "src/pragha-file-utils.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-debug.h"
@@ -45,7 +46,7 @@ pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin)
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			add_audio_cd (pragha_device_get_application(plugin));
+			pragha_application_append_audio_cd (pragha_device_get_application(plugin));
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:

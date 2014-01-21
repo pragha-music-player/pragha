@@ -20,6 +20,10 @@ dnl  Initialize automake
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE()
 
+dnl Set required and max glib/gdk versions
+AC_DEFINE(GDK_VERSION_MIN_REQUIRED, GDK_VERSION_3_4, [Ignore post 3.10 deprecations])
+AC_DEFINE(GDK_VERSION_MAX_ALLOWED, GDK_VERSION_3_10, [Ignore post 3.10 deprecations])
+
 dnl *********************
 dnl * Debugging support *
 dnl *********************
@@ -77,11 +81,11 @@ GSTREAMER_REQUIRED=0.11.90
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
-XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.28])
-XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.2.0])
+XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.32])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.4.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
 XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
-XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.80])
+XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.90])
 XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
@@ -138,10 +142,6 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
                            [libmtp],
                            [libmtp library], [yes])
 fi
-
-dnl Test for new paranoia headers location
-AC_CHECK_HEADER(cdio/paranoia/cdda.h, [
-	AC_DEFINE(HAVE_PARANOIA_NEW_INCLUDES, 1, [Define to 1 if cdio/paranoia/paranoia.h is present]) ])
 
 dnl Check min taglib to add monkeyaudio support
 TAGLIB_1_7_FOUND="no"

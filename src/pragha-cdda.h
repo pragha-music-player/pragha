@@ -19,23 +19,20 @@
 #ifndef CDDA_H
 #define CDDA_H
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib.h>
+
+#include <cdio/paranoia/cdda.h>
+#include <cdio/cd_types.h>
+#include <cddb/cddb.h>
 
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
-#ifdef HAVE_PARANOIA_NEW_INCLUDES
-   #include <cdio/paranoia/cdda.h>
-#else
-   #include <cdio/cdda.h>
-   #ifdef __CDIO_CONFIG_H__
-      #include <cdio/cdio_unconfig.h>
-   #endif
-#endif
-#include <cdio/cd_types.h>
-#include <cddb/cddb.h>
-
-void add_audio_cd (PraghaApplication *pragha);
+void pragha_application_append_audio_cd (PraghaApplication *pragha);
 
 void pragha_cdda_free ();
 
