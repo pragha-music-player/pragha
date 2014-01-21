@@ -143,7 +143,7 @@ static void         pragha_playlist_update_playback_sequence (PraghaPlaylist *pl
 
 static void         pragha_playlist_set_first_rand_ref (PraghaPlaylist *cplaylist, GtkTreePath *path);
 
-static void         pragha_playlist_select_path        (PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center);
+static void         pragha_playlist_select_path        (PraghaPlaylist *playlist, GtkTreePath *path, gboolean center);
 
 static void         pragha_playlist_change_ref_list_tags (PraghaPlaylist *playlist, GList *rlist, gint changed, PraghaMusicobject *mobj);
 static void         pragha_playlist_update_track_state    (PraghaPlaylist *playlist, GtkTreePath *path, PraghaBackendState state);
@@ -1184,48 +1184,48 @@ modify_current_playlist_columns(PraghaPlaylist* cplaylist,
 
 /* Function to jump to track on current playlist */
 
-void
-pragha_playlist_select_path (PraghaPlaylist *cplaylist, GtkTreePath *path, gboolean center)
+static void
+pragha_playlist_select_path (PraghaPlaylist *playlist, GtkTreePath *path, gboolean center)
 {
 	GtkTreeSelection *selection;
+	GdkRectangle vrect, crect;
 	gint cx, cy, cnt_selected;
 
-	GdkRectangle vrect;
-	GdkRectangle crect;
+	if (!path)
+		return;
 
-	if (path) {
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(cplaylist->view));
-		cnt_selected = gtk_tree_selection_count_selected_rows(selection);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(playlist->view));
+	cnt_selected = gtk_tree_selection_count_selected_rows (selection);
 
-		if (cnt_selected > 1)
-			return;
+	if (cnt_selected > 1)
+		return;
 
-		gtk_tree_selection_unselect_all(selection);
-		gtk_tree_selection_select_path(GTK_TREE_SELECTION (selection), path);
+	gtk_tree_selection_unselect_all (selection);
+	gtk_tree_selection_select_path (GTK_TREE_SELECTION (selection), path);
 
-		gtk_tree_view_get_visible_rect(GTK_TREE_VIEW(cplaylist->view), &vrect);
-		gtk_tree_view_get_cell_area(GTK_TREE_VIEW(cplaylist->view), path, NULL, &crect);
+	gtk_tree_view_set_cursor (GTK_TREE_VIEW(playlist->view),
+	                          path, NULL, FALSE);
 
-		gtk_tree_view_convert_widget_to_tree_coords(GTK_TREE_VIEW(cplaylist->view), crect.x, crect.y, &cx, &cy);
+	gtk_tree_view_get_visible_rect (GTK_TREE_VIEW(playlist->view), &vrect);
+	gtk_tree_view_get_cell_area (GTK_TREE_VIEW(playlist->view), path, NULL, &crect);
 
-		if (pragha_preferences_get_shuffle(cplaylist->preferences)) {
-			if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
-							     path, NULL, TRUE, 0.5, 0.0);
-			}
+	gtk_tree_view_convert_widget_to_tree_coords (GTK_TREE_VIEW(playlist->view), crect.x, crect.y, &cx, &cy);
+
+	if (pragha_preferences_get_shuffle(playlist->preferences) || center) {
+		if ((cy < vrect.y) || (cy + crect.height > vrect.y + vrect.height)) {
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
+			                              path, NULL, TRUE, 0.5, 0.0);
 		}
-		else {
-			if (cy < vrect.y) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
-							     path, NULL, TRUE, 0.0, 0.0);
-			}
-			else if (cy + crect.height > vrect.y + vrect.height) {
-				gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(cplaylist->view),
-							     path, NULL, TRUE, 1.0, 0.0);
-			}
+	}
+	else {
+		if (cy < vrect.y) {
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
+			                              path, NULL, TRUE, 0.0, 0.0);
 		}
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(cplaylist->view),
-					 path, NULL, FALSE);
+		else if (cy + crect.height > vrect.y + vrect.height) {
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW(playlist->view),
+			                              path, NULL, TRUE, 1.0, 0.0);
+		}
 	}
 }
 
