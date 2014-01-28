@@ -228,8 +228,8 @@ pragha_notify_prefrenceces_event (PraghaPreferences *preferences, const gchar *k
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
 
-	if (g_strcmp0(key, "albumart_in_osd") == 0)
-		priv->album_art_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "albumart_in_osd");
+	if (g_strcmp0(key, "album_art_in_osd") == 0)
+		priv->album_art_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd");
 	else if (g_strcmp0(key, "actions_in_osd") == 0)
 		priv->actions_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd");
 
@@ -246,9 +246,9 @@ toggle_albumart_in_osd (GtkToggleButton *button)
 
 	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
 	pragha_preferences_set_boolean (preferences,
-	                                plugin_group, "albumart_in_osd",
+	                                plugin_group, "album_art_in_osd",
 	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
-	pragha_preferences_plugin_changed (preferences, "albumart_in_osd");
+	pragha_preferences_plugin_changed (preferences, "album_art_in_osd");
 
 	g_object_unref (G_OBJECT (preferences));
 	g_free (plugin_group);
@@ -295,7 +295,7 @@ pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
 	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(albumart_in_osd),
-		pragha_preferences_get_boolean (preferences, plugin_group, "albumart_in_osd"));
+		pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(actions_in_osd),
 		pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd"));
 
