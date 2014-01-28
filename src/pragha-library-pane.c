@@ -325,14 +325,15 @@ library_store_prepend_node(GtkTreeModel *model,
 {
 	gtk_tree_store_prepend(GTK_TREE_STORE(model), iter, p_iter);
 
-	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-	                   L_PIXBUF, pixbuf,
-	                   L_NODE_DATA, node_data,
-	                   L_NODE_TYPE, node_type,
-	                   L_LOCATION_ID, location_id,
-	                   L_MACH, FALSE,
-	                   L_VISIBILE, TRUE,
-	                   -1);
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+	                    L_PIXBUF, pixbuf,
+	                    L_NODE_DATA, node_data,
+	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
+	                    L_NODE_TYPE, node_type,
+	                    L_LOCATION_ID, location_id,
+	                    L_MACH, FALSE,
+	                    L_VISIBILE, TRUE,
+	                    -1);
 }
 
 static void
@@ -364,15 +365,15 @@ add_child_node_folder(GtkTreeModel *model,
 	}
 
 	/* Insert the new folder after the last subdirectory by order */
-	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_PIXBUF, clibrary->pixbuf_dir,
-			   L_NODE_DATA, node_data,
-			   L_NODE_TYPE, NODE_FOLDER,
-			   L_LOCATION_ID, 0,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
+	gtk_tree_store_insert_before (GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter,L_PIXBUF, clibrary->pixbuf_dir,
+	                    L_NODE_DATA, node_data,
+	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
+	                    L_NODE_TYPE, NODE_FOLDER,
+	                    L_LOCATION_ID, 0,
+	                    L_MACH, FALSE,
+	                    L_VISIBILE, TRUE,
+	                    -1);
 }
 
 /* Appends a child (iter) to p_iter with given data. NOTE that iter
@@ -407,15 +408,16 @@ add_child_node_file(GtkTreeModel *model,
 	}
 
 	/* Insert the new file after the last file by order */
-	gtk_tree_store_insert_before(GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), iter,
-			   L_PIXBUF, clibrary->pixbuf_track,
-			   L_NODE_DATA, node_data,
-			   L_NODE_TYPE, NODE_BASENAME,
-			   L_LOCATION_ID, location_id,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
+	gtk_tree_store_insert_before (GTK_TREE_STORE(model), iter, p_iter, valid ? &l_iter : NULL);
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+	                    L_PIXBUF, clibrary->pixbuf_track,
+	                    L_NODE_DATA, node_data,
+	                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
+	                    L_NODE_TYPE, NODE_BASENAME,
+	                    L_LOCATION_ID, location_id,
+	                    L_MACH, FALSE,
+	                    L_VISIBILE, TRUE,
+	                    -1);
 }
 
 /* Adds a file and its parent directories to the library tree */
@@ -1751,14 +1753,15 @@ library_view_complete_folder_view(GtkTreeModel *model,
 			gtk_tree_store_append(GTK_TREE_STORE(model),
 					      &iter,
 					      p_iter);
-			gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-					   L_PIXBUF, clibrary->pixbuf_dir,
-					   L_NODE_DATA, list->data,
-					   L_NODE_TYPE, NODE_FOLDER,
-					   L_LOCATION_ID, 0,
-					   L_MACH, FALSE,
-					   L_VISIBILE, TRUE,
-					   -1);
+			gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
+			                    L_PIXBUF, clibrary->pixbuf_dir,
+			                    L_NODE_DATA, list->data,
+			                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
+			                    L_NODE_TYPE, NODE_FOLDER,
+			                    L_LOCATION_ID, 0,
+			                    L_MACH, FALSE,
+			                    L_VISIBILE, TRUE,
+			                    -1);
 			f_iter = &iter;
 		}
 		else {
