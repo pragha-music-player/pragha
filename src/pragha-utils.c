@@ -168,59 +168,6 @@ pragha_strstr_lv(gchar *haystack, gchar *needle, PraghaPreferences *preferences)
 			   aproximate_search ? 1 : 0);
 }
 
-#if !GLIB_CHECK_VERSION(2,32,0)
-/* Functions to check the network manager status. */
-
-static NMState
-dbus_check_nm_status (GDBusProxy *proxy)
-{
-	GVariant *tuple = g_dbus_proxy_call_sync(proxy,
-						  "state",
-						  NULL,
-						  G_DBUS_CALL_FLAGS_NONE,
-						  -1,
-						  NULL,
-						  NULL);
-
-	if (!tuple)
-		return NM_STATE_UNKNOWN;
-
-	guint32 state;
-	g_variant_get(tuple, "(u)", &state);
-
-	g_variant_unref(tuple);
-
-	return state;
-}
-
-gboolean
-nm_is_online ()
-{
-	GDBusProxy *proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-							  G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-							  NULL,
-							  NM_DBUS_SERVICE,
-							  NM_DBUS_PATH,
-							  NM_DBUS_INTERFACE,
-							  NULL,
-							  NULL);
-
-	if (!proxy)
-		return FALSE;
-
-	NMState state = dbus_check_nm_status (proxy);
-
-	g_object_unref(proxy);
-
-	if (state == NM_STATE_CONNECTED_LOCAL ||
-	    state == NM_STATE_CONNECTED_SITE ||
-	    state == NM_STATE_CONNECTED_GLOBAL)
-		return TRUE;
-
-	return FALSE;
-}
-#endif
-
 /* Set and remove the watch cursor to suggest background work.*/
 
 void

@@ -729,11 +729,7 @@ pragha_application_local_command_line (GApplication *application, gchar ***argum
 void
 pragha_application_quit (PraghaApplication *pragha)
 {
-#if GLIB_CHECK_VERSION (2, 32, 0)
 	g_application_quit (G_APPLICATION (pragha));
-#else
-	g_application_release (G_APPLICATION (pragha));
-#endif
 }
 
 static void
@@ -789,11 +785,6 @@ gint main(gint argc, gchar *argv[])
 	g_set_application_name(_("Pragha Music Player"));
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
 
-  /* Initialize the GThread system */
-#if !GLIB_CHECK_VERSION(2,31,0)
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-#endif
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
 #endif

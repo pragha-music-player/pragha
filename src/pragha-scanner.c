@@ -47,8 +47,8 @@ struct _PraghaScanner {
 	GThread           *no_files_thread;
 	GThread           *worker_thread;
 	/* Mutex to protect progress */
-	PRAGHA_MUTEX      (no_files_mutex);
-	PRAGHA_MUTEX      (files_scanned_mutex);
+	GMutex             no_files_mutex;
+	GMutex             files_scanned_mutex;
 	/* Progress of threads */
 	guint              no_files;
 	guint              files_scanned;
@@ -73,13 +73,13 @@ pragha_scanner_update_progress(gpointer user_data)
 	if(g_cancellable_is_cancelled (scanner->cancellable))
 		return FALSE;
 
-	pragha_mutex_lock (scanner->no_files_mutex);
+	g_mutex_lock (&scanner->no_files_mutex);
 	no_files = scanner->no_files;
-	pragha_mutex_unlock (scanner->no_files_mutex);
+	g_mutex_unlock (&scanner->no_files_mutex);
 
-	pragha_mutex_lock (scanner->files_scanned_mutex);
+	g_mutex_lock (&scanner->files_scanned_mutex);
 	files_scanned = scanner->files_scanned;
-	pragha_mutex_unlock (scanner->files_scanned_mutex);
+	g_mutex_unlock (&scanner->files_scanned_mutex);
 
 	if(no_files > 0) {
 		fraction = (gdouble)files_scanned / (gdouble)no_files;
@@ -113,9 +113,9 @@ pragha_scanner_count_no_files_worker(gpointer data)
 
 		no_files += pragha_get_dir_count(list->data, scanner->cancellable);
 
-		pragha_mutex_lock (scanner->no_files_mutex);
+		g_mutex_lock (&scanner->no_files_mutex);
 		scanner->no_files = no_files;
-		pragha_mutex_unlock (scanner->no_files_mutex);
+		g_mutex_unlock (&scanner->no_files_mutex);
 	}
 
 	return NULL;
@@ -356,9 +356,9 @@ pragha_scanner_scan_handler(PraghaScanner *scanner, const gchar *dir_name)
 					break;
 			}
 
-			pragha_mutex_lock (scanner->files_scanned_mutex);
+			g_mutex_lock (&scanner->files_scanned_mutex);
 			scanner->files_scanned++;
-			pragha_mutex_unlock (scanner->files_scanned_mutex);
+			g_mutex_unlock (&scanner->files_scanned_mutex);
 		}
 
 		g_free(ab_file);
@@ -440,9 +440,9 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 				}
 			}
 
-			pragha_mutex_lock (scanner->files_scanned_mutex);
+			g_mutex_lock (&scanner->files_scanned_mutex);
 			scanner->files_scanned++;
-			pragha_mutex_unlock (scanner->files_scanned_mutex);
+			g_mutex_unlock (&scanner->files_scanned_mutex);
 
 			g_free(s_ab_file);
 		}
@@ -570,11 +570,7 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 
 	/* Launch threads */
 
-	#if GLIB_CHECK_VERSION(2,31,0)
 	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);
-	#else
-	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
-	#endif
 
 	scanner->worker_thread = pragha_async_launch_full(pragha_scanner_update_worker,
 	                                                  pragha_scanner_worker_finished,
@@ -622,11 +618,7 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 
 	/* Launch threads */
 
-	#if GLIB_CHECK_VERSION(2,31,0)
 	scanner->no_files_thread = g_thread_new("Count no files", pragha_scanner_count_no_files_worker, scanner);
-	#else
-	scanner->no_files_thread = g_thread_create(pragha_scanner_count_no_files_worker, scanner, TRUE, NULL);
-	#endif
 
 	scanner->worker_thread = pragha_async_launch_full(pragha_scanner_scan_worker,
 	                                                  pragha_scanner_worker_finished,
@@ -645,8 +637,8 @@ pragha_scanner_free(PraghaScanner *scanner)
 	g_hash_table_destroy(scanner->tracks_table);
 	free_str_list(scanner->folder_list);
 	free_str_list(scanner->folder_scanned);
-	pragha_mutex_free(scanner->no_files_mutex);
-	pragha_mutex_free(scanner->files_scanned_mutex);
+	g_mutex_clear (&scanner->no_files_mutex);
+	g_mutex_clear (&scanner->files_scanned_mutex);
 	g_object_unref(scanner->cancellable);
 
 	g_slice_free (PraghaScanner, scanner);
@@ -699,9 +691,9 @@ pragha_scanner_new()
 	                                               g_free,
 	                                               g_object_unref);
 	scanner->files_scanned = 0;
-	pragha_mutex_create(scanner->files_scanned_mutex);
+	g_mutex_init (&scanner->files_scanned_mutex);
 	scanner->no_files = 0;
-	pragha_mutex_create(scanner->no_files_mutex);
+	g_mutex_init (&scanner->no_files_mutex);
 	scanner->cancellable = g_cancellable_new ();
 	scanner->update_timeout = 0;
 

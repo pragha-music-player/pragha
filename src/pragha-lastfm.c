@@ -52,7 +52,7 @@ struct _PraghaLastfm {
 
 	GtkWidget         *ntag_lastfm_button;
 	PraghaMusicobject *nmobj;
-	PRAGHA_MUTEX      (nmobj_mutex);
+	GMutex             nmobj_mutex;
 
 	/* Menu options */
 	GtkActionGroup *action_group_main_menu;
@@ -389,9 +389,9 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 
 	/* Get all info of suggestions
 	 * Temp Musicobject to not block tag edit dialog */
-	pragha_mutex_lock (clastfm->nmobj_mutex);
+	g_mutex_lock (&clastfm->nmobj_mutex);
 	nmobj = pragha_musicobject_dup(clastfm->nmobj);
-	pragha_mutex_unlock (clastfm->nmobj_mutex);
+	g_mutex_unlock (&clastfm->nmobj_mutex);
 
 	g_object_get(nmobj,
 	             "title", &ntitle,
@@ -1057,11 +1057,11 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 	             "file", &cfile,
 	             NULL);
 
-	pragha_mutex_lock (clastfm->nmobj_mutex);
+	g_mutex_lock (&clastfm->nmobj_mutex);
 	g_object_get (clastfm->nmobj,
 	              "file", &nfile,
 	              NULL);
-	pragha_mutex_unlock (clastfm->nmobj_mutex);
+	g_mutex_unlock (&clastfm->nmobj_mutex);
 
 	if(g_ascii_strcasecmp(cfile, nfile) == 0)
 		gtk_widget_show (clastfm->ntag_lastfm_button);
@@ -1128,10 +1128,10 @@ do_lastfm_now_playing (gpointer data)
 			if(changed & TAG_ALBUM_CHANGED)
 				pragha_musicobject_set_album(tmobj, ntrack->album);
 
-			pragha_mutex_lock (clastfm->nmobj_mutex);
+			g_mutex_lock (&clastfm->nmobj_mutex);
 			g_object_unref (clastfm->nmobj);
 			clastfm->nmobj = tmobj;
-			pragha_mutex_unlock (clastfm->nmobj_mutex);
+			g_mutex_unlock (&clastfm->nmobj_mutex);
 
 			g_idle_add (show_lastfm_sugest_corrrection_button, clastfm);
 		}
@@ -1422,7 +1422,7 @@ pragha_lastfm_new (PraghaApplication *pragha)
 	clastfm->session_id = NULL;
 	clastfm->status = LASTFM_STATUS_INVALID;
 	clastfm->nmobj = pragha_musicobject_new();
-	pragha_mutex_create (clastfm->nmobj_mutex);
+	g_mutex_init (&clastfm->nmobj_mutex);
 	clastfm->ntag_lastfm_button = NULL;
 
 	clastfm->has_user = FALSE;
@@ -1438,11 +1438,7 @@ pragha_lastfm_new (PraghaApplication *pragha)
 	if (pragha_preferences_get_lastfm_support (preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
-#if GLIB_CHECK_VERSION(2,32,0)
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
-#else
-		if (nm_is_online () == TRUE)
-#endif
 			g_idle_add (pragha_lastfm_connect_idle, clastfm);
 		else
 			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
@@ -1458,7 +1454,7 @@ pragha_lastfm_free (PraghaLastfm *clastfm)
 	pragha_lastfm_disconnect (clastfm);
 
 	g_object_unref(clastfm->nmobj);
-	pragha_mutex_free(clastfm->nmobj_mutex);
+	g_mutex_clear (&clastfm->nmobj_mutex);
 
 	g_slice_free(PraghaLastfm, clastfm);
 }

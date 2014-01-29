@@ -84,11 +84,7 @@ pragha_async_launch (GThreadFunc worker_func, GSourceFunc finish_func, gpointer 
 	as->userdata = user_data;
 	as->finished_data = NULL;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
 	g_thread_unref(g_thread_new("Launch async", pragha_async_worker, as));
-	#else
-	g_thread_create(pragha_async_worker, as, FALSE, NULL);
-	#endif
 }
 
 GThread *
@@ -102,9 +98,5 @@ pragha_async_launch_full (GThreadFunc worker_func, GSourceFunc finish_func, gpoi
 	as->userdata = userdata;
 	as->finished_data = NULL;
 
-	#if GLIB_CHECK_VERSION(2,31,0)
 	return g_thread_new("Launch async", pragha_async_worker, as);
-	#else
-	return g_thread_create(pragha_async_worker, as, TRUE, NULL);
-	#endif
 }
