@@ -33,24 +33,6 @@ gsize levenshtein_safe_strcmp(const gchar * s, const gchar * t);
 gchar *g_strstr_lv (gchar *haystack, gchar *needle, gsize lv_distance);
 gchar *pragha_strstr_lv(gchar *haystack, gchar *needle, PraghaPreferences *preferences);
 
-#if !GLIB_CHECK_VERSION(2,32,0)
-#define NM_DBUS_SERVICE		"org.freedesktop.NetworkManager"
-#define NM_DBUS_PATH		"/org/freedesktop/NetworkManager"
-#define NM_DBUS_INTERFACE	"org.freedesktop.NetworkManager"
-
-typedef enum {
-        NM_STATE_UNKNOWN          = 0,
-        NM_STATE_ASLEEP           = 10,
-        NM_STATE_DISCONNECTED     = 20,
-        NM_STATE_DISCONNECTING    = 30,
-        NM_STATE_CONNECTING       = 40,
-        NM_STATE_CONNECTED_LOCAL  = 50,
-        NM_STATE_CONNECTED_SITE   = 60,
-        NM_STATE_CONNECTED_GLOBAL = 70
-} NMState;
-gboolean nm_is_online ();
-#endif
-
 void set_watch_cursor (GtkWidget *widget);
 void remove_watch_cursor (GtkWidget *widget);
 
