@@ -71,6 +71,9 @@ gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 
 gint
+pragha_database_find_container (PraghaDatabase *database, const gchar *container);
+
+gint
 pragha_database_find_artist (PraghaDatabase *database, const gchar *artist);
 
 gint
@@ -93,6 +96,9 @@ pragha_database_find_radio (PraghaDatabase *database, const gchar *radio);
 
 gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
+
+gint
+pragha_database_add_new_container (PraghaDatabase *database, const gchar *container);
 
 gint
 pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist);
@@ -152,7 +158,7 @@ void
 pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio);
 
 void
-pragha_database_add_new_musicobject (PraghaDatabase *database, PraghaMusicobject *mobj);
+pragha_database_add_new_musicobject (PraghaDatabase *database, const gchar *container, PraghaMusicobject *mobj);
 
 gchar *
 pragha_database_get_filename_from_location_id (PraghaDatabase *database, gint location_id);

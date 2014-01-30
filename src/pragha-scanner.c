@@ -134,7 +134,7 @@ pragha_scanner_add_track_db(gpointer key,
 	PraghaMusicobject *mobj = value;
 	PraghaDatabase *database = user_data;
 
-	pragha_database_add_new_musicobject (database, mobj);
+	pragha_database_add_new_musicobject (database, "Unknown", mobj);
 
 	pragha_process_gtk_events ();
 }
