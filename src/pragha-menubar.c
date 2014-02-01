@@ -42,18 +42,6 @@
 #include "pragha-equalizer-dialog.h"
 #include "pragha.h"
 
-static gchar *license = "This program is free software: "
-	"you can redistribute it and/or modify\n"
-	"it under the terms of the GNU General Public License as published by\n"
-	"the Free Software Foundation, either version 3 of the License, or\n"
-	"(at your option) any later version.\n\n"
-	"This program is distributed in the hope that it will be useful,\n"
-	"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-	"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-	"GNU General Public License for more details.\n\n"
-	"You should have received a copy of the GNU General Public License\n"
-	"along with this program.  If not, see <http://www.gnu.org/licenses/>.";
-
 /*
  * Menubar callbacks.
  */
@@ -976,8 +964,8 @@ void about_widget(PraghaApplication *pragha)
 	                      "authors", authors,
 	                      "translator-credits", _("translator-credits"),
 	                      "comments", "A lightweight GTK+ music player",
-	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2013 Matias",
-	                      "license", license,
+	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2014 Matias",
+	                      "license-type", GTK_LICENSE_GPL_3_0,
 	                      "name", PACKAGE_NAME,
 	                      "version", PACKAGE_VERSION,
 	                      NULL);
