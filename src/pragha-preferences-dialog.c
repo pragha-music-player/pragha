@@ -197,9 +197,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 				library_changed = TRUE;
 			}
 		}
-		if (library_changed)
-			pragha_database_change_tracks_done (database);
-		g_object_unref (database);
 
 		/* Check if was added new folders to library */
 
@@ -223,6 +220,10 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			                               GROUP_LIBRARY,
 			                               KEY_LIBRARY_DIR);
 		}
+
+		if (library_changed)
+			pragha_database_change_tracks_done (database);
+		g_object_unref (database);
 
 		if (new_library_list)
 			free_str_list (new_library_list);
