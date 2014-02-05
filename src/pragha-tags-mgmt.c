@@ -31,12 +31,25 @@
 #include <tag_c.h>
 
 #include "pragha-tags-mgmt.h"
-#include "pragha-tagger.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-debug.h"
 #include "pragha.h"
+
+GMutex tags_mutex;
+
+void
+pragha_tags_mutex_init (void)
+{
+	g_mutex_init (&tags_mutex);
+}
+
+void
+pragha_tags_mutex_clear (void)
+{
+	g_mutex_clear (&tags_mutex);
+}
 
 gboolean
 pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file)
@@ -46,6 +59,8 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 	TagLib_Tag *tag;
 	const TagLib_AudioProperties *audio_prop;
 	gchar *title = NULL, *artist = NULL, *album = NULL, *genre = NULL, *comment = NULL;
+
+	g_mutex_lock (&tags_mutex);
 
 	/* workaround for crash in taglib
 	   https://github.com/taglib/taglib/issues/78 */
@@ -105,6 +120,8 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 exit:
 	taglib_file_free(tfile);
 
+	g_mutex_unlock (&tags_mutex);
+
 	return ret;
 }
 
@@ -118,10 +135,12 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 	if (!file || !changed)
 		return FALSE;
 
+	g_mutex_lock (&tags_mutex);
+
 	tfile = taglib_file_new(file);
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
-		return FALSE;
+		goto exit;
 	}
 
 	tag = taglib_file_tag(tfile);
@@ -159,8 +178,11 @@ pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int c
 	}
 
 	taglib_tag_free_strings();
+
 exit:
 	taglib_file_free(tfile);
+
+	g_mutex_unlock (&tags_mutex);
 
 	return ret;
 }

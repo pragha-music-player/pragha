@@ -71,7 +71,7 @@ pragha_block_device_add_to_library (PraghaDevicesPlugin *plugin, GMount *mount)
 	}
 
 	scanner = pragha_application_get_scanner (pragha);
-	pragha_scanner_update_library (scanner);
+	//pragha_scanner_update_library (scanner);
 
 	g_object_unref (mount_point);
 	g_free (mount_path);

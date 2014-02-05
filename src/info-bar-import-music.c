@@ -26,6 +26,7 @@
 #endif
 
 #include "pragha-utils.h"
+#include "pragha-scanner-folder.h"
 #include "pragha.h"
 
 gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha)
@@ -108,7 +109,7 @@ static void info_bar_update_response_cb(GtkInfoBar *info_bar, gint response_id, 
 			break;
 		case GTK_RESPONSE_YES:
 			scanner = pragha_application_get_scanner (pragha);
-			pragha_scanner_update_library (scanner);
+			//pragha_scanner_update_library (scanner);
 			break;
 		default:
 			g_warn_if_reached();

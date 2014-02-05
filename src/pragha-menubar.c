@@ -34,6 +34,7 @@
 #include "pragha-utils.h"
 #include "pragha-filter-dialog.h"
 #include "pragha-playlists-mgmt.h"
+#include "pragha-scanner-folder.h"
 #include "pragha-tagger.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tags-mgmt.h"
@@ -890,7 +891,7 @@ static void update_library_action(GtkAction *action, PraghaApplication *pragha)
 	PraghaScanner *scanner;
 	scanner = pragha_application_get_scanner (pragha);
 
-	pragha_scanner_update_library (scanner);
+	//pragha_scanner_update_library (scanner);
 }
 
 /* Handler for remove, crop and clear action in the Tools menu */

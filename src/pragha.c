@@ -38,6 +38,7 @@
 #include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
+#include "pragha-tags-mgmt.h"
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -520,6 +521,8 @@ pragha_application_dispose (GObject *object)
 		pragha->cdbase = NULL;
 	}
 
+	pragha_tags_mutex_clear ();
+
 	G_OBJECT_CLASS (pragha_application_parent_class)->dispose (object);
 }
 
@@ -544,6 +547,8 @@ pragha_application_startup (GApplication *application)
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
 	}
+
+	pragha_tags_mutex_init ();
 
 #ifdef HAVE_LIBPEAS
 	pragha->peas_engine = peas_engine_get_default ();
