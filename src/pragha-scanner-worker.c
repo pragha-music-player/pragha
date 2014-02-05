@@ -83,12 +83,12 @@ pragha_scanner_worker_save_tracks (PraghaScannerWorker *worker)
 	GHashTableIter iter;
 	gpointer value, key;
 
-	database = pragha_database_get();
+	database = pragha_database_get ();
 	pragha_database_begin_transaction (database);
 
 	container = pragha_scanner_worker_get_container (worker);
 
-	pragha_database_delete_dir (database, container);
+	pragha_database_forget_container (database, container);
 
 	g_hash_table_iter_init (&iter, worker->tracks_table);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {

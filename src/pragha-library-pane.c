@@ -1667,7 +1667,7 @@ static void
 library_pane_change_style (GObject *gobject, GParamSpec *pspec, PraghaLibraryPane *library)
 {
 	library_pane_update_style (library);
-	library_pane_view_reload (library);
+	pragha_library_pane_view_reload (library);
 }
 
 /*********************************/
@@ -1734,25 +1734,22 @@ void
 library_view_complete_folder_view(GtkTreeModel *model,
                                   GtkTreeIter *p_iter,
                                   PraghaLibraryPane *clibrary)
-
 {
 	PraghaPreparedStatement *statement;
 	const gchar *sql = NULL, *filepath = NULL;
-	gchar *mask = NULL;
 	GtkTreeIter iter, *f_iter;
-	GSList *list = NULL, *library_dir = NULL;
+	GSList *list = NULL, *folder_list = NULL;
 
-	library_dir =
-		pragha_preferences_get_filename_list(clibrary->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_DIR);
+	/* Get only the folders in preferences */
 
-	for(list = library_dir ; list != NULL ; list=list->next) {
+	folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
+		                                                GROUP_LIBRARY,
+		                                                KEY_LIBRARY_DIR);
+
+	for (list = folder_list ; list != NULL ; list=list->next) {
 		/*If no need to fuse folders, add headers and set p_iter */
 		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {
-			gtk_tree_store_append(GTK_TREE_STORE(model),
-					      &iter,
-					      p_iter);
+			gtk_tree_store_append(GTK_TREE_STORE(model), &iter, p_iter);
 			gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
 			                    L_PIXBUF, clibrary->pixbuf_dir,
 			                    L_NODE_DATA, list->data,
@@ -1768,10 +1765,11 @@ library_view_complete_folder_view(GtkTreeModel *model,
 			f_iter = p_iter;
 		}
 
-		sql = "SELECT name, id FROM LOCATION WHERE name LIKE ? ORDER BY name DESC";
+		sql = "SELECT name, id FROM LOCATION WHERE id IN "
+		      "(SELECT location FROM TRACK WHERE CONTAINER IN (SELECT id FROM CONTAINER WHERE name = ?)) ORDER BY name DESC";
+
 		statement = pragha_database_create_statement (clibrary->cdbase, sql);
-		mask = g_strconcat (list->data, "%", NULL);
-		pragha_prepared_statement_bind_string (statement, 1, mask);
+		pragha_prepared_statement_bind_string (statement, 1, list->data);
 		while (pragha_prepared_statement_step (statement)) {
 			filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(list->data) + 1;
 			add_folder_file(model,
@@ -1783,9 +1781,8 @@ library_view_complete_folder_view(GtkTreeModel *model,
 			pragha_process_gtk_events ();
 		}
 		pragha_prepared_statement_free (statement);
-		g_free(mask);
 	}
-	free_str_list(library_dir);
+	free_str_list(folder_list);
 }
 
 void
@@ -1794,44 +1791,52 @@ library_view_complete_tags_view(GtkTreeModel *model,
                                 PraghaLibraryPane *clibrary)
 {
 	PraghaPreparedStatement *statement;
-	gchar *order_str = NULL, *sql = NULL;
+	gchar *sql = NULL, *order_sql = NULL, *collection_sql = NULL;
+	GSList *folder_list = NULL;
+
+	/* Get only the folders in preferences */
+
+	folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
+		                                                GROUP_LIBRARY,
+		                                                KEY_LIBRARY_DIR);
+	pragha_database_create_temp_table_list (clibrary->cdbase, "FOLDERS", folder_list);
 
 	/* Get order needed to sqlite query. */
 	switch(pragha_preferences_get_library_style(clibrary->preferences)) {
 		case FOLDERS:
 			break;
 		case ARTIST:
-			order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_sql = g_strdup("ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			break;
 		case ALBUM:
 			if (pragha_preferences_get_sort_by_year(clibrary->preferences))
-				order_str = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+				order_sql = g_strdup("YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			else
-				order_str = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+				order_sql = g_strdup("ALBUM.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			break;
 		case GENRE:
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			break;
 		case ARTIST_ALBUM:
 			if (pragha_preferences_get_sort_by_year(clibrary->preferences))
-				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			else
-				order_str = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			break;
 		case GENRE_ARTIST:
-			order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
+			order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, TRACK.title COLLATE NOCASE DESC");
 			break;
 		case GENRE_ALBUM:
 			if (pragha_preferences_get_sort_by_year(clibrary->preferences))
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			else
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			break;
 		case GENRE_ARTIST_ALBUM:
 			if (pragha_preferences_get_sort_by_year(clibrary->preferences))
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, YEAR.year COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			else
-				order_str = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
+				order_sql = g_strdup("GENRE.name COLLATE NOCASE DESC, ARTIST.name COLLATE NOCASE DESC, ALBUM.name COLLATE NOCASE DESC, TRACK.track_no COLLATE NOCASE DESC");
 			break;
 		default:
 			break;
@@ -1839,9 +1844,10 @@ library_view_complete_tags_view(GtkTreeModel *model,
 
 	/* Common query for all tag based library views */
 	sql = g_strdup_printf("SELECT TRACK.title, ARTIST.name, YEAR.year, ALBUM.name, GENRE.name, LOCATION.name, LOCATION.id "
-	                        "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
-	                        "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
-	                        "ORDER BY %s;", order_str);
+	                       "FROM TRACK, ARTIST, YEAR, ALBUM, GENRE, LOCATION "
+	                       "WHERE ARTIST.id = TRACK.artist AND TRACK.year = YEAR.id AND ALBUM.id = TRACK.album AND GENRE.id = TRACK.genre AND LOCATION.id = TRACK.location "
+	                       "AND TRACk.container IN (SELECT id FROM CONTAINER WHERE name IN (SELECT name FROM FOLDERS))"
+	                       "ORDER BY %s;", order_sql);
 
 	statement = pragha_database_create_statement (clibrary->cdbase, sql);
 	while (pragha_prepared_statement_step (statement)) {
@@ -1861,12 +1867,32 @@ library_view_complete_tags_view(GtkTreeModel *model,
 	}
 	pragha_prepared_statement_free (statement);
 
-	g_free(order_str);
+	free_str_list(folder_list);
+
+	g_free(order_sql);
+	g_free(collection_sql);
 	g_free(sql);
 }
 
+static void
+pragha_library_view_append_category (GtkTreeModel *model,
+                                     GtkTreeIter  *iter,
+                                     const gchar  *name,
+                                     GdkPixbuf    *pixbuf)
+{
+	gtk_tree_store_append (GTK_TREE_STORE(model), iter, NULL);
+	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
+	                    L_PIXBUF, pixbuf,
+	                    L_NODE_DATA, name,
+	                    L_NODE_BOLD, PANGO_WEIGHT_BOLD,
+	                    L_NODE_TYPE, NODE_CATEGORY,
+	                    L_MACH, FALSE,
+	                    L_VISIBILE, TRUE,
+	                    -1);
+}
+
 void
-library_pane_view_reload(PraghaLibraryPane *clibrary)
+pragha_library_pane_view_reload (PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *model, *filter_model;
 	GtkTreeIter iter;
@@ -1887,49 +1913,23 @@ library_pane_view_reload(PraghaLibraryPane *clibrary)
 
 	/* Playlists.*/
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, clibrary->pixbuf_dir,
-			   L_NODE_DATA, _("Playlists"),
-			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
-
-	library_view_append_playlists(model, &iter, clibrary);
+	pragha_library_view_append_category (model, &iter,
+	                                     _("Playlists"),
+	                                     clibrary->pixbuf_dir);
+	library_view_append_playlists (model, &iter, clibrary);
 
 	/* Radios. */
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, clibrary->pixbuf_dir,
-			   L_NODE_DATA, _("Radios"),
-			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
-
-	library_view_append_radios(model, &iter, clibrary);
+	pragha_library_view_append_category (model, &iter,
+	                                     _("Radios"),
+	                                     clibrary->pixbuf_dir);
+	library_view_append_radios (model, &iter, clibrary);
 
 	/* Add library header */
 
-	gtk_tree_store_append(GTK_TREE_STORE(model),
-			      &iter,
-			      NULL);
-	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-			   L_PIXBUF, clibrary->pixbuf_dir,
-			   L_NODE_DATA, _("Library"),
-			   L_NODE_BOLD, PANGO_WEIGHT_BOLD,
-			   L_NODE_TYPE, NODE_CATEGORY,
-			   L_MACH, FALSE,
-			   L_VISIBILE, TRUE,
-			   -1);
+	pragha_library_view_append_category (model, &iter,
+	                                     _("Library"),
+	                                     clibrary->pixbuf_dir);
 
 	if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
 		library_view_complete_folder_view(model, &iter, clibrary);
@@ -2013,7 +2013,7 @@ update_library_tracks_changes(PraghaDatabase *database, PraghaLibraryPane *libra
 	/*
 	 * Rework to olny update library tree!!!.
 	 **/
-	library_pane_view_reload(library);
+	pragha_library_pane_view_reload(library);
 }
 
 /*************************************/
@@ -2802,7 +2802,7 @@ void
 pragha_library_pane_init_view (PraghaLibraryPane *clibrary)
 {
 	library_pane_update_style(clibrary);
-	library_pane_view_reload(clibrary);
+	pragha_library_pane_view_reload(clibrary);
 }
 
 GtkWidget *

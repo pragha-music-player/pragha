@@ -140,7 +140,7 @@ void
 pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_name, const gchar *new_name);
 
 void
-pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name);
+pragha_database_forget_container (PraghaDatabase *database, const gchar *container);
 
 gint
 pragha_database_get_playlist_count (PraghaDatabase *database);
@@ -168,6 +168,9 @@ pragha_database_update_local_files_change_tag (PraghaDatabase *database, GArray 
 
 gchar**
 pragha_database_get_playlist_names (PraghaDatabase *database);
+
+void
+pragha_database_create_temp_table_list (PraghaDatabase *database, const gchar *name, GSList *content_list);
 
 void
 pragha_database_flush (PraghaDatabase *database);

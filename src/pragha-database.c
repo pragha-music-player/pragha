@@ -434,41 +434,45 @@ pragha_database_update_radio_name (PraghaDatabase *database, const gchar *old_na
 }
 
 void
-pragha_database_delete_dir (PraghaDatabase *database, const gchar *dir_name)
+pragha_database_forget_container (PraghaDatabase *database, const gchar *container)
 {
 	const gchar *sql;
+	gint container_id = 0;
+
 	PraghaPreparedStatement *statement;
-	gchar *mask = g_strconcat (dir_name, "%", NULL);
 
-	/* Delete all tracks under the given dir */
+	/* Get continer_id */
 
-	sql = "DELETE FROM TRACK WHERE location IN (SELECT id FROM LOCATION WHERE NAME LIKE ?)";
-	statement = pragha_database_create_statement (database, sql);
-	pragha_prepared_statement_bind_string (statement, 1, mask);
-	pragha_prepared_statement_step (statement);
-	pragha_prepared_statement_free (statement);
+	container_id = pragha_database_find_container (database, container);
 
 	/* Delete the location entries */
 
-	sql = "DELETE FROM LOCATION WHERE name LIKE ?";
+	sql = "DELETE FROM LOCATION WHERE id IN (SELECT location FROM TRACK WHERE CONTAINER = ?)";
+
 	statement = pragha_database_create_statement (database, sql);
-	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_bind_int (statement, 1, container_id);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 
-	/* Delete all entries from PLAYLIST_TRACKS which match given dir */
+	/* Delete all tracks under the container */
 
-	sql = "DELETE FROM PLAYLIST_TRACKS WHERE file LIKE ?";
+	sql = "DELETE FROM TRACK WHERE container = ?";
 	statement = pragha_database_create_statement (database, sql);
-	pragha_prepared_statement_bind_string (statement, 1, mask);
+	pragha_prepared_statement_bind_int (statement, 1, container_id);
+	pragha_prepared_statement_step (statement);
+	pragha_prepared_statement_free (statement);
+
+	/* Delete the container */
+
+	sql = "DELETE FROM CONTAINER WHERE id = ?";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_int (statement, 1, container_id);
 	pragha_prepared_statement_step (statement);
 	pragha_prepared_statement_free (statement);
 
 	/* Now flush unused artists, albums, genres, years */
 
 	pragha_database_flush_stale_entries (database);
-
-	g_free (mask);
 }
 
 gint
@@ -861,6 +865,31 @@ pragha_database_get_playlist_names (PraghaDatabase *database)
 		g_ptr_array_free (playlists, TRUE);
 		return NULL;
 	}
+}
+
+void
+pragha_database_create_temp_table_list (PraghaDatabase *database, const gchar *name, GSList *content_list)
+{
+	PraghaPreparedStatement *statement;
+	GSList *list = NULL;
+	gchar *sql = NULL;
+
+	sql = g_strdup_printf ("DROP TABLE IF EXISTS %s;", name);
+	pragha_database_exec_query (database, sql);
+	g_free(sql);
+
+	sql = g_strdup_printf ("CREATE TEMP TABLE %s (id INTEGER PRIMARY KEY, name VARCHAR(255), UNIQUE(name));", name);
+	pragha_database_exec_query (database, sql);
+	g_free(sql);
+
+	sql = g_strdup_printf("INSERT INTO %s (name) VALUES (?);", name);
+	for (list = content_list; list != NULL; list = list->next) {
+		statement = pragha_database_create_statement (database, sql);
+		pragha_prepared_statement_bind_string (statement, 1, list->data);
+		pragha_prepared_statement_step (statement);
+		pragha_prepared_statement_free (statement);
+	}
+	g_free(sql);
 }
 
 void

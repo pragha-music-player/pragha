@@ -144,12 +144,13 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 #ifdef HAVE_LIBCLASTFM
 	PraghaLastfm *clastfm;
 #endif
-	gboolean test_change, pref_setted, pref_toggled;
+	PraghaDatabase *database;
+	gboolean pref_setted, pref_toggled, library_changed = FALSE;
 	gchar *audio_sink = NULL, *window_state_sink = NULL;
 	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
-	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
+	GSList *list, *old_library_list = NULL, *new_library_list = NULL;
 	PraghaLibraryStyle style;
 	GtkWidget *infobar;
 
@@ -179,14 +180,43 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
 
 
-		/* Save new library folders */
+		/* Get the new and old library folders */
 
-		library_dir = pragha_preferences_dialog_get_library_list (dialog);
-		if (library_dir) {
+		new_library_list = pragha_preferences_dialog_get_library_list (dialog);
+
+		old_library_list = pragha_preferences_get_filename_list (dialog->preferences,
+		                                                        GROUP_LIBRARY,
+		                                                        KEY_LIBRARY_DIR);
+
+		/* Immediately removes the removed folders */
+
+		database = pragha_database_get ();
+		for (list = old_library_list; list != NULL; list = list->next) {
+			if (!is_present_str_list (list->data, new_library_list)) {
+				pragha_database_forget_container (database, list->data);
+				library_changed = TRUE;
+			}
+		}
+		if (library_changed)
+			pragha_database_change_tracks_done (database);
+		g_object_unref (database);
+
+		/* Check if was added new folders to library */
+
+		for (list = new_library_list; list != NULL; list = list->next) {
+			if (!is_present_str_list (list->data, old_library_list)) {
+				infobar = create_info_bar_update_music(dialog->pragha);
+				pragha_window_add_widget_to_infobox(dialog->pragha, infobar);
+			}
+		}
+
+		/* Save new library list */
+
+		if (new_library_list) {
 			pragha_preferences_set_filename_list (dialog->preferences,
-				                                  GROUP_LIBRARY,
-				                                  KEY_LIBRARY_DIR,
-				                                  library_dir);
+			                                      GROUP_LIBRARY,
+			                                      KEY_LIBRARY_DIR,
+			                                      new_library_list);
 		}
 		else {
 			pragha_preferences_remove_key (dialog->preferences,
@@ -194,41 +224,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			                               KEY_LIBRARY_DIR);
 		}
 
-		/* Get scanded folders and compare. If changed show infobar */
-
-		folder_scanned =
-			pragha_preferences_get_filename_list (dialog->preferences,
-			                                      GROUP_LIBRARY,
-			                                      KEY_LIBRARY_SCANNED);
-
-		if (folder_scanned && library_dir) {
-			test_change = FALSE;
-			for(list = folder_scanned; list != NULL; list = list->next) {
-				if(is_present_str_list(list->data, library_dir))
-					continue;
-				test_change = TRUE;
-				break;
-			}
-			for(list = library_dir; list != NULL; list = list->next) {
-				if(is_present_str_list(list->data, folder_scanned))
-					continue;
-				test_change = TRUE;
-				break;
-			}
-
-			if(test_change) {
-				infobar = create_info_bar_update_music(dialog->pragha);
-				pragha_window_add_widget_to_infobox(dialog->pragha, infobar);
-			}
-		}
-
-		if (library_dir)
-			free_str_list(library_dir);
-		if (folder_scanned)
-			free_str_list(folder_scanned);
+		if (new_library_list)
+			free_str_list (new_library_list);
+		if (old_library_list)
+			free_str_list (old_library_list);
 
 		library = pragha_application_get_library (dialog->pragha);
-
 		style = pragha_preferences_get_library_style (dialog->preferences);
 
 		/* Save fuse folders preference, and reload view if needed */
@@ -239,7 +240,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
 
 		if ((style == FOLDERS) && (pref_setted != pref_toggled))
-			library_pane_view_reload (library);
+			pragha_library_pane_view_reload (library);
 
 		/* Save sort by year preference, and reload view if needed */
 
@@ -249,7 +250,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_sort_by_year (dialog->preferences, pref_toggled);
 
 		if ((style != FOLDERS) && (pref_setted != pref_toggled))
-			library_pane_view_reload (library);
+			pragha_library_pane_view_reload (library);
 
 		/* General preferences */
 

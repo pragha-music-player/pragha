@@ -65,9 +65,9 @@ gboolean simple_library_search_activate_handler   (GtkEntry *entry, PraghaLibrar
 void     clear_library_search                     (PraghaLibraryPane *clibrary);
 
 gboolean pragha_library_need_update_view (PraghaPreferences *preferences, gint changed);
-gboolean pragha_library_need_update    (PraghaLibraryPane *clibrary, gint changed);
-void     library_pane_view_reload      (PraghaLibraryPane *clibrary);
-void     pragha_library_pane_init_view (PraghaLibraryPane *clibrary);
+gboolean pragha_library_need_update      (PraghaLibraryPane *clibrary, gint changed);
+void     pragha_library_pane_view_reload (PraghaLibraryPane *clibrary);
+void     pragha_library_pane_init_view   (PraghaLibraryPane *clibrary);
 
 GtkWidget         *pragha_library_pane_get_widget     (PraghaLibraryPane *librarypane);
 GtkWidget         *pragha_library_pane_get_pane_title (PraghaLibraryPane *library);

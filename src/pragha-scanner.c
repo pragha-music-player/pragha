@@ -133,25 +133,24 @@ pragha_scanner_worker_finished_dialog (PraghaScanner *scanner)
 static void
 pragha_scanner_worker_finished (PraghaScannerWorker *worker, PraghaScanner *scanner)
 {
+	PraghaDatabase *database;
 	GSList *list;
 
+	/* Update workers status */
 	if (pragha_scanner_worker_is_cancelled (worker))
 		scanner->workers_cancelled++;
-
 	scanner->workers_running--;
 
+	/* Finished all workers? */
 	if (scanner->workers_running > 0)
 		return;
 
-	/* Stop and hide progress*/
+	/* Stop and hide progress */
 	g_source_remove (scanner->update_timeout);
 	gtk_widget_hide (scanner->hbox);
 
-	if (scanner->workers_cancelled > 0) {
-		g_slist_free_full (scanner->workers_list, g_object_unref);
-		scanner->workers_list = NULL;
-	}
-	else {
+	/* If not cancalled, update library */
+	if (scanner->workers_cancelled == 0) {
 		pragha_scanner_worker_finished_dialog (scanner);
 
 		for (list = scanner->workers_list; list != NULL; list = list->next) {
@@ -160,9 +159,22 @@ pragha_scanner_worker_finished (PraghaScannerWorker *worker, PraghaScanner *scan
 		}
 	}
 
+	/* Remove workers */
+	g_slist_free_full (scanner->workers_list, g_object_unref);
+	scanner->workers_list = NULL;
 	scanner->workers_running = 0;
 	scanner->workers_cancelled = 0;
 
+	/* Update library pane */
+	database = pragha_database_get();
+	pragha_database_change_tracks_done (database);
+	g_object_unref(database);
+
+	/* Cosmetics.. */
+	gtk_progress_bar_set_text (GTK_PROGRESS_BAR(scanner->progress_bar), NULL);
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(scanner->progress_bar), 0.0);
+
+	/* Allow close the dialog */
 	scanner->update_timeout = 0;
 }
 
