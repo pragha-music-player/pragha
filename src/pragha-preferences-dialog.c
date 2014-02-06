@@ -240,7 +240,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 
 		pragha_preferences_set_fuse_folders (dialog->preferences, pref_toggled);
 
-		if ((style == FOLDERS) && (pref_setted != pref_toggled))
+		if (pref_setted != pref_toggled)
 			pragha_library_pane_view_reload (library);
 
 		/* Save sort by year preference, and reload view if needed */
@@ -840,7 +840,7 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_wide_tall_control(table, &row, hbox_library);
 
-	fuse_folders = gtk_check_button_new_with_label(_("Merge folders in the folders estructure view"));
+	fuse_folders = gtk_check_button_new_with_label(_("View all imported folders in a merged view"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, fuse_folders);
 
 	sort_by_year = gtk_check_button_new_with_label(_("Sort albums by release year"));

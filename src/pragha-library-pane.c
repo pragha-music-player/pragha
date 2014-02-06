@@ -337,11 +337,11 @@ library_store_prepend_node(GtkTreeModel *model,
 }
 
 static void
-add_child_node_folder(GtkTreeModel *model,
-		      GtkTreeIter *iter,
-		      GtkTreeIter *p_iter,
-		      const gchar *node_data,
-		      PraghaLibraryPane *clibrary)
+pragha_library_view_append_folder_node (PraghaLibraryPane *clibrary,
+                                        GtkTreeModel      *model,
+                                        GtkTreeIter       *iter,
+                                        GtkTreeIter       *p_iter,
+                                        const gchar       *node_data)
 {
 	GtkTreeIter l_iter;
 	gchar *data = NULL;
@@ -380,12 +380,12 @@ add_child_node_folder(GtkTreeModel *model,
  * and p_iter must be created outside this function */
 
 static void
-add_child_node_file(GtkTreeModel *model,
-		    GtkTreeIter *iter,
-		    GtkTreeIter *p_iter,
-		    const gchar *node_data,
-		    int location_id,
-		    PraghaLibraryPane *clibrary)
+pragha_library_view_append_file_node (PraghaLibraryPane *clibrary,
+                                      GtkTreeModel      *model,
+                                      GtkTreeIter       *iter,
+                                      GtkTreeIter       *p_iter,
+                                      const gchar       *node_data,
+                                      int                location_id)
 {
 	GtkTreeIter l_iter;
 	gchar *data = NULL;
@@ -423,15 +423,14 @@ add_child_node_file(GtkTreeModel *model,
 /* Adds a file and its parent directories to the library tree */
 
 static void
-add_folder_file(GtkTreeModel *model,
-                const gchar *filepath,
-                int location_id,
-                GtkTreeIter *p_iter,
-                PraghaLibraryPane *clibrary)
+pragha_library_view_append_filename (PraghaLibraryPane *clibrary,
+                                     GtkTreeModel      *model,
+                                     GtkTreeIter       *p_iter,
+                                     const gchar       *filepath,
+                                     int                location_id)
 {
-	gchar **subpaths = NULL;		/* To be freed */
-
 	GtkTreeIter iter, iter2, search_iter;
+	gchar **subpaths = NULL;		/* To be freed */
 	int i = 0 , len = 0;
 
 	/* Point after library directory prefix */
@@ -445,9 +444,9 @@ add_folder_file(GtkTreeModel *model,
 	for (i = 0; subpaths[i]; i++) {
 		if (!find_child_node(subpaths[i], &search_iter, p_iter, model)) {
 			if(i < len)
-				add_child_node_folder(model, &iter, p_iter, subpaths[i], clibrary);
+				pragha_library_view_append_folder_node (clibrary, model, &iter, p_iter, subpaths[i]);
 			else
-				add_child_node_file(model, &iter, p_iter, subpaths[i], location_id, clibrary);
+				pragha_library_view_append_file_node (clibrary, model, &iter, p_iter, subpaths[i], location_id);
 			p_iter = &iter;
 		}
 		else {
@@ -462,16 +461,16 @@ add_folder_file(GtkTreeModel *model,
 /* Adds an entry to the library tree by tag (genre, artist...) */
 
 static void
-add_child_node_by_tags (GtkTreeModel *model,
-                       GtkTreeIter *p_iter,
-                       gint location_id,
-                       const gchar *location,
-                       const gchar *genre,
-                       const gchar *album,
-                       const gchar *year,
-                       const gchar *artist,
-                       const gchar *track,
-                       PraghaLibraryPane *clibrary)
+pragha_library_view_append_node_by_tags (PraghaLibraryPane *clibrary,
+                                         GtkTreeModel      *model,
+                                         GtkTreeIter       *p_iter,
+                                         gint               location_id,
+                                         const gchar       *location,
+                                         const gchar       *genre,
+                                         const gchar       *album,
+                                         const gchar       *year,
+                                         const gchar       *artist,
+                                         const gchar      *track)
 {
 	GtkTreeIter iter, iter2, search_iter;
 	gchar *node_data = NULL;
@@ -1731,74 +1730,68 @@ library_view_append_radios(GtkTreeModel *model,
 }
 
 void
-library_view_complete_folder_view(GtkTreeModel *model,
-                                  GtkTreeIter *p_iter,
-                                  PraghaLibraryPane *clibrary)
+pragha_library_view_append_container_by_folder (PraghaLibraryPane *clibrary,
+                                                GtkTreeModel      *model,
+                                                GtkTreeIter       *p_iter,
+                                                const gchar       *container)
 {
 	PraghaPreparedStatement *statement;
 	const gchar *sql = NULL, *filepath = NULL;
-	GtkTreeIter iter, *f_iter;
-	GSList *list = NULL, *folder_list = NULL;
+	GSList *folder_list = NULL;
 
 	/* Get only the folders in preferences */
-
-	folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
-		                                                GROUP_LIBRARY,
-		                                                KEY_LIBRARY_DIR);
-
-	for (list = folder_list ; list != NULL ; list=list->next) {
-		/*If no need to fuse folders, add headers and set p_iter */
-		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {
-			gtk_tree_store_append(GTK_TREE_STORE(model), &iter, p_iter);
-			gtk_tree_store_set (GTK_TREE_STORE(model), &iter,
-			                    L_PIXBUF, clibrary->pixbuf_dir,
-			                    L_NODE_DATA, list->data,
-			                    L_NODE_BOLD, PANGO_WEIGHT_NORMAL,
-			                    L_NODE_TYPE, NODE_FOLDER,
-			                    L_LOCATION_ID, 0,
-			                    L_MACH, FALSE,
-			                    L_VISIBILE, TRUE,
-			                    -1);
-			f_iter = &iter;
-		}
-		else {
-			f_iter = p_iter;
-		}
-
-		sql = "SELECT name, id FROM LOCATION WHERE id IN "
-		      "(SELECT location FROM TRACK WHERE CONTAINER IN (SELECT id FROM CONTAINER WHERE name = ?)) ORDER BY name DESC";
-
-		statement = pragha_database_create_statement (clibrary->cdbase, sql);
-		pragha_prepared_statement_bind_string (statement, 1, list->data);
-		while (pragha_prepared_statement_step (statement)) {
-			filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(list->data) + 1;
-			add_folder_file(model,
-			                filepath,
-			                pragha_prepared_statement_get_int(statement, 1),
-			                f_iter,
-			                clibrary);
-
-			pragha_process_gtk_events ();
-		}
-		pragha_prepared_statement_free (statement);
+	if (container == NULL) {
+		folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
+				                                            GROUP_LIBRARY,
+				                                            KEY_LIBRARY_DIR);
 	}
+	else {
+		folder_list = g_slist_append(folder_list, g_strdup(container));
+	}
+	pragha_database_create_temp_table_list (clibrary->cdbase, "FOLDERS", folder_list);
+
+	sql = "SELECT LOCATION.name, LOCATION.id, CONTAINER.name "
+	      "FROM LOCATION, TRACK, CONTAINER "
+	      "WHERE LOCATION.id = TRACK.location AND CONTAINER.id = TRACK.container "
+	      "AND TRACk.container IN (SELECT id FROM CONTAINER WHERE name IN (SELECT name FROM FOLDERS))"
+	      "ORDER BY LOCATION.name DESC";
+
+	statement = pragha_database_create_statement (clibrary->cdbase, sql);
+	while (pragha_prepared_statement_step (statement)) {
+		filepath = pragha_prepared_statement_get_string(statement, 0) + strlen(pragha_prepared_statement_get_string(statement, 2)) + 1;
+		pragha_library_view_append_filename (clibrary,
+		                                     model,
+		                                     p_iter,
+		                                     filepath,
+		                                     pragha_prepared_statement_get_int(statement, 1));
+
+		pragha_process_gtk_events ();
+	}
+	pragha_prepared_statement_free (statement);
+
 	free_str_list(folder_list);
 }
 
 void
-library_view_complete_tags_view(GtkTreeModel *model,
-                                GtkTreeIter *p_iter,
-                                PraghaLibraryPane *clibrary)
+pragha_library_view_append_container_by_tags (PraghaLibraryPane *clibrary,
+                                              GtkTreeModel      *model,
+                                              GtkTreeIter       *p_iter,
+                                              const gchar       *container)
 {
 	PraghaPreparedStatement *statement;
 	gchar *sql = NULL, *order_sql = NULL, *collection_sql = NULL;
 	GSList *folder_list = NULL;
 
 	/* Get only the folders in preferences */
+	if (container == NULL) {
+		folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
+				                                            GROUP_LIBRARY,
+				                                            KEY_LIBRARY_DIR);
+	}
+	else {
+		folder_list = g_slist_append(folder_list, g_strdup(container));
+	}
 
-	folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
-		                                                GROUP_LIBRARY,
-		                                                KEY_LIBRARY_DIR);
 	pragha_database_create_temp_table_list (clibrary->cdbase, "FOLDERS", folder_list);
 
 	/* Get order needed to sqlite query. */
@@ -1851,16 +1844,14 @@ library_view_complete_tags_view(GtkTreeModel *model,
 
 	statement = pragha_database_create_statement (clibrary->cdbase, sql);
 	while (pragha_prepared_statement_step (statement)) {
-		add_child_node_by_tags(model,
-		                       p_iter,
-		                       pragha_prepared_statement_get_int(statement, 6),
-		                       pragha_prepared_statement_get_string(statement, 5),
-		                       pragha_prepared_statement_get_string(statement, 4),
-		                       pragha_prepared_statement_get_string(statement, 3),
-		                       pragha_prepared_statement_get_string(statement, 2),
-		                       pragha_prepared_statement_get_string(statement, 1),
-		                       pragha_prepared_statement_get_string(statement, 0),
-		                       clibrary);
+		pragha_library_view_append_node_by_tags (clibrary, model, p_iter,
+		                                         pragha_prepared_statement_get_int(statement, 6),
+		                                         pragha_prepared_statement_get_string(statement, 5),
+		                                         pragha_prepared_statement_get_string(statement, 4),
+		                                         pragha_prepared_statement_get_string(statement, 3),
+		                                         pragha_prepared_statement_get_string(statement, 2),
+		                                         pragha_prepared_statement_get_string(statement, 1),
+		                                         pragha_prepared_statement_get_string(statement, 0));
 
 		/* Have to give control to GTK periodically ... */
 		pragha_process_gtk_events ();
@@ -1877,10 +1868,11 @@ library_view_complete_tags_view(GtkTreeModel *model,
 static void
 pragha_library_view_append_category (GtkTreeModel *model,
                                      GtkTreeIter  *iter,
+                                     GtkTreeIter  *p_iter,
                                      const gchar  *name,
                                      GdkPixbuf    *pixbuf)
 {
-	gtk_tree_store_append (GTK_TREE_STORE(model), iter, NULL);
+	gtk_tree_store_append (GTK_TREE_STORE(model), iter, p_iter);
 	gtk_tree_store_set (GTK_TREE_STORE(model), iter,
 	                    L_PIXBUF, pixbuf,
 	                    L_NODE_DATA, name,
@@ -1895,7 +1887,8 @@ void
 pragha_library_pane_view_reload (PraghaLibraryPane *clibrary)
 {
 	GtkTreeModel *model, *filter_model;
-	GtkTreeIter iter;
+	GtkTreeIter iter, *p_iter = NULL, p_iter2;
+	GSList *folder_list = NULL, *list;
 
 	clibrary->view_change = TRUE;
 
@@ -1913,29 +1906,51 @@ pragha_library_pane_view_reload (PraghaLibraryPane *clibrary)
 
 	/* Playlists.*/
 
-	pragha_library_view_append_category (model, &iter,
+	pragha_library_view_append_category (model, &iter, NULL,
 	                                     _("Playlists"),
 	                                     clibrary->pixbuf_dir);
 	library_view_append_playlists (model, &iter, clibrary);
 
 	/* Radios. */
 
-	pragha_library_view_append_category (model, &iter,
+	pragha_library_view_append_category (model, &iter, NULL,
 	                                     _("Radios"),
 	                                     clibrary->pixbuf_dir);
 	library_view_append_radios (model, &iter, clibrary);
 
 	/* Add library header */
 
-	pragha_library_view_append_category (model, &iter,
+	pragha_library_view_append_category (model, &iter, NULL,
 	                                     _("Library"),
 	                                     clibrary->pixbuf_dir);
 
-	if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
-		library_view_complete_folder_view(model, &iter, clibrary);
+	if (!pragha_preferences_get_fuse_folders(clibrary->preferences)) {
+		folder_list = pragha_preferences_get_filename_list (clibrary->preferences,
+			                                                GROUP_LIBRARY,
+			                                                KEY_LIBRARY_DIR);
+
+		p_iter2 = iter;
+		p_iter = &p_iter2;
+		for (list = folder_list ; list != NULL ; list=list->next) {
+			pragha_library_view_append_category (model, &iter, p_iter,
+			                                     list->data,
+			                                     clibrary->pixbuf_dir);
+
+			if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
+				pragha_library_view_append_container_by_folder (clibrary, model, &iter, list->data);
+			}
+			else {
+				pragha_library_view_append_container_by_tags (clibrary, model, &iter, list->data);
+			}
+		}
 	}
 	else {
-		library_view_complete_tags_view(model, &iter, clibrary);
+		if (pragha_preferences_get_library_style(clibrary->preferences) == FOLDERS) {
+			pragha_library_view_append_container_by_folder (clibrary, model, &iter, NULL);
+		}
+		else {
+			pragha_library_view_append_container_by_tags (clibrary, model, &iter, NULL);
+		}
 	}
 
 	/* Sensitive, set model and filter */
