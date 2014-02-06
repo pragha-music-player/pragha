@@ -70,8 +70,10 @@ struct _PraghaApplication {
 	GtkUIManager      *menu_ui_manager;
 	PraghaToolbar     *toolbar;
 	GtkWidget         *infobox;
-	GtkWidget         *pane;
-	PraghaSidebar     *sidebar;
+	GtkWidget         *pane1;
+	GtkWidget         *pane2;
+	PraghaSidebar     *sidebar1;
+	PraghaSidebar     *sidebar2;
 	PraghaLibraryPane *library;
 	PraghaPlaylist    *playlist;
 	PraghaStatusbar   *statusbar;
@@ -276,9 +278,15 @@ pragha_application_get_toolbar (PraghaApplication *pragha)
 }
 
 PraghaSidebar *
-pragha_application_get_sidebar (PraghaApplication *pragha)
+pragha_application_get_first_sidebar (PraghaApplication *pragha)
 {
-	return pragha->sidebar;
+	return pragha->sidebar1;
+}
+
+PraghaSidebar *
+pragha_application_get_second_sidebar (PraghaApplication *pragha)
+{
+	return pragha->sidebar2;
 }
 
 PraghaStatusbar *
@@ -330,10 +338,17 @@ pragha_application_get_infobox_container (PraghaApplication *pragha)
 }
 
 GtkWidget *
-pragha_application_get_pane (PraghaApplication *pragha)
+pragha_application_get_first_pane (PraghaApplication *pragha)
 {
-	return pragha->pane;
+	return pragha->pane1;
 }
+
+GtkWidget *
+pragha_application_get_second_pane (PraghaApplication *pragha)
+{
+	return pragha->pane2;
+}
+
 
 #ifdef HAVE_LIBPEAS
 PeasEngine *
@@ -434,8 +449,10 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	pragha->menu_ui_manager = pragha_menubar_new ();
 	pragha->toolbar = pragha_toolbar_new ();
 	pragha->infobox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-	pragha->pane = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
-	pragha->sidebar = pragha_sidebar_new ();
+	pragha->pane1 = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
+	pragha->pane2 = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
+	pragha->sidebar1 = pragha_sidebar_new ();
+	pragha->sidebar2 = pragha_sidebar_new ();
 	pragha->library = pragha_library_pane_new ();
 	pragha->playlist = pragha_playlist_new ();
 	pragha->statusbar = pragha_statusbar_get ();
@@ -473,9 +490,13 @@ pragha_application_dispose (GObject *object)
 		pragha->peas_engine = NULL;
 	}
 #endif
-	if (pragha->sidebar) {
-		pragha_sidebar_free (pragha->sidebar);
-		pragha->sidebar = NULL;
+	if (pragha->sidebar1) {
+		pragha_sidebar_free (pragha->sidebar1);
+		pragha->sidebar1 = NULL;
+	}
+	if (pragha->sidebar2) {
+		pragha_sidebar_free (pragha->sidebar2);
+		pragha->sidebar2 = NULL;
 	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);

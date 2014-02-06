@@ -72,7 +72,8 @@ GdkPixbuf         *pragha_application_get_pixbuf_app      (PraghaApplication *pr
 PraghaPlaylist    *pragha_application_get_playlist        (PraghaApplication *pragha);
 PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pragha);
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
-PraghaSidebar     *pragha_application_get_sidebar         (PraghaApplication *pragha);
+PraghaSidebar     *pragha_application_get_first_sidebar   (PraghaApplication *pragha);
+PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pragha);
 PraghaStatusbar   *pragha_application_get_statusbar       (PraghaApplication *pragha);
 PraghaStatusIcon  *pragha_application_get_status_icon     (PraghaApplication *pragha);
 
@@ -81,7 +82,8 @@ GtkAction         *pragha_application_get_menu_action        (PraghaApplication 
 GtkWidget         *pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path);
 GtkWidget         *pragha_application_get_menubar            (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
-GtkWidget         *pragha_application_get_pane               (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_first_pane         (PraghaApplication *pragha);
+GtkWidget         *pragha_application_get_second_pane        (PraghaApplication *pragha);
 
 #ifdef HAVE_LIBPEAS
 PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);

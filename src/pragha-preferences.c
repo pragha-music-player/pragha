@@ -62,6 +62,8 @@ struct _PraghaPreferencesPrivate
 	/* Window preferences. */
 	gboolean   lateral_panel;
 	gint       sidebar_size;
+	gboolean   secondary_lateral_panel;
+	gint       secondary_sidebar_size;
 	gboolean   show_album_art;
 	gint       album_art_size;
 	gchar     *album_art_pattern;
@@ -100,6 +102,8 @@ enum
 	PROP_AUDIO_CD_DEVICE,
 	PROP_LATERAL_PANEL,
 	PROP_SIDEBAR_SIZE,
+	PROP_SECONDARY_LATERAL_PANEL,
+	PROP_SECONDARY_SIDEBAR_SIZE,
 	PROP_SHOW_ALBUM_ART,
 	PROP_ALBUM_ART_SIZE,
 	PROP_ALBUM_ART_PATTERN,
@@ -904,6 +908,60 @@ pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_secondary_lateral_panel:
+ *
+ */
+gboolean
+pragha_preferences_get_secondary_lateral_panel (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
+
+	return preferences->priv->secondary_lateral_panel;
+}
+
+/**
+ * pragha_preferences_set_secondary_lateral_panel:
+ *
+ */
+void
+pragha_preferences_set_secondary_lateral_panel (PraghaPreferences *preferences,
+                                                gboolean secondary_lateral_panel)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->secondary_lateral_panel = secondary_lateral_panel;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SECONDARY_LATERAL_PANEL]);
+}
+
+/**
+ * pragha_preferences_get_secondary_sidebar_size:
+ *
+ */
+gint
+pragha_preferences_get_secondary_sidebar_size (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), DEFAULT_SIDEBAR_SIZE);
+
+	return preferences->priv->secondary_sidebar_size;
+}
+
+/**
+ * pragha_preferences_set_secondary_sidebar_size:
+ *
+ */
+void
+pragha_preferences_set_secondary_sidebar_size (PraghaPreferences *preferences,
+                                               gint secondary_sidebar_size)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->secondary_sidebar_size = secondary_sidebar_size;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SECONDARY_SIDEBAR_SIZE]);
+}
+
+/**
  * pragha_preferences_get_show_album_art:
  *
  */
@@ -1318,7 +1376,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
+	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1326,7 +1384,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *lastfm_user;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gdouble software_volume;
-	gint library_style, sidebar_size, album_art_size;
+	gint library_style, sidebar_size, secondary_sidebar_size, album_art_size;
 	gboolean fuse_folders, sort_by_year;
 	const gchar *user_config_dir;
 	gchar *pragha_config_dir = NULL;
@@ -1578,6 +1636,30 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_sidebar_size(preferences, sidebar_size);
+	}
+
+	secondary_lateral_panel = g_key_file_get_boolean(priv->rc_keyfile,
+	                                                 GROUP_WINDOW,
+	                                                 KEY_SECONDARY_SIDEBAR,
+	                                                 &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_secondary_lateral_panel(preferences, secondary_lateral_panel);
+	}
+
+	secondary_sidebar_size = g_key_file_get_integer(priv->rc_keyfile,
+	                                                GROUP_WINDOW,
+	                                                KEY_SECONDARY_SIDEBAR_SIZE,
+	                                                &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_secondary_sidebar_size(preferences, secondary_sidebar_size);
 	}
 
 	show_album_art = g_key_file_get_boolean(priv->rc_keyfile,
@@ -1871,6 +1953,14 @@ pragha_preferences_finalize (GObject *object)
 	                       priv->sidebar_size);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
+	                       KEY_SECONDARY_SIDEBAR,
+	                       priv->secondary_lateral_panel);
+	g_key_file_set_integer(priv->rc_keyfile,
+	                       GROUP_WINDOW,
+	                       KEY_SECONDARY_SIDEBAR_SIZE,
+	                       priv->secondary_sidebar_size);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
 	                       KEY_SHOW_ALBUM_ART,
 	                       priv->show_album_art);
 	g_key_file_set_integer(priv->rc_keyfile,
@@ -2036,6 +2126,12 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SIDEBAR_SIZE:
 			g_value_set_int (value, pragha_preferences_get_sidebar_size(preferences));
 			break;
+		case PROP_SECONDARY_LATERAL_PANEL:
+			g_value_set_boolean (value, pragha_preferences_get_secondary_lateral_panel(preferences));
+			break;
+		case PROP_SECONDARY_SIDEBAR_SIZE:
+			g_value_set_int (value, pragha_preferences_get_secondary_sidebar_size(preferences));
+			break;
 		case PROP_SHOW_ALBUM_ART:
 			g_value_set_boolean (value, pragha_preferences_get_show_album_art(preferences));
 			break;
@@ -2142,6 +2238,12 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SIDEBAR_SIZE:
 			pragha_preferences_set_sidebar_size(preferences, g_value_get_int(value));
+			break;
+		case PROP_SECONDARY_LATERAL_PANEL:
+			pragha_preferences_set_secondary_lateral_panel(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_SECONDARY_SIDEBAR_SIZE:
+			pragha_preferences_set_secondary_sidebar_size(preferences, g_value_get_int(value));
 			break;
 		case PROP_SHOW_ALBUM_ART:
 			pragha_preferences_set_show_album_art(preferences, g_value_get_boolean(value));
@@ -2395,6 +2497,30 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_int ("sidebar-size",
 		                  "SidebarSize",
 		                  "Sidebar Size Preferences",
+		                  0,
+		                  G_MAXINT,
+		                  DEFAULT_SIDEBAR_SIZE,
+		                  PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:secondary_lateral_panel:
+	  *
+	  */
+	gParamSpecs[PROP_SECONDARY_LATERAL_PANEL] =
+		g_param_spec_boolean("secondary-lateral-panel",
+		                     "SecondaryLateralPanel",
+		                     "Show Secondary Lateral Panel Preference",
+		                     FALSE,
+		                     PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:secondary_sidebar_size:
+	  *
+	  */
+	gParamSpecs[PROP_SECONDARY_SIDEBAR_SIZE] =
+		g_param_spec_int ("secondary-sidebar-size",
+		                  "SecondarySidebarSize",
+		                  "Secondary Sidebar Size Preferences",
 		                  0,
 		                  G_MAXINT,
 		                  DEFAULT_SIDEBAR_SIZE,

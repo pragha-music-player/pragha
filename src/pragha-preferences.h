@@ -92,8 +92,10 @@ struct _PraghaPreferencesClass
 #define KEY_START_MODE              "start_mode"
 #define KEY_WINDOW_SIZE            "window_size"
 #define KEY_WINDOW_POSITION        "window_position"
-#define KEY_SIDEBAR_SIZE           "sidebar_size"
 #define KEY_SIDEBAR                "sidebar"
+#define KEY_SIDEBAR_SIZE           "sidebar_size"
+#define KEY_SECONDARY_SIDEBAR      "secondary_sidebar"
+#define KEY_SECONDARY_SIDEBAR_SIZE "secondary_sidebar_size"
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR             "status_bar"
@@ -322,6 +324,13 @@ pragha_preferences_set_lateral_panel (PraghaPreferences *preferences,
                                       gboolean lateral_panel);
 
 gboolean
+pragha_preferences_get_secondary_lateral_panel (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_secondary_lateral_panel (PraghaPreferences *preferences,
+                                                gboolean secondary_lateral_panel);
+
+gboolean
 pragha_preferences_get_show_album_art (PraghaPreferences *preferences);
 
 void
@@ -376,6 +385,13 @@ pragha_preferences_get_sidebar_size (PraghaPreferences *preferences);
 void
 pragha_preferences_set_sidebar_size (PraghaPreferences *preferences,
                                      gint sidebar_size);
+
+gint
+pragha_preferences_get_secondary_sidebar_size (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_secondary_sidebar_size (PraghaPreferences *preferences,
+                                               gint secondary_sidebar_size);
 
 const gchar *
 pragha_preferences_get_start_mode (PraghaPreferences *preferences);

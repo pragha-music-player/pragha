@@ -127,7 +127,8 @@ static const gchar *main_menu_xml = "<ui>					\
 		<menu action=\"ViewMenu\">					\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
-			<menuitem action=\"Lateral panel\"/>		\
+			<menuitem action=\"Lateral panel1\"/>		\
+			<menuitem action=\"Lateral panel2\"/>		\
 			<menuitem action=\"Playback controls below\"/>	\
 			<menuitem action=\"Status bar\"/>			\
 			<separator/>						\
@@ -228,9 +229,12 @@ static GtkToggleActionEntry toggles_entries[] = {
 	{"Fullscreen", NULL, N_("_Fullscreen"),
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
-	{"Lateral panel", NULL, N_("Lateral _panel"),
+	{"Lateral panel1", NULL, N_("Lateral _panel"),
 	 "F9", "Lateral panel", NULL,
 	TRUE},
+	{"Lateral panel2", NULL, N_("Secondary lateral panel"),
+	 "", "Secondary lateral panel", NULL,
+	FALSE},
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
@@ -1038,8 +1042,11 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	GtkAction *action_repeat = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/PlaybackMenu/Repeat");
 	g_object_bind_property (preferences, "repeat", action_repeat, "active", binding_flags);
 
-	GtkAction *action_lateral = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel");
-	g_object_bind_property (preferences, "lateral-panel", action_lateral, "active", binding_flags);
+	GtkAction *action_lateral1 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel1");
+	g_object_bind_property (preferences, "lateral-panel", action_lateral1, "active", binding_flags);
+
+	GtkAction *action_lateral2 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel2");
+	g_object_bind_property (preferences, "secondary-lateral-panel", action_lateral2, "active", binding_flags);
 
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
 	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);

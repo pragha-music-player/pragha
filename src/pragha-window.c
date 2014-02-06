@@ -283,7 +283,7 @@ pragha_window_free (PraghaApplication *pragha)
 
 	/* Save sidebar size */
 
-	pane = pragha_application_get_pane (pragha);
+	pane = pragha_application_get_first_pane (pragha);
 	pragha_preferences_set_sidebar_size(preferences,
 		gtk_paned_get_position(GTK_PANED(pane)));
 
@@ -388,13 +388,16 @@ pragha_window_new (PraghaApplication *pragha)
 	GtkWidget *window;
 	PraghaPlaylist *playlist;
 	PraghaLibraryPane *library;
-	PraghaSidebar *sidebar;
+	PraghaSidebar *sidebar1, *sidebar2;
 	PraghaStatusbar *statusbar;
 	PraghaToolbar *toolbar;
-	GtkWidget *menubar, *pane, *infobox;
+	GtkWidget *menubar, *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
+
+	const GBindingFlags binding_flags =
+		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
@@ -405,11 +408,13 @@ pragha_window_new (PraghaApplication *pragha)
 	window    = pragha_application_get_window (pragha);
 	playlist  = pragha_application_get_playlist (pragha);
 	library   = pragha_application_get_library (pragha);
-	sidebar   = pragha_application_get_sidebar (pragha);
+	sidebar1  = pragha_application_get_first_sidebar (pragha);
+	sidebar2  = pragha_application_get_second_sidebar (pragha);
 	statusbar = pragha_application_get_statusbar (pragha);
 	toolbar   = pragha_application_get_toolbar (pragha);
 	menubar   = pragha_application_get_menubar (pragha);
-	pane      = pragha_application_get_pane (pragha);
+	pane1     = pragha_application_get_first_pane (pragha);
+	pane2     = pragha_application_get_second_pane (pragha);
 	infobox   = pragha_application_get_infobox_container (pragha);
 
 	/* Main window */
@@ -463,22 +468,31 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(playlist_statusbar_vbox), GTK_WIDGET(statusbar),
 	                    FALSE, FALSE, 0);
 
-	/* Pack widgets: [Sidebar][ Playlist ]
-	 *               [       ][Status Bar]
+	/* Pack widgets: [Sidebar1][ Playlist ]
+	 *               [        ][Status Bar]
 	 */
 
-	gtk_paned_pack1 (GTK_PANED (pane), pragha_sidebar_get_widget(sidebar), FALSE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane), playlist_statusbar_vbox, TRUE, FALSE);
+	gtk_paned_pack1 (GTK_PANED (pane1), pragha_sidebar_get_widget(sidebar1), FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
 
-	gtk_paned_set_position (GTK_PANED (pane),
+	gtk_paned_set_position (GTK_PANED (pane1),
 		pragha_preferences_get_sidebar_size (preferences));
 
+	/* Pack widgets: [Sidebar1][ Playlist ][Sidebar2]
+	 *               [        ][Status Bar][        ]
+	 */
 
-	/* Pack widgets: [    Menubar        ]
-	 *               [    Toolbar        ]
-	 *               [    Infobox        ]
-	 *               [Sidebar][ Playlist ]
-	 *               [Sidebar][Status Bar]
+	gtk_paned_pack1 (GTK_PANED (pane2), pane1, TRUE, FALSE);
+	gtk_paned_pack2 (GTK_PANED (pane2), pragha_sidebar_get_widget(sidebar2), FALSE, TRUE);
+
+	/*gtk_paned_set_position (GTK_PANED (pane1),
+		pragha_preferences_get_sidebar_size (preferences));*/
+
+	/* Pack widgets: [            Menubar           ]
+	 *               [            Toolbar           ]
+	 *               [            Infobox           ]
+	 *               [Sidebar1][ Playlist ][Sidebar2]
+	 *               [Sidebar1][Status Bar][Sidebar2]
 	 */
 
 	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
@@ -489,26 +503,34 @@ pragha_window_new (PraghaApplication *pragha)
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), pane,
+	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
 	                    TRUE, TRUE, 0);
 
-	/* Add library pane to sidebar. */
+	/* Add library pane to first sidebar. */
 
-	pragha_sidebar_attach_plugin (sidebar,
+	pragha_sidebar_attach_plugin (sidebar1,
 		                          pragha_library_pane_get_widget (library),
 		                          pragha_library_pane_get_pane_title (library),
 		                          pragha_library_pane_get_popup_menu (library));
+
+	g_object_bind_property (preferences, "lateral-panel",
+	                        pragha_sidebar_get_widget(sidebar1), "visible",
+	                        binding_flags);
 
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.
 	 */
 
 	gtk_widget_show(vbox_main);
-
 	gtk_widget_show (menubar);
 	gtk_widget_show (GTK_WIDGET(toolbar));
 	gtk_widget_show (infobox);
-	gtk_widget_show (pane);
+	gtk_widget_show (pane1);
+	gtk_widget_show (pane2);
+
+	g_object_bind_property (preferences, "secondary-lateral-panel",
+	                        pragha_sidebar_get_widget(sidebar2), "visible",
+	                        binding_flags);
 
 	gtk_widget_show(playlist_statusbar_vbox);
 	gtk_widget_show_all (GTK_WIDGET(playlist));
