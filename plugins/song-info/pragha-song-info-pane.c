@@ -99,6 +99,14 @@ pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
 	}
 }
 
+void
+pragha_songinfo_pane_clear_text (PraghaSonginfoPane *pane)
+{
+	GtkTextBuffer *buffer;
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->text_view));
+	gtk_text_buffer_set_text (buffer, "", -1);
+}
+
 GtkWidget *
 pragha_songinfo_pane_get_pane_title (PraghaSonginfoPane *pane)
 {

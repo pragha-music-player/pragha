@@ -160,6 +160,10 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plug
 	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_LYRICS, artist, title);
 }
 
+/*
+ * Handlers depending on backend status
+ */
+
 static void
 related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 {
@@ -210,7 +214,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 
 	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED) {
-		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
+		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
 	}
 
@@ -257,7 +261,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
 	if (state == ST_STOPPED)
-		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
+		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 
 	if (state != ST_PLAYING)
 		return;
@@ -265,7 +269,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
 	if (file_type == FILE_NONE || file_type == FILE_HTTP) {
-		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
+		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
 	}
 
@@ -273,20 +277,9 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	                                               pragha_song_info_get_info_delayed, plugin, NULL);
 }
 
-static void
-pragha_song_info_prefrenceces_event (PraghaPreferences *preferences, const gchar *key, PraghaSongInfoPlugin *plugin)
-{
-	PraghaSongInfoPluginPrivate *priv = NULL;
-	gchar *plugin_group = NULL;
-
-	if (g_strcmp0(key, "DownloadAlbumArt") == 0) {
-		priv = plugin->priv;
-
-		plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
-		priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
-		g_free (plugin_group);
-	}
-}
+/*
+ * Public api
+ */
 
 GlyrDatabase *
 pragha_songinfo_plugin_get_cache (PraghaSongInfoPlugin *plugin)
@@ -311,6 +304,75 @@ pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin)
 
 	return priv->pragha;
 }
+
+/*
+ * Preferences plugin
+ */
+
+static void
+pragha_song_info_prefrenceces_event (PraghaPreferences *preferences, const gchar *key, PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = NULL;
+	gchar *plugin_group = NULL;
+
+	if (g_strcmp0(key, "DownloadAlbumArt") == 0) {
+		priv = plugin->priv;
+
+		plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
+		priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
+		g_free (plugin_group);
+	}
+}
+
+static void
+toggle_download_album_art (GtkToggleButton *button)
+{
+	PraghaPreferences *preferences = NULL;
+	gchar *plugin_group = NULL;
+
+	preferences = pragha_preferences_get ();
+
+	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
+	pragha_preferences_set_boolean (preferences,
+	                                plugin_group, "DownloadAlbumArt",
+	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
+	pragha_preferences_plugin_changed (preferences, "DownloadAlbumArt");
+
+	g_object_unref (G_OBJECT (preferences));
+	g_free (plugin_group);
+}
+
+static GtkWidget *
+pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
+{
+	PraghaPreferences *preferences = NULL;
+	gchar *plugin_group = NULL;
+	GtkWidget *table, *download_album_art;
+	guint row = 0;
+
+	table = pragha_hig_workarea_table_new ();
+
+	download_album_art = gtk_check_button_new_with_label (_("Download the album art while playing their songs."));
+	pragha_hig_workarea_table_add_wide_control (table, &row, download_album_art);
+
+	preferences = pragha_preferences_get ();
+
+	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(download_album_art),
+		pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt"));
+
+	g_object_unref (G_OBJECT (preferences));
+	g_free (plugin_group);
+
+	g_signal_connect (G_OBJECT(download_album_art), "toggled",
+	                  G_CALLBACK(toggle_download_album_art), NULL);
+
+	return table;
+}
+
+/*
+ * Plugin
+ */
 
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
@@ -409,50 +471,4 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	glyr_cleanup ();
 
 	priv->pragha = NULL;
-}
-
-static void
-toggle_download_album_art (GtkToggleButton *button)
-{
-	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
-
-	preferences = pragha_preferences_get ();
-
-	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
-	pragha_preferences_set_boolean (preferences,
-	                                plugin_group, "DownloadAlbumArt",
-	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
-	pragha_preferences_plugin_changed (preferences, "DownloadAlbumArt");
-
-	g_object_unref (G_OBJECT (preferences));
-	g_free (plugin_group);
-}
-
-static GtkWidget *
-pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
-{
-	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
-	GtkWidget *table, *download_album_art;
-	guint row = 0;
-
-	table = pragha_hig_workarea_table_new ();
-
-	download_album_art = gtk_check_button_new_with_label (_("Download the album art while playing their songs."));
-	pragha_hig_workarea_table_add_wide_control (table, &row, download_album_art);
-
-	preferences = pragha_preferences_get ();
-
-	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "song-info");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(download_album_art),
-		pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt"));
-
-	g_object_unref (G_OBJECT (preferences));
-	g_free (plugin_group);
-
-	g_signal_connect (G_OBJECT(download_album_art), "toggled",
-	                  G_CALLBACK(toggle_download_album_art), NULL);
-
-	return table;
 }
