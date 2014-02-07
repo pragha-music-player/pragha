@@ -231,7 +231,8 @@ pragha_song_info_get_info_delayed (gpointer data)
 	if (priv->download_album_art)
 		related_get_album_art_handler (plugin);
 
-	related_get_song_info_pane_handler (plugin);
+	if (gtk_widget_is_visible(GTK_WIDGET(priv->pane)))
+		related_get_song_info_pane_handler (plugin);
 
 	return FALSE;
 }
