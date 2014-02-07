@@ -63,7 +63,6 @@ glyr_finished_successfully (glyr_struct *glyr_info)
 static gboolean
 glyr_finished_thread_update (gpointer data)
 {
-	GtkWidget *window;
 	glyr_struct *glyr_info = data;
 
 	if (glyr_info->head != NULL)

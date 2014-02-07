@@ -25,6 +25,7 @@ struct _PraghaSidebar {
 	GtkWidget *menu_button;
 	GtkWidget *close_button;
 	GtkWidget *title_box;
+
 	GtkMenu *popup_menu;
 };
 
@@ -53,6 +54,32 @@ pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
 		sidebar->popup_menu = popup_menu;
 	}
 	gtk_widget_show_all (title);
+}
+
+void
+pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
+                              GtkWidget     *widget)
+{
+	GList *list;
+	GtkWidget *children;
+	gint page;
+
+	page = gtk_notebook_page_num (GTK_NOTEBOOK(sidebar->container), widget);
+
+	if (page >= 0) {
+		gtk_notebook_remove_page (GTK_NOTEBOOK(sidebar->container), page);
+		gtk_menu_detach (sidebar->popup_menu);
+
+		list = gtk_container_get_children (GTK_CONTAINER(sidebar->title_box));
+		if (list) {
+			children = list->data;
+			gtk_container_remove(GTK_CONTAINER(sidebar->title_box), children);
+			g_list_free(list);
+		}
+	}
+
+	if (gtk_notebook_get_n_pages (GTK_NOTEBOOK(sidebar->container)) == 0)
+		gtk_widget_hide(GTK_WIDGET(sidebar->widget));
 }
 
 GtkWidget *
