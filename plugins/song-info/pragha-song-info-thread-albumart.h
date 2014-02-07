@@ -15,8 +15,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_SONGINFO_THREAD_PANE_H
-#define PRAGHA_SONGINFO_THREAD_PANE_H
+#ifndef PRAGHA_SONGINFO_THREAD_ALBUMART_H
+#define PRAGHA_SONGINFO_THREAD_ALBUMART_H
 
 #include <glib.h>
 
@@ -32,4 +32,4 @@ pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
 
 G_END_DECLS
 
-#endif /* PRAGHA_SONGINFO_THREAD_PANE_H */
+#endif /* PRAGHA_SONGINFO_THREAD_ALBUMART_H */

@@ -43,6 +43,8 @@
 #include "pragha-song-info-plugin.h"
 #include "pragha-song-info-dialog.h"
 #include "pragha-song-info-pane.h"
+#include "pragha-song-info-thread-albumart.h"
+#include "pragha-song-info-thread-dialog.h"
 #include "pragha-song-info-thread-pane.h"
 
 #include "src/pragha.h"
@@ -380,11 +382,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_preferences_set_boolean (preferences, plugin_group, "DownloadAlbumArt", priv->download_album_art);
 	g_free (plugin_group);
 
+	pragha_sidebar_remove_plugin (pragha_application_get_second_sidebar (priv->pragha),
+	                              GTK_WIDGET (priv->pane));
+
 	glyr_db_destroy (priv->cache_db);
 
 	glyr_cleanup ();
 
-	priv->pragha= NULL;
+	priv->pragha = NULL;
 }
 
 static void

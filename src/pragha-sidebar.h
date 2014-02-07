@@ -28,6 +28,10 @@ pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
                               GtkWidget     *title,
                               GtkMenu       *popup_menu);
 
+void
+pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
+                              GtkWidget     *widget);
+
 GtkWidget     *pragha_sidebar_get_widget      (PraghaSidebar *sidebar);
 
 void           pragha_sidebar_free            (PraghaSidebar *sidebar);
