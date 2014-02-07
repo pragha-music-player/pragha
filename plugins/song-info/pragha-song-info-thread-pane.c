@@ -154,6 +154,7 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
                                          const gchar          *title,
                                          const gchar          *filename)
 {
+	PraghaSonginfoPane *pane;
 	GlyrDatabase *cache_db;
 	glyr_struct *glyr_info;
 
@@ -162,14 +163,20 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 	glyr_query_init (&glyr_info->query);
 	glyr_opt_type (&glyr_info->query, type);
 
+	pane = pragha_songinfo_plugin_get_pane (plugin);
+
 	switch (type) {
 		case GLYR_GET_ARTIST_BIO:
+			pragha_songinfo_pane_set_text (pane, artist, _("Searching..."), "");
+
 			glyr_opt_artist(&glyr_info->query, artist);
 
 			glyr_opt_lang (&glyr_info->query, "auto");
 			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
 			break;
 		case GLYR_GET_LYRICS:
+			pragha_songinfo_pane_set_text (pane, title, _("Searching..."), "");
+
 			glyr_opt_artist(&glyr_info->query, artist);
 			glyr_opt_title(&glyr_info->query, title);
 			break;

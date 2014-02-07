@@ -266,8 +266,8 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
 	}
-
-	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 5,
+	
+	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 1,
 	                                               pragha_song_info_get_info_delayed, plugin, NULL);
 }
 
