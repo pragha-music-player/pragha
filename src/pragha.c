@@ -677,6 +677,10 @@ pragha_application_startup (GApplication *application)
 	pragha_plugins_activate_saved (pragha);
 	#endif
 
+	/* Finally fill the library and the playlist */
+
+	pragha_init_gui_state (pragha);
+
 	g_application_hold (application); //TODO don't hold if gtkapp
 }
 

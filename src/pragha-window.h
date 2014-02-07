@@ -39,6 +39,8 @@ void     pragha_window_add_widget_to_infobox (PraghaApplication *pragha, GtkWidg
 gint     pragha_menubar_append_plugin_action (PraghaApplication *pragha, GtkActionGroup *action_group, const gchar *menu_xml);
 void     pragha_menubar_remove_plugin_action (PraghaApplication *pragha, GtkActionGroup *action_group, gint merge_id);
 
+void     pragha_init_gui_state (PraghaApplication *pragha);
+
 void     pragha_window_free (PraghaApplication *pragha);
 void     pragha_window_new  (PraghaApplication *pragha);
 
