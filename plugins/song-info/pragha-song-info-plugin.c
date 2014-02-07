@@ -40,8 +40,10 @@
 
 #include "plugins/pragha-plugin-macros.h"
 
+#include "pragha-song-info-plugin.h"
 #include "pragha-song-info-dialog.h"
 #include "pragha-song-info-pane.h"
+#include "pragha-song-info-thread-pane.h"
 
 #include "src/pragha.h"
 #include "src/pragha-hig.h"
@@ -51,14 +53,7 @@
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-utils.h"
 
-#define PRAGHA_TYPE_SONG_INFO_PLUGIN         (pragha_song_info_plugin_get_type ())
-#define PRAGHA_SONG_INFO_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_SONG_INFO_PLUGIN, PraghaSongInfoPlugin))
-#define PRAGHA_SONG_INFO_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_SONG_INFO_PLUGIN, PraghaSongInfoPlugin))
-#define PRAGHA_IS_SONG_INFO_PLUGIN(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PRAGHA_TYPE_SONG_INFO_PLUGIN))
-#define PRAGHA_IS_SONG_INFO_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_SONG_INFO_PLUGIN))
-#define PRAGHA_SONG_INFO_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_SONG_INFO_PLUGIN, PraghaSongInfoPluginClass))
-
-typedef struct {
+struct _PraghaSongInfoPluginPrivate {
 	PraghaApplication  *pragha;
 	PraghaSonginfoPane *pane;
 
@@ -68,11 +63,11 @@ typedef struct {
 
 	GtkActionGroup     *action_group_playlist;
 	guint               merge_id_playlist;
-} PraghaSongInfoPluginPrivate;
+};
 
-PRAGHA_PLUGIN_REGISTER_CONFIGURABLE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
-                                     PraghaSongInfoPlugin,
-                                     pragha_song_info_plugin)
+PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
+                                                  PraghaSongInfoPlugin,
+                                                  pragha_song_info_plugin)
 
 typedef struct
 {
@@ -187,38 +182,6 @@ glyr_finished_incorrectly(glyr_struct *glyr_info)
 	g_object_unref (statusbar);
 }
 
-static void
-glyr_finished_successfully_pane (glyr_struct *glyr_info)
-{
-	switch (glyr_info->head->type) {
-		case GLYR_TYPE_LYRICS:
-		case GLYR_TYPE_ARTIST_BIO:
-			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, glyr_info->head->data);
-			break;
-		case GLYR_TYPE_COVERART:
-		default:
-			break;
-	}
-
-	glyr_free_list(glyr_info->head);
-}
-
-static void
-glyr_finished_incorrectly_pane (glyr_struct *glyr_info)
-{
-	switch (glyr_info->query.type) {
-		case GLYR_GET_LYRICS:
-			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, _("Lyrics not found."));
-			break;
-		case GLYR_GET_ARTIST_BIO:
-			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, _("Lyrics not found."));
-			break;
-		case GLYR_GET_COVERART:
-		default:
-			break;
-	}
-}
-
 /*
  * Final threads
  */
@@ -236,26 +199,6 @@ glyr_finished_thread_update (gpointer data)
 		glyr_finished_successfully (glyr_info);
 	else
 		glyr_finished_incorrectly (glyr_info);
-
-	glyr_query_destroy (&glyr_info->query);
-	g_slice_free (glyr_struct, glyr_info);
-
-	return FALSE;
-}
-
-static gboolean
-glyr_finished_thread_update_pane (gpointer data)
-{
-	GtkWidget *window;
-	glyr_struct *glyr_info = data;
-
-	window = pragha_application_get_window (glyr_info->plugin->priv->pragha);
-	remove_watch_cursor (window);
-
-	if(glyr_info->head != NULL)
-		glyr_finished_successfully_pane (glyr_info);
-	else
-		glyr_finished_incorrectly_pane (glyr_info);
 
 	glyr_query_destroy (&glyr_info->query);
 	g_slice_free (glyr_struct, glyr_info);
@@ -323,48 +266,6 @@ configure_and_launch_get_text_info_dialog (GLYR_GET_TYPE        type,
 
 	pragha_async_launch (get_related_info_idle_func,
 	                     glyr_finished_thread_update,
-	                     glyr_info);
-}
-
-/* Configure the thrad to get the artist bio or lyric. */
-
-static void
-configure_and_launch_get_text_info_pane (GLYR_GET_TYPE        type,
-                                         const gchar          *artist,
-                                         const gchar          *title,
-                                         PraghaSongInfoPlugin *plugin)
-{
-	glyr_struct *glyr_info;
-
-	PraghaSongInfoPluginPrivate *priv = plugin->priv;
-
-	glyr_info = g_slice_new0 (glyr_struct);
-
-	glyr_query_init (&glyr_info->query);
-	glyr_opt_type (&glyr_info->query, type);
-
-	switch (type) {
-		case GLYR_GET_ARTIST_BIO:
-			glyr_opt_artist(&glyr_info->query, artist);
-
-			glyr_opt_lang (&glyr_info->query, "auto");
-			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
-			break;
-		case GLYR_GET_LYRICS:
-			glyr_opt_artist(&glyr_info->query, artist);
-			glyr_opt_title(&glyr_info->query, title);
-			break;
-		default:
-			break;
-	}
-
-	glyr_opt_lookup_db (&glyr_info->query, priv->cache_db);
-	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
-
-	glyr_info->plugin = plugin;
-
-	pragha_async_launch (get_related_info_idle_func,
-	                     glyr_finished_thread_update_pane,
 	                     glyr_info);
 }
 
@@ -473,7 +374,7 @@ exists:
 }
 
 static void
-related_get_song_info_handler (PraghaSongInfoPlugin *plugin)
+related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaMusicobject *mobj;
@@ -486,8 +387,10 @@ related_get_song_info_handler (PraghaSongInfoPlugin *plugin)
 	pragha = plugin->priv->pragha;
 
 	backend = pragha_application_get_backend (pragha);
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
+	if (pragha_backend_get_state (backend) == ST_STOPPED) {
+		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
 		return;
+	}
 
 	mobj = pragha_backend_get_musicobject (backend);
 	artist = pragha_musicobject_get_artist (mobj);
@@ -496,9 +399,8 @@ related_get_song_info_handler (PraghaSongInfoPlugin *plugin)
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	configure_and_launch_get_text_info_pane (pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, plugin);
+	pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title);
 }
-
 
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
@@ -513,17 +415,23 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
+	if (state == ST_STOPPED)
+		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
+
 	if (state != ST_PLAYING)
 		return;
 
 	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
 
-	if (file_type == FILE_NONE || file_type == FILE_HTTP)
+	if (file_type == FILE_NONE || file_type == FILE_HTTP) {
+		pragha_songinfo_pane_set_text (plugin->priv->pane, "", "", "");
 		return;
+	}
 
 	if (priv->download_album_art)
 		related_get_album_art_handler (plugin);
-	related_get_song_info_handler (plugin);
+
+	related_get_song_info_pane_handler (plugin);
 }
 
 static void
@@ -539,6 +447,22 @@ pragha_song_info_prefrenceces_event (PraghaPreferences *preferences, const gchar
 		priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
 		g_free (plugin_group);
 	}
+}
+
+GlyrDatabase *
+pragha_songinfo_plugin_get_cache (PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	return priv->cache_db;
+}
+
+PraghaSonginfoPane *
+pragha_songinfo_plugin_get_pane (PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	return priv->pane;
 }
 
 static void
