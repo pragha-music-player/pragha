@@ -73,14 +73,6 @@ PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
                                                   PraghaSongInfoPlugin,
                                                   pragha_song_info_plugin)
 
-typedef struct
-{
-	PraghaSongInfoPlugin *plugin;
-	GlyrQuery             query;
-	GlyrMemCache         *head;
-}
-glyr_struct;
-
 /*
  * Popups
  */
@@ -206,6 +198,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	PraghaMusicobject *mobj;
 	const gchar *artist = NULL;
 	const gchar *title = NULL;
+	const gchar *filename = NULL;
 
 	CDEBUG (DBG_INFO, "Get song info handler");
 
@@ -221,11 +214,12 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	mobj = pragha_backend_get_musicobject (backend);
 	artist = pragha_musicobject_get_artist (mobj);
 	title = pragha_musicobject_get_title (mobj);
+	filename = pragha_musicobject_get_file (mobj);
 
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title);
+	pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, filename);
 }
 
 static gboolean

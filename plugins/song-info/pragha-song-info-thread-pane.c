@@ -30,10 +30,42 @@
 
 typedef struct {
 	PraghaSongInfoPlugin *plugin;
+	gchar                *filename;
 	GlyrQuery             query;
 	GlyrMemCache         *head;
 } glyr_struct;
 
+
+/*
+ * Function to check if has the last
+ */
+
+static gboolean
+glyr_finished_thread_is_current_song (PraghaSongInfoPlugin *plugin, const gchar *filename)
+{
+	PraghaApplication *pragha;
+	PraghaBackend *backend;
+	PraghaMusicobject *mobj;
+	const gchar *current_filename = NULL;
+
+	pragha = pragha_songinfo_plugin_get_application (plugin);
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return FALSE;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	current_filename = pragha_musicobject_get_file (mobj);
+
+	if (g_ascii_strcasecmp(filename, current_filename))
+		return FALSE;
+
+	return TRUE;
+}
+
+/*
+ * Threads
+ */
 
 static void
 glyr_finished_successfully_pane (glyr_struct *glyr_info)
@@ -53,8 +85,6 @@ glyr_finished_successfully_pane (glyr_struct *glyr_info)
 		default:
 			break;
 	}
-
-	glyr_free_list(glyr_info->head);
 }
 
 static void
@@ -82,12 +112,21 @@ glyr_finished_thread_update_pane (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
-	if(glyr_info->head != NULL)
+	if (!glyr_finished_thread_is_current_song(glyr_info->plugin, glyr_info->filename))
+		goto old_thread;
+
+	if (glyr_info->head != NULL)
 		glyr_finished_successfully_pane (glyr_info);
 	else
 		glyr_finished_incorrectly_pane (glyr_info);
 
+old_thread:
+	if (glyr_info->head != NULL)
+		glyr_free_list (glyr_info->head);
+
 	glyr_query_destroy (&glyr_info->query);
+	g_free (glyr_info->filename);
+
 	g_slice_free (glyr_struct, glyr_info);
 
 	return FALSE;
@@ -112,7 +151,8 @@ void
 pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
                                          GLYR_GET_TYPE        type,
                                          const gchar          *artist,
-                                         const gchar          *title)
+                                         const gchar          *title,
+                                         const gchar          *filename)
 {
 	GlyrDatabase *cache_db;
 	glyr_struct *glyr_info;
@@ -142,6 +182,7 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 	glyr_opt_lookup_db (&glyr_info->query, cache_db);
 	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 
+	glyr_info->filename = g_strdup(filename);
 	glyr_info->plugin = plugin;
 
 	pragha_async_launch (get_related_info_idle_func,
