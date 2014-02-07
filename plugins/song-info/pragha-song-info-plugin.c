@@ -65,6 +65,8 @@ struct _PraghaSongInfoPluginPrivate {
 
 	GtkActionGroup     *action_group_playlist;
 	guint               merge_id_playlist;
+
+	guint               timeout_id;
 };
 
 PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
@@ -222,6 +224,20 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title);
 }
 
+static gboolean
+pragha_song_info_get_info_delayed (gpointer data)
+{
+	PraghaSongInfoPlugin *plugin = data;
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	if (priv->download_album_art)
+		related_get_album_art_handler (plugin);
+
+	related_get_song_info_pane_handler (plugin);
+
+	return FALSE;
+}
+
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
@@ -230,6 +246,11 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	PraghaSongInfoPlugin *plugin = user_data;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	if (priv->timeout_id) {
+		g_source_remove (priv->timeout_id);
+		priv->timeout_id = 0;
+	}
 
 	state = pragha_backend_get_state (backend);
 
@@ -248,10 +269,8 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 		return;
 	}
 
-	if (priv->download_album_art)
-		related_get_album_art_handler (plugin);
-
-	related_get_song_info_pane_handler (plugin);
+	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 5,
+	                                               pragha_song_info_get_info_delayed, plugin, NULL);
 }
 
 static void
