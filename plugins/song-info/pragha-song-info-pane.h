@@ -40,6 +40,7 @@ void                pragha_songinfo_pane_set_text              (PraghaSonginfoPa
                                                                 const gchar        *title,
                                                                 const gchar        *text,
                                                                 const gchar        *provider);
+void                pragha_songinfo_pane_clear_text            (PraghaSonginfoPane *pane);
 
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);
