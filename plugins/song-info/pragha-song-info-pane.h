@@ -36,7 +36,11 @@ typedef struct {
 	GtkScrolledWindowClass __parent__;
 } PraghaSonginfoPaneClass;
 
-void                pragha_songinfo_pane_set_text              (PraghaSonginfoPane *pane, const gchar *text);
+void                pragha_songinfo_pane_set_text              (PraghaSonginfoPane *pane,
+                                                                const gchar        *title,
+                                                                const gchar        *text,
+                                                                const gchar        *provider);
+
 GtkWidget          *pragha_songinfo_pane_get_pane_title        (PraghaSonginfoPane *pane);
 GtkMenu            *pragha_songinfo_pane_get_popup_menu        (PraghaSonginfoPane *pane);
 GtkUIManager       *pragha_songinfo_pane_get_pane_context_menu (PraghaSonginfoPane *pane);

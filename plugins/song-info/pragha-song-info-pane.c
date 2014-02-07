@@ -29,11 +29,15 @@
 
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha-utils.h"
+
 struct _PraghaSonginfoPane {
 	GtkScrolledWindow  parent;
 
+	/* Text widget */
 	GtkWidget         *text_view;
 
+	/* Info that show thde pane */
 	GLYR_GET_TYPE      info_type;
 
 	/* Sidebar widgets */
@@ -69,12 +73,30 @@ GtkActionEntry songinfo_pane_context_aentries[] = {
  */
 
 void
-pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane, const gchar *text)
+pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
+                               const gchar        *title,
+                               const gchar        *text,
+                               const gchar        *provider)
 {
+	GtkTextIter iter;
 	GtkTextBuffer *buffer;
+
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pane->text_view));
 
-	gtk_text_buffer_set_text (buffer, text, -1);
+	gtk_text_buffer_set_text (buffer, "", -1);
+
+	gtk_text_buffer_get_start_iter (GTK_TEXT_BUFFER(buffer), &iter);
+	gtk_text_buffer_insert_with_tags_by_name (GTK_TEXT_BUFFER(buffer), &iter, title, -1,
+	                                          "style_bold", "style_large", NULL);
+
+	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
+	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, text, -1);
+
+	if (string_is_not_empty(provider)) {
+		gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
+		gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, _("Thanks to "), -1);
+		gtk_text_buffer_insert_with_tags_by_name (GTK_TEXT_BUFFER(buffer), &iter, provider, -1, "style_bold", "style_italic", NULL);
+	}
 }
 
 GtkWidget *
@@ -167,12 +189,19 @@ static void
 pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 {
 	GtkWidget *view;
+	GtkTextBuffer *buffer;
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+
+	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_bold", "weight", PANGO_WEIGHT_BOLD, NULL);
+	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_large", "scale", PANGO_SCALE_X_LARGE, NULL);
+	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_italic", "style", PANGO_STYLE_ITALIC, NULL);
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pane),
 	                                GTK_POLICY_AUTOMATIC,
