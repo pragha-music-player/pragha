@@ -47,6 +47,12 @@ struct _PraghaSonginfoPane {
 
 G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW)
 
+enum {
+	SIGNAL_TYPE_CHANGED,
+	LAST_SIGNAL
+};
+static int signals[LAST_SIGNAL] = { 0 };
+
 /*
  * Menus definitions
  *
@@ -142,6 +148,8 @@ pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoP
 {
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Artist info"));
 	pane->info_type = GLYR_GET_ARTIST_BIO;
+
+	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
 }
 
 static void
@@ -149,6 +157,8 @@ pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *
 {
 	gtk_label_set_text (GTK_LABEL(pane->pane_title), _("Lyrics"));
 	pane->info_type = GLYR_GET_LYRICS;
+
+	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
 }
 
 /* Construction */
@@ -242,6 +252,15 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 
 	gobject_class = G_OBJECT_CLASS (klass);
 	gobject_class->finalize = pragha_songinfo_pane_finalize;
+
+	signals[SIGNAL_TYPE_CHANGED] =
+		g_signal_new ("type-changed",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, type_changed),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 PraghaSonginfoPane *

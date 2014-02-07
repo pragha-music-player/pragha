@@ -273,6 +273,23 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 }
 
 /*
+ * Update handlers
+ */
+
+static void
+pragha_songinfo_pane_type_changed (PraghaSonginfoPane *pane, PraghaSongInfoPlugin *plugin)
+{
+	related_get_song_info_pane_handler (plugin);
+}
+
+static void
+pragha_songinfo_pane_visibility_changed (PraghaPreferences *preferences, GParamSpec *pspec, PraghaSongInfoPlugin *plugin)
+{
+	if (pragha_preferences_get_secondary_lateral_panel (preferences))
+		related_get_song_info_pane_handler (plugin);
+}
+
+/*
  * Public api
  */
 
@@ -410,6 +427,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 		                          pragha_songinfo_pane_get_popup_menu (priv->pane));
 
 	/* Connect signals */
+
 	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), plugin);
 
@@ -417,6 +435,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	g_signal_connect (G_OBJECT(preferences), "PluginsChanged",
 	                  G_CALLBACK(pragha_song_info_prefrenceces_event), plugin);
+
+	g_signal_connect (G_OBJECT(preferences), "notify::secondary-lateral-panel",
+	                  G_CALLBACK(pragha_songinfo_pane_visibility_changed), plugin);
+
+	g_signal_connect (G_OBJECT(priv->pane), "type-changed",
+	                  G_CALLBACK(pragha_songinfo_pane_type_changed), plugin);
+
+	/* Default values */
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
 	priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
