@@ -41,10 +41,12 @@
 #include "plugins/pragha-plugin-macros.h"
 
 #include "pragha-song-info-dialog.h"
+#include "pragha-song-info-pane.h"
 
 #include "src/pragha.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-playback.h"
+#include "src/pragha-sidebar.h"
 #include "src/pragha-simple-async.h"
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-utils.h"
@@ -57,17 +59,15 @@
 #define PRAGHA_SONG_INFO_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_SONG_INFO_PLUGIN, PraghaSongInfoPluginClass))
 
 typedef struct {
-	PraghaApplication *pragha;
+	PraghaApplication  *pragha;
+	PraghaSonginfoPane *pane;
 
-	GlyrDatabase      *cache_db;
+	GlyrDatabase       *cache_db;
 
-	gboolean           download_album_art;
+	gboolean            download_album_art;
 
-	GtkActionGroup    *action_group_main_menu;
-	guint              merge_id_main_menu;
-
-	GtkActionGroup    *action_group_playlist;
-	guint              merge_id_playlist;
+	GtkActionGroup     *action_group_playlist;
+	guint               merge_id_playlist;
 } PraghaSongInfoPluginPrivate;
 
 PRAGHA_PLUGIN_REGISTER_CONFIGURABLE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
@@ -76,37 +76,15 @@ PRAGHA_PLUGIN_REGISTER_CONFIGURABLE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
 
 typedef struct
 {
-	PraghaApplication *pragha;
-	GlyrQuery          query;
-	GlyrMemCache      *head;
+	PraghaSongInfoPlugin *plugin;
+	GlyrQuery             query;
+	GlyrMemCache         *head;
 }
 glyr_struct;
 
 /*
  * Popups
  */
-
-static void get_lyric_action       (GtkAction *action, PraghaSongInfoPlugin *plugin);
-static void get_artist_info_action (GtkAction *action, PraghaSongInfoPlugin *plugin);
-
-static const GtkActionEntry main_menu_actions [] = {
-	{"Search lyric", NULL, N_("Search _lyric"),
-	 "<Control>Y", "Search lyric", G_CALLBACK(get_lyric_action)},
-	{"Search artist info", "dialog-information", N_("Search _artist info"),
-	 "", "Search artist info", G_CALLBACK(get_artist_info_action)},
-};
-
-static const gchar *main_menu_xml = "<ui>						\
-	<menubar name=\"Menubar\">							\
-		<menu action=\"ToolsMenu\">						\
-			<placeholder name=\"pragha-plugins-placeholder\">	\
-				<menuitem action=\"Search lyric\"/>			\
-				<menuitem action=\"Search artist info\"/>		\
-				<separator/>						\
-			</placeholder>							\
-		</menu>									\
-	</menubar>										\
-</ui>";
 
 static void get_lyric_current_playlist_action       (GtkAction *action, PraghaSongInfoPlugin *plugin);
 static void get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plugin);
@@ -141,7 +119,7 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 	if(glyr_info->head == NULL)
 		return;
 
-	PraghaApplication *pragha = glyr_info->pragha;
+	PraghaApplication *pragha = glyr_info->plugin->priv->pragha;
 
 	artist = glyr_info->query.artist;
 	album = glyr_info->query.album;
@@ -155,12 +133,12 @@ pragha_update_downloaded_album_art (glyr_struct *glyr_info)
 /* Manages the results of glyr threads. */
 
 static void
-glyr_finished_successfully(glyr_struct *glyr_info)
+glyr_finished_successfully (glyr_struct *glyr_info)
 {
 	GtkWidget *window;
 	gchar *title_header = NULL, *subtitle_header = NULL;
 
-	PraghaApplication *pragha = glyr_info->pragha;
+	PraghaApplication *pragha = glyr_info->plugin->priv->pragha;
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_COVERART:
@@ -209,19 +187,75 @@ glyr_finished_incorrectly(glyr_struct *glyr_info)
 	g_object_unref (statusbar);
 }
 
+static void
+glyr_finished_successfully_pane (glyr_struct *glyr_info)
+{
+	switch (glyr_info->head->type) {
+		case GLYR_TYPE_LYRICS:
+		case GLYR_TYPE_ARTIST_BIO:
+			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, glyr_info->head->data);
+			break;
+		case GLYR_TYPE_COVERART:
+		default:
+			break;
+	}
+
+	glyr_free_list(glyr_info->head);
+}
+
+static void
+glyr_finished_incorrectly_pane (glyr_struct *glyr_info)
+{
+	switch (glyr_info->query.type) {
+		case GLYR_GET_LYRICS:
+			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, _("Lyrics not found."));
+			break;
+		case GLYR_GET_ARTIST_BIO:
+			pragha_songinfo_pane_set_text (glyr_info->plugin->priv->pane, _("Lyrics not found."));
+			break;
+		case GLYR_GET_COVERART:
+		default:
+			break;
+	}
+}
+
+/*
+ * Final threads
+ */
+
 static gboolean
 glyr_finished_thread_update (gpointer data)
 {
 	GtkWidget *window;
 	glyr_struct *glyr_info = data;
 
-	window = pragha_application_get_window (glyr_info->pragha);
+	window = pragha_application_get_window (glyr_info->plugin->priv->pragha);
 	remove_watch_cursor (window);
 
 	if(glyr_info->head != NULL)
 		glyr_finished_successfully (glyr_info);
 	else
 		glyr_finished_incorrectly (glyr_info);
+
+	glyr_query_destroy (&glyr_info->query);
+	g_slice_free (glyr_struct, glyr_info);
+
+	return FALSE;
+}
+
+static gboolean
+glyr_finished_thread_update_pane (gpointer data)
+{
+	GtkWidget *window;
+	glyr_struct *glyr_info = data;
+
+	window = pragha_application_get_window (glyr_info->plugin->priv->pragha);
+	remove_watch_cursor (window);
+
+	if(glyr_info->head != NULL)
+		glyr_finished_successfully_pane (glyr_info);
+	else
+		glyr_finished_incorrectly_pane (glyr_info);
 
 	glyr_query_destroy (&glyr_info->query);
 	g_slice_free (glyr_struct, glyr_info);
@@ -282,9 +316,9 @@ configure_and_launch_get_text_info_dialog (GLYR_GET_TYPE        type,
 	glyr_opt_lookup_db (&glyr_info->query, priv->cache_db);
 	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 
-	glyr_info->pragha = plugin->priv->pragha;
+	glyr_info->plugin = plugin;
 
-	window = pragha_application_get_window (glyr_info->pragha);
+	window = pragha_application_get_window (plugin->priv->pragha);
 	set_watch_cursor (window);
 
 	pragha_async_launch (get_related_info_idle_func,
@@ -292,57 +326,51 @@ configure_and_launch_get_text_info_dialog (GLYR_GET_TYPE        type,
 	                     glyr_info);
 }
 
-static void
-get_artist_info_action (GtkAction *action, PraghaSongInfoPlugin *plugin)
-{
-	PraghaBackend *backend;
-	PraghaMusicobject *mobj = NULL;
-	const gchar *artist = NULL;
-	PraghaApplication *pragha = NULL;
-
-	pragha = plugin->priv->pragha;
-	backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
-		return;
-
-	CDEBUG(DBG_INFO, "Get Artist info Action");
-
-	mobj = pragha_backend_get_musicobject (backend);
-	artist = pragha_musicobject_get_artist (mobj);
-
-	if (string_is_empty(artist))
-		return;
-
-	configure_and_launch_get_text_info_dialog (GLYR_GET_ARTISTBIO, artist, NULL, plugin);
-}
+/* Configure the thrad to get the artist bio or lyric. */
 
 static void
-get_lyric_action (GtkAction *action, PraghaSongInfoPlugin *plugin)
+configure_and_launch_get_text_info_pane (GLYR_GET_TYPE        type,
+                                         const gchar          *artist,
+                                         const gchar          *title,
+                                         PraghaSongInfoPlugin *plugin)
 {
-	PraghaBackend *backend;
-	PraghaMusicobject *mobj = NULL;
-	const gchar *artist = NULL;
-	const gchar *title = NULL;
+	glyr_struct *glyr_info;
 
-	PraghaApplication *pragha = NULL;
-	pragha = plugin->priv->pragha;
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	backend = pragha_application_get_backend (pragha);
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
-		return;
+	glyr_info = g_slice_new0 (glyr_struct);
 
-	CDEBUG(DBG_INFO, "Get lyrics Action");
+	glyr_query_init (&glyr_info->query);
+	glyr_opt_type (&glyr_info->query, type);
 
-	mobj = pragha_backend_get_musicobject (backend);
-	artist = pragha_musicobject_get_artist (mobj);
-	title = pragha_musicobject_get_title (mobj);
+	switch (type) {
+		case GLYR_GET_ARTIST_BIO:
+			glyr_opt_artist(&glyr_info->query, artist);
 
-	if (string_is_empty(artist) || string_is_empty(title))
-		return;
+			glyr_opt_lang (&glyr_info->query, "auto");
+			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
+			break;
+		case GLYR_GET_LYRICS:
+			glyr_opt_artist(&glyr_info->query, artist);
+			glyr_opt_title(&glyr_info->query, title);
+			break;
+		default:
+			break;
+	}
 
-	configure_and_launch_get_text_info_dialog (GLYR_GET_LYRICS, artist, title, plugin);
+	glyr_opt_lookup_db (&glyr_info->query, priv->cache_db);
+	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
+
+	glyr_info->plugin = plugin;
+
+	pragha_async_launch (get_related_info_idle_func,
+	                     glyr_finished_thread_update_pane,
+	                     glyr_info);
 }
+
+/*
+ * Action on playlist that show a dialog
+ */
 
 static void
 get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plugin)
@@ -436,7 +464,7 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	glyr_opt_artist (&glyr_info->query, artist);
 	glyr_opt_album (&glyr_info->query, album);
 
-	glyr_info->pragha = pragha;
+	glyr_info->plugin = plugin;
 
 	pragha_async_launch (get_related_info_idle_func, glyr_finished_thread_update, glyr_info);
 
@@ -445,24 +473,43 @@ exists:
 }
 
 static void
+related_get_song_info_handler (PraghaSongInfoPlugin *plugin)
+{
+	PraghaBackend *backend;
+	PraghaMusicobject *mobj;
+	const gchar *artist = NULL;
+	const gchar *title = NULL;
+
+	CDEBUG (DBG_INFO, "Get song info handler");
+
+	PraghaApplication *pragha = NULL;
+	pragha = plugin->priv->pragha;
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	artist = pragha_musicobject_get_artist (mobj);
+	title = pragha_musicobject_get_title (mobj);
+
+	if (string_is_empty(artist) || string_is_empty(title))
+		return;
+
+	configure_and_launch_get_text_info_pane (pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, plugin);
+}
+
+
+static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	PraghaMusicType file_type = FILE_NONE;
 	PraghaBackendState state = 0;
-	gboolean playing = FALSE;
-	GtkAction *action;
 
 	PraghaSongInfoPlugin *plugin = user_data;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
 	state = pragha_backend_get_state (backend);
-	playing = (state != ST_STOPPED);
-
-	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search lyric");
-	gtk_action_set_sensitive (action, playing);
-
-	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search artist info");
-	gtk_action_set_sensitive (action, playing);
 
 	CDEBUG(DBG_INFO, "Configuring thread to get the cover art");
 
@@ -476,6 +523,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	if (priv->download_album_art)
 		related_get_album_art_handler (plugin);
+	related_get_song_info_handler (plugin);
 }
 
 static void
@@ -499,7 +547,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
 	gchar *cache_folder = NULL, *plugin_group = NULL;
-	GtkAction *action;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -514,24 +561,6 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->cache_db = glyr_db_init (cache_folder);
 	g_free (cache_folder);
 
-	/* Attach main menu */
-	priv->action_group_main_menu = gtk_action_group_new ("PraghaGlyrMainMenuActions");
-	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_main_menu,
-	                              main_menu_actions,
-	                              G_N_ELEMENTS (main_menu_actions),
-	                              plugin);
-
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
-	                                                                priv->action_group_main_menu,
-	                                                                main_menu_xml);
-
-	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search lyric");
-	gtk_action_set_sensitive (action, FALSE);
-
-	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search artist info");
-	gtk_action_set_sensitive (action, FALSE);
-
 	/* Attach Playlist popup menu*/
 	priv->action_group_playlist = gtk_action_group_new ("PraghaGlyrPlaylistActions");
 	gtk_action_group_set_translation_domain (priv->action_group_playlist, GETTEXT_PACKAGE);
@@ -545,6 +574,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                                                priv->action_group_playlist,
 	                                                                playlist_xml);
 
+	/* Create the pane and attach it */
+	priv->pane = pragha_songinfo_pane_new ();
+	pragha_sidebar_attach_plugin (pragha_application_get_second_sidebar (priv->pragha),
+		                          GTK_WIDGET (priv->pane),
+		                          pragha_songinfo_pane_get_pane_title (priv->pane),
+		                          pragha_songinfo_pane_get_popup_menu (priv->pane));
+
+	/* Connect signals */
 	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), plugin);
 
@@ -575,11 +612,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha),
 	                                      backend_changed_state_cb, plugin);
-
-	pragha_menubar_remove_plugin_action (pragha,
-	                                     priv->action_group_main_menu,
-	                                     priv->merge_id_main_menu);
-	priv->merge_id_main_menu = 0;
 
 	playlist = pragha_application_get_playlist (pragha);
 	pragha_playlist_remove_plugin_action (playlist,
