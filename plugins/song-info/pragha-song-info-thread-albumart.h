@@ -15,18 +15,21 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef __PRAGHA_SONG_INFO_DIALOG_H__
-#define __PRAGHA_SONG_INFO_DIALOG_H__
+#ifndef PRAGHA_SONGINFO_THREAD_PANE_H
+#define PRAGHA_SONGINFO_THREAD_PANE_H
 
-#include <gtk/gtk.h>
+#include <glib.h>
+
+#include <glyr/glyr.h>
+#include "pragha-song-info-plugin.h"
 
 G_BEGIN_DECLS
 
 void
-pragha_show_related_text_info_dialog (GtkWidget   *widget,
-                                      const gchar *title_header,
-                                      const gchar *subtitle_header,
-                                      const gchar *text);
+pragha_songinfo_plugin_get_album_art (PraghaSongInfoPlugin *plugin,
+                                      const gchar          *artist,
+                                      const gchar          *album_art);
+
 G_END_DECLS
 
-#endif /* __PRAGHA_SONG_INFO_DIALOG_H__ */
+#endif /* PRAGHA_SONGINFO_THREAD_PANE_H */
