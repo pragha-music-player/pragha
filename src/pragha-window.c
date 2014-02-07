@@ -303,7 +303,7 @@ pragha_window_free (PraghaApplication *pragha)
 	g_free(pragha_accels_path);
 }
 
-static void init_gui_state(PraghaApplication *pragha)
+void pragha_init_gui_state (PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaLibraryPane *library;
@@ -381,8 +381,6 @@ pragha_window_init (PraghaApplication *pragha)
 	update_playlist_changes_on_menu(pragha);
 
 	pragha_init_session_support(pragha);
-
-	init_gui_state(pragha);
 }
 
 void
