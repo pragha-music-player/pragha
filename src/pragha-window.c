@@ -287,6 +287,10 @@ pragha_window_free (PraghaApplication *pragha)
 	pragha_preferences_set_sidebar_size(preferences,
 		gtk_paned_get_position(GTK_PANED(pane)));
 
+	pane = pragha_application_get_second_pane (pragha);
+	pragha_preferences_set_secondary_sidebar_size (preferences,
+		gtk_paned_get_position(GTK_PANED(pane)));
+
 	/* Save menu accelerators edited */
 
 	user_config_dir = g_get_user_config_dir();
@@ -485,8 +489,8 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_paned_pack1 (GTK_PANED (pane2), pane1, TRUE, FALSE);
 	gtk_paned_pack2 (GTK_PANED (pane2), pragha_sidebar_get_widget(sidebar2), FALSE, TRUE);
 
-	/*gtk_paned_set_position (GTK_PANED (pane1),
-		pragha_preferences_get_sidebar_size (preferences));*/
+	gtk_paned_set_position (GTK_PANED (pane2),
+		pragha_preferences_get_secondary_sidebar_size (preferences));
 
 	/* Pack widgets: [            Menubar           ]
 	 *               [            Toolbar           ]
