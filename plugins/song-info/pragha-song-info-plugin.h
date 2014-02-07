@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -28,6 +28,8 @@
 #include <glyr/cache.h>
 #include "pragha-song-info-pane.h"
 
+#include "src/pragha.h"
+
 #include "plugins/pragha-plugin-macros.h"
 
 G_BEGIN_DECLS
@@ -45,8 +47,9 @@ PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PUBLIC_HEADER (PRAGHA_TYPE_SONG_INFO_PLUGIN,
                                                    PraghaSongInfoPlugin,
                                                    pragha_song_info_plugin)
 
-GlyrDatabase       *pragha_songinfo_plugin_get_cache (PraghaSongInfoPlugin *plugin);
-PraghaSonginfoPane *pragha_songinfo_plugin_get_pane  (PraghaSongInfoPlugin *plugin);
+PraghaApplication  *pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin);
+GlyrDatabase       *pragha_songinfo_plugin_get_cache       (PraghaSongInfoPlugin *plugin);
+PraghaSonginfoPane *pragha_songinfo_plugin_get_pane        (PraghaSongInfoPlugin *plugin);
 
 G_END_DECLS
 

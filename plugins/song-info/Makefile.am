@@ -13,7 +13,11 @@ libsong_info_la_SOURCES =						\
 	pragha-song-info-dialog.h					\
 	pragha-song-info-pane.c						\
 	pragha-song-info-pane.h						\
-	pragha-song-info-thread-pane.c			    \
+	pragha-song-info-thread-albumart.c			\
+	pragha-song-info-thread-albumart.h			\
+	pragha-song-info-thread-dialog.c			\
+	pragha-song-info-thread-dialog.h			\
+	pragha-song-info-thread-pane.c				\
 	pragha-song-info-thread-pane.h
 
 libsong_info_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
