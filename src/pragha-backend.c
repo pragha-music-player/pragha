@@ -372,6 +372,9 @@ pragha_backend_get_state (PraghaBackend *backend)
 static void
 pragha_backend_set_state (PraghaBackend *backend, PraghaBackendState state)
 {
+	if (backend->priv->state == state)
+		return;
+
 	backend->priv->state = state;
 
 	CDEBUG(DBG_BACKEND, "Setting new playback state: %s: ", pragha_playback_state_get_name(state));
