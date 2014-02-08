@@ -1,7 +1,83 @@
 ==============================================================
-Overview of changes in Pragha 1.1.2 since 1.1.1
+Overview of changes between Pragha 1.3.0 and 1.2
 ==============================================================
-  
+
+News:
+	Depends completely on Gtk+3 >= 3.2 and Glib >= 2.32, Gstreamer1 and libcdio_paranoia >= 0.90 [1]
+	Add support to plugins, depending on libpeas >= 1.2
+	 - Port gnome-media-keys, keybinder, mpris2, notify, and song-info.
+	 - Still pending rewrite the lastfm plugin.
+	 - Add SOO-EXPERIMENTAL and INCOMPLET devices plugin.
+	Add a second sidebar on right.
+	 - Just used by the plugin song-info to show lyrics.
+
+Others Changes:
+	Continued with the cleaning, writing, and conversion to GObjects
+	 - PraghaArtCache, PraghaSidebar, and and every plugins.
+	 - PraghaApplication now is based on GtkApplication.
+	Fix many bugs in gtk+3 interface, and fixes deprecations prior 3.10
+
+NOTE:
+[0]	Seems little, but 99% of the work in 1.2 was done here, and then backported.
+[1] Support to Gtk+2 and libcdio_paranoia = 0.83 was removed completely.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.2
+Bugs fixed:
+	Fix thread safety when reading tags.
+	Explicitly specified use normal fonts in the library.
+	Fix seg fault when disable and enable again mpris2.
+
+Updates Translations:
+	New Korean (Korea) translation thanks to Smallsnail.
+	New Vietnamese translation thanks to Ppanhh.
+	Many other updates. Thanks to all.
+
+V1.2.rc
+News:
+	Highlight the headers on library view.
+	Disable all video features of playbin.
+	Add support for embedded album art when gstreamer >= 1.0
+	Add simple appdata.xml to gnome-software.
+
+Others Changes:
+	Continued with the cleaning, writing, and conversion to GObjects
+	* PraghaToolbar, PraghaLibraryPane, PraghaPlaylist, etc.
+	* PraghaApplication is based on GApplication, controlling single instance, and dbus messages.
+	All preferences have been ported to PraghaPreferences
+	Better support to GTK3, and prepare wayland support
+	Require by default Gstreamer >= 1.0
+
+Bugs fixed: (Sumary: The most relevant to the user.)
+	Fix unable to automatically play another song in pragha.
+	Art-cache: fix for case artist or album cointains slash
+	Fix regression on 1.1.2: Return to import playlists.
+	Fix save fuse_folders option when not set folder structure view.
+	No insensitive albumart_in_osd toggle button when change show sytray option.
+	Fix wrong min glib version. g_thread_unref need 2.31
+	Fix updating library view after rescan.
+	Dbus: fix crash on get current state.
+	Fix some coverity defects:
+	* Unused pointer value (UNUSED_VALUE)
+	* Uninitialized scalar variable (UNINIT)
+	* Division or modulo by zero (DIVIDE_BY_ZERO)
+	* Unchecked return value (CHECKED_RETURN)
+	* Unchecked return value from library (CHECKED_RETURN)
+	* Dereference before null check (REVERSE_INULL)
+	* Resource leak (RESOURCE_LEAK)
+	* Explicit null dereferenced (FORWARD_NULL)
+
+NOTE:
+	Gstreamer >= 1.0 is needed by default.
+	* Set the previous version with: ./configure --with-gstreamer=0.10
+	Still depends on libcdio >= 0.83 by default.
+	* To compile with libcdio >= 0.90 use: ./configure CPPFLAGS="-DHAVE_PARANOIA_NEW_INCLUDES"
+	Remove dbus-1 and dbus-glib-1 requirements.
+
+V1.1.2
 News:
 	Improved indexing of the library. Also allows continue listening music while analyzing. [1]
 	The database uses prepared statements, improving the general performance of Pragha.
@@ -44,10 +120,7 @@ Notes:
 [1] Sorry, but also adds a regression. Stop importing playlists.
 [2] To compile, have to comment the line 23 of Pragha.h
 
-==============================================================
-OTHERS REALESES:
-==============================================================
-
+V1.1.1
 News:
 	Add a button to close the sidebar.
 	Use toolbar style to playback controls.
