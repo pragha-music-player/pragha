@@ -76,7 +76,7 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 dnl Check for i18n support
-XDT_I18N([cs de es el fr hu it ja nl no pl pt pt_BR ru sv tr uk zh_CN])
+XDT_I18N([cs de es el fr hu it ja ko_KR nl no pl pt pt_BR ru sv tr uk vi zh_CN])
 
 dnl Check for required packages
 XDT_CHECK_PACKAGE([GSTREAMER], [gstreamer-${GSTREAMER_API_VERSION}], [$GSTREAMER_REQUIRED])

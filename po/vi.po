@@ -3,53 +3,46 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# Pingax <pingax@frugalware.org>, 2013-2014
-# Pingax <pingax@frugalware.org>, 2013
-# Julien Sansous <bambou_puravida@hotmail.com>, 2012
-# Julien Sansous <bambou_puravida@hotmail.com>, 2012
-# Pingax <pingax@frugalware.org>, 2011
-# raphaelh <raphael.huck@gmail.com>, 2011
+# Anh Phan <ppanhh@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-02-08 17:30-0300\n"
-"PO-Revision-Date: 2014-01-29 16:17+0000\n"
-"Last-Translator: Pingax <pingax@frugalware.org>\n"
-"Language-Team: French (http://www.transifex.com/projects/p/Pragha/language/"
-"fr/)\n"
-"Language: fr\n"
+"PO-Revision-Date: 2013-11-20 09:24+0000\n"
+"Last-Translator: matias <mati86dl@gmail.com>\n"
+"Language-Team: Vietnamese (http://www.transifex.com/projects/p/Pragha/"
+"language/vi/)\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../src/info-bar-import-music.c:83
 #, c-format
 msgid "Would you like to import %s to library?"
-msgstr "Voulez-vous importer %s à la bibliothèque ?"
+msgstr ""
 
 #: ../src/info-bar-import-music.c:130
 msgid "Want to upgrade your music library?"
-msgstr "Voulez-vous mettre à jour votre bibiothèque ?"
+msgstr ""
 
 #: ../src/pragha-cmdline.c:206
 msgid "FILENAME"
-msgstr "NOM DE FICHIER"
+msgstr ""
 
 #: ../src/pragha-cmdline.c:267
 msgid "Use --help to see a full list of available command line options."
 msgstr ""
-"Utilisez --help pour obtenir une liste complète des options disponibles de "
-"la ligne de commande."
 
 #: ../src/pragha-equalizer-dialog.c:41
 msgid "Disabled"
-msgstr "Désactivé"
+msgstr "Vô Hiệu Hóa"
 
 #: ../src/pragha-equalizer-dialog.c:42
 msgid "Classical"
-msgstr "Classique"
+msgstr "Classical"
 
 #: ../src/pragha-equalizer-dialog.c:43
 msgid "Club"
@@ -61,31 +54,31 @@ msgstr "Dance"
 
 #: ../src/pragha-equalizer-dialog.c:45
 msgid "Full Bass"
-msgstr "Grave"
+msgstr "Trầm mạnh"
 
 #: ../src/pragha-equalizer-dialog.c:46
 msgid "Full Bass and Treble"
-msgstr "Grave et aigus"
+msgstr "Trầm mạnh và Bổng"
 
 #: ../src/pragha-equalizer-dialog.c:47
 msgid "Full Treble"
-msgstr "Aigus"
+msgstr "Bổng mạnh"
 
 #: ../src/pragha-equalizer-dialog.c:48
 msgid "Laptop Speakers and Headphones"
-msgstr "Hauts-parleurs du portable et casque"
+msgstr "Loa Laptop và Tai nghe"
 
 #: ../src/pragha-equalizer-dialog.c:49
 msgid "Large Hall"
-msgstr "Grande salle"
+msgstr "Đại sảnh lớn"
 
 #: ../src/pragha-equalizer-dialog.c:50
 msgid "Live"
-msgstr "Live"
+msgstr "Nhạc sống"
 
 #: ../src/pragha-equalizer-dialog.c:51
 msgid "Party"
-msgstr "Fête"
+msgstr "Tiệc tùng"
 
 #: ../src/pragha-equalizer-dialog.c:52
 msgid "Pop"
@@ -93,7 +86,7 @@ msgstr "Pop"
 
 #: ../src/pragha-equalizer-dialog.c:53
 msgid "Reggae"
-msgstr "Reggae"
+msgstr "Nhịp mạnh"
 
 #: ../src/pragha-equalizer-dialog.c:54
 msgid "Rock"
@@ -105,7 +98,7 @@ msgstr "Ska"
 
 #: ../src/pragha-equalizer-dialog.c:56
 msgid "Smiley Face Curve"
-msgstr ""
+msgstr "Độ cong khuôn mặt cười"
 
 #: ../src/pragha-equalizer-dialog.c:57
 msgid "Soft"
@@ -121,67 +114,67 @@ msgstr "Techno"
 
 #: ../src/pragha-equalizer-dialog.c:60
 msgid "Custom"
-msgstr "Personnalisé"
+msgstr "Tự chọn"
 
 #. Create the dialog
 #: ../src/pragha-equalizer-dialog.c:293
 msgid "Equalizer"
-msgstr "Egaliseur"
+msgstr "Bộ cân chỉnh tần số"
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:501
 #: ../src/pragha-notify.c:145
 msgid "Unknown Artist"
-msgstr "Artiste inconnu"
+msgstr ""
 
 #: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:508
 #: ../src/pragha-library-pane.c:513 ../src/pragha-notify.c:146
 msgid "Unknown Album"
-msgstr "Album inconnu"
+msgstr ""
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:372
 msgid "Search in playlist"
-msgstr "Rechercher dans la liste de lecture."
+msgstr ""
 
 #: ../src/pragha-filter-dialog.c:379 ../src/pragha-playlist.c:203
 msgid "Add to playback queue"
-msgstr "Ajouter à la liste de lecture"
+msgstr "Thêm vào hàng đợi để phát"
 
 #: ../src/pragha-glyr.c:62 ../src/pragha-glyr.c:84
 msgid "Search _lyric"
-msgstr "Chercher les _paroles"
+msgstr "Tìm _lời nhạc"
 
 #: ../src/pragha-glyr.c:64 ../src/pragha-glyr.c:86
 msgid "Search _artist info"
-msgstr "Chercher les informations de l´_artiste"
+msgstr "Tìm _thông tin về nghệ sĩ"
 
 #: ../src/pragha-glyr.c:218
 #, c-format
 msgid "Lyrics thanks to %s"
-msgstr "Paroles courtoisies de %s"
+msgstr ""
 
 #: ../src/pragha-glyr.c:219 ../src/pragha-toolbar.c:141
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">par</span></small> %s"
+msgstr "%s <small><span weight=\"light\">bởi</span></small> %s"
 
 #: ../src/pragha-glyr.c:223
 #, c-format
 msgid "Artist info"
-msgstr "Informations de l´artiste"
+msgstr ""
 
 #: ../src/pragha-glyr.c:224
 #, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr "%s<small><span weight=\"light\">merci à</span></small>%s"
+msgstr ""
 
 #: ../src/pragha-glyr.c:244
 msgid "Lyrics not found."
-msgstr "Paroles non trouvées"
+msgstr ""
 
 #: ../src/pragha-glyr.c:247
 msgid "Artist information not found."
-msgstr "Informations de l´artiste non trouvées"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:93
 msgid "_Lastfm"
@@ -189,111 +182,111 @@ msgstr "_Lastfm"
 
 #: ../src/pragha-lastfm.c:94 ../src/pragha-lastfm.c:125
 msgid "Love track"
-msgstr "J'aime cette piste"
+msgstr "Track bạn thích"
 
 #: ../src/pragha-lastfm.c:96 ../src/pragha-lastfm.c:127
 msgid "Unlove track"
-msgstr "Je n'aime plus cette piste"
+msgstr "Track bạn không thích"
 
 #: ../src/pragha-lastfm.c:98 ../src/pragha-lastfm.c:768
 msgid "Import a XSPF playlist"
-msgstr "Importer une liste de lecture XSPF"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:100
 msgid "Add favorites"
-msgstr "Ajouter aux favoris"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:102 ../src/pragha-lastfm.c:129
 msgid "Add similar"
-msgstr "Ajouter des pistes similaires"
+msgstr "Thêm vào phần tương tự"
 
 #: ../src/pragha-lastfm.c:255
 msgid "No connection Last.fm has been established."
-msgstr "La connexion à Last.fm n'a pas pu être établie."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:441
 msgid "Last.fm suggested a tag correction"
-msgstr "Last.fm a suggéré la correction de l´étiquette"
+msgstr "Last.fm đề nghị sự chỉnh sửa thẻ đánh dấu dữ liệu"
 
 #: ../src/pragha-lastfm.c:463
 msgid "Love song on Last.fm failed."
-msgstr "J´aime cette chanson sur Last.fm échoué"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:480
 msgid "Unlove song on Last.fm failed."
-msgstr "L'action \"retirer des coup de coeur\" sur Last.fm a échoué"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:584
 #, c-format
 msgid "Added %d songs of %d sugested from Last.fm."
-msgstr "%d pistes ont été ajoutées parmi les %d suggérées par Last.fm."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:587
 #, c-format
 msgid "Last.fm not suggest any similar song."
-msgstr "Last.fm n'a suggéré aucune chanson similaire."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:591
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr "%d pistes ont été ajoutées parmi les %d dernières aimées sur Last.fm."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:594
 #, c-format
 msgid "You had no favorite songs on Last.fm."
-msgstr "Vous n'avez aucune chanson favorite sur Last.fm."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:744 ../src/pragha-playlists-mgmt.c:1054
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
-msgstr "%d chansons ajoutées depuis %d de la liste de lecture importée."
+msgstr ""
 
 #: ../src/pragha-lastfm.c:776 ../src/pragha-menubar.c:401
 msgid "Supported media"
-msgstr "Fichiers pris en charge"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:1010
 msgid "Last.fm submission failed"
-msgstr "La soumission à Last.fm a échoué"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:1012
 msgid "Track scrobbled on Last.fm"
-msgstr "Piste soumise à Last.fm"
+msgstr ""
 
 #: ../src/pragha-lastfm.c:1152
 msgid "Update current song on Last.fm failed."
-msgstr "Mise à jour de la chanson en cours sur Last.fm échouée"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:127
 msgid "_Skip"
-msgstr "Passer"
+msgstr "_Bỏ qua"
 
 #: ../src/pragha-library-pane.c:128
 msgid "S_kip All"
-msgstr "Tout passer"
+msgstr "Bỏ _qua tất cả"
 
 #: ../src/pragha-library-pane.c:129
 msgid "Delete _All"
-msgstr "Tout _supprimer"
+msgstr "Xoá _tất cả"
 
 #: ../src/pragha-library-pane.c:183
 msgid "_Expand library"
-msgstr "_Maximiser la vue de la bibliothèque"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:185
 msgid "_Collapse library"
-msgstr "_Minimiser la vue de la bibliothèque"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:187 ../src/pragha-library-pane.c:1581
 msgid "Folders structure"
-msgstr "Structure des dossiers"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:189 ../src/pragha-library-pane.c:1590
 #: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3273
 #: ../src/pragha-playlist.c:3442 ../src/pragha-statusicon.c:143
 #: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:902
 msgid "Artist"
-msgstr "Artiste"
+msgstr "Nghệ sĩ"
 
 #: ../src/pragha-library-pane.c:191 ../src/pragha-library-pane.c:1599
 #: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3274
@@ -307,103 +300,103 @@ msgstr "Album"
 #: ../src/pragha-playlist.c:3444 ../src/pragha-tags-dialog.c:117
 #: ../src/pragha-tags-dialog.c:912
 msgid "Genre"
-msgstr "Genre"
+msgstr "Thể loại"
 
 #: ../src/pragha-library-pane.c:195 ../src/pragha-library-pane.c:1620
 msgid "Artist / Album"
-msgstr "Artiste / Album"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:197 ../src/pragha-library-pane.c:1644
 msgid "Genre / Album"
-msgstr "Genre / Album"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:199 ../src/pragha-library-pane.c:1632
 msgid "Genre / Artist"
-msgstr "Genre / Artiste"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:201 ../src/pragha-library-pane.c:1659
 msgid "Genre / Artist / Album"
-msgstr "Genre / Artiste / Album"
+msgstr ""
 
 #. Playlist and Radio tree
 #: ../src/pragha-library-pane.c:237
 msgid "_Add to current playlist"
-msgstr "_Ajouter la liste de lecture courante"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:239
 msgid "_Replace current playlist"
-msgstr "_Remplacer la liste de lecture courante"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:241
 msgid "Replace and _play"
-msgstr "Remplacer et _jouer"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:243 ../src/pragha-playlists-mgmt.c:538
 msgid "Rename"
-msgstr "Renommer"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:245
 msgid "Delete"
-msgstr "Enlever"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:247 ../src/pragha-playlists-mgmt.c:1312
 #: ../src/pragha-playlists-mgmt.c:1350 ../src/pragha-playlists-mgmt.c:1401
 #: ../src/pragha-playlists-mgmt.c:1453
 msgid "Export"
-msgstr "Exporter"
+msgstr ""
 
 #. Set dialog properties
 #: ../src/pragha-library-pane.c:249 ../src/pragha-tags-dialog.c:98
 msgid "Edit tags"
-msgstr "Modifier les étiquettes"
+msgstr "Chỉnh sửa thẻ đánh dấu"
 
 #: ../src/pragha-library-pane.c:251
 msgid "Move to _trash"
-msgstr "_Mettre à la corbeille"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:253
 msgid "Delete from library"
-msgstr "Enlever de la bibliothèque"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:506
 msgid "Unknown"
-msgstr "Inconnu"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:518
 msgid "Unknown Genre"
-msgstr "Genre inconnu"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:838
 msgid "Cannot move file to trash, do you want to delete immediately?"
-msgstr "Impossible de mettre à la corbeille ; supprimer immédiatement ?"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:839
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
-msgstr "Le fichier \"%s\" ne peut être mis à la corbeille. Détails : %s"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:1895 ../src/pragha-library-pane.c:1977
 #: ../src/pragha-menubar.c:480 ../src/pragha-mpris.c:816
 #: ../src/pragha-playlists-mgmt.c:644 ../src/pragha-playlists-mgmt.c:671
 msgid "Playlists"
-msgstr "Listes de lecture"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:1911 ../src/pragha-library-pane.c:1986
 msgid "Radios"
-msgstr "Radios"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:1927 ../src/pragha-preferences-dialog.c:872
 #: ../src/pragha-preferences-dialog.c:1188
 msgid "Library"
-msgstr "Bibliothèque"
+msgstr "Thư viện"
 
 #: ../src/pragha-library-pane.c:2482
 msgid "Really want to move the files to trash?"
-msgstr "Êtes-vous sûr de mettre les fichiers à la corbeille ?"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:2484
 msgid "Delete immediately instead of move to trash"
-msgstr "Supprimer immédiatement au lieu de mettre à la corbeille ?"
+msgstr ""
 
 #: ../src/pragha-library-pane.c:2534
 msgid ""
@@ -411,370 +404,359 @@ msgid ""
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr ""
-"Êtes-vous sûr de vouloir supprimer la sélection de la bibliothèque ?\n"
-"\n"
-"Attention: Pour récupérer, il faut rescanner toute la bibliothèque."
 
 #: ../src/pragha-menubar.c:174
 msgid "_Playback"
-msgstr "_Lecture"
+msgstr ""
 
 #: ../src/pragha-menubar.c:175
 msgid "Play_list"
-msgstr "_Liste de lecture"
+msgstr ""
 
 #: ../src/pragha-menubar.c:176
 msgid "_View"
-msgstr "_Vue"
+msgstr ""
 
 #: ../src/pragha-menubar.c:177 ../src/pragha-playlist.c:215
 msgid "_Tools"
-msgstr "_Outils"
+msgstr "_Công cụ"
 
 #: ../src/pragha-menubar.c:178
 msgid "_Help"
-msgstr "_Aide"
+msgstr ""
 
 #: ../src/pragha-menubar.c:179
 msgid "Prev track"
-msgstr "Piste précédente"
+msgstr ""
 
 #: ../src/pragha-menubar.c:181 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
-msgstr "Lecture / Pause"
+msgstr "Phát / Tạm dừng"
 
 #: ../src/pragha-menubar.c:183 ../src/pragha-statusicon.c:87
 msgid "Stop"
-msgstr "Arrêter"
+msgstr "Dừng lại"
 
 #: ../src/pragha-menubar.c:185
 msgid "Next track"
-msgstr "Piste suivante"
+msgstr ""
 
 #: ../src/pragha-menubar.c:187 ../src/pragha-playlist.c:218
 #: ../src/pragha-statusicon.c:91
 msgid "Edit track information"
-msgstr "Editer les étiquettes de la piste"
+msgstr "_Chỉnh sửa thông tin bài nhạc"
 
 #: ../src/pragha-menubar.c:189 ../src/pragha-statusicon.c:93
 msgid "_Quit"
-msgstr "_Quitter"
+msgstr "_Thoát"
 
 #: ../src/pragha-menubar.c:191 ../src/pragha-statusicon.c:77
 msgid "_Add files"
-msgstr "_Ajouter des fichiers"
+msgstr "_Thêm tập tin"
 
 #: ../src/pragha-menubar.c:192
 msgid "Open a media file"
-msgstr "Ouvrir un fichier multimédia"
+msgstr "Mở tập tin media"
 
 #: ../src/pragha-menubar.c:193 ../src/pragha-statusicon.c:79
 msgid "Add Audio _CD"
-msgstr "Ajouter le _CD audio"
+msgstr "Thêm Audio _CD"
 
 #: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:81
 msgid "Add _location"
-msgstr "Ajouter _emplacement"
+msgstr "Thêm _địa điểm"
 
 #: ../src/pragha-menubar.c:197
 msgid "_Add the library"
-msgstr "_Ajouter la bibliothèque"
+msgstr "_Thêm vào thư viện"
 
 #: ../src/pragha-menubar.c:199
 msgid "Remove selection from playlist"
-msgstr "Enlever la séléction de la liste de lecture"
+msgstr ""
 
 #: ../src/pragha-menubar.c:201 ../src/pragha-playlist.c:209
 msgid "Crop playlist"
-msgstr "Récupérer la liste de lecture"
+msgstr "Cắt bỏ danh sách phát"
 
 #: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:211
 msgid "Clear playlist"
-msgstr "Effacer la liste de lecture"
+msgstr "Dọn trống danh sách phát"
 
 #: ../src/pragha-menubar.c:205 ../src/pragha-playlist.c:213
 #: ../src/pragha-playlists-mgmt.c:65 ../src/pragha-playlists-mgmt.c:91
 #: ../src/pragha-playlists-mgmt.c:1231
 msgid "Save playlist"
-msgstr "Sauvegarder la liste de lecture"
+msgstr "Lưu lại danh sách phát"
 
 #: ../src/pragha-menubar.c:206 ../src/pragha-playlist.c:214
 #: ../src/pragha-playlists-mgmt.c:67 ../src/pragha-playlists-mgmt.c:93
 #: ../src/pragha-playlists-mgmt.c:1233
 msgid "Save selection"
-msgstr "Sauvegarder la sélection"
+msgstr "Lưu lại vùng lựa chọn"
 
 #: ../src/pragha-menubar.c:207
 msgid "_Search in playlist"
-msgstr "_Chercher dans la liste de lecture"
+msgstr ""
 
 #: ../src/pragha-menubar.c:209
 msgid "_Preferences"
-msgstr "_Préférences"
+msgstr ""
 
 #: ../src/pragha-menubar.c:211
 msgid "Jump to playing song"
-msgstr "_Aller au morceau en cours de lecture"
+msgstr ""
 
 #: ../src/pragha-menubar.c:213
 msgid "E_qualizer"
-msgstr "Egaliseur"
+msgstr ""
 
 #: ../src/pragha-menubar.c:215
 msgid "_Rescan library"
-msgstr "_Rescanner la bibliothèque"
+msgstr ""
 
 #: ../src/pragha-menubar.c:217
 msgid "_Update library"
-msgstr "_Mise à jour de la bibliothèque"
+msgstr ""
 
 #: ../src/pragha-menubar.c:219
 msgid "_Statistics"
-msgstr "_Statistiques"
+msgstr ""
 
 #: ../src/pragha-menubar.c:221
 msgid "Homepage"
-msgstr "Site Internet"
+msgstr ""
 
 #: ../src/pragha-menubar.c:223
 msgid "Community"
-msgstr "Communauté"
+msgstr ""
 
 #: ../src/pragha-menubar.c:225
 msgid "Wiki"
-msgstr "Wiki"
+msgstr ""
 
 #: ../src/pragha-menubar.c:227
 msgid "Translate Pragha"
-msgstr "Traduire Pragha"
+msgstr ""
 
 #: ../src/pragha-menubar.c:229 ../src/pragha-statusicon.c:75
 msgid "About"
-msgstr "À propos"
+msgstr "Dịch bởi Vietnamesel10n"
 
 #: ../src/pragha-menubar.c:234
 msgid "_Shuffle"
-msgstr "Lecture a_léatoire"
+msgstr ""
 
 #: ../src/pragha-menubar.c:237
 msgid "_Repeat"
-msgstr "Lecture en _boucle"
+msgstr ""
 
 #: ../src/pragha-menubar.c:240
 msgid "_Fullscreen"
-msgstr "_Plein écran"
+msgstr ""
 
 #: ../src/pragha-menubar.c:243
 msgid "Lateral _panel"
-msgstr "_Panneau latéral"
+msgstr "_Khung điều khiển phía bên"
 
 #: ../src/pragha-menubar.c:246
 msgid "Playback controls below"
-msgstr "Contrôles de lecture en dessous"
+msgstr ""
 
 #: ../src/pragha-menubar.c:249
 msgid "Status bar"
-msgstr "Barre d'état"
+msgstr ""
 
 #: ../src/pragha-menubar.c:357
 msgid "Select a file to play"
-msgstr "Sélectionner un fichier à jouer"
+msgstr ""
 
 #: ../src/pragha-menubar.c:379
 msgid "Add recursively files"
-msgstr "Ajouter les fichiers récursivement"
+msgstr ""
 
 #: ../src/pragha-menubar.c:483
 msgid "All files"
-msgstr "Tous les fichiers"
+msgstr ""
 
 #: ../src/pragha-menubar.c:564
 msgid "Enter the URL of an internet radio stream"
-msgstr "Entrer l´URL d´un flux radio internet"
+msgstr ""
 
 #: ../src/pragha-menubar.c:569
 msgid "Give it a name to save"
-msgstr "Nommer pour enregistrer"
+msgstr ""
 
 #: ../src/pragha-menubar.c:587
 msgid "Add a location"
-msgstr "Ajouter un emplacement"
+msgstr ""
 
 #: ../src/pragha-menubar.c:950
 msgid "Total Tracks:"
-msgstr "Pistes :"
+msgstr ""
 
 #: ../src/pragha-menubar.c:952
 msgid "Total Artists:"
-msgstr "Artistes :"
+msgstr ""
 
 #: ../src/pragha-menubar.c:954
 msgid "Total Albums:"
-msgstr "Albums :"
+msgstr ""
 
 #: ../src/pragha-menubar.c:957
 msgid "Statistics"
-msgstr "Statistiques"
+msgstr ""
 
 #: ../src/pragha-menubar.c:983
 msgid "translator-credits"
 msgstr ""
-"Raphaël Huck <raphael.huck@gmail.com>\n"
-"Olivier Karquel <yellowspoon@free.fr>\n"
-"Raphael Tournoy <lexpas@free.fr>\n"
-"Laurent Coudeur <laurentc@iol.ie>\n"
-"Stéphane Raimbault  <stephane.raimbault@gmail.com>\n"
-"Robert-André Mauchin <zebob.m@pengzone.org>\n"
-"Quentin Peten <hidden e-mail>"
 
 #: ../src/pragha-notify.c:144
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "par <b>%s</b> dans <b>%s</b> <b>(%s)</b>"
+msgstr ""
 
 #: ../src/pragha-notify.c:161 ../src/pragha-statusicon.c:83
 msgid "Prev Track"
-msgstr "Piste précédente"
+msgstr "Track trước đó"
 
 #: ../src/pragha-notify.c:165 ../src/pragha-statusicon.c:89
 #: ../src/pragha-toolbar.c:739
 msgid "Next Track"
-msgstr "Piste suivante"
+msgstr "Track tiếp theo"
 
 #. Create labels
 #: ../src/pragha-playlist.c:113 ../src/pragha-playlist.c:3272
 #: ../src/pragha-playlist.c:3441 ../src/pragha-statusicon.c:142
 #: ../src/pragha-tags-dialog.c:114 ../src/pragha-tags-dialog.c:897
 msgid "Title"
-msgstr "Titre"
+msgstr "Tiêu đề"
 
 #: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3276
 #: ../src/pragha-playlist.c:3445 ../src/pragha-tags-dialog.c:618
 msgid "Bitrate"
-msgstr "Débit binaire"
+msgstr "Tốc độ bit"
 
 #: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3277
 #: ../src/pragha-playlist.c:3446 ../src/pragha-tags-dialog.c:119
 msgid "Year"
-msgstr "Année"
+msgstr "Năm"
 
 #: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3278
 #: ../src/pragha-playlist.c:3447 ../src/pragha-tags-dialog.c:120
 #: ../src/pragha-tags-dialog.c:917
 msgid "Comment"
-msgstr "Commentaire"
+msgstr "Bình luận"
 
 #. Create labels
 #: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3279
 #: ../src/pragha-playlist.c:3448 ../src/pragha-statusicon.c:145
 #: ../src/pragha-tags-dialog.c:617
 msgid "Length"
-msgstr "Durée"
+msgstr "Độ dài"
 
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3280
 #: ../src/pragha-playlist.c:3449 ../src/pragha-tags-dialog.c:622
 msgid "Filename"
-msgstr "Nom du fichier"
+msgstr "Tên tập tin"
 
 #: ../src/pragha-playlist.c:205
 msgid "Remove to playback queue"
-msgstr "Enlever de la liste de lecture"
+msgstr "Loại khỏi danh sách hàng đợi"
 
 #: ../src/pragha-playlist.c:207
 msgid "Remove from playlist"
-msgstr "Enlever de la liste de lecture"
+msgstr "Loại bỏ khỏi danh sách phát"
 
 #: ../src/pragha-playlist.c:2405
 #, c-format
 msgid "Copy \"%i\" to selected track numbers"
-msgstr ""
+msgstr "Sao chép \"%i\" đến số track được chọn"
 
 #: ../src/pragha-playlist.c:2411
 #, c-format
 msgid "Copy \"%s\" to selected titles"
-msgstr ""
+msgstr "Sao chép \"%s\" vào các tiêu đề được chọn"
 
 #: ../src/pragha-playlist.c:2417
 #, c-format
 msgid "Copy \"%s\" to selected artists"
-msgstr ""
+msgstr "Sao chép \"%s\" vào các nghệ sĩ được chọn"
 
 #: ../src/pragha-playlist.c:2423
 #, c-format
 msgid "Copy \"%s\" to selected albums"
-msgstr "Copier \"%s\" aux albums sélectionnés"
+msgstr "Sao chép \"%s\" vào các album được chọn"
 
 #: ../src/pragha-playlist.c:2429
 #, c-format
 msgid "Copy \"%s\" to selected genres"
-msgstr "Copier \"%s\" aux genres sélectionnés"
+msgstr "Sao chép \"%s\" vào loại nhạc được chọn"
 
 #: ../src/pragha-playlist.c:2435
 #, c-format
 msgid "Copy \"%i\" to selected years"
-msgstr "Copier \"%i\" aux années sélectionnées"
+msgstr "Sao chép \"%i\" vào năm được chọn"
 
 #: ../src/pragha-playlist.c:2441
 #, c-format
 msgid "Copy \"%s\" to selected comments"
-msgstr "Copier \"%s\" aux commentaires sélectionnés"
+msgstr "Sao chép \"%s\" vào bình luận được chọn"
 
 #. Create the checkmenu items
 #: ../src/pragha-playlist.c:3271 ../src/pragha-playlist.c:3440
 #: ../src/pragha.c:184
 msgid "Track"
 msgid_plural "Tracks"
-msgstr[0] ""
-msgstr[1] "Piste"
+msgstr[0] "Track"
 
 #: ../src/pragha-playlist.c:3283
 msgid "Clear sort"
-msgstr "Annule le tri"
+msgstr "Dọn trống phần sắp xếp"
 
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-preferences-dialog.c:951
 msgid "Playlist"
-msgstr "Liste de lecture"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:128
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b> est un nom de liste de lecture réservé"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:152
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
-msgstr "Voulez-vous remplacer la liste de lecture: %s ?"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:529
 msgid "Choose a new name"
-msgstr "Choisir un nouveau nom"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:582
 #, c-format
 msgid "Do you want to delete the item: %s ?"
-msgstr "Voulez-vous effacer le champ: %s ?"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:612
 msgid "Export playlist to file"
-msgstr "Exporter la liste de lecture dans un fichier"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1207
 msgid "What do you want to do?"
-msgstr "Que voulez-vous faire ?"
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1209
 #, c-format
 msgid "Replace the playlist \"%s\""
-msgstr "Remplace la liste de lecture \"%s\""
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1214
 #, c-format
 msgid "Add to playlist \"%s\""
-msgstr "Ajouter à la liste de lecture \"%s\""
+msgstr ""
 
 #: ../src/pragha-playlists-mgmt.c:1307 ../src/pragha-playlists-mgmt.c:1345
 #: ../src/pragha-playlists-mgmt.c:1390 ../src/pragha-playlists-mgmt.c:1442
 msgid "New playlist"
-msgstr "Nouvelle liste de lecture"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:81
 msgid ""
@@ -782,280 +764,279 @@ msgid ""
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
-"Les motifs doivent être de la forme : <nom du fichier>;<nom du fichier>;...\n"
-"Un maximum de six motifs est autorisé.\n"
-"Les wildcards ne sont pas encore acceptés (les patchs sont les "
-"bienvenus :-) )."
+"Mẫu đặt tên nên theo dạng :<filename> ;<filename> ;....\n"
+"Cho phép một mẫu có tối đa bốn thành tố.\n"
+"Không chấp nhận các ký tự đặc biệt ( sẽ được cập nhật ở phiên bản "
+"sau   :-) )."
 
 #: ../src/pragha-preferences-dialog.c:103
 msgid "Album art pattern"
-msgstr "Motif à l'emplacement de la Pochette"
+msgstr "Mẫu đặt tên dành cho Album art"
 
 #: ../src/pragha-preferences-dialog.c:264
 #: ../src/pragha-preferences-dialog.c:1016
 msgid "Start normal"
-msgstr "Démarrer normalement"
+msgstr "Khởi chạy theo kiểu thông thường"
 
 #: ../src/pragha-preferences-dialog.c:268
 #: ../src/pragha-preferences-dialog.c:1017
 msgid "Start fullscreen"
-msgstr "Démarrer en mode plein écran"
+msgstr "Khởi chạy ở chế độ toàn màn hình"
 
 #: ../src/pragha-preferences-dialog.c:272
 #: ../src/pragha-preferences-dialog.c:1018
 msgid "Start in system tray"
-msgstr "Démarer minimisé"
+msgstr "Khởi chạy và thu nhỏ ở khay hệ thống"
 
 #. Create a folder chooser dialog
 #: ../src/pragha-preferences-dialog.c:442
 msgid "Select a folder to add to library"
-msgstr "Sélectionner un répertoire à ajouter à la bibliothèque"
+msgstr "Chọn một thư mục để thêm vào thư viện"
 
 #. Labels
 #: ../src/pragha-preferences-dialog.c:795
 #: ../src/pragha-preferences-dialog.c:1186
 msgid "Audio"
-msgstr "Audio"
+msgstr "Âm Thanh"
 
 #: ../src/pragha-preferences-dialog.c:797
 msgid "Audio sink"
-msgstr "Pilote audio"
+msgstr "Audio sink"
 
 #: ../src/pragha-preferences-dialog.c:801
 #: ../src/pragha-preferences-dialog.c:820
 #: ../src/pragha-preferences-dialog.c:826
 msgid "Restart Required"
-msgstr "Redémarrage obligatoire"
+msgstr "Cần khởi động lại"
 
 #: ../src/pragha-preferences-dialog.c:816
 msgid "Audio Device"
-msgstr "Périphérique audio"
+msgstr "Thiết bị âm thanh"
 
 #: ../src/pragha-preferences-dialog.c:825
 msgid "Use software mixer"
-msgstr "Utiliser un logiciel de mixage"
+msgstr "Sử dụng phần mềm phối nhạc"
 
 #: ../src/pragha-preferences-dialog.c:830
 msgid "Audio CD"
-msgstr "Disque audio"
+msgstr "Đĩa CD âm thanh"
 
 #: ../src/pragha-preferences-dialog.c:832
 msgid "Audio CD Device"
-msgstr "Périphérique CD Audio"
+msgstr "Thiết bị Audio CD "
 
 #: ../src/pragha-preferences-dialog.c:880
 msgid "Folders"
-msgstr "Répertoires"
+msgstr "Thư mục"
 
 #: ../src/pragha-preferences-dialog.c:916
 msgid "Merge folders in the folders estructure view"
-msgstr "Fusionner les dossiers dans la vue hiérarchique"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:919
 msgid "Sort albums by release year"
-msgstr "Trier les albums par année de sortie"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:953
 msgid "Highlight rows on current playlist"
-msgstr "Surligner les lignes dans la liste de lecture courante"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:956
 msgid "Controls"
-msgstr "Contrôles"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:958
 msgid "Show Album art in Panel"
-msgstr "Montrer la pochette d'album dans le panneau"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:961
 msgid "Size of Album art"
-msgstr "Taille de la pochette"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:966
 msgid "Album art file pattern"
-msgstr "Motif à l'emplacement de la pochette"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1004
 msgid "Search"
-msgstr "Recherche"
+msgstr ""
 
 #. Instant search.
 #: ../src/pragha-preferences-dialog.c:1006 ../src/pragha-search-entry.c:40
 msgid "Refine the search while writing"
-msgstr "Affiner la recherche en cours de frappe"
+msgstr ""
 
 #. Aproximate search.
 #: ../src/pragha-preferences-dialog.c:1009 ../src/pragha-search-entry.c:47
 msgid "Search approximate words"
-msgstr "Rechercher les termes ressemblant"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1012
 msgid "When starting pragha"
-msgstr "Lors du lancement de pragha"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1015
 msgid "Remember last window state"
-msgstr "Se rappeler de la disposition de la fenêtre"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1021
 msgid "Restore last playlist"
-msgstr "Restaurer la dernière liste de lecture"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1024
 msgid "When adding folders"
-msgstr "Lors de l'ajout de dossiers"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1025
 msgid "Add files recursively"
-msgstr "Ajouter les fichiers récursivement"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1052
 #: ../src/pragha-preferences-dialog.c:1190
 msgid "Desktop"
-msgstr "Bureau"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1054
 msgid "Show Pragha icon in the notification area"
-msgstr "Afficher l'icône de pragha dans la zone de notification"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1057
 msgid "Minimize Pragha when close the window"
-msgstr "Minimiser Pragha lors de la fermeture de la fenetre"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1060
 msgid "Notifications"
-msgstr "Notifications"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1062
 msgid "Show OSD for track change"
-msgstr "Afficher une notification lors d'un changement de piste"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1065
 msgid "Show Album art in notifications"
-msgstr "Afficher les pochettes des albums dans les notifications"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1068
 msgid "Add actions to change track to notifications"
-msgstr "Ajouter les actions sur les pistes dans les notifications"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1109
 msgid "Last.fm Support"
-msgstr "Support Last.fm"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1112
 msgid "Username"
-msgstr "Identifiant"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1119
 msgid "Password"
-msgstr "Mot de passe"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1129
 msgid "Others services"
-msgstr "Autres services"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1132
 msgid "Get album art"
-msgstr "Récupérer la pochette de l'album"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1135
 msgid "Connect to CDDB server"
-msgstr "Se connecter au serveur CDDB"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1138
 msgid "Allow remote control with MPRIS2 interface"
-msgstr "Autoriser le contrôle à distance avec l'interface MPRIS2"
+msgstr ""
 
 #. The main preferences dialog
 #. Add to dialog
 #: ../src/pragha-preferences-dialog.c:1177
 #: ../src/pragha-preferences-dialog.c:1219
 msgid "Preferences of Pragha"
-msgstr "Préférences de Pragha"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1187
 msgid "Appearance"
-msgstr "Apparence"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1189
 msgid "General"
-msgstr "Général"
+msgstr ""
 
 #: ../src/pragha-preferences-dialog.c:1191
 msgid "Services"
-msgstr "Servicse"
+msgstr ""
 
 #: ../src/pragha-scanner.c:88
 #, c-format
 msgid "%i files analized of %i detected"
-msgstr "%i fichiers analysés sur %i détectés"
+msgstr ""
 
 #: ../src/pragha-scanner.c:94
 msgid "Searching files to analyze"
-msgstr "Recherche de fichiers à analyser"
+msgstr ""
 
 #: ../src/pragha-scanner.c:225
 msgid "Library scan complete"
-msgstr "Scan de la bibliothèque terminé"
+msgstr ""
 
 #: ../src/pragha-statusicon.c:137 ../src/pragha-toolbar.c:160
 #: ../src/pragha-toolbar.c:415
 msgid "<b>Not playing</b>"
-msgstr "<b>Arrêté</b>"
+msgstr "<b>Hiện không phát bài nào</b>"
 
 #: ../src/pragha-tags-dialog.c:118
 msgid "Track No"
-msgstr "Piste n°"
+msgstr "Số hiệu track"
 
 #: ../src/pragha-tags-dialog.c:121
 msgid "File"
-msgstr "Fichier"
+msgstr "Tập tin"
 
 #. The main edit dialog
 #: ../src/pragha-tags-dialog.c:501 ../src/pragha-tags-dialog.c:719
 msgid "Details"
-msgstr "Détails"
+msgstr "Chi tiết"
 
 #: ../src/pragha-tags-dialog.c:602
 msgid "channel"
 msgid_plural "channels"
-msgstr[0] "canal"
-msgstr[1] "canaux"
+msgstr[0] ""
 
 #: ../src/pragha-tags-dialog.c:619
 msgid "Channels"
-msgstr "Chaînes"
+msgstr "Kênh"
 
 #: ../src/pragha-tags-dialog.c:620
 msgid "Samplerate"
-msgstr "Fréquence d'échantillonnage"
+msgstr "Tỉ lệ mẫu"
 
 #: ../src/pragha-tags-dialog.c:621
 msgid "Folder"
-msgstr "Répertoire"
+msgstr "Thư mục"
 
 #: ../src/pragha-tags-dialog.c:890
 msgid "Selection to"
-msgstr "Sélection vers"
+msgstr "Chọn đến"
 
 #: ../src/pragha-tags-dialog.c:928
 msgid "Open folder"
-msgstr "Ouvrir le répertoire"
+msgstr "Mở thư mục"
 
 #: ../src/pragha-tags-mgmt.c:182
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
 msgstr ""
-"Désirez-vous modifier le numéro de piste à TOUTES les pistes sélectionnées "
-"pour le numéro : %d ?"
+"Bạn có muốn thiết lập số hiệu track đối với toàn bộ các track được chọn "
+"thành: %d hay không?"
 
 #: ../src/pragha-tags-mgmt.c:200
 #, c-format
 msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
 msgstr ""
-"Désirez-vous modifier la balise titre de TOUTES les pistes sélectionnées "
-"pour : %s ?"
+"Bạn có muốn thiết lập thẻ đánh dấu dữ liệu của tiêu đề đối với toàn bộ các "
+"track được chọn thành: %s hay không?"
 
 #: ../src/pragha-toolbar.c:136
 #, c-format
@@ -1063,47 +1044,46 @@ msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
-"%s <small><span weight=\"light\">par</span></small> %s <small><span weight="
-"\"light\">de</span></small> %s"
+"%s <small><span weight=\"light\">bởi</span></small> %s <small><span weight="
+"\"light\">trong</span></small> %s"
 
 #: ../src/pragha-toolbar.c:145
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">de</span></small> %s"
+msgstr "%s <small><span weight=\"light\">trong</span></small> %s"
 
 #: ../src/pragha-toolbar.c:724
 msgid "Previous Track"
-msgstr "Piste précédente"
+msgstr "Track trước đó"
 
 #: ../src/pragha-toolbar.c:729
 msgid "Play / Pause Track"
-msgstr "Lecture / Pause de la piste"
+msgstr "Phát / Tạm dừng track"
 
 #: ../src/pragha-toolbar.c:734
 msgid "Stop playback"
-msgstr "Arrêter la lecture"
+msgstr "Dừng chế độ phát lại"
 
 #: ../src/pragha-toolbar.c:772
 msgid "Leave Fullscreen"
-msgstr "Quitter le mode plein écran"
+msgstr "Thoát khỏi toàn màn hình"
 
 #: ../src/pragha-toolbar.c:778
 msgid "Play songs in a random order"
-msgstr "Lire les morceaux en ordre aléatoire"
+msgstr "Phát nhạc theo thứ tự ngẫu nhiên"
 
 #: ../src/pragha-toolbar.c:783
 msgid "Repeat playback list at the end"
-msgstr "Répéter la lecture jusqu'à la fin"
+msgstr "Lặp lại danh sách ở phần cuối"
 
 #: ../src/pragha-utils.c:285
 msgid "day"
 msgid_plural "days"
 msgstr[0] ""
-msgstr[1] "jour"
 
 #: ../src/pragha-utils.c:521
 msgid "Unable to open the browser"
-msgstr "Impossible d'ouvrir le navigateur"
+msgstr ""
 
 #: ../src/pragha-window.c:113
 #, c-format
@@ -1112,19 +1092,19 @@ msgid ""
 "(%s)\n"
 "<b>Reason:</b> %s"
 msgstr ""
-"<b>Erreur à la lecture de la piste courante</b>⏎\n"
-"(%s)⏎\n"
-"<b>Raison:</b> %s"
+"<b>Xảy ra lỗi với track đang được phát.</b>\n"
+"(%s)\n"
+"<b>Nguyên nhân :</b> %s"
 
 #. Setup application name and pulseaudio role
 #: ../src/pragha.c:374 ../src/pragha.c:745
 msgid "Pragha Music Player"
-msgstr "Lecture de musique Pragha"
+msgstr ""
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
-msgstr "Lecteur de musique"
+msgstr ""
 
 #: ../data/pragha.desktop.in.h:2
 msgid "Manage and listen to music"
-msgstr "Gérer et écouter de la musique"
+msgstr ""
