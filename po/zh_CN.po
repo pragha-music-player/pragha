@@ -1,1071 +1,1092 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
+# 
 # Translators:
-# 乐群 陈 <chenlequn22@gmail.com>, 2012.
+# 乐群 陈 <chenlequn22@gmail.com>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-17 20:10-0300\n"
-"PO-Revision-Date: 2013-02-11 02:54+0000\n"
+"POT-Creation-Date: 2013-11-08 14:09-0300\n"
+"PO-Revision-Date: 2013-11-20 09:24+0000\n"
 "Last-Translator: matias <mati86dl@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: zh_CN\n"
+"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/Pragha/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ../src/equalizer.c:23
+#: ../src/info-bar-import-music.c:83
+#, c-format
+msgid "Would you like to import %s to library?"
+msgstr ""
+
+#: ../src/info-bar-import-music.c:130
+msgid "Want to upgrade your music library?"
+msgstr ""
+
+#: ../src/pragha-cmdline.c:206
+msgid "FILENAME"
+msgstr ""
+
+#: ../src/pragha-cmdline.c:267
+msgid "Use --help to see a full list of available command line options."
+msgstr ""
+
+#: ../src/pragha-equalizer-dialog.c:41
 msgid "Disabled"
 msgstr ""
 
-#: ../src/equalizer.c:24
+#: ../src/pragha-equalizer-dialog.c:42
 msgid "Classical"
 msgstr ""
 
-#: ../src/equalizer.c:25
+#: ../src/pragha-equalizer-dialog.c:43
 msgid "Club"
 msgstr ""
 
-#: ../src/equalizer.c:26
+#: ../src/pragha-equalizer-dialog.c:44
 msgid "Dance"
 msgstr ""
 
-#: ../src/equalizer.c:27
+#: ../src/pragha-equalizer-dialog.c:45
 msgid "Full Bass"
 msgstr ""
 
-#: ../src/equalizer.c:28
+#: ../src/pragha-equalizer-dialog.c:46
 msgid "Full Bass and Treble"
 msgstr ""
 
-#: ../src/equalizer.c:29
+#: ../src/pragha-equalizer-dialog.c:47
 msgid "Full Treble"
 msgstr ""
 
-#: ../src/equalizer.c:30
+#: ../src/pragha-equalizer-dialog.c:48
 msgid "Laptop Speakers and Headphones"
 msgstr ""
 
-#: ../src/equalizer.c:31
+#: ../src/pragha-equalizer-dialog.c:49
 msgid "Large Hall"
 msgstr ""
 
-#: ../src/equalizer.c:32
+#: ../src/pragha-equalizer-dialog.c:50
 msgid "Live"
 msgstr ""
 
-#: ../src/equalizer.c:33
+#: ../src/pragha-equalizer-dialog.c:51
 msgid "Party"
 msgstr ""
 
-#: ../src/equalizer.c:34
+#: ../src/pragha-equalizer-dialog.c:52
 msgid "Pop"
 msgstr ""
 
-#: ../src/equalizer.c:35
+#: ../src/pragha-equalizer-dialog.c:53
 msgid "Reggae"
 msgstr ""
 
-#: ../src/equalizer.c:36
+#: ../src/pragha-equalizer-dialog.c:54
 msgid "Rock"
 msgstr ""
 
-#: ../src/equalizer.c:37
+#: ../src/pragha-equalizer-dialog.c:55
 msgid "Ska"
 msgstr ""
 
-#: ../src/equalizer.c:38
+#: ../src/pragha-equalizer-dialog.c:56
 msgid "Smiley Face Curve"
 msgstr ""
 
-#: ../src/equalizer.c:39
+#: ../src/pragha-equalizer-dialog.c:57
 msgid "Soft"
 msgstr ""
 
-#: ../src/equalizer.c:40
+#: ../src/pragha-equalizer-dialog.c:58
 msgid "Soft Rock"
 msgstr ""
 
-#: ../src/equalizer.c:41
+#: ../src/pragha-equalizer-dialog.c:59
 msgid "Techno"
 msgstr ""
 
-#: ../src/equalizer.c:42
+#: ../src/pragha-equalizer-dialog.c:60
 msgid "Custom"
 msgstr ""
 
 #. Create the dialog
-#: ../src/equalizer.c:249
+#: ../src/pragha-equalizer-dialog.c:293
 msgid "Equalizer"
 msgstr ""
 
-#: ../src/gui.c:154 ../src/panel.c:224 ../src/statusicon.c:101
-msgid "<b>Not playing</b>"
-msgstr "<b>未播放</b>"
+#: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:499
+#: ../src/pragha-notify.c:145
+msgid "Unknown Artist"
+msgstr "未知歌手"
 
-#: ../src/gui.c:165
-msgid "Last.fm suggested a tag correction"
+#: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:506
+#: ../src/pragha-library-pane.c:511 ../src/pragha-notify.c:146
+msgid "Unknown Album"
+msgstr "未知专辑"
+
+#. The search dialog
+#: ../src/pragha-filter-dialog.c:372
+msgid "Search in playlist"
 msgstr ""
 
-#: ../src/gui.c:376
+#: ../src/pragha-filter-dialog.c:379 ../src/pragha-playlist.c:201
+msgid "Add to playback queue"
+msgstr "添加到播放队列"
+
+#: ../src/pragha-glyr.c:62 ../src/pragha-glyr.c:84
+msgid "Search _lyric"
+msgstr "搜索歌词(_l)"
+
+#: ../src/pragha-glyr.c:64 ../src/pragha-glyr.c:86
+msgid "Search _artist info"
+msgstr "查找艺人信息(_a)"
+
+#: ../src/pragha-glyr.c:218
 #, c-format
-msgid ""
-"<b>Error playing current track.</b>\n"
-"(%s)\n"
-"<b>Reason:</b> %s"
+msgid "Lyrics thanks to %s"
 msgstr ""
-"<b>无法播放当前曲目</b>\n"
-"(%s)\n"
-"<b>原因是：</b> %s"
 
-#: ../src/pragha.h:133 ../src/tags.c:636
-msgid "Track No"
-msgstr "曲目标号"
-
-#. Create labels
-#: ../src/pragha.h:134 ../src/pragha-playlist.c:2998
-#: ../src/pragha-playlist.c:3173 ../src/statusicon.c:105 ../src/tags.c:568
-#: ../src/tags.c:632
-msgid "Title"
-msgstr "标题"
-
-#: ../src/pragha.h:135 ../src/pragha-playlist.c:2999
-#: ../src/pragha-playlist.c:3174 ../src/pragha-library-pane.c:52
-#: ../src/pragha-library-pane.c:1412 ../src/statusicon.c:106 ../src/tags.c:571
-#: ../src/tags.c:633
-msgid "Artist"
-msgstr "歌手"
-
-#: ../src/pragha.h:136 ../src/pragha-playlist.c:3000
-#: ../src/pragha-playlist.c:3175 ../src/pragha-library-pane.c:54
-#: ../src/pragha-library-pane.c:1421 ../src/statusicon.c:107 ../src/tags.c:574
-#: ../src/tags.c:634
-msgid "Album"
-msgstr "专辑"
-
-#: ../src/pragha.h:137 ../src/pragha-playlist.c:3001
-#: ../src/pragha-playlist.c:3176 ../src/pragha-library-pane.c:56
-#: ../src/pragha-library-pane.c:1430 ../src/tags.c:577 ../src/tags.c:635
-msgid "Genre"
-msgstr "类型"
-
-#: ../src/pragha.h:138 ../src/pragha-playlist.c:3002
-#: ../src/pragha-playlist.c:3177 ../src/tags.c:178
-msgid "Bitrate"
-msgstr "比特率"
-
-#: ../src/pragha.h:139 ../src/pragha-playlist.c:3003
-#: ../src/pragha-playlist.c:3178 ../src/tags.c:637
-msgid "Year"
-msgstr "年份"
-
-#: ../src/pragha.h:140 ../src/pragha-playlist.c:3004
-#: ../src/pragha-playlist.c:3179 ../src/tags.c:580 ../src/tags.c:638
-msgid "Comment"
-msgstr "注释"
-
-#. Create labels
-#: ../src/pragha.h:141 ../src/pragha-playlist.c:3005
-#: ../src/pragha-playlist.c:3180 ../src/statusicon.c:108 ../src/tags.c:177
-msgid "Length"
-msgstr "长度"
-
-#: ../src/pragha.h:142 ../src/pragha-playlist.c:3006
-#: ../src/pragha-playlist.c:3181 ../src/tags.c:182
-msgid "Filename"
-msgstr "文件名"
-
-#: ../src/pragha.h:289
-msgid "_Skip"
-msgstr "跳过(_S)"
-
-#: ../src/pragha.h:290
-msgid "S_kip All"
-msgstr "跳过全部(_k)"
-
-#: ../src/pragha.h:291
-msgid "Delete _All"
-msgstr "删除全部(_A)"
-
-#: ../src/panel.c:196
-#, c-format
-msgid ""
-"%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
-"\"light\">in</span></small> %s"
-msgstr ""
-"%s <small><span weight=\"light\">由</span></small> %s <small><span weight="
-"\"light\">位于</span></small> %s"
-
-#: ../src/panel.c:201 ../src/glyr-related.c:159
+#: ../src/pragha-glyr.c:219 ../src/pragha-toolbar.c:141
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr "%s <small><span weight=\"light\">由</span></small> %s"
 
-#: ../src/panel.c:205
+#: ../src/pragha-glyr.c:223
 #, c-format
-msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">于</span></small> %s"
+msgid "Artist info"
+msgstr "艺人信息"
 
-#: ../src/panel.c:500
-msgid "Previous Track"
-msgstr "上一首歌曲"
+#: ../src/pragha-glyr.c:224
+#, c-format
+msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
+msgstr ""
 
-#: ../src/panel.c:509
-msgid "Play / Pause Track"
-msgstr "播放/暂停歌曲"
+#: ../src/pragha-glyr.c:244
+msgid "Lyrics not found."
+msgstr ""
 
-#: ../src/panel.c:518
-msgid "Stop playback"
-msgstr "停止播放"
+#: ../src/pragha-glyr.c:247
+msgid "Artist information not found."
+msgstr "没有找到艺人信息"
 
-#: ../src/panel.c:527 ../src/statusicon.c:62 ../src/notify.c:124
-msgid "Next Track"
-msgstr "下一首"
-
-#: ../src/panel.c:571
-msgid "Leave Fullscreen"
-msgstr "离开全屏"
-
-#: ../src/panel.c:579
-msgid "Play songs in a random order"
-msgstr "乱序播放"
-
-#: ../src/panel.c:587
-msgid "Repeat playback list at the end"
-msgstr "重复播放"
-
-#: ../src/pragha-playlist.c:61
-msgid "Add to playback queue"
-msgstr "添加到播放队列"
-
-#: ../src/pragha-playlist.c:63
-msgid "Remove to playback queue"
-msgstr "从播放队列中移除"
-
-#: ../src/pragha-playlist.c:65
-msgid "Remove from playlist"
-msgstr "从播放列表中删除"
-
-#: ../src/pragha-playlist.c:67 ../src/menu.c:133
-msgid "Crop playlist"
-msgstr "清空播放列表"
-
-#: ../src/pragha-playlist.c:69 ../src/menu.c:135
-msgid "Clear playlist"
-msgstr "清空播放列表"
-
-#: ../src/pragha-playlist.c:71 ../src/menu.c:137 ../src/playlist.c:35
-#: ../src/playlist.c:61 ../src/playlist.c:1053
-msgid "Save playlist"
-msgstr "保存播放列表"
-
-#: ../src/pragha-playlist.c:72 ../src/menu.c:138 ../src/playlist.c:37
-#: ../src/playlist.c:63 ../src/playlist.c:1055
-msgid "Save selection"
-msgstr "保存所选"
-
-#: ../src/pragha-playlist.c:73 ../src/menu.c:111
-msgid "_Tools"
-msgstr "工具(_T)"
-
-#: ../src/pragha-playlist.c:75 ../src/pragha-playlist.c:80 ../src/menu.c:148
-#: ../src/menu.c:153
-msgid "Search _lyric"
-msgstr "搜索歌词(_l)"
-
-#: ../src/pragha-playlist.c:77 ../src/pragha-playlist.c:82 ../src/menu.c:150
-#: ../src/menu.c:155
-msgid "Search _artist info"
-msgstr "查找艺人信息(_a)"
-
-#: ../src/pragha-playlist.c:85 ../src/menu.c:158
+#: ../src/pragha-lastfm.c:93
 msgid "_Lastfm"
 msgstr "_Last.FM"
 
-#: ../src/pragha-playlist.c:87 ../src/pragha-playlist.c:94 ../src/menu.c:160
-#: ../src/menu.c:171
+#: ../src/pragha-lastfm.c:94 ../src/pragha-lastfm.c:125
 msgid "Love track"
 msgstr "设为喜爱曲目"
 
-#: ../src/pragha-playlist.c:89 ../src/pragha-playlist.c:96 ../src/menu.c:162
-#: ../src/menu.c:173
+#: ../src/pragha-lastfm.c:96 ../src/pragha-lastfm.c:127
 msgid "Unlove track"
 msgstr "从喜爱曲目中删除"
 
-#: ../src/pragha-playlist.c:91 ../src/pragha-playlist.c:98 ../src/menu.c:168
-#: ../src/menu.c:179
+#: ../src/pragha-lastfm.c:98 ../src/pragha-lastfm.c:768
+msgid "Import a XSPF playlist"
+msgstr "导入XSPF播放列表"
+
+#: ../src/pragha-lastfm.c:100
+msgid "Add favorites"
+msgstr "添加到我最喜爱的"
+
+#: ../src/pragha-lastfm.c:102 ../src/pragha-lastfm.c:129
 msgid "Add similar"
 msgstr "添加相似歌曲"
 
-#: ../src/pragha-playlist.c:103 ../src/statusicon.c:64 ../src/menu.c:127
-msgid "Edit track information"
-msgstr "修改音轨信息"
+#: ../src/pragha-lastfm.c:255
+msgid "No connection Last.fm has been established."
+msgstr "无法建立到Last.FM的连接"
 
-#: ../src/pragha-playlist.c:105 ../src/statusicon.c:50 ../src/menu.c:113
-msgid "_Add files"
-msgstr "添加(_A)"
-
-#: ../src/pragha-playlist.c:106 ../src/menu.c:114
-msgid "Open a media file"
-msgstr "打开媒体文件"
-
-#: ../src/pragha-playlist.c:107 ../src/statusicon.c:52 ../src/menu.c:115
-msgid "Add Audio _CD"
-msgstr "添加整张CD(_C)"
-
-#: ../src/pragha-playlist.c:109 ../src/statusicon.c:54 ../src/menu.c:117
-msgid "Add _location"
-msgstr "添加网络地址(_l)"
-
-#: ../src/pragha-playlist.c:111
-msgid "_Add the library"
+#: ../src/pragha-lastfm.c:441
+msgid "Last.fm suggested a tag correction"
 msgstr ""
 
-#: ../src/pragha-playlist.c:113 ../src/statusicon.c:66 ../src/menu.c:129
-msgid "_Quit"
-msgstr "退出(_Q)"
+#: ../src/pragha-lastfm.c:463
+msgid "Love song on Last.fm failed."
+msgstr "在Last.FM上设置喜爱曲目失败"
 
-#: ../src/pragha-playlist.c:118 ../src/menu.c:210
-msgid "Lateral _panel"
-msgstr "表盘(_p)"
+#: ../src/pragha-lastfm.c:480
+msgid "Unlove song on Last.fm failed."
+msgstr ""
 
-#. Create the checkmenu items
-#: ../src/pragha-playlist.c:210 ../src/pragha-playlist.c:2997
-#: ../src/pragha-playlist.c:3172
-msgid "Track"
-msgid_plural "Tracks"
-msgstr[0] "曲目标号"
-
-#: ../src/pragha-playlist.c:2053
+#: ../src/pragha-lastfm.c:584
 #, c-format
-msgid "Copy \"%i\" to selected track numbers"
-msgstr ""
+msgid "Added %d songs of %d sugested from Last.fm."
+msgstr "从Last.FM上添加了%d首推荐（共%d首）"
 
-#: ../src/pragha-playlist.c:2059
+#: ../src/pragha-lastfm.c:587
 #, c-format
-msgid "Copy \"%s\" to selected titles"
-msgstr ""
+msgid "Last.fm not suggest any similar song."
+msgstr "Last.FM没有推荐任何相似曲目"
 
-#: ../src/pragha-playlist.c:2065
+#: ../src/pragha-lastfm.c:591
 #, c-format
-msgid "Copy \"%s\" to selected artists"
-msgstr ""
+msgid "Added %d songs of the last %d loved on Last.fm."
+msgstr "从Last.FM上添加了%d首喜爱曲目（共%d首）"
 
-#: ../src/pragha-playlist.c:2071
+#: ../src/pragha-lastfm.c:594
 #, c-format
-msgid "Copy \"%s\" to selected albums"
-msgstr ""
+msgid "You had no favorite songs on Last.fm."
+msgstr "你在Last.FM上没有喜爱的曲目"
 
-#: ../src/pragha-playlist.c:2077
+#: ../src/pragha-lastfm.c:744 ../src/pragha-playlists-mgmt.c:1054
 #, c-format
-msgid "Copy \"%s\" to selected genres"
+msgid "Added %d songs from %d of the imported playlist."
 msgstr ""
 
-#: ../src/pragha-playlist.c:2083
-#, c-format
-msgid "Copy \"%i\" to selected years"
+#: ../src/pragha-lastfm.c:776 ../src/pragha-menubar.c:401
+msgid "Supported media"
+msgstr "所有支持的媒体"
+
+#: ../src/pragha-lastfm.c:1010
+msgid "Last.fm submission failed"
 msgstr ""
 
-#: ../src/pragha-playlist.c:2089
-#, c-format
-msgid "Copy \"%s\" to selected comments"
+#: ../src/pragha-lastfm.c:1012
+msgid "Track scrobbled on Last.fm"
 msgstr ""
 
-#: ../src/pragha-playlist.c:3009
-msgid "Clear sort"
-msgstr "清晰排序"
+#: ../src/pragha-lastfm.c:1152
+msgid "Update current song on Last.fm failed."
+msgstr ""
 
-#: ../src/pragha-library-pane.c:46
+#: ../src/pragha-library-pane.c:127
+msgid "_Skip"
+msgstr "跳过(_S)"
+
+#: ../src/pragha-library-pane.c:128
+msgid "S_kip All"
+msgstr "跳过全部(_k)"
+
+#: ../src/pragha-library-pane.c:129
+msgid "Delete _All"
+msgstr "删除全部(_A)"
+
+#: ../src/pragha-library-pane.c:183
 msgid "_Expand library"
 msgstr "扩展“库”(_E)"
 
-#: ../src/pragha-library-pane.c:48
+#: ../src/pragha-library-pane.c:185
 msgid "_Collapse library"
 msgstr "折叠”库“(_C)"
 
-#: ../src/pragha-library-pane.c:50 ../src/pragha-library-pane.c:1403
+#: ../src/pragha-library-pane.c:187 ../src/pragha-library-pane.c:1579
 msgid "Folders structure"
 msgstr "目录结构"
 
-#: ../src/pragha-library-pane.c:58 ../src/pragha-library-pane.c:1442
+#: ../src/pragha-library-pane.c:189 ../src/pragha-library-pane.c:1588
+#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3228
+#: ../src/pragha-playlist.c:3397 ../src/pragha-statusicon.c:143
+#: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:902
+msgid "Artist"
+msgstr "歌手"
+
+#: ../src/pragha-library-pane.c:191 ../src/pragha-library-pane.c:1597
+#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3229
+#: ../src/pragha-playlist.c:3398 ../src/pragha-statusicon.c:144
+#: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:907
+msgid "Album"
+msgstr "专辑"
+
+#: ../src/pragha-library-pane.c:193 ../src/pragha-library-pane.c:1606
+#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3230
+#: ../src/pragha-playlist.c:3399 ../src/pragha-tags-dialog.c:117
+#: ../src/pragha-tags-dialog.c:912
+msgid "Genre"
+msgstr "类型"
+
+#: ../src/pragha-library-pane.c:195 ../src/pragha-library-pane.c:1618
 msgid "Artist / Album"
 msgstr "歌手/专辑"
 
-#: ../src/pragha-library-pane.c:60 ../src/pragha-library-pane.c:1466
+#: ../src/pragha-library-pane.c:197 ../src/pragha-library-pane.c:1642
 msgid "Genre / Album"
 msgstr "类别/专辑"
 
-#: ../src/pragha-library-pane.c:62 ../src/pragha-library-pane.c:1454
+#: ../src/pragha-library-pane.c:199 ../src/pragha-library-pane.c:1630
 msgid "Genre / Artist"
 msgstr "类别/歌手"
 
-#: ../src/pragha-library-pane.c:64 ../src/pragha-library-pane.c:1481
+#: ../src/pragha-library-pane.c:201 ../src/pragha-library-pane.c:1657
 msgid "Genre / Artist / Album"
 msgstr "类别/歌手/专辑"
 
 #. Playlist and Radio tree
-#: ../src/pragha-library-pane.c:100
+#: ../src/pragha-library-pane.c:237
 msgid "_Add to current playlist"
 msgstr "添加到播放列表(_A)"
 
-#: ../src/pragha-library-pane.c:102
+#: ../src/pragha-library-pane.c:239
 msgid "_Replace current playlist"
 msgstr "替换当前播放列表(_R)"
 
-#: ../src/pragha-library-pane.c:104
+#: ../src/pragha-library-pane.c:241
 msgid "Replace and _play"
 msgstr "替换并播放(_p)"
 
-#: ../src/pragha-library-pane.c:106 ../src/playlist.c:391
+#: ../src/pragha-library-pane.c:243 ../src/pragha-playlists-mgmt.c:538
 msgid "Rename"
 msgstr "重命名"
 
-#: ../src/pragha-library-pane.c:108
+#: ../src/pragha-library-pane.c:245
 msgid "Delete"
 msgstr "删除"
 
-#: ../src/pragha-library-pane.c:110 ../src/playlist.c:1134
-#: ../src/playlist.c:1172 ../src/playlist.c:1217 ../src/playlist.c:1262
+#: ../src/pragha-library-pane.c:247 ../src/pragha-playlists-mgmt.c:1312
+#: ../src/pragha-playlists-mgmt.c:1350 ../src/pragha-playlists-mgmt.c:1401
+#: ../src/pragha-playlists-mgmt.c:1453
 msgid "Export"
 msgstr "导出"
 
-#. The main edit dialog
-#: ../src/pragha-library-pane.c:112 ../src/tags.c:881
+#. Set dialog properties
+#: ../src/pragha-library-pane.c:249 ../src/pragha-tags-dialog.c:98
 msgid "Edit tags"
 msgstr "编辑tags"
 
-#: ../src/pragha-library-pane.c:114
+#: ../src/pragha-library-pane.c:251
 msgid "Move to _trash"
 msgstr "移到回收站(_t)"
 
-#: ../src/pragha-library-pane.c:116
+#: ../src/pragha-library-pane.c:253
 msgid "Delete from library"
 msgstr "从“库”中删除"
 
-#: ../src/pragha-library-pane.c:118 ../src/menu.c:182
-msgid "_Rescan library"
-msgstr "重新扫描“库”(_R)"
-
-#: ../src/pragha-library-pane.c:120 ../src/menu.c:184
-msgid "_Update library"
-msgstr "更新“库”(_U)"
-
-#: ../src/pragha-library-pane.c:340 ../src/notify.c:108
-msgid "Unknown Artist"
-msgstr "未知歌手"
-
-#: ../src/pragha-library-pane.c:345
+#: ../src/pragha-library-pane.c:504
 msgid "Unknown"
 msgstr ""
 
-#: ../src/pragha-library-pane.c:347 ../src/pragha-library-pane.c:352
-#: ../src/notify.c:109
-msgid "Unknown Album"
-msgstr "未知专辑"
-
-#: ../src/pragha-library-pane.c:357
+#: ../src/pragha-library-pane.c:516
 msgid "Unknown Genre"
 msgstr "未知类别"
 
-#: ../src/pragha-library-pane.c:677
+#: ../src/pragha-library-pane.c:836
 msgid "Cannot move file to trash, do you want to delete immediately?"
 msgstr "无法移到回收站，是否直接删除？"
 
-#: ../src/pragha-library-pane.c:678
+#: ../src/pragha-library-pane.c:837
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr "文件 \"%s\"无法移到回收站。详细：%s"
 
-#: ../src/pragha-library-pane.c:1748 ../src/pragha-library-pane.c:1828
-#: ../src/menu.c:454 ../src/playlist.c:498
+#: ../src/pragha-library-pane.c:1892 ../src/pragha-library-pane.c:1974
+#: ../src/pragha-menubar.c:480 ../src/pragha-mpris.c:817
+#: ../src/pragha-playlists-mgmt.c:644 ../src/pragha-playlists-mgmt.c:671
 msgid "Playlists"
 msgstr "播放列表"
 
-#: ../src/pragha-library-pane.c:1763 ../src/pragha-library-pane.c:1837
+#: ../src/pragha-library-pane.c:1908 ../src/pragha-library-pane.c:1983
 msgid "Radios"
 msgstr "电台"
 
-#: ../src/pragha-library-pane.c:1778 ../src/pref.c:1144 ../src/pref.c:1478
+#: ../src/pragha-library-pane.c:1924 ../src/pragha-preferences-dialog.c:872
+#: ../src/pragha-preferences-dialog.c:1188
 msgid "Library"
 msgstr "“库”"
 
-#: ../src/pragha-library-pane.c:2356
+#: ../src/pragha-library-pane.c:2479
 msgid "Really want to move the files to trash?"
 msgstr "确定移动这些文件到回收站么？"
 
-#: ../src/pragha-library-pane.c:2358
+#: ../src/pragha-library-pane.c:2481
 msgid "Delete immediately instead of move to trash"
 msgstr "不移到回收站，直接删除"
 
-#: ../src/pragha-library-pane.c:2408
+#: ../src/pragha-library-pane.c:2531
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
+msgstr "确定从“库”中删除当前文件？\n\n警告：必须重新扫描才能恢复"
+
+#: ../src/pragha-menubar.c:174
+msgid "_Playback"
 msgstr ""
-"确定从“库”中删除当前文件？\n"
-"\n"
-"警告：必须重新扫描才能恢复"
 
-#: ../src/statusicon.c:48 ../src/menu.c:196
-msgid "About"
-msgstr "关于"
+#: ../src/pragha-menubar.c:175
+msgid "Play_list"
+msgstr ""
 
-#: ../src/statusicon.c:56 ../src/notify.c:120
-msgid "Prev Track"
+#: ../src/pragha-menubar.c:176
+msgid "_View"
+msgstr "视图(_V)"
+
+#: ../src/pragha-menubar.c:177 ../src/pragha-playlist.c:213
+msgid "_Tools"
+msgstr "工具(_T)"
+
+#: ../src/pragha-menubar.c:178
+msgid "_Help"
+msgstr "帮助(_H)"
+
+#: ../src/pragha-menubar.c:179
+msgid "Prev track"
 msgstr "上一首"
 
-#: ../src/statusicon.c:58 ../src/menu.c:121
+#: ../src/pragha-menubar.c:181 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
 msgstr "播放/暂停"
 
-#: ../src/statusicon.c:60 ../src/menu.c:123
+#: ../src/pragha-menubar.c:183 ../src/pragha-statusicon.c:87
 msgid "Stop"
 msgstr "停止"
 
-#: ../src/tags.c:162 ../src/tags.c:179
-msgid "Channels"
-msgstr "声道"
+#: ../src/pragha-menubar.c:185
+msgid "Next track"
+msgstr "下一首"
 
-#: ../src/tags.c:180
-msgid "Samplerate"
-msgstr "采样率"
+#: ../src/pragha-menubar.c:187 ../src/pragha-playlist.c:216
+#: ../src/pragha-statusicon.c:91
+msgid "Edit track information"
+msgstr "修改音轨信息"
 
-#: ../src/tags.c:181
-msgid "Folder"
-msgstr "文件夹"
+#: ../src/pragha-menubar.c:189 ../src/pragha-statusicon.c:93
+msgid "_Quit"
+msgstr "退出(_Q)"
 
-#. The main edit dialog
-#: ../src/tags.c:279 ../src/tags.c:924
-msgid "Details"
-msgstr "详细"
+#: ../src/pragha-menubar.c:191 ../src/pragha-statusicon.c:77
+msgid "_Add files"
+msgstr "添加(_A)"
 
-#: ../src/tags.c:324
+#: ../src/pragha-menubar.c:192
+msgid "Open a media file"
+msgstr "打开媒体文件"
+
+#: ../src/pragha-menubar.c:193 ../src/pragha-statusicon.c:79
+msgid "Add Audio _CD"
+msgstr "添加整张CD(_C)"
+
+#: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:81
+msgid "Add _location"
+msgstr "添加网络地址(_l)"
+
+#: ../src/pragha-menubar.c:197
+msgid "_Add the library"
+msgstr ""
+
+#: ../src/pragha-menubar.c:199
+msgid "Remove selection from playlist"
+msgstr "从播放列表中删除"
+
+#: ../src/pragha-menubar.c:201 ../src/pragha-playlist.c:207
+msgid "Crop playlist"
+msgstr "清空播放列表"
+
+#: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:209
+msgid "Clear playlist"
+msgstr "清空播放列表"
+
+#: ../src/pragha-menubar.c:205 ../src/pragha-playlist.c:211
+#: ../src/pragha-playlists-mgmt.c:65 ../src/pragha-playlists-mgmt.c:91
+#: ../src/pragha-playlists-mgmt.c:1231
+msgid "Save playlist"
+msgstr "保存播放列表"
+
+#: ../src/pragha-menubar.c:206 ../src/pragha-playlist.c:212
+#: ../src/pragha-playlists-mgmt.c:67 ../src/pragha-playlists-mgmt.c:93
+#: ../src/pragha-playlists-mgmt.c:1233
+msgid "Save selection"
+msgstr "保存所选"
+
+#: ../src/pragha-menubar.c:207
+msgid "_Search in playlist"
+msgstr "在列表中搜索(_S)"
+
+#: ../src/pragha-menubar.c:209
+msgid "_Preferences"
+msgstr "首选项(_P)"
+
+#: ../src/pragha-menubar.c:211
+msgid "Jump to playing song"
+msgstr "跳到正播放歌曲"
+
+#: ../src/pragha-menubar.c:213
+msgid "E_qualizer"
+msgstr "均衡器(_q)"
+
+#: ../src/pragha-menubar.c:215
+msgid "_Rescan library"
+msgstr "重新扫描“库”(_R)"
+
+#: ../src/pragha-menubar.c:217
+msgid "_Update library"
+msgstr "更新“库”(_U)"
+
+#: ../src/pragha-menubar.c:219
+msgid "_Statistics"
+msgstr "状态(_S)"
+
+#: ../src/pragha-menubar.c:221
+msgid "Homepage"
+msgstr "主页"
+
+#: ../src/pragha-menubar.c:223
+msgid "Community"
+msgstr "社区"
+
+#: ../src/pragha-menubar.c:225
+msgid "Wiki"
+msgstr "Wiki"
+
+#: ../src/pragha-menubar.c:227
+msgid "Translate Pragha"
+msgstr "翻译Pragha"
+
+#: ../src/pragha-menubar.c:229 ../src/pragha-statusicon.c:75
+msgid "About"
+msgstr "关于"
+
+#: ../src/pragha-menubar.c:234
+msgid "_Shuffle"
+msgstr "随机(_S)"
+
+#: ../src/pragha-menubar.c:237
+msgid "_Repeat"
+msgstr "重复(_R)"
+
+#: ../src/pragha-menubar.c:240
+msgid "_Fullscreen"
+msgstr "全屏(_F)"
+
+#: ../src/pragha-menubar.c:243
+msgid "Lateral _panel"
+msgstr "表盘(_p)"
+
+#: ../src/pragha-menubar.c:246
+msgid "Playback controls below"
+msgstr "播放控制"
+
+#: ../src/pragha-menubar.c:249
+msgid "Status bar"
+msgstr "状态栏"
+
+#: ../src/pragha-menubar.c:357
+msgid "Select a file to play"
+msgstr "选择一个文件来播放"
+
+#: ../src/pragha-menubar.c:379
+msgid "Add recursively files"
+msgstr "递归添加文件"
+
+#: ../src/pragha-menubar.c:483
+msgid "All files"
+msgstr "所有文件"
+
+#: ../src/pragha-menubar.c:564
+msgid "Enter the URL of an internet radio stream"
+msgstr "输入感兴趣的电台地址"
+
+#: ../src/pragha-menubar.c:569
+msgid "Give it a name to save"
+msgstr "保存为"
+
+#: ../src/pragha-menubar.c:587
+msgid "Add a location"
+msgstr "添加网络地址"
+
+#: ../src/pragha-menubar.c:950
+msgid "Total Tracks:"
+msgstr "歌曲数量"
+
+#: ../src/pragha-menubar.c:952
+msgid "Total Artists:"
+msgstr "歌手数量"
+
+#: ../src/pragha-menubar.c:954
+msgid "Total Albums:"
+msgstr "专辑数量"
+
+#: ../src/pragha-menubar.c:957
+msgid "Statistics"
+msgstr "状态"
+
+#: ../src/pragha-menubar.c:983
+msgid "translator-credits"
+msgstr "翻译者"
+
+#: ../src/pragha-notify.c:144
 #, c-format
-msgid ""
-"Do you want to set the track number of ALL of the selected tracks to: %d ?"
-msgstr ""
+msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
+msgstr "由 <b>%s</b> 于 <b>%s</b> <b>(%s)</b>"
 
-#: ../src/tags.c:354
+#: ../src/pragha-notify.c:161 ../src/pragha-statusicon.c:83
+msgid "Prev Track"
+msgstr "上一首"
+
+#: ../src/pragha-notify.c:165 ../src/pragha-statusicon.c:89
+#: ../src/pragha-toolbar.c:739
+msgid "Next Track"
+msgstr "下一首"
+
+#. Create labels
+#: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3227
+#: ../src/pragha-playlist.c:3396 ../src/pragha-statusicon.c:142
+#: ../src/pragha-tags-dialog.c:114 ../src/pragha-tags-dialog.c:897
+msgid "Title"
+msgstr "标题"
+
+#: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3231
+#: ../src/pragha-playlist.c:3400 ../src/pragha-tags-dialog.c:618
+msgid "Bitrate"
+msgstr "比特率"
+
+#: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3232
+#: ../src/pragha-playlist.c:3401 ../src/pragha-tags-dialog.c:119
+msgid "Year"
+msgstr "年份"
+
+#: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3233
+#: ../src/pragha-playlist.c:3402 ../src/pragha-tags-dialog.c:120
+#: ../src/pragha-tags-dialog.c:917
+msgid "Comment"
+msgstr "注释"
+
+#. Create labels
+#: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3234
+#: ../src/pragha-playlist.c:3403 ../src/pragha-statusicon.c:145
+#: ../src/pragha-tags-dialog.c:617
+msgid "Length"
+msgstr "长度"
+
+#: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3235
+#: ../src/pragha-playlist.c:3404 ../src/pragha-tags-dialog.c:622
+msgid "Filename"
+msgstr "文件名"
+
+#: ../src/pragha-playlist.c:203
+msgid "Remove to playback queue"
+msgstr "从播放队列中移除"
+
+#: ../src/pragha-playlist.c:205
+msgid "Remove from playlist"
+msgstr "从播放列表中删除"
+
+#: ../src/pragha-playlist.c:2360
 #, c-format
-msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
+msgid "Copy \"%i\" to selected track numbers"
 msgstr ""
 
-#: ../src/tags.c:561
-msgid "Selection to"
+#: ../src/pragha-playlist.c:2366
+#, c-format
+msgid "Copy \"%s\" to selected titles"
 msgstr ""
 
-#: ../src/tags.c:590
-msgid "Open folder"
-msgstr "打开文件夹"
+#: ../src/pragha-playlist.c:2372
+#, c-format
+msgid "Copy \"%s\" to selected artists"
+msgstr ""
 
-#: ../src/tags.c:639
-msgid "File"
-msgstr "文件"
+#: ../src/pragha-playlist.c:2378
+#, c-format
+msgid "Copy \"%s\" to selected albums"
+msgstr ""
 
-#: ../src/pref.c:21
+#: ../src/pragha-playlist.c:2384
+#, c-format
+msgid "Copy \"%s\" to selected genres"
+msgstr ""
+
+#: ../src/pragha-playlist.c:2390
+#, c-format
+msgid "Copy \"%i\" to selected years"
+msgstr ""
+
+#: ../src/pragha-playlist.c:2396
+#, c-format
+msgid "Copy \"%s\" to selected comments"
+msgstr ""
+
+#. Create the checkmenu items
+#: ../src/pragha-playlist.c:3226 ../src/pragha-playlist.c:3395
+#: ../src/pragha.c:184
+msgid "Track"
+msgid_plural "Tracks"
+msgstr[0] "曲目标号"
+
+#: ../src/pragha-playlist.c:3238
+msgid "Clear sort"
+msgstr "清晰排序"
+
+#: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-preferences-dialog.c:951
+msgid "Playlist"
+msgstr ""
+
+#: ../src/pragha-playlists-mgmt.c:128
+msgid "<b>con_playlist</b> is a reserved playlist name"
+msgstr "<b>con_playlist</b> 是一个反转后的播放列表名"
+
+#: ../src/pragha-playlists-mgmt.c:152
+#, c-format
+msgid "Do you want to overwrite the playlist: %s ?"
+msgstr "确认覆盖播放列表 %s ？"
+
+#: ../src/pragha-playlists-mgmt.c:529
+msgid "Choose a new name"
+msgstr "选择一个新的名字"
+
+#: ../src/pragha-playlists-mgmt.c:582
+#, c-format
+msgid "Do you want to delete the item: %s ?"
+msgstr "确认删除 %s ？"
+
+#: ../src/pragha-playlists-mgmt.c:612
+msgid "Export playlist to file"
+msgstr "导出播放列表到文件中"
+
+#: ../src/pragha-playlists-mgmt.c:1207
+msgid "What do you want to do?"
+msgstr ""
+
+#: ../src/pragha-playlists-mgmt.c:1209
+#, c-format
+msgid "Replace the playlist \"%s\""
+msgstr ""
+
+#: ../src/pragha-playlists-mgmt.c:1214
+#, c-format
+msgid "Add to playlist \"%s\""
+msgstr ""
+
+#: ../src/pragha-playlists-mgmt.c:1307 ../src/pragha-playlists-mgmt.c:1345
+#: ../src/pragha-playlists-mgmt.c:1390 ../src/pragha-playlists-mgmt.c:1442
+msgid "New playlist"
+msgstr "新建播放列表"
+
+#: ../src/pragha-preferences-dialog.c:81
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
-msgstr ""
-"匹配式必须是如下格式:<filename>;<filename>;....\n"
-"最多支持6个。\n"
-"通配符目前不支持（欢迎patchs ^_^）"
+msgstr "匹配式必须是如下格式:<filename>;<filename>;....\n最多支持6个。\n通配符目前不支持（欢迎patchs ^_^）"
 
-#: ../src/pref.c:43
+#: ../src/pragha-preferences-dialog.c:103
 msgid "Album art pattern"
 msgstr "歌手匹配式"
 
-#: ../src/pref.c:179 ../src/pref.c:1296
+#: ../src/pragha-preferences-dialog.c:264
+#: ../src/pragha-preferences-dialog.c:1016
 msgid "Start normal"
 msgstr "正常启动"
 
-#: ../src/pref.c:184 ../src/pref.c:1297
+#: ../src/pragha-preferences-dialog.c:268
+#: ../src/pragha-preferences-dialog.c:1017
 msgid "Start fullscreen"
 msgstr "全屏启动"
 
-#: ../src/pref.c:189 ../src/pref.c:1298
+#: ../src/pragha-preferences-dialog.c:272
+#: ../src/pragha-preferences-dialog.c:1018
 msgid "Start in system tray"
 msgstr "最小化到托盘启动"
 
 #. Create a folder chooser dialog
-#: ../src/pref.c:392
+#: ../src/pragha-preferences-dialog.c:442
 msgid "Select a folder to add to library"
 msgstr "选择一个目录加入到“库”中"
 
 #. Labels
-#: ../src/pref.c:1067 ../src/pref.c:1476
+#: ../src/pragha-preferences-dialog.c:795
+#: ../src/pragha-preferences-dialog.c:1186
 msgid "Audio"
 msgstr "音频"
 
-#: ../src/pref.c:1069
+#: ../src/pragha-preferences-dialog.c:797
 msgid "Audio sink"
 msgstr "音频输出"
 
-#: ../src/pref.c:1073 ../src/pref.c:1093 ../src/pref.c:1098
+#: ../src/pragha-preferences-dialog.c:801
+#: ../src/pragha-preferences-dialog.c:820
+#: ../src/pragha-preferences-dialog.c:826
 msgid "Restart Required"
 msgstr "需要重启"
 
-#: ../src/pref.c:1088
+#: ../src/pragha-preferences-dialog.c:816
 msgid "Audio Device"
 msgstr "音频设备"
 
-#: ../src/pref.c:1097
+#: ../src/pragha-preferences-dialog.c:825
 msgid "Use software mixer"
 msgstr "使用软件混合器"
 
-#: ../src/pref.c:1102
+#: ../src/pragha-preferences-dialog.c:830
 msgid "Audio CD"
 msgstr ""
 
-#: ../src/pref.c:1104
+#: ../src/pragha-preferences-dialog.c:832
 msgid "Audio CD Device"
 msgstr "音频CD设备"
 
-#: ../src/pref.c:1152
+#: ../src/pragha-preferences-dialog.c:880
 msgid "Folders"
 msgstr "文件夹"
 
-#: ../src/pref.c:1198
+#: ../src/pragha-preferences-dialog.c:916
 msgid "Merge folders in the folders estructure view"
 msgstr "在目录结构视图中合并目录"
 
-#: ../src/pref.c:1201
+#: ../src/pragha-preferences-dialog.c:919
 msgid "Sort albums by release year"
 msgstr "按发行年份排序"
 
-#: ../src/pref.c:1233 ../src/playlist.c:39
-msgid "Playlist"
-msgstr ""
-
-#: ../src/pref.c:1235
+#: ../src/pragha-preferences-dialog.c:953
 msgid "Highlight rows on current playlist"
 msgstr "为播放列表交替染色"
 
-#: ../src/pref.c:1238
+#: ../src/pragha-preferences-dialog.c:956
 msgid "Controls"
 msgstr ""
 
-#: ../src/pref.c:1240
+#: ../src/pragha-preferences-dialog.c:958
 msgid "Show Album art in Panel"
 msgstr "在表盘中显示专辑"
 
-#: ../src/pref.c:1243
+#: ../src/pragha-preferences-dialog.c:961
 msgid "Size of Album art"
 msgstr "专辑大小"
 
-#: ../src/pref.c:1248
+#: ../src/pragha-preferences-dialog.c:966
 msgid "Album art file pattern"
 msgstr "专辑匹配式"
 
-#: ../src/pref.c:1284
+#: ../src/pragha-preferences-dialog.c:1004
 msgid "Search"
 msgstr ""
 
-#: ../src/pref.c:1286
+#. Instant search.
+#: ../src/pragha-preferences-dialog.c:1006 ../src/pragha-search-entry.c:40
 msgid "Refine the search while writing"
 msgstr "搜索时即时显示结果"
 
-#: ../src/pref.c:1289
+#. Aproximate search.
+#: ../src/pragha-preferences-dialog.c:1009 ../src/pragha-search-entry.c:47
 msgid "Search approximate words"
 msgstr ""
 
-#: ../src/pref.c:1292
+#: ../src/pragha-preferences-dialog.c:1012
 msgid "When starting pragha"
 msgstr ""
 
-#: ../src/pref.c:1295
+#: ../src/pragha-preferences-dialog.c:1015
 msgid "Remember last window state"
 msgstr "记住最后的窗口状态"
 
-#: ../src/pref.c:1301
+#: ../src/pragha-preferences-dialog.c:1021
 msgid "Restore last playlist"
 msgstr "恢复最后的播放列表"
 
-#: ../src/pref.c:1304
+#: ../src/pragha-preferences-dialog.c:1024
 msgid "When adding folders"
 msgstr ""
 
-#: ../src/pref.c:1305
+#: ../src/pragha-preferences-dialog.c:1025
 msgid "Add files recursively"
 msgstr "递归添加文件"
 
-#: ../src/pref.c:1335 ../src/pref.c:1480
+#: ../src/pragha-preferences-dialog.c:1052
+#: ../src/pragha-preferences-dialog.c:1190
 msgid "Desktop"
 msgstr ""
 
-#: ../src/pref.c:1337
+#: ../src/pragha-preferences-dialog.c:1054
 msgid "Show Pragha icon in the notification area"
 msgstr ""
 
-#: ../src/pref.c:1340
+#: ../src/pragha-preferences-dialog.c:1057
 msgid "Minimize Pragha when close the window"
 msgstr "当点击关闭按钮时最小化Pragha"
 
-#: ../src/pref.c:1343
+#: ../src/pragha-preferences-dialog.c:1060
 msgid "Notifications"
 msgstr "通知"
 
-#: ../src/pref.c:1345
+#: ../src/pragha-preferences-dialog.c:1062
 msgid "Show OSD for track change"
 msgstr "在歌曲变换是显示OSD"
 
-#: ../src/pref.c:1349
-msgid "Associate notifications to system tray"
-msgstr "关联通知到托盘"
-
-#: ../src/pref.c:1353
+#: ../src/pragha-preferences-dialog.c:1065
 msgid "Show Album art in notifications"
 msgstr "在通知中显示专辑"
 
-#: ../src/pref.c:1356
+#: ../src/pragha-preferences-dialog.c:1068
 msgid "Add actions to change track to notifications"
 msgstr "在通知中添加切换动作"
 
-#: ../src/pref.c:1400
+#: ../src/pragha-preferences-dialog.c:1109
 msgid "Last.fm Support"
 msgstr "对Last.fm的支持"
 
-#: ../src/pref.c:1403
+#: ../src/pragha-preferences-dialog.c:1112
 msgid "Username"
 msgstr "用户名"
 
-#: ../src/pref.c:1409
+#: ../src/pragha-preferences-dialog.c:1119
 msgid "Password"
 msgstr "密码"
 
-#: ../src/pref.c:1418
+#: ../src/pragha-preferences-dialog.c:1129
 msgid "Others services"
 msgstr ""
 
-#: ../src/pref.c:1421
+#: ../src/pragha-preferences-dialog.c:1132
 msgid "Get album art"
 msgstr "下载专辑封面"
 
-#: ../src/pref.c:1424
+#: ../src/pragha-preferences-dialog.c:1135
 msgid "Connect to CDDB server"
 msgstr "连接到CDDB服务器"
 
-#: ../src/pref.c:1427
+#: ../src/pragha-preferences-dialog.c:1138
 msgid "Allow remote control with MPRIS2 interface"
 msgstr "允许MPRIS2接口远程控制"
 
 #. The main preferences dialog
 #. Add to dialog
-#: ../src/pref.c:1465 ../src/pref.c:1521
+#: ../src/pragha-preferences-dialog.c:1177
+#: ../src/pragha-preferences-dialog.c:1219
 msgid "Preferences of Pragha"
 msgstr "Pragha首选项"
 
-#: ../src/pref.c:1477
+#: ../src/pragha-preferences-dialog.c:1187
 msgid "Appearance"
 msgstr "外观"
 
-#: ../src/pref.c:1479
+#: ../src/pragha-preferences-dialog.c:1189
 msgid "General"
 msgstr "通用"
 
-#: ../src/pref.c:1481
+#: ../src/pragha-preferences-dialog.c:1191
 msgid "Services"
 msgstr ""
 
-#: ../src/menu.c:108
-msgid "_Playback"
-msgstr ""
-
-#: ../src/menu.c:109
-msgid "Play_list"
-msgstr ""
-
-#: ../src/menu.c:110
-msgid "_View"
-msgstr "视图(_V)"
-
-#: ../src/menu.c:112
-msgid "_Help"
-msgstr "帮助(_H)"
-
-#: ../src/menu.c:119
-msgid "Prev track"
-msgstr "上一首"
-
-#: ../src/menu.c:125
-msgid "Next track"
-msgstr "下一首"
-
-#: ../src/menu.c:131
-msgid "Remove selection from playlist"
-msgstr "从播放列表中删除"
-
-#: ../src/menu.c:139
-msgid "_Search in playlist"
-msgstr "在列表中搜索(_S)"
-
-#: ../src/menu.c:141
-msgid "_Preferences"
-msgstr "首选项(_P)"
-
-#: ../src/menu.c:143
-msgid "Jump to playing song"
-msgstr "跳到正播放歌曲"
-
-#: ../src/menu.c:145
-msgid "E_qualizer"
-msgstr "均衡器(_q)"
-
-#: ../src/menu.c:164 ../src/menu.c:175 ../src/pragha-lastfm.c:479
-msgid "Import a XSPF playlist"
-msgstr "导入XSPF播放列表"
-
-#: ../src/menu.c:166 ../src/menu.c:177
-msgid "Add favorites"
-msgstr "添加到我最喜爱的"
-
-#: ../src/menu.c:186
-msgid "_Statistics"
-msgstr "状态(_S)"
-
-#: ../src/menu.c:188
-msgid "Homepage"
-msgstr "主页"
-
-#: ../src/menu.c:190
-msgid "Community"
-msgstr "社区"
-
-#: ../src/menu.c:192
-msgid "Wiki"
-msgstr "Wiki"
-
-#: ../src/menu.c:194
-msgid "Translate Pragha"
-msgstr "翻译Pragha"
-
-#: ../src/menu.c:201
-msgid "_Shuffle"
-msgstr "随机(_S)"
-
-#: ../src/menu.c:204
-msgid "_Repeat"
-msgstr "重复(_R)"
-
-#: ../src/menu.c:207
-msgid "_Fullscreen"
-msgstr "全屏(_F)"
-
-#: ../src/menu.c:213
-msgid "Playback controls below"
-msgstr "播放控制"
-
-#: ../src/menu.c:216
-msgid "Status bar"
-msgstr "状态栏"
-
-#: ../src/menu.c:326
-msgid "Select a file to play"
-msgstr "选择一个文件来播放"
-
-#: ../src/menu.c:347
-msgid "Add recursively files"
-msgstr "递归添加文件"
-
-#: ../src/menu.c:369 ../src/pragha-lastfm.c:487
-msgid "Supported media"
-msgstr "所有支持的媒体"
-
-#: ../src/menu.c:457
-msgid "All files"
-msgstr "所有文件"
-
-#: ../src/menu.c:536
-msgid "Enter the URL of an internet radio stream"
-msgstr "输入感兴趣的电台地址"
-
-#: ../src/menu.c:541
-msgid "Give it a name to save"
-msgstr "保存为"
-
-#: ../src/menu.c:559
-msgid "Add a location"
-msgstr "添加网络地址"
-
-#: ../src/menu.c:862
-msgid "Total Tracks:"
-msgstr "歌曲数量"
-
-#: ../src/menu.c:864
-msgid "Total Artists:"
-msgstr "歌手数量"
-
-#: ../src/menu.c:866
-msgid "Total Albums:"
-msgstr "专辑数量"
-
-#: ../src/menu.c:868
-msgid "Statistics"
-msgstr "状态"
-
-#: ../src/menu.c:885
-msgid "translator-credits"
-msgstr "翻译者"
-
-#: ../src/notify.c:107
-#, c-format
-msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "由 <b>%s</b> 于 <b>%s</b> <b>(%s)</b>"
-
-#: ../src/utils.c:521
-msgid "day"
-msgid_plural "days"
-msgstr[0] "天"
-
-#: ../src/utils.c:747
-msgid "Unable to open the browser"
-msgstr "无法打开浏览器"
-
-#: ../src/playlist.c:98
-msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b> 是一个反转后的播放列表名"
-
-#: ../src/playlist.c:123
-#, c-format
-msgid "Do you want to overwrite the playlist: %s ?"
-msgstr "确认覆盖播放列表 %s ？"
-
-#: ../src/playlist.c:382
-msgid "Choose a new name"
-msgstr "选择一个新的名字"
-
-#: ../src/playlist.c:435
-#, c-format
-msgid "Do you want to delete the item: %s ?"
-msgstr "确认删除 %s ？"
-
-#: ../src/playlist.c:465
-msgid "Export playlist to file"
-msgstr "导出播放列表到文件中"
-
-#: ../src/playlist.c:880 ../src/pragha-lastfm.c:460
-#, c-format
-msgid "Added %d songs from %d of the imported playlist."
-msgstr ""
-
-#: ../src/playlist.c:1029
-msgid "What do you want to do?"
-msgstr ""
-
-#: ../src/playlist.c:1031
-#, c-format
-msgid "Replace the playlist \"%s\""
-msgstr ""
-
-#: ../src/playlist.c:1036
-#, c-format
-msgid "Add to playlist \"%s\""
-msgstr ""
-
-#: ../src/playlist.c:1129 ../src/playlist.c:1167 ../src/playlist.c:1206
-#: ../src/playlist.c:1251
-msgid "New playlist"
-msgstr "新建播放列表"
-
-#: ../src/pragha-lastfm.c:203
-msgid "Love song on Last.fm failed."
-msgstr "在Last.FM上设置喜爱曲目失败"
-
-#: ../src/pragha-lastfm.c:220
-msgid "Unlove song on Last.fm failed."
-msgstr ""
-
-#: ../src/pragha-lastfm.c:250 ../src/pragha-lastfm.c:280
-#: ../src/pragha-lastfm.c:402 ../src/pragha-lastfm.c:540
-#: ../src/pragha-lastfm.c:582 ../src/pragha-lastfm.c:624
-#: ../src/pragha-lastfm.c:665 ../src/pragha-lastfm.c:724
-#: ../src/pragha-lastfm.c:856 ../src/pragha-lastfm.c:915
-#: ../src/pragha-lastfm.c:921
-msgid "No connection Last.fm has been established."
-msgstr "无法建立到Last.FM的连接"
-
-#: ../src/pragha-lastfm.c:314
-#, c-format
-msgid "Added %d songs of %d sugested from Last.fm."
-msgstr "从Last.FM上添加了%d首推荐（共%d首）"
-
-#: ../src/pragha-lastfm.c:317
-#, c-format
-msgid "Last.fm not suggest any similar song."
-msgstr "Last.FM没有推荐任何相似曲目"
-
-#: ../src/pragha-lastfm.c:321
-#, c-format
-msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr "从Last.FM上添加了%d首喜爱曲目（共%d首）"
-
-#: ../src/pragha-lastfm.c:324
-#, c-format
-msgid "You had no favorite songs on Last.fm."
-msgstr "你在Last.FM上没有喜爱的曲目"
-
-#: ../src/pragha-lastfm.c:708
-msgid "Last.fm submission failed"
-msgstr ""
-
-#: ../src/pragha-lastfm.c:710
-msgid "Track scrobbled on Last.fm"
-msgstr ""
-
-#: ../src/pragha-lastfm.c:835
-msgid "Update current song on Last.fm failed."
-msgstr ""
-
-#: ../src/glyr-related.c:158
-#, c-format
-msgid "Lyrics thanks to %s"
-msgstr ""
-
-#: ../src/glyr-related.c:167
-#, c-format
-msgid "Artist info"
-msgstr "艺人信息"
-
-#: ../src/glyr-related.c:168
-#, c-format
-msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr ""
-
-#: ../src/glyr-related.c:186
-msgid "Lyrics not found."
-msgstr ""
-
-#: ../src/glyr-related.c:193
-msgid "Artist information not found."
-msgstr "没有找到艺人信息"
-
-#: ../src/info-bar-import-music.c:67
-#, c-format
-msgid "Would you like to import %s to library?"
-msgstr ""
-
-#: ../src/info-bar-import-music.c:111
-msgid "Want to upgrade your music library?"
-msgstr ""
-
-#: ../src/pragha-scanner.c:47
+#: ../src/pragha-scanner.c:88
 #, c-format
 msgid "%i files analized of %i detected"
 msgstr ""
 
-#: ../src/pragha-scanner.c:53
+#: ../src/pragha-scanner.c:94
 msgid "Searching files to analyze"
 msgstr ""
 
-#: ../src/pragha-scanner.c:151
+#: ../src/pragha-scanner.c:225
 msgid "Library scan complete"
 msgstr "“库”扫描完毕"
+
+#: ../src/pragha-statusicon.c:137 ../src/pragha-toolbar.c:160
+#: ../src/pragha-toolbar.c:415
+msgid "<b>Not playing</b>"
+msgstr "<b>未播放</b>"
+
+#: ../src/pragha-tags-dialog.c:118
+msgid "Track No"
+msgstr "曲目标号"
+
+#: ../src/pragha-tags-dialog.c:121
+msgid "File"
+msgstr "文件"
+
+#. The main edit dialog
+#: ../src/pragha-tags-dialog.c:501 ../src/pragha-tags-dialog.c:719
+msgid "Details"
+msgstr "详细"
+
+#: ../src/pragha-tags-dialog.c:602
+msgid "channel"
+msgid_plural "channels"
+msgstr[0] ""
+
+#: ../src/pragha-tags-dialog.c:619
+msgid "Channels"
+msgstr "声道"
+
+#: ../src/pragha-tags-dialog.c:620
+msgid "Samplerate"
+msgstr "采样率"
+
+#: ../src/pragha-tags-dialog.c:621
+msgid "Folder"
+msgstr "文件夹"
+
+#: ../src/pragha-tags-dialog.c:890
+msgid "Selection to"
+msgstr ""
+
+#: ../src/pragha-tags-dialog.c:928
+msgid "Open folder"
+msgstr "打开文件夹"
+
+#: ../src/pragha-tags-mgmt.c:180
+#, c-format
+msgid ""
+"Do you want to set the track number of ALL of the selected tracks to: %d ?"
+msgstr ""
+
+#: ../src/pragha-tags-mgmt.c:198
+#, c-format
+msgid ""
+"Do you want to set the title tag of ALL of the selected tracks to: %s ?"
+msgstr ""
+
+#: ../src/pragha-toolbar.c:136
+#, c-format
+msgid ""
+"%s <small><span weight=\"light\">by</span></small> %s <small><span "
+"weight=\"light\">in</span></small> %s"
+msgstr "%s <small><span weight=\"light\">由</span></small> %s <small><span weight=\"light\">位于</span></small> %s"
+
+#: ../src/pragha-toolbar.c:145
+#, c-format
+msgid "%s <small><span weight=\"light\">in</span></small> %s"
+msgstr "%s <small><span weight=\"light\">于</span></small> %s"
+
+#: ../src/pragha-toolbar.c:724
+msgid "Previous Track"
+msgstr "上一首歌曲"
+
+#: ../src/pragha-toolbar.c:729
+msgid "Play / Pause Track"
+msgstr "播放/暂停歌曲"
+
+#: ../src/pragha-toolbar.c:734
+msgid "Stop playback"
+msgstr "停止播放"
+
+#: ../src/pragha-toolbar.c:772
+msgid "Leave Fullscreen"
+msgstr "离开全屏"
+
+#: ../src/pragha-toolbar.c:778
+msgid "Play songs in a random order"
+msgstr "乱序播放"
+
+#: ../src/pragha-toolbar.c:783
+msgid "Repeat playback list at the end"
+msgstr "重复播放"
+
+#: ../src/pragha-utils.c:285
+msgid "day"
+msgid_plural "days"
+msgstr[0] "天"
+
+#: ../src/pragha-utils.c:521
+msgid "Unable to open the browser"
+msgstr "无法打开浏览器"
+
+#: ../src/pragha-window.c:113
+#, c-format
+msgid ""
+"<b>Error playing current track.</b>\n"
+"(%s)\n"
+"<b>Reason:</b> %s"
+msgstr "<b>无法播放当前曲目</b>\n(%s)\n<b>原因是：</b> %s"
+
+#. Setup application name and pulseaudio role
+#: ../src/pragha.c:374 ../src/pragha.c:747
+msgid "Pragha Music Player"
+msgstr ""
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
