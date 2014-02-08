@@ -1,7 +1,19 @@
 ==============================================================
-Overview of changes in Pragha 1.2.rc since 1.1.2
+Overview of changes in Pragha 1.2 since 1.1.2
 ==============================================================
 
+Pragha V1.2
+Bugs fixed:
+	Fix thread safety when reading tags.
+	Explicitly specified use normal fonts in the library.
+	Fix seg fault when disable and enable again mpris2.
+
+Updates Translations:
+	New Korean (Korea) translation thanks to Smallsnail.
+	New Vietnamese translation thanks to Ppanhh.
+	Many other updates. Thanks to all.
+
+V1.2.rc
 News:
 	Highlight the headers on library view.
 	Disable all video features of playbin.

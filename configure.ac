@@ -6,11 +6,10 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [2])
-m4_define([pragha_version_micro], [rc])
-m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
+m4_define([pragha_version], [pragha_version_major().pragha_version_minor()])
 
 dnl Initialize autoconf
-AC_COPYRIGHT([Copyright (c) 2009-2013
+AC_COPYRIGHT([Copyright (c) 2009-2014
         Matias De lellis <mati86dl@gmail.com>])
 AC_INIT([pragha], [pragha_version()], [mati86dl@gmail.com])
 AC_CONFIG_HEADERS([config.h])

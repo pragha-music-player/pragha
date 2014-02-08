@@ -982,7 +982,7 @@ void about_widget(PraghaApplication *pragha)
 	                      "authors", authors,
 	                      "translator-credits", _("translator-credits"),
 	                      "comments", "A lightweight GTK+ music player",
-	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2013 Matias",
+	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2014 Matias",
 	                      "license", license,
 	                      "name", PACKAGE_NAME,
 	                      "version", PACKAGE_VERSION,
