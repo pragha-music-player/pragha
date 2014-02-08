@@ -1031,6 +1031,9 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
 
+	/* Hide second sidebar */
+	GtkAction *action_sidebar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel2");
+	gtk_action_set_visible (action_sidebar, FALSE);
 
 	/* Binding properties to Actions. */
 
