@@ -158,6 +158,17 @@ pragha_window_unfullscreen (GObject *object, PraghaApplication *pragha)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
 }
 
+static void
+pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *pragha)
+{
+	GtkAction *action;
+	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Lateral panel2");
+	if (pragha_sidebar_get_n_panes (sidebar))
+		gtk_action_set_visible (action, TRUE);
+	else
+		gtk_action_set_visible (action, FALSE);
+}
+
 /*
  * Public api.
  */
@@ -474,7 +485,7 @@ pragha_window_new (PraghaApplication *pragha)
 	 *               [        ][Status Bar]
 	 */
 
-	gtk_paned_pack1 (GTK_PANED (pane1), pragha_sidebar_get_widget(sidebar1), FALSE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (pane1), GTK_WIDGET(sidebar1), FALSE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (pane1), playlist_statusbar_vbox, TRUE, FALSE);
 
 	gtk_paned_set_position (GTK_PANED (pane1),
@@ -485,7 +496,7 @@ pragha_window_new (PraghaApplication *pragha)
 	 */
 
 	gtk_paned_pack1 (GTK_PANED (pane2), pane1, TRUE, FALSE);
-	gtk_paned_pack2 (GTK_PANED (pane2), pragha_sidebar_get_widget(sidebar2), FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane2), GTK_WIDGET(sidebar2), FALSE, TRUE);
 
 	gtk_paned_set_position (GTK_PANED (pane2),
 		pragha_preferences_get_secondary_sidebar_size (preferences));
@@ -516,8 +527,17 @@ pragha_window_new (PraghaApplication *pragha)
 		                          pragha_library_pane_get_popup_menu (library));
 
 	g_object_bind_property (preferences, "lateral-panel",
-	                        pragha_sidebar_get_widget(sidebar1), "visible",
+	                        sidebar1, "visible",
 	                        binding_flags);
+
+	/* Second sidebar visibility depend on their children */
+
+	g_object_bind_property (preferences, "secondary-lateral-panel",
+	                        sidebar2, "visible",
+	                        binding_flags);
+
+	g_signal_connect (G_OBJECT(sidebar2), "children-changed",
+	                  G_CALLBACK(pragha_sidebar_children_changed), pragha);
 
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.
@@ -529,10 +549,6 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_widget_show (infobox);
 	gtk_widget_show (pane1);
 	gtk_widget_show (pane2);
-
-	g_object_bind_property (preferences, "secondary-lateral-panel",
-	                        pragha_sidebar_get_widget(sidebar2), "visible",
-	                        binding_flags);
 
 	gtk_widget_show(playlist_statusbar_vbox);
 	gtk_widget_show_all (GTK_WIDGET(playlist));

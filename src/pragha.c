@@ -490,14 +490,6 @@ pragha_application_dispose (GObject *object)
 		pragha->peas_engine = NULL;
 	}
 #endif
-	if (pragha->sidebar1) {
-		pragha_sidebar_free (pragha->sidebar1);
-		pragha->sidebar1 = NULL;
-	}
-	if (pragha->sidebar2) {
-		pragha_sidebar_free (pragha->sidebar2);
-		pragha->sidebar2 = NULL;
-	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
 		g_object_unref (pragha->backend);

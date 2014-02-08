@@ -202,10 +202,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 
 	CDEBUG (DBG_INFO, "Get song info handler");
 
-	PraghaApplication *pragha = NULL;
-	pragha = plugin->priv->pragha;
-
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (plugin->priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED) {
 		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
@@ -391,6 +388,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
+	PraghaSidebar *sidebar;
 	gchar *cache_folder = NULL, *plugin_group = NULL;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
@@ -421,7 +419,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	/* Create the pane and attach it */
 	priv->pane = pragha_songinfo_pane_new ();
-	pragha_sidebar_attach_plugin (pragha_application_get_second_sidebar (priv->pragha),
+	sidebar = pragha_application_get_second_sidebar (priv->pragha);
+	pragha_sidebar_attach_plugin (sidebar,
 		                          GTK_WIDGET (priv->pane),
 		                          pragha_songinfo_pane_get_pane_title (priv->pane),
 		                          pragha_songinfo_pane_get_popup_menu (priv->pane));
@@ -455,6 +454,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaApplication *pragha = NULL;
 	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
+	PraghaSidebar *sidebar;
 	gchar *plugin_group = NULL;
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
@@ -484,8 +484,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_preferences_set_boolean (preferences, plugin_group, "DownloadAlbumArt", priv->download_album_art);
 	g_free (plugin_group);
 
-	pragha_sidebar_remove_plugin (pragha_application_get_second_sidebar (priv->pragha),
-	                              GTK_WIDGET (priv->pane));
+	sidebar = pragha_application_get_second_sidebar (priv->pragha);
+	pragha_sidebar_remove_plugin (sidebar, GTK_WIDGET(priv->pane));
 
 	glyr_db_destroy (priv->cache_db);
 
