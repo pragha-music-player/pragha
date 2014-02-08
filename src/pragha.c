@@ -80,6 +80,8 @@ struct _PraghaApplication {
 
 	PraghaStatusIcon  *status_icon;
 
+	GBinding          *sidebar2_binding;
+
 #ifdef HAVE_LIBPEAS
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
@@ -480,6 +482,10 @@ pragha_application_dispose (GObject *object)
 		pragha->clastfm = NULL;
 	}
 #endif
+	if (pragha->sidebar2_binding) {
+		g_object_unref (pragha->sidebar2_binding);
+		pragha->sidebar2_binding = NULL;
+	}
 #ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
 		pragha_plugins_save_activated (pragha);
@@ -660,6 +666,11 @@ pragha_application_startup (GApplication *application)
 	g_object_bind_property (pragha->preferences, "timer-remaining-mode",
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
+
+	pragha->sidebar2_binding =
+		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
+		                        pragha->sidebar2, "visible",
+		                        binding_flags);
 
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);

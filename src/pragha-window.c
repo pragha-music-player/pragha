@@ -163,10 +163,13 @@ pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *prag
 {
 	GtkAction *action;
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Lateral panel2");
-	if (pragha_sidebar_get_n_panes (sidebar))
+	if (pragha_sidebar_get_n_panes (sidebar)) {
 		gtk_action_set_visible (action, TRUE);
-	else
+	}
+	else {
 		gtk_action_set_visible (action, FALSE);
+		gtk_widget_set_visible (GTK_WIDGET(sidebar), FALSE);
+	}
 }
 
 /*
@@ -531,10 +534,6 @@ pragha_window_new (PraghaApplication *pragha)
 	                        binding_flags);
 
 	/* Second sidebar visibility depend on their children */
-
-	g_object_bind_property (preferences, "secondary-lateral-panel",
-	                        sidebar2, "visible",
-	                        binding_flags);
 
 	g_signal_connect (G_OBJECT(sidebar2), "children-changed",
 	                  G_CALLBACK(pragha_sidebar_children_changed), pragha);
