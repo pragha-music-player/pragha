@@ -20,7 +20,19 @@
 
 #include <gtk/gtk.h>
 
+#define PRAGHA_TYPE_SIDEBAR            (pragha_sidebar_get_type ())
+#define PRAGHA_SIDEBAR(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_SIDEBAR, PraghaSidebar))
+#define PRAGHA_IS_SIDEBAR(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_SIDEBAR))
+#define PRAGHA_SIDEBAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  PRAGHA_TYPE_SIDEBAR, PraghaSidebarClass))
+#define PRAGHA_IS_SIDEBAR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  PRAGHA_TYPE_SIDEBAR))
+#define PRAGHA_SIDEBAR_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  PRAGHA_TYPE_SIDEBAR, PraghaSidebarClass))
+
 typedef struct _PraghaSidebar PraghaSidebar;
+
+typedef struct {
+	GtkScrolledWindowClass    __parent__;
+	void (*children_changed) (PraghaSidebar *sidebar);
+} PraghaSidebarClass;
 
 void
 pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
@@ -32,9 +44,9 @@ void
 pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
                               GtkWidget     *widget);
 
-GtkWidget     *pragha_sidebar_get_widget      (PraghaSidebar *sidebar);
+gint
+pragha_sidebar_get_n_panes (PraghaSidebar *sidebar);
 
-void           pragha_sidebar_free            (PraghaSidebar *sidebar);
-PraghaSidebar *pragha_sidebar_new             (void);
+PraghaSidebar *pragha_sidebar_new (void);
 
 #endif /* PRAGHA_SIDEBAR_H */

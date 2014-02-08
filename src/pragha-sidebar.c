@@ -16,18 +16,26 @@
 /*************************************************************************/
 
 #include "pragha-sidebar.h"
-#include "pragha-preferences.h"
 
 struct _PraghaSidebar {
-	GtkWidget *widget;
+	GtkBox     __parent__;
+
 	GtkWidget *container;
 	GtkWidget *header;
 	GtkWidget *menu_button;
 	GtkWidget *close_button;
 	GtkWidget *title_box;
 
-	GtkMenu *popup_menu;
+	GtkMenu   *popup_menu;
 };
+
+G_DEFINE_TYPE(PraghaSidebar, pragha_sidebar, GTK_TYPE_BOX)
+
+enum {
+	SIGNAL_CHILDREN_CHANGED,
+	LAST_SIGNAL
+};
+static int signals[LAST_SIGNAL] = { 0 };
 
 /*
  * Public Api.
@@ -54,6 +62,8 @@ pragha_sidebar_attach_plugin (PraghaSidebar *sidebar,
 		sidebar->popup_menu = popup_menu;
 	}
 	gtk_widget_show_all (title);
+
+	g_signal_emit (sidebar, signals[SIGNAL_CHILDREN_CHANGED], 0);
 }
 
 void
@@ -78,14 +88,13 @@ pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
 		}
 	}
 
-	if (gtk_notebook_get_n_pages (GTK_NOTEBOOK(sidebar->container)) == 0)
-		gtk_widget_hide(GTK_WIDGET(sidebar->widget));
+	g_signal_emit (sidebar, signals[SIGNAL_CHILDREN_CHANGED], 0);
 }
 
-GtkWidget *
-pragha_sidebar_get_widget(PraghaSidebar *sidebar)
+gint
+pragha_sidebar_get_n_panes (PraghaSidebar *sidebar)
 {
-	return sidebar->widget;
+	return 	gtk_notebook_get_n_pages (GTK_NOTEBOOK(sidebar->container));
 }
 
 /*
@@ -129,7 +138,7 @@ pragha_sidebar_menu_position (GtkMenu  *menu,
 static void
 pragha_sidebar_close_button_cb (GtkWidget *widget, PraghaSidebar *sidebar)
 {
-	gtk_widget_hide(GTK_WIDGET(sidebar->widget));
+	gtk_widget_hide (GTK_WIDGET(sidebar));
 }
 
 static gboolean
@@ -257,52 +266,59 @@ pragha_sidebar_container_new(PraghaSidebar *sidebar)
 	return notebook;
 }
 
-GtkWidget *
-pragha_sidebar_widget_new(PraghaSidebar *sidebar)
+static void
+pragha_sidebar_finalize (GObject *object)
 {
-	GtkWidget *vbox;
-
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
-
-	gtk_box_pack_start(GTK_BOX(vbox),
-	                   sidebar->header,
-	                   FALSE,
-	                   FALSE,
-	                   0);
-	gtk_box_pack_start(GTK_BOX(vbox),
-	                   sidebar->container,
-	                   TRUE,
-	                   TRUE,
-	                   0);
-
-	gtk_widget_show_all(vbox);
-
-	return vbox;
+	//PraghaSidebar *sidebar = PRAGHA_SIDEBAR (object);
+	(*G_OBJECT_CLASS (pragha_sidebar_parent_class)->finalize) (object);
 }
 
-void
-pragha_sidebar_free(PraghaSidebar *sidebar)
+static void
+pragha_sidebar_init (PraghaSidebar *sidebar)
 {
-	g_slice_free(PraghaSidebar, sidebar);
-}
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (sidebar),
+	                                GTK_ORIENTATION_VERTICAL);
 
-PraghaSidebar *
-pragha_sidebar_new(void)
-{
-	PraghaSidebar *sidebar;
-
-	sidebar = g_slice_new0(PraghaSidebar);
+	gtk_box_set_spacing (GTK_BOX(sidebar), 2);
 
 	sidebar->title_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-	sidebar->menu_button = praga_sidebar_menu_button_new(sidebar);
-	sidebar->close_button = pragha_sidebar_close_button_new(sidebar);
+	sidebar->menu_button = praga_sidebar_menu_button_new (sidebar);
+	sidebar->close_button = pragha_sidebar_close_button_new (sidebar);
 
-	sidebar->header = pragha_sidebar_header_new(sidebar);
-	sidebar->container = pragha_sidebar_container_new(sidebar);
-
-	sidebar->widget = pragha_sidebar_widget_new(sidebar);
+	sidebar->header = pragha_sidebar_header_new (sidebar);
+	sidebar->container = pragha_sidebar_container_new (sidebar);
 
 	sidebar->popup_menu = NULL;
 
-	return sidebar;
+	gtk_box_pack_start (GTK_BOX(sidebar), sidebar->header,
+	                    FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(sidebar), sidebar->container,
+	                    TRUE, TRUE, 0);
+
+	gtk_widget_show_all (GTK_WIDGET(sidebar->header));
+	gtk_widget_show_all (GTK_WIDGET(sidebar->container));
+}
+
+static void
+pragha_sidebar_class_init (PraghaSidebarClass *klass)
+{
+	GObjectClass  *gobject_class;
+
+	gobject_class = G_OBJECT_CLASS (klass);
+	gobject_class->finalize = pragha_sidebar_finalize;
+
+	signals[SIGNAL_CHILDREN_CHANGED] =
+		g_signal_new ("children-changed",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaSidebarClass, children_changed),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+}
+
+PraghaSidebar *
+pragha_sidebar_new (void)
+{
+	return g_object_new (PRAGHA_TYPE_SIDEBAR, NULL);
 }
