@@ -476,8 +476,16 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	preferences = pragha_application_get_preferences (pragha);
 
-	g_signal_handlers_disconnect_by_func (preferences,
+	g_signal_handlers_disconnect_by_func (G_OBJECT(preferences),
 	                                      pragha_song_info_prefrenceces_event,
+	                                      plugin);
+
+	g_signal_handlers_disconnect_by_func (G_OBJECT(preferences),
+	                                      pragha_songinfo_pane_visibility_changed,
+	                                      plugin);
+
+	g_signal_handlers_disconnect_by_func (G_OBJECT(preferences),
+	                                      pragha_songinfo_pane_type_changed,
 	                                      plugin);
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
