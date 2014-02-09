@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-void
+GCancellable *
 pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
                                          GLYR_GET_TYPE         type,
                                          const gchar          *artist,

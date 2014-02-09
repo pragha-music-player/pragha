@@ -30,6 +30,8 @@
 
 typedef struct {
 	PraghaSongInfoPlugin *plugin;
+	GCancellable         *cancellable;
+	gulong                cancel_id;
 	gchar                *filename;
 	GlyrQuery             query;
 	GlyrMemCache         *head;
@@ -112,6 +114,9 @@ glyr_finished_thread_update_pane (gpointer data)
 {
 	glyr_struct *glyr_info = data;
 
+	if (g_cancellable_is_cancelled (glyr_info->cancellable))
+		goto old_thread;
+
 	if (!glyr_finished_thread_is_current_song(glyr_info->plugin, glyr_info->filename))
 		goto old_thread;
 
@@ -121,6 +126,9 @@ glyr_finished_thread_update_pane (gpointer data)
 		glyr_finished_incorrectly_pane (glyr_info);
 
 old_thread:
+	g_cancellable_disconnect (glyr_info->cancellable, glyr_info->cancel_id);
+	g_object_unref (glyr_info->cancellable);
+
 	if (glyr_info->head != NULL)
 		glyr_free_list (glyr_info->head);
 
@@ -147,7 +155,14 @@ get_related_info_idle_func (gpointer data)
 	return glyr_info;
 }
 
-void
+static void
+search_cancelled (GCancellable *cancellable, gpointer user_data)
+{
+	GlyrQuery *query = user_data;
+	glyr_signal_exit (query);
+}
+
+GCancellable *
 pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
                                          GLYR_GET_TYPE        type,
                                          const gchar          *artist,
@@ -192,8 +207,17 @@ pragha_songinfo_plugin_get_info_to_pane (PraghaSongInfoPlugin *plugin,
 	glyr_info->filename = g_strdup(filename);
 	glyr_info->plugin = plugin;
 
+	GCancellable *cancellable = g_cancellable_new ();
+	glyr_info->cancellable = g_object_ref (cancellable);
+	glyr_info->cancel_id = g_cancellable_connect (glyr_info->cancellable,
+	                                              G_CALLBACK (search_cancelled),
+	                                              &glyr_info->query,
+	                                              NULL);
+
 	pragha_async_launch (get_related_info_idle_func,
 	                     glyr_finished_thread_update_pane,
 	                     glyr_info);
+
+	return cancellable;
 }
 
