@@ -528,6 +528,8 @@ pragha_playlist_stopped_playback (PraghaPlaylist *playlist)
 		gtk_tree_row_reference_free (playlist->curr_seq_ref);
 		playlist->curr_seq_ref = NULL;
 	}
+
+	gtk_tree_path_free (path);
 }
 
 /* Update playback state pixbuf */
