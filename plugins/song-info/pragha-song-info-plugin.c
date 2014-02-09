@@ -66,7 +66,7 @@ struct _PraghaSongInfoPluginPrivate {
 	GtkActionGroup     *action_group_playlist;
 	guint               merge_id_playlist;
 
-	guint               timeout_id;
+	GCancellable       *pane_search;
 };
 
 PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
@@ -194,6 +194,7 @@ exists:
 static void
 related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 {
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 	PraghaBackend *backend;
 	PraghaMusicobject *mobj;
 	const gchar *artist = NULL;
@@ -216,11 +217,12 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, filename);
+	g_warn_if_fail (priv->pane_search == NULL);
+	priv->pane_search = pragha_songinfo_plugin_get_info_to_pane (plugin, pragha_songinfo_pane_get_default_view(plugin->priv->pane), artist, title, filename);
 }
 
-static gboolean
-pragha_song_info_get_info_delayed (gpointer data)
+static void
+pragha_song_info_get_info (gpointer data)
 {
 	PraghaSongInfoPlugin *plugin = data;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
@@ -230,8 +232,6 @@ pragha_song_info_get_info_delayed (gpointer data)
 
 	if (gtk_widget_is_visible(GTK_WIDGET(priv->pane)))
 		related_get_song_info_pane_handler (plugin);
-
-	return FALSE;
 }
 
 static void
@@ -243,9 +243,10 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	PraghaSongInfoPlugin *plugin = user_data;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	if (priv->timeout_id) {
-		g_source_remove (priv->timeout_id);
-		priv->timeout_id = 0;
+	if (priv->pane_search) {
+		g_cancellable_cancel (priv->pane_search);
+		g_object_unref (priv->pane_search);
+		priv->pane_search = NULL;
 	}
 
 	state = pragha_backend_get_state (backend);
@@ -265,7 +266,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 		return;
 	}
 	
-	priv->timeout_id = g_idle_add (pragha_song_info_get_info_delayed, plugin);
+	pragha_song_info_get_info (plugin);
 }
 
 /*
