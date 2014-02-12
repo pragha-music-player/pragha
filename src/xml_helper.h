@@ -16,7 +16,7 @@ struct _XMLNode {
 	XMLNode *next;		// List of peer elements
 };
 
-
+char *unescape_HTML(const char *original);
 int strisspace(const char *string);
 
 XMLNode *xmlnode_get(XMLNode *root, const char **path, const char *name, const char *value);

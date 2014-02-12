@@ -1,3 +1,9 @@
+/*
+ * This File is part of libclastfm 0.5 (http://liblastfm.sourceforge.net/)
+ * Licenced as GNU General Public License version 3
+ * http://sourceforge.net/p/liblastfm/code/ci/master/tree/src/lfm_helper.c
+ */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,8 +12,35 @@
 
 #include "xml_helper.h"
 
+const char *HTML_ESCAPE[] = {
+	"&amp;", "&",
+	"&quot;","\"",
+	"&ndash;","-",
+	NULL
+};
+
 /* XML Parser's Element name and content buffer */
 #define BUFFER_SIZE	1024*1024
+
+char *
+unescape_HTML(const char *original) {
+	char *cptr, *dup;
+	int i;
+
+	if (original == NULL)
+		return NULL;
+
+	dup = strdup (original);
+	for( i = 0 ; HTML_ESCAPE[i]; i += 2) {
+		cptr = strstr(dup, HTML_ESCAPE[i]);
+		while (cptr) {
+			// This may not work on older systems
+			sprintf (cptr, "%s%s", HTML_ESCAPE[i+1], cptr+strlen(HTML_ESCAPE[i]));
+			cptr = strstr (dup, HTML_ESCAPE[i]);
+		}
+	}
+	return dup;
+}
 
 /* Returns 0 if not entirely white space */
 int strisspace(const char *string){
