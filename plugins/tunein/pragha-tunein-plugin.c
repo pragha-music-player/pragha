@@ -36,8 +36,10 @@
 
 #include "src/pragha.h"
 #include "src/pragha-playlist.h"
+#include "src/pragha-playlists-mgmt.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-hig.h"
+#include "src/pragha-utils.h"
 #include "src/xml_helper.h"
 
 #include "plugins/pragha-plugin-macros.h"
@@ -92,7 +94,6 @@ static const gchar *main_menu_xml = "<ui>						\
 	</menubar>													\
 </ui>";
 
-
 /*
  * TuneIn Handlers
  */
@@ -110,24 +111,23 @@ tunein_helper_get_atribute (XMLNode *xml, const gchar *atribute)
 }
 
 static void
-pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
+pragha_tunein_plugin_get_radio_done (SoupSession *session,
+                                     SoupMessage *msg,
+                                     gpointer     user_data)
 {
-	SoupSession *session;
-	SoupMessage *msg;
-	gchar *query = NULL;
+	GtkWidget *window;
+	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
+	PraghaMusicobject *mobj = NULL;
 	XMLNode *xml = NULL, *xi;
 	const gchar *name = NULL, *url = NULL;
-	PraghaPlaylist *playlist;
-	PraghaMusicobject *mobj = NULL;
+	gchar *name_fixed = NULL;
 
+	PraghaTuneinPlugin *plugin = user_data;
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", field);
-
-	session = soup_session_sync_new ();
-
-	msg = soup_message_new ("GET", query);
-	soup_session_send_message (session, msg);
+	window = pragha_application_get_window (priv->pragha);
+	remove_watch_cursor (window);
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
 		return;
@@ -138,12 +138,46 @@ pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 	name = tunein_helper_get_atribute (xi, "text");
 	url = tunein_helper_get_atribute (xi, "URL");
 
-	mobj = new_musicobject_from_location (url, name);
+	if (string_is_empty(name) || string_is_empty(url)) {
+		xmlnode_free(xml);
+		return;
+	}
+
+	name_fixed = unescape_HTML (name);
+	mobj = new_musicobject_from_location (url, name_fixed);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	pragha_playlist_append_single_song (playlist, mobj);
+	new_radio (playlist, url, name_fixed);
+
+	cdbase = pragha_application_get_database (priv->pragha);
+	pragha_database_change_playlists_done (cdbase);
 
 	xmlnode_free(xml);
+	g_free (name_fixed);
+}
+
+static void
+pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
+{
+	GtkWidget *window;
+	SoupSession *session;
+	SoupMessage *msg;
+	gchar *query = NULL;
+
+	PraghaTuneinPluginPrivate *priv = plugin->priv;
+
+	window = pragha_application_get_window (priv->pragha);
+	set_watch_cursor (window);
+
+	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", field);
+
+	session = soup_session_sync_new ();
+
+	msg = soup_message_new ("GET", query);
+	soup_session_queue_message (session, msg,
+	                            pragha_tunein_plugin_get_radio_done, plugin);
+
 	g_free (query);
 }
 
