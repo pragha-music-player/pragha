@@ -731,7 +731,7 @@ pragha_totem_pl_parser_parse_from_uri (const gchar *uri)
 	gchar *base;
 
 	pl_parser = totem_pl_parser_new ();
-	g_object_set (pl_parser, "recurse", FALSE, NULL);
+	//g_object_set (pl_parser, "recurse", FALSE, NULL);
 	g_signal_connect (G_OBJECT(pl_parser), "entry-parsed",
 	                  G_CALLBACK(_on_pl_entry_parsed), &plitems);
 
