@@ -5,3 +5,4 @@ plugins/song-info/pragha-song-info-thread-dialog.c
 plugins/song-info/pragha-song-info-thread-pane.c
 plugins/devices/pragha-devices-cd.c
 plugins/devices/pragha-devices-plugin.c
+plugins/tunein/pragha-tunein-plugin.c

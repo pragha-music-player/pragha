@@ -28,3 +28,7 @@ endif
 if HAVE_LIBMTP
 SUBDIRS += devices
 endif
+
+if HAVE_LIBSOUP
+SUBDIRS += tunein
+endif
