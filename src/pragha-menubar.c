@@ -122,6 +122,16 @@ activate_toggle (GSimpleAction *action,
   g_variant_unref (state);
 }
 
+static void
+pragha_set_enable_action (GtkWindow  *window,
+                          const char *action_name,
+                          gboolean    enabled)
+{
+	GAction *action;
+	action = g_action_map_lookup_action (G_ACTION_MAP (window), action_name);
+	g_object_set (action, "enabled", enabled, NULL);
+}
+
 static GActionEntry win_entries[] = {
 	{ "prev",    pragha_gmenu_prev,       NULL, NULL,    NULL },
 	{ "play",    pragha_gmenu_playpause,  NULL, NULL,    NULL },
@@ -361,11 +371,18 @@ void
 pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	GtkAction *action;
+	GtkWindow *window;
 	gboolean playing = FALSE;
 
 	PraghaApplication *pragha = user_data;
 
 	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
+
+	window = GTK_WINDOW(pragha_application_get_window(pragha));
+	pragha_set_enable_action (window, "prev", playing);
+	pragha_set_enable_action (window, "stop", playing);
+	pragha_set_enable_action (window, "next", playing);
+	pragha_set_enable_action (window, "edit", playing);
 
 	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Prev");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
