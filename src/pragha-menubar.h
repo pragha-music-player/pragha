@@ -25,6 +25,12 @@
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
+/*
+ * Helper to GMenumodel definitions.
+ *
+ * NOTE: Remember use "&lt;" and "&gt;" as "<" and ">" in accelerators.
+ */
+
 #define NEW_MENU(_MENU) \
 	"<interface>" \
 	"  <menu id='" _MENU "'>"
@@ -40,11 +46,26 @@ typedef struct _PraghaApplication PraghaApplication;
 	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
 	"        </item>"
 
+#define NEW_ACCEL_ITEM(_LABEL,_ACCEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='accel'>" _ACCEL  "</attribute>"  \
+	"        </item>"
+
 #define NEW_ICON_ITEM(_LABEL,_ICON,_PREFIX,_ACTION) \
 	"        <item>" \
 	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
 	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
 	"          <attribute name='icon'>" _ICON "</attribute>" \
+	"        </item>"
+
+#define NEW_ICON_ACCEL_ITEM(_LABEL,_ICON,_ACCEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='icon'>" _ICON "</attribute>" \
+	"          <attribute name='accel'>" _ACCEL  "</attribute>"  \
 	"        </item>"
 
 #define SEPARATOR \

@@ -147,35 +147,26 @@ static GActionEntry win_entries[] = {
 static const gchar *menu_ui = \
 	NEW_MENU("menubar") \
 		NEW_SUBMENU("_Playback") \
-			NEW_ICON_ITEM("Prev track",        "media-skip-backward",  "win", "prev") \
-			NEW_ICON_ITEM("Play / Pause",      "media-playback-start", "win", "play") \
-			NEW_ICON_ITEM("Stop",              "media-playback-stop",  "win", "stop") \
-			NEW_ICON_ITEM("Next track",        "media-skip-forward",   "win", "next") \
+			NEW_ICON_ACCEL_ITEM("Prev track",             "media-skip-backward",  "&lt;Alt&gt;Left",      "win", "prev") \
+			NEW_ICON_ACCEL_ITEM("Play / Pause",           "media-playback-start", "&lt;Control&gt;space", "win", "play") \
+			NEW_ICON_ITEM      ("Stop",                   "media-playback-stop",                          "win", "stop") \
+			NEW_ICON_ACCEL_ITEM("Next track",             "media-skip-forward",   "&lt;Alt&gt;Right",     "win", "next") \
 			SEPARATOR \
-			NEW_ITEM("_Shuffle",                                       "win", "shuffle") \
-			NEW_ITEM("_Repeat",                                        "win", "repeat") \
+			NEW_ACCEL_ITEM     ("_Shuffle",                                       "&lt;Control&gt;U",     "win", "shuffle") \
+			NEW_ACCEL_ITEM     ("_Repeat",                                        "&lt;Control&gt;R",     "win", "repeat") \
 			SEPARATOR \
-			NEW_ITEM("Edit track information",                         "win", "edit") \
+			NEW_ACCEL_ITEM     ("Edit track information",                         "&lt;Control&gt;E",     "win", "edit") \
 			SEPARATOR \
-			NEW_ICON_ITEM("_Quit",             "application-exit",     "win", "quit") \
+			NEW_ICON_ACCEL_ITEM("_Quit",                  "application-exit",     "&lt;Control&gt;Q",     "win", "quit") \
 		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
-			NEW_ICON_ITEM("About",             "help-about",           "win", "about") \
+			NEW_ICON_ITEM      ("About",                  "help-about",                                   "win", "about") \
 		CLOSE_SUBMENU \
 	CLOSE_MENU;
 
 /*
  * Menubar callbacks.
  */
-
-/* Playback */
-
-static void prev_action(GtkAction *action, PraghaApplication *pragha);
-static void play_pause_action(GtkAction *action, PraghaApplication *pragha);
-static void stop_action(GtkAction *action, PraghaApplication *pragha);
-static void next_action (GtkAction *action, PraghaApplication *pragha);
-// void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
-static void quit_action(GtkAction *action, PraghaApplication *pragha);
 
 /* Playlist */
 
@@ -216,20 +207,6 @@ static void translate_action(GtkAction *action, PraghaApplication *pragha);
 
 static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
-		<menu action=\"PlaybackMenu\">					\
-			<separator/>						\
-			<menuitem action=\"Prev\"/>				\
-			<menuitem action=\"Play_pause\"/>			\
-			<menuitem action=\"Stop\"/>				\
-			<menuitem action=\"Next\"/>				\
-			<separator/>						\
-			<menuitem action=\"Shuffle\"/>				\
-			<menuitem action=\"Repeat\"/>				\
-			<separator/>						\
-			<menuitem action=\"Edit tags\"/>			\
-			<separator/>						\
-			<menuitem action=\"Quit\"/>				\
-		</menu>								\
 		<menu action=\"PlaylistMenu\">					\
 			<menuitem action=\"Add files\"/>			\
 			<menuitem action=\"Add Audio CD\"/>			\
@@ -282,23 +259,10 @@ static const gchar *main_menu_xml = "<ui>					\
 </ui>";
 
 static GtkActionEntry main_aentries[] = {
-	{"PlaybackMenu", NULL, N_("_Playback")},
 	{"PlaylistMenu", NULL, N_("Play_list")},
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Prev", "media-skip-backward", N_("Prev track"),
-	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
-	{"Play_pause", "media-playback-start", N_("Play / Pause"),
-	 "<Control>space", "Play / Pause", G_CALLBACK(play_pause_action)},
-	{"Stop", "media-playback-stop", N_("Stop"),
-	 "", "Stop", G_CALLBACK(stop_action)},
-	{"Next", "media-skip-forward", N_("Next track"),
-	 "<Alt>Right", "Next track", G_CALLBACK(next_action)},
-	{"Edit tags", NULL, N_("Edit track information"),
-	 "<Control>E", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
-	{"Quit", "application-exit", N_("_Quit"),
-	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add files", "document-open", N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
 	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
@@ -342,12 +306,6 @@ static GtkActionEntry main_aentries[] = {
 };
 
 static GtkToggleActionEntry toggles_entries[] = {
-	{"Shuffle", NULL, N_("_Shuffle"),
-	 "<Control>U", "Shuffle Songs", NULL,
-	 FALSE},
-	{"Repeat", NULL, N_("_Repeat"),
-	 "<Control>R", "Repeat Songs", NULL,
-	 FALSE},
 	{"Fullscreen", NULL, N_("_Fullscreen"),
 	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
 	FALSE},
@@ -370,12 +328,10 @@ static GtkToggleActionEntry toggles_entries[] = {
 void
 pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	GtkAction *action;
 	GtkWindow *window;
 	gboolean playing = FALSE;
 
 	PraghaApplication *pragha = user_data;
-
 	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
 
 	window = GTK_WINDOW(pragha_application_get_window(pragha));
@@ -383,21 +339,6 @@ pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *psp
 	pragha_set_enable_action (window, "stop", playing);
 	pragha_set_enable_action (window, "next", playing);
 	pragha_set_enable_action (window, "edit", playing);
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Prev");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Stop");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Next");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/PlaybackMenu/Edit tags");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
-
-	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Jump to playing song");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
 }
 
 /* Add Files a folders to play list based on Audacius code.*/
@@ -800,34 +741,6 @@ static void add_libary_action(GtkAction *action, PraghaApplication *pragha)
 	}
 }
 
-/* Handler for the 'Prev' item in the pragha menu */
-
-static void prev_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_playback_prev_track(pragha);
-}
-
-/* Handler for the 'Play / Pause' item in the pragha menu */
-
-static void play_pause_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_playback_play_pause_resume(pragha);
-}
-
-/* Handler for the 'Stop' item in the pragha menu */
-
-static void stop_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_playback_stop(pragha);
-}
-
-/* Handler for the 'Next' item in the pragha menu */
-
-static void next_action (GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_playback_next_track(pragha);
-}
-
 static void
 pragha_edit_tags_dialog_response (GtkWidget      *dialog,
                                   gint            response_id,
@@ -906,13 +819,6 @@ void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha)
 	                                    pragha_backend_get_musicobject (backend));
 	
 	gtk_widget_show (dialog);
-}
-
-/* Handler for the 'Quit' item in the pragha menu */
-
-static void quit_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_application_quit (pragha);
 }
 
 /* Handler for 'Search Playlist' option in the Edit menu */
@@ -1163,12 +1069,19 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	GtkBuilder *builder;
 	GActionMap *map;
 	GAction *action;
+	GError *error = NULL;
+	gsize length = -1;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	builder = gtk_builder_new ();
-	gtk_builder_add_from_string (builder, menu_ui, -1, NULL);
+	gtk_builder_add_from_string (builder, menu_ui, length, &error);
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+	}
+
 	g_action_map_add_action_entries (G_ACTION_MAP (pragha_application_get_window(pragha)),
 	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
 	gtk_application_set_menubar (GTK_APPLICATION (pragha),
@@ -1219,12 +1132,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                             binding_variant_to_gboolean,
 	                             NULL,
 	                             NULL);
-
-	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
-	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);
-
-	GtkAction *action_repeat = gtk_ui_manager_get_action(menu_ui_manager,"/Menubar/PlaybackMenu/Repeat");
-	g_object_bind_property (preferences, "repeat", action_repeat, "active", binding_flags);
 
 	GtkAction *action_lateral1 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel1");
 	g_object_bind_property (preferences, "lateral-panel", action_lateral1, "active", binding_flags);
