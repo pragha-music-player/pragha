@@ -113,7 +113,7 @@ GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
 #define PRAGHA_APPLICATION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj),  PRAGHA_TYPE_APPLICATION, PraghaApplicationClass))
 
 typedef struct {
-	GApplicationClass parent_class;
+	GtkApplicationClass parent_class;
 } PraghaApplicationClass;
 
 void pragha_application_quit (PraghaApplication *pragha);
