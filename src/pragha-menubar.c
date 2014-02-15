@@ -43,6 +43,56 @@
 #include "pragha.h"
 
 /*
+ * GMenuModel definitions.
+ */
+
+static void
+pragha_gmenu_playpause (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_playback_play_pause_resume (pragha);
+}
+
+static void
+pragha_gmenu_about (GSimpleAction *action,
+                    GVariant      *parameter,
+                    gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	about_action (NULL, pragha);
+}
+
+static void
+pragha_gmenu_quit (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+
+	pragha_application_quit (pragha);
+}
+
+static GActionEntry win_entries[] = {
+  { "play",  pragha_gmenu_playpause, NULL, NULL, NULL },
+  { "about", pragha_gmenu_about,     NULL, NULL, NULL },
+  { "quit",  pragha_gmenu_quit,      NULL, NULL, NULL }
+};
+
+static const gchar *menu_ui = \
+	NEW_MENU("menubar") \
+		NEW_SUBMENU("_Playback") \
+			NEW_ICON_ITEM("Play / Pause", "media-playback-start", "win", "play") \
+			SEPARATOR \
+			NEW_ICON_ITEM("_Quit", "application-exit", "win", "quit") \
+		CLOSE_SUBMENU \
+		NEW_SUBMENU("_Help") \
+			NEW_ICON_ITEM("About", "help-about", "win", "about") \
+		CLOSE_SUBMENU \
+	CLOSE_MENU;
+
+/*
  * Menubar callbacks.
  */
 
@@ -1012,6 +1062,14 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	GtkBuilder *builder = gtk_builder_new ();
+	gtk_builder_add_from_string (builder, menu_ui, -1, NULL);
+	g_action_map_add_action_entries (G_ACTION_MAP (pragha_application_get_window(pragha)),
+	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
+	gtk_application_set_menubar (GTK_APPLICATION (pragha),
+	                             G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
+	g_object_unref (builder);
  
 	main_actions = gtk_action_group_new("Main Actions");
 

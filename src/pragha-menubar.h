@@ -25,6 +25,40 @@
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
+#define NEW_MENU(_MENU) \
+	"<interface>" \
+	"  <menu id='" _MENU "'>"
+
+#define NEW_SUBMENU(_LABEL) \
+	"  <submenu>" \
+	"    <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"      <section>"
+
+#define NEW_ITEM(_LABEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"        </item>"
+
+#define NEW_ICON_ITEM(_LABEL,_ICON,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='icon'>" _ICON "</attribute>" \
+	"        </item>"
+
+#define SEPARATOR \
+	"      </section>" \
+	"      <section>"
+
+#define CLOSE_SUBMENU \
+	"      </section>" \
+	"    </submenu>"
+
+#define CLOSE_MENU \
+	"  </menu>" \
+	"</interface>"
+
 void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 
 /*
