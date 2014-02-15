@@ -49,7 +49,7 @@ GThread *pragha_main_thread = NULL;
 #endif
 
 struct _PraghaApplication {
-	GApplication base_instance;
+	GtkApplication base_instance;
 
 	/* Main window and icon */
 
@@ -92,7 +92,7 @@ struct _PraghaApplication {
 #endif
 };
 
-G_DEFINE_TYPE (PraghaApplication, pragha_application, G_TYPE_APPLICATION);
+G_DEFINE_TYPE (PraghaApplication, pragha_application, GTK_TYPE_APPLICATION);
 
 /*
  * Some calbacks..
@@ -435,7 +435,7 @@ pragha_application_construct_window (PraghaApplication *pragha)
 {
 	/* Main window */
 
-	pragha->mainwindow = gtk_window_new (GTK_WINDOW_TOPLEVEL); //TODO GtkApplicationWindow
+	pragha->mainwindow = gtk_application_window_new (GTK_APPLICATION (pragha));
 
 	pragha->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
 	if (!pragha->pixbuf_app)
@@ -683,8 +683,6 @@ pragha_application_startup (GApplication *application)
 	/* Finally fill the library and the playlist */
 
 	pragha_init_gui_state (pragha);
-
-	g_application_hold (application); //TODO don't hold if gtkapp
 }
 
 static void
