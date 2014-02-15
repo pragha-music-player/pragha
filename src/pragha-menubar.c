@@ -47,12 +47,48 @@
  */
 
 static void
+pragha_gmenu_prev (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_playback_prev_track (pragha);
+}
+
+static void
 pragha_gmenu_playpause (GSimpleAction *action,
                         GVariant      *parameter,
                         gpointer       user_data)
 {
 	PraghaApplication *pragha = user_data;
 	pragha_playback_play_pause_resume (pragha);
+}
+
+static void
+pragha_gmenu_stop (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_playback_stop (pragha);
+}
+
+static void
+pragha_gmenu_next (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_playback_next_track (pragha);
+}
+
+static void
+pragha_gmenu_edit (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	edit_tags_playing_action (NULL, pragha);
 }
 
 static void
@@ -74,21 +110,47 @@ pragha_gmenu_quit (GSimpleAction *action,
 	pragha_application_quit (pragha);
 }
 
+static void
+activate_toggle (GSimpleAction *action,
+                 GVariant      *parameter,
+                 gpointer       user_data)
+{
+  GVariant *state;
+
+  state = g_action_get_state (G_ACTION (action));
+  g_action_change_state (G_ACTION (action), g_variant_new_boolean (!g_variant_get_boolean (state)));
+  g_variant_unref (state);
+}
+
 static GActionEntry win_entries[] = {
-  { "play",  pragha_gmenu_playpause, NULL, NULL, NULL },
-  { "about", pragha_gmenu_about,     NULL, NULL, NULL },
-  { "quit",  pragha_gmenu_quit,      NULL, NULL, NULL }
+	{ "prev",    pragha_gmenu_prev,       NULL, NULL,    NULL },
+	{ "play",    pragha_gmenu_playpause,  NULL, NULL,    NULL },
+	{ "stop",    pragha_gmenu_stop,       NULL, NULL,    NULL },
+	{ "next",    pragha_gmenu_next,       NULL, NULL,    NULL },
+	{ "shuffle", activate_toggle,         NULL, "false", NULL },
+	{ "repeat",  activate_toggle,         NULL, "false", NULL },
+	{ "edit",    pragha_gmenu_edit,       NULL, NULL,    NULL },
+	{ "quit",    pragha_gmenu_quit,       NULL, NULL,    NULL },
+	{ "about",   pragha_gmenu_about,      NULL, NULL,    NULL }
 };
 
 static const gchar *menu_ui = \
 	NEW_MENU("menubar") \
 		NEW_SUBMENU("_Playback") \
-			NEW_ICON_ITEM("Play / Pause", "media-playback-start", "win", "play") \
+			NEW_ICON_ITEM("Prev track",        "media-skip-backward",  "win", "prev") \
+			NEW_ICON_ITEM("Play / Pause",      "media-playback-start", "win", "play") \
+			NEW_ICON_ITEM("Stop",              "media-playback-stop",  "win", "stop") \
+			NEW_ICON_ITEM("Next track",        "media-skip-forward",   "win", "next") \
 			SEPARATOR \
-			NEW_ICON_ITEM("_Quit", "application-exit", "win", "quit") \
+			NEW_ITEM("_Shuffle",                                       "win", "shuffle") \
+			NEW_ITEM("_Repeat",                                        "win", "repeat") \
+			SEPARATOR \
+			NEW_ITEM("Edit track information",                         "win", "edit") \
+			SEPARATOR \
+			NEW_ICON_ITEM("_Quit",             "application-exit",     "win", "quit") \
 		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
-			NEW_ICON_ITEM("About", "help-about", "win", "about") \
+			NEW_ICON_ITEM("About",             "help-about",           "win", "about") \
 		CLOSE_SUBMENU \
 	CLOSE_MENU;
 
@@ -1054,16 +1116,41 @@ void about_action(GtkAction *action, PraghaApplication *pragha)
 	about_widget(pragha);
 }
 
+static gboolean
+binding_gboolean_to_variant (GBinding *binding,
+                             const GValue *from_value,
+                             GValue *to_value,
+                             gpointer user_data)
+{
+	GVariant *vvalue = g_variant_new_boolean (g_value_get_boolean (from_value));
+	g_value_set_variant (to_value, vvalue);
+	return TRUE;
+}
+
+static gboolean
+binding_variant_to_gboolean (GBinding *binding,
+                             const GValue *from_value,
+                             GValue *to_value,
+                             gpointer user_data)
+{
+	gboolean vbool = g_variant_get_boolean(g_value_get_variant(from_value));
+	g_value_set_boolean (to_value, vbool);
+	return TRUE;
+}
+
 void
 pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkActionGroup *main_actions;
+	GtkBuilder *builder;
+	GActionMap *map;
+	GAction *action;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
-	GtkBuilder *builder = gtk_builder_new ();
+	builder = gtk_builder_new ();
 	gtk_builder_add_from_string (builder, menu_ui, -1, NULL);
 	g_action_map_add_action_entries (G_ACTION_MAP (pragha_application_get_window(pragha)),
 	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
@@ -1096,6 +1183,25 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	/* Binding properties to Actions. */
 
 	preferences = pragha_application_get_preferences (pragha);
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	action = g_action_map_lookup_action (map, "shuffle");
+	g_object_bind_property_full (preferences, "shuffle",
+	                             action, "state",
+	                             binding_flags,
+	                             binding_gboolean_to_variant,
+	                             binding_variant_to_gboolean,
+	                             NULL,
+	                             NULL);
+
+	action = g_action_map_lookup_action (map, "repeat");
+	g_object_bind_property_full (preferences, "repeat",
+	                             action, "state",
+	                             binding_flags,
+	                             binding_gboolean_to_variant,
+	                             binding_variant_to_gboolean,
+	                             NULL,
+	                             NULL);
 
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
 	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);
