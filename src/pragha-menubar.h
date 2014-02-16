@@ -71,6 +71,8 @@ typedef struct _PraghaApplication PraghaApplication;
 #define SEPARATOR \
 	"      </section>" \
 	"      <section>"
+#define NEW_PLACEHOLDER(_TAG) \
+	"      <section id='" _TAG "'/>"
 
 #define CLOSE_SUBMENU \
 	"      </section>" \
@@ -79,6 +81,13 @@ typedef struct _PraghaApplication PraghaApplication;
 #define CLOSE_MENU \
 	"  </menu>" \
 	"</interface>"
+
+GMenu *
+pragha_menubar_get_menu_section (PraghaApplication *pragha,
+                                 const char        *id);
+void
+pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
+                                   const char        *id);
 
 void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 

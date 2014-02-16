@@ -43,6 +43,16 @@
 #include "pragha.h"
 
 /*
+ * Proptotypes of functions.
+ *
+ * TODO: move these functions where tcorrespond!.
+ */
+
+GtkBuilder *builder;
+
+static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
+
+/*
  * GMenuModel definitions.
  */
 
@@ -110,6 +120,144 @@ pragha_gmenu_quit (GSimpleAction *action,
 	pragha_application_quit (pragha);
 }
 
+/*
+ * Playback submenu.
+ */
+static void
+pragha_gmenu_open (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	open_file_action (NULL, pragha);
+}
+
+static void
+pragha_gmenu_audio_cd (GSimpleAction *action,
+                       GVariant      *parameter,
+                       gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_application_append_audio_cd (pragha);
+}
+
+static void
+pragha_gmenu_location (GSimpleAction *action,
+                       GVariant      *parameter,
+                       gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	add_location_action (NULL, pragha);
+}
+
+static void
+pragha_gmenu_library (GSimpleAction *action,
+                      GVariant      *parameter,
+                      gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	add_libary_action (NULL, pragha);
+}
+
+static void
+pragha_gmenu_remove (GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_remove_selection (playlist);
+}
+
+static void
+pragha_gmenu_crop (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_crop_selection (playlist);
+}
+
+static void
+pragha_gmenu_playlist_export (GSimpleAction *action,
+                              GVariant      *parameter,
+                              gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+
+	export_current_playlist (NULL, playlist);
+}
+
+static void
+pragha_gmenu_playlist_save (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+
+	save_current_playlist (NULL, playlist);
+}
+
+static void
+pragha_gmenu_selection_export (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+	export_selected_playlist (NULL, playlist);
+}
+
+static void
+pragha_gmenu_selection_save (GSimpleAction *action,
+                             GVariant      *parameter,
+                             gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+	save_selected_playlist (NULL, playlist);
+}
+
+static void
+pragha_gmenu_clear (GSimpleAction *action,
+                    GVariant      *parameter,
+                    gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+	PraghaApplication *pragha = user_data;
+
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_remove_all (playlist);
+}
+
+static void
+pragha_gmenu_search (GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_filter_dialog (pragha);
+}
+
+/*
+ * Useful functions.
+ */
+
 static void
 activate_toggle (GSimpleAction *action,
                  GVariant      *parameter,
@@ -132,7 +280,50 @@ pragha_set_enable_action (GtkWindow  *window,
 	g_object_set (action, "enabled", enabled, NULL);
 }
 
+GMenu *
+pragha_menubar_get_menu_section (PraghaApplication *pragha,
+                                 const char        *id)
+{
+	GObject *object;
+	object = gtk_builder_get_object (builder, id);
+
+	if (object == NULL || !G_IS_MENU (object))
+		return NULL;
+
+	return G_MENU (object);
+}
+
+void
+pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
+                                   const char        *id)
+{
+	GMenu *menu;
+
+	menu = G_MENU (gtk_builder_get_object (builder, id));
+
+	while (g_menu_model_get_n_items (G_MENU_MODEL (menu)) > 0) {
+		const char *action;
+		g_menu_model_get_item_attribute (G_MENU_MODEL (menu), 0, G_MENU_ATTRIBUTE_ACTION, "s", &action);
+		if (g_str_has_prefix (action, "win.")) {
+			GVariant *target;
+
+			target = g_menu_model_get_item_attribute_value (G_MENU_MODEL (menu), 0, G_MENU_ATTRIBUTE_TARGET, NULL);
+
+			/* Don't remove actions that have a specific target */
+			if (target == NULL) {
+				GtkWindow *window;
+				window = GTK_WINDOW(pragha_application_get_window(pragha));
+				g_action_map_remove_action (G_ACTION_MAP (window), action + strlen ("win."));
+			}
+			else
+				g_variant_unref (target);
+		}
+		g_menu_remove (G_MENU (menu), 0);
+	}
+}
+
 static GActionEntry win_entries[] = {
+	/* Playback submenu. */
 	{ "prev",    pragha_gmenu_prev,       NULL, NULL,    NULL },
 	{ "play",    pragha_gmenu_playpause,  NULL, NULL,    NULL },
 	{ "stop",    pragha_gmenu_stop,       NULL, NULL,    NULL },
@@ -141,43 +332,71 @@ static GActionEntry win_entries[] = {
 	{ "repeat",  activate_toggle,         NULL, "false", NULL },
 	{ "edit",    pragha_gmenu_edit,       NULL, NULL,    NULL },
 	{ "quit",    pragha_gmenu_quit,       NULL, NULL,    NULL },
-	{ "about",   pragha_gmenu_about,      NULL, NULL,    NULL }
+	{ "about",   pragha_gmenu_about,      NULL, NULL,    NULL },
+	/* Playlist submenu. */
+	{ "open",     pragha_gmenu_open,       NULL, NULL,    NULL },
+	{ "cd",       pragha_gmenu_audio_cd,   NULL, NULL,    NULL },
+	{ "location", pragha_gmenu_location,   NULL, NULL,    NULL },
+	{ "libary",   pragha_gmenu_library,    NULL, NULL,    NULL },
+	{ "remove",   pragha_gmenu_remove,     NULL, NULL,    NULL },
+	{ "crop",     pragha_gmenu_crop,       NULL, NULL,    NULL },
+	{ "clear",    pragha_gmenu_clear,      NULL, NULL,    NULL },
+	{ "export_playlist",  pragha_gmenu_playlist_export,  NULL, NULL, NULL },
+	{ "new_playlist",     pragha_gmenu_playlist_save,    NULL, NULL, NULL },
+	{ "export_selection", pragha_gmenu_selection_export, NULL, NULL, NULL },
+	{ "new_selection",    pragha_gmenu_selection_save,   NULL, NULL, NULL },
+	{ "search",   pragha_gmenu_search,     NULL, NULL,    NULL }
 };
 
 static const gchar *menu_ui = \
 	NEW_MENU("menubar") \
 		NEW_SUBMENU("_Playback") \
-			NEW_ICON_ACCEL_ITEM("Prev track",             "media-skip-backward",  "&lt;Alt&gt;Left",      "win", "prev") \
-			NEW_ICON_ACCEL_ITEM("Play / Pause",           "media-playback-start", "&lt;Control&gt;space", "win", "play") \
-			NEW_ICON_ITEM      ("Stop",                   "media-playback-stop",                          "win", "stop") \
-			NEW_ICON_ACCEL_ITEM("Next track",             "media-skip-forward",   "&lt;Alt&gt;Right",     "win", "next") \
+			NEW_ICON_ACCEL_ITEM("Prev track",                     "media-skip-backward",  "&lt;Alt&gt;Left",      "win", "prev") \
+			NEW_ICON_ACCEL_ITEM("Play / Pause",                   "media-playback-start", "&lt;Control&gt;space", "win", "play") \
+			NEW_ICON_ITEM      ("Stop",                           "media-playback-stop",                          "win", "stop") \
+			NEW_ICON_ACCEL_ITEM("Next track",                     "media-skip-forward",   "&lt;Alt&gt;Right",     "win", "next") \
 			SEPARATOR \
-			NEW_ACCEL_ITEM     ("_Shuffle",                                       "&lt;Control&gt;U",     "win", "shuffle") \
-			NEW_ACCEL_ITEM     ("_Repeat",                                        "&lt;Control&gt;R",     "win", "repeat") \
+			NEW_ACCEL_ITEM     ("_Shuffle",                                               "&lt;Control&gt;U",     "win", "shuffle") \
+			NEW_ACCEL_ITEM     ("_Repeat",                                                "&lt;Control&gt;R",     "win", "repeat") \
 			SEPARATOR \
-			NEW_ACCEL_ITEM     ("Edit track information",                         "&lt;Control&gt;E",     "win", "edit") \
+			NEW_ACCEL_ITEM     ("Edit track information",                                 "&lt;Control&gt;E",     "win", "edit") \
 			SEPARATOR \
-			NEW_ICON_ACCEL_ITEM("_Quit",                  "application-exit",     "&lt;Control&gt;Q",     "win", "quit") \
+			NEW_ICON_ACCEL_ITEM("_Quit",                          "application-exit",     "&lt;Control&gt;Q",     "win", "quit") \
+		CLOSE_SUBMENU \
+		NEW_SUBMENU("Play_list") \
+			NEW_ICON_ACCEL_ITEM("_Add files",                     "document-open",        "&lt;Control&gt;O",     "win", "open") \
+			NEW_ICON_ITEM      ("Add Audio _CD",                  "media-optical",                                "win", "cd") \
+			NEW_ICON_ITEM      ("Add _location",                  "network-workgroup",                            "win", "location") \
+			SEPARATOR \
+			NEW_ICON_ITEM      ("_Add the library",               "list-add",                                     "win", "library") \
+			SEPARATOR \
+			NEW_ICON_ITEM      ("Remove selection from playlist", "list-remove",                                  "win", "remove") \
+			NEW_ICON_ACCEL_ITEM("Crop playlist",                  "list-remove",          "&lt;Control&gt;C",     "win", "crop") \
+			NEW_ICON_ACCEL_ITEM("Clear playlist",                 "edit-clear",           "&lt;Control&gt;L",     "win", "clear") \
+			SEPARATOR \
+			NEW_SUBMENU("Save playlist") \
+				NEW_ICON_ACCEL_ITEM("New playlist",               "document-new",         "&lt;Control&gt;S",     "win", "new_playlist") \
+				NEW_ICON_ITEM      ("Export",                     "media-floppy",                                 "win", "export_playlist") \
+				SEPARATOR \
+				NEW_PLACEHOLDER("playlist-submenu") \
+			CLOSE_SUBMENU \
+			NEW_SUBMENU("Save selection") \
+				NEW_ICON_ACCEL_ITEM("New playlist",               "document-new", "&lt;Shift&gt;&lt;Control&gt;S","win", "new_selection") \
+				NEW_ICON_ITEM      ("Export",                     "media-floppy",                                 "win", "export_selection") \
+				SEPARATOR \
+				NEW_PLACEHOLDER("selection-submenu") \
+			CLOSE_SUBMENU \
+			SEPARATOR \
+			NEW_ICON_ACCEL_ITEM("_Search in playlist",            "edit-find",            "&lt;Control&gt;F",     "win", "search") \
 		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
-			NEW_ICON_ITEM      ("About",                  "help-about",                                   "win", "about") \
+			NEW_ICON_ITEM      ("About",                          "help-about",                                   "win", "about") \
 		CLOSE_SUBMENU \
 	CLOSE_MENU;
 
 /*
  * Menubar callbacks.
  */
-
-/* Playlist */
-
-// void open_file_action(GtkAction *action, PraghaApplication *pragha);
-// void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
-// void add_location_action(GtkAction *action, PraghaApplication *pragha);
-static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
-static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menubar_crop_playlist_action        (GtkAction *action, PraghaApplication *pragha);
-static void pragha_menubar_clear_playlist_action       (GtkAction *action, PraghaApplication *pragha);
-static void search_playlist_action(GtkAction *action, PraghaApplication *pragha);
 
 /* View */
 
@@ -207,22 +426,6 @@ static void translate_action(GtkAction *action, PraghaApplication *pragha);
 
 static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
-		<menu action=\"PlaylistMenu\">					\
-			<menuitem action=\"Add files\"/>			\
-			<menuitem action=\"Add Audio CD\"/>			\
-			<menuitem action=\"Add location\"/>			\
-			<separator/>				    			\
-			<menuitem action=\"Add the library\"/>		\
-			<separator/>				    		\
-			<menuitem action=\"Remove from playlist\"/>		\
-			<menuitem action=\"Crop playlist\"/>			\
-			<menuitem action=\"Clear playlist\"/>			\
-			<separator/>				    		\
-			<menuitem action=\"Save playlist\"/>			\
-			<menuitem action=\"Save selection\"/>			\
-			<separator/>						\
-			<menuitem action=\"Search in playlist\"/>		\
-		</menu>								\
 		<menu action=\"ViewMenu\">					\
 			<menuitem action=\"Fullscreen\"/>			\
 			<separator/>						\
@@ -259,28 +462,9 @@ static const gchar *main_menu_xml = "<ui>					\
 </ui>";
 
 static GtkActionEntry main_aentries[] = {
-	{"PlaylistMenu", NULL, N_("Play_list")},
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Add files", "document-open", N_("_Add files"),
-	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
-	{"Add location", "network-workgroup", N_("Add _location"),
-	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
-	{"Add the library", "list-add", N_("_Add the library"),
-	"", "Add all the library", G_CALLBACK(add_libary_action)},
-	{"Remove from playlist", "list-remove", N_("Remove selection from playlist"),
-	 "", "Remove selection from playlist", G_CALLBACK(pragha_menubar_remove_playlist_action)},
-	{"Crop playlist", "list-remove", N_("Crop playlist"),
-	 "<Control>C", "Crop playlist", G_CALLBACK(pragha_menubar_crop_playlist_action)},
-	{"Clear playlist", "edit-clear", N_("Clear playlist"),
-	 "<Control>L", "Clear the current playlist", G_CALLBACK(pragha_menubar_clear_playlist_action)},
-	{"Save playlist", "document-save-as", N_("Save playlist")},
-	{"Save selection", NULL, N_("Save selection")},
-	{"Search in playlist", "edit-find", N_("_Search in playlist"),
-	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Preferences", "preferences-system", N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
 	{"Jump to playing song", "go-jump", N_("Jump to playing song"),
@@ -821,13 +1005,6 @@ void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_widget_show (dialog);
 }
 
-/* Handler for 'Search Playlist' option in the Edit menu */
-
-static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_filter_dialog (pragha);
-}
-
 /* Handler for the 'Preferences' item in the Edit menu */
 
 static void pref_action(GtkAction *action, PraghaApplication *pragha)
@@ -918,35 +1095,6 @@ static void update_library_action(GtkAction *action, PraghaApplication *pragha)
 	scanner = pragha_application_get_scanner (pragha);
 
 	pragha_scanner_update_library (scanner);
-}
-
-/* Handler for remove, crop and clear action in the Tools menu */
-
-static void
-pragha_menubar_remove_playlist_action (GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-
-	playlist = pragha_application_get_playlist (pragha);
-	pragha_playlist_remove_selection (playlist);
-}
-
-static void
-pragha_menubar_crop_playlist_action (GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-
-	playlist = pragha_application_get_playlist (pragha);
-	pragha_playlist_crop_selection (playlist);
-}
-
-static void
-pragha_menubar_clear_playlist_action (GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-
-	playlist = pragha_application_get_playlist (pragha);
-	pragha_playlist_remove_all (playlist);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */
@@ -1066,7 +1214,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 {
 	PraghaPreferences *preferences;
 	GtkActionGroup *main_actions;
-	GtkBuilder *builder;
 	GActionMap *map;
 	GAction *action;
 	GError *error = NULL;
@@ -1086,7 +1233,7 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
 	gtk_application_set_menubar (GTK_APPLICATION (pragha),
 	                             G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
-	g_object_unref (builder);
+	//g_object_unref (builder);
  
 	main_actions = gtk_action_group_new("Main Actions");
 
