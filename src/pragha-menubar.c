@@ -96,15 +96,6 @@ pragha_gmenu_edit (GSimpleAction *action,
 }
 
 static void
-pragha_gmenu_about (GSimpleAction *action,
-                    GVariant      *parameter,
-                    gpointer       user_data)
-{
-	PraghaApplication *pragha = user_data;
-	pragha_application_about_dialog (pragha);
-}
-
-static void
 pragha_gmenu_quit (GSimpleAction *action,
                    GVariant      *parameter,
                    gpointer       user_data)
@@ -309,7 +300,6 @@ pragha_gmenu_controls_below (GSimpleAction *action,
 	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
 }
 
-
 static void
 pragha_gmenu_jump_to_song (GSimpleAction *action,
                            GVariant      *parameter,
@@ -323,6 +313,59 @@ pragha_gmenu_jump_to_song (GSimpleAction *action,
 	pragha_playlist_show_current_track (playlist);
 }
 
+/* Help Submenu */
+
+static void
+pragha_gmenu_show_homepage (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	const gchar *uri = "http://pragha.wikispaces.com/";
+
+	open_url (uri, pragha_application_get_window(pragha));
+}
+
+static void
+pragha_gmenu_show_community (GSimpleAction *action,
+                             GVariant      *parameter,
+                             gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
+
+	open_url (uri, pragha_application_get_window(pragha));
+}
+
+static void
+pragha_gmenu_show_wiki (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	const gchar *uri = "http://pragha.wikispaces.com/";
+
+	open_url (uri, pragha_application_get_window(pragha));
+}
+
+static void
+pragha_gmenu_translate (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
+	open_url (uri, pragha_application_get_window(pragha));
+}
+
+static void
+pragha_gmenu_about (GSimpleAction *action,
+                    GVariant      *parameter,
+                    gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_application_about_dialog (pragha);
+}
 
 /*
  * Useful functions.
@@ -423,6 +466,10 @@ static GActionEntry win_entries[] = {
 	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
 	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
 	/* Help submenu */
+	{ "homepage",         pragha_gmenu_show_homepage,    NULL, NULL,    NULL },
+	{ "community",        pragha_gmenu_show_community,   NULL, NULL,    NULL },
+	{ "wiki",             pragha_gmenu_show_wiki,        NULL, NULL,    NULL },
+	{ "translate",        pragha_gmenu_translate,        NULL, NULL,    NULL },
 	{ "about",            pragha_gmenu_about,            NULL, NULL,    NULL }
 };
 
@@ -478,6 +525,12 @@ static const gchar *menu_ui = \
 			NEW_ICON_ACCEL_ITEM("Jump to playing song",           "go-jump",              "&lt;Control&gt;J",     "win", "jump-song") \
 		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
+			NEW_ICON_ITEM      ("Homepage",                       "go-home",                                      "win", "homepage") \
+			NEW_ICON_ITEM      ("Community",                      "dialog-information",                           "win", "community") \
+			NEW_ITEM           ("Wiki",                                                                           "win", "wiki") \
+			SEPARATOR \
+			NEW_ICON_ITEM      ("Translate Pragha",               "preferences-desktop-locale",                   "win", "translate") \
+			SEPARATOR \
 			NEW_ICON_ITEM      ("About",                          "help-about",                                   "win", "about") \
 		CLOSE_SUBMENU \
 	CLOSE_MENU;
@@ -493,13 +546,6 @@ static void rescan_library_action(GtkAction *action, PraghaApplication *pragha);
 static void update_library_action(GtkAction *action, PraghaApplication *pragha);
 static void statistics_action(GtkAction *action, PraghaApplication *pragha);
 static void pref_action(GtkAction *action, PraghaApplication *pragha);
-
-/* Help */
-
-static void home_action(GtkAction *action, PraghaApplication *pragha);
-static void community_action(GtkAction *action, PraghaApplication *pragha);
-static void wiki_action(GtkAction *action, PraghaApplication *pragha);
-static void translate_action(GtkAction *action, PraghaApplication *pragha);
 
 /*
  * Menu bar ui definition.
@@ -520,19 +566,11 @@ static const gchar *main_menu_xml = "<ui>					\
 			<separator/>						\
 			<menuitem action=\"Preferences\"/>			\
 		</menu>								\
-		<menu action=\"HelpMenu\">					\
-			<menuitem action=\"Home\"/>				\
-			<menuitem action=\"Community\"/>			\
-			<menuitem action=\"Wiki\"/>				\
-			<separator/>						\
-			<menuitem action=\"Translate Pragha\"/>			\
-		</menu>								\
 	</menubar>								\
 </ui>";
 
 static GtkActionEntry main_aentries[] = {
 	{"ToolsMenu", NULL, N_("_Tools")},
-	{"HelpMenu", NULL, N_("_Help")},
 	{"Preferences", "preferences-system", N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
@@ -542,15 +580,7 @@ static GtkActionEntry main_aentries[] = {
 	{"Update library", "system-run", N_("_Update library"),
 	 "", "Update library", G_CALLBACK(update_library_action)},
 	{"Statistics", "dialog-information", N_("_Statistics"),
-	 "", "Statistics", G_CALLBACK(statistics_action)},
-	{"Home", "go-home", N_("Homepage"),
-	 "", "Homepage", G_CALLBACK(home_action)},
-	{"Community", "dialog-information", N_("Community"),
-	 "", "Forum of pragha", G_CALLBACK(community_action)},
-	{"Wiki", NULL, N_("Wiki"),
-	 "", "Wiki of pragha", G_CALLBACK(wiki_action)},
-	{"Translate Pragha", "preferences-desktop-locale", N_("Translate Pragha"),
-	 "", "Translate Pragha", G_CALLBACK(translate_action)}
+	 "", "Statistics", G_CALLBACK(statistics_action)}
 };
 
 /* Sentitive menubar actions depending on the playback status. */
@@ -646,30 +676,6 @@ static void statistics_action(GtkAction *action, PraghaApplication *pragha)
 	                  G_CALLBACK (gtk_widget_destroy), NULL);
 
 	gtk_widget_show_all(dialog);
-}
-
-static void home_action(GtkAction *action, PraghaApplication *pragha)
-{
-	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri, pragha_application_get_window(pragha));
-}
-
-static void community_action(GtkAction *action, PraghaApplication *pragha)
-{
-	const gchar *uri = "http://bbs.archlinux.org/viewtopic.php?id=46171";
-	open_url(uri, pragha_application_get_window(pragha));
-}
-
-static void wiki_action(GtkAction *action, PraghaApplication *pragha)
-{
-	const gchar *uri = "http://pragha.wikispaces.com/";
-	open_url(uri, pragha_application_get_window(pragha));
-}
-
-static void translate_action(GtkAction *action, PraghaApplication *pragha)
-{
-	const gchar *uri = "http://www.transifex.net/projects/p/Pragha/";
-	open_url(uri, pragha_application_get_window(pragha));
 }
 
 static gboolean
