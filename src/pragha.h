@@ -57,6 +57,13 @@
 
 typedef struct _PraghaApplication PraghaApplication;
 
+/* */
+
+void pragha_application_open_files           (PraghaApplication *pragha);
+void pragha_application_add_location         (PraghaApplication *pragha);
+void pragha_application_append_entery_libary (PraghaApplication *pragha);
+void pragha_application_about_dialog         (PraghaApplication *pragha);
+
 /* Functions to access private members */
 
 PraghaPreferences *pragha_application_get_preferences     (PraghaApplication *pragha);

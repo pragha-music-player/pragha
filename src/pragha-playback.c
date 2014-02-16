@@ -20,6 +20,10 @@
 #endif
 
 #include "pragha-playback.h"
+#include "pragha-tagger.h"
+#include "pragha-tags-dialog.h"
+#include "pragha-tags-mgmt.h"
+#include "pragha-musicobject-mgmt.h"
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -134,6 +138,87 @@ void pragha_playback_next_track(PraghaApplication *pragha)
 
 	/* Play a new song */
 	pragha_advance_playback (pragha);
+}
+
+static void
+pragha_edit_tags_dialog_response (GtkWidget      *dialog,
+                                  gint            response_id,
+                                  PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+	PraghaToolbar *toolbar;
+	PraghaPlaylist *playlist;
+	PraghaMusicobject *nmobj, *bmobj;
+	PraghaTagger *tagger;
+	gint changed = 0;
+
+	if (response_id == GTK_RESPONSE_HELP) {
+		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(pragha));
+		return;
+	}
+
+	if (response_id == GTK_RESPONSE_OK) {
+		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
+		if(changed) {
+			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
+
+			backend = pragha_application_get_backend (pragha);
+
+			if(pragha_backend_get_state (backend) != ST_STOPPED) {
+				PraghaMusicobject *current_mobj = pragha_backend_get_musicobject (backend);
+				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
+					toolbar = pragha_application_get_toolbar (pragha);
+					playlist = pragha_application_get_playlist (pragha);
+
+
+					/* Update public current song */
+					pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
+
+					/* Update current song on playlist */
+					pragha_playlist_update_current_track(playlist, changed, nmobj);
+
+					/* Update current song on backend */
+					bmobj = g_object_ref(pragha_backend_get_musicobject(backend));
+					pragha_update_musicobject_change_tag(bmobj, changed, nmobj);
+					g_object_unref(bmobj);
+
+					pragha_toolbar_set_title(toolbar, current_mobj);
+				}
+			}
+
+			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
+				tagger = pragha_tagger_new();
+				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
+				pragha_tagger_set_changes(tagger, nmobj, changed);
+				pragha_tagger_apply_changes (tagger);
+				g_object_unref(tagger);
+			}
+		}
+	}
+	gtk_widget_destroy (dialog);
+}
+
+void
+pragha_playback_edit_current_track (PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+	GtkWidget *dialog;
+
+	backend = pragha_application_get_backend (pragha);
+
+	if(pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
+
+	dialog = pragha_tags_dialog_new();
+
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_edit_tags_dialog_response), pragha);
+
+	pragha_tags_dialog_set_musicobject (PRAGHA_TAGS_DIALOG(dialog),
+	                                    pragha_backend_get_musicobject (backend));
+	
+	gtk_widget_show (dialog);
 }
 
 /******************************************/
@@ -258,16 +343,6 @@ pragha_playback_show_current_album_art (GObject *object, PraghaApplication *prag
 	uri = g_filename_to_uri (albumart_path, NULL, NULL);
 	open_url(uri, pragha_application_get_window (pragha));
 	g_free (uri);
-}
-
-void
-pragha_playback_edit_current_track (GObject *object, PraghaApplication *pragha)
-{
-	PraghaBackend *backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_get_state (backend) != ST_STOPPED) {
-		edit_tags_playing_action(NULL, pragha);
-	}
 }
 
 void

@@ -28,7 +28,7 @@
 
 #include "pragha-statusicon.h"
 #include "pragha-playback.h"
-#include "pragha-menubar.h"
+#include "pragha-cdda.h"
 #include "pragha.h"
 
 struct _PraghaStatusIcon {
@@ -50,6 +50,7 @@ static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *st
 static void systray_prev_action         (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_next_action         (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_quit                (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_edit_tags_action    (GtkAction *action, PraghaStatusIcon *status_icon);
 
 static const gchar *systray_menu_xml =
 	"<ui>						\
@@ -89,7 +90,7 @@ static const GtkActionEntry systray_menu_aentries[] = {
 	{"Next", "media-skip-forward", N_("Next Track"),
 	 "", "Next Track", G_CALLBACK(systray_next_action)},
 	{"Edit tags", NULL, N_("Edit track information"),
-	 "", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
+	 "", "Edit information of current track", G_CALLBACK(systray_edit_tags_action)},
 	{"Quit", "application-exit", N_("_Quit"),
 	 "", "Quit", G_CALLBACK(systray_quit)}
 };
@@ -180,25 +181,25 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 static void
 systray_about_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	about_action (action, status_icon->pragha);
+	pragha_application_about_dialog (status_icon->pragha);
 }
 
 static void
 systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	open_file_action (action, status_icon->pragha);
+	pragha_application_open_files (status_icon->pragha);
 }
 
 static void
 systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	add_audio_cd_action (action, status_icon->pragha);
+	pragha_application_append_audio_cd (status_icon->pragha);
 }
 
 static void
 systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	add_location_action (action, status_icon->pragha);
+	pragha_application_add_location (status_icon->pragha);
 }
 
 static void
@@ -231,6 +232,14 @@ systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_next_track(status_icon->pragha);
+}
+
+static void
+systray_edit_tags_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_edit_current_track (status_icon->pragha);
 }
 
 static void

@@ -37,6 +37,7 @@
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
+#include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
@@ -97,6 +98,429 @@ G_DEFINE_TYPE (PraghaApplication, pragha_application, GTK_TYPE_APPLICATION);
 /*
  * Some calbacks..
  */
+/* Add Files a folders to play list based on Audacius code.*/
+/* /src/ui_fileopen.c */
+static void
+pragha_open_files_dialog_close_button_cb (GtkWidget *widget, gpointer data)
+{
+    gtk_widget_destroy(GTK_WIDGET(data));
+}
+
+static void
+pragha_open_files_dialog_add_button_cb (GtkWidget *widget, gpointer data)
+{
+	PraghaPlaylist *playlist;
+	GSList *files = NULL, *l;
+	gboolean add_recursively;
+	GList *mlist = NULL;
+
+	GtkWidget *window = g_object_get_data(data, "window");
+	GtkWidget *chooser = g_object_get_data(data, "chooser");
+	GtkWidget *toggle = g_object_get_data(data, "toggle-button");
+	PraghaApplication *pragha = g_object_get_data(data, "pragha");
+
+	PraghaPreferences *preferences = pragha_application_get_preferences (pragha);
+
+	add_recursively = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle));
+	pragha_preferences_set_add_recursively (preferences, add_recursively);
+
+	gchar *last_folder = gtk_file_chooser_get_current_folder ((GtkFileChooser *) chooser);
+	pragha_preferences_set_last_folder (preferences, last_folder);
+	g_free (last_folder);
+
+	files = gtk_file_chooser_get_filenames((GtkFileChooser *) chooser);
+
+	gtk_widget_destroy(window);
+
+	if (files) {
+		for (l = files; l != NULL; l = l->next) {
+			mlist = append_mobj_list_from_unknown_filename(mlist, l->data);
+		}
+		g_slist_free_full(files, g_free);
+
+		playlist = pragha_application_get_playlist (pragha);
+		pragha_playlist_append_mobj_list (playlist, mlist);
+		g_list_free (mlist);
+	}
+}
+
+static gboolean
+pragha_open_files_dialog_keypress (GtkWidget   *dialog,
+                                   GdkEventKey *event,
+                                   gpointer     data)
+{
+    if (event->keyval == GDK_KEY_Escape) {
+        gtk_widget_destroy(dialog);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/* Handler for the 'Open' item in the File menu */
+
+void
+pragha_application_open_files (PraghaApplication *pragha)
+{
+	PraghaPreferences *preferences;
+	GtkWidget *window, *hbox, *vbox, *chooser, *bbox, *toggle, *close_button, *add_button;
+	gpointer storage;
+	gint i = 0;
+	GtkFileFilter *media_filter, *playlist_filter, *all_filter;
+	const gchar *last_folder = NULL;
+
+	/* Create a file chooser dialog */
+
+	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+	gtk_window_set_type_hint (GTK_WINDOW (window), GDK_WINDOW_TYPE_HINT_DIALOG);
+	gtk_window_set_title(GTK_WINDOW(window), (_("Select a file to play")));
+	gtk_window_set_default_size(GTK_WINDOW(window), 700, 450);
+	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+
+	chooser = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_OPEN);
+
+	/* Set various properties */
+
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(chooser), TRUE);
+
+	preferences = pragha_application_get_preferences (pragha);
+	last_folder = pragha_preferences_get_last_folder (preferences);
+	if (string_is_not_empty(last_folder))
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), last_folder);
+
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+
+	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
+	if(pragha_preferences_get_add_recursively (preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
+
+	bbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
+	gtk_box_set_spacing(GTK_BOX(bbox), 6);
+
+	close_button = gtk_button_new_with_mnemonic (_("_Cancel"));
+	add_button = gtk_button_new_with_mnemonic (_("_Add"));
+	gtk_container_add(GTK_CONTAINER(bbox), close_button);
+	gtk_container_add(GTK_CONTAINER(bbox), add_button);
+
+	gtk_box_pack_start(GTK_BOX(hbox), toggle, TRUE, TRUE, 3);
+	gtk_box_pack_end(GTK_BOX(hbox), bbox, FALSE, FALSE, 3);
+
+	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 3);
+	gtk_box_pack_end(GTK_BOX(vbox), chooser, TRUE, TRUE, 3);
+
+	/* Create file filters  */
+
+	media_filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(GTK_FILE_FILTER(media_filter), _("Supported media"));
+	
+	while (mime_wav[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_wav[i++]);
+	i = 0;
+	while (mime_mpeg[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_mpeg[i++]);
+	i = 0;
+	while (mime_flac[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_flac[i++]);
+	i = 0;
+	while (mime_ogg[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_ogg[i++]);
+
+	i = 0;
+	while (mime_asf[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_asf[i++]);
+	i = 0;
+	while (mime_mp4[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_mp4[i++]);
+	i = 0;
+	while (mime_ape[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_ape[i++]);
+
+	#ifdef HAVE_PLPARSER
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_playlist[i++]);
+	i = 0;
+	while (mime_dual[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_dual[i++]);
+	#else
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.m3u");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.M3U");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.pls");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.PLS");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.xspf");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.XSPF");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.wax");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(media_filter), "*.WAX");
+	#endif
+
+	playlist_filter = gtk_file_filter_new();
+
+	#ifdef HAVE_PLPARSER
+	i = 0;
+	while (mime_playlist[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
+					      mime_playlist[i++]);
+	i = 0;
+	while (mime_dual[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(playlist_filter),
+					      mime_dual[i++]);
+	#else
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.m3u");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.M3U");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.pls");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.PLS");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.xspf");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.XSPF");
+
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.wax");
+	gtk_file_filter_add_pattern(GTK_FILE_FILTER(playlist_filter), "*.WAX");
+	#endif
+
+	gtk_file_filter_set_name(GTK_FILE_FILTER(playlist_filter), _("Playlists"));
+
+	all_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (GTK_FILE_FILTER(all_filter), _("All files"));
+	gtk_file_filter_add_pattern (GTK_FILE_FILTER(all_filter), "*");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
+	                             GTK_FILE_FILTER(media_filter));
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
+	                             GTK_FILE_FILTER(playlist_filter));
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER(chooser),
+	                             GTK_FILE_FILTER(all_filter));
+
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(chooser),
+	                            GTK_FILE_FILTER(media_filter));
+
+	storage = g_object_new(G_TYPE_OBJECT, NULL);
+	g_object_set_data(storage, "window", window);
+	g_object_set_data(storage, "chooser", chooser);
+	g_object_set_data(storage, "toggle-button", toggle);
+	g_object_set_data(storage, "pragha", pragha);
+
+	g_signal_connect (add_button, "clicked",
+	                  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
+	g_signal_connect (chooser, "file-activated",
+	                  G_CALLBACK(pragha_open_files_dialog_add_button_cb), storage);
+	g_signal_connect (close_button, "clicked",
+	                  G_CALLBACK(pragha_open_files_dialog_close_button_cb), window);
+	g_signal_connect (window, "destroy",
+	                  G_CALLBACK(gtk_widget_destroy), window);
+	g_signal_connect (window, "key-press-event",
+	                  G_CALLBACK(pragha_open_files_dialog_keypress), NULL);
+
+	gtk_window_set_transient_for(GTK_WINDOW (window), GTK_WINDOW(pragha_application_get_window(pragha)));
+	gtk_window_set_destroy_with_parent (GTK_WINDOW (window), TRUE);
+
+	gtk_widget_show_all(window);
+}
+
+/* Build a dialog to get a new playlist name */
+
+static char *
+totem_open_location_set_from_clipboard (GtkWidget *open_location)
+{
+	GtkClipboard *clipboard;
+	gchar *clipboard_content;
+
+	/* Initialize the clipboard and get its content */
+	clipboard = gtk_clipboard_get_for_display (gtk_widget_get_display (GTK_WIDGET (open_location)), GDK_SELECTION_CLIPBOARD);
+	clipboard_content = gtk_clipboard_wait_for_text (clipboard);
+
+	/* Check clipboard for "://". If it exists, return it */
+	if (clipboard_content != NULL && strcmp (clipboard_content, "") != 0)
+	{
+		if (g_strrstr (clipboard_content, "://") != NULL)
+			return clipboard_content;
+	}
+
+	g_free (clipboard_content);
+	return NULL;
+}
+
+void
+pragha_application_add_location (PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
+	GtkWidget *dialog;
+	GtkWidget *vbox, *hbox;
+	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
+	const gchar *uri = NULL, *name = NULL;
+	gchar *clipboard_location;
+	PraghaMusicobject *mobj;
+	gint result;
+
+	/* Create dialog window */
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+
+	label_new = gtk_label_new_with_mnemonic(_("Enter the URL of an internet radio stream"));
+	uri_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(uri_entry), 255);
+
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	label_name = gtk_label_new_with_mnemonic(_("Give it a name to save"));
+	name_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(name_entry), 255);
+
+	gtk_box_pack_start(GTK_BOX(hbox), label_name, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), name_entry, TRUE, TRUE, 2);
+
+	gtk_box_pack_start(GTK_BOX(vbox), label_new, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), uri_entry, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
+
+	/* Get item from clipboard to fill GtkEntry */
+	clipboard_location = totem_open_location_set_from_clipboard (uri_entry);
+	if (clipboard_location != NULL && strcmp (clipboard_location, "") != 0) {
+		gtk_entry_set_text (GTK_ENTRY(uri_entry), clipboard_location);
+		g_free (clipboard_location);
+	}
+
+	dialog = gtk_dialog_new_with_buttons (_("Add a location"),
+	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                      _("_Ok"), GTK_RESPONSE_ACCEPT,
+	                                      NULL);
+
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
+
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
+
+	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, -1);
+
+	gtk_entry_set_activates_default (GTK_ENTRY(uri_entry), TRUE);
+	gtk_entry_set_activates_default (GTK_ENTRY(name_entry), TRUE);
+
+	gtk_widget_show_all(dialog);
+
+	result = gtk_dialog_run(GTK_DIALOG(dialog));
+	switch(result) {
+	case GTK_RESPONSE_ACCEPT:
+		if (gtk_entry_get_text_length (GTK_ENTRY(uri_entry)))
+			uri = gtk_entry_get_text(GTK_ENTRY(uri_entry));
+
+		if(uri != NULL) {
+			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
+				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+
+			mobj = new_musicobject_from_location(uri, name);
+
+			playlist = pragha_application_get_playlist (pragha);
+			pragha_playlist_append_single_song (playlist, mobj);
+
+			if (name) {
+				new_radio (playlist, uri, name);
+
+				cdbase = pragha_application_get_database (pragha);
+				pragha_database_change_playlists_done (cdbase);
+			}
+		}
+		break;
+	case GTK_RESPONSE_CANCEL:
+		break;
+	default:
+		break;
+	}
+	gtk_widget_destroy(dialog);
+
+	return;
+}
+
+/* Handler for 'Add All' action in the Tools menu */
+
+void
+pragha_application_append_entery_libary (PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist;
+	PraghaDatabase *cdbase;
+	GList *list = NULL;
+	PraghaMusicobject *mobj;
+
+	/* Query and insert entries */
+
+	set_watch_cursor (pragha_application_get_window(pragha));
+
+	cdbase = pragha_application_get_database (pragha);
+
+	const gchar *sql = "SELECT id FROM LOCATION";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+
+	while (pragha_prepared_statement_step (statement)) {
+		gint location_id = pragha_prepared_statement_get_int (statement, 0);
+		mobj = new_musicobject_from_db (cdbase, location_id);
+
+		if (G_LIKELY(mobj))
+			list = g_list_prepend (list, mobj);
+		else
+			g_warning ("Unable to retrieve details for"
+			            " location_id : %d",
+			            location_id);
+
+		pragha_process_gtk_events ();
+	}
+
+	pragha_prepared_statement_free (statement);
+
+	remove_watch_cursor (pragha_application_get_window(pragha));
+
+	if (list) {
+		list = g_list_reverse(list);
+		playlist = pragha_application_get_playlist (pragha);
+		pragha_playlist_append_mobj_list (playlist, list);
+		g_list_free(list);
+	}
+}
+
+/* Handler for the 'About' action in the Help menu */
+
+void
+pragha_application_about_dialog (PraghaApplication *pragha)
+{
+	GtkWidget *mainwindow;
+	GdkPixbuf *pixbuf_app;
+
+	mainwindow = pragha_application_get_window (pragha);
+	pixbuf_app = pragha_application_get_pixbuf_app (pragha);
+
+	const gchar *authors[] = {
+		"sujith ( m.sujith@gmail.com )",
+		"matias ( mati86dl@gmail.com )",
+		NULL};
+
+	gtk_show_about_dialog(GTK_WINDOW(mainwindow),
+	                      "logo", pixbuf_app,
+	                      "authors", authors,
+	                      "translator-credits", _("translator-credits"),
+	                      "comments", "A lightweight GTK+ music player",
+	                      "copyright", "(C) 2007-2009 Sujith\n(C) 2009-2014 Matias",
+	                      "license-type", GTK_LICENSE_GPL_3_0,
+	                      "name", PACKAGE_NAME,
+	                      "version", PACKAGE_VERSION,
+	                      NULL);
+}
+
 static void
 pragha_library_pane_append_tracks (PraghaLibraryPane *library, PraghaApplication *pragha)
 {
@@ -623,8 +1047,8 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(pragha_window_unfullscreen), pragha);
 	g_signal_connect (toolbar, "album-art-activated",
 	                  G_CALLBACK(pragha_playback_show_current_album_art), pragha);
-	g_signal_connect (toolbar, "track-info-activated",
-	                  G_CALLBACK(pragha_playback_edit_current_track), pragha);
+	g_signal_connect_swapped (toolbar, "track-info-activated",
+	                          G_CALLBACK(pragha_playback_edit_current_track), pragha);
 	g_signal_connect (toolbar, "track-progress-activated",
 	                  G_CALLBACK(pragha_playback_seek_fraction), pragha);
 

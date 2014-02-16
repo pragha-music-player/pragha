@@ -92,17 +92,6 @@ pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
 void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 
 /*
- * Shared actions whit status icon.
- */
-
-void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
-void open_file_action(GtkAction *action, PraghaApplication *pragha);
-void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
-void add_location_action(GtkAction *action, PraghaApplication *pragha);
-
-void about_action(GtkAction *action, PraghaApplication *pragha);
-
-/*
  * Public api..
  */
 
