@@ -1443,18 +1443,14 @@ update_playlist_changes_save_playlist_mainmenu (PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaDatabase *cdbase;
-	GActionMap *map;
 	GSimpleAction *action;
-	GMenu *menu;
 	GMenuItem *item;
 	gchar *selection_name = NULL, *action_name = NULL;
 	gint i = 0;
 
 	pragha_menubar_emthy_menu_section (pragha, "playlist-submenu");
-	menu = pragha_menubar_get_menu_section (pragha, "playlist-submenu");
 
 	playlist = pragha_application_get_playlist (pragha);
-	map = G_ACTION_MAP (pragha_application_get_window(pragha));
 	cdbase = pragha_application_get_database (pragha);
 
 	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
@@ -1468,11 +1464,10 @@ update_playlist_changes_save_playlist_mainmenu (PraghaApplication *pragha)
 		action = g_simple_action_new (selection_name, NULL);
 		g_signal_connect (G_OBJECT (action), "activate",
 		                  G_CALLBACK (pragha_menu_playlist_save_playlist), playlist);
-		g_action_map_add_action (map, G_ACTION (action));
-
 		action_name = g_strdup_printf ("win.%s", selection_name);
 		item = g_menu_item_new (name, action_name);
-		g_menu_append_item (G_MENU (menu), item);
+
+		pragha_menubar_append_action (pragha, "playlist-submenu", action, item);
 
 		g_free(selection_name);
 		g_free(action_name);
@@ -1485,18 +1480,14 @@ update_playlist_changes_save_selection_mainmenu (PraghaApplication *pragha)
 {
 	PraghaPlaylist *playlist;
 	PraghaDatabase *cdbase;
-	GActionMap *map;
 	GSimpleAction *action;
-	GMenu *menu;
 	GMenuItem *item;
 	gchar *selection_name = NULL, *action_name = NULL;
 	gint i = 0;
 
 	pragha_menubar_emthy_menu_section (pragha, "selection-submenu");
-	menu = pragha_menubar_get_menu_section (pragha, "selection-submenu");
 
 	playlist = pragha_application_get_playlist (pragha);
-	map = G_ACTION_MAP (pragha_application_get_window(pragha));
 	cdbase = pragha_application_get_database (pragha);
 
 	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
@@ -1510,11 +1501,10 @@ update_playlist_changes_save_selection_mainmenu (PraghaApplication *pragha)
 		action = g_simple_action_new (selection_name, NULL);
 		g_signal_connect (G_OBJECT (action), "activate",
 		                  G_CALLBACK (pragha_menu_playlist_save_selection), playlist);
-		g_action_map_add_action (map, G_ACTION (action));
-
 		action_name = g_strdup_printf ("win.%s", selection_name);
+
 		item = g_menu_item_new (name, action_name);
-		g_menu_append_item (G_MENU (menu), item);
+		pragha_menubar_append_action (pragha, "selection-submenu", action, item);
 
 		g_free(selection_name);
 		g_free(action_name);

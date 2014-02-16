@@ -46,9 +46,8 @@
 static void statistics_action(GtkAction *action, PraghaApplication *pragha);
 
 /*
- * GMenuModel definitions.
+ * Playback submenu.
  */
-
 static void
 pragha_gmenu_prev (GSimpleAction *action,
                    GVariant      *parameter,
@@ -105,7 +104,7 @@ pragha_gmenu_quit (GSimpleAction *action,
 }
 
 /*
- * Playback submenu.
+ * Playlist submenu.
  */
 static void
 pragha_gmenu_open (GSimpleAction *action,
@@ -488,6 +487,50 @@ pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
 				g_variant_unref (target);
 		}
 		g_menu_remove (G_MENU (menu), 0);
+	}
+}
+
+void
+pragha_menubar_append_action (PraghaApplication *pragha,
+                              const gchar       *placeholder,
+                              GSimpleAction     *action,
+                              GMenuItem         *item)
+{
+	GActionMap *map;
+	GMenu *place;
+
+	place = pragha_menubar_get_menu_section (pragha, placeholder);
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+
+	g_action_map_add_action (map, G_ACTION (action));
+	g_menu_append_item (G_MENU (place), item);
+}
+
+void
+pragha_menubar_remove_action (PraghaApplication *pragha,
+                              const gchar       *placeholder,
+                              const gchar       *action_name)
+{
+	GtkBuilder *builder;
+	GActionMap *map;
+	GMenu *menu;
+	const char *action;
+	gint i;
+
+	builder = pragha_application_get_menu_ui (pragha);
+	menu = G_MENU (gtk_builder_get_object (builder, placeholder));
+
+	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++) {
+		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_ACTION, "s", &action)) {
+			if (g_strcmp0 (action + strlen ("win."), action_name) == 0) {
+				g_menu_remove (G_MENU (menu), i);
+
+				map = G_ACTION_MAP (pragha_application_get_window(pragha));
+				g_action_map_remove_action (map, action_name);
+				break;
+			}
+		}
 	}
 }
 

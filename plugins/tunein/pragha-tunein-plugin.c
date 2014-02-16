@@ -39,6 +39,7 @@
 #include "src/pragha-playlists-mgmt.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-hig.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-utils.h"
 #include "src/xml_helper.h"
 
@@ -73,26 +74,12 @@ static void pragha_tunein_get_radio_dialog        (PraghaTuneinPlugin *plugin);
  */
 
 static void
-pragha_tunein_plugin_get_radio_action (GtkAction *action, PraghaTuneinPlugin *plugin)
+pragha_tunein_plugin_get_radio_action (GAction            *action,
+                                       GVariant           *variant,
+                                       PraghaTuneinPlugin *plugin)
 {
 	pragha_tunein_get_radio_dialog (plugin);
 }
-
-static const GtkActionEntry main_menu_actions [] = {
-	{"Search tunein", "audio-input-microphone", N_("Search radio on TuneIn"),
-	 "", "Search tunein", G_CALLBACK(pragha_tunein_plugin_get_radio_action)}
-};
-
-static const gchar *main_menu_xml = "<ui>						\
-	<menubar name=\"Menubar\">									\
-		<menu action=\"ToolsMenu\">								\
-			<placeholder name=\"pragha-plugins-placeholder\">	\
-				<menuitem action=\"Search tunein\"/>			\
-				<separator/>									\
-			</placeholder>										\
-		</menu>													\
-	</menubar>													\
-</ui>";
 
 /*
  * TuneIn Handlers
@@ -237,6 +224,8 @@ pragha_tunein_get_radio_dialog (PraghaTuneinPlugin *plugin)
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	GSimpleAction *action;
+	GMenuItem *item;
 	PraghaTuneinPlugin *plugin = PRAGHA_TUNEIN_PLUGIN (activatable);
 
 	g_debug ("%s", G_STRFUNC);
@@ -245,17 +234,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	/* Attach main menu */
+	action = g_simple_action_new ("tunein_get_radio", NULL);
+	g_signal_connect (G_OBJECT (action), "activate",
+	                  G_CALLBACK (pragha_tunein_plugin_get_radio_action), plugin);
+	item = g_menu_item_new (_("Search radio on TuneIn"), "win.tunein_get_radio");
+	g_menu_item_set_icon (item, g_themed_icon_new ("audio-input-microphone"));
 
-	priv->action_group_main_menu = gtk_action_group_new ("PraghaTuneinPlugin");
-	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (priv->action_group_main_menu,
-	                              main_menu_actions,
-	                              G_N_ELEMENTS (main_menu_actions),
-	                              plugin);
-
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
-	                                                                priv->action_group_main_menu,
-	                                                                main_menu_xml);
+	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 }
 
 static void
@@ -266,8 +251,5 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_debug ("%s", G_STRFUNC);
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
-	                                     priv->action_group_main_menu,
-	                                     priv->merge_id_main_menu);
-	priv->merge_id_main_menu = 0;
+	pragha_menubar_remove_action(priv->pragha, "pragha-plugins-placeholder", "tunein_get_radio");
 }

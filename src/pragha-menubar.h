@@ -82,16 +82,22 @@ typedef struct _PraghaApplication PraghaApplication;
 	"  </menu>" \
 	"</interface>"
 
-GMenu *
-pragha_menubar_get_menu_section (PraghaApplication *pragha,
-                                 const char        *id);
-void
-pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
-                                   const char        *id);
-
 /*
  * Public api..
  */
+
+GMenu *pragha_menubar_get_menu_section   (PraghaApplication *pragha,
+                                          const char        *id);
+void   pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
+                                          const char        *id);
+
+void   pragha_menubar_append_action      (PraghaApplication *pragha,
+                                          const gchar       *placeholder,
+                                          GSimpleAction     *action,
+                                          GMenuItem         *item);
+void   pragha_menubar_remove_action      (PraghaApplication *pragha,
+                                          const gchar       *placeholder,
+                                          const gchar       *action_name);
 
 GtkBuilder *pragha_application_set_menubar (PraghaApplication *pragha);
 
