@@ -84,10 +84,7 @@ PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pr
 PraghaStatusbar   *pragha_application_get_statusbar       (PraghaApplication *pragha);
 PraghaStatusIcon  *pragha_application_get_status_icon     (PraghaApplication *pragha);
 
-GtkUIManager      *pragha_application_get_menu_ui_manager    (PraghaApplication *pragha);
-GtkAction         *pragha_application_get_menu_action        (PraghaApplication *pragha, const gchar *path);
-GtkWidget         *pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path);
-GtkWidget         *pragha_application_get_menubar            (PraghaApplication *pragha);
+GtkBuilder        *pragha_application_get_menu_ui            (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_first_pane         (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_second_pane        (PraghaApplication *pragha);

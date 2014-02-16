@@ -89,14 +89,10 @@ void
 pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
                                    const char        *id);
 
-void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
-
 /*
  * Public api..
  */
 
-void pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha);
-
-GtkUIManager* pragha_menubar_new (void);
+GtkBuilder *pragha_application_set_menubar (PraghaApplication *pragha);
 
 #endif /* PRAGHA_MENU_H */

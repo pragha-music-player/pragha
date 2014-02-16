@@ -43,8 +43,7 @@
  *
  * TODO: move these functions where tcorrespond!.
  */
-
-GtkBuilder *builder;
+static void statistics_action(GtkAction *action, PraghaApplication *pragha);
 
 /*
  * GMenuModel definitions.
@@ -239,12 +238,13 @@ pragha_gmenu_search (GSimpleAction *action,
 	pragha_filter_dialog (pragha);
 }
 
+/* View submenu */
+
 static void
 pragha_gmenu_fullscreen (GSimpleAction *action,
                          GVariant      *parameter,
                          gpointer       user_data)
 {
-	GtkWidget *menubar;
 	GdkWindowState window_state;
 	gboolean fullscreen;
 	GVariant *state;
@@ -258,17 +258,15 @@ pragha_gmenu_fullscreen (GSimpleAction *action,
 	g_action_change_state (G_ACTION (action), g_variant_new_boolean (fullscreen));
 	g_variant_unref (state);
 
-	menubar = pragha_application_get_menubar (pragha);
-
 	if (fullscreen) {
 		gtk_window_fullscreen (GTK_WINDOW(pragha_application_get_window(pragha)));
-		gtk_widget_hide (GTK_WIDGET(menubar));
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(pragha_application_get_window(pragha)), FALSE);
 	}
 	else {
 		window_state = gdk_window_get_state (gtk_widget_get_window (pragha_application_get_window(pragha)));
 		if (window_state & GDK_WINDOW_STATE_FULLSCREEN)
 			gtk_window_unfullscreen (GTK_WINDOW(pragha_application_get_window(pragha)));
-		gtk_widget_show (GTK_WIDGET(menubar));
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(pragha_application_get_window(pragha)), TRUE);
 	}
 }
 
@@ -311,6 +309,59 @@ pragha_gmenu_jump_to_song (GSimpleAction *action,
 	playlist = pragha_application_get_playlist (pragha);
 
 	pragha_playlist_show_current_track (playlist);
+}
+
+/* Tools Submenu */
+
+static void
+pragha_gmenu_equalizer (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_equalizer_dialog_show(pragha);
+}
+
+static void
+pragha_gmenu_rescan_library (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+	PraghaScanner *scanner;
+	PraghaApplication *pragha = user_data;
+
+	scanner = pragha_application_get_scanner (pragha);
+	pragha_scanner_scan_library (scanner);
+}
+
+static void
+pragha_gmenu_update_library (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+	PraghaScanner *scanner;
+	PraghaApplication *pragha = user_data;
+
+	scanner = pragha_application_get_scanner (pragha);
+	pragha_scanner_update_library (scanner);
+}
+
+static void
+pragha_gmenu_show_statistic (GSimpleAction *action,
+                             GVariant      *parameter,
+                             gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	statistics_action (NULL, pragha);
+}
+
+static void
+pragha_gmenu_show_preferences (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	pragha_preferences_dialog_show (pragha);
 }
 
 /* Help Submenu */
@@ -398,6 +449,9 @@ pragha_menubar_get_menu_section (PraghaApplication *pragha,
                                  const char        *id)
 {
 	GObject *object;
+	GtkBuilder *builder;
+
+	builder = pragha_application_get_menu_ui (pragha);
 	object = gtk_builder_get_object (builder, id);
 
 	if (object == NULL || !G_IS_MENU (object))
@@ -411,7 +465,9 @@ pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
                                    const char        *id)
 {
 	GMenu *menu;
+	GtkBuilder *builder;
 
+	builder = pragha_application_get_menu_ui (pragha);
 	menu = G_MENU (gtk_builder_get_object (builder, id));
 
 	while (g_menu_model_get_n_items (G_MENU_MODEL (menu)) > 0) {
@@ -465,6 +521,12 @@ static GActionEntry win_entries[] = {
 	{ "controls-below",   pragha_gmenu_controls_below,   NULL, "false", NULL },
 	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
 	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
+	/* Tools submenu */
+	{ "equalizer",        pragha_gmenu_equalizer,        NULL, NULL,    NULL },
+	{ "lib-rescan",       pragha_gmenu_rescan_library,   NULL, NULL,    NULL },
+	{ "lib-update",       pragha_gmenu_update_library,   NULL, NULL,    NULL },
+	{ "statistics",       pragha_gmenu_show_statistic,   NULL, NULL,    NULL },
+	{ "preferences",      pragha_gmenu_show_preferences, NULL, NULL,    NULL },
 	/* Help submenu */
 	{ "homepage",         pragha_gmenu_show_homepage,    NULL, NULL,    NULL },
 	{ "community",        pragha_gmenu_show_community,   NULL, NULL,    NULL },
@@ -524,6 +586,18 @@ static const gchar *menu_ui = \
 			SEPARATOR \
 			NEW_ICON_ACCEL_ITEM("Jump to playing song",           "go-jump",              "&lt;Control&gt;J",     "win", "jump-song") \
 		CLOSE_SUBMENU \
+		NEW_SUBMENU("_Tools") \
+			NEW_ITEM           ("E_qualizer",                                                                     "win", "equalizer") \
+			SEPARATOR \
+			NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+			SEPARATOR \
+			NEW_ICON_ITEM      ("_Rescan library",                "system-run",                                   "win", "lib-rescan") \
+			NEW_ICON_ITEM      ("_Update library",                "system-run",                                   "win", "lib-update") \
+			SEPARATOR \
+			NEW_ICON_ITEM      ("_Statistics",                   "dialog-information",                            "win", "statistics") \
+			SEPARATOR \
+			NEW_ICON_ACCEL_ITEM("_Preferences",                   "preferences-system",   "&lt;Control&gt;P",     "win", "preferences") \
+			CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
 			NEW_ICON_ITEM      ("Homepage",                       "go-home",                                      "win", "homepage") \
 			NEW_ICON_ITEM      ("Community",                      "dialog-information",                           "win", "community") \
@@ -534,54 +608,6 @@ static const gchar *menu_ui = \
 			NEW_ICON_ITEM      ("About",                          "help-about",                                   "win", "about") \
 		CLOSE_SUBMENU \
 	CLOSE_MENU;
-
-/*
- * Menubar callbacks.
- */
-
-/* Tools */
-
-static void show_equalizer_action(GtkAction *action, PraghaApplication *pragha);
-static void rescan_library_action(GtkAction *action, PraghaApplication *pragha);
-static void update_library_action(GtkAction *action, PraghaApplication *pragha);
-static void statistics_action(GtkAction *action, PraghaApplication *pragha);
-static void pref_action(GtkAction *action, PraghaApplication *pragha);
-
-/*
- * Menu bar ui definition.
- */
-
-static const gchar *main_menu_xml = "<ui>					\
-	<menubar name=\"Menubar\">						\
-		<menu action=\"ToolsMenu\">					\
-			<separator/>						\
-			<menuitem action=\"Equalizer\"/>			\
-			<separator/>						\
-			<placeholder name=\"pragha-plugins-placeholder\"/>		\
-			<separator/>						\
-			<menuitem action=\"Rescan library\"/>			\
-			<menuitem action=\"Update library\"/>			\
-			<separator/>						\
-			<menuitem action=\"Statistics\"/>			\
-			<separator/>						\
-			<menuitem action=\"Preferences\"/>			\
-		</menu>								\
-	</menubar>								\
-</ui>";
-
-static GtkActionEntry main_aentries[] = {
-	{"ToolsMenu", NULL, N_("_Tools")},
-	{"Preferences", "preferences-system", N_("_Preferences"),
-	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Equalizer", NULL, N_("E_qualizer"),
-	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
-	{"Rescan library", "system-run", N_("_Rescan library"),
-	 "", "Rescan library", G_CALLBACK(rescan_library_action)},
-	{"Update library", "system-run", N_("_Update library"),
-	 "", "Update library", G_CALLBACK(update_library_action)},
-	{"Statistics", "dialog-information", N_("_Statistics"),
-	 "", "Statistics", G_CALLBACK(statistics_action)}
-};
 
 /* Sentitive menubar actions depending on the playback status. */
 
@@ -599,49 +625,6 @@ pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *psp
 	pragha_set_enable_action (window, "stop", playing);
 	pragha_set_enable_action (window, "next", playing);
 	pragha_set_enable_action (window, "edit", playing);
-}
-
-/* Handler for the 'Add Audio CD' item in the pragha menu */
-
-void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_application_append_audio_cd (pragha);
-}
-
-/* Handler for the 'Preferences' item in the Edit menu */
-
-static void pref_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_preferences_dialog_show (pragha);
-}
-
-/* Handler for the 'Equalizer' item in the Tools menu */
-
-static void
-show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_equalizer_dialog_show(pragha);
-}
-
-
-/* Handler for the 'Rescan Library' item in the Tools menu */
-
-static void rescan_library_action(GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaScanner *scanner;
-	scanner = pragha_application_get_scanner (pragha);
-
-	pragha_scanner_scan_library (scanner);
-}
-
-/* Handler for the 'Update Library' item in the Tools menu */
-
-static void update_library_action(GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaScanner *scanner;
-	scanner = pragha_application_get_scanner (pragha);
-
-	pragha_scanner_update_library (scanner);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */
@@ -700,15 +683,16 @@ binding_variant_to_gboolean (GBinding *binding,
 	return TRUE;
 }
 
-void
-pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha)
+GtkBuilder *
+pragha_application_set_menubar (PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	GtkActionGroup *main_actions;
+	GtkBuilder *builder;
 	GActionMap *map;
 	GAction *action;
 	GError *error = NULL;
 	gsize length = -1;
+	gchar *pragha_accels_path = NULL;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -724,21 +708,6 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
 	gtk_application_set_menubar (GTK_APPLICATION (pragha),
 	                             G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
-	//g_object_unref (builder);
- 
-	main_actions = gtk_action_group_new("Main Actions");
-
-	gtk_action_group_set_translation_domain (main_actions, GETTEXT_PACKAGE);
-
-	gtk_action_group_add_actions (main_actions,
-	                              main_aentries,
-	                              G_N_ELEMENTS(main_aentries),
-	                              (gpointer)pragha);
-
-	gtk_window_add_accel_group (GTK_WINDOW(pragha_application_get_window(pragha)),
-	                            gtk_ui_manager_get_accel_group(menu_ui_manager));
-
-	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
 
 	/* Get the action map*/
 
@@ -797,27 +766,12 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                             NULL,
 	                             NULL);
 
-	g_object_unref (main_actions);
-}
-
-GtkUIManager*
-pragha_menubar_new (void)
-{
-	GtkUIManager *main_menu = NULL;
-	gchar *pragha_accels_path = NULL;
-	GError *error = NULL;
-
-	main_menu = gtk_ui_manager_new();
-
-	if (!gtk_ui_manager_add_ui_from_string(main_menu, main_menu_xml, -1, &error)) {
-		g_critical("Unable to create main menu, err : %s", error->message);
-	}
-
-	/* Load menu accelerators edited */
+	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
+	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
 
 	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(), "/pragha/accels.scm", NULL);
 	gtk_accel_map_load (pragha_accels_path);
 	g_free (pragha_accels_path);
 
-	return main_menu;
+	return builder;
 }

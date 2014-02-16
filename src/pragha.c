@@ -68,7 +68,7 @@ struct _PraghaApplication {
 
 	/* Main widgets */
 
-	GtkUIManager      *menu_ui_manager;
+	GtkBuilder        *menu_ui;
 	PraghaToolbar     *toolbar;
 	GtkWidget         *infobox;
 	GtkWidget         *pane1;
@@ -727,34 +727,10 @@ pragha_application_get_status_icon (PraghaApplication *pragha)
 	return pragha->status_icon;
 }
 
-GtkUIManager *
-pragha_application_get_menu_ui_manager (PraghaApplication *pragha)
+GtkBuilder *
+pragha_application_get_menu_ui (PraghaApplication *pragha)
 {
-	return pragha->menu_ui_manager;
-}
-
-GtkAction *
-pragha_application_get_menu_action (PraghaApplication *pragha, const gchar *path)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
-
-	return gtk_ui_manager_get_action (ui_manager, path);
-}
-
-GtkWidget *
-pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
-
-	return gtk_ui_manager_get_widget (ui_manager, path);
-}
-
-GtkWidget *
-pragha_application_get_menubar (PraghaApplication *pragha)
-{
-	GtkUIManager *ui_manager = pragha_application_get_menu_ui_manager (pragha);
-
-	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
+	return pragha->menu_ui;
 }
 
 GtkWidget *
@@ -872,7 +848,6 @@ pragha_application_construct_window (PraghaApplication *pragha)
 
 	/* Get all widgets instances */
 
-	pragha->menu_ui_manager = pragha_menubar_new ();
 	pragha->toolbar = pragha_toolbar_new ();
 	pragha->infobox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	pragha->pane1 = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
@@ -884,9 +859,9 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	pragha->statusbar = pragha_statusbar_get ();
 	pragha->scanner = pragha_scanner_new();
 
-	pragha->status_icon = pragha_status_icon_new (pragha);
+	pragha->menu_ui = pragha_application_set_menubar (pragha);
 
-	pragha_menubar_connect_signals (pragha->menu_ui_manager, pragha);
+	pragha->status_icon = pragha_status_icon_new (pragha);
 
 	/* Contruct the window. */
 
@@ -947,9 +922,9 @@ pragha_application_dispose (GObject *object)
 		pragha->pixbuf_app = NULL;
 	}
 
-	if (pragha->menu_ui_manager) {
-		g_object_unref (pragha->menu_ui_manager);
-		pragha->menu_ui_manager = NULL;
+	if (pragha->menu_ui) {
+		g_object_unref (pragha->menu_ui);
+		pragha->menu_ui = NULL;
 	}
 
 	/* Save Preferences and database. */
@@ -1023,8 +998,6 @@ pragha_application_startup (GApplication *application)
 	                 G_CALLBACK(gui_backend_error_show_dialog_cb), pragha);
 	g_signal_connect (pragha->backend, "error",
 	                  G_CALLBACK(gui_backend_error_update_current_playlist_cb), pragha);
-	g_signal_connect (pragha->backend, "notify::state",
-	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
 
 	/*
 	 * Collect widgets and construct the window.

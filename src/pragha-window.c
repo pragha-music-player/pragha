@@ -210,7 +210,7 @@ pragha_menubar_append_plugin_action (PraghaApplication *pragha,
                                      GtkActionGroup *action_group,
                                      const gchar *menu_xml)
 {
-	GtkUIManager *ui_manager;
+	/*GtkUIManager *ui_manager;
 	GError *error = NULL;
 	gint merge_id;
 
@@ -227,7 +227,8 @@ pragha_menubar_append_plugin_action (PraghaApplication *pragha,
 		g_error_free (error);
 	}
 
-	return merge_id;
+	return merge_id;*/
+	return 0;
 }
 
 void
@@ -235,11 +236,11 @@ pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
                                      GtkActionGroup *action_group,
                                      gint merge_id)
 {
-	GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (pragha);
+	/*GtkUIManager * ui_manager = pragha_application_get_menu_ui_manager (pragha);
 
 	gtk_ui_manager_remove_ui (ui_manager, merge_id);
 	gtk_ui_manager_remove_action_group (ui_manager, action_group);
-	g_object_unref (action_group);
+	g_object_unref (action_group);*/
 }
 
 /*
@@ -420,7 +421,7 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaSidebar *sidebar1, *sidebar2;
 	PraghaStatusbar *statusbar;
 	PraghaToolbar *toolbar;
-	GtkWidget *menubar, *pane1, *pane2, *infobox;
+	GtkWidget *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
@@ -441,7 +442,6 @@ pragha_window_new (PraghaApplication *pragha)
 	sidebar2  = pragha_application_get_second_sidebar (pragha);
 	statusbar = pragha_application_get_statusbar (pragha);
 	toolbar   = pragha_application_get_toolbar (pragha);
-	menubar   = pragha_application_get_menubar (pragha);
 	pane1     = pragha_application_get_first_pane (pragha);
 	pane2     = pragha_application_get_second_pane (pragha);
 	infobox   = pragha_application_get_infobox_container (pragha);
@@ -517,8 +517,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_paned_set_position (GTK_PANED (pane2),
 		pragha_preferences_get_secondary_sidebar_size (preferences));
 
-	/* Pack widgets: [            Menubar           ]
-	 *               [            Toolbar           ]
+	/* Pack widgets: [            Toolbar           ]
 	 *               [            Infobox           ]
 	 *               [Sidebar1][ Playlist ][Sidebar2]
 	 *               [Sidebar1][Status Bar][Sidebar2]
@@ -526,8 +525,6 @@ pragha_window_new (PraghaApplication *pragha)
 
 	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 
-	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
-	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
@@ -556,7 +553,6 @@ pragha_window_new (PraghaApplication *pragha)
 	 */
 
 	gtk_widget_show(vbox_main);
-	gtk_widget_show (menubar);
 	gtk_widget_show (GTK_WIDGET(toolbar));
 	gtk_widget_show (infobox);
 	gtk_widget_show (pane1);
