@@ -248,6 +248,82 @@ pragha_gmenu_search (GSimpleAction *action,
 	pragha_filter_dialog (pragha);
 }
 
+static void
+pragha_gmenu_fullscreen (GSimpleAction *action,
+                         GVariant      *parameter,
+                         gpointer       user_data)
+{
+	GtkWidget *menubar;
+	GdkWindowState window_state;
+	gboolean fullscreen;
+	GVariant *state;
+
+	PraghaApplication *pragha = user_data;
+
+	state = g_action_get_state (G_ACTION (action));
+
+	fullscreen = !g_variant_get_boolean (state);
+
+	g_action_change_state (G_ACTION (action), g_variant_new_boolean (fullscreen));
+	g_variant_unref (state);
+
+	menubar = pragha_application_get_menubar (pragha);
+
+	if (fullscreen) {
+		gtk_window_fullscreen (GTK_WINDOW(pragha_application_get_window(pragha)));
+		gtk_widget_hide (GTK_WIDGET(menubar));
+	}
+	else {
+		window_state = gdk_window_get_state (gtk_widget_get_window (pragha_application_get_window(pragha)));
+		if (window_state & GDK_WINDOW_STATE_FULLSCREEN)
+			gtk_window_unfullscreen (GTK_WINDOW(pragha_application_get_window(pragha)));
+		gtk_widget_show (GTK_WIDGET(menubar));
+	}
+}
+
+static void
+pragha_gmenu_controls_below (GSimpleAction *action,
+                             GVariant      *parameter,
+                             gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	PraghaPreferences *preferences;
+	PraghaToolbar *toolbar;
+	GtkWidget *parent;
+	GVariant *state;
+	gboolean controls_below;
+
+	state = g_action_get_state (G_ACTION (action));
+	controls_below = !g_variant_get_boolean (state);
+	g_action_change_state (G_ACTION (action), g_variant_new_boolean (controls_below));
+	g_variant_unref (state);
+
+	preferences = pragha_application_get_preferences (pragha);
+	pragha_preferences_set_controls_below (preferences, controls_below);
+
+	toolbar = pragha_application_get_toolbar (pragha);
+	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
+
+	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
+
+	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
+}
+
+
+static void
+pragha_gmenu_jump_to_song (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaPlaylist *playlist;
+
+	PraghaApplication *pragha = user_data;
+	playlist = pragha_application_get_playlist (pragha);
+
+	pragha_playlist_show_current_track (playlist);
+}
+
+
 /*
  * Useful functions.
  */
@@ -257,11 +333,11 @@ activate_toggle (GSimpleAction *action,
                  GVariant      *parameter,
                  gpointer       user_data)
 {
-  GVariant *state;
+	GVariant *state;
 
-  state = g_action_get_state (G_ACTION (action));
-  g_action_change_state (G_ACTION (action), g_variant_new_boolean (!g_variant_get_boolean (state)));
-  g_variant_unref (state);
+	state = g_action_get_state (G_ACTION (action));
+	g_action_change_state (G_ACTION (action), g_variant_new_boolean (!g_variant_get_boolean (state)));
+	g_variant_unref (state);
 }
 
 static void
@@ -326,7 +402,6 @@ static GActionEntry win_entries[] = {
 	{ "repeat",           activate_toggle,               NULL, "false", NULL },
 	{ "edit",             pragha_gmenu_edit,             NULL, NULL,    NULL },
 	{ "quit",             pragha_gmenu_quit,             NULL, NULL,    NULL },
-	{ "about",            pragha_gmenu_about,            NULL, NULL,    NULL },
 	/* Playlist submenu. */
 	{ "open",             pragha_gmenu_open,             NULL, NULL,    NULL },
 	{ "cd",               pragha_gmenu_audio_cd,         NULL, NULL,    NULL },
@@ -339,7 +414,16 @@ static GActionEntry win_entries[] = {
 	{ "new_playlist",     pragha_gmenu_playlist_save,    NULL, NULL,    NULL },
 	{ "export_selection", pragha_gmenu_selection_export, NULL, NULL,    NULL },
 	{ "new_selection",    pragha_gmenu_selection_save,   NULL, NULL,    NULL },
-	{ "search",           pragha_gmenu_search,           NULL, NULL,    NULL }
+	{ "search",           pragha_gmenu_search,           NULL, NULL,    NULL },
+	/* View Submenu */
+	{ "fullscreen",       pragha_gmenu_fullscreen,       NULL, "false", NULL },
+	{ "sidebar1",         activate_toggle,               NULL, "false", NULL },
+	{ "sidebar2",         activate_toggle,               NULL, "false", NULL },
+	{ "controls-below",   pragha_gmenu_controls_below,   NULL, "false", NULL },
+	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
+	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
+	/* Help submenu */
+	{ "about",            pragha_gmenu_about,            NULL, NULL,    NULL }
 };
 
 static const gchar *menu_ui = \
@@ -383,6 +467,16 @@ static const gchar *menu_ui = \
 			SEPARATOR \
 			NEW_ICON_ACCEL_ITEM("_Search in playlist",            "edit-find",            "&lt;Control&gt;F",     "win", "search") \
 		CLOSE_SUBMENU \
+		NEW_SUBMENU("_View") \
+			NEW_ACCEL_ITEM     ("_Fullscreen",                                            "F11",                  "win", "fullscreen") \
+			SEPARATOR \
+			NEW_ACCEL_ITEM     ("Lateral _panel",                                         "F9",                   "win", "sidebar1") \
+			NEW_ACCEL_ITEM     ("Secondary lateral panel",                                "&lt;Control&gt;F9",    "win", "sidebar2") \
+			NEW_ITEM           ("Playback controls below",                                                        "win", "controls-below") \
+			NEW_ITEM           ("Status bar",                                                                     "win", "status-bar") \
+			SEPARATOR \
+			NEW_ICON_ACCEL_ITEM("Jump to playing song",           "go-jump",              "&lt;Control&gt;J",     "win", "jump-song") \
+		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
 			NEW_ICON_ITEM      ("About",                          "help-about",                                   "win", "about") \
 		CLOSE_SUBMENU \
@@ -391,12 +485,6 @@ static const gchar *menu_ui = \
 /*
  * Menubar callbacks.
  */
-
-/* View */
-
-static void fullscreen_action (GtkAction *action, PraghaApplication *pragha);
-static void show_controls_below_action (GtkAction *action, PraghaApplication *pragha);
-static void jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha);
 
 /* Tools */
 
@@ -419,16 +507,6 @@ static void translate_action(GtkAction *action, PraghaApplication *pragha);
 
 static const gchar *main_menu_xml = "<ui>					\
 	<menubar name=\"Menubar\">						\
-		<menu action=\"ViewMenu\">					\
-			<menuitem action=\"Fullscreen\"/>			\
-			<separator/>						\
-			<menuitem action=\"Lateral panel1\"/>		\
-			<menuitem action=\"Lateral panel2\"/>		\
-			<menuitem action=\"Playback controls below\"/>	\
-			<menuitem action=\"Status bar\"/>			\
-			<separator/>						\
-			<menuitem action=\"Jump to playing song\"/>	\
-		</menu>								\
 		<menu action=\"ToolsMenu\">					\
 			<separator/>						\
 			<menuitem action=\"Equalizer\"/>			\
@@ -448,20 +526,15 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Wiki\"/>				\
 			<separator/>						\
 			<menuitem action=\"Translate Pragha\"/>			\
-			<separator/>						\
-			<menuitem action=\"About\"/>				\
 		</menu>								\
 	</menubar>								\
 </ui>";
 
 static GtkActionEntry main_aentries[] = {
-	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
 	{"Preferences", "preferences-system", N_("_Preferences"),
 	 "<Control>P", "Set preferences", G_CALLBACK(pref_action)},
-	{"Jump to playing song", "go-jump", N_("Jump to playing song"),
-	 "<Control>J", "Jump to playing song", G_CALLBACK(jump_to_playing_song_action)},
 	{"Equalizer", NULL, N_("E_qualizer"),
 	 "", "Equalizer", G_CALLBACK(show_equalizer_action)},
 	{"Rescan library", "system-run", N_("_Rescan library"),
@@ -478,24 +551,6 @@ static GtkActionEntry main_aentries[] = {
 	 "", "Wiki of pragha", G_CALLBACK(wiki_action)},
 	{"Translate Pragha", "preferences-desktop-locale", N_("Translate Pragha"),
 	 "", "Translate Pragha", G_CALLBACK(translate_action)}
-};
-
-static GtkToggleActionEntry toggles_entries[] = {
-	{"Fullscreen", NULL, N_("_Fullscreen"),
-	 "F11", "Switch between full screen and windowed mode", G_CALLBACK(fullscreen_action),
-	FALSE},
-	{"Lateral panel1", NULL, N_("Lateral _panel"),
-	 "F9", "Lateral panel", NULL,
-	TRUE},
-	{"Lateral panel2", NULL, N_("Secondary lateral panel"),
-	 "", "Secondary lateral panel", NULL,
-	FALSE},
-	{"Playback controls below", NULL, N_("Playback controls below"),
-	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
-	FALSE},
-	{"Status bar", NULL, N_("Status bar"),
-	 "", "Status bar", NULL,
-	TRUE}
 };
 
 /* Sentitive menubar actions depending on the playback status. */
@@ -528,62 +583,6 @@ void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
 static void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_preferences_dialog_show (pragha);
-}
-
-/* Handler for the 'Full screen' item in the Edit menu */
-
-static void
-fullscreen_action (GtkAction *action, PraghaApplication *pragha)
-{
-	GtkWidget *menu_bar;
-	gboolean fullscreen;
-	GdkWindowState state;
-
-	menu_bar = pragha_application_get_menubar (pragha);
-
-	fullscreen = gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action));
-
-	if(fullscreen){
-		gtk_window_fullscreen(GTK_WINDOW(pragha_application_get_window(pragha)));
-		gtk_widget_hide(GTK_WIDGET(menu_bar));
-	}
-	else {
-		state = gdk_window_get_state (gtk_widget_get_window (pragha_application_get_window(pragha)));
-		if (state & GDK_WINDOW_STATE_FULLSCREEN)
-			gtk_window_unfullscreen(GTK_WINDOW(pragha_application_get_window(pragha)));
-		gtk_widget_show(GTK_WIDGET(menu_bar));
-	}
-}
-
-/* Handler for the 'Show_controls_below_action' item in the view menu */
-
-static void
-show_controls_below_action (GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaPreferences *preferences;
-	PraghaToolbar *toolbar;
-	GtkWidget *parent;
-
-	preferences = pragha_application_get_preferences (pragha);
-
-	pragha_preferences_set_controls_below (preferences,
-		gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
-
-	toolbar = pragha_application_get_toolbar (pragha);
-	parent  = gtk_widget_get_parent (GTK_WIDGET(toolbar));
-
-	gint position = pragha_preferences_get_controls_below (preferences) ? 3 : 1;
-
-	gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), position);
-}
-
-static void
-jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-	playlist = pragha_application_get_playlist (pragha);
-
-	pragha_playlist_show_current_track (playlist);
 }
 
 /* Handler for the 'Equalizer' item in the Tools menu */
@@ -729,25 +728,25 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                              main_aentries,
 	                              G_N_ELEMENTS(main_aentries),
 	                              (gpointer)pragha);
-	gtk_action_group_add_toggle_actions (main_actions,
-	                                     toggles_entries,
-	                                     G_N_ELEMENTS(toggles_entries),
-	                                     pragha);
 
 	gtk_window_add_accel_group (GTK_WINDOW(pragha_application_get_window(pragha)),
 	                            gtk_ui_manager_get_accel_group(menu_ui_manager));
 
 	gtk_ui_manager_insert_action_group (menu_ui_manager, main_actions, 0);
 
-	/* Hide second sidebar */
-	GtkAction *action_sidebar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel2");
-	gtk_action_set_visible (action_sidebar, FALSE);
+	/* Get the action map*/
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+
+	/* Insensitive second sidebar */
+
+	action = g_action_map_lookup_action (map, "sidebar2");
+	g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 
 	/* Binding properties to Actions. */
 
 	preferences = pragha_application_get_preferences (pragha);
 
-	map = G_ACTION_MAP (pragha_application_get_window(pragha));
 	action = g_action_map_lookup_action (map, "shuffle");
 	g_object_bind_property_full (preferences, "shuffle",
 	                             action, "state",
@@ -766,14 +765,31 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 	                             NULL,
 	                             NULL);
 
-	GtkAction *action_lateral1 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel1");
-	g_object_bind_property (preferences, "lateral-panel", action_lateral1, "active", binding_flags);
+	action = g_action_map_lookup_action (map, "sidebar1");
+	g_object_bind_property_full (preferences, "lateral-panel",
+	                             action, "state",
+	                             binding_flags,
+	                             binding_gboolean_to_variant,
+	                             binding_variant_to_gboolean,
+	                             NULL,
+	                             NULL);
+	action = g_action_map_lookup_action (map, "sidebar2");
+	g_object_bind_property_full (preferences, "secondary-lateral-panel",
+	                             action, "state",
+	                             binding_flags,
+	                             binding_gboolean_to_variant,
+	                             binding_variant_to_gboolean,
+	                             NULL,
+	                             NULL);
 
-	GtkAction *action_lateral2 = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Lateral panel2");
-	g_object_bind_property (preferences, "secondary-lateral-panel", action_lateral2, "active", binding_flags);
-
-	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
-	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
+	action = g_action_map_lookup_action (map, "status-bar");
+	g_object_bind_property_full (preferences, "show-status-bar",
+	                             action, "state",
+	                             binding_flags,
+	                             binding_gboolean_to_variant,
+	                             binding_variant_to_gboolean,
+	                             NULL,
+	                             NULL);
 
 	g_object_unref (main_actions);
 }

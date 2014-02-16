@@ -136,13 +136,17 @@ gui_backend_error_update_current_playlist_cb (PraghaBackend *backend, const GErr
 static gboolean
 pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, PraghaApplication *pragha)
 {
-	GtkAction *action_fullscreen;
+	GAction *action;
+	GActionMap *map;
+	gboolean fullscreen;
 
  	if (event->type == GDK_WINDOW_STATE && (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)) {
-		action_fullscreen = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Fullscreen");
+		map = G_ACTION_MAP (pragha_application_get_window(pragha));
+		action = g_action_map_lookup_action (map, "fullscreen");
 
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen),
-		                              (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
+		fullscreen = ((event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) != 0);
+
+		g_action_change_state (G_ACTION (action), g_variant_new_boolean (fullscreen));
 	}
 
 	return FALSE;
@@ -151,23 +155,29 @@ pragha_window_state_event (GtkWidget *widget, GdkEventWindowState *event, Pragha
 void
 pragha_window_unfullscreen (GObject *object, PraghaApplication *pragha)
 {
-	GtkAction *action_fullscreen;
+	GAction *action;
+	GActionMap *map;
 
-	action_fullscreen = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Fullscreen");
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	action = g_action_map_lookup_action (map, "fullscreen");
 
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action_fullscreen), FALSE);
+	g_action_change_state (G_ACTION (action), g_variant_new_boolean (FALSE));
 }
 
 static void
 pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *pragha)
 {
-	GtkAction *action;
-	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Lateral panel2");
+	GAction *action;
+	GActionMap *map;
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	action = g_action_map_lookup_action (map, "sidebar2");
+
 	if (pragha_sidebar_get_n_panes (sidebar)) {
-		gtk_action_set_visible (action, TRUE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (action), TRUE);
 	}
 	else {
-		gtk_action_set_visible (action, FALSE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 		gtk_widget_set_visible (GTK_WIDGET(sidebar), FALSE);
 	}
 }
@@ -342,21 +352,24 @@ static void
 pragha_window_init_menu_actions (PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	GtkAction *action = NULL;
+	GAction *action;
+	GActionMap *map;
 	const gchar *start_mode;
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
 
 	preferences = pragha_application_get_preferences (pragha);
 
-	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Fullscreen");
-
+	action = g_action_map_lookup_action (map, "fullscreen");
 	start_mode = pragha_preferences_get_start_mode (preferences);
 	if(!g_ascii_strcasecmp(start_mode, FULLSCREEN_STATE))
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), TRUE);
+		g_action_change_state (G_ACTION (action), g_variant_new_boolean (TRUE));
 	else
-		gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), FALSE);
+		g_action_change_state (G_ACTION (action), g_variant_new_boolean (FALSE));
 
-	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Playback controls below");
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION(action), pragha_preferences_get_controls_below (preferences));
+	action = g_action_map_lookup_action (map, "controls-below");
+	g_action_change_state (G_ACTION (action),
+		g_variant_new_boolean (pragha_preferences_get_controls_below (preferences)));
 }
 
 static void
