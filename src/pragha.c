@@ -495,6 +495,10 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->peas_engine);
 		pragha->peas_engine = NULL;
 	}
+	if (pragha->peas_exten_set) {
+		g_object_unref (pragha->peas_exten_set);
+		pragha->peas_exten_set = NULL;
+	}
 #endif
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
@@ -572,7 +576,6 @@ pragha_application_startup (GApplication *application)
 	                                                 PEAS_TYPE_ACTIVATABLE,
 	                                                 "object", pragha,
 	                                                 NULL);
-	g_object_unref (pragha);
 
 	peas_extension_set_foreach (pragha->peas_exten_set,
 	                            (PeasExtensionSetForeachFunc) on_extension_added,
@@ -820,6 +823,7 @@ gint main(gint argc, gchar *argv[])
 
 	pragha = pragha_application_new ();
 	status = g_application_run (G_APPLICATION (pragha), argc, argv);
+	g_object_run_dispose (G_OBJECT (pragha));
 	g_object_unref (pragha);
 
 	return status;
