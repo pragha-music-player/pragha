@@ -534,6 +534,61 @@ pragha_menubar_remove_action (PraghaApplication *pragha,
 	}
 }
 
+void
+pragha_menubar_append_submenu (PraghaApplication  *pragha,
+                               const gchar        *placeholder,
+                               const gchar        *xml_ui,
+                               const gchar        *menu_id,
+                               const gchar        *label,
+                               gpointer            user_data)
+{
+	GtkBuilder *builder;
+	GError *error = NULL;
+	GMenuModel *menu;
+	GMenu *section;
+	GMenuItem *menu_item;
+
+	builder = gtk_builder_new ();
+	gtk_builder_add_from_string (builder, xml_ui, -1, &error);
+
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+
+	section = pragha_menubar_get_menu_section (pragha, placeholder);
+	menu = G_MENU_MODEL (gtk_builder_get_object (builder, menu_id));
+
+	menu_item = g_menu_item_new_submenu (label, menu);
+	g_menu_item_set_attribute (menu_item, "pragha-merge-id", "s", menu_id);
+	g_menu_insert_item (section, -1, menu_item);
+
+	g_object_unref (menu_item);
+}
+
+void
+pragha_menubar_remove_by_id (PraghaApplication *pragha,
+                             const gchar       *placeholder,
+                             const gchar       *item_id)
+{
+	GtkBuilder *builder;
+	GMenu *menu;
+	const char *id;
+	gint i;
+
+	builder = pragha_application_get_menu_ui (pragha);
+	menu = G_MENU (gtk_builder_get_object (builder, placeholder));
+
+	for (i = 0; i < g_menu_model_get_n_items (G_MENU_MODEL(menu)); i++) {
+		if (g_menu_model_get_item_attribute (G_MENU_MODEL(menu), i, "pragha-merge-id", "s", &id)) {
+			if (g_strcmp0 (id, item_id) == 0)
+				g_menu_remove (G_MENU (menu), i);
+		}
+	}
+}
+
+
 static GActionEntry win_entries[] = {
 	/* Playback submenu. */
 	{ "prev",             pragha_gmenu_prev,             NULL, NULL,    NULL },
@@ -640,7 +695,7 @@ static const gchar *menu_ui = \
 			NEW_ICON_ITEM      ("_Statistics",                   "dialog-information",                            "win", "statistics") \
 			SEPARATOR \
 			NEW_ICON_ACCEL_ITEM("_Preferences",                   "preferences-system",   "&lt;Control&gt;P",     "win", "preferences") \
-			CLOSE_SUBMENU \
+		CLOSE_SUBMENU \
 		NEW_SUBMENU("_Help") \
 			NEW_ICON_ITEM      ("Homepage",                       "go-home",                                      "win", "homepage") \
 			NEW_ICON_ITEM      ("Community",                      "dialog-information",                           "win", "community") \
@@ -734,27 +789,29 @@ pragha_application_set_menubar (PraghaApplication *pragha)
 	GActionMap *map;
 	GAction *action;
 	GError *error = NULL;
-	gsize length = -1;
 	gchar *pragha_accels_path = NULL;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
 
 	builder = gtk_builder_new ();
-	gtk_builder_add_from_string (builder, menu_ui, length, &error);
+	gtk_builder_add_from_string (builder, menu_ui, -1, &error);
 	if (error) {
 		g_print ("GtkBuilder error: %s", error->message);
 		g_error_free (error);
+		error = NULL;
 	}
-
-	g_action_map_add_action_entries (G_ACTION_MAP (pragha_application_get_window(pragha)),
-	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
-	gtk_application_set_menubar (GTK_APPLICATION (pragha),
-	                             G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
 
 	/* Get the action map*/
 
 	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+
+	/* Add the menu */
+
+	g_action_map_add_action_entries (G_ACTION_MAP (map),
+	                                 win_entries, G_N_ELEMENTS (win_entries), pragha);
+	gtk_application_set_menubar (GTK_APPLICATION (pragha),
+	                             G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
 
 	/* Insensitive second sidebar */
 

@@ -40,6 +40,11 @@ typedef struct _PraghaApplication PraghaApplication;
 	"    <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
 	"      <section>"
 
+#define NEW_NAMED_SUBMENU(_ID,_LABEL) \
+	"  <submenu id='" _ID "'>" \
+	"    <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"      <section>"
+
 #define NEW_ITEM(_LABEL,_PREFIX,_ACTION) \
 	"        <item>" \
 	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
@@ -74,6 +79,12 @@ typedef struct _PraghaApplication PraghaApplication;
 #define NEW_PLACEHOLDER(_TAG) \
 	"      <section id='" _TAG "'/>"
 
+#define OPEN_PLACEHOLDER(_TAG) \
+	"      <section id='" _TAG "'>"
+
+#define CLOSE_PLACEHOLDER \
+	"      </section>"
+
 #define CLOSE_SUBMENU \
 	"      </section>" \
 	"    </submenu>"
@@ -98,6 +109,17 @@ void   pragha_menubar_append_action      (PraghaApplication *pragha,
 void   pragha_menubar_remove_action      (PraghaApplication *pragha,
                                           const gchar       *placeholder,
                                           const gchar       *action_name);
+
+void   pragha_menubar_append_submenu     (PraghaApplication  *pragha,
+                                          const gchar        *placeholder,
+                                          const gchar        *xml_ui,
+                                          const gchar        *menu_id,
+                                          const gchar        *label,
+                                          gpointer            user_data);
+
+void   pragha_menubar_remove_by_id       (PraghaApplication *pragha,
+                                          const gchar       *placeholder,
+                                          const gchar       *item_id);
 
 GtkBuilder *pragha_application_set_menubar (PraghaApplication *pragha);
 

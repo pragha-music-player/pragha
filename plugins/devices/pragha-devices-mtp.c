@@ -35,6 +35,7 @@
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-debug.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha.h"
 
 #include "pragha-devices-plugin.h"
@@ -42,8 +43,6 @@
 #include "pragha-devices-block.h"
 
 static void pragha_mtp_action_send_to_device   (GtkAction *action, PraghaDevicesPlugin *plugin);
-static void pragha_mtp_action_append_songs     (GtkAction *action, PraghaDevicesPlugin *plugin);
-static void pragha_mtp_action_show_device_info (GtkAction *action, PraghaDevicesPlugin *plugin);
 
 static PraghaMusicobject *new_musicobject_from_mtp (LIBMTP_track_t *track);
 
@@ -63,28 +62,95 @@ static const gchar *mtp_sendto_xml = "<ui>					\
 	</popup>								\
 </ui>";
 
-static const GtkActionEntry mtp_menu_actions [] = {
-	{"MtpDevice", "multimedia-player", "Fake MTP device"},
-	{"Add MTP library", "list-add", N_("_Add the library"),
-	"", "Add all the library", G_CALLBACK(pragha_mtp_action_append_songs)},
-	{"Show device info", "dialog-information", N_("Show device info"),
-	"", "Show device info", G_CALLBACK(pragha_mtp_action_show_device_info)},
+static void
+pragha_gmenu_append_mtp_songs (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaDevicesPlugin *plugin = user_data;
+	pragha_device_cache_append_tracks (plugin);
+}
+
+static void
+pragha_gmenu_show_device_info (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaApplication *pragha = NULL;
+	GtkWidget *dialog, *header, *table, *label;
+	LIBMTP_mtpdevice_t *mtp_device;
+	LIBMTP_devicestorage_t *storage;
+	gchar *friend_label = NULL;
+	gchar *storage_size = NULL;
+	gchar *storage_free = NULL;
+	gchar *storage_string = NULL;
+	guint row = 0;
+
+	PraghaDevicesPlugin *plugin = user_data;
+
+	mtp_device = pragha_device_get_mtp_device (plugin);
+	pragha = pragha_device_get_application (plugin);
+
+	friend_label = LIBMTP_Get_Friendlyname (mtp_device);
+
+	dialog = gtk_dialog_new_with_buttons (friend_label,
+	                                      GTK_WINDOW(pragha_application_get_window (pragha)),
+	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                      _("_Ok"), GTK_RESPONSE_OK,
+	                                      NULL);
+
+	header = sokoke_xfce_header_new (friend_label, "multimedia-player");
+
+	table = pragha_hig_workarea_table_new ();
+
+	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
+	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
+		pragha_hig_workarea_table_add_section_title (table, &row, storage->StorageDescription);
+
+		storage_free = g_format_size (storage->FreeSpaceInBytes);
+		storage_size = g_format_size (storage->MaxCapacity);
+
+		storage_string = g_strdup_printf (_("%s free of %s (%d%% used)"),
+		                                  storage_free, storage_size,
+		                                  (gint) ((storage->MaxCapacity - storage->FreeSpaceInBytes) * 100 / storage->MaxCapacity));
+
+		label = gtk_label_new_with_mnemonic (storage_string);
+
+		pragha_hig_workarea_table_add_wide_control (table, &row, label);
+
+		g_free (storage_free);
+		g_free (storage_size);
+		g_free (storage_string);
+	}
+
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), table, TRUE, TRUE, 0);
+
+	g_signal_connect (G_OBJECT(dialog), "response",
+	                  G_CALLBACK(gtk_widget_destroy), NULL);
+
+	gtk_widget_show_all (dialog);
+
+	g_free (friend_label);
+
+}
+
+static GActionEntry mtp_entries[] = {
+	{ "add-mtp",       pragha_gmenu_append_mtp_songs, NULL, NULL, NULL },
+	{ "show-mtp-info", pragha_gmenu_show_device_info, NULL, NULL, NULL }
 };
 
-static const gchar *mtp_menu_xml = "<ui>					\
-	<menubar name=\"Menubar\">						\
-		<menu action=\"ToolsMenu\">					\
-			<placeholder name=\"pragha-plugins-placeholder\">	\
-				<menu action=\"MtpDevice\">			\
-					<menuitem action=\"Add MTP library\"/>	\
-					<separator/>				\
-					<menuitem action=\"Show device info\"/>	\
-				</menu>						\
-				<separator/>					\
-			</placeholder>						\
-		</menu>								\
-	</menubar>								\
-</ui>";
+static const gchar *mtp_menu_ui = \
+	NEW_MENU("menubar") \
+		NEW_SUBMENU("_Tools") \
+			NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+			NEW_NAMED_SUBMENU("mtp-device-sudmenu", "Unknown MTP device") \
+				NEW_ICON_ITEM("_Add the library",  "list-add",           "win", "add-mtp") \
+				SEPARATOR \
+				NEW_ICON_ITEM("Show device info",  "dialog-information", "win", "show-mtp-info") \
+			CLOSE_SUBMENU \
+		CLOSE_SUBMENU \
+	CLOSE_MENU;
 
 LIBMTP_track_t *
 get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj)
@@ -208,74 +274,12 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaDevicesPlugin *plugin
 
 	LIBMTP_destroy_track_t(mtp_track);
 }
-static void
-pragha_mtp_action_append_songs (GtkAction *action, PraghaDevicesPlugin *plugin)
-{
-	pragha_device_cache_append_tracks (plugin);
-}
-
-static void
-pragha_mtp_action_show_device_info (GtkAction *action, PraghaDevicesPlugin *plugin)
-{
-	PraghaApplication *pragha = NULL;
-	GtkWidget *dialog, *header, *table, *label;
-	LIBMTP_mtpdevice_t *mtp_device;
-	LIBMTP_devicestorage_t *storage;
-	gchar *friend_label = NULL;
-	gchar *storage_size = NULL;
-	gchar *storage_free = NULL;
-	gchar *storage_string = NULL;
-	guint row = 0;
-
-	mtp_device = pragha_device_get_mtp_device (plugin);
-	pragha = pragha_device_get_application (plugin);
-
-	friend_label = LIBMTP_Get_Friendlyname (mtp_device);
-
-	dialog = gtk_dialog_new_with_buttons (friend_label,
-	                                      GTK_WINDOW(pragha_application_get_window (pragha)),
-	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      _("_Ok"), GTK_RESPONSE_OK,
-	                                      NULL);
-
-	header = sokoke_xfce_header_new (friend_label, "multimedia-player");
-
-	table = pragha_hig_workarea_table_new ();
-
-	LIBMTP_Get_Storage (mtp_device, LIBMTP_STORAGE_SORTBY_FREESPACE);
-	for (storage = mtp_device->storage; storage != 0; storage = storage->next) {
-		pragha_hig_workarea_table_add_section_title (table, &row, storage->StorageDescription);
-
-		storage_free = g_format_size (storage->FreeSpaceInBytes);
-		storage_size = g_format_size (storage->MaxCapacity);
-
-		storage_string = g_strdup_printf (_("%s free of %s (%d%% used)"),
-		                                  storage_free, storage_size,
-		                                  (gint) ((storage->MaxCapacity - storage->FreeSpaceInBytes) * 100 / storage->MaxCapacity));
-
-		label = gtk_label_new_with_mnemonic (storage_string);
-
-		pragha_hig_workarea_table_add_wide_control (table, &row, label);
-
-		g_free (storage_free);
-		g_free (storage_size);
-		g_free (storage_string);
-	}
-
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), header, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), table, TRUE, TRUE, 0);
-
-	g_signal_connect (G_OBJECT(dialog), "response",
-	                  G_CALLBACK(gtk_widget_destroy), NULL);
-
-	gtk_widget_show_all (dialog);
-
-	g_free (friend_label);
-}
 
 static void
 pragha_playlist_append_mtp_action (PraghaDevicesPlugin *plugin)
 {
+	PraghaApplication *pragha;
+	GActionMap *map;
 	GtkActionGroup *action_group;
 	GtkAction *action;
 	gchar *friend_label = NULL;
@@ -284,19 +288,17 @@ pragha_playlist_append_mtp_action (PraghaDevicesPlugin *plugin)
 
 	/* Menubar tools. */
 
-	action_group = gtk_action_group_new ("PraghaMenubarMtpActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+	pragha = pragha_device_get_application (plugin);
+	pragha_menubar_append_submenu (pragha, "pragha-plugins-placeholder",
+	                               mtp_menu_ui,
+	                               "mtp-device-sudmenu",
+	                               friend_label,
+	                               plugin);
 
-	gtk_action_group_add_actions (action_group,
-	                              mtp_menu_actions,
-	                              G_N_ELEMENTS (mtp_menu_actions),
-	                              plugin);
-
-	action = gtk_action_group_get_action (action_group, "MtpDevice");
-	gtk_action_set_label(GTK_ACTION(action), friend_label);
-
-	pragha_devices_plugin_append_menu_action (plugin, action_group, mtp_menu_xml);
-
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	g_action_map_add_action_entries (G_ACTION_MAP (map),
+	                                 mtp_entries, G_N_ELEMENTS (mtp_entries),
+	                                 plugin);
 	/* Playlist sendto */
 
 	action_group = gtk_action_group_new ("PraghaPlaylistMtpActions");
@@ -412,6 +414,14 @@ pragha_devices_add_detected_device (PraghaDevicesPlugin *plugin)
 		default:
 			break;
 	}
+}
+
+void
+pragha_devices_mtp_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
+{
+	pragha_menubar_remove_by_id (pragha_device_get_application (plugin),
+	                             "pragha-plugins-placeholder",
+	                             "mtp-device-sudmenu");
 }
 
 void

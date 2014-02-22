@@ -39,6 +39,7 @@
 #include "pragha-devices-mtp.h"
 #include "pragha-devices-cd.h"
 
+#include "src/pragha-menubar.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
 #include "src/pragha.h"
@@ -55,9 +56,6 @@ struct _PraghaDevicesPluginPrivate {
 	PraghaDeviceType    hooked_type;
 
 	GHashTable         *tracks_table;
-
-	GtkActionGroup     *action_group_menu;
-	guint               merge_id_menu;
 
 	GtkActionGroup     *action_group_playlist;
 	guint               merge_id_playlist;
@@ -265,12 +263,25 @@ pragha_gudev_clear_hook_devices (PraghaDevicesPlugin *plugin)
 {
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
+	if (!priv->device)
+		return;
+
 	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", priv->bus_hooked, priv->device_hooked);
 
-	if (priv->device) {
-		g_object_unref (priv->device);
-		priv->device = NULL;
+	switch (priv->hooked_type) {
+		case PRAGHA_DEVICE_MTP:
+			pragha_devices_mtp_removed (plugin, priv->device);
+			break;
+		case PRAGHA_DEVICE_MOUNTABLE:
+		case PRAGHA_DEVICE_AUDIO_CD:
+		case PRAGHA_DEVICE_UNKNOWN:
+		case PRAGHA_DEVICE_NONE:
+		default:
+			break;
 	}
+	g_object_unref (priv->device);
+	priv->device = NULL;
+
 	if (priv->mtp_device) {
 		LIBMTP_Release_Device(priv->mtp_device);
 		priv->mtp_device = NULL;
@@ -353,8 +364,6 @@ pragha_gudev_device_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 	if (priv->bus_hooked == busnum &&
 	    priv->device_hooked == devnum) {
 		pragha_gudev_clear_hook_devices (plugin);
-
-		pragha_devices_remove_playlist_action (plugin);
 	}
 }
 
@@ -398,15 +407,6 @@ pragha_devices_remove_playlist_action (PraghaDevicesPlugin *plugin)
 
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	if (!priv->merge_id_menu)
-		return;
-
-	pragha_menubar_remove_plugin_action (priv->pragha,
-	                                     priv->action_group_menu,
-	                                     priv->merge_id_menu);
-
-	priv->merge_id_menu = 0;
-
 	if (!priv->merge_id_playlist)
 		return;
 
@@ -416,32 +416,6 @@ pragha_devices_remove_playlist_action (PraghaDevicesPlugin *plugin)
 	                                      priv->merge_id_playlist);
 
 	priv->merge_id_playlist = 0;
-}
-
-void
-pragha_devices_plugin_append_menu_action (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	priv->action_group_menu = action_group;
-	priv->merge_id_menu     = pragha_menubar_append_plugin_action (priv->pragha,
-	                                                               priv->action_group_menu,
-	                                                               menu_xml);
-}
-
-void
-pragha_devices_plugin_remove_menu_action (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	if (!priv->merge_id_menu)
-		return;
-
-	pragha_menubar_remove_plugin_action (priv->pragha,
-	                                     priv->action_group_menu,
-	                                     priv->merge_id_menu);
-
-	priv->merge_id_menu = 0;
 }
 
 static void
@@ -474,6 +448,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
 	g_debug ("%s", G_STRFUNC);
+
+	pragha_menubar_remove_by_id (pragha_device_get_application (plugin),
+	                             "pragha-plugins-placeholder",
+	                             "mtp-device-sudmenu");
 
 	if (priv->hooked_type != PRAGHA_DEVICE_NONE)
 		pragha_gudev_clear_hook_devices (plugin);

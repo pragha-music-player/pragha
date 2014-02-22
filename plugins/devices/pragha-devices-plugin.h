@@ -84,8 +84,6 @@ void                pragha_gudev_clear_hook_devices          (PraghaDevicesPlugi
 
 void                pragha_devices_append_playlist_action    (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml);
 void                pragha_devices_remove_playlist_action    (PraghaDevicesPlugin *plugin);
-void                pragha_devices_plugin_append_menu_action (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml);
-void                pragha_devices_remove_menu_action        (PraghaDevicesPlugin *plugin);
 
 G_END_DECLS
 
