@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "pragha-menubar.h"
 #include "pragha-musicobject.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
@@ -55,8 +56,6 @@ struct _PraghaLastfm {
 	GMutex             nmobj_mutex;
 
 	/* Menu options */
-	GtkActionGroup *action_group_main_menu;
-	guint           merge_id_main_menu;
 
 	GtkActionGroup *action_group_playlist;
 	guint merge_id_playlist;
@@ -80,46 +79,52 @@ typedef enum {
  * Prototypes
  */
 
+static void pragha_gmenu_lastfm_add_favorites_action    (GSimpleAction *action,
+                                                         GVariant      *parameter,
+                                                         gpointer       user_data);
+static void pragha_gmenu_lastfm_get_similar_action      (GSimpleAction *action,
+                                                         GVariant      *parameter,
+                                                         gpointer       user_data);
+static void pragha_gmenu_lastfm_import_xspf_action      (GSimpleAction *action,
+                                                         GVariant      *parameter,
+                                                         gpointer       user_data);
+static void pragha_gmenu_lastfm_track_love_action       (GSimpleAction *action,
+                                                         GVariant      *parameter,
+                                                         gpointer       user_data);
+static void pragha_gmenu_lastfm_track_unlove_action     (GSimpleAction *action,
+                                                         GVariant      *parameter,
+                                                         gpointer       user_data);
+
+static GActionEntry lastfm_entries[] = {
+	{ "lastfm-love",       pragha_gmenu_lastfm_track_love_action,    NULL, NULL, NULL },
+	{ "lastfm-unlove",     pragha_gmenu_lastfm_track_unlove_action,  NULL, NULL, NULL },
+	{ "lastfm-import",     pragha_gmenu_lastfm_import_xspf_action,   NULL, NULL, NULL },
+	{ "lastfm-favorities", pragha_gmenu_lastfm_add_favorites_action, NULL, NULL, NULL },
+	{ "lastfm-similar",    pragha_gmenu_lastfm_get_similar_action,   NULL, NULL, NULL }
+};
+
+static const gchar *lastfm_menu_ui = \
+	NEW_MENU("menubar") \
+		NEW_SUBMENU("_Tools") \
+			NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+			NEW_NAMED_SUBMENU("lastfm-sudmenu", "_Lastfm") \
+				NEW_ITEM("Love track",             "win", "lastfm-love") \
+				NEW_ITEM("Unlove track",           "win", "lastfm-unlove") \
+				SEPARATOR \
+				NEW_ITEM("Import a XSPF playlist", "win", "lastfm-import") \
+				NEW_ITEM("Add favorites",          "win", "lastfm-favorities") \
+				NEW_ITEM("Add similar",            "win", "lastfm-similar") \
+			CLOSE_SUBMENU \
+		CLOSE_SUBMENU \
+	CLOSE_MENU;
+
+/*
+ * Playlist submenu
+ */
+
 static void lastfm_get_similar_current_playlist_action  (GtkAction *action, PraghaLastfm *clastfm);
 static void lastfm_track_current_playlist_love_action   (GtkAction *action, PraghaLastfm *clastfm);
 static void lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_add_favorites_action                 (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_get_similar_action                   (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_import_xspf_action                   (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_love_action                    (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_unlove_action                  (GtkAction *action, PraghaLastfm *clastfm);
-
-static const GtkActionEntry main_menu_actions [] = {
-	{"Lastfm", NULL, N_("_Lastfm")},
-	{"Love track", NULL, N_("Love track"),
-	 "", "Love track", G_CALLBACK(lastfm_track_love_action)},
-	{"Unlove track", NULL, N_("Unlove track"),
-	 "", "Unlove track", G_CALLBACK(lastfm_track_unlove_action)},
-	{"Import a XSPF playlist", NULL, N_("Import a XSPF playlist"),
-	 "", "Import a XSPF playlist", G_CALLBACK(lastfm_import_xspf_action)},
-	{"Add favorites", NULL, N_("Add favorites"),
-	 "", "Add favorites", G_CALLBACK(lastfm_add_favorites_action)},
-	{"Add similar", NULL, N_("Add similar"),
-	 "", "Add similar", G_CALLBACK(lastfm_get_similar_action)},
-};
-
-static const gchar *main_menu_xml = "<ui>					\
-	<menubar name=\"Menubar\">						\
-		<menu action=\"ToolsMenu\">					\
-			<placeholder name=\"pragha-plugins-placeholder\">		\
-				<menu action=\"Lastfm\">				\
-					<menuitem action=\"Love track\"/>		\
-					<menuitem action=\"Unlove track\"/>		\
-					<separator/>					\
-					<menuitem action=\"Import a XSPF playlist\"/>	\
-					<menuitem action=\"Add favorites\"/>		\
-					<menuitem action=\"Add similar\"/>		\
-				</menu>							\
-				<separator/>						\
-			</placeholder>						\
-		</menu>								\
-	</menubar>								\
-</ui>";
 
 static const GtkActionEntry playlist_actions [] = {
 	{"Love track", NULL, N_("Love track"),
@@ -223,6 +228,7 @@ void
 pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
 {
 	PraghaBackend *backend;
+	GtkWindow *window;
 	PraghaBackendState state = 0;
 
 	PraghaApplication *pragha = clastfm->pragha;
@@ -235,10 +241,11 @@ pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
 	gboolean lfm_inited = (clastfm->session_id != NULL);
 	gboolean has_user   = (lfm_inited && clastfm->has_user);
 
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", playing && logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", playing && logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", has_user);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", playing && lfm_inited);
+	window = GTK_WINDOW(pragha_application_get_window(pragha));
+	pragha_menubar_set_enable_action (window, "lastfm-love", playing && logged);
+	pragha_menubar_set_enable_action (window, "lastfm-unlove", playing && logged);
+	pragha_menubar_set_enable_action (window, "lastfm-favorities", has_user);
+	pragha_menubar_set_enable_action (window, "lastfm-similar", playing && lfm_inited);
 
 	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Love track", logged);
 	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Unlove track", logged);
@@ -754,11 +761,14 @@ cancel:
 }
 
 static void
-lastfm_import_xspf_action (GtkAction *action, PraghaLastfm *clastfm)
+pragha_gmenu_lastfm_import_xspf_action (GSimpleAction *action,
+                                        GVariant      *parameter,
+                                        gpointer       user_data)
 {
 	GtkWidget *dialog;
 	GtkFileFilter *media_filter;
 
+	PraghaLastfm *clastfm = user_data;
 	PraghaApplication *pragha = clastfm->pragha;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
@@ -819,8 +829,11 @@ do_lastfm_add_favorites_action (gpointer user_data)
 }
 
 static void
-lastfm_add_favorites_action (GtkAction *action, PraghaLastfm *clastfm)
+pragha_gmenu_lastfm_add_favorites_action (GSimpleAction *action,
+                                          GVariant      *parameter,
+                                          gpointer       user_data)
 {
+	PraghaLastfm *clastfm = user_data;
 	PraghaApplication *pragha = clastfm->pragha;
 
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
@@ -857,10 +870,13 @@ do_lastfm_get_similar_action (gpointer user_data)
 }
 
 static void
-lastfm_get_similar_action (GtkAction *action, PraghaLastfm *clastfm)
+pragha_gmenu_lastfm_get_similar_action (GSimpleAction *action,
+                                        GVariant      *parameter,
+                                        gpointer       user_data)
 {
 	PraghaBackend *backend;
 
+	PraghaLastfm *clastfm = user_data;
 	PraghaApplication *pragha = clastfm->pragha;
 
 	CDEBUG(DBG_LASTFM, "Get similar action");
@@ -901,10 +917,13 @@ do_lastfm_current_song_love (gpointer data)
 }
 
 static void
-lastfm_track_love_action (GtkAction *action, PraghaLastfm *clastfm)
+pragha_gmenu_lastfm_track_love_action (GSimpleAction *action,
+                                       GVariant      *parameter,
+                                       gpointer       user_data)
 {
 	PraghaBackend *backend;
 
+	PraghaLastfm *clastfm = user_data;
 	PraghaApplication *pragha = clastfm->pragha;
 
 	CDEBUG(DBG_LASTFM, "Love Handler");
@@ -944,10 +963,13 @@ do_lastfm_current_song_unlove (gpointer data)
 }
 
 static void
-lastfm_track_unlove_action (GtkAction *action, PraghaLastfm *clastfm)
+pragha_gmenu_lastfm_track_unlove_action (GSimpleAction *action,
+                                         GVariant      *parameter,
+                                         gpointer       user_data)
 {
 	PraghaBackend *backend;
 
+	PraghaLastfm *clastfm = user_data;
 	PraghaApplication *pragha = clastfm->pragha;
 
 	CDEBUG(DBG_LASTFM, "Unlove Handler");
@@ -1267,23 +1289,27 @@ static void
 pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
 {
 	PraghaPlaylist *playlist;
+	GtkWindow *window;
+	GActionMap *map;
+
 	PraghaApplication *pragha = clastfm->pragha;
 
-	clastfm->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
-	gtk_action_group_set_translation_domain (clastfm->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (clastfm->action_group_main_menu,
-	                              main_menu_actions,
-	                              G_N_ELEMENTS (main_menu_actions),
-	                              clastfm);
+	pragha_menubar_append_submenu (pragha, "pragha-plugins-placeholder",
+	                               lastfm_menu_ui,
+	                               "lastfm-sudmenu",
+	                               _("_Lastfm"),
+	                               clastfm);
 
-	clastfm->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha,
-	                                                                   clastfm->action_group_main_menu,
-	                                                                   main_menu_xml);
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	g_action_map_add_action_entries (G_ACTION_MAP (map),
+	                                 lastfm_entries, G_N_ELEMENTS(lastfm_entries),
+	                                 clastfm);
 
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", FALSE);
+	window = GTK_WINDOW(pragha_application_get_window(pragha));
+	pragha_menubar_set_enable_action (window, "lastfm-love", FALSE);
+	pragha_menubar_set_enable_action (window, "lastfm-unlove", FALSE);
+	pragha_menubar_set_enable_action (window, "lastfm-favorities", FALSE);
+	pragha_menubar_set_enable_action (window, "lastfm-similar", FALSE);
 
 	clastfm->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
 	gtk_action_group_set_translation_domain (clastfm->action_group_playlist, GETTEXT_PACKAGE);
@@ -1304,14 +1330,9 @@ pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
 	PraghaPlaylist *playlist;
 	PraghaApplication *pragha = clastfm->pragha;
 
-	if(!clastfm->merge_id_main_menu)
-		return;
-
-	pragha_menubar_remove_plugin_action (pragha,
-	                                     clastfm->action_group_main_menu,
-	                                     clastfm->merge_id_main_menu);
-
-	clastfm->merge_id_main_menu = 0;
+	pragha_menubar_remove_by_id (pragha,
+	                             "pragha-plugins-placeholder",
+	                             "lastfm-sudmenu");
 
 	if (!clastfm->merge_id_playlist)
 		return;

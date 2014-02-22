@@ -433,10 +433,10 @@ activate_toggle (GSimpleAction *action,
 	g_variant_unref (state);
 }
 
-static void
-pragha_set_enable_action (GtkWindow  *window,
-                          const char *action_name,
-                          gboolean    enabled)
+void
+pragha_menubar_set_enable_action (GtkWindow  *window,
+                                  const char *action_name,
+                                  gboolean    enabled)
 {
 	GAction *action;
 	action = g_action_map_lookup_action (G_ACTION_MAP (window), action_name);
@@ -719,10 +719,10 @@ pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *psp
 	playing = (pragha_backend_get_state (backend) != ST_STOPPED);
 
 	window = GTK_WINDOW(pragha_application_get_window(pragha));
-	pragha_set_enable_action (window, "prev", playing);
-	pragha_set_enable_action (window, "stop", playing);
-	pragha_set_enable_action (window, "next", playing);
-	pragha_set_enable_action (window, "edit", playing);
+	pragha_menubar_set_enable_action (window, "prev", playing);
+	pragha_menubar_set_enable_action (window, "stop", playing);
+	pragha_menubar_set_enable_action (window, "next", playing);
+	pragha_menubar_set_enable_action (window, "edit", playing);
 }
 
 /* Handler for 'Statistics' action in the Tools menu */

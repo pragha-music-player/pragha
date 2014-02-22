@@ -97,6 +97,10 @@ typedef struct _PraghaApplication PraghaApplication;
  * Public api..
  */
 
+void   pragha_menubar_set_enable_action  (GtkWindow  *window,
+                                          const char *action_name,
+                                          gboolean    enabled);
+
 GMenu *pragha_menubar_get_menu_section   (PraghaApplication *pragha,
                                           const char        *id);
 void   pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
