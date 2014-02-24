@@ -35,6 +35,7 @@ typedef struct _PraghaSonginfoPane PraghaSonginfoPane;
 typedef struct {
 	GtkScrolledWindowClass __parent__;
 	void (*type_changed)   (PraghaSonginfoPane *pane);
+	void (*search_others)  (PraghaSonginfoPane *pane);
 } PraghaSonginfoPaneClass;
 
 void                pragha_songinfo_pane_set_text              (PraghaSonginfoPane *pane,

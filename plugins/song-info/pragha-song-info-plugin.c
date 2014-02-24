@@ -124,7 +124,7 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin
 	if (string_is_empty(artist))
 		return;
 
-	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_ARTISTBIO, artist, NULL);
+	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_ARTISTBIO, artist, NULL, 1);
 }
 
 static void
@@ -149,7 +149,7 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plug
 	if (string_is_empty(artist) || string_is_empty(title))
 		return;
 
-	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_LYRICS, artist, title);
+	pragha_songinfo_plugin_get_info_to_dialog (plugin, GLYR_GET_LYRICS, artist, title, 1);
 }
 
 /*
@@ -284,6 +284,36 @@ static void
 pragha_songinfo_pane_type_changed (PraghaSonginfoPane *pane, PraghaSongInfoPlugin *plugin)
 {
 	related_get_song_info_pane_handler (plugin);
+}
+
+static void
+pragha_songinfo_pane_search_others (PraghaSonginfoPane *pane, PraghaSongInfoPlugin *plugin)
+{
+	PraghaBackend *backend;
+	PraghaMusicobject *mobj;
+	const gchar *artist = NULL;
+	const gchar *title = NULL;
+
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	CDEBUG (DBG_INFO, "Get song info handler");
+
+	backend = pragha_application_get_backend (plugin->priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED) {
+		pragha_songinfo_pane_clear_text (plugin->priv->pane);
+		return;
+	}
+
+	mobj = pragha_backend_get_musicobject (backend);
+	artist = pragha_musicobject_get_artist (mobj);
+	title = pragha_musicobject_get_title (mobj);
+
+	if (string_is_empty(artist) || string_is_empty(title))
+		return;
+
+	pragha_songinfo_plugin_get_info_to_dialog (plugin,
+		                                       pragha_songinfo_pane_get_default_view(priv->pane),
+		                                       artist, title, 5);
 }
 
 static void
@@ -447,6 +477,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	g_signal_connect (G_OBJECT(priv->pane), "type-changed",
 	                  G_CALLBACK(pragha_songinfo_pane_type_changed), plugin);
+	g_signal_connect (G_OBJECT(priv->pane), "search-others",
+	                  G_CALLBACK(pragha_songinfo_pane_search_others), plugin);
 
 	/* Default values */
 

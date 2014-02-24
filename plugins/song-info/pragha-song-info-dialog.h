@@ -23,10 +23,10 @@
 G_BEGIN_DECLS
 
 void
-pragha_show_related_text_info_dialog (GtkWidget   *widget,
-                                      const gchar *title_header,
-                                      const gchar *subtitle_header,
-                                      const gchar *text);
+pragha_show_related_text_info_dialog (GtkWidget    *parent,
+                                      const gchar  *title,
+                                      GlyrMemCache *head);
+
 G_END_DECLS
 
 #endif /* __PRAGHA_SONG_INFO_DIALOG_H__ */
