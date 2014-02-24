@@ -22,10 +22,17 @@
 
 G_BEGIN_DECLS
 
+typedef struct _PraghaSongInfoDialog PraghaSongInfoDialog;
+
 void
-pragha_show_related_text_info_dialog (GtkWidget    *parent,
-                                      const gchar  *title,
-                                      GlyrMemCache *head);
+pragha_song_info_dialog_show (PraghaSongInfoDialog *dialog,
+                              GlyrQuery            *query,
+                              GlyrMemCache         *head);
+
+PraghaSongInfoDialog *
+pragha_song_info_dialog_new  (GtkWidget    *parent,
+                              const gchar  *title,
+                              GlyrDatabase *cache_db);
 
 G_END_DECLS
 

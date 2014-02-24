@@ -40,25 +40,34 @@ static void
 glyr_finished_successfully (glyr_struct *glyr_info)
 {
 	PraghaApplication *pragha;
+	PraghaSongInfoDialog *dialog;
+	GlyrDatabase *cache_db;
 	GtkWidget *window;
 	gchar *subtitle_header = NULL;
 
-	pragha = pragha_songinfo_plugin_get_application (glyr_info->plugin);
-
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
+			pragha = pragha_songinfo_plugin_get_application (glyr_info->plugin);
+
 			window = pragha_application_get_window (pragha);
+			cache_db = pragha_songinfo_plugin_get_cache (glyr_info->plugin);
+
 			subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), glyr_info->query.title, glyr_info->query.artist);
-			pragha_show_related_text_info_dialog (window, subtitle_header, glyr_info->head);
+			dialog = pragha_song_info_dialog_new (window, subtitle_header, cache_db);
+			pragha_song_info_dialog_show (dialog, &glyr_info->query, glyr_info->head);
 			g_free(subtitle_header);
 			break;
 		case GLYR_TYPE_ARTIST_BIO:
+			pragha = pragha_songinfo_plugin_get_application (glyr_info->plugin);
+
 			window = pragha_application_get_window (pragha);
-			pragha_show_related_text_info_dialog (window, glyr_info->query.artist, glyr_info->head);
+			cache_db = pragha_songinfo_plugin_get_cache (glyr_info->plugin);
+
+			dialog = pragha_song_info_dialog_new (window, glyr_info->query.artist, cache_db);
+			pragha_song_info_dialog_show (dialog, &glyr_info->query, glyr_info->head);
 			break;
 		case GLYR_TYPE_COVERART:
 		default:
-			glyr_free_list(glyr_info->head);
 			break;
 	}
 }
@@ -79,6 +88,7 @@ glyr_finished_incorrectly(glyr_struct *glyr_info)
 		default:
 			break;
 	}
+	glyr_query_destroy (&glyr_info->query);
 	g_object_unref (statusbar);
 }
 
@@ -103,7 +113,6 @@ glyr_finished_thread_update (gpointer data)
 	else
 		glyr_finished_incorrectly (glyr_info);
 
-	glyr_query_destroy (&glyr_info->query);
 	g_slice_free (glyr_struct, glyr_info);
 
 	return FALSE;
@@ -142,13 +151,18 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 
 	glyr_query_init (&glyr_info->query);
 	glyr_opt_type (&glyr_info->query, type);
+	glyr_opt_number (&glyr_info->query, requests);
+
+	cache_db = pragha_songinfo_plugin_get_cache (plugin);
+	glyr_opt_lookup_db (&glyr_info->query, cache_db);
 
 	switch (type) {
 		case GLYR_GET_ARTIST_BIO:
 			glyr_opt_artist(&glyr_info->query, artist);
-
-			glyr_opt_lang (&glyr_info->query, "auto");
-			glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
+			if (requests == 1) {
+				glyr_opt_lang (&glyr_info->query, "auto");
+				glyr_opt_lang_aware_only (&glyr_info->query, TRUE);
+			}
 			break;
 		case GLYR_GET_LYRICS:
 			glyr_opt_artist(&glyr_info->query, artist);
@@ -156,15 +170,6 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 			break;
 		default:
 			break;
-	}
-
-	if (requests > 1) {
-		glyr_opt_number (&glyr_info->query, requests);
-	}
-	else {
-		cache_db = pragha_songinfo_plugin_get_cache (plugin);
-		glyr_opt_lookup_db (&glyr_info->query, cache_db);
-		glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 	}
 
 	glyr_info->plugin = plugin;

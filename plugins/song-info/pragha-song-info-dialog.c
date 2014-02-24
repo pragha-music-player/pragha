@@ -31,19 +31,24 @@
 #include <gtk/gtk.h>
 
 #include <glyr/glyr.h>
+#include <glyr/cache.h>
+
 #include <glib/gstdio.h>
 
 #include "pragha-song-info-dialog.h"
 
 #include "src/pragha-simple-widgets.h"
 
-typedef struct {
+struct _PraghaSongInfoDialog {
 	GtkWidget     *dialog;
 	GtkTextBuffer *buffer;
 
+	GlyrDatabase  *cache_db;
+	GlyrQuery     *query;
+
 	GlyrMemCache  *head;
 	GlyrMemCache  *head_p;
-} PraghaSongInfoDialog;
+};
 
 /* Use the download info on glyr thread and show a dialog. */
 
@@ -51,6 +56,8 @@ static void
 pragha_text_info_dialog_clean (PraghaSongInfoDialog *dialog_s)
 {
 	glyr_free_list (dialog_s->head);
+	glyr_query_destroy (dialog_s->query);
+
 	g_slice_free(PraghaSongInfoDialog, dialog_s);
 }
 
@@ -78,6 +85,24 @@ pragha_text_info_dialog_set_info (PraghaSongInfoDialog *dialog_s, GlyrMemCache *
 	dialog_s->head_p = head;
 }
 
+void
+pragha_song_info_save_cache (PraghaSongInfoDialog *dialog_s)
+{
+	GlyrMemCache *tmp_head;
+
+	tmp_head = dialog_s->head_p->next;
+	dialog_s->head_p->next = NULL;
+
+	/* Removes all previous entries */
+	glyr_opt_number (dialog_s->query, 0);
+	glyr_db_delete (dialog_s->cache_db, dialog_s->query);
+
+	/* Insert only the new info */
+	glyr_db_insert (dialog_s->cache_db, dialog_s->query, dialog_s->head_p);
+
+	dialog_s->head_p->next = tmp_head;
+}
+
 static void
 pragha_text_info_dialog_response (GtkDialog *dialog,
                                   gint       response,
@@ -96,6 +121,7 @@ pragha_text_info_dialog_response (GtkDialog *dialog,
 			}
 			break;
 		case GTK_RESPONSE_OK:
+			pragha_song_info_save_cache (dialog_s);
 		default:
 			pragha_text_info_dialog_clean (dialog_s);
 			gtk_widget_destroy (GTK_WIDGET(dialog));
@@ -104,17 +130,32 @@ pragha_text_info_dialog_response (GtkDialog *dialog,
 }
 
 void
-pragha_show_related_text_info_dialog (GtkWidget    *parent,
-                                      const gchar  *title,
-                                      GlyrMemCache *head)
+pragha_song_info_dialog_show (PraghaSongInfoDialog *dialog,
+                              GlyrQuery            *query,
+                              GlyrMemCache         *head)
+{
+	if (head->next)
+		gtk_dialog_add_button (GTK_DIALOG (dialog->dialog),
+		                       _("_Next"), GTK_RESPONSE_YES);
+
+	dialog->query = query;
+	dialog->head = head;
+	dialog->head_p = head;
+
+	pragha_text_info_dialog_set_info (dialog, head);
+
+	gtk_widget_show_all (dialog->dialog);
+}
+
+PraghaSongInfoDialog *
+pragha_song_info_dialog_new (GtkWidget    *parent,
+                             const gchar  *title,
+                             GlyrDatabase *cache_db)
 {
 	GtkWidget *dialog, *vbox, *header, *view, *scrolled;
 
 	PraghaSongInfoDialog *dialog_s;
 	dialog_s = g_slice_new0(PraghaSongInfoDialog);
-
-	dialog_s->head = head;
-	dialog_s->head_p = head;
 
 	view = gtk_text_view_new ();
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
@@ -141,8 +182,6 @@ pragha_show_related_text_info_dialog (GtkWidget    *parent,
 	gtk_window_set_transient_for (GTK_WINDOW(dialog), GTK_WINDOW(parent));
 	gtk_window_set_destroy_with_parent (GTK_WINDOW(dialog), TRUE);
 
-	if (head->next)
-		gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Next"), GTK_RESPONSE_YES);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Ok"), GTK_RESPONSE_OK);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
@@ -154,11 +193,10 @@ pragha_show_related_text_info_dialog (GtkWidget    *parent,
 	gtk_box_pack_start (GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
 
 	dialog_s->dialog = dialog;
-
-	pragha_text_info_dialog_set_info (dialog_s, head);
+	dialog_s->cache_db = cache_db;
 
 	g_signal_connect (G_OBJECT(dialog), "response",
 	                  G_CALLBACK(pragha_text_info_dialog_response), dialog_s);
 
-	gtk_widget_show_all(dialog);
+	return dialog_s;
 }
