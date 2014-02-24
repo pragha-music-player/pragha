@@ -29,8 +29,7 @@ void
 pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
                                            GLYR_GET_TYPE         type,
                                            const gchar          *artist,
-                                           const gchar          *title,
-                                           gint                  requests);
+                                           const gchar          *title);
 
 G_END_DECLS
 

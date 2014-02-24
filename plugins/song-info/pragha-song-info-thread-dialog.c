@@ -41,26 +41,34 @@ glyr_finished_successfully (glyr_struct *glyr_info)
 {
 	PraghaApplication *pragha;
 	GtkWidget *window;
-	gchar *subtitle_header = NULL;
+	gchar *title_header = NULL, *subtitle_header = NULL;
 
 	pragha = pragha_songinfo_plugin_get_application (glyr_info->plugin);
 
 	switch (glyr_info->head->type) {
 		case GLYR_TYPE_LYRICS:
 			window = pragha_application_get_window (pragha);
+			title_header =  g_strdup_printf(_("Lyrics thanks to %s"), glyr_info->head->prov);
 			subtitle_header = g_markup_printf_escaped (_("%s <small><span weight=\"light\">by</span></small> %s"), glyr_info->query.title, glyr_info->query.artist);
-			pragha_show_related_text_info_dialog (window, subtitle_header, glyr_info->head);
-			g_free(subtitle_header);
+
+			pragha_show_related_text_info_dialog (window, title_header, subtitle_header, glyr_info->head->data);
 			break;
 		case GLYR_TYPE_ARTIST_BIO:
 			window = pragha_application_get_window (pragha);
-			pragha_show_related_text_info_dialog (window, glyr_info->query.artist, glyr_info->head);
+			title_header =  g_strdup_printf(_("Artist info"));
+			subtitle_header = g_strdup_printf(_("%s <small><span weight=\"light\">thanks to</span></small> %s"), glyr_info->query.artist, glyr_info->head->prov);
+
+			pragha_show_related_text_info_dialog (window, title_header, subtitle_header, glyr_info->head->data);
 			break;
 		case GLYR_TYPE_COVERART:
 		default:
-			glyr_free_list(glyr_info->head);
 			break;
 	}
+
+	g_free(title_header);
+	g_free(subtitle_header);
+
+	glyr_free_list(glyr_info->head);
 }
 
 static void
@@ -130,8 +138,7 @@ void
 pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
                                            GLYR_GET_TYPE        type,
                                            const gchar          *artist,
-                                           const gchar          *title,
-                                           gint                 requests)
+                                           const gchar          *title)
 {
 	PraghaApplication *pragha;
 	GtkWidget *window;
@@ -158,14 +165,10 @@ pragha_songinfo_plugin_get_info_to_dialog (PraghaSongInfoPlugin *plugin,
 			break;
 	}
 
-	if (requests > 1) {
-		glyr_opt_number (&glyr_info->query, requests);
-	}
-	else {
-		cache_db = pragha_songinfo_plugin_get_cache (plugin);
-		glyr_opt_lookup_db (&glyr_info->query, cache_db);
-		glyr_opt_db_autowrite (&glyr_info->query, TRUE);
-	}
+	cache_db = pragha_songinfo_plugin_get_cache (plugin);
+
+	glyr_opt_lookup_db (&glyr_info->query, cache_db);
+	glyr_opt_db_autowrite (&glyr_info->query, TRUE);
 
 	glyr_info->plugin = plugin;
 

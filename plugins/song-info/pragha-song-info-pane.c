@@ -49,7 +49,6 @@ G_DEFINE_TYPE(PraghaSonginfoPane, pragha_songinfo_pane, GTK_TYPE_SCROLLED_WINDOW
 
 enum {
 	SIGNAL_TYPE_CHANGED,
-	SIGNAL_SEARCH_OTHERS,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -60,14 +59,11 @@ static int signals[LAST_SIGNAL] = { 0 };
  **/
 static void pragha_songinfo_pane_show_artist_info_action (GtkAction *action, PraghaSonginfoPane *pane);
 static void pragha_songinfo_pane_show_lyrics_action      (GtkAction *action, PraghaSonginfoPane *pane);
-static void pragha_songinfo_pane_search_others_action    (GtkAction *action, PraghaSonginfoPane *pane);
 
 gchar *songinfo_pane_context_menu_xml = "<ui> \
 	<popup>                                   \
 	<menuitem action=\"Artist info\"/>        \
 	<menuitem action=\"Lyrics\"/>             \
-	<separator/>                              \
-	<menuitem action=\"Search-others\"/>        \
 	</popup>                                  \
 	</ui>";
 
@@ -75,9 +71,7 @@ GtkActionEntry songinfo_pane_context_aentries[] = {
 	{"Artist info", NULL, N_("Artist info"),
 	 "", "Artist info", G_CALLBACK(pragha_songinfo_pane_show_artist_info_action)},
 	{"Lyrics", NULL, N_("Lyrics"),
-	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)},
-	{"Search-others", NULL, N_("Search on other providers"),
-	 "", NULL, G_CALLBACK(pragha_songinfo_pane_search_others_action)}
+	 "", "Lyrics", G_CALLBACK(pragha_songinfo_pane_show_lyrics_action)}
 };
 
 /*
@@ -165,12 +159,6 @@ pragha_songinfo_pane_show_lyrics_action (GtkAction *action, PraghaSonginfoPane *
 	pane->info_type = GLYR_GET_LYRICS;
 
 	g_signal_emit (pane, signals[SIGNAL_TYPE_CHANGED], 0);
-}
-
-static void
-pragha_songinfo_pane_search_others_action (GtkAction *action, PraghaSonginfoPane *pane)
-{
-	g_signal_emit (pane, signals[SIGNAL_SEARCH_OTHERS], 0);
 }
 
 /* Construction */
@@ -270,15 +258,6 @@ pragha_songinfo_pane_class_init (PraghaSonginfoPaneClass *klass)
 		              G_TYPE_FROM_CLASS (gobject_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, type_changed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__VOID,
-		              G_TYPE_NONE, 0);
-
-	signals[SIGNAL_SEARCH_OTHERS] =
-		g_signal_new ("search-others",
-		              G_TYPE_FROM_CLASS (gobject_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (PraghaSonginfoPaneClass, search_others),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);
