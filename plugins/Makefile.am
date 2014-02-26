@@ -32,3 +32,7 @@ endif
 if HAVE_LIBSOUP
 SUBDIRS += tunein
 endif
+
+if HAVE_RYGEL
+SUBDIRS += dlna
+endif
