@@ -93,6 +93,16 @@ typedef struct _PraghaApplication PraghaApplication;
 	"  </menu>" \
 	"</interface>"
 
+#define NEW_POPUP(_POPUP) \
+	"<interface>" \
+	"  <menu id='" _POPUP "'>" \
+	"    <section>"
+
+#define CLOSE_POPUP \
+	"    </section>" \
+	"  </menu>" \
+	"</interface>"
+
 /*
  * Public api..
  */

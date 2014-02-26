@@ -27,6 +27,7 @@
 #endif
 
 #include "pragha-statusicon.h"
+#include "pragha-menubar.h"
 #include "pragha-playback.h"
 #include "pragha-cdda.h"
 #include "pragha.h"
@@ -34,71 +35,150 @@
 struct _PraghaStatusIcon {
 	GtkStatusIcon __parent__;
 
-	PraghaApplication *pragha;
+	PraghaApplication  *pragha;
 
-	GtkUIManager   *ui_manager;
+	GtkBuilder         *builder;
+	GSimpleActionGroup *actions;
 };
 
 G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
 
-static void systray_about_action        (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_open_file_action    (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_play_pause_action   (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_prev_action         (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_next_action         (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_quit                (GtkAction *action, PraghaStatusIcon *status_icon);
-static void systray_edit_tags_action    (GtkAction *action, PraghaStatusIcon *status_icon);
+static void
+pragha_systray_gmenu_about (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	pragha_application_about_dialog (status_icon->pragha);
+}
 
-static const gchar *systray_menu_xml =
-	"<ui>						\
-	<popup>						\
-		<menuitem action=\"About\"/>		\
-		<separator/>				\
-		<menuitem action=\"Add files\"/>	\
-		<menuitem action=\"Add Audio CD\"/>	\
-		<menuitem action=\"Add location\"/>	\
-		<separator/>				\
-		<menuitem action=\"Prev\"/>		\
-		<menuitem action=\"Play_Pause\"/>	\
-		<menuitem action=\"Stop\"/>		\
-		<menuitem action=\"Next\"/>		\
-		<separator/>				\
-		<menuitem action=\"Edit tags\"/>	\
-		<separator/>				\
-		<menuitem action=\"Quit\"/>		\
-	</popup>					\
-	</ui>";
+static void
+pragha_systray_gmenu_open (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	pragha_application_open_files (status_icon->pragha);
+}
 
-static const GtkActionEntry systray_menu_aentries[] = {
-	{"About", "help-about", N_("About"),
-	 "", NULL, G_CALLBACK(systray_about_action)},
-	{"Add files", "document-open", N_("_Add files"),
-	 "", NULL, G_CALLBACK(systray_open_file_action)},
-	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(systray_add_audio_cd_action)},
-	{"Add location", "network-workgroup", N_("Add _location"),
-	 "", "Add a no local stream", G_CALLBACK(systray_add_location_action)},
-	{"Prev", "media-skip-backward", N_("Prev Track"),
-	 "", "Prev Track", G_CALLBACK(systray_prev_action)},
-	{"Play_Pause", "media-playback-start", N_("Play / Pause"),
-	 "", "Play / Pause", G_CALLBACK(systray_play_pause_action)},
-	{"Stop", "media-playback-stop", N_("Stop"),
-	 "", "Stop", G_CALLBACK(systray_stop_action)},
-	{"Next", "media-skip-forward", N_("Next Track"),
-	 "", "Next Track", G_CALLBACK(systray_next_action)},
-	{"Edit tags", NULL, N_("Edit track information"),
-	 "", "Edit information of current track", G_CALLBACK(systray_edit_tags_action)},
-	{"Quit", "application-exit", N_("_Quit"),
-	 "", "Quit", G_CALLBACK(systray_quit)}
+static void
+pragha_systray_gmenu_audio_cd (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	pragha_application_append_audio_cd (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_location (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	pragha_application_add_location (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_prev (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_prev_track (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_playpause (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_play_pause_resume (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_stop (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_stop (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_next (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_next_track (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_edit (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_edit_current_track (status_icon->pragha);
+}
+
+static void
+pragha_systray_gmenu_quit (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
+{
+	PraghaStatusIcon *status_icon = user_data;
+	pragha_application_quit (status_icon->pragha);
+}
+
+static const gchar *systray_menu_xml = \
+	NEW_POPUP("systray-menu") \
+		NEW_ICON_ITEM("About",                  "help-about",           "systray", "about") \
+		SEPARATOR \
+		NEW_ICON_ITEM("_Add files",             "document-open",        "systray", "open") \
+		NEW_ICON_ITEM("Add Audio _CD",          "media-optical",        "systray", "cd") \
+		NEW_ICON_ITEM("Add _location",          "network-workgroup",    "systray", "location") \
+		SEPARATOR \
+		NEW_ICON_ITEM("Prev track",             "media-skip-backward",  "systray", "prev") \
+		NEW_ICON_ITEM("Play / Pause",           "media-playback-start", "systray", "play") \
+		NEW_ICON_ITEM("Stop",                   "media-playback-stop",  "systray", "stop") \
+		NEW_ICON_ITEM("Next track",             "media-skip-forward",   "systray", "next") \
+		SEPARATOR \
+		NEW_ITEM     ("Edit track information",                         "systray", "edit") \
+		SEPARATOR \
+		NEW_ICON_ITEM("_Quit",                  "application-exit",     "systray", "quit") \
+	CLOSE_POPUP;
+
+static const GActionEntry systray_menu_aentries[] = {
+	{ "about",    pragha_systray_gmenu_about,     NULL, NULL, NULL },
+	{ "open",     pragha_systray_gmenu_open,      NULL, NULL, NULL },
+	{ "cd",       pragha_systray_gmenu_audio_cd,  NULL, NULL, NULL },
+	{ "location", pragha_systray_gmenu_location,  NULL, NULL, NULL },
+	{ "prev",     pragha_systray_gmenu_prev,      NULL, NULL, NULL },
+	{ "play",     pragha_systray_gmenu_playpause, NULL, NULL, NULL },
+	{ "stop",     pragha_systray_gmenu_stop,      NULL, NULL, NULL },
+	{ "next",     pragha_systray_gmenu_next,      NULL, NULL, NULL },
+	{ "edit",     pragha_systray_gmenu_edit,      NULL, NULL, NULL },
+	{ "quit",     pragha_systray_gmenu_quit,      NULL, NULL, NULL }
 };
 
 static gboolean
 status_icon_clicked (GtkWidget *widget, GdkEventButton *event, PraghaStatusIcon *status_icon)
 {
 	GtkWidget *popup_menu;
+	GMenuModel *model;
 
 	switch (event->button)
 	{
@@ -109,7 +189,11 @@ status_icon_clicked (GtkWidget *widget, GdkEventButton *event, PraghaStatusIcon 
 			pragha_playback_play_pause_resume (status_icon->pragha);
 			break;
 		case 3:
-			popup_menu = gtk_ui_manager_get_widget(status_icon->ui_manager, "/popup");
+			model = G_MENU_MODEL(gtk_builder_get_object (status_icon->builder, "systray-menu"));
+
+			popup_menu = gtk_menu_new_from_model(model);
+			gtk_widget_insert_action_group (popup_menu, "systray", G_ACTION_GROUP(status_icon->actions));
+
 			gtk_menu_popup (GTK_MENU(popup_menu), NULL, NULL, NULL, NULL,
 			                event->button, gtk_get_current_event_time ());
 		default: break;
@@ -179,103 +263,32 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 }
 
 static void
-systray_about_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	pragha_application_about_dialog (status_icon->pragha);
-}
-
-static void
-systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	pragha_application_open_files (status_icon->pragha);
-}
-
-static void
-systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	pragha_application_append_audio_cd (status_icon->pragha);
-}
-
-static void
-systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	pragha_application_add_location (status_icon->pragha);
-}
-
-static void
-systray_play_pause_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(status_icon->pragha);
-}
-
-static void
-systray_stop_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(status_icon->pragha);
-}
-
-static void
-systray_prev_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(status_icon->pragha);
-}
-
-static void
-systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(status_icon->pragha);
-}
-
-static void
-systray_edit_tags_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_edit_current_track (status_icon->pragha);
-}
-
-static void
-systray_quit (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	pragha_application_quit (status_icon->pragha);
-}
-
-static void
 pragha_status_icon_update_state (PraghaBackend *backend, GParamSpec *pspec, PraghaStatusIcon *status_icon)
 {
-	GtkAction *action;
+	GAction *action;
 	PraghaBackendState state = 0;
 
 	state = pragha_backend_get_state (backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
-	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Prev");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+	action = g_action_map_lookup_action (G_ACTION_MAP (status_icon->actions), "prev");
+	g_object_set (action, "enabled", playing, NULL);
 
-	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Stop");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+	action = g_action_map_lookup_action (G_ACTION_MAP (status_icon->actions), "stop");
+	g_object_set (action, "enabled", playing, NULL);
 
-	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Next");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+	action = g_action_map_lookup_action (G_ACTION_MAP (status_icon->actions), "next");
+	g_object_set (action, "enabled", playing, NULL);
 
-	action = gtk_ui_manager_get_action (status_icon->ui_manager, "/popup/Edit tags");
-	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+	action = g_action_map_lookup_action (G_ACTION_MAP (status_icon->actions), "edit");
+	g_object_set (action, "enabled", playing, NULL);
 }
 
 static void
 pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
-	GtkActionGroup *actions;
 	GdkPixbuf *pixbuf_app;
 
 	const GBindingFlags binding_flags =
@@ -287,14 +300,11 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 	if (pixbuf_app)
 		gtk_status_icon_set_from_pixbuf (GTK_STATUS_ICON(status_icon), pixbuf_app);
 
-	actions = gtk_action_group_new ("Systray Actions");
-	gtk_action_group_set_translation_domain (actions, GETTEXT_PACKAGE);
-
-	gtk_action_group_add_actions (actions,
-	                              systray_menu_aentries,
-	                              G_N_ELEMENTS(systray_menu_aentries),
-	                              (gpointer)status_icon);
-	gtk_ui_manager_insert_action_group (status_icon->ui_manager, actions, 0);
+	status_icon->actions = g_simple_action_group_new ();
+	g_simple_action_group_add_entries (status_icon->actions,
+	                                   systray_menu_aentries,
+	                                   G_N_ELEMENTS(systray_menu_aentries),
+	                                   (gpointer)status_icon);
 
 	preferences = pragha_application_get_preferences (pragha);
 	g_object_bind_property (preferences, "show-status-icon",
@@ -303,7 +313,7 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
 	                  G_CALLBACK (pragha_status_icon_update_state), status_icon);
 
-	g_object_unref (actions);
+	//g_object_unref (actions);
 }
 
 static void
@@ -311,9 +321,9 @@ pragha_status_icon_dispose (GObject *object)
 {
 	PraghaStatusIcon *status_icon = PRAGHA_STATUS_ICON(object);
 
-	if (status_icon->ui_manager) {
-		g_object_unref (status_icon->ui_manager);
-		status_icon->ui_manager = NULL;
+	if (status_icon->builder) {
+		g_object_unref (status_icon->builder);
+		status_icon->builder = NULL;
 	}
 
 	(*G_OBJECT_CLASS (pragha_status_icon_parent_class)->dispose) (object);
@@ -333,9 +343,13 @@ pragha_status_icon_init (PraghaStatusIcon *status_icon)
 {
 	GError *error = NULL;
 
-	status_icon->ui_manager = gtk_ui_manager_new();
-	if (!gtk_ui_manager_add_ui_from_string (status_icon->ui_manager, systray_menu_xml, -1, &error))
-		g_critical("Unable to create systray menu, err : %s", error->message);
+	status_icon->builder = gtk_builder_new ();
+	gtk_builder_add_from_string (status_icon->builder, systray_menu_xml, -1, &error);
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
 
 	g_signal_connect (status_icon, "button-press-event",
 	                  G_CALLBACK (status_icon_clicked), status_icon);
