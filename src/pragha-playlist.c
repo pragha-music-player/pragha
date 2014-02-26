@@ -92,7 +92,8 @@ struct _PraghaPlaylist {
 
 	/* Menu */
 	GtkWidget           *header_context_menu;
-	GtkUIManager        *playlist_context_menu;
+	GtkBuilder          *builder;
+	GSimpleActionGroup  *actions;
 };
 
 enum
@@ -169,58 +170,44 @@ static gint compare_length   (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *
 /*
  * playlist_context_menu calbacks
  */
-static void queue_current_playlist        (GtkAction *action, PraghaPlaylist *playlist);
-static void dequeue_current_playlist      (GtkAction *action, PraghaPlaylist *playlist);
-static void remove_from_playlist          (GtkAction *action, PraghaPlaylist *playlist);
-static void crop_current_playlist         (GtkAction *action, PraghaPlaylist *playlist);
-static void current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist);
-static void pragha_playlist_copy_tags     (GtkAction *action, PraghaPlaylist *playlist);
-static void pragha_playlist_edit_tags     (GtkAction *action, PraghaPlaylist *playlist);
 
-static const gchar *playlist_context_menu_xml = "<ui>				\
-	<popup name=\"SelectionPopup\">		   				\
-	<menuitem action=\"Queue track\"/>					\
-	<menuitem action=\"Dequeue track\"/>					\
-	<separator/>				    				\
-	<menuitem action=\"Remove from playlist\"/>				\
-	<menuitem action=\"Crop playlist\"/>					\
-	<menuitem action=\"Clear playlist\"/>					\
-	<separator/>				    				\
-	<menuitem action=\"Save playlist\"/>					\
-	<menuitem action=\"Save selection\"/>					\
-	<menu action=\"SendToMenu\">						\
-		<placeholder name=\"pragha-sendto-placeholder\"/>		\
-	</menu>									\
-	<separator/>				    				\
-	<menu action=\"ToolsMenu\">						\
-		<placeholder name=\"pragha-plugins-placeholder\"/>		\
-	</menu>									\
-	<separator/>				    				\
-	<menuitem action=\"Copy tag to selection\"/>				\
-	<separator/>				    				\
-	<menuitem action=\"Edit tags\"/>					\
-	</popup>				    				\
-	</ui>";
+static void queue_current_playlist        (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void dequeue_current_playlist      (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void remove_from_playlist          (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void crop_current_playlist         (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void current_playlist_clear_action (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void pragha_playlist_copy_tags     (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void pragha_playlist_edit_tags     (GSimpleAction *action, GVariant *parameter, gpointer user_data);
 
-static GtkActionEntry playlist_context_aentries[] = {
-	{"Queue track", "list-add", N_("Add to playback queue"),
-	 "", "Add to playback queue", G_CALLBACK(queue_current_playlist)},
-	{"Dequeue track", "list-remove", N_("Remove to playback queue"),
-	 "", "Remove to playback queue", G_CALLBACK(dequeue_current_playlist)},
-	{"Remove from playlist", "list-remove", N_("Remove from playlist"),
-	 "", "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
-	{"Crop playlist", "list-remove", N_("Crop playlist"),
-	 "", "Remove no telected tracks of playlist", G_CALLBACK(crop_current_playlist)},
-	{"Clear playlist", "edit-clear", N_("Clear playlist"),
-	 "", "Clear the current playlist", G_CALLBACK(current_playlist_clear_action)},
-	{"Save playlist", "document-save", N_("Save playlist")},
-	{"Save selection", "document-save-as", N_("Save selection")},
-	{"SendToMenu", NULL, N_("_Send to")},
-	{"ToolsMenu", NULL, N_("_Tools")},
-	{"Copy tag to selection", "edit-copy", NULL,
-	 "", "Copy tag to selection", G_CALLBACK(pragha_playlist_copy_tags)},
-	{"Edit tags", NULL, N_("Edit track information"),
-	 "", "Edit information for this track", G_CALLBACK(pragha_playlist_edit_tags)}
+static const gchar *playlist_context_menu_xml = \
+	NEW_POPUP("playlist-menu") \
+		NEW_ICON_ITEM("Add to playback queue",    "list-add",    "playlist", "queue") \
+		NEW_ICON_ITEM("Remove to playback queue", "list-remove", "playlist", "unqueue") \
+		SEPARATOR \
+		NEW_ICON_ITEM("Remove from playlist",     "list-remove", "playlist", "remove") \
+		NEW_ICON_ITEM("Crop playlist",            "list-remove", "playlist", "crop") \
+		NEW_ICON_ITEM("Clear playlist",           "edit-clear",  "playlist", "clear") \
+		SEPARATOR \
+		NEW_NAMED_SUBMENU("send-to","_Send to") \
+			NEW_PLACEHOLDER("pragha-sendto-placeholder") \
+		CLOSE_SUBMENU \
+		NEW_NAMED_SUBMENU("tools","_Tools") \
+			NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+		CLOSE_SUBMENU \
+		SEPARATOR \
+		NEW_ICON_ITEM("Copy tag to selection",    "edit-copy",   "playlist", "dup-tag") \
+		SEPARATOR \
+		NEW_ITEM     ("Edit track information",                  "playlist", "edit") \
+	CLOSE_POPUP;
+
+static const GActionEntry playlist_context_aentries[] = {
+	{ "queue",   queue_current_playlist,        NULL, NULL, NULL },
+	{ "unqueue", dequeue_current_playlist,      NULL, NULL, NULL },
+	{ "remove",  remove_from_playlist,          NULL, NULL, NULL },
+	{ "crop",    crop_current_playlist,         NULL, NULL, NULL },
+	{ "clear",   current_playlist_clear_action, NULL, NULL, NULL },
+	{ "dup-tag", pragha_playlist_copy_tags,     NULL, NULL, NULL },
+	{ "edit",    pragha_playlist_edit_tags,     NULL, NULL, NULL }
 };
 
 /*
@@ -228,41 +215,60 @@ static GtkActionEntry playlist_context_aentries[] = {
  */
 
 static void
-queue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+queue_current_playlist (GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       user_data)
 {
+	PraghaPlaylist *playlist = user_data;
 	pragha_playlist_queue_handler (playlist);
 }
 
 static void
-dequeue_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+dequeue_current_playlist (GSimpleAction *action,
+                          GVariant      *parameter,
+                          gpointer       user_data)
 {
+	PraghaPlaylist *playlist = user_data;
 	pragha_playlist_dequeue_handler (playlist);
 }
 
 static void
-remove_from_playlist (GtkAction *action, PraghaPlaylist *playlist)
+remove_from_playlist (GSimpleAction *action,
+                      GVariant      *parameter,
+                      gpointer       user_data)
 {
+	PraghaPlaylist *playlist = user_data;
 	pragha_playlist_remove_selection (playlist);
 }
 
 static void
-crop_current_playlist (GtkAction *action, PraghaPlaylist *playlist)
+crop_current_playlist (GSimpleAction *action,
+                       GVariant      *parameter,
+                       gpointer       user_data)
 {
+	PraghaPlaylist *playlist = user_data;
 	pragha_playlist_crop_selection (playlist);
 }
 
 static void
-current_playlist_clear_action (GtkAction *action, PraghaPlaylist *playlist)
+current_playlist_clear_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
 {
+	PraghaPlaylist *playlist = user_data;
 	pragha_playlist_remove_all (playlist);
 }
 
 static void
-pragha_playlist_copy_tags (GtkAction *action, PraghaPlaylist *playlist)
+pragha_playlist_copy_tags (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
 {
 	PraghaMusicobject *mobj = NULL;
 	gint changed = 0;
 	GList *rlist;
+
+	PraghaPlaylist *playlist = user_data;
 
 	mobj    = g_object_get_data (G_OBJECT(action), "mobj");
 	changed = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(action), "change"));
@@ -311,11 +317,15 @@ no_change:
 }
 
 static void
-pragha_playlist_edit_tags (GtkAction *action, PraghaPlaylist *playlist)
+pragha_playlist_edit_tags (GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       user_data)
 {
 	GtkWidget *dialog;
 	GList *rlist = NULL;
 	PraghaMusicobject *mobj;
+
+	PraghaPlaylist *playlist = user_data;
 
 	dialog = pragha_tags_dialog_new();
 
@@ -613,26 +623,22 @@ pragha_playlist_set_track_error (PraghaPlaylist *playlist, GError *error)
 
 static void
 pragha_playlist_menu_action_set_sensitive (PraghaPlaylist *playlist,
-                                           const gchar *action,
-                                           gboolean sentitive)
+                                           const gchar    *action_name,
+                                           gboolean        sentitive)
 {
-	GtkWidget *item_widget;
-
-	item_widget = gtk_ui_manager_get_widget(playlist->playlist_context_menu, action);
-
-	gtk_widget_set_sensitive (GTK_WIDGET(item_widget), sentitive);
+	GAction *action;
+	action = g_action_map_lookup_action (G_ACTION_MAP (playlist->actions), action_name);
+	g_object_set (action, "enabled", sentitive, NULL);
 }
 
 static void
 pragha_playlist_menu_action_set_visible (PraghaPlaylist *playlist,
-                                         const gchar *action,
-                                         gboolean visible)
+                                         const gchar    *action_name,
+                                         gboolean        visible)
 {
-	GtkWidget *item_widget;
-
-	item_widget = gtk_ui_manager_get_widget(playlist->playlist_context_menu, action);
-
-	gtk_widget_set_visible (GTK_WIDGET(item_widget), visible);
+	GtkWidget *widget;
+	widget = GTK_WIDGET(gtk_builder_get_object(playlist->builder, action_name));
+	gtk_widget_set_visible (widget, visible);
 }
 
 /* Clear current seq ref */
@@ -2393,7 +2399,6 @@ pragha_playlist_personalize_copy_tag_to_seleccion (PraghaPlaylist *playlist,
 {
 	GList *list = NULL;
 	gint icolumn = 0;
-	GtkAction *action = NULL;
 	gchar *label = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gint change = 0;
@@ -2454,17 +2459,17 @@ pragha_playlist_personalize_copy_tag_to_seleccion (PraghaPlaylist *playlist,
 	}
 
 	if (change) {
-		action = gtk_ui_manager_get_action (playlist->playlist_context_menu,
+		/*action = gtk_ui_manager_get_action (playlist->playlist_context_menu,
 		                                    "/SelectionPopup/Copy tag to selection");
 
 		g_object_set_data(G_OBJECT(action), "mobj", mobj);
 		g_object_set_data(G_OBJECT(action), "change", GINT_TO_POINTER(change));
 
 		pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Copy tag to selection", TRUE);
-		gtk_action_set_label(GTK_ACTION(action), label);
+		gtk_action_set_label(GTK_ACTION(action), label);*/
 	}
 	else {
-		pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Copy tag to selection", FALSE);
+		pragha_playlist_menu_action_set_visible (playlist, "dup-tag", FALSE);
 	}
 
 	g_list_free(list);
@@ -2534,6 +2539,7 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
                                         GdkEventButton *event)
 {
 	GtkWidget *popup_menu;
+	GMenuModel *model;
 	GtkTreeSelection *selection;
 	gint n_select = 0;
 	GtkTreePath *path;
@@ -2541,7 +2547,10 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
 	GtkTreeIter iter;
 	gboolean ret = FALSE, is_queue = FALSE;
 
-	popup_menu = gtk_ui_manager_get_widget (playlist->playlist_context_menu, "/SelectionPopup");
+	model = G_MENU_MODEL(gtk_builder_get_object (playlist->builder, "playlist-menu"));
+
+	popup_menu = gtk_menu_new_from_model(model);
+	gtk_widget_insert_action_group (popup_menu, "playlist", G_ACTION_GROUP(playlist->actions));
 
 	ret = gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW(playlist->view),
 	                                     (gint) event->x,(gint) event->y,
@@ -2563,43 +2572,43 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
 			gtk_tree_model_get (playlist->model, &iter, P_BUBBLE, &is_queue, -1);
 
 			if (is_queue) {
-				pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Queue track", FALSE);
-				pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Dequeue track", TRUE);
+				pragha_playlist_menu_action_set_visible (playlist, "queue", FALSE);
+				pragha_playlist_menu_action_set_visible (playlist, "unqueue", TRUE);
 
-				pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Deueue track", TRUE);
+				pragha_playlist_menu_action_set_sensitive (playlist, "unqueue", TRUE);
 			}
 			else {
-				pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Queue track", TRUE);
-				pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Dequeue track", FALSE);
+				pragha_playlist_menu_action_set_visible (playlist, "queue", TRUE);
+				pragha_playlist_menu_action_set_visible (playlist, "unqueue", FALSE);
 
-				pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Queue track", TRUE);
+				pragha_playlist_menu_action_set_sensitive (playlist, "queue", TRUE);
 			}
 		}
 
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Remove from playlist", TRUE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Crop playlist", TRUE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Clear playlist", TRUE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Save selection", TRUE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Save playlist", TRUE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Edit tags", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "remove", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "crop", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "clear", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "save-selection", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "save-playlist", TRUE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "edit", TRUE);
 
 		n_select = gtk_tree_selection_count_selected_rows (selection);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/ToolsMenu", (n_select == 1));
+		pragha_playlist_menu_action_set_sensitive (playlist, "tools", (n_select == 1));
 
 		if(n_select > 1) {
-			pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Copy tag to selection", TRUE);
+			pragha_playlist_menu_action_set_visible (playlist, "dup-tag", TRUE);
 			pragha_playlist_personalize_copy_tag_to_seleccion (playlist, column, &iter);
 		}
 		else
-			pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Copy tag to selection", FALSE);
+			pragha_playlist_menu_action_set_visible (playlist, "dup-tag", FALSE);
 
 		gtk_tree_path_free (path);
 	}
 	else {
 		if (playlist->no_tracks == 0) {
 			/* Click on emthy playlist. */
-			pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Queue track", TRUE);
-			pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Dequeue track", FALSE);
+			pragha_playlist_menu_action_set_visible (playlist, "queue", TRUE);
+			pragha_playlist_menu_action_set_visible (playlist, "unqueue", FALSE);
 		}
 		else {
 			/* Click on any song. */
@@ -2607,16 +2616,16 @@ pragha_playlist_second_button_press_cb (PraghaPlaylist *playlist,
 			gtk_tree_selection_unselect_all (selection);
 		}
 
-		pragha_playlist_menu_action_set_visible (playlist, "/SelectionPopup/Copy tag to selection", FALSE);
+		pragha_playlist_menu_action_set_visible (playlist, "dup-tag", FALSE);
 
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Queue track", FALSE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Remove from playlist", FALSE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Crop playlist", FALSE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Clear playlist", (playlist->no_tracks != 0));
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Save selection", FALSE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Save playlist", (playlist->no_tracks != 0));
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/ToolsMenu", FALSE);
-		pragha_playlist_menu_action_set_sensitive (playlist, "/SelectionPopup/Edit tags", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "queue", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "remove", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "crop", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "clear", (playlist->no_tracks != 0));
+		pragha_playlist_menu_action_set_sensitive (playlist, "selection", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "save-playlist", (playlist->no_tracks != 0));
+		pragha_playlist_menu_action_set_sensitive (playlist, "tools", FALSE);
+		pragha_playlist_menu_action_set_sensitive (playlist, "edit", FALSE);
 	}
 
 	gtk_menu_popup (GTK_MENU(popup_menu), NULL, NULL, NULL, NULL, event->button, event->time);
@@ -3358,33 +3367,6 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	return menu;
 }
 
-static GtkUIManager*
-pragha_playlist_context_menu_new (PraghaPlaylist *playlist)
-{
-	GtkUIManager *context_menu = NULL;
-	GtkActionGroup *context_actions;
-	GError *error = NULL;
-
-	context_actions = gtk_action_group_new("Playlist Context Actions");
-	context_menu = gtk_ui_manager_new();
-
-	gtk_action_group_set_translation_domain (context_actions, GETTEXT_PACKAGE);
-
-	if (!gtk_ui_manager_add_ui_from_string(context_menu, playlist_context_menu_xml, -1, &error)) {
-		g_critical("Unable to create current playlist context menu, err : %s", error->message);
-	}
-	gtk_action_group_add_actions(context_actions,
-	                             playlist_context_aentries,
-	                             G_N_ELEMENTS(playlist_context_aentries),
-	                             (gpointer) playlist);
-
-	gtk_ui_manager_insert_action_group(context_menu, context_actions, 0);
-
-	g_object_unref (context_actions);
-
-	return context_menu;
-}
-
 static const GtkTargetEntry pentries[] = {
 	{"REF_LIBRARY", GTK_TARGET_SAME_APP, TARGET_REF_LIBRARY},
 	{"text/uri-list", GTK_TARGET_OTHER_APP, TARGET_URI_LIST},
@@ -4122,7 +4104,7 @@ pragha_playlist_get_model(PraghaPlaylist* cplaylist)
 GtkUIManager *
 pragha_playlist_get_context_menu(PraghaPlaylist* cplaylist)
 {
-	return cplaylist->playlist_context_menu;
+	return NULL;//cplaylist->playlist_context_menu;
 }
 
 gint
@@ -4130,7 +4112,7 @@ pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
                                       GtkActionGroup *action_group,
                                       const gchar *menu_xml)
 {
-	GtkUIManager *ui_manager;
+	/*GtkUIManager *ui_manager;
 	GError *error = NULL;
 	gint merge_id;
 
@@ -4147,7 +4129,7 @@ pragha_playlist_append_plugin_action (PraghaPlaylist *cplaylist,
 		g_error_free (error);
 	}
 
-	return merge_id;
+	return merge_id;*/
 }
 
 void
@@ -4155,9 +4137,9 @@ pragha_playlist_remove_plugin_action (PraghaPlaylist *cplaylist,
                                       GtkActionGroup *action_group,
                                       gint merge_id)
 {
-	gtk_ui_manager_remove_ui (cplaylist->playlist_context_menu, merge_id);
+	/*gtk_ui_manager_remove_ui (cplaylist->playlist_context_menu, merge_id);
 	gtk_ui_manager_remove_action_group (cplaylist->playlist_context_menu, action_group);
-	g_object_unref (action_group);
+	g_object_unref (action_group);*/
 }
 
 PraghaDatabase *
@@ -4238,6 +4220,8 @@ pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 static void
 pragha_playlist_init (PraghaPlaylist *playlist)
 {
+	GError *error = NULL;
+
 	/* Get usefuls instances */
 
 	playlist->cdbase = pragha_database_get ();
@@ -4274,8 +4258,20 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 
 	/* Create menus */
 
+	playlist->builder = gtk_builder_new ();
+	gtk_builder_add_from_string (playlist->builder, playlist_context_menu_xml, -1, &error);
+	if (error) {
+		g_print ("GtkBuilder error: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+	playlist->actions = g_simple_action_group_new ();
+	g_simple_action_group_add_entries (playlist->actions,
+	                                   playlist_context_aentries,
+	                                   G_N_ELEMENTS(playlist_context_aentries),
+	                                   (gpointer)playlist);
+
 	playlist->header_context_menu = create_header_context_menu (playlist);
-	playlist->playlist_context_menu = pragha_playlist_context_menu_new (playlist);
 
 	/* Init the rest of flags */
 
@@ -4318,9 +4314,14 @@ pragha_playlist_dispose (GObject *object)
 		playlist->model = NULL;
 	}
 
-	if (playlist->playlist_context_menu) {
-		g_object_unref (playlist->playlist_context_menu);
-		playlist->playlist_context_menu = NULL;
+	if (playlist->builder) {
+		g_object_unref (playlist->builder);
+		playlist->builder = NULL;
+	}
+
+	if (playlist->actions) {
+		g_object_unref (playlist->actions);
+		playlist->actions = NULL;
 	}
 
 	if (playlist->playing_pixbuf) {

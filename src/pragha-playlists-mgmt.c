@@ -1365,7 +1365,7 @@ void playlist_save_complete_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cpla
 static void
 update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist)
 {
-	GtkWidget *submenu, *menuitem;
+	/*GtkWidget *submenu, *menuitem;
 	
 	submenu = gtk_menu_new ();
 
@@ -1397,13 +1397,13 @@ update_playlist_changes_save_selection_popup_playlist (PraghaPlaylist *cplaylist
 
 	pragha_prepared_statement_free (statement);
 
-	gtk_widget_show_all (submenu);
+	gtk_widget_show_all (submenu);*/
 }
 
 static void
 update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 {
-	GtkWidget *submenu, *menuitem;
+	/*GtkWidget *submenu, *menuitem;
 	
 	submenu = gtk_menu_new ();
 
@@ -1435,7 +1435,7 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 
 	pragha_prepared_statement_free (statement);
 
-	gtk_widget_show_all (submenu);
+	gtk_widget_show_all (submenu);*/
 }
 
 static void
