@@ -34,8 +34,8 @@
 
 const gchar *mime_flac[] = {"audio/x-flac", NULL};
 const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
-const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", NULL};
-const gchar *mime_wav[] = {"audio/x-wav", NULL};
+const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", "application/x-ext-ogg", NULL};
+const gchar *mime_wav[] = {"audio/x-wav", "audio/wav", NULL};
 const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", NULL};
 const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
 const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NULL};
@@ -100,9 +100,44 @@ is_valid_mime(const gchar *mime, const gchar **mlist)
 	return FALSE;
 }
 
+#ifdef G_OS_WIN32
+/*
+ * Next based on evince code.
+ * See https://git.gnome.org/browse/evince/tree/libdocument/ev-file-helpers.c
+ */
+static gchar *
+get_mime_type_from_uri (const gchar *uri, GError **error)
+{
+	GFile *file;
+	GFileInfo *file_info;
+	const gchar *content_type;
+	gchar *mime_type = NULL;
+
+	file = g_file_new_for_uri (uri);
+	file_info = g_file_query_info (file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+	                               0, NULL, error);
+	g_object_unref (file);
+
+	if (file_info == NULL)
+		return NULL;
+
+	content_type = g_file_info_get_content_type (file_info);
+	if (content_type != NULL) {
+		mime_type = g_content_type_get_mime_type (content_type);
+	}
+	if (mime_type == NULL) {
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Unknown MIME Type");
+	}
+
+	g_object_unref (file_info);
+
+	g_print ("%s\n", mime_type);
+
+	return mime_type;
+}
+#else
 /* Accepts only absolute filename */
 /* NB: Disregarding 'uncertain' flag for now. */
-
 static gchar*
 get_mime_type (const gchar *file)
 {
@@ -113,6 +148,7 @@ get_mime_type (const gchar *file)
 
 	return result;
 }
+#endif
 
 PraghaMusicType
 pragha_file_get_music_type(const gchar *filename)
@@ -123,7 +159,11 @@ pragha_file_get_music_type(const gchar *filename)
 	if (!filename)
 		return ret;
 
-	result = get_mime_type(filename);
+#ifdef G_OS_WIN32
+	result = get_mime_type_from_uri (filename, NULL);
+#else
+	result = get_mime_type (filename);
+#endif
 
 	if (result) {
 		if(is_valid_mime(result, mime_flac))
@@ -178,7 +218,11 @@ pragha_file_get_media_type (const gchar *filename)
 	if (!filename)
 		return ret;
 
-	result = get_mime_type(filename);
+#ifdef G_OS_WIN32
+	result = get_mime_type_from_uri (filename, NULL);
+#else
+	result = get_mime_type (filename);
+#endif
 
 	if (result) {
 		if (is_valid_mime(result, mime_flac) ||
@@ -242,7 +286,12 @@ add_recent_file (const gchar *filename)
 	GtkRecentData recent_data;
 	gchar *uri = NULL;
 
-	recent_data.mime_type = get_mime_type(filename);
+#ifdef G_OS_WIN32
+	recent_data.mime_type = get_mime_type_from_uri (filename, NULL);
+#else
+	recent_data.mime_type = get_mime_type (filename);
+#endif
+
 	if (recent_data.mime_type == NULL)
 		return;
 
