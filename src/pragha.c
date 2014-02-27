@@ -520,7 +520,9 @@ pragha_application_dispose (GObject *object)
 		pragha->scanner = NULL;
 	}
 
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 	pragha_cdda_free ();
+#endif
 
 	if (pragha->pixbuf_app) {
 		g_object_unref (pragha->pixbuf_app);

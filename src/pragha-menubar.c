@@ -179,8 +179,10 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add files", "document-open", N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
 	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
+#endif
 	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
 	{"Add the library", "list-add", N_("_Add the library"),
@@ -510,10 +512,12 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 
 /* Handler for the 'Add Audio CD' item in the pragha menu */
 
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
 {
 	pragha_application_append_audio_cd (pragha);
 }
+#endif
 
 /* Build a dialog to get a new playlist name */
 

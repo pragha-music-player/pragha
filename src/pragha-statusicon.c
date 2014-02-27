@@ -43,7 +43,9 @@ G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
 
 static void systray_about_action        (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_open_file_action    (GtkAction *action, PraghaStatusIcon *status_icon);
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 static void systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon);
+#endif
 static void systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_play_pause_action   (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *status_icon);
@@ -76,8 +78,10 @@ static const GtkActionEntry systray_menu_aentries[] = {
 	 "", NULL, G_CALLBACK(systray_about_action)},
 	{"Add files", "document-open", N_("_Add files"),
 	 "", NULL, G_CALLBACK(systray_open_file_action)},
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
 	 "", "Append a Audio CD", G_CALLBACK(systray_add_audio_cd_action)},
+#endif
 	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(systray_add_location_action)},
 	{"Prev", "media-skip-backward", N_("Prev Track"),
@@ -189,11 +193,13 @@ systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
 	open_file_action (action, status_icon->pragha);
 }
 
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 static void
 systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
 	add_audio_cd_action (action, status_icon->pragha);
 }
+#endif
 
 static void
 systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)

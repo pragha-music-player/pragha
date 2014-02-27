@@ -84,9 +84,6 @@ XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.32])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.4.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
-XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.90])
-XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
 dnl Check peas library to plugins support
@@ -107,6 +104,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY],
                            [libnotify], [0.4.4],
                            [libnotify],
                            [libnotify library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBNOTIFY], 0)
 fi
 
 dnl Check global keyboard shortcuts support
@@ -116,6 +115,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
                            [keybinder-3.0], [0.2.0],
                            [keybinder],
                            [keybinder library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBKEYBINDER], 0)
 fi
 
 dnl Check libglyr
@@ -125,6 +126,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                            [libglyr], [1.0.1],
                            [libglyr],
                            [libglyr library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBGLYR], 0)
 fi
 
 GUDEV_FOUND="no"
@@ -133,6 +136,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
                            [gudev-1.0], [145],
                            [gudev-1.0],
                            [gudev-1.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GUDEV], 0)
 fi
 
 LIBMTP_FOUND="no"
@@ -141,6 +146,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
                            [libmtp], [1.1.0],
                            [libmtp],
                            [libmtp library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBMTP], 0)
 fi
 
 dnl Check libpsuop
@@ -150,6 +157,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBSOUP],
                            [libsoup-2.4], [2.38],
                            [libsoup-2.4],
                            [libsoup-2.4 library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBSOUP], 0)
 fi
 
 dnl Check rygel
@@ -159,6 +168,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
                            [rygel-server-2.0], [0.20.0],
                            [rygel-server-2.0],
                            [rygel-server-2.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
 
 dnl Check min taglib to add monkeyaudio support
@@ -167,6 +178,27 @@ XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
                        [taglib], [1.7.0],
                        [taglib],
                        [taglib library to APE], [yes])
+
+dnl Check libcdio
+LIBCDIO_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO],
+                           [libcdio], [0.80],
+                           [libcdio],
+                           [libcdio library], [yes])
+
+dnl Check libcdio_paranoia
+LIBCDIO_PARANOIA_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO_PARANOIA],
+                           [libcdio_paranoia], [0.90],
+                           [libcdio_paranoia],
+                           [libcdio_paranoia library], [yes])
+
+dnl Check libcddb
+LIBCDDB_FOUND="no"
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDDB],
+                           [libcddb], [1.3.0],
+                           [libcddb],
+                           [libcddb library], [yes])
 
 dnl Check gstreamer-audio
 GSTREAMER_AUDIO_FOUND="no"

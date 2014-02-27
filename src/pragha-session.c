@@ -60,6 +60,11 @@ pragha_init_session_support(PraghaApplication *pragha)
 		g_error_free (error);
 	}
 }
+#elif WIN32
+void
+pragha_init_session_support(PraghaApplication *pragha)
+{
+}
 #else
 void
 pragha_init_session_support(PraghaApplication *pragha)
