@@ -46,7 +46,9 @@ pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin)
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
+			#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 			pragha_application_append_audio_cd (pragha_device_get_application(plugin));
+			#endif
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:

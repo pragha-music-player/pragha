@@ -23,17 +23,28 @@
 #include <config.h>
 #endif
 
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
+
 #include <glib.h>
 
 #include <cdio/paranoia/cdda.h>
 #include <cdio/cd_types.h>
 #include <cddb/cddb.h>
 
+#include "pragha-musicobject.h"
+
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
+
+PraghaMusicobject *
+new_musicobject_from_cdda(PraghaApplication *pragha,
+                          cdrom_drive_t *cdda_drive,
+                          cddb_disc_t *cddb_disc,
+                          gint track_no);
 
 void pragha_application_append_audio_cd (PraghaApplication *pragha);
 
 void pragha_cdda_free ();
 
+#endif
 #endif /* CDDA_H */
