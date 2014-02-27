@@ -60,7 +60,8 @@ pragha_init_session_support(PraghaApplication *pragha)
 		g_error_free (error);
 	}
 }
-#elif WIN32
+#else
+#ifdef G_OS_WIN32
 void
 pragha_init_session_support(PraghaApplication *pragha)
 {
@@ -79,4 +80,5 @@ pragha_init_session_support(PraghaApplication *pragha)
 	gtk_window_set_role (GTK_WINDOW (window), role);
 	g_free (role);
 }
+#endif
 #endif
