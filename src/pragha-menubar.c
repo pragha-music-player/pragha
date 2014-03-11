@@ -110,7 +110,6 @@ static const gchar *main_menu_xml = "<ui>					\
 		</menu>								\
 		<menu action=\"PlaylistMenu\">					\
 			<menuitem action=\"Add files\"/>			\
-			<menuitem action=\"Add Audio CD\"/>			\
 			<menuitem action=\"Add location\"/>			\
 			<separator/>				    			\
 			<menuitem action=\"Add the library\"/>		\

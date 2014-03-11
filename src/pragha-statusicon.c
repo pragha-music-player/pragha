@@ -58,8 +58,7 @@ static const gchar *systray_menu_xml =
 	<popup>						\
 		<menuitem action=\"About\"/>		\
 		<separator/>				\
-		<menuitem action=\"Add files\"/>	\
-		<menuitem action=\"Add Audio CD\"/>	\
+		<menuitem action=\"Add files\"/> \
 		<menuitem action=\"Add location\"/>	\
 		<separator/>				\
 		<menuitem action=\"Prev\"/>		\

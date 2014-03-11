@@ -141,3 +141,11 @@ pragha_LDADD += $(LIBPEAS_LIBS)
 pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
 pragha_LDADD += $(LIBPEAS_GTK_LIBS)
 endif
+
+if WIN32
+AM_CFLAGS = \
+        -mms-bitfields
+
+AM_LDFLAGS = \
+        -Wl,-subsystem,windows
+endif

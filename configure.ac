@@ -59,6 +59,13 @@ case "$with_gstreamer" in
 esac
 AC_DEFINE_UNQUOTED(GSTREAMER_API_VERSION, $GSTREAMER_API_VERSION, [Define the GStreamer+ API version])
 
+case "${host}" in
+        i[[3456789]]86-mingw32*) WIN32="yes" ;;
+        *cygwin*) WIN32="yes" ;;
+        *) WIN32="no" ;;
+esac
+AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
+
 AC_SUBST(CFLAGS)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
