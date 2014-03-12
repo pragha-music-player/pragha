@@ -26,11 +26,6 @@ AppId={{1A58C548-142C-4016-9943-6A39EB25BB51}
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
 
-[Registry]
-Root: HKCR; SubKey: ".*.mp3"; ValueType: string; ValueData: "Mp3 audio"; Flags: uninsdeletekey
-Root: HKCR; SubKey: "Mp3 audio"; ValueType: string; ValueData: "Play mp3 with Pragha"; Flags: uninsdeletekey
-Root: HKCR; SubKey: "Mp3 audio\Shell\Open\Command"; ValueType: string; ValueData: """{app}/bin\pragha.exe"" ""%1"""; Flags: uninsdeletekey
-
 [Run]
 Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent
 Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent
@@ -46,22 +41,24 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 
 [Files]
 ;pragha files
-Source: "..\src\.libs\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
+Source: "{#MINGW}\bin\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
 Source: "pragha.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\hicolor\128x128\apps"
-Source: "..\po\cs.gmo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\po\de.gmo"; DestDir: "{app}\share\locale\de\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\po\fr.gmo"; DestDir: "{app}\share\locale\fr\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\po\pt.gmo"; DestDir: "{app}\share\locale\pt\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\po\ru.gmo"; DestDir: "{app}\share\locale\ru\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\README"; DestDir: "{app}"; DestName: "Readme.txt"
+Source: "{#MINGW}\share\locale\cs\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"
+Source: "{#MINGW}\share\locale\es\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\es\LC_MESSAGES\"
+Source: "{#MINGW}\share\locale\fr\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\fr\LC_MESSAGES\"
+Source: "{#MINGW}\share\locale\pt\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\pt\LC_MESSAGES\"
+Source: "{#MINGW}\share\locale\ru\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\ru\LC_MESSAGES\"
+Source: "{#MINGW}\share\doc\pragha\README"; DestDir: "{app}"; DestName: "Readme.txt"
+
 ;icons
-Source: "..\data\pragha.png"; DestDir: "{app}\share\pixmaps\pragha"
-Source: "..\data\album.png"; DestDir: "{app}\share\pixmaps\pragha"
-Source: "..\data\artist.png"; DestDir: "{app}\share\pixmaps\pragha"
-Source: "..\data\track.png"; DestDir: "{app}\share\pixmaps\pragha"
-Source: "..\data\cover.png"; DestDir: "{app}\share\pixmaps\pragha"
-Source: "..\data\genre.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\pragha.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\album.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\artist.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\track.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\cover.png"; DestDir: "{app}\share\pixmaps\pragha"
+Source: "{#MINGW}\share\pixmaps\pragha\genre.png"; DestDir: "{app}\share\pixmaps\pragha"
+
 ; Deps
 Source: "{#MINGW}\bin\iconv.dll"; DestDir: "{app}/bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icudata50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
@@ -233,12 +230,31 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoconvert.dll"; DestDir: "{app}\lib
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstogg.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstlame.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+; Stock Icons
+#define ICON_PATH "Z:\\usr\share\icons\oxygen"
+Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-stop.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-skip-forward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\status\media-playlist-shuffle.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\media-playlist-repeat.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\dialog-information.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+
+Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\window-close.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\go-jump.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\edit-find.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-find-symbolic.png"
+Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-clear-symbolic.png"
+Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"
 
 [Icons]
-Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; Comment: "Yeah!. Music..";
+Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Comment: "Yeah!. Music..";
 Name: "{group}\Pragha Website"; Filename: "https://github.com/matiasdelellis/pragha";
-Name: "{group}\Uninstall Pragha"; Filename: "{uninstallexe}";
-Name: "{userdesktop}\Pragha"; Filename: "{app}\bin\pragha.exe"; Tasks: desktopicon; Comment: "Yeah!. Music..";
+Name: "{group}\Uninstall Pragha"; Filename: "{uninstallexe}"; IconFilename: {app}\pragha.ico;
+Name: "{userdesktop}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Tasks: desktopicon; Comment: "Yeah!. Music..";
 
 [Dirs]
 Name: "{app}\etc"
