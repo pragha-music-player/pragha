@@ -36,11 +36,18 @@ Filename: "{app}\bin\pragha.exe"; Parameters: "/x"
 Filename: "{app}\README"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent
 Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent unchecked
 
+[Registry]
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\pragha.exe"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\pango\1.8.0\modules"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gstreamer-1.0\"; Flags: uninsdeletevalue
+
 #define MINGW  "Z:\usr\i686-w64-mingw32\sys-root\mingw"
 
 [Files]
 ;pragha files
-Source: "..\src\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
+Source: "..\src\.libs\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
 Source: "pragha.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\hicolor\128x128\apps"
 Source: "..\po\cs.gmo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"; DestName: "pragha.mo"
@@ -159,20 +166,20 @@ Source: "{#MINGW}\etc\fonts\conf.d\60-latin.conf"; DestDir: "{app}\etc\fonts\con
 Source: "{#MINGW}\etc\fonts\conf.d\45-latin.conf"; DestDir: "{app}\etc\fonts\conf.d"; Flags: ignoreversion
 Source: "{#MINGW}\etc\fonts\conf.d\49-sansserif.conf"; DestDir: "{app}\etc\fonts\conf.d"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-tga.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-qtif.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-jasper.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ras.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xpm.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-wbmp.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ani.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pcx.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pnm.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-icns.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xbm.dll"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-basic-fc.dll"; DestDir: "{app}\pango\1.8.0\modules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-indic-lang.dll"; DestDir: "{app}\pango\1.8.0\modules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-arabic-lang.dll"; DestDir: "{app}\pango\1.8.0\modules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-tga.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-qtif.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-jasper.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ras.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xpm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-wbmp.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ani.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pcx.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pnm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-icns.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xbm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-basic-fc.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-indic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-arabic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-et.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-cyrillic-translit.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-er.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
