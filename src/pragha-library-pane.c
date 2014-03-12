@@ -26,6 +26,7 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <glib.h>
 #include <glib/gstdio.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
@@ -42,6 +43,10 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-dnd.h"
 #include "pragha.h"
+
+#ifdef G_OS_WIN32
+#include "../win32/win32dep.h"
+#endif
 
 struct _PraghaLibraryPane {
 	GtkBox           __parent__;
@@ -2739,26 +2744,33 @@ pragha_library_pane_create_widget (PraghaLibraryPane *library)
 static void
 pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 {
+	gchar *pix_uri = NULL;
 	GtkIconTheme *icontheme = gtk_icon_theme_get_default();
 
+	pix_uri = g_build_filename (PIXMAPDIR, "artist.png", NULL);
 	librarypane->pixbuf_artist =
-		gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/artist.png",
+		gdk_pixbuf_new_from_file_at_scale(pix_uri,
 		                                  16, 16,
 		                                  TRUE,
 		                                  NULL);
 	if (!librarypane->pixbuf_artist)
 		g_warning("Unable to load artist png");
+	g_free (pix_uri);
 
 	librarypane->pixbuf_album =
 		gtk_icon_theme_load_icon(icontheme,
 		                         "media-optical",
 		                         16, 0,
 		                         NULL);
-	if (!librarypane->pixbuf_album)
+
+	if (!librarypane->pixbuf_album) {
+		pix_uri = g_build_filename (PIXMAPDIR, "album.png", NULL);
 		librarypane->pixbuf_album =
-			gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/album.png",
+			gdk_pixbuf_new_from_file_at_scale(pix_uri,
 			                                  16, 16,
 			                                  TRUE, NULL);
+		g_free (pix_uri);
+	}
 	if (!librarypane->pixbuf_album)
 		g_warning("Unable to load album png");
 
@@ -2767,21 +2779,25 @@ pragha_library_pane_init_pixbufs(PraghaLibraryPane *librarypane)
 		                         "audio-x-generic",
 		                         16, 0,
 		                         NULL);
-	if (!librarypane->pixbuf_track)
+	if (!librarypane->pixbuf_track) {
+		pix_uri = g_build_filename (PIXMAPDIR, "track.png", NULL);
 		librarypane->pixbuf_track =
-			gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR "/track.png",
+			gdk_pixbuf_new_from_file_at_scale(pix_uri,
 			                                  16, 16,
 			                                  TRUE, NULL);
-
+		g_free (pix_uri);
+	}
 	if (!librarypane->pixbuf_track)
 		g_warning("Unable to load track png");
 
+	pix_uri = g_build_filename (PIXMAPDIR, "genre.png", NULL);
 	librarypane->pixbuf_genre =
-		gdk_pixbuf_new_from_file_at_scale(PIXMAPDIR"/genre.png",
-			                                  16, 16,
-			                                  TRUE, NULL);
+		gdk_pixbuf_new_from_file_at_scale(pix_uri,
+		                                  16, 16,
+		                                  TRUE, NULL);
 	if (!librarypane->pixbuf_genre)
 		g_warning("Unable to load genre png");
+	g_free (pix_uri);
 
 	librarypane->pixbuf_dir =
 		gtk_icon_theme_load_icon(icontheme,

@@ -433,11 +433,16 @@ pragha_plugins_activate_saved (PraghaApplication *pragha)
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
 {
+	gchar *icon_uri = NULL;
+
 	/* Main window */
 
 	pragha->mainwindow = gtk_application_window_new (GTK_APPLICATION (pragha));
 
-	pragha->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
+	icon_uri = g_build_filename (PIXMAPDIR, "pragha.png", NULL);
+	pragha->pixbuf_app = gdk_pixbuf_new_from_file (icon_uri, NULL);
+	g_free (icon_uri);
+
 	if (!pragha->pixbuf_app)
 		g_warning("Unable to load pragha png");
 	else

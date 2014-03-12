@@ -143,6 +143,10 @@ pragha_LDADD += $(LIBPEAS_GTK_LIBS)
 endif
 
 if WIN32
+pragha_SOURCES += \
+		../win32/win32dep.c \
+		../win32/win32dep.h
+
 AM_CFLAGS = \
         -mms-bitfields
 
