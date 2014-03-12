@@ -17,6 +17,11 @@
 
 #include "pragha-album-art.h"
 
+#include <glib.h>
+#ifdef G_OS_WIN32
+#include "../win32/win32dep.h"
+#endif
+
 G_DEFINE_TYPE(PraghaAlbumArt, pragha_album_art, GTK_TYPE_IMAGE)
 
 struct _PraghaAlbumArtPrivate
@@ -51,13 +56,17 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
 {
    PraghaAlbumArtPrivate *priv;
    GdkPixbuf *pixbuf, *album_art, *frame;
+   gchar *frame_uri = NULL;
    GError *error = NULL;
 
    g_return_if_fail(PRAGHA_IS_ALBUM_ART(albumart));
 
    priv = albumart->priv;
 
-   frame = gdk_pixbuf_new_from_file (PIXMAPDIR"/cover.png", &error);
+   frame_uri = g_build_filename (PIXMAPDIR, "cover.png", NULL);
+   frame = gdk_pixbuf_new_from_file (frame_uri, &error);
+   g_free (frame_uri);
+
    if(priv->path != NULL) {
       album_art = gdk_pixbuf_new_from_file_at_scale(priv->path,
                                                     112,

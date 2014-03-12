@@ -32,9 +32,8 @@ Root: HKCR; SubKey: "Mp3 audio"; ValueType: string; ValueData: "Play mp3 with Pr
 Root: HKCR; SubKey: "Mp3 audio\Shell\Open\Command"; ValueType: string; ValueData: """{app}/bin\pragha.exe"" ""%1"""; Flags: uninsdeletekey
 
 [Run]
-Filename: "{app}\bin\pragha.exe"; Parameters: "/x"
-Filename: "{app}\README"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent
-Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent unchecked
+Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent
+Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent
 
 [Registry]
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\pragha.exe"; Flags: uninsdeletekey
@@ -55,7 +54,7 @@ Source: "..\po\de.gmo"; DestDir: "{app}\share\locale\de\LC_MESSAGES\"; DestName:
 Source: "..\po\fr.gmo"; DestDir: "{app}\share\locale\fr\LC_MESSAGES\"; DestName: "pragha.mo"
 Source: "..\po\pt.gmo"; DestDir: "{app}\share\locale\pt\LC_MESSAGES\"; DestName: "pragha.mo"
 Source: "..\po\ru.gmo"; DestDir: "{app}\share\locale\ru\LC_MESSAGES\"; DestName: "pragha.mo"
-Source: "..\README"; DestDir: "{app}"
+Source: "..\README"; DestDir: "{app}"; DestName: "Readme.txt"
 ;icons
 Source: "..\data\pragha.png"; DestDir: "{app}\share\pixmaps\pragha"
 Source: "..\data\album.png"; DestDir: "{app}\share\pixmaps\pragha"
@@ -236,10 +235,10 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstlame.dll"; DestDir: "{app}\lib\gstream
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Pragha"; Filename: "{app}\pragha.exe"; Comment: "Yeah!. Music..";
+Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; Comment: "Yeah!. Music..";
 Name: "{group}\Pragha Website"; Filename: "https://github.com/matiasdelellis/pragha";
 Name: "{group}\Uninstall Pragha"; Filename: "{uninstallexe}";
-Name: "{userdesktop}\Pragha"; Filename: "{app}\pragha.exe"; Tasks: desktopicon; Comment: "Yeah!. Music..";
+Name: "{userdesktop}\Pragha"; Filename: "{app}\bin\pragha.exe"; Tasks: desktopicon; Comment: "Yeah!. Music..";
 
 [Dirs]
 Name: "{app}\etc"
