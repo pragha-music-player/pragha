@@ -43,7 +43,9 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 ;pragha files
 Source: "{#MINGW}\bin\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
 Source: "pragha.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "settings.ini"; DestDir: "{app}\etc\gtk-3.0"; Flags: ignoreversion
 Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\hicolor\128x128\apps"
+
 Source: "{#MINGW}\share\locale\cs\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\es\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\es\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\fr\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\fr\LC_MESSAGES\"
@@ -230,13 +232,14 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoconvert.dll"; DestDir: "{app}\lib
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstogg.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstlame.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+
 ; Stock Icons
 #define ICON_PATH "Z:\\usr\share\icons\oxygen"
 Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-pause.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\actions\media-playback-stop.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\actions\media-skip-forward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\status\media-playlist-shuffle.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
 Source: "{#ICON_PATH}\48x48\status\media-playlist-repeat.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
 Source: "{#ICON_PATH}\48x48\status\dialog-information.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
@@ -245,10 +248,15 @@ Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\ico
 Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\window-close.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\go-jump.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\list-remove.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\edit-find.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-find-symbolic.png"
 Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-clear-symbolic.png"
+Source: "{#ICON_PATH}\22x22\devices\media-optical.png"; DestDir: "{app}\share\icons\hicolor\22x22\devices\"
+Source: "{#ICON_PATH}\22x22\mimetypes\audio-x-generic.png"; DestDir: "{app}\share\icons\hicolor\22x22\mimetypes"
 Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"
+Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"; DestName: "folder-music.png"
 
 [Icons]
 Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Comment: "Yeah!. Music..";
