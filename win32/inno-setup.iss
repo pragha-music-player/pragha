@@ -42,20 +42,19 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gstreamer-1.0\"; Flags: uninsdeletevalue
 
 [Files]
-;pragha files
+; Pragha files
 Source: "{#MINGW}\bin\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
 Source: "pragha.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "settings.ini"; DestDir: "{app}\etc\gtk-3.0"; Flags: ignoreversion
 Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\hicolor\128x128\apps"
-
+; Translations
 Source: "{#MINGW}\share\locale\cs\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\es\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\es\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\fr\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\fr\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\pt\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\pt\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\ru\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\ru\LC_MESSAGES\"
 Source: "{#MINGW}\share\doc\pragha\README"; DestDir: "{app}"; DestName: "Readme.txt"
-
-;icons
+; Icons
 Source: "{#MINGW}\share\pixmaps\pragha\pragha.png"; DestDir: "{app}\share\pixmaps\pragha"
 Source: "{#MINGW}\share\pixmaps\pragha\album.png"; DestDir: "{app}\share\pixmaps\pragha"
 Source: "{#MINGW}\share\pixmaps\pragha\artist.png"; DestDir: "{app}\share\pixmaps\pragha"
@@ -64,7 +63,108 @@ Source: "{#MINGW}\share\pixmaps\pragha\cover.png"; DestDir: "{app}\share\pixmaps
 Source: "{#MINGW}\share\pixmaps\pragha\genre.png"; DestDir: "{app}\share\pixmaps\pragha"
 
 ; Deps
-Source: "{#MINGW}\bin\iconv.dll"; DestDir: "{app}/bin"; Flags: ignoreversion
+; Atk
+Source: "{#MINGW}\bin\libatk-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Bzip2
+Source: "{#MINGW}\bin\libbz2-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Cairo
+Source: "{#MINGW}\bin\libcairo-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libcairo-gobject-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libcairo-script-interpreter-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Expat
+Source: "{#MINGW}\bin\libexpat-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Fontconfig
+Source: "{#MINGW}\bin\libfontconfig-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Freetype
+Source: "{#MINGW}\bin\libfreetype-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Gcc
+Source: "{#MINGW}\bin\libgcc_s_sjlj-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libssp-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Gcc-c++
+Source: "{#MINGW}\bin\libstdc++-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Gdk-pixbuf
+Source: "{#MINGW}\bin\libgdk_pixbuf-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-tga.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-qtif.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-jasper.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ras.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xpm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-wbmp.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ani.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pcx.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pnm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-icns.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xbm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
+; Gettext
+Source: "{#MINGW}\bin\libasprintf-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgettextlib-0-18-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgettextpo-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgettextsrc-0-18-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libintl-8.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Glib
+Source: "{#MINGW}\bin\libgio-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libglib-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgmodule-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgobject-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgthread-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Gstreamer1
+Source: "{#MINGW}\bin\libgstbase-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstcontroller-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstnet-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstreamer-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstcoreelements.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+; Gstreamer1-plugin-base
+Source: "{#MINGW}\bin\libgstallocators-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstapp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstaudio-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstfft-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstpbutils-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstriff-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstrtp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstrtsp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstsdp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgsttag-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstvideo-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstadder.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstapp.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudioconvert.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudiorate.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudioresample.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudiotestsrc.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstgio.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstogg.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstpango.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstplayback.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstsubparse.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgsttcp.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgsttypefindfunctions.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoconvert.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideorate.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoscale.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideotestsrc.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvolume.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gstreamer-1.0\libgstvorbis.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
+; Gtk3
+Source: "{#MINGW}\bin\libgailutil-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgdk-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgtk-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-et.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-cyrillic-translit.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-er.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-thai.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ipa.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-multipress.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-am-et.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-cedilla.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ime.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-inuktitut.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-viqr.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
+; Harfbuzz
+Source: "{#MINGW}\bin\libharfbuzz-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libharfbuzz-icu-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Icu
 Source: "{#MINGW}\bin\icudata50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icui18n50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icuio50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
@@ -73,68 +173,46 @@ Source: "{#MINGW}\bin\iculx50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icutest50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icutu50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\icuuc50.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libasprintf-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libatk-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libbz2-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libcairo-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libcairo-gobject-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libcairo-script-interpreter-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libexpat-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libffi-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libfontconfig-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libfreetype-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgailutil-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgcc_s_sjlj-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgdk_pixbuf-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgdk-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgettextlib-0-18-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgettextpo-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgettextsrc-0-18-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgio-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libglib-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgmodule-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgobject-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstallocators-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstapp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstaudio-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstbase-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstcontroller-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstfft-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstnet-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstpbutils-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstreamer-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstriff-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstrtp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstrtsp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstsdp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgsttag-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstvideo-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgthread-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgtk-3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libharfbuzz-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libharfbuzz-icu-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libintl-8.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Jasper
 Source: "{#MINGW}\bin\libjasper-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Ffi
+Source: "{#MINGW}\bin\libffi-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Jpeg-turbo
 Source: "{#MINGW}\bin\libjpeg-62.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libturbojpeg.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Ogg
 Source: "{#MINGW}\bin\libogg-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Png
+Source: "{#MINGW}\bin\libpng16-16.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Vorbis
+Source: "{#MINGW}\bin\libvorbis-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libvorbisenc-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libvorbisfile-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Pango
 Source: "{#MINGW}\bin\libpango-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libpangocairo-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libpangoft2-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libpangowin32-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-basic-fc.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-indic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
+Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-arabic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
+; Pixman
 Source: "{#MINGW}\bin\libpixman-1-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libpng16-16.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Sqlite
 Source: "{#MINGW}\bin\libsqlite3-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libssp-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libstdc++-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libtag_c.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Taglib
 Source: "{#MINGW}\bin\libtag.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libtag_c.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Termcap
 Source: "{#MINGW}\bin\libtermcap-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libturbojpeg.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libvorbis-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libvorbisenc-2.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libvorbisfile-3.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Iconv
+Source: "{#MINGW}\bin\iconv.dll"; DestDir: "{app}/bin"; Flags: ignoreversion
+; Winpthread
 Source: "{#MINGW}\bin\libwinpthread-1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+; Zlib
 Source: "{#MINGW}\bin\zlib1.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+
+; Settings
 Source: "{#MINGW}\etc\gtk-3.0\gtk.immodules"; DestDir: "{app}\etc\gtk-3.0"; Flags: ignoreversion
 Source: "{#MINGW}\etc\gtk-3.0\im-multipress.conf"; DestDir: "{app}\etc\gtk-3.0"; Flags: ignoreversion
 Source: "{#MINGW}\etc\pango\pango.modules"; DestDir: "{app}\etc\pango"; Flags: ignoreversion
@@ -155,75 +233,10 @@ Source: "{#MINGW}\etc\fonts\conf.d\69-unifont.conf"; DestDir: "{app}\etc\fonts\c
 Source: "{#MINGW}\etc\fonts\conf.d\60-latin.conf"; DestDir: "{app}\etc\fonts\conf.d"; Flags: ignoreversion
 Source: "{#MINGW}\etc\fonts\conf.d\45-latin.conf"; DestDir: "{app}\etc\fonts\conf.d"; Flags: ignoreversion
 Source: "{#MINGW}\etc\fonts\conf.d\49-sansserif.conf"; DestDir: "{app}\etc\fonts\conf.d"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-tga.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-qtif.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-jasper.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ras.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xpm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-wbmp.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-ani.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pcx.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-pnm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-icns.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-xbm.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-basic-fc.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-indic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\pango\1.8.0\modules\pango-arabic-lang.dll"; DestDir: "{app}\lib\pango\1.8.0\modules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-et.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-cyrillic-translit.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ti-er.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-thai.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ipa.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-multipress.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-am-et.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-cedilla.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-ime.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-inuktitut.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gtk-3.0\3.0.0\immodules\im-viqr.dll"; DestDir: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: ignoreversion
 Source: "{#MINGW}\share\glib-2.0\schemas\org.gtk.Settings.FileChooser.gschema.xml"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
-Source: "{#MINGW}\share\glib-2.0\schemas\org.gtk.exampleapp.gschema.xml"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
 Source: "{#MINGW}\share\glib-2.0\schemas\org.gtk.Settings.ColorChooser.gschema.xml"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
 Source: "{#MINGW}\share\glib-2.0\schemas\gschemas.compiled"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
-Source: "{#MINGW}\share\glib-2.0\schemas\org.gtk.Demo.gschema.xml"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
 Source: "{#MINGW}\share\glib-2.0\schemas\gschema.dtd"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
-; Gstreamer1
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstasf.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstcoreelements.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgsttcp.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgsta52dec.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstdvdsub.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideotestsrc.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudiotestsrc.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstrmdemux.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstsubparse.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstdvdlpcmdec.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvorbis.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstx264.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstmpeg2dec.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudioresample.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvolume.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstplayback.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudiorate.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstaudioconvert.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstmad.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstgio.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstxingmux.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstadder.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstamrwbdec.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideorate.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstdvdread.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstapp.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstpango.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgsttypefindfunctions.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoscale.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstamrnb.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstcdio.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgsttwolame.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoconvert.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstogg.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstlame.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 
 ; Stock Icons
 Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
@@ -273,7 +286,7 @@ Name: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"
 Name: "{app}\pango"
 Name: "{app}\pango\1.8.0"
 Name: "{app}\pango\1.8.0\modules"
-Name: "{app}\gtk-3.0"
+Name: "{app}\lib\gtk-3.0"
 Name: "{app}\lib\gtk-3.0\3.0.0"
 Name: "{app}\lib\gtk-3.0\3.0.0\immodules"
 Name: "{app}\lib\gstreamer-1.0"
