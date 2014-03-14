@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib/gstdio.h>
+
 #include "pragha-art-cache.h"
 #include "pragha-utils.h"
 
@@ -28,6 +30,9 @@ pragha_art_cache_new ()
 {
 	PraghaArtCache *cache = g_slice_new (PraghaArtCache);
 	cache->cache_dir = g_build_path (G_DIR_SEPARATOR_S, g_get_user_cache_dir (), "pragha", NULL);
+
+	g_mkdir_with_parents (cache->cache_dir, S_IRWXU);
+
 	return cache;
 }
 
@@ -43,7 +48,7 @@ pragha_art_cache_build_path (PraghaArtCache *cache, const gchar *artist, const g
 {
 	gchar *artist_escaped = pragha_escape_slashes (artist);
 	gchar *album_escaped = pragha_escape_slashes (album);
-	gchar *result = g_strdup_printf ("%s/album-%s-%s.jpeg", cache->cache_dir, artist_escaped, album_escaped);
+	gchar *result = g_strdup_printf ("%s%salbum-%s-%s.jpeg", cache->cache_dir, G_DIR_SEPARATOR_S, artist_escaped, album_escaped);
 	g_free (album_escaped);
 	g_free (artist_escaped);
 	return result;
