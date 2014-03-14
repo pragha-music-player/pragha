@@ -23,11 +23,15 @@ OutputBaseFilename=Pragha 1.3.0
 ChangesAssociations=no
 AppId={{1A58C548-142C-4016-9943-6A39EB25BB51}
 
+#define MINGW  "Z:\usr\i686-w64-mingw32\sys-root\mingw"
+#define ICON_PATH "Z:\usr\share\icons\oxygen"
+
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
 
 [Run]
-Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent
+;Filename: "{app}\bin\gtk-update-icon-cache.exe {app}\share\icons\hicolor\"
+Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent unchecked
 Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent
 
 [Registry]
@@ -36,8 +40,6 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\pango\1.8.0\modules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gstreamer-1.0\"; Flags: uninsdeletevalue
-
-#define MINGW  "Z:\usr\i686-w64-mingw32\sys-root\mingw"
 
 [Files]
 ;pragha files
@@ -224,7 +226,6 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstlame.dll"; DestDir: "{app}\lib\gstream
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstencodebin.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 
 ; Stock Icons
-#define ICON_PATH "Z:\\usr\share\icons\oxygen"
 Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
 Source: "{#ICON_PATH}\48x48\actions\media-playback-pause.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
@@ -233,6 +234,10 @@ Source: "{#ICON_PATH}\48x48\actions\media-skip-forward.png"; DestDir: "{app}\sha
 Source: "{#ICON_PATH}\48x48\status\media-playlist-shuffle.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
 Source: "{#ICON_PATH}\48x48\status\media-playlist-repeat.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
 Source: "{#ICON_PATH}\48x48\status\dialog-information.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-muted.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-high.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-low.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-medium.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
 
 Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
@@ -247,6 +252,7 @@ Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share
 Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"
 Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"; DestName: "folder-music.png"
+Source: "{#ICON_PATH}\index.theme"; DestDir: "{app}\share\icons\hicolor\"
 
 [Icons]
 Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Comment: "Yeah!. Music..";
