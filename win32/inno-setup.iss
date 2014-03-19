@@ -21,6 +21,7 @@ SourceDir=.
 OutputDir=.
 OutputBaseFilename=Pragha 1.3.0
 ChangesAssociations=no
+SetupIconFile="pragha.ico"
 AppId={{1A58C548-142C-4016-9943-6A39EB25BB51}
 
 #define MINGW  "Z:\usr\i686-w64-mingw32\sys-root\mingw"
@@ -36,7 +37,7 @@ Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: post
 
 [Registry]
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\pragha.exe"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\pango\1.8.0\modules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gstreamer-1.0\"; Flags: uninsdeletevalue
@@ -84,7 +85,7 @@ Source: "{#MINGW}\bin\libssp-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libstdc++-6.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 ; Gdk-pixbuf
 Source: "{#MINGW}\bin\libgdk_pixbuf-2.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"; DestDir: "{app}\gdk-pixbuf-2.0\2.10.0"; Flags: ignoreversion
+Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-tga.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-qtif.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gdk-pixbuf-2.0\2.10.0\loaders\libpixbufloader-jasper.dll"; DestDir: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"; Flags: ignoreversion
@@ -283,9 +284,9 @@ Name: "{app}\etc\fonts\conf.d"
 Name: "{app}\lib\gdk-pixbuf-2.0"
 Name: "{app}\lib\gdk-pixbuf-2.0\2.10.0"
 Name: "{app}\lib\gdk-pixbuf-2.0\2.10.0\loaders"
-Name: "{app}\pango"
-Name: "{app}\pango\1.8.0"
-Name: "{app}\pango\1.8.0\modules"
+Name: "{app}\lib\pango"
+Name: "{app}\lib\pango\1.8.0"
+Name: "{app}\lib\pango\1.8.0\modules"
 Name: "{app}\lib\gtk-3.0"
 Name: "{app}\lib\gtk-3.0\3.0.0"
 Name: "{app}\lib\gtk-3.0\3.0.0\immodules"
