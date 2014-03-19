@@ -31,7 +31,7 @@ AppId={{1A58C548-142C-4016-9943-6A39EB25BB51}
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
 
 [Run]
-;Filename: "{app}\bin\gtk-update-icon-cache.exe {app}\share\icons\hicolor\"
+;Filename: "{app}\bin\gtk-update-icon-cache.exe {app}\share\icons\oxygen\"
 Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec skipifsilent unchecked
 Filename: "{app}\bin\pragha.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent
 
@@ -47,7 +47,7 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 Source: "{#MINGW}\bin\pragha.exe"; DestDir: "{app}/bin"; DestName: "pragha.exe"
 Source: "pragha.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "settings.ini"; DestDir: "{app}\etc\gtk-3.0"; Flags: ignoreversion
-Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\hicolor\128x128\apps"
+Source: "..\data\pragha.png"; DestDir: "{app}\share\icons\oxygen\128x128\apps"
 ; Translations
 Source: "{#MINGW}\share\locale\cs\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\cs\LC_MESSAGES\"
 Source: "{#MINGW}\share\locale\es\LC_MESSAGES\pragha.mo"; DestDir: "{app}\share\locale\es\LC_MESSAGES\"
@@ -240,33 +240,33 @@ Source: "{#MINGW}\share\glib-2.0\schemas\gschemas.compiled"; DestDir: "{app}\sha
 Source: "{#MINGW}\share\glib-2.0\schemas\gschema.dtd"; DestDir: "{app}\share\glib-2.0\schemas"; Flags: ignoreversion
 
 ; Stock Icons
-Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\actions\media-playback-pause.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\actions\media-playback-stop.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\actions\media-skip-forward.png"; DestDir: "{app}\share\icons\hicolor\48x48\actions\"
-Source: "{#ICON_PATH}\48x48\status\media-playlist-shuffle.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\media-playlist-repeat.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\dialog-information.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\audio-volume-muted.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\audio-volume-high.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\audio-volume-low.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
-Source: "{#ICON_PATH}\48x48\status\audio-volume-medium.png"; DestDir: "{app}\share\icons\hicolor\48x48\status\"
+Source: "{#ICON_PATH}\48x48\actions\media-skip-backward.png"; DestDir: "{app}\share\icons\oxygen\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-start.png"; DestDir: "{app}\share\icons\oxygen\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-pause.png"; DestDir: "{app}\share\icons\oxygen\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-playback-stop.png"; DestDir: "{app}\share\icons\oxygen\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\actions\media-skip-forward.png"; DestDir: "{app}\share\icons\oxygen\48x48\actions\"
+Source: "{#ICON_PATH}\48x48\status\media-playlist-shuffle.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\media-playlist-repeat.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\dialog-information.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-muted.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-high.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-low.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
+Source: "{#ICON_PATH}\48x48\status\audio-volume-medium.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
 
-Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\actions\window-close.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\actions\go-jump.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\actions\list-remove.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\actions\edit-find.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-find-symbolic.png"
-Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"; DestName: "edit-clear-symbolic.png"
-Source: "{#ICON_PATH}\22x22\devices\media-optical.png"; DestDir: "{app}\share\icons\hicolor\22x22\devices\"
-Source: "{#ICON_PATH}\22x22\mimetypes\audio-x-generic.png"; DestDir: "{app}\share\icons\hicolor\22x22\mimetypes"
-Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\icons\hicolor\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"
-Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\hicolor\22x22\places\"; DestName: "folder-music.png"
-Source: "{#ICON_PATH}\index.theme"; DestDir: "{app}\share\icons\hicolor\"
+Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\window-close.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\go-jump.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\list-remove.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\actions\edit-find.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"; DestName: "edit-find-symbolic.png"
+Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"; DestName: "edit-clear-symbolic.png"
+Source: "{#ICON_PATH}\22x22\devices\media-optical.png"; DestDir: "{app}\share\icons\oxygen\22x22\devices\"
+Source: "{#ICON_PATH}\22x22\mimetypes\audio-x-generic.png"; DestDir: "{app}\share\icons\oxygen\22x22\mimetypes"
+Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"
+Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-music.png"
+Source: "{#ICON_PATH}\index.theme"; DestDir: "{app}\share\icons\oxygen\"
 
 [Icons]
 Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Comment: "Yeah!. Music..";
