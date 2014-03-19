@@ -257,7 +257,7 @@ pragha_file_get_media_type (const gchar *filename)
 static gboolean
 is_image_file(const gchar *file)
 {
-	gboolean uncertain = FALSE, ret = FALSE;
+	gboolean ret = FALSE;
 	gchar *result = NULL;
 
 	if (!file)
@@ -265,8 +265,11 @@ is_image_file(const gchar *file)
 
 	/* Type: JPG, PNG */
 
-	result = g_content_type_guess(file, NULL, 0, &uncertain);
-
+#ifdef G_OS_WIN32
+	result = get_mime_type_from_uri (file, NULL);
+#else
+	result = get_mime_type (file);
+#endif
 	if (!result)
 		return FALSE;
 	else {
@@ -363,7 +366,7 @@ get_image_path_from_dir (const gchar *path)
 
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
-		ab_file = g_strconcat(path, "/", next_file, NULL);
+		ab_file = g_strconcat(path, G_DIR_SEPARATOR_S, next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR) &&
 		    is_image_file(ab_file)) {
 			result = ab_file;
@@ -408,7 +411,7 @@ get_pref_image_path_dir (PraghaPreferences *preferences, const gchar *path)
 
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
-		ab_file = g_strconcat(path, "/", next_file, NULL);
+		ab_file = g_strconcat(path, G_DIR_SEPARATOR_S, next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_REGULAR))
 			file_list = g_slist_append(file_list, g_strdup(next_file));
 
@@ -422,7 +425,7 @@ get_pref_image_path_dir (PraghaPreferences *preferences, const gchar *path)
 	pattern = g_strsplit(patterns, ";", ALBUM_ART_NO_PATTERNS);
 	while (pattern[i]) {
 		if (is_present_str_list(pattern[i], file_list)) {
-			ab_file = g_strconcat(path, "/", pattern[i], NULL);
+			ab_file = g_strconcat(path, G_DIR_SEPARATOR_S, pattern[i], NULL);
 			if (is_image_file(ab_file))
 				return ab_file;
 			g_free(ab_file);
@@ -459,7 +462,7 @@ gint pragha_get_dir_count(const gchar *dir_name, GCancellable *cancellable)
 		if(g_cancellable_is_cancelled (cancellable))
 			return 0;
 
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+		ab_file = g_strconcat(dir_name, G_DIR_SEPARATOR_S, next_file, NULL);
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR))
 			file_count += pragha_get_dir_count(ab_file, cancellable);
 		else {
@@ -492,7 +495,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 
 	next_file = g_dir_read_name(dir);
 	while (next_file) {
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+		ab_file = g_strconcat(dir_name, G_DIR_SEPARATOR_S, next_file, NULL);
 
 		if (is_dir_and_accessible(ab_file)) {
 			preferences = pragha_preferences_get();

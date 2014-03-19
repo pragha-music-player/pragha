@@ -412,7 +412,7 @@ pragha_scanner_update_handler(PraghaScanner *scanner, const gchar *dir_name)
 		if(g_cancellable_is_cancelled (scanner->cancellable))
 			return;
 
-		ab_file = g_strconcat(dir_name, "/", next_file, NULL);
+		ab_file = g_strconcat(dir_name, G_DIR_SEPARATOR_S, next_file, NULL);
 
 		if (g_file_test(ab_file, G_FILE_TEST_IS_DIR)) {
 			pragha_scanner_update_handler(scanner, ab_file);
