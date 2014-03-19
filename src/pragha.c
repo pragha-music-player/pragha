@@ -43,6 +43,10 @@
 #include "pragha-utils.h"
 #include "pragha.h"
 
+#ifdef G_OS_WIN32
+#include "../win32/win32dep.h"
+#endif
+
 gint debug_level;
 #ifdef DEBUG
 GThread *pragha_main_thread = NULL;
