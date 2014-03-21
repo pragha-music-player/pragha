@@ -252,6 +252,7 @@ AC_CONFIG_FILES([plugins/notify/Makefile])
 AC_CONFIG_FILES([plugins/devices/Makefile])
 AC_CONFIG_FILES([plugins/tunein/Makefile])
 AC_CONFIG_FILES([plugins/dlna/Makefile])
+AC_CONFIG_FILES([plugins/cdrom/Makefile])
 fi
 AC_OUTPUT
 
@@ -266,6 +267,7 @@ echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
+echo "   * Play Audio cds.........................................................: $LIBCDIO_FOUND"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"

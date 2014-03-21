@@ -36,3 +36,11 @@ endif
 if HAVE_RYGEL
 SUBDIRS += dlna
 endif
+
+if HAVE_LIBCDIO
+if HAVE_LIBCDIO_PARANOIA
+if HAVE_LIBCDDB
+SUBDIRS += cdrom
+endif
+endif
+endif

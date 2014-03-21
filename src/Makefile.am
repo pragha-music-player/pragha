@@ -19,8 +19,6 @@ pragha_SOURCES = \
 		pragha-art-cache.h \
 		pragha-backend.c \
 		pragha-backend.h \
-		pragha-cdda.c \
-		pragha-cdda.h \
 		pragha-cmdline.c \
 		pragha-database.c \
 		pragha-database.h \
@@ -40,6 +38,8 @@ pragha_SOURCES = \
 		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
+		pragha-music-enum.c \
+		pragha-music-enum.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-musicobject-mgmt.c \
@@ -99,8 +99,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -109,10 +107,7 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
-	$(TAGLIB_C_LIBS)						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)
+	$(TAGLIB_C_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)

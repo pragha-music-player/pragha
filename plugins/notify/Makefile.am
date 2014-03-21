@@ -24,8 +24,6 @@ libnotify_la_CFLAGS =						\
 	$(LIBNOTIFY_CFLAGS) 						\
 	$(LIBPEAS_CFLAGS) 						\
 	$(LIBPEAS_GTK_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -39,10 +37,7 @@ libnotify_la_LIBADD =						\
 	$(TAGLIB_C_LIBS)							\
 	$(LIBNOTIFY_LIBS) 						\
 	$(LIBPEAS_LIBS)							\
-	$(LIBPEAS_GTK_LIBS)						\
-	$(LIBCDIO_LIBS) 							\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)
+	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 libnotify_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)

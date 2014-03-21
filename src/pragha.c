@@ -43,6 +43,8 @@
 #include "pragha-utils.h"
 #include "pragha.h"
 
+#include "pragha-music-enum.h"
+
 #ifdef G_OS_WIN32
 #include "../win32/win32dep.h"
 #endif
@@ -529,10 +531,6 @@ pragha_application_dispose (GObject *object)
 		pragha->scanner = NULL;
 	}
 
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	pragha_cdda_free ();
-#endif
-
 	if (pragha->pixbuf_app) {
 		g_object_unref (pragha->pixbuf_app);
 		pragha->pixbuf_app = NULL;
@@ -808,6 +806,7 @@ gint main(gint argc, gchar *argv[])
 #ifdef DEBUG
 	g_print ("debug enabled\n");
 	pragha_main_thread = g_thread_self ();
+	test_pragha_music_enum_map ();
 #endif
 	debug_level = 0;
 

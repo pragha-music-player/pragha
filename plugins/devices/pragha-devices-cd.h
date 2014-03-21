@@ -15,6 +15,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
+
 #ifndef PRAGHA_DEVICES_CD_H
 #define PRAGHA_DEVICES_CD_H
 
@@ -23,3 +29,5 @@
 void pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin);
 
 #endif /* PRAGHA_DEVICES_CD_H */
+
+#endif

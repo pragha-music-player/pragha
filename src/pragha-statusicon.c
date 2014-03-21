@@ -43,9 +43,6 @@ G_DEFINE_TYPE(PraghaStatusIcon, pragha_status_icon, GTK_TYPE_STATUS_ICON)
 
 static void systray_about_action        (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_open_file_action    (GtkAction *action, PraghaStatusIcon *status_icon);
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-static void systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon);
-#endif
 static void systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_play_pause_action   (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *status_icon);
@@ -60,6 +57,7 @@ static const gchar *systray_menu_xml =
 		<separator/>				\
 		<menuitem action=\"Add files\"/> \
 		<menuitem action=\"Add location\"/>	\
+		<placeholder name=\"pragha-append-music-placeholder\"/>	\
 		<separator/>				\
 		<menuitem action=\"Prev\"/>		\
 		<menuitem action=\"Play_Pause\"/>	\
@@ -77,10 +75,6 @@ static const GtkActionEntry systray_menu_aentries[] = {
 	 "", NULL, G_CALLBACK(systray_about_action)},
 	{"Add files", "document-open", N_("_Add files"),
 	 "", NULL, G_CALLBACK(systray_open_file_action)},
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(systray_add_audio_cd_action)},
-#endif
 	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(systray_add_location_action)},
 	{"Prev", "media-skip-backward", N_("Prev Track"),
@@ -96,6 +90,43 @@ static const GtkActionEntry systray_menu_aentries[] = {
 	{"Quit", "application-exit", N_("_Quit"),
 	 "", "Quit", G_CALLBACK(systray_quit)}
 };
+
+gint
+pragha_systray_append_plugin_action (PraghaStatusIcon *status_icon,
+                                     GtkActionGroup   *action_group,
+                                     const gchar      *menu_xml)
+{
+	GError *error = NULL;
+	gint merge_id;
+
+	gtk_ui_manager_insert_action_group (status_icon->ui_manager, action_group, -1);
+
+	merge_id = gtk_ui_manager_add_ui_from_string (status_icon->ui_manager,
+	                                              menu_xml,
+	                                              -1,
+	                                              &error);
+
+	if (error) {
+		g_warning ("Adding plugin to menubar: %s", error->message);
+		g_error_free (error);
+	}
+
+	return merge_id;
+}
+
+void
+pragha_systray_remove_plugin_action (PraghaStatusIcon *status_icon,
+                                     GtkActionGroup   *action_group,
+                                     gint              merge_id)
+{
+	gtk_ui_manager_remove_ui (status_icon->ui_manager, merge_id);
+	gtk_ui_manager_remove_action_group (status_icon->ui_manager, action_group);
+	g_object_unref (action_group);
+}
+
+/*
+ * Status Icon
+ */
 
 static gboolean
 status_icon_clicked (GtkWidget *widget, GdkEventButton *event, PraghaStatusIcon *status_icon)
@@ -191,14 +222,6 @@ systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
 	open_file_action (action, status_icon->pragha);
 }
-
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-static void
-systray_add_audio_cd_action (GtkAction *action, PraghaStatusIcon *status_icon)
-{
-	add_audio_cd_action (action, status_icon->pragha);
-}
-#endif
 
 static void
 systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)

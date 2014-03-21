@@ -1,6 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,28 +15,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_MUSICOBJECT_MGMT_H
-#define PRAGHA_MUSICOBJECT_MGMT_H
-
-#include "pragha-musicobject.h"
-#include "pragha-database.h"
+#ifndef PRAGHA_CDROM_PLUGIN_H
+#define PRAGHA_CDROM_PLUGIN_H
 
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
-/* Flags to control tags changed. */
+void pragha_application_append_audio_cd (PraghaApplication *pragha);
 
-#define TAG_TNO_CHANGED     1<<0
-#define TAG_TITLE_CHANGED   1<<1
-#define TAG_ARTIST_CHANGED  1<<2
-#define TAG_ALBUM_CHANGED   1<<3
-#define TAG_GENRE_CHANGED   1<<4
-#define TAG_YEAR_CHANGED    1<<5
-#define TAG_COMMENT_CHANGED 1<<6
-
-PraghaMusicobject* new_musicobject_from_file(const gchar *file);
-PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
-PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
-void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
-
-#endif /* PRAGHA_MUSICOBJECT_MGMT_H */
+#endif /* PRAGHA_CDROM_PLUGIN_H */

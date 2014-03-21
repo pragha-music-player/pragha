@@ -37,6 +37,15 @@ typedef struct {
 
 typedef struct _PraghaStatusIcon PraghaStatusIcon;
 
+gint
+pragha_systray_append_plugin_action (PraghaStatusIcon *status_icon,
+                                     GtkActionGroup   *action_group,
+                                     const gchar      *menu_xml);
+void
+pragha_systray_remove_plugin_action (PraghaStatusIcon *status_icon,
+                                     GtkActionGroup   *action_group,
+                                     gint              merge_id);
+
 PraghaStatusIcon *pragha_status_icon_new (PraghaApplication *pragha);
 
 #endif /* PRAGHA_STATUSICON_H */
