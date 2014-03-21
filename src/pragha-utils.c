@@ -20,11 +20,17 @@
 #include <config.h>
 #endif
 
+#include <glib.h>
 #include <glib/gprintf.h>
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
+#endif
+
+#ifdef G_OS_WIN32
+#include <windows.h>
 #endif
 
 #include "pragha-utils.h"
@@ -439,6 +445,12 @@ pragha_process_gtk_events ()
 /* callback used to open default browser when URLs got clicked */
 void open_url(const gchar *url, GtkWidget *parent)
 {
+	#ifdef G_OS_WIN32
+	if (g_file_test(url, G_FILE_TEST_IS_DIR))
+		ShellExecute (0, "explore", url, NULL, NULL, SW_SHOWNORMAL);
+	else
+		ShellExecute (0, "open", url, NULL, NULL, SW_SHOWNORMAL);
+	#else
 	gboolean success = TRUE;
 	const gchar *argv[3];
 	gchar *methods[] = {"xdg-open","firefox","mozilla","opera","konqueror",NULL};
@@ -471,6 +483,7 @@ void open_url(const gchar *url, GtkWidget *parent)
 		g_signal_connect (d, "response", G_CALLBACK (gtk_widget_destroy), NULL);
 		gtk_window_present (GTK_WINDOW (d));
 	}
+	#endif
 }
 
 /* It gives the position of the menu on the 

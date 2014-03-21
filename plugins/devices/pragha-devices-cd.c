@@ -19,6 +19,8 @@
 #include <config.h>
 #endif
 
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -28,7 +30,7 @@
 #include <gudev/gudev.h>
 #include <stdlib.h>
 
-#include "src/pragha-cdda.h"
+#include "plugins/cdrom/pragha-cdrom-plugin.h"
 #include "src/pragha-file-utils.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-debug.h"
@@ -46,12 +48,11 @@ pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin)
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 			pragha_application_append_audio_cd (pragha_device_get_application(plugin));
-			#endif
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:
 			break;
 	}
 }
+#endif

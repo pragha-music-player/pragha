@@ -37,7 +37,10 @@
 #include "pragha-devices-plugin.h"
 #include "pragha-devices-block.h"
 #include "pragha-devices-mtp.h"
+
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 #include "pragha-devices-cd.h"
+#endif
 
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
@@ -314,7 +317,9 @@ pragha_gudev_device_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 			pragha_devices_moutable_added (plugin, device);
 			break;
 		case PRAGHA_DEVICE_AUDIO_CD:
+			#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 			pragha_devices_audio_cd_added (plugin);
+			#endif
 			break;
 		case PRAGHA_DEVICE_MTP:
 			pragha_devices_mtp_added (plugin, device);

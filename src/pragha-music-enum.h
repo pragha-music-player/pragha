@@ -1,6 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,28 +15,25 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_MUSICOBJECT_MGMT_H
-#define PRAGHA_MUSICOBJECT_MGMT_H
+#ifndef PRAGHA_MUSIC_ENUM_H
+#define PRAGHA_MUSIC_ENUM_H
 
-#include "pragha-musicobject.h"
-#include "pragha-database.h"
+#include <glib.h>
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#define MAX_ENUM_SIZE 10
 
-/* Flags to control tags changed. */
+G_BEGIN_DECLS
 
-#define TAG_TNO_CHANGED     1<<0
-#define TAG_TITLE_CHANGED   1<<1
-#define TAG_ARTIST_CHANGED  1<<2
-#define TAG_ALBUM_CHANGED   1<<3
-#define TAG_GENRE_CHANGED   1<<4
-#define TAG_YEAR_CHANGED    1<<5
-#define TAG_COMMENT_CHANGED 1<<6
+const gchar * pragha_music_enum_map_get_name (gint enum_code);
 
-PraghaMusicobject* new_musicobject_from_file(const gchar *file);
-PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
-PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
-void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
+gint          pragha_music_enum_map_get      (const gchar *name);
+gint          pragha_music_enum_map_remove   (const gchar *name);
 
-#endif /* PRAGHA_MUSICOBJECT_MGMT_H */
+void          pragha_music_enum_map_free     (void);
+void          pragha_music_enum_map_init     (gint min_enum, gint max_enum);
+
+void          test_pragha_music_enum_map     (void);
+
+G_END_DECLS
+
+#endif /* PRAGHA_MUSIC_ENUM_H */
