@@ -176,7 +176,7 @@ pragha_musicobject_is_local_file (PraghaMusicobject *musicobject)
 
 	PraghaMusicType file_type = musicobject->priv->file_type;
 
-	return file_type != FILE_CDDA && file_type != FILE_HTTP;
+	return (file_type != FILE_HTTP) && (file_type < FILE_NONE);
 }
 
 /**
@@ -674,7 +674,7 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                  "FileType",
 		                  "The File Type",
 		                  FILE_HTTP,
-		                  10,
+		                  FILE_USER_L,
 		                  FILE_NONE,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

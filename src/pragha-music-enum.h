@@ -32,8 +32,6 @@ gint          pragha_music_enum_map_remove   (const gchar *name);
 void          pragha_music_enum_map_free     (void);
 void          pragha_music_enum_map_init     (gint min_enum, gint max_enum);
 
-void          test_pragha_music_enum_map     (void);
-
 G_END_DECLS
 
 #endif /* PRAGHA_MUSIC_ENUM_H */

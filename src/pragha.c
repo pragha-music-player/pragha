@@ -806,7 +806,6 @@ gint main(gint argc, gchar *argv[])
 #ifdef DEBUG
 	g_print ("debug enabled\n");
 	pragha_main_thread = g_thread_self ();
-	test_pragha_music_enum_map ();
 #endif
 	debug_level = 0;
 
@@ -823,6 +822,9 @@ gint main(gint argc, gchar *argv[])
 	/* Setup application name and pulseaudio role */
 	g_set_application_name(_("Pragha Music Player"));
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
+
+	/* Init music type enum */
+	pragha_music_enum_map_init (FILE_USER_0, FILE_USER_L);
 
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();

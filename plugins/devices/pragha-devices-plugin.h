@@ -63,11 +63,6 @@ typedef enum {
 	PRAGHA_DEVICE_UNKNOWN
 } PraghaDeviceType;
 
-enum
-{
-	FILE_DEVICE_MTP
-};
-
 void                pragha_device_cache_append_tracks        (PraghaDevicesPlugin *plugin);
 void                pragha_device_cache_clear                (PraghaDevicesPlugin *plugin);
 void                pragha_device_cache_insert_track         (PraghaDevicesPlugin *plugin, PraghaMusicobject *mobj);

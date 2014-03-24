@@ -119,7 +119,7 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 
 	nfile = g_strdup_printf("cdda://%d", track_no);
 	pragha_musicobject_set_file(mobj, nfile);
-	pragha_musicobject_set_file_type (mobj, FILE_CDDA);
+	pragha_musicobject_set_file_type (mobj, pragha_music_enum_map_get("FILE_CDDA"));
 
 	pragha_musicobject_set_track_no(mobj, track_no);
 
@@ -301,6 +301,33 @@ add:
 		cddb_destroy(cddb_conn);
 }
 
+void
+pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
+{
+	PraghaMusicobject *mobj = NULL;
+	PraghaMusicType file_type = FILE_NONE;
+	GObject *source;
+
+	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	file_type = pragha_musicobject_get_file_type (mobj);
+
+	if (file_type != pragha_music_enum_map_get("FILE_CDDA"))
+		return;
+
+	g_object_get (obj, "source", &source, NULL);
+	if (source) {
+		PraghaPreferences *preferences = pragha_application_get_preferences (priv->pragha);
+		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
+		if (audio_cd_device) {
+			g_object_set (source, "device", audio_cd_device, NULL);
+		}
+		g_object_unref (source);
+	}
+}
+
 /*
  * Menubar
  */
@@ -340,6 +367,7 @@ static const gchar *syst_menu_xml = "<ui>							\
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
 	PraghaStatusIcon *status_icon = NULL;
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 
@@ -364,12 +392,18 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_syst_menu = pragha_systray_append_plugin_action (status_icon,
 	                                                                priv->action_group_main_menu,
 	                                                                syst_menu_xml);
+	/* Connect signals */
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_connect (backend, "set-device",
+	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
 	PraghaStatusIcon *status_icon = NULL;
+
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
@@ -385,6 +419,9 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_syst_menu);
 	priv->merge_id_syst_menu = 0;
+
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
 
 	libcddb_shutdown ();
 }
