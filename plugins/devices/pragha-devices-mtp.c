@@ -35,6 +35,7 @@
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-debug.h"
+#include "src/pragha-music-enum.h"
 #include "src/pragha.h"
 
 #include "pragha-devices-plugin.h"
@@ -114,7 +115,6 @@ get_mtp_track_from_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobjec
 			filetype = LIBMTP_FILETYPE_MP4;
 			break;
 		case FILE_APE:
-		case FILE_CDDA:
 		case FILE_HTTP:
 		default:
 			filetype = LIBMTP_FILETYPE_UNKNOWN;
@@ -329,7 +329,7 @@ new_musicobject_from_mtp (LIBMTP_track_t *track)
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
-	                     "file-type", FILE_DEVICE_MTP,
+	                     "file-type", pragha_music_enum_map_get("FILE_MTP"),
 	                     NULL);
 	if (track->title)
 		pragha_musicobject_set_title (mobj, track->title);

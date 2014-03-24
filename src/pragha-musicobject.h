@@ -50,6 +50,11 @@ struct _PraghaMusicobjectClass
 /* File music types */
 
 typedef enum {
+	FILE_USER_L    =  4,
+	FILE_USER_3    =  3,
+	FILE_USER_2    =  2,
+	FILE_USER_1    =  1,
+	FILE_USER_0    =  0,
 	FILE_NONE      = -1,
 	FILE_WAV       = -2,
 	FILE_MP3       = -3,
@@ -58,8 +63,7 @@ typedef enum {
 	FILE_ASF       = -6,
 	FILE_MP4       = -7,
 	FILE_APE       = -8,
-	FILE_CDDA      = -9,
-	FILE_HTTP      = -10
+	FILE_HTTP      = -9
 } PraghaMusicType;
 
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS

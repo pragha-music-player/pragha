@@ -82,6 +82,9 @@ enum {
 static GParamSpec *properties[PROP_LAST] = { 0 };
 
 enum {
+	SIGNAL_SET_DEVICE,
+	SIGNAL_PREPARE_SOURCE,
+	SIGNAL_CLEAN_SOURCE,
 	SIGNAL_TICK,
 	SIGNAL_SEEKED,
 	SIGNAL_BUFFERING,
@@ -108,25 +111,7 @@ emit_tick_cb (gpointer user_data)
 static void
 pragha_backend_source_notify_cb (GObject *obj, GParamSpec *pspec, PraghaBackend *backend)
 {
-	GObject *source;
-	PraghaMusicType file_type = FILE_NONE;
-
-	PraghaBackendPrivate *priv = backend->priv;
-
-	file_type = pragha_musicobject_get_file_type(priv->mobj);
-
-	if(file_type != FILE_CDDA)
-		return;
-
-	g_object_get (obj, "source", &source, NULL);
-
-	if (source) {
-		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(priv->preferences);
-		if (audio_cd_device) {
-			g_object_set (source, "device", audio_cd_device, NULL);
-		}
-		g_object_unref (source);
-	}
+	g_signal_emit (backend, signals[SIGNAL_SET_DEVICE], 0, obj);
 }
 
 gint64
@@ -911,70 +896,103 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 	gobject_class->dispose = pragha_backend_dispose;
 	gobject_class->finalize = pragha_backend_finalize;
 
-	properties[PROP_VOLUME] = g_param_spec_double ("volume", "Volume", "Playback volume.",
-                                                       0.0, 1.0, 0.5,
-                                                       G_PARAM_READWRITE |
-                                                       G_PARAM_STATIC_STRINGS);
+	properties[PROP_VOLUME] =
+		g_param_spec_double ("volume", "Volume", "Playback volume.",
+		                     0.0, 1.0, 0.5,
+		                     G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-	properties[PROP_TARGET_STATE] = g_param_spec_int ("targetstate", "TargetState", "Playback target state.",
-                                                   G_MININT, G_MAXINT, 0,
-                                                   G_PARAM_READABLE |
-                                                   G_PARAM_STATIC_STRINGS);
+	properties[PROP_TARGET_STATE] =
+		g_param_spec_int ("targetstate", "TargetState", "Playback target state.",
+		                  G_MININT, G_MAXINT, 0,
+		                  G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-	properties[PROP_STATE] = g_param_spec_int ("state", "State", "Playback state.",
-                                                   G_MININT, G_MAXINT, 0,
-                                                   G_PARAM_READABLE |
-                                                   G_PARAM_STATIC_STRINGS);
+	properties[PROP_STATE] =
+		g_param_spec_int ("state", "State", "Playback state.",
+		                  G_MININT, G_MAXINT, 0,
+		                  G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (gobject_class, PROP_LAST, properties);
 
-	signals[SIGNAL_TICK] = g_signal_new ("tick",
-                                             G_TYPE_FROM_CLASS (gobject_class),
-                                             G_SIGNAL_RUN_LAST,
-                                             G_STRUCT_OFFSET (PraghaBackendClass, tick),
-                                             NULL, NULL,
-                                             g_cclosure_marshal_VOID__VOID,
-                                             G_TYPE_NONE, 0);
+	signals[SIGNAL_SET_DEVICE] =
+		g_signal_new ("set-device",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, set_device),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
 
-	signals[SIGNAL_SEEKED] = g_signal_new ("seeked",
-                                               G_TYPE_FROM_CLASS (gobject_class),
-                                               G_SIGNAL_RUN_LAST,
-                                               G_STRUCT_OFFSET (PraghaBackendClass, seeked),
-                                               NULL, NULL,
-                                               g_cclosure_marshal_VOID__VOID,
-                                               G_TYPE_NONE, 0);
+	signals[SIGNAL_PREPARE_SOURCE] =
+		g_signal_new ("prepare-source",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, prepare_source),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 
-	signals[SIGNAL_BUFFERING] = g_signal_new ("buffering",
-                                                  G_TYPE_FROM_CLASS (gobject_class),
-                                                  G_SIGNAL_RUN_LAST,
-                                                  G_STRUCT_OFFSET (PraghaBackendClass, buffering),
-                                                  NULL, NULL,
-                                                  g_cclosure_marshal_VOID__INT,
-                                                  G_TYPE_NONE, 1, G_TYPE_INT);
+	signals[SIGNAL_CLEAN_SOURCE] =
+		g_signal_new ("clean_source",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, clean_source),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 
-	signals[SIGNAL_FINISHED] = g_signal_new ("finished",
-	                                         G_TYPE_FROM_CLASS (gobject_class),
-	                                         G_SIGNAL_RUN_LAST,
-	                                         G_STRUCT_OFFSET (PraghaBackendClass, finished),
-	                                         NULL, NULL,
-	                                         g_cclosure_marshal_VOID__VOID,
-	                                         G_TYPE_NONE, 0);
+	signals[SIGNAL_TICK] =
+		g_signal_new ("tick",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, tick),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 
-	signals[SIGNAL_ERROR] = g_signal_new ("error",
-                                              G_TYPE_FROM_CLASS (gobject_class),
-                                              G_SIGNAL_RUN_LAST,
-                                              G_STRUCT_OFFSET (PraghaBackendClass, error),
-                                              NULL, NULL,
-                                              g_cclosure_marshal_VOID__POINTER,
-                                              G_TYPE_NONE, 1, G_TYPE_POINTER);
+	signals[SIGNAL_SEEKED] =
+		g_signal_new ("seeked",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, seeked),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 
-	signals[SIGNAL_TAGS_CHANGED] = g_signal_new ("tags-changed",
-	                                             G_TYPE_FROM_CLASS (gobject_class),
-	                                             G_SIGNAL_RUN_LAST,
-	                                             G_STRUCT_OFFSET (PraghaBackendClass, tags_changed),
-	                                             NULL, NULL,
-	                                             g_cclosure_marshal_VOID__INT,
-	                                             G_TYPE_NONE, 1, G_TYPE_INT);
+	signals[SIGNAL_BUFFERING] =
+		g_signal_new ("buffering",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, buffering),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
+
+	signals[SIGNAL_FINISHED] =
+		g_signal_new ("finished",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, finished),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+
+	signals[SIGNAL_ERROR] =
+		g_signal_new ("error",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, error),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__POINTER,
+		              G_TYPE_NONE, 1, G_TYPE_POINTER);
+
+	signals[SIGNAL_TAGS_CHANGED] =
+		g_signal_new ("tags-changed",
+		              G_TYPE_FROM_CLASS (gobject_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaBackendClass, tags_changed),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__INT,
+		              G_TYPE_NONE, 1, G_TYPE_INT);
 
 	g_type_class_add_private (klass, sizeof (PraghaBackendPrivate));
 }

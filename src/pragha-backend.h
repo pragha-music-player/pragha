@@ -48,6 +48,9 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+	void (*set_device) (PraghaBackend *backend, GObject *obj);
+	void (*prepare_source) (PraghaBackend *backend);
+	void (*clean_source) (PraghaBackend *backend);
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
