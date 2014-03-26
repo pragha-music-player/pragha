@@ -35,6 +35,7 @@
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-preferences.h"
+#include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
 #include "pragha-lastfm.h"
@@ -71,6 +72,8 @@ GtkWidget         *pragha_application_get_window          (PraghaApplication *pr
 GdkPixbuf         *pragha_application_get_pixbuf_app      (PraghaApplication *pragha);
 PraghaPlaylist    *pragha_application_get_playlist        (PraghaApplication *pragha);
 PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pragha);
+PreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication *pragha);
+
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_first_sidebar   (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pragha);

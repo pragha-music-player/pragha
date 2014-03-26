@@ -333,12 +333,12 @@ pragha_gudev_device_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 static void
 pragha_gudev_device_changed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 {
+#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 	gint device_type = 0;
-
 	device_type = pragha_gudev_get_device_type (device);
-
 	if (device_type == PRAGHA_DEVICE_AUDIO_CD)
 		pragha_devices_audio_cd_added (plugin);
+#endif
 }
 
 static void

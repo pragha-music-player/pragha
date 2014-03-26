@@ -43,9 +43,9 @@ G_BEGIN_DECLS
 
 typedef struct _PraghaSongInfoPluginPrivate PraghaSongInfoPluginPrivate;
 
-PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PUBLIC_HEADER (PRAGHA_TYPE_SONG_INFO_PLUGIN,
-                                                   PraghaSongInfoPlugin,
-                                                   pragha_song_info_plugin)
+PRAGHA_PLUGIN_REGISTER_PUBLIC_HEADER (PRAGHA_TYPE_SONG_INFO_PLUGIN,
+                                      PraghaSongInfoPlugin,
+                                      pragha_song_info_plugin)
 
 PraghaApplication  *pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin);
 GlyrDatabase       *pragha_songinfo_plugin_get_cache       (PraghaSongInfoPlugin *plugin);
