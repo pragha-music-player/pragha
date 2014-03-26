@@ -1313,7 +1313,7 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	#ifdef HAVE_LIBPEAS
 	plugins_vbox = pref_create_plugins_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
-	gtk_widget_show (plugin_vbox);
+	gtk_widget_show_all (plugins_vbox);
 	#endif
 
 	/* Add to dialog */
