@@ -51,11 +51,12 @@ struct _PreferencesDialog {
 	PraghaApplication *pragha;
 	PraghaPreferences *preferences;
 
-	GtkWidget *widget;
+	GtkWidget         *widget;
+	GtkWidget         *notebook;
+	PreferencesTab    *audio_tab;
+	PreferencesTab    *desktop_tab;
+	PreferencesTab    *services_tab;
 
-	PreferencesTab *audio_tab;
-	PreferencesTab *desktop_tab;
-	PreferencesTab *services_tab;
 #ifndef G_OS_WIN32
 	GtkWidget *audio_device_w;
 	GtkWidget *audio_sink_combo_w;
@@ -452,6 +453,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 	}
 
 	gtk_widget_hide(GTK_WIDGET(dialog->widget));
+}
+
+static gboolean
+pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, PreferencesDialog *dialog)
+{
+	return TRUE;
 }
 
 /* Handler for adding a new library */
@@ -1174,6 +1181,9 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 {
 	PreferencesDialog *dialog;
 	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	gtk_notebook_set_current_page (GTK_NOTEBOOK(dialog->notebook), 0);
+
 	gtk_widget_show (dialog->widget);
 }
 
@@ -1279,12 +1289,16 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 
 	g_signal_connect (G_OBJECT(dialog->widget), "response",
 	                  G_CALLBACK(pragha_preferences_dialog_response), dialog);
+	g_signal_connect (G_OBJECT(dialog->widget), "delete_event",
+	                  G_CALLBACK(pragha_preferences_dialog_delete), dialog);
 
 	pragha_preferences_dialog_init_settings(dialog);
 
 	toggle_album_art(GTK_TOGGLE_BUTTON(dialog->album_art_w), dialog);
 
 	gtk_dialog_set_default_response(GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
+
+	dialog->notebook = pref_notebook;
 
 	return dialog;
 }
