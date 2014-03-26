@@ -247,8 +247,12 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 	PraghaLastfm *clastfm;
 #endif
 	gboolean test_change, pref_setted, pref_toggled;
-	gchar *audio_sink = NULL, *window_state_sink = NULL;
-	const gchar *album_art_pattern, *audio_device;
+	gchar *window_state_sink = NULL;
+	const gchar *album_art_pattern;
+#ifndef G_OS_WIN32
+	const gchar *audio_device;
+	gchar *audio_sink = NULL;
+#endif
 #if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
 	const gchar *audio_cd_device;
 #endif
@@ -1212,7 +1216,7 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 {
 	PreferencesDialog *dialog;
 	dialog = pragha_application_get_preferences_dialog (pragha);
-	gtk_widget_show_all (dialog->widget);
+	gtk_widget_show (dialog->widget);
 }
 
 void
@@ -1266,6 +1270,10 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 
 	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
 
+	library_vbox = pref_create_library_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
+	gtk_widget_show_all (library_vbox);
+
 	dialog->audio_tab = pragha_preferences_tab_new (_("Audio"));
 	#ifndef G_OS_WIN32
 	audio_vbox = pref_create_audio_page(dialog);
@@ -1275,17 +1283,15 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	audio_vbox = pref_create_cdrom_page (dialog);
 	pragha_preferences_tab_append_setting (dialog->audio_tab, audio_vbox, FALSE);
 	#endif
-
 	pragha_preferences_notebook_append_tab (pref_notebook, dialog->audio_tab);
 
 	appearance_vbox = pref_create_appearance_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox, label_appearance);
-
-	library_vbox = pref_create_library_page(dialog);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
+	gtk_widget_show_all (appearance_vbox);
 
 	general_vbox = pref_create_general_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox, label_general);
+	gtk_widget_show_all (general_vbox);
 
 	dialog->desktop_tab = pragha_preferences_tab_new (_("Desktop"));
 	desktop_vbox = pref_create_desktop_page(dialog);
@@ -1307,6 +1313,7 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	#ifdef HAVE_LIBPEAS
 	plugins_vbox = pref_create_plugins_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
+	gtk_widget_show (plugin_vbox);
 	#endif
 
 	/* Add to dialog */
@@ -1315,6 +1322,8 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), pref_notebook, TRUE, TRUE, 0);
+	gtk_widget_show_all (header);
+	gtk_widget_show (pref_notebook);
 
 	/* Setup signal handlers */
 

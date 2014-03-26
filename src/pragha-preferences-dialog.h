@@ -19,6 +19,8 @@
 #ifndef PRAGHA_PREFERENCES_DIALOG_H
 #define PRAGHA_PREFERENCES_DIALOG_H
 
+#include <gtk/gtk.h>
+
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
