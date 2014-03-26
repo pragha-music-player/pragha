@@ -505,10 +505,6 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->sidebar2_binding);
 		pragha->sidebar2_binding = NULL;
 	}
-	if (pragha->setting_dialog) {
-		pragha_preferences_dialog_free (pragha->setting_dialog);
-		pragha->setting_dialog = NULL;
-	}
 #ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
 		pragha_plugins_save_activated (pragha);
@@ -523,6 +519,10 @@ pragha_application_dispose (GObject *object)
 		pragha->peas_exten_set = NULL;
 	}
 #endif
+	if (pragha->setting_dialog) {
+		pragha_preferences_dialog_free (pragha->setting_dialog);
+		pragha->setting_dialog = NULL;
+	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
 		g_object_unref (pragha->backend);
