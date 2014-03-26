@@ -42,6 +42,7 @@
 #include "src/pragha-hig.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
+#include "src/pragha-preferences-dialog.h"
 
 #ifndef NOTIFY_CHECK_VERSION
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
@@ -58,6 +59,7 @@
 
 typedef struct {
 	PraghaApplication  *pragha;
+	GtkWidget          *setting_widget;
 
 	NotifyNotification *notify;
 
@@ -65,10 +67,9 @@ typedef struct {
 	gboolean            actions_in_osd;
 } PraghaNotifyPluginPrivate;
 
-PRAGHA_PLUGIN_REGISTER_CONFIGURABLE (PRAGHA_TYPE_NOTIFY_PLUGIN,
-                                     PraghaNotifyPlugin,
-                                     pragha_notify_plugin)
-
+PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_NOTIFY_PLUGIN,
+                        PraghaNotifyPlugin,
+                        pragha_notify_plugin)
 
 static gboolean
 can_support_actions (void)
@@ -272,13 +273,15 @@ toggle_actions_in_osd (GtkToggleButton *button)
 	g_free (plugin_group);
 }
 
-static GtkWidget *
-pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
+static void
+pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 {
 	PraghaPreferences *preferences = NULL;
 	gchar *plugin_group = NULL;
 	GtkWidget *table, *albumart_in_osd, *actions_in_osd;
 	guint row = 0;
+
+	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
 	table = pragha_hig_workarea_table_new ();
 
@@ -310,8 +313,19 @@ pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
 	if (!can_support_actions())
 		gtk_widget_set_sensitive (actions_in_osd, FALSE);
 
-	return table;
+	priv->setting_widget = table;
+
+	pragha_preferences_append_desktop_setting (priv->pragha, table, FALSE);
 }
+
+static void
+pragha_notify_plugin_remove_setting (PraghaNotifyPlugin *plugin)
+{
+	PraghaNotifyPluginPrivate *priv = plugin->priv;
+
+	pragha_preferences_remove_desktop_setting (priv->pragha, priv->setting_widget);
+}
+
 
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
@@ -340,6 +354,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->actions_in_osd   = pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd");
 	priv->album_art_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd");
 	g_free (plugin_group);
+
+	pragha_notify_plugin_append_setting (plugin);
 }
 
 static void
@@ -370,6 +386,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_preferences_set_boolean (preferences, plugin_group, "actions_in_osd", priv->actions_in_osd);
 	pragha_preferences_set_boolean (preferences, plugin_group, "album_art_in_osd", priv->album_art_in_osd);
 	g_free (plugin_group);
+
+	pragha_notify_plugin_remove_setting (plugin);
 
 	priv->pragha= NULL;
 }

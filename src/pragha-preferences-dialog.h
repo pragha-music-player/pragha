@@ -29,6 +29,15 @@ typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PreferencesDialog PreferencesDialog;
 
-void pragha_preferences_dialog_show (PraghaApplication *pragha);
+void               pragha_preferences_append_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget);
+
+void               pragha_preferences_append_services_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_services_setting (PraghaApplication *pragha, GtkWidget *widget);
+
+void               pragha_preferences_dialog_show            (PraghaApplication *pragha);
+
+void               pragha_preferences_dialog_free            (PreferencesDialog *dialog);
+PreferencesDialog *pragha_preferences_dialog_new             (PraghaApplication *pragha);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

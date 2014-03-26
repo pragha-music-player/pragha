@@ -71,6 +71,8 @@ struct _PraghaApplication {
 
 	PraghaScanner     *scanner;
 
+	PreferencesDialog *setting_dialog;
+
 	/* Main widgets */
 
 	GtkUIManager      *menu_ui_manager;
@@ -277,6 +279,12 @@ PraghaLibraryPane *
 pragha_application_get_library (PraghaApplication *pragha)
 {
 	return pragha->library;
+}
+
+PreferencesDialog *
+pragha_application_get_preferences_dialog (PraghaApplication *pragha)
+{
+	return pragha->setting_dialog;
 }
 
 PraghaToolbar *
@@ -497,6 +505,10 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->sidebar2_binding);
 		pragha->sidebar2_binding = NULL;
 	}
+	if (pragha->setting_dialog) {
+		pragha_preferences_dialog_free (pragha->setting_dialog);
+		pragha->setting_dialog = NULL;
+	}
 #ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
 		pragha_plugins_save_activated (pragha);
@@ -683,7 +695,8 @@ pragha_application_startup (GApplication *application)
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
 		                        pragha->sidebar2, "visible",
 		                        binding_flags);
-
+	
+	pragha->setting_dialog = pragha_preferences_dialog_new (pragha);
 	#ifdef HAVE_LIBCLASTFM
 	pragha->clastfm = pragha_lastfm_new(pragha);
 	#endif
