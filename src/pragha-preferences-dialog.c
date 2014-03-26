@@ -61,10 +61,6 @@ struct _PreferencesDialog {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 #endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	GtkWidget *audio_cd_device_w;
-#endif
-
 	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
@@ -86,9 +82,6 @@ struct _PreferencesDialog {
 	GtkWidget *lastfm_w;
 	GtkWidget *lastfm_uname_w;
 	GtkWidget *lastfm_pass_w;
-#endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	GtkWidget *use_cddb_w;
 #endif
 };
 
@@ -141,6 +134,22 @@ pragha_preferences_notebook_append_tab (GtkWidget *notebook, PreferencesTab *tab
 		gtk_widget_hide (tab->vbox);
 	else
 		gtk_widget_show_all (tab->vbox);
+}
+
+void
+pragha_preferences_append_audio_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_append_setting (dialog->audio_tab, widget, expand);
+}
+
+void
+pragha_preferences_remove_audio_setting (PraghaApplication *pragha, GtkWidget *widget)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_remove_setting (dialog->audio_tab, widget);
 }
 
 void
@@ -253,9 +262,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 	const gchar *audio_device;
 	gchar *audio_sink = NULL;
 #endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	const gchar *audio_cd_device;
-#endif
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
@@ -283,13 +289,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
 
 		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
-		#endif
-
-		#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(dialog->audio_cd_device_w));
-		if (audio_cd_device) {
-			pragha_preferences_set_audio_cd_device(dialog->preferences, audio_cd_device);
-		}
 		#endif
 
 		/* Save new library folders */
@@ -446,10 +445,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_lastfm_disconnect (clastfm);
 			pragha_lastfm_connect (clastfm);
 		}
-#endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-		pragha_preferences_set_use_cddb(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
 #endif
 		break;
 	default:
@@ -662,9 +657,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(dialog->preferences);
 	const gchar *audio_device = pragha_preferences_get_audio_device(dialog->preferences);
 #endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(dialog->preferences);
-#endif
 	const gchar *start_mode = pragha_preferences_get_start_mode(dialog->preferences);
 
 	/* Audio Options */
@@ -700,12 +692,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 
 	if (pragha_preferences_get_software_mixer(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
-#endif
-
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	if (string_is_not_empty(audio_cd_device))
-		gtk_entry_set_text(GTK_ENTRY(dialog->audio_cd_device_w),
-				   audio_cd_device);
 #endif
 
 	/* General Options */
@@ -806,10 +792,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
 	}
 #endif
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	if (pragha_preferences_get_use_cddb(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
-#endif
 }
 
 gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
@@ -885,35 +867,6 @@ pref_create_audio_page (PreferencesDialog *dialog)
 
 	g_signal_connect (G_OBJECT(audio_sink_combo), "changed",
 	                  G_CALLBACK(change_audio_sink), dialog);
-
-	return table;
-}
-#endif
-
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-static GtkWidget *
-pref_create_cdrom_page (PreferencesDialog *dialog)
-{
-	GtkWidget *table;
-	GtkWidget *audio_cd_device_label,*audio_cd_device_entry;
-	guint row = 0;
-
-	table = pragha_hig_workarea_table_new();
-
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
-
-	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
-	gtk_misc_set_alignment(GTK_MISC (audio_cd_device_label), 0, 0);
-
-	audio_cd_device_entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry), AUDIO_CD_DEVICE_ENTRY_LEN);
-	gtk_entry_set_activates_default (GTK_ENTRY(audio_cd_device_entry), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
-
-	/* Store references */
-
-	dialog->audio_cd_device_w = audio_cd_device_entry;
 
 	return table;
 }
@@ -1170,27 +1123,6 @@ pref_create_lastfm_page (PreferencesDialog *dialog)
 }
 #endif
 
-#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-static GtkWidget*
-pref_create_cddb_page (PreferencesDialog *dialog)
-{
-	GtkWidget *table;
-	GtkWidget *use_cddb;
-	guint row = 0;
-
-	table = pragha_hig_workarea_table_new();
-
-	pragha_hig_workarea_table_add_section_title(table, &row, "CDDB");
-
-	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
-
-	dialog->use_cddb_w = use_cddb;
-
-	return table;
-}
-#endif
-
 #ifdef HAVE_LIBPEAS
 static GtkWidget*
 pref_create_plugins_page (PreferencesDialog *dialog)
@@ -1210,6 +1142,32 @@ pref_create_plugins_page (PreferencesDialog *dialog)
 	return table;
 }
 #endif
+
+void
+pragha_preferences_dialog_connect_handler (PraghaApplication *pragha,
+                                           GCallback          callback,
+                                           gpointer           user_data)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	g_signal_connect (G_OBJECT(dialog->widget), "response",
+	                  G_CALLBACK(callback), user_data);
+}
+
+void
+pragha_preferences_dialog_disconnect_handler (PraghaApplication *pragha,
+                                              GCallback          callback,
+                                              gpointer           user_data)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	g_signal_handlers_disconnect_by_func (dialog->widget,
+	                                      callback,
+	                                      user_data);
+}
+
 
 void
 pragha_preferences_dialog_show (PraghaApplication *pragha)
@@ -1279,10 +1237,6 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	audio_vbox = pref_create_audio_page(dialog);
 	pragha_preferences_tab_append_setting (dialog->audio_tab, audio_vbox, FALSE);
 	#endif
-	#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	audio_vbox = pref_create_cdrom_page (dialog);
-	pragha_preferences_tab_append_setting (dialog->audio_tab, audio_vbox, FALSE);
-	#endif
 	pragha_preferences_notebook_append_tab (pref_notebook, dialog->audio_tab);
 
 	appearance_vbox = pref_create_appearance_page(dialog);
@@ -1300,10 +1254,6 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	dialog->services_tab = pragha_preferences_tab_new (_("Services"));
 	#ifdef HAVE_LIBCLASTFM
 	services_vbox = pref_create_lastfm_page (dialog);
-	pragha_preferences_tab_append_setting (dialog->services_tab, services_vbox, FALSE);
-	#endif
-	#if HAVE_LIBCDIO && HAVE_LIBCDIO_PARANOIA && HAVE_LIBCDDB
-	services_vbox = pref_create_cddb_page (dialog);
 	pragha_preferences_tab_append_setting (dialog->services_tab, services_vbox, FALSE);
 	#endif
 
