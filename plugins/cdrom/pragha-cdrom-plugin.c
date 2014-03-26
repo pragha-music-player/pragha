@@ -38,6 +38,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
@@ -55,6 +56,11 @@
 
 struct _PraghaCdromPluginPrivate {
 	PraghaApplication *pragha;
+
+	GtkWidget          *device_setting_widget;
+	GtkWidget          *audio_cd_device_w;
+	GtkWidget          *cddb_setting_widget;
+	GtkWidget          *use_cddb_w;
 
 	GtkActionGroup    *action_group_main_menu;
 	guint              merge_id_main_menu;
@@ -362,6 +368,127 @@ static const gchar *syst_menu_xml = "<ui>							\
 	</ui>";
 
 /*
+ * Cdrom Settings
+ */
+static void
+pragha_cdrom_preferences_dialog_response (GtkDialog         *dialog_w,
+                                          gint               response_id,
+                                          PraghaCdromPlugin *plugin)
+{
+	PraghaPreferences *preferences;
+	const gchar *audio_cd_device;
+
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	switch(response_id) {
+	case GTK_RESPONSE_CANCEL:
+		break;
+	case GTK_RESPONSE_OK:
+		preferences = pragha_preferences_get();
+		audio_cd_device = gtk_entry_get_text (GTK_ENTRY(priv->audio_cd_device_w));
+		if (audio_cd_device) {
+			pragha_preferences_set_audio_cd_device (preferences, audio_cd_device);
+		}
+		pragha_preferences_set_use_cddb (preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w)));
+		g_object_unref (preferences);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
+pragha_cdrom_init_settings (PraghaCdromPlugin *plugin)
+{
+	PraghaPreferences *preferences;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	preferences = pragha_preferences_get();
+
+	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
+
+	if (string_is_not_empty(audio_cd_device))
+		gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w), audio_cd_device);
+
+	if (pragha_preferences_get_use_cddb(preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w), TRUE);
+
+	g_object_unref (preferences);
+}
+
+static void
+pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
+{
+	GtkWidget *table;
+	GtkWidget *audio_cd_device_label,*audio_cd_device_entry, *use_cddb;
+	guint row = 0;
+
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	/* Cd Device */
+
+	table = pragha_hig_workarea_table_new();
+
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
+
+	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
+	gtk_misc_set_alignment (GTK_MISC (audio_cd_device_label), 0, 0);
+
+	audio_cd_device_entry = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY(audio_cd_device_entry), AUDIO_CD_DEVICE_ENTRY_LEN);
+	gtk_entry_set_activates_default (GTK_ENTRY(audio_cd_device_entry), TRUE);
+
+	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
+
+	/* Store references */
+
+	priv->device_setting_widget = table;
+	priv->audio_cd_device_w = audio_cd_device_entry;
+
+	/* CDDB Option */
+	row = 0;
+	table = pragha_hig_workarea_table_new();
+
+	pragha_hig_workarea_table_add_section_title (table, &row, "CDDB");
+
+	use_cddb = gtk_check_button_new_with_label (_("Connect to CDDB server"));
+	pragha_hig_workarea_table_add_wide_control (table, &row, use_cddb);
+
+	priv->cddb_setting_widget = table;
+	priv->use_cddb_w = use_cddb;
+
+	/* Append panes */
+
+	pragha_preferences_append_audio_setting (priv->pragha,
+	                                         priv->device_setting_widget, FALSE);
+	pragha_preferences_append_services_setting (priv->pragha,
+	                                            priv->cddb_setting_widget, FALSE);
+
+	/* Configure handler and settings */
+	pragha_preferences_dialog_connect_handler (priv->pragha,
+	                                           G_CALLBACK(pragha_cdrom_preferences_dialog_response),
+	                                           plugin);
+
+	pragha_cdrom_init_settings (plugin);
+}
+
+static void
+pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
+{
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	pragha_preferences_remove_audio_setting (priv->pragha,
+	                                         priv->device_setting_widget);
+	pragha_preferences_remove_services_setting (priv->pragha,
+	                                            priv->cddb_setting_widget);
+
+	pragha_preferences_dialog_disconnect_handler (priv->pragha,
+	                                              G_CALLBACK(pragha_cdrom_preferences_dialog_response),
+	                                              plugin);
+}
+
+/*
  * Cdrom plugin
  */
 static void
@@ -396,6 +523,9 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
+
+	/* Settings */
+	pragha_cdrom_plugin_append_setting (plugin);
 }
 
 static void
@@ -422,6 +552,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
+
+	pragha_cdrom_plugin_remove_setting (plugin);
 
 	libcddb_shutdown ();
 }
