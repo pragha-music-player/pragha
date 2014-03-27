@@ -253,6 +253,7 @@ AC_CONFIG_FILES([plugins/devices/Makefile])
 AC_CONFIG_FILES([plugins/tunein/Makefile])
 AC_CONFIG_FILES([plugins/dlna/Makefile])
 AC_CONFIG_FILES([plugins/cdrom/Makefile])
+AC_CONFIG_FILES([plugins/lastfm/Makefile])
 fi
 AC_OUTPUT
 
@@ -272,6 +273,7 @@ echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Share music library on DLNA............(Need rygel-server-2.0 >= 0.20).: $RYGEL_FOUND"
+echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management removable devices.:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
@@ -279,7 +281,6 @@ AS_IF([test $GSTREAMER_API_VERSION = 1.0],
       [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
       [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
 echo "   * Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
-echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
 

@@ -94,10 +94,6 @@ struct _PraghaApplication {
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
 #endif
-
-#ifdef HAVE_LIBCLASTFM
-	PraghaLastfm      *clastfm;
-#endif
 };
 
 G_DEFINE_TYPE (PraghaApplication, pragha_application, GTK_TYPE_APPLICATION);
@@ -374,14 +370,6 @@ pragha_application_get_peas_engine (PraghaApplication *pragha)
 }
 #endif
 
-#ifdef HAVE_LIBCLASTFM
-PraghaLastfm *
-pragha_application_get_lastfm (PraghaApplication *pragha)
-{
-	return pragha->clastfm;
-}
-#endif
-
 gboolean
 pragha_application_is_first_run (PraghaApplication *pragha)
 {
@@ -495,12 +483,6 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-#ifdef HAVE_LIBCLASTFM
-	if (pragha->clastfm) {
-		pragha_lastfm_free (pragha->clastfm);
-		pragha->clastfm = NULL;
-	}
-#endif
 	if (pragha->sidebar2_binding) {
 		g_object_unref (pragha->sidebar2_binding);
 		pragha->sidebar2_binding = NULL;
@@ -697,9 +679,6 @@ pragha_application_startup (GApplication *application)
 		                        binding_flags);
 	
 	pragha->setting_dialog = pragha_preferences_dialog_new (pragha);
-	#ifdef HAVE_LIBCLASTFM
-	pragha->clastfm = pragha_lastfm_new(pragha);
-	#endif
 
 	#ifdef HAVE_LIBPEAS
 	pragha_plugins_activate_saved (pragha);

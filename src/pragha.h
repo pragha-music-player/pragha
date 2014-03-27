@@ -38,7 +38,6 @@
 #include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
-#include "pragha-lastfm.h"
 #include "pragha-toolbar.h"
 #include "pragha-scanner.h"
 #include "pragha-sidebar.h"
@@ -90,10 +89,6 @@ GtkWidget         *pragha_application_get_second_pane        (PraghaApplication 
 
 #ifdef HAVE_LIBPEAS
 PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
-#endif
-
-#ifdef HAVE_LIBCLASTFM
-PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
 #endif
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);

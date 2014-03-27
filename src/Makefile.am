@@ -87,8 +87,6 @@ pragha_SOURCES = \
 		pragha-window.h \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
-		pragha-lastfm.c \
-		pragha-lastfm.h \
 		xml_helper.c \
 		xml_helper.h
 
@@ -112,11 +110,6 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
-endif
-
-if HAVE_LIBCLASTFM
-pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
-pragha_LDADD += $(LIBCLASTFM_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
