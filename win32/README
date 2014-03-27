@@ -14,6 +14,7 @@ Install deps:
 Prepare the build:
 	# git clone https://github.com/matiasdelellis/pragha.git -b Win32 PraghaWin32
 	# cd PraghaWin32
+	# ./autogen.sh --host=i586-mingw32msvc --enable-debug
 	# mingw32-configure --host=i586-mingw32msvc --enable-debug
 
 Build and install:
