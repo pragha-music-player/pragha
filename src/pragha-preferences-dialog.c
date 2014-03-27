@@ -78,12 +78,6 @@ struct _PreferencesDialog {
 	GtkWidget *show_icon_tray_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
-
-#ifdef HAVE_LIBCLASTFM
-	GtkWidget *lastfm_w;
-	GtkWidget *lastfm_uname_w;
-	GtkWidget *lastfm_pass_w;
-#endif
 };
 
 /*
@@ -253,9 +247,6 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
-#ifdef HAVE_LIBCLASTFM
-	PraghaLastfm *clastfm;
-#endif
 	gboolean test_change, pref_setted, pref_toggled;
 	gchar *window_state_sink = NULL;
 	const gchar *album_art_pattern;
@@ -429,24 +420,6 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 				
 			}
 		}
-
-		/* Services internet preferences */
-#ifdef HAVE_LIBCLASTFM
-		pragha_preferences_set_lastfm_support (dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w)));
-
-		if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
-			pragha_preferences_set_lastfm_user (dialog->preferences,
-				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_uname_w)));
-
-			pragha_lastfm_set_password(dialog->preferences,
-				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
-
-			clastfm = pragha_application_get_lastfm (dialog->pragha);
-			pragha_lastfm_disconnect (clastfm);
-			pragha_lastfm_connect (clastfm);
-		}
-#endif
 		break;
 	default:
 		break;
@@ -537,25 +510,6 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 	if (gtk_tree_selection_get_selected(selection, &model, &iter))
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 }
-
-/* Toggle displaying last.fm username/password widgets */
-#ifdef HAVE_LIBCLASTFM
-static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
-{
-	PraghaLastfm *clastfm;
-	gboolean is_active;
-
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w));
-
-	gtk_widget_set_sensitive(dialog->lastfm_uname_w, is_active);
-	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
-
-	if(!is_active) {
-		clastfm = pragha_application_get_lastfm (dialog->pragha);
-		pragha_lastfm_disconnect (clastfm);
-	}
-}
-#endif
 
 /* Toggle hint of playlist */
 
@@ -783,22 +737,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
 	if (pragha_preferences_get_sort_by_year(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
-
-	/* Service Internet Option */
-#ifdef HAVE_LIBCLASTFM
-	if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w), TRUE);
-
-		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_uname_w),
-		                   pragha_preferences_get_lastfm_user (dialog->preferences));
-		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_pass_w),
-		                   pragha_lastfm_get_password(dialog->preferences));
-	}
-	else {
-		gtk_widget_set_sensitive(dialog->lastfm_uname_w, FALSE);
-		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
-	}
-#endif
 }
 
 gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
@@ -1087,49 +1025,6 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	return table;
 }
 
-#ifdef HAVE_LIBCLASTFM
-static GtkWidget*
-pref_create_lastfm_page (PreferencesDialog *dialog)
-{
-	GtkWidget *table;
-	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
-	guint row = 0;
-
-	table = pragha_hig_workarea_table_new();
-
-	pragha_hig_workarea_table_add_section_title(table, &row, "Last.fm");
-
-	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, lastfm_check);
-
-	lastfm_ulabel = gtk_label_new(_("Username"));
-	lastfm_uname = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
-	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_uname), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
-
-	lastfm_plabel = gtk_label_new(_("Password"));
-	lastfm_pass = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
-	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
-	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
-	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
-
-	/* Store references. */
-
-	dialog->lastfm_w = lastfm_check;
-	dialog->lastfm_uname_w = lastfm_uname;
-	dialog->lastfm_pass_w = lastfm_pass;
-	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
-	                  G_CALLBACK(toggle_lastfm), dialog);
-
-	return table;
-}
-#endif
-
 #ifdef HAVE_LIBPEAS
 static GtkWidget*
 pref_create_plugins_page (PreferencesDialog *dialog)
@@ -1262,10 +1157,6 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	pragha_preferences_tab_append_setting (dialog->desktop_tab, desktop_vbox, FALSE);
 
 	dialog->services_tab = pragha_preferences_tab_new (_("Services"));
-	#ifdef HAVE_LIBCLASTFM
-	services_vbox = pref_create_lastfm_page (dialog);
-	pragha_preferences_tab_append_setting (dialog->services_tab, services_vbox, FALSE);
-	#endif
 
 	pragha_preferences_notebook_append_tab (pref_notebook, dialog->desktop_tab);
 	pragha_preferences_notebook_append_tab (pref_notebook, dialog->services_tab);
