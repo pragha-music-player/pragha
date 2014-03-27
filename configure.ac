@@ -179,6 +179,42 @@ else
 AM_CONDITIONAL([HAVE_RYGEL], 0)
 fi
 
+dnl Check libclastfm
+LIBCLASTFM_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
+                           [libclastfm], [0.5],
+                           [libclastfm],
+                           [libclastfm library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBCLASTFM], 0)
+fi
+
+dnl Check libcdio, libcdio_paranoia and libcddb
+LIBCDIO_FOUND="no"
+LIBCDIO_PARANOIA_FOUND="no"
+LIBCDDB_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO],
+                           [libcdio], [0.80],
+                           [libcdio],
+                           [libcdio library], [yes])
+
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO_PARANOIA],
+                           [libcdio_paranoia], [0.90],
+                           [libcdio_paranoia],
+                           [libcdio_paranoia library], [yes])
+
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDDB],
+                           [libcddb], [1.3.0],
+                           [libcddb],
+                           [libcddb library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBCDIO], 0)
+AM_CONDITIONAL([HAVE_LIBCDIO_PARANOIA], 0)
+AM_CONDITIONAL([HAVE_LIBCDDB], 0)
+fi
+
 dnl Check min taglib to add monkeyaudio support
 TAGLIB_1_7_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
@@ -186,41 +222,12 @@ XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
                        [taglib],
                        [taglib library to APE], [yes])
 
-dnl Check libcdio
-LIBCDIO_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO],
-                           [libcdio], [0.80],
-                           [libcdio],
-                           [libcdio library], [yes])
-
-dnl Check libcdio_paranoia
-LIBCDIO_PARANOIA_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO_PARANOIA],
-                           [libcdio_paranoia], [0.90],
-                           [libcdio_paranoia],
-                           [libcdio_paranoia library], [yes])
-
-dnl Check libcddb
-LIBCDDB_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBCDDB],
-                           [libcddb], [1.3.0],
-                           [libcddb],
-                           [libcddb library], [yes])
-
 dnl Check gstreamer-audio
 GSTREAMER_AUDIO_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
                        [gstreamer-audio-1.0], [$GSTREAMER_REQUIRED],
                        [gstreamer-audio],
                        [gstreamer-audio], [yes])
-
-dnl Check libclastfm
-LIBCLASTFM_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
-                       [libclastfm], [0.5],
-                       [libclastfm],
-                       [libclastfm library], [yes])
-
 
 dnl Check libxfce4ui
 LIBXFCE4UI_FOUND="no"
