@@ -26,6 +26,7 @@
 #endif
 
 #include "pragha-musicobject.h"
+#include "pragha-hig.h"
 #include "pragha-lastfm.h"
 #include "pragha-simple-async.h"
 #include "pragha-utils.h"
@@ -46,6 +47,12 @@ struct _PraghaLastfm {
 	enum LASTFM_STATUS_CODES  status;
 	gboolean                  has_user;
 	gboolean                  has_pass;
+
+	/* Settings widgets */
+	GtkWidget                *setting_widget;
+	GtkWidget                *enable_w;
+	GtkWidget                *lastfm_uname_w;
+	GtkWidget                *lastfm_pass_w;
 
 	/* Elapsed Time*/
 	time_t playback_started;
@@ -1406,6 +1413,143 @@ pragha_lastfm_disconnect (PraghaLastfm *clastfm)
 	}
 }
 
+/*
+ * Lastfm Settings
+ */
+static void
+pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
+                                           gint          response_id,
+                                           PraghaLastfm *lastfm)
+{
+	PraghaPreferences *preferences;
+
+	switch(response_id) {
+	case GTK_RESPONSE_CANCEL:
+		break;
+	case GTK_RESPONSE_OK:
+		preferences = pragha_preferences_get ();
+
+		pragha_preferences_set_lastfm_support (preferences,
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lastfm->enable_w)));
+
+		if (pragha_preferences_get_lastfm_support (preferences)) {
+			pragha_preferences_set_lastfm_user (preferences,
+				gtk_entry_get_text(GTK_ENTRY(lastfm->lastfm_uname_w)));
+
+			pragha_lastfm_set_password (preferences,
+				gtk_entry_get_text(GTK_ENTRY(lastfm->lastfm_pass_w)));
+
+			pragha_lastfm_disconnect (lastfm);
+			pragha_lastfm_connect (lastfm);
+		}
+		g_object_unref (preferences);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
+toggle_lastfm (GtkToggleButton *button, PraghaLastfm *lastfm)
+{
+	gboolean is_active;
+
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lastfm->enable_w));
+
+	gtk_widget_set_sensitive (lastfm->lastfm_uname_w, is_active);
+	gtk_widget_set_sensitive (lastfm->lastfm_pass_w, is_active);
+
+	if(!is_active) {
+		pragha_lastfm_disconnect (lastfm);
+	}
+}
+
+static void
+pragha_lastfm_init_settings (PraghaLastfm *lastfm)
+{
+	PraghaPreferences *preferences;
+	preferences = pragha_preferences_get ();
+
+	if (pragha_preferences_get_lastfm_support (preferences)) {
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(lastfm->enable_w), TRUE);
+
+		gtk_entry_set_text (GTK_ENTRY(lastfm->lastfm_uname_w),
+		                    pragha_preferences_get_lastfm_user (preferences));
+		gtk_entry_set_text (GTK_ENTRY(lastfm->lastfm_pass_w),
+		                    pragha_lastfm_get_password (preferences));
+	}
+	else {
+		gtk_widget_set_sensitive (lastfm->lastfm_uname_w, FALSE);
+		gtk_widget_set_sensitive (lastfm->lastfm_pass_w, FALSE);
+	}
+
+	g_object_unref (preferences);
+}
+
+static void
+pragha_lastfm_plugin_append_setting (PraghaLastfm *lastfm)
+{
+	GtkWidget *table;
+	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
+	guint row = 0;
+
+	table = pragha_hig_workarea_table_new ();
+
+	pragha_hig_workarea_table_add_section_title (table, &row, "Last.fm");
+
+	lastfm_check = gtk_check_button_new_with_label (_("Last.fm Support"));
+	pragha_hig_workarea_table_add_wide_control (table, &row, lastfm_check);
+
+	lastfm_ulabel = gtk_label_new (_("Username"));
+	lastfm_uname = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
+	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_uname), TRUE);
+
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
+
+	lastfm_plabel = gtk_label_new (_("Password"));
+	lastfm_pass = gtk_entry_new ();
+	gtk_entry_set_max_length (GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
+	gtk_entry_set_visibility (GTK_ENTRY(lastfm_pass), FALSE);
+	gtk_entry_set_invisible_char (GTK_ENTRY(lastfm_pass), '*');
+	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
+
+	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
+
+	/* Store references. */
+
+	lastfm->enable_w = lastfm_check;
+	lastfm->lastfm_uname_w = lastfm_uname;
+	lastfm->lastfm_pass_w = lastfm_pass;
+	lastfm->setting_widget = table;
+
+	/* Append panes */
+
+	pragha_preferences_append_services_setting (lastfm->pragha,
+	                                            lastfm->setting_widget, FALSE);
+
+	/* Configure handler and settings */
+	pragha_preferences_dialog_connect_handler (lastfm->pragha,
+	                                           G_CALLBACK(pragha_lastfm_preferences_dialog_response),
+	                                           lastfm);
+
+	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
+	                  G_CALLBACK(toggle_lastfm), lastfm);
+
+	pragha_lastfm_init_settings (lastfm);
+}
+
+static void
+pragha_lastfm_plugin_remove_setting (PraghaLastfm *lastfm)
+{
+	pragha_preferences_remove_services_setting (lastfm->pragha,
+	                                            lastfm->setting_widget);
+
+	pragha_preferences_dialog_disconnect_handler (lastfm->pragha,
+	                                              G_CALLBACK(pragha_lastfm_preferences_dialog_response),
+	                                              lastfm);
+}
+
 /* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
  * And no show any error. */
 
@@ -1445,6 +1589,8 @@ pragha_lastfm_new (PraghaApplication *pragha)
 			                            pragha_lastfm_connect_idle, clastfm, NULL);
 	}
 
+	pragha_lastfm_plugin_append_setting (clastfm);
+
 	return clastfm;
 }
 
@@ -1452,6 +1598,8 @@ void
 pragha_lastfm_free (PraghaLastfm *clastfm)
 {
 	pragha_lastfm_disconnect (clastfm);
+
+	pragha_lastfm_plugin_remove_setting (clastfm);
 
 	g_object_unref(clastfm->nmobj);
 	g_mutex_clear (&clastfm->nmobj_mutex);
