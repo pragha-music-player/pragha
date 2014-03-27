@@ -20,12 +20,13 @@
 #include <config.h>
 #endif
 
+#include <glib.h>
+#include <stdlib.h>
+
 #include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha.h"
-
-#include <stdlib.h>
 
 #if HAVE_GSTREAMER_AUDIO
 #include <gst/audio/streamvolume.h>
@@ -814,6 +815,7 @@ pragha_backend_init_equalizer_preset (PraghaBackend *backend)
 	}
 }
 
+#ifndef G_OS_WIN32
 static GstElement *
 make_audio_sink (PraghaPreferences *preferences)
 {
@@ -843,6 +845,7 @@ make_audio_sink (PraghaPreferences *preferences)
 
 	return gst_element_factory_make (audiosink, "audio-sink");
 }
+#endif
 
 static void
 pragha_backend_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
@@ -1021,7 +1024,11 @@ pragha_backend_init (PraghaBackend *backend)
 
 	/* If no audio sink has been specified via the "audio-sink" property, playbin will use the autoaudiosink.
 	   Need review then when return the audio preferences. */
+	#ifndef G_OS_WIN32
 	priv->audio_sink = make_audio_sink (priv->preferences);
+	#else
+	priv->audio_sink = gst_element_factory_make ("directsoundsink", "audio-sink");
+	#endif
 
 	if (priv->audio_sink != NULL) {
 		const gchar *audio_device_pref = pragha_preferences_get_audio_device (priv->preferences);
