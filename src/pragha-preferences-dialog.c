@@ -1097,7 +1097,7 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 	PreferencesDialog *dialog;
 	GtkWidget *header, *pref_notebook;
 
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
+	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
 	GtkWidget *label_appearance, *label_library, *label_general;
 	#ifdef HAVE_LIBPEAS
 	GtkWidget *plugins_vbox;

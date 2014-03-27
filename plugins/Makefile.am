@@ -44,3 +44,8 @@ SUBDIRS += cdrom
 endif
 endif
 endif
+
+if HAVE_LIBCLASTFM
+SUBDIRS += lastfm
+endif
+

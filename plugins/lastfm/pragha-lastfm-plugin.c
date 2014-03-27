@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2011-2014 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -15,7 +15,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
@@ -25,23 +25,44 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-musicobject.h"
-#include "pragha-hig.h"
-#include "pragha-lastfm.h"
-#include "pragha-simple-async.h"
-#include "pragha-utils.h"
-#include "pragha-tagger.h"
-#include "pragha-tags-dialog.h"
-#include "pragha-tags-mgmt.h"
-#include "pragha-musicobject-mgmt.h"
-#include "xml_helper.h"
-#include "pragha.h"
+#include <glib.h>
+#include <glib-object.h>
+#include <gmodule.h>
+#include <gtk/gtk.h>
 
-#ifdef HAVE_LIBCLASTFM
+#include <cdio/paranoia/cdda.h>
+#include <cdio/cd_types.h>
+#include <cddb/cddb.h>
+
+#include <libpeas/peas.h>
+
+#include "src/pragha.h"
+#include "src/pragha-hig.h"
+#include "src/pragha-utils.h"
+#include "src/pragha-musicobject.h"
+#include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-statusicon.h"
+#include "src/pragha-tagger.h"
+#include "src/pragha-simple-async.h"
+#include "src/pragha-utils.h"
+#include "src/pragha-tags-dialog.h"
+#include "src/pragha-tags-mgmt.h"
+#include "src/xml_helper.h"
+
+#include "plugins/pragha-plugin-macros.h"
 
 #include <clastfm.h>
 
-struct _PraghaLastfm {
+#define PRAGHA_TYPE_LASTFM_PLUGIN         (pragha_lastfm_plugin_get_type ())
+#define PRAGHA_LASTFM_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_LASTFM_PLUGIN, PraghaLastfmPlugin))
+#define PRAGHA_LASTFM_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_LASTFM_PLUGIN, PraghaLastfmPlugin))
+#define PRAGHA_IS_LASTFM_PLUGIN(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PRAGHA_TYPE_LASTFM_PLUGIN))
+#define PRAGHA_IS_LASTFM_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_LASTFM_PLUGIN))
+#define PRAGHA_LASTFM_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_LASTFM_PLUGIN, PraghaLastfmPluginClass))
+
+struct _PraghaLastfmPluginPrivate {
+	PraghaApplication        *pragha;
+
 	/* Last session status. */
 	LASTFM_SESSION           *session_id;
 	enum LASTFM_STATUS_CODES  status;
@@ -55,24 +76,27 @@ struct _PraghaLastfm {
 	GtkWidget                *lastfm_pass_w;
 
 	/* Elapsed Time*/
-	time_t playback_started;
+	time_t                    playback_started;
 
-	GtkWidget         *ntag_lastfm_button;
-	PraghaMusicobject *nmobj;
-	GMutex             nmobj_mutex;
+	GtkWidget                *ntag_lastfm_button;
+	PraghaMusicobject        *nmobj;
+	GMutex                    nmobj_mutex;
 
 	/* Menu options */
-	GtkActionGroup *action_group_main_menu;
-	guint           merge_id_main_menu;
+	GtkActionGroup           *action_group_main_menu;
+	guint                     merge_id_main_menu;
 
-	GtkActionGroup *action_group_playlist;
-	guint merge_id_playlist;
+	GtkActionGroup           *action_group_playlist;
+	guint                     merge_id_playlist;
 
-	guint           timeout_id;
-
-	/* Future PraghaAplication */
-	PraghaApplication *pragha;
+	guint                     timeout_id;
 };
+typedef struct _PraghaLastfmPluginPrivate PraghaLastfmPluginPrivate;
+
+PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_LASTFM_PLUGIN,
+                        PraghaLastfmPlugin,
+                        pragha_lastfm_plugin)
+
 
 #define LASTFM_API_KEY "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET  "f3498ce387f30eeae8ea1b1023afb32b"
@@ -84,17 +108,57 @@ typedef enum {
 } LastfmQueryType;
 
 /*
+ * Some structs to handle threads.
+ */
+
+typedef struct {
+	GList              *list;
+	LastfmQueryType     query_type;
+	guint               query_count;
+	PraghaLastfmPlugin *plugin;
+} AddMusicObjectListData;
+
+typedef struct {
+	PraghaLastfmPlugin *plugin;
+	PraghaMusicobject  *mobj;
+} PraghaLastfmAsyncData;
+
+static PraghaLastfmAsyncData *
+pragha_lastfm_async_data_new (PraghaLastfmPlugin *plugin)
+{
+	PraghaBackend *backend;
+	PraghaLastfmAsyncData *data;
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	backend = pragha_application_get_backend (priv->pragha);
+
+	data = g_slice_new (PraghaLastfmAsyncData);
+	data->plugin = plugin;
+	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
+
+	return data;
+}
+
+static void
+pragha_lastfm_async_data_free (PraghaLastfmAsyncData *data)
+{
+	g_object_unref (data->mobj);
+	g_slice_free (PraghaLastfmAsyncData, data);
+}
+
+/*
  * Prototypes
  */
 
-static void lastfm_get_similar_current_playlist_action  (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_current_playlist_love_action   (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_add_favorites_action                 (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_get_similar_action                   (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_import_xspf_action                   (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_love_action                    (GtkAction *action, PraghaLastfm *clastfm);
-static void lastfm_track_unlove_action                  (GtkAction *action, PraghaLastfm *clastfm);
+static void lastfm_get_similar_current_playlist_action  (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_track_current_playlist_love_action   (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_add_favorites_action                 (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_get_similar_action                   (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_import_xspf_action                   (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_track_love_action                    (GtkAction *action, PraghaLastfmPlugin *plugin);
+static void lastfm_track_unlove_action                  (GtkAction *action, PraghaLastfmPlugin *plugin);
 
 static const GtkActionEntry main_menu_actions [] = {
 	{"Lastfm", NULL, N_("_Lastfm")},
@@ -151,45 +215,6 @@ static const gchar *playlist_xml = "<ui>					\
 	</popup>				    				\
 </ui>";
 
-/*
- * Some structs to handle threads.
- */
-
-typedef struct {
-	GList *list;
-	LastfmQueryType query_type;
-	guint query_count;
-	PraghaLastfm *clastfm;
-} AddMusicObjectListData;
-
-typedef struct {
-	PraghaLastfm *clastfm;
-	PraghaMusicobject *mobj;
-} PraghaLastfmAsyncData;
-
-static PraghaLastfmAsyncData *
-pragha_lastfm_async_data_new (PraghaLastfm *clastfm)
-{
-	PraghaBackend *backend;
-	PraghaLastfmAsyncData *data;
-
-	backend = pragha_application_get_backend (clastfm->pragha);
-
-	data = g_slice_new (PraghaLastfmAsyncData);
-	data->clastfm = clastfm;
-	data->mobj = pragha_musicobject_dup (pragha_backend_get_musicobject (backend));
-
-	return data;
-}
-
-static void
-pragha_lastfm_async_data_free (PraghaLastfmAsyncData *data)
-{
-	g_object_unref (data->mobj);
-	g_slice_free (PraghaLastfmAsyncData, data);
-}
-
-
 /* Save a get the lastfm password.
  * TODO: Implement any basic crypto.
  */
@@ -227,29 +252,29 @@ pragha_action_group_set_sensitive (GtkActionGroup *group, const gchar *name, gbo
 }
 
 void
-pragha_lastfm_update_menu_actions (PraghaLastfm *clastfm)
+pragha_lastfm_update_menu_actions (PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaBackendState state = 0;
 
-	PraghaApplication *pragha = clastfm->pragha;
-	
-	backend = pragha_application_get_backend (pragha);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	backend = pragha_application_get_backend (priv->pragha);
 	state = pragha_backend_get_state (backend);
 
 	gboolean playing    = (state != ST_STOPPED);
-	gboolean logged     = (clastfm->status == LASTFM_STATUS_OK);
-	gboolean lfm_inited = (clastfm->session_id != NULL);
-	gboolean has_user   = (lfm_inited && clastfm->has_user);
+	gboolean logged     = (priv->status == LASTFM_STATUS_OK);
+	gboolean lfm_inited = (priv->session_id != NULL);
+	gboolean has_user   = (lfm_inited && priv->has_user);
 
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", playing && logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", playing && logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", has_user);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", playing && lfm_inited);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Love track", playing && logged);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Unlove track", playing && logged);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add favorites", has_user);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add similar", playing && lfm_inited);
 
-	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Love track", logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Unlove track", logged);
-	pragha_action_group_set_sensitive (clastfm->action_group_playlist, "Add similar", lfm_inited);
+	pragha_action_group_set_sensitive (priv->action_group_playlist, "Love track", logged);
+	pragha_action_group_set_sensitive (priv->action_group_playlist, "Unlove track", logged);
+	pragha_action_group_set_sensitive (priv->action_group_playlist, "Add similar", lfm_inited);
 }
 
 /*
@@ -266,7 +291,7 @@ static void pragha_lastfm_no_connection_advice (void)
 /* Find a song with the artist and title independently of the album and adds it to the playlist */
 
 static GList *
-prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfm *clastfm,
+prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfmPlugin *plugin,
                                                  const gchar *artist,
                                                  const gchar *title,
                                                  GList *list)
@@ -276,15 +301,15 @@ prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfm *clastfm,
 	PraghaMusicobject *mobj = NULL;
 	gint location_id = 0;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (priv->pragha);
 
-	if(pragha_mobj_list_already_has_title_of_artist (list, title, artist) ||
+	if (pragha_mobj_list_already_has_title_of_artist (list, title, artist) ||
 	   pragha_playlist_already_has_title_of_artist (playlist, title, artist))
 		return list;
 
-	cdbase = pragha_application_get_database (pragha);
+	cdbase = pragha_application_get_database (priv->pragha);
 
 	const gchar *sql = "SELECT TRACK.title, ARTIST.name, LOCATION.id "
 				"FROM TRACK, ARTIST, LOCATION "
@@ -313,7 +338,7 @@ prepend_song_with_artist_and_title_to_mobj_list (PraghaLastfm *clastfm,
 static void
 pragha_corrected_by_lastfm_dialog_response (GtkWidget    *dialog,
                                             gint          response_id,
-                                            PraghaLastfm *clastfm)
+                                            PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaPlaylist *playlist;
@@ -322,38 +347,38 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget    *dialog,
 	PraghaTagger *tagger;
 	gint changed = 0;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_application_get_window(pragha));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(priv->pragha));
 		return;
 	}
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
-		if(changed) {
-			backend = pragha_application_get_backend (pragha);
+		if (changed) {
+			backend = pragha_application_get_backend (priv->pragha);
 
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
-			if(pragha_backend_get_state (backend) != ST_STOPPED) {
+			if (pragha_backend_get_state (backend) != ST_STOPPED) {
 				current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare(nmobj, current_mobj) == 0) {
-					toolbar = pragha_application_get_toolbar (pragha);
+					toolbar = pragha_application_get_toolbar (priv->pragha);
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag(current_mobj, changed, nmobj);
 
 					/* Update current song on playlist */
-					playlist = pragha_application_get_playlist (pragha);
+					playlist = pragha_application_get_playlist (priv->pragha);
 					pragha_playlist_update_current_track (playlist, changed, nmobj);
 
 					pragha_toolbar_set_title(toolbar, current_mobj);
 				}
 			}
 
-			if(G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
+			if (G_LIKELY(pragha_musicobject_is_local_file (nmobj))) {
 				tagger = pragha_tagger_new();
 				pragha_tagger_add_file (tagger, pragha_musicobject_get_file(nmobj));
 				pragha_tagger_set_changes(tagger, nmobj, changed);
@@ -363,12 +388,12 @@ pragha_corrected_by_lastfm_dialog_response (GtkWidget    *dialog,
 		}
 	}
 
-	gtk_widget_hide (clastfm->ntag_lastfm_button);
+	gtk_widget_hide (priv->ntag_lastfm_button);
 	gtk_widget_destroy (dialog);
 }
 
 static void
-edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
+edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 	PraghaMusicobject *tmobj, *nmobj;
@@ -377,11 +402,11 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 	gint prechanged = 0;
 	GtkWidget *dialog;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (priv->pragha);
 
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
 	/* Get all info of current track */
@@ -396,9 +421,9 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 
 	/* Get all info of suggestions
 	 * Temp Musicobject to not block tag edit dialog */
-	g_mutex_lock (&clastfm->nmobj_mutex);
-	nmobj = pragha_musicobject_dup(clastfm->nmobj);
-	g_mutex_unlock (&clastfm->nmobj_mutex);
+	g_mutex_lock (&priv->nmobj_mutex);
+	nmobj = pragha_musicobject_dup(priv->nmobj);
+	g_mutex_unlock (&priv->nmobj_mutex);
 
 	g_object_get(nmobj,
 	             "title", &ntitle,
@@ -407,15 +432,15 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 	             NULL);
 
 	/* Compare original mobj and suggested from lastfm */
-	if(g_ascii_strcasecmp(otitle, ntitle)) {
+	if (g_ascii_strcasecmp(otitle, ntitle)) {
 		pragha_musicobject_set_title(tmobj, ntitle);
 		prechanged |= TAG_TITLE_CHANGED;
 	}
-	if(g_ascii_strcasecmp(oartist, nartist)) {
+	if (g_ascii_strcasecmp(oartist, nartist)) {
 		pragha_musicobject_set_artist(tmobj, nartist);
 		prechanged |= TAG_ARTIST_CHANGED;
 	}
-	if(g_ascii_strcasecmp(oalbum, nalbum)) {
+	if (g_ascii_strcasecmp(oalbum, nalbum)) {
 		pragha_musicobject_set_album(tmobj, nalbum);
 		prechanged |= TAG_ALBUM_CHANGED;
 	}
@@ -423,7 +448,7 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 	dialog = pragha_tags_dialog_new();
 
 	g_signal_connect (G_OBJECT (dialog), "response",
-	                  G_CALLBACK (pragha_corrected_by_lastfm_dialog_response), clastfm);
+	                  G_CALLBACK (pragha_corrected_by_lastfm_dialog_response), plugin);
 
 	pragha_tags_dialog_set_musicobject(PRAGHA_TAGS_DIALOG(dialog), tmobj);
 	pragha_tags_dialog_set_changed(PRAGHA_TAGS_DIALOG(dialog), prechanged);
@@ -432,7 +457,7 @@ edit_tags_corrected_by_lastfm (GtkButton *button, PraghaLastfm *clastfm)
 }
 
 static GtkWidget*
-pragha_lastfm_tag_suggestion_button_new (PraghaLastfm *clastfm)
+pragha_lastfm_tag_suggestion_button_new (PraghaLastfmPlugin *plugin)
 {
 	GtkWidget* ntag_lastfm_button;
 
@@ -444,7 +469,7 @@ pragha_lastfm_tag_suggestion_button_new (PraghaLastfm *clastfm)
 	                            _("Last.fm suggested a tag correction"));
 
 	g_signal_connect(G_OBJECT(ntag_lastfm_button), "clicked",
-	                 G_CALLBACK(edit_tags_corrected_by_lastfm), clastfm);
+	                 G_CALLBACK(edit_tags_corrected_by_lastfm), plugin);
 
 	return ntag_lastfm_button;
 }
@@ -452,13 +477,14 @@ pragha_lastfm_tag_suggestion_button_new (PraghaLastfm *clastfm)
 /* Love and unlove music object */
 
 gpointer
-do_lastfm_love_mobj (PraghaLastfm *clastfm, const gchar *title, const gchar *artist)
+do_lastfm_love_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar *artist)
 {
 	gint rv;
 
 	CDEBUG(DBG_LASTFM, "Love mobj on thread");
 
-	rv = LASTFM_track_love (clastfm->session_id,
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	rv = LASTFM_track_love (priv->session_id,
 	                        title,
 	                        artist);
 
@@ -469,13 +495,14 @@ do_lastfm_love_mobj (PraghaLastfm *clastfm, const gchar *title, const gchar *art
 }
 
 gpointer
-do_lastfm_unlove_mobj (PraghaLastfm *clastfm, const gchar *title, const gchar *artist)
+do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar *artist)
 {
 	gint rv;
 
 	CDEBUG(DBG_LASTFM, "Unlove mobj on thread");
 
-	rv = LASTFM_track_unlove (clastfm->session_id,
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	rv = LASTFM_track_unlove (priv->session_id,
 	                          title,
 	                          artist);
 
@@ -495,31 +522,32 @@ do_lastfm_current_playlist_love (gpointer data)
 	PraghaMusicobject *mobj = NULL;
 	const gchar *title, *artist;
 
-	PraghaLastfm *clastfm = data;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (priv->pragha);
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
 
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	return do_lastfm_love_mobj (clastfm, title, artist);
+	return do_lastfm_love_mobj (plugin, title, artist);
 }
 
 static void
-lastfm_track_current_playlist_love_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_track_current_playlist_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	CDEBUG(DBG_LASTFM, "Love handler to current playlist");
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
 	pragha_async_launch (do_lastfm_current_playlist_love,
 	                     pragha_async_set_idle_message,
-	                     clastfm);
+	                     plugin);
 }
 
 gpointer
@@ -529,31 +557,32 @@ do_lastfm_current_playlist_unlove (gpointer data)
 	PraghaMusicobject *mobj = NULL;
 	const gchar *title, *artist;
 
-	PraghaLastfm *clastfm = data;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (priv->pragha);
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
 
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	return do_lastfm_unlove_mobj (clastfm, title, artist);
+	return do_lastfm_unlove_mobj (plugin, title, artist);
 }
 
 static void
-lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	CDEBUG(DBG_LASTFM, "Unlove Handler to current playlist");
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
 	pragha_async_launch (do_lastfm_current_playlist_unlove,
 	                     pragha_async_set_idle_message,
-	                     clastfm);
+	                     plugin);
 }
 
 static gboolean
@@ -567,30 +596,31 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	AddMusicObjectListData *data = user_data;
 
 	GList *list = data->list;
-	PraghaLastfm *clastfm = data->clastfm;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = data->plugin;
 
-	if(list != NULL) {
-		playlist = pragha_application_get_playlist (pragha);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	if (list != NULL) {
+		playlist = pragha_application_get_playlist (priv->pragha);
 		pragha_playlist_append_mobj_list (playlist, list);
 
 		songs_added = g_list_length(list);
 		g_list_free(list);
 	}
 	else {
-		remove_watch_cursor (pragha_application_get_window(pragha));
+		remove_watch_cursor (pragha_application_get_window(priv->pragha));
 	}
 
 	switch(data->query_type) {
 		case LASTFM_GET_SIMILAR:
-			if(data->query_count > 0)
+			if (data->query_count > 0)
 				summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."),
 							  songs_added, data->query_count);
 			else
 				summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
 			break;
 		case LASTFM_GET_LOVED:
-			if(data->query_count > 0)
+			if (data->query_count > 0)
 				summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."),
 							  songs_added, data->query_count);
 			else
@@ -614,7 +644,7 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 }
 
 gpointer
-do_lastfm_get_similar (PraghaLastfm *clastfm, const gchar *title, const gchar *artist)
+do_lastfm_get_similar (PraghaLastfmPlugin *plugin, const gchar *title, const gchar *artist)
 {
 	LFMList *results = NULL, *li;
 	LASTFM_TRACK_INFO *track = NULL;
@@ -623,16 +653,17 @@ do_lastfm_get_similar (PraghaLastfm *clastfm, const gchar *title, const gchar *a
 	gint rv;
 
 	AddMusicObjectListData *data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	if(string_is_not_empty(title) && string_is_not_empty(artist)) {
-		rv = LASTFM_track_get_similar (clastfm->session_id,
+	if (string_is_not_empty(title) && string_is_not_empty(artist)) {
+		rv = LASTFM_track_get_similar (priv->session_id,
 		                               title,
 		                               artist,
 		                               50, &results);
 
 		for (li=results; li && rv == LASTFM_STATUS_OK; li=li->next) {
 			track = li->data;
-			list = prepend_song_with_artist_and_title_to_mobj_list (clastfm, track->artist, track->name, list);
+			list = prepend_song_with_artist_and_title_to_mobj_list (plugin, track->artist, track->name, list);
 			query_count += 1;
 		}
 	}
@@ -641,7 +672,7 @@ do_lastfm_get_similar (PraghaLastfm *clastfm, const gchar *title, const gchar *a
 	data->list = list;
 	data->query_type = LASTFM_GET_SIMILAR;
 	data->query_count = query_count;
-	data->clastfm = clastfm;
+	data->plugin = plugin;
 
 	LASTFM_free_track_info_list (results);
 
@@ -657,44 +688,44 @@ do_lastfm_get_similar_current_playlist_action (gpointer user_data)
 
 	AddMusicObjectListData *data;
 
-	PraghaLastfm *clastfm = user_data;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = user_data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (priv->pragha);
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
 
 	title = pragha_musicobject_get_title(mobj);
 	artist = pragha_musicobject_get_artist(mobj);
 
-	data = do_lastfm_get_similar (clastfm, title, artist);
+	data = do_lastfm_get_similar (plugin, title, artist);
 
 	return data;
 }
 
 static void
-lastfm_get_similar_current_playlist_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_get_similar_current_playlist_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Get similar action to current playlist");
 
-	if (clastfm->session_id == NULL) {
+	if (priv->session_id == NULL) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
-	set_watch_cursor (pragha_application_get_window(pragha));
+	set_watch_cursor (pragha_application_get_window(priv->pragha));
 	pragha_async_launch (do_lastfm_get_similar_current_playlist_action,
 	                     append_mobj_list_current_playlist_idle,
-	                     clastfm);
+	                     plugin);
 }
 
 /* Functions that respond to menu options. */
 
 static void
-lastfm_import_xspf_response (GtkDialog *dialog,
-                             gint response,
-                             PraghaLastfm *clastfm)
+lastfm_import_xspf_response (GtkDialog          *dialog,
+                             gint                response,
+                             PraghaLastfmPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
 	PraghaStatusbar *statusbar;
@@ -705,10 +736,10 @@ lastfm_import_xspf_response (GtkDialog *dialog,
 
 	GFile *file;
 	gsize size;
+	
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	PraghaApplication *pragha = clastfm->pragha;
-
-	if(response != GTK_RESPONSE_ACCEPT)
+	if (response != GTK_RESPONSE_ACCEPT)
 		goto cancel;
 
 	file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(dialog));
@@ -735,11 +766,11 @@ lastfm_import_xspf_response (GtkDialog *dialog,
 		xc = xmlnode_get(xi,CCA {"track","creator",NULL},NULL,NULL);
 
 		if (xt && xc)
-			list = prepend_song_with_artist_and_title_to_mobj_list (clastfm, xc->content, xt->content, list);
+			list = prepend_song_with_artist_and_title_to_mobj_list (plugin, xc->content, xt->content, list);
 	}
 
-	if(list) {
-		playlist = pragha_application_get_playlist (pragha);
+	if (list) {
+		playlist = pragha_application_get_playlist (priv->pragha);
 		pragha_playlist_append_mobj_list (playlist, list);
 		g_list_free (list);
 	}
@@ -761,15 +792,15 @@ cancel:
 }
 
 static void
-lastfm_import_xspf_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_import_xspf_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	GtkWidget *dialog;
 	GtkFileFilter *media_filter;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	dialog = gtk_file_chooser_dialog_new (_("Import a XSPF playlist"),
-	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_WINDOW(pragha_application_get_window(priv->pragha)),
 	                                      GTK_FILE_CHOOSER_ACTION_OPEN,
 	                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                      _("_Open"), GTK_RESPONSE_ACCEPT,
@@ -781,7 +812,7 @@ lastfm_import_xspf_action (GtkAction *action, PraghaLastfm *clastfm)
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), GTK_FILE_FILTER(media_filter));
 
 	g_signal_connect (G_OBJECT(dialog), "response",
-	                  G_CALLBACK(lastfm_import_xspf_response), clastfm);
+	                  G_CALLBACK(lastfm_import_xspf_response), plugin);
 
 	gtk_widget_show_all (dialog);
 }
@@ -797,50 +828,50 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	guint query_count = 0;
 	GList *list = NULL;
 
-	PraghaLastfm *clastfm = user_data;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = user_data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	do {
-		preferences = pragha_application_get_preferences (pragha);
-		rpages = LASTFM_user_get_loved_tracks(clastfm->session_id,
+		preferences = pragha_application_get_preferences (priv->pragha);
+		rpages = LASTFM_user_get_loved_tracks(priv->session_id,
 		                                      pragha_preferences_get_lastfm_user (preferences),
 		                                      cpage,
 		                                      &results);
 
-		for(li=results; li; li=li->next) {
+		for (li=results; li; li=li->next) {
 			track = li->data;
-			list = prepend_song_with_artist_and_title_to_mobj_list (clastfm, track->artist, track->name, list);
+			list = prepend_song_with_artist_and_title_to_mobj_list (plugin, track->artist, track->name, list);
 			query_count += 1;
 		}
 		LASTFM_free_track_info_list (results);
 		cpage++;
-	} while(rpages != 0);
+	} while (rpages != 0);
 
 	data = g_slice_new (AddMusicObjectListData);
 	data->list = list;
 	data->query_type = LASTFM_GET_LOVED;
 	data->query_count = query_count;
-	data->clastfm = clastfm;
+	data->plugin = plugin;
 
 	return data;
 }
 
 static void
-lastfm_add_favorites_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_add_favorites_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Add Favorites action");
 
-	if ((clastfm->session_id == NULL) || !clastfm->has_user) {
+	if ((priv->session_id == NULL) || !priv->has_user) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
-	set_watch_cursor (pragha_application_get_window(pragha));
+	set_watch_cursor (pragha_application_get_window(priv->pragha));
 	pragha_async_launch (do_lastfm_add_favorites_action,
 	                     append_mobj_list_current_playlist_idle,
-	                     clastfm);
+	                     plugin);
 }
 
 static gpointer
@@ -850,13 +881,13 @@ do_lastfm_get_similar_action (gpointer user_data)
 
 	PraghaLastfmAsyncData *lastfm_async_data = user_data;
 
-	PraghaLastfm *clastfm   = lastfm_async_data->clastfm;
+	PraghaLastfmPlugin *plugin   = lastfm_async_data->plugin;
 	PraghaMusicobject *mobj = lastfm_async_data->mobj;
 
 	const gchar *title = pragha_musicobject_get_title (mobj);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 
-	data = do_lastfm_get_similar (clastfm, title, artist);
+	data = do_lastfm_get_similar (plugin, title, artist);
 
 	pragha_lastfm_async_data_free(lastfm_async_data);
 
@@ -864,27 +895,27 @@ do_lastfm_get_similar_action (gpointer user_data)
 }
 
 static void
-lastfm_get_similar_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_get_similar_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Get similar action");
 
-	backend = pragha_application_get_backend (pragha);
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	if (clastfm->session_id == NULL) {
+	if (priv->session_id == NULL) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
-	set_watch_cursor (pragha_application_get_window(pragha));
+	set_watch_cursor (pragha_application_get_window(priv->pragha));
 	pragha_async_launch (do_lastfm_get_similar_action,
 	                     append_mobj_list_current_playlist_idle,
-	                     pragha_lastfm_async_data_new (clastfm));
+	                     pragha_lastfm_async_data_new (plugin));
 }
 
 static gpointer
@@ -894,13 +925,13 @@ do_lastfm_current_song_love (gpointer data)
 
 	PraghaLastfmAsyncData *lastfm_async_data = data;
 
-	PraghaLastfm *clastfm   = lastfm_async_data->clastfm;
+	PraghaLastfmPlugin *plugin = lastfm_async_data->plugin;
 	PraghaMusicobject *mobj = lastfm_async_data->mobj;
 
 	const gchar *title = pragha_musicobject_get_title (mobj);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 
-	msg_data = do_lastfm_love_mobj (clastfm, title, artist);
+	msg_data = do_lastfm_love_mobj (plugin, title, artist);
 
 	pragha_lastfm_async_data_free(lastfm_async_data);
 
@@ -908,26 +939,26 @@ do_lastfm_current_song_love (gpointer data)
 }
 
 static void
-lastfm_track_love_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_track_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Love Handler");
 
-	backend = pragha_application_get_backend (pragha);
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
 	pragha_async_launch (do_lastfm_current_song_love,
 	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (clastfm));
+	                     pragha_lastfm_async_data_new (plugin));
 }
 
 static gpointer
@@ -937,13 +968,13 @@ do_lastfm_current_song_unlove (gpointer data)
 
 	PraghaLastfmAsyncData *lastfm_async_data = data;
 
-	PraghaLastfm *clastfm   = lastfm_async_data->clastfm;
+	PraghaLastfmPlugin *plugin = lastfm_async_data->plugin;
 	PraghaMusicobject *mobj = lastfm_async_data->mobj;
 
 	const gchar *title = pragha_musicobject_get_title (mobj);
 	const gchar *artist = pragha_musicobject_get_artist (mobj);
 
-	msg_data = do_lastfm_unlove_mobj (clastfm, title, artist);
+	msg_data = do_lastfm_unlove_mobj (plugin, title, artist);
 
 	pragha_lastfm_async_data_free(lastfm_async_data);
 
@@ -951,26 +982,26 @@ do_lastfm_current_song_unlove (gpointer data)
 }
 
 static void
-lastfm_track_unlove_action (GtkAction *action, PraghaLastfm *clastfm)
+lastfm_track_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Unlove Handler");
 
-	backend = pragha_application_get_backend (pragha);
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	backend = pragha_application_get_backend (priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
 
 	pragha_async_launch (do_lastfm_current_song_unlove,
 	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (clastfm));
+	                     pragha_lastfm_async_data_new (plugin));
 }
 
 static gpointer
@@ -982,8 +1013,10 @@ do_lastfm_scrob (gpointer data)
 
 	PraghaLastfmAsyncData *lastfm_async_data = data;
 
-	PraghaLastfm *clastfm   = lastfm_async_data->clastfm;
+	PraghaLastfmPlugin *plugin = lastfm_async_data->plugin;
 	PraghaMusicobject *mobj = lastfm_async_data->mobj;
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
@@ -995,11 +1028,11 @@ do_lastfm_scrob (gpointer data)
 	             "length", &length,
 	             NULL);
 
-	rv = LASTFM_track_scrobble (clastfm->session_id,
+	rv = LASTFM_track_scrobble (priv->session_id,
 	                            title,
 	                            album,
 	                            artist,
-	                            clastfm->playback_started,
+	                            priv->playback_started,
 	                            length,
 	                            track_no,
 	                            0, NULL);
@@ -1019,22 +1052,23 @@ gboolean
 lastfm_scrob_handler(gpointer data)
 {
 	PraghaBackend *backend;
-	PraghaLastfm *clastfm = data;
+	PraghaLastfmPlugin *plugin = data;
 
 	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
 
-	backend = pragha_application_get_backend (clastfm->pragha);
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	backend = pragha_application_get_backend (priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return FALSE;
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return FALSE;
 	}
 
 	pragha_async_launch (do_lastfm_scrob,
 	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (clastfm));
+	                     pragha_lastfm_async_data_new (plugin));
 
 	return FALSE;
 }
@@ -1046,32 +1080,32 @@ show_lastfm_sugest_corrrection_button (gpointer user_data)
 	PraghaBackend *backend;
 	gchar *cfile = NULL, *nfile = NULL;
 
-	PraghaLastfm *clastfm = user_data;
-	PraghaApplication *pragha = clastfm->pragha;
+	PraghaLastfmPlugin *plugin = user_data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	/* Hack to safe!.*/
-	if(!clastfm->ntag_lastfm_button) {
-		toolbar = pragha_application_get_toolbar (pragha);
+	if (!priv->ntag_lastfm_button) {
+		toolbar = pragha_application_get_toolbar (priv->pragha);
 
-		clastfm->ntag_lastfm_button =
-			pragha_lastfm_tag_suggestion_button_new (clastfm);
+		priv->ntag_lastfm_button =
+			pragha_lastfm_tag_suggestion_button_new (plugin);
 
-		pragha_toolbar_add_extention_widget (toolbar, clastfm->ntag_lastfm_button);
+		pragha_toolbar_add_extention_widget (toolbar, priv->ntag_lastfm_button);
 	}
 
-	backend = pragha_application_get_backend (pragha);
+	backend = pragha_application_get_backend (priv->pragha);
 	g_object_get(pragha_backend_get_musicobject (backend),
 	             "file", &cfile,
 	             NULL);
 
-	g_mutex_lock (&clastfm->nmobj_mutex);
-	g_object_get (clastfm->nmobj,
+	g_mutex_lock (&priv->nmobj_mutex);
+	g_object_get (priv->nmobj,
 	              "file", &nfile,
 	              NULL);
-	g_mutex_unlock (&clastfm->nmobj_mutex);
+	g_mutex_unlock (&priv->nmobj_mutex);
 
-	if(g_ascii_strcasecmp(cfile, nfile) == 0)
-		gtk_widget_show (clastfm->ntag_lastfm_button);
+	if (g_ascii_strcasecmp(cfile, nfile) == 0)
+		gtk_widget_show (priv->ntag_lastfm_button);
 
 	g_free(cfile);
 	g_free(nfile);
@@ -1091,10 +1125,12 @@ do_lastfm_now_playing (gpointer data)
 
 	PraghaLastfmAsyncData *lastfm_async_data = data;
 
-	PraghaLastfm *clastfm   = lastfm_async_data->clastfm;
+	PraghaLastfmPlugin *plugin = lastfm_async_data->plugin;
 	PraghaMusicobject *mobj = lastfm_async_data->mobj;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	g_object_get(mobj,
 	             "title", &title,
@@ -1104,7 +1140,7 @@ do_lastfm_now_playing (gpointer data)
 	             "length", &length,
 	             NULL);
 
-	rv = LASTFM_track_update_now_playing (clastfm->session_id,
+	rv = LASTFM_track_update_now_playing (priv->session_id,
 	                                      title,
 	                                      album,
 	                                      artist,
@@ -1115,32 +1151,32 @@ do_lastfm_now_playing (gpointer data)
 
 	if (rv == LASTFM_STATUS_OK) {
 		/* Fist check lastfm response, and compare tags. */
-		if(list != NULL) {
+		if (list != NULL) {
 			ntrack = list->data;
-			if(ntrack->name && g_ascii_strcasecmp(title, ntrack->name))
+			if (ntrack->name && g_ascii_strcasecmp(title, ntrack->name))
 				changed |= TAG_TITLE_CHANGED;
-			if(ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist))
+			if (ntrack->artist && g_ascii_strcasecmp(artist, ntrack->artist))
 				changed |= TAG_ARTIST_CHANGED;
-			if(ntrack->album && g_ascii_strcasecmp(album, ntrack->album))
+			if (ntrack->album && g_ascii_strcasecmp(album, ntrack->album))
 				changed |= TAG_ALBUM_CHANGED;
 		}
 
 		if (changed) {
 			tmobj = g_object_ref(mobj);
 
-			if(changed & TAG_TITLE_CHANGED)
+			if (changed & TAG_TITLE_CHANGED)
 				pragha_musicobject_set_title(tmobj, ntrack->name);
-			if(changed & TAG_ARTIST_CHANGED)
+			if (changed & TAG_ARTIST_CHANGED)
 				pragha_musicobject_set_artist(tmobj, ntrack->artist);
-			if(changed & TAG_ALBUM_CHANGED)
+			if (changed & TAG_ALBUM_CHANGED)
 				pragha_musicobject_set_album(tmobj, ntrack->album);
 
-			g_mutex_lock (&clastfm->nmobj_mutex);
-			g_object_unref (clastfm->nmobj);
-			clastfm->nmobj = tmobj;
-			g_mutex_unlock (&clastfm->nmobj_mutex);
+			g_mutex_lock (&priv->nmobj_mutex);
+			g_object_unref (priv->nmobj);
+			priv->nmobj = tmobj;
+			g_mutex_unlock (&priv->nmobj_mutex);
 
-			g_idle_add (show_lastfm_sugest_corrrection_button, clastfm);
+			g_idle_add (show_lastfm_sugest_corrrection_button, plugin);
 		}
 	}
 
@@ -1158,7 +1194,7 @@ do_lastfm_now_playing (gpointer data)
 }
 
 void
-lastfm_now_playing_handler (PraghaLastfm *clastfm)
+lastfm_now_playing_handler (PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
 	gchar *title = NULL, *artist = NULL;
@@ -1166,15 +1202,16 @@ lastfm_now_playing_handler (PraghaLastfm *clastfm)
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
 
-	backend = pragha_application_get_backend (clastfm->pragha);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	backend = pragha_application_get_backend (priv->pragha);
 
-	if(pragha_backend_get_state (backend) == ST_STOPPED)
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
-	if (!clastfm->has_user || !clastfm->has_pass)
+	if (!priv->has_user || !priv->has_pass)
 		return;
 
-	if (clastfm->status != LASTFM_STATUS_OK) {
+	if (priv->status != LASTFM_STATUS_OK) {
 		pragha_lastfm_no_connection_advice ();
 		return;
 	}
@@ -1190,22 +1227,22 @@ lastfm_now_playing_handler (PraghaLastfm *clastfm)
 
 	pragha_async_launch (do_lastfm_now_playing,
 	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (clastfm));
+	                     pragha_lastfm_async_data_new (plugin));
 
 	/* Kick the lastfm scrobbler on
 	 * Note: Only scrob if tracks is more than 30s.
 	 * and scrob when track is at 50% or 4mins, whichever comes
 	 * first */
 
-	if((length / 2) > (240 - WAIT_UPDATE)) {
+	if ((length / 2) > (240 - WAIT_UPDATE)) {
 		length = 240 - WAIT_UPDATE;
 	}
 	else {
 		length = (length / 2) - WAIT_UPDATE;
 	}
 
-	clastfm->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, length,
-	                                                  lastfm_scrob_handler, clastfm, NULL);
+	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, length,
+	                                               lastfm_scrob_handler, plugin, NULL);
 exit:
 	g_free(title);
 	g_free(artist);
@@ -1218,13 +1255,14 @@ update_related_handler (gpointer data)
 {
 	PraghaPreferences *preferences;
 
-	PraghaLastfm *clastfm = data;
+	PraghaLastfmPlugin *plugin = data;
 
 	CDEBUG(DBG_INFO, "Updating Lastm depending preferences");
 
-	preferences = pragha_application_get_preferences (clastfm->pragha);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	preferences = pragha_application_get_preferences (priv->pragha);
 	if (pragha_preferences_get_lastfm_support (preferences))
-		lastfm_now_playing_handler (clastfm);
+		lastfm_now_playing_handler (plugin);
 
 	return FALSE;
 }
@@ -1235,7 +1273,8 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	PraghaMusicType file_type = FILE_NONE;
 	PraghaBackendState state = 0;
 
-	PraghaLastfm *clastfm = user_data;
+	PraghaLastfmPlugin *plugin = user_data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	state = pragha_backend_get_state (backend);
 
@@ -1243,18 +1282,18 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	/* Update gui. */
 
-	pragha_lastfm_update_menu_actions (clastfm);
+	pragha_lastfm_update_menu_actions (plugin);
 
 	/* Update thread. */
 
-	if (clastfm->timeout_id) {
-		g_source_remove (clastfm->timeout_id);
-		clastfm->timeout_id = 0;
+	if (priv->timeout_id) {
+		g_source_remove (priv->timeout_id);
+		priv->timeout_id = 0;
 	}
 
 	if (state != ST_PLAYING) {
-		if (clastfm->ntag_lastfm_button)
-			gtk_widget_hide (clastfm->ntag_lastfm_button);
+		if (priv->ntag_lastfm_button)
+			gtk_widget_hide (priv->ntag_lastfm_button);
 		return;
 	}
 
@@ -1263,72 +1302,74 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	if (file_type == FILE_NONE || file_type == FILE_HTTP)
 		return;
 
-	if (clastfm->status == LASTFM_STATUS_OK)
-		time(&clastfm->playback_started);
+	if (priv->status == LASTFM_STATUS_OK)
+		time(&priv->playback_started);
 
-	clastfm->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
-	                                                  update_related_handler, clastfm, NULL);
+	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
+	                                                  update_related_handler, plugin, NULL);
 }
 
 static void
-pragha_menubar_append_lastfm (PraghaLastfm *clastfm)
+pragha_menubar_append_lastfm (PraghaLastfmPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
-	PraghaApplication *pragha = clastfm->pragha;
 
-	clastfm->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
-	gtk_action_group_set_translation_domain (clastfm->action_group_main_menu, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (clastfm->action_group_main_menu,
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	priv->action_group_main_menu = gtk_action_group_new ("PraghaLastfmMainMenuActions");
+	gtk_action_group_set_translation_domain (priv->action_group_main_menu, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (priv->action_group_main_menu,
 	                              main_menu_actions,
 	                              G_N_ELEMENTS (main_menu_actions),
-	                              clastfm);
+	                              plugin);
 
-	clastfm->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha,
-	                                                                   clastfm->action_group_main_menu,
-	                                                                   main_menu_xml);
+	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	                                                                priv->action_group_main_menu,
+	                                                                main_menu_xml);
 
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Love track", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Unlove track", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add favorites", FALSE);
-	pragha_action_group_set_sensitive (clastfm->action_group_main_menu, "Add similar", FALSE);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Love track", FALSE);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Unlove track", FALSE);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add favorites", FALSE);
+	pragha_action_group_set_sensitive (priv->action_group_main_menu, "Add similar", FALSE);
 
-	clastfm->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
-	gtk_action_group_set_translation_domain (clastfm->action_group_playlist, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (clastfm->action_group_playlist,
+	priv->action_group_playlist = gtk_action_group_new ("PraghaLastfmPlaylistActions");
+	gtk_action_group_set_translation_domain (priv->action_group_playlist, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (priv->action_group_playlist,
 	                              playlist_actions,
 	                              G_N_ELEMENTS (playlist_actions),
-	                              clastfm);
+	                              plugin);
 
-	playlist = pragha_application_get_playlist (pragha);
-	clastfm->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
-	                                                                   clastfm->action_group_playlist,
-	                                                                   playlist_xml);
+	playlist = pragha_application_get_playlist (priv->pragha);
+	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
+	                                                                priv->action_group_playlist,
+	                                                                playlist_xml);
 }
 
 static void
-pragha_menubar_remove_lastfm (PraghaLastfm *clastfm)
+pragha_menubar_remove_lastfm (PraghaLastfmPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
-	PraghaApplication *pragha = clastfm->pragha;
 
-	if(!clastfm->merge_id_main_menu)
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	if (!priv->merge_id_main_menu)
 		return;
 
-	pragha_menubar_remove_plugin_action (pragha,
-	                                     clastfm->action_group_main_menu,
-	                                     clastfm->merge_id_main_menu);
+	pragha_menubar_remove_plugin_action (priv->pragha,
+	                                     priv->action_group_main_menu,
+	                                     priv->merge_id_main_menu);
 
-	clastfm->merge_id_main_menu = 0;
+	priv->merge_id_main_menu = 0;
 
-	if (!clastfm->merge_id_playlist)
+	if (!priv->merge_id_playlist)
 		return;
 
-	playlist = pragha_application_get_playlist (pragha);
+	playlist = pragha_application_get_playlist (priv->pragha);
 	pragha_playlist_remove_plugin_action (playlist,
-	                                      clastfm->action_group_playlist,
-	                                      clastfm->merge_id_playlist);
+	                                      priv->action_group_playlist,
+	                                      priv->merge_id_playlist);
 
-	clastfm->merge_id_playlist = 0;
+	priv->merge_id_playlist = 0;
 }
 
 static gboolean
@@ -1338,30 +1379,29 @@ pragha_lastfm_connect_idle(gpointer data)
 	const gchar *user;
 	const gchar *pass;
 
-	PraghaLastfm *clastfm = data;
+	PraghaLastfmPlugin *plugin = data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	PraghaApplication *pragha = clastfm->pragha;
+	priv->has_user = FALSE;
+	priv->has_pass = FALSE;
 
-	clastfm->has_user = FALSE;
-	clastfm->has_pass = FALSE;
+	priv->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
 
-	clastfm->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
-
-	if (clastfm->session_id != NULL) {
-		preferences = pragha_application_get_preferences (pragha);
+	if (priv->session_id != NULL) {
+		preferences = pragha_application_get_preferences (priv->pragha);
 		user = pragha_preferences_get_lastfm_user (preferences);
 		pass = pragha_lastfm_get_password (preferences);
 
-		clastfm->has_user = string_is_not_empty(user);
-		clastfm->has_pass = string_is_not_empty(pass);
+		priv->has_user = string_is_not_empty(user);
+		priv->has_pass = string_is_not_empty(pass);
 
-		if(clastfm->has_user && clastfm->has_pass) {
-			clastfm->status = LASTFM_login (clastfm->session_id,
-			                                user, pass);
+		if (priv->has_user && priv->has_pass) {
+			priv->status = LASTFM_login (priv->session_id,
+			                             user, pass);
 
-			if (clastfm->status == LASTFM_STATUS_OK) {
-				g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
-				                  G_CALLBACK (backend_changed_state_cb), clastfm);
+			if (priv->status == LASTFM_STATUS_OK) {
+				g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+				                  G_CALLBACK (backend_changed_state_cb), plugin);
 			}
 			else {
 				pragha_lastfm_no_connection_advice ();
@@ -1374,8 +1414,8 @@ pragha_lastfm_connect_idle(gpointer data)
 		CDEBUG(DBG_INFO, "Failure to init libclastfm");
 	}
 
-	pragha_menubar_append_lastfm (clastfm);
-	pragha_lastfm_update_menu_actions (clastfm);
+	pragha_menubar_append_lastfm (plugin);
+	pragha_lastfm_update_menu_actions (plugin);
 
 	return FALSE;
 }
@@ -1383,33 +1423,35 @@ pragha_lastfm_connect_idle(gpointer data)
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
 gint
-pragha_lastfm_connect (PraghaLastfm *clastfm)
+pragha_lastfm_connect (PraghaLastfmPlugin *plugin)
 {
 	CDEBUG(DBG_INFO, "Connecting LASTFM");
 
-	g_idle_add (pragha_lastfm_connect_idle, clastfm);
+	g_idle_add (pragha_lastfm_connect_idle, plugin);
 
 	return 0;
 }
 
 void
-pragha_lastfm_disconnect (PraghaLastfm *clastfm)
+pragha_lastfm_disconnect (PraghaLastfmPlugin *plugin)
 {
-	if (clastfm->session_id != NULL) {
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	if (priv->session_id != NULL) {
 		CDEBUG(DBG_INFO, "Disconnecting LASTFM");
 
-		if (clastfm->status == LASTFM_STATUS_OK)
-			g_signal_handlers_disconnect_by_func (pragha_application_get_backend (clastfm->pragha),
-			                                      backend_changed_state_cb, clastfm->pragha);
+		if (priv->status == LASTFM_STATUS_OK)
+			g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
+			                                      backend_changed_state_cb, priv->pragha);
 
-		pragha_menubar_remove_lastfm (clastfm);
+		pragha_menubar_remove_lastfm (plugin);
 
-		LASTFM_dinit(clastfm->session_id);
+		LASTFM_dinit(priv->session_id);
 
-		clastfm->session_id = NULL;
-		clastfm->status = LASTFM_STATUS_INVALID;
-		clastfm->has_user = FALSE;
-		clastfm->has_pass = FALSE;
+		priv->session_id = NULL;
+		priv->status = LASTFM_STATUS_INVALID;
+		priv->has_user = FALSE;
+		priv->has_pass = FALSE;
 	}
 }
 
@@ -1419,9 +1461,11 @@ pragha_lastfm_disconnect (PraghaLastfm *clastfm)
 static void
 pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
                                            gint          response_id,
-                                           PraghaLastfm *lastfm)
+                                           PraghaLastfmPlugin *plugin)
 {
 	PraghaPreferences *preferences;
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
@@ -1430,17 +1474,17 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 		preferences = pragha_preferences_get ();
 
 		pragha_preferences_set_lastfm_support (preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lastfm->enable_w)));
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->enable_w)));
 
 		if (pragha_preferences_get_lastfm_support (preferences)) {
 			pragha_preferences_set_lastfm_user (preferences,
-				gtk_entry_get_text(GTK_ENTRY(lastfm->lastfm_uname_w)));
+				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_uname_w)));
 
 			pragha_lastfm_set_password (preferences,
-				gtk_entry_get_text(GTK_ENTRY(lastfm->lastfm_pass_w)));
+				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_pass_w)));
 
-			pragha_lastfm_disconnect (lastfm);
-			pragha_lastfm_connect (lastfm);
+			pragha_lastfm_disconnect (plugin);
+			pragha_lastfm_connect (plugin);
 		}
 		g_object_unref (preferences);
 		break;
@@ -1450,48 +1494,55 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 }
 
 static void
-toggle_lastfm (GtkToggleButton *button, PraghaLastfm *lastfm)
+toggle_lastfm (GtkToggleButton *button, PraghaLastfmPlugin *plugin)
 {
 	gboolean is_active;
 
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lastfm->enable_w));
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	gtk_widget_set_sensitive (lastfm->lastfm_uname_w, is_active);
-	gtk_widget_set_sensitive (lastfm->lastfm_pass_w, is_active);
+	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->enable_w));
 
-	if(!is_active) {
-		pragha_lastfm_disconnect (lastfm);
+	gtk_widget_set_sensitive (priv->lastfm_uname_w, is_active);
+	gtk_widget_set_sensitive (priv->lastfm_pass_w, is_active);
+
+	if (!is_active) {
+		pragha_lastfm_disconnect (plugin);
 	}
 }
 
 static void
-pragha_lastfm_init_settings (PraghaLastfm *lastfm)
+pragha_lastfm_init_settings (PraghaLastfmPlugin *plugin)
 {
 	PraghaPreferences *preferences;
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
 	preferences = pragha_preferences_get ();
 
 	if (pragha_preferences_get_lastfm_support (preferences)) {
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(lastfm->enable_w), TRUE);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->enable_w), TRUE);
 
-		gtk_entry_set_text (GTK_ENTRY(lastfm->lastfm_uname_w),
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w),
 		                    pragha_preferences_get_lastfm_user (preferences));
-		gtk_entry_set_text (GTK_ENTRY(lastfm->lastfm_pass_w),
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w),
 		                    pragha_lastfm_get_password (preferences));
 	}
 	else {
-		gtk_widget_set_sensitive (lastfm->lastfm_uname_w, FALSE);
-		gtk_widget_set_sensitive (lastfm->lastfm_pass_w, FALSE);
+		gtk_widget_set_sensitive (priv->lastfm_uname_w, FALSE);
+		gtk_widget_set_sensitive (priv->lastfm_pass_w, FALSE);
 	}
 
 	g_object_unref (preferences);
 }
 
 static void
-pragha_lastfm_plugin_append_setting (PraghaLastfm *lastfm)
+pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 {
 	GtkWidget *table;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	guint row = 0;
+
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	table = pragha_hig_workarea_table_new ();
 
@@ -1518,92 +1569,98 @@ pragha_lastfm_plugin_append_setting (PraghaLastfm *lastfm)
 
 	/* Store references. */
 
-	lastfm->enable_w = lastfm_check;
-	lastfm->lastfm_uname_w = lastfm_uname;
-	lastfm->lastfm_pass_w = lastfm_pass;
-	lastfm->setting_widget = table;
+	priv->enable_w = lastfm_check;
+	priv->lastfm_uname_w = lastfm_uname;
+	priv->lastfm_pass_w = lastfm_pass;
+	priv->setting_widget = table;
 
 	/* Append panes */
 
-	pragha_preferences_append_services_setting (lastfm->pragha,
-	                                            lastfm->setting_widget, FALSE);
+	pragha_preferences_append_services_setting (priv->pragha,
+	                                            priv->setting_widget, FALSE);
 
 	/* Configure handler and settings */
-	pragha_preferences_dialog_connect_handler (lastfm->pragha,
+	pragha_preferences_dialog_connect_handler (priv->pragha,
 	                                           G_CALLBACK(pragha_lastfm_preferences_dialog_response),
-	                                           lastfm);
+	                                           plugin);
 
 	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
-	                  G_CALLBACK(toggle_lastfm), lastfm);
+	                  G_CALLBACK(toggle_lastfm), plugin);
 
-	pragha_lastfm_init_settings (lastfm);
+	pragha_lastfm_init_settings (plugin);
 }
 
 static void
-pragha_lastfm_plugin_remove_setting (PraghaLastfm *lastfm)
+pragha_lastfm_plugin_remove_setting (PraghaLastfmPlugin *plugin)
 {
-	pragha_preferences_remove_services_setting (lastfm->pragha,
-	                                            lastfm->setting_widget);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	pragha_preferences_dialog_disconnect_handler (lastfm->pragha,
+	pragha_preferences_remove_services_setting (priv->pragha,
+	                                            priv->setting_widget);
+
+	pragha_preferences_dialog_disconnect_handler (priv->pragha,
 	                                              G_CALLBACK(pragha_lastfm_preferences_dialog_response),
-	                                              lastfm);
+	                                              plugin);
 }
 
-/* When just launch pragha init lastfm immediately if has internet or otherwise waiting 30 seconds.
- * And no show any error. */
-
-PraghaLastfm *
-pragha_lastfm_new (PraghaApplication *pragha)
+/*
+ * Lastfm plugin
+ */
+static void
+pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PraghaLastfm *clastfm;
 	PraghaPreferences *preferences;
 
-	clastfm = g_slice_new0(PraghaLastfm);
+	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
 
-	/* Init struct flags */
+	g_debug ("%s", G_STRFUNC);
 
-	clastfm->session_id = NULL;
-	clastfm->status = LASTFM_STATUS_INVALID;
-	clastfm->nmobj = pragha_musicobject_new();
-	g_mutex_init (&clastfm->nmobj_mutex);
-	clastfm->ntag_lastfm_button = NULL;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	clastfm->has_user = FALSE;
-	clastfm->has_pass = FALSE;
+	/* Init plugin flags */
 
-	clastfm->timeout_id = 0;
+	priv->session_id = NULL;
+	priv->status = LASTFM_STATUS_INVALID;
+	priv->nmobj = pragha_musicobject_new();
+	g_mutex_init (&priv->nmobj_mutex);
+	priv->ntag_lastfm_button = NULL;
 
-	clastfm->pragha = pragha;
+	priv->has_user = FALSE;
+	priv->has_pass = FALSE;
+
+	priv->timeout_id = 0;
 
 	/* Test internet and launch threads.*/
 
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_application_get_preferences (priv->pragha);
 	if (pragha_preferences_get_lastfm_support (preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
-			g_idle_add (pragha_lastfm_connect_idle, clastfm);
+			g_idle_add (pragha_lastfm_connect_idle, plugin);
 		else
 			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
-			                            pragha_lastfm_connect_idle, clastfm, NULL);
+			                            pragha_lastfm_connect_idle, plugin, NULL);
 	}
 
-	pragha_lastfm_plugin_append_setting (clastfm);
+	/* Append settings */
 
-	return clastfm;
+	pragha_lastfm_plugin_append_setting (plugin);
 }
 
-void
-pragha_lastfm_free (PraghaLastfm *clastfm)
+static void
+pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	pragha_lastfm_disconnect (clastfm);
+	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	pragha_lastfm_plugin_remove_setting (clastfm);
+	g_debug ("%s", G_STRFUNC);
 
-	g_object_unref(clastfm->nmobj);
-	g_mutex_clear (&clastfm->nmobj_mutex);
+	pragha_lastfm_disconnect (plugin);
+	pragha_lastfm_plugin_remove_setting (plugin);
 
-	g_slice_free(PraghaLastfm, clastfm);
+	g_object_unref (priv->nmobj);
+	g_mutex_clear (&priv->nmobj_mutex);
 }
-#endif
+
