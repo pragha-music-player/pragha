@@ -89,7 +89,8 @@ struct _PraghaLastfmPluginPrivate {
 	GtkActionGroup           *action_group_playlist;
 	guint                     merge_id_playlist;
 
-	guint                     timeout_id;
+	guint                     update_timeout_id;
+	guint                     scrobble_timeout_id;
 };
 typedef struct _PraghaLastfmPluginPrivate PraghaLastfmPluginPrivate;
 
@@ -1048,31 +1049,6 @@ do_lastfm_scrob (gpointer data)
 		return _("Track scrobbled on Last.fm");
 }
 
-gboolean
-lastfm_scrob_handler(gpointer data)
-{
-	PraghaBackend *backend;
-	PraghaLastfmPlugin *plugin = data;
-
-	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
-
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-	backend = pragha_application_get_backend (priv->pragha);
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
-		return FALSE;
-
-	if (priv->status != LASTFM_STATUS_OK) {
-		pragha_lastfm_no_connection_advice ();
-		return FALSE;
-	}
-
-	pragha_async_launch (do_lastfm_scrob,
-	                     pragha_async_set_idle_message,
-	                     pragha_lastfm_async_data_new (plugin));
-
-	return FALSE;
-}
-
 static gboolean
 show_lastfm_sugest_corrrection_button (gpointer user_data)
 {
@@ -1193,76 +1169,42 @@ do_lastfm_now_playing (gpointer data)
 		return NULL;
 }
 
-void
-lastfm_now_playing_handler (PraghaLastfmPlugin *plugin)
+static gboolean
+pragha_lastfm_now_playing_handler (gpointer data)
 {
-	PraghaBackend *backend;
-	gchar *title = NULL, *artist = NULL;
-	gint length;
+	PraghaLastfmPlugin *plugin = data;
+	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	priv->update_timeout_id = 0;
 
 	CDEBUG(DBG_LASTFM, "Update now playing Handler");
 
-	PraghaLastfmPluginPrivate *priv = plugin->priv;
-	backend = pragha_application_get_backend (priv->pragha);
-
-	if (pragha_backend_get_state (backend) == ST_STOPPED)
-		return;
-
-	if (!priv->has_user || !priv->has_pass)
-		return;
-
-	if (priv->status != LASTFM_STATUS_OK) {
-		pragha_lastfm_no_connection_advice ();
-		return;
-	}
-
-	g_object_get(pragha_backend_get_musicobject (backend),
-	             "title", &title,
-	             "artist", &artist,
-	             "length", &length,
-	             NULL);
-
-	if (string_is_empty(title) || string_is_empty(artist) || (length < 30))
-		goto exit;
-
+	time(&priv->playback_started);
 	pragha_async_launch (do_lastfm_now_playing,
 	                     pragha_async_set_idle_message,
 	                     pragha_lastfm_async_data_new (plugin));
 
-	/* Kick the lastfm scrobbler on
-	 * Note: Only scrob if tracks is more than 30s.
-	 * and scrob when track is at 50% or 4mins, whichever comes
-	 * first */
-
-	if ((length / 2) > (240 - WAIT_UPDATE)) {
-		length = 240 - WAIT_UPDATE;
-	}
-	else {
-		length = (length / 2) - WAIT_UPDATE;
-	}
-
-	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, length,
-	                                               lastfm_scrob_handler, plugin, NULL);
-exit:
-	g_free(title);
-	g_free(artist);
-
-	return;
+	return FALSE;
 }
 
 static gboolean
-update_related_handler (gpointer data)
+pragha_lastfm_scrobble_handler (gpointer data)
 {
-	PraghaPreferences *preferences;
-
 	PraghaLastfmPlugin *plugin = data;
-
-	CDEBUG(DBG_INFO, "Updating Lastm depending preferences");
-
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
-	preferences = pragha_application_get_preferences (priv->pragha);
-	if (pragha_preferences_get_lastfm_support (preferences))
-		lastfm_now_playing_handler (plugin);
+
+	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
+
+	priv->scrobble_timeout_id = 0;
+
+	if (priv->status != LASTFM_STATUS_OK) {
+		pragha_lastfm_no_connection_advice ();
+		return FALSE;
+	}
+
+	pragha_async_launch (do_lastfm_scrob,
+	                     pragha_async_set_idle_message,
+	                     pragha_lastfm_async_data_new (plugin));
 
 	return FALSE;
 }
@@ -1270,8 +1212,11 @@ update_related_handler (gpointer data)
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
+	PraghaPreferences *preferences;
+	PraghaMusicobject *mobj = NULL;
 	PraghaMusicType file_type = FILE_NONE;
 	PraghaBackendState state = 0;
+	gint length = 0, dalay_time = 0;
 
 	PraghaLastfmPlugin *plugin = user_data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
@@ -1286,9 +1231,13 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	/* Update thread. */
 
-	if (priv->timeout_id) {
-		g_source_remove (priv->timeout_id);
-		priv->timeout_id = 0;
+	if (priv->update_timeout_id) {
+		g_source_remove (priv->update_timeout_id);
+		priv->update_timeout_id = 0;
+	}
+	if (priv->scrobble_timeout_id) {
+		g_source_remove (priv->scrobble_timeout_id);
+		priv->scrobble_timeout_id = 0;
 	}
 
 	if (state != ST_PLAYING) {
@@ -1297,16 +1246,45 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 		return;
 	}
 
-	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
+	/*
+	 * Check settings, status, file-type, title, artist and length before update.
+	 */
 
+	preferences = pragha_application_get_preferences (priv->pragha);
+	if (!pragha_preferences_get_lastfm_support (preferences))
+		return;
+
+	if (!priv->has_user || !priv->has_pass)
+		return;
+
+	if (priv->status != LASTFM_STATUS_OK)
+		return;
+
+	mobj = pragha_backend_get_musicobject (backend);
+
+	file_type = pragha_musicobject_get_file_type (mobj);
 	if (file_type == FILE_NONE || file_type == FILE_HTTP)
 		return;
 
-	if (priv->status == LASTFM_STATUS_OK)
-		time(&priv->playback_started);
+	length = pragha_musicobject_get_length (mobj);
+	if (length < 30)
+		return;
 
-	priv->timeout_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
-	                                                  update_related_handler, plugin, NULL);
+	if (string_is_empty(pragha_musicobject_get_title(mobj)))
+		return;
+	if (string_is_empty(pragha_musicobject_get_artist(mobj)))
+		return;
+
+	/* Now playing delayed handler */
+	priv->update_timeout_id =
+		g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, WAIT_UPDATE,
+	                                pragha_lastfm_now_playing_handler, plugin, NULL);
+
+	/* Scrobble delayed handler */
+	dalay_time = ((length / 2) > 240) ? 240 : (length / 2);
+	priv->scrobble_timeout_id =
+		g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, dalay_time,
+		                            pragha_lastfm_scrobble_handler, plugin, NULL);
 }
 
 static void
@@ -1629,7 +1607,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->has_user = FALSE;
 	priv->has_pass = FALSE;
 
-	priv->timeout_id = 0;
+	priv->update_timeout_id = 0;
+	priv->scrobble_timeout_id = 0;
 
 	/* Test internet and launch threads.*/
 
