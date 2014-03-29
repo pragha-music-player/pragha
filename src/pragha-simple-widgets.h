@@ -20,6 +20,14 @@
 
 #include <gtk/gtk.h>
 
+G_BEGIN_DECLS
+
+typedef struct _PraghaTrackProgress PraghaTrackProgress;
+
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
+
+PraghaTrackProgress *pragha_track_progress_new (void);
+
+G_END_DECLS
 
 #endif /* PRAGHA_SIMPLE_WIDGETS_H */
