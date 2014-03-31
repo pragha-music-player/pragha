@@ -346,7 +346,7 @@ gchar* get_display_name(PraghaMusicobject *mobj)
 {
 	gchar *name = NULL;
 	
-	if (pragha_musicobject_is_local_file(mobj)) {
+	if (!pragha_musicobject_is_local_file(mobj)) {
 		name = g_strdup(pragha_musicobject_get_file(mobj));
 	} else {
 		name = get_display_filename(pragha_musicobject_get_file(mobj), FALSE);
