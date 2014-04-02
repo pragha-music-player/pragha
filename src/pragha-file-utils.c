@@ -131,8 +131,6 @@ get_mime_type_from_uri (const gchar *uri, GError **error)
 
 	g_object_unref (file_info);
 
-	g_print ("%s\n", mime_type);
-
 	return mime_type;
 }
 #else
