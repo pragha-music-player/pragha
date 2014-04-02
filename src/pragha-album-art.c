@@ -68,11 +68,19 @@ pragha_album_art_update_image (PraghaAlbumArt *albumart)
    g_free (frame_uri);
 
    if (priv->path != NULL) {
+      #ifdef G_OS_WIN32
+      GdkPixbuf *a_pixbuf = gdk_pixbuf_new_from_file (priv->path, &error);
+      if (a_pixbuf) {
+         album_art = gdk_pixbuf_scale_simple (a_pixbuf, 112, 112, GDK_INTERP_BILINEAR);
+         g_object_unref(G_OBJECT(a_pixbuf));
+      }
+      #else
       album_art = gdk_pixbuf_new_from_file_at_scale(priv->path,
                                                     112,
                                                     112,
                                                     FALSE,
                                                     &error);
+      #endif
       if (album_art) {
          gdk_pixbuf_copy_area (album_art, 0, 0, 112, 112, frame, 12, 8);
          g_object_unref(G_OBJECT(album_art));
