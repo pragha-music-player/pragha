@@ -48,6 +48,7 @@ static void systray_play_pause_action   (GtkAction *action, PraghaStatusIcon *st
 static void systray_stop_action         (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_prev_action         (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_next_action         (GtkAction *action, PraghaStatusIcon *status_icon);
+static void systray_edit_action         (GtkAction *action, PraghaStatusIcon *status_icon);
 static void systray_quit                (GtkAction *action, PraghaStatusIcon *status_icon);
 
 static const gchar *systray_menu_xml =
@@ -86,7 +87,7 @@ static const GtkActionEntry systray_menu_aentries[] = {
 	{"Next", "media-skip-forward", N_("Next Track"),
 	 "", "Next Track", G_CALLBACK(systray_next_action)},
 	{"Edit tags", NULL, N_("Edit track information"),
-	 "", "Edit information of current track", G_CALLBACK(edit_tags_playing_action)},
+	 "", "Edit information of current track", G_CALLBACK(systray_edit_action)},
 	{"Quit", "application-exit", N_("_Quit"),
 	 "", "Quit", G_CALLBACK(systray_quit)}
 };
@@ -259,6 +260,12 @@ systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
 		pragha_playback_next_track(status_icon->pragha);
+}
+
+static void
+systray_edit_action (GtkAction *action, PraghaStatusIcon *status_icon)
+{
+	edit_tags_playing_action (NULL, status_icon->pragha);
 }
 
 static void
