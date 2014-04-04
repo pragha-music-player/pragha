@@ -239,10 +239,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaTuneinPlugin *plugin = PRAGHA_TUNEIN_PLUGIN (activatable);
 
-	g_debug ("%s", G_STRFUNC);
-
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+
+	CDEBUG(DBG_PLUGIN, "TuneIn plugin %s", G_STRFUNC);
 
 	/* Attach main menu */
 
@@ -264,7 +264,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaTuneinPlugin *plugin = PRAGHA_TUNEIN_PLUGIN (activatable);
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "TuneIn plugin %s", G_STRFUNC);
 
 	pragha_menubar_remove_plugin_action (priv->pragha,
 	                                     priv->action_group_main_menu,

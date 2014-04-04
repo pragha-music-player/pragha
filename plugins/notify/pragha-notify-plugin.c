@@ -337,6 +337,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaNotifyPlugin *plugin = PRAGHA_NOTIFY_PLUGIN (activatable);
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
+	CDEBUG(DBG_PLUGIN, "Notify plugin %s", G_STRFUNC);
+
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	notify_init (PACKAGE_NAME);
@@ -368,7 +370,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaNotifyPlugin *plugin = PRAGHA_NOTIFY_PLUGIN (activatable);
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Notify plugin %s", G_STRFUNC);
 
 	notify_uninit ();
 

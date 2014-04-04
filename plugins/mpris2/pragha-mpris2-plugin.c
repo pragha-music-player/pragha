@@ -423,7 +423,7 @@ seeked_cb (PraghaBackend *backend, gpointer user_data)
 	if(NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS emit seeked signal..");
+	CDEBUG(DBG_PLUGIN, "MPRIS emit seeked signal..");
 
 	backend = pragha_application_get_backend (plugin->priv->pragha);
 
@@ -446,7 +446,7 @@ mpris_Player_OpenUri (GDBusMethodInvocation *invocation,
 
 	g_variant_get(parameters, "(s)", &uri);
 
-	CDEBUG(DBG_MPRIS, "MPRIS Player OpenUri");
+	CDEBUG(DBG_PLUGIN, "MPRIS Player OpenUri");
 
 	if(uri) {
 		// TODO: Translate "cdda://sr0/Track 01.wav" URIs for new_musicobject_from_cdda()
@@ -577,7 +577,7 @@ handle_get_metadata (PraghaMusicobject *mobj, GVariantBuilder *b)
 	gint track_no, year, length, bitrate, channels, samplerate;
 	gchar *date = NULL, *url = NULL;
 
-	CDEBUG(DBG_MPRIS, "MPRIS handle get metadata");
+	CDEBUG(DBG_PLUGIN, "MPRIS handle get metadata");
 
 	file = pragha_musicobject_get_file(mobj);
 	title = pragha_musicobject_get_title(mobj);
@@ -635,7 +635,7 @@ mpris_Player_get_Metadata (GError **error, PraghaMpris2Plugin *plugin)
 	GVariantBuilder b;
 	const gchar *arturl;
 
-	CDEBUG(DBG_MPRIS, "MPRIS Player get Metadata");
+	CDEBUG(DBG_PLUGIN, "MPRIS Player get Metadata");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("a{sv}"));
 
@@ -763,7 +763,7 @@ mpris_Playlists_ActivatePlaylist (GDBusMethodInvocation *invocation,
 	gchar **db_playlists = NULL;
 	gint i = 0;
 
-	CDEBUG(DBG_MPRIS, "MPRIS Playlists ActivatePlaylist");
+	CDEBUG(DBG_PLUGIN, "MPRIS Playlists ActivatePlaylist");
 
 	g_variant_get(parameters, "(o)", &get_playlist);
 
@@ -820,7 +820,7 @@ mpris_Playlists_GetPlaylists (GDBusMethodInvocation *invocation,
 	gboolean reverse;
 	gint imax = 0;
 
-	CDEBUG(DBG_MPRIS, "MPRIS Playlists GetPlaylists");
+	CDEBUG(DBG_PLUGIN, "MPRIS Playlists GetPlaylists");
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("(a(oss))"));
 	g_variant_builder_open(&builder, G_VARIANT_TYPE("a(oss)"));
@@ -892,7 +892,7 @@ mpris_TrackList_GetTracksMetadata (GDBusMethodInvocation *invocation,
 	GVariantBuilder b;
 	const gchar *track_id;
 
-	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GetTracksMetada");
+	CDEBUG(DBG_PLUGIN, "MPRIS Tracklist GetTracksMetada");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("(aa{sv})"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("aa{sv}"));
@@ -972,7 +972,7 @@ mpris_TrackList_GoTo (GDBusMethodInvocation *invocation,
 
 	g_variant_get(parameters, "(o)", &track_id);
 
-	CDEBUG(DBG_MPRIS, "MPRIS Tracklist GoTo");
+	CDEBUG(DBG_PLUGIN, "MPRIS Tracklist GoTo");
 
 	mobj = get_mobj_at_mpris2_track_id (track_id);
 
@@ -996,7 +996,7 @@ mpris_TrackList_get_Tracks (GError **error, PraghaMpris2Plugin *plugin)
 	PraghaMusicobject *mobj = NULL;
 	GList *list = NULL, *i;
 
-	CDEBUG(DBG_MPRIS, "MPRIS Tracklist get Tracks");
+	CDEBUG(DBG_PLUGIN, "MPRIS Tracklist get Tracks");
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
 
@@ -1190,7 +1190,7 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
-	CDEBUG(DBG_INFO, "Acquired DBus name %s", name);
+	CDEBUG(DBG_PLUGIN, "Acquired DBus name %s", name);
 }
 
 static void
@@ -1205,7 +1205,7 @@ on_name_lost (GDBusConnection *connection,
 		plugin->priv->dbus_connection = NULL;
 	}
 
-	CDEBUG(DBG_INFO, "Lost DBus name %s", name);
+	CDEBUG(DBG_PLUGIN, "Lost DBus name %s", name);
 }
 
 /* pragha callbacks */
@@ -1223,7 +1223,7 @@ pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 	if(NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS update any");
+	CDEBUG(DBG_PLUGIN, "MPRIS update any");
 
 	backend = pragha_application_get_backend (plugin->priv->pragha);
 
@@ -1293,7 +1293,7 @@ pragha_mpris_update_metadata_changed (PraghaMpris2Plugin *plugin)
 	if (NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS update metadata of current track.");
+	CDEBUG(DBG_PLUGIN, "MPRIS update metadata of current track.");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE("a{sv}"));
 
@@ -1318,7 +1318,7 @@ pragha_mpris_update_mobj_remove(PraghaMpris2Plugin *plugin, PraghaMusicobject *m
 	if(NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS update mobj remove");
+	CDEBUG(DBG_PLUGIN, "MPRIS update mobj remove");
 
 	tuples[0] = handle_get_trackid(mobj);
 
@@ -1344,7 +1344,7 @@ pragha_mpris_update_mobj_added (PraghaMpris2Plugin *plugin,
 	playlist = pragha_application_get_playlist (plugin->priv->pragha);
 	model = pragha_playlist_get_model (playlist);
 
-	CDEBUG(DBG_MPRIS, "MPRIS update mobj added");
+	CDEBUG(DBG_PLUGIN, "MPRIS update mobj added");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(a{sv}o)"));
 	path = gtk_tree_model_get_path(model, iter);
@@ -1378,7 +1378,7 @@ pragha_mpris_update_mobj_changed(PraghaMpris2Plugin *plugin, PraghaMusicobject *
 	if(NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS update mobj changed");
+	CDEBUG(DBG_PLUGIN, "MPRIS update mobj changed");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(a{sv})"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("a{sv}"));
@@ -1406,7 +1406,7 @@ pragha_mpris_update_tracklist_replaced (PraghaMpris2Plugin *plugin)
 	if (NULL == plugin->priv->dbus_connection)
 		return; /* better safe than sorry */
 
-	CDEBUG(DBG_MPRIS, "MPRIS update tracklist changed");
+	CDEBUG(DBG_PLUGIN, "MPRIS update tracklist changed");
 
 	g_variant_builder_init(&b, G_VARIANT_TYPE ("(aoo)"));
 	g_variant_builder_open(&b, G_VARIANT_TYPE("ao"));
@@ -1478,7 +1478,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Mpris2 plugin %s", G_STRFUNC);
 
 	priv->saved_shuffle = FALSE;
 	priv->saved_playbackstatus = FALSE;
@@ -1521,7 +1521,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaMpris2Plugin *plugin = PRAGHA_MPRIS2_PLUGIN (activatable);
 	PraghaMpris2PluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Mpris2 plugin %s", G_STRFUNC);
 
 	if (NULL == priv->dbus_connection)
 		return;
