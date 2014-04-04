@@ -63,7 +63,8 @@ typedef enum {
 	FILE_ASF       = -6,
 	FILE_MP4       = -7,
 	FILE_APE       = -8,
-	FILE_HTTP      = -9
+	FILE_TRACKER   = -9,
+	FILE_HTTP      = -10
 } PraghaMusicType;
 
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS

@@ -30,6 +30,7 @@ new_musicobject_from_file(const gchar *file)
 {
 	PraghaMusicobject *mobj = NULL;
 	PraghaMusicType type;
+	gboolean ret = FALSE;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
@@ -42,7 +43,32 @@ new_musicobject_from_file(const gchar *file)
 	                     "file-type", type,
 	                     NULL);
 
-	if(G_LIKELY(pragha_musicobject_set_tags_from_file(mobj, file)))
+	switch (type) {
+		case FILE_USER_L:
+		case FILE_USER_3:
+		case FILE_USER_2:
+		case FILE_USER_1:
+		case FILE_USER_0:
+		case FILE_NONE:
+			break;
+		case FILE_WAV:
+		case FILE_MP3:
+		case FILE_FLAC:
+		case FILE_OGGVORBIS:
+		case FILE_ASF:
+		case FILE_MP4:
+		case FILE_APE:
+			ret = pragha_musicobject_set_tags_from_file (mobj, file);
+			break;
+		case FILE_TRACKER:
+			ret = TRUE;
+			break;
+		case FILE_HTTP:
+		default:
+			break;
+	}
+
+	if (G_LIKELY(ret))
 		return mobj;
 	else {
 		g_critical("Fail to create musicobject from file");

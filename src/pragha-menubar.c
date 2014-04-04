@@ -416,6 +416,10 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	while (mime_ape[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_ape[i++]);
+	i = 0;
+	while (mime_tracker[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_tracker[i++]);
 
 	#ifdef HAVE_PLPARSER
 	i = 0;

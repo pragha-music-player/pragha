@@ -31,7 +31,6 @@
 /*
  * Mimetype handles by pragha
  */
-
 const gchar *mime_flac[] = {"audio/x-flac", NULL};
 const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
 const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", "application/x-ext-ogg", NULL};
@@ -39,6 +38,7 @@ const gchar *mime_wav[] = {"audio/x-wav", "audio/wav", NULL};
 const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", NULL};
 const gchar *mime_mp4 [] = {"audio/x-m4a", NULL};
 const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NULL};
+const gchar *mime_tracker[] = {"audio/x-mod", "audio/x-xm", NULL};
 
 const gchar *mime_image[] = {"image/jpeg", "image/png", NULL};
 
@@ -178,6 +178,8 @@ pragha_file_get_music_type(const gchar *filename)
 			ret = FILE_MP4;
 		else if (is_valid_mime(result, mime_ape))
 			ret = FILE_APE;
+		else if (is_valid_mime(result, mime_tracker))
+			ret = FILE_TRACKER;
 	}
 	g_free(result);
 
@@ -229,7 +231,8 @@ pragha_file_get_media_type (const gchar *filename)
 		    is_valid_mime(result, mime_wav) ||
 		    is_valid_mime(result, mime_asf) ||
 		    is_valid_mime(result, mime_mp4) ||
-		    is_valid_mime(result, mime_ape))
+		    is_valid_mime(result, mime_ape) ||
+		    is_valid_mime(result, mime_tracker))
 			ret = MEDIA_TYPE_AUDIO;
 		#ifdef HAVE_PLPARSER
 		else if (is_valid_mime(result, mime_playlist))
