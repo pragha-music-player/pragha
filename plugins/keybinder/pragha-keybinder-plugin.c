@@ -105,7 +105,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	keybinder_init ();
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Keybinder plugin %s", G_STRFUNC);
 
 	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, priv->pragha);
 	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, priv->pragha);
@@ -117,7 +117,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Keybinder plugin %s", G_STRFUNC);
 
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
 	keybinder_unbind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler);

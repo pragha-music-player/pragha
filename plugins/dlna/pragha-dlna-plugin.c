@@ -204,7 +204,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
 	rygel_media_engine_init (&error);
 	if (error != NULL) {
@@ -251,7 +251,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
 	cdbase = pragha_application_get_database (priv->pragha);
 	g_signal_handlers_disconnect_by_func (cdbase,

@@ -24,8 +24,7 @@
 enum debug_level {
 	DBG_BACKEND = 1,
 	DBG_INFO,
-	DBG_LASTFM,
-	DBG_MPRIS,
+	DBG_PLUGIN,
 	DBG_MOBJ,
 	DBG_DB,
 	DBG_VERBOSE,

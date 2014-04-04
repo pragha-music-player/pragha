@@ -457,7 +457,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Devices plugin %s", G_STRFUNC);
 
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                            g_str_equal,
@@ -478,7 +478,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaDevicesPlugin *plugin = PRAGHA_DEVICES_PLUGIN (activatable);
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Devices plugin %s", G_STRFUNC);
 
 	if (priv->hooked_type != PRAGHA_DEVICE_NONE)
 		pragha_gudev_clear_hook_devices (plugin);

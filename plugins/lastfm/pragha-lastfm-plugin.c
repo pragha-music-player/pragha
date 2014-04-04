@@ -483,7 +483,7 @@ do_lastfm_love_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gchar
 {
 	gint rv;
 
-	CDEBUG(DBG_LASTFM, "Love mobj on thread");
+	CDEBUG(DBG_PLUGIN, "Love mobj on thread");
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 	rv = LASTFM_track_love (priv->session_id,
@@ -501,7 +501,7 @@ do_lastfm_unlove_mobj (PraghaLastfmPlugin *plugin, const gchar *title, const gch
 {
 	gint rv;
 
-	CDEBUG(DBG_LASTFM, "Unlove mobj on thread");
+	CDEBUG(DBG_PLUGIN, "Unlove mobj on thread");
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 	rv = LASTFM_track_unlove (priv->session_id,
@@ -539,7 +539,7 @@ do_lastfm_current_playlist_love (gpointer data)
 static void
 lastfm_track_current_playlist_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
-	CDEBUG(DBG_LASTFM, "Love handler to current playlist");
+	CDEBUG(DBG_PLUGIN, "Love handler to current playlist");
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 	if (priv->status != LASTFM_STATUS_OK) {
@@ -574,7 +574,7 @@ do_lastfm_current_playlist_unlove (gpointer data)
 static void
 lastfm_track_current_playlist_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
-	CDEBUG(DBG_LASTFM, "Unlove Handler to current playlist");
+	CDEBUG(DBG_PLUGIN, "Unlove Handler to current playlist");
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 	if (priv->status != LASTFM_STATUS_OK) {
@@ -709,7 +709,7 @@ lastfm_get_similar_current_playlist_action (GtkAction *action, PraghaLastfmPlugi
 {
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Get similar action to current playlist");
+	CDEBUG(DBG_PLUGIN, "Get similar action to current playlist");
 
 	if (priv->session_id == NULL) {
 		pragha_lastfm_no_connection_advice ();
@@ -863,7 +863,7 @@ lastfm_add_favorites_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 {
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Add Favorites action");
+	CDEBUG(DBG_PLUGIN, "Add Favorites action");
 
 	if ((priv->session_id == NULL) || !priv->has_user) {
 		pragha_lastfm_no_connection_advice ();
@@ -903,7 +903,7 @@ lastfm_get_similar_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Get similar action");
+	CDEBUG(DBG_PLUGIN, "Get similar action");
 
 	backend = pragha_application_get_backend (priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
@@ -947,7 +947,7 @@ lastfm_track_love_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Love Handler");
+	CDEBUG(DBG_PLUGIN, "Love Handler");
 
 	backend = pragha_application_get_backend (priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
@@ -990,7 +990,7 @@ lastfm_track_unlove_action (GtkAction *action, PraghaLastfmPlugin *plugin)
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Unlove Handler");
+	CDEBUG(DBG_PLUGIN, "Unlove Handler");
 
 	backend = pragha_application_get_backend (priv->pragha);
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
@@ -1015,7 +1015,7 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Scrobbler thread");
+	CDEBUG(DBG_PLUGIN, "Scrobbler thread");
 
 	g_mutex_lock (&priv->data_mutex);
 	g_object_get (priv->current_mobj,
@@ -1097,7 +1097,7 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Update now playing thread");
+	CDEBUG(DBG_PLUGIN, "Update now playing thread");
 
 	g_mutex_lock (&priv->data_mutex);
 	g_object_get (priv->current_mobj,
@@ -1168,7 +1168,7 @@ pragha_lastfm_now_playing_handler (gpointer data)
 
 	priv->update_timeout_id = 0;
 
-	CDEBUG(DBG_LASTFM, "Update now playing Handler");
+	CDEBUG(DBG_PLUGIN, "Update now playing Handler");
 
 	/* Set current song info */
 	backend = pragha_application_get_backend (priv->pragha);
@@ -1198,7 +1198,7 @@ pragha_lastfm_scrobble_handler (gpointer data)
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	CDEBUG(DBG_LASTFM, "Scrobbler Handler");
+	CDEBUG(DBG_PLUGIN, "Scrobbler Handler");
 
 	priv->scrobble_timeout_id = 0;
 
@@ -1228,7 +1228,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	state = pragha_backend_get_state (backend);
 
-	CDEBUG(DBG_INFO, "Configuring thread to update Lastfm");
+	CDEBUG(DBG_PLUGIN, "Configuring thread to update Lastfm");
 
 	/* Update gui. */
 
@@ -1388,13 +1388,13 @@ pragha_lastfm_connect_idle(gpointer data)
 			}
 			else {
 				pragha_lastfm_no_connection_advice ();
-				CDEBUG(DBG_INFO, "Failure to login on lastfm");
+				CDEBUG(DBG_PLUGIN, "Failure to login on lastfm");
 			}
 		}
 	}
 	else {
 		pragha_lastfm_no_connection_advice ();
-		CDEBUG(DBG_INFO, "Failure to init libclastfm");
+		CDEBUG(DBG_PLUGIN, "Failure to init libclastfm");
 	}
 
 	pragha_menubar_append_lastfm (plugin);
@@ -1408,7 +1408,7 @@ pragha_lastfm_connect_idle(gpointer data)
 gint
 pragha_lastfm_connect (PraghaLastfmPlugin *plugin)
 {
-	CDEBUG(DBG_INFO, "Connecting LASTFM");
+	CDEBUG(DBG_PLUGIN, "Connecting LASTFM");
 
 	g_idle_add (pragha_lastfm_connect_idle, plugin);
 
@@ -1421,7 +1421,7 @@ pragha_lastfm_disconnect (PraghaLastfmPlugin *plugin)
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	if (priv->session_id != NULL) {
-		CDEBUG(DBG_INFO, "Disconnecting LASTFM");
+		CDEBUG(DBG_PLUGIN, "Disconnecting LASTFM");
 
 		if (priv->status == LASTFM_STATUS_OK)
 			g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
@@ -1595,10 +1595,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaPreferences *preferences;
 
 	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
-
-	g_debug ("%s", G_STRFUNC);
-
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Lastfm plugin %s", G_STRFUNC);
+
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	/* Init plugin flags */
@@ -1622,7 +1622,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 	if (pragha_preferences_get_lastfm_support (preferences)) {
-		CDEBUG(DBG_INFO, "Initializing LASTFM");
+		CDEBUG(DBG_PLUGIN, "Initializing LASTFM");
 
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
 			g_idle_add (pragha_lastfm_connect_idle, plugin);
@@ -1642,7 +1642,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Lastfm plugin %s", G_STRFUNC);
 
 	pragha_lastfm_disconnect (plugin);
 	pragha_lastfm_plugin_remove_setting (plugin);

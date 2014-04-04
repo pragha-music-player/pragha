@@ -416,6 +416,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
+	CDEBUG(DBG_PLUGIN, "Song-info plugin %s", G_STRFUNC);
+
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	glyr_init ();
@@ -486,7 +488,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	pragha = plugin->priv->pragha;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "SongInfo plugin %s", G_STRFUNC);
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha),
 	                                      backend_changed_state_cb, plugin);

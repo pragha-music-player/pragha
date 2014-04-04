@@ -83,8 +83,7 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 	gint channels, start, end;
 	gchar *ntitle = NULL, *nfile = NULL;
 
-	CDEBUG(DBG_MOBJ, "Creating new musicobject from cdda: %d",
-	       track_no);
+	CDEBUG(DBG_PLUGIN, "Creating new musicobject from cdda: %d", track_no);
 
 	channels = cdio_get_track_channels(cdda_drive->p_cdio,
 					   track_no);
@@ -214,7 +213,7 @@ find_audio_cd (PraghaApplication *pragha)
 			return NULL;
 		}
 
-		CDEBUG(DBG_INFO, "Trying Audio CD Device: %s", *cdda_devices);
+		CDEBUG(DBG_PLUGIN, "Trying Audio CD Device: %s", *cdda_devices);
 
 		drive = cdio_cddap_identify(*cdda_devices, 0, NULL);
 		if (!drive) {
@@ -222,11 +221,9 @@ find_audio_cd (PraghaApplication *pragha)
 			goto exit;
 		}
 	} else {
-		CDEBUG(DBG_INFO, "Trying Audio CD Device: %s",
-		       audio_cd_device);
+		CDEBUG(DBG_PLUGIN, "Trying Audio CD Device: %s", audio_cd_device);
 
-		drive = cdio_cddap_identify(audio_cd_device,
-					    0, NULL);
+		drive = cdio_cddap_identify(audio_cd_device, 0, NULL);
 		if (!drive) {
 			g_warning("Unable to identify Audio CD");
 			return NULL;
@@ -291,13 +288,13 @@ pragha_application_append_audio_cd (PraghaApplication *pragha)
 			goto add;
 		}
 
-		CDEBUG(DBG_INFO, "Successfully initialized CDDB");
+		CDEBUG(DBG_PLUGIN, "Successfully initialized CDDB");
 		goto add;
 	}
 
 add:
 	add_audio_cd_tracks(pragha, cdda_drive, cddb_disc);
-	CDEBUG(DBG_INFO, "Successfully opened Audio CD device");
+	CDEBUG(DBG_PLUGIN, "Successfully opened Audio CD device");
 
 	if (cdda_drive)
 		cdio_cddap_close(cdda_drive);
@@ -498,7 +495,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaStatusIcon *status_icon = NULL;
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN,"CDROM plugin %s", G_STRFUNC);
 
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
@@ -537,7 +534,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN,"CDROM plugin %s", G_STRFUNC);
 
 	pragha_menubar_remove_plugin_action (priv->pragha,
 	                                     priv->action_group_main_menu,
