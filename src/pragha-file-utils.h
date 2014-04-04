@@ -52,6 +52,7 @@ extern const gchar *mime_ogg[];
 extern const gchar *mime_asf[];
 extern const gchar *mime_mp4[];
 extern const gchar *mime_ape[];
+extern const gchar *mime_tracker[];
 
 extern const gchar *mime_image[];
 
