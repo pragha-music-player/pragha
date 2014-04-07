@@ -66,6 +66,10 @@ case "${host}" in
 esac
 AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
 
+if test x"$WIN32" = x"yes"; then
+AC_CHECK_TOOL(WINDRES, windres)
+fi
+
 AC_SUBST(CFLAGS)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])

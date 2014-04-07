@@ -132,12 +132,17 @@ endif
 
 if WIN32
 pragha_SOURCES += \
-		../win32/win32dep.c \
-		../win32/win32dep.h
+		$(top_srcdir)/win32/win32dep.c \
+		$(top_srcdir)/win32/win32dep.h
 
 AM_CFLAGS = \
         -mms-bitfields
 
 AM_LDFLAGS = \
         -Wl,-subsystem,windows
+
+pragha-res.o: $(top_srcdir)/win32/pragha.rc
+	$(WINDRES) -i $(top_srcdir)/win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
+
+pragha_LDADD += pragha-res.o
 endif
