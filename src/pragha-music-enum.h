@@ -19,18 +19,34 @@
 #define PRAGHA_MUSIC_ENUM_H
 
 #include <glib.h>
-
-#define MAX_ENUM_SIZE 10
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-const gchar * pragha_music_enum_map_get_name (gint enum_code);
+#define MAX_ENUM_SIZE 10
 
-gint          pragha_music_enum_map_get      (const gchar *name);
-gint          pragha_music_enum_map_remove   (const gchar *name);
+#define PRAGHA_TYPE_MUSIC_ENUM (pragha_music_enum_get_type())
+#define PRAGHA_MUSIC_ENUM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_MUSIC_ENUM, PraghaMusicEnum))
+#define PRAGHA_MUSIC_ENUM_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_MUSIC_ENUM, PraghaMusicEnum const))
+#define PRAGHA_MUSIC_ENUM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_MUSIC_ENUM, PraghaMusicEnumClass))
+#define PRAGHA_IS_MUSIC_ENUM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_MUSIC_ENUM))
+#define PRAGHA_IS_MUSIC_ENUM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_MUSIC_ENUM))
+#define PRAGHA_MUSIC_ENUM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_MUSIC_ENUM, PraghaMusicEnumClass))
 
-void          pragha_music_enum_map_free     (void);
-void          pragha_music_enum_map_init     (gint min_enum, gint max_enum);
+typedef struct _PraghaMusicEnum PraghaMusicEnum;
+typedef struct _PraghaMusicEnumClass PraghaMusicEnumClass;
+
+struct _PraghaMusicEnumClass
+{
+	GObjectClass parent_class;
+	void (*enum_removed)    (PraghaMusicEnum *enum_map, gint enum_removed);
+};
+
+PraghaMusicEnum *pragha_music_enum_get          (void);
+
+const gchar     *pragha_music_enum_map_get_name (PraghaMusicEnum *enum_map, gint enum_code);
+gint             pragha_music_enum_map_get      (PraghaMusicEnum *enum_map, const gchar *name);
+gint             pragha_music_enum_map_remove   (PraghaMusicEnum *enum_map, const gchar *name);
 
 G_END_DECLS
 

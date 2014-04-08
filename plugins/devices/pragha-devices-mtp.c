@@ -320,6 +320,7 @@ pragha_playlist_append_mtp_action (PraghaDevicesPlugin *plugin)
 static PraghaMusicobject *
 new_musicobject_from_mtp (LIBMTP_track_t *track)
 {
+	PraghaMusicEnum *enum_map = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gchar *uri = NULL;
 	
@@ -327,10 +328,13 @@ new_musicobject_from_mtp (LIBMTP_track_t *track)
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to MTP: %s", uri);
 
+	enum_map = pragha_music_enum_get();
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
-	                     "file-type", pragha_music_enum_map_get("FILE_MTP"),
+	                     "file-type", pragha_music_enum_map_get(enum_map, "FILE_MTP"),
 	                     NULL);
+	g_object_unref (enum_map);
+
 	if (track->title)
 		pragha_musicobject_set_title (mobj, track->title);
 	if (track->artist)
@@ -412,6 +416,15 @@ pragha_devices_add_detected_device (PraghaDevicesPlugin *plugin)
 		default:
 			break;
 	}
+}
+
+void
+pragha_devices_mtp_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
+{
+	PraghaMusicEnum *enum_map = NULL;
+	enum_map = pragha_music_enum_get ();
+	pragha_music_enum_map_remove (enum_map, "FILE_MTP");
+	g_object_unref (enum_map);
 }
 
 void

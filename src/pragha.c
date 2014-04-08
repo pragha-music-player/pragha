@@ -68,6 +68,7 @@ struct _PraghaApplication {
 	PraghaPreferences *preferences;
 	PraghaDatabase    *cdbase;
 	PraghaArtCache    *art_cache;
+	PraghaMusicEnum   *enum_map;
 
 	PraghaScanner     *scanner;
 
@@ -217,6 +218,13 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 			g_free (album_art_path);
 		}
 	}
+}
+
+static void
+pragha_enum_map_removed_handler (PraghaMusicEnum *enum_map, gint enum_removed, PraghaApplication *pragha)
+{
+	/* TODO */
+	g_print("Removed enum: %d\n", enum_removed);
 }
 
 /*
@@ -514,6 +522,10 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->art_cache);
 		pragha->art_cache = NULL;
 	}
+	if (pragha->enum_map) {
+		g_object_unref (pragha->enum_map);
+		pragha->enum_map = NULL;
+	}
 	if (pragha->mainwindow) {
 		pragha_window_free (pragha);
 		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
@@ -570,6 +582,10 @@ pragha_application_startup (GApplication *application)
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
 	}
+
+	pragha->enum_map = pragha_music_enum_get ();
+	g_signal_connect (pragha->enum_map, "enum-removed",
+	                  G_CALLBACK(pragha_enum_map_removed_handler), pragha);
 
 #ifdef HAVE_LIBPEAS
 	pragha->peas_engine = peas_engine_get_default ();
@@ -814,9 +830,6 @@ gint main(gint argc, gchar *argv[])
 	/* Setup application name and pulseaudio role */
 	g_set_application_name(_("Pragha Music Player"));
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
-
-	/* Init music type enum */
-	pragha_music_enum_map_init (FILE_USER_0, FILE_USER_L);
 
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();

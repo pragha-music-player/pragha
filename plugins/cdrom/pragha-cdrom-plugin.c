@@ -79,6 +79,7 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
                            gint track_no)
 {
 	PraghaPreferences *preferences;
+	PraghaMusicEnum *enum_map = NULL;
 	PraghaMusicobject *mobj = NULL;
 	gint channels, start, end;
 	gchar *ntitle = NULL, *nfile = NULL;
@@ -122,10 +123,12 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 		}
 	}
 
+	enum_map = pragha_music_enum_get ();
+	pragha_musicobject_set_file_type (mobj, pragha_music_enum_map_get(enum_map, "FILE_CDDA"));
+	g_object_unref (enum_map);
+
 	nfile = g_strdup_printf("cdda://%d", track_no);
 	pragha_musicobject_set_file(mobj, nfile);
-	pragha_musicobject_set_file_type (mobj, pragha_music_enum_map_get("FILE_CDDA"));
-
 	pragha_musicobject_set_track_no(mobj, track_no);
 
 	if (!ntitle)
@@ -307,6 +310,7 @@ add:
 void
 pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
 {
+	PraghaMusicEnum *enum_map = NULL;
 	PraghaMusicobject *mobj = NULL;
 	PraghaMusicType file_type = FILE_NONE;
 	GObject *source;
@@ -317,8 +321,12 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 	mobj = pragha_backend_get_musicobject (backend);
 	file_type = pragha_musicobject_get_file_type (mobj);
 
-	if (file_type != pragha_music_enum_map_get("FILE_CDDA"))
+	enum_map = pragha_music_enum_get ();
+	if (file_type != pragha_music_enum_map_get(enum_map, "FILE_CDDA")) {
+		g_object_unref (enum_map);
 		return;
+	}
+	g_object_unref (enum_map);
 
 	g_object_get (obj, "source", &source, NULL);
 	if (source) {
@@ -493,11 +501,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
 	PraghaStatusIcon *status_icon = NULL;
+	PraghaMusicEnum *enum_map = NULL;
+
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
+	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN,"CDROM plugin %s", G_STRFUNC);
 
-	PraghaCdromPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
 	/* Attach main menu */
@@ -516,10 +526,16 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_syst_menu = pragha_systray_append_plugin_action (status_icon,
 	                                                                priv->action_group_main_menu,
 	                                                                syst_menu_xml);
+	g_object_ref (priv->action_group_main_menu);
+
 	/* Connect signals */
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
+
+	enum_map = pragha_music_enum_get ();
+	pragha_music_enum_map_get (enum_map, "FILE_CDDA");
+	g_object_unref (enum_map);
 
 	/* Settings */
 	pragha_cdrom_plugin_append_setting (plugin);
@@ -530,6 +546,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
 	PraghaStatusIcon *status_icon = NULL;
+	PraghaMusicEnum *enum_map = NULL;
 
 	PraghaCdromPlugin *plugin = PRAGHA_CDROM_PLUGIN (activatable);
 	PraghaCdromPluginPrivate *priv = plugin->priv;
@@ -551,6 +568,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
 
 	pragha_cdrom_plugin_remove_setting (plugin);
+
+	enum_map = pragha_music_enum_get ();
+	pragha_music_enum_map_remove (enum_map, "FILE_CDDA");
+	g_object_unref (enum_map);
 
 	libcddb_shutdown ();
 }
