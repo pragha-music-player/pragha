@@ -21,6 +21,7 @@
 #include <gudev/gudev.h>
 #include "pragha-devices-plugin.h"
 
-void pragha_devices_mtp_added (PraghaDevicesPlugin *plugin, GUdevDevice *device);
+void pragha_devices_mtp_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device);
+void pragha_devices_mtp_added   (PraghaDevicesPlugin *plugin, GUdevDevice *device);
 
 #endif /* PRAGHA_DEVICES_MTP_H */

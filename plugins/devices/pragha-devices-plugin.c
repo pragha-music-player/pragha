@@ -270,10 +270,23 @@ pragha_gudev_clear_hook_devices (PraghaDevicesPlugin *plugin)
 
 	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", priv->bus_hooked, priv->device_hooked);
 
-	if (priv->device) {
-		g_object_unref (priv->device);
-		priv->device = NULL;
+	if (!priv->device)
+		return;
+
+	switch (priv->hooked_type) {
+		case PRAGHA_DEVICE_MTP:
+			pragha_devices_mtp_removed (plugin, priv->device);
+		case PRAGHA_DEVICE_MOUNTABLE:
+		case PRAGHA_DEVICE_AUDIO_CD:
+		case PRAGHA_DEVICE_UNKNOWN:
+		case PRAGHA_DEVICE_NONE:
+		default:
+			break;
 	}
+
+	g_object_unref (priv->device);
+	priv->device = NULL;
+
 	if (priv->mtp_device) {
 		LIBMTP_Release_Device(priv->mtp_device);
 		priv->mtp_device = NULL;
