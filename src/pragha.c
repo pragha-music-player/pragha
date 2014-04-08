@@ -223,8 +223,7 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 static void
 pragha_enum_map_removed_handler (PraghaMusicEnum *enum_map, gint enum_removed, PraghaApplication *pragha)
 {
-	/* TODO */
-	g_print("Removed enum: %d\n", enum_removed);
+	pragha_playlist_crop_music_type (pragha->playlist, enum_removed);
 }
 
 /*
