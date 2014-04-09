@@ -378,6 +378,7 @@ pragha_backend_stop (PraghaBackend *backend)
 	pragha_backend_set_target_state (backend, GST_STATE_READY);
 
 	if(priv->mobj) {
+		g_signal_emit (backend, signals[SIGNAL_CLEAN_SOURCE], 0);
 		g_object_unref(priv->mobj);
 		priv->mobj = NULL;
 	}
@@ -551,6 +552,13 @@ out:
 }
 
 void
+pragha_backend_set_playback_uri (PraghaBackend *backend, const gchar *uri)
+{
+	PraghaBackendPrivate *priv = backend->priv;
+	g_object_set (priv->pipeline, "uri", uri, NULL);
+}
+
+void
 pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj)
 {
 	PraghaBackendPrivate *priv = backend->priv;
@@ -601,7 +609,7 @@ pragha_backend_play (PraghaBackend *backend)
 		g_free (uri);
 	}
 	else {
-		g_object_set (priv->pipeline, "uri", file, NULL);
+		g_signal_emit (backend, signals[SIGNAL_PREPARE_SOURCE], 0);
 	}
 
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);
@@ -935,7 +943,7 @@ pragha_backend_class_init (PraghaBackendClass *klass)
 		              G_TYPE_NONE, 0);
 
 	signals[SIGNAL_CLEAN_SOURCE] =
-		g_signal_new ("clean_source",
+		g_signal_new ("clean-source",
 		              G_TYPE_FROM_CLASS (gobject_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaBackendClass, clean_source),
@@ -1099,7 +1107,7 @@ pragha_backend_init (PraghaBackend *backend)
 }
 
 PraghaBackend *
-pragha_backend_new ()
+pragha_backend_new (void)
 {
 	gst_init (NULL, NULL);
 

@@ -24,7 +24,9 @@
 #else
 #include <glib/gi18n.h>
 #endif
+
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib-object.h>
 #include <gmodule.h>
 #include <gtk/gtk.h>
@@ -348,6 +350,51 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	g_free(friend_label);
 }
 
+void
+pragha_mtp_plugin_clean_source (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaMusicobject *mobj;
+	gchar *tmp_filename = NULL;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_mtp_file (mobj))
+		return;
+
+	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
+	g_unlink (tmp_filename);
+	g_free (tmp_filename);
+}
+
+void
+pragha_mtp_plugin_prepare_source (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaMusicobject *mobj;
+	gchar *tmp_filename = NULL, *uri = NULL;
+	gint track_id, ret = -1;
+
+	PraghaMtpPlugin *plugin = user_data;
+	PraghaMtpPluginPrivate *priv = plugin->priv;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_mtp_file (mobj))
+		return;
+
+	tmp_filename = pragha_mtp_plugin_get_temp_filename(mobj);
+	track_id = pragha_mtp_plugin_get_track_id(mobj);
+
+	ret = LIBMTP_Get_Track_To_File (priv->mtp_device,
+	                                track_id, tmp_filename,
+	                                NULL, NULL);
+
+	if (ret == 0) {
+		uri = g_filename_to_uri (tmp_filename, NULL, NULL);
+		pragha_backend_set_playback_uri (backend, uri);
+		g_free(uri);
+	}
+	g_free (tmp_filename);
+}
+
+
 static void
 pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 {
@@ -548,6 +595,8 @@ pragha_mtp_plugin_device_removed (PraghaDeviceClient *device_client,
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
+
 	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN (activatable);
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
@@ -560,6 +609,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                                            g_free,
 	                                            g_object_unref);
 
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_connect (backend, "prepare-source",
+	                  G_CALLBACK(pragha_mtp_plugin_prepare_source), plugin);
+	g_signal_connect (backend, "clean-source",
+	                  G_CALLBACK(pragha_mtp_plugin_clean_source), plugin);
+
 	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_mtp_plugin_device_added),
 	                                       G_CALLBACK(pragha_mtp_plugin_device_removed),
 	                                       plugin);
@@ -570,6 +625,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaBackend *backend;
+
 	PraghaMtpPlugin *plugin = PRAGHA_MTP_PLUGIN (activatable);
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
@@ -580,6 +637,10 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_mtp_clear_hook_device (plugin);
 
 	g_hash_table_destroy (priv->tracks_table);
+
+	backend = pragha_application_get_backend (priv->pragha);
+	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_prepare_source, plugin);
+	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_clean_source, plugin);
 
 	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_mtp_plugin_device_added),
 	                                          G_CALLBACK(pragha_mtp_plugin_device_removed),

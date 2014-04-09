@@ -15,6 +15,8 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
 #include <glib/gstdio.h>
 
 #include "src/pragha-utils.h"
@@ -131,4 +133,39 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 	g_free(uri);
 
 	return mobj;
+}
+
+gint
+pragha_mtp_plugin_get_track_id (PraghaMusicobject *mobj)
+{
+	const gchar *track_id, *file;
+
+	file = pragha_musicobject_get_file (mobj);
+	track_id = file + strlen ("mtp://");
+
+	return atoi(track_id);
+}
+
+gchar *
+pragha_mtp_plugin_get_temp_filename (PraghaMusicobject *mobj)
+{
+	const gchar *track_id, *file;
+
+	file = pragha_musicobject_get_file (mobj);
+	track_id = file + strlen ("mtp://");
+
+	return g_strdup_printf ("/tmp/%s", track_id);
+}
+
+gboolean
+pragha_musicobject_is_mtp_file (PraghaMusicobject *mobj)
+{
+	PraghaMusicEnum *enum_map = NULL;
+	PraghaMusicType file_type = FILE_NONE;
+
+	enum_map = pragha_music_enum_get ();
+	file_type = pragha_music_enum_map_get(enum_map, "FILE_MTP");
+	g_object_unref (enum_map);
+
+	return (file_type == pragha_musicobject_get_file_type (mobj));
 }

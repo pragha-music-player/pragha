@@ -609,7 +609,7 @@ pragha_application_startup (GApplication *application)
 	g_signal_connect (pragha->art_cache, "cache-changed",
 	                  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
 
-	pragha->backend = pragha_backend_new (pragha);
+	pragha->backend = pragha_backend_new ();
 
 	g_signal_connect (pragha->backend, "finished",
 	                  G_CALLBACK(pragha_backend_finished_song), pragha);
