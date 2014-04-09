@@ -45,6 +45,11 @@
 #include "src/pragha-statusicon.h"
 #include "src/pragha-music-enum.h"
 
+#if HAVE_GUDEV
+#include "plugins/devices/pragha-devices-plugin.h"
+#include "plugins/devices/pragha-device-client.h"
+#endif
+
 #include "plugins/pragha-plugin-macros.h"
 
 #define PRAGHA_TYPE_CDROM_PLUGIN         (pragha_cdrom_plugin_get_type ())
@@ -340,6 +345,51 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 }
 
 /*
+ * GUDEV signals.
+ */
+
+#ifdef HAVE_GUDEV
+static void
+pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
+                                  PraghaDeviceType    device_type,
+                                  GUdevDevice        *u_device,
+                                  gpointer            user_data)
+{
+	gint response;
+	PraghaCdromPlugin *plugin = user_data;
+	PraghaCdromPluginPrivate *priv = plugin->priv;
+
+	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
+		return;
+
+	response = pragha_gudev_show_dialog (NULL, _("Audio/Data CD"), "media-optical",
+	                                     _("Was inserted an Audio Cd."), NULL,
+	                                     _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
+	switch (response) {
+		case PRAGHA_DEVICE_RESPONSE_PLAY:
+			pragha_application_append_audio_cd (priv->pragha);
+			break;
+		case PRAGHA_DEVICE_RESPONSE_NONE:
+		default:
+			break;
+	}
+}
+
+void
+pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
+                                    PraghaDeviceType    device_type,
+                                    GUdevDevice        *u_device,
+                                    gpointer            user_data)
+{
+	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
+		return;
+
+	g_print ("CDROM REMOVEDDDDD.. Cri cri.. never detect it.. .\n");
+}
+#endif
+
+
+/*
  * Menubar
  */
 static void
@@ -533,6 +583,12 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
 
+	#ifdef HAVE_GUDEV
+	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),
+	                                       G_CALLBACK(pragha_cdrom_plugin_device_removed),
+	                                       plugin);
+	#endif
+
 	enum_map = pragha_music_enum_get ();
 	pragha_music_enum_map_get (enum_map, "FILE_CDDA");
 	g_object_unref (enum_map);
@@ -566,6 +622,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
+
+	#ifdef HAVE_GUDEV
+	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),
+	                                          G_CALLBACK(pragha_cdrom_plugin_device_removed),
+	                                          plugin);
+	#endif
 
 	pragha_cdrom_plugin_remove_setting (plugin);
 

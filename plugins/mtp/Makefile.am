@@ -1,21 +1,21 @@
-plugindir = $(libdir)/pragha/plugins/devices
+plugindir = $(libdir)/pragha/plugins/mtp
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) 	\
 	$(LIBPEAS_CFLAGS)		\
 	$(LIBPEAS_GTK_CFLAGS)
 
-plugin_LTLIBRARIES = libdevices.la
+plugin_LTLIBRARIES = libpmtp.la
 
-libdevices_la_SOURCES = \
-	pragha-devices-plugin.c \
-	pragha-devices-plugin.h \
-	pragha-device-client.c \
-	pragha-device-client.h
+libpmtp_la_SOURCES = \
+	pragha-devices-mtp.c \
+	pragha-devices-mtp.h \
+	pragha-mtp-musicobject.c \
+	pragha-mtp-musicobject.h
 
-libdevices_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
+libpmtp_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
-libdevices_la_CFLAGS =						\
+libpmtp_la_CFLAGS =							\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -26,10 +26,11 @@ libdevices_la_CFLAGS =						\
 	$(LIBPEAS_CFLAGS) 						\
 	$(LIBPEAS_GTK_CFLAGS) 						\
 	$(GUDEV_CFLAGS) 						\
+	$(LIBMTP_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
-libdevices_la_LIBADD =							\
+libpmtp_la_LIBADD =							\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -38,18 +39,19 @@ libdevices_la_LIBADD =							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBPEAS_LIBS)							\
 	$(LIBPEAS_GTK_LIBS)						\
-	$(GUDEV_LIBS)
+	$(GUDEV_LIBS) 							\
+	$(LIBMTP_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
-libdevices_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
-libdevices_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
+libpmtp_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
+libpmtp_la_LIBADD += $(GSTREAMER_AUDIO_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
-libdevices_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
-libdevices_la_LIBADD += $(LIBXFCE4UI_LIBS)
+libpmtp_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
+libpmtp_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
-plugin_DATA = devices.plugin
+plugin_DATA = mtp.plugin
 
 EXTRA_DIST = $(plugin_DATA)
