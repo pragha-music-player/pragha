@@ -220,9 +220,6 @@ pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusic
 	if (G_UNLIKELY(!mobj))
 		return;
 
-	if (!pragha_musicobject_is_local_file(mobj))
-		return;
-
 	preferences = pragha_application_get_preferences (pragha);
 	if (!pragha_preferences_get_show_album_art (preferences))
 		return;
@@ -233,6 +230,9 @@ pragha_playback_update_current_album_art (PraghaApplication *pragha, PraghaMusic
 	                                   pragha_musicobject_get_album(mobj));
 
 	if (album_path == NULL) {
+		if (!pragha_musicobject_is_local_file(mobj))
+			return;
+
 		path = g_path_get_dirname(pragha_musicobject_get_file(mobj));
 
 		album_path = get_pref_image_path_dir (preferences, path);
