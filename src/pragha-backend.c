@@ -589,27 +589,47 @@ pragha_backend_get_musicobject(PraghaBackend *backend)
 void
 pragha_backend_play (PraghaBackend *backend)
 {
-	PraghaBackendPrivate *priv = backend->priv;
+	PraghaMusicType type = FILE_NONE;
 	gchar *file = NULL, *uri = NULL;
-	gboolean local_file;
+
+	PraghaBackendPrivate *priv = backend->priv;
 
 	g_object_get(priv->mobj,
 	             "file", &file,
+	             "file-type", &type,
 	             NULL);
-	local_file = pragha_musicobject_is_local_file (priv->mobj);
 
 	if (string_is_empty(file))
 		goto exit;
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
-	if (local_file) {
-		uri = g_filename_to_uri (file, NULL, NULL);
-		g_object_set (priv->pipeline, "uri", uri, NULL);
-		g_free (uri);
-	}
-	else {
-		g_signal_emit (backend, signals[SIGNAL_PREPARE_SOURCE], 0);
+	switch (type) {
+		case FILE_USER_L:
+		case FILE_USER_3:
+		case FILE_USER_2:
+		case FILE_USER_1:
+		case FILE_USER_0:
+			g_signal_emit (backend, signals[SIGNAL_PREPARE_SOURCE], 0);
+			break;
+		case FILE_WAV:
+		case FILE_MP3:
+		case FILE_FLAC:
+		case FILE_OGGVORBIS:
+		case FILE_ASF:
+		case FILE_MP4:
+		case FILE_APE:
+		case FILE_TRACKER:
+			uri = g_filename_to_uri (file, NULL, NULL);
+			g_object_set (priv->pipeline, "uri", uri, NULL);
+			g_free (uri);
+			break;
+		case FILE_HTTP:
+			g_object_set (priv->pipeline, "uri", file, NULL);
+			break;
+		case FILE_NONE:
+		default:
+			break;
 	}
 
 	pragha_backend_set_target_state (backend, GST_STATE_PLAYING);
