@@ -312,26 +312,31 @@ add:
 		cddb_destroy(cddb_conn);
 }
 
-void
-pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
+static gboolean
+pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 {
 	PraghaMusicEnum *enum_map = NULL;
-	PraghaMusicobject *mobj = NULL;
 	PraghaMusicType file_type = FILE_NONE;
+
+	enum_map = pragha_music_enum_get ();
+	file_type = pragha_music_enum_map_get(enum_map, "FILE_CDDA");
+	g_object_unref (enum_map);
+
+	return (file_type == pragha_musicobject_get_file_type (mobj));
+}
+
+static void
+pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer user_data)
+{
+	PraghaMusicobject *mobj = NULL;
 	GObject *source;
 
 	PraghaCdromPlugin *plugin = user_data;
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
 	mobj = pragha_backend_get_musicobject (backend);
-	file_type = pragha_musicobject_get_file_type (mobj);
-
-	enum_map = pragha_music_enum_get ();
-	if (file_type != pragha_music_enum_map_get(enum_map, "FILE_CDDA")) {
-		g_object_unref (enum_map);
+	if (!pragha_musicobject_is_cdda_type (mobj))
 		return;
-	}
-	g_object_unref (enum_map);
 
 	g_object_get (obj, "source", &source, NULL);
 	if (source) {
@@ -342,6 +347,20 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 		}
 		g_object_unref (source);
 	}
+}
+
+static void
+pragha_cdrom_plugin_prepare_source (PraghaBackend *backend, gpointer user_data)
+{
+	PraghaMusicobject *mobj;
+	const gchar *uri = NULL;
+
+	mobj = pragha_backend_get_musicobject (backend);
+	if (!pragha_musicobject_is_cdda_type (mobj))
+		return;
+
+	uri = pragha_musicobject_get_file (mobj);
+	pragha_backend_set_playback_uri (backend, uri);
 }
 
 /*
@@ -582,6 +601,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
+	g_signal_connect (backend, "prepare-source",
+	                  G_CALLBACK(pragha_cdrom_plugin_prepare_source), plugin);
 
 	#ifdef HAVE_GUDEV
 	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),
@@ -622,6 +643,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
+	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_prepare_source, plugin);
 
 	#ifdef HAVE_GUDEV
 	pragha_devices_plugin_disconnect_signals (G_CALLBACK(pragha_cdrom_plugin_device_added),

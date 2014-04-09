@@ -26,6 +26,10 @@ G_BEGIN_DECLS
 LIBMTP_track_t    *mtp_track_new_from_pragha_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj);
 PraghaMusicobject *pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track);
 
+gint               pragha_mtp_plugin_get_track_id        (PraghaMusicobject *mobj);
+gchar             *pragha_mtp_plugin_get_temp_filename   (PraghaMusicobject *mobj);
+gboolean           pragha_musicobject_is_mtp_file        (PraghaMusicobject *mobj);
+
 G_END_DECLS
 
 #endif /* __PRAGHA_MTP_PLUGIN_H__ */
