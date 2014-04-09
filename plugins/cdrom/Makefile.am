@@ -51,6 +51,11 @@ libcdrom_la_CFLAGS += $(LIBXFCE4UI_CFLAGS)
 libcdrom_la_LIBADD += $(LIBXFCE4UI_LIBS)
 endif
 
+if HAVE_GUDEV
+libcdrom_la_CFLAGS += $(GUDEV_CFLAGS)
+libcdrom_la_LIBADD += $(GUDEV_LIBS)
+endif
+
 plugin_DATA = cdrom.plugin
 
 EXTRA_DIST = $(plugin_DATA)

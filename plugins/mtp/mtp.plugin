@@ -1,7 +1,7 @@
 [Plugin]
-Module=cdrom
-Name=Play cdrom
-Description=Play audios cds
+Module=pmtp
+Name=Mtp Devices
+Description=Management MTP devices
 Authors=Matias De lellis <mati86dl@gmail.com>
 Copyright=Copyright © 2014 Matias De lellis
 Website=https://github.com/matiasdelellis/pragha
