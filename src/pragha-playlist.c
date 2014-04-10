@@ -3117,7 +3117,7 @@ pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
 
 /* Save current playlist state on exit */
 
-static void
+void
 pragha_playlist_save_playlist_state (PraghaPlaylist* cplaylist)
 {
 	GtkTreePath *path = NULL;
@@ -3198,7 +3198,8 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 	}
 }
 
-void init_current_playlist_view(PraghaPlaylist *cplaylist)
+void
+pragha_playlist_init_playlist_state (PraghaPlaylist *cplaylist)
 {
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
@@ -4428,8 +4429,6 @@ pragha_playlist_unrealize (GtkWidget *widget)
 {
 	PraghaPlaylist *playlist = PRAGHA_PLAYLIST (widget);
 
-	if (pragha_preferences_get_restore_playlist (playlist->preferences))
-		pragha_playlist_save_playlist_state (playlist);
 	pragha_playlist_save_preferences (playlist);
 
 	(*GTK_WIDGET_CLASS (pragha_playlist_parent_class)->unrealize) (widget);

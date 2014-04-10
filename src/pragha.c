@@ -513,7 +513,6 @@ pragha_application_dispose (GObject *object)
 		pragha->setting_dialog = NULL;
 	}
 	if (pragha->backend) {
-		pragha_playback_stop (pragha);
 		g_object_unref (pragha->backend);
 		pragha->backend = NULL;
 	}
@@ -705,9 +704,26 @@ pragha_application_startup (GApplication *application)
 }
 
 static void
+pragha_application_shutdown (GApplication *application)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	CDEBUG(DBG_INFO, "Pragha shutdown: Saving curret state.");
+
+	if (pragha_preferences_get_restore_playlist (pragha->preferences))
+		pragha_playlist_save_playlist_state (pragha->playlist);
+
+	pragha_playback_stop (pragha);
+
+	G_APPLICATION_CLASS (pragha_application_parent_class)->shutdown (application);
+}
+
+static void
 pragha_application_activate (GApplication *application)
 {
 	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	CDEBUG(DBG_INFO, G_STRFUNC);
 
 	gtk_window_present (GTK_WINDOW (pragha->mainwindow));
 }
@@ -769,8 +785,6 @@ pragha_application_local_command_line (GApplication *application, gchar ***argum
 	return FALSE;
 }
 
-//TODO consider use of GApplication::shutdown to save preferences and playlist
-
 void
 pragha_application_quit (PraghaApplication *pragha)
 {
@@ -786,6 +800,7 @@ pragha_application_class_init (PraghaApplicationClass *class)
 	object_class->dispose = pragha_application_dispose;
 
 	application_class->startup = pragha_application_startup;
+	application_class->shutdown = pragha_application_shutdown;
 	application_class->activate = pragha_application_activate;
 	application_class->open = pragha_application_open;
 	application_class->command_line = pragha_application_command_line;
