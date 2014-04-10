@@ -97,6 +97,12 @@ pragha_preferences_tab_new (const gchar *label)
 }
 
 static void
+pragha_preferences_tab_free (PreferencesTab *tab)
+{
+	g_slice_free (PreferencesTab, tab);
+}
+
+static void
 pragha_preferences_tab_append_setting (PreferencesTab *tab, GtkWidget *widget, gboolean expand)
 {
 	gtk_box_pack_start (GTK_BOX(tab->vbox), widget, expand, expand, 0);
@@ -129,6 +135,7 @@ pragha_preferences_notebook_append_tab (GtkWidget *notebook, PreferencesTab *tab
 		gtk_widget_hide (tab->vbox);
 	else
 		gtk_widget_show_all (tab->vbox);
+	g_list_free (list);
 }
 
 void
@@ -1086,6 +1093,11 @@ void
 pragha_preferences_dialog_free (PreferencesDialog *dialog)
 {
 	g_object_unref (dialog->preferences);
+
+	pragha_preferences_tab_free (dialog->audio_tab);
+	pragha_preferences_tab_free (dialog->desktop_tab);
+	pragha_preferences_tab_free (dialog->services_tab);
+
 	gtk_widget_destroy (GTK_WIDGET(dialog->widget));
 
 	g_slice_free (PreferencesDialog, dialog);
