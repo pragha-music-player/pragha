@@ -79,8 +79,6 @@ struct _PraghaPreferencesPrivate
 	gboolean   hide_instead_close;
 	/* Services preferences */
 	gboolean   use_cddb;
-	gboolean   lastfm_support;
-	gchar     *lastfm_user;
 };
 
 enum
@@ -117,8 +115,6 @@ enum
 	PROP_TIMER_REMAINING_MODE,
 	PROP_HIDE_INSTEAD_CLOSE,
 	PROP_USE_CDDB,
-	PROP_LASTFM_SUPPORT,
-	PROP_LASTFM_USER,
 	LAST_PROP
 };
 static GParamSpec *gParamSpecs[LAST_PROP];
@@ -1315,61 +1311,6 @@ pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
 }
 
-/**
- * pragha_preferences_get_lastfm_support:
- *
- */
-gboolean
-pragha_preferences_get_lastfm_support (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
-
-	return preferences->priv->lastfm_support;
-}
-
-/**
- * pragha_preferences_set_lastfm_support:
- *
- */
-void
-pragha_preferences_set_lastfm_support (PraghaPreferences *preferences,
-                                       gboolean lastfm_support)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->lastfm_support = lastfm_support;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LASTFM_SUPPORT]);
-}
-
-/**
- * pragha_preferences_get_lastfm_user:
- *
- */
-const gchar *
-pragha_preferences_get_lastfm_user (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
-
-	return preferences->priv->lastfm_user;
-}
-
-/**
- * pragha_preferences_set_lastfm_user:
- *
- */
-void
-pragha_preferences_set_lastfm_user (PraghaPreferences *preferences,
-                                    const gchar *lastfm_user)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	g_free(preferences->priv->lastfm_user);
-	preferences->priv->lastfm_user = g_strdup(lastfm_user);
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LASTFM_USER]);
-}
-
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
@@ -1380,8 +1321,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
-	gboolean use_cddb, lastfm_support;
-	gchar *lastfm_user;
+	gboolean use_cddb;
 	gchar *audio_sink, *audio_device, *audio_cd_device;
 	gdouble software_volume;
 	gint library_style, sidebar_size, secondary_sidebar_size, album_art_size;
@@ -1827,36 +1767,11 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_use_cddb(preferences, use_cddb);
 	}
 
-	lastfm_support = g_key_file_get_boolean(priv->rc_keyfile,
-	                                        GROUP_SERVICES,
-	                                        KEY_LASTFM,
-	                                        &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_lastfm_support(preferences, lastfm_support);
-	}
-
-	lastfm_user = g_key_file_get_string(priv->rc_keyfile,
-	                                    GROUP_SERVICES,
-	                                    KEY_LASTFM_USER,
-	                                    &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_lastfm_user(preferences, lastfm_user);
-	}
-
 	g_free(installed_version);
 	g_free(audio_sink);
 	g_free(audio_device);
 	g_free(audio_cd_device);
 	g_free(album_art_pattern);
-	g_free(lastfm_user);
 	g_free(start_mode);
 	g_free(last_folder);
 	g_free(last_folder_converted);
@@ -2033,21 +1948,6 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_USE_CDDB,
 	                       priv->use_cddb);
 
-	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_SERVICES,
-	                       KEY_LASTFM,
-	                       priv->lastfm_support);
-
-	if (string_is_not_empty(priv->lastfm_user))
-		g_key_file_set_string(priv->rc_keyfile,
-		                      GROUP_SERVICES,
-		                      KEY_LASTFM_USER,
-		                      priv->lastfm_user);
-	else
-		pragha_preferences_remove_key(preferences,
-		                              GROUP_SERVICES,
-		                              KEY_LASTFM_USER);
-
 	/* Save to key file */
 
 	data = g_key_file_to_data(priv->rc_keyfile, &length, NULL);
@@ -2064,7 +1964,6 @@ pragha_preferences_finalize (GObject *object)
 	g_free(priv->album_art_pattern);
 	g_free(priv->start_mode);
 	g_free(priv->last_folder);
-	g_free(priv->lastfm_user);
 
 	G_OBJECT_CLASS(pragha_preferences_parent_class)->finalize(object);
 }
@@ -2170,12 +2069,6 @@ pragha_preferences_get_property (GObject *object,
 			break;
 		case PROP_USE_CDDB:
 			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
-			break;
-		case PROP_LASTFM_SUPPORT:
-			g_value_set_boolean (value, pragha_preferences_get_lastfm_support(preferences));
-			break;
-		case PROP_LASTFM_USER:
-			g_value_set_string (value, pragha_preferences_get_lastfm_user(preferences));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -2283,12 +2176,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_USE_CDDB:
 			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_LASTFM_SUPPORT:
-			pragha_preferences_set_lastfm_support(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_LASTFM_USER:
-			pragha_preferences_set_lastfm_user(preferences, g_value_get_string(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -2670,28 +2557,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "Use Cddb Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:lastfm_support:
-	  *
-	  */
-	gParamSpecs[PROP_LASTFM_SUPPORT] =
-		g_param_spec_boolean("lastfm-support",
-		                     "LastfmSupport",
-		                     "Lastfm Support Preference",
-		                      FALSE,
-		                      PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:lastfm_user:
-	  *
-	  */
-	gParamSpecs[PROP_LASTFM_USER] =
-		g_param_spec_string("lastfm-user",
-		                    "LastfmUser",
-		                    "Lastfm User Preference",
-		                    "",
-		                    PRAGHA_PREF_PARAMS);
 
 	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
 

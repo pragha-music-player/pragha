@@ -221,8 +221,8 @@ static const gchar *playlist_xml = "<ui>					\
  * TODO: Implement any basic crypto.
  */
 
-void
-pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass)
+static void
+pragha_lastfm_plugin_set_password (PraghaPreferences *preferences, const gchar *pass)
 {
 	if (string_is_not_empty(pass))
 		pragha_preferences_set_string (preferences,
@@ -235,13 +235,53 @@ pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass)
 		                               KEY_LASTFM_PASS);
 }
 
-const gchar *
-pragha_lastfm_get_password (PraghaPreferences *preferences)
+static gchar *
+pragha_lastfm_plugin_get_password (PraghaPreferences *preferences)
 {
 	return pragha_preferences_get_string (preferences,
 	                                      GROUP_SERVICES,
 	                                      KEY_LASTFM_PASS);
 }
+
+static void
+pragha_lastfm_plugin_set_user (PraghaPreferences *preferences, const gchar *user)
+{
+	if (string_is_not_empty(user))
+		pragha_preferences_set_string (preferences,
+		                               GROUP_SERVICES,
+		                               KEY_LASTFM_USER,
+		                               user);
+	else
+ 		pragha_preferences_remove_key (preferences,
+		                               GROUP_SERVICES,
+		                               KEY_LASTFM_USER);
+}
+
+static gchar *
+pragha_lastfm_plugin_get_user (PraghaPreferences *preferences)
+{
+	return pragha_preferences_get_string (preferences,
+	                                      GROUP_SERVICES,
+	                                      KEY_LASTFM_USER);
+}
+
+static void
+pragha_lastfm_plugin_set_scrobble_support (PraghaPreferences *preferences, gboolean supported)
+{
+	pragha_preferences_set_boolean (preferences,
+		                            GROUP_SERVICES,
+		                            KEY_LASTFM,
+		                            supported);
+}
+
+static gboolean
+pragha_lastfm_plugin_get_scrobble_support (PraghaPreferences *preferences)
+{
+	return pragha_preferences_get_boolean (preferences,
+	                                       GROUP_SERVICES,
+	                                       KEY_LASTFM);
+}
+
 
 /* Upadate lastfm menubar acording lastfm state */
 
@@ -829,16 +869,19 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	AddMusicObjectListData *data;
 	guint query_count = 0;
 	GList *list = NULL;
+	gchar *user = NULL;
 
 	PraghaLastfmPlugin *plugin = user_data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
+	preferences = pragha_application_get_preferences (priv->pragha);
+	user = pragha_lastfm_plugin_get_user (preferences);
+
 	do {
-		preferences = pragha_application_get_preferences (priv->pragha);
-		rpages = LASTFM_user_get_loved_tracks(priv->session_id,
-		                                      pragha_preferences_get_lastfm_user (preferences),
-		                                      cpage,
-		                                      &results);
+		rpages = LASTFM_user_get_loved_tracks (priv->session_id,
+		                                       user,
+		                                       cpage,
+		                                       &results);
 
 		for (li=results; li; li=li->next) {
 			track = li->data;
@@ -854,6 +897,8 @@ do_lastfm_add_favorites_action (gpointer user_data)
 	data->query_type = LASTFM_GET_LOVED;
 	data->query_count = query_count;
 	data->plugin = plugin;
+
+	g_free (user);
 
 	return data;
 }
@@ -1256,7 +1301,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	 */
 
 	preferences = pragha_application_get_preferences (priv->pragha);
-	if (!pragha_preferences_get_lastfm_support (preferences))
+	if (!pragha_lastfm_plugin_get_scrobble_support (preferences))
 		return;
 
 	if (!priv->has_user || !priv->has_pass)
@@ -1359,8 +1404,7 @@ static gboolean
 pragha_lastfm_connect_idle(gpointer data)
 {
 	PraghaPreferences *preferences;
-	const gchar *user;
-	const gchar *pass;
+	gchar *user = NULL, *pass = NULL;
 
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
@@ -1372,8 +1416,8 @@ pragha_lastfm_connect_idle(gpointer data)
 
 	if (priv->session_id != NULL) {
 		preferences = pragha_application_get_preferences (priv->pragha);
-		user = pragha_preferences_get_lastfm_user (preferences);
-		pass = pragha_lastfm_get_password (preferences);
+		user = pragha_lastfm_plugin_get_user (preferences);
+		pass = pragha_lastfm_plugin_get_password (preferences);
 
 		priv->has_user = string_is_not_empty(user);
 		priv->has_pass = string_is_not_empty(pass);
@@ -1391,6 +1435,8 @@ pragha_lastfm_connect_idle(gpointer data)
 				CDEBUG(DBG_PLUGIN, "Failure to login on lastfm");
 			}
 		}
+		g_free(user);
+		g_free(pass);
 	}
 	else {
 		pragha_lastfm_no_connection_advice ();
@@ -1456,14 +1502,14 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 	case GTK_RESPONSE_OK:
 		preferences = pragha_preferences_get ();
 
-		pragha_preferences_set_lastfm_support (preferences,
+		pragha_lastfm_plugin_set_scrobble_support (preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->enable_w)));
 
-		if (pragha_preferences_get_lastfm_support (preferences)) {
-			pragha_preferences_set_lastfm_user (preferences,
+		if (pragha_lastfm_plugin_get_scrobble_support (preferences)) {
+			pragha_lastfm_plugin_set_user (preferences,
 				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_uname_w)));
 
-			pragha_lastfm_set_password (preferences,
+			pragha_lastfm_plugin_set_password (preferences,
 				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_pass_w)));
 
 			pragha_lastfm_disconnect (plugin);
@@ -1497,18 +1543,22 @@ static void
 pragha_lastfm_init_settings (PraghaLastfmPlugin *plugin)
 {
 	PraghaPreferences *preferences;
+	gchar *user = NULL, *pass = NULL;
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
 	preferences = pragha_preferences_get ();
 
-	if (pragha_preferences_get_lastfm_support (preferences)) {
+	if (pragha_lastfm_plugin_get_scrobble_support (preferences)) {
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->enable_w), TRUE);
 
-		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w),
-		                    pragha_preferences_get_lastfm_user (preferences));
-		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w),
-		                    pragha_lastfm_get_password (preferences));
+		user = pragha_lastfm_plugin_get_user (preferences);
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w), user);
+		g_free(user);
+
+		pass = pragha_lastfm_plugin_get_password (preferences);
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w), pass);
+		g_free(pass);
 	}
 	else {
 		gtk_widget_set_sensitive (priv->lastfm_uname_w, FALSE);
@@ -1621,7 +1671,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	/* Test internet and launch threads.*/
 
 	preferences = pragha_application_get_preferences (priv->pragha);
-	if (pragha_preferences_get_lastfm_support (preferences)) {
+	if (pragha_lastfm_plugin_get_scrobble_support (preferences)) {
 		CDEBUG(DBG_PLUGIN, "Initializing LASTFM");
 
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))

@@ -435,20 +435,6 @@ void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
 
-gboolean
-pragha_preferences_get_lastfm_support (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_lastfm_support (PraghaPreferences *preferences,
-                                       gboolean lastfm_support);
-
-const gchar *
-pragha_preferences_get_lastfm_user (PraghaPreferences *preferences);
-
-void
-pragha_preferences_set_lastfm_user (PraghaPreferences *preferences,
-                                    const gchar *lastfm_user);
-
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */
