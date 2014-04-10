@@ -30,7 +30,7 @@
 static void
 pragha_session_quit (XfceSMClient *sm_client, PraghaApplication *pragha)
 {
-	gtk_main_quit();
+	pragha_application_quit (pragha);
 }
 
 static void

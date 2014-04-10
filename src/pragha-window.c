@@ -329,7 +329,7 @@ void pragha_init_gui_state (PraghaApplication *pragha)
 	preferences = pragha_application_get_preferences (pragha);
 	if (pragha_preferences_get_restore_playlist (preferences)) {
 		playlist = pragha_application_get_playlist (pragha);
-		init_current_playlist_view (playlist);
+		pragha_playlist_init_playlist_state (playlist);
 	}
 
 	if (info_bar_import_music_will_be_useful(pragha)) {
