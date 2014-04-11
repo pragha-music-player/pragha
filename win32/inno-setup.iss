@@ -26,6 +26,7 @@ AppId={{1A58C548-142C-4016-9943-6A39EB25BB51}
 
 #define MINGW  "Z:\usr\i686-w64-mingw32\sys-root\mingw"
 #define ICON_PATH "Z:\usr\share\icons\oxygen"
+#define GST_CODECS "c:\gstreamer\1.0\x86"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
@@ -41,6 +42,10 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\pango\1.8.0\modules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gtk-3.0\3.0.0\immodules"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\lib\gstreamer-1.0\"; Flags: uninsdeletevalue
+
+[Components]
+Name: "main"; Description: "Main Files"; Types: full compact custom; Flags: fixed
+Name: "codecs"; Description: "Privative Codecs"; Types: full
 
 [Files]
 ; Pragha files
@@ -119,11 +124,8 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstcoreelements.dll"; DestDir: "{app}\lib
 Source: "{#MINGW}\bin\libgstallocators-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstapp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstaudio-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstfft-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstpbutils-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstriff-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstrtp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgstrtsp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstsdp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgsttag-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstvideo-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
@@ -141,10 +143,6 @@ Source: "{#MINGW}\lib\gstreamer-1.0\libgstplayback.dll"; DestDir: "{app}\lib\gst
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstsubparse.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgsttcp.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgsttypefindfunctions.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoconvert.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideorate.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideoscale.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
-Source: "{#MINGW}\lib\gstreamer-1.0\libgstvideotestsrc.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstvolume.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 Source: "{#MINGW}\lib\gstreamer-1.0\libgstvorbis.dll"; DestDir: "{app}\lib\gstreamer-1.0"; Flags: ignoreversion
 ; Gtk3
@@ -270,6 +268,8 @@ Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\ic
 Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"
 Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-music.png"
 Source: "{#ICON_PATH}\index.theme"; DestDir: "{app}\share\icons\oxygen\"
+
+#include "codecs.iss"
 
 [Icons]
 Name: "{group}\Pragha"; Filename: "{app}\bin\pragha.exe"; IconFilename: {app}\pragha.ico; Comment: "Yeah!. Music..";
