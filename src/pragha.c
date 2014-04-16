@@ -420,6 +420,7 @@ pragha_plugins_save_activated (PraghaApplication *pragha)
 
 		g_strfreev(loaded_plugins);
 	}
+	peas_engine_set_loaded_plugins (pragha->peas_engine, NULL);
 }
 
 static void
@@ -492,8 +493,6 @@ pragha_application_dispose (GObject *object)
 
 #ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
-		pragha_plugins_save_activated (pragha);
-
 		peas_engine_garbage_collect (pragha->peas_engine);
 
 		g_object_unref (pragha->peas_engine);
@@ -704,6 +703,10 @@ pragha_application_shutdown (GApplication *application)
 	pragha_window_save_settings (pragha);
 
 	pragha_playback_stop (pragha);
+
+#ifdef HAVE_LIBPEAS
+	pragha_plugins_save_activated (pragha);
+#endif
 
 	gtk_widget_destroy (pragha->mainwindow);
 
