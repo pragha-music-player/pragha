@@ -41,7 +41,8 @@ void     pragha_menubar_remove_plugin_action (PraghaApplication *pragha, GtkActi
 
 void     pragha_init_gui_state (PraghaApplication *pragha);
 
-void     pragha_window_free (PraghaApplication *pragha);
+void     pragha_window_save_settings (PraghaApplication *pragha);
+
 void     pragha_window_new  (PraghaApplication *pragha);
 
 #endif /* PRAGHA_WINDOW_H */

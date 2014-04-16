@@ -490,10 +490,6 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-	if (pragha->sidebar2_binding) {
-		g_object_unref (pragha->sidebar2_binding);
-		pragha->sidebar2_binding = NULL;
-	}
 #ifdef HAVE_LIBPEAS
 	if (pragha->peas_engine) {
 		pragha_plugins_save_activated (pragha);
@@ -524,22 +520,14 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->enum_map);
 		pragha->enum_map = NULL;
 	}
-	if (pragha->mainwindow) {
-		pragha_window_free (pragha);
-		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
-		gtk_widget_destroy (pragha->mainwindow);
-		pragha->mainwindow = NULL;
-	}
 	if (pragha->scanner) {
 		pragha_scanner_free (pragha->scanner);
 		pragha->scanner = NULL;
 	}
-
 	if (pragha->pixbuf_app) {
 		g_object_unref (pragha->pixbuf_app);
 		pragha->pixbuf_app = NULL;
 	}
-
 	if (pragha->menu_ui_manager) {
 		g_object_unref (pragha->menu_ui_manager);
 		pragha->menu_ui_manager = NULL;
@@ -713,7 +701,11 @@ pragha_application_shutdown (GApplication *application)
 	if (pragha_preferences_get_restore_playlist (pragha->preferences))
 		pragha_playlist_save_playlist_state (pragha->playlist);
 
+	pragha_window_save_settings (pragha);
+
 	pragha_playback_stop (pragha);
+
+	gtk_widget_destroy (pragha->mainwindow);
 
 	G_APPLICATION_CLASS (pragha_application_parent_class)->shutdown (application);
 }
@@ -848,9 +840,6 @@ gint main(gint argc, gchar *argv[])
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
 #endif
-
-	/* Initialize GTK+ */
-	gtk_init(&argc, &argv); //TODO delete if gtk app
 
 	pragha = pragha_application_new ();
 	status = g_application_run (G_APPLICATION (pragha), argc, argv);

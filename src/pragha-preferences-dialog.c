@@ -1098,8 +1098,6 @@ pragha_preferences_dialog_free (PreferencesDialog *dialog)
 	pragha_preferences_tab_free (dialog->desktop_tab);
 	pragha_preferences_tab_free (dialog->services_tab);
 
-	gtk_widget_destroy (GTK_WIDGET(dialog->widget));
-
 	g_slice_free (PreferencesDialog, dialog);
 }
 
@@ -1125,7 +1123,7 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 
 	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences of Pragha"),
 	                                              GTK_WINDOW(pragha_application_get_window(pragha)),
-	                                              GTK_DIALOG_MODAL,
+	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                              _("_Ok"), GTK_RESPONSE_OK,
 	                                              NULL);
