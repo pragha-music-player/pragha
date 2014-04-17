@@ -45,7 +45,7 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pragha.
 
 [Components]
 Name: "main"; Description: "Main Files"; Types: full compact custom; Flags: fixed
-Name: "codecs"; Description: "Privative Codecs"; Types: full
+Name: "codecsgood"; Description: "Tested Privative Codecs"; Types: fullName: "codecsbad"; Description: "More Privative Codecs"; Types: full
 
 [Files]
 ; Pragha files
@@ -126,6 +126,8 @@ Source: "{#MINGW}\bin\libgstapp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignorev
 Source: "{#MINGW}\bin\libgstaudio-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstpbutils-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstriff-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstrtp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "{#MINGW}\bin\libgstrtsp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstsdp-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgsttag-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgstvideo-1.0-0.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
@@ -251,6 +253,7 @@ Source: "{#ICON_PATH}\48x48\status\audio-volume-high.png"; DestDir: "{app}\share
 Source: "{#ICON_PATH}\48x48\status\audio-volume-low.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
 Source: "{#ICON_PATH}\48x48\status\audio-volume-medium.png"; DestDir: "{app}\share\icons\oxygen\48x48\status\"
 
+Source: "{#ICON_PATH}\22x22\actions\media-eject.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"; DestName: "media-eject-symbolic.png"
 Source: "{#ICON_PATH}\22x22\actions\view-refresh.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\process-stop.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\actions\window-close.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
@@ -261,12 +264,21 @@ Source: "{#ICON_PATH}\22x22\actions\list-remove.png"; DestDir: "{app}\share\icon
 Source: "{#ICON_PATH}\22x22\actions\edit-find.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"; DestName: "edit-find-symbolic.png"
 Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"; DestName: "edit-clear-symbolic.png"
 Source: "{#ICON_PATH}\22x22\actions\edit-clear.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
+Source: "{#ICON_PATH}\22x22\devices\drive-harddisk.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "drive-harddisk-symbolic.png"
 Source: "{#ICON_PATH}\22x22\devices\media-optical.png"; DestDir: "{app}\share\icons\oxygen\22x22\devices\"
 Source: "{#ICON_PATH}\22x22\mimetypes\audio-x-generic.png"; DestDir: "{app}\share\icons\oxygen\22x22\mimetypes"
+Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"
+Source: "{#ICON_PATH}\22x22\places\folder-documents.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-documents-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\folder-downloads.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-download-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\folder-image.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-pictures-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-music.png"
+Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-music-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\folder-video.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-video-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\user-desktop.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "user-desktop-symbolic.png"
+Source: "{#ICON_PATH}\22x22\places\user-home.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "user-home-symbolic.png"
 Source: "{#ICON_PATH}\22x22\status\audio-volume-high.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
 Source: "{#ICON_PATH}\22x22\status\dialog-warning.png"; DestDir: "{app}\share\icons\oxygen\22x22\actions\"
-Source: "{#ICON_PATH}\22x22\places\folder.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"
-Source: "{#ICON_PATH}\22x22\places\folder-sound.png"; DestDir: "{app}\share\icons\oxygen\22x22\places\"; DestName: "folder-music.png"
+
 Source: "{#ICON_PATH}\index.theme"; DestDir: "{app}\share\icons\oxygen\"
 
 #include "codecs.iss"
