@@ -123,6 +123,10 @@ pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
 if HAVE_LIBPEAS
+pragha_SOURCES = \
+		pragha-plugins-engine.c \
+		pragha-plugins-engine.h
+
 pragha_CFLAGS += $(LIBPEAS_CFLAGS)
 pragha_LDADD += $(LIBPEAS_LIBS)
 

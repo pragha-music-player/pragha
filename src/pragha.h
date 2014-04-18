@@ -26,10 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#ifdef HAVE_LIBPEAS
-#include <libpeas/peas.h>
-#endif
-
 #include "pragha-album-art.h"
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
@@ -86,10 +82,6 @@ GtkWidget         *pragha_application_get_menubar            (PraghaApplication 
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_first_pane         (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_second_pane        (PraghaApplication *pragha);
-
-#ifdef HAVE_LIBPEAS
-PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
-#endif
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 
