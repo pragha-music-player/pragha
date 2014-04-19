@@ -1056,6 +1056,7 @@ pragha_lastfm_scrobble_thread (gpointer data)
 {
 	gchar *title = NULL, *artist = NULL, *album = NULL;
 	gint track_no, length, rv;
+	time_t last_time;
 
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
@@ -1070,13 +1071,14 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	              "track-no", &track_no,
 	              "length",   &length,
 	              NULL);
+	last_time = priv->playback_started;
 	g_mutex_unlock (&priv->data_mutex);
 
 	rv = LASTFM_track_scrobble (priv->session_id,
 	                            title,
 	                            album,
 	                            artist,
-	                            priv->playback_started, // FIXME!.
+	                            last_time,
 	                            length,
 	                            track_no,
 	                            0, NULL);

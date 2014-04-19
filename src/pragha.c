@@ -616,6 +616,12 @@ pragha_application_shutdown (GApplication *application)
 
 	pragha_playback_stop (pragha);
 
+	/* Shutdown plugins can hide sidebar before save settings. */
+	if (pragha->sidebar2_binding) {
+		g_object_unref (pragha->sidebar2_binding);
+		pragha->sidebar2_binding = NULL;
+	}
+
 #ifdef HAVE_LIBPEAS
 	pragha_plugins_engine_shutdown (pragha->plugins_engine);
 #endif
