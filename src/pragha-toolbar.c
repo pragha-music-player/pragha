@@ -778,6 +778,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
 
 	vol_button = gtk_volume_button_new();
+	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), vol_button);
