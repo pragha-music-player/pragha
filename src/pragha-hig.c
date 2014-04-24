@@ -17,6 +17,10 @@
 
 #include "pragha-hig.h"
 
+#if !GTK_CHECK_VERSION (3, 12, 0)
+#define gtk_widget_set_margin_start gtk_widget_set_margin_left
+#endif
+
 void
 gtk_label_set_attribute_bold(GtkLabel *label)
 {
@@ -50,7 +54,7 @@ void
 pragha_hig_workarea_table_add_wide_control(GtkWidget *table, guint *row, GtkWidget *widget)
 {
 	gtk_grid_attach (GTK_GRID(table), widget, 0, *row, 2, 1);
-	gtk_widget_set_margin_left (GTK_WIDGET(widget), 12);
+	gtk_widget_set_margin_start (GTK_WIDGET(widget), 12);
 
 	++ * row;
 }
@@ -59,8 +63,7 @@ void
 pragha_hig_workarea_table_add_wide_tall_control(GtkWidget *table, guint *row, GtkWidget *widget)
 {
 	gtk_grid_attach (GTK_GRID(table), widget, 0, *row, 2, 1);
-
-	gtk_widget_set_margin_left (GTK_WIDGET(widget), 12);
+	gtk_widget_set_margin_start (GTK_WIDGET(widget), 12);
 
 	gtk_widget_set_hexpand (widget, TRUE);
 	gtk_widget_set_vexpand (widget, TRUE);
@@ -72,7 +75,7 @@ void
 pragha_hig_workarea_table_add_row(GtkWidget *table, guint *row, GtkWidget *label, GtkWidget *control)
 {
 	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-	gtk_widget_set_margin_left (GTK_WIDGET(label), 12);
+	gtk_widget_set_margin_start (GTK_WIDGET(label), 12);
 
 	gtk_grid_attach (GTK_GRID(table), label, 0, *row, 1, 1);
 	gtk_grid_attach (GTK_GRID(table), control, 1, *row, 1, 1);
