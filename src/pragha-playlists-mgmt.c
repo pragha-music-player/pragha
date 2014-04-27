@@ -26,6 +26,9 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef HAVE_PLPARSER
 #include <totem-pl-parser.h>
 #else
@@ -926,7 +929,6 @@ pragha_pl_parser_parse_m3u (const gchar *file)
 
 	g_free(base);
 
-exit_chan:
 	if (g_io_channel_shutdown(chan, TRUE, &err) != G_IO_STATUS_NORMAL) {
 		g_critical("Unable to open M3U playlist: %s", file);
 		g_error_free(err);

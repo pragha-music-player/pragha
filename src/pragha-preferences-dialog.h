@@ -19,6 +19,8 @@
 #ifndef PRAGHA_PREFERENCES_DIALOG_H
 #define PRAGHA_PREFERENCES_DIALOG_H
 
+#include <gtk/gtk.h>
+
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
@@ -29,6 +31,25 @@ typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PreferencesDialog PreferencesDialog;
 
-void pragha_preferences_dialog_show (PraghaApplication *pragha);
+void               pragha_preferences_append_audio_setting    (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_audio_setting    (PraghaApplication *pragha, GtkWidget *widget);
+
+void               pragha_preferences_append_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget);
+
+void               pragha_preferences_append_services_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_services_setting (PraghaApplication *pragha, GtkWidget *widget);
+
+void               pragha_preferences_dialog_connect_handler    (PraghaApplication *pragha,
+                                                                 GCallback          callback,
+                                                                 gpointer           user_data);
+void               pragha_preferences_dialog_disconnect_handler (PraghaApplication *pragha,
+                                                                 GCallback          callback,
+                                                                 gpointer           user_data);
+
+void               pragha_preferences_dialog_show            (PraghaApplication *pragha);
+
+void               pragha_preferences_dialog_free            (PreferencesDialog *dialog);
+PreferencesDialog *pragha_preferences_dialog_new             (PraghaApplication *pragha);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

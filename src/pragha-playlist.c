@@ -1689,6 +1689,72 @@ pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 	g_slist_free(to_delete);
 }
 
+
+void
+pragha_playlist_crop_music_type (PraghaPlaylist *playlist, PraghaMusicType music_type)
+{
+	GtkTreeIter iter;
+	PraghaMusicobject *mobj = NULL;
+	gboolean ret, played = FALSE;
+	GtkTreeRowReference *ref;
+	GtkTreePath *path;
+	GSList *to_delete = NULL, *i = NULL;
+
+	set_watch_cursor (GTK_WIDGET(playlist));
+
+	/* Get a reference to all the nodes that are _not_ selected */
+
+	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
+	while (ret) {
+		gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
+		if (music_type == pragha_musicobject_get_file_type(mobj)) {
+			path = gtk_tree_model_get_path (playlist->model, &iter);
+			ref = gtk_tree_row_reference_new (playlist->model, path);
+			to_delete = g_slist_prepend(to_delete, ref);
+			gtk_tree_path_free(path);
+		}
+		ret = gtk_tree_model_iter_next (playlist->model, &iter);
+	}
+
+	/* Delete the referenced nodes */
+
+	pragha_playlist_set_changing (playlist, TRUE);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(playlist->view), NULL);
+
+	for (i=to_delete; i != NULL; i = i->next) {
+		ref = i->data;
+		path = gtk_tree_row_reference_get_path(ref);
+		delete_rand_track_refs (path, playlist);
+		delete_queue_track_refs (path, playlist);
+		test_clear_curr_seq_ref (path, playlist);
+
+		if (gtk_tree_model_get_iter (playlist->model, &iter, path)) {
+			gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
+			g_object_unref(mobj);
+			gtk_tree_model_get (playlist->model, &iter, P_PLAYED, &played, -1);
+			gtk_list_store_remove (GTK_LIST_STORE(playlist->model), &iter);
+			playlist->no_tracks--;
+			if (!played)
+				playlist->unplayed_tracks--;
+
+			/* Have to give control to GTK periodically ... */
+			pragha_process_gtk_events ();
+		}
+		gtk_tree_path_free(path);
+		gtk_tree_row_reference_free(ref);
+	}
+
+	gtk_tree_view_set_model (GTK_TREE_VIEW(playlist->view), playlist->model);
+	pragha_playlist_set_changing (playlist, FALSE);
+
+	requeue_track_refs (playlist);
+
+	remove_watch_cursor (GTK_WIDGET(playlist));
+	g_signal_emit (playlist, signals[PLAYLIST_CHANGED], 0);
+
+	g_slist_free(to_delete);
+}
+
 /* Handle key press on current playlist view.
  * Based on Totem Code*/
 
@@ -3051,7 +3117,7 @@ pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist)
 
 /* Save current playlist state on exit */
 
-static void
+void
 pragha_playlist_save_playlist_state (PraghaPlaylist* cplaylist)
 {
 	GtkTreePath *path = NULL;
@@ -3132,7 +3198,8 @@ static void init_playlist_current_playlist(PraghaPlaylist *cplaylist)
 	}
 }
 
-void init_current_playlist_view(PraghaPlaylist *cplaylist)
+void
+pragha_playlist_init_playlist_state (PraghaPlaylist *cplaylist)
 {
 	gchar *ref = NULL;
 	GtkTreePath *path = NULL;
@@ -4362,8 +4429,6 @@ pragha_playlist_unrealize (GtkWidget *widget)
 {
 	PraghaPlaylist *playlist = PRAGHA_PLAYLIST (widget);
 
-	if (pragha_preferences_get_restore_playlist (playlist->preferences))
-		pragha_playlist_save_playlist_state (playlist);
 	pragha_playlist_save_preferences (playlist);
 
 	(*GTK_WIDGET_CLASS (pragha_playlist_parent_class)->unrealize) (widget);

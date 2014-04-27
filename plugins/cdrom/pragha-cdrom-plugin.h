@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2011-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -15,33 +15,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_LASTFM_H
-#define PRAGHA_LASTFM_H
-
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef HAVE_LIBCLASTFM
-
-#include <clastfm.h>
-
-#include "pragha-preferences.h"
+#ifndef PRAGHA_CDROM_PLUGIN_H
+#define PRAGHA_CDROM_PLUGIN_H
 
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
 
-typedef struct _PraghaLastfm PraghaLastfm;
+void pragha_application_append_audio_cd (PraghaApplication *pragha);
 
-void          pragha_lastfm_set_password (PraghaPreferences *preferences, const gchar *pass);
-const gchar  *pragha_lastfm_get_password (PraghaPreferences *preferences);
-
-gint          pragha_lastfm_connect      (PraghaLastfm *clastfm);
-void          pragha_lastfm_disconnect   (PraghaLastfm *clastfm);
-
-PraghaLastfm *pragha_lastfm_new          (PraghaApplication *pragha);
-void          pragha_lastfm_free         (PraghaLastfm *clastfm);
-
-#endif
-
-#endif /* PRAGHA_LASTFM_H */
+#endif /* PRAGHA_CDROM_PLUGIN_H */

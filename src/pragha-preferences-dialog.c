@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include <glib.h>
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -38,17 +40,28 @@
 #include "pragha-simple-widgets.h"
 #include "pragha.h"
 
+struct _PreferencesTab {
+	GtkWidget *widget;
+	GtkWidget *vbox;
+	GtkWidget *label;
+};
+typedef struct _PreferencesTab PreferencesTab;
+
 struct _PreferencesDialog {
 	PraghaApplication *pragha;
 	PraghaPreferences *preferences;
 
-	GtkWidget *widget;
+	GtkWidget         *widget;
+	GtkWidget         *notebook;
+	PreferencesTab    *audio_tab;
+	PreferencesTab    *desktop_tab;
+	PreferencesTab    *services_tab;
 
+#ifndef G_OS_WIN32
 	GtkWidget *audio_device_w;
-	GtkWidget *audio_cd_device_w;
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
-
+#endif
 	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
@@ -65,14 +78,114 @@ struct _PreferencesDialog {
 	GtkWidget *show_icon_tray_w;
 	GtkWidget *close_to_tray_w;
 	GtkWidget *add_recursively_w;
-
-#ifdef HAVE_LIBCLASTFM
-	GtkWidget *lastfm_w;
-	GtkWidget *lastfm_uname_w;
-	GtkWidget *lastfm_pass_w;
-#endif
-	GtkWidget *use_cddb_w;
 };
+
+/*
+ * Dinamic Tabs
+ */
+
+static PreferencesTab *
+pragha_preferences_tab_new (const gchar *label)
+{
+	PreferencesTab *tab;
+	tab = g_slice_new0(PreferencesTab);
+
+	tab->label = gtk_label_new(label);
+	tab->vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+
+	return tab;
+}
+
+static void
+pragha_preferences_tab_free (PreferencesTab *tab)
+{
+	g_slice_free (PreferencesTab, tab);
+}
+
+static void
+pragha_preferences_tab_append_setting (PreferencesTab *tab, GtkWidget *widget, gboolean expand)
+{
+	gtk_box_pack_start (GTK_BOX(tab->vbox), widget, expand, expand, 0);
+	gtk_widget_show_all (tab->vbox);
+}
+
+static void
+pragha_preferences_tab_remove_setting (PreferencesTab *tab, GtkWidget *widget)
+{
+	GList *list = NULL;
+	gtk_container_remove (GTK_CONTAINER(tab->vbox), widget);
+
+	list = gtk_container_get_children (GTK_CONTAINER(tab->vbox));
+
+	if (g_list_length(list) == 0)
+		gtk_widget_hide (tab->vbox);
+	g_list_free(list);
+}
+
+static void
+pragha_preferences_notebook_append_tab (GtkWidget *notebook, PreferencesTab *tab)
+{
+	GList *list = NULL;
+
+	gtk_notebook_append_page (GTK_NOTEBOOK(notebook),
+	                          tab->vbox, tab->label);
+
+	list = gtk_container_get_children (GTK_CONTAINER(tab->vbox));
+	if (g_list_length(list) == 0)
+		gtk_widget_hide (tab->vbox);
+	else
+		gtk_widget_show_all (tab->vbox);
+	g_list_free (list);
+}
+
+void
+pragha_preferences_append_audio_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_append_setting (dialog->audio_tab, widget, expand);
+}
+
+void
+pragha_preferences_remove_audio_setting (PraghaApplication *pragha, GtkWidget *widget)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_remove_setting (dialog->audio_tab, widget);
+}
+
+void
+pragha_preferences_append_desktop_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_append_setting (dialog->desktop_tab, widget, expand);
+}
+
+void
+pragha_preferences_remove_desktop_setting (PraghaApplication *pragha, GtkWidget *widget)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_remove_setting (dialog->desktop_tab, widget);
+}
+
+void
+pragha_preferences_append_services_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_append_setting (dialog->services_tab, widget, expand);
+}
+
+void
+pragha_preferences_remove_services_setting (PraghaApplication *pragha, GtkWidget *widget)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_tab_remove_setting (dialog->services_tab, widget);
+}
+
 
 const gchar *album_art_pattern_info = N_("Patterns should be of the form:\
 <filename>;<filename>;....\nA maximum of six patterns are allowed.\n\
@@ -141,12 +254,13 @@ static void
 pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, PreferencesDialog *dialog)
 {
 	PraghaLibraryPane *library;
-#ifdef HAVE_LIBCLASTFM
-	PraghaLastfm *clastfm;
-#endif
 	gboolean test_change, pref_setted, pref_toggled;
-	gchar *audio_sink = NULL, *window_state_sink = NULL;
-	const gchar *album_art_pattern, *audio_cd_device, *audio_device;
+	gchar *window_state_sink = NULL;
+	const gchar *album_art_pattern;
+#ifndef G_OS_WIN32
+	const gchar *audio_device;
+	gchar *audio_sink = NULL;
+#endif
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively;
 	gint album_art_size;
 	GSList *list, *library_dir = NULL, *folder_scanned = NULL;
@@ -158,6 +272,7 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		break;
 	case GTK_RESPONSE_OK:
 		/* Audio preferences */
+		#ifndef G_OS_WIN32
 		audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dialog->audio_sink_combo_w));
 		if(audio_sink) {
 			pragha_preferences_set_audio_sink(dialog->preferences, audio_sink);
@@ -169,15 +284,11 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 			pragha_preferences_set_audio_device(dialog->preferences, audio_device);
 		}
 
-		audio_cd_device = gtk_entry_get_text(GTK_ENTRY(dialog->audio_cd_device_w));
-		if (audio_cd_device) {
-			pragha_preferences_set_audio_cd_device(dialog->preferences, audio_cd_device);
-		}
-
 		gboolean software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w));
 		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
-		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
 
+		pragha_backend_set_soft_volume(pragha_application_get_backend(dialog->pragha), software_mixer);
+		#endif
 
 		/* Save new library folders */
 
@@ -316,36 +427,18 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 				
 			}
 		}
-
-		/* Services internet preferences */
-#ifdef HAVE_LIBCLASTFM
-		pragha_preferences_set_lastfm_support (dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w)));
-
-		if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
-			pragha_preferences_set_lastfm_user (dialog->preferences,
-				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_uname_w)));
-
-			pragha_lastfm_set_password(dialog->preferences,
-				gtk_entry_get_text(GTK_ENTRY(dialog->lastfm_pass_w)));
-
-			clastfm = pragha_application_get_lastfm (dialog->pragha);
-			pragha_lastfm_disconnect (clastfm);
-			pragha_lastfm_connect (clastfm);
-		}
-#endif
-		pragha_preferences_set_use_cddb(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
 		break;
 	default:
 		break;
 	}
 
-	g_object_unref(dialog->preferences);
+	gtk_widget_hide(GTK_WIDGET(dialog->widget));
+}
 
-	gtk_widget_destroy(GTK_WIDGET(dialog->widget));
-
-	g_slice_free(PreferencesDialog, dialog);
+static gboolean
+pragha_preferences_dialog_delete (GtkWidget *widget, GdkEvent *event, PreferencesDialog *dialog)
+{
+	return TRUE;
 }
 
 /* Handler for adding a new library */
@@ -425,25 +518,6 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 }
 
-/* Toggle displaying last.fm username/password widgets */
-#ifdef HAVE_LIBCLASTFM
-static void toggle_lastfm(GtkToggleButton *button, PreferencesDialog *dialog)
-{
-	PraghaLastfm *clastfm;
-	gboolean is_active;
-
-	is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w));
-
-	gtk_widget_set_sensitive(dialog->lastfm_uname_w, is_active);
-	gtk_widget_set_sensitive(dialog->lastfm_pass_w, is_active);
-
-	if(!is_active) {
-		clastfm = pragha_application_get_lastfm (dialog->pragha);
-		pragha_lastfm_disconnect (clastfm);
-	}
-}
-#endif
-
 /* Toggle hint of playlist */
 
 static void toggle_use_hint (GtkToggleButton *button, PreferencesDialog *dialog)
@@ -479,6 +553,7 @@ static void toggle_show_icon_tray(GtkToggleButton *button, PreferencesDialog *di
 
 /* Some audios toggles handlers */
 
+#ifndef G_OS_WIN32
 static void update_audio_device_alsa(PreferencesDialog *dialog)
 {
 	gtk_widget_set_sensitive(dialog->audio_device_w, TRUE);
@@ -535,6 +610,7 @@ change_audio_sink(GtkComboBox *combo, PreferencesDialog *dialog)
 
 	g_free(audio_sink);
 }
+#endif
 
 static void
 pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
@@ -545,14 +621,14 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	GtkTreeModel *model;
 	GError *error = NULL;
 	GSList *library_dir = NULL;
-
+#ifndef G_OS_WIN32
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(dialog->preferences);
 	const gchar *audio_device = pragha_preferences_get_audio_device(dialog->preferences);
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device(dialog->preferences);
+#endif
 	const gchar *start_mode = pragha_preferences_get_start_mode(dialog->preferences);
 
 	/* Audio Options */
-
+#ifndef G_OS_WIN32
 	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
 			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 1);
@@ -582,12 +658,9 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	if (string_is_not_empty(audio_device))
 		gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w), audio_device);
 
-	if (string_is_not_empty(audio_cd_device))
-		gtk_entry_set_text(GTK_ENTRY(dialog->audio_cd_device_w),
-				   audio_cd_device);
-
 	if (pragha_preferences_get_software_mixer(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
+#endif
 
 	/* General Options */
 
@@ -671,24 +744,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
 	if (pragha_preferences_get_sort_by_year(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->sort_by_year_w), TRUE);
-
-	/* Service Internet Option */
-#ifdef HAVE_LIBCLASTFM
-	if (pragha_preferences_get_lastfm_support (dialog->preferences)) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->lastfm_w), TRUE);
-
-		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_uname_w),
-		                   pragha_preferences_get_lastfm_user (dialog->preferences));
-		gtk_entry_set_text(GTK_ENTRY(dialog->lastfm_pass_w),
-		                   pragha_lastfm_get_password(dialog->preferences));
-	}
-	else {
-		gtk_widget_set_sensitive(dialog->lastfm_uname_w, FALSE);
-		gtk_widget_set_sensitive(dialog->lastfm_pass_w, FALSE);
-	}
-#endif
-	if (pragha_preferences_get_use_cddb(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w), TRUE);
 }
 
 gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDialog *dialog)
@@ -709,12 +764,12 @@ gint library_view_key_press (GtkWidget *win, GdkEventKey *event, PreferencesDial
 	return FALSE;
 }
 
+#ifndef G_OS_WIN32
 static GtkWidget*
 pref_create_audio_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, \
-		  *soft_mixer, *audio_cd_device_label,*audio_cd_device_entry;
+	GtkWidget *audio_device_entry, *audio_device_label, *audio_sink_combo, *sink_label, *soft_mixer;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -754,22 +809,10 @@ pref_create_audio_page (PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_wide_control(table, &row, soft_mixer);
 
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Audio CD"));
-
-	audio_cd_device_label = gtk_label_new(_("Audio CD Device"));
-	gtk_misc_set_alignment(GTK_MISC (audio_cd_device_label), 0, 0);
-
-	audio_cd_device_entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(audio_cd_device_entry), AUDIO_CD_DEVICE_ENTRY_LEN);
-	gtk_entry_set_activates_default (GTK_ENTRY(audio_cd_device_entry), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, audio_cd_device_label, audio_cd_device_entry);
-
 	/* Store references */
 
 	dialog->audio_sink_combo_w = audio_sink_combo;
 	dialog->audio_device_w = audio_device_entry;
-	dialog->audio_cd_device_w = audio_cd_device_entry;
 	dialog->soft_mixer_w = soft_mixer;
 
 	/* Setup signal handlers */
@@ -779,6 +822,7 @@ pref_create_audio_page (PreferencesDialog *dialog)
 
 	return table;
 }
+#endif
 
 static GtkWidget*
 pref_create_library_page (PreferencesDialog *dialog)
@@ -988,60 +1032,6 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	return table;
 }
 
-static GtkWidget*
-pref_create_services_page(PreferencesDialog *dialog)
-{
-	GtkWidget *table;
-	#ifdef HAVE_LIBCLASTFM
-	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
-	#endif
-	GtkWidget *use_cddb;
-	guint row = 0;
-
-	table = pragha_hig_workarea_table_new();
-
-	#ifdef HAVE_LIBCLASTFM
-	pragha_hig_workarea_table_add_section_title(table, &row, "Last.fm");
-
-	lastfm_check = gtk_check_button_new_with_label(_("Last.fm Support"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, lastfm_check);
-
-	lastfm_ulabel = gtk_label_new(_("Username"));
-	lastfm_uname = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(lastfm_uname), LASTFM_UNAME_LEN);
-	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_uname), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, lastfm_ulabel, lastfm_uname);
-
-	lastfm_plabel = gtk_label_new(_("Password"));
-	lastfm_pass = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY(lastfm_pass), LASTFM_PASS_LEN);
-	gtk_entry_set_visibility(GTK_ENTRY(lastfm_pass), FALSE);
-	gtk_entry_set_invisible_char(GTK_ENTRY(lastfm_pass), '*');
-	gtk_entry_set_activates_default (GTK_ENTRY(lastfm_pass), TRUE);
-
-	pragha_hig_workarea_table_add_row (table, &row, lastfm_plabel, lastfm_pass);
-	#endif
-
-	pragha_hig_workarea_table_add_section_title(table, &row, _("Others services"));
-
-	use_cddb = gtk_check_button_new_with_label(_("Connect to CDDB server"));
-	pragha_hig_workarea_table_add_wide_control(table, &row, use_cddb);
-
-	/* Store references. */
-
-	#ifdef HAVE_LIBCLASTFM
-	dialog->lastfm_w = lastfm_check;
-	dialog->lastfm_uname_w = lastfm_uname;
-	dialog->lastfm_pass_w = lastfm_pass;
-	g_signal_connect (G_OBJECT(lastfm_check), "toggled",
-	                  G_CALLBACK(toggle_lastfm), dialog);
-	#endif
-	dialog->use_cddb_w = use_cddb;
-
-	return table;
-}
-
 #ifdef HAVE_LIBPEAS
 static GtkWidget*
 pref_create_plugins_page (PreferencesDialog *dialog)
@@ -1063,13 +1053,62 @@ pref_create_plugins_page (PreferencesDialog *dialog)
 #endif
 
 void
+pragha_preferences_dialog_connect_handler (PraghaApplication *pragha,
+                                           GCallback          callback,
+                                           gpointer           user_data)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	g_signal_connect (G_OBJECT(dialog->widget), "response",
+	                  G_CALLBACK(callback), user_data);
+}
+
+void
+pragha_preferences_dialog_disconnect_handler (PraghaApplication *pragha,
+                                              GCallback          callback,
+                                              gpointer           user_data)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	g_signal_handlers_disconnect_by_func (dialog->widget,
+	                                      callback,
+	                                      user_data);
+}
+
+
+void
 pragha_preferences_dialog_show (PraghaApplication *pragha)
+{
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+
+	gtk_notebook_set_current_page (GTK_NOTEBOOK(dialog->notebook), 0);
+
+	gtk_widget_show (dialog->widget);
+}
+
+void
+pragha_preferences_dialog_free (PreferencesDialog *dialog)
+{
+	g_object_unref (dialog->preferences);
+
+	pragha_preferences_tab_free (dialog->audio_tab);
+	pragha_preferences_tab_free (dialog->desktop_tab);
+	pragha_preferences_tab_free (dialog->services_tab);
+
+	g_slice_free (PreferencesDialog, dialog);
+}
+
+PreferencesDialog *
+pragha_preferences_dialog_new (PraghaApplication *pragha)
 {
 	PreferencesDialog *dialog;
 	GtkWidget *header, *pref_notebook;
 
-	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox, *services_vbox;
-	GtkWidget *label_audio, *label_appearance, *label_library, *label_general, *label_desktop, *label_services;
+	GtkWidget *audio_vbox, *appearance_vbox, *library_vbox, *general_vbox, *desktop_vbox;
+	GtkWidget *label_appearance, *label_library, *label_general;
 	#ifdef HAVE_LIBPEAS
 	GtkWidget *plugins_vbox;
 	GtkWidget *label_plugins;
@@ -1084,19 +1123,16 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences of Pragha"),
 	                                              GTK_WINDOW(pragha_application_get_window(pragha)),
-	                                              GTK_DIALOG_MODAL,
+	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                              _("_Ok"), GTK_RESPONSE_OK,
 	                                              NULL);
 
 	/* Labels */
 
-	label_audio = gtk_label_new(_("Audio"));
 	label_appearance = gtk_label_new(_("Appearance"));
 	label_library = gtk_label_new(_("Library"));
 	label_general = gtk_label_new(_("General"));
-	label_desktop = gtk_label_new(_("Desktop"));
-	label_services = gtk_label_new(_("Services"));
 	#ifdef HAVE_LIBPEAS
 	label_plugins = gtk_label_new(_("Plugins"));
 	#endif
@@ -1107,27 +1143,38 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	gtk_container_set_border_width (GTK_CONTAINER(pref_notebook), 4);
 
+	library_vbox = pref_create_library_page(dialog);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
+	gtk_widget_show_all (library_vbox);
+
+	dialog->audio_tab = pragha_preferences_tab_new (_("Audio"));
+	#ifndef G_OS_WIN32
 	audio_vbox = pref_create_audio_page(dialog);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), audio_vbox, label_audio);
+	pragha_preferences_tab_append_setting (dialog->audio_tab, audio_vbox, FALSE);
+	#endif
+	pragha_preferences_notebook_append_tab (pref_notebook, dialog->audio_tab);
 
 	appearance_vbox = pref_create_appearance_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), appearance_vbox, label_appearance);
-
-	library_vbox = pref_create_library_page(dialog);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
+	gtk_widget_show_all (appearance_vbox);
 
 	general_vbox = pref_create_general_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), general_vbox, label_general);
+	gtk_widget_show_all (general_vbox);
 
+	dialog->desktop_tab = pragha_preferences_tab_new (_("Desktop"));
 	desktop_vbox = pref_create_desktop_page(dialog);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), desktop_vbox, label_desktop);
+	pragha_preferences_tab_append_setting (dialog->desktop_tab, desktop_vbox, FALSE);
 
-	services_vbox = pref_create_services_page(dialog);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), services_vbox, label_services);
+	dialog->services_tab = pragha_preferences_tab_new (_("Services"));
+
+	pragha_preferences_notebook_append_tab (pref_notebook, dialog->desktop_tab);
+	pragha_preferences_notebook_append_tab (pref_notebook, dialog->services_tab);
 
 	#ifdef HAVE_LIBPEAS
 	plugins_vbox = pref_create_plugins_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), plugins_vbox, label_plugins);
+	gtk_widget_show_all (plugins_vbox);
 	#endif
 
 	/* Add to dialog */
@@ -1136,16 +1183,23 @@ pragha_preferences_dialog_show (PraghaApplication *pragha)
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), header, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog->widget))), pref_notebook, TRUE, TRUE, 0);
+	gtk_widget_show_all (header);
+	gtk_widget_show (pref_notebook);
 
 	/* Setup signal handlers */
 
 	g_signal_connect (G_OBJECT(dialog->widget), "response",
 	                  G_CALLBACK(pragha_preferences_dialog_response), dialog);
+	g_signal_connect (G_OBJECT(dialog->widget), "delete_event",
+	                  G_CALLBACK(pragha_preferences_dialog_delete), dialog);
 
 	pragha_preferences_dialog_init_settings(dialog);
 
 	toggle_album_art(GTK_TOGGLE_BUTTON(dialog->album_art_w), dialog);
 
 	gtk_dialog_set_default_response(GTK_DIALOG (dialog->widget), GTK_RESPONSE_OK);
-	gtk_widget_show_all(dialog->widget);
+
+	dialog->notebook = pref_notebook;
+
+	return dialog;
 }

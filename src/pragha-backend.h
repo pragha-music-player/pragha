@@ -48,6 +48,9 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+	void (*set_device) (PraghaBackend *backend, GObject *obj);
+	void (*prepare_source) (PraghaBackend *backend);
+	void (*clean_source) (PraghaBackend *backend);
 	void (*tick) (PraghaBackend *backend);
 	void (*seeked) (PraghaBackend *backend);
 	void (*buffering) (PraghaBackend *backend, gint percent);
@@ -56,28 +59,37 @@ typedef struct {
 	void (*tags_changed) (PraghaBackend *backend, gint changed);
 } PraghaBackendClass;
 
-gboolean pragha_backend_can_seek (PraghaBackend *backend);
-void pragha_backend_seek (PraghaBackend *backend, gint64 seek);
-gint64 pragha_backend_get_current_length(PraghaBackend *backend);
-gint64 pragha_backend_get_current_position(PraghaBackend *backend);
-void pragha_backend_set_soft_volume(PraghaBackend *backend, gboolean value);
-gdouble pragha_backend_get_volume (PraghaBackend *backend);
-void pragha_backend_set_volume (PraghaBackend *backend, gdouble volume);
-void pragha_backend_set_delta_volume (PraghaBackend *backend, gdouble delta);
-gboolean pragha_backend_is_playing(PraghaBackend *backend);
-gboolean pragha_backend_is_paused(PraghaBackend *backend);
-gboolean pragha_backend_emitted_error (PraghaBackend *backend);
-GError *pragha_backend_get_error (PraghaBackend *backend);
-PraghaBackendState pragha_backend_get_state (PraghaBackend *backend);
-void pragha_backend_pause (PraghaBackend *backend);
-void pragha_backend_resume (PraghaBackend *backend);
-void pragha_backend_play (PraghaBackend *backend);
-void pragha_backend_stop (PraghaBackend *backend);
-void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *mobj);
-PraghaMusicobject *pragha_backend_get_musicobject(PraghaBackend *backend);
-GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
-void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
-PraghaBackend * pragha_backend_new ();
+gboolean           pragha_backend_can_seek             (PraghaBackend *backend);
+void               pragha_backend_seek                 (PraghaBackend *backend, gint64 seek);
+
+gint64             pragha_backend_get_current_length   (PraghaBackend *backend);
+gint64             pragha_backend_get_current_position (PraghaBackend *backend);
+
+void               pragha_backend_set_soft_volume      (PraghaBackend *backend, gboolean value);
+gdouble            pragha_backend_get_volume           (PraghaBackend *backend);
+void               pragha_backend_set_volume           (PraghaBackend *backend, gdouble volume);
+void               pragha_backend_set_delta_volume     (PraghaBackend *backend, gdouble delta);
+
+gboolean           pragha_backend_is_playing           (PraghaBackend *backend);
+gboolean           pragha_backend_is_paused            (PraghaBackend *backend);
+
+gboolean           pragha_backend_emitted_error        (PraghaBackend *backend);
+GError            *pragha_backend_get_error            (PraghaBackend *backend);
+PraghaBackendState pragha_backend_get_state            (PraghaBackend *backend);
+
+void               pragha_backend_pause                (PraghaBackend *backend);
+void               pragha_backend_resume               (PraghaBackend *backend);
+void               pragha_backend_play                 (PraghaBackend *backend);
+void               pragha_backend_stop                 (PraghaBackend *backend);
+
+void               pragha_backend_set_playback_uri     (PraghaBackend *backend, const gchar *uri);
+void               pragha_backend_set_musicobject      (PraghaBackend *backend, PraghaMusicobject *mobj);
+PraghaMusicobject *pragha_backend_get_musicobject      (PraghaBackend *backend);
+
+GstElement        *pragha_backend_get_equalizer        (PraghaBackend *backend);
+void               pragha_backend_update_equalizer     (PraghaBackend *backend, const gdouble *bands);
+
+PraghaBackend     *pragha_backend_new                  (void);
 
 G_END_DECLS
 

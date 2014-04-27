@@ -2,7 +2,6 @@ src/info-bar-import-music.c
 src/pragha-cmdline.c
 src/pragha-equalizer-dialog.c
 src/pragha-filter-dialog.c
-src/pragha-lastfm.c
 src/pragha-library-pane.c
 src/pragha-menubar.c
 src/pragha-playlist.c
@@ -19,3 +18,5 @@ src/pragha-window.c
 src/pragha.c
 data/pragha.desktop.in
 plugins/notify/pragha-notify-plugin.c
+plugins/lastfm/pragha-lastfm-plugin.c
+plugins/cdrom/pragha-cdrom-plugin.c

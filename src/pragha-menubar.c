@@ -28,7 +28,6 @@
 
 #include <gdk/gdkkeysyms.h>
 #include "pragha-menubar.h"
-#include "pragha-cdda.h"
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -58,7 +57,6 @@ static void quit_action(GtkAction *action, PraghaApplication *pragha);
 /* Playlist */
 
 // void open_file_action(GtkAction *action, PraghaApplication *pragha);
-// void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
 // void add_location_action(GtkAction *action, PraghaApplication *pragha);
 static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
@@ -110,8 +108,8 @@ static const gchar *main_menu_xml = "<ui>					\
 		</menu>								\
 		<menu action=\"PlaylistMenu\">					\
 			<menuitem action=\"Add files\"/>			\
-			<menuitem action=\"Add Audio CD\"/>			\
 			<menuitem action=\"Add location\"/>			\
+			<placeholder name=\"pragha-append-music-placeholder\"/>		\
 			<separator/>				    			\
 			<menuitem action=\"Add the library\"/>		\
 			<separator/>				    		\
@@ -179,8 +177,6 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add files", "document-open", N_("_Add files"),
 	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
-	{"Add Audio CD", "media-optical", N_("Add Audio _CD"),
-	 "", "Append a Audio CD", G_CALLBACK(add_audio_cd_action)},
 	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
 	{"Add the library", "list-add", N_("_Add the library"),
@@ -420,6 +416,10 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	while (mime_ape[i])
 		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
 					      mime_ape[i++]);
+	i = 0;
+	while (mime_tracker[i])
+		gtk_file_filter_add_mime_type(GTK_FILE_FILTER(media_filter),
+					      mime_tracker[i++]);
 
 	#ifdef HAVE_PLPARSER
 	i = 0;
@@ -506,13 +506,6 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 	gtk_window_set_destroy_with_parent (GTK_WINDOW (window), TRUE);
 
 	gtk_widget_show_all(window);
-}
-
-/* Handler for the 'Add Audio CD' item in the pragha menu */
-
-void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha)
-{
-	pragha_application_append_audio_cd (pragha);
 }
 
 /* Build a dialog to get a new playlist name */

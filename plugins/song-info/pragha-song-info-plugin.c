@@ -53,10 +53,13 @@
 #include "src/pragha-sidebar.h"
 #include "src/pragha-simple-async.h"
 #include "src/pragha-simple-widgets.h"
+#include "src/pragha-preferences-dialog.h"
 #include "src/pragha-utils.h"
 
 struct _PraghaSongInfoPluginPrivate {
 	PraghaApplication  *pragha;
+	GtkWidget          *setting_widget;
+
 	PraghaSonginfoPane *pane;
 
 	GlyrDatabase       *cache_db;
@@ -69,9 +72,9 @@ struct _PraghaSongInfoPluginPrivate {
 	GCancellable       *pane_search;
 };
 
-PRAGHA_PLUGIN_REGISTER_CONFIGURABLE_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
-                                                  PraghaSongInfoPlugin,
-                                                  pragha_song_info_plugin)
+PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE (PRAGHA_TYPE_SONG_INFO_PLUGIN,
+                                     PraghaSongInfoPlugin,
+                                     pragha_song_info_plugin)
 
 /*
  * Popups
@@ -388,15 +391,19 @@ toggle_download_album_art (GtkToggleButton *button)
 	g_free (plugin_group);
 }
 
-static GtkWidget *
-pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
+static void
+pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 {
 	PraghaPreferences *preferences = NULL;
 	gchar *plugin_group = NULL;
 	GtkWidget *table, *download_album_art;
 	guint row = 0;
 
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
 	table = pragha_hig_workarea_table_new ();
+
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Song Information"));
 
 	download_album_art = gtk_check_button_new_with_label (_("Download the album art while playing their songs."));
 	pragha_hig_workarea_table_add_wide_control (table, &row, download_album_art);
@@ -413,13 +420,21 @@ pragha_plugin_create_configure_widget (PeasGtkConfigurable *configurable)
 	g_signal_connect (G_OBJECT(download_album_art), "toggled",
 	                  G_CALLBACK(toggle_download_album_art), NULL);
 
-	return table;
+	pragha_preferences_append_services_setting (priv->pragha, table, FALSE);
+	priv->setting_widget = table;
+}
+
+static void
+pragha_songinfo_plugin_remove_setting (PraghaSongInfoPlugin *plugin)
+{
+	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	pragha_preferences_remove_services_setting (priv->pragha, priv->setting_widget);
 }
 
 /*
  * Plugin
  */
-
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
@@ -430,6 +445,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Song-info plugin %s", G_STRFUNC);
 
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
@@ -485,6 +502,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
 	priv->download_album_art = pragha_preferences_get_boolean (preferences, plugin_group, "DownloadAlbumArt");
 	g_free (plugin_group);
+
+	pragha_songinfo_plugin_append_setting (plugin);
 }
 
 static void
@@ -501,7 +520,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	pragha = plugin->priv->pragha;
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "SongInfo plugin %s", G_STRFUNC);
 
 	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha),
 	                                      backend_changed_state_cb, plugin);
@@ -533,6 +552,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	sidebar = pragha_application_get_second_sidebar (priv->pragha);
 	pragha_sidebar_remove_plugin (sidebar, GTK_WIDGET(priv->pane));
+
+	pragha_songinfo_plugin_remove_setting (plugin);
 
 	glyr_db_destroy (priv->cache_db);
 

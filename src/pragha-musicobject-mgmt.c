@@ -16,6 +16,9 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-file-utils.h"
 #include "pragha-playlists-mgmt.h"
@@ -27,6 +30,7 @@ new_musicobject_from_file(const gchar *file)
 {
 	PraghaMusicobject *mobj = NULL;
 	PraghaMusicType type;
+	gboolean ret = FALSE;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
@@ -39,7 +43,32 @@ new_musicobject_from_file(const gchar *file)
 	                     "file-type", type,
 	                     NULL);
 
-	if(G_LIKELY(pragha_musicobject_set_tags_from_file(mobj, file)))
+	switch (type) {
+		case FILE_USER_L:
+		case FILE_USER_3:
+		case FILE_USER_2:
+		case FILE_USER_1:
+		case FILE_USER_0:
+		case FILE_NONE:
+			break;
+		case FILE_WAV:
+		case FILE_MP3:
+		case FILE_FLAC:
+		case FILE_OGGVORBIS:
+		case FILE_ASF:
+		case FILE_MP4:
+		case FILE_APE:
+			ret = pragha_musicobject_set_tags_from_file (mobj, file);
+			break;
+		case FILE_TRACKER:
+			ret = TRUE;
+			break;
+		case FILE_HTTP:
+		default:
+			break;
+	}
+
+	if (G_LIKELY(ret))
 		return mobj;
 	else {
 		g_critical("Fail to create musicobject from file");
@@ -107,76 +136,6 @@ AND LOCATION.id = ?";
 	}
 
 	pragha_prepared_statement_free (statement);
-
-	return mobj;
-}
-
-PraghaMusicobject *
-new_musicobject_from_cdda(PraghaApplication *pragha,
-                          cdrom_drive_t *cdda_drive,
-                          cddb_disc_t *cddb_disc,
-                          gint track_no)
-{
-	PraghaPreferences *preferences;
-	PraghaMusicobject *mobj = NULL;
-	gint channels, start, end;
-	gchar *ntitle = NULL, *nfile = NULL;
-
-	CDEBUG(DBG_MOBJ, "Creating new musicobject from cdda: %d",
-	       track_no);
-
-	channels = cdio_get_track_channels(cdda_drive->p_cdio,
-					   track_no);
-	start = cdio_cddap_track_firstsector(cdda_drive, track_no);
-	end = cdio_cddap_track_lastsector(cdda_drive, track_no);
-
-	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT, NULL);
-
-	preferences = pragha_application_get_preferences (pragha);
-	if (pragha_preferences_get_use_cddb (preferences) && cddb_disc) {
-		cddb_track_t *track;
-		const gchar *title, *artist, *album, *genre;
-		gint year;
-
-		track = cddb_disc_get_track(cddb_disc, track_no - 1);
-		if (track) {
-			title = cddb_track_get_title(track);
-			if (title)
-				ntitle = g_strdup(title);
-
-			artist = cddb_track_get_artist(track);
-			if(artist)
-				pragha_musicobject_set_artist(mobj, artist);
-
-			album = cddb_disc_get_title(cddb_disc);
-			if(album)
-				pragha_musicobject_set_album(mobj, album);
-
-			year = cddb_disc_get_year(cddb_disc);
-			if(year)
-				pragha_musicobject_set_year(mobj, year);
-
-			genre = cddb_disc_get_genre(cddb_disc);
-			if(genre)
-				pragha_musicobject_set_genre(mobj, genre);
-		}
-	}
-
-	nfile = g_strdup_printf("cdda://%d", track_no);
-	pragha_musicobject_set_file(mobj, nfile);
-	pragha_musicobject_set_file_type(mobj, FILE_CDDA);
-
-	pragha_musicobject_set_track_no(mobj, track_no);
-
-	if (!ntitle)
-		ntitle = g_strdup_printf("Track %d", track_no);
-	pragha_musicobject_set_title(mobj, ntitle);
-
-	pragha_musicobject_set_length(mobj, (end - start) / CDIO_CD_FRAMES_PER_SEC);
-	pragha_musicobject_set_channels(mobj, (channels > 0) ? channels : 0);
-
-	g_free(nfile);
-	g_free(ntitle);
 
 	return mobj;
 }

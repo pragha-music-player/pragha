@@ -25,6 +25,7 @@
 #else
 #include <glib/gi18n.h>
 #endif
+#include <glib.h>
 
 #include <stdlib.h>
 
@@ -55,7 +56,21 @@ pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file
 		goto exit;
 	}
 
+	#ifdef G_OS_WIN32
+	GError *err = NULL;
+	gchar *encoded_file = g_locale_from_utf8(file, -1, NULL, NULL, &err);
+	if (!encoded_file) {
+		g_warning("Unable to get filename from UTF-8 string: %s", file);
+		g_error_free(err);
+		err = NULL;
+	}
+	else {
+		tfile = taglib_file_new(encoded_file);
+		g_free(encoded_file);
+	}
+	#else
 	tfile = taglib_file_new(file);
+	#endif
 	if (!tfile) {
 		g_warning("Unable to open file using taglib : %s", file);
 		ret = FALSE;

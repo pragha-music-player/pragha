@@ -24,6 +24,7 @@
 #else
 #include <glib/gi18n.h>
 #endif
+
 #include <glib.h>
 #include <glib-object.h>
 #include <gmodule.h>
@@ -34,38 +35,30 @@
 
 #include "plugins/pragha-plugin-macros.h"
 
+#include "pragha-device-client.h"
 #include "pragha-devices-plugin.h"
-#include "pragha-devices-block.h"
-#include "pragha-devices-mtp.h"
-#include "pragha-devices-cd.h"
 
-#include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
 #include "src/pragha.h"
+
+#define PRAGHA_TYPE_DEVICES_PLUGIN         (pragha_devices_plugin_get_type ())
+#define PRAGHA_DEVICES_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_DEVICES_PLUGIN, PraghaDevicesPlugin))
+#define PRAGHA_DEVICES_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_DEVICES_PLUGIN, PraghaDevicesPlugin))
+#define PRAGHA_IS_DEVICES_PLUGIN(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PRAGHA_TYPE_DEVICES_PLUGIN))
+#define PRAGHA_IS_DEVICES_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_DEVICES_PLUGIN))
+#define PRAGHA_DEVICES_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_DEVICES_PLUGIN, PraghaDevicesPluginClass))
 
 struct _PraghaDevicesPluginPrivate {
 	PraghaApplication  *pragha;
 
+	PraghaDeviceClient *device_client;
 	GUdevClient        *gudev_client;
-	GUdevDevice        *device;
-	LIBMTP_mtpdevice_t *mtp_device;
-
-	guint64             bus_hooked;
-	guint64             device_hooked;
-	PraghaDeviceType    hooked_type;
-
-	GHashTable         *tracks_table;
-
-	GtkActionGroup     *action_group_menu;
-	guint               merge_id_menu;
-
-	GtkActionGroup     *action_group_playlist;
-	guint               merge_id_playlist;
 };
+typedef struct _PraghaDevicesPluginPrivate PraghaDevicesPluginPrivate;
 
-PRAGHA_PLUGIN_REGISTER_PRIVATE_CODE (PRAGHA_TYPE_DEVICES_PLUGIN,
-                                     PraghaDevicesPlugin,
-                                     pragha_devices_plugin)
+PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_DEVICES_PLUGIN,
+                        PraghaDevicesPlugin,
+                        pragha_devices_plugin)
 
 static const gchar * gudev_subsystems[] =
 {
@@ -74,102 +67,10 @@ static const gchar * gudev_subsystems[] =
 	NULL,
 };
 
-void
-pragha_device_cache_append_tracks (PraghaDevicesPlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-	GHashTableIter iter;
-	gpointer key, value;
-	PraghaMusicobject *mobj = NULL;
-	GList *list = NULL;
-
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	g_hash_table_iter_init (&iter, priv->tracks_table);
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		mobj = value;
-		if (G_LIKELY(mobj)) {
-			list = g_list_append (list, mobj);
-			g_object_ref (mobj);
-		}
-		/* Have to give control to GTK periodically ... */
-		pragha_process_gtk_events ();
-	}
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	pragha_playlist_append_mobj_list (playlist, list);
-	g_list_free(list);
-}
-
-void
-pragha_device_cache_clear (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	g_hash_table_remove_all (priv->tracks_table);
-}
-
-void
-pragha_device_cache_insert_track (PraghaDevicesPlugin *plugin, PraghaMusicobject *mobj)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	const gchar *file = pragha_musicobject_get_file(mobj);
-
-	if (string_is_empty(file))
-		return;
-
-	g_hash_table_insert (priv->tracks_table,
-	                     g_strdup(file),
-	                     mobj);
-}
-
-/**/
-
-gboolean
-pragha_device_already_is_busy (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	return (priv->hooked_type != PRAGHA_DEVICE_NONE);
-}
-
-gboolean
-pragha_device_already_is_idle (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	return (priv->hooked_type == PRAGHA_DEVICE_NONE);
-}
-
-GUdevDevice *
-pragha_device_get_udev_device (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	return priv->device;
-}
-
-LIBMTP_mtpdevice_t *
-pragha_device_get_mtp_device (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	return priv->mtp_device;
-}
-
-PraghaApplication *
-pragha_device_get_application (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	return priv->pragha;
-}
 
 /*
- * Generic dialog to get some action to responce to udev events.
+ * Publics functions.
  */
-
 gint
 pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
                           const gchar *primary_text, const gchar *secondary_text,
@@ -210,9 +111,39 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
 	return response;
 }
 
-/*
- * Check the type of device that listens udev to act accordingly.
- */
+void
+pragha_devices_plugin_connect_signals (GCallback added_callback,
+                                       GCallback removed_callback,
+                                       gpointer  user_data)
+{
+	PraghaDeviceClient *device_client;
+	device_client = pragha_device_client_get();
+
+	g_signal_connect (G_OBJECT(device_client), "device-added",
+	                  G_CALLBACK(added_callback), user_data);
+	g_signal_connect (G_OBJECT(device_client), "device-removed",
+	                  G_CALLBACK(removed_callback), user_data);
+
+	g_object_unref (device_client);
+}
+
+void
+pragha_devices_plugin_disconnect_signals (GCallback added_callback,
+                                          GCallback removed_callback,
+                                          gpointer  user_data)
+{
+	PraghaDeviceClient *device_client;
+	device_client = pragha_device_client_get();
+
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      added_callback,
+	                                      user_data);
+	g_signal_handlers_disconnect_by_func (device_client,
+	                                      removed_callback,
+	                                      user_data);
+
+	g_object_unref (device_client);
+}
 
 static gint
 pragha_gudev_get_device_type (GUdevDevice *device)
@@ -260,108 +191,45 @@ pragha_gudev_get_device_type (GUdevDevice *device)
 	return PRAGHA_DEVICE_UNKNOWN;
 }
 
-void
-pragha_gudev_clear_hook_devices (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	CDEBUG(DBG_INFO, "Clear hooked device, Bus: %ld, Dev: %ld", priv->bus_hooked, priv->device_hooked);
-
-	if (priv->device) {
-		g_object_unref (priv->device);
-		priv->device = NULL;
-	}
-	if (priv->mtp_device) {
-		LIBMTP_Release_Device(priv->mtp_device);
-		priv->mtp_device = NULL;
-	}
-
-	pragha_device_cache_clear (plugin);
-
-	priv->hooked_type   = PRAGHA_DEVICE_NONE;
-	priv->bus_hooked    = 0;
-	priv->device_hooked = 0;
-}
-
-void
-pragha_gudev_set_hook_device (PraghaDevicesPlugin *plugin,
-                              PraghaDeviceType     device_type,
-                              GUdevDevice         *device,
-                              LIBMTP_mtpdevice_t  *mtp_device,
-                              guint64              busnum,
-                              guint64              devnum)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	priv->hooked_type   = device_type;
-	priv->device        = g_object_ref (device);
-	priv->mtp_device    = mtp_device;
-	priv->bus_hooked    = busnum;
-	priv->device_hooked = devnum;
-}
-
 /* Functions that manage to "add" "change" and "remove" devices events. */
 
 static void
 pragha_gudev_device_added (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 {
 	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
+	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
 	device_type = pragha_gudev_get_device_type (device);
-
-	switch (device_type) {
-		case PRAGHA_DEVICE_MOUNTABLE:
-			pragha_devices_moutable_added (plugin, device);
-			break;
-		case PRAGHA_DEVICE_AUDIO_CD:
-			pragha_devices_audio_cd_added (plugin);
-			break;
-		case PRAGHA_DEVICE_MTP:
-			pragha_devices_mtp_added (plugin, device);
-		case PRAGHA_DEVICE_UNKNOWN:
-		case PRAGHA_DEVICE_NONE:
-		default:
-			break;
-	}
+	if (device_type != PRAGHA_DEVICE_UNKNOWN)
+		pragha_device_client_device_added (priv->device_client, device_type, device);
 }
 
 static void
 pragha_gudev_device_changed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 {
-	gint device_type = 0;
+	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
+	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
 	device_type = pragha_gudev_get_device_type (device);
-
 	if (device_type == PRAGHA_DEVICE_AUDIO_CD)
-		pragha_devices_audio_cd_added (plugin);
+		pragha_device_client_device_added (priv->device_client, device_type, device);
 }
 
 static void
 pragha_gudev_device_removed (PraghaDevicesPlugin *plugin, GUdevDevice *device)
 {
-	guint64 busnum = 0;
-	guint64 devnum = 0;
-
+	PraghaDeviceType device_type = PRAGHA_DEVICE_UNKNOWN;
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	if (priv->hooked_type == PRAGHA_DEVICE_NONE)
-		return;
-
-	busnum = g_udev_device_get_property_as_uint64 (device, "BUSNUM");
-	devnum = g_udev_device_get_property_as_uint64 (device, "DEVNUM");
-
-	if (priv->bus_hooked == busnum &&
-	    priv->device_hooked == devnum) {
-		pragha_gudev_clear_hook_devices (plugin);
-
-		pragha_devices_remove_playlist_action (plugin);
-	}
+	device_type = pragha_gudev_get_device_type (device);
+	if (device_type != PRAGHA_DEVICE_UNKNOWN)
+		pragha_device_client_device_removed (priv->device_client, device_type, device);
 }
 
 /* Main devices functions that listen udev events. */
 
 static void
-gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, PraghaDevicesPlugin *plugin)
+gudev_uevent_cb (GUdevClient *client, const char *action, GUdevDevice *device, PraghaDevicesPlugin *plugin)
 {
 	if (g_str_equal(action, "add")) {
 		pragha_gudev_device_added (plugin, device);
@@ -374,95 +242,19 @@ gudev_uevent_cb(GUdevClient *client, const char *action, GUdevDevice *device, Pr
 	}
 }
 
-/* Add send to menu option.. */
-
-void
-pragha_devices_append_playlist_action (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml)
-{
-	PraghaPlaylist *playlist;
-
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-
-	priv->action_group_playlist = action_group;
-	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
-	                                                                priv->action_group_playlist,
-	                                                                menu_xml);
-}
-
-void
-pragha_devices_remove_playlist_action (PraghaDevicesPlugin *plugin)
-{
-	PraghaPlaylist *playlist;
-
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	if (!priv->merge_id_menu)
-		return;
-
-	pragha_menubar_remove_plugin_action (priv->pragha,
-	                                     priv->action_group_menu,
-	                                     priv->merge_id_menu);
-
-	priv->merge_id_menu = 0;
-
-	if (!priv->merge_id_playlist)
-		return;
-
-	playlist = pragha_application_get_playlist (priv->pragha);
-	pragha_playlist_remove_plugin_action (playlist,
-	                                      priv->action_group_playlist,
-	                                      priv->merge_id_playlist);
-
-	priv->merge_id_playlist = 0;
-}
-
-void
-pragha_devices_plugin_append_menu_action (PraghaDevicesPlugin *plugin, GtkActionGroup *action_group, const gchar *menu_xml)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	priv->action_group_menu = action_group;
-	priv->merge_id_menu     = pragha_menubar_append_plugin_action (priv->pragha,
-	                                                               priv->action_group_menu,
-	                                                               menu_xml);
-}
-
-void
-pragha_devices_plugin_remove_menu_action (PraghaDevicesPlugin *plugin)
-{
-	PraghaDevicesPluginPrivate *priv = plugin->priv;
-
-	if (!priv->merge_id_menu)
-		return;
-
-	pragha_menubar_remove_plugin_action (priv->pragha,
-	                                     priv->action_group_menu,
-	                                     priv->merge_id_menu);
-
-	priv->merge_id_menu = 0;
-}
-
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
 	PraghaDevicesPlugin *plugin = PRAGHA_DEVICES_PLUGIN (activatable);
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
+	CDEBUG(DBG_PLUGIN, "Devices plugin %s", G_STRFUNC);
+
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
 
-	g_debug ("%s", G_STRFUNC);
-
-	priv->tracks_table = g_hash_table_new_full (g_str_hash,
-	                                            g_str_equal,
-	                                            g_free,
-	                                            g_object_unref);
+	priv->device_client = pragha_device_client_get ();
 
 	priv->gudev_client = g_udev_client_new(gudev_subsystems);
-
-	LIBMTP_Init ();
-
 	g_signal_connect (priv->gudev_client, "uevent",
 	                  G_CALLBACK(gudev_uevent_cb), plugin);
 }
@@ -473,17 +265,13 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaDevicesPlugin *plugin = PRAGHA_DEVICES_PLUGIN (activatable);
 	PraghaDevicesPluginPrivate *priv = plugin->priv;
 
-	g_debug ("%s", G_STRFUNC);
-
-	if (priv->hooked_type != PRAGHA_DEVICE_NONE)
-		pragha_gudev_clear_hook_devices (plugin);
-
-	g_hash_table_destroy (priv->tracks_table);
+	CDEBUG(DBG_PLUGIN, "Devices plugin %s", G_STRFUNC);
 
 	g_signal_handlers_disconnect_by_func (priv->gudev_client,
 	                                      gudev_uevent_cb, plugin);
-
 	g_object_unref (priv->gudev_client);
+
+	g_object_unref (priv->device_client);
 
 	priv->pragha = NULL;
 }

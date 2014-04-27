@@ -19,8 +19,6 @@ pragha_SOURCES = \
 		pragha-art-cache.h \
 		pragha-backend.c \
 		pragha-backend.h \
-		pragha-cdda.c \
-		pragha-cdda.h \
 		pragha-cmdline.c \
 		pragha-database.c \
 		pragha-database.h \
@@ -40,6 +38,8 @@ pragha_SOURCES = \
 		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
+		pragha-music-enum.c \
+		pragha-music-enum.h \
 		pragha-musicobject.c \
 		pragha-musicobject.h \
 		pragha-musicobject-mgmt.c \
@@ -87,8 +87,6 @@ pragha_SOURCES = \
 		pragha-window.h \
 		gtkcellrendererbubble.c \
 		gtkcellrendererbubble.h \
-		pragha-lastfm.c \
-		pragha-lastfm.h \
 		xml_helper.c \
 		xml_helper.h
 
@@ -99,8 +97,6 @@ pragha_CFLAGS =	$(GSTREAMER_CFLAGS)					\
 	$(GTK_CFLAGS) 							\
 	$(SQLITE3_CFLAGS) 						\
 	$(TAGLIB_C_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -109,19 +105,11 @@ pragha_LDADD = $(GSTREAMER_LIBS)					\
 	$(GIO_LIBS) 							\
 	$(GTK_LIBS) 							\
 	$(SQLITE3_LIBS)							\
-	$(TAGLIB_C_LIBS)						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)
+	$(TAGLIB_C_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 pragha_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)
 pragha_LDADD += $(GSTREAMER_AUDIO_LIBS)
-endif
-
-if HAVE_LIBCLASTFM
-pragha_CFLAGS += $(LIBCLASTFM_CFLAGS)
-pragha_LDADD += $(LIBCLASTFM_LIBS)
 endif
 
 if HAVE_LIBXFCE4UI
@@ -135,9 +123,30 @@ pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
 if HAVE_LIBPEAS
+pragha_SOURCES = \
+		pragha-plugins-engine.c \
+		pragha-plugins-engine.h
+
 pragha_CFLAGS += $(LIBPEAS_CFLAGS)
 pragha_LDADD += $(LIBPEAS_LIBS)
 
 pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
 pragha_LDADD += $(LIBPEAS_GTK_LIBS)
+endif
+
+if WIN32
+pragha_SOURCES += \
+		$(top_srcdir)/win32/win32dep.c \
+		$(top_srcdir)/win32/win32dep.h
+
+AM_CFLAGS = \
+        -mms-bitfields
+
+AM_LDFLAGS = \
+        -Wl,-subsystem,windows
+
+pragha-res.o: $(top_srcdir)/win32/pragha.rc
+	$(WINDRES) -i $(top_srcdir)/win32/pragha.rc --input-format=rc -o pragha-res.o -O coff
+
+pragha_LDADD += pragha-res.o
 endif

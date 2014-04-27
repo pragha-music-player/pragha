@@ -79,6 +79,7 @@ void export_selected_playlist (GtkAction *action, PraghaPlaylist *cplaylist);
 
 void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
 void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
+void pragha_playlist_crop_music_type  (PraghaPlaylist *playlist, PraghaMusicType music_type);
 void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
 
 void pragha_playlist_go_prev_track    (PraghaPlaylist *playlist);
@@ -117,9 +118,10 @@ pragha_playlist_already_has_title_of_artist(PraghaPlaylist *cplaylist,
 GList *pragha_playlist_get_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_mobj_list(PraghaPlaylist* cplaylist);
 GList *pragha_playlist_get_selection_ref_list(PraghaPlaylist *cplaylist);
-PraghaMusicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
-void init_current_playlist_view(PraghaPlaylist *cplaylist);
 
+void pragha_playlist_save_playlist_state (PraghaPlaylist* cplaylist);
+void pragha_playlist_init_playlist_state (PraghaPlaylist* cplaylist);
+PraghaMusicobject *pragha_playlist_get_selected_musicobject(PraghaPlaylist* cplaylist);
 gboolean pragha_playlist_propagate_event(PraghaPlaylist* cplaylist, GdkEventKey *event);
 
 void pragha_playlist_activate_path        (PraghaPlaylist* cplaylist, GtkTreePath *path);

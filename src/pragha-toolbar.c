@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2014 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -27,6 +27,7 @@
 #endif
 #include <gdk/gdkkeysyms.h>
 
+#include "pragha-simple-widgets.h"
 #include "pragha-utils.h"
 #include "pragha.h"
 
@@ -40,7 +41,8 @@ struct _PraghaToolbar {
 	GtkToolbar   __parent__;
 
 	PraghaAlbumArt *albumart;
-	GtkWidget      *track_progress_bar;
+	PraghaTrackProgress *track_progress_bar;
+
 	GtkToolItem    *prev_button;
 	GtkToolItem    *play_button;
 	GtkToolItem    *stop_button;
@@ -402,8 +404,9 @@ pragha_toolbar_get_album_art(PraghaToolbar *toolbar)
 GtkWidget*
 pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 {
+	PraghaTrackProgress *progress_bar;
 	GtkWidget *title_extention_hbox, *title, *title_event_box, *extention_box;
-	GtkWidget *progress_bar_event_box, *progress_hbox, *time_label, *time_align, *progress_bar, *length_label, *length_align, *length_event_box;
+	GtkWidget *progress_bar_event_box, *progress_hbox, *time_label, *time_align, *length_label, *length_align, *length_event_box;
 	GtkWidget *track_info_vbox, *track_info_align;
 
 	/* The title widget. */
@@ -445,13 +448,12 @@ pragha_toolbar_create_track_info_bar (PraghaToolbar *toolbar)
 
 	/* Progress bar widget. */
 
-	progress_bar = gtk_progress_bar_new();
-	gtk_widget_set_size_request(GTK_WIDGET(progress_bar), -1, 12);
+	progress_bar = pragha_track_progress_new ();
 
 	progress_bar_event_box = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(progress_bar_event_box), FALSE);
 
-	gtk_container_add(GTK_CONTAINER(progress_bar_event_box), progress_bar);
+	gtk_container_add(GTK_CONTAINER(progress_bar_event_box), GTK_WIDGET(progress_bar));
 
 	g_signal_connect (G_OBJECT(progress_bar_event_box), "button-press-event",
 	                  G_CALLBACK(pragha_toolbar_progress_bar_event_seek), toolbar);
@@ -776,6 +778,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
 
 	vol_button = gtk_volume_button_new();
+	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), vol_button);

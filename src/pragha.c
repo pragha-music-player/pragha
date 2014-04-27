@@ -32,7 +32,7 @@
 #include <tag_c.h>
 
 #ifdef HAVE_LIBPEAS
-#include <libpeas/peas.h>
+#include "pragha-plugins-engine.h"
 #endif
 
 #include "pragha-window.h"
@@ -42,6 +42,12 @@
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha.h"
+
+#include "pragha-music-enum.h"
+
+#ifdef G_OS_WIN32
+#include "../win32/win32dep.h"
+#endif
 
 gint debug_level;
 #ifdef DEBUG
@@ -62,8 +68,11 @@ struct _PraghaApplication {
 	PraghaPreferences *preferences;
 	PraghaDatabase    *cdbase;
 	PraghaArtCache    *art_cache;
+	PraghaMusicEnum   *enum_map;
 
 	PraghaScanner     *scanner;
+
+	PreferencesDialog *setting_dialog;
 
 	/* Main widgets */
 
@@ -83,12 +92,7 @@ struct _PraghaApplication {
 	GBinding          *sidebar2_binding;
 
 #ifdef HAVE_LIBPEAS
-	PeasEngine        *peas_engine;
-	PeasExtensionSet  *peas_exten_set;
-#endif
-
-#ifdef HAVE_LIBCLASTFM
-	PraghaLastfm      *clastfm;
+	PraghaPluginsEngine *plugins_engine;
 #endif
 };
 
@@ -215,6 +219,12 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 	}
 }
 
+static void
+pragha_enum_map_removed_handler (PraghaMusicEnum *enum_map, gint enum_removed, PraghaApplication *pragha)
+{
+	pragha_playlist_crop_music_type (pragha->playlist, enum_removed);
+}
+
 /*
  * Some public actions.
  */
@@ -271,6 +281,12 @@ PraghaLibraryPane *
 pragha_application_get_library (PraghaApplication *pragha)
 {
 	return pragha->library;
+}
+
+PreferencesDialog *
+pragha_application_get_preferences_dialog (PraghaApplication *pragha)
+{
+	return pragha->setting_dialog;
 }
 
 PraghaToolbar *
@@ -351,93 +367,25 @@ pragha_application_get_second_pane (PraghaApplication *pragha)
 	return pragha->pane2;
 }
 
-
-#ifdef HAVE_LIBPEAS
-PeasEngine *
-pragha_application_get_peas_engine (PraghaApplication *pragha)
-{
-	return pragha->peas_engine;
-}
-#endif
-
-#ifdef HAVE_LIBCLASTFM
-PraghaLastfm *
-pragha_application_get_lastfm (PraghaApplication *pragha)
-{
-	return pragha->clastfm;
-}
-#endif
-
 gboolean
 pragha_application_is_first_run (PraghaApplication *pragha)
 {
 	return string_is_empty (pragha_preferences_get_installed_version (pragha->preferences));
 }
 
-/* Plugin hacking...
- * TODO: Move to own file..
- */
-#ifdef HAVE_LIBPEAS
-static void
-on_extension_added (PeasExtensionSet  *set,
-                    PeasPluginInfo    *info,
-                    PeasExtension     *exten,
-                    gpointer           data)
-{
-	peas_activatable_activate (PEAS_ACTIVATABLE (exten));
-}
-
-static void
-on_extension_removed (PeasExtensionSet  *set,
-                      PeasPluginInfo    *info,
-                      PeasExtension     *exten,
-                      gpointer           data)
-{
-	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
-}
-
-static void
-pragha_plugins_save_activated (PraghaApplication *pragha)
-{
-	gchar **loaded_plugins = NULL;
-
-	loaded_plugins = peas_engine_get_loaded_plugins (pragha->peas_engine);
-	if (loaded_plugins) {
-		pragha_preferences_set_string_list (pragha->preferences,
-				                            "PLUGINS",
-				                            "Activated",
-				                            (const gchar * const*)loaded_plugins,
-		                                     g_strv_length(loaded_plugins));
-
-		g_strfreev(loaded_plugins);
-	}
-}
-
-static void
-pragha_plugins_activate_saved (PraghaApplication *pragha)
-{
-	gchar **loaded_plugins = NULL;
-
-	loaded_plugins = pragha_preferences_get_string_list (pragha->preferences,
-	                                                     "PLUGINS",
-	                                                     "Activated",
-	                                                     NULL);
-
-	if (loaded_plugins) {
-		peas_engine_set_loaded_plugins (pragha->peas_engine, (const gchar **) loaded_plugins);
-		g_strfreev(loaded_plugins);
-	}
-}
-#endif
-
 static void
 pragha_application_construct_window (PraghaApplication *pragha)
 {
+	gchar *icon_uri = NULL;
+
 	/* Main window */
 
 	pragha->mainwindow = gtk_application_window_new (GTK_APPLICATION (pragha));
 
-	pragha->pixbuf_app = gdk_pixbuf_new_from_file (PIXMAPDIR"/pragha.png", NULL);
+	icon_uri = g_build_filename (PIXMAPDIR, "pragha.png", NULL);
+	pragha->pixbuf_app = gdk_pixbuf_new_from_file (icon_uri, NULL);
+	g_free (icon_uri);
+
 	if (!pragha->pixbuf_app)
 		g_warning("Unable to load pragha png");
 	else
@@ -476,32 +424,17 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-#ifdef HAVE_LIBCLASTFM
-	if (pragha->clastfm) {
-		pragha_lastfm_free (pragha->clastfm);
-		pragha->clastfm = NULL;
-	}
-#endif
-	if (pragha->sidebar2_binding) {
-		g_object_unref (pragha->sidebar2_binding);
-		pragha->sidebar2_binding = NULL;
-	}
 #ifdef HAVE_LIBPEAS
-	if (pragha->peas_engine) {
-		pragha_plugins_save_activated (pragha);
-
-		peas_engine_garbage_collect (pragha->peas_engine);
-
-		g_object_unref (pragha->peas_engine);
-		pragha->peas_engine = NULL;
-	}
-	if (pragha->peas_exten_set) {
-		g_object_unref (pragha->peas_exten_set);
-		pragha->peas_exten_set = NULL;
+	if (pragha->plugins_engine) {
+		g_object_unref (pragha->plugins_engine);
+		pragha->plugins_engine = NULL;
 	}
 #endif
+	if (pragha->setting_dialog) {
+		pragha_preferences_dialog_free (pragha->setting_dialog);
+		pragha->setting_dialog = NULL;
+	}
 	if (pragha->backend) {
-		pragha_playback_stop (pragha);
 		g_object_unref (pragha->backend);
 		pragha->backend = NULL;
 	}
@@ -509,24 +442,18 @@ pragha_application_dispose (GObject *object)
 		g_object_unref (pragha->art_cache);
 		pragha->art_cache = NULL;
 	}
-	if (pragha->mainwindow) {
-		pragha_window_free (pragha);
-		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
-		gtk_widget_destroy (pragha->mainwindow);
-		pragha->mainwindow = NULL;
+	if (pragha->enum_map) {
+		g_object_unref (pragha->enum_map);
+		pragha->enum_map = NULL;
 	}
 	if (pragha->scanner) {
 		pragha_scanner_free (pragha->scanner);
 		pragha->scanner = NULL;
 	}
-
-	pragha_cdda_free ();
-
 	if (pragha->pixbuf_app) {
 		g_object_unref (pragha->pixbuf_app);
 		pragha->pixbuf_app = NULL;
 	}
-
 	if (pragha->menu_ui_manager) {
 		g_object_unref (pragha->menu_ui_manager);
 		pragha->menu_ui_manager = NULL;
@@ -568,30 +495,19 @@ pragha_application_startup (GApplication *application)
 		g_error("Unable to init music dbase");
 	}
 
+	pragha->enum_map = pragha_music_enum_get ();
+	g_signal_connect (pragha->enum_map, "enum-removed",
+	                  G_CALLBACK(pragha_enum_map_removed_handler), pragha);
+
 #ifdef HAVE_LIBPEAS
-	pragha->peas_engine = peas_engine_get_default ();
-
-	peas_engine_add_search_path (pragha->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
-	pragha->peas_exten_set = peas_extension_set_new (pragha->peas_engine,
-	                                                 PEAS_TYPE_ACTIVATABLE,
-	                                                 "object", pragha,
-	                                                 NULL);
-
-	peas_extension_set_foreach (pragha->peas_exten_set,
-	                            (PeasExtensionSetForeachFunc) on_extension_added,
-	                            NULL);
-
-	g_signal_connect (pragha->peas_exten_set, "extension-added",
-	                  G_CALLBACK (on_extension_added), NULL);
-	g_signal_connect (pragha->peas_exten_set, "extension-removed",
-	                  G_CALLBACK (on_extension_removed), NULL);
+	pragha->plugins_engine = pragha_plugins_engine_new (pragha);
 #endif
 
 	pragha->art_cache = pragha_art_cache_get ();
 	g_signal_connect (pragha->art_cache, "cache-changed",
 	                  G_CALLBACK(pragha_art_cache_changed_handler), pragha);
 
-	pragha->backend = pragha_backend_new (pragha);
+	pragha->backend = pragha_backend_new ();
 
 	g_signal_connect (pragha->backend, "finished",
 	                  G_CALLBACK(pragha_backend_finished_song), pragha);
@@ -674,13 +590,11 @@ pragha_application_startup (GApplication *application)
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
 		                        pragha->sidebar2, "visible",
 		                        binding_flags);
-
-	#ifdef HAVE_LIBCLASTFM
-	pragha->clastfm = pragha_lastfm_new(pragha);
-	#endif
+	
+	pragha->setting_dialog = pragha_preferences_dialog_new (pragha);
 
 	#ifdef HAVE_LIBPEAS
-	pragha_plugins_activate_saved (pragha);
+	pragha_plugins_engine_startup (pragha->plugins_engine);
 	#endif
 
 	/* Finally fill the library and the playlist */
@@ -689,9 +603,40 @@ pragha_application_startup (GApplication *application)
 }
 
 static void
+pragha_application_shutdown (GApplication *application)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	CDEBUG(DBG_INFO, "Pragha shutdown: Saving curret state.");
+
+	if (pragha_preferences_get_restore_playlist (pragha->preferences))
+		pragha_playlist_save_playlist_state (pragha->playlist);
+
+	pragha_window_save_settings (pragha);
+
+	pragha_playback_stop (pragha);
+
+	/* Shutdown plugins can hide sidebar before save settings. */
+	if (pragha->sidebar2_binding) {
+		g_object_unref (pragha->sidebar2_binding);
+		pragha->sidebar2_binding = NULL;
+	}
+
+#ifdef HAVE_LIBPEAS
+	pragha_plugins_engine_shutdown (pragha->plugins_engine);
+#endif
+
+	gtk_widget_destroy (pragha->mainwindow);
+
+	G_APPLICATION_CLASS (pragha_application_parent_class)->shutdown (application);
+}
+
+static void
 pragha_application_activate (GApplication *application)
 {
 	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	CDEBUG(DBG_INFO, G_STRFUNC);
 
 	gtk_window_present (GTK_WINDOW (pragha->mainwindow));
 }
@@ -753,8 +698,6 @@ pragha_application_local_command_line (GApplication *application, gchar ***argum
 	return FALSE;
 }
 
-//TODO consider use of GApplication::shutdown to save preferences and playlist
-
 void
 pragha_application_quit (PraghaApplication *pragha)
 {
@@ -770,6 +713,7 @@ pragha_application_class_init (PraghaApplicationClass *class)
 	object_class->dispose = pragha_application_dispose;
 
 	application_class->startup = pragha_application_startup;
+	application_class->shutdown = pragha_application_shutdown;
 	application_class->activate = pragha_application_activate;
 	application_class->open = pragha_application_open;
 	application_class->command_line = pragha_application_command_line;
@@ -817,9 +761,6 @@ gint main(gint argc, gchar *argv[])
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
 #endif
-
-	/* Initialize GTK+ */
-	gtk_init(&argc, &argv); //TODO delete if gtk app
 
 	pragha = pragha_application_new ();
 	status = g_application_run (G_APPLICATION (pragha), argc, argv);

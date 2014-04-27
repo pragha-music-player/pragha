@@ -10,6 +10,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <glib.h>
+
 #include "xml_helper.h"
 
 const char *HTML_ESCAPE[] = {
@@ -137,7 +139,7 @@ static char * _tinycxml_parse(char *xml,XMLNode *parent, char *buffer){
 	if(strncmp(c,"<![CDATA[",9) == 0){
 		n = strstr(c,"]]>");
 		n += 3;
-		node->content = strndup(c,n-c);
+		node->content = g_strndup(c, n-c);
 		n = strstr(n,">");
 		return (n) ?  n+1 : NULL;
 	}

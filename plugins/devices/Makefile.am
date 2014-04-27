@@ -10,17 +10,12 @@ plugin_LTLIBRARIES = libdevices.la
 libdevices_la_SOURCES = \
 	pragha-devices-plugin.c \
 	pragha-devices-plugin.h \
-	pragha-devices-block.c \
-	pragha-devices-block.h \
-	pragha-devices-cd.c \
-	pragha-devices-cd.h \
-	pragha-devices-mtp.c \
-	pragha-devices-mtp.h
+	pragha-device-client.c \
+	pragha-device-client.h
 
 libdevices_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
 
 libdevices_la_CFLAGS =						\
-	$(LIBKEYBINDER_CFLAGS)						\
 	$(GSTREAMER_CFLAGS)						\
 	$(GSTREAMER_BASE_CFLAGS)					\
 	$(GLIB_CFLAGS) 							\
@@ -30,15 +25,11 @@ libdevices_la_CFLAGS =						\
 	$(TAGLIB_C_CFLAGS) 						\
 	$(LIBPEAS_CFLAGS) 						\
 	$(LIBPEAS_GTK_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
 	$(GUDEV_CFLAGS) 						\
-	$(LIBMTP_CFLAGS)						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
 libdevices_la_LIBADD =							\
-	$(LIBKEYBINDER_LIBS) 						\
 	$(GSTREAMER_LIBS)						\
 	$(GLIB_LIBS) 							\
 	$(GIO_LIBS) 							\
@@ -47,11 +38,7 @@ libdevices_la_LIBADD =							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBPEAS_LIBS)							\
 	$(LIBPEAS_GTK_LIBS)						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS) 						\
-	$(GUDEV_LIBS) 							\
-	$(LIBMTP_LIBS)
+	$(GUDEV_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 libdevices_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)

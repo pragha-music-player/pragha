@@ -21,7 +21,6 @@
 
 #include "pragha-musicobject.h"
 #include "pragha-database.h"
-#include "pragha-cdda.h"
 
 /* pragha.h */
 typedef struct _PraghaApplication PraghaApplication;
@@ -38,7 +37,6 @@ typedef struct _PraghaApplication PraghaApplication;
 
 PraghaMusicobject* new_musicobject_from_file(const gchar *file);
 PraghaMusicobject* new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id);
-PraghaMusicobject* new_musicobject_from_cdda(PraghaApplication *pragha, cdrom_drive_t *cdda_drive, cddb_disc_t *cddb_disc, gint track_no);
 PraghaMusicobject* new_musicobject_from_location(const gchar *uri, const gchar *name);
 void pragha_update_musicobject_change_tag(PraghaMusicobject *mobj, gint changed, PraghaMusicobject *nmobj);
 

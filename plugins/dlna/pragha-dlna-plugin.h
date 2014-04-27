@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2012-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -15,11 +15,25 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_DEVICES_CD_H
-#define PRAGHA_DEVICES_CD_H
+#ifndef __PRAGHA_DLNA_PLUGIN_H__
+#define __PRAGHA_DLNA_PLUGIN_H__
 
-#include "pragha-devices-plugin.h"
+#include <gtk/gtk.h>
+#include <libpeas/peas.h>
 
-void pragha_devices_audio_cd_added (PraghaDevicesPlugin *plugin);
+#include "src/pragha.h"
 
-#endif /* PRAGHA_DEVICES_CD_H */
+G_BEGIN_DECLS
+
+#define PRAGHA_TYPE_DLNA_PLUGIN         (pragha_dlna_plugin_get_type ())
+#define PRAGHA_DLNA_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_DLNA_PLUGIN, PraghaDlnaPlugin))
+#define PRAGHA_DLNA_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_DLNA_PLUGIN, PraghaDlnaPlugin))
+#define PRAGHA_IS_DLNA_PLUGIN(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PRAGHA_TYPE_DLNA_PLUGIN))
+#define PRAGHA_IS_DLNA_PLUGIN_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), PRAGHA_TYPE_DLNA_PLUGIN))
+#define PRAGHA_DLNA_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_DLNA_PLUGIN, PraghaDlnaPluginClass))
+
+GType                 pragha_dlna_plugin_get_type        (void) G_GNUC_CONST;
+
+G_END_DECLS
+
+#endif /* __PRAGHA_DLNA_PLUGIN_H__ */

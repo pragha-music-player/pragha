@@ -59,6 +59,17 @@ case "$with_gstreamer" in
 esac
 AC_DEFINE_UNQUOTED(GSTREAMER_API_VERSION, $GSTREAMER_API_VERSION, [Define the GStreamer+ API version])
 
+case "${host}" in
+        i[[3456789]]86-mingw32*) WIN32="yes" ;;
+        *cygwin*) WIN32="yes" ;;
+        *) WIN32="no" ;;
+esac
+AM_CONDITIONAL([WIN32], test "$WIN32" = "yes")
+
+if test x"$WIN32" = x"yes"; then
+AC_CHECK_TOOL(WINDRES, windres)
+fi
+
 AC_SUBST(CFLAGS)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -84,9 +95,6 @@ XDT_CHECK_PACKAGE([GSTREAMER_BASE], [gstreamer-base-1.0], [$GSTREAMER_REQUIRED])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [2.32])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [3.4.0])
 XDT_CHECK_PACKAGE([SQLITE3], [sqlite3], [3.4])
-XDT_CHECK_PACKAGE([LIBCDIO], [libcdio], [0.80])
-XDT_CHECK_PACKAGE([LIBCDIO_PARANOIA], [libcdio_paranoia], [0.90])
-XDT_CHECK_PACKAGE([LIBCDDB], [libcddb], [1.3.0])
 XDT_CHECK_PACKAGE([TAGLIB_C], [taglib_c], [1.4])
 
 dnl Check peas library to plugins support
@@ -107,6 +115,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY],
                            [libnotify], [0.4.4],
                            [libnotify],
                            [libnotify library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBNOTIFY], 0)
 fi
 
 dnl Check global keyboard shortcuts support
@@ -116,6 +126,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBKEYBINDER],
                            [keybinder-3.0], [0.2.0],
                            [keybinder],
                            [keybinder library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBKEYBINDER], 0)
 fi
 
 dnl Check libglyr
@@ -125,6 +137,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBGLYR],
                            [libglyr], [1.0.1],
                            [libglyr],
                            [libglyr library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBGLYR], 0)
 fi
 
 GUDEV_FOUND="no"
@@ -133,6 +147,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([GUDEV],
                            [gudev-1.0], [145],
                            [gudev-1.0],
                            [gudev-1.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_GUDEV], 0)
 fi
 
 LIBMTP_FOUND="no"
@@ -141,6 +157,8 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBMTP],
                            [libmtp], [1.1.0],
                            [libmtp],
                            [libmtp library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBMTP], 0)
 fi
 
 dnl Check libpsuop
@@ -150,6 +168,55 @@ XDT_CHECK_OPTIONAL_PACKAGE([LIBSOUP],
                            [libsoup-2.4], [2.38],
                            [libsoup-2.4],
                            [libsoup-2.4 library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBSOUP], 0)
+fi
+
+dnl Check rygel
+RYGEL_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([RYGEL],
+                           [rygel-server-2.0], [0.20.0],
+                           [rygel-server-2.0],
+                           [rygel-server-2.0 library], [yes])
+else
+AM_CONDITIONAL([HAVE_RYGEL], 0)
+fi
+
+dnl Check libclastfm
+LIBCLASTFM_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
+                           [libclastfm], [0.5],
+                           [libclastfm],
+                           [libclastfm library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBCLASTFM], 0)
+fi
+
+dnl Check libcdio, libcdio_paranoia and libcddb
+LIBCDIO_FOUND="no"
+LIBCDIO_PARANOIA_FOUND="no"
+LIBCDDB_FOUND="no"
+if test x"$LIBPEAS_FOUND" = x"yes"; then
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO],
+                           [libcdio], [0.80],
+                           [libcdio],
+                           [libcdio library], [yes])
+
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDIO_PARANOIA],
+                           [libcdio_paranoia], [0.90],
+                           [libcdio_paranoia],
+                           [libcdio_paranoia library], [yes])
+
+XDT_CHECK_OPTIONAL_PACKAGE([LIBCDDB],
+                           [libcddb], [1.3.0],
+                           [libcddb],
+                           [libcddb library], [yes])
+else
+AM_CONDITIONAL([HAVE_LIBCDIO], 0)
+AM_CONDITIONAL([HAVE_LIBCDIO_PARANOIA], 0)
+AM_CONDITIONAL([HAVE_LIBCDDB], 0)
 fi
 
 dnl Check min taglib to add monkeyaudio support
@@ -165,14 +232,6 @@ XDT_CHECK_OPTIONAL_PACKAGE([GSTREAMER_AUDIO],
                        [gstreamer-audio-1.0], [$GSTREAMER_REQUIRED],
                        [gstreamer-audio],
                        [gstreamer-audio], [yes])
-
-dnl Check libclastfm
-LIBCLASTFM_FOUND="no"
-XDT_CHECK_OPTIONAL_PACKAGE([LIBCLASTFM],
-                       [libclastfm], [0.5],
-                       [libclastfm],
-                       [libclastfm library], [yes])
-
 
 dnl Check libxfce4ui
 LIBXFCE4UI_FOUND="no"
@@ -202,7 +261,12 @@ AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
 AC_CONFIG_FILES([plugins/song-info/Makefile])
 AC_CONFIG_FILES([plugins/notify/Makefile])
 AC_CONFIG_FILES([plugins/devices/Makefile])
+AC_CONFIG_FILES([plugins/mtp/Makefile])
+AC_CONFIG_FILES([plugins/removable-media/Makefile])
 AC_CONFIG_FILES([plugins/tunein/Makefile])
+AC_CONFIG_FILES([plugins/dlna/Makefile])
+AC_CONFIG_FILES([plugins/cdrom/Makefile])
+AC_CONFIG_FILES([plugins/lastfm/Makefile])
 fi
 AC_OUTPUT
 
@@ -217,9 +281,12 @@ echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
+echo "   * Play Audio cds.........................................................: $LIBCDIO_FOUND"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
+echo "   * Share music library on DLNA............(Need rygel-server-2.0 >= 0.20).: $RYGEL_FOUND"
+echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * EXPERIMENTAL management removable devices.:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
@@ -227,7 +294,6 @@ AS_IF([test $GSTREAMER_API_VERSION = 1.0],
       [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
       [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
 echo "   * Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
-echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"
 echo "   * Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
 

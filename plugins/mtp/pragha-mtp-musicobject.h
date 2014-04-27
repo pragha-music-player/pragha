@@ -15,12 +15,21 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_DEVICES_MTP_H
-#define PRAGHA_DEVICES_MTP_H
+#ifndef __PRAGHA_MTP_PLUGIN_H__
+#define __PRAGHA_MTP_PLUGIN_H__
 
-#include <gudev/gudev.h>
-#include "pragha-devices-plugin.h"
+#include <libmtp.h>
+#include "src/pragha-musicobject.h"
 
-void pragha_devices_mtp_added (PraghaDevicesPlugin *plugin, GUdevDevice *device);
+G_BEGIN_DECLS
 
-#endif /* PRAGHA_DEVICES_MTP_H */
+LIBMTP_track_t    *mtp_track_new_from_pragha_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj);
+PraghaMusicobject *pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track);
+
+gint               pragha_mtp_plugin_get_track_id        (PraghaMusicobject *mobj);
+gchar             *pragha_mtp_plugin_get_temp_filename   (PraghaMusicobject *mobj);
+gboolean           pragha_musicobject_is_mtp_file        (PraghaMusicobject *mobj);
+
+G_END_DECLS
+
+#endif /* __PRAGHA_MTP_PLUGIN_H__ */

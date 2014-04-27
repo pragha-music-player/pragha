@@ -23,8 +23,6 @@ libtunein_la_CFLAGS =						\
 	$(TAGLIB_C_CFLAGS) 						\
 	$(LIBPEAS_CFLAGS) 						\
 	$(LIBPEAS_GTK_CFLAGS) 						\
-	$(LIBCDIO_CFLAGS) 						\
-	$(LIBCDDB_CFLAGS) 						\
 	-I$(top_srcdir)/src/include 					\
 	-Wall
 
@@ -37,10 +35,7 @@ libtunein_la_LIBADD =						\
 	$(SQLITE3_LIBS)							\
 	$(TAGLIB_C_LIBS)						\
 	$(LIBPEAS_LIBS)							\
-	$(LIBPEAS_GTK_LIBS)						\
-	$(LIBCDIO_LIBS) 						\
-	$(LIBCDIO_PARANOIA_LIBS) 					\
-	$(LIBCDDB_LIBS)
+	$(LIBPEAS_GTK_LIBS)
 
 if HAVE_GSTREAMER_AUDIO
 libtunein_la_CFLAGS += $(GSTREAMER_AUDIO_CFLAGS)

@@ -201,7 +201,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	GtkWidget *window;
 	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (activatable);
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Gnome-Media-Keys plugin %s", G_STRFUNC);
 
 	PraghaGnomeMediaKeysPluginPrivate *priv = plugin->priv;
 	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
@@ -228,7 +228,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	GtkWidget *window;
 	PraghaGnomeMediaKeysPlugin *plugin = PRAGHA_GNOME_MEDIA_KEYS_PLUGIN (activatable);
 
-	g_debug ("%s", G_STRFUNC);
+	CDEBUG(DBG_PLUGIN, "Gnome-Media-Keys plugin %s", G_STRFUNC);
 
 	g_bus_unwatch_name (plugin->priv->watch_id);
 

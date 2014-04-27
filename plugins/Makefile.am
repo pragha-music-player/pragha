@@ -25,10 +25,32 @@ if HAVE_LIBNOTIFY
 SUBDIRS += notify
 endif
 
-if HAVE_LIBMTP
+if HAVE_GUDEV
 SUBDIRS += devices
+SUBDIRS += removable-media
+endif
+
+if HAVE_LIBMTP
+SUBDIRS += mtp
 endif
 
 if HAVE_LIBSOUP
 SUBDIRS += tunein
 endif
+
+if HAVE_RYGEL
+SUBDIRS += dlna
+endif
+
+if HAVE_LIBCDIO
+if HAVE_LIBCDIO_PARANOIA
+if HAVE_LIBCDDB
+SUBDIRS += cdrom
+endif
+endif
+endif
+
+if HAVE_LIBCLASTFM
+SUBDIRS += lastfm
+endif
+

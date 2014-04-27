@@ -26,18 +26,14 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#ifdef HAVE_LIBPEAS
-#include <libpeas/peas.h>
-#endif
-
 #include "pragha-album-art.h"
 #include "pragha-art-cache.h"
 #include "pragha-backend.h"
 #include "pragha-database.h"
 #include "pragha-preferences.h"
+#include "pragha-preferences-dialog.h"
 #include "pragha-playlist.h"
 #include "pragha-library-pane.h"
-#include "pragha-lastfm.h"
 #include "pragha-toolbar.h"
 #include "pragha-scanner.h"
 #include "pragha-sidebar.h"
@@ -71,6 +67,8 @@ GtkWidget         *pragha_application_get_window          (PraghaApplication *pr
 GdkPixbuf         *pragha_application_get_pixbuf_app      (PraghaApplication *pragha);
 PraghaPlaylist    *pragha_application_get_playlist        (PraghaApplication *pragha);
 PraghaLibraryPane *pragha_application_get_library         (PraghaApplication *pragha);
+PreferencesDialog *pragha_application_get_preferences_dialog (PraghaApplication *pragha);
+
 PraghaToolbar     *pragha_application_get_toolbar         (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_first_sidebar   (PraghaApplication *pragha);
 PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pragha);
@@ -84,14 +82,6 @@ GtkWidget         *pragha_application_get_menubar            (PraghaApplication 
 GtkWidget         *pragha_application_get_infobox_container  (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_first_pane         (PraghaApplication *pragha);
 GtkWidget         *pragha_application_get_second_pane        (PraghaApplication *pragha);
-
-#ifdef HAVE_LIBPEAS
-PeasEngine        *pragha_application_get_peas_engine        (PraghaApplication *pragha);
-#endif
-
-#ifdef HAVE_LIBCLASTFM
-PraghaLastfm      *pragha_application_get_lastfm             (PraghaApplication *pragha);
-#endif
 
 gboolean           pragha_application_is_first_run           (PraghaApplication *pragha);
 
