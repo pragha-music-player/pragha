@@ -41,7 +41,6 @@
 
 struct _PraghaSongInfoDialog {
 	GtkWidget     *dialog;
-	GtkWidget     *text_view;
 	GtkTextBuffer *buffer;
 
 	GlyrDatabase  *cache_db;
@@ -78,15 +77,6 @@ pragha_text_info_dialog_set_info (PraghaSongInfoDialog *dialog_s, GlyrMemCache *
 			break;
 	}
 
-	if (g_ascii_strcasecmp(head->prov, _("Edited")) == 0) {
-		gtk_text_view_set_editable (GTK_TEXT_VIEW(dialog_s->text_view), TRUE);
-		gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(dialog_s->text_view), TRUE);
-	}
-	else {
-		gtk_text_view_set_editable (GTK_TEXT_VIEW(dialog_s->text_view), FALSE);
-		gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(dialog_s->text_view), FALSE);
-	}
-
 	gtk_text_buffer_set_text (dialog_s->buffer, head->data, -1);
 
 	gtk_window_set_title (GTK_WINDOW(dialog_s->dialog), title);
@@ -95,7 +85,7 @@ pragha_text_info_dialog_set_info (PraghaSongInfoDialog *dialog_s, GlyrMemCache *
 	dialog_s->head_p = head;
 }
 
-static void
+void
 pragha_song_info_save_cache (PraghaSongInfoDialog *dialog_s)
 {
 	GlyrMemCache *tmp_head;
@@ -114,50 +104,6 @@ pragha_song_info_save_cache (PraghaSongInfoDialog *dialog_s)
 }
 
 static void
-pragha_text_info_dialog_edit_info (PraghaSongInfoDialog *dialog_s)
-{
-	GlyrMemCache *dup, *tmp_head;
-	dup = glyr_cache_copy (dialog_s->head_p);
-	glyr_cache_set_prov (dup, _("Edited"));
-
-	tmp_head = dialog_s->head_p->next;
-	dialog_s->head_p->next = dup;
-
-	dup->prev = dialog_s->head_p;
-	dup->next = tmp_head;
-
-	pragha_text_info_dialog_set_info (dialog_s, dup);
-}
-
-static void
-pragha_song_info_update_edited_cache (PraghaSongInfoDialog *dialog_s)
-{
-	GtkTextIter start, end;
-	const gchar *text = NULL;
-
-	gtk_text_buffer_get_start_iter (dialog_s->buffer, &start);
-	gtk_text_buffer_get_end_iter (dialog_s->buffer, &end);
-
-	text = gtk_text_buffer_get_text (dialog_s->buffer, &start, &end, FALSE);
-
-	glyr_cache_set_data (dialog_s->head_p, g_strdup(text), -1);
-}
-
-static void
-pragha_text_info_dialog_show_next (PraghaSongInfoDialog *dialog_s)
-{
-	if (g_ascii_strcasecmp (dialog_s->head_p->prov, _("Edited")) == 0)
-		pragha_song_info_update_edited_cache(dialog_s);
-
-	if (dialog_s->head_p->next) {
-		pragha_text_info_dialog_set_info (dialog_s, dialog_s->head_p->next);
-	}
-	else {
-		pragha_text_info_dialog_set_info (dialog_s, dialog_s->head);
-	}
-}
-
-static void
 pragha_text_info_dialog_response (GtkDialog *dialog,
                                   gint       response,
                                   gpointer   data)
@@ -167,10 +113,12 @@ pragha_text_info_dialog_response (GtkDialog *dialog,
 	switch (response)
 	{
 		case GTK_RESPONSE_YES:
-			pragha_text_info_dialog_show_next (dialog_s);
-			break;
-		case GTK_RESPONSE_HELP:
-			pragha_text_info_dialog_edit_info (dialog_s);
+			if (dialog_s->head_p->next) {
+				pragha_text_info_dialog_set_info (dialog_s, dialog_s->head_p->next);
+			}
+			else {
+				pragha_text_info_dialog_set_info (dialog_s, dialog_s->head);
+			}
 			break;
 		case GTK_RESPONSE_OK:
 			pragha_song_info_save_cache (dialog_s);
@@ -215,6 +163,8 @@ pragha_song_info_dialog_new (GtkWidget    *parent,
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
 
+	dialog_s->buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+
 	scrolled = gtk_scrolled_window_new (NULL, NULL);
 
 	gtk_container_add (GTK_CONTAINER (scrolled), view);
@@ -233,7 +183,6 @@ pragha_song_info_dialog_new (GtkWidget    *parent,
 	gtk_window_set_destroy_with_parent (GTK_WINDOW(dialog), TRUE);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Ok"), GTK_RESPONSE_OK);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), _("_Edit"), GTK_RESPONSE_HELP);
 
 	gtk_window_set_default_size(GTK_WINDOW (dialog), 450, 350);
 
@@ -244,9 +193,6 @@ pragha_song_info_dialog_new (GtkWidget    *parent,
 	gtk_box_pack_start (GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
 
 	dialog_s->dialog = dialog;
-	dialog_s->text_view = view;
-	dialog_s->buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-
 	dialog_s->cache_db = cache_db;
 
 	g_signal_connect (G_OBJECT(dialog), "response",
