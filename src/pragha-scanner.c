@@ -160,9 +160,9 @@ pragha_scanner_import_playlist (PraghaDatabase *database,
 	list = pragha_pl_parser_parse_from_file_by_extension (playlist_file);
 #endif
 
-	playlist_id = pragha_database_add_new_playlist (database, playlist);
-	if(list) {
-		for (i=list; i != NULL; i = i->next) {
+	if (list) {
+		playlist_id = pragha_database_add_new_playlist (database, playlist);
+		for (i = list; i != NULL; i = i->next) {
 			pragha_database_add_playlist_track (database, playlist_id, i->data);
 			g_free(i->data);
 		}
