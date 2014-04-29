@@ -63,6 +63,7 @@ struct _PreferencesDialog {
 	GtkWidget *soft_mixer_w;
 #endif
 	GtkWidget *use_hint_w;
+	GtkWidget *use_symbolic_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
 	GtkWidget *album_art_pattern_w;
@@ -528,6 +529,16 @@ static void toggle_use_hint (GtkToggleButton *button, PreferencesDialog *dialog)
 	pragha_preferences_set_use_hint(dialog->preferences, use_hint);
 }
 
+/* Toggle symbolic on panel */
+
+static void toggle_use_symbolic (GtkToggleButton *button, PreferencesDialog *dialog)
+{
+	gboolean use_symbolic;
+	use_symbolic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+
+	pragha_preferences_set_use_symbolic_icons(dialog->preferences, use_symbolic);
+}
+
 /* Toggle album art pattern */
 
 static void toggle_album_art(GtkToggleButton *button, PreferencesDialog *dialog)
@@ -679,6 +690,9 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 
 	if (pragha_preferences_get_use_hint(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
+
+	if (pragha_preferences_get_use_symbolic_icons(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_symbolic_w), TRUE);
 
 	if (pragha_preferences_get_instant_search(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->instant_filter_w), TRUE);
@@ -910,7 +924,8 @@ static GtkWidget*
 pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
+	GtkWidget *use_hint, *use_symbolic, *album_art, *album_art_pattern_label;
+	GtkWidget *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
@@ -919,6 +934,9 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	use_hint = gtk_check_button_new_with_label(_("Highlight rows on current playlist"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, use_hint);
+
+	use_symbolic = gtk_check_button_new_with_label(_("Use symbolic icons in panel"));
+	pragha_hig_workarea_table_add_wide_control(table, &row, use_symbolic);
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Controls"));
 
@@ -943,16 +961,19 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	/* Store references */
 
 	dialog->use_hint_w = use_hint;
+	dialog->use_symbolic_w = use_symbolic;
 	dialog->album_art_w = album_art;
 	dialog->album_art_size_w = album_art_size;
 	dialog->album_art_pattern_w = album_art_pattern;
 
 	/* Setup signal handlers */
 
-	g_signal_connect(G_OBJECT(use_hint), "toggled",
-			 G_CALLBACK(toggle_use_hint), dialog);
-	g_signal_connect(G_OBJECT(album_art), "toggled",
-			 G_CALLBACK(toggle_album_art), dialog);
+	g_signal_connect (G_OBJECT(use_hint), "toggled",
+	                  G_CALLBACK(toggle_use_hint), dialog);
+	g_signal_connect (G_OBJECT(use_symbolic), "toggled",
+	                  G_CALLBACK(toggle_use_symbolic), dialog);
+	g_signal_connect (G_OBJECT(album_art), "toggled",
+	                  G_CALLBACK(toggle_album_art), dialog);
 
 	return table;
 }

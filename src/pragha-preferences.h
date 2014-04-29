@@ -61,6 +61,7 @@ struct _PraghaPreferencesClass
 #define KEY_INSTANT_SEARCH         "instant_filter"
 #define KEY_APPROXIMATE_SEARCH     "aproximate_search"
 #define KEY_USE_HINT               "use_hint"
+#define KEY_USE_SYMBOLIC           "use_symbolic"
 
 #define GROUP_PLAYLIST "Playlist"
 #define KEY_SAVE_PLAYLIST          "save_playlist"
@@ -274,6 +275,12 @@ pragha_preferences_set_use_hint (PraghaPreferences *preferences,
                                  gboolean use_hint);
 gboolean
 pragha_preferences_get_use_hint (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_use_symbolic_icons (PraghaPreferences *preferences,
+                                           gboolean use_symbolic_icons);
+gboolean
+pragha_preferences_get_use_symbolic_icons (PraghaPreferences *preferences);
 
 void
 pragha_preferences_set_restore_playlist (PraghaPreferences *preferences,
