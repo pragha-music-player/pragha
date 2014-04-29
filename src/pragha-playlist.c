@@ -548,9 +548,9 @@ pragha_playlist_update_track_state (PraghaPlaylist *playlist, GtkTreePath *path,
 		icon_theme = gtk_icon_theme_get_default ();
 
 		if(playlist->track_error->code == GST_RESOURCE_ERROR_NOT_FOUND)
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove", 16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "list-remove-symbolic", 16, 0, NULL);
 		else
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning", 16, 0, NULL);
+			pixbuf = gtk_icon_theme_load_icon (icon_theme, "dialog-warning-symbolic", 16, 0, NULL);
 	}
 	else {
 		switch (state) {
@@ -3521,7 +3521,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
 
-	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high", GTK_ICON_SIZE_MENU);
+	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high-symbolic", GTK_ICON_SIZE_MENU);
 
 	/* Column : Queue Bubble and Status Pixbuf */
 
@@ -4294,11 +4294,11 @@ pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 
 	cplaylist->playing_pixbuf =
 		gtk_icon_theme_load_icon (icontheme,
-					  "media-playback-start",
+					  "media-playback-start-symbolic",
 					  16, 0, NULL);
 	cplaylist->paused_pixbuf =
 		gtk_icon_theme_load_icon (icontheme,
-					  "media-playback-pause",
+					  "media-playback-pause-symbolic",
 					  16, 0, NULL);
 }
 
