@@ -1,5 +1,20 @@
 ==============================================================
-Overview of changes in Pragha 1.2 since 1.1.2
+Overview of changes in Pragha 1.2.1 since 1.2
+==============================================================
+
+Bugs fixed:
+	Create cache folders when init album-art-cache.
+	Lastfm: Backport some changes from Pragha 1.3.1.
+	  * Better protect tags and time_t on threads.
+	  * Use diferents time_id to scrobble and update now playing.
+	  * Fix submits multiple entries of one song to LastFM.
+	  * Betters function names and declare a lot as static.
+	Show album arts in cache to all songs. But search in folders only to local songs.
+	Fix Segfault when edit song tags from systray menu.
+	Not import empty playlists when scan the library.
+
+==============================================================
+OTHERS REALESES:
 ==============================================================
 
 Pragha V1.2
@@ -53,10 +68,6 @@ NOTE:
 	Still depends on libcdio >= 0.83 by default.
 	* To compile with libcdio >= 0.90 use: ./configure CPPFLAGS="-DHAVE_PARANOIA_NEW_INCLUDES"
 	Remove dbus-1 and dbus-glib-1 requirements.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.1.2
 News:
