@@ -35,9 +35,9 @@
 
 #ifdef G_OS_WIN32
 const gchar *mime_flac[] = {"audio/x-flac", "application/x-ext-flac", NULL};
-const gchar *mime_mpeg[] = {"audio/mpeg", NULL};
+const gchar *mime_mpeg[] = {"audio/mpeg", "application/x-ext-mp3", NULL};
 const gchar *mime_ogg[] = {"audio/x-vorbis+ogg", "audio/ogg", "application/ogg", "application/x-ext-ogg", NULL};
-const gchar *mime_wav[] = {"audio/x-wav", "audio/wav", NULL};
+const gchar *mime_wav[] = {"audio/x-wav", "audio/wav", "application/x-ext-wav", NULL};
 const gchar *mime_asf[] = {"video/x-ms-asf", "audio/x-ms-wma", "application/x-ext-wma", NULL};
 const gchar *mime_mp4 [] = {"audio/x-m4a", "application/x-ext-m4a", NULL};
 const gchar *mime_ape [] = {"application/x-ape", "audio/ape", "audio/x-ape", NULL};
