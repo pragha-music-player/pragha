@@ -326,7 +326,7 @@ static void pragha_lastfm_no_connection_advice (void)
 {
 	PraghaStatusbar *statusbar = pragha_statusbar_get ();
 
-	pragha_statusbar_set_misc_text (statusbar, _("No connection Last.fm has been established."));
+	pragha_statusbar_set_misc_text (statusbar, _("Unable to establish conection with Last.fm"));
 	g_object_unref (statusbar);
 }
 
@@ -656,17 +656,17 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 	switch(data->query_type) {
 		case LASTFM_GET_SIMILAR:
 			if (data->query_count > 0)
-				summary = g_strdup_printf(_("Added %d songs of %d sugested from Last.fm."),
-							  songs_added, data->query_count);
+				summary = g_strdup_printf(_("Added %d tracks of %d suggested from Last.fm"),
+				                          songs_added, data->query_count);
 			else
-				summary = g_strdup_printf(_("Last.fm not suggest any similar song."));
+				summary = g_strdup_printf(_("Last.fm doesn´t suggest any similar track"));
 			break;
 		case LASTFM_GET_LOVED:
 			if (data->query_count > 0)
 				summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."),
 							  songs_added, data->query_count);
 			else
-				summary = g_strdup_printf(_("You had no favorite songs on Last.fm."));
+				summary = g_strdup_printf(_("You don´t have favorite tracks on Last.fm"));
 			break;
 		case LASTFM_NONE:
 		default:

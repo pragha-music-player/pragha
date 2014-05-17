@@ -37,14 +37,14 @@ seach_entry_populate_popup (GtkEntry *entry, PraghaPreferences *preferences)
 
 	/* Instant search. */
 
-	item = gtk_check_menu_item_new_with_label (_("Refine the search while writing"));
+	item = gtk_check_menu_item_new_with_label (_("Search while typing"));
 	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
 	g_object_bind_property (preferences, "instant-search", item, "active", binding_flags);
 	gtk_widget_show (item);
 
 	/* Aproximate search. */
 
-	item = gtk_check_menu_item_new_with_label (_("Search approximate words"));
+	item = gtk_check_menu_item_new_with_label (_("Search similar words"));
 	gtk_menu_shell_append (GTK_MENU_SHELL (popup_menu), item);
 	g_object_bind_property (preferences, "approximate-searches", item, "active", binding_flags);
 	gtk_widget_show (item);

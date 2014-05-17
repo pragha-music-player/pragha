@@ -840,7 +840,7 @@ trash_or_unlink_row (GArray *loc_arr, gboolean unlink, PraghaLibraryPane *librar
 				file = g_file_new_for_path(filename);
 
 				if(!unlink && !(deleted = g_file_trash(file, NULL, &error))) {
-					primary = g_strdup (_("Cannot move file to trash, do you want to delete immediately?"));
+					primary = g_strdup (_("File can´t be moved to trash. Delete permanently?"));
 					secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
 									g_file_get_basename (file), error->message);
 
@@ -2486,7 +2486,7 @@ pragha_library_pane_delete_from_hdd_action (GtkAction *action, PraghaLibraryPane
 		                                 GTK_BUTTONS_YES_NO,
 		                                 _("Really want to move the files to trash?"));
 
-		toggle_unlink = gtk_check_button_new_with_label(_("Delete immediately instead of move to trash"));
+		toggle_unlink = gtk_check_button_new_with_label(_("Delete permanently instead of moving to trash"));
 		gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), toggle_unlink, TRUE, TRUE, 0);
 
 		gtk_widget_show_all(dialog);

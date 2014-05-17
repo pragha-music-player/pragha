@@ -163,7 +163,7 @@ static GtkActionEntry main_aentries[] = {
 	{"ViewMenu", NULL, N_("_View")},
 	{"ToolsMenu", NULL, N_("_Tools")},
 	{"HelpMenu", NULL, N_("_Help")},
-	{"Prev", "media-skip-backward", N_("Prev track"),
+	{"Prev", "media-skip-backward", N_("Previous track"),
 	 "<Alt>Left", "Prev track", G_CALLBACK(prev_action)},
 	{"Play_pause", "media-playback-start", N_("Play / Pause"),
 	 "<Control>space", "Play / Pause", G_CALLBACK(play_pause_action)},
@@ -364,7 +364,7 @@ void open_file_action(GtkAction *action, PraghaApplication *pragha)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
+	toggle = gtk_check_button_new_with_label(_("Add files recursively"));
 	if(pragha_preferences_get_add_recursively (preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
 

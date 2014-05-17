@@ -989,10 +989,10 @@ pref_create_general_page(PreferencesDialog *dialog)
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Search"));
 
-	instant_filter = gtk_check_button_new_with_label(_("Refine the search while writing"));
+	instant_filter = gtk_check_button_new_with_label(_("Search while typing"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, instant_filter);
 
-	aproximate_search = gtk_check_button_new_with_label(_("Search approximate words"));
+	aproximate_search = gtk_check_button_new_with_label(_("Search similar words"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, aproximate_search);
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("When starting pragha"));
@@ -1037,7 +1037,7 @@ pref_create_desktop_page(PreferencesDialog *dialog)
 	show_icon_tray = gtk_check_button_new_with_label(_("Show Pragha icon in the notification area"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, show_icon_tray);
 
-	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when close the window"));
+	close_to_tray = gtk_check_button_new_with_label(_("Minimize Pragha when closing window"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, close_to_tray);
 
 	/* Setup signal handlers */
@@ -1142,7 +1142,7 @@ pragha_preferences_dialog_new (PraghaApplication *pragha)
 
 	/* The main preferences dialog */
 
-	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences of Pragha"),
+	dialog->widget = gtk_dialog_new_with_buttons (_("Preferences"),
 	                                              GTK_WINDOW(pragha_application_get_window(pragha)),
 	                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                              _("_Cancel"), GTK_RESPONSE_CANCEL,

@@ -205,8 +205,8 @@ static const gchar *playlist_context_menu_xml = "<ui>				\
 static GtkActionEntry playlist_context_aentries[] = {
 	{"Queue track", "list-add", N_("Add to playback queue"),
 	 "", "Add to playback queue", G_CALLBACK(queue_current_playlist)},
-	{"Dequeue track", "list-remove", N_("Remove to playback queue"),
-	 "", "Remove to playback queue", G_CALLBACK(dequeue_current_playlist)},
+	{"Dequeue track", "list-remove", N_("Remove from playback queue"),
+	 "", "Remove from playback queue", G_CALLBACK(dequeue_current_playlist)},
 	{"Remove from playlist", "list-remove", N_("Remove from playlist"),
 	 "", "Remove selection from playlist", G_CALLBACK(remove_from_playlist)},
 	{"Crop playlist", "list-remove", N_("Crop playlist"),
