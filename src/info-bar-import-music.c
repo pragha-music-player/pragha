@@ -127,7 +127,7 @@ GtkWidget *create_info_bar_update_music(PraghaApplication *pragha)
 	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_No"), GTK_RESPONSE_CANCEL);
 	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_Yes"), GTK_RESPONSE_YES);
 
-	GtkWidget *label = gtk_label_new(_("Want to upgrade your music library?"));
+	GtkWidget *label = gtk_label_new(_("Would you like to update your music library?"));
 	gtk_box_pack_start(GTK_BOX(content_area), label, FALSE, FALSE, 0);
 
 	g_signal_connect(info_bar, "response", G_CALLBACK(info_bar_update_response_cb), pragha);

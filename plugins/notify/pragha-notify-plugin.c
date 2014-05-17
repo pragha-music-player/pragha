@@ -179,11 +179,11 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 
 		if (can_support_actions() && priv->actions_in_osd) {
 			notify_notification_add_action(
-				priv->notify, "media-skip-backward", _("Prev Track"),
+				priv->notify, "media-skip-backward", _("Previous track"),
 				NOTIFY_ACTION_CALLBACK(notify_Prev_Callback), plugin,
 				NULL);
 			notify_notification_add_action(
-				priv->notify, "media-skip-forward", _("Next Track"),
+				priv->notify, "media-skip-forward", _("Next track"),
 				NOTIFY_ACTION_CALLBACK(notify_Next_Callback), plugin,
 				NULL);
 		}
