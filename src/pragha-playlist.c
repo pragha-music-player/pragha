@@ -4303,6 +4303,13 @@ pragha_playlist_init_pixbuf(PraghaPlaylist* cplaylist)
 }
 
 static void
+pragha_playlist_update_menu_playlist_changes (PraghaDatabase *database,
+                                              PraghaPlaylist *playlist)
+{
+	update_playlist_changes_on_menu (playlist);
+}
+
+static void
 pragha_playlist_init (PraghaPlaylist *playlist)
 {
 	/* Get usefuls instances */
@@ -4365,6 +4372,11 @@ pragha_playlist_init (PraghaPlaylist *playlist)
 	                  G_CALLBACK(pragha_playlist_button_press_cb), playlist);
 	g_signal_connect (G_OBJECT(playlist->view), "button-release-event",
 	                  G_CALLBACK(current_playlist_button_release_cb), playlist);
+
+	g_signal_connect (G_OBJECT(playlist->cdbase), "PlaylistsChanged",
+	                  G_CALLBACK(pragha_playlist_update_menu_playlist_changes), playlist);
+
+	pragha_playlist_update_menu_playlist_changes (playlist->cdbase, playlist);
 
 	gtk_widget_show_all (GTK_WIDGET(playlist));
 }

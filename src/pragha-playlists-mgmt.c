@@ -1246,44 +1246,57 @@ replace_or_append_dialog(PraghaPlaylist *cplaylist, const gchar *playlist, Pragh
 	return choise;
 }
 
-void playlist_save_selection(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+
+void
+pragha_playlist_save_selection (PraghaPlaylist *playlist, const gchar *name)
 {
 	PraghaPlaylistAction choise;
-	const gchar *playlist;
 
-	playlist = gtk_menu_item_get_label (menuitem);
-
-	choise = replace_or_append_dialog(cplaylist, playlist, SAVE_SELECTED);
+	choise = replace_or_append_dialog (playlist, name, SAVE_SELECTED);
 	switch(choise) {
 		case NEW_PLAYLIST:
-			new_playlist(cplaylist, playlist, SAVE_SELECTED);
+			new_playlist (playlist, name, SAVE_SELECTED);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(cplaylist, playlist, SAVE_SELECTED);
+			append_playlist (playlist, name, SAVE_SELECTED);
 			break;
 		default:
 			break;
 	}
 }
 
-void playlist_save_complete_playlist(GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+void
+pragha_playlist_save_playlist (PraghaPlaylist *playlist, const gchar *name)
 {
 	PraghaPlaylistAction choise;
-	const gchar *playlist;
 
-	playlist = gtk_menu_item_get_label (menuitem);
-
-	choise = replace_or_append_dialog(cplaylist, playlist, SAVE_COMPLETE);
+	choise = replace_or_append_dialog (playlist, name, SAVE_COMPLETE);
 	switch(choise) {
 		case NEW_PLAYLIST:
-			new_playlist(cplaylist, playlist, SAVE_COMPLETE);
+			new_playlist (playlist, name, SAVE_COMPLETE);
 			break;
 		case APPEND_PLAYLIST:
-			append_playlist(cplaylist, playlist, SAVE_COMPLETE);
+			append_playlist (playlist, name, SAVE_COMPLETE);
 			break;
 		default:
 			break;
 	}
+}
+
+static void
+playlist_save_selection (GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+{
+	const gchar *playlist;
+	playlist = gtk_menu_item_get_label (menuitem);
+	pragha_playlist_save_selection (cplaylist, playlist);
+}
+
+static void
+playlist_save_complete_playlist (GtkMenuItem *menuitem, PraghaPlaylist *cplaylist)
+{
+	const gchar *playlist;
+	playlist = gtk_menu_item_get_label (menuitem);
+	pragha_playlist_save_playlist (cplaylist, playlist);
 }
 
 static void
@@ -1362,122 +1375,9 @@ update_playlist_changes_save_playlist_popup_playlist (PraghaPlaylist *cplaylist)
 	gtk_widget_show_all (submenu);
 }
 
-static void
-update_playlist_changes_save_playlist_mainmenu (PraghaApplication *pragha)
+void
+update_playlist_changes_on_menu (PraghaPlaylist *playlist)
 {
-	PraghaPlaylist *playlist;
-	PraghaDatabase *cdbase;
-	GtkWidget *submenu, *menuitem, *place;
-	GtkAccelGroup* accel_group;
-
-	playlist = pragha_application_get_playlist (pragha);
-
-	submenu = gtk_menu_new ();
-
-	place = pragha_application_get_menu_action_widget (pragha, "/Menubar/PlaylistMenu/Save playlist");
-
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
-
-	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem),
-	                               gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_current_playlist), playlist);
-
-	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(pragha_application_get_window(pragha)), accel_group);
-	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
-	gtk_accel_map_add_entry ("<SubMenu>/New playlist", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK);
-	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/New playlist");
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem),
-	                               gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(export_current_playlist), playlist);
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	menuitem = gtk_separator_menu_item_new ();
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
-	cdbase = pragha_application_get_database (pragha);
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
-	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
-
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
-		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_complete_playlist), playlist);
-		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	gtk_widget_show_all (submenu);
-}
-
-static void
-update_playlist_changes_save_selection_mainmenu (PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-	PraghaDatabase *cdbase;
-	GtkWidget *submenu, *menuitem, *place;
-	GtkAccelGroup* accel_group;
-
-	playlist = pragha_application_get_playlist (pragha);
-
-	submenu = gtk_menu_new ();
-
-	place = pragha_application_get_menu_action_widget (pragha, "/Menubar/PlaylistMenu/Save selection");
-
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(place), submenu);
-
-	menuitem = gtk_image_menu_item_new_with_label (_("New playlist"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(save_selected_playlist), playlist);
-
-	accel_group = gtk_accel_group_new ();
-	gtk_window_add_accel_group(GTK_WINDOW(pragha_application_get_window(pragha)), accel_group);
-	gtk_menu_set_accel_group(GTK_MENU(submenu), accel_group);
-	gtk_accel_map_add_entry ("<SubMenu>/Save selection", gdk_keyval_from_name ("s"), GDK_CONTROL_MASK+GDK_SHIFT_MASK);
-	gtk_menu_item_set_accel_path (GTK_MENU_ITEM(menuitem), "<SubMenu>/Save selection");
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	menuitem = gtk_image_menu_item_new_with_label (_("Export"));
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(menuitem), gtk_image_new_from_icon_name("media-floppy", GTK_ICON_SIZE_MENU));
-	g_signal_connect(menuitem, "activate", G_CALLBACK(export_selected_playlist), playlist);
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	menuitem = gtk_separator_menu_item_new ();
-	gtk_menu_shell_append (GTK_MENU_SHELL(submenu), menuitem);
-
-	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
-	cdbase = pragha_application_get_database (pragha);
-	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
-	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
-
-	while (pragha_prepared_statement_step (statement)) {
-		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
-		menuitem = gtk_image_menu_item_new_with_label (name);
-		g_signal_connect (menuitem, "activate", G_CALLBACK(playlist_save_selection), playlist);
-		gtk_menu_shell_append (GTK_MENU_SHELL (submenu), menuitem);
-	}
-
-	pragha_prepared_statement_free (statement);
-
-	gtk_widget_show_all (submenu);
-}
-
-void update_playlist_changes_on_menu(PraghaApplication *pragha)
-{
-	PraghaPlaylist *playlist;
-
-	/* Update main menu. */
-	update_playlist_changes_save_playlist_mainmenu(pragha);
-	update_playlist_changes_save_selection_mainmenu(pragha);
-
-	/* Update playlist pupup menu. */
-	playlist = pragha_application_get_playlist (pragha);
 	update_playlist_changes_save_playlist_popup_playlist (playlist);
 	update_playlist_changes_save_selection_popup_playlist (playlist);
 }
