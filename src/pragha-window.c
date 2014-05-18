@@ -392,7 +392,6 @@ pragha_window_init (PraghaApplication *pragha)
 	}
 
 	pragha_window_init_menu_actions(pragha);
-	update_playlist_changes_on_menu(pragha);
 
 	pragha_init_session_support(pragha);
 }

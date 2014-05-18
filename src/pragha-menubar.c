@@ -62,6 +62,12 @@ static void add_libary_action(GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_remove_playlist_action      (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_crop_playlist_action        (GtkAction *action, PraghaApplication *pragha);
 static void pragha_menubar_clear_playlist_action       (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_save_playlist_action        (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_export_playlist_action      (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_save_selection_action       (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menubar_export_selection_action     (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menu_action_save_playlist           (GtkAction *action, PraghaApplication *pragha);
+static void pragha_menu_action_save_selection          (GtkAction *action, PraghaApplication *pragha);
 static void search_playlist_action(GtkAction *action, PraghaApplication *pragha);
 
 /* View */
@@ -117,8 +123,18 @@ static const gchar *main_menu_xml = "<ui>					\
 			<menuitem action=\"Crop playlist\"/>			\
 			<menuitem action=\"Clear playlist\"/>			\
 			<separator/>				    		\
-			<menuitem action=\"Save playlist\"/>			\
-			<menuitem action=\"Save selection\"/>			\
+			<menu action=\"SavePlaylist\">				\
+				<menuitem action=\"New playlist1\"/>		\
+				<menuitem action=\"Export1\"/>			\
+				<separator/>				    	\
+				<placeholder name=\"pragha-save-playlist-placeholder\"/> 	\
+			</menu>							\
+			<menu action=\"SaveSelection\">				\
+				<menuitem action=\"New playlist2\"/>		\
+				<menuitem action=\"Export2\"/>			\
+				<separator/>				    	\
+				<placeholder name=\"pragha-save-selection-placeholder\"/> 	\
+			</menu>							\
 			<separator/>						\
 			<menuitem action=\"Search in playlist\"/>		\
 		</menu>								\
@@ -187,8 +203,16 @@ static GtkActionEntry main_aentries[] = {
 	 "<Control>C", "Crop playlist", G_CALLBACK(pragha_menubar_crop_playlist_action)},
 	{"Clear playlist", "edit-clear", N_("Clear playlist"),
 	 "<Control>L", "Clear the current playlist", G_CALLBACK(pragha_menubar_clear_playlist_action)},
-	{"Save playlist", "document-save-as", N_("Save playlist")},
-	{"Save selection", NULL, N_("Save selection")},
+	{"SavePlaylist", "document-save-as", N_("Save playlist")},
+	{"New playlist1", "document-new", N_("New playlist"),
+	 "<Control>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_playlist_action)},
+	{"Export1", "media-floppy", N_("Export"),
+	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_playlist_action)},
+	{"SaveSelection", NULL, N_("Save selection")},
+	{"New playlist2", "document-new", N_("New playlist"),
+	 "<Control><Mayus>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_selection_action)},
+	{"Export2", "media-floppy", N_("Export"),
+	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_selection_action)},
 	{"Search in playlist", "edit-find", N_("_Search in playlist"),
 	 "<Control>F", "Search in playlist", G_CALLBACK(search_playlist_action)},
 	{"Preferences", "preferences-system", N_("_Preferences"),
@@ -265,6 +289,76 @@ pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *psp
 
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Jump to playing song");
 	gtk_action_set_sensitive (GTK_ACTION (action), playing);
+}
+
+static void
+pragha_menubar_update_playlist_changes (PraghaDatabase *database, PraghaApplication *pragha)
+{
+	GtkUIManager *ui_manager;
+	GtkAction *action;
+	PraghaPreparedStatement *statement;
+	const gchar *sql = NULL, *playlist = NULL;
+	gchar *action_name = NULL;
+
+	static gint playlist_ui_id = 0;
+	static GtkActionGroup *playlist_action_group = NULL;
+
+	ui_manager = pragha_application_get_menu_ui_manager (pragha);
+
+	gtk_ui_manager_remove_ui (ui_manager, playlist_ui_id);
+	gtk_ui_manager_ensure_update (ui_manager);
+
+	if (playlist_action_group) {
+		gtk_ui_manager_remove_action_group (ui_manager, playlist_action_group);
+		g_object_unref (playlist_action_group);
+	}
+
+	playlist_action_group = gtk_action_group_new ("playlists-action-group");
+	gtk_ui_manager_insert_action_group (ui_manager, playlist_action_group, -1);
+
+	playlist_ui_id = gtk_ui_manager_new_merge_id (ui_manager);
+
+	sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE DESC";
+	statement = pragha_database_create_statement (database, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+
+	while (pragha_prepared_statement_step (statement)) {
+		playlist = pragha_prepared_statement_get_string(statement, 0);
+
+		/* Save playlist */
+		action_name = g_strdup_printf ("playlist-to-%s", playlist);
+		action = gtk_action_new (action_name, playlist, NULL, NULL);
+		gtk_action_group_add_action (playlist_action_group, action);
+		g_object_unref (action);
+
+		g_signal_connect (G_OBJECT (action), "activate",
+		                  G_CALLBACK (pragha_menu_action_save_playlist), pragha);
+
+		gtk_ui_manager_add_ui (ui_manager, playlist_ui_id,
+				       "/Menubar/PlaylistMenu/SavePlaylist/pragha-save-playlist-placeholder",
+				       playlist, action_name,
+				       GTK_UI_MANAGER_MENUITEM, FALSE);
+		g_free (action_name);
+
+		/* Save selection */
+		action_name = g_strdup_printf ("selection-to-%s", playlist);
+		action = gtk_action_new (action_name, playlist, NULL, NULL);
+		gtk_action_group_add_action (playlist_action_group, action);
+		g_object_unref (action);
+
+		g_signal_connect (G_OBJECT (action), "activate",
+		                  G_CALLBACK (pragha_menu_action_save_selection), pragha);
+
+		gtk_ui_manager_add_ui (ui_manager, playlist_ui_id,
+				       "/Menubar/PlaylistMenu/SaveSelection/pragha-save-selection-placeholder",
+				       playlist, action_name,
+				       GTK_UI_MANAGER_MENUITEM, FALSE);
+		g_free (action_name);
+
+		pragha_process_gtk_events ();
+	}
+	pragha_prepared_statement_free (statement);
+
 }
 
 /* Add Files a folders to play list based on Audacius code.*/
@@ -907,6 +1001,52 @@ pragha_menubar_clear_playlist_action (GtkAction *action, PraghaApplication *prag
 	pragha_playlist_remove_all (playlist);
 }
 
+static void
+pragha_menubar_save_playlist_action (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
+	save_current_playlist (NULL, playlist);
+}
+
+static void
+pragha_menubar_export_playlist_action (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
+	export_current_playlist (NULL, playlist);
+}
+
+static void
+pragha_menubar_save_selection_action (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
+	save_selected_playlist (NULL, playlist);
+}
+
+static void
+pragha_menu_action_save_playlist (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);;
+	const gchar *name = gtk_action_get_label (action);
+
+	pragha_playlist_save_playlist (playlist, name);
+}
+
+static void
+pragha_menu_action_save_selection (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);;
+	const gchar *name = gtk_action_get_label (action);
+
+	pragha_playlist_save_selection (playlist, name);
+}
+
+static void
+pragha_menubar_export_selection_action (GtkAction *action, PraghaApplication *pragha)
+{
+	PraghaPlaylist *playlist = pragha_application_get_playlist (pragha);
+	export_selected_playlist (NULL, playlist);
+}
+
 /* Handler for 'Statistics' action in the Tools menu */
 
 static void statistics_action(GtkAction *action, PraghaApplication *pragha)
@@ -1046,6 +1186,11 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	GtkAction *action_status_bar = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/ViewMenu/Status bar");
 	g_object_bind_property (preferences, "show-status-bar", action_status_bar, "active", binding_flags);
+
+	g_signal_connect (pragha_application_get_database(pragha), "PlaylistsChanged",
+	                  G_CALLBACK(pragha_menubar_update_playlist_changes), pragha);
+
+	pragha_menubar_update_playlist_changes (pragha_application_get_database(pragha), pragha);
 
 	g_object_unref (main_actions);
 }

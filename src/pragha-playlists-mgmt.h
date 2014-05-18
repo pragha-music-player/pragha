@@ -49,6 +49,9 @@ void save_playlist(PraghaPlaylist* cplaylist, gint playlist_id, PraghaPlaylistAc
 void new_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPlaylistActionRange type);
 void append_playlist(PraghaPlaylist* cplaylist, const gchar *playlist, PraghaPlaylistActionRange type);
 
+void pragha_playlist_save_selection (PraghaPlaylist *playlist, const gchar *name);
+void pragha_playlist_save_playlist  (PraghaPlaylist *playlist, const gchar *name);
+
 GList *
 pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file);
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
@@ -56,6 +59,6 @@ GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, PraghaApplication *pragha);
 
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
-void update_playlist_changes_on_menu(PraghaApplication *pragha);
+void update_playlist_changes_on_menu (PraghaPlaylist *playlist);
 
 #endif /* PRAGHA_PLAYLISTS_MGMT_H */
