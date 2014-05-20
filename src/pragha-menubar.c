@@ -633,7 +633,7 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 	GtkWidget *vbox, *hbox;
 	GtkWidget *label_new, *uri_entry, *label_name, *name_entry;
 	const gchar *uri = NULL, *name = NULL;
-	gchar *clipboard_location;
+	gchar *clipboard_location = NULL, *parsed_uri = NULL;
 	PraghaMusicobject *mobj;
 	gint result;
 
@@ -687,21 +687,23 @@ void add_location_action(GtkAction *action, PraghaApplication *pragha)
 		if (gtk_entry_get_text_length (GTK_ENTRY(uri_entry)))
 			uri = gtk_entry_get_text(GTK_ENTRY(uri_entry));
 
-		if(uri != NULL) {
+		if (string_is_not_empty(uri)) {
 			if (gtk_entry_get_text_length (GTK_ENTRY(name_entry)))
 				name = gtk_entry_get_text(GTK_ENTRY(name_entry));
 
-			mobj = new_musicobject_from_location(uri, name);
+			parsed_uri = pragha_pl_get_first_playlist_item (uri);
+			mobj = new_musicobject_from_location (parsed_uri, name);
 
 			playlist = pragha_application_get_playlist (pragha);
 			pragha_playlist_append_single_song (playlist, mobj);
 
-			if (name) {
-				new_radio (playlist, uri, name);
+			if (string_is_not_empty(name)) {
+				new_radio (playlist, parsed_uri, name);
 
 				cdbase = pragha_application_get_database (pragha);
 				pragha_database_change_playlists_done (cdbase);
 			}
+			g_free (parsed_uri);
 		}
 		break;
 	case GTK_RESPONSE_CANCEL:

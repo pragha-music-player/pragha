@@ -120,8 +120,8 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	PraghaDatabase *cdbase;
 	PraghaMusicobject *mobj = NULL;
 	XMLNode *xml = NULL, *xi;
-	const gchar *name = NULL, *url = NULL;
-	gchar *name_fixed = NULL;
+	const gchar *type = NULL, *name = NULL, *url = NULL;
+	gchar *uri_parsed, *name_fixed = NULL;
 
 	PraghaTuneinPlugin *plugin = user_data;
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
@@ -135,6 +135,12 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	xml = tinycxml_parse ((gchar *)msg->response_body->data);
 	xi = xmlnode_get (xml, CCA{"opml", "body", "outline", NULL }, NULL, NULL);
 
+	type = tunein_helper_get_atribute (xi, "type");
+	if (g_ascii_strcasecmp(type, "audio") != 0) {
+		xmlnode_free(xml);
+		return;
+	}
+
 	name = tunein_helper_get_atribute (xi, "text");
 	url = tunein_helper_get_atribute (xi, "URL");
 
@@ -144,17 +150,21 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	}
 
 	name_fixed = unescape_HTML (name);
-	mobj = new_musicobject_from_location (url, name_fixed);
+	uri_parsed = pragha_pl_get_first_playlist_item (url);
+
+	mobj = new_musicobject_from_location (uri_parsed, name_fixed);
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	pragha_playlist_append_single_song (playlist, mobj);
-	new_radio (playlist, url, name_fixed);
+	new_radio (playlist, uri_parsed, name_fixed);
 
 	cdbase = pragha_application_get_database (priv->pragha);
 	pragha_database_change_playlists_done (cdbase);
 
 	xmlnode_free(xml);
+
 	g_free (name_fixed);
+	g_free (uri_parsed);
 }
 
 static void
@@ -163,14 +173,15 @@ pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 	GtkWidget *window;
 	SoupSession *session;
 	SoupMessage *msg;
-	gchar *query = NULL;
+	gchar *escaped_field = NULL, *query = NULL;
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
 	window = pragha_application_get_window (priv->pragha);
 	set_watch_cursor (window);
 
-	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", field);
+	escaped_field = g_uri_escape_string (field, NULL, TRUE);
+	query = g_strdup_printf ("%s%s", "http://opml.radiotime.com/Search.aspx?query=", escaped_field);
 
 	session = soup_session_sync_new ();
 
@@ -178,6 +189,7 @@ pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 	soup_session_queue_message (session, msg,
 	                            pragha_tunein_plugin_get_radio_done, plugin);
 
+	g_free (escaped_field);
 	g_free (query);
 }
 

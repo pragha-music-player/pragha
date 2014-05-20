@@ -144,31 +144,15 @@ PraghaMusicobject *
 new_musicobject_from_location(const gchar *uri, const gchar *name)
 {
 	PraghaMusicobject *mobj = NULL;
-	gchar *file = NULL;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject to location: %s", uri);
 
-#ifdef HAVE_PLPARSER
-	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
-	if(list) {
-		file = g_strdup(list->data);
-		g_slist_free_full(list, g_free);
-	}
-	else {
-		file = g_strdup(uri);
-	}
-#else
-	file = g_strdup(uri);
-#endif
-
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-	                     "file", file,
+	                     "file",      uri,
 	                     "file-type", FILE_HTTP,
 	                     NULL);
 	if (name)
 		pragha_musicobject_set_title(mobj, name);
-
-	g_free(file);
 
 	return mobj;
 }

@@ -57,6 +57,7 @@ pragha_pl_parser_append_mobj_list_by_extension (GList *mlist, const gchar *file)
 GSList *pragha_pl_parser_parse_from_file_by_extension (const gchar *filename);
 GSList *pragha_totem_pl_parser_parse_from_uri(const gchar *uri);
 void pragha_pl_parser_open_from_file_by_extension(const gchar *file, PraghaApplication *pragha);
+gchar * pragha_pl_get_first_playlist_item (const gchar *uri);
 
 void new_radio (PraghaPlaylist* cplaylist, const gchar *uri, const gchar *name);
 void update_playlist_changes_on_menu (PraghaPlaylist *playlist);

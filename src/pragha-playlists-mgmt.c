@@ -1058,6 +1058,26 @@ void pragha_pl_parser_open_from_file_by_extension (const gchar *file, PraghaAppl
 	g_list_free(mlist);
 }
 
+gchar *
+pragha_pl_get_first_playlist_item (const gchar *uri)
+{
+	gchar *file = NULL;
+#ifdef HAVE_PLPARSER
+	GSList *list = pragha_totem_pl_parser_parse_from_uri(uri);
+	if (list != NULL) {
+		file = g_strdup(list->data);
+		g_slist_free_full(list, g_free);
+	}
+	else {
+		file = g_strdup(uri);
+	}
+#else
+	/* TODO: Check if local uri and parse it */
+	file = g_strdup(uri);
+#endif
+	return file;
+}
+
 /* Appennd a tracks list to a playlist using the given type */
 
 static void
