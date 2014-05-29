@@ -35,12 +35,17 @@
 #include "pragha-plugins-engine.h"
 #endif
 
+#ifdef HAVE_LIBSOUP
+#include "pragha-online.h"
+#endif
+
 #include "pragha-window.h"
 #include "pragha-playback.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
+
 #include "pragha.h"
 
 #include "pragha-music-enum.h"
@@ -600,6 +605,10 @@ pragha_application_startup (GApplication *application)
 	/* Finally fill the library and the playlist */
 
 	pragha_init_gui_state (pragha);
+
+	#ifdef HAVE_LIBSOUP
+	pragha_check_online_version (pragha);
+	#endif
 }
 
 static void

@@ -123,7 +123,7 @@ pragha_LDADD += $(PLPARSER_LIBS)
 endif
 
 if HAVE_LIBPEAS
-pragha_SOURCES = \
+pragha_SOURCES += \
 		pragha-plugins-engine.c \
 		pragha-plugins-engine.h
 
@@ -132,6 +132,15 @@ pragha_LDADD += $(LIBPEAS_LIBS)
 
 pragha_CFLAGS += $(LIBPEAS_GTK_CFLAGS)
 pragha_LDADD += $(LIBPEAS_GTK_LIBS)
+endif
+
+if HAVE_LIBSOUP
+pragha_SOURCES += \
+		pragha-online.c \
+		pragha-online.h
+
+pragha_CFLAGS += $(LIBSOUP_CFLAGS)
+pragha_LDADD += $(LIBSOUP_LIBS)
 endif
 
 if WIN32
