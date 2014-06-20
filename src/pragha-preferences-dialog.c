@@ -369,15 +369,16 @@ pragha_preferences_dialog_response(GtkDialog *dialog_w, gint response_id, Prefer
 		pragha_preferences_set_use_cddb(dialog->preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_cddb_w)));
 
-		pragha_preferences_set_use_mpris2(dialog->preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w)));
+		pref_setted = pragha_preferences_get_use_mpris2 (dialog->preferences);
+		pref_toggled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->use_mpris2_w));
+		if (pref_setted != pref_toggled) {
+			pragha_preferences_set_use_mpris2 (dialog->preferences, pref_toggled);
 
-		mpris2 = pragha_application_get_mpris2 (dialog->pragha);
-		if(!pragha_preferences_get_use_mpris2(dialog->preferences)) {
-			pragha_mpris_close (mpris2);
-		}
-		else {
-			pragha_mpris_init (mpris2, dialog->pragha);
+			mpris2 = pragha_application_get_mpris2 (dialog->pragha);
+			if (pref_toggled)
+				pragha_mpris_init (mpris2, dialog->pragha);
+			else
+				pragha_mpris_close (mpris2);
 		}
 		break;
 	default:
