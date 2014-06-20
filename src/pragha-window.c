@@ -223,7 +223,7 @@ pragha_menubar_remove_plugin_action (PraghaApplication *pragha,
  */
 
 void
-pragha_window_free (PraghaApplication *pragha)
+pragha_window_save_settings (PraghaApplication *pragha)
 {
 	PraghaPreferences *preferences;
 	GtkWidget *window, *pane;

@@ -50,7 +50,7 @@ struct _PraghaLastfm {
 	gboolean                  has_pass;
 
 	/* Song status */
-	PRAGHA_MUTEX              (data_mutex);
+	GMutex                    data_mutex;
 	time_t                    playback_started;
 	PraghaMusicobject        *current_mobj;
 	PraghaMusicobject        *updated_mobj;
@@ -394,9 +394,9 @@ pragha_lastfm_tags_corrected_dialog (GtkButton *button, PraghaLastfm *clastfm)
 
 	/* Get all info of suggestions
 	 * Temp Musicobject to not block tag edit dialog */
-	pragha_mutex_lock (clastfm->data_mutex);
+	g_mutex_lock (&clastfm->data_mutex);
 	nmobj = pragha_musicobject_dup(clastfm->updated_mobj);
-	pragha_mutex_unlock (clastfm->data_mutex);
+	g_mutex_unlock (&clastfm->data_mutex);
 
 	g_object_get(nmobj,
 	             "title", &ntitle,
@@ -982,7 +982,7 @@ pragha_lastfm_scrobble_thread (gpointer data)
 
 	CDEBUG(DBG_LASTFM, "Scrobbler thread");
 
-	pragha_mutex_lock (clastfm->data_mutex);
+	g_mutex_lock (&clastfm->data_mutex);
 	g_object_get (clastfm->current_mobj,
 	              "title", &title,
 	              "artist", &artist,
@@ -991,7 +991,7 @@ pragha_lastfm_scrobble_thread (gpointer data)
 	              "length", &length,
 	              NULL);
 	last_time = clastfm->playback_started;
-	pragha_mutex_unlock (clastfm->data_mutex);
+	g_mutex_unlock (&clastfm->data_mutex);
 
 	rv = LASTFM_track_scrobble (clastfm->session_id,
 	                            title,
@@ -1037,11 +1037,11 @@ pragha_lastfm_show_corrrection_button (gpointer user_data)
 	             "file", &cfile,
 	             NULL);
 
-	pragha_mutex_lock (clastfm->data_mutex);
+	g_mutex_lock (&clastfm->data_mutex);
 	g_object_get (clastfm->updated_mobj,
 	              "file", &nfile,
 	              NULL);
-	pragha_mutex_unlock (clastfm->data_mutex);
+	g_mutex_unlock (&clastfm->data_mutex);
 
 	if(g_ascii_strcasecmp(cfile, nfile) == 0)
 		gtk_widget_show (clastfm->ntag_lastfm_button);
@@ -1064,7 +1064,7 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	PraghaLastfm *clastfm = data;
 
 	CDEBUG(DBG_LASTFM, "Update now playing thread");
-	pragha_mutex_lock (clastfm->data_mutex);
+	g_mutex_lock (&clastfm->data_mutex);
 	g_object_get(clastfm->current_mobj,
 	             "title", &title,
 	             "artist", &artist,
@@ -1072,7 +1072,7 @@ pragha_lastfm_now_playing_thread (gpointer data)
 	             "track-no", &track_no,
 	             "length", &length,
 	             NULL);
-	pragha_mutex_unlock (clastfm->data_mutex);
+	g_mutex_unlock (&clastfm->data_mutex);
 
 	rv = LASTFM_track_update_now_playing (clastfm->session_id,
 	                                      title,
@@ -1106,7 +1106,7 @@ pragha_lastfm_now_playing_thread (gpointer data)
 				pragha_musicobject_set_artist(clastfm->updated_mobj, ntrack->artist);
 			if(changed & TAG_ALBUM_CHANGED)
 				pragha_musicobject_set_album(clastfm->updated_mobj, ntrack->album);
-			pragha_mutex_unlock (clastfm->data_mutex);
+			g_mutex_unlock (&clastfm->data_mutex);
 
 			g_idle_add (pragha_lastfm_show_corrrection_button, clastfm);
 		}
@@ -1412,7 +1412,7 @@ pragha_lastfm_new (PraghaApplication *pragha)
 	clastfm->session_id = NULL;
 	clastfm->status = LASTFM_STATUS_INVALID;
 
-	pragha_mutex_create (clastfm->data_mutex);
+	g_mutex_init (&clastfm->data_mutex);
 	clastfm->updated_mobj = pragha_musicobject_new ();
 	clastfm->current_mobj = pragha_musicobject_new ();
 
@@ -1432,11 +1432,7 @@ pragha_lastfm_new (PraghaApplication *pragha)
 	if (pragha_preferences_get_lastfm_support (preferences)) {
 		CDEBUG(DBG_INFO, "Initializing LASTFM");
 
-#if GLIB_CHECK_VERSION(2,32,0)
 		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
-#else
-		if (nm_is_online () == TRUE)
-#endif
 			g_idle_add (pragha_lastfm_connect_idle, clastfm);
 		else
 			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
@@ -1454,7 +1450,7 @@ pragha_lastfm_free (PraghaLastfm *clastfm)
 	g_object_unref (clastfm->updated_mobj);
 	g_object_unref (clastfm->current_mobj);
 
-	pragha_mutex_free(clastfm->data_mutex);
+	g_mutex_clear (&clastfm->data_mutex);
 
 	g_slice_free(PraghaLastfm, clastfm);
 }

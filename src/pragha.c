@@ -401,25 +401,9 @@ pragha_application_dispose (GObject *object)
 
 	CDEBUG(DBG_INFO, "Cleaning up");
 
-#ifdef HAVE_LIBGLYR
-	if (pragha->glyr) {
-		pragha_glyr_free (pragha->glyr);
-		pragha->glyr = NULL;
-	}
-#endif
-#ifdef HAVE_LIBCLASTFM
-	if (pragha->clastfm) {
-		pragha_lastfm_free (pragha->clastfm);
-		pragha->clastfm = NULL;
-	}
-#endif
 	if (pragha->sidebar) {
 		pragha_sidebar_free (pragha->sidebar);
 		pragha->sidebar = NULL;
-	}
-	if (pragha->mpris2) {
-		pragha_mpris_free (pragha->mpris2);
-		pragha->mpris2 = NULL;
 	}
 	if (pragha->backend) {
 		pragha_playback_stop (pragha);
@@ -429,22 +413,6 @@ pragha_application_dispose (GObject *object)
 	if (pragha->art_cache) {
 		pragha_art_cache_free (pragha->art_cache);
 		pragha->art_cache = NULL;
-	}
-	if (pragha->cgnome_media_keys) {
-		gnome_media_keys_free (pragha->cgnome_media_keys);
-		pragha->cgnome_media_keys = NULL;
-	}
-#ifdef HAVE_LIBKEYBINDER
-	if (pragha->keybinder) {
-		keybinder_free ();
-		pragha->keybinder = FALSE;
-	}
-#endif
-	if (pragha->mainwindow) {
-		pragha_window_free (pragha);
-		/* Explicit destroy mainwindow to finalize lifecycle of childrens */
-		gtk_widget_destroy (pragha->mainwindow);
-		pragha->mainwindow = NULL;
 	}
 	if (pragha->scanner) {
 		pragha_scanner_free (pragha->scanner);
@@ -479,6 +447,51 @@ pragha_application_dispose (GObject *object)
 	}
 
 	G_OBJECT_CLASS (pragha_application_parent_class)->dispose (object);
+}
+
+static void
+pragha_application_shutdown (GApplication *application)
+{
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
+
+	CDEBUG(DBG_INFO, "Pragha shutdown: Saving curret state.");
+
+	if (pragha_preferences_get_restore_playlist (pragha->preferences))
+		pragha_playlist_save_playlist_state (pragha->playlist);
+
+	pragha_window_save_settings (pragha);
+
+	pragha_playback_stop (pragha);
+
+#ifdef HAVE_LIBGLYR
+	if (pragha->glyr) {
+		pragha_glyr_free (pragha->glyr);
+		pragha->glyr = NULL;
+	}
+#endif
+#ifdef HAVE_LIBCLASTFM
+	if (pragha->clastfm) {
+		pragha_lastfm_free (pragha->clastfm);
+		pragha->clastfm = NULL;
+	}
+#endif
+	if (pragha->mpris2) {
+		pragha_mpris_free (pragha->mpris2);
+		pragha->mpris2 = NULL;
+	}
+	if (pragha->cgnome_media_keys) {
+		gnome_media_keys_free (pragha->cgnome_media_keys);
+		pragha->cgnome_media_keys = NULL;
+	}
+#ifdef HAVE_LIBKEYBINDER
+	if (pragha->keybinder) {
+		keybinder_free ();
+		pragha->keybinder = FALSE;
+	}
+#endif
+	gtk_widget_destroy (pragha->mainwindow);
+
+	G_APPLICATION_CLASS (pragha_application_parent_class)->shutdown (application);
 }
 
 static void
@@ -680,16 +693,10 @@ pragha_application_local_command_line (GApplication *application, gchar ***argum
 	return FALSE;
 }
 
-//TODO consider use of GApplication::shutdown to save preferences and playlist
-
 void
 pragha_application_quit (PraghaApplication *pragha)
 {
-#if GLIB_CHECK_VERSION (2, 32, 0)
 	g_application_quit (G_APPLICATION (pragha));
-#else
-	g_application_release (G_APPLICATION (pragha));
-#endif
 }
 
 static void
@@ -701,6 +708,7 @@ pragha_application_class_init (PraghaApplicationClass *class)
 	object_class->dispose = pragha_application_dispose;
 
 	application_class->startup = pragha_application_startup;
+	application_class->shutdown = pragha_application_shutdown;
 	application_class->activate = pragha_application_activate;
 	application_class->open = pragha_application_open;
 	application_class->command_line = pragha_application_command_line;
@@ -746,10 +754,7 @@ gint main(gint argc, gchar *argv[])
 	g_setenv("PULSE_PROP_media.role", "audio", TRUE);
 
   /* Initialize the GThread system */
-#if !GLIB_CHECK_VERSION(2,31,0)
-	if (!g_thread_supported())
-		g_thread_init(NULL);
-#endif
+
 #if !GLIB_CHECK_VERSION(2,35,1)
 	g_type_init ();
 #endif
