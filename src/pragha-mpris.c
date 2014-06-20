@@ -1447,10 +1447,10 @@ void pragha_mpris_close (PraghaMpris2 *mpris2)
 	PraghaBackend *backend;
 	PraghaApplication *pragha = mpris2->pragha;
 
-	backend = pragha_application_get_backend (pragha);
-
 	if(NULL == mpris2->dbus_connection)
 		return;
+
+	backend = pragha_application_get_backend (pragha);
 
 	for (i = 0; i < N_OBJECTS; i++) {
 		g_dbus_connection_unregister_object (mpris2->dbus_connection,
