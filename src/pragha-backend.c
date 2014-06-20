@@ -1093,7 +1093,7 @@ pragha_backend_init (PraghaBackend *backend)
 }
 
 PraghaBackend *
-pragha_backend_new ()
+pragha_backend_new (void)
 {
 	gst_init (NULL, NULL);
 

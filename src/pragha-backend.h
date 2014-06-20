@@ -77,7 +77,8 @@ void pragha_backend_set_musicobject (PraghaBackend *backend, PraghaMusicobject *
 PraghaMusicobject *pragha_backend_get_musicobject(PraghaBackend *backend);
 GstElement * pragha_backend_get_equalizer (PraghaBackend *backend);
 void pragha_backend_update_equalizer (PraghaBackend *backend, const gdouble *bands);
-PraghaBackend * pragha_backend_new ();
+
+PraghaBackend * pragha_backend_new (void);
 
 G_END_DECLS
 
