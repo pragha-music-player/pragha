@@ -1993,7 +1993,7 @@ pragha_playlist_update_current_track(PraghaPlaylist *cplaylist, gint changed, Pr
 			gtk_list_store_set(GTK_LIST_STORE(cplaylist->model), &iter, P_ARTIST, pragha_musicobject_get_artist(mobj),-1);
 		}
 		if (changed & TAG_ALBUM_CHANGED) {
-			pragha_musicobject_set_title(mobj, pragha_musicobject_get_title(nmobj));
+			pragha_musicobject_set_album(mobj, pragha_musicobject_get_album(nmobj));
 			gtk_list_store_set(GTK_LIST_STORE(cplaylist->model), &iter, P_ALBUM, pragha_musicobject_get_album(mobj),-1);
 		}
 		if (changed & TAG_GENRE_CHANGED) {
