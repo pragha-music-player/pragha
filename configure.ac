@@ -255,6 +255,7 @@ AC_CONFIG_FILES([po/Makefile.in])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
+AC_CONFIG_FILES([plugins/acoustid/Makefile])
 AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
 AC_CONFIG_FILES([plugins/gnome-media-keys/Makefile])
@@ -284,6 +285,7 @@ echo "   * Controls Pragha using gnome-media-keys interface.....................
 echo "   * Play Audio cds.........................................................: $LIBCDIO_FOUND"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
+echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Search radios on TuneIn.........................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
 echo "   * Share music library on DLNA............(Need rygel-server-2.0 >= 0.20).: $RYGEL_FOUND"
 echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5).: $LIBCLASTFM_FOUND"

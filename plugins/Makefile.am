@@ -35,6 +35,7 @@ SUBDIRS += mtp
 endif
 
 if HAVE_LIBSOUP
+SUBDIRS += acoustid
 SUBDIRS += tunein
 endif
 
