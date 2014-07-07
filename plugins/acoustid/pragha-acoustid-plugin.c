@@ -173,6 +173,7 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	PraghaStatusbar *statusbar;
 	XMLNode *xml = NULL, *xi;
 	gchar *otitle = NULL, *oartist = NULL, *oalbum = NULL;
+	gchar *ntitle = NULL, *nartist = NULL, *nalbum = NULL;
 	gint prechanged = 0;
 
 	PraghaAcoustidPlugin *plugin = user_data;
@@ -193,21 +194,33 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	xml = tinycxml_parse ((gchar *)msg->response_body->data);
 
 	xi = xmlnode_get (xml, CCA{"response", "results", "result", "recordings", "recording", "title", NULL }, NULL, NULL);
-	if (xi && g_ascii_strcasecmp (otitle, xi->content)) {
-		pragha_musicobject_set_title (priv->mobj, xi->content);
-		prechanged |= TAG_TITLE_CHANGED;
+	if (xi && string_is_not_empty(xi->content)) {
+		ntitle = unescape_HTML (xi->content);
+		if (g_strcmp0(otitle, ntitle)) {
+			pragha_musicobject_set_title (priv->mobj, ntitle);
+			prechanged |= TAG_TITLE_CHANGED;
+		}
+		g_free (ntitle);
 	}
 
 	xi = xmlnode_get (xml, CCA{"response", "results", "result", "recordings", "recording", "artists", "artist", "name", NULL }, NULL, NULL);
-	if (xi && g_ascii_strcasecmp (oartist, xi->content)) {
-		pragha_musicobject_set_artist (priv->mobj, xi->content);
-		prechanged |= TAG_ARTIST_CHANGED;
+	if (xi && string_is_not_empty(xi->content)) {
+		nartist = unescape_HTML (xi->content);
+		if (g_strcmp0(oartist, nartist)) {
+			pragha_musicobject_set_artist (priv->mobj, nartist);
+			prechanged |= TAG_ARTIST_CHANGED;
+		}
+		g_free (nartist);
 	}
 
 	xi = xmlnode_get (xml, CCA{"response", "results", "result", "recordings", "recording", "releasegroups", "releasegroup", "title", NULL }, NULL, NULL);
-	if (xi && g_ascii_strcasecmp (oalbum, xi->content)) {
-		pragha_musicobject_set_album (priv->mobj, xi->content);
-		prechanged |= TAG_ALBUM_CHANGED;
+	if (xi && string_is_not_empty(xi->content)) {
+		nalbum = unescape_HTML (xi->content);
+		if (g_strcmp0(oalbum, nalbum)) {
+			pragha_musicobject_set_album (priv->mobj, nalbum);
+			prechanged |= TAG_ALBUM_CHANGED;
+		}
+		g_free (nalbum);
 	}
 
 	if (prechanged)	{
@@ -226,6 +239,10 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 		pragha_statusbar_set_misc_text (statusbar, _("AcoustID not found any similar song"));
 		g_object_unref (statusbar);
 	}
+
+	g_free (otitle);
+	g_free (oartist);
+	g_free (oalbum);
 
 	g_object_unref (priv->mobj);
 	xmlnode_free (xml);
@@ -286,7 +303,6 @@ pragha_acoustid_get_fingerprint (const gchar *filename, gchar **fingerprint)
 	msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR | GST_MESSAGE_EOS);
 	if (msg != NULL)
 		gst_message_unref (msg);
-
 	gst_object_unref (bus);
 
 	gst_element_set_state (pipeline, GST_STATE_NULL);
