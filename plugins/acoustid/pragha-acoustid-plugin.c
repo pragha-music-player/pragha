@@ -287,7 +287,7 @@ pragha_acoustid_get_fingerprint (const gchar *filename, gchar **fingerprint)
 	GstElement *pipeline, *chromaprint;
 	GstBus *bus;
 	GstMessage *msg;
-	gchar *uri, *pipestring;
+	gchar *uri, *pipestring = NULL;
 
 	uri = g_filename_to_uri(filename, NULL, NULL);
 	pipestring = g_strdup_printf("uridecodebin uri=%s ! audioconvert ! chromaprint name=chromaprint0 ! fakesink", uri);
@@ -311,6 +311,7 @@ pragha_acoustid_get_fingerprint (const gchar *filename, gchar **fingerprint)
 	g_object_get (chromaprint, "fingerprint", fingerprint, NULL);
 
 	gst_object_unref (pipeline);
+	g_free (pipestring);
 
 	return TRUE;
 }
@@ -345,6 +346,8 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 		pragha_acoustid_plugin_get_metadata (plugin, duration, fingerprint);
 	else
 		remove_watch_cursor (window);
+
+	g_free (fingerprint);
 }
 
 /*
