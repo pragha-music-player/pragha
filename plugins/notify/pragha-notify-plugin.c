@@ -48,8 +48,6 @@
 #define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
-#define OSD_TIMEOUT 5
-
 #define PRAGHA_TYPE_NOTIFY_PLUGIN         (pragha_notify_plugin_get_type ())
 #define PRAGHA_NOTIFY_PLUGIN(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), PRAGHA_TYPE_NOTIFY_PLUGIN, PraghaNotifyPlugin))
 #define PRAGHA_NOTIFY_PLUGIN_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), PRAGHA_TYPE_NOTIFY_PLUGIN, PraghaNotifyPlugin))
@@ -196,8 +194,6 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 		if (!priv->actions_in_osd)
 			notify_notification_clear_actions (priv->notify);
 	}
-
-	notify_notification_set_timeout (priv->notify, OSD_TIMEOUT);
 
 	/* Add album art if set */
 	if (priv->album_art_in_osd) {
