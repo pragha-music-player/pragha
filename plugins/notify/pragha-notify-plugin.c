@@ -145,6 +145,9 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 
 	priv = plugin->priv;
 
+	if (NULL == mobj)
+		return;
+
 	if (gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(priv->pragha))))
 		return;
 
