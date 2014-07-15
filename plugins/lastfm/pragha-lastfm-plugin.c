@@ -1411,39 +1411,29 @@ pragha_lastfm_connect_idle(gpointer data)
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	priv->has_user = FALSE;
-	priv->has_pass = FALSE;
+	priv->session_id = LASTFM_init (LASTFM_API_KEY, LASTFM_SECRET);
 
-	priv->session_id = LASTFM_init(LASTFM_API_KEY, LASTFM_SECRET);
+	preferences = pragha_application_get_preferences (priv->pragha);
+	user = pragha_lastfm_plugin_get_user (preferences);
+	pass = pragha_lastfm_plugin_get_password (preferences);
 
-	if (priv->session_id != NULL) {
-		preferences = pragha_application_get_preferences (priv->pragha);
-		user = pragha_lastfm_plugin_get_user (preferences);
-		pass = pragha_lastfm_plugin_get_password (preferences);
+	priv->has_user = string_is_not_empty(user);
+	priv->has_pass = string_is_not_empty(pass);
 
-		priv->has_user = string_is_not_empty(user);
-		priv->has_pass = string_is_not_empty(pass);
+	if (priv->has_user && priv->has_pass) {
+		priv->status = LASTFM_login (priv->session_id, user, pass);
 
-		if (priv->has_user && priv->has_pass) {
-			priv->status = LASTFM_login (priv->session_id,
-			                             user, pass);
-
-			if (priv->status == LASTFM_STATUS_OK) {
-				g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
-				                  G_CALLBACK (backend_changed_state_cb), plugin);
-			}
-			else {
-				pragha_lastfm_no_connection_advice ();
-				CDEBUG(DBG_PLUGIN, "Failure to login on lastfm");
-			}
+		if (priv->status == LASTFM_STATUS_OK) {
+			g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+			                  G_CALLBACK (backend_changed_state_cb), plugin);
 		}
-		g_free(user);
-		g_free(pass);
+		else {
+			pragha_lastfm_no_connection_advice ();
+			CDEBUG(DBG_PLUGIN, "Failure to login on lastfm");
+		}
 	}
-	else {
-		pragha_lastfm_no_connection_advice ();
-		CDEBUG(DBG_PLUGIN, "Failure to init libclastfm");
-	}
+	g_free(user);
+	g_free(pass);
 
 	pragha_menubar_append_lastfm (plugin);
 	pragha_lastfm_update_menu_actions (plugin);
@@ -1453,17 +1443,15 @@ pragha_lastfm_connect_idle(gpointer data)
 
 /* Init lastfm with a simple thread when change preferences and show error messages. */
 
-gint
+static void
 pragha_lastfm_connect (PraghaLastfmPlugin *plugin)
 {
 	CDEBUG(DBG_PLUGIN, "Connecting LASTFM");
 
 	g_idle_add (pragha_lastfm_connect_idle, plugin);
-
-	return 0;
 }
 
-void
+static void
 pragha_lastfm_disconnect (PraghaLastfmPlugin *plugin)
 {
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
@@ -1495,6 +1483,8 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
                                            PraghaLastfmPlugin *plugin)
 {
 	PraghaPreferences *preferences;
+	const gchar *test_user = NULL, *entry_user = NULL, *test_pass = NULL, *entry_pass = NULL;
+	gboolean changed = FALSE, test_scrobble = FALSE, toggle_scrobble = FALSE;
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
@@ -1502,20 +1492,35 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 	case GTK_RESPONSE_CANCEL:
 		break;
 	case GTK_RESPONSE_OK:
+		toggle_scrobble = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->enable_w));
+		entry_user = gtk_entry_get_text (GTK_ENTRY(priv->lastfm_uname_w));
+		entry_pass = gtk_entry_get_text (GTK_ENTRY(priv->lastfm_pass_w));
+
 		preferences = pragha_preferences_get ();
+		test_scrobble = pragha_lastfm_plugin_get_scrobble_support (preferences);
+		test_user = pragha_lastfm_plugin_get_user (preferences);
+		test_pass = pragha_lastfm_plugin_get_password (preferences);
 
-		pragha_lastfm_plugin_set_scrobble_support (preferences,
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->enable_w)));
+		if (test_scrobble != toggle_scrobble) {
+			pragha_lastfm_plugin_set_scrobble_support (preferences, toggle_scrobble);
+			changed = TRUE;
+		}
 
-		if (pragha_lastfm_plugin_get_scrobble_support (preferences)) {
-			pragha_lastfm_plugin_set_user (preferences,
-				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_uname_w)));
+		if (g_ascii_strcasecmp (test_user, entry_user)) {
+			pragha_lastfm_plugin_set_user (preferences, entry_user);
+			changed = TRUE;
+		}
 
-			pragha_lastfm_plugin_set_password (preferences,
-				gtk_entry_get_text(GTK_ENTRY(priv->lastfm_pass_w)));
+		if (g_ascii_strcasecmp (test_pass, entry_pass)) {
+			pragha_lastfm_plugin_set_password (preferences, entry_pass);
+			changed = TRUE;
+		}
 
+		if (changed) {
 			pragha_lastfm_disconnect (plugin);
-			pragha_lastfm_connect (plugin);
+
+			if (toggle_scrobble)
+				pragha_lastfm_connect (plugin);
 		}
 		g_object_unref (preferences);
 		break;
