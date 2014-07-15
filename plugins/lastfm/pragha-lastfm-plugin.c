@@ -1555,11 +1555,13 @@ pragha_lastfm_init_settings (PraghaLastfmPlugin *plugin)
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->enable_w), TRUE);
 
 		user = pragha_lastfm_plugin_get_user (preferences);
-		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w), user);
+		if (string_is_not_empty(user))
+			gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w), user);
 		g_free(user);
 
 		pass = pragha_lastfm_plugin_get_password (preferences);
-		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w), pass);
+		if (string_is_not_empty(pass))
+			gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w), pass);
 		g_free(pass);
 	}
 	else {
