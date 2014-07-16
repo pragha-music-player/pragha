@@ -293,7 +293,7 @@ pragha_action_group_set_sensitive (GtkActionGroup *group, const gchar *name, gbo
 	gtk_action_set_sensitive (action, sensitive);
 }
 
-void
+static void
 pragha_lastfm_update_menu_actions (PraghaLastfmPlugin *plugin)
 {
 	PraghaBackend *backend;
@@ -1407,36 +1407,37 @@ pragha_lastfm_connect_idle(gpointer data)
 {
 	PraghaPreferences *preferences;
 	gchar *user = NULL, *pass = NULL;
+	gboolean scrobble = FALSE;
 
 	PraghaLastfmPlugin *plugin = data;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
+	CDEBUG(DBG_PLUGIN, "Connecting LASTFM");
+
 	priv->session_id = LASTFM_init (LASTFM_API_KEY, LASTFM_SECRET);
 
 	preferences = pragha_application_get_preferences (priv->pragha);
+
+	scrobble = pragha_lastfm_plugin_get_scrobble_support (preferences);
 	user = pragha_lastfm_plugin_get_user (preferences);
 	pass = pragha_lastfm_plugin_get_password (preferences);
 
 	priv->has_user = string_is_not_empty(user);
 	priv->has_pass = string_is_not_empty(pass);
 
-	if (priv->has_user && priv->has_pass) {
+	if (scrobble && priv->has_user && priv->has_pass) {
 		priv->status = LASTFM_login (priv->session_id, user, pass);
 
-		if (priv->status == LASTFM_STATUS_OK) {
-			g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
-			                  G_CALLBACK (backend_changed_state_cb), plugin);
-		}
-		else {
+		if (priv->status != LASTFM_STATUS_OK) {
 			pragha_lastfm_no_connection_advice ();
 			CDEBUG(DBG_PLUGIN, "Failure to login on lastfm");
 		}
 	}
+
+	pragha_lastfm_update_menu_actions (plugin);
+
 	g_free(user);
 	g_free(pass);
-
-	pragha_menubar_append_lastfm (plugin);
-	pragha_lastfm_update_menu_actions (plugin);
 
 	return FALSE;
 }
@@ -1446,8 +1447,6 @@ pragha_lastfm_connect_idle(gpointer data)
 static void
 pragha_lastfm_connect (PraghaLastfmPlugin *plugin)
 {
-	CDEBUG(DBG_PLUGIN, "Connecting LASTFM");
-
 	g_idle_add (pragha_lastfm_connect_idle, plugin);
 }
 
@@ -1459,12 +1458,6 @@ pragha_lastfm_disconnect (PraghaLastfmPlugin *plugin)
 	if (priv->session_id != NULL) {
 		CDEBUG(DBG_PLUGIN, "Disconnecting LASTFM");
 
-		if (priv->status == LASTFM_STATUS_OK)
-			g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
-			                                      backend_changed_state_cb, priv->pragha);
-
-		pragha_menubar_remove_lastfm (plugin);
-
 		LASTFM_dinit(priv->session_id);
 
 		priv->session_id = NULL;
@@ -1472,6 +1465,7 @@ pragha_lastfm_disconnect (PraghaLastfmPlugin *plugin)
 		priv->has_user = FALSE;
 		priv->has_pass = FALSE;
 	}
+	pragha_lastfm_update_menu_actions (plugin);
 }
 
 /*
@@ -1506,21 +1500,19 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 			changed = TRUE;
 		}
 
-		if (g_ascii_strcasecmp (test_user, entry_user)) {
+		if (g_strcmp0 (test_user, entry_user)) {
 			pragha_lastfm_plugin_set_user (preferences, entry_user);
 			changed = TRUE;
 		}
 
-		if (g_ascii_strcasecmp (test_pass, entry_pass)) {
+		if (g_strcmp0 (test_pass, entry_pass)) {
 			pragha_lastfm_plugin_set_password (preferences, entry_pass);
 			changed = TRUE;
 		}
 
 		if (changed) {
 			pragha_lastfm_disconnect (plugin);
-
-			if (toggle_scrobble)
-				pragha_lastfm_connect (plugin);
+			pragha_lastfm_connect (plugin);
 		}
 		g_object_unref (preferences);
 		break;
@@ -1542,7 +1534,8 @@ toggle_lastfm (GtkToggleButton *button, PraghaLastfmPlugin *plugin)
 	gtk_widget_set_sensitive (priv->lastfm_pass_w, is_active);
 
 	if (!is_active) {
-		pragha_lastfm_disconnect (plugin);
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w), "");
+		gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w), "");
 	}
 }
 
@@ -1590,7 +1583,7 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 
 	pragha_hig_workarea_table_add_section_title (table, &row, "Last.fm");
 
-	lastfm_check = gtk_check_button_new_with_label (_("Last.fm Support"));
+	lastfm_check = gtk_check_button_new_with_label (_("Scrobble on Last.fm"));
 	pragha_hig_workarea_table_add_wide_control (table, &row, lastfm_check);
 
 	lastfm_ulabel = gtk_label_new (_("Username"));
@@ -1651,8 +1644,6 @@ pragha_lastfm_plugin_remove_setting (PraghaLastfmPlugin *plugin)
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
-	PraghaPreferences *preferences;
-
 	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
@@ -1677,22 +1668,25 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->update_timeout_id = 0;
 	priv->scrobble_timeout_id = 0;
 
+	/* Append menu and settings */
+
+	pragha_menubar_append_lastfm (plugin);
+	pragha_lastfm_plugin_append_setting (plugin);
+
 	/* Test internet and launch threads.*/
 
-	preferences = pragha_application_get_preferences (priv->pragha);
-	if (pragha_lastfm_plugin_get_scrobble_support (preferences)) {
-		CDEBUG(DBG_PLUGIN, "Initializing LASTFM");
-
-		if (g_network_monitor_get_network_available (g_network_monitor_get_default ()))
-			g_idle_add (pragha_lastfm_connect_idle, plugin);
-		else
-			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
-			                            pragha_lastfm_connect_idle, plugin, NULL);
+	if (g_network_monitor_get_network_available (g_network_monitor_get_default ())) {
+		g_idle_add (pragha_lastfm_connect_idle, plugin);
+	}
+	else {
+		g_timeout_add_seconds_full (G_PRIORITY_DEFAULT_IDLE, 30,
+		                            pragha_lastfm_connect_idle, plugin, NULL);
 	}
 
-	/* Append settings */
+	/* Connect playback signals */
 
-	pragha_lastfm_plugin_append_setting (plugin);
+	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+	                  G_CALLBACK (backend_changed_state_cb), plugin);
 }
 
 static void
@@ -1703,8 +1697,19 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Lastfm plugin %s", G_STRFUNC);
 
+	/* Disconnect playback signals */
+
+	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
+	                                      backend_changed_state_cb, priv->pragha);
+
 	pragha_lastfm_disconnect (plugin);
+
+	/* Remove menu and settings */
+
+	pragha_menubar_remove_lastfm (plugin);
 	pragha_lastfm_plugin_remove_setting (plugin);
+
+	/* Clean */
 
 	g_object_unref (priv->updated_mobj);
 	g_object_unref (priv->current_mobj);
