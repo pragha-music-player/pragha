@@ -37,6 +37,7 @@
 #endif
 
 #include "pragha-playlists-mgmt.h"
+#include "pragha-model-playlist.h"
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -265,7 +266,7 @@ pragha_parser_append_foreach_playlist (GtkTreeModel *model,
 
 	PraghaPlParser *parser = data;
 
-	gtk_tree_model_get (model, iter, P_MOBJ_PTR, &mobj, -1);
+	gtk_tree_model_get (model, iter, PRAGHA_LIST_COL_MOBJ, &mobj, -1);
 
 	filename = pragha_musicobject_get_file(mobj);
 	base_uri = get_display_filename(filename, TRUE);

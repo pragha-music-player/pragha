@@ -38,6 +38,8 @@ pragha_SOURCES = \
 		pragha-library-pane.h \
 		pragha-menubar.c \
 		pragha-menubar.h \
+		pragha-model-playlist.c \
+		pragha-model-playlist.h \
 		pragha-music-enum.c \
 		pragha-music-enum.h \
 		pragha-musicobject.c \

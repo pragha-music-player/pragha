@@ -42,28 +42,6 @@ typedef struct {
 	void (*playlist_changed) (PraghaPlaylist *playlist);
 } PraghaPlaylistClass;
 
-/* Columns in current playlist view */
-
-enum curplaylist_columns {
-	P_MOBJ_PTR,
-	P_QUEUE,
-	P_BUBBLE,
-	P_STATUS_PIXBUF,
-	P_TRACK_NO,
-	P_TITLE,
-	P_ARTIST,
-	P_ALBUM,
-	P_GENRE,
-	P_BITRATE,
-	P_YEAR,
-	P_COMMENT,
-	P_LENGTH,
-	P_FILENAME,
-	P_MIMETYPE,
-	P_PLAYED,
-	N_P_COLUMNS
-};
-
 /* Current playlist movement */
 
 typedef enum {
