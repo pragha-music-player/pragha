@@ -1,5 +1,7 @@
 
 #include <gobject/gvaluecollector.h>
+#include <stdlib.h>
+
 #include "pragha-model-playlist.h"
 #include "pragha-utils.h"
 
@@ -407,7 +409,7 @@ pragha_model_playlist_get_value (GtkTreeModel *tree_model,
 			g_value_set_boolean(value, song->bubble);
 			break;
 		case PRAGHA_LIST_COL_PIXBUF:
-			g_value_set_pointer(value, song->pixbuf);
+			g_value_set_object (value, song->pixbuf);
 			break;
 		case PRAGHA_LIST_COL_TRACK_NO:
 			track_no = pragha_musicobject_get_track_no(song->mobj);
@@ -513,7 +515,7 @@ pragha_model_playlist_set_value (GtkTreeModel *tree_model,
 			song->bubble = g_value_get_boolean(value);
 			break;
 		case PRAGHA_LIST_COL_PIXBUF:
-			song->pixbuf = g_value_get_pointer(value);
+			song->pixbuf = g_value_get_object(value);
 			break;
 		case PRAGHA_LIST_COL_TRACK_NO:
 			pragha_musicobject_set_track_no (song->mobj, g_value_get_int(value));
@@ -533,7 +535,7 @@ pragha_model_playlist_set_value (GtkTreeModel *tree_model,
 		case PRAGHA_LIST_COL_BITRATE:
 			break;
 		case PRAGHA_LIST_COL_YEAR:
-			//pragha_musicobject_set_year(song->mobj, atoi(g_value_get_string(value)));
+			pragha_musicobject_set_year(song->mobj, atoi(g_value_get_string(value)));
 			break;
 		case PRAGHA_LIST_COL_COMMENT:
 			pragha_musicobject_set_comment (song->mobj, g_value_get_string(value));
@@ -578,10 +580,10 @@ pragha_model_playlist_set_real (GtkTreeModel *tree_model,
 		pragha_model_playlist_set_value (tree_model, iter, column, &value);
 		g_value_unset (&value);
 
-		/*GtkTreePath *path;
+		GtkTreePath *path;
 		path = pragha_model_playlist_get_path (tree_model, iter);
 		gtk_tree_model_row_changed (tree_model, path, iter);
-		gtk_tree_path_free (path);*/
+		gtk_tree_path_free (path);
 
 		column = va_arg (var_args, gint);
 	}
@@ -598,6 +600,7 @@ pragha_model_playlist_set (GtkTreeModel *tree_model,
 	pragha_model_playlist_set_real (tree_model, iter, var_args);
 	va_end (var_args);
 }
+
 
 /*****************************************************************************
  *
