@@ -1266,7 +1266,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 {
 	PraghaPreferences *preferences;
 	PraghaMusicobject *mobj = NULL;
-	PraghaMusicType file_type = FILE_NONE;
+	PraghaMusicSource file_source = FILE_NONE;
 	PraghaBackendState state = 0;
 	gint length = 0, dalay_time = 0;
 
@@ -1314,8 +1314,8 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	mobj = pragha_backend_get_musicobject (backend);
 
-	file_type = pragha_musicobject_get_file_type (mobj);
-	if (file_type == FILE_NONE || file_type == FILE_HTTP)
+	file_source = pragha_musicobject_get_source (mobj);
+	if (file_source == FILE_NONE || file_source == FILE_HTTP)
 		return;
 
 	length = pragha_musicobject_get_length (mobj);

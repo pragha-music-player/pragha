@@ -56,16 +56,9 @@ typedef enum {
 	FILE_USER_1    =  1,
 	FILE_USER_0    =  0,
 	FILE_NONE      = -1,
-	FILE_WAV       = -2,
-	FILE_MP3       = -3,
-	FILE_FLAC      = -4,
-	FILE_OGGVORBIS = -5,
-	FILE_ASF       = -6,
-	FILE_MP4       = -7,
-	FILE_APE       = -8,
-	FILE_TRACKER   = -9,
-	FILE_HTTP      = -10
-} PraghaMusicType;
+	FILE_LOCAL     = -2,
+	FILE_HTTP      = -3
+} PraghaMusicSource;
 
 #define PRAGHA_MUSICOBJECT_PARAM_STRING G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS
 
@@ -88,11 +81,17 @@ pragha_musicobject_set_file (PraghaMusicobject *musicobject,
 gboolean
 pragha_musicobject_is_local_file (PraghaMusicobject *musicobject);
 
-PraghaMusicType
-pragha_musicobject_get_file_type (PraghaMusicobject *musicobject);
+PraghaMusicSource
+pragha_musicobject_get_source (PraghaMusicobject *musicobject);
 void
-pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
-                                  PraghaMusicType file_type);
+pragha_musicobject_set_source (PraghaMusicobject *musicobject,
+                               PraghaMusicSource  source);
+
+const gchar *
+pragha_musicobject_get_mime_type (PraghaMusicobject *musicobject);
+void
+pragha_musicobject_set_mime_type (PraghaMusicobject *musicobject,
+                                  const gchar       *mime_type);
 
 const gchar *
 pragha_musicobject_get_title (PraghaMusicobject *musicobject);

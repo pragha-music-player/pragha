@@ -541,10 +541,11 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 {
 	GtkWidget *dialog;
 	GtkWidget *properties_table;
-	GtkWidget *label_length, *label_bitrate, *label_channels, *label_samplerate, *label_folder, *label_filename;
-	GtkWidget *info_length, *info_bitrate, *info_channels, *info_samplerate, *info_folder, *info_filename;
+	GtkWidget *label_length, *label_bitrate, *label_channels, *label_samplerate, *label_folder, *label_filename, *label_mimetype;
+	GtkWidget *info_length, *info_bitrate, *info_channels, *info_samplerate, *info_folder, *info_filename, *info_mimetype;
 
 	gchar *length = NULL, *bitrate = NULL, *channels = NULL, *samplerate = NULL, *folder = NULL, *filename = NULL;
+	const gchar *mimetype = NULL;
 
 	if(!mobj)
 		return;
@@ -557,6 +558,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	samplerate = g_strdup_printf("%d Hz", pragha_musicobject_get_samplerate(mobj));
 	folder = get_display_filename(pragha_musicobject_get_file(mobj), TRUE);
 	filename = get_display_name(mobj);
+	mimetype = pragha_musicobject_get_mime_type(mobj);
 
 	/* Create table */
 
@@ -575,6 +577,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	label_samplerate = gtk_label_new(_("Samplerate"));
 	label_folder = gtk_label_new(_("Folder"));
 	label_filename = gtk_label_new(_("Filename"));
+	label_mimetype = gtk_label_new(_("Mimetype"));
 
 	gtk_misc_set_alignment(GTK_MISC (label_length), 1, 0);
 	gtk_misc_set_alignment(GTK_MISC (label_bitrate), 1, 0);
@@ -582,6 +585,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_misc_set_alignment(GTK_MISC (label_samplerate), 1, 0);
 	gtk_misc_set_alignment(GTK_MISC (label_folder), 1, 0);
 	gtk_misc_set_alignment(GTK_MISC (label_filename), 1, 0);
+	gtk_misc_set_alignment(GTK_MISC (label_mimetype), 1, 0);
 
 	gtk_label_set_attribute_bold(GTK_LABEL(label_length));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_bitrate));
@@ -589,6 +593,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_label_set_attribute_bold(GTK_LABEL(label_samplerate));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_folder));
 	gtk_label_set_attribute_bold(GTK_LABEL(label_filename));
+	gtk_label_set_attribute_bold(GTK_LABEL(label_mimetype));
 
 	/* Create info labels */
 
@@ -598,6 +603,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	info_samplerate = gtk_label_new(samplerate);
 	info_folder = gtk_label_new(folder);
 	info_filename = gtk_label_new(filename);
+	info_mimetype = gtk_label_new(mimetype);
 
 	gtk_misc_set_alignment(GTK_MISC (info_length), 0, 0);
 	gtk_misc_set_alignment(GTK_MISC (info_bitrate), 0, 0);
@@ -605,6 +611,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_misc_set_alignment(GTK_MISC (info_samplerate), 0, 0);
 	gtk_misc_set_alignment(GTK_MISC (info_folder), 0, 0);
 	gtk_misc_set_alignment(GTK_MISC (info_filename), 0, 0);
+	gtk_misc_set_alignment(GTK_MISC (info_mimetype), 0, 0);
 
 	gtk_label_set_selectable(GTK_LABEL(info_length), TRUE);
 	gtk_label_set_selectable(GTK_LABEL(info_bitrate), TRUE);
@@ -612,6 +619,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_label_set_selectable(GTK_LABEL(info_samplerate), TRUE);
 	gtk_label_set_selectable(GTK_LABEL(info_folder), TRUE);
 	gtk_label_set_selectable(GTK_LABEL(info_filename), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(info_mimetype), TRUE);
 
 	gtk_widget_set_hexpand (GTK_WIDGET(info_length), TRUE);
 	gtk_widget_set_hexpand (GTK_WIDGET(info_bitrate), TRUE);
@@ -619,6 +627,7 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 	gtk_widget_set_hexpand (GTK_WIDGET(info_samplerate), TRUE);
 	gtk_widget_set_hexpand (GTK_WIDGET(info_folder), TRUE);
 	gtk_widget_set_hexpand (GTK_WIDGET(info_filename), TRUE);
+	gtk_widget_set_hexpand (GTK_WIDGET(info_mimetype), TRUE);
 
 	/* Attach labels */
 
@@ -639,6 +648,9 @@ pragha_track_properties_dialog(PraghaMusicobject *mobj,
 
 	gtk_grid_attach (GTK_GRID(properties_table), label_filename, 0, 5, 1, 1);
 	gtk_grid_attach (GTK_GRID(properties_table), info_filename, 1, 5, 1, 1);
+
+	gtk_grid_attach (GTK_GRID(properties_table), label_mimetype, 0, 6, 1, 1);
+	gtk_grid_attach (GTK_GRID(properties_table), info_mimetype, 1, 6, 1, 1);
 
 	/* The main edit dialog */
 

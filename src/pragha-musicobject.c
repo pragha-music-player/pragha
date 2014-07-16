@@ -22,7 +22,8 @@ G_DEFINE_TYPE(PraghaMusicobject, pragha_musicobject, G_TYPE_OBJECT)
 struct _PraghaMusicobjectPrivate
 {
 	gchar *file;
-	PraghaMusicType file_type;
+	PraghaMusicSource source;
+	gchar *mime_type;
 	gchar *title;
 	gchar *artist;
 	gchar *album;
@@ -40,7 +41,8 @@ enum
 {
 	PROP_0,
 	PROP_FILE,
-	PROP_FILE_TYPE,
+	PROP_SOURCE,
+	PROP_MIME_TYPE,
 	PROP_TITLE,
 	PROP_ARTIST,
 	PROP_ALBUM,
@@ -78,7 +80,8 @@ pragha_musicobject_dup (PraghaMusicobject *musicobject)
 
 	return g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", pragha_musicobject_get_file(musicobject),
-	                     "file-type", pragha_musicobject_get_file_type(musicobject),
+	                     "source", pragha_musicobject_get_source (musicobject),
+	                     "mime-type", pragha_musicobject_get_mime_type(musicobject),
 	                     "title", pragha_musicobject_get_title(musicobject),
 	                     "artist", pragha_musicobject_get_artist(musicobject),
 	                     "album", pragha_musicobject_get_album(musicobject),
@@ -104,7 +107,8 @@ pragha_musicobject_clean (PraghaMusicobject *musicobject)
 
 	g_object_set (musicobject,
 	              "file", "",
-	              "file-type", 0,
+	              "source", FILE_NONE,
+	              "mime-type", "",
 	              "title", "",
 	              "artist", "",
 	              "album", "",
@@ -174,29 +178,29 @@ pragha_musicobject_is_local_file (PraghaMusicobject *musicobject)
 {
 	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FALSE);
 
-	PraghaMusicType file_type = musicobject->priv->file_type;
+	PraghaMusicSource source = musicobject->priv->source;
 
-	return (file_type != FILE_HTTP) && (file_type < FILE_NONE);
+	return (source == FILE_LOCAL);
 }
 
 /**
- * pragha_musicobject_get_file_type:
+ * pragha_musicobject_get_source:
  *
  */
-PraghaMusicType
-pragha_musicobject_get_file_type (PraghaMusicobject *musicobject)
+PraghaMusicSource
+pragha_musicobject_get_source (PraghaMusicobject *musicobject)
 {
-	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), 0);
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), FILE_NONE);
 
-	return musicobject->priv->file_type;
+	return musicobject->priv->source;
 }
 /**
- * pragha_musicobject_set_file_type:
+ * pragha_musicobject_set_source:
  *
  */
 void
-pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
-                                  PraghaMusicType file_type)
+pragha_musicobject_set_source (PraghaMusicobject *musicobject,
+                               PraghaMusicSource  source)
 {
 	PraghaMusicobjectPrivate *priv;
 
@@ -204,7 +208,36 @@ pragha_musicobject_set_file_type (PraghaMusicobject *musicobject,
 
 	priv = musicobject->priv;
 
-	priv->file_type = file_type;
+	priv->source = source;
+}
+
+/**
+ * pragha_musicobject_get_mime_type:
+ *
+ */
+const gchar *
+pragha_musicobject_get_mime_type (PraghaMusicobject *musicobject)
+{
+	g_return_val_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject), NULL);
+
+	return musicobject->priv->mime_type;
+}
+/**
+ * pragha_musicobject_set_mime_type:
+ *
+ */
+void
+pragha_musicobject_set_mime_type (PraghaMusicobject *musicobject,
+                                  const gchar       *mime_type)
+{
+	PraghaMusicobjectPrivate *priv;
+
+	g_return_if_fail(PRAGHA_IS_MUSICOBJECT(musicobject));
+
+	priv = musicobject->priv;
+
+	g_free (priv->mime_type);
+	priv->mime_type = g_strdup(mime_type);
 }
 
 /**
@@ -528,6 +561,7 @@ pragha_musicobject_finalize (GObject *object)
 	priv = PRAGHA_MUSICOBJECT(object)->priv;
 
 	g_free(priv->file);
+	g_free(priv->mime_type);
 	g_free(priv->title);
 	g_free(priv->artist);
 	g_free(priv->album);
@@ -549,8 +583,11 @@ pragha_musicobject_get_property (GObject *object,
 	case PROP_FILE:
 		g_value_set_string (value, pragha_musicobject_get_file(musicobject));
 		break;
-	case PROP_FILE_TYPE:
-		g_value_set_int(value, pragha_musicobject_get_file_type(musicobject));
+	case PROP_SOURCE:
+		g_value_set_int(value, pragha_musicobject_get_source(musicobject));
+		break;
+	case PROP_MIME_TYPE:
+		g_value_set_string (value, pragha_musicobject_get_mime_type(musicobject));
 		break;
 	case PROP_TITLE:
 		g_value_set_string (value, pragha_musicobject_get_title(musicobject));
@@ -602,8 +639,11 @@ pragha_musicobject_set_property (GObject *object,
 	case PROP_FILE:
 		pragha_musicobject_set_file(musicobject, g_value_get_string(value));
 		break;
-	case PROP_FILE_TYPE:
-		pragha_musicobject_set_file_type(musicobject, g_value_get_int(value));
+	case PROP_SOURCE:
+		pragha_musicobject_set_source(musicobject, g_value_get_int(value));
+		break;
+	case PROP_MIME_TYPE:
+		pragha_musicobject_set_mime_type(musicobject, g_value_get_string(value));
 		break;
 	case PROP_TITLE:
 		pragha_musicobject_set_title(musicobject, g_value_get_string(value));
@@ -666,17 +706,28 @@ pragha_musicobject_class_init (PraghaMusicobjectClass *klass)
 		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
-	  * PraghaMusicobject:file_type:
+	  * PraghaMusicobject:source:
 	  *
 	  */
-	gParamSpecs[PROP_FILE_TYPE] =
-		g_param_spec_int ("file-type",
-		                  "FileType",
-		                  "The File Type",
+	gParamSpecs[PROP_SOURCE] =
+		g_param_spec_int ("source",
+		                  "Source",
+		                  "Source of file",
 		                  FILE_HTTP,
 		                  FILE_USER_L,
 		                  FILE_NONE,
 		                  G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+	/**
+	  * PraghaMusicobject:mime_type:
+	  *
+	  */
+	gParamSpecs[PROP_MIME_TYPE] =
+		g_param_spec_string("mime-type",
+		                    "MimeType",
+		                    "The MimeType",
+		                    "",
+		                    PRAGHA_MUSICOBJECT_PARAM_STRING);
 
 	/**
 	  * PraghaMusicobject:title:

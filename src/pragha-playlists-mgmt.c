@@ -1127,7 +1127,7 @@ save_playlist(PraghaPlaylist* cplaylist,
 			    	file = g_strdup(pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);
 			}
-			else if(pragha_musicobject_get_file_type(mobj) == FILE_HTTP) {
+			else if(pragha_musicobject_get_source(mobj) == FILE_HTTP) {
 				/* TODO: Fix this negradaaa!. */
 				file = g_strdup_printf("Radio:/%s", pragha_musicobject_get_file(mobj));
 				files = g_slist_prepend(files, file);

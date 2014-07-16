@@ -129,7 +129,7 @@ new_musicobject_from_cdda (PraghaApplication *pragha,
 	}
 
 	enum_map = pragha_music_enum_get ();
-	pragha_musicobject_set_file_type (mobj, pragha_music_enum_map_get(enum_map, "FILE_CDDA"));
+	pragha_musicobject_set_source (mobj, pragha_music_enum_map_get(enum_map, "FILE_CDDA"));
 	g_object_unref (enum_map);
 
 	nfile = g_strdup_printf("cdda://%d", track_no);
@@ -316,13 +316,13 @@ static gboolean
 pragha_musicobject_is_cdda_type (PraghaMusicobject *mobj)
 {
 	PraghaMusicEnum *enum_map = NULL;
-	PraghaMusicType file_type = FILE_NONE;
+	PraghaMusicSource file_source = FILE_NONE;
 
 	enum_map = pragha_music_enum_get ();
-	file_type = pragha_music_enum_map_get(enum_map, "FILE_CDDA");
+	file_source = pragha_music_enum_map_get(enum_map, "FILE_CDDA");
 	g_object_unref (enum_map);
 
-	return (file_type == pragha_musicobject_get_file_type (mobj));
+	return (file_source == pragha_musicobject_get_source (mobj));
 }
 
 static void

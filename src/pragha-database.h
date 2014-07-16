@@ -71,6 +71,9 @@ gint
 pragha_database_find_location (PraghaDatabase *database, const gchar *location);
 
 gint
+pragha_database_find_mime_type (PraghaDatabase *database, const gchar *mime_type);
+
+gint
 pragha_database_find_artist (PraghaDatabase *database, const gchar *artist);
 
 gint
@@ -93,6 +96,9 @@ pragha_database_find_radio (PraghaDatabase *database, const gchar *radio);
 
 gint
 pragha_database_add_new_location (PraghaDatabase *database, const gchar *location);
+
+gint
+pragha_database_add_new_mime_type (PraghaDatabase *database, const gchar *mime_type);
 
 gint
 pragha_database_add_new_artist (PraghaDatabase *database, const gchar *artist);

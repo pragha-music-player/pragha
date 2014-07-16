@@ -252,7 +252,7 @@ pragha_song_info_get_info (gpointer data)
 static void
 backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
-	PraghaMusicType file_type = FILE_NONE;
+	PraghaMusicSource file_source = FILE_NONE;
 	PraghaBackendState state = 0;
 
 	PraghaSongInfoPlugin *plugin = user_data;
@@ -269,9 +269,9 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	if (state != ST_PLAYING)
 		return;
 
-	file_type = pragha_musicobject_get_file_type (pragha_backend_get_musicobject (backend));
+	file_source = pragha_musicobject_get_source (pragha_backend_get_musicobject (backend));
 
-	if (file_type == FILE_NONE || file_type == FILE_HTTP) {
+	if (file_source == FILE_NONE || file_source == FILE_HTTP) {
 		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
 	}

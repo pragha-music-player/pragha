@@ -119,6 +119,7 @@ G_DEFINE_TYPE(PraghaPlaylist, pragha_playlist, GTK_TYPE_SCROLLED_WINDOW)
 #define P_COMMENT_STR       N_("Comment")
 #define P_LENGTH_STR        N_("Length")
 #define P_FILENAME_STR      N_("Filename")
+#define P_MIMETYPE_STR      N_("Mimetype")
 
 /*
  * Prototypes
@@ -158,6 +159,7 @@ static void playlist_year_column_change_cb     (GtkCheckMenuItem *item, PraghaPl
 static void playlist_length_column_change_cb   (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 static void playlist_comment_column_change_cb  (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 static void playlist_filename_column_change_cb (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
+static void playlist_mimetype_column_change_cb (GtkCheckMenuItem *item, PraghaPlaylist* cplaylist);
 
 static void clear_sort_current_playlist_cb (GtkMenuItem *item, PraghaPlaylist *cplaylist);
 
@@ -1691,7 +1693,7 @@ pragha_playlist_crop_selection (PraghaPlaylist *playlist)
 
 
 void
-pragha_playlist_crop_music_type (PraghaPlaylist *playlist, PraghaMusicType music_type)
+pragha_playlist_crop_music_type (PraghaPlaylist *playlist, PraghaMusicSource music_type)
 {
 	GtkTreeIter iter;
 	PraghaMusicobject *mobj = NULL;
@@ -1707,7 +1709,7 @@ pragha_playlist_crop_music_type (PraghaPlaylist *playlist, PraghaMusicType music
 	ret = gtk_tree_model_get_iter_first (playlist->model, &iter);
 	while (ret) {
 		gtk_tree_model_get (playlist->model, &iter, P_MOBJ_PTR, &mobj, -1);
-		if (music_type == pragha_musicobject_get_file_type(mobj)) {
+		if (music_type == pragha_musicobject_get_source(mobj)) {
 			path = gtk_tree_model_get_path (playlist->model, &iter);
 			ref = gtk_tree_row_reference_new (playlist->model, path);
 			to_delete = g_slist_prepend(to_delete, ref);
@@ -2023,7 +2025,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 			GtkTreeIter *pos)
 {
 	GtkTreeIter iter;
-	const gchar *title, *artist, *album, *genre, *comment;
+	const gchar *title, *artist, *album, *genre, *comment, *mimetype;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 	GtkTreeModel *model = cplaylist->model;
@@ -2040,6 +2042,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	track_no = pragha_musicobject_get_track_no(mobj);
 	year = pragha_musicobject_get_year(mobj);
 	comment = pragha_musicobject_get_comment(mobj);
+	mimetype = pragha_musicobject_get_mime_type(mobj);
 	length = pragha_musicobject_get_length(mobj);
 	bitrate = pragha_musicobject_get_bitrate(mobj);
 
@@ -2074,6 +2077,7 @@ insert_current_playlist(PraghaPlaylist *cplaylist,
 	                   P_COMMENT, comment,
 	                   P_LENGTH, ch_length,
 	                   P_FILENAME, ch_filename,
+	                   P_MIMETYPE, mimetype,
 	                   P_PLAYED, FALSE,
 	                   -1);
 
@@ -2098,7 +2102,7 @@ static void
 append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, GtkTreePath **path)
 {
 	GtkTreeIter iter;
-	const gchar *title, *artist, *album, *genre, *comment;
+	const gchar *title, *artist, *album, *genre, *comment, *mimetype;
 	gint track_no, year, length, bitrate;
 	gchar *ch_length = NULL, *ch_track_no = NULL, *ch_year = NULL, *ch_bitrate = NULL, *ch_filename = NULL;
 	GtkTreeModel *model = cplaylist->model;
@@ -2115,6 +2119,7 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	track_no = pragha_musicobject_get_track_no(mobj);
 	year = pragha_musicobject_get_year(mobj);
 	comment = pragha_musicobject_get_comment(mobj);
+	mimetype = pragha_musicobject_get_mime_type(mobj);
 	length = pragha_musicobject_get_length(mobj);
 	bitrate = pragha_musicobject_get_bitrate(mobj);
 
@@ -2145,6 +2150,7 @@ append_current_playlist_ex(PraghaPlaylist *cplaylist, PraghaMusicobject *mobj, G
 	                   P_COMMENT, comment,
 	                   P_LENGTH, ch_length,
 	                   P_FILENAME, ch_filename,
+	                   P_MIMETYPE, mimetype,
 	                   P_PLAYED, FALSE,
 	                   -1);
 
@@ -3334,6 +3340,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 		*toggle_comment,
 		*toggle_length,
 		*toggle_filename,
+		*toggle_mimetype,
 		*separator,
 		*action_clear_sort;
 
@@ -3351,6 +3358,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	toggle_comment = gtk_check_menu_item_new_with_label(_("Comment"));
 	toggle_length = gtk_check_menu_item_new_with_label(_("Length"));
 	toggle_filename = gtk_check_menu_item_new_with_label(_("Filename"));
+	toggle_mimetype = gtk_check_menu_item_new_with_label(_("Mimetype"));
 	separator = gtk_separator_menu_item_new ();
 
 	action_clear_sort = gtk_image_menu_item_new_with_label(_("Clear sort"));
@@ -3369,6 +3377,7 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_comment);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_length);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_filename);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), toggle_mimetype);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), separator);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), action_clear_sort);
 
@@ -3394,6 +3403,8 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_length), TRUE);
 	if (is_present_str_list(P_FILENAME_STR, cplaylist->columns))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_filename), TRUE);
+	if (is_present_str_list(P_MIMETYPE_STR, cplaylist->columns))
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(toggle_mimetype), TRUE);
 
 	/* Setup the individual signal handlers */
 
@@ -3417,6 +3428,8 @@ create_header_context_menu(PraghaPlaylist* cplaylist)
 			 G_CALLBACK(playlist_length_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(toggle_filename), "toggled",
 			 G_CALLBACK(playlist_filename_column_change_cb), cplaylist);
+	g_signal_connect(G_OBJECT(toggle_mimetype), "toggled",
+			 G_CALLBACK(playlist_mimetype_column_change_cb), cplaylist);
 	g_signal_connect(G_OBJECT(action_clear_sort), "activate",
 			 G_CALLBACK(clear_sort_current_playlist_cb), cplaylist);
 
@@ -3507,7 +3520,8 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 		*label_year,
 		*label_comment,
 		*label_length,
-		*label_filename;
+		*label_filename,
+		*label_mimetype;
 	GtkWidget *col_button;
 
 	label_track = gtk_label_new(_("Track"));
@@ -3520,6 +3534,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	label_comment = gtk_label_new(_("Comment"));
 	label_length = gtk_label_new(_("Length"));
 	label_filename = gtk_label_new(_("Filename"));
+	label_mimetype = gtk_label_new(_("Mimetype"));
 
 	state_pixbuf = gtk_image_new_from_icon_name ("audio-volume-high", GTK_ICON_SIZE_MENU);
 
@@ -3743,6 +3758,27 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	col_button = gtk_widget_get_ancestor(label_filename, GTK_TYPE_BUTTON);
 	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
 			 G_CALLBACK(header_right_click_cb), cplaylist);
+
+	/* Column : Mimetype */
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer),1);
+	gtk_cell_renderer_set_fixed_size (renderer, 1, -1);
+	column = gtk_tree_view_column_new_with_attributes(P_MIMETYPE_STR,
+							  renderer,
+							  "text",
+							  P_MIMETYPE,
+							  NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, P_MIMETYPE);
+	g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_column_set_widget(column, label_mimetype);
+	gtk_widget_show(label_mimetype);
+	col_button = gtk_widget_get_ancestor(label_mimetype, GTK_TYPE_BUTTON);
+	g_signal_connect(G_OBJECT(GTK_WIDGET(col_button)), "button-press-event",
+			 G_CALLBACK(header_right_click_cb), cplaylist);
+
 }
 
 void
@@ -3778,6 +3814,7 @@ create_current_playlist_view (PraghaPlaylist *cplaylist)
 				   G_TYPE_STRING,	/* Tag : Comment */
 				   G_TYPE_STRING,	/* Tag : Length */
 				   G_TYPE_STRING,	/* Filename */
+				   G_TYPE_STRING,	/* Mimetype */
 				   G_TYPE_BOOLEAN);	/* Played flag */
 
 	/* Create the tree view */
@@ -3963,6 +4000,17 @@ playlist_filename_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplay
 	state = gtk_check_menu_item_get_active(item);
 
 	playlist_column_set_visible(cplaylist, P_FILENAME, state);
+}
+
+/* Callback for adding/deleting mimetype column */
+
+static void
+playlist_mimetype_column_change_cb(GtkCheckMenuItem *item, PraghaPlaylist* cplaylist)
+{
+	gboolean state;
+	state = gtk_check_menu_item_get_active(item);
+
+	playlist_column_set_visible(cplaylist, P_MIMETYPE, state);
 }
 
 /* Clear sort in the current playlist */

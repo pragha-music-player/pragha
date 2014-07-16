@@ -64,7 +64,7 @@ extern const gchar *mime_dual[];
 gboolean is_playable_file(const gchar *file);
 
 PraghaMediaType    pragha_file_get_media_type                   (const gchar *filename);
-PraghaMusicType    pragha_file_get_music_type                   (const gchar *filename);
+gchar             *pragha_file_get_music_type                   (const gchar *filename);
 PraghaPlaylistType pragha_pl_parser_guess_format_from_extension (const gchar *filename);
 
 gboolean is_dir_and_accessible(const gchar *dir);

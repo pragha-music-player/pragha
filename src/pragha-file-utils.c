@@ -161,14 +161,13 @@ get_mime_type (const gchar *file)
 }
 #endif
 
-PraghaMusicType
+gchar *
 pragha_file_get_music_type(const gchar *filename)
 {
-	PraghaMusicType ret = FILE_NONE;
 	gchar *result = NULL;
 
 	if (!filename)
-		return ret;
+		return NULL;
 
 #ifdef G_OS_WIN32
 	result = get_mime_type_from_uri (filename, NULL);
@@ -176,27 +175,7 @@ pragha_file_get_music_type(const gchar *filename)
 	result = get_mime_type (filename);
 #endif
 
-	if (result) {
-		if(is_valid_mime(result, mime_flac))
-			ret = FILE_FLAC;
-		else if(is_valid_mime(result, mime_mpeg))
-			ret = FILE_MP3;
-		else if(is_valid_mime(result, mime_ogg))
-			ret = FILE_OGGVORBIS;
-		else if (is_valid_mime(result, mime_wav))
-			ret = FILE_WAV;
-		else if (is_valid_mime(result, mime_asf))
-			ret = FILE_ASF;
-		else if (is_valid_mime(result, mime_mp4))
-			ret = FILE_MP4;
-		else if (is_valid_mime(result, mime_ape))
-			ret = FILE_APE;
-		else if (is_valid_mime(result, mime_tracker))
-			ret = FILE_TRACKER;
-	}
-	g_free(result);
-
-	return ret;
+	return result;
 }
 
 PraghaPlaylistType
@@ -337,7 +316,7 @@ gboolean is_playable_file(const gchar *file)
 		return FALSE;
 
 	if (g_file_test(file, G_FILE_TEST_IS_REGULAR) &&
-	    (pragha_file_get_music_type(file) != FILE_NONE))
+	    (pragha_file_get_media_type(file) != MEDIA_TYPE_AUDIO))
 		return TRUE;
 	else
 		return FALSE;

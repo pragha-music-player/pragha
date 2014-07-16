@@ -15,15 +15,32 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <glib/gstdio.h>
 
 #include "src/pragha-utils.h"
+#include "src/pragha-file-utils.h"
 #include "src/pragha-music-enum.h"
 #include "src/pragha-debug.h"
 
 #include "pragha-mtp-musicobject.h"
+
+static gboolean
+is_valid_mime(const gchar *mime, const gchar **mlist)
+{
+	gint i = 0;
+	while (mlist[i]) {
+		if (g_content_type_equals(mime, mlist[i]))
+			return TRUE;
+		i++;
+	}
+	return FALSE;
+}
 
 LIBMTP_track_t *
 mtp_track_new_from_pragha_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMusicobject *mobj)
@@ -31,33 +48,25 @@ mtp_track_new_from_pragha_musicobject (LIBMTP_mtpdevice_t *mtp_device, PraghaMus
 	LIBMTP_track_t *tr;
 	LIBMTP_filetype_t filetype;
 	gchar *filename;
+	const gchar *mime_type;
 	struct stat sbuf;
 
-	switch (pragha_musicobject_get_file_type(mobj)) {
-		case FILE_WAV:
-			filetype = LIBMTP_FILETYPE_WAV;
-			break;
-		case FILE_MP3:
-			filetype = LIBMTP_FILETYPE_MP3;
-			break;
-		case FILE_FLAC:
-			filetype = LIBMTP_FILETYPE_FLAC;
-			break;
-		case FILE_OGGVORBIS:
-			filetype = LIBMTP_FILETYPE_OGG;
-			break;
-		case FILE_ASF:
-			filetype = LIBMTP_FILETYPE_WMA;
-			break;
-		case FILE_MP4:
-			filetype = LIBMTP_FILETYPE_MP4;
-			break;
-		case FILE_APE:
-		case FILE_HTTP:
-		default:
-			filetype = LIBMTP_FILETYPE_UNKNOWN;
-			break;
-	}
+	mime_type = pragha_musicobject_get_mime_type (mobj);
+
+	if (is_valid_mime(mime_type, mime_flac))
+		filetype = LIBMTP_FILETYPE_FLAC;
+	else if (is_valid_mime(mime_type, mime_mpeg))
+		filetype = LIBMTP_FILETYPE_MP3;
+	else if (is_valid_mime(mime_type, mime_ogg))
+		filetype = LIBMTP_FILETYPE_OGG;
+	else if (is_valid_mime(mime_type, mime_wav))
+		filetype = LIBMTP_FILETYPE_WAV;
+	else if (is_valid_mime(mime_type, mime_asf))
+		filetype = LIBMTP_FILETYPE_WMA;
+	else if (is_valid_mime(mime_type, mime_mp4))
+		filetype = LIBMTP_FILETYPE_MP4;
+	else
+		filetype = LIBMTP_FILETYPE_UNKNOWN;
 
 	if (filetype == LIBMTP_FILETYPE_UNKNOWN)
 		return NULL;
@@ -109,7 +118,7 @@ pragha_musicobject_new_from_mtp_track (LIBMTP_track_t *track)
 	enum_map = pragha_music_enum_get();
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", uri,
-	                     "file-type", pragha_music_enum_map_get(enum_map, "FILE_MTP"),
+	                     "source", pragha_music_enum_map_get(enum_map, "FILE_MTP"),
 	                     NULL);
 	g_object_unref (enum_map);
 
@@ -161,11 +170,11 @@ gboolean
 pragha_musicobject_is_mtp_file (PraghaMusicobject *mobj)
 {
 	PraghaMusicEnum *enum_map = NULL;
-	PraghaMusicType file_type = FILE_NONE;
+	PraghaMusicSource file_source = FILE_NONE;
 
 	enum_map = pragha_music_enum_get ();
-	file_type = pragha_music_enum_map_get(enum_map, "FILE_MTP");
+	file_source = pragha_music_enum_map_get(enum_map, "FILE_MTP");
 	g_object_unref (enum_map);
 
-	return (file_type == pragha_musicobject_get_file_type (mobj));
+	return (file_source == pragha_musicobject_get_source (mobj));
 }

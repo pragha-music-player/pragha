@@ -529,7 +529,7 @@ pragha_backend_parse_message_tag (PraghaBackend *backend, GstMessage *message)
 
 	save_embedded_art (backend, tag_list);
 
-	if (pragha_musicobject_get_file_type (priv->mobj) != FILE_HTTP)
+	if (pragha_musicobject_get_source (priv->mobj) != FILE_HTTP)
 		goto out;
 
 	if (gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &str))
@@ -589,14 +589,14 @@ pragha_backend_get_musicobject(PraghaBackend *backend)
 void
 pragha_backend_play (PraghaBackend *backend)
 {
-	PraghaMusicType type = FILE_NONE;
+	PraghaMusicSource file_source = FILE_NONE;
 	gchar *file = NULL, *uri = NULL;
 
 	PraghaBackendPrivate *priv = backend->priv;
 
 	g_object_get(priv->mobj,
 	             "file", &file,
-	             "file-type", &type,
+	             "source", &file_source,
 	             NULL);
 
 	if (string_is_empty(file))
@@ -604,7 +604,7 @@ pragha_backend_play (PraghaBackend *backend)
 
 	CDEBUG(DBG_BACKEND, "Playing: %s", file);
 
-	switch (type) {
+	switch (file_source) {
 		case FILE_USER_L:
 		case FILE_USER_3:
 		case FILE_USER_2:
@@ -612,14 +612,7 @@ pragha_backend_play (PraghaBackend *backend)
 		case FILE_USER_0:
 			g_signal_emit (backend, signals[SIGNAL_PREPARE_SOURCE], 0);
 			break;
-		case FILE_WAV:
-		case FILE_MP3:
-		case FILE_FLAC:
-		case FILE_OGGVORBIS:
-		case FILE_ASF:
-		case FILE_MP4:
-		case FILE_APE:
-		case FILE_TRACKER:
+		case FILE_LOCAL:
 			uri = g_filename_to_uri (file, NULL, NULL);
 			g_object_set (priv->pipeline, "uri", uri, NULL);
 			g_free (uri);

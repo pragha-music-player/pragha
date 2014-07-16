@@ -29,44 +29,22 @@ PraghaMusicobject *
 new_musicobject_from_file(const gchar *file)
 {
 	PraghaMusicobject *mobj = NULL;
-	PraghaMusicType type;
+	gchar *mime_type = NULL;
 	gboolean ret = FALSE;
 
 	CDEBUG(DBG_MOBJ, "Creating new musicobject from file: %s", file);
 
-	type = pragha_file_get_music_type(file);
-	if (type == FILE_NONE)
-		return NULL;
+	mime_type = pragha_file_get_music_type(file);
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file", file,
-	                     "file-type", type,
+	                     "source", FILE_LOCAL,
+	                     "mime-type", mime_type,
 	                     NULL);
 
-	switch (type) {
-		case FILE_USER_L:
-		case FILE_USER_3:
-		case FILE_USER_2:
-		case FILE_USER_1:
-		case FILE_USER_0:
-		case FILE_NONE:
-			break;
-		case FILE_WAV:
-		case FILE_MP3:
-		case FILE_FLAC:
-		case FILE_OGGVORBIS:
-		case FILE_ASF:
-		case FILE_MP4:
-		case FILE_APE:
-			ret = pragha_musicobject_set_tags_from_file (mobj, file);
-			break;
-		case FILE_TRACKER:
-			ret = TRUE;
-			break;
-		case FILE_HTTP:
-		default:
-			break;
-	}
+	g_free (mime_type);
+
+	ret = pragha_musicobject_set_tags_from_file (mobj, file);
 
 	if (G_LIKELY(ret))
 		return mobj;
@@ -87,7 +65,7 @@ new_musicobject_from_db(PraghaDatabase *cdbase, gint location_id)
 	       location_id);
 
 	const gchar *sql = "SELECT \
-TRACK.file_type, \
+MIME_TYPE.name, \
 TRACK.samplerate, \
 TRACK.channels, \
 TRACK.length, \
@@ -100,8 +78,9 @@ ALBUM.name, \
 ARTIST.name, \
 TRACK.title, \
 LOCATION.name \
-FROM TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
+FROM MIME_TYPE, TRACK, COMMENT, YEAR, GENRE, ALBUM, ARTIST, LOCATION \
 WHERE TRACK.location = ? \
+AND MIME_TYPE.id = TRACK.file_type \
 AND COMMENT.id = TRACK.comment \
 AND YEAR.id = TRACK.year \
 AND GENRE.id = TRACK.genre \
@@ -116,7 +95,8 @@ AND LOCATION.id = ?";
 	if (pragha_prepared_statement_step (statement)) {
 		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 		                     "file", pragha_prepared_statement_get_string (statement, 12),
-		                     "file-type", pragha_prepared_statement_get_int (statement, 0),
+		                     "source", FILE_LOCAL,
+		                     "mime-type", pragha_prepared_statement_get_string (statement, 0),
 		                     "title", pragha_prepared_statement_get_string (statement, 11),
 		                     "artist", pragha_prepared_statement_get_string (statement, 10),
 		                     "album", pragha_prepared_statement_get_string (statement, 9),
@@ -149,7 +129,7 @@ new_musicobject_from_location(const gchar *uri, const gchar *name)
 
 	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
 	                     "file",      uri,
-	                     "file-type", FILE_HTTP,
+	                     "source", FILE_HTTP,
 	                     NULL);
 	if (name)
 		pragha_musicobject_set_title(mobj, name);

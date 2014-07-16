@@ -59,6 +59,7 @@ enum curplaylist_columns {
 	P_COMMENT,
 	P_LENGTH,
 	P_FILENAME,
+	P_MIMETYPE,
 	P_PLAYED,
 	N_P_COLUMNS
 };
@@ -79,7 +80,7 @@ void export_selected_playlist (GtkAction *action, PraghaPlaylist *cplaylist);
 
 void pragha_playlist_remove_selection (PraghaPlaylist *playlist);
 void pragha_playlist_crop_selection   (PraghaPlaylist *playlist);
-void pragha_playlist_crop_music_type  (PraghaPlaylist *playlist, PraghaMusicType music_type);
+void pragha_playlist_crop_music_type  (PraghaPlaylist *playlist, PraghaMusicSource music_type);
 void pragha_playlist_remove_all       (PraghaPlaylist *playlist);
 
 void pragha_playlist_go_prev_track    (PraghaPlaylist *playlist);
