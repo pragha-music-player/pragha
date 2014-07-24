@@ -43,6 +43,10 @@ if HAVE_RYGEL
 SUBDIRS += dlna
 endif
 
+if HAVE_GRILO
+SUBDIRS += dlna-renderer
+endif
+
 if HAVE_LIBCDIO
 if HAVE_LIBCDIO_PARANOIA
 if HAVE_LIBCDDB

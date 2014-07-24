@@ -87,8 +87,8 @@ pragha_dlna_plugin_append_track (PraghaDlnaPlugin  *plugin,
 		rygel_music_item_set_artist (item, pragha_musicobject_get_artist(mobj));
 		rygel_music_item_set_album (item, pragha_musicobject_get_album(mobj));
 		rygel_music_item_set_track_number (item, pragha_musicobject_get_track_no(mobj));
-		rygel_music_item_set_artist (item, pragha_musicobject_get_artist(mobj));
-		rygel_music_item_set_album (item, pragha_musicobject_get_album(mobj));
+
+		rygel_audio_item_set_duration (RYGEL_AUDIO_ITEM(item), (glong)pragha_musicobject_get_length(mobj));
 
 		file = pragha_musicobject_get_file (mobj);
 		content_type = g_content_type_guess (file, NULL, 0, &uncertain);
@@ -169,7 +169,12 @@ pragha_dlna_plugin_share_playlist (PraghaDlnaPlugin *plugin)
 	list = pragha_playlist_get_mobj_list (playlist);
 	for (i = list; i != NULL; i = i->next) {
 		mobj = i->data;
-		pragha_dlna_plugin_append_track (plugin, mobj, id++);
+
+		if (mobj == NULL)
+			continue;
+
+		if (pragha_musicobject_is_local_file(mobj))
+			pragha_dlna_plugin_append_track (plugin, mobj, id++);
 
 		pragha_process_gtk_events ();
 	}
