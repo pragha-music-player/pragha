@@ -18,6 +18,7 @@
 #include <libpeas/peas.h>
 
 #include "pragha-plugins-engine.h"
+#include "pragha-utils.h"
 
 struct _PraghaPluginsEngine {
 	GObject           _parent;
@@ -78,18 +79,25 @@ pragha_plugins_engine_startup (PraghaPluginsEngine *engine)
 {
 	PraghaPreferences *preferences;
 	gchar **loaded_plugins = NULL;
+	const gchar *default_plugins[] = {"notify", "song-info", NULL};
 
 	CDEBUG(DBG_PLUGIN,"Plugins engine startup");
 
 	preferences = pragha_application_get_preferences (engine->pragha);
-	loaded_plugins = pragha_preferences_get_string_list (preferences,
-	                                                     "PLUGINS",
-	                                                     "Activated",
-	                                                     NULL);
 
-	if (loaded_plugins) {
-		peas_engine_set_loaded_plugins (engine->peas_engine, (const gchar **) loaded_plugins);
-		g_strfreev(loaded_plugins);
+	if (string_is_not_empty (pragha_preferences_get_installed_version (preferences))) {
+		loaded_plugins = pragha_preferences_get_string_list (preferences,
+		                                                     "PLUGINS",
+		                                                     "Activated",
+		                                                     NULL);
+
+		if (loaded_plugins) {
+			peas_engine_set_loaded_plugins (engine->peas_engine, (const gchar **) loaded_plugins);
+			g_strfreev(loaded_plugins);
+		}
+	}
+	else {
+		peas_engine_set_loaded_plugins (engine->peas_engine, (const gchar **) default_plugins);
 	}
 }
 
