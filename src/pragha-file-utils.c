@@ -475,6 +475,7 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 {
 	PraghaPreferences *preferences;
 	PraghaMusicobject *mobj = NULL;
+	PraghaMediaType file_type;
 	GDir *dir;
 	const gchar *next_file = NULL;
 	gchar *ab_file;
@@ -497,10 +498,20 @@ append_mobj_list_from_folder(GList *list, gchar *dir_name)
 			g_object_unref(G_OBJECT(preferences));
 		}
 		else {
-			if (is_playable_file(ab_file)) {
-				mobj = new_musicobject_from_file(ab_file);
-				if (G_LIKELY(mobj))
-					list = g_list_append(list, mobj);
+			file_type = pragha_file_get_media_type (ab_file);
+			switch (file_type) {
+				case MEDIA_TYPE_AUDIO:
+					mobj = new_musicobject_from_file (ab_file);
+					if (G_LIKELY(mobj))
+						list = g_list_append(list, mobj);
+					break;
+				case MEDIA_TYPE_PLAYLIST:
+					list = pragha_pl_parser_append_mobj_list_by_extension (list, ab_file);
+					break;
+				case MEDIA_TYPE_IMAGE:
+				case MEDIA_TYPE_UNKNOWN:
+				default:
+					break;
 			}
 		}
 
