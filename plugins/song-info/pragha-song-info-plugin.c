@@ -271,7 +271,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 
 	file_source = pragha_musicobject_get_source (pragha_backend_get_musicobject (backend));
 
-	if (file_source == FILE_NONE || file_source == FILE_HTTP) {
+	if (file_source == FILE_NONE) {
 		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
 	}
