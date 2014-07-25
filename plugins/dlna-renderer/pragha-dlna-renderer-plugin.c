@@ -91,23 +91,40 @@ static const gchar *main_menu_xml = "<ui>						\
 	</menubar>													\
 </ui>";
 
-static gboolean
-pragha_dlna_renderer_plugin_search_music_source (GrlRegistry *registry,
-                                                 GrlSource   *source,
-                                                 gpointer     user_data)
+static GList *
+pragha_dlna_renderer_append_media (GList *list, GrlMedia *media)
 {
-	PraghaPlaylist *playlist;
 	PraghaMusicobject *mobj;
+	const gchar *title = NULL, *url = NULL;
+	guint seconds = 0;
+
+	url = grl_media_get_url (media);
+	title = grl_media_get_title (media);
+	seconds = grl_media_get_duration (media);
+
+	mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
+	                     "file", url,
+	                     "source", FILE_HTTP,
+	                     "title", title,
+	                     "length", seconds,
+	                     NULL);
+
+	if (G_LIKELY(mobj))
+		list = g_list_prepend (list, mobj);
+
+	return list;
+}
+
+static GList *
+pragha_dlna_renderer_append_source (GList     *list,
+                                    GrlSource *source,
+                                    GrlMedia  *container)
+{
 	GrlOperationOptions *options;
 	GrlCaps *caps;
 	GrlMedia *media;
 	GList *keys = NULL;
 	GList *medias = NULL, *media_iter;
-	GList *mobj_list = NULL;
-	const gchar *title = NULL, *url = NULL;
-	guint seconds = 0;
-
-	PraghaDlnaRendererPlugin *plugin = user_data;
 
 	keys = grl_metadata_key_list_new (GRL_METADATA_KEY_TITLE,
 	                                  GRL_METADATA_KEY_DURATION,
@@ -120,54 +137,39 @@ pragha_dlna_renderer_plugin_search_music_source (GrlRegistry *registry,
 
 	grl_operation_options_set_flags (options, GRL_RESOLVE_IDLE_RELAY);
 
-	medias = grl_source_browse_sync (source, NULL, keys, options, NULL);
+	medias = grl_source_browse_sync (source, container, keys, options, NULL);
 	for (media_iter = medias; media_iter; media_iter = g_list_next (media_iter)) {
 		if (media_iter->data == NULL)
 			continue;
 
 		media = GRL_MEDIA (media_iter->data);
 
-		url = grl_media_get_url (media);
-		title = grl_media_get_title (media);
-		seconds = grl_media_get_duration (media);
-
-		mobj = g_object_new (PRAGHA_TYPE_MUSICOBJECT,
-			                 "file", url,
-			                 "source", FILE_HTTP,
-			                 "title", title,
-			                 "length", seconds,
-			                 NULL);
-
-		if (G_LIKELY(mobj))
-			mobj_list = g_list_prepend(mobj_list, mobj);
-
+		if (GRL_IS_MEDIA_BOX (media)) {
+			list = pragha_dlna_renderer_append_source (list, source, media);
+		}
+		else if (GRL_IS_MEDIA_AUDIO (media)) {
+			list = pragha_dlna_renderer_append_media (list, media);
+		}
 		pragha_process_gtk_events ();
 
 		g_object_unref (media);
 	}
 
-	if (mobj_list) {
-		playlist = pragha_application_get_playlist (plugin->priv->pragha);
-
-		pragha_playlist_append_mobj_list (playlist, mobj_list);
-		g_list_free (mobj_list);
-	}
-
-	g_object_unref (caps);
 	g_object_unref (options);
 
 	g_list_free (keys);
 	g_list_free (medias);
 
-	return FALSE;
+	return list;
 }
 
 static void
 pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 {
+	PraghaPlaylist *playlist;
 	GList *sources = NULL, *sources_iter;
 	GrlRegistry *registry;
-	gboolean ret = FALSE;
+	GList *list = NULL;
 
 	CDEBUG(DBG_PLUGIN, "DLNA Renderer plugin %s", G_STRFUNC);
 
@@ -175,10 +177,18 @@ pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 
 	sources = grl_registry_get_sources_by_operations (registry, GRL_OP_BROWSE, FALSE);
 	for (sources_iter = sources; sources_iter; sources_iter = g_list_next (sources_iter)) {
-		ret = pragha_dlna_renderer_plugin_search_music_source (registry, GRL_SOURCE(sources_iter->data), plugin);
-		if (ret)
+		list = pragha_dlna_renderer_append_source (list, GRL_SOURCE(sources_iter->data), NULL);
+		if (list)
 			break;
 	}
+
+	if (list) {
+		playlist = pragha_application_get_playlist (plugin->priv->pragha);
+
+		pragha_playlist_append_mobj_list (playlist, list);
+		g_list_free (list);
+	}
+
 	g_list_free (sources);
 }
 
