@@ -157,6 +157,7 @@ pragha_dlna_renderer_plugin_search_music_source (GrlRegistry *registry,
 	g_object_unref (options);
 
 	g_list_free (keys);
+	g_list_free (medias);
 
 	return FALSE;
 }
