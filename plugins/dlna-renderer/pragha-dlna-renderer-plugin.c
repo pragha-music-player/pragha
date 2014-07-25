@@ -167,6 +167,7 @@ static void
 pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 {
 	PraghaPlaylist *playlist;
+	PraghaStatusbar *statusbar;
 	GList *sources = NULL, *sources_iter;
 	GrlRegistry *registry;
 	GList *list = NULL;
@@ -182,12 +183,24 @@ pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 			break;
 	}
 
+	statusbar = pragha_statusbar_get ();
+
 	if (list) {
 		playlist = pragha_application_get_playlist (plugin->priv->pragha);
 
 		pragha_playlist_append_mobj_list (playlist, list);
 		g_list_free (list);
+
+		const gchar *server = grl_source_get_name (GRL_SOURCE(sources_iter->data));
+		gchar *msge = g_strdup_printf (_("Music of the %s server was added."), server);
+		pragha_statusbar_set_misc_text (statusbar, msge);
+		g_free (msge);
 	}
+	else {
+		pragha_statusbar_set_misc_text (statusbar, _("Could not find any DLNA server."));
+	}
+
+	g_object_unref (statusbar);
 
 	g_list_free (sources);
 }
