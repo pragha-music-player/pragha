@@ -289,7 +289,7 @@ pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
 
-	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track to notifications"));
+	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, actions_in_osd);
 
 	preferences = pragha_preferences_get ();
