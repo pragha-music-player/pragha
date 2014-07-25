@@ -83,6 +83,16 @@ static void pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin);
 static void
 pragha_acoustid_plugin_get_metadata_action (GtkAction *action, PraghaAcoustidPlugin *plugin)
 {
+	PraghaBackend *backend;
+
+	PraghaAcoustidPluginPrivate *priv = plugin->priv;
+
+	CDEBUG(DBG_PLUGIN, "Get Metadata action");
+
+	backend = pragha_application_get_backend (priv->pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
+
 	pragha_acoustid_get_metadata_dialog (plugin);
 }
 
