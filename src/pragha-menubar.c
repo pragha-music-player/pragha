@@ -192,7 +192,7 @@ static GtkActionEntry main_aentries[] = {
 	{"Quit", "application-exit", N_("_Quit"),
 	 "<Control>Q", "Quit pragha", G_CALLBACK(quit_action)},
 	{"Add files", "document-open", N_("_Add files"),
-	 NULL, N_("Open a media file"), G_CALLBACK(open_file_action)},
+	 "<Control>O", N_("Open a media file"), G_CALLBACK(open_file_action)},
 	{"Add location", "network-workgroup", N_("Add _location"),
 	 "", "Add a no local stream", G_CALLBACK(add_location_action)},
 	{"Add the library", "list-add", N_("_Add the library"),
