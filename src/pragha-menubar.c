@@ -210,7 +210,7 @@ static GtkActionEntry main_aentries[] = {
 	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_playlist_action)},
 	{"SaveSelection", NULL, N_("Save selection")},
 	{"New playlist2", "document-new", N_("New playlist"),
-	 "<Control><Mayus>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_selection_action)},
+	 "<Control><Shift>S", "Save new playlist", G_CALLBACK(pragha_menubar_save_selection_action)},
 	{"Export2", "media-floppy", N_("Export"),
 	 "", "Export playlist", G_CALLBACK(pragha_menubar_export_selection_action)},
 	{"Search in playlist", "edit-find", N_("_Search in playlist"),
