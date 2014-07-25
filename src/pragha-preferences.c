@@ -52,7 +52,6 @@ struct _PraghaPreferencesPrivate
 	gboolean   shuffle;
 	gboolean   repeat;
 	gboolean   use_hint;
-	gboolean   use_symbolic;
 	gboolean   restore_playlist;
 	/* Audio preferences. */
 	gchar     *audio_sink;
@@ -93,7 +92,6 @@ enum
 	PROP_SHUFFLE,
 	PROP_REPEAT,
 	PROP_USE_HINT,
-	PROP_USE_SYMBOLIC,
 	PROP_RESTORE_PLAYLIST,
 	PROP_AUDIO_SINK,
 	PROP_AUDIO_DEVICE,
@@ -684,33 +682,6 @@ pragha_preferences_set_use_hint (PraghaPreferences *preferences,
 	preferences->priv->use_hint = use_hint;
 
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_HINT]);
-}
-
-/**
- * pragha_preferences_get_use_symbolic_icons:
- *
- */
-gboolean
-pragha_preferences_get_use_symbolic_icons (PraghaPreferences *preferences)
-{
-	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), FALSE);
-
-	return preferences->priv->use_symbolic;
-}
-
-/**
- * pragha_preferences_set_use_symbolic_icons:
- *
- */
-void
-pragha_preferences_set_use_symbolic_icons (PraghaPreferences *preferences,
-                                           gboolean use_symbolic_icons)
-{
-	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
-
-	preferences->priv->use_symbolic = use_symbolic_icons;
-
-	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_SYMBOLIC]);
 }
 
 /**
@@ -1345,7 +1316,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
-	gboolean shuffle, repeat, use_hint, use_symbolic, restore_playlist, software_mixer;
+	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
 	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
@@ -1473,18 +1444,6 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	}
 	else {
 		pragha_preferences_set_use_hint(preferences, use_hint);
-	}
-
-	use_symbolic = g_key_file_get_boolean(priv->rc_keyfile,
-	                                      GROUP_GENERAL,
-	                                      KEY_USE_SYMBOLIC,
-	                                      &error);
-	if (error) {
-		g_error_free(error);
-		error = NULL;
-	}
-	else {
-		pragha_preferences_set_use_symbolic_icons(preferences, use_symbolic);
 	}
 
 	library_style = g_key_file_get_integer(priv->rc_keyfile,
@@ -1870,10 +1829,6 @@ pragha_preferences_finalize (GObject *object)
 	                       KEY_USE_HINT,
 	                       priv->use_hint);
 	g_key_file_set_boolean(priv->rc_keyfile,
-	                       GROUP_GENERAL,
-	                       KEY_USE_SYMBOLIC,
-	                       priv->use_symbolic);
-	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_PLAYLIST,
 	                       KEY_SAVE_PLAYLIST,
 	                       priv->restore_playlist);
@@ -2046,9 +2001,6 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_USE_HINT:
 			g_value_set_boolean (value, pragha_preferences_get_use_hint(preferences));
 			break;
-		case PROP_USE_SYMBOLIC:
-			g_value_set_boolean (value, pragha_preferences_get_use_symbolic_icons(preferences));
-			break;
 		case PROP_RESTORE_PLAYLIST:
 			g_value_set_boolean (value, pragha_preferences_get_restore_playlist(preferences));
 			break;
@@ -2155,9 +2107,6 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_USE_HINT:
 			pragha_preferences_set_use_hint(preferences, g_value_get_boolean(value));
-			break;
-		case PROP_USE_SYMBOLIC:
-			pragha_preferences_set_use_symbolic_icons(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_RESTORE_PLAYLIST:
 			pragha_preferences_set_restore_playlist(preferences, g_value_get_boolean(value));
@@ -2346,17 +2295,6 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "UseHint",
 		                     "Use hint Preference",
 		                     TRUE,
-		                     PRAGHA_PREF_PARAMS);
-
-	/**
-	  * PraghaPreferences:use_symbolic:
-	  *
-	  */
-	gParamSpecs[PROP_USE_SYMBOLIC] =
-		g_param_spec_boolean("use-symbolic",
-		                     "UseSymbolic",
-		                     "Use Symbolic Icons Preference",
-		                     FALSE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**

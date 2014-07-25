@@ -48,10 +48,7 @@ struct _PraghaToolbar {
 	GtkToolItem    *stop_button;
 	GtkToolItem    *next_button;
 	GtkToolItem    *unfull_button;
-	GtkToolItem    *shuffle_button;
-	GtkToolItem    *repeat_button;
 	GtkWidget      *vol_button;
-
 	GtkWidget      *track_length_label;
 	GtkWidget      *track_time_label;
 	GtkWidget      *now_playing_label;
@@ -325,22 +322,14 @@ void
 pragha_toolbar_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
 {
 	PraghaToolbar *toolbar = user_data;
-	const gchar *playback_icon = NULL;
-	gboolean use_symbolic = FALSE;
-
 	PraghaBackendState state = pragha_backend_get_state (backend);
 
 	gboolean playing = (state != ST_STOPPED);
 
-	g_object_get (toolbar->vol_button, "use-symbolic", &use_symbolic, NULL);
-	if (use_symbolic)
-		playback_icon = (state == ST_PLAYING) ? "media-playback-pause-symbolic" : "media-playback-start-symbolic";
-	else
-		playback_icon = (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start";
-
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->prev_button), playing);
 
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button), playback_icon);
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button),
+	                               (state == ST_PLAYING) ? "media-playback-pause" : "media-playback-start");
 
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->stop_button), playing);
 	gtk_widget_set_sensitive (GTK_WIDGET(toolbar->next_button), playing);
@@ -354,47 +343,6 @@ pragha_toolbar_show_ramaning_time_cb (PraghaToolbar *toolbar, GParamSpec *pspec,
 {
 	PraghaBackend *backend = user_data;
 	pragha_toolbar_update_playback_progress (backend, toolbar);
-}
-
-static void
-pragha_preferences_use_symbolic_changed (PraghaPreferences *preferences, GParamSpec *pspec, gpointer user_data)
-{
-	const gchar *playback_icon = NULL;
-
-	PraghaToolbar *toolbar = user_data;
-
-	playback_icon = gtk_tool_button_get_icon_name (GTK_TOOL_BUTTON(toolbar->play_button));
-
-	if (pragha_preferences_get_use_symbolic_icons(preferences)) {
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->prev_button), "media-skip-backward-symbolic");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->stop_button), "media-playback-stop-symbolic");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->next_button), "media-skip-forward-symbolic");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->unfull_button), "view-restore-symbolic");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->shuffle_button), "media-playlist-shuffle-symbolic");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->repeat_button), "media-playlist-repeat-symbolic");
-
-		if (g_ascii_strcasecmp(playback_icon, "media-playback-start") == 0)
-			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button), "media-playback-start-symbolic");
-		else
-			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button), "media-playback-pause-symbolic");
-
-		g_object_set(toolbar->vol_button, "use-symbolic", TRUE, NULL);
-	}
-	else {
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->prev_button), "media-skip-backward");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->stop_button), "media-playback-stop");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->next_button), "media-skip-forward");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->unfull_button), "view-restore");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->shuffle_button), "media-playlist-shuffle");
-		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->repeat_button), "media-playlist-repeat");
-
-		if (g_ascii_strcasecmp(playback_icon, "media-playback-start-symbolic") == 0)
-			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button), "media-playback-start");
-		else
-			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(toolbar->play_button), "media-playback-pause");
-
-		g_object_set(toolbar->vol_button, "use-symbolic", FALSE, NULL);
-	}
 }
 
 /*
@@ -823,13 +771,11 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(shuffle_button), "media-playlist-shuffle");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(shuffle_button));
-	toolbar->shuffle_button = shuffle_button;
 
 	repeat_button = gtk_toggle_tool_button_new ();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(repeat_button), "media-playlist-repeat");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
-	toolbar->repeat_button = repeat_button;
 
 	vol_button = gtk_volume_button_new();
 	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
@@ -878,9 +824,6 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_bind_property(preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(preferences, "repeat", repeat_button, "active", binding_flags);
 	g_object_bind_property(preferences, "album-art-size", albumart, "size", binding_flags);
-
-	g_signal_connect (G_OBJECT (preferences), "notify::use-symbolic",
-	                  G_CALLBACK (pragha_preferences_use_symbolic_changed), toolbar);
 
 	gtk_widget_show_all(GTK_WIDGET(toolbar));
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
