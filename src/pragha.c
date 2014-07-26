@@ -476,13 +476,14 @@ pragha_application_dispose (GObject *object)
 static void
 pragha_application_startup (GApplication *application)
 {
-	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
-
 	PraghaToolbar *toolbar;
 	PraghaPlaylist *playlist;
+	const gchar *version = NULL;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	PraghaApplication *pragha = PRAGHA_APPLICATION (application);
 
 	G_APPLICATION_CLASS (pragha_application_parent_class)->startup (application);
 
@@ -493,6 +494,11 @@ pragha_application_startup (GApplication *application)
 	pragha->cdbase = pragha_database_get();
 	if (pragha_database_start_successfully(pragha->cdbase) == FALSE) {
 		g_error("Unable to init music dbase");
+	}
+
+	version = pragha_preferences_get_installed_version (pragha->preferences);
+	if (string_is_not_empty (version) && (g_ascii_strcasecmp (version, "1.3.1") < 0)) {
+		pragha_database_compatibilize_version (pragha->cdbase);
 	}
 
 	pragha->enum_map = pragha_music_enum_get ();

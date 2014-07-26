@@ -561,7 +561,7 @@ pragha_database_delete_radio (PraghaDatabase *database, const gchar *radio)
 static void
 pragha_database_add_new_track (PraghaDatabase *database,
                                gint location_id,
-                               gint mime_type,
+                               gint mime_type_id,
                                gint artist_id,
                                gint album_id,
                                gint genre_id,
@@ -593,7 +593,7 @@ pragha_database_add_new_track (PraghaDatabase *database,
 
 	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
 	pragha_prepared_statement_bind_int (statement, 1, location_id);
-	pragha_prepared_statement_bind_int (statement, 2, mime_type);
+	pragha_prepared_statement_bind_int (statement, 2, mime_type_id);
 	pragha_prepared_statement_bind_int (statement, 3, track_no);
 	pragha_prepared_statement_bind_int (statement, 4, artist_id);
 	pragha_prepared_statement_bind_int (statement, 5, album_id);
@@ -922,6 +922,8 @@ pragha_database_init_schema (PraghaDatabase *database)
 	gint i;
 
 	const gchar *queries[] = {
+		"PRAGMA user_version=131",
+
 		"PRAGMA synchronous=OFF",
 
 		"CREATE TABLE IF NOT EXISTS TRACK "
@@ -1023,6 +1025,50 @@ pragha_database_change_tracks_done(PraghaDatabase *database)
 	g_return_if_fail(PRAGHA_IS_DATABASE(database));
 
 	g_signal_emit (database, signals[SIGNAL_TRACKS_CHANGED], 0);
+}
+
+/**
+ * pragha_database_compatibilize_version:
+ *
+ */
+void
+pragha_database_compatibilize_version (PraghaDatabase *database)
+{
+	gint i;
+
+	const gchar *mime_types[] = {
+		"audio/x-wav",
+		"audio/mpeg",
+		"audio/x-flac",
+		"audio/ogg",
+		"audio/x-ms-wma",
+		"audio/x-m4a",
+		"audio/ape",
+		"audio/x-mod"
+	};
+	const gchar *sql = "UPDATE TRACK SET file_type = file_type + 1";
+
+	for (i = 0; i < G_N_ELEMENTS(mime_types); i++) {
+		if (!pragha_database_find_mime_type (database, mime_types[i]))
+			pragha_database_add_new_mime_type (database, mime_types[i]);
+
+	}
+
+	pragha_database_exec_query (database, sql);
+}
+
+gint
+pragha_database_get_version (PraghaDatabase *database)
+{
+	gint version = 0;
+
+	const gchar *sql = "PRAGMA user_version";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (database, sql);
+	if (pragha_prepared_statement_step (statement))
+		version = pragha_prepared_statement_get_int (statement, 0);
+	pragha_prepared_statement_free (statement);
+
+	return version;
 }
 
 /**
