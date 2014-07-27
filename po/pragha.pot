@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-16 21:39-0300\n"
+"POT-Creation-Date: 2014-07-27 17:35-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,21 +129,21 @@ msgstr ""
 msgid "Equalizer"
 msgstr ""
 
-#: ../src/pragha-equalizer-dialog.c:297 ../src/pragha-menubar.c:576
+#: ../src/pragha-equalizer-dialog.c:297 ../src/pragha-menubar.c:670
 #: ../src/pragha-playlists-mgmt.c:85 ../src/pragha-playlists-mgmt.c:540
-#: ../src/pragha-playlists-mgmt.c:1218 ../src/pragha-preferences-dialog.c:1149
-#: ../src/pragha-tags-dialog.c:101 ../src/pragha-tags-dialog.c:648
+#: ../src/pragha-playlists-mgmt.c:1238 ../src/pragha-preferences-dialog.c:1128
+#: ../src/pragha-tags-dialog.c:101 ../src/pragha-tags-dialog.c:660
 msgid "_Ok"
 msgstr ""
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:506
-#: ../plugins/notify/pragha-notify-plugin.c:167
+#: ../plugins/notify/pragha-notify-plugin.c:168
 msgid "Unknown Artist"
 msgstr ""
 
 #: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:513
 #: ../src/pragha-library-pane.c:518
-#: ../plugins/notify/pragha-notify-plugin.c:168
+#: ../plugins/notify/pragha-notify-plugin.c:169
 msgid "Unknown Album"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgstr ""
 msgid "_Close"
 msgstr ""
 
-#: ../src/pragha-filter-dialog.c:378 ../src/pragha-playlist.c:206
+#: ../src/pragha-filter-dialog.c:378 ../src/pragha-playlist.c:208
 msgid "Add to playback queue"
 msgstr ""
 
@@ -189,23 +189,23 @@ msgid "Folders structure"
 msgstr ""
 
 #: ../src/pragha-library-pane.c:194 ../src/pragha-library-pane.c:1595
-#: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3346
-#: ../src/pragha-playlist.c:3515 ../src/pragha-statusicon.c:178
-#: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:827
+#: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3353
+#: ../src/pragha-playlist.c:3529 ../src/pragha-statusicon.c:178
+#: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:839
 msgid "Artist"
 msgstr ""
 
 #: ../src/pragha-library-pane.c:196 ../src/pragha-library-pane.c:1604
-#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3347
-#: ../src/pragha-playlist.c:3516 ../src/pragha-statusicon.c:179
-#: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:832
+#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3354
+#: ../src/pragha-playlist.c:3530 ../src/pragha-statusicon.c:179
+#: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:844
 msgid "Album"
 msgstr ""
 
 #: ../src/pragha-library-pane.c:198 ../src/pragha-library-pane.c:1613
-#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3348
-#: ../src/pragha-playlist.c:3517 ../src/pragha-tags-dialog.c:118
-#: ../src/pragha-tags-dialog.c:837
+#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3355
+#: ../src/pragha-playlist.c:3531 ../src/pragha-tags-dialog.c:118
+#: ../src/pragha-tags-dialog.c:849
 msgid "Genre"
 msgstr ""
 
@@ -246,9 +246,9 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: ../src/pragha-library-pane.c:252 ../src/pragha-playlists-mgmt.c:1303
-#: ../src/pragha-playlists-mgmt.c:1341 ../src/pragha-playlists-mgmt.c:1393
-#: ../src/pragha-playlists-mgmt.c:1446
+#: ../src/pragha-library-pane.c:252 ../src/pragha-menubar.c:209
+#: ../src/pragha-menubar.c:214 ../src/pragha-playlists-mgmt.c:1336
+#: ../src/pragha-playlists-mgmt.c:1374
 msgid "Export"
 msgstr ""
 
@@ -282,11 +282,11 @@ msgstr ""
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr ""
 
-#: ../src/pragha-library-pane.c:852 ../src/pragha-menubar.c:375
-#: ../src/pragha-menubar.c:575 ../src/pragha-playlists-mgmt.c:84
+#: ../src/pragha-library-pane.c:852 ../src/pragha-menubar.c:469
+#: ../src/pragha-menubar.c:669 ../src/pragha-playlists-mgmt.c:84
 #: ../src/pragha-playlists-mgmt.c:539 ../src/pragha-playlists-mgmt.c:611
-#: ../src/pragha-playlists-mgmt.c:1217 ../src/pragha-preferences-dialog.c:496
-#: ../src/pragha-preferences-dialog.c:1148 ../src/pragha-tags-dialog.c:100
+#: ../src/pragha-playlists-mgmt.c:1237 ../src/pragha-preferences-dialog.c:495
+#: ../src/pragha-preferences-dialog.c:1127 ../src/pragha-tags-dialog.c:100
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:847
 msgid "_Cancel"
 msgstr ""
@@ -296,7 +296,7 @@ msgid "_Delete"
 msgstr ""
 
 #: ../src/pragha-library-pane.c:1900 ../src/pragha-library-pane.c:1982
-#: ../src/pragha-menubar.c:472 ../src/pragha-playlists-mgmt.c:640
+#: ../src/pragha-menubar.c:566 ../src/pragha-playlists-mgmt.c:640
 #: ../src/pragha-playlists-mgmt.c:667
 msgid "Playlists"
 msgstr ""
@@ -305,8 +305,8 @@ msgstr ""
 msgid "Radios"
 msgstr ""
 
-#: ../src/pragha-library-pane.c:1932 ../src/pragha-preferences-dialog.c:855
-#: ../src/pragha-preferences-dialog.c:1155
+#: ../src/pragha-library-pane.c:1932 ../src/pragha-preferences-dialog.c:841
+#: ../src/pragha-preferences-dialog.c:1134
 msgid "Library"
 msgstr ""
 
@@ -325,316 +325,326 @@ msgid ""
 "Warning: To recover we must rescan the entire library."
 msgstr ""
 
-#: ../src/pragha-menubar.c:161
+#: ../src/pragha-menubar.c:177
 msgid "_Playback"
 msgstr ""
 
-#: ../src/pragha-menubar.c:162
+#: ../src/pragha-menubar.c:178
 msgid "Play_list"
 msgstr ""
 
-#: ../src/pragha-menubar.c:163
+#: ../src/pragha-menubar.c:179
 msgid "_View"
 msgstr ""
 
-#: ../src/pragha-menubar.c:164 ../src/pragha-playlist.c:219
+#: ../src/pragha-menubar.c:180 ../src/pragha-playlist.c:221
 msgid "_Tools"
 msgstr ""
 
-#: ../src/pragha-menubar.c:165
+#: ../src/pragha-menubar.c:181
 msgid "_Help"
 msgstr ""
 
-#: ../src/pragha-menubar.c:166 ../src/pragha-statusicon.c:81
-#: ../plugins/notify/pragha-notify-plugin.c:182
+#: ../src/pragha-menubar.c:182 ../src/pragha-statusicon.c:81
+#: ../plugins/notify/pragha-notify-plugin.c:183
 msgid "Previous track"
 msgstr ""
 
-#: ../src/pragha-menubar.c:168 ../src/pragha-statusicon.c:83
+#: ../src/pragha-menubar.c:184 ../src/pragha-statusicon.c:83
 msgid "Play / Pause"
 msgstr ""
 
-#: ../src/pragha-menubar.c:170 ../src/pragha-statusicon.c:85
+#: ../src/pragha-menubar.c:186 ../src/pragha-statusicon.c:85
 msgid "Stop"
 msgstr ""
 
-#: ../src/pragha-menubar.c:172 ../src/pragha-statusicon.c:87
-#: ../plugins/notify/pragha-notify-plugin.c:186
+#: ../src/pragha-menubar.c:188 ../src/pragha-statusicon.c:87
+#: ../plugins/notify/pragha-notify-plugin.c:187
 msgid "Next track"
 msgstr ""
 
-#: ../src/pragha-menubar.c:174 ../src/pragha-playlist.c:222
+#: ../src/pragha-menubar.c:190 ../src/pragha-playlist.c:224
 #: ../src/pragha-statusicon.c:89
 msgid "Edit track information"
 msgstr ""
 
-#: ../src/pragha-menubar.c:176 ../src/pragha-statusicon.c:91
+#: ../src/pragha-menubar.c:192 ../src/pragha-statusicon.c:91
 msgid "_Quit"
 msgstr ""
 
-#: ../src/pragha-menubar.c:178 ../src/pragha-statusicon.c:77
+#: ../src/pragha-menubar.c:194 ../src/pragha-statusicon.c:77
 msgid "_Add files"
 msgstr ""
 
-#: ../src/pragha-menubar.c:179
+#: ../src/pragha-menubar.c:195
 msgid "Open a media file"
 msgstr ""
 
-#: ../src/pragha-menubar.c:180 ../src/pragha-statusicon.c:79
+#: ../src/pragha-menubar.c:196 ../src/pragha-statusicon.c:79
 msgid "Add _location"
 msgstr ""
 
-#: ../src/pragha-menubar.c:182
+#: ../src/pragha-menubar.c:198
 msgid "_Add the library"
 msgstr ""
 
-#: ../src/pragha-menubar.c:184
+#: ../src/pragha-menubar.c:200
 msgid "Remove selection from playlist"
 msgstr ""
 
-#: ../src/pragha-menubar.c:186 ../src/pragha-playlist.c:212
+#: ../src/pragha-menubar.c:202 ../src/pragha-playlist.c:214
 msgid "Crop playlist"
 msgstr ""
 
-#: ../src/pragha-menubar.c:188 ../src/pragha-playlist.c:214
+#: ../src/pragha-menubar.c:204 ../src/pragha-playlist.c:216
 msgid "Clear playlist"
 msgstr ""
 
-#: ../src/pragha-menubar.c:190 ../src/pragha-playlist.c:216
+#: ../src/pragha-menubar.c:206 ../src/pragha-playlist.c:218
 #: ../src/pragha-playlists-mgmt.c:68 ../src/pragha-playlists-mgmt.c:91
-#: ../src/pragha-playlists-mgmt.c:1222
+#: ../src/pragha-playlists-mgmt.c:1242
 msgid "Save playlist"
 msgstr ""
 
-#: ../src/pragha-menubar.c:191 ../src/pragha-playlist.c:217
+#: ../src/pragha-menubar.c:207 ../src/pragha-menubar.c:212
+#: ../src/pragha-playlists-mgmt.c:1331 ../src/pragha-playlists-mgmt.c:1369
+msgid "New playlist"
+msgstr ""
+
+#: ../src/pragha-menubar.c:211 ../src/pragha-playlist.c:219
 #: ../src/pragha-playlists-mgmt.c:70 ../src/pragha-playlists-mgmt.c:93
-#: ../src/pragha-playlists-mgmt.c:1224
+#: ../src/pragha-playlists-mgmt.c:1244
 msgid "Save selection"
 msgstr ""
 
-#: ../src/pragha-menubar.c:192
+#: ../src/pragha-menubar.c:216
 msgid "_Search in playlist"
 msgstr ""
 
-#: ../src/pragha-menubar.c:194
+#: ../src/pragha-menubar.c:218
 msgid "_Preferences"
 msgstr ""
 
-#: ../src/pragha-menubar.c:196
+#: ../src/pragha-menubar.c:220
 msgid "Jump to playing song"
 msgstr ""
 
-#: ../src/pragha-menubar.c:198
+#: ../src/pragha-menubar.c:222
 msgid "E_qualizer"
 msgstr ""
 
-#: ../src/pragha-menubar.c:200
+#: ../src/pragha-menubar.c:224
 msgid "_Rescan library"
 msgstr ""
 
-#: ../src/pragha-menubar.c:202
+#: ../src/pragha-menubar.c:226
 msgid "_Update library"
 msgstr ""
 
-#: ../src/pragha-menubar.c:204
+#: ../src/pragha-menubar.c:228
 msgid "_Statistics"
 msgstr ""
 
-#: ../src/pragha-menubar.c:206
+#: ../src/pragha-menubar.c:230
 msgid "Homepage"
 msgstr ""
 
-#: ../src/pragha-menubar.c:208
+#: ../src/pragha-menubar.c:232
 msgid "Community"
 msgstr ""
 
-#: ../src/pragha-menubar.c:210
+#: ../src/pragha-menubar.c:234
 msgid "Wiki"
 msgstr ""
 
-#: ../src/pragha-menubar.c:212
+#: ../src/pragha-menubar.c:236
 msgid "Translate Pragha"
 msgstr ""
 
-#: ../src/pragha-menubar.c:214 ../src/pragha-statusicon.c:75
+#: ../src/pragha-menubar.c:238 ../src/pragha-statusicon.c:75
 msgid "About"
 msgstr ""
 
-#: ../src/pragha-menubar.c:219
+#: ../src/pragha-menubar.c:243
 msgid "_Shuffle"
 msgstr ""
 
-#: ../src/pragha-menubar.c:222
+#: ../src/pragha-menubar.c:246
 msgid "_Repeat"
 msgstr ""
 
-#: ../src/pragha-menubar.c:225
+#: ../src/pragha-menubar.c:249
 msgid "_Fullscreen"
 msgstr ""
 
-#: ../src/pragha-menubar.c:228
+#: ../src/pragha-menubar.c:252
 msgid "Lateral _panel"
 msgstr ""
 
-#: ../src/pragha-menubar.c:231
+#: ../src/pragha-menubar.c:255
 msgid "Secondary lateral panel"
 msgstr ""
 
-#: ../src/pragha-menubar.c:234
+#: ../src/pragha-menubar.c:258
 msgid "Playback controls below"
 msgstr ""
 
-#: ../src/pragha-menubar.c:237
+#: ../src/pragha-menubar.c:261
 msgid "Status bar"
 msgstr ""
 
-#: ../src/pragha-menubar.c:345
+#: ../src/pragha-menubar.c:439
 msgid "Select a file to play"
 msgstr ""
 
-#: ../src/pragha-menubar.c:367 ../src/pragha-preferences-dialog.c:1011
+#: ../src/pragha-menubar.c:461 ../src/pragha-preferences-dialog.c:990
 msgid "Add files recursively"
 msgstr ""
 
-#: ../src/pragha-menubar.c:376 ../src/pragha-preferences-dialog.c:882
+#: ../src/pragha-menubar.c:470 ../src/pragha-preferences-dialog.c:868
 msgid "_Add"
 msgstr ""
 
-#: ../src/pragha-menubar.c:389 ../plugins/lastfm/pragha-lastfm-plugin.c:852
+#: ../src/pragha-menubar.c:483 ../plugins/lastfm/pragha-lastfm-plugin.c:852
 msgid "Supported media"
 msgstr ""
 
-#: ../src/pragha-menubar.c:475
+#: ../src/pragha-menubar.c:569
 msgid "All files"
 msgstr ""
 
-#: ../src/pragha-menubar.c:549
+#: ../src/pragha-menubar.c:643
 msgid "Enter the URL of an internet radio stream"
 msgstr ""
 
-#: ../src/pragha-menubar.c:554
+#: ../src/pragha-menubar.c:648
 msgid "Give it a name to save"
 msgstr ""
 
-#: ../src/pragha-menubar.c:572
+#: ../src/pragha-menubar.c:666
 msgid "Add a location"
 msgstr ""
 
-#: ../src/pragha-menubar.c:929
+#: ../src/pragha-menubar.c:1071
 msgid "Total Tracks:"
 msgstr ""
 
-#: ../src/pragha-menubar.c:931
+#: ../src/pragha-menubar.c:1073
 msgid "Total Artists:"
 msgstr ""
 
-#: ../src/pragha-menubar.c:933
+#: ../src/pragha-menubar.c:1075
 msgid "Total Albums:"
 msgstr ""
 
-#: ../src/pragha-menubar.c:936
+#: ../src/pragha-menubar.c:1078
 msgid "Statistics"
 msgstr ""
 
-#: ../src/pragha-menubar.c:962
+#: ../src/pragha-menubar.c:1104
 msgid "translator-credits"
 msgstr ""
 
 #. Create labels
-#: ../src/pragha-playlist.c:113 ../src/pragha-playlist.c:3345
-#: ../src/pragha-playlist.c:3514 ../src/pragha-statusicon.c:177
-#: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:822
+#: ../src/pragha-playlist.c:113 ../src/pragha-playlist.c:3352
+#: ../src/pragha-playlist.c:3528 ../src/pragha-statusicon.c:177
+#: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:834
 msgid "Title"
 msgstr ""
 
-#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3349
-#: ../src/pragha-playlist.c:3518 ../src/pragha-tags-dialog.c:573
+#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3356
+#: ../src/pragha-playlist.c:3532 ../src/pragha-tags-dialog.c:575
 msgid "Bitrate"
 msgstr ""
 
-#: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3350
-#: ../src/pragha-playlist.c:3519 ../src/pragha-tags-dialog.c:120
+#: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3357
+#: ../src/pragha-playlist.c:3533 ../src/pragha-tags-dialog.c:120
 msgid "Year"
 msgstr ""
 
-#: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3351
-#: ../src/pragha-playlist.c:3520 ../src/pragha-tags-dialog.c:121
-#: ../src/pragha-tags-dialog.c:842
+#: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3358
+#: ../src/pragha-playlist.c:3534 ../src/pragha-tags-dialog.c:121
+#: ../src/pragha-tags-dialog.c:854
 msgid "Comment"
 msgstr ""
 
 #. Create labels
-#: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3352
-#: ../src/pragha-playlist.c:3521 ../src/pragha-statusicon.c:180
-#: ../src/pragha-tags-dialog.c:572
+#: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3359
+#: ../src/pragha-playlist.c:3535 ../src/pragha-statusicon.c:180
+#: ../src/pragha-tags-dialog.c:574
 msgid "Length"
 msgstr ""
 
-#: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3353
-#: ../src/pragha-playlist.c:3522 ../src/pragha-tags-dialog.c:577
+#: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3360
+#: ../src/pragha-playlist.c:3536 ../src/pragha-tags-dialog.c:579
 msgid "Filename"
 msgstr ""
 
-#: ../src/pragha-playlist.c:208
-msgid "Remove from playback queue"
+#: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3361
+#: ../src/pragha-playlist.c:3537 ../src/pragha-tags-dialog.c:580
+msgid "Mimetype"
 msgstr ""
 
 #: ../src/pragha-playlist.c:210
+msgid "Remove from playback queue"
+msgstr ""
+
+#: ../src/pragha-playlist.c:212
 msgid "Remove from playlist"
 msgstr ""
 
-#: ../src/pragha-playlist.c:218
+#: ../src/pragha-playlist.c:220
 msgid "_Send to"
-msgstr ""
-
-#: ../src/pragha-playlist.c:2477
-#, c-format
-msgid "Copy \"%i\" to selected track numbers"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2483
 #, c-format
-msgid "Copy \"%s\" to selected titles"
+msgid "Copy \"%i\" to selected track numbers"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2489
 #, c-format
-msgid "Copy \"%s\" to selected artists"
+msgid "Copy \"%s\" to selected titles"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2495
 #, c-format
-msgid "Copy \"%s\" to selected albums"
+msgid "Copy \"%s\" to selected artists"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2501
 #, c-format
-msgid "Copy \"%s\" to selected genres"
+msgid "Copy \"%s\" to selected albums"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2507
 #, c-format
-msgid "Copy \"%i\" to selected years"
+msgid "Copy \"%s\" to selected genres"
 msgstr ""
 
 #: ../src/pragha-playlist.c:2513
+#, c-format
+msgid "Copy \"%i\" to selected years"
+msgstr ""
+
+#: ../src/pragha-playlist.c:2519
 #, c-format
 msgid "Copy \"%s\" to selected comments"
 msgstr ""
 
 #. Create the checkmenu items
-#: ../src/pragha-playlist.c:3344 ../src/pragha-playlist.c:3513
+#: ../src/pragha-playlist.c:3351 ../src/pragha-playlist.c:3527
 #: ../src/pragha.c:184
 msgid "Track"
 msgid_plural "Tracks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/pragha-playlist.c:3356
+#: ../src/pragha-playlist.c:3364
 msgid "Clear sort"
 msgstr ""
 
-#: ../src/pragha-playlists-mgmt.c:72 ../src/pragha-preferences-dialog.c:933
+#: ../src/pragha-playlists-mgmt.c:72 ../src/pragha-preferences-dialog.c:918
 msgid "Playlist"
 msgstr ""
 
@@ -670,192 +680,183 @@ msgstr ""
 msgid "Added %d songs from %d of the imported playlist."
 msgstr ""
 
-#: ../src/pragha-playlists-mgmt.c:1202
+#: ../src/pragha-playlists-mgmt.c:1222
 msgid "What do you want to do?"
 msgstr ""
 
-#: ../src/pragha-playlists-mgmt.c:1204
+#: ../src/pragha-playlists-mgmt.c:1224
 #, c-format
 msgid "Replace the playlist \"%s\""
 msgstr ""
 
-#: ../src/pragha-playlists-mgmt.c:1209
+#: ../src/pragha-playlists-mgmt.c:1229
 #, c-format
 msgid "Add to playlist \"%s\""
 msgstr ""
 
-#: ../src/pragha-playlists-mgmt.c:1298 ../src/pragha-playlists-mgmt.c:1336
-#: ../src/pragha-playlists-mgmt.c:1381 ../src/pragha-playlists-mgmt.c:1435
-msgid "New playlist"
-msgstr ""
-
-#: ../src/pragha-preferences-dialog.c:191
+#: ../src/pragha-preferences-dialog.c:190
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:213
+#: ../src/pragha-preferences-dialog.c:212
 msgid "Album art pattern"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:370
-#: ../src/pragha-preferences-dialog.c:1002
+#: ../src/pragha-preferences-dialog.c:369
+#: ../src/pragha-preferences-dialog.c:981
 msgid "Start normal"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:374
-#: ../src/pragha-preferences-dialog.c:1003
+#: ../src/pragha-preferences-dialog.c:373
+#: ../src/pragha-preferences-dialog.c:982
 msgid "Start fullscreen"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:378
-#: ../src/pragha-preferences-dialog.c:1004
+#: ../src/pragha-preferences-dialog.c:377
+#: ../src/pragha-preferences-dialog.c:983
 msgid "Start in system tray"
 msgstr ""
 
 #. Create a folder chooser dialog
-#: ../src/pragha-preferences-dialog.c:493
+#: ../src/pragha-preferences-dialog.c:492
 msgid "Select a folder to add to library"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:497
+#: ../src/pragha-preferences-dialog.c:496
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:848
 msgid "_Open"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:791
-#: ../src/pragha-preferences-dialog.c:1171
+#: ../src/pragha-preferences-dialog.c:777
+#: ../src/pragha-preferences-dialog.c:1150
 msgid "Audio"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:793
+#: ../src/pragha-preferences-dialog.c:779
 msgid "Audio sink"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:797
-#: ../src/pragha-preferences-dialog.c:816
-#: ../src/pragha-preferences-dialog.c:822
+#: ../src/pragha-preferences-dialog.c:783
+#: ../src/pragha-preferences-dialog.c:802
+#: ../src/pragha-preferences-dialog.c:808
 msgid "Restart Required"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:812
+#: ../src/pragha-preferences-dialog.c:798
 msgid "Audio Device"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:821
+#: ../src/pragha-preferences-dialog.c:807
 msgid "Use software mixer"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:863
+#: ../src/pragha-preferences-dialog.c:849
 msgid "Folders"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:883
+#: ../src/pragha-preferences-dialog.c:869
 msgid "_Remove"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:899
+#: ../src/pragha-preferences-dialog.c:885
 msgid "Merge folders in the folders estructure view"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:902
+#: ../src/pragha-preferences-dialog.c:888
 msgid "Sort albums by release year"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:935
+#: ../src/pragha-preferences-dialog.c:920
 msgid "Highlight rows on current playlist"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:938
-msgid "Use symbolic icons in panel"
-msgstr ""
-
-#: ../src/pragha-preferences-dialog.c:941
+#: ../src/pragha-preferences-dialog.c:923
 msgid "Controls"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:943
+#: ../src/pragha-preferences-dialog.c:925
 msgid "Show Album art in Panel"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:946
+#: ../src/pragha-preferences-dialog.c:928
 msgid "Size of Album art"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:951
+#: ../src/pragha-preferences-dialog.c:933
 msgid "Album art file pattern"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:990
+#: ../src/pragha-preferences-dialog.c:969
 msgid "Search"
 msgstr ""
 
 #. Instant search.
-#: ../src/pragha-preferences-dialog.c:992 ../src/pragha-search-entry.c:40
+#: ../src/pragha-preferences-dialog.c:971 ../src/pragha-search-entry.c:40
 msgid "Search while typing"
 msgstr ""
 
 #. Aproximate search.
-#: ../src/pragha-preferences-dialog.c:995 ../src/pragha-search-entry.c:47
+#: ../src/pragha-preferences-dialog.c:974 ../src/pragha-search-entry.c:47
 msgid "Search similar words"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:998
+#: ../src/pragha-preferences-dialog.c:977
 msgid "When starting pragha"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1001
+#: ../src/pragha-preferences-dialog.c:980
 msgid "Remember last window state"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1007
+#: ../src/pragha-preferences-dialog.c:986
 msgid "Restore last playlist"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1010
+#: ../src/pragha-preferences-dialog.c:989
 msgid "When adding folders"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1035
-#: ../src/pragha-preferences-dialog.c:1186
+#: ../src/pragha-preferences-dialog.c:1014
+#: ../src/pragha-preferences-dialog.c:1165
 msgid "Desktop"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1037
+#: ../src/pragha-preferences-dialog.c:1016
 msgid "Show Pragha icon in the notification area"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1040
+#: ../src/pragha-preferences-dialog.c:1019
 msgid "Minimize Pragha when closing window"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1066
-#: ../src/pragha-preferences-dialog.c:1158
+#: ../src/pragha-preferences-dialog.c:1045
+#: ../src/pragha-preferences-dialog.c:1137
 msgid "Plugins"
 msgstr ""
 
 #. The main preferences dialog
-#: ../src/pragha-preferences-dialog.c:1145
+#: ../src/pragha-preferences-dialog.c:1124
 msgid "Preferences"
 msgstr ""
 
 #. Labels
-#: ../src/pragha-preferences-dialog.c:1154
+#: ../src/pragha-preferences-dialog.c:1133
 msgid "Appearance"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1156
+#: ../src/pragha-preferences-dialog.c:1135
 msgid "General"
 msgstr ""
 
-#: ../src/pragha-preferences-dialog.c:1190
+#: ../src/pragha-preferences-dialog.c:1169
 msgid "Services"
 msgstr ""
 
 #. Add to dialog
-#: ../src/pragha-preferences-dialog.c:1203
+#: ../src/pragha-preferences-dialog.c:1182
 msgid "Preferences of Pragha"
 msgstr ""
 
@@ -872,8 +873,8 @@ msgstr ""
 msgid "Library scan complete"
 msgstr ""
 
-#: ../src/pragha-statusicon.c:172 ../src/pragha-toolbar.c:165
-#: ../src/pragha-toolbar.c:468
+#: ../src/pragha-statusicon.c:172 ../src/pragha-toolbar.c:162
+#: ../src/pragha-toolbar.c:416
 msgid "<b>Not playing</b>"
 msgstr ""
 
@@ -886,33 +887,33 @@ msgid "File"
 msgstr ""
 
 #. The main edit dialog
-#: ../src/pragha-tags-dialog.c:455 ../src/pragha-tags-dialog.c:645
+#: ../src/pragha-tags-dialog.c:455 ../src/pragha-tags-dialog.c:657
 msgid "Details"
 msgstr ""
 
-#: ../src/pragha-tags-dialog.c:556
+#: ../src/pragha-tags-dialog.c:557
 msgid "channel"
 msgid_plural "channels"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/pragha-tags-dialog.c:574
+#: ../src/pragha-tags-dialog.c:576
 msgid "Channels"
 msgstr ""
 
-#: ../src/pragha-tags-dialog.c:575
+#: ../src/pragha-tags-dialog.c:577
 msgid "Samplerate"
 msgstr ""
 
-#: ../src/pragha-tags-dialog.c:576
+#: ../src/pragha-tags-dialog.c:578
 msgid "Folder"
 msgstr ""
 
-#: ../src/pragha-tags-dialog.c:815
+#: ../src/pragha-tags-dialog.c:827
 msgid "Selection to"
 msgstr ""
 
-#: ../src/pragha-tags-dialog.c:853
+#: ../src/pragha-tags-dialog.c:865
 msgid "Open folder"
 msgstr ""
 
@@ -927,48 +928,48 @@ msgstr ""
 msgid "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:141
+#: ../src/pragha-toolbar.c:138
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span weight="
 "\"light\">in</span></small> %s"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:146
+#: ../src/pragha-toolbar.c:143
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:150
+#: ../src/pragha-toolbar.c:147
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:766
+#: ../src/pragha-toolbar.c:714
 msgid "Previous Track"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:772
+#: ../src/pragha-toolbar.c:720
 msgid "Play / Pause Track"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:778
+#: ../src/pragha-toolbar.c:726
 msgid "Stop playback"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:784
+#: ../src/pragha-toolbar.c:732
 msgid "Next Track"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:818
+#: ../src/pragha-toolbar.c:766
 msgid "Leave Fullscreen"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:824
+#: ../src/pragha-toolbar.c:772
 msgid "Play songs in a random order"
 msgstr ""
 
-#: ../src/pragha-toolbar.c:830
+#: ../src/pragha-toolbar.c:777
 msgid "Repeat playback list at the end"
 msgstr ""
 
@@ -999,7 +1000,7 @@ msgid "_Next"
 msgstr ""
 
 #. Setup application name and pulseaudio role
-#: ../src/pragha.c:395 ../src/pragha.c:758
+#: ../src/pragha.c:395 ../src/pragha.c:764
 msgid "Pragha Music Player"
 msgstr ""
 
@@ -1011,21 +1012,21 @@ msgstr ""
 msgid "Manage and listen to music"
 msgstr ""
 
-#: ../plugins/notify/pragha-notify-plugin.c:166
+#: ../plugins/notify/pragha-notify-plugin.c:167
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 msgstr ""
 
-#: ../plugins/notify/pragha-notify-plugin.c:288
+#: ../plugins/notify/pragha-notify-plugin.c:287
 msgid "Notifications"
 msgstr ""
 
-#: ../plugins/notify/pragha-notify-plugin.c:290
+#: ../plugins/notify/pragha-notify-plugin.c:289
 msgid "Show Album art in notifications"
 msgstr ""
 
-#: ../plugins/notify/pragha-notify-plugin.c:293
-msgid "Add actions to change track to notifications"
+#: ../plugins/notify/pragha-notify-plugin.c:292
+msgid "Add actions to change track in notifications"
 msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:166
@@ -1105,7 +1106,7 @@ msgid "Update current song on Last.fm failed."
 msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1586
-msgid "Last.fm Support"
+msgid "Scrobble on Last.fm"
 msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1589

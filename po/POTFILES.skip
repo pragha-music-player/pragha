@@ -7,3 +7,5 @@ plugins/devices/pragha-devices-cd.c
 plugins/devices/pragha-devices-plugin.c
 plugins/tunein/pragha-tunein-plugin.c
 plugins/dlna/pragha-dlna-plugin.c
+plugins/dlna-renderer/pragha-dlna-renderer-plugin.c
+plugins/acoustid/pragha-acoustid-plugin.c
