@@ -1,7 +1,64 @@
 ==============================================================
-Overview of changes between Pragha 1.3.0 and 1.2
+Overview of changes between Pragha 1.3.1 and 1.3.0
 ==============================================================
 
+News:
+ 	New TuneIn plugin. Allow search on TuneIn and append first radio.
+	New DLNA server plugin. Allow share playlist to a DLNA server using Rygel.
+	New DLNA renderer plugin. Allow play music on a DLNA server using Grilo.
+	New AcousticId plugin. Get metadata of current song on AcoustID service.
+	D'Oh!. Port to GtkApplication.
+	Return a basic support to MOD files.
+	Allow playback music on MTP devices.
+	First basic port to Windows.
+
+Others Changes:
+	The CD-ROM support became a plugin.
+	The Last.fm support became a plugin.
+	 * Better protect tags and time_t on threads.
+	 * Use diferents time_id to scrobble and update now playing.
+	 * Fix submits multiple entries of one song to LastFM.
+	 * Betters function names and declare a lot as static.
+	Song-info plugin: don't delay searching and cancel if song was changed.
+	Allow recursive playlist disabled since https://bugzilla.redhat.com/show_bug.cgi?id=1013020
+	Reduce track progress bar size. (A regresion since Gtk+-2)
+	Split Devices plugin. Devices, MTP, Renovable, and CDROM.
+	PraghaMusicobject/Database: file_type coverted to mime_type.
+	PraghaMusicobject: Add source property, to differentiate local files, of http, or plugins.
+	Gui: Show Mimetype on Playlist and tags properties dialog.
+	Set <Control>O as acceletator to open files dialog.
+	Enable the Notify and Song Info plugins on first run
+
+Bugs fixed:
+	Fix Segfault when edit song tags from systray menu.
+	Playlist: fix memory leak.
+	Fix compilation without libpeas. Issue #60
+	Fix some segfault when use Glib >= 2.40.
+	Create cache folders when init it. NOT IN THE SONGINFO PLUGIN!!!.
+	Show album arts in cache to all songs.
+	Not import empty playlists when scan the library.
+	Update the menubar and playlist submenu when change any playlists saved.
+	Fix never change album on playlist when update tags.
+	Fix bad update of title on playlist when update tags.
+	Notify Plugin: Remove custom timeout.
+	Notify plugin: Check new song before sending a notification.
+	Lastfm Plugin: Fix warning when user or password in empty..
+	Lastfm Plugin: No start new sessions every time that close the configuration dialog.
+	Add licence to xml_helper.c/.h files.
+	Fix opening folder with images.
+
+Updates Translations:
+	Some improvements to English source file strings. Thanks to @smarquespt. See #67
+	Update Chinese (China) translation thanks to chunyang.
+	Update Czech translation thanks to anespor.
+	Update French translation thanks to Pingax.
+	Update Portuguese translation thanks to smarquespt.
+
+==============================================================
+OTHERS REALESES:
+==============================================================
+
+V1.3.0
 News:
 	Depends completely on Gtk+3 >= 3.2 and Glib >= 2.32, Gstreamer1 and libcdio_paranoia >= 0.90 [1]
 	Add support to plugins, depending on libpeas >= 1.2
@@ -20,10 +77,6 @@ Others Changes:
 NOTE:
 [0]	Seems little, but 99% of the work in 1.2 was done here, and then backported.
 [1] Support to Gtk+2 and libcdio_paranoia = 0.83 was removed completely.
-
-==============================================================
-OTHERS REALESES:
-==============================================================
 
 V1.2
 Bugs fixed:

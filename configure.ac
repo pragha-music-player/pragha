@@ -6,7 +6,7 @@ dnl
 dnl Version information
 m4_define([pragha_version_major], [1])
 m4_define([pragha_version_minor], [3])
-m4_define([pragha_version_micro], [0])
+m4_define([pragha_version_micro], [1])
 
 m4_define([pragha_version], [pragha_version_major().pragha_version_minor().pragha_version_micro()])
 
@@ -230,6 +230,15 @@ AM_CONDITIONAL([HAVE_LIBCDIO_PARANOIA], 0)
 AM_CONDITIONAL([HAVE_LIBCDDB], 0)
 fi
 
+CDROM_SUPPORT="no"
+if test x"$LIBCDIO_FOUND" = x"yes"; then
+if test x"$LIBCDIO_PARANOIA_FOUND" = x"yes"; then
+if test x"$LIBCDDB_FOUND" = x"yes"; then
+CDROM_SUPPORT="yes"
+fi
+fi
+fi
+
 dnl Check min taglib to add monkeyaudio support
 TAGLIB_1_7_FOUND="no"
 XDT_CHECK_OPTIONAL_PACKAGE([TAGLIB_1_7],
@@ -294,7 +303,7 @@ echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
-echo "   * Play Audio cds.........................................................: $LIBCDIO_FOUND"
+echo "   * Play Audio cds.........................................................: $CDROM_SUPPORT"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"
 echo "   * Search metadata on AcoustID.....................(Need libsoup >= 2.38).: $LIBSOUP_FOUND"
@@ -311,4 +320,3 @@ AS_IF([test $GSTREAMER_API_VERSION = 1.0],
 echo "   * Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
 echo "   * Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
-
