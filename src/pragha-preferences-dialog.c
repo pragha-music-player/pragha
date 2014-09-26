@@ -62,6 +62,7 @@ struct _PreferencesDialog {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 #endif
+	GtkWidget *gnome_style_w;
 	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
@@ -518,6 +519,62 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 }
 
+/* Toggle gnome style */
+
+static void
+toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
+{
+	GtkWidget *window, *parent, *toolbar, *menubar;
+	GtkStyleContext *context;
+	gboolean gnome_style = FALSE;
+
+	window = pragha_application_get_window (dialog->pragha);
+	toolbar = pragha_application_get_toolbar (dialog->pragha);
+	menubar = pragha_application_get_menubar (dialog->pragha);
+	g_object_ref(toolbar);
+
+	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
+	context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
+
+	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
+
+	if (gnome_style) {
+		gtk_widget_hide(GTK_WIDGET(window));
+		pragha_preferences_set_controls_below(dialog->preferences, FALSE);
+		/*
+		 * TODO: Inhibit controls below
+		 */
+		gtk_container_remove (GTK_CONTAINER(parent), toolbar);
+		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
+		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), TRUE);
+
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_TOOLBAR);
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+		gtk_style_context_add_class (context, "header-bar");
+
+		gtk_widget_show(GTK_WIDGET(window));
+	}
+	else {
+		gtk_widget_hide(GTK_WIDGET(window));
+		gtk_window_set_titlebar (GTK_WINDOW (window), NULL);
+		gtk_window_set_title (GTK_WINDOW(window), _("Pragha Music Player"));
+
+		gtk_box_pack_start (GTK_BOX(parent), GTK_WIDGET(toolbar),
+		                    FALSE, FALSE, 0);
+		gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), 1);
+
+		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), FALSE);
+
+		gtk_style_context_remove_class (context, "header-bar");
+		gtk_style_context_add_class (context, GTK_STYLE_CLASS_TOOLBAR);
+		gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+
+		gtk_widget_show(GTK_WIDGET(window));
+	}
+	g_object_unref(toolbar);
+}
+
 /* Toggle hint of playlist */
 
 static void toggle_use_hint (GtkToggleButton *button, PreferencesDialog *dialog)
@@ -676,6 +733,9 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 3);
 		}
 	}
+
+	if (pragha_preferences_get_gnome_style(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w), TRUE);
 
 	if (pragha_preferences_get_use_hint(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
@@ -910,10 +970,16 @@ static GtkWidget*
 pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *use_hint, *album_art, *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
+	GtkWidget *gnome_style, *use_hint, *album_art;
+	GtkWidget *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
+
+	pragha_hig_workarea_table_add_section_title(table, &row, _("Appearance"));
+
+	gnome_style = gtk_check_button_new_with_label(_("Use Gnome 3 HIG"));
+	pragha_hig_workarea_table_add_wide_control(table, &row, gnome_style);
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));
 
@@ -942,6 +1008,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	/* Store references */
 
+	dialog->gnome_style_w = gnome_style;
 	dialog->use_hint_w = use_hint;
 	dialog->album_art_w = album_art;
 	dialog->album_art_size_w = album_art_size;
@@ -949,6 +1016,8 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	/* Setup signal handlers */
 
+	g_signal_connect(G_OBJECT(gnome_style), "toggled",
+			 G_CALLBACK(toggle_gnome_style), dialog);
 	g_signal_connect(G_OBJECT(use_hint), "toggled",
 			 G_CALLBACK(toggle_use_hint), dialog);
 	g_signal_connect(G_OBJECT(album_art), "toggled",

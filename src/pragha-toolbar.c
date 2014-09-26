@@ -425,8 +425,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
 	g_signal_connect(G_OBJECT (album_art_frame), "button_press_event",
 	                 G_CALLBACK (pragha_toolbar_album_art_activated), toolbar);
-
-	gtk_box_pack_start (GTK_BOX(hbox), album_art_frame, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(hbox), album_art_frame, FALSE, FALSE, 2);
 
 	albumart = pragha_album_art_new ();
 	g_object_bind_property (preferences, "album-art-size",
@@ -538,7 +537,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->track_length_label = length_label;
 	toolbar->extention_box      = extention_box;
 
-	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
 	gtk_widget_set_size_request(GTK_WIDGET(vbox), 600, -1);
 	gtk_widget_show_all(hbox);
 
@@ -744,25 +743,26 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	unfull_button = gtk_tool_button_new (NULL, NULL);
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(unfull_button), "view-restore");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(unfull_button), _("Leave Fullscreen"));
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(unfull_button));
 	toolbar->unfull_button = unfull_button;
 
 	shuffle_button = gtk_toggle_tool_button_new();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(shuffle_button), "media-playlist-shuffle");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(shuffle_button), _("Play songs in a random order"));
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
 
 	repeat_button = gtk_toggle_tool_button_new ();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(repeat_button), "media-playlist-repeat");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(repeat_button), _("Repeat playback list at the end"));
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
 
 	vol_button = gtk_volume_button_new();
 	g_object_set(vol_button, "use-symbolic", FALSE, NULL);
 	gtk_button_set_relief(GTK_BUTTON(vol_button), GTK_RELIEF_NONE);
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
-	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(vol_button));
 	toolbar->vol_button = vol_button;
+
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(vol_button));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(unfull_button));
 
 	/* Connect signals */
 
@@ -805,7 +805,8 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_show_all(GTK_WIDGET(toolbar));
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
 
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), TRUE);
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar),
+		pragha_preferences_get_gnome_style (preferences));
 
 	g_object_unref(preferences);
 }

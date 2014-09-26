@@ -69,6 +69,7 @@ struct _PraghaPreferencesPrivate
 	gchar     *album_art_pattern;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
+	gboolean   gnome_style;
 	gboolean   controls_below;
 	gboolean   remember_state;
 	gchar     *start_mode;
@@ -107,6 +108,7 @@ enum
 	PROP_ALBUM_ART_PATTERN,
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
+	PROP_GNOME_STYLE,
 	PROP_CONTROLS_BELOW,
 	PROP_REMEMBER_STATE,
 	PROP_START_MODE,
@@ -1094,6 +1096,33 @@ pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_gnome_style:
+ *
+ */
+gboolean
+pragha_preferences_get_gnome_style (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->gnome_style;
+}
+
+/**
+ * pragha_preferences_set_gnome_style:
+ *
+ */
+void
+pragha_preferences_set_gnome_style (PraghaPreferences *preferences,
+                                    gboolean           gnome_style)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->gnome_style = gnome_style;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_GNOME_STYLE]);
+}
+
+/**
  * pragha_preferences_get_controls_below:
  *
  */
@@ -1317,7 +1346,7 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, show_status_icon, controls_below, remember_state;
+	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, show_status_icon, gnome_style, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1662,6 +1691,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_status_icon(preferences, show_status_icon);
 	}
 
+	gnome_style = g_key_file_get_boolean(priv->rc_keyfile,
+	                                     GROUP_WINDOW,
+	                                     KEY_GNOME_STYLE,
+	                                     &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_gnome_style(preferences, gnome_style);
+	}
+
 	controls_below = g_key_file_get_boolean(priv->rc_keyfile,
 	                                        GROUP_WINDOW,
 	                                        KEY_CONTROLS_BELOW,
@@ -1901,6 +1942,10 @@ pragha_preferences_finalize (GObject *object)
 	                       priv->show_status_icon);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
+	                       KEY_GNOME_STYLE,
+	                       priv->gnome_style);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
 	                       KEY_CONTROLS_BELOW,
 	                       priv->controls_below);
 	g_key_file_set_boolean(priv->rc_keyfile,
@@ -2046,6 +2091,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SHOW_STATUS_ICON:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_icon(preferences));
 			break;
+		case PROP_GNOME_STYLE:
+			g_value_set_boolean (value, pragha_preferences_get_gnome_style(preferences));
+			break;
 		case PROP_CONTROLS_BELOW:
 			g_value_set_boolean (value, pragha_preferences_get_controls_below(preferences));
 			break;
@@ -2152,6 +2200,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_GNOME_STYLE:
+			pragha_preferences_set_gnome_style(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_CONTROLS_BELOW:
 			pragha_preferences_set_controls_below(preferences, g_value_get_boolean(value));
@@ -2468,6 +2519,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "ShowStatusIcon",
 		                     "Show Status Icon Preference",
 		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:gnome_style:
+	  *
+	  */
+	gParamSpecs[PROP_GNOME_STYLE] =
+		g_param_spec_boolean("gnome-style",
+		                     "GnomeStyle",
+		                     "Gnome Style Preference",
+		                      FALSE,
 		                      PRAGHA_PREF_PARAMS);
 
 	/**

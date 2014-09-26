@@ -99,6 +99,7 @@ struct _PraghaPreferencesClass
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR             "status_bar"
+#define KEY_GNOME_STYLE            "gnome_style"
 #define KEY_CONTROLS_BELOW         "controls_below"
 
 #define GROUP_SERVICES   "services"
@@ -364,6 +365,13 @@ pragha_preferences_get_show_status_icon (PraghaPreferences *preferences);
 void
 pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
                                          gboolean show_status_icon);
+
+gboolean
+pragha_preferences_get_gnome_style (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_gnome_style (PraghaPreferences *preferences,
+                                    gboolean           gnome_style);
 
 gboolean
 pragha_preferences_get_controls_below (PraghaPreferences *preferences);
