@@ -392,8 +392,6 @@ pragha_application_construct_window (PraghaApplication *pragha)
 		gtk_window_set_icon (GTK_WINDOW(pragha->mainwindow),
 		                     pragha->pixbuf_app);
 	
-	gtk_window_set_title(GTK_WINDOW(pragha->mainwindow), _("Pragha Music Player"));
-
 	/* Get all widgets instances */
 
 	pragha->menu_ui_manager = pragha_menubar_new ();
@@ -415,6 +413,9 @@ pragha_application_construct_window (PraghaApplication *pragha)
 	/* Contruct the window. */
 
 	pragha_window_new (pragha);
+
+	gtk_window_set_title (GTK_WINDOW(pragha->mainwindow),
+	                      _("Pragha Music Player"));
 }
 
 static void

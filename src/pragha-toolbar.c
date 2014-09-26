@@ -250,7 +250,7 @@ pragha_toolbar_album_art_activated (GtkWidget      *event_box,
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
 		g_signal_emit (toolbar, signals[ALBUM_ART_ACTIVATED], 0);
 
-	return TRUE;
+	return FALSE;
 }
 
 static gboolean
@@ -261,7 +261,7 @@ pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
 		g_signal_emit (toolbar, signals[TRACK_INFO_ACTIVATED], 0);
 
-	return TRUE;
+	return FALSE;
 }
 
 static void
