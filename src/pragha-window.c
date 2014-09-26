@@ -514,8 +514,8 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
-	                    FALSE, FALSE, 0);
+	/*gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
+	                    FALSE, FALSE, 0);*/
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
@@ -554,6 +554,12 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Pack everyting on the main window. */
 
 	gtk_container_add(GTK_CONTAINER(window), vbox_main);
+
+	gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
+	GtkWidget *song = pragha_toolbar_get_song_box(toolbar);
+	gtk_header_bar_set_custom_title(GTK_HEADER_BAR(toolbar), GTK_WIDGET(song));
+
+	gtk_widget_show (GTK_WIDGET(toolbar));
 
 	pragha_window_init (pragha);
 }
