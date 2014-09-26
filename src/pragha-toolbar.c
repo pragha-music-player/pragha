@@ -407,6 +407,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	PraghaPreferences *preferences;
 	PraghaTrackProgress *progress_bar;
 	PraghaAlbumArt *albumart;
+	PraghaContainer *box;
 	GtkWidget *hbox, *vbox, *top_hbox, *botton_hbox;
 	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
 	GtkWidget *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
@@ -416,10 +417,16 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 
 	preferences = pragha_preferences_get();
 
+	/*
+	 * Main box that allow expand.
+	 */
+	box = pragha_container_new ();
+
  	/*
  	 * Main box: [Album][Song info]
  	 */
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_pack_start (GTK_BOX(box), hbox, TRUE, TRUE, 0);
 
 	album_art_frame = gtk_event_box_new ();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(album_art_frame), FALSE);
@@ -538,12 +545,11 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->extention_box      = extention_box;
 
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
-	gtk_widget_set_size_request(GTK_WIDGET(vbox), 600, -1);
-	gtk_widget_show_all(hbox);
+	gtk_widget_show_all(GTK_WIDGET(box));
 
 	g_object_unref(preferences);
 
-	return hbox;
+	return GTK_WIDGET(box);
 }
 
 static void

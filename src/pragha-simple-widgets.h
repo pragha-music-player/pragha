@@ -23,10 +23,12 @@
 G_BEGIN_DECLS
 
 typedef struct _PraghaTrackProgress PraghaTrackProgress;
+typedef struct _PraghaContainer     PraghaContainer;
 
 gpointer sokoke_xfce_header_new (const gchar *header, const gchar *icon);
 
 PraghaTrackProgress *pragha_track_progress_new (void);
+PraghaContainer     *pragha_container_new      (void);
 
 G_END_DECLS
 
