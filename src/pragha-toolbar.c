@@ -38,8 +38,11 @@ gboolean    pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar);
 
 
 struct _PraghaToolbar {
+#if GTK_CHECK_VERSION (3, 10, 0)
 	GtkHeaderBar   __parent__;
-
+#else
+	GtkToolbar      __parent__;
+#endif
 	PraghaAlbumArt *albumart;
 	PraghaTrackProgress *track_progress_bar;
 
@@ -82,7 +85,11 @@ enum
 
 static int signals[LAST_SIGNAL] = { 0 };
 
+#if GTK_CHECK_VERSION (3, 10, 0)
 G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_HEADER_BAR)
+#else
+G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_TOOLBAR)
+#endif
 
 void
 pragha_toolbar_update_progress (PraghaToolbar *toolbar, gint length, gint progress)
@@ -552,6 +559,23 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	return GTK_WIDGET(box);
 }
 
+#if !GTK_CHECK_VERSION (3, 10, 0)
+static void
+gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
+{
+	GtkWidget *align_box;
+	GtkToolItem *boxitem;
+
+	boxitem = gtk_tool_item_new ();
+
+	align_box = gtk_alignment_new(0, 0.5, 0, 0);
+	gtk_container_add(GTK_CONTAINER(align_box), item);
+
+	gtk_container_add (GTK_CONTAINER(boxitem), align_box);
+	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
+}
+#endif
+
 static void
 vol_button_value_changed (GtkVolumeButton *button, gdouble value, PraghaToolbar *toolbar)
 {
@@ -723,26 +747,48 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	prev_button = gtk_tool_button_new (NULL, NULL);
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(prev_button), "media-skip-backward");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_button), _("Previous Track"));
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(prev_button));
 	toolbar->prev_button = prev_button;
 
 	play_button = gtk_tool_button_new (NULL, NULL);
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(play_button), "media-playback-start");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(play_button), _("Play / Pause Track"));
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(play_button));
 	toolbar->play_button = play_button;
 
 	stop_button = gtk_tool_button_new (NULL, NULL);
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(stop_button), "media-playback-stop");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(stop_button), _("Stop playback"));
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(stop_button));
 	toolbar->stop_button = stop_button;
 
 	next_button = gtk_tool_button_new (NULL, NULL);
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON(next_button), "media-skip-forward");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
-	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(next_button));
 	toolbar->next_button = next_button;
+
+#if GTK_CHECK_VERSION (3, 10, 0)
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(prev_button));
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(play_button));
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(stop_button));
+	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(next_button));
+#else
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(prev_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(play_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(stop_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(next_button));
+#endif
+
+	/* Song info Box */
+
+#if !GTK_CHECK_VERSION (3, 10, 0)
+	GtkToolItem *boxitem = gtk_tool_item_new ();
+	gtk_tool_item_set_expand (GTK_TOOL_ITEM(boxitem), TRUE);
+	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
+
+	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_container_add (GTK_CONTAINER(boxitem), box);
+
+	GtkWidget *playing = pragha_toolbar_get_song_box (toolbar);
+	gtk_box_pack_start (GTK_BOX(box), playing, TRUE, TRUE, 5);
+#endif
 
 	/* Setup Right control buttons */
 
@@ -765,10 +811,17 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
 	toolbar->vol_button = vol_button;
 
+#if GTK_CHECK_VERSION (3, 10, 0)
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(vol_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(unfull_button));
+#else
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(unfull_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(shuffle_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(vol_button));
+#endif
 
 	/* Connect signals */
 
@@ -810,9 +863,10 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	gtk_widget_show_all(GTK_WIDGET(toolbar));
 	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
-
+#if GTK_CHECK_VERSION (3, 10, 0)
 	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar),
 		pragha_preferences_get_gnome_style (preferences));
+#endif
 
 	g_object_unref(preferences);
 }

@@ -38,7 +38,11 @@ typedef struct _PraghaApplication PraghaApplication;
 typedef struct _PraghaToolbar PraghaToolbar;
 
 typedef struct {
+#if GTK_CHECK_VERSION (3, 10, 0)
 	GtkHeaderBarClass __parent__;
+#else
+	GtkToolbarClass __parent__;
+#endif
 	void (*prev) (PraghaToolbar *toolbar);
 	void (*play) (PraghaToolbar *toolbar);
 	void (*stop) (PraghaToolbar *toolbar);

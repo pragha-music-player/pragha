@@ -62,7 +62,9 @@ struct _PreferencesDialog {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 #endif
+#if GTK_CHECK_VERSION (3, 10, 0)
 	GtkWidget *gnome_style_w;
+#endif
 	GtkWidget *use_hint_w;
 	GtkWidget *album_art_w;
 	GtkWidget *album_art_size_w;
@@ -520,7 +522,7 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 }
 
 /* Toggle gnome style */
-
+#if GTK_CHECK_VERSION (3, 10, 0)
 static void
 toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 {
@@ -529,7 +531,7 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 	gboolean gnome_style = FALSE;
 
 	window = pragha_application_get_window (dialog->pragha);
-	toolbar = pragha_application_get_toolbar (dialog->pragha);
+	toolbar = GTK_WIDGET(pragha_application_get_toolbar (dialog->pragha));
 	menubar = pragha_application_get_menubar (dialog->pragha);
 	g_object_ref(toolbar);
 
@@ -574,7 +576,7 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 	}
 	g_object_unref(toolbar);
 }
-
+#endif
 /* Toggle hint of playlist */
 
 static void toggle_use_hint (GtkToggleButton *button, PreferencesDialog *dialog)
@@ -733,10 +735,10 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 3);
 		}
 	}
-
+#if GTK_CHECK_VERSION (3, 10, 0)
 	if (pragha_preferences_get_gnome_style(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w), TRUE);
-
+#endif
 	if (pragha_preferences_get_use_hint(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
 
@@ -970,16 +972,21 @@ static GtkWidget*
 pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *gnome_style, *use_hint, *album_art;
+#if GTK_CHECK_VERSION (3, 10, 0)
+	GtkWidget *gnome_style;
+#endif
+	GtkWidget *use_hint, *album_art;
 	GtkWidget *album_art_pattern_label, *album_art_size, *album_art_size_label, *album_art_pattern;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new();
 
+#if GTK_CHECK_VERSION (3, 10, 0)
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Appearance"));
 
 	gnome_style = gtk_check_button_new_with_label(_("Use Gnome 3 HIG"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, gnome_style);
+#endif
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));
 
@@ -1007,17 +1014,19 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	pragha_hig_workarea_table_add_row (table, &row, album_art_pattern_label, album_art_pattern);
 
 	/* Store references */
-
+#if GTK_CHECK_VERSION (3, 10, 0)
 	dialog->gnome_style_w = gnome_style;
+#endif
 	dialog->use_hint_w = use_hint;
 	dialog->album_art_w = album_art;
 	dialog->album_art_size_w = album_art_size;
 	dialog->album_art_pattern_w = album_art_pattern;
 
 	/* Setup signal handlers */
-
+#if GTK_CHECK_VERSION (3, 10, 0)
 	g_signal_connect(G_OBJECT(gnome_style), "toggled",
 			 G_CALLBACK(toggle_gnome_style), dialog);
+#endif
 	g_signal_connect(G_OBJECT(use_hint), "toggled",
 			 G_CALLBACK(toggle_use_hint), dialog);
 	g_signal_connect(G_OBJECT(album_art), "toggled",
