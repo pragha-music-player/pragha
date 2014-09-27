@@ -1174,6 +1174,12 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	preferences = pragha_application_get_preferences (pragha);
 
+#if GTK_CHECK_VERSION (3, 10, 0)
+	GtkAction *bellow_action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Playback controls below");
+	if (pragha_preferences_get_gnome_style(preferences))
+		gtk_action_set_sensitive (GTK_ACTION (bellow_action), FALSE);
+#endif
+
 	GtkAction *action_shuffle = gtk_ui_manager_get_action(menu_ui_manager, "/Menubar/PlaybackMenu/Shuffle");
 	g_object_bind_property (preferences, "shuffle", action_shuffle, "active", binding_flags);
 

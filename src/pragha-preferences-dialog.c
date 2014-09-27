@@ -527,6 +527,7 @@ static void
 toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 {
 	GtkWidget *window, *parent, *toolbar, *menubar;
+	GtkAction *action;
 	GtkStyleContext *context;
 	gboolean gnome_style = FALSE;
 
@@ -540,13 +541,14 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 
 	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
+	action = pragha_application_get_menu_action (dialog->pragha, "/Menubar/ViewMenu/Playback controls below");
 
 	if (gnome_style) {
 		gtk_widget_hide(GTK_WIDGET(window));
+
 		pragha_preferences_set_controls_below(dialog->preferences, FALSE);
-		/*
-		 * TODO: Inhibit controls below
-		 */
+		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
 		gtk_container_remove (GTK_CONTAINER(parent), toolbar);
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
 		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), TRUE);
@@ -559,6 +561,9 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 	}
 	else {
 		gtk_widget_hide(GTK_WIDGET(window));
+
+		gtk_action_set_sensitive (GTK_ACTION (action), TRUE);
+
 		gtk_window_set_titlebar (GTK_WINDOW (window), NULL);
 		gtk_window_set_title (GTK_WINDOW(window), _("Pragha Music Player"));
 
