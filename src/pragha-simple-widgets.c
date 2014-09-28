@@ -151,7 +151,7 @@ pragha_container_get_preferred_width (GtkWidget *widget,
 	if (minimum)
 		*minimum = 140;
 	if (natural)
-		*natural = 860;
+		*natural = 1600;
 }
 
 static void

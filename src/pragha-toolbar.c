@@ -415,7 +415,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	PraghaTrackProgress *progress_bar;
 	PraghaAlbumArt *albumart;
 	PraghaContainer *box;
-	GtkWidget *hbox, *vbox, *top_hbox, *botton_hbox;
+	GtkWidget *hbox, *vbox_aling, *vbox, *top_hbox, *botton_hbox;
 	GtkWidget *album_art_frame,*title, *title_event_box, *extention_box;
 	GtkWidget *progress_bar_event_box, *time_label, *time_align, *length_label, *length_align, *length_event_box;
 
@@ -452,7 +452,10 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	/*
 	 * Song info vbox
 	 */
+	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
+
  	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
  	/*
  	 * Top box: [Title][extentions]
@@ -551,7 +554,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	toolbar->track_length_label = length_label;
 	toolbar->extention_box      = extention_box;
 
-	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox_aling, TRUE, TRUE, 2);
 	gtk_widget_show_all(GTK_WIDGET(box));
 
 	g_object_unref(preferences);
