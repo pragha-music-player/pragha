@@ -370,6 +370,27 @@ pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event
  * Public api.
  */
 
+#if GTK_CHECK_VERSION (3, 10, 0)
+void
+pragha_toolbar_set_style (PraghaToolbar *toolbar, gboolean gnome_style)
+{
+	GtkStyleContext *context;
+	context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
+
+	if (gnome_style) {
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_TOOLBAR);
+		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+		gtk_style_context_add_class (context, "header-bar");
+	}
+	else {
+		gtk_style_context_remove_class (context, "header-bar");
+		gtk_style_context_add_class (context, GTK_STYLE_CLASS_TOOLBAR);
+		gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+	}
+	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), gnome_style);
+}
+#endif
+
 void
 pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
 {
@@ -864,12 +885,14 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_bind_property(preferences, "shuffle", shuffle_button, "active", binding_flags);
 	g_object_bind_property(preferences, "repeat", repeat_button, "active", binding_flags);
 
-	gtk_widget_show_all(GTK_WIDGET(toolbar));
-	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
+	/* Fix styling */
 #if GTK_CHECK_VERSION (3, 10, 0)
-	gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar),
+	pragha_toolbar_set_style(toolbar,
 		pragha_preferences_get_gnome_style (preferences));
 #endif
+
+	gtk_widget_show_all(GTK_WIDGET(toolbar));
+	gtk_widget_hide(GTK_WIDGET(toolbar->unfull_button));
 
 	g_object_unref(preferences);
 }

@@ -526,22 +526,22 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 static void
 toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 {
-	GtkWidget *window, *parent, *toolbar, *menubar;
+	PraghaToolbar *toolbar;
+	GtkWidget *window, *parent, *menubar;
 	GtkAction *action;
-	GtkStyleContext *context;
 	gboolean gnome_style = FALSE;
 
+	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
+
 	window = pragha_application_get_window (dialog->pragha);
-	toolbar = GTK_WIDGET(pragha_application_get_toolbar (dialog->pragha));
+	toolbar = pragha_application_get_toolbar (dialog->pragha);
 	menubar = pragha_application_get_menubar (dialog->pragha);
 	g_object_ref(toolbar);
 
 	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
-	context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
-
-	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
-	action = pragha_application_get_menu_action (dialog->pragha, "/Menubar/ViewMenu/Playback controls below");
+	action = pragha_application_get_menu_action (dialog->pragha,
+		"/Menubar/ViewMenu/Playback controls below");
 
 	if (gnome_style) {
 		gtk_widget_hide(GTK_WIDGET(window));
@@ -549,13 +549,8 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 		pragha_preferences_set_controls_below(dialog->preferences, FALSE);
 		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
 
-		gtk_container_remove (GTK_CONTAINER(parent), toolbar);
+		gtk_container_remove (GTK_CONTAINER(parent), GTK_WIDGET(toolbar));
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
-		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), TRUE);
-
-		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_TOOLBAR);
-		gtk_style_context_remove_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-		gtk_style_context_add_class (context, "header-bar");
 
 		gtk_widget_show(GTK_WIDGET(window));
 	}
@@ -571,14 +566,10 @@ toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 		                    FALSE, FALSE, 0);
 		gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), 1);
 
-		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(toolbar), FALSE);
-
-		gtk_style_context_remove_class (context, "header-bar");
-		gtk_style_context_add_class (context, GTK_STYLE_CLASS_TOOLBAR);
-		gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-
 		gtk_widget_show(GTK_WIDGET(window));
 	}
+	pragha_toolbar_set_style(toolbar, gnome_style);
+
 	g_object_unref(toolbar);
 }
 #endif
@@ -740,10 +731,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 				gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->window_state_combo_w), 3);
 		}
 	}
-#if GTK_CHECK_VERSION (3, 10, 0)
-	if (pragha_preferences_get_gnome_style(dialog->preferences))
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w), TRUE);
-#endif
 	if (pragha_preferences_get_use_hint(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w), TRUE);
 
@@ -1028,10 +1015,15 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	dialog->album_art_pattern_w = album_art_pattern;
 
 	/* Setup signal handlers */
+
 #if GTK_CHECK_VERSION (3, 10, 0)
+	if (pragha_preferences_get_gnome_style(dialog->preferences))
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w), TRUE);
+
 	g_signal_connect(G_OBJECT(gnome_style), "toggled",
 			 G_CALLBACK(toggle_gnome_style), dialog);
 #endif
+
 	g_signal_connect(G_OBJECT(use_hint), "toggled",
 			 G_CALLBACK(toggle_use_hint), dialog);
 	g_signal_connect(G_OBJECT(album_art), "toggled",

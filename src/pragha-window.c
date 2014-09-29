@@ -510,7 +510,7 @@ pragha_window_new (PraghaApplication *pragha)
 	 *               [Sidebar1][Status Bar][Sidebar2]
 	 */
 
-	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
@@ -522,7 +522,7 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
-	                    TRUE, TRUE, 0);
+	                    TRUE, TRUE, 2);
 
 	/* Add library pane to first sidebar. */
 

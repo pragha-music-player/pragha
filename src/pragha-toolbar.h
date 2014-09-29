@@ -62,7 +62,12 @@ void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer u
 void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 void pragha_toolbar_show_ramaning_time_cb    (PraghaToolbar *toolbar, GParamSpec *pspec, gpointer user_data);
 
-gboolean pragha_toolbar_window_state_event  (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
+gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
+
+#if GTK_CHECK_VERSION (3, 10, 0)
+void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
+#endif
+
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
