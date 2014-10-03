@@ -99,7 +99,7 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
 		gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG (dialog), image);
 	}
 	if (secondary_text != NULL)
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dialog), secondary_text);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dialog), "%s", secondary_text);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), PRAGHA_DEVICE_RESPONSE_NONE);
 
