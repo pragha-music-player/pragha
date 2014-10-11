@@ -272,21 +272,27 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	/* finish mounting the volume */
-	if (g_volume_mount_finish (volume, result, &error)) {
-		/* get the moint point of the volume */
-		mount = g_volume_get_mount (volume);
-
-		if (mount != NULL) {
-			pragha_block_device_mounted (plugin, priv->u_device, mount, &error);
-			g_object_unref (mount);
+	if (!g_volume_mount_finish (volume, result, &error)) {
+		 if (error->code != G_IO_ERROR_FAILED_HANDLED &&
+		     error->code != G_IO_ERROR_ALREADY_MOUNTED) {
+			/*
+			 * TODO: Show dialog with warning.
+			 *
+			name = g_volume_get_name (G_VOLUME (volume));
+			primary = g_strdup_printf (_("Unable to access “%s”"), name);
+			g_free (name);
+			emit_show_error_message (sidebar, primary, error->message);
+			g_free (primary);*/
 		}
+		g_error_free (error);
 	}
 
-	if (error != NULL) {
-		// TODO: Check G_IO_ERROR_ALREADY_MOUNTED and ignore it..
-		pragha_removable_clear_hook_device (plugin);
+	/* get the moint point of the volume */
+	mount = g_volume_get_mount (volume);
+	if (mount != NULL) {
+		pragha_block_device_mounted (plugin, priv->u_device, mount, &error);
+		g_object_unref (mount);
 	}
-
 	g_object_unref (volume);
 }
 
@@ -356,6 +362,9 @@ pragha_removable_plugin_device_removed (PraghaDeviceClient *device_client,
 
 	PraghaRemovablePlugin *plugin = user_data;
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
+
+	if (!priv->u_device || !priv->mount_path)
+		return;
 
 	if (device_type != PRAGHA_DEVICE_MOUNTABLE)
 		return;
