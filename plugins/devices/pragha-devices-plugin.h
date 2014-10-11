@@ -32,10 +32,12 @@ enum
 	PRAGHA_DEVICE_RESPONSE_PLAY,
 	PRAGHA_DEVICE_RESPONSE_BROWSE,
 };
-gint
-pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
-                          const gchar *primary_text, const gchar *secondary_text,
-                          const gchar *first_button_text, gint first_button_response);
+
+GtkWidget *
+pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
+                         const gchar *primary_text, const gchar *secondary_text,
+                         const gchar *first_button_text, gint first_button_response);
+
 
 typedef enum {
 	PRAGHA_DEVICE_NONE = 0,

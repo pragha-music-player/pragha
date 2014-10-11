@@ -55,9 +55,15 @@ typedef struct _PraghaRemovablePluginPrivate PraghaRemovablePluginPrivate;
 struct _PraghaRemovablePluginPrivate {
 	PraghaApplication  *pragha;
 
+	/* Gudev devie */
 	guint64             bus_hooked;
 	guint64             device_hooked;
 	GUdevDevice        *u_device;
+
+	/* Gio Volume */
+	GVolume            *volume;
+
+	/* Mount point. */
 	gchar              *mount_path;
 };
 
@@ -76,6 +82,10 @@ pragha_removable_clear_hook_device (PraghaRemovablePlugin *plugin)
 	if (priv->u_device) {
 		g_object_unref (priv->u_device);
 		priv->u_device = NULL;
+	}
+	if (priv->volume) {
+		g_object_unref (priv->volume);
+		priv->volume = NULL;
 	}
 	if (priv->mount_path) {
 		g_free(priv->mount_path);
@@ -158,38 +168,6 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
  * Extentions copy of Thunar-volman code.
  * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-gio-extensions.c */
 
-static gchar *
-tvm_notify_decode (const gchar *str)
-{
-	GString     *string;
-	const gchar *p;
-	gchar       *result;
-	gchar        decoded_c;
-
-	if (str == NULL)
-		return NULL;
-
-	if (!g_utf8_validate (str, -1, NULL))
-		return NULL;
-
-	string = g_string_new (NULL);
-
-	for (p = str; p != NULL && *p != '\0'; ++p) {
-		if (*p == '\\' && p[1] == 'x' && g_ascii_isalnum (p[2]) && g_ascii_isalnum (p[3])) {
-			decoded_c = (g_ascii_xdigit_value (p[2]) << 4) | g_ascii_xdigit_value (p[3]);
-			g_string_append_c (string, decoded_c);
-			p = p + 3;
-		}
-		else
-			g_string_append_c (string, *p);
-	}
-
-	result = string->str;
-	g_string_free (string, FALSE);
-
-	return result;
-}
-
 static GVolume *
 tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
                                           const gchar    *kind,
@@ -220,57 +198,16 @@ tvm_g_volume_monitor_get_volume_for_kind (GVolumeMonitor *monitor,
 	return volume;
 }
 
-/* The next funtions allow to handle block removables.
- * The most of code is inspired in:
- * http://git.xfce.org/xfce/thunar-volman/tree/thunar-volman/tvm-block-removable.c */
-
-static void
-pragha_block_device_mounted (PraghaRemovablePlugin *plugin, GUdevDevice *device, GMount *mount, GError **error)
-{
-	const gchar *volume_name;
-	gchar       *decoded_name;
-	gchar       *message;
-	gint         response;
-
-	g_return_if_fail (G_IS_MOUNT (mount));
-	g_return_if_fail (error == NULL || *error == NULL);
-
-	volume_name = g_udev_device_get_property (device, "ID_FS_LABEL_ENC");
-	decoded_name = tvm_notify_decode (volume_name);
-  
-	if (decoded_name != NULL)
-		message = g_strdup_printf (_("The volume \"%s\" was mounted automatically"), decoded_name);
-	else
-		message = g_strdup_printf (_("The inserted volume was mounted automatically"));
-
-	response = pragha_gudev_show_dialog (NULL, _("Renovable Device"), "media-removable",
-	                                     message, NULL,
-	                                     _("_Update library"), PRAGHA_DEVICE_RESPONSE_BROWSE);
-	switch (response)
-	{
-		case PRAGHA_DEVICE_RESPONSE_BROWSE:
-			pragha_block_device_add_to_library (plugin, mount);
-			break;
-		case PRAGHA_DEVICE_RESPONSE_NONE:
-		default:
-			break;
-	}
-
-	g_free (decoded_name);
-	g_free (message);
-}
-
 static void
 pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaRemovablePlugin *plugin)
 {
-	GMount *mount;
-	GError *error = NULL;
-	gchar *name = NULL, *primary = NULL;
+	GtkWidget *dialog;
+	GMount    *mount;
+	GError    *error = NULL;
+	gchar     *name = NULL, *primary = NULL;
   
 	g_return_if_fail (G_IS_VOLUME (volume));
 	g_return_if_fail (G_IS_ASYNC_RESULT (result));
-
-	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
 	/* finish mounting the volume */
 	if (!g_volume_mount_finish (volume, result, &error)) {
@@ -280,9 +217,13 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 			primary = g_strdup_printf (_("Unable to access \"%s\""), name);
 			g_free (name);
 
-			pragha_gudev_show_dialog (NULL, _("Renovable Device"), "media-removable",
-			                          primary, error->message,
-			                          NULL, PRAGHA_DEVICE_RESPONSE_NONE);
+			dialog = pragha_gudev_dialog_new (NULL, _("Renovable Device"), "media-removable",
+			                                  primary, error->message,
+			                                  NULL, PRAGHA_DEVICE_RESPONSE_NONE);
+			g_signal_connect (dialog, "response",
+			                  G_CALLBACK (gtk_widget_destroy), NULL);
+
+			gtk_widget_show_all (dialog);
 
 			g_free (primary);
 		}
@@ -292,41 +233,86 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 	/* get the moint point of the volume */
 	mount = g_volume_get_mount (volume);
 	if (mount != NULL) {
-		pragha_block_device_mounted (plugin, priv->u_device, mount, &error);
+		pragha_block_device_add_to_library (plugin, mount);
 		g_object_unref (mount);
 	}
 	g_object_unref (volume);
 }
 
-static gboolean
-pragha_block_device_mount (gpointer data)
+static void
+pragha_block_device_mount_device (PraghaRemovablePlugin *plugin)
 {
-	GVolumeMonitor  *monitor;
 	GMountOperation *mount_operation;
-	GVolume         *volume;
+
+	PraghaRemovablePluginPrivate *priv = plugin->priv;
+
+	/* try to mount the volume asynchronously */
+	mount_operation = gtk_mount_operation_new (NULL);
+	g_volume_mount (priv->volume, G_MOUNT_MOUNT_NONE, mount_operation,
+	                NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish,
+	                plugin);
+	g_object_unref (mount_operation);
+}
+
+static void
+pragha_block_device_detected_response (GtkWidget *dialog,
+                                       gint       response,
+                                       gpointer   user_data)
+{
+	PraghaRemovablePlugin *plugin = user_data;
+
+	switch (response)
+	{
+		case PRAGHA_DEVICE_RESPONSE_BROWSE:
+			pragha_block_device_mount_device (plugin);
+			break;
+		case PRAGHA_DEVICE_RESPONSE_NONE:
+			pragha_removable_clear_hook_device (plugin);
+		default:
+			break;
+	}
+	gtk_widget_destroy (dialog);
+}
+
+static gboolean
+pragha_block_device_detected (gpointer data)
+{
+	GtkWidget      *dialog;
+	GVolumeMonitor *monitor;
+	GVolume        *volume;
+	gchar *name = NULL, *primary = NULL;
 
 	PraghaRemovablePlugin *plugin = data;
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
-	monitor = g_volume_monitor_get ();
-
 	/* determine the GVolume corresponding to the udev removable */
+	monitor = g_volume_monitor_get ();
 	volume = tvm_g_volume_monitor_get_volume_for_kind (monitor,
 	                                                   G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE,
 	                                                   g_udev_device_get_device_file (priv->u_device));
 	g_object_unref (monitor);
 
 	/* check if we have a volume */
-	if (volume != NULL) {
-		if (g_volume_can_mount (volume)) {
-			/* try to mount the volume asynchronously */
-			mount_operation = gtk_mount_operation_new (NULL);
-			g_volume_mount (volume, G_MOUNT_MOUNT_NONE, mount_operation,
-			                NULL, (GAsyncReadyCallback) pragha_block_device_mount_finish,
-			                plugin);
-			g_object_unref (mount_operation);
-		}
+	priv->volume = volume;
+	if (volume == NULL || !g_volume_can_mount (volume)) {
+		pragha_removable_clear_hook_device (plugin);
+		return FALSE;
 	}
+
+	name = g_volume_get_name (G_VOLUME (volume));
+	primary = g_strdup_printf (_("Want to manage \"%s\" volume?"), name);
+	g_free (name);
+
+	dialog = pragha_gudev_dialog_new (NULL, _("Renovable Device"), "media-removable",
+	                                  primary, NULL,
+	                                  _("_Update library"), PRAGHA_DEVICE_RESPONSE_BROWSE);
+
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_block_device_detected_response), plugin);
+
+	gtk_widget_show_all (dialog);
+
+	g_free (primary);
 
 	return FALSE;
 }
@@ -346,11 +332,12 @@ pragha_removable_plugin_device_added (PraghaDeviceClient *device_client,
 	priv->bus_hooked = g_udev_device_get_property_as_uint64 (u_device, "BUSNUM");
 	priv->device_hooked = g_udev_device_get_property_as_uint64 (u_device, "DEVNUM");
 	priv->u_device = g_object_ref (u_device);
+	priv->volume = NULL;
 
 	/*
 	 * HACK: We're listening udev. Then wait 2 seconds, to ensure that GVolume also detects the device.
 	 */
-	g_timeout_add_seconds(2, pragha_block_device_mount, plugin);
+	g_timeout_add_seconds(2, pragha_block_device_detected, plugin);
 }
 
 void

@@ -71,14 +71,13 @@ static const gchar * gudev_subsystems[] =
 /*
  * Publics functions.
  */
-gint
-pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
-                          const gchar *primary_text, const gchar *secondary_text,
-                          const gchar *first_button_text, gint first_button_response)
+GtkWidget *
+pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
+                         const gchar *primary_text, const gchar *secondary_text,
+                         const gchar *first_button_text, gint first_button_response)
 {
 	GtkWidget *dialog;
 	GtkWidget *image;
-	gint response = PRAGHA_DEVICE_RESPONSE_NONE;
 
 	dialog = gtk_message_dialog_new (NULL,
 	                                 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -104,12 +103,7 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), PRAGHA_DEVICE_RESPONSE_NONE);
 
-	gtk_widget_show_all(dialog);
-
-	response = gtk_dialog_run (GTK_DIALOG (dialog));
-	gtk_widget_destroy (dialog);
-
-	return response;
+	return dialog;
 }
 
 void

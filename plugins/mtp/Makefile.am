@@ -9,7 +9,6 @@ plugin_LTLIBRARIES = libpmtp.la
 
 libpmtp_la_SOURCES = \
 	pragha-devices-mtp.c \
-	pragha-devices-mtp.h \
 	pragha-mtp-musicobject.c \
 	pragha-mtp-musicobject.h
 
