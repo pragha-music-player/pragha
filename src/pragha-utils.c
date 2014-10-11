@@ -267,6 +267,9 @@ gboolean is_present_str_list(const gchar *str, GSList *list)
 	gchar *lstr;
 	gboolean ret = FALSE;
 
+	if (!str)
+		return FALSE;
+
 	if (list) {
 		for (i=list; i != NULL; i = i->next) {
 			lstr = i->data;
@@ -290,6 +293,8 @@ GSList* delete_from_str_list(const gchar *str, GSList *list)
 	GSList *i = NULL;
 	gchar *lstr;
 
+	if (!str)
+		return list;
 	if (!list)
 		return NULL;
 
