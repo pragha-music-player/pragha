@@ -265,6 +265,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 {
 	GMount *mount;
 	GError *error = NULL;
+	gchar *name = NULL, *primary = NULL;
   
 	g_return_if_fail (G_IS_VOLUME (volume));
 	g_return_if_fail (G_IS_ASYNC_RESULT (result));
@@ -273,16 +274,17 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 
 	/* finish mounting the volume */
 	if (!g_volume_mount_finish (volume, result, &error)) {
-		 if (error->code != G_IO_ERROR_FAILED_HANDLED &&
-		     error->code != G_IO_ERROR_ALREADY_MOUNTED) {
-			/*
-			 * TODO: Show dialog with warning.
-			 *
+		if (error->code != G_IO_ERROR_FAILED_HANDLED &&
+		    error->code != G_IO_ERROR_ALREADY_MOUNTED) {
 			name = g_volume_get_name (G_VOLUME (volume));
-			primary = g_strdup_printf (_("Unable to access “%s”"), name);
+			primary = g_strdup_printf (_("Unable to access \"%s\""), name);
 			g_free (name);
-			emit_show_error_message (sidebar, primary, error->message);
-			g_free (primary);*/
+
+			pragha_gudev_show_dialog (NULL, _("Renovable Device"), "media-removable",
+			                          primary, error->message,
+			                          NULL, PRAGHA_DEVICE_RESPONSE_NONE);
+
+			g_free (primary);
 		}
 		g_error_free (error);
 	}

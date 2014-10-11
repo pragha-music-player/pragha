@@ -92,7 +92,8 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
 	gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), primary_text);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Ignore"), PRAGHA_DEVICE_RESPONSE_NONE);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), first_button_text, first_button_response);
+	if (first_button_text != NULL)
+		gtk_dialog_add_button (GTK_DIALOG (dialog), first_button_text, first_button_response);
 
 	if(icon != NULL) {
 		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
