@@ -255,6 +255,9 @@ pragha_toolbar_album_art_activated (GtkWidget      *event_box,
                                     PraghaToolbar  *toolbar)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+#if GTK_CHECK_VERSION (3, 12, 0)
+		if (!gtk_header_bar_get_show_close_button(GTK_HEADER_BAR(toolbar)))
+#endif
 		g_signal_emit (toolbar, signals[ALBUM_ART_ACTIVATED], 0);
 
 	return FALSE;
@@ -266,6 +269,9 @@ pragha_toolbar_song_label_event_edit (GtkWidget      *event_box,
                                       PraghaToolbar  *toolbar)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+#if GTK_CHECK_VERSION (3, 12, 0)
+		if (!gtk_header_bar_get_show_close_button(GTK_HEADER_BAR(toolbar)))
+#endif
 		g_signal_emit (toolbar, signals[TRACK_INFO_ACTIVATED], 0);
 
 	return FALSE;
