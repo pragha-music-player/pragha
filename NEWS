@@ -1,15 +1,22 @@
 ==============================================================
-Overview of changes in Pragha 1.2.2 since 1.2.1
+Overview of changes in Pragha 1.2.3 since 1.2.2
 ==============================================================
 
 Bugs fixed:
-	Fix some segfault when use Glib >= 2.40. (Change requirements to Glib >= 2.32)
-	Fix segfault when change preferences and mpris2 is disabled. Issue #68
-	Fix segfault when close Pragha and Mpris2 is disabled. Issue #68
+	Fix bad title strings on playlist when edit or copy this tag
+	Fix bad albums strings on playlist when edit or copy this tag.
+	Check existence of the files before import any playlist.. So.. never more import empty playlists!.
+	Don't use deprecated GtkArrow.
 
 ==============================================================
 OTHERS REALESES:
 ==============================================================
+
+V1.2.2
+Bugs fixed:
+	Fix some segfault when use Glib >= 2.40. (Change requirements to Glib >= 2.32)
+	Fix segfault when change preferences and mpris2 is disabled. Issue #68
+	Fix segfault when close Pragha and Mpris2 is disabled. Issue #68
 
 V1.2.1
 Bugs fixed:
