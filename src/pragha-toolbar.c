@@ -38,7 +38,7 @@ gboolean    pragha_toolbar_get_remaning_mode (PraghaToolbar *toolbar);
 
 
 struct _PraghaToolbar {
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	GtkHeaderBar   __parent__;
 #else
 	GtkToolbar      __parent__;
@@ -85,7 +85,7 @@ enum
 
 static int signals[LAST_SIGNAL] = { 0 };
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_HEADER_BAR)
 #else
 G_DEFINE_TYPE(PraghaToolbar, pragha_toolbar, GTK_TYPE_TOOLBAR)
@@ -370,7 +370,7 @@ pragha_toolbar_window_state_event (GtkWidget *widget, GdkEventWindowState *event
  * Public api.
  */
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 void
 pragha_toolbar_set_style (PraghaToolbar *toolbar, gboolean gnome_style)
 {
@@ -583,7 +583,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	return GTK_WIDGET(box);
 }
 
-#if !GTK_CHECK_VERSION (3, 10, 0)
+#if !GTK_CHECK_VERSION (3, 12, 0)
 static void
 gtk_tool_insert_generic_item(GtkToolbar *toolbar, GtkWidget *item)
 {
@@ -788,7 +788,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_button), _("Next Track"));
 	toolbar->next_button = next_button;
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(prev_button));
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(play_button));
 	gtk_header_bar_pack_start(GTK_HEADER_BAR(toolbar), GTK_WIDGET(stop_button));
@@ -802,7 +802,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 
 	/* Song info Box */
 
-#if !GTK_CHECK_VERSION (3, 10, 0)
+#if !GTK_CHECK_VERSION (3, 12, 0)
 	GtkToolItem *boxitem = gtk_tool_item_new ();
 	gtk_tool_item_set_expand (GTK_TOOL_ITEM(boxitem), TRUE);
 	gtk_toolbar_insert (GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(boxitem), -1);
@@ -835,7 +835,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
 	toolbar->vol_button = vol_button;
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(vol_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
@@ -886,7 +886,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_bind_property(preferences, "repeat", repeat_button, "active", binding_flags);
 
 	/* Fix styling */
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	pragha_toolbar_set_style(toolbar,
 		pragha_preferences_get_gnome_style (preferences));
 #endif

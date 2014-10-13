@@ -38,7 +38,7 @@ typedef struct _PraghaApplication PraghaApplication;
 typedef struct _PraghaToolbar PraghaToolbar;
 
 typedef struct {
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	GtkHeaderBarClass __parent__;
 #else
 	GtkToolbarClass __parent__;
@@ -64,7 +64,7 @@ void pragha_toolbar_show_ramaning_time_cb    (PraghaToolbar *toolbar, GParamSpec
 
 gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
 #endif
 

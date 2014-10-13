@@ -62,7 +62,7 @@ struct _PreferencesDialog {
 	GtkWidget *audio_sink_combo_w;
 	GtkWidget *soft_mixer_w;
 #endif
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	GtkWidget *gnome_style_w;
 #endif
 	GtkWidget *use_hint_w;
@@ -522,7 +522,7 @@ static void library_remove_cb(GtkButton *button, PreferencesDialog *dialog)
 }
 
 /* Toggle gnome style */
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 static void
 toggle_gnome_style (GtkToggleButton *button, PreferencesDialog *dialog)
 {
@@ -964,7 +964,7 @@ static GtkWidget*
 pref_create_appearance_page(PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	GtkWidget *gnome_style;
 #endif
 	GtkWidget *use_hint, *album_art;
@@ -973,7 +973,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	table = pragha_hig_workarea_table_new();
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Appearance"));
 
 	gnome_style = gtk_check_button_new_with_label(_("Use Gnome 3 HIG"));
@@ -1006,7 +1006,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	pragha_hig_workarea_table_add_row (table, &row, album_art_pattern_label, album_art_pattern);
 
 	/* Store references */
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	dialog->gnome_style_w = gnome_style;
 #endif
 	dialog->use_hint_w = use_hint;
@@ -1016,7 +1016,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	/* Setup signal handlers */
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	if (pragha_preferences_get_gnome_style(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w), TRUE);
 

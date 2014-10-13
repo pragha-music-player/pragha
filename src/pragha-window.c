@@ -514,7 +514,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	if (pragha_preferences_get_gnome_style (preferences) == FALSE)
 #endif
 		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
@@ -558,7 +558,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	gtk_container_add(GTK_CONTAINER(window), vbox_main);
 
-#if GTK_CHECK_VERSION (3, 10, 0)
+#if GTK_CHECK_VERSION (3, 12, 0)
 	if (pragha_preferences_get_gnome_style (preferences))
 		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
 
