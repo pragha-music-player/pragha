@@ -20,11 +20,12 @@
 #include <config.h>
 #endif
 
+#include "pragha-file-utils.h"
+
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-musicobject-mgmt.h"

@@ -17,10 +17,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <sqlite3.h>
 
 #include "pragha-database.h"
 #include "pragha-prepared-statement-private.h"
+
+#include <sqlite3.h>
+
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-utils.h"

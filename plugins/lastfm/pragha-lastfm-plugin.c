@@ -47,6 +47,7 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-tags-dialog.h"
 #include "src/pragha-tags-mgmt.h"
+#include "src/pragha-window.h"
 #include "src/xml_helper.h"
 
 #include "plugins/pragha-plugin-macros.h"
@@ -102,6 +103,8 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_LASTFM_PLUGIN,
 
 #define LASTFM_API_KEY "ecdc2d21dbfe1139b1f0da35daca9309"
 #define LASTFM_SECRET  "f3498ce387f30eeae8ea1b1023afb32b"
+
+#define WAIT_UPDATE 5
 
 typedef enum {
 	LASTFM_NONE = 0,

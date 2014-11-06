@@ -22,8 +22,7 @@
 #include <gtk/gtk.h>
 #include "pragha-backend.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 

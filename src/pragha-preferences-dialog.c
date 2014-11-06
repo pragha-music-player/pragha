@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-preferences-dialog.h"
+
 #include <glib.h>
 
 #if defined(GETTEXT_PACKAGE)
@@ -34,10 +36,10 @@
 
 #include <gdk/gdkkeysyms.h>
 
-#include "pragha-preferences-dialog.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
+#include "pragha-window.h"
 #include "pragha.h"
 
 struct _PreferencesTab {

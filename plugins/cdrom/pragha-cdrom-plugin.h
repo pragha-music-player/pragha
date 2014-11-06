@@ -18,8 +18,7 @@
 #ifndef PRAGHA_CDROM_PLUGIN_H
 #define PRAGHA_CDROM_PLUGIN_H
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 void pragha_application_append_audio_cd (PraghaApplication *pragha);
 

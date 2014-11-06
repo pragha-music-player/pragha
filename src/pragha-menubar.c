@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-menubar.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -27,7 +29,7 @@
 #endif
 
 #include <gdk/gdkkeysyms.h>
-#include "pragha-menubar.h"
+
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"

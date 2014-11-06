@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-backend.h"
+
 #include <glib.h>
 #include <stdlib.h>
 

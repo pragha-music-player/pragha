@@ -20,10 +20,8 @@
 #define PRAGHA_TAGS_MGMT_H
 
 #include <gtk/gtk.h>
-#include "pragha-musicobject.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha-musicobject.h"
 
 gboolean pragha_musicobject_set_tags_from_file(PraghaMusicobject *mobj, const gchar *file);
 gboolean pragha_musicobject_save_tags_to_file(gchar *file, PraghaMusicobject *mobj, int changed);

@@ -46,6 +46,7 @@
 #include "src/pragha-music-enum.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-simple-widgets.h"
+#include "src/pragha-window.h"
 #include "src/pragha-hig.h"
 #include "src/pragha.h"
 

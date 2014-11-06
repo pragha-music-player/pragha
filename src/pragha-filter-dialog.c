@@ -19,6 +19,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-filter-dialog.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -26,7 +28,7 @@
 #endif
 
 #include <gdk/gdkkeysyms.h>
-#include "pragha-filter-dialog.h"
+
 #include "pragha-utils.h"
 #include "pragha-search-entry.h"
 #include "pragha.h"

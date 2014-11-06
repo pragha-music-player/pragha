@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sqlite3.h>
-#include "pragha-database.h"
 #include "pragha-prepared-statement.h"
 #include "pragha-prepared-statement-private.h"
+
+#include <sqlite3.h>
+
+#include "pragha-database.h"
+
 
 struct PraghaPreparedStatement {
 	sqlite3_stmt *stmt;

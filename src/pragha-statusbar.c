@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-statusbar.h"
+
 #include "pragha-preferences.h"
 
 struct _PraghaStatusbarClass

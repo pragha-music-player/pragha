@@ -20,8 +20,7 @@
 
 #include <glib.h>
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 void pragha_init_session_support(PraghaApplication *pragha);
 

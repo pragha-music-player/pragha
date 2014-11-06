@@ -20,6 +20,7 @@
 #endif
 
 #include "pragha-playback.h"
+
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"

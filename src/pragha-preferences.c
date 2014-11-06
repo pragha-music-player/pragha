@@ -19,6 +19,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-preferences.h"
+
 #include <stdio.h> /* TODO: Port this to glib!!. */
 #include <errno.h>
 #include <fcntl.h>
@@ -26,7 +28,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "pragha-preferences.h"
 #include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-library-pane.h"

@@ -15,13 +15,13 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha-simple-widgets.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
 #endif
-
-#include "pragha-simple-widgets.h"
 
 /* Create a new haeder widget to use in preferences.
  * Based in Midori Web Browser. Copyright (C) 2007 Christian Dywan. */

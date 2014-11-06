@@ -19,13 +19,14 @@
 #include <config.h>
 #endif
 
+#include "pragha-equalizer-dialog.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-equalizer-dialog.h"
 #include "pragha.h"
 
 #define NUM_BANDS 10

@@ -15,9 +15,10 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha-plugins-engine.h"
+
 #include <libpeas/peas.h>
 
-#include "pragha-plugins-engine.h"
 #include "pragha-utils.h"
 
 struct _PraghaPluginsEngine {

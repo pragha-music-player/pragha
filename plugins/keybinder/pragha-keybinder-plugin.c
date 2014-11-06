@@ -32,6 +32,7 @@
 
 #include "src/pragha.h"
 #include "src/pragha-playback.h"
+#include "src/pragha-window.h"
 
 #include "plugins/pragha-plugin-macros.h"
 

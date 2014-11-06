@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -41,8 +43,6 @@
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha.h"
-
 #include "pragha-music-enum.h"
 
 #ifdef G_OS_WIN32

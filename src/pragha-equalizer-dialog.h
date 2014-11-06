@@ -21,8 +21,7 @@
 #include <gtk/gtk.h>
 #include "pragha-preferences.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
 

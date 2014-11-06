@@ -19,11 +19,12 @@
 #include <config.h>
 #endif
 
+#include "pragha-session.h"
+
 #ifdef HAVE_LIBXFCE4UI
 #include <libxfce4ui/libxfce4ui.h>
 #endif
 
-#include "pragha-session.h"
 #include "pragha.h"
 
 #if HAVE_LIBXFCE4UI

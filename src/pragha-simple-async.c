@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-simple-async.h"
+
 #include "pragha-statusbar.h"
 
 struct _AsyncSimple {

@@ -21,9 +21,7 @@
 
 #include "pragha-database.h"
 #include "pragha-playlist.h"
-
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 /* Playlist management */
 

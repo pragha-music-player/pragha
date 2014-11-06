@@ -20,15 +20,17 @@
 #include <config.h>
 #endif
 
+#include "pragha-statusicon.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-statusicon.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
+#include "pragha-window.h"
 #include "pragha.h"
 
 struct _PraghaStatusIcon {

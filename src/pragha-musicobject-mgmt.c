@@ -16,10 +16,11 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#include "pragha-musicobject-mgmt.h"
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "pragha-musicobject-mgmt.h"
 #include "pragha-file-utils.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-tags-mgmt.h"

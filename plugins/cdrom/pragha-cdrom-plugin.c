@@ -44,6 +44,7 @@
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-statusicon.h"
 #include "src/pragha-music-enum.h"
+#include "src/pragha-window.h"
 
 #if HAVE_GUDEV
 #include "plugins/devices/pragha-devices-plugin.h"

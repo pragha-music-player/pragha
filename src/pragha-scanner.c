@@ -15,8 +15,11 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <glib.h>
-#include <glib/gstdio.h>
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include "pragha-scanner.h"
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -24,7 +27,9 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-scanner.h"
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"

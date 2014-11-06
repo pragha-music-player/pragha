@@ -20,8 +20,7 @@
 #include <config.h>
 #endif
 
-#include <glib.h>
-#include <glib/gprintf.h>
+#include "pragha-utils.h"
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -29,11 +28,13 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <glib.h>
+#include <glib/gprintf.h>
+
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
 
-#include "pragha-utils.h"
 
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
