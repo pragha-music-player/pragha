@@ -881,7 +881,7 @@ static void quit_action(GtkAction *action, PraghaApplication *pragha)
 
 static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_filter_dialog (pragha);
+	pragha_filter_dialog (pragha_application_get_playlist (pragha));
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */

@@ -296,9 +296,8 @@ pragha_filter_dialog_response(GtkDialog *dialog,
 }
 
 void
-pragha_filter_dialog (PraghaApplication *pragha)
+pragha_filter_dialog (PraghaPlaylist *playlist)
 {
-	PraghaPlaylist *playlist;
 	PraghaPreferences *preferences;
 	GtkWidget *dialog, *scrollwin, *vbox, *search_entry;
 	GtkWidget *filter_view = NULL;
@@ -310,8 +309,7 @@ pragha_filter_dialog (PraghaApplication *pragha)
 	PraghaFilterDialog *fdialog;
 	fdialog = g_slice_new0(PraghaFilterDialog);
 
-	playlist = pragha_application_get_playlist (pragha);
-	preferences = pragha_application_get_preferences (pragha);
+	preferences = pragha_preferences_get ();
 
 	/* Crete the filter entry */
 
@@ -367,12 +365,12 @@ pragha_filter_dialog (PraghaApplication *pragha)
 	fdialog->filter_string = NULL;
 	fdialog->timeout_id = 0;
 	fdialog->cplaylist = playlist;
-	fdialog->preferences = pragha_preferences_get();
+	fdialog->preferences = preferences;
 
 	/* The search dialog */
 
 	dialog = gtk_dialog_new_with_buttons (_("Search in playlist"),
-	                                      GTK_WINDOW(pragha_application_get_window(pragha)),
+	                                      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(playlist))),
 	                                      GTK_DIALOG_MODAL,
 	                                      _("_Close"), GTK_RESPONSE_CANCEL,
 	                                      NULL);
