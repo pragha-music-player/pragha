@@ -952,9 +952,11 @@ jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
 static void
 show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_equalizer_dialog_show(pragha);
-}
+	GtkWidget *parent = pragha_application_get_window (pragha);
+	PraghaBackend *backend = pragha_application_get_backend(pragha);
 
+	pragha_equalizer_dialog_show (backend, parent);
+}
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
 

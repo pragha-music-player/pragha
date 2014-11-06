@@ -27,9 +27,11 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha.h"
+#include "pragha-preferences.h"
 
 #define NUM_BANDS 10
+
+typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
 
 struct _PraghaEqualizerDialog {
 	GtkWidget         *vscales[NUM_BANDS];
@@ -230,7 +232,8 @@ pragha_equalizer_dialog_response (GtkWidget *w_dialog,
 	g_slice_free(PraghaEqualizerDialog, dialog);
 }
 
-void pragha_equalizer_dialog_show(PraghaApplication *pragha)
+void
+pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent)
 {
 	PraghaEqualizerDialog *dialog;
 	GtkWidget *w_dialog, *mhbox, *hbox, *dbvbox, *label;
@@ -238,7 +241,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 
 	dialog = g_slice_new0 (PraghaEqualizerDialog);
 
-	dialog->equalizer = pragha_backend_get_equalizer (pragha_application_get_backend(pragha));
+	dialog->equalizer = pragha_backend_get_equalizer (backend);
 	dialog->preferences = pragha_preferences_get ();
 
 	/* Create vertical scales band to equalizer */
@@ -293,7 +296,7 @@ void pragha_equalizer_dialog_show(PraghaApplication *pragha)
 	/* Create the dialog */
 
 	w_dialog = gtk_dialog_new_with_buttons (_("Equalizer"),
-	                                        GTK_WINDOW(pragha_application_get_window (pragha)),
+	                                        GTK_WINDOW(parent),
 	                                        GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                        _("_Ok"), GTK_RESPONSE_OK,
 	                                        NULL);
