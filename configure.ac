@@ -85,7 +85,7 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 dnl Check for i18n support
-XDT_I18N([cs de es el fr hu it ja ko_KR nl no pl pt pt_BR ru sv tr uk vi zh_CN])
+XDT_I18N([ca cs de es el fr hu it ja ko_KR nl no pl pt pt_BR ru sv tr uk vi zh_CN])
 
 GSTREAMER_REQUIRED=0.11.90
 
