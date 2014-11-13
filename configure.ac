@@ -39,26 +39,6 @@ AC_ARG_ENABLE(debug,[  --enable-debug    Turn on debugging],[
 	CFLAGS="$CFLAGS -DNDEBUG"
 ])
 
-dnl gstreamer version
-AC_ARG_WITH([gstreamer],
-            [AS_HELP_STRING([--with-gstreamer=0.10|1.0],[which gstreamer version to compile against (default: 1.0)])],
-            [case "$with_gstreamer" in
-                0.10|1.0) ;;
-                *) AC_MSG_ERROR([invalid gstreamer version specified]) ;;
-             esac],
-            [with_gstreamer=1.0]
-)
-
-case "$with_gstreamer" in
-  0.10) GSTREAMER_API_VERSION=0.10
-       GSTREAMER_REQUIRED=0.10
-       ;;
-  1.0) GSTREAMER_API_VERSION=1.0
-       GSTREAMER_REQUIRED=0.11.90
-       ;;
-esac
-AC_DEFINE_UNQUOTED(GSTREAMER_API_VERSION, $GSTREAMER_API_VERSION, [Define the GStreamer+ API version])
-
 case "${host}" in
         i[[3456789]]86-mingw32*) WIN32="yes" ;;
         *cygwin*) WIN32="yes" ;;
@@ -314,9 +294,7 @@ echo "   * Lastfm scroble, and add similar songs support (Need libclastfm >= 0.5
 echo "   * EXPERIMENTAL management removable devices.:(Need gudev-1.0 and libmtp).: $LIBMTP_FOUND"
 echo ""
 echo "  Others build options..:"
-AS_IF([test $GSTREAMER_API_VERSION = 1.0],
-      [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"],
-      [echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_INTERFACES_FOUND"])
+echo "   * Cubic volume support.....................(Need gstreamer-plugins-base).: $GSTREAMER_AUDIO_FOUND"
 echo "   * Better session management support........(Need libxfce4ui-2 >= 4.11.0).: $LIBXFCE4UI_FOUND"
 echo "   * Use totem-pl-parser to open playlists....(Need totem-plparser >= 2.26).: $PLPARSER_FOUND"
 echo ""
