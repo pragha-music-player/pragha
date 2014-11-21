@@ -888,7 +888,9 @@ static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 
 static void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_preferences_dialog_show (pragha);
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_dialog_show (dialog);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */

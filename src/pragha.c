@@ -220,6 +220,13 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 }
 
 static void
+pragha_libary_list_changed_cb (PraghaPreferences *preferences, PraghaApplication *pragha)
+{
+	GtkWidget *infobar = create_info_bar_update_music (pragha);
+	pragha_window_add_widget_to_infobox (pragha, infobar);
+}
+
+static void
 pragha_enum_map_removed_handler (PraghaMusicEnum *enum_map, gint enum_removed, PraghaApplication *pragha)
 {
 	pragha_playlist_crop_music_type (pragha->playlist, enum_removed);
@@ -592,12 +599,15 @@ pragha_application_startup (GApplication *application)
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
+	g_signal_connect (pragha->preferences, "LibraryChanged",
+	                  G_CALLBACK (pragha_libary_list_changed_cb), pragha);
+
 	pragha->sidebar2_binding =
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
 		                        pragha->sidebar2, "visible",
 		                        binding_flags);
-	
-	pragha->setting_dialog = pragha_preferences_dialog_new (pragha);
+
+	pragha->setting_dialog = pragha_preferences_dialog_new (pragha->mainwindow);
 
 	#ifdef HAVE_LIBPEAS
 	pragha_plugins_engine_startup (pragha->plugins_engine);

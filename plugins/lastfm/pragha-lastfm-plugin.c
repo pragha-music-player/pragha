@@ -1576,6 +1576,7 @@ pragha_lastfm_init_settings (PraghaLastfmPlugin *plugin)
 static void
 pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	GtkWidget *table;
 	GtkWidget *lastfm_check, *lastfm_uname, *lastfm_pass, *lastfm_ulabel, *lastfm_plabel;
 	guint row = 0;
@@ -1614,11 +1615,12 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 
 	/* Append panes */
 
-	pragha_preferences_append_services_setting (priv->pragha,
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_append_services_setting (dialog,
 	                                            priv->setting_widget, FALSE);
 
 	/* Configure handler and settings */
-	pragha_preferences_dialog_connect_handler (priv->pragha,
+	pragha_preferences_dialog_connect_handler (dialog,
 	                                           G_CALLBACK(pragha_lastfm_preferences_dialog_response),
 	                                           plugin);
 
@@ -1631,12 +1633,14 @@ pragha_lastfm_plugin_append_setting (PraghaLastfmPlugin *plugin)
 static void
 pragha_lastfm_plugin_remove_setting (PraghaLastfmPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
-	pragha_preferences_remove_services_setting (priv->pragha,
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_remove_services_setting (dialog,
 	                                            priv->setting_widget);
 
-	pragha_preferences_dialog_disconnect_handler (priv->pragha,
+	pragha_preferences_dialog_disconnect_handler (dialog,
 	                                              G_CALLBACK(pragha_lastfm_preferences_dialog_response),
 	                                              plugin);
 }

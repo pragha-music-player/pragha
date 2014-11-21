@@ -275,6 +275,7 @@ toggle_actions_in_osd (GtkToggleButton *button)
 static void
 pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaPreferences *preferences = NULL;
 	gchar *plugin_group = NULL;
 	GtkWidget *table, *albumart_in_osd, *actions_in_osd;
@@ -314,15 +315,18 @@ pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 
 	priv->setting_widget = table;
 
-	pragha_preferences_append_desktop_setting (priv->pragha, table, FALSE);
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_append_desktop_setting (dialog, table, FALSE);
 }
 
 static void
 pragha_notify_plugin_remove_setting (PraghaNotifyPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
-	pragha_preferences_remove_desktop_setting (priv->pragha, priv->setting_widget);
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_remove_desktop_setting (dialog, priv->setting_widget);
 }
 
 
