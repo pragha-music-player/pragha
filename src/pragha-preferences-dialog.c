@@ -461,7 +461,8 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	}
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w));
-	pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
+	if (gnome_style != pragha_preferences_get_gnome_style(dialog->preferences))
+		pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
 #endif
 }
 
