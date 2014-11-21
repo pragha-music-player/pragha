@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -41,8 +43,6 @@
 #include "pragha-menubar.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
-#include "pragha.h"
-
 #include "pragha-music-enum.h"
 
 #ifdef G_OS_WIN32
@@ -218,6 +218,64 @@ pragha_art_cache_changed_handler (PraghaArtCache *cache, PraghaApplication *prag
 		}
 	}
 }
+
+static void
+pragha_libary_list_changed_cb (PraghaPreferences *preferences, PraghaApplication *pragha)
+{
+	GtkWidget *infobar = create_info_bar_update_music (pragha);
+	pragha_window_add_widget_to_infobox (pragha, infobar);
+}
+
+#if GTK_CHECK_VERSION (3, 12, 0)
+static void
+pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec, PraghaApplication *pragha)
+{
+	PraghaToolbar *toolbar;
+	GtkWidget *window, *parent, *menubar;
+	GtkAction *action;
+
+	window = pragha_application_get_window (pragha);
+	toolbar = pragha_application_get_toolbar (pragha);
+	menubar = pragha_application_get_menubar (pragha);
+	g_object_ref(toolbar);
+
+	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
+	action = pragha_application_get_menu_action (pragha,
+		"/Menubar/ViewMenu/Playback controls below");
+
+	if (pragha_preferences_get_gnome_style (preferences)) {
+		gtk_widget_hide(GTK_WIDGET(window));
+
+		pragha_preferences_set_controls_below(preferences, FALSE);
+		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
+		gtk_container_remove (GTK_CONTAINER(parent), GTK_WIDGET(toolbar));
+		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
+
+		pragha_toolbar_set_style(toolbar, TRUE);
+
+		gtk_widget_show(GTK_WIDGET(window));
+	}
+	else {
+		gtk_widget_hide(GTK_WIDGET(window));
+
+		gtk_action_set_sensitive (GTK_ACTION (action), TRUE);
+
+		gtk_window_set_titlebar (GTK_WINDOW (window), NULL);
+		gtk_window_set_title (GTK_WINDOW(window), _("Pragha Music Player"));
+
+		gtk_box_pack_start (GTK_BOX(parent), GTK_WIDGET(toolbar),
+		                    FALSE, FALSE, 0);
+		gtk_box_reorder_child(GTK_BOX(parent), GTK_WIDGET(toolbar), 1);
+
+		pragha_toolbar_set_style(toolbar, FALSE);
+
+		gtk_widget_show(GTK_WIDGET(window));
+	}
+	g_object_unref(toolbar);
+}
+#endif
+
 
 static void
 pragha_enum_map_removed_handler (PraghaMusicEnum *enum_map, gint enum_removed, PraghaApplication *pragha)
@@ -593,12 +651,19 @@ pragha_application_startup (GApplication *application)
 	                        toolbar, "timer-remaining-mode",
 	                        binding_flags);
 
+	g_signal_connect (pragha->preferences, "LibraryChanged",
+	                  G_CALLBACK (pragha_libary_list_changed_cb), pragha);
+#if GTK_CHECK_VERSION (3, 12, 0)
+	g_signal_connect (pragha->preferences, "notify::gnome-style",
+	                  G_CALLBACK (pragha_gnome_style_changed_cb), pragha);
+#endif
+
 	pragha->sidebar2_binding =
 		g_object_bind_property (pragha->preferences, "secondary-lateral-panel",
 		                        pragha->sidebar2, "visible",
 		                        binding_flags);
-	
-	pragha->setting_dialog = pragha_preferences_dialog_new (pragha);
+
+	pragha->setting_dialog = pragha_preferences_dialog_new (pragha->mainwindow);
 
 	#ifdef HAVE_LIBPEAS
 	pragha_plugins_engine_startup (pragha->plugins_engine);

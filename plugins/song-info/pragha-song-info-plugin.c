@@ -364,6 +364,7 @@ toggle_download_album_art (GtkToggleButton *button)
 static void
 pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaPreferences *preferences = NULL;
 	gchar *plugin_group = NULL;
 	GtkWidget *table, *download_album_art;
@@ -390,16 +391,19 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 	g_signal_connect (G_OBJECT(download_album_art), "toggled",
 	                  G_CALLBACK(toggle_download_album_art), NULL);
 
-	pragha_preferences_append_services_setting (priv->pragha, table, FALSE);
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_append_services_setting (dialog, table, FALSE);
 	priv->setting_widget = table;
 }
 
 static void
 pragha_songinfo_plugin_remove_setting (PraghaSongInfoPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	pragha_preferences_remove_services_setting (priv->pragha, priv->setting_widget);
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_remove_services_setting (dialog, priv->setting_widget);
 }
 
 /*

@@ -21,9 +21,6 @@
 
 #include <gtk/gtk.h>
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
-
 #define LASTFM_UNAME_LEN           256
 #define LASTFM_PASS_LEN            512
 #define ALBUM_ART_PATTERN_LEN      1024
@@ -31,25 +28,25 @@ typedef struct _PraghaApplication PraghaApplication;
 
 typedef struct _PreferencesDialog PreferencesDialog;
 
-void               pragha_preferences_append_audio_setting    (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
-void               pragha_preferences_remove_audio_setting    (PraghaApplication *pragha, GtkWidget *widget);
+void               pragha_preferences_append_audio_setting    (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_audio_setting    (PreferencesDialog *dialog, GtkWidget *widget);
 
-void               pragha_preferences_append_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
-void               pragha_preferences_remove_desktop_setting  (PraghaApplication *pragha, GtkWidget *widget);
+void               pragha_preferences_append_desktop_setting  (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_desktop_setting  (PreferencesDialog *dialog, GtkWidget *widget);
 
-void               pragha_preferences_append_services_setting (PraghaApplication *pragha, GtkWidget *widget, gboolean expand);
-void               pragha_preferences_remove_services_setting (PraghaApplication *pragha, GtkWidget *widget);
+void               pragha_preferences_append_services_setting (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand);
+void               pragha_preferences_remove_services_setting (PreferencesDialog *dialog, GtkWidget *widget);
 
-void               pragha_preferences_dialog_connect_handler    (PraghaApplication *pragha,
+void               pragha_preferences_dialog_connect_handler    (PreferencesDialog *dialog,
                                                                  GCallback          callback,
                                                                  gpointer           user_data);
-void               pragha_preferences_dialog_disconnect_handler (PraghaApplication *pragha,
+void               pragha_preferences_dialog_disconnect_handler (PreferencesDialog *pragha,
                                                                  GCallback          callback,
                                                                  gpointer           user_data);
 
-void               pragha_preferences_dialog_show            (PraghaApplication *pragha);
+void               pragha_preferences_dialog_show            (PreferencesDialog *dialog);
 
 void               pragha_preferences_dialog_free            (PreferencesDialog *dialog);
-PreferencesDialog *pragha_preferences_dialog_new             (PraghaApplication *pragha);
+PreferencesDialog *pragha_preferences_dialog_new             (GtkWidget         *parent);
 
 #endif /* PRAGHA_PREFERENCES_DIALOG_H */

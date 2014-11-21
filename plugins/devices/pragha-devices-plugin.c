@@ -71,14 +71,13 @@ static const gchar * gudev_subsystems[] =
 /*
  * Publics functions.
  */
-gint
-pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *icon,
-                          const gchar *primary_text, const gchar *secondary_text,
-                          const gchar *first_button_text, gint first_button_response)
+GtkWidget *
+pragha_gudev_dialog_new (GtkWidget *parent, const gchar *title, const gchar *icon,
+                         const gchar *primary_text, const gchar *secondary_text,
+                         const gchar *first_button_text, gint first_button_response)
 {
 	GtkWidget *dialog;
 	GtkWidget *image;
-	gint response = PRAGHA_DEVICE_RESPONSE_NONE;
 
 	dialog = gtk_message_dialog_new (NULL,
 	                                 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -92,23 +91,19 @@ pragha_gudev_show_dialog (GtkWidget *parent, const gchar *title, const gchar *ic
 	gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), primary_text);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Ignore"), PRAGHA_DEVICE_RESPONSE_NONE);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), first_button_text, first_button_response);
+	if (first_button_text != NULL)
+		gtk_dialog_add_button (GTK_DIALOG (dialog), first_button_text, first_button_response);
 
 	if(icon != NULL) {
 		image = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_DIALOG);
 		gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG (dialog), image);
 	}
 	if (secondary_text != NULL)
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dialog), secondary_text);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG (dialog), "%s", secondary_text);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dialog), PRAGHA_DEVICE_RESPONSE_NONE);
 
-	gtk_widget_show_all(dialog);
-
-	response = gtk_dialog_run (GTK_DIALOG (dialog));
-	gtk_widget_destroy (dialog);
-
-	return response;
+	return dialog;
 }
 
 void

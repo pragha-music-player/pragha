@@ -16,6 +16,7 @@
 /*************************************************************************/
 
 #include "pragha-tagger.h"
+
 #include "pragha-musicobject.h"
 #include "pragha-database.h"
 #include "pragha-library-pane.h"

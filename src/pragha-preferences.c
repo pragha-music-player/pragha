@@ -19,6 +19,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-preferences.h"
+
 #include <stdio.h> /* TODO: Port this to glib!!. */
 #include <errno.h>
 #include <fcntl.h>
@@ -26,7 +28,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "pragha-preferences.h"
 #include "pragha-musicobject.h"
 #include "pragha-utils.h"
 #include "pragha-library-pane.h"
@@ -123,6 +124,7 @@ static GParamSpec *gParamSpecs[LAST_PROP];
 
 enum {
 	SIGNAL_PLUGINS_CHANGED,
+	SIGNAL_LIBRARY_CHANGED,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -441,6 +443,45 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 	g_free (name_upper);
 
 	return group_name;
+}
+
+
+/**
+ * pragha_preferences_get_filename_list:
+ *
+ */
+GSList *
+pragha_preferences_get_library_list (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), NULL);
+
+	return pragha_preferences_get_filename_list (preferences,
+		                                         GROUP_LIBRARY,
+		                                         KEY_LIBRARY_DIR);
+}
+
+/**
+ * pragha_preferences_set_filename_list:
+ *
+ */
+void
+pragha_preferences_set_library_list (PraghaPreferences *preferences,
+                                     GSList *list)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	if (list != NULL) {
+		pragha_preferences_set_filename_list (preferences,
+			                                  GROUP_LIBRARY,
+			                                  KEY_LIBRARY_DIR,
+			                                  list);
+	}
+	else {
+		pragha_preferences_remove_key (preferences,
+		                               GROUP_LIBRARY,
+		                               KEY_LIBRARY_DIR);
+	}
+	g_signal_emit (preferences, signals[SIGNAL_LIBRARY_CHANGED], 0);
 }
 
 /**
@@ -2630,6 +2671,15 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__STRING,
 		              G_TYPE_NONE, 1, G_TYPE_STRING);
+
+	signals[SIGNAL_LIBRARY_CHANGED] =
+		g_signal_new ("LibraryChanged",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPreferencesClass, library_change),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 static void

@@ -19,13 +19,10 @@
 #define PRAGHA_EQUALIZER_DIALOG_H
 
 #include <gtk/gtk.h>
-#include "pragha-preferences.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha-backend.h"
 
-typedef struct _PraghaEqualizerDialog PraghaEqualizerDialog;
-
-void pragha_equalizer_dialog_show(PraghaApplication *pragha);
+void
+pragha_equalizer_dialog_show (PraghaBackend *backend, GtkWidget *parent);
 
 #endif /* PRAGHA_EQUALIZER_DIALOG_H */

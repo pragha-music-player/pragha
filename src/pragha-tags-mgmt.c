@@ -20,18 +20,19 @@
 #include <config.h>
 #endif
 
+#include "pragha-tags-mgmt.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
 #include <glib/gi18n.h>
 #endif
+
 #include <glib.h>
 
 #include <stdlib.h>
-
 #include <tag_c.h>
 
-#include "pragha-tags-mgmt.h"
 #include "pragha-tagger.h"
 #include "pragha-hig.h"
 #include "pragha-utils.h"

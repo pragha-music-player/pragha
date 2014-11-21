@@ -194,7 +194,11 @@ praga_sidebar_menu_button_new (PraghaSidebar *sidebar)
 	button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
+#if GTK_CHECK_VERSION (3, 14, 0)
+	arrow = gtk_image_new_from_icon_name("pan-down-symbolic", GTK_ICON_SIZE_MENU);
+#else
 	arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
+#endif
 
 	gtk_box_pack_start (GTK_BOX(hbox),
 	                    sidebar->title_box,

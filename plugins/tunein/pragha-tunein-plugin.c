@@ -40,6 +40,7 @@
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
+#include "src/pragha-window.h"
 #include "src/xml_helper.h"
 
 #include "plugins/pragha-plugin-macros.h"

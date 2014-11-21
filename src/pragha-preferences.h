@@ -46,6 +46,7 @@ struct _PraghaPreferencesClass
 {
 	GObjectClass parent_class;
 	void (*plugins_change) (PraghaPreferences *preferences, const gchar *key);
+  void (*library_change) (PraghaPreferences *preferences);
 };
 
 /* Defines to key preferences. */
@@ -224,6 +225,12 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 /*
  * Public api.
  */
+
+GSList *
+pragha_preferences_get_library_list (PraghaPreferences *preferences);
+void
+pragha_preferences_set_library_list (PraghaPreferences *preferences,
+                                     GSList *list);
 
 const gchar *
 pragha_preferences_get_installed_version (PraghaPreferences *preferences);

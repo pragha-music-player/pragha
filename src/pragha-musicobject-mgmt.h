@@ -22,9 +22,6 @@
 #include "pragha-musicobject.h"
 #include "pragha-database.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
-
 /* Flags to control tags changed. */
 
 #define TAG_TNO_CHANGED     1<<0

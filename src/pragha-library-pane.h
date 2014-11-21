@@ -22,9 +22,6 @@
 #include <gtk/gtk.h>
 #include "pragha-preferences.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
-
 #define PRAGHA_TYPE_LIBRARY_PANE                  (pragha_library_pane_get_type ())
 #define PRAGHA_LIBRARY_PANE(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_LIBRARY_PANE, PraghaLibraryPane))
 #define PRAGHA_IS_LIBRARY_PANE(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_LIBRARY_PANE))
@@ -59,8 +56,6 @@ typedef enum {
 
 GList * pragha_library_pane_get_mobj_list (PraghaLibraryPane *library);
 
-void     simple_library_search_keyrelease         (PraghaApplication *pragha);
-gboolean simple_library_search_keyrelease_handler (GtkEntry *entry, PraghaLibraryPane *clibrary);
 gboolean simple_library_search_activate_handler   (GtkEntry *entry, PraghaLibraryPane *clibrary);
 void     clear_library_search                     (PraghaLibraryPane *clibrary);
 

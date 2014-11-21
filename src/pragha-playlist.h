@@ -23,9 +23,6 @@
 #include "pragha-backend.h"
 #include "pragha-database.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
-
 #define PRAGHA_TYPE_PLAYLIST                  (pragha_playlist_get_type ())
 #define PRAGHA_PLAYLIST(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_PLAYLIST, PraghaPlaylist))
 #define PRAGHA_IS_PLAYLIST(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_PLAYLIST))

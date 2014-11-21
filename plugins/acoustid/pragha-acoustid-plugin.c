@@ -43,11 +43,9 @@
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
 #include "src/xml_helper.h"
-
+#include "src/pragha-window.h"
 #include "src/pragha-tagger.h"
-//#include "src/pragha-utils.h"
 #include "src/pragha-tags-dialog.h"
-//#include "src/pragha-tags-mgmt.h"
 
 #include "plugins/pragha-plugin-macros.h"
 

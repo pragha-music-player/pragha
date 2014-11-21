@@ -15,8 +15,11 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#include <glib.h>
-#include <glib/gstdio.h>
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include "pragha-scanner.h"
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -24,7 +27,9 @@
 #include <glib/gi18n.h>
 #endif
 
-#include "pragha-scanner.h"
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
@@ -139,6 +144,25 @@ pragha_scanner_add_track_db(gpointer key,
 	pragha_process_gtk_events ();
 }
 
+static GSList *
+pragha_scanner_clean_playlist (GSList *list)
+{
+	gchar *file = NULL;
+	GSList *l, *tmp = NULL;
+
+	for (l=list; l != NULL; l = l->next) {
+		file = l->data;
+
+		if (g_file_test(file, G_FILE_TEST_EXISTS))
+			tmp = g_slist_prepend(tmp, file);
+		else
+			g_free (file);
+	}
+	g_slist_free (list);
+
+	return g_slist_reverse(tmp);
+}
+
 static void
 pragha_scanner_import_playlist (PraghaDatabase *database,
                                 const gchar *playlist_file)
@@ -160,6 +184,7 @@ pragha_scanner_import_playlist (PraghaDatabase *database,
 	list = pragha_pl_parser_parse_from_file_by_extension (playlist_file);
 #endif
 
+	list = pragha_scanner_clean_playlist (list);
 	if (list) {
 		playlist_id = pragha_database_add_new_playlist (database, playlist);
 		for (i = list; i != NULL; i = i->next) {

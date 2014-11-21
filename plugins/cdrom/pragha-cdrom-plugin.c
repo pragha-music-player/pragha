@@ -44,6 +44,7 @@
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-statusicon.h"
 #include "src/pragha-music-enum.h"
+#include "src/pragha-window.h"
 
 #if HAVE_GUDEV
 #include "plugins/devices/pragha-devices-plugin.h"
@@ -369,21 +370,13 @@ pragha_cdrom_plugin_prepare_source (PraghaBackend *backend, gpointer user_data)
 
 #ifdef HAVE_GUDEV
 static void
-pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
-                                  PraghaDeviceType    device_type,
-                                  GUdevDevice        *u_device,
-                                  gpointer            user_data)
+pragha_cdrom_plugin_device_added_response (GtkWidget *dialog,
+                                           gint       response,
+                                           gpointer   user_data)
 {
-	gint response;
 	PraghaCdromPlugin *plugin = user_data;
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
-	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
-		return;
-
-	response = pragha_gudev_show_dialog (NULL, _("Audio/Data CD"), "media-optical",
-	                                     _("Was inserted an Audio Cd."), NULL,
-	                                     _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
 	switch (response) {
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
 			pragha_application_append_audio_cd (priv->pragha);
@@ -392,6 +385,31 @@ pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
 		default:
 			break;
 	}
+
+	gtk_widget_destroy (dialog);
+}
+
+static void
+pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
+                                  PraghaDeviceType    device_type,
+                                  GUdevDevice        *u_device,
+                                  gpointer            user_data)
+{
+	GtkWidget *dialog;
+
+	PraghaCdromPlugin *plugin = user_data;
+
+	if (device_type != PRAGHA_DEVICE_AUDIO_CD)
+		return;
+
+	dialog = pragha_gudev_dialog_new (NULL, _("Audio/Data CD"), "media-optical",
+	                                 _("Was inserted an Audio Cd."), NULL,
+	                                 _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
+
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_cdrom_plugin_device_added_response), plugin);
+
+	gtk_widget_show_all (dialog);
 }
 
 void
@@ -494,6 +512,7 @@ pragha_cdrom_init_settings (PraghaCdromPlugin *plugin)
 static void
 pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	GtkWidget *table;
 	GtkWidget *audio_cd_device_label,*audio_cd_device_entry, *use_cddb;
 	guint row = 0;
@@ -534,13 +553,14 @@ pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 
 	/* Append panes */
 
-	pragha_preferences_append_audio_setting (priv->pragha,
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	pragha_preferences_append_audio_setting (dialog,
 	                                         priv->device_setting_widget, FALSE);
-	pragha_preferences_append_services_setting (priv->pragha,
+	pragha_preferences_append_services_setting (dialog,
 	                                            priv->cddb_setting_widget, FALSE);
 
 	/* Configure handler and settings */
-	pragha_preferences_dialog_connect_handler (priv->pragha,
+	pragha_preferences_dialog_connect_handler (dialog,
 	                                           G_CALLBACK(pragha_cdrom_preferences_dialog_response),
 	                                           plugin);
 
@@ -550,14 +570,17 @@ pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 static void
 pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
 {
+	PreferencesDialog *dialog;
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
-	pragha_preferences_remove_audio_setting (priv->pragha,
+	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+
+	pragha_preferences_remove_audio_setting (dialog,
 	                                         priv->device_setting_widget);
-	pragha_preferences_remove_services_setting (priv->pragha,
+	pragha_preferences_remove_services_setting (dialog,
 	                                            priv->cddb_setting_widget);
 
-	pragha_preferences_dialog_disconnect_handler (priv->pragha,
+	pragha_preferences_dialog_disconnect_handler (dialog,
 	                                              G_CALLBACK(pragha_cdrom_preferences_dialog_response),
 	                                              plugin);
 }

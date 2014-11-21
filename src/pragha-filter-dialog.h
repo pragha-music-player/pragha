@@ -18,10 +18,9 @@
 #ifndef PRAGHA_FILTER_DIALOG_H
 #define PRAGHA_FILTER_DIALOG_H
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha-playlist.h"
 
 void
-pragha_filter_dialog (PraghaApplication *pragha);
+pragha_filter_dialog (PraghaPlaylist *playlist);
 
 #endif /* PRAGHA_FILTER_DIALOG_H */

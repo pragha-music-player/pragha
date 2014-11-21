@@ -19,10 +19,6 @@
 #ifndef PRAGHA_H
 #define PRAGHA_H
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -39,7 +35,6 @@
 #include "pragha-sidebar.h"
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
-#include "pragha-window.h"
 #include "pragha-debug.h"
 
 /* Some default preferences. */
@@ -48,8 +43,6 @@
 #define MIN_WINDOW_HEIGHT          (gdk_screen_height() * 3 / 4)
 #define COL_WIDTH_THRESH           30
 #define DEFAULT_PLAYLIST_COL_WIDTH ((MIN_WINDOW_WIDTH - DEFAULT_SIDEBAR_SIZE) / 4)
-
-#define WAIT_UPDATE 5
 
 typedef struct _PraghaApplication PraghaApplication;
 

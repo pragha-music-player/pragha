@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-playlists-mgmt.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -36,7 +38,6 @@
 #include "xml_helper.h"
 #endif
 
-#include "pragha-playlists-mgmt.h"
 #include "pragha-hig.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"

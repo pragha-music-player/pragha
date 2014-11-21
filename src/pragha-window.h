@@ -20,10 +20,9 @@
 #define PRAGHA_WINDOW_H
 
 #include <gtk/gtk.h>
-#include "pragha-backend.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha-backend.h"
+#include "pragha.h"
 
 gboolean pragha_close_window        (GtkWidget *widget, GdkEvent *event, PraghaApplication *pragha);
 void     pragha_destroy_window      (GtkWidget *widget, PraghaApplication *pragha);

@@ -46,6 +46,7 @@
 #include "src/pragha-music-enum.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-simple-widgets.h"
+#include "src/pragha-window.h"
 #include "src/pragha-hig.h"
 #include "src/pragha.h"
 
@@ -478,12 +479,12 @@ pragha_mtp_clear_hook_device (PraghaMtpPlugin *plugin)
 }
 
 static void
-pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
+pragha_mtp_detected_ask_action_response (GtkWidget *dialog,
+                                         gint       response,
+                                         gpointer   user_data)
 {
-	gint response;
-	response = pragha_gudev_show_dialog (NULL, _("MTP Device"), "multimedia-player",
-	                                     _("Was inserted an MTP Device"), NULL,
-	                                     _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+	PraghaMtpPlugin *plugin = user_data;
+
 	switch (response)
 	{
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
@@ -493,6 +494,21 @@ pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
 		default:
 			break;
 	}
+	gtk_widget_destroy (dialog);
+}
+
+static void
+pragha_mtp_detected_ask_action (PraghaMtpPlugin *plugin)
+{
+	GtkWidget *dialog;
+	dialog = pragha_gudev_dialog_new (NULL, _("MTP Device"), "multimedia-player",
+	                                  _("Was inserted an MTP Device"), NULL,
+	                                  _("Append songs of device"), PRAGHA_DEVICE_RESPONSE_PLAY);
+
+	g_signal_connect (G_OBJECT (dialog), "response",
+	                  G_CALLBACK (pragha_mtp_detected_ask_action_response), plugin);
+
+	gtk_widget_show_all (dialog);
 }
 
 static void

@@ -21,8 +21,7 @@
 #include "pragha-backend.h"
 #include "pragha-playlist.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
+#include "pragha.h"
 
 void pragha_playback_set_playlist_track   (PraghaPlaylist *playlist, PraghaMusicobject *mobj, PraghaApplication *pragha);
 

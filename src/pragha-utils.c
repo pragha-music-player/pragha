@@ -20,8 +20,7 @@
 #include <config.h>
 #endif
 
-#include <glib.h>
-#include <glib/gprintf.h>
+#include "pragha-utils.h"
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -29,11 +28,13 @@
 #include <glib/gi18n.h>
 #endif
 
+#include <glib.h>
+#include <glib/gprintf.h>
+
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
 
-#include "pragha-utils.h"
 
 /**
 @brief duplicate utf8 string, truncated after @a num characters if the string is longer than that
@@ -273,6 +274,9 @@ gboolean is_present_str_list(const gchar *str, GSList *list)
 	gchar *lstr;
 	gboolean ret = FALSE;
 
+	if (!str)
+		return FALSE;
+
 	if (list) {
 		for (i=list; i != NULL; i = i->next) {
 			lstr = i->data;
@@ -296,6 +300,8 @@ GSList* delete_from_str_list(const gchar *str, GSList *list)
 	GSList *i = NULL;
 	gchar *lstr;
 
+	if (!str)
+		return list;
 	if (!list)
 		return NULL;
 

@@ -45,6 +45,7 @@
 #include "src/pragha-playlist.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-window.h"
 
 #include "plugins/pragha-plugin-macros.h"
 

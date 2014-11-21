@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-menubar.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -27,7 +29,7 @@
 #endif
 
 #include <gdk/gdkkeysyms.h>
-#include "pragha-menubar.h"
+
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -879,14 +881,16 @@ static void quit_action(GtkAction *action, PraghaApplication *pragha)
 
 static void search_playlist_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_filter_dialog (pragha);
+	pragha_filter_dialog (pragha_application_get_playlist (pragha));
 }
 
 /* Handler for the 'Preferences' item in the Edit menu */
 
 static void pref_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_preferences_dialog_show (pragha);
+	PreferencesDialog *dialog;
+	dialog = pragha_application_get_preferences_dialog (pragha);
+	pragha_preferences_dialog_show (dialog);
 }
 
 /* Handler for the 'Full screen' item in the Edit menu */
@@ -950,9 +954,11 @@ jump_to_playing_song_action (GtkAction *action, PraghaApplication *pragha)
 static void
 show_equalizer_action(GtkAction *action, PraghaApplication *pragha)
 {
-	pragha_equalizer_dialog_show(pragha);
-}
+	GtkWidget *parent = pragha_application_get_window (pragha);
+	PraghaBackend *backend = pragha_application_get_backend(pragha);
 
+	pragha_equalizer_dialog_show (backend, parent);
+}
 
 /* Handler for the 'Rescan Library' item in the Tools menu */
 

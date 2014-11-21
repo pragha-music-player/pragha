@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "pragha-library-pane.h"
+
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
 #else
@@ -31,7 +33,6 @@
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
 
-#include "pragha-library-pane.h"
 #include "pragha-playback.h"
 #include "pragha-menubar.h"
 #include "pragha-utils.h"
@@ -1399,8 +1400,9 @@ void queue_refilter (PraghaLibraryPane *clibrary)
 	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
 }
 
-gboolean simple_library_search_keyrelease_handler(GtkEntry *entry,
-						  PraghaLibraryPane *clibrary)
+static gboolean
+simple_library_search_keyrelease_handler (GtkEntry          *entry,
+                                          PraghaLibraryPane *clibrary)
 {
 	const gchar *text = NULL;
 	gboolean has_text;

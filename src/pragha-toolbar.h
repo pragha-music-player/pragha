@@ -25,9 +25,6 @@
 #include "pragha-album-art.h"
 #include "pragha-backend.h"
 
-/* pragha.h */
-typedef struct _PraghaApplication PraghaApplication;
-
 #define PRAGHA_TYPE_TOOLBAR                  (pragha_toolbar_get_type ())
 #define PRAGHA_TOOLBAR(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_TOOLBAR, PraghaToolbar))
 #define PRAGHA_IS_TOOLBAR(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_TOOLBAR))
@@ -67,7 +64,6 @@ gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowS
 #if GTK_CHECK_VERSION (3, 12, 0)
 void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
 #endif
-
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);

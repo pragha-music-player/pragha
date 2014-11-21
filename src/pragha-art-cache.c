@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pragha-art-cache.h"
+
 #include <glib/gstdio.h>
 
-#include "pragha-art-cache.h"
 #include "pragha-utils.h"
 
 struct _PraghaArtCache {
