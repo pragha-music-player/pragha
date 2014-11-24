@@ -1372,7 +1372,6 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	GActionMap *map;
 	GAction *action;
 	GError *error = NULL;
-	gchar *pragha_accels_path = NULL;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -1462,13 +1461,6 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	                             binding_variant_to_gboolean,
 	                             NULL,
 	                             NULL);
-
-	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
-	                  G_CALLBACK (pragha_menubar_update_playback_state_cb), pragha);
-
-	pragha_accels_path = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(), "/pragha/accels.scm", NULL);
-	gtk_accel_map_load (pragha_accels_path);
-	g_free (pragha_accels_path);
 
 	return builder;
 }

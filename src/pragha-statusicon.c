@@ -332,6 +332,7 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 
 	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
 	                  G_CALLBACK (pragha_status_icon_update_state), status_icon);
+	pragha_status_icon_update_state (pragha_application_get_backend (pragha), NULL, status_icon);
 
 	g_object_unref (actions);
 }

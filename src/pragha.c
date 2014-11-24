@@ -1117,6 +1117,11 @@ pragha_application_startup (GApplication *application)
 	pragha_plugins_engine_startup (pragha->plugins_engine);
 	#endif
 
+	/* Forse update menubar and toolbar playback actions */
+
+	pragha_menubar_update_playback_state_cb (pragha->backend, NULL, pragha);
+	pragha_toolbar_playback_state_cb (pragha->backend, NULL, pragha->toolbar);
+
 	/* Finally fill the library and the playlist */
 
 	pragha_init_gui_state (pragha);
