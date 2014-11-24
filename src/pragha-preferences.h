@@ -102,6 +102,7 @@ struct _PraghaPreferencesClass
 #define KEY_STATUS_BAR             "status_bar"
 #define KEY_GNOME_STYLE            "gnome_style"
 #define KEY_CONTROLS_BELOW         "controls_below"
+#define KEY_SHOW_MENUBAR           "show_menubar"
 
 #define GROUP_SERVICES   "services"
 #define KEY_LASTFM                 "lastfm"

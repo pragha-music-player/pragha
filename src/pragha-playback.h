@@ -35,7 +35,7 @@ void pragha_backend_finished_song         (PraghaBackend *backend, PraghaApplica
 void pragha_backend_tags_changed          (PraghaBackend *backend, gint changed, PraghaApplication *pragha);
 
 void pragha_playback_show_current_album_art (GObject *object, PraghaApplication *pragha);
-void pragha_playback_edit_current_track     (GObject *object, PraghaApplication *pragha);
+void pragha_playback_edit_current_track   (PraghaApplication *pragha);
 
 void pragha_playback_seek_fraction (GObject *object, gdouble fraction, PraghaApplication *pragha);
 

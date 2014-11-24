@@ -93,7 +93,7 @@ pragha_songinfo_pane_set_text (PraghaSonginfoPane *pane,
 
 	gtk_text_buffer_get_start_iter (GTK_TEXT_BUFFER(buffer), &iter);
 	gtk_text_buffer_insert_with_tags_by_name (GTK_TEXT_BUFFER(buffer), &iter, title, -1,
-	                                          "style_bold", "style_large", NULL);
+	                                          "style_bold", "style_large", "margin_top", NULL);
 
 	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, "\n\n", -1);
 	gtk_text_buffer_insert (GTK_TEXT_BUFFER(buffer), &iter, text, -1);
@@ -214,12 +214,14 @@ pragha_songinfo_pane_init (PraghaSonginfoPane *pane)
 	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (view), FALSE);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (view), GTK_WRAP_WORD);
 	gtk_text_view_set_accepts_tab (GTK_TEXT_VIEW (view), FALSE);
+	g_object_set (view, "left-margin", 4, "right-margin", 4, NULL);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 
 	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_bold", "weight", PANGO_WEIGHT_BOLD, NULL);
 	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_large", "scale", PANGO_SCALE_X_LARGE, NULL);
 	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "style_italic", "style", PANGO_STYLE_ITALIC, NULL);
+	gtk_text_buffer_create_tag(GTK_TEXT_BUFFER(buffer), "margin_top", "pixels-above-lines", 2, NULL);
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pane),
 	                                GTK_POLICY_AUTOMATIC,

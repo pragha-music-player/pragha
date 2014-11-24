@@ -55,6 +55,8 @@ struct _PraghaToolbar {
 	GtkToolItem    *next_button;
 	GtkToolItem    *unfull_button;
 	GtkWidget      *vol_button;
+	GtkWidget      *extra_button_box;
+
 	GtkWidget      *track_length_label;
 	GtkWidget      *track_time_label;
 	GtkWidget      *now_playing_label;
@@ -416,6 +418,23 @@ pragha_toolbar_add_extention_widget(PraghaToolbar *toolbar, GtkWidget *widget)
 	gtk_container_add(GTK_CONTAINER(toolbar->extention_box), widget);
 }
 
+void
+pragha_toolbar_add_extra_button (PraghaToolbar *toolbar, GtkWidget *widget)
+{
+	GList *list;
+	GtkWidget *children;
+
+	list = gtk_container_get_children (GTK_CONTAINER(toolbar->extra_button_box));
+	if(list) {
+		children = list->data;
+		gtk_container_remove(GTK_CONTAINER(toolbar->extra_button_box), children);
+		gtk_widget_destroy(GTK_WIDGET(children));
+		g_list_free(list);
+	}
+	gtk_container_add(GTK_CONTAINER(toolbar->extra_button_box), widget);
+}
+
+
 const gchar*
 pragha_toolbar_get_progress_text(PraghaToolbar *toolbar)
 {
@@ -484,7 +503,7 @@ pragha_toolbar_get_song_box (PraghaToolbar *toolbar)
 	 */
 	vbox_aling = gtk_alignment_new(0.5, 0.5, 1, 0);
 
- 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+ 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_container_add(GTK_CONTAINER(vbox_aling), GTK_WIDGET(vbox));
 
  	/*
@@ -844,7 +863,10 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	g_object_set(G_OBJECT(vol_button), "size", GTK_ICON_SIZE_LARGE_TOOLBAR, NULL);
 	toolbar->vol_button = vol_button;
 
+	toolbar->extra_button_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
 #if GTK_CHECK_VERSION (3, 12, 0)
+	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(toolbar->extra_button_box));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(vol_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(repeat_button));
 	gtk_header_bar_pack_end(GTK_HEADER_BAR(toolbar), GTK_WIDGET(shuffle_button));
@@ -854,6 +876,7 @@ pragha_toolbar_init (PraghaToolbar *toolbar)
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(shuffle_button));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(repeat_button));
 	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(vol_button));
+	gtk_tool_insert_generic_item(GTK_TOOLBAR(toolbar), GTK_WIDGET(toolbar->extra_button_box));
 #endif
 
 	/* Connect signals */

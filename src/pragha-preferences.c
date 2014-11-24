@@ -70,6 +70,7 @@ struct _PraghaPreferencesPrivate
 	gchar     *album_art_pattern;
 	gboolean   show_status_bar;
 	gboolean   show_status_icon;
+	gboolean   show_menubar;
 	gboolean   gnome_style;
 	gboolean   controls_below;
 	gboolean   remember_state;
@@ -109,6 +110,7 @@ enum
 	PROP_ALBUM_ART_PATTERN,
 	PROP_SHOW_STATUS_BAR,
 	PROP_SHOW_STATUS_ICON,
+	PROP_SHOW_MENUBAR,
 	PROP_GNOME_STYLE,
 	PROP_CONTROLS_BELOW,
 	PROP_REMEMBER_STATE,
@@ -1137,6 +1139,33 @@ pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_get_show_menubar:
+ *
+ */
+gboolean
+pragha_preferences_get_show_menubar (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->show_menubar;
+}
+
+/**
+ * pragha_preferences_set_show_menubar:
+ *
+ */
+void
+pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
+                                     gboolean           show_menubar)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->show_menubar = show_menubar;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_SHOW_MENUBAR]);
+}
+
+/**
  * pragha_preferences_get_gnome_style:
  *
  */
@@ -1387,7 +1416,8 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 	gchar *installed_version;
 	gboolean approximate_search, instant_search;
 	gboolean shuffle, repeat, use_hint, restore_playlist, software_mixer;
-	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, show_status_icon, gnome_style, controls_below, remember_state;
+	gboolean lateral_panel, secondary_lateral_panel, show_album_art, show_status_bar, \
+		show_status_icon, show_menubar, gnome_style, controls_below, remember_state;
 	gchar *album_art_pattern;
 	gchar *start_mode, *last_folder, *last_folder_converted = NULL;
 	gboolean add_recursively, timer_remaining_mode, hide_instead_close;
@@ -1732,6 +1762,18 @@ pragha_preferences_load_from_file(PraghaPreferences *preferences)
 		pragha_preferences_set_show_status_icon(preferences, show_status_icon);
 	}
 
+	show_menubar = g_key_file_get_boolean(priv->rc_keyfile,
+	                                      GROUP_WINDOW,
+	                                      KEY_SHOW_MENUBAR,
+	                                      &error);
+	if (error) {
+		g_error_free(error);
+		error = NULL;
+	}
+	else {
+		pragha_preferences_set_show_menubar(preferences, show_menubar);
+	}
+
 	gnome_style = g_key_file_get_boolean(priv->rc_keyfile,
 	                                     GROUP_WINDOW,
 	                                     KEY_GNOME_STYLE,
@@ -1983,6 +2025,10 @@ pragha_preferences_finalize (GObject *object)
 	                       priv->show_status_icon);
 	g_key_file_set_boolean(priv->rc_keyfile,
 	                       GROUP_WINDOW,
+	                       KEY_SHOW_MENUBAR,
+	                       priv->show_menubar);
+	g_key_file_set_boolean(priv->rc_keyfile,
+	                       GROUP_WINDOW,
 	                       KEY_GNOME_STYLE,
 	                       priv->gnome_style);
 	g_key_file_set_boolean(priv->rc_keyfile,
@@ -2132,6 +2178,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_SHOW_STATUS_ICON:
 			g_value_set_boolean (value, pragha_preferences_get_show_status_icon(preferences));
 			break;
+		case PROP_SHOW_MENUBAR:
+			g_value_set_boolean (value, pragha_preferences_get_show_menubar(preferences));
+			break;
 		case PROP_GNOME_STYLE:
 			g_value_set_boolean (value, pragha_preferences_get_gnome_style(preferences));
 			break;
@@ -2241,6 +2290,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_SHOW_STATUS_ICON:
 			pragha_preferences_set_show_status_icon(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_SHOW_MENUBAR:
+			pragha_preferences_set_show_menubar(preferences, g_value_get_boolean(value));
 			break;
 		case PROP_GNOME_STYLE:
 			pragha_preferences_set_gnome_style(preferences, g_value_get_boolean(value));
@@ -2559,6 +2611,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("show-status-icon",
 		                     "ShowStatusIcon",
 		                     "Show Status Icon Preference",
+		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:show_menubar:
+	  *
+	  */
+	gParamSpecs[PROP_SHOW_MENUBAR] =
+		g_param_spec_boolean("show-menubar",
+		                     "ShowMenubar",
+		                     "Show Menubar Preference",
 		                      TRUE,
 		                      PRAGHA_PREF_PARAMS);
 

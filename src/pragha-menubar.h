@@ -24,18 +24,87 @@
 
 #include "pragha.h"
 
-void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
-
 /*
- * Shared actions whit status icon.
+ * Helper to GMenumodel definitions.
+ *
+ * NOTE: Remember use "&lt;" and "&gt;" as "<" and ">" in accelerators.
  */
 
-void edit_tags_playing_action(GtkAction *action, PraghaApplication *pragha);
-void open_file_action(GtkAction *action, PraghaApplication *pragha);
-void add_audio_cd_action(GtkAction *action, PraghaApplication *pragha);
-void add_location_action(GtkAction *action, PraghaApplication *pragha);
+#define NEW_MENU(_MENU) \
+	"<interface>" \
+	"  <menu id='" _MENU "'>" \
+	"    <section>"
 
-void about_action(GtkAction *action, PraghaApplication *pragha);
+#define NEW_SUBMENU(_LABEL) \
+	"  <submenu>" \
+	"    <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"      <section>"
+
+#define NEW_NAMED_SUBMENU(_ID,_LABEL) \
+	"  <submenu id='" _ID "'>" \
+	"    <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"      <section>"
+
+#define NEW_ITEM(_LABEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"        </item>"
+
+#define NEW_ACCEL_ITEM(_LABEL,_ACCEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='accel'>" _ACCEL  "</attribute>"  \
+	"        </item>"
+
+#define NEW_ICON_ITEM(_LABEL,_ICON,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='icon'>" _ICON "</attribute>" \
+	"        </item>"
+
+#define NEW_ICON_ACCEL_ITEM(_LABEL,_ICON,_ACCEL,_PREFIX,_ACTION) \
+	"        <item>" \
+	"          <attribute name='label' translatable='yes'>" _LABEL "</attribute>" \
+	"          <attribute name='action'>" _PREFIX "." _ACTION  "</attribute>"  \
+	"          <attribute name='icon'>" _ICON "</attribute>" \
+	"          <attribute name='accel'>" _ACCEL  "</attribute>"  \
+	"        </item>"
+
+#define SEPARATOR \
+	"      </section>" \
+	"      <section>"
+#define NEW_PLACEHOLDER(_TAG) \
+	"      <section id='" _TAG "'/>"
+
+#define OPEN_PLACEHOLDER(_TAG) \
+	"      <section id='" _TAG "'>"
+
+#define CLOSE_PLACEHOLDER \
+	"      </section>"
+
+#define CLOSE_SUBMENU \
+	"      </section>" \
+	"    </submenu>"
+
+#define CLOSE_MENU \
+	"    </section>" \
+	"  </menu>" \
+	"</interface>"
+
+#define NEW_POPUP(_POPUP) \
+	"<interface>" \
+	"  <menu id='" _POPUP "'>" \
+	"    <section>"
+
+#define CLOSE_POPUP \
+	"    </section>" \
+	"  </menu>" \
+	"</interface>"
+
+void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 
 /*
  * Public api..
@@ -43,6 +112,7 @@ void about_action(GtkAction *action, PraghaApplication *pragha);
 
 void pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha);
 
-GtkUIManager* pragha_menubar_new (void);
+GtkUIManager *pragha_menubar_new       (void);
+GtkBuilder   *pragha_gmenu_toolbar_new (PraghaApplication *pragha);
 
 #endif /* PRAGHA_MENU_H */

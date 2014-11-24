@@ -65,6 +65,7 @@ gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowS
 void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
 #endif
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
+void     pragha_toolbar_add_extra_button     (PraghaToolbar *toolbar, GtkWidget *widget);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
 const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);

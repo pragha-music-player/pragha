@@ -29,6 +29,8 @@
 #endif
 
 #include "pragha-playback.h"
+#include "pragha-toolbar.h"
+#include "pragha-menubar.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
@@ -409,6 +411,8 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
+	GtkWidget *menu_button;
+	GtkBuilder *menu_ui;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
 
@@ -525,6 +529,27 @@ pragha_window_new (PraghaApplication *pragha)
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
 	                    TRUE, TRUE, 2);
 
+	g_object_bind_property (preferences, "show-menubar",
+	                        menubar, "visible",
+	                        binding_flags);
+
+	/* Add menu-button to toolbar */
+
+	menu_button =  gtk_menu_button_new ();
+	gtk_button_set_image (GTK_BUTTON (menu_button),
+		gtk_image_new_from_icon_name ("emblem-system-symbolic", GTK_ICON_SIZE_MENU));
+	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
+
+	menu_ui = pragha_application_get_menu_ui(pragha);
+	gtk_menu_button_set_menu_model (GTK_MENU_BUTTON(menu_button),
+		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "menubar")));
+
+	g_object_bind_property (preferences, "show-menubar",
+	                        menu_button, "visible",
+	                        binding_flags | G_BINDING_INVERT_BOOLEAN);
+
+	pragha_toolbar_add_extra_button (toolbar, menu_button);
+
 	/* Add library pane to first sidebar. */
 
 	pragha_sidebar_attach_plugin (sidebar1,
@@ -544,9 +569,7 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.
 	 */
-
 	gtk_widget_show(vbox_main);
-	gtk_widget_show (menubar);
 	gtk_widget_show (GTK_WIDGET(toolbar));
 	gtk_widget_show (infobox);
 	gtk_widget_show (pane1);
