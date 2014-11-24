@@ -670,13 +670,18 @@ pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec
 	g_object_ref(toolbar);
 
 	parent  = gtk_widget_get_parent (GTK_WIDGET(menubar));
-	action = pragha_application_get_menu_action (pragha,
-		"/Menubar/ViewMenu/Playback controls below");
 
 	if (pragha_preferences_get_gnome_style (preferences)) {
 		gtk_widget_hide(GTK_WIDGET(window));
 
 		pragha_preferences_set_controls_below(preferences, FALSE);
+
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Fullscreen");
+		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
+
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Playback controls below");
 		gtk_action_set_sensitive (GTK_ACTION (action), FALSE);
 
 		gtk_container_remove (GTK_CONTAINER(parent), GTK_WIDGET(toolbar));
@@ -689,6 +694,12 @@ pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec
 	else {
 		gtk_widget_hide(GTK_WIDGET(window));
 
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Fullscreen");
+		gtk_action_set_sensitive (GTK_ACTION (action), TRUE);
+
+		action = pragha_application_get_menu_action (pragha,
+			"/Menubar/ViewMenu/Playback controls below");
 		gtk_action_set_sensitive (GTK_ACTION (action), TRUE);
 
 		gtk_window_set_titlebar (GTK_WINDOW (window), NULL);
