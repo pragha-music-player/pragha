@@ -338,7 +338,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 		                                      GROUP_LIBRARY,
 		                                      KEY_LIBRARY_SCANNED);
 
-	if (folder_scanned && library_dir) {
+	if (folder_scanned || library_dir) {
 		test_change = FALSE;
 		for (list = folder_scanned; list != NULL; list = list->next) {
 			if (is_present_str_list(list->data, library_dir))
@@ -461,8 +461,10 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	}
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gnome_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w));
-	if (gnome_style != pragha_preferences_get_gnome_style(dialog->preferences))
-		pragha_preferences_set_gnome_style(dialog->preferences, gnome_style);
+	if (gnome_style != pragha_preferences_get_gnome_style(dialog->preferences)) {
+		pragha_preferences_set_gnome_style (dialog->preferences, gnome_style);
+		pragha_preferences_set_show_menubar (dialog->preferences, !gnome_style);
+	}
 #endif
 }
 

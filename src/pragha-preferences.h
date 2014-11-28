@@ -375,6 +375,13 @@ pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
                                          gboolean show_status_icon);
 
 gboolean
+pragha_preferences_get_show_menubar (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
+                                     gboolean           show_menubar);
+
+gboolean
 pragha_preferences_get_gnome_style (PraghaPreferences *preferences);
 
 void

@@ -165,12 +165,21 @@ static void
 pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *pragha)
 {
 	GtkAction *action;
+	GAction *baction;
+	GActionMap *map;
+
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Lateral panel2");
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	baction = g_action_map_lookup_action (map, "sidebar2");
+
 	if (pragha_sidebar_get_n_panes (sidebar)) {
 		gtk_action_set_visible (action, TRUE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (baction), TRUE);
 	}
 	else {
 		gtk_action_set_visible (action, FALSE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (baction), FALSE);
 		gtk_widget_set_visible (GTK_WIDGET(sidebar), FALSE);
 	}
 }
