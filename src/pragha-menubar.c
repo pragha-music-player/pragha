@@ -1428,14 +1428,6 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	                             binding_variant_to_gboolean,
 	                             NULL,
 	                             NULL);
-	action = g_action_map_lookup_action (map, "sidebar1");
-	g_object_bind_property_full (preferences, "lateral-panel",
-	                             action, "state",
-	                             binding_flags,
-	                             binding_gboolean_to_variant,
-	                             binding_variant_to_gboolean,
-	                             NULL,
-	                             NULL);
 	action = g_action_map_lookup_action (map, "sidebar2");
 	g_object_bind_property_full (preferences, "secondary-lateral-panel",
 	                             action, "state",
