@@ -276,21 +276,70 @@ pragha_preferences_dialog_set_library_list (PreferencesDialog *dialog, GSList *l
 	}
 }
 
+/*
+ * When cancel the preferences dialog should restore all changes
+ */
 static void
 pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 {
 	GSList *library_list = NULL;
+
+	/*
+	 * Collection settings.
+	 */
 	library_list = pragha_preferences_get_filename_list (dialog->preferences,
 	                                                     GROUP_LIBRARY,
 	                                                     KEY_LIBRARY_SCANNED);
 	pragha_preferences_dialog_set_library_list(dialog, library_list);
 
+	/*
+	 * Audio settings.
+	 */
+#ifndef G_OS_WIN32
+	const gchar *audio_sink = pragha_preferences_get_audio_sink(dialog->preferences);
+	if (string_is_not_empty(audio_sink)) {
+		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 1);
+		else if (!g_ascii_strcasecmp(audio_sink, OSS4_SINK))
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 2);
+		else if (!g_ascii_strcasecmp(audio_sink, OSS_SINK))
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 3);
+		else if (!g_ascii_strcasecmp(audio_sink, PULSE_SINK))
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 4);
+		else
+			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 0);
+	}
+
+	gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w),
+		pragha_preferences_get_audio_device(dialog->preferences));
+
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w),
+		pragha_preferences_get_software_mixer (dialog->preferences));
+#endif
+
+	/*
+	 * Apareanse settings
+	 */
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->gnome_style_w),
 		pragha_preferences_get_gnome_style(dialog->preferences));
 #endif
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->use_hint_w),
+		pragha_preferences_get_use_hint(dialog->preferences));
+
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(dialog->album_art_w),
+		pragha_preferences_get_show_album_art(dialog->preferences));
+
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(dialog->album_art_size_w),
+		pragha_preferences_get_album_art_size(dialog->preferences));
+
+	gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
+		pragha_preferences_get_album_art_pattern (dialog->preferences));
 }
 
+/*
+ * When accepting the preferences dialog must be set changes.
+ */
 static void
 pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 {
@@ -310,23 +359,36 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	 * Audio preferences
 	 */
 #ifndef G_OS_WIN32
+	gboolean need_restart = FALSE;
 	const gchar *audio_device;
 	gchar *audio_sink = NULL;
 	gboolean software_mixer;
 
 	audio_sink = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dialog->audio_sink_combo_w));
 	if(audio_sink) {
-		pragha_preferences_set_audio_sink(dialog->preferences, audio_sink);
+		if (g_ascii_strcasecmp(audio_sink, pragha_preferences_get_audio_sink(dialog->preferences))) {
+			pragha_preferences_set_audio_sink(dialog->preferences, audio_sink);
+			need_restart = TRUE;
+		}
 		g_free(audio_sink);
 	}
 
 	audio_device = gtk_entry_get_text(GTK_ENTRY(dialog->audio_device_w));
-	if(audio_device) {
-		pragha_preferences_set_audio_device(dialog->preferences, audio_device);
+	if (audio_device) {
+		if (g_ascii_strcasecmp(audio_device, pragha_preferences_get_audio_device(dialog->preferences))) {
+			pragha_preferences_set_audio_device(dialog->preferences, audio_device);
+			need_restart = TRUE;
+		}
 	}
 
 	software_mixer = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w));
-	pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
+	if (software_mixer != pragha_preferences_get_software_mixer(dialog->preferences)) {
+		pragha_preferences_set_software_mixer(dialog->preferences, software_mixer);
+		need_restart = TRUE;
+	}
+
+	if (need_restart)
+		pragha_preferences_need_restart (dialog->preferences);
 #endif
 
 	/*
@@ -627,7 +689,6 @@ static void update_audio_device_pulse(PreferencesDialog *dialog)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
-	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
 static void update_audio_device_default(PreferencesDialog *dialog)
@@ -635,7 +696,6 @@ static void update_audio_device_default(PreferencesDialog *dialog)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), FALSE);
 	gtk_widget_set_sensitive(dialog->audio_device_w, FALSE);
 	gtk_widget_set_sensitive(dialog->soft_mixer_w, FALSE);
-	pragha_preferences_set_software_mixer(dialog->preferences, FALSE);
 }
 
 /* The enumerated audio devices have to be changed here */

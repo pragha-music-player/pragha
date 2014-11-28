@@ -127,6 +127,7 @@ static GParamSpec *gParamSpecs[LAST_PROP];
 enum {
 	SIGNAL_PLUGINS_CHANGED,
 	SIGNAL_LIBRARY_CHANGED,
+	SIGNAL_NEED_RESTART,
 	LAST_SIGNAL
 };
 static int signals[LAST_SIGNAL] = { 0 };
@@ -447,6 +448,17 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 	return group_name;
 }
 
+/**
+ * pragha_preferences_get_installed_version:
+ *
+ */
+void
+pragha_preferences_need_restart (PraghaPreferences *preferences)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_signal_emit (preferences, signals[SIGNAL_NEED_RESTART], 0);
+}
 
 /**
  * pragha_preferences_get_filename_list:
@@ -2740,6 +2752,15 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (PraghaPreferencesClass, library_change),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+
+	signals[SIGNAL_NEED_RESTART] =
+		g_signal_new ("NeedRestart",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (PraghaPreferencesClass, need_restart),
 		              NULL, NULL,
 		              g_cclosure_marshal_VOID__VOID,
 		              G_TYPE_NONE, 0);

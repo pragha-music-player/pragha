@@ -656,6 +656,13 @@ pragha_libary_list_changed_cb (PraghaPreferences *preferences, PraghaApplication
 	pragha_window_add_widget_to_infobox (pragha, infobar);
 }
 
+static void
+pragha_need_restart_cb (PraghaPreferences *preferences, PraghaApplication *pragha)
+{
+	GtkWidget *infobar = pragha_info_bar_need_restart (pragha);
+	pragha_window_add_widget_to_infobox (pragha, infobar);
+}
+
 #if GTK_CHECK_VERSION (3, 12, 0)
 static void
 pragha_gnome_style_changed_cb (PraghaPreferences *preferences, GParamSpec *pspec, PraghaApplication *pragha)
@@ -1101,6 +1108,9 @@ pragha_application_startup (GApplication *application)
 
 	g_signal_connect (pragha->preferences, "LibraryChanged",
 	                  G_CALLBACK (pragha_libary_list_changed_cb), pragha);
+	g_signal_connect (pragha->preferences, "NeedRestart",
+	                  G_CALLBACK (pragha_need_restart_cb), pragha);
+
 #if GTK_CHECK_VERSION (3, 12, 0)
 	g_signal_connect (pragha->preferences, "notify::gnome-style",
 	                  G_CALLBACK (pragha_gnome_style_changed_cb), pragha);

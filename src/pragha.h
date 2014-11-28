@@ -91,6 +91,7 @@ gint handle_command_line (PraghaApplication *pragha, GApplicationCommandLine *co
 gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha);
 GtkWidget* create_info_bar_import_music(PraghaApplication *pragha);
 GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
+GtkWidget *pragha_info_bar_need_restart (PraghaApplication *pragha);
 
 /* Pragha app */
 
