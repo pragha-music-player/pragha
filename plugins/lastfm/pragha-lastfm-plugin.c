@@ -1615,23 +1615,31 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
                                            PraghaLastfmPlugin *plugin)
 {
 	PraghaPreferences *preferences;
-	const gchar *test_user = NULL, *entry_user = NULL, *test_pass = NULL, *entry_pass = NULL;
+	const gchar *entry_user = NULL, *entry_pass = NULL;
+	gchar *test_user = NULL, *test_pass = NULL;
 	gboolean changed = FALSE, test_scrobble = FALSE, toggle_scrobble = FALSE;
 
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
+	preferences = pragha_preferences_get ();
+
+	test_user = pragha_lastfm_plugin_get_user (preferences);
+	test_pass = pragha_lastfm_plugin_get_password (preferences);
+
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->enable_w),
+			pragha_lastfm_plugin_get_scrobble_support (preferences));
+
+		pragha_gtk_entry_set_text (GTK_ENTRY(priv->lastfm_uname_w), test_user);
+		pragha_gtk_entry_set_text (GTK_ENTRY(priv->lastfm_pass_w), test_pass);
 		break;
 	case GTK_RESPONSE_OK:
 		toggle_scrobble = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->enable_w));
 		entry_user = gtk_entry_get_text (GTK_ENTRY(priv->lastfm_uname_w));
 		entry_pass = gtk_entry_get_text (GTK_ENTRY(priv->lastfm_pass_w));
 
-		preferences = pragha_preferences_get ();
 		test_scrobble = pragha_lastfm_plugin_get_scrobble_support (preferences);
-		test_user = pragha_lastfm_plugin_get_user (preferences);
-		test_pass = pragha_lastfm_plugin_get_password (preferences);
 
 		if (test_scrobble != toggle_scrobble) {
 			pragha_lastfm_plugin_set_scrobble_support (preferences, toggle_scrobble);
@@ -1652,11 +1660,13 @@ pragha_lastfm_preferences_dialog_response (GtkDialog    *dialog,
 			pragha_lastfm_disconnect (plugin);
 			pragha_lastfm_connect (plugin);
 		}
-		g_object_unref (preferences);
 		break;
 	default:
 		break;
 	}
+	g_object_unref (preferences);
+	g_free (test_user);
+	g_free (test_pass);
 }
 
 static void

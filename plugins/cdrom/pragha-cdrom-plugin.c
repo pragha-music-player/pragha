@@ -483,14 +483,12 @@ pragha_cdrom_preferences_dialog_response (GtkDialog         *dialog_w,
 	preferences = pragha_preferences_get();
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
-		audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
-		gtk_entry_set_text (GTK_ENTRY(priv->audio_cd_device_w),
-		                    audio_cd_device ? audio_cd_device : "");
+		pragha_gtk_entry_set_text (GTK_ENTRY(priv->audio_cd_device_w),
+			pragha_preferences_get_audio_cd_device (preferences));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w),
 			pragha_preferences_get_use_cddb (preferences));
 		break;
 	case GTK_RESPONSE_OK:
-		preferences = pragha_preferences_get();
 		audio_cd_device = gtk_entry_get_text (GTK_ENTRY(priv->audio_cd_device_w));
 		if (audio_cd_device) {
 			pragha_preferences_set_audio_cd_device (preferences, audio_cd_device);
@@ -512,10 +510,8 @@ pragha_cdrom_init_settings (PraghaCdromPlugin *plugin)
 
 	preferences = pragha_preferences_get();
 
-	const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
-
-	if (string_is_not_empty(audio_cd_device))
-		gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w), audio_cd_device);
+	pragha_gtk_entry_set_text(GTK_ENTRY(priv->audio_cd_device_w),
+		pragha_preferences_get_audio_cd_device (preferences));
 
 	if (pragha_preferences_get_use_cddb(preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w), TRUE);

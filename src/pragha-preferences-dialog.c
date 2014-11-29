@@ -86,6 +86,17 @@ struct _PreferencesDialog {
 };
 
 /*
+ * Utils.
+ */
+
+void
+pragha_gtk_entry_set_text (GtkEntry *entry, const gchar *text)
+{
+	gtk_entry_set_text (GTK_ENTRY(entry),
+		string_is_not_empty(text) ? text : "");
+}
+
+/*
  * Dinamic Tabs
  */
 
@@ -317,7 +328,7 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(dialog->audio_sink_combo_w), 0);
 	}
 
-	gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w),
+	pragha_gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w),
 		pragha_preferences_get_audio_device(dialog->preferences));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w),
@@ -340,7 +351,7 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(dialog->album_art_size_w),
 		pragha_preferences_get_album_art_size(dialog->preferences));
 
-	gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
+	pragha_gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
 		pragha_preferences_get_album_art_pattern (dialog->preferences));
 
 	/*
@@ -758,7 +769,6 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	/* Audio Options */
 #ifndef G_OS_WIN32
 	const gchar *audio_sink = pragha_preferences_get_audio_sink(dialog->preferences);
-	const gchar *audio_device = pragha_preferences_get_audio_device(dialog->preferences);
 
 	if (string_is_not_empty(audio_sink)) {
 		if (!g_ascii_strcasecmp(audio_sink, ALSA_SINK))
@@ -786,8 +796,8 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 			update_audio_device_default(dialog);
 	}
 
-	if (string_is_not_empty(audio_device))
-		gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w), audio_device);
+	pragha_gtk_entry_set_text(GTK_ENTRY(dialog->audio_device_w),
+		pragha_preferences_get_audio_device(dialog->preferences));
 
 	if (pragha_preferences_get_software_mixer(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->soft_mixer_w), TRUE);
@@ -834,8 +844,8 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(dialog->album_art_size_w),
 	                           pragha_preferences_get_album_art_size(dialog->preferences));
 
-	gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
-	                   pragha_preferences_get_album_art_pattern(dialog->preferences));
+	pragha_gtk_entry_set_text(GTK_ENTRY(dialog->album_art_pattern_w),
+		pragha_preferences_get_album_art_pattern(dialog->preferences));
 
 	/* Lbrary Options */
 
