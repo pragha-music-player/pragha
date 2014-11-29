@@ -1223,7 +1223,6 @@ pragha_menubar_remove_by_id (PraghaApplication *pragha,
 	GMenu *menu;
 	const char *id;
 	gint i;
-	return;
 
 	builder = pragha_application_get_menu_ui (pragha);
 	menu = G_MENU (gtk_builder_get_object (builder, placeholder));

@@ -112,6 +112,22 @@ void pragha_menubar_update_playback_state_cb (PraghaBackend *backend, GParamSpec
 
 void pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication *pragha);
 
+void
+pragha_menubar_set_enable_action (GtkWindow  *window,
+                                  const char *action_name,
+                                  gboolean    enabled);
+void
+pragha_menubar_append_submenu (PraghaApplication  *pragha,
+                               const gchar        *placeholder,
+                               const gchar        *xml_ui,
+                               const gchar        *menu_id,
+                               const gchar        *label,
+                               gpointer            user_data);
+void
+pragha_menubar_remove_by_id (PraghaApplication *pragha,
+                             const gchar       *placeholder,
+                             const gchar       *item_id);
+
 GtkUIManager *pragha_menubar_new       (void);
 GtkBuilder   *pragha_gmenu_toolbar_new (PraghaApplication *pragha);
 
