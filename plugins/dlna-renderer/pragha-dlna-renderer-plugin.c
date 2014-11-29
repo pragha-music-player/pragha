@@ -43,6 +43,7 @@
 #include "src/pragha-utils.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-playlist.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-window.h"
@@ -74,6 +75,14 @@ static void
 pragha_dlna_renderer_plugin_search_music_action (GtkAction *action, PraghaDlnaRendererPlugin *plugin)
 {
 	pragha_dlna_renderer_plugin_search_music (plugin);
+}
+
+static void
+pragha_gmenu_dlna_renderer_plugin_search_music_action (GSimpleAction *action,
+                                                       GVariant      *parameter,
+                                                       gpointer       user_data)
+{
+	pragha_dlna_renderer_plugin_search_music (PRAGHA_DLNA_RENDERER_PLUGIN(user_data));
 }
 
 static const GtkActionEntry main_menu_actions [] = {
@@ -213,6 +222,8 @@ static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
 	GrlRegistry *registry;
+	GMenuItem *item;
+	GSimpleAction *action;
 	GError *error = NULL;
 
 	PraghaDlnaRendererPlugin *plugin = PRAGHA_DLNA_RENDERER_PLUGIN (activatable);
@@ -241,6 +252,16 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
+
+	/* Gear Menu */
+
+	action = g_simple_action_new ("search-dlna", NULL);
+	g_signal_connect (G_OBJECT (action), "activate",
+	                  G_CALLBACK (pragha_gmenu_dlna_renderer_plugin_search_music_action), plugin);
+
+	item = g_menu_item_new (_("Search music on DLNA server"), "win.search-dlna");
+
+	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 }
 
 static void
@@ -256,6 +277,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
+
+	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-dlna");
 
 	grl_deinit ();
 }
