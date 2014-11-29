@@ -30,6 +30,8 @@
 
 #include <gdk/gdkkeysyms.h>
 
+#include <stdlib.h>
+
 #include "pragha-playback.h"
 #include "pragha-file-utils.h"
 #include "pragha-utils.h"
@@ -42,6 +44,14 @@
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-equalizer-dialog.h"
 #include "pragha.h"
+
+/*
+ * Prototypes
+ */
+
+static void
+pragha_gear_menu_update_playlist_changes (PraghaDatabase    *database,
+                                          PraghaApplication *pragha);
 
 /*
  * Menubar callbacks.
@@ -736,8 +746,11 @@ pragha_menubar_connect_signals (GtkUIManager *menu_ui_manager, PraghaApplication
 
 	g_signal_connect (pragha_application_get_database(pragha), "PlaylistsChanged",
 	                  G_CALLBACK(pragha_menubar_update_playlist_changes), pragha);
-
 	pragha_menubar_update_playlist_changes (pragha_application_get_database(pragha), pragha);
+
+	g_signal_connect (pragha_application_get_database(pragha), "PlaylistsChanged",
+	                  G_CALLBACK(pragha_gear_menu_update_playlist_changes), pragha);
+	pragha_gear_menu_update_playlist_changes (pragha_application_get_database(pragha), pragha);
 
 	g_object_unref (main_actions);
 }
@@ -903,6 +916,44 @@ pragha_gmenu_playlist_save (GSimpleAction *action,
 	save_current_playlist (NULL, playlist);
 }
 
+
+static gchar *
+pragha_database_get_playlist_by_order (PraghaDatabase *cdbase, gint id)
+{
+	gchar *name = NULL;
+	gint i = 0;
+
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
+
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+	while (pragha_prepared_statement_step (statement)) {
+		if (i++ == id)
+			break;
+	}
+	name = g_strdup(pragha_prepared_statement_get_string (statement, 0));
+	pragha_prepared_statement_free (statement);
+
+	return name;
+}
+
+static void
+pragha_gmenu_playlist_append (GSimpleAction *action,
+                              GVariant      *parameter,
+                              gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	PraghaPlaylist *playlist  = pragha_application_get_playlist (pragha);
+	PraghaDatabase *cdbase    = pragha_playlist_get_database (playlist);
+
+	const gchar *name         = g_action_get_name (G_ACTION(action));
+	gchar *title              = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("playlist")));
+
+	pragha_playlist_save_playlist (playlist, title);
+
+	g_free(title);
+}
+
 static void
 pragha_gmenu_selection_export (GSimpleAction *action,
                                GVariant      *parameter,
@@ -925,6 +976,23 @@ pragha_gmenu_selection_save (GSimpleAction *action,
 
 	playlist = pragha_application_get_playlist (pragha);
 	save_selected_playlist (NULL, playlist);
+}
+
+static void
+pragha_gmenu_selection_append (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	PraghaApplication *pragha = user_data;
+	PraghaPlaylist *playlist  = pragha_application_get_playlist (pragha);
+	PraghaDatabase *cdbase    = pragha_playlist_get_database (playlist);
+
+	const gchar *name         = g_action_get_name (G_ACTION(action));
+	gchar *title              = pragha_database_get_playlist_by_order(cdbase, atoi(name + strlen("selection")));
+
+	pragha_playlist_save_selection (playlist, title);
+
+	g_free(title);
 }
 
 static void
@@ -1106,7 +1174,7 @@ pragha_menubar_get_menu_section (PraghaApplication *pragha,
 	return G_MENU (object);
 }
 
-void
+static void
 pragha_menubar_emthy_menu_section (PraghaApplication *pragha,
                                    const char        *id)
 {
@@ -1233,6 +1301,62 @@ pragha_menubar_remove_by_id (PraghaApplication *pragha,
 				g_menu_remove (G_MENU (menu), i);
 		}
 	}
+}
+
+static void
+pragha_gear_menu_update_playlist_changes (PraghaDatabase *database, PraghaApplication *pragha)
+{
+	PraghaDatabase *cdbase;
+	GSimpleAction *action;
+	GMenuItem *item;
+	gchar *selection_name = NULL, *action_name = NULL;
+	gint i = 0;
+
+	pragha_menubar_emthy_menu_section (pragha, "selection-submenu");
+	pragha_menubar_emthy_menu_section (pragha, "playlist-submenu");
+
+	cdbase = pragha_application_get_database (pragha);
+
+	const gchar *sql = "SELECT name FROM PLAYLIST WHERE name != ? ORDER BY name COLLATE NOCASE";
+	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
+
+	pragha_prepared_statement_bind_string (statement, 1, SAVE_PLAYLIST_STATE);
+	while (pragha_prepared_statement_step (statement)) {
+		const gchar *name = pragha_prepared_statement_get_string (statement, 0);
+
+		/* Playlist */
+		selection_name = g_strdup_printf ("playlist%d", i);
+
+		action = g_simple_action_new (selection_name, NULL);
+		g_signal_connect (G_OBJECT (action), "activate",
+		                  G_CALLBACK (pragha_gmenu_playlist_append), pragha);
+		action_name = g_strdup_printf ("win.%s", selection_name);
+
+		item = g_menu_item_new (name, action_name);
+		pragha_menubar_append_action (pragha, "playlist-submenu", action, item);
+
+		g_free(selection_name);
+		g_free(action_name);
+
+		/* Selection */
+		selection_name = g_strdup_printf ("selection%d", i);
+
+		action = g_simple_action_new (selection_name, NULL);
+		g_signal_connect (G_OBJECT (action), "activate",
+		                  G_CALLBACK (pragha_gmenu_selection_append), pragha);
+
+		action_name = g_strdup_printf ("win.%s", selection_name);
+		item = g_menu_item_new (name, action_name);
+
+		pragha_menubar_append_action (pragha, "selection-submenu", action, item);
+
+		g_free(selection_name);
+		g_free(action_name);
+
+		i++;
+		pragha_process_gtk_events ();
+	}
+	pragha_prepared_statement_free (statement);
 }
 
 /*
