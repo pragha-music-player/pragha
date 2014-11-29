@@ -37,6 +37,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-playlists-mgmt.h"
 #include "src/pragha-musicobject-mgmt.h"
@@ -111,9 +112,20 @@ static const gchar *main_menu_xml = "<ui>						\
 </ui>";
 
 /*
- * AcoustID Handlers
+ * Gear menu.
  */
 
+static void
+pragha_gmenu_search_metadata_action (GSimpleAction *action,
+                                     GVariant      *parameter,
+                                     gpointer       user_data)
+{
+	pragha_acoustid_plugin_get_metadata_action (NULL, PRAGHA_ACOUSTID_PLUGIN(user_data));
+}
+
+/*
+ * AcoustID Handlers
+ */
 
 static void
 pragha_acoustid_dialog_response (GtkWidget            *dialog,
@@ -358,12 +370,34 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	g_free (fingerprint);
 }
 
+static void
+backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data)
+{
+	GtkWindow *window;
+	GtkAction *action;
+	PraghaBackendState state = 0;
+
+	PraghaAcoustidPlugin *plugin = user_data;
+	PraghaAcoustidPluginPrivate *priv = plugin->priv;
+
+	state = pragha_backend_get_state (backend);
+
+	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search metadata");
+	gtk_action_set_sensitive (action, state != ST_STOPPED);
+
+	window = GTK_WINDOW(pragha_application_get_window(priv->pragha));
+	pragha_menubar_set_enable_action (window, "search-metadata", state != ST_STOPPED);
+}
+
 /*
  * AcoustID plugin
  */
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	GMenuItem *item;
+	GSimpleAction *action;
+
 	PraghaAcoustidPlugin *plugin = PRAGHA_ACOUSTID_PLUGIN (activatable);
 
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
@@ -383,6 +417,21 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
+	/* Gear Menu */
+
+	action = g_simple_action_new ("search-metadata", NULL);
+	g_signal_connect (G_OBJECT (action), "activate",
+	                  G_CALLBACK (pragha_gmenu_search_metadata_action), plugin);
+
+	item = g_menu_item_new (_("Search Metadata"), "win.search-metadata");
+
+	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+
+	/* Connect playback signals */
+
+	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+	                  G_CALLBACK (backend_changed_state_cb), plugin);
+	backend_changed_state_cb (pragha_application_get_backend (priv->pragha), NULL, plugin);
 }
 
 static void
@@ -393,8 +442,17 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "AcustID plugin %s", G_STRFUNC);
 
+	/* Disconnect playback signals */
+
+	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
+	                                      backend_changed_state_cb, plugin);
+
+	/* Remove menu actions */
+
 	pragha_menubar_remove_plugin_action (priv->pragha,
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
+
+	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-metadata");
 }
