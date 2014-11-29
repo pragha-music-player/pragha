@@ -1468,6 +1468,7 @@ static const gchar *menu_ui = \
 			SEPARATOR \
 			NEW_PLACEHOLDER("selection-submenu") \
 		CLOSE_SUBMENU \
+		SEPARATOR \
 		NEW_ICON_ACCEL_ITEM("_Search in playlist",            "edit-find",            "&lt;Control&gt;F",     "win", "search") \
 		NEW_ICON_ACCEL_ITEM("Jump to playing song",           "go-jump",              "&lt;Control&gt;J",     "win", "jump-song") \
 		SEPARATOR \
