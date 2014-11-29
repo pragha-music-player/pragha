@@ -40,6 +40,7 @@
 #include "src/pragha.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-utils.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
 #include "src/pragha-statusicon.h"
@@ -425,7 +426,6 @@ pragha_cdrom_plugin_device_removed (PraghaDeviceClient *device_client,
 }
 #endif
 
-
 /*
  * Menubar
  */
@@ -434,6 +434,14 @@ pragha_cdrom_plugin_append_action (GtkAction *action, PraghaCdromPlugin *plugin)
 {
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 	pragha_application_append_audio_cd (priv->pragha);
+}
+
+static void
+pragha_gmenu_add_cdrom_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+	pragha_cdrom_plugin_append_action (NULL, PRAGHA_CDROM_PLUGIN(user_data));
 }
 
 static const GtkActionEntry main_menu_actions [] = {
@@ -472,8 +480,14 @@ pragha_cdrom_preferences_dialog_response (GtkDialog         *dialog_w,
 
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
+	preferences = pragha_preferences_get();
 	switch(response_id) {
 	case GTK_RESPONSE_CANCEL:
+		audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
+		gtk_entry_set_text (GTK_ENTRY(priv->audio_cd_device_w),
+		                    audio_cd_device ? audio_cd_device : "");
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w),
+			pragha_preferences_get_use_cddb (preferences));
 		break;
 	case GTK_RESPONSE_OK:
 		preferences = pragha_preferences_get();
@@ -483,11 +497,11 @@ pragha_cdrom_preferences_dialog_response (GtkDialog         *dialog_w,
 		}
 		pragha_preferences_set_use_cddb (preferences,
 			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->use_cddb_w)));
-		g_object_unref (preferences);
 		break;
 	default:
 		break;
 	}
+	g_object_unref (preferences);
 }
 
 static void
@@ -591,6 +605,8 @@ pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	GMenuItem *item;
+	GSimpleAction *action;
 	PraghaBackend *backend;
 	PraghaStatusIcon *status_icon = NULL;
 	PraghaMusicEnum *enum_map = NULL;
@@ -614,13 +630,27 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
+
+	/* Systray */
+
 	status_icon = pragha_application_get_status_icon(priv->pragha);
 	priv->merge_id_syst_menu = pragha_systray_append_plugin_action (status_icon,
 	                                                                priv->action_group_main_menu,
 	                                                                syst_menu_xml);
 	g_object_ref (priv->action_group_main_menu);
 
+	/* Gear Menu */
+
+	action = g_simple_action_new ("add-cdrom", NULL);
+	g_signal_connect (G_OBJECT (action), "activate",
+	                  G_CALLBACK (pragha_gmenu_add_cdrom_action), plugin);
+
+	item = g_menu_item_new (_("Add Audio _CD"), "win.add-cdrom");
+
+	pragha_menubar_append_action (priv->pragha, "pragha-plugins-append-music", action, item);
+
 	/* Connect signals */
+
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
@@ -663,6 +693,8 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_syst_menu);
 	priv->merge_id_syst_menu = 0;
+
+	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-append-music", "add-cdrom");
 
 	backend = pragha_application_get_backend (priv->pragha);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
