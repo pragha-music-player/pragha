@@ -256,8 +256,7 @@ static GActionEntry lastfm_entries[] = {
 
 static const gchar *lastfm_menu_ui = \
 	NEW_MENU("menubar") \
-		NEW_SUBMENU("_Tools") \
-			NEW_PLACEHOLDER("pragha-plugins-placeholder") \
+		OPEN_PLACEHOLDER("pragha-plugins-placeholder") \
 			NEW_NAMED_SUBMENU("lastfm-sudmenu", "_Lastfm") \
 				NEW_ITEM("Love track",             "win", "lastfm-love") \
 				NEW_ITEM("Unlove track",           "win", "lastfm-unlove") \
@@ -266,7 +265,7 @@ static const gchar *lastfm_menu_ui = \
 				NEW_ITEM("Add favorites",          "win", "lastfm-favorities") \
 				NEW_ITEM("Add similar",            "win", "lastfm-similar") \
 			CLOSE_SUBMENU \
-		CLOSE_SUBMENU \
+		CLOSE_PLACEHOLDER \
 	CLOSE_MENU;
 
 
