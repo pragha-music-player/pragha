@@ -61,6 +61,8 @@ typedef struct {
 
 	NotifyNotification *notify;
 
+	GtkWidget          *album_art_in_osd_w;
+	GtkWidget          *actions_in_osd_w;
 	gboolean            album_art_in_osd;
 	gboolean            actions_in_osd;
 } PraghaNotifyPluginPrivate;
@@ -219,65 +221,50 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 }
 
 static void
-pragha_notify_prefrenceces_event (PraghaPreferences *preferences, const gchar *key, PraghaNotifyPlugin *plugin)
+pragha_notify_preferences_dialog_response (GtkDialog          *dialog,
+                                           gint                response_id,
+                                           PraghaNotifyPlugin *plugin)
 {
-	PraghaNotifyPluginPrivate *priv = NULL;
+	PraghaPreferences *preferences;
 	gchar *plugin_group = NULL;
 
-	priv = plugin->priv;
+	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
+	switch(response_id) {
+		case GTK_RESPONSE_CANCEL:
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->album_art_in_osd_w),
+			                              priv->album_art_in_osd);
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->actions_in_osd_w),
+			                              priv->actions_in_osd);
+			break;
+		case GTK_RESPONSE_OK:
+			priv->album_art_in_osd =
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->album_art_in_osd_w));
+			priv->actions_in_osd =
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->actions_in_osd_w));
 
-	if (g_strcmp0(key, "album_art_in_osd") == 0)
-		priv->album_art_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd");
-	else if (g_strcmp0(key, "actions_in_osd") == 0)
-		priv->actions_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd");
+			preferences = pragha_preferences_get ();
+			plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
 
-	g_free (plugin_group);
-}
+			pragha_preferences_set_boolean (preferences,
+			                                plugin_group, "album_art_in_osd",
+			                                priv->album_art_in_osd);
+			pragha_preferences_set_boolean (preferences,
+			                                plugin_group, "actions_in_osd",
+			                                priv->actions_in_osd);
 
-static void
-toggle_albumart_in_osd (GtkToggleButton *button)
-{
-	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
-
-	preferences = pragha_preferences_get ();
-
-	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
-	pragha_preferences_set_boolean (preferences,
-	                                plugin_group, "album_art_in_osd",
-	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
-	pragha_preferences_plugin_changed (preferences, "album_art_in_osd");
-
-	g_object_unref (G_OBJECT (preferences));
-	g_free (plugin_group);
-}
-
-static void
-toggle_actions_in_osd (GtkToggleButton *button)
-{
-	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
-
-	preferences = pragha_preferences_get ();
-
-	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
-	pragha_preferences_set_boolean (preferences,
-	                                plugin_group, "actions_in_osd",
-	                                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
-	pragha_preferences_plugin_changed (preferences, "actions_in_osd");
-
-	g_object_unref (G_OBJECT (preferences));
-	g_free (plugin_group);
+			g_object_unref (preferences);
+			g_free (plugin_group);
+			break;
+		default:
+			break;
+	}
 }
 
 static void
 pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 {
 	PreferencesDialog *dialog;
-	PraghaPreferences *preferences = NULL;
-	gchar *plugin_group = NULL;
 	GtkWidget *table, *albumart_in_osd, *actions_in_osd;
 	guint row = 0;
 
@@ -290,33 +277,27 @@ pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 	albumart_in_osd = gtk_check_button_new_with_label(_("Show Album art in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, albumart_in_osd);
 
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(albumart_in_osd), priv->album_art_in_osd);
+
 	actions_in_osd = gtk_check_button_new_with_label(_("Add actions to change track in notifications"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, actions_in_osd);
 
-	preferences = pragha_preferences_get ();
-
-	plugin_group = pragha_preferences_get_plugin_group_name(preferences, "notify");
-
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(albumart_in_osd),
-		pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd"));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(actions_in_osd),
-		pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd"));
-
-	g_object_unref (G_OBJECT (preferences));
-	g_free (plugin_group);
-
-	g_signal_connect (G_OBJECT(albumart_in_osd), "toggled",
-	                  G_CALLBACK(toggle_albumart_in_osd), NULL);
-	g_signal_connect (G_OBJECT(actions_in_osd), "toggled",
-	                  G_CALLBACK(toggle_actions_in_osd), NULL);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(actions_in_osd), priv->actions_in_osd);
 
 	if (!can_support_actions())
 		gtk_widget_set_sensitive (actions_in_osd, FALSE);
 
 	priv->setting_widget = table;
+	priv->album_art_in_osd_w = albumart_in_osd;
+	priv->actions_in_osd_w = actions_in_osd;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);
 	pragha_preferences_append_desktop_setting (dialog, table, FALSE);
+
+	/* Configure handler and settings */
+	pragha_preferences_dialog_connect_handler (dialog,
+	                                           G_CALLBACK(pragha_notify_preferences_dialog_response),
+	                                           plugin);
 }
 
 static void
@@ -326,9 +307,12 @@ pragha_notify_plugin_remove_setting (PraghaNotifyPlugin *plugin)
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+
+	pragha_preferences_dialog_disconnect_handler (dialog,
+	                                              G_CALLBACK(pragha_notify_preferences_dialog_response),
+	                                              plugin);
 	pragha_preferences_remove_desktop_setting (dialog, priv->setting_widget);
 }
-
 
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
@@ -346,29 +330,30 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	notify_init (PACKAGE_NAME);
 
+	preferences = pragha_application_get_preferences (priv->pragha);
+	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
+	priv->actions_in_osd =
+		pragha_preferences_get_boolean (preferences,
+		                                plugin_group,
+		                                "actions_in_osd");
+	priv->album_art_in_osd =
+		pragha_preferences_get_boolean (preferences,
+		                                plugin_group,
+		                                "album_art_in_osd");
+
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_connect (playlist, "playlist-set-track",
 	                  G_CALLBACK(pragha_notify_plugin_show_new_track), plugin);
 
-
-	preferences = pragha_application_get_preferences (priv->pragha);
-	g_signal_connect (G_OBJECT(preferences), "PluginsChanged",
-	                  G_CALLBACK(pragha_notify_prefrenceces_event), plugin);
-
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
-	priv->actions_in_osd   = pragha_preferences_get_boolean (preferences, plugin_group, "actions_in_osd");
-	priv->album_art_in_osd = pragha_preferences_get_boolean (preferences, plugin_group, "album_art_in_osd");
-	g_free (plugin_group);
-
 	pragha_notify_plugin_append_setting (plugin);
+
+	g_free (plugin_group);
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
-	PraghaPreferences *preferences;
 	PraghaPlaylist *playlist;
-	gchar *plugin_group = NULL;
 
 	PraghaNotifyPlugin *plugin = PRAGHA_NOTIFY_PLUGIN (activatable);
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
@@ -381,16 +366,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_signal_handlers_disconnect_by_func (playlist,
 	                                      pragha_notify_plugin_show_new_track,
 	                                      plugin);
-
-	preferences = pragha_application_get_preferences (priv->pragha);
-	g_signal_handlers_disconnect_by_func (preferences,
-	                                      pragha_notify_prefrenceces_event,
-	                                      plugin);
-
-	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
-	pragha_preferences_set_boolean (preferences, plugin_group, "actions_in_osd", priv->actions_in_osd);
-	pragha_preferences_set_boolean (preferences, plugin_group, "album_art_in_osd", priv->album_art_in_osd);
-	g_free (plugin_group);
 
 	pragha_notify_plugin_remove_setting (plugin);
 
