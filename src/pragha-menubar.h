@@ -116,6 +116,17 @@ void
 pragha_menubar_set_enable_action (GtkWindow  *window,
                                   const char *action_name,
                                   gboolean    enabled);
+
+void
+pragha_menubar_append_action (PraghaApplication *pragha,
+                              const gchar       *placeholder,
+                              GSimpleAction     *action,
+                              GMenuItem         *item);
+void
+pragha_menubar_remove_action (PraghaApplication *pragha,
+                              const gchar       *placeholder,
+                              const gchar       *action_name);
+
 void
 pragha_menubar_append_submenu (PraghaApplication  *pragha,
                                const gchar        *placeholder,
