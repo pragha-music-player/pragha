@@ -586,6 +586,7 @@ pragha_window_new (PraghaApplication *pragha)
 
 	g_signal_connect (G_OBJECT(sidebar2), "children-changed",
 	                  G_CALLBACK(pragha_sidebar_children_changed), pragha);
+	pragha_sidebar_style_position (sidebar2, GTK_POS_RIGHT);
 
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.

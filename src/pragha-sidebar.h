@@ -47,6 +47,10 @@ pragha_sidebar_remove_plugin (PraghaSidebar *sidebar,
 gint
 pragha_sidebar_get_n_panes (PraghaSidebar *sidebar);
 
+void
+pragha_sidebar_style_position (PraghaSidebar  *sidebar,
+                               GtkPositionType position);
+
 PraghaSidebar *pragha_sidebar_new (void);
 
 #endif /* PRAGHA_SIDEBAR_H */
