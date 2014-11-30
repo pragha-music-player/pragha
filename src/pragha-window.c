@@ -422,11 +422,20 @@ pragha_window_new (PraghaApplication *pragha)
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
 	GtkWidget *menu_button;
 	GtkBuilder *menu_ui;
+	GIcon *icon = NULL;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	const gchar *fallbacks_icon_menu[] = {
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
+		"open-menu",
+		"emblem-system",
+		NULL,
+	};
 
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
@@ -545,9 +554,12 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Add menu-button to toolbar */
 
 	menu_button =  gtk_menu_button_new ();
-	gtk_button_set_image (GTK_BUTTON (menu_button),
-		gtk_image_new_from_icon_name ("emblem-system-symbolic", GTK_ICON_SIZE_MENU));
 	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
+
+	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
+	gtk_button_set_image (GTK_BUTTON (menu_button),
+		gtk_image_new_from_gicon(icon, GTK_ICON_SIZE_MENU));
+	g_object_unref (icon);
 
 	menu_ui = pragha_application_get_menu_ui(pragha);
 	gtk_menu_button_set_menu_model (GTK_MENU_BUTTON(menu_button),
