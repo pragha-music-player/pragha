@@ -993,6 +993,7 @@ pragha_application_startup (GApplication *application)
 	PraghaToolbar *toolbar;
 	PraghaPlaylist *playlist;
 	const gchar *version = NULL;
+	const gchar *desktop = NULL;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
@@ -1126,6 +1127,16 @@ pragha_application_startup (GApplication *application)
 	#ifdef HAVE_LIBPEAS
 	pragha_plugins_engine_startup (pragha->plugins_engine);
 	#endif
+
+	/* If first run and the desktop is gnome adapts style. */
+
+	if (pragha_application_is_first_run (pragha)) {
+		desktop = g_getenv ("XDG_CURRENT_DESKTOP");
+		if (desktop && (g_strcmp0(desktop, "GNOME") == 0)) {
+			pragha_preferences_set_gnome_style (pragha->preferences, TRUE);
+			pragha_preferences_set_show_menubar (pragha->preferences, FALSE);
+		}
+	}
 
 	/* Forse update menubar and toolbar playback actions */
 
