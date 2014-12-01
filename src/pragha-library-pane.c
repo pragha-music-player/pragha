@@ -1400,7 +1400,7 @@ void queue_refilter (PraghaLibraryPane *clibrary)
 	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
 }
 
-static gboolean
+static void
 simple_library_search_keyrelease_handler (GtkEntry          *entry,
                                           PraghaLibraryPane *clibrary)
 {
@@ -1408,7 +1408,7 @@ simple_library_search_keyrelease_handler (GtkEntry          *entry,
 	gboolean has_text;
 	
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
-		return FALSE;
+		return;
 
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);
@@ -1426,8 +1426,6 @@ simple_library_search_keyrelease_handler (GtkEntry          *entry,
 	else {
 		clear_library_search (clibrary);
 	}
-
-	return FALSE;
 }
 
 gboolean simple_library_search_activate_handler(GtkEntry *entry,
