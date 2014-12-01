@@ -217,7 +217,7 @@ pragha_block_device_mount_finish (GVolume *volume, GAsyncResult *result, PraghaR
 			primary = g_strdup_printf (_("Unable to access \"%s\""), name);
 			g_free (name);
 
-			dialog = pragha_gudev_dialog_new (NULL, _("Renovable Device"), "media-removable",
+			dialog = pragha_gudev_dialog_new (NULL, _("Removable Device"), "media-removable",
 			                                  primary, error->message,
 			                                  NULL, PRAGHA_DEVICE_RESPONSE_NONE);
 			g_signal_connect (dialog, "response",
@@ -303,7 +303,7 @@ pragha_block_device_detected (gpointer data)
 	primary = g_strdup_printf (_("Want to manage \"%s\" volume?"), name);
 	g_free (name);
 
-	dialog = pragha_gudev_dialog_new (NULL, _("Renovable Device"), "media-removable",
+	dialog = pragha_gudev_dialog_new (NULL, _("Removable Device"), "media-removable",
 	                                  primary, NULL,
 	                                  _("_Update library"), PRAGHA_DEVICE_RESPONSE_BROWSE);
 
