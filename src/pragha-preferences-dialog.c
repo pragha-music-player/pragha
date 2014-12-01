@@ -1037,6 +1037,9 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 
 	gnome_style = gtk_check_button_new_with_label(_("Use Gnome 3 HIG"));
 	pragha_hig_workarea_table_add_wide_control(table, &row, gnome_style);
+
+	if (!gdk_screen_is_composited (gdk_screen_get_default()))
+		gtk_widget_set_sensitive (gnome_style, FALSE);
 #endif
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Playlist"));

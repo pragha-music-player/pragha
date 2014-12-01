@@ -1132,7 +1132,8 @@ pragha_application_startup (GApplication *application)
 
 	if (pragha_application_is_first_run (pragha)) {
 		desktop = g_getenv ("XDG_CURRENT_DESKTOP");
-		if (desktop && (g_strcmp0(desktop, "GNOME") == 0)) {
+		if (desktop && (g_strcmp0(desktop, "GNOME") == 0) &&
+			gdk_screen_is_composited (gdk_screen_get_default())) {
 			pragha_preferences_set_gnome_style (pragha->preferences, TRUE);
 			pragha_preferences_set_show_menubar (pragha->preferences, FALSE);
 		}
