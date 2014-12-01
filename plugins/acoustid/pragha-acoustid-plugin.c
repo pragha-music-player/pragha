@@ -96,7 +96,7 @@ pragha_acoustid_plugin_get_metadata_action (GtkAction *action, PraghaAcoustidPlu
 }
 
 static const GtkActionEntry main_menu_actions [] = {
-	{"Search metadata", NULL, N_("Search Metadata"),
+	{"Search metadata", NULL, N_("Search tags on AcoustID"),
 	 "", "Search metadata", G_CALLBACK(pragha_acoustid_plugin_get_metadata_action)}
 };
 
@@ -423,7 +423,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	g_signal_connect (G_OBJECT (action), "activate",
 	                  G_CALLBACK (pragha_gmenu_search_metadata_action), plugin);
 
-	item = g_menu_item_new (_("Search Metadata"), "win.search-metadata");
+	item = g_menu_item_new (_("Search tags on AcoustID"), "win.search-metadata");
 
 	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 

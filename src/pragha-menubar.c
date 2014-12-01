@@ -271,8 +271,8 @@ static GtkToggleActionEntry toggles_entries[] = {
 	{"Playback controls below", NULL, N_("Playback controls below"),
 	 NULL, "Show playback controls below", G_CALLBACK(show_controls_below_action),
 	FALSE},
-	{"Show menubar", NULL, N_("Show menubar"),
-	 "<Control>M", "Show Menubar", NULL,
+	{"Show menubar", NULL, N_("Menubar"),
+	 "<Control>M", "Show menubar", NULL,
 	TRUE},
 	{"Status bar", NULL, N_("Status bar"),
 	 "", "Status bar", NULL,
@@ -1426,7 +1426,7 @@ static GActionEntry win_entries[] = {
 	/* View Submenu */
 	{ "sidebar1",         activate_toggle,               NULL, "false", NULL },
 	{ "sidebar2",         activate_toggle,               NULL, "false", NULL },
-	{ "show-menubar",     activate_toggle,               NULL, "true", NULL },
+	{ "menubar",          activate_toggle,               NULL, "true",  NULL },
 	{ "status-bar",       activate_toggle,               NULL, "false", NULL },
 	{ "jump-song",        pragha_gmenu_jump_to_song,     NULL, NULL,    NULL },
 	/* Tools submenu */
@@ -1474,7 +1474,7 @@ static const gchar *menu_ui = \
 		SEPARATOR \
 		NEW_ACCEL_ITEM     ("Show lateral _panel",                                    "F9",                   "win", "sidebar1") \
 		NEW_ACCEL_ITEM     ("Show secondary lateral panel",                           "&lt;Control&gt;F9",    "win", "sidebar2") \
-		NEW_ACCEL_ITEM     ("Show menubar",                                           "&lt;Control&gt;M",     "win", "show-menubar") \
+		NEW_ACCEL_ITEM     ("Show menubar",                                           "&lt;Control&gt;M",     "win", "menubar") \
 		NEW_ITEM           ("Show status bar",                                                                "win", "status-bar") \
 		SEPARATOR \
 		NEW_PLACEHOLDER("pragha-plugins-placeholder") \
@@ -1569,7 +1569,7 @@ pragha_gmenu_toolbar_new (PraghaApplication *pragha)
 	                             binding_variant_to_gboolean,
 	                             NULL,
 	                             NULL);
-	action = g_action_map_lookup_action (map, "show-menubar");
+	action = g_action_map_lookup_action (map, "menubar");
 	g_object_bind_property_full (preferences, "show-menubar",
 	                             action, "state",
 	                             binding_flags,
