@@ -1164,16 +1164,24 @@ static GtkWidget*
 pref_create_plugins_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *manager;
+	GtkWidget *view, *sw;
 	guint row = 0;
 
 	table = pragha_hig_workarea_table_new ();
 
 	pragha_hig_workarea_table_add_section_title (table, &row, _("Plugins"));
 
-	manager = peas_gtk_plugin_manager_new (peas_engine_get_default ());
+	sw = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+	                                GTK_POLICY_AUTOMATIC,
+	                                GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
+	                                     GTK_SHADOW_IN);
 
-	pragha_hig_workarea_table_add_wide_tall_control (table, &row, manager);
+	view = peas_gtk_plugin_manager_view_new (peas_engine_get_default ());
+	gtk_container_add (GTK_CONTAINER (sw), view);
+
+	pragha_hig_workarea_table_add_wide_tall_control (table, &row, sw);
 
 	return table;
 }
