@@ -461,7 +461,7 @@ pragha_preferences_need_restart (PraghaPreferences *preferences)
 }
 
 /**
- * pragha_preferences_get_filename_list:
+ * pragha_preferences_get_library_list:
  *
  */
 GSList *
@@ -475,7 +475,7 @@ pragha_preferences_get_library_list (PraghaPreferences *preferences)
 }
 
 /**
- * pragha_preferences_set_filename_list:
+ * pragha_preferences_set_library_list:
  *
  */
 void

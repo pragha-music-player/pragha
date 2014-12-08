@@ -109,11 +109,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 
-	library_dir =
-		pragha_preferences_get_filename_list (preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_DIR);
-
+	library_dir = pragha_preferences_get_library_list (preferences);
 	if (!is_present_str_list (mount_path, library_dir)) {
 		library_dir = g_slist_append (library_dir, g_strdup(mount_path));
 
@@ -128,6 +124,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 	pragha_scanner_update_library (scanner);
 
 	g_object_unref (mount_point);
+	free_str_list(library_dir);
 	g_free (mount_path);
 }
 
@@ -142,11 +139,7 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 
-	library_dir =
-		pragha_preferences_get_filename_list (preferences,
-		                                      GROUP_LIBRARY,
-		                                      KEY_LIBRARY_DIR);
-
+	library_dir = pragha_preferences_get_library_list (preferences);
 	if (is_present_str_list (priv->mount_path, library_dir)) {
 		library_dir = delete_from_str_list (priv->mount_path, library_dir);
 
@@ -158,6 +151,7 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 		scanner = pragha_application_get_scanner (priv->pragha);
 		pragha_scanner_update_library (scanner);
 	}
+	free_str_list(library_dir);
 }
 
 /*

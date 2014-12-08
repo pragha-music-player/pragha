@@ -299,10 +299,9 @@ pragha_preferences_dialog_restore_changes (PreferencesDialog *dialog)
 	/*
 	 * Collection settings.
 	 */
-	library_list = pragha_preferences_get_filename_list (dialog->preferences,
-	                                                     GROUP_LIBRARY,
-	                                                     KEY_LIBRARY_SCANNED);
+	library_list = pragha_preferences_get_library_list (dialog->preferences);
 	pragha_preferences_dialog_set_library_list(dialog, library_list);
+	free_str_list(library_list);
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w),
 		pragha_preferences_get_fuse_folders(dialog->preferences));
@@ -850,8 +849,10 @@ pragha_preferences_dialog_init_settings(PreferencesDialog *dialog)
 	/* Lbrary Options */
 
 	library_dir = pragha_preferences_get_library_list (dialog->preferences);
-	if (library_dir)
+	if (library_dir) {
 		pragha_preferences_dialog_set_library_list(dialog, library_dir);
+		free_str_list(library_dir);
+	}
 
 	if (pragha_preferences_get_fuse_folders(dialog->preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dialog->fuse_folders_w), TRUE);
@@ -1210,6 +1211,12 @@ pragha_preferences_dialog_disconnect_handler (PreferencesDialog *dialog,
 void
 pragha_preferences_dialog_show (PreferencesDialog *dialog)
 {
+	GSList *library_list = NULL;
+	if (string_is_empty (pragha_preferences_get_installed_version (dialog->preferences))) {
+		library_list = pragha_preferences_get_library_list (dialog->preferences);
+		pragha_preferences_dialog_set_library_list (dialog, library_list);
+		free_str_list(library_list);
+	}
 	gtk_notebook_set_current_page (GTK_NOTEBOOK(dialog->notebook), 0);
 	gtk_widget_show (dialog->widget);
 }

@@ -1747,11 +1747,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 	GtkTreeIter iter, *f_iter;
 	GSList *list = NULL, *library_dir = NULL;
 
-	library_dir =
-		pragha_preferences_get_filename_list(clibrary->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_DIR);
-
+	library_dir = pragha_preferences_get_library_list (clibrary->preferences);
 	for(list = library_dir ; list != NULL ; list=list->next) {
 		/*If no need to fuse folders, add headers and set p_iter */
 		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {

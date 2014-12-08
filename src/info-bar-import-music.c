@@ -56,6 +56,10 @@ static void info_bar_response_cb(GtkInfoBar *info_bar, gint response_id, gpointe
 			                                      GROUP_LIBRARY,
 			                                      KEY_LIBRARY_DIR,
 			                                      library_dir);
+			pragha_preferences_set_filename_list (preferences,
+			                                      GROUP_LIBRARY,
+			                                      KEY_LIBRARY_SCANNED,
+			                                      library_dir);
 			free_str_list(library_dir);
 
 			scanner = pragha_application_get_scanner (pragha);
