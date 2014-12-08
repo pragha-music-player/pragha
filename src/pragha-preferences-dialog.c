@@ -403,7 +403,7 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 	gchar *window_state_sink = NULL;
 	const gchar *album_art_pattern;
 	gboolean show_album_art, instant_search, approximate_search, restore_playlist, add_recursively, use_hint;
-	gboolean test_change, pref_setted, pref_toggled;
+	gboolean test_change, pref_setted, pref_toggled, library_locked;
 #if GTK_CHECK_VERSION (3, 12, 0)
 	gboolean gnome_style;
 #endif
@@ -455,7 +455,9 @@ pragha_preferences_dialog_accept_changes (PreferencesDialog *dialog)
 		                                      GROUP_LIBRARY,
 		                                      KEY_LIBRARY_SCANNED);
 
-	if (folder_scanned || library_dir) {
+	library_locked = pragha_preferences_get_lock_library (dialog->preferences);
+
+	if ((folder_scanned || library_dir) && (library_locked == FALSE)) {
 		test_change = FALSE;
 		for (list = folder_scanned; list != NULL; list = list->next) {
 			if (is_present_str_list(list->data, library_dir))
@@ -942,8 +944,8 @@ static GtkWidget*
 pref_create_library_page (PreferencesDialog *dialog)
 {
 	GtkWidget *table;
-	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, *library_remove, \
-		  *hbox_library, *fuse_folders, *sort_by_year;
+	GtkWidget *library_view, *library_view_scroll, *library_bbox_align, *library_bbox, *library_add, \
+		*library_remove, *hbox_library, *fuse_folders, *sort_by_year, *infobar, *label;
 	GtkListStore *library_store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -953,6 +955,12 @@ pref_create_library_page (PreferencesDialog *dialog)
 	table = pragha_hig_workarea_table_new();
 
 	pragha_hig_workarea_table_add_section_title(table, &row, _("Library"));
+
+	infobar = gtk_info_bar_new ();
+	gtk_info_bar_set_message_type (GTK_INFO_BAR (infobar), GTK_MESSAGE_INFO);
+	label = gtk_label_new (_("Can not change directories while they are analyzing."));
+	gtk_box_pack_start (GTK_BOX (gtk_info_bar_get_content_area (GTK_INFO_BAR (infobar))), label, FALSE, FALSE, 0);
+	pragha_hig_workarea_table_add_wide_control(table, &row, infobar);
 
 	hbox_library = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
@@ -1010,12 +1018,20 @@ pref_create_library_page (PreferencesDialog *dialog)
 
 	/* Setup signal handlers */
 
-	g_signal_connect(G_OBJECT(library_add), "clicked",
-			 G_CALLBACK(library_add_cb), dialog);
-	g_signal_connect(G_OBJECT(library_remove), "clicked",
-			 G_CALLBACK(library_remove_cb), dialog);
+	g_signal_connect (G_OBJECT(library_add), "clicked",
+	                  G_CALLBACK(library_add_cb), dialog);
+	g_signal_connect (G_OBJECT(library_remove), "clicked",
+	                  G_CALLBACK(library_remove_cb), dialog);
 	g_signal_connect (G_OBJECT (library_view), "key_press_event",
-			  G_CALLBACK(library_view_key_press), dialog);
+	                  G_CALLBACK(library_view_key_press), dialog);
+
+	g_object_bind_property (dialog->preferences, "lock-library",
+	                        hbox_library, "sensitive",
+	                        G_BINDING_INVERT_BOOLEAN);
+
+	g_object_bind_property (dialog->preferences, "lock-library",
+	                        infobar, "visible",
+	                        G_BINDING_SYNC_CREATE | G_BINDING_DEFAULT);
 
 	return table;
 }
@@ -1277,6 +1293,9 @@ pragha_preferences_dialog_new (GtkWidget *parent)
 	library_vbox = pref_create_library_page(dialog);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pref_notebook), library_vbox, label_library);
 	gtk_widget_show_all (library_vbox);
+
+	/* Fose hide infobar */
+	pragha_preferences_set_lock_library (dialog->preferences, FALSE);
 
 	dialog->audio_tab = pragha_preferences_tab_new (_("Audio"));
 	#ifndef G_OS_WIN32

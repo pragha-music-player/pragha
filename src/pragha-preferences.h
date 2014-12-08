@@ -462,6 +462,13 @@ void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
 
+gboolean
+pragha_preferences_get_lock_library (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_lock_library (PraghaPreferences *preferences,
+                                     gboolean           lock_library);
+
 G_END_DECLS
 
 #endif /* PRAGHA_PREFERENCES_H */

@@ -82,6 +82,9 @@ struct _PraghaPreferencesPrivate
 	gboolean   hide_instead_close;
 	/* Services preferences */
 	gboolean   use_cddb;
+
+	/* Properties without backup. */
+	gboolean   lock_library;
 };
 
 enum
@@ -120,6 +123,7 @@ enum
 	PROP_TIMER_REMAINING_MODE,
 	PROP_HIDE_INSTEAD_CLOSE,
 	PROP_USE_CDDB,
+	PROP_LOCK_LIBRARY,
 	LAST_PROP
 };
 static GParamSpec *gParamSpecs[LAST_PROP];
@@ -1422,6 +1426,33 @@ pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
 	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_USE_CDDB]);
 }
 
+/**
+ * pragha_preferences_get_lock_library:
+ *
+ */
+gboolean
+pragha_preferences_get_lock_library (PraghaPreferences *preferences)
+{
+	g_return_val_if_fail(PRAGHA_IS_PREFERENCES(preferences), TRUE);
+
+	return preferences->priv->lock_library;
+}
+
+/**
+ * pragha_preferences_set_lock_library:
+ *
+ */
+void
+pragha_preferences_set_lock_library (PraghaPreferences *preferences,
+                                     gboolean           lock_library)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	preferences->priv->lock_library = lock_library;
+
+	g_object_notify_by_pspec(G_OBJECT(preferences), gParamSpecs[PROP_LOCK_LIBRARY]);
+}
+
 static void
 pragha_preferences_load_from_file(PraghaPreferences *preferences)
 {
@@ -2220,6 +2251,9 @@ pragha_preferences_get_property (GObject *object,
 		case PROP_USE_CDDB:
 			g_value_set_boolean (value, pragha_preferences_get_use_cddb(preferences));
 			break;
+		case PROP_LOCK_LIBRARY:
+			g_value_set_boolean (value, pragha_preferences_get_lock_library(preferences));
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -2332,6 +2366,9 @@ pragha_preferences_set_property (GObject *object,
 			break;
 		case PROP_USE_CDDB:
 			pragha_preferences_set_use_cddb(preferences, g_value_get_boolean(value));
+			break;
+		case PROP_LOCK_LIBRARY:
+			pragha_preferences_set_lock_library(preferences, g_value_get_boolean(value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -2734,6 +2771,17 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                     "UseCddb",
 		                     "Use Cddb Preference",
 		                      TRUE,
+		                      PRAGHA_PREF_PARAMS);
+
+	/**
+	  * PraghaPreferences:use_cddb:
+	  *
+	  */
+	gParamSpecs[PROP_LOCK_LIBRARY] =
+		g_param_spec_boolean("lock-library",
+		                     "LockLibrary",
+		                     "Lock Library Changes",
+		                      FALSE,
 		                      PRAGHA_PREF_PARAMS);
 
 	g_object_class_install_properties(object_class, LAST_PROP, gParamSpecs);
