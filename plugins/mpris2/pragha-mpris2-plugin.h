@@ -21,7 +21,6 @@
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
 
-#include "src/pragha.h"
 #include "src/pragha-plugin-object.h"
 
 G_BEGIN_DECLS
@@ -40,7 +39,7 @@ G_BEGIN_DECLS
 typedef struct _PraghaMpris2PluginPrivate PraghaMpris2PluginPrivate;
 
 struct _PraghaMpris2PluginPrivate {
-	PraghaPluginObject *object;;
+	PraghaPluginObject *object;
 
 	guint              owner_id;
 	GDBusNodeInfo     *introspection_data;
@@ -48,7 +47,7 @@ struct _PraghaMpris2PluginPrivate {
 	GQuark             interface_quarks[N_OBJECTS];
 	guint              registration_object_ids[N_OBJECTS];
 
-	gboolean           saved_playbackstatus;
+	gboolean           saved_loopstatus;
 	gboolean           saved_shuffle;
 	gchar             *saved_title;
 	gdouble            volume;

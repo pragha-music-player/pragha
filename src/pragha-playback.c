@@ -91,6 +91,53 @@ void pragha_playback_play_pause_resume(PraghaApplication *pragha)
 	}
 }
 
+/* Start playback of a new track, or resume playback of current track */
+
+void pragha_playback_play (PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+	PraghaPlaylist *playlist;
+
+	CDEBUG(DBG_BACKEND, "Play a track");
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) == ST_STOPPED)
+		return;
+
+	playlist = pragha_application_get_playlist (pragha);
+	pragha_playlist_go_any_track (playlist);
+}
+
+/* Start playback of a new track, or resume playback of current track */
+
+void pragha_playback_pause (PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+
+	CDEBUG(DBG_BACKEND, "Pause a track");
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) != ST_PLAYING)
+		return;
+
+	pragha_backend_pause (backend);
+}
+
+/* Start playback of a new track, or resume playback of current track */
+
+void pragha_playback_resume(PraghaApplication *pragha)
+{
+	PraghaBackend *backend;
+
+	CDEBUG(DBG_BACKEND, "Resume a track");
+
+	backend = pragha_application_get_backend (pragha);
+	if (pragha_backend_get_state (backend) != ST_PAUSED)
+		return;
+
+	pragha_backend_resume (backend);
+}
+
 /* Stop the playback */
 
 void pragha_playback_stop(PraghaApplication *pragha)

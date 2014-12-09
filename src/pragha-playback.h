@@ -27,8 +27,12 @@ void pragha_playback_set_playlist_track   (PraghaPlaylist *playlist, PraghaMusic
 
 void pragha_playback_prev_track           (PraghaApplication *pragha);
 void pragha_playback_play_pause_resume    (PraghaApplication *pragha);
+void pragha_playback_play                 (PraghaApplication *pragha);
+void pragha_playback_pause                (PraghaApplication *pragha);
+void pragha_playback_resume               (PraghaApplication *pragha);
 void pragha_playback_stop                 (PraghaApplication *pragha);
 void pragha_playback_next_track           (PraghaApplication *pragha);
+
 void pragha_advance_playback              (PraghaApplication *pragha);
 
 void pragha_backend_finished_song         (PraghaBackend *backend, PraghaApplication *pragha);

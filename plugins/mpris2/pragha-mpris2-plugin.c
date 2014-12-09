@@ -278,12 +278,7 @@ mpris_Player_Play (GDBusMethodInvocation *invocation,
                    GVariant              *parameters,
                    PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume (pragha_plugin_object_get_pragha(plugin->priv->object));
-
+	pragha_plugin_object_playback_play_pause_resume (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -292,12 +287,7 @@ mpris_Player_Next (GDBusMethodInvocation *invocation,
                    GVariant              *parameters,
                    PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track (pragha_plugin_object_get_pragha(plugin->priv->object));
-
+	pragha_plugin_object_playback_next (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -306,12 +296,7 @@ mpris_Player_Previous (GDBusMethodInvocation *invocation,
                        GVariant              *parameters,
                        PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track (pragha_plugin_object_get_pragha(plugin->priv->object));
-
+	pragha_plugin_object_playback_prev (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -320,12 +305,7 @@ mpris_Player_Pause (GDBusMethodInvocation *invocation,
                     GVariant              *parameters,
                     PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_backend_pause (backend);
-
+	pragha_plugin_object_playback_pause (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -334,12 +314,7 @@ mpris_Player_PlayPause (GDBusMethodInvocation *invocation,
                         GVariant              *parameters,
                         PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume (pragha_plugin_object_get_pragha(plugin->priv->object));
-
+	pragha_plugin_object_playback_play_pause_resume (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -348,12 +323,7 @@ mpris_Player_Stop (GDBusMethodInvocation *invocation,
                    GVariant              *parameters,
                    PraghaMpris2Plugin    *plugin)
 {
-	PraghaBackend *backend;
-
-	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop (pragha_plugin_object_get_pragha(plugin->priv->object));
-
+	pragha_plugin_object_playback_stop (plugin->priv->object);
 	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
@@ -493,11 +463,8 @@ mpris_Player_get_PlaybackStatus (GError **error, PraghaMpris2Plugin *plugin)
 static GVariant *
 mpris_Player_get_LoopStatus (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaPreferences *preferences;
 	gboolean repeat;
-
-	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(plugin->priv->object));
-	repeat = pragha_preferences_get_repeat (preferences);
+	repeat = pragha_plugin_object_playback_get_repeat (plugin->priv->object);
 
 	return g_variant_new_string(repeat ? "Playlist" : "None");
 }
@@ -507,14 +474,11 @@ mpris_Player_put_LoopStatus (GVariant            *value,
                              GError             **error,
                              PraghaMpris2Plugin  *plugin)
 {
-	PraghaPreferences *preferences;
-
 	const gchar *new_loop = g_variant_get_string(value, NULL);
 
 	gboolean repeat = g_strcmp0("Playlist", new_loop) ? FALSE : TRUE;
 
-	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(plugin->priv->object));
-	pragha_preferences_set_repeat (preferences, repeat);
+	pragha_plugin_object_playback_set_repeat (plugin->priv->object, repeat);
 }
 
 static GVariant *
@@ -532,11 +496,8 @@ mpris_Player_put_Rate (GVariant *value, GError **error, PraghaMpris2Plugin *plug
 static GVariant *
 mpris_Player_get_Shuffle (GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaPreferences *preferences;
 	gboolean shuffle;
-
-	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(plugin->priv->object));
-	shuffle = pragha_preferences_get_shuffle (preferences);
+	shuffle = pragha_plugin_object_playback_get_shuffle (plugin->priv->object);
 
 	return g_variant_new_boolean(shuffle);
 }
@@ -544,11 +505,8 @@ mpris_Player_get_Shuffle (GError **error, PraghaMpris2Plugin *plugin)
 static void
 mpris_Player_put_Shuffle (GVariant *value, GError **error, PraghaMpris2Plugin *plugin)
 {
-	PraghaPreferences *preferences;
 	gboolean shuffle = g_variant_get_boolean(value);
-
-	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(plugin->priv->object));
-	pragha_preferences_set_shuffle (preferences, shuffle);
+	pragha_plugin_object_playback_set_shuffle (plugin->priv->object, shuffle);
 }
 
 static GVariant *
@@ -1248,9 +1206,9 @@ pragha_mpris_update_any (PraghaMpris2Plugin *plugin)
 		g_variant_builder_add (&b, "{sv}", "PlaybackStatus", mpris_Player_get_PlaybackStatus (NULL, plugin));
 	}
 	repeat = pragha_preferences_get_repeat (preferences);
-	if (plugin->priv->saved_playbackstatus != repeat) {
+	if (plugin->priv->saved_loopstatus != repeat) {
 		change_detected = TRUE;
-		plugin->priv->saved_playbackstatus = repeat;
+		plugin->priv->saved_loopstatus = repeat;
 		g_variant_builder_add (&b, "{sv}", "LoopStatus", mpris_Player_get_LoopStatus (NULL, plugin));
 	}
 	curr_vol = pragha_backend_get_volume (backend);
@@ -1482,7 +1440,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	CDEBUG(DBG_PLUGIN, "Mpris2 plugin %s", G_STRFUNC);
 
 	priv->saved_shuffle = FALSE;
-	priv->saved_playbackstatus = FALSE;
+	priv->saved_loopstatus = FALSE;
 	priv->saved_title = NULL;
 	priv->volume = 0;
 

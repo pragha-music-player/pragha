@@ -44,36 +44,22 @@ static void
 on_media_player_key_pressed (PraghaGnomeMediaKeysPlugin *plugin,
                              const gchar                *key)
 {
-	PraghaBackend *backend;
-	PraghaPreferences *preferences;
-
-	PraghaApplication *pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
-
-	backend = pragha_application_get_backend (pragha);
-	preferences = pragha_application_get_preferences (pragha);
-
-	if (pragha_backend_emitted_error (backend))
-		return;
+	PraghaGnomeMediaKeysPluginPrivate *priv = plugin->priv;
 
 	if (g_strcmp0("Play", key) == 0)
-		pragha_playback_play_pause_resume(pragha);
+		pragha_plugin_object_playback_play_pause_resume(priv->object);
 	else if (g_strcmp0("Pause", key) == 0)
-		pragha_backend_pause (backend);
+		pragha_plugin_object_playback_pause(priv->object);
 	else if (g_strcmp0("Stop", key) == 0)
-		pragha_playback_stop(pragha);
+		pragha_plugin_object_playback_stop(priv->object);
 	else if (g_strcmp0("Previous", key) == 0)
-		pragha_playback_prev_track(pragha);
+		pragha_plugin_object_playback_prev(priv->object);
 	else if (g_strcmp0("Next", key) == 0)
-		pragha_playback_next_track(pragha);
-	else if (g_strcmp0("Repeat", key) == 0) {
-		gboolean repeat = pragha_preferences_get_repeat (preferences);
-		pragha_preferences_set_repeat (preferences, !repeat);
-	}
-	else if (g_strcmp0("Shuffle", key) == 0) {
-		gboolean shuffle = pragha_preferences_get_shuffle (preferences);
-		pragha_preferences_set_shuffle (preferences, !shuffle);
-	}
-
+		pragha_plugin_object_playback_next(priv->object);
+	else if (g_strcmp0("Repeat", key) == 0)
+		pragha_plugin_object_playback_toggle_repeat (priv->object);
+	else if (g_strcmp0("Shuffle", key) == 0)
+		pragha_plugin_object_playback_toggle_shuffle (priv->object);
 	//XXX missed buttons: "Rewind" and "FastForward"
 }
 

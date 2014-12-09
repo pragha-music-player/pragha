@@ -29,9 +29,9 @@
 #include <libpeas-gtk/peas-gtk.h>
 
 #include "pragha-keybinder-plugin.h"
+#include "src/pragha-plugin-object.h"
 
 #include "src/pragha.h"
-#include "src/pragha-playback.h"
 #include "src/pragha-window.h"
 
 #include "plugins/pragha-plugin-macros.h"
@@ -43,49 +43,29 @@ PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_KEYBINDER_PLUGIN,
 static void
 keybind_prev_handler (const char *keystring, gpointer data)
 {
-	PraghaBackend *backend;
-	PraghaApplication *pragha = data;
-
-	backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_prev_track(pragha);
+	PraghaPluginObject *object = data;
+	pragha_plugin_object_playback_prev(object);
 }
 
 static void
 keybind_play_handler (const char *keystring, gpointer data)
 {
-	PraghaBackend *backend;
-	PraghaApplication *pragha = data;
-
-	backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_play_pause_resume(pragha);
+	PraghaPluginObject *object = data;
+	pragha_plugin_object_playback_play_pause_resume(object);
 }
 
 static void
 keybind_stop_handler (const char *keystring, gpointer data)
 {
-	PraghaBackend *backend;
-	PraghaApplication *pragha = data;
-
-	backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_stop(pragha);
+	PraghaPluginObject *object = data;
+	pragha_plugin_object_playback_stop(object);
 }
 
 static void
 keybind_next_handler (const char *keystring, gpointer data)
 {
-	PraghaBackend *backend;
-	PraghaApplication *pragha = data;
-
-	backend = pragha_application_get_backend (pragha);
-
-	if (pragha_backend_emitted_error (backend) == FALSE)
-		pragha_playback_next_track(pragha);
+	PraghaPluginObject *object = data;
+	pragha_plugin_object_playback_next(object);
 }
 
 static void
