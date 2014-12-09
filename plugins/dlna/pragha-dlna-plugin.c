@@ -40,6 +40,7 @@
 #include <libpeas-gtk/peas-gtk.h>
 
 #include "pragha-dlna-plugin.h"
+#include "src/pragha-plugin-object.h"
 
 #include "src/pragha.h"
 #include "src/pragha-utils.h"
@@ -51,7 +52,7 @@
 typedef struct _PraghaDlnaPluginPrivate PraghaDlnaPluginPrivate;
 
 struct _PraghaDlnaPluginPrivate {
-	PraghaApplication    *pragha;
+	PraghaPluginObject   *object;
 
     RygelMediaServer     *server;
     RygelSimpleContainer *container;
@@ -118,9 +119,9 @@ pragha_dlna_plugin_share_library (PraghaDlnaPlugin *plugin)
 
 	/* Query and insert entries */
 
-	set_watch_cursor (pragha_application_get_window(priv->pragha));
+	set_watch_cursor (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 
-	cdbase = pragha_application_get_database (priv->pragha);
+	cdbase = pragha_application_get_database (pragha_plugin_object_get_pragha(priv->object));
 
 	const gchar *sql = "SELECT id FROM LOCATION";
 	PraghaPreparedStatement *statement = pragha_database_create_statement (cdbase, sql);
@@ -136,7 +137,7 @@ pragha_dlna_plugin_share_library (PraghaDlnaPlugin *plugin)
 	}
 	pragha_prepared_statement_free (statement);
 
-	remove_watch_cursor (pragha_application_get_window(priv->pragha));
+	remove_watch_cursor (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 }
 
 static void
@@ -162,9 +163,9 @@ pragha_dlna_plugin_share_playlist (PraghaDlnaPlugin *plugin)
 
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 
-	set_watch_cursor (pragha_application_get_window(priv->pragha));
+	set_watch_cursor (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 
 	list = pragha_playlist_get_mobj_list (playlist);
 	for (i = list; i != NULL; i = i->next) {
@@ -179,7 +180,7 @@ pragha_dlna_plugin_share_playlist (PraghaDlnaPlugin *plugin)
 		pragha_process_gtk_events ();
 	}
 
-	remove_watch_cursor (pragha_application_get_window(priv->pragha));
+	remove_watch_cursor (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 }
 
 static void
@@ -207,7 +208,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaDlnaPlugin *plugin = PRAGHA_DLNA_PLUGIN (activatable);
 
 	PraghaDlnaPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
@@ -232,11 +233,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	}
 	freeifaddrs (addrs);
 
-	cdbase = pragha_application_get_database (priv->pragha);
+	cdbase = pragha_application_get_database (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_connect (cdbase, "TracksChanged",
 		              G_CALLBACK(pragha_dlna_plugin_database_changed), plugin);
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_connect (playlist, "playlist-changed",
 		              G_CALLBACK(pragha_dlna_plugin_playlist_changed), plugin);
 
@@ -258,12 +259,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "DLNA plugin %s", G_STRFUNC);
 
-	cdbase = pragha_application_get_database (priv->pragha);
+	cdbase = pragha_application_get_database (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_handlers_disconnect_by_func (cdbase,
 	                                      pragha_dlna_plugin_database_changed,
 	                                      plugin);
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_handlers_disconnect_by_func (playlist,
 	                                      pragha_dlna_plugin_playlist_changed,
 	                                      plugin);
@@ -272,4 +273,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_object_unref (priv->container);
 	g_object_unref (priv->server);
+
+	plugin->priv->object = NULL;
 }

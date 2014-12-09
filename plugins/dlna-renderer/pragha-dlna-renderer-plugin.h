@@ -21,8 +21,6 @@
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
 
-#include "src/pragha.h"
-
 G_BEGIN_DECLS
 
 #define PRAGHA_TYPE_DLNA_RENDERER_PLUGIN         (pragha_dlna_renderer_plugin_get_type ())

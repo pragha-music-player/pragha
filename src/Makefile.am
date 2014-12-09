@@ -124,6 +124,8 @@ endif
 
 if HAVE_LIBPEAS
 pragha_SOURCES = \
+		pragha-plugin-object.c \
+		pragha-plugin-object.h \
 		pragha-plugins-engine.c \
 		pragha-plugins-engine.h
 

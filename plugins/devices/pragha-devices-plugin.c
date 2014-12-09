@@ -37,6 +37,7 @@
 
 #include "pragha-device-client.h"
 #include "pragha-devices-plugin.h"
+#include "src/pragha-plugin-object.h"
 
 #include "src/pragha-utils.h"
 #include "src/pragha.h"
@@ -49,7 +50,7 @@
 #define PRAGHA_DEVICES_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_DEVICES_PLUGIN, PraghaDevicesPluginClass))
 
 struct _PraghaDevicesPluginPrivate {
-	PraghaApplication  *pragha;
+	PraghaPluginObject *object;
 
 	PraghaDeviceClient *device_client;
 	GUdevClient        *gudev_client;
@@ -245,7 +246,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Devices plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	priv->device_client = pragha_device_client_get ();
 
@@ -268,5 +269,5 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_object_unref (priv->device_client);
 
-	priv->pragha = NULL;
+	priv->object = NULL;
 }

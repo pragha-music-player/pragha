@@ -49,6 +49,7 @@
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-window.h"
 #include "src/pragha-hig.h"
+#include "src/pragha-plugin-object.h"
 #include "src/pragha.h"
 
 #define PRAGHA_TYPE_MTP_PLUGIN         (pragha_mtp_plugin_get_type ())
@@ -61,7 +62,7 @@
 typedef struct _PraghaMtpPluginPrivate PraghaMtpPluginPrivate;
 
 struct _PraghaMtpPluginPrivate {
-	PraghaApplication  *pragha;
+	PraghaPluginObject *object;
 
 	guint64             bus_hooked;
 	guint64             device_hooked;
@@ -186,7 +187,7 @@ pragha_mtp_plugin_append_cache (PraghaMtpPlugin *plugin)
 		pragha_process_gtk_events ();
 	}
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	pragha_playlist_append_mobj_list (playlist, list);
 	g_list_free(list);
 }
@@ -229,7 +230,7 @@ pragha_mtp_action_send_to_device (GtkAction *action, PraghaMtpPlugin *plugin)
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
 
 	if (!mobj)
@@ -289,7 +290,7 @@ pragha_mtp_action_show_device_info (GtkAction *action, PraghaMtpPlugin *plugin)
 		friend_label = LIBMTP_Get_Modelname (priv->mtp_device);
 
 	dialog = gtk_dialog_new_with_buttons (friend_label,
-	                                      GTK_WINDOW(pragha_application_get_window (priv->pragha)),
+	                                      GTK_WINDOW(pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object))),
 	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 	                                      _("_Ok"), GTK_RESPONSE_OK,
 	                                      NULL);
@@ -360,20 +361,20 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	action = gtk_action_group_get_action (action_group, "MtpDevice");
 	gtk_action_set_label(GTK_ACTION(action), friend_label);
 
-	priv->merge_id_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	priv->merge_id_menu = pragha_menubar_append_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                                           action_group,
 	                                                           mtp_menu_xml);
 	priv->action_group_menu = action_group;
 
 	/* Gear Menu */
 
-	pragha_menubar_append_submenu (priv->pragha, "pragha-plugins-placeholder",
+	pragha_menubar_append_submenu (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder",
 	                               mtp_menu_ui,
 	                               "mtp-sudmenu",
 	                               friend_label,
 	                               plugin);
 
-	map = G_ACTION_MAP (pragha_application_get_window(priv->pragha));
+	map = G_ACTION_MAP (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 	g_action_map_add_action_entries (G_ACTION_MAP (map),
 	                                 mtp_entries, G_N_ELEMENTS(mtp_entries),
 	                                 plugin);
@@ -391,7 +392,7 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	action = gtk_action_group_get_action (action_group, "Send to MTP");
 	gtk_action_set_label(GTK_ACTION(action), friend_label);
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
 	                                                                action_group,
 	                                                                mtp_sendto_xml);
@@ -455,7 +456,7 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 	if (!priv->merge_id_menu)
 		return;
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
+	pragha_menubar_remove_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                     priv->action_group_menu,
 	                                     priv->merge_id_menu);
 	priv->merge_id_menu = 0;
@@ -463,13 +464,13 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 	if (!priv->merge_id_playlist)
 		return;
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	pragha_playlist_remove_plugin_action (playlist,
 	                                      priv->action_group_playlist,
 	                                      priv->merge_id_playlist);
 	priv->merge_id_playlist = 0;
 
-	pragha_menubar_remove_by_id (priv->pragha,
+	pragha_menubar_remove_by_id (pragha_plugin_object_get_pragha(priv->object),
 	                             "pragha-plugins-placeholder",
 	                             "mtp-sudmenu");
 }
@@ -671,14 +672,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Mtp plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	priv->tracks_table = g_hash_table_new_full (g_str_hash,
 	                                            g_str_equal,
 	                                            g_free,
 	                                            g_object_unref);
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_connect (backend, "prepare-source",
 	                  G_CALLBACK(pragha_mtp_plugin_prepare_source), plugin);
 	g_signal_connect (backend, "clean-source",
@@ -707,7 +708,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_hash_table_destroy (priv->tracks_table);
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_prepare_source, plugin);
 	g_signal_handlers_disconnect_by_func (backend, pragha_mtp_plugin_clean_source, plugin);
 
@@ -715,5 +716,5 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                          G_CALLBACK(pragha_mtp_plugin_device_removed),
 	                                          plugin);
 
-	priv->pragha = NULL;
+	priv->object = NULL;
 }

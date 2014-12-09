@@ -102,22 +102,24 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (activatable);
 
 	PraghaKeybinderPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	keybinder_init ();
 
 	CDEBUG(DBG_PLUGIN, "Keybinder plugin %s", G_STRFUNC);
 
-	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, priv->pragha);
-	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, priv->pragha);
-	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, priv->pragha);
-	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, priv->pragha);
-	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, priv->pragha);
+	keybinder_bind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler, pragha_plugin_object_get_pragha(priv->object));
+	keybinder_bind("XF86AudioStop", (KeybinderHandler) keybind_stop_handler, pragha_plugin_object_get_pragha(priv->object));
+	keybinder_bind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler, pragha_plugin_object_get_pragha(priv->object));
+	keybinder_bind("XF86AudioNext", (KeybinderHandler) keybind_next_handler, pragha_plugin_object_get_pragha(priv->object));
+	keybinder_bind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler, pragha_plugin_object_get_pragha(priv->object));
 }
 
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaKeybinderPlugin *plugin = PRAGHA_KEYBINDER_PLUGIN (activatable);
+
 	CDEBUG(DBG_PLUGIN, "Keybinder plugin %s", G_STRFUNC);
 
 	keybinder_unbind("XF86AudioPlay", (KeybinderHandler) keybind_play_handler);
@@ -125,4 +127,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	keybinder_unbind("XF86AudioPrev", (KeybinderHandler) keybind_prev_handler);
 	keybinder_unbind("XF86AudioNext", (KeybinderHandler) keybind_next_handler);
 	keybinder_unbind("XF86AudioMedia", (KeybinderHandler) keybind_media_handler);
+
+	plugin->priv->object = NULL;
 }

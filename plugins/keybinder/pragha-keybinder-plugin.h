@@ -22,6 +22,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-plugin-object.h"
 
 G_BEGIN_DECLS
 
@@ -35,7 +36,7 @@ G_BEGIN_DECLS
 typedef struct _PraghaKeybinderPluginPrivate PraghaKeybinderPluginPrivate;
 
 struct _PraghaKeybinderPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaPluginObject *object;
 };
 
 GType                 pragha_keybinder_plugin_get_type        (void) G_GNUC_CONST;

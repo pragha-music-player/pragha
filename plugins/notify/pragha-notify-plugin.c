@@ -39,6 +39,7 @@
 #include "plugins/pragha-plugin-macros.h"
 
 #include "src/pragha.h"
+#include "src/pragha-plugin-object.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
@@ -56,7 +57,7 @@
 #define PRAGHA_NOTIFY_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_NOTIFY_PLUGIN, PraghaNotifyPluginClass))
 
 typedef struct {
-	PraghaApplication  *pragha;
+	PraghaPluginObject *object;
 	GtkWidget          *setting_widget;
 
 	NotifyNotification *notify;
@@ -112,7 +113,7 @@ notify_Prev_Callback (NotifyNotification *osd,
 
 	g_assert (action != NULL);
 
-	PraghaApplication *pragha = plugin->priv->pragha;
+	PraghaApplication *pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 
 	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
@@ -128,7 +129,7 @@ notify_Next_Callback (NotifyNotification *osd,
 
 	g_assert (action != NULL);
 
-	PraghaApplication *pragha = plugin->priv->pragha;
+	PraghaApplication *pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 
 	backend = pragha_application_get_backend (pragha);
 	if (pragha_backend_emitted_error (backend) == FALSE)
@@ -150,7 +151,7 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 	if (NULL == mobj)
 		return;
 
-	if (gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(priv->pragha))))
+	if (gtk_window_is_active(GTK_WINDOW (pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)))))
 		return;
 
 	const gchar *file = pragha_musicobject_get_file (mobj);
@@ -202,7 +203,7 @@ pragha_notify_plugin_show_new_track (PraghaPlaylist     *playlist,
 
 	/* Add album art if set */
 	if (priv->album_art_in_osd) {
-		toolbar = pragha_application_get_toolbar (priv->pragha);
+		toolbar = pragha_application_get_toolbar (pragha_plugin_object_get_pragha(priv->object));
 		notify_notification_set_icon_from_pixbuf (priv->notify,
 			pragha_album_art_get_pixbuf (pragha_toolbar_get_album_art(toolbar)));
 	}
@@ -291,7 +292,7 @@ pragha_notify_plugin_append_setting (PraghaNotifyPlugin *plugin)
 	priv->album_art_in_osd_w = albumart_in_osd;
 	priv->actions_in_osd_w = actions_in_osd;
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 	pragha_preferences_append_desktop_setting (dialog, table, FALSE);
 
 	/* Configure handler and settings */
@@ -306,7 +307,7 @@ pragha_notify_plugin_remove_setting (PraghaNotifyPlugin *plugin)
 	PreferencesDialog *dialog;
 	PraghaNotifyPluginPrivate *priv = plugin->priv;
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 
 	pragha_preferences_dialog_disconnect_handler (dialog,
 	                                              G_CALLBACK(pragha_notify_preferences_dialog_response),
@@ -326,11 +327,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Notify plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	notify_init (PACKAGE_NAME);
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(priv->object));
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
 	priv->actions_in_osd =
 		pragha_preferences_get_boolean (preferences,
@@ -341,7 +342,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 		                                plugin_group,
 		                                "album_art_in_osd");
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_connect (playlist, "playlist-set-track",
 	                  G_CALLBACK(pragha_notify_plugin_show_new_track), plugin);
 
@@ -362,12 +363,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	notify_uninit ();
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_handlers_disconnect_by_func (playlist,
 	                                      pragha_notify_plugin_show_new_track,
 	                                      plugin);
 
 	pragha_notify_plugin_remove_setting (plugin);
 
-	priv->pragha= NULL;
+	priv->object = NULL;
 }

@@ -47,7 +47,7 @@ on_media_player_key_pressed (PraghaGnomeMediaKeysPlugin *plugin,
 	PraghaBackend *backend;
 	PraghaPreferences *preferences;
 
-	PraghaApplication *pragha = plugin->priv->pragha;
+	PraghaApplication *pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 
 	backend = pragha_application_get_backend (pragha);
 	preferences = pragha_application_get_preferences (pragha);
@@ -204,7 +204,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	CDEBUG(DBG_PLUGIN, "Gnome-Media-Keys plugin %s", G_STRFUNC);
 
 	PraghaGnomeMediaKeysPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	plugin->priv->watch_id =
 		g_bus_watch_name (G_BUS_TYPE_SESSION,
@@ -215,7 +215,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 		                  plugin,
 		                  NULL);
 
-	window = pragha_application_get_window (plugin->priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(plugin->priv->object));
 
 	plugin->priv->handler_id =
 		g_signal_connect (G_OBJECT(window), "focus-in-event",
@@ -232,11 +232,13 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	g_bus_unwatch_name (plugin->priv->watch_id);
 
-	window = pragha_application_get_window (plugin->priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(plugin->priv->object));
 
 	if (plugin->priv->handler_id != 0)
 		g_signal_handler_disconnect (G_OBJECT(window), plugin->priv->handler_id);
 
 	if (plugin->priv->proxy != NULL)
 		g_object_unref(plugin->priv->proxy);
+
+	plugin->priv->object = NULL;
 }

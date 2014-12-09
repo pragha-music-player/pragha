@@ -36,6 +36,8 @@
 
 #include <libpeas/peas.h>
 
+#include "src/pragha-plugin-object.h"
+
 #include "src/pragha.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
@@ -58,7 +60,7 @@
 #define PRAGHA_ACOUSTID_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_ACOUSTID_PLUGIN, PraghaAcoustidPluginClass))
 
 struct _PraghaAcoustidPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaPluginObject *object;
 
 	PraghaMusicobject *mobj;
 
@@ -88,7 +90,7 @@ pragha_acoustid_plugin_get_metadata_action (GtkAction *action, PraghaAcoustidPlu
 
 	CDEBUG(DBG_PLUGIN, "Get Metadata action");
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
@@ -143,27 +145,27 @@ pragha_acoustid_dialog_response (GtkWidget            *dialog,
 
 	if (response_id == GTK_RESPONSE_HELP) {
 		nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
-		pragha_track_properties_dialog(nmobj, pragha_application_get_window(priv->pragha));
+		pragha_track_properties_dialog(nmobj, pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 		return;
 	}
 
 	if (response_id == GTK_RESPONSE_OK) {
 		changed = pragha_tags_dialog_get_changed(PRAGHA_TAGS_DIALOG(dialog));
 		if (changed) {
-			backend = pragha_application_get_backend (priv->pragha);
+			backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 
 			nmobj = pragha_tags_dialog_get_musicobject(PRAGHA_TAGS_DIALOG(dialog));
 
 			if (pragha_backend_get_state (backend) != ST_STOPPED) {
 				current_mobj = pragha_backend_get_musicobject (backend);
 				if (pragha_musicobject_compare (nmobj, current_mobj) == 0) {
-					toolbar = pragha_application_get_toolbar (priv->pragha);
+					toolbar = pragha_application_get_toolbar (pragha_plugin_object_get_pragha(priv->object));
 
 					/* Update public current song */
 					pragha_update_musicobject_change_tag (current_mobj, changed, nmobj);
 
 					/* Update current song on playlist */
-					playlist = pragha_application_get_playlist (priv->pragha);
+					playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 					pragha_playlist_update_current_track (playlist, changed, nmobj);
 
 					pragha_toolbar_set_title(toolbar, current_mobj);
@@ -199,7 +201,7 @@ pragha_acoustid_plugin_get_metadata_done (SoupSession *session,
 	PraghaAcoustidPlugin *plugin = user_data;
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object));
 	remove_watch_cursor (window);
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
@@ -351,7 +353,7 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	mobj = pragha_backend_get_musicobject (backend);
 
 	priv->mobj = pragha_musicobject_dup (mobj);
@@ -359,7 +361,7 @@ pragha_acoustid_get_metadata_dialog (PraghaAcoustidPlugin *plugin)
 	file = pragha_musicobject_get_file (mobj);
 	duration = pragha_musicobject_get_length (mobj);
 
-	window = pragha_application_get_window (priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object));
 	set_watch_cursor (window);
 
 	if (pragha_acoustid_get_fingerprint (file, &fingerprint))
@@ -385,7 +387,7 @@ backend_changed_state_cb (PraghaBackend *backend, GParamSpec *pspec, gpointer us
 	action = gtk_action_group_get_action (priv->action_group_main_menu, "Search metadata");
 	gtk_action_set_sensitive (action, state != ST_STOPPED);
 
-	window = GTK_WINDOW(pragha_application_get_window(priv->pragha));
+	window = GTK_WINDOW(pragha_application_get_window(pragha_plugin_object_get_pragha(priv->object)));
 	pragha_menubar_set_enable_action (window, "search-metadata", state != ST_STOPPED);
 }
 
@@ -401,7 +403,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaAcoustidPlugin *plugin = PRAGHA_ACOUSTID_PLUGIN (activatable);
 
 	PraghaAcoustidPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "AcustId plugin %s", G_STRFUNC);
 
@@ -414,7 +416,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              plugin);
 
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 	/* Gear Menu */
@@ -425,13 +427,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	item = g_menu_item_new (_("Search tags on AcoustID"), "win.search-metadata");
 
-	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	pragha_menubar_append_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", action, item);
 
 	/* Connect playback signals */
 
-	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+	g_signal_connect (pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object)), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), plugin);
-	backend_changed_state_cb (pragha_application_get_backend (priv->pragha), NULL, plugin);
+	backend_changed_state_cb (pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object)), NULL, plugin);
 }
 
 static void
@@ -444,15 +446,17 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	/* Disconnect playback signals */
 
-	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (priv->pragha),
+	g_signal_handlers_disconnect_by_func (pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object)),
 	                                      backend_changed_state_cb, plugin);
 
 	/* Remove menu actions */
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
+	pragha_menubar_remove_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
 
-	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-metadata");
+	pragha_menubar_remove_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", "search-metadata");
+
+	priv->object = NULL;
 }

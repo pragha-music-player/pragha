@@ -22,6 +22,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-plugin-object.h"
 
 G_BEGIN_DECLS
 
@@ -39,7 +40,7 @@ G_BEGIN_DECLS
 typedef struct _PraghaMpris2PluginPrivate PraghaMpris2PluginPrivate;
 
 struct _PraghaMpris2PluginPrivate {
-	PraghaApplication *pragha;
+	PraghaPluginObject *object;;
 
 	guint              owner_id;
 	GDBusNodeInfo     *introspection_data;

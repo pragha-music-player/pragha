@@ -48,6 +48,7 @@
 #include "pragha-song-info-thread-pane.h"
 
 #include "src/pragha.h"
+#include "src/pragha-plugin-object.h"
 #include "src/pragha-hig.h"
 #include "src/pragha-playback.h"
 #include "src/pragha-sidebar.h"
@@ -57,7 +58,7 @@
 #include "src/pragha-utils.h"
 
 struct _PraghaSongInfoPluginPrivate {
-	PraghaApplication  *pragha;
+	PraghaPluginObject *object;
 	GtkWidget          *setting_widget;
 
 	PraghaSonginfoPane *pane;
@@ -116,7 +117,7 @@ get_artist_info_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin
 
 	PraghaApplication *pragha = NULL;
 
-	pragha = plugin->priv->pragha;
+	pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 	playlist = pragha_application_get_playlist (pragha);
 
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
@@ -140,7 +141,7 @@ get_lyric_current_playlist_action (GtkAction *action, PraghaSongInfoPlugin *plug
 	const gchar *title = NULL;
 
 	PraghaApplication *pragha = NULL;
-	pragha = plugin->priv->pragha;
+	pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 
 	playlist = pragha_application_get_playlist (pragha);
 	mobj = pragha_playlist_get_selected_musicobject (playlist);
@@ -172,7 +173,7 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 
 	CDEBUG(DBG_INFO, "Get album art handler");
 
-	backend = pragha_application_get_backend (plugin->priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
 	if (pragha_backend_get_state (backend) == ST_STOPPED)
 		return;
 
@@ -183,7 +184,7 @@ related_get_album_art_handler (PraghaSongInfoPlugin *plugin)
 	if (string_is_empty(artist) || string_is_empty(album))
 		return;
 
-	art_cache = pragha_application_get_art_cache (plugin->priv->pragha);
+	art_cache = pragha_application_get_art_cache (pragha_plugin_object_get_pragha(plugin->priv->object));
 	album_art_path = pragha_art_cache_get_uri (art_cache, artist, album);
 
 	if (album_art_path)
@@ -219,7 +220,7 @@ related_get_song_info_pane_handler (PraghaSongInfoPlugin *plugin)
 
 	CDEBUG (DBG_INFO, "Get song info handler");
 
-	backend = pragha_application_get_backend (plugin->priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(plugin->priv->object));
 	if (pragha_backend_get_state (backend) == ST_STOPPED) {
 		pragha_songinfo_pane_clear_text (plugin->priv->pane);
 		return;
@@ -322,7 +323,7 @@ pragha_songinfo_plugin_get_application (PraghaSongInfoPlugin *plugin)
 {
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	return priv->pragha;
+	return pragha_plugin_object_get_pragha(priv->object);
 }
 
 /*
@@ -390,7 +391,7 @@ pragha_songinfo_plugin_append_setting (PraghaSongInfoPlugin *plugin)
 	priv->setting_widget = table;
 	priv->download_album_art_w = download_album_art_w;
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 	pragha_preferences_append_services_setting (dialog, table, FALSE);
 
 	pragha_preferences_dialog_connect_handler (dialog,
@@ -407,7 +408,7 @@ pragha_songinfo_plugin_remove_setting (PraghaSongInfoPlugin *plugin)
 	PreferencesDialog *dialog;
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 
 	pragha_preferences_dialog_disconnect_handler (dialog,
 	                                              G_CALLBACK(pragha_songinfo_preferences_dialog_response),
@@ -432,7 +433,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Song-info plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	glyr_init ();
 
@@ -450,14 +451,14 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                              G_N_ELEMENTS (playlist_actions),
 	                              plugin);
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	priv->merge_id_playlist = pragha_playlist_append_plugin_action (playlist,
 	                                                                priv->action_group_playlist,
 	                                                                playlist_xml);
 
 	/* Create the pane and attach it */
 	priv->pane = pragha_songinfo_pane_new ();
-	sidebar = pragha_application_get_second_sidebar (priv->pragha);
+	sidebar = pragha_application_get_second_sidebar (pragha_plugin_object_get_pragha(priv->object));
 	pragha_sidebar_attach_plugin (sidebar,
 		                          GTK_WIDGET (priv->pane),
 		                          pragha_songinfo_pane_get_pane_title (priv->pane),
@@ -465,11 +466,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	/* Connect signals */
 
-	g_signal_connect (pragha_application_get_backend (priv->pragha), "notify::state",
+	g_signal_connect (pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object)), "notify::state",
 	                  G_CALLBACK (backend_changed_state_cb), plugin);
-	backend_changed_state_cb (pragha_application_get_backend (priv->pragha), NULL, plugin);
+	backend_changed_state_cb (pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object)), NULL, plugin);
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(priv->object));
 
 	g_signal_connect (G_OBJECT(preferences), "notify::secondary-lateral-panel",
 	                  G_CALLBACK(pragha_songinfo_pane_visibility_changed), plugin);
@@ -494,7 +495,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaSongInfoPlugin *plugin = PRAGHA_SONG_INFO_PLUGIN (activatable);
 	PraghaSongInfoPluginPrivate *priv = plugin->priv;
 
-	pragha = plugin->priv->pragha;
+	pragha = pragha_plugin_object_get_pragha(plugin->priv->object);
 
 	CDEBUG(DBG_PLUGIN, "SongInfo plugin %s", G_STRFUNC);
 
@@ -522,7 +523,7 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	pragha_preferences_set_boolean (preferences, plugin_group, "DownloadAlbumArt", priv->download_album_art);
 	g_free (plugin_group);
 
-	sidebar = pragha_application_get_second_sidebar (priv->pragha);
+	sidebar = pragha_application_get_second_sidebar (pragha_plugin_object_get_pragha(priv->object));
 	pragha_sidebar_remove_plugin (sidebar, GTK_WIDGET(priv->pane));
 
 	pragha_songinfo_plugin_remove_setting (plugin);
@@ -531,5 +532,5 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	glyr_cleanup ();
 
-	priv->pragha = NULL;
+	priv->object = NULL;
 }

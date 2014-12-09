@@ -26,6 +26,8 @@
 #include <glib/gi18n.h>
 #endif
 
+#include "src/pragha-plugin-object.h"
+
 #include <glib.h>
 #include <glib-object.h>
 #include <gmodule.h>
@@ -62,7 +64,7 @@
 #define PRAGHA_CDROM_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_CDROM_PLUGIN, PraghaCdromPluginClass))
 
 struct _PraghaCdromPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaPluginObject *object;
 
 	GtkWidget          *device_setting_widget;
 	GtkWidget          *audio_cd_device_w;
@@ -342,7 +344,7 @@ pragha_cdrom_plugin_set_device (PraghaBackend *backend, GObject *obj, gpointer u
 
 	g_object_get (obj, "source", &source, NULL);
 	if (source) {
-		PraghaPreferences *preferences = pragha_application_get_preferences (priv->pragha);
+		PraghaPreferences *preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(priv->object));
 		const gchar *audio_cd_device = pragha_preferences_get_audio_cd_device (preferences);
 		if (audio_cd_device) {
 			g_object_set (source, "device", audio_cd_device, NULL);
@@ -380,7 +382,7 @@ pragha_cdrom_plugin_device_added_response (GtkWidget *dialog,
 
 	switch (response) {
 		case PRAGHA_DEVICE_RESPONSE_PLAY:
-			pragha_application_append_audio_cd (priv->pragha);
+			pragha_application_append_audio_cd (pragha_plugin_object_get_pragha(priv->object));
 			break;
 		case PRAGHA_DEVICE_RESPONSE_NONE:
 		default:
@@ -433,7 +435,7 @@ static void
 pragha_cdrom_plugin_append_action (GtkAction *action, PraghaCdromPlugin *plugin)
 {
 	PraghaCdromPluginPrivate *priv = plugin->priv;
-	pragha_application_append_audio_cd (priv->pragha);
+	pragha_application_append_audio_cd (pragha_plugin_object_get_pragha(priv->object));
 }
 
 static void
@@ -563,7 +565,7 @@ pragha_cdrom_plugin_append_setting (PraghaCdromPlugin *plugin)
 
 	/* Append panes */
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 	pragha_preferences_append_audio_setting (dialog,
 	                                         priv->device_setting_widget, FALSE);
 	pragha_preferences_append_services_setting (dialog,
@@ -583,7 +585,7 @@ pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
 	PreferencesDialog *dialog;
 	PraghaCdromPluginPrivate *priv = plugin->priv;
 
-	dialog = pragha_application_get_preferences_dialog (priv->pragha);
+	dialog = pragha_application_get_preferences_dialog (pragha_plugin_object_get_pragha(priv->object));
 
 	pragha_preferences_remove_audio_setting (dialog,
 	                                         priv->device_setting_widget);
@@ -612,7 +614,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN,"CDROM plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	/* Attach main menu */
 
@@ -623,13 +625,13 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              plugin);
 
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 
 	/* Systray */
 
-	status_icon = pragha_application_get_status_icon(priv->pragha);
+	status_icon = pragha_application_get_status_icon(pragha_plugin_object_get_pragha(priv->object));
 	priv->merge_id_syst_menu = pragha_systray_append_plugin_action (status_icon,
 	                                                                priv->action_group_main_menu,
 	                                                                syst_menu_xml);
@@ -643,11 +645,11 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	item = g_menu_item_new (_("Add Audio _CD"), "win.add-cdrom");
 
-	pragha_menubar_append_action (priv->pragha, "pragha-plugins-append-music", action, item);
+	pragha_menubar_append_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-append-music", action, item);
 
 	/* Connect signals */
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_connect (backend, "set-device",
 	                  G_CALLBACK(pragha_cdrom_plugin_set_device), plugin);
 	g_signal_connect (backend, "prepare-source",
@@ -679,20 +681,20 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN,"CDROM plugin %s", G_STRFUNC);
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
+	pragha_menubar_remove_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
 
-	status_icon = pragha_application_get_status_icon(priv->pragha);
+	status_icon = pragha_application_get_status_icon(pragha_plugin_object_get_pragha(priv->object));
 	pragha_systray_remove_plugin_action (status_icon,
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_syst_menu);
 	priv->merge_id_syst_menu = 0;
 
-	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-append-music", "add-cdrom");
+	pragha_menubar_remove_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-append-music", "add-cdrom");
 
-	backend = pragha_application_get_backend (priv->pragha);
+	backend = pragha_application_get_backend (pragha_plugin_object_get_pragha(priv->object));
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_set_device, plugin);
 	g_signal_handlers_disconnect_by_func (backend, pragha_cdrom_plugin_prepare_source, plugin);
 
@@ -709,4 +711,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	g_object_unref (enum_map);
 
 	libcddb_shutdown ();
+
+	priv->object = NULL;
 }

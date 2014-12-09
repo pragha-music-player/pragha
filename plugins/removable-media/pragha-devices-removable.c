@@ -41,6 +41,7 @@
 
 #include "src/pragha-playback.h"
 #include "src/pragha-utils.h"
+#include "src/pragha-plugin-object.h"
 #include "src/pragha.h"
 
 #define PRAGHA_TYPE_REMOVABLE_PLUGIN         (pragha_removable_plugin_get_type ())
@@ -53,7 +54,7 @@
 typedef struct _PraghaRemovablePluginPrivate PraghaRemovablePluginPrivate;
 
 struct _PraghaRemovablePluginPrivate {
-	PraghaApplication  *pragha;
+	PraghaPluginObject *object;
 
 	/* Gudev devie */
 	guint64             bus_hooked;
@@ -107,7 +108,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 	mount_point = g_mount_get_root (mount);
 	mount_path = g_file_get_path (mount_point);
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(priv->object));
 
 	library_dir = pragha_preferences_get_library_list (preferences);
 	if (!is_present_str_list (mount_path, library_dir)) {
@@ -120,7 +121,7 @@ pragha_block_device_add_to_library (PraghaRemovablePlugin *plugin, GMount *mount
 	}
 	priv->mount_path = g_strdup(mount_path);
 
-	scanner = pragha_application_get_scanner (priv->pragha);
+	scanner = pragha_application_get_scanner (pragha_plugin_object_get_pragha(priv->object));
 	pragha_scanner_update_library (scanner);
 
 	g_object_unref (mount_point);
@@ -137,7 +138,7 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 
 	PraghaRemovablePluginPrivate *priv = plugin->priv;
 
-	preferences = pragha_application_get_preferences (priv->pragha);
+	preferences = pragha_application_get_preferences (pragha_plugin_object_get_pragha(priv->object));
 
 	library_dir = pragha_preferences_get_library_list (preferences);
 	if (is_present_str_list (priv->mount_path, library_dir)) {
@@ -148,7 +149,7 @@ pragha_removable_drop_device_from_library (PraghaRemovablePlugin *plugin)
 		                                      KEY_LIBRARY_DIR,
 		                                      library_dir);
 
-		scanner = pragha_application_get_scanner (priv->pragha);
+		scanner = pragha_application_get_scanner (pragha_plugin_object_get_pragha(priv->object));
 		pragha_scanner_update_library (scanner);
 	}
 	free_str_list(library_dir);
@@ -369,7 +370,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "Removable plugin %s", G_STRFUNC);
 
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	pragha_devices_plugin_connect_signals (G_CALLBACK(pragha_removable_plugin_device_added),
 	                                       G_CALLBACK(pragha_removable_plugin_device_removed),
@@ -388,5 +389,5 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                          G_CALLBACK(pragha_removable_plugin_device_removed),
 	                                          plugin);
 
-	priv->pragha = NULL;
+	priv->object = NULL;
 }

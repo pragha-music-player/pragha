@@ -35,6 +35,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-plugin-object.h"
 #include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-playlists-mgmt.h"
@@ -54,7 +55,7 @@
 #define PRAGHA_TUNEIN_PLUGIN_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), PRAGHA_TYPE_TUNEIN_PLUGIN, PraghaTuneinPluginClass))
 
 struct _PraghaTuneinPluginPrivate {
-	PraghaApplication *pragha;
+	PraghaPluginObject *object;
 
 	GtkActionGroup    *action_group_main_menu;
 	guint              merge_id_main_menu;
@@ -136,7 +137,7 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 	PraghaTuneinPlugin *plugin = user_data;
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object));
 	remove_watch_cursor (window);
 
 	if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
@@ -164,11 +165,11 @@ pragha_tunein_plugin_get_radio_done (SoupSession *session,
 
 	mobj = new_musicobject_from_location (uri_parsed, name_fixed);
 
-	playlist = pragha_application_get_playlist (priv->pragha);
+	playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(priv->object));
 	pragha_playlist_append_single_song (playlist, mobj);
 	new_radio (playlist, uri_parsed, name_fixed);
 
-	cdbase = pragha_application_get_database (priv->pragha);
+	cdbase = pragha_application_get_database (pragha_plugin_object_get_pragha(priv->object));
 	pragha_database_change_playlists_done (cdbase);
 
 	xmlnode_free(xml);
@@ -187,7 +188,7 @@ pragha_tunein_plugin_get_radio (PraghaTuneinPlugin *plugin, const gchar *field)
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	window = pragha_application_get_window (priv->pragha);
+	window = pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object));
 	set_watch_cursor (window);
 
 	escaped_field = g_uri_escape_string (field, NULL, TRUE);
@@ -216,7 +217,7 @@ pragha_tunein_get_radio_dialog (PraghaTuneinPlugin *plugin)
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
 
-	parent = pragha_application_get_window (priv->pragha);
+	parent = pragha_application_get_window (pragha_plugin_object_get_pragha(priv->object));
 	dialog = gtk_dialog_new_with_buttons (_("Search in TuneIn"),
 	                                      GTK_WINDOW(parent),
 	                                      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -265,7 +266,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaTuneinPlugin *plugin = PRAGHA_TUNEIN_PLUGIN (activatable);
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "TuneIn plugin %s", G_STRFUNC);
 
@@ -278,7 +279,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              plugin);
 
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 
@@ -290,7 +291,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	item = g_menu_item_new (_("Search radio on TuneIn"), "win.search-tunein");
 
-	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	pragha_menubar_append_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", action, item);
 }
 
 static void
@@ -301,10 +302,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "TuneIn plugin %s", G_STRFUNC);
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
+	pragha_menubar_remove_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
 
-	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-tunein");
+	pragha_menubar_remove_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", "search-tunein");
+
+	priv->object = NULL;
 }

@@ -38,6 +38,7 @@
 #include <grilo.h>
 
 #include "pragha-dlna-renderer-plugin.h"
+#include "src/pragha-plugin-object.h"
 
 #include "src/pragha.h"
 #include "src/pragha-utils.h"
@@ -53,10 +54,10 @@
 typedef struct _PraghaDlnaRendererPluginPrivate PraghaDlnaRendererPluginPrivate;
 
 struct _PraghaDlnaRendererPluginPrivate {
-	PraghaApplication    *pragha;
+	PraghaPluginObject *object;
 
-	GtkActionGroup       *action_group_main_menu;
-	guint                 merge_id_main_menu;
+	GtkActionGroup     *action_group_main_menu;
+	guint               merge_id_main_menu;
 };
 
 PRAGHA_PLUGIN_REGISTER (PRAGHA_TYPE_DLNA_RENDERER_PLUGIN,
@@ -196,7 +197,7 @@ pragha_dlna_renderer_plugin_search_music (PraghaDlnaRendererPlugin *plugin)
 	statusbar = pragha_statusbar_get ();
 
 	if (list) {
-		playlist = pragha_application_get_playlist (plugin->priv->pragha);
+		playlist = pragha_application_get_playlist (pragha_plugin_object_get_pragha(plugin->priv->object));
 
 		pragha_playlist_append_mobj_list (playlist, list);
 		g_list_free (list);
@@ -229,7 +230,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	PraghaDlnaRendererPlugin *plugin = PRAGHA_DLNA_RENDERER_PLUGIN (activatable);
 
 	PraghaDlnaRendererPluginPrivate *priv = plugin->priv;
-	priv->pragha = g_object_get_data (G_OBJECT (plugin), "object");
+	priv->object = g_object_get_data (G_OBJECT (plugin), "object");
 
 	CDEBUG(DBG_PLUGIN, "DLNA Renderer plugin %s", G_STRFUNC);
 
@@ -249,7 +250,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	                              G_N_ELEMENTS (main_menu_actions),
 	                              plugin);
 
-	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
+	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
 
@@ -261,7 +262,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	item = g_menu_item_new (_("Search music on DLNA server"), "win.search-dlna");
 
-	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
+	pragha_menubar_append_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", action, item);
 }
 
 static void
@@ -273,12 +274,14 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "DLNA Renderer plugin %s", G_STRFUNC);
 
-	pragha_menubar_remove_plugin_action (priv->pragha,
+	pragha_menubar_remove_plugin_action (pragha_plugin_object_get_pragha(priv->object),
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
 
-	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-dlna");
+	pragha_menubar_remove_action (pragha_plugin_object_get_pragha(priv->object), "pragha-plugins-placeholder", "search-dlna");
 
 	grl_deinit ();
+
+	priv->object = NULL;
 }
