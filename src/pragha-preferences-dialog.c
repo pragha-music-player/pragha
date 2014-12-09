@@ -32,6 +32,7 @@
 
 #ifdef HAVE_LIBPEAS
 #include <libpeas-gtk/peas-gtk.h>
+#include "pragha-plugins-view.h"
 #endif
 
 #include <gdk/gdkkeysyms.h>
@@ -1195,7 +1196,7 @@ pref_create_plugins_page (PreferencesDialog *dialog)
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
 	                                     GTK_SHADOW_IN);
 
-	view = peas_gtk_plugin_manager_view_new (peas_engine_get_default ());
+	view = pragha_plugins_view_new (peas_engine_get_default ());
 	gtk_container_add (GTK_CONTAINER (sw), view);
 
 	pragha_hig_workarea_table_add_wide_tall_control (table, &row, sw);

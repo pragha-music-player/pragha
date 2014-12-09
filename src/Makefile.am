@@ -125,7 +125,9 @@ endif
 if HAVE_LIBPEAS
 pragha_SOURCES = \
 		pragha-plugins-engine.c \
-		pragha-plugins-engine.h
+		pragha-plugins-engine.h \
+		pragha-plugins-view.c \
+		pragha-plugins-view.h
 
 pragha_CFLAGS += $(LIBPEAS_CFLAGS)
 pragha_LDADD += $(LIBPEAS_LIBS)
