@@ -302,9 +302,16 @@ pragha_scanner_worker_finished (gpointer data)
 			                             GROUP_LIBRARY,
 			                             KEY_LIBRARY_SCANNED,
 			                             scanner->folder_list);
+
+		pragha_preferences_set_lock_library (preferences, FALSE);
+
 		g_object_unref(G_OBJECT(preferences));
 	}
 	else {
+		preferences = pragha_preferences_get();
+		pragha_preferences_set_lock_library (preferences, FALSE);
+		g_object_unref(G_OBJECT(preferences));
+
 		gtk_widget_hide(scanner->hbox);
 	}
 
@@ -538,6 +545,8 @@ pragha_scanner_update_library(PraghaScanner *scanner)
 
 	preferences = pragha_preferences_get();
 
+	pragha_preferences_set_lock_library (preferences, TRUE);
+
 	/* Get last time that update the library and folders to analyze */
 
 	last_scan_time = pragha_preferences_get_string(preferences,
@@ -612,6 +621,7 @@ pragha_scanner_scan_library(PraghaScanner *scanner)
 		return;
 
 	preferences = pragha_preferences_get();
+	pragha_preferences_set_lock_library (preferences, TRUE);
 
 	/* Get last time that update the library and folders to analyze */
 

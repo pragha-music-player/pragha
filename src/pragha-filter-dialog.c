@@ -138,9 +138,9 @@ queue_filter_dialog_refilter (PraghaFilterDialog *fdialog)
 	fdialog->timeout_id = g_timeout_add(500, (GSourceFunc)do_filter_dialog_refilter, fdialog);
 }
 
-static gboolean
-simple_filter_search_keyrelease_handler(GtkEntry *entry,
-					PraghaFilterDialog *fdialog)
+static void
+simple_filter_search_keyrelease_handler (GtkEntry           *entry,
+                                         PraghaFilterDialog *fdialog)
 {
 	const gchar *text = NULL;
 	gchar *u_str = NULL;
@@ -160,11 +160,9 @@ simple_filter_search_keyrelease_handler(GtkEntry *entry,
 	}
 
 	if (!pragha_preferences_get_instant_search(fdialog->preferences))
-		return FALSE;
+		return;
 
 	queue_filter_dialog_refilter(fdialog);
-
-	return FALSE;
 }
 
 static gboolean

@@ -47,6 +47,7 @@ struct _PraghaPreferencesClass
 	GObjectClass parent_class;
 	void (*plugins_change) (PraghaPreferences *preferences, const gchar *key);
   void (*library_change) (PraghaPreferences *preferences);
+  void (*need_restart) (PraghaPreferences *preferences);
 };
 
 /* Defines to key preferences. */
@@ -100,7 +101,9 @@ struct _PraghaPreferencesClass
 #define KEY_SHOW_ALBUM_ART         "show_album_art"
 #define KEY_ALBUM_ART_SIZE         "album_art_size"
 #define KEY_STATUS_BAR             "status_bar"
+#define KEY_GNOME_STYLE            "gnome_style"
 #define KEY_CONTROLS_BELOW         "controls_below"
+#define KEY_SHOW_MENUBAR           "show_menubar"
 
 #define GROUP_SERVICES   "services"
 #define KEY_LASTFM                 "lastfm"
@@ -224,6 +227,9 @@ pragha_preferences_get_plugin_group_name (PraghaPreferences *preferences,
 /*
  * Public api.
  */
+
+void
+pragha_preferences_need_restart (PraghaPreferences *preferences);
 
 GSList *
 pragha_preferences_get_library_list (PraghaPreferences *preferences);
@@ -373,6 +379,20 @@ pragha_preferences_set_show_status_icon (PraghaPreferences *preferences,
                                          gboolean show_status_icon);
 
 gboolean
+pragha_preferences_get_show_menubar (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_show_menubar (PraghaPreferences *preferences,
+                                     gboolean           show_menubar);
+
+gboolean
+pragha_preferences_get_gnome_style (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_gnome_style (PraghaPreferences *preferences,
+                                    gboolean           gnome_style);
+
+gboolean
 pragha_preferences_get_controls_below (PraghaPreferences *preferences);
 
 void
@@ -441,6 +461,13 @@ pragha_preferences_get_use_cddb (PraghaPreferences *preferences);
 void
 pragha_preferences_set_use_cddb (PraghaPreferences *preferences,
                                  gboolean use_cddb);
+
+gboolean
+pragha_preferences_get_lock_library (PraghaPreferences *preferences);
+
+void
+pragha_preferences_set_lock_library (PraghaPreferences *preferences,
+                                     gboolean           lock_library);
 
 G_END_DECLS
 

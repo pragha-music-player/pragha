@@ -35,6 +35,7 @@
 #include <libpeas/peas.h>
 
 #include "src/pragha.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-playlist.h"
 #include "src/pragha-playlists-mgmt.h"
 #include "src/pragha-musicobject-mgmt.h"
@@ -77,6 +78,14 @@ static void
 pragha_tunein_plugin_get_radio_action (GtkAction *action, PraghaTuneinPlugin *plugin)
 {
 	pragha_tunein_get_radio_dialog (plugin);
+}
+
+static void
+pragha_gmenu_tunein_plugin_get_radio_action (GSimpleAction *action,
+                                             GVariant      *parameter,
+                                             gpointer       user_data)
+{
+	pragha_tunein_get_radio_dialog (PRAGHA_TUNEIN_PLUGIN(user_data));
 }
 
 static const GtkActionEntry main_menu_actions [] = {
@@ -250,6 +259,9 @@ pragha_tunein_get_radio_dialog (PraghaTuneinPlugin *plugin)
 static void
 pragha_plugin_activate (PeasActivatable *activatable)
 {
+	GMenuItem *item;
+	GSimpleAction *action;
+
 	PraghaTuneinPlugin *plugin = PRAGHA_TUNEIN_PLUGIN (activatable);
 
 	PraghaTuneinPluginPrivate *priv = plugin->priv;
@@ -269,6 +281,16 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	priv->merge_id_main_menu = pragha_menubar_append_plugin_action (priv->pragha,
 	                                                                priv->action_group_main_menu,
 	                                                                main_menu_xml);
+
+	/* Gear Menu */
+
+	action = g_simple_action_new ("search-tunein", NULL);
+	g_signal_connect (G_OBJECT (action), "activate",
+	                  G_CALLBACK (pragha_gmenu_tunein_plugin_get_radio_action), plugin);
+
+	item = g_menu_item_new (_("Search radio on TuneIn"), "win.search-tunein");
+
+	pragha_menubar_append_action (priv->pragha, "pragha-plugins-placeholder", action, item);
 }
 
 static void
@@ -283,4 +305,6 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                     priv->action_group_main_menu,
 	                                     priv->merge_id_main_menu);
 	priv->merge_id_main_menu = 0;
+
+	pragha_menubar_remove_action (priv->pragha, "pragha-plugins-placeholder", "search-tunein");
 }

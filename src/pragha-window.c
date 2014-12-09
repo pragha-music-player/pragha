@@ -29,6 +29,8 @@
 #endif
 
 #include "pragha-playback.h"
+#include "pragha-toolbar.h"
+#include "pragha-menubar.h"
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
@@ -163,12 +165,21 @@ static void
 pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *pragha)
 {
 	GtkAction *action;
+	GAction *baction;
+	GActionMap *map;
+
 	action = pragha_application_get_menu_action (pragha, "/Menubar/ViewMenu/Lateral panel2");
+
+	map = G_ACTION_MAP (pragha_application_get_window(pragha));
+	baction = g_action_map_lookup_action (map, "sidebar2");
+
 	if (pragha_sidebar_get_n_panes (sidebar)) {
 		gtk_action_set_visible (action, TRUE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (baction), TRUE);
 	}
 	else {
 		gtk_action_set_visible (action, FALSE);
+		g_simple_action_set_enabled (G_SIMPLE_ACTION (baction), FALSE);
 		gtk_widget_set_visible (GTK_WIDGET(sidebar), FALSE);
 	}
 }
@@ -409,11 +420,22 @@ pragha_window_new (PraghaApplication *pragha)
 	PraghaToolbar *toolbar;
 	GtkWidget *menubar, *pane1, *pane2, *infobox;
 	GtkWidget *playlist_statusbar_vbox, *vbox_main;
+	GtkWidget *menu_button;
+	GtkBuilder *menu_ui;
+	GIcon *icon = NULL;
 	gint *win_size, *win_position;
 	gsize cnt = 0;
 
 	const GBindingFlags binding_flags =
 		G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL;
+
+	const gchar *fallbacks_icon_menu[] = {
+		"open-menu-symbolic",
+		"emblem-system-symbolic",
+		"open-menu",
+		"emblem-system",
+		NULL,
+	};
 
 	CDEBUG(DBG_INFO, "Packaging widgets, and initiating the window");
 
@@ -511,16 +533,43 @@ pragha_window_new (PraghaApplication *pragha)
 	 *               [Sidebar1][Status Bar][Sidebar2]
 	 */
 
-	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
 	gtk_box_pack_start (GTK_BOX(vbox_main), menubar,
 	                    FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
-	                    FALSE, FALSE, 0);
+#if GTK_CHECK_VERSION (3, 12, 0)
+	if (pragha_preferences_get_gnome_style (preferences) == FALSE)
+#endif
+		gtk_box_pack_start (GTK_BOX(vbox_main), GTK_WIDGET(toolbar),
+		                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), infobox,
 	                    FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX(vbox_main), pane2,
-	                    TRUE, TRUE, 0);
+	                    TRUE, TRUE, 2);
+
+	g_object_bind_property (preferences, "show-menubar",
+	                        menubar, "visible",
+	                        binding_flags);
+
+	/* Add menu-button to toolbar */
+
+	menu_button =  gtk_menu_button_new ();
+	gtk_button_set_relief(GTK_BUTTON(menu_button), GTK_RELIEF_NONE);
+
+	icon = g_themed_icon_new_from_names ((gchar **)fallbacks_icon_menu, -1);
+	gtk_button_set_image (GTK_BUTTON (menu_button),
+		gtk_image_new_from_gicon(icon, GTK_ICON_SIZE_MENU));
+	g_object_unref (icon);
+
+	menu_ui = pragha_application_get_menu_ui(pragha);
+	gtk_menu_button_set_menu_model (GTK_MENU_BUTTON(menu_button),
+		G_MENU_MODEL (gtk_builder_get_object (menu_ui, "menubar")));
+
+	g_object_bind_property (preferences, "show-menubar",
+	                        menu_button, "visible",
+	                        binding_flags | G_BINDING_INVERT_BOOLEAN);
+
+	pragha_toolbar_add_extra_button (toolbar, menu_button);
 
 	/* Add library pane to first sidebar. */
 
@@ -537,13 +586,12 @@ pragha_window_new (PraghaApplication *pragha)
 
 	g_signal_connect (G_OBJECT(sidebar2), "children-changed",
 	                  G_CALLBACK(pragha_sidebar_children_changed), pragha);
+	pragha_sidebar_style_position (sidebar2, GTK_POS_RIGHT);
 
 	/* Show the widgets individually.
 	 *  NOTE: the rest of the widgets, depends on the preferences.
 	 */
-
 	gtk_widget_show(vbox_main);
-	gtk_widget_show (menubar);
 	gtk_widget_show (GTK_WIDGET(toolbar));
 	gtk_widget_show (infobox);
 	gtk_widget_show (pane1);
@@ -555,6 +603,15 @@ pragha_window_new (PraghaApplication *pragha)
 	/* Pack everyting on the main window. */
 
 	gtk_container_add(GTK_CONTAINER(window), vbox_main);
+
+#if GTK_CHECK_VERSION (3, 12, 0)
+	if (pragha_preferences_get_gnome_style (preferences))
+		gtk_window_set_titlebar (GTK_WINDOW (window), GTK_WIDGET(toolbar));
+
+	GtkWidget *song = pragha_toolbar_get_song_box(toolbar);
+	gtk_header_bar_set_custom_title(GTK_HEADER_BAR(toolbar), GTK_WIDGET(song));
+#endif
+	gtk_widget_show (GTK_WIDGET(toolbar));
 
 	pragha_window_init (pragha);
 }

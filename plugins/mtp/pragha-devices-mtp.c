@@ -44,6 +44,7 @@
 #include "pragha-mtp-musicobject.h"
 
 #include "src/pragha-music-enum.h"
+#include "src/pragha-menubar.h"
 #include "src/pragha-utils.h"
 #include "src/pragha-simple-widgets.h"
 #include "src/pragha-window.h"
@@ -125,6 +126,40 @@ static const gchar *mtp_menu_xml = "<ui>					\
 		</menu>								\
 	</menubar>								\
 </ui>";
+
+/*
+ * Gear Menu.
+ */
+static void
+pragha_gmenu_mtp_add_library_action (GSimpleAction *action,
+                                     GVariant      *parameter,
+                                     gpointer       user_data)
+{
+	pragha_mtp_action_append_songs (NULL, PRAGHA_MTP_PLUGIN(user_data));
+}
+
+static void
+pragha_gmenu_mtp_show_device_info_action (GSimpleAction *action,
+                                          GVariant      *parameter,
+                                          gpointer       user_data)
+{
+	pragha_mtp_action_show_device_info (NULL, PRAGHA_MTP_PLUGIN(user_data));
+}
+
+static GActionEntry mtp_entries[] = {
+	{ "mtp-library",  pragha_gmenu_mtp_add_library_action,       NULL, NULL, NULL },
+	{ "mtp-info",     pragha_gmenu_mtp_show_device_info_action,  NULL, NULL, NULL }
+};
+
+static const gchar *mtp_menu_ui = \
+	NEW_MENU("menubar") \
+		OPEN_PLACEHOLDER("pragha-plugins-placeholder") \
+			NEW_NAMED_SUBMENU("mtp-sudmenu", "Unknown MTP device") \
+				NEW_ITEM("Add MTP library",        "win", "mtp-library") \
+				NEW_ITEM("Show device info",       "win", "mtp-info") \
+			CLOSE_SUBMENU \
+		CLOSE_PLACEHOLDER \
+	CLOSE_MENU;
 
 /*
  * Basic Cache..
@@ -303,6 +338,7 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	PraghaPlaylist *playlist;
 	GtkActionGroup *action_group;
 	GtkAction *action;
+	GActionMap *map;
 	gchar *friend_label = NULL;
 
 	PraghaMtpPluginPrivate *priv = plugin->priv;
@@ -328,6 +364,19 @@ pragha_mtp_plugin_append_menu_action (PraghaMtpPlugin *plugin)
 	                                                           action_group,
 	                                                           mtp_menu_xml);
 	priv->action_group_menu = action_group;
+
+	/* Gear Menu */
+
+	pragha_menubar_append_submenu (priv->pragha, "pragha-plugins-placeholder",
+	                               mtp_menu_ui,
+	                               "mtp-sudmenu",
+	                               friend_label,
+	                               plugin);
+
+	map = G_ACTION_MAP (pragha_application_get_window(priv->pragha));
+	g_action_map_add_action_entries (G_ACTION_MAP (map),
+	                                 mtp_entries, G_N_ELEMENTS(mtp_entries),
+	                                 plugin);
 
 	/* Playlist sendto */
 
@@ -419,6 +468,10 @@ pragha_mtp_plugin_remove_menu_action (PraghaMtpPlugin *plugin)
 	                                      priv->action_group_playlist,
 	                                      priv->merge_id_playlist);
 	priv->merge_id_playlist = 0;
+
+	pragha_menubar_remove_by_id (priv->pragha,
+	                             "pragha-plugins-placeholder",
+	                             "mtp-sudmenu");
 }
 
 static int

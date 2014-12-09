@@ -35,7 +35,11 @@
 typedef struct _PraghaToolbar PraghaToolbar;
 
 typedef struct {
+#if GTK_CHECK_VERSION (3, 12, 0)
+	GtkHeaderBarClass __parent__;
+#else
 	GtkToolbarClass __parent__;
+#endif
 	void (*prev) (PraghaToolbar *toolbar);
 	void (*play) (PraghaToolbar *toolbar);
 	void (*stop) (PraghaToolbar *toolbar);
@@ -55,12 +59,18 @@ void pragha_toolbar_update_playback_progress (PraghaBackend *backend, gpointer u
 void pragha_toolbar_playback_state_cb        (PraghaBackend *backend, GParamSpec *pspec, gpointer user_data);
 void pragha_toolbar_show_ramaning_time_cb    (PraghaToolbar *toolbar, GParamSpec *pspec, gpointer user_data);
 
-gboolean pragha_toolbar_window_state_event  (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
+gboolean pragha_toolbar_window_state_event   (GtkWidget *widget, GdkEventWindowState *event, PraghaToolbar *toolbar);
+
+#if GTK_CHECK_VERSION (3, 12, 0)
+void     pragha_toolbar_set_style            (PraghaToolbar *toolbar, gboolean gnome_style);
+#endif
 void     pragha_toolbar_add_extention_widget (PraghaToolbar *toolbar, GtkWidget *widget);
+void     pragha_toolbar_add_extra_button     (PraghaToolbar *toolbar, GtkWidget *widget);
 
 const gchar    *pragha_toolbar_get_progress_text (PraghaToolbar *toolbar);
 const gchar    *pragha_toolbar_get_length_text   (PraghaToolbar *toolbar);
 
+GtkWidget      *pragha_toolbar_get_song_box      (PraghaToolbar *toolbar);
 PraghaAlbumArt *pragha_toolbar_get_album_art     (PraghaToolbar *toolbar);
 
 PraghaToolbar *pragha_toolbar_new        (void);

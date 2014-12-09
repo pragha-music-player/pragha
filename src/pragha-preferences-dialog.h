@@ -28,6 +28,8 @@
 
 typedef struct _PreferencesDialog PreferencesDialog;
 
+void               pragha_gtk_entry_set_text                  (GtkEntry *entry, const gchar *text);
+
 void               pragha_preferences_append_audio_setting    (PreferencesDialog *dialog, GtkWidget *widget, gboolean expand);
 void               pragha_preferences_remove_audio_setting    (PreferencesDialog *dialog, GtkWidget *widget);
 

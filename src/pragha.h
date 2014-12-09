@@ -46,6 +46,11 @@
 
 typedef struct _PraghaApplication PraghaApplication;
 
+void               pragha_application_open_files          (PraghaApplication *pragha);
+void               pragha_application_add_location        (PraghaApplication *pragha);
+void               pragha_application_append_entery_libary(PraghaApplication *pragha);
+void               pragha_application_about_dialog        (PraghaApplication *pragha);
+
 /* Functions to access private members */
 
 PraghaPreferences *pragha_application_get_preferences     (PraghaApplication *pragha);
@@ -68,6 +73,7 @@ PraghaSidebar     *pragha_application_get_second_sidebar  (PraghaApplication *pr
 PraghaStatusbar   *pragha_application_get_statusbar       (PraghaApplication *pragha);
 PraghaStatusIcon  *pragha_application_get_status_icon     (PraghaApplication *pragha);
 
+GtkBuilder        *pragha_application_get_menu_ui            (PraghaApplication *pragha);
 GtkUIManager      *pragha_application_get_menu_ui_manager    (PraghaApplication *pragha);
 GtkAction         *pragha_application_get_menu_action        (PraghaApplication *pragha, const gchar *path);
 GtkWidget         *pragha_application_get_menu_action_widget (PraghaApplication *pragha, const gchar *path);
@@ -85,6 +91,7 @@ gint handle_command_line (PraghaApplication *pragha, GApplicationCommandLine *co
 gboolean info_bar_import_music_will_be_useful(PraghaApplication *pragha);
 GtkWidget* create_info_bar_import_music(PraghaApplication *pragha);
 GtkWidget* create_info_bar_update_music(PraghaApplication *pragha);
+GtkWidget *pragha_info_bar_need_restart (PraghaApplication *pragha);
 
 /* Pragha app */
 

@@ -121,3 +121,56 @@ pragha_track_progress_new (void)
 {
 	return g_object_new (PRAGHA_TYPE_TRACK_PROGRESS, NULL);
 }
+
+/*
+ * PraghaContainer: An extension of GtkContainer to expand their default size.
+ */
+#define PRAGHA_TYPE_CONTAINER (pragha_container_get_type())
+#define PRAGHA_CONTAINER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_CONTAINER, PraghaContainer))
+#define PRAGHA_CONTAINER_CONST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PRAGHA_TYPE_CONTAINER, PraghaContainer const))
+#define PRAGHA_CONTAINER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PRAGHA_TYPE_CONTAINER, PraghaContainerClass))
+#define PRAGHA_IS_CONTAINER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PRAGHA_TYPE_CONTAINER))
+#define PRAGHA_IS_CONTAINER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PRAGHA_TYPE_CONTAINER))
+#define PRAGHA_CONTAINER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PRAGHA_TYPE_CONTAINER, PraghaContainerClass))
+
+typedef struct _PraghaContainerClass PraghaContainerClass;
+
+struct _PraghaContainerClass {
+	GtkBoxClass parent_class;
+};
+struct _PraghaContainer {
+	GtkBox _parent;
+};
+G_DEFINE_TYPE(PraghaContainer, pragha_container, GTK_TYPE_BOX)
+
+static void
+pragha_container_get_preferred_width (GtkWidget *widget,
+                                      gint      *minimum,
+                                      gint      *natural)
+{
+	if (minimum)
+		*minimum = 140;
+	if (natural)
+		*natural = 1600;
+}
+
+static void
+pragha_container_class_init (PraghaContainerClass *class)
+{
+	GtkWidgetClass *widget_class;
+
+	widget_class = GTK_WIDGET_CLASS (class);
+	widget_class->get_preferred_width = pragha_container_get_preferred_width;
+}
+
+static void
+pragha_container_init (PraghaContainer *widget)
+{
+	gtk_orientable_set_orientation (GTK_ORIENTABLE (widget), GTK_ORIENTATION_HORIZONTAL);
+}
+
+PraghaContainer *
+pragha_container_new (void)
+{
+	return g_object_new (PRAGHA_TYPE_CONTAINER, NULL);
+}

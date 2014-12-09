@@ -137,3 +137,46 @@ GtkWidget *create_info_bar_update_music(PraghaApplication *pragha)
 	return info_bar;
 }
 
+
+static void
+info_bar_restart_response_cb(GtkInfoBar *info_bar, gint response_id, gpointer user_data)
+{
+	PraghaApplication *pragha = user_data;
+
+	gtk_widget_destroy(GTK_WIDGET(info_bar));
+
+	switch (response_id)
+	{
+		case GTK_RESPONSE_CANCEL:
+			break;
+		case GTK_RESPONSE_YES:
+			pragha_application_quit(pragha);
+			break;
+		default:
+			g_warn_if_reached();
+	}
+}
+
+GtkWidget *
+pragha_info_bar_need_restart (PraghaApplication *pragha)
+{
+	GtkWidget *info_bar = gtk_info_bar_new();
+	GtkWidget *action_area = gtk_info_bar_get_action_area(GTK_INFO_BAR (info_bar));
+	GtkWidget *content_area = gtk_info_bar_get_content_area(GTK_INFO_BAR(info_bar));
+
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(action_area), GTK_ORIENTATION_HORIZONTAL);
+
+	//GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_No"), GTK_RESPONSE_CANCEL);
+	gtk_info_bar_add_button(GTK_INFO_BAR(info_bar), _("_Yes"), GTK_RESPONSE_YES);
+
+	GtkWidget *label = gtk_label_new(_("Some changes need restart pragha."));
+	gtk_box_pack_start(GTK_BOX(content_area), label, FALSE, FALSE, 0);
+
+	g_signal_connect(info_bar, "response", G_CALLBACK(info_bar_restart_response_cb), pragha);
+
+	gtk_widget_show_all(info_bar);
+
+	return info_bar;
+}
+

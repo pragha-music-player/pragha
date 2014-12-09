@@ -217,19 +217,19 @@ systray_volume_scroll (GtkWidget *widget, GdkEventScroll *event, PraghaStatusIco
 static void
 systray_about_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	about_action (action, status_icon->pragha);
+	pragha_application_about_dialog (status_icon->pragha);
 }
 
 static void
 systray_open_file_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	open_file_action (action, status_icon->pragha);
+	pragha_application_open_files (status_icon->pragha);
 }
 
 static void
 systray_add_location_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	add_location_action (action, status_icon->pragha);
+	pragha_application_add_location (status_icon->pragha);
 }
 
 static void
@@ -267,7 +267,9 @@ systray_next_action (GtkAction *action, PraghaStatusIcon *status_icon)
 static void
 systray_edit_action (GtkAction *action, PraghaStatusIcon *status_icon)
 {
-	edit_tags_playing_action (NULL, status_icon->pragha);
+	PraghaBackend *backend = pragha_application_get_backend (status_icon->pragha);
+	if (pragha_backend_emitted_error (backend) == FALSE)
+		pragha_playback_edit_current_track (status_icon->pragha);
 }
 
 static void
@@ -330,6 +332,7 @@ pragha_status_icon_set_application (PraghaStatusIcon *status_icon, PraghaApplica
 
 	g_signal_connect (pragha_application_get_backend (pragha), "notify::state",
 	                  G_CALLBACK (pragha_status_icon_update_state), status_icon);
+	pragha_status_icon_update_state (pragha_application_get_backend (pragha), NULL, status_icon);
 
 	g_object_unref (actions);
 }

@@ -1400,7 +1400,7 @@ void queue_refilter (PraghaLibraryPane *clibrary)
 	clibrary->timeout_id = g_timeout_add(500, (GSourceFunc)do_refilter, clibrary);
 }
 
-static gboolean
+static void
 simple_library_search_keyrelease_handler (GtkEntry          *entry,
                                           PraghaLibraryPane *clibrary)
 {
@@ -1408,7 +1408,7 @@ simple_library_search_keyrelease_handler (GtkEntry          *entry,
 	gboolean has_text;
 	
 	if (!pragha_preferences_get_instant_search(clibrary->preferences))
-		return FALSE;
+		return;
 
 	if (clibrary->filter_entry != NULL) {
 		g_free (clibrary->filter_entry);
@@ -1426,8 +1426,6 @@ simple_library_search_keyrelease_handler (GtkEntry          *entry,
 	else {
 		clear_library_search (clibrary);
 	}
-
-	return FALSE;
 }
 
 gboolean simple_library_search_activate_handler(GtkEntry *entry,
@@ -1749,11 +1747,7 @@ library_view_complete_folder_view(GtkTreeModel *model,
 	GtkTreeIter iter, *f_iter;
 	GSList *list = NULL, *library_dir = NULL;
 
-	library_dir =
-		pragha_preferences_get_filename_list(clibrary->preferences,
-			                             GROUP_LIBRARY,
-			                             KEY_LIBRARY_DIR);
-
+	library_dir = pragha_preferences_get_library_list (clibrary->preferences);
 	for(list = library_dir ; list != NULL ; list=list->next) {
 		/*If no need to fuse folders, add headers and set p_iter */
 		if(!pragha_preferences_get_fuse_folders(clibrary->preferences)) {
