@@ -69,14 +69,12 @@ update_plugin (PraghaPluginsStore *store,
 {
 	gboolean loaded;
 	gboolean available;
-	gboolean builtin;
 	gchar *markup;
 	const gchar *icon_name;
 	GIcon *icon_gicon = NULL;
 
 	loaded = peas_plugin_info_is_loaded (info);
 	available = peas_plugin_info_is_available (info, NULL);
-	builtin = peas_plugin_info_is_builtin (info);
 
 	if (peas_plugin_info_get_description (info) == NULL) {
 		markup = g_markup_printf_escaped ("<b>%s</b>",
@@ -134,11 +132,11 @@ update_plugin (PraghaPluginsStore *store,
 
 	gtk_list_store_set (GTK_LIST_STORE (store), iter,
 	                    PRAGHA_PLUGINS_STORE_ENABLED_COLUMN,        loaded,
-	                    PRAGHA_PLUGINS_STORE_CAN_ENABLE_COLUMN,     !builtin && available,
+	                    PRAGHA_PLUGINS_STORE_CAN_ENABLE_COLUMN,     available,
 	                    PRAGHA_PLUGINS_STORE_ICON_GICON_COLUMN,     icon_gicon,
 	                    PRAGHA_PLUGINS_STORE_ICON_VISIBLE_COLUMN,   !available,
 	                    PRAGHA_PLUGINS_STORE_INFO_COLUMN,           markup,
-	                    PRAGHA_PLUGINS_STORE_INFO_SENSITIVE_COLUMN, available && (!builtin || loaded),
+	                    PRAGHA_PLUGINS_STORE_INFO_SENSITIVE_COLUMN, available || loaded,
 	                    PRAGHA_PLUGINS_STORE_PLUGIN_COLUMN,         info,
 	                    -1);
 
@@ -494,15 +492,12 @@ struct _PraghaPluginsViewPrivate {
 	PraghaPluginsStore *store;
 
 	GtkWidget *popup_menu;
-
-	guint show_builtin : 1;
 };
 
 /* Properties */
 enum {
 	PROP_V_0,
 	PROP_V_ENGINE,
-	PROP_V_SHOW_BUILTIN,
 	N_V_PROPERTIES
 };
 
@@ -516,45 +511,6 @@ static guint signals[LAST_SIGNAL];
 static GParamSpec *properties_v[N_V_PROPERTIES] = { NULL };
 
 G_DEFINE_TYPE (PraghaPluginsView, pragha_plugins_view, GTK_TYPE_TREE_VIEW)
-
-static void
-convert_iter_to_child_iter (PraghaPluginsView *view,
-                            GtkTreeIter       *iter)
-{
-	if (!view->priv->show_builtin) {
-		GtkTreeModel *model;
-		GtkTreeIter child_iter;
-
-		model = gtk_tree_view_get_model (GTK_TREE_VIEW (view));
-
-		gtk_tree_model_filter_convert_iter_to_child_iter (GTK_TREE_MODEL_FILTER (model),
-																												&child_iter, iter);
-
-		*iter = child_iter;
-	}
-}
-
-static gboolean
-convert_child_iter_to_iter (PraghaPluginsView *view,
-                            GtkTreeIter       *child_iter)
-{
-	gboolean success = TRUE;
-
-	if (!view->priv->show_builtin) {
-		GtkTreeModel *model;
-		GtkTreeIter iter;
-
-		model = gtk_tree_view_get_model (GTK_TREE_VIEW (view));
-
-		success = gtk_tree_model_filter_convert_child_iter_to_iter (GTK_TREE_MODEL_FILTER (model),
-		                                                            &iter, child_iter);
-
-		if (success)
-			*child_iter = iter;
-	}
-
-	return success;
-}
 
 static void
 plugin_list_changed_cb (PeasEngine        *engine,
@@ -571,24 +527,6 @@ plugin_list_changed_cb (PeasEngine        *engine,
 		pragha_plugins_view_set_selected_plugin (view, info);
 }
 
-static gboolean
-filter_builtins_visible (PraghaPluginsStore *store,
-                         GtkTreeIter        *iter,
-                         PraghaPluginsView  *view)
-{
-	PeasPluginInfo *info;
-
-	/* We never filter showing builtins */
-	g_assert (view->priv->show_builtin == FALSE);
-
-	info = pragha_plugins_store_get_plugin (store, iter);
-
-	if (info == NULL)
-		return FALSE;
-
-	return !peas_plugin_info_is_builtin (info);
-}
-
 static void
 enabled_toggled_cb (GtkCellRendererToggle *cell,
                     gchar                 *path_str,
@@ -602,7 +540,6 @@ enabled_toggled_cb (GtkCellRendererToggle *cell,
 	path = gtk_tree_path_new_from_string (path_str);
 
 	if (gtk_tree_model_get_iter (model, &iter, path)) {
-		convert_iter_to_child_iter (view, &iter);
 		pragha_plugins_store_toggle_enabled (view->priv->store, &iter);
 	}
 
@@ -626,7 +563,6 @@ name_search_cb (GtkTreeModel      *model,
 	gint key_len;
 	gboolean retval;
 
-	convert_iter_to_child_iter (view, &child_iter);
 	info = pragha_plugins_store_get_plugin (view->priv->store, &child_iter);
 
 	if (info == NULL)
@@ -663,8 +599,6 @@ enabled_menu_cb (GtkMenu           *menu,
 
 	g_return_if_fail (gtk_tree_selection_get_selected (selection, NULL, &iter));
 
-	convert_iter_to_child_iter (view, &iter);
-
 	pragha_plugins_store_toggle_enabled (view->priv->store, &iter);
 }
 
@@ -700,8 +634,7 @@ create_popup_menu (PraghaPluginsView *view)
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item),
 	                                peas_plugin_info_is_loaded (info));
 	g_signal_connect (item, "toggled", G_CALLBACK (enabled_menu_cb), view);
-	gtk_widget_set_sensitive (item, peas_plugin_info_is_available (info, NULL) &&
-	                                !peas_plugin_info_is_builtin (info));
+	gtk_widget_set_sensitive (item, peas_plugin_info_is_available (info, NULL));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
 	item = gtk_separator_menu_item_new ();
@@ -948,8 +881,6 @@ pragha_plugins_view_query_tooltip (GtkWidget  *widget,
 	if (!is_row)
 		return FALSE;
 
-	convert_iter_to_child_iter (view, &iter);
-
 	info = pragha_plugins_store_get_plugin (view->priv->store, &iter);
 
 	if (peas_plugin_info_is_available (info, &error))
@@ -979,8 +910,6 @@ pragha_plugins_view_row_activated (GtkTreeView       *tree_view,
 	if (!gtk_tree_model_get_iter (gtk_tree_view_get_model (tree_view), &iter, path))
 		return;
 
-	convert_iter_to_child_iter (view, &iter);
-
 	if (pragha_plugins_store_can_enable (view->priv->store, &iter))
 		pragha_plugins_store_toggle_enabled (view->priv->store, &iter);
 }
@@ -997,10 +926,6 @@ pragha_plugins_view_set_property (GObject      *object,
 		{
 		case PROP_V_ENGINE:
 			view->priv->engine = g_value_get_object (value);
-			break;
-		case PROP_V_SHOW_BUILTIN:
-			pragha_plugins_view_set_show_builtin (view,
-			                                      g_value_get_boolean (value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1021,10 +946,6 @@ pragha_plugins_view_get_property (GObject    *object,
 		case PROP_V_ENGINE:
 			g_value_set_object (value, view->priv->engine);
 			break;
-		case PROP_V_SHOW_BUILTIN:
-			g_value_set_boolean (value,
-			                     pragha_plugins_view_get_show_builtin (view));
-			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 			break;
@@ -1034,6 +955,10 @@ pragha_plugins_view_get_property (GObject    *object,
 static void
 pragha_plugins_view_constructed (GObject *object)
 {
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	gboolean iter_set;
+
 	PraghaPluginsView *view = PRAGHA_PLUGINS_VIEW (object);
 
 	if (view->priv->engine == NULL)
@@ -1044,8 +969,18 @@ pragha_plugins_view_constructed (GObject *object)
 	view->priv->store = pragha_plugins_store_new (view->priv->engine);
 
 	/* Properly set the model */
-	view->priv->show_builtin = TRUE;
-	pragha_plugins_view_set_show_builtin (view, FALSE);
+
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
+
+	/* We must get the selected iter before setting if builtin
+	   plugins should be shown so the proper model is set */
+	iter_set = gtk_tree_selection_get_selected (selection, NULL, &iter);
+
+	gtk_tree_view_set_model (GTK_TREE_VIEW (view),
+	                         GTK_TREE_MODEL (view->priv->store));
+
+	if (iter_set)
+		gtk_tree_selection_select_iter (selection, &iter);
 
 	g_signal_connect (view->priv->engine,
 	                  "notify::plugin-list",
@@ -1105,14 +1040,6 @@ pragha_plugins_view_class_init (PraghaPluginsViewClass *klass)
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
 
-	properties_v[PROP_V_SHOW_BUILTIN] =
-		g_param_spec_boolean ("show-builtin",
-		                      "show-builtin",
-		                      "If builtin plugins should be shown",
-		                      FALSE,
-		                      G_PARAM_READWRITE |
-		                      G_PARAM_STATIC_STRINGS);
-
 	signals[POPULATE_POPUP] =
 		g_signal_new ("populate-popup",
 		              the_type,
@@ -1140,65 +1067,6 @@ pragha_plugins_view_new (PeasEngine *engine)
 }
 
 void
-pragha_plugins_view_set_show_builtin (PraghaPluginsView *view,
-                                      gboolean           show_builtin)
-{
-	GtkTreeSelection *selection;
-	GtkTreeIter iter;
-	gboolean iter_set;
-
-	g_return_if_fail (PRAGHA_PLUGINS_VIEW (view));
-
-	show_builtin = (show_builtin != FALSE);
-
-	if (view->priv->show_builtin == show_builtin)
-		return;
-
-	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
-
-	/* We must get the selected iter before setting if builtin
-	   plugins should be shown so the proper model is set */
-	iter_set = gtk_tree_selection_get_selected (selection, NULL, &iter);
-
-	if (iter_set)
-		convert_iter_to_child_iter (view, &iter);
-
-	view->priv->show_builtin = show_builtin;
-
-	if (show_builtin) {
-		gtk_tree_view_set_model (GTK_TREE_VIEW (view),
-		                         GTK_TREE_MODEL (view->priv->store));
-    }
-	else {
-		GtkTreeModel *model;
-
-		model = gtk_tree_model_filter_new (GTK_TREE_MODEL (view->priv->store), NULL);
-		gtk_tree_model_filter_set_visible_func (GTK_TREE_MODEL_FILTER (model),
-		                                        (GtkTreeModelFilterVisibleFunc) filter_builtins_visible,
-		                                        view,
-		                                        NULL);
-
-		gtk_tree_view_set_model (GTK_TREE_VIEW (view), model);
-
-		g_object_unref (model);
-	}
-
-	if (iter_set && convert_child_iter_to_iter (view, &iter))
-		gtk_tree_selection_select_iter (selection, &iter);
-
-	g_object_notify_by_pspec (G_OBJECT (view),
-	                          properties_v[PROP_V_SHOW_BUILTIN]);
-}
-
-gboolean
-pragha_plugins_view_get_show_builtin (PraghaPluginsView *view)
-{
-	g_return_val_if_fail (PRAGHA_IS_PLUGINS_VIEW (view), FALSE);
-
-	return view->priv->show_builtin;
-}
-
-void
 pragha_plugins_view_set_selected_plugin (PraghaPluginsView *view,
                                          PeasPluginInfo    *info)
 {
@@ -1209,9 +1077,6 @@ pragha_plugins_view_set_selected_plugin (PraghaPluginsView *view,
 	g_return_if_fail (info != NULL);
 
 	g_return_if_fail (pragha_plugins_store_get_iter_from_plugin (view->priv->store, &iter, info));
-
-	if (!convert_child_iter_to_iter (view, &iter))
-		return;
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	gtk_tree_selection_select_iter (selection, &iter);
@@ -1228,7 +1093,6 @@ pragha_plugins_view_get_selected_plugin (PraghaPluginsView *view)
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	if (selection != NULL && gtk_tree_selection_get_selected (selection, NULL, &iter)) {
-		convert_iter_to_child_iter (view, &iter);
 		info = pragha_plugins_store_get_plugin (view->priv->store, &iter);
 	}
 
