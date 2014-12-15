@@ -135,6 +135,7 @@ void
 pragha_plugin_object_playback_toggle_repeat (PraghaPluginObject *object)
 {
 	PraghaPreferences *preferences;
+
 	g_return_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object));
 
 	PraghaPluginObjectPrivate *priv = object->priv;
@@ -149,6 +150,7 @@ pragha_plugin_object_playback_set_repeat (PraghaPluginObject *object,
                                           gboolean            repeat)
 {
 	PraghaPreferences *preferences;
+
 	g_return_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object));
 
 	PraghaPluginObjectPrivate *priv = object->priv;
@@ -161,6 +163,7 @@ gboolean
 pragha_plugin_object_playback_get_repeat (PraghaPluginObject *object)
 {
 	PraghaPreferences *preferences;
+
 	g_return_val_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object), FALSE);
 
 	PraghaPluginObjectPrivate *priv = object->priv;
@@ -174,6 +177,7 @@ void
 pragha_plugin_object_playback_toggle_shuffle (PraghaPluginObject *object)
 {
 	PraghaPreferences *preferences;
+
 	g_return_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object));
 
 	PraghaPluginObjectPrivate *priv = object->priv;
@@ -188,6 +192,7 @@ pragha_plugin_object_playback_set_shuffle (PraghaPluginObject *object,
                                            gboolean            shuffle)
 {
 	PraghaPreferences *preferences;
+
 	g_return_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object));
 
 	PraghaPluginObjectPrivate *priv = object->priv;
@@ -200,7 +205,8 @@ gboolean
 pragha_plugin_object_playback_get_shuffle (PraghaPluginObject *object)
 {
 	PraghaPreferences *preferences;
-	g_return_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object));
+
+	g_return_val_if_fail(PRAGHA_IS_PLUGIN_OBJECT(object), FALSE);
 
 	PraghaPluginObjectPrivate *priv = object->priv;
 
@@ -208,7 +214,6 @@ pragha_plugin_object_playback_get_shuffle (PraghaPluginObject *object)
 
 	return pragha_preferences_get_shuffle (preferences);
 }
-
 
 /*
  *
