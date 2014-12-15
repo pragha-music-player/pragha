@@ -1070,7 +1070,7 @@ pref_create_appearance_page(PreferencesDialog *dialog)
 	pragha_hig_workarea_table_add_wide_control(table, &row, album_art);
 
 	album_art_size_label = gtk_label_new(_("Size of Album art"));
-	album_art_size = gtk_spin_button_new_with_range (DEFAULT_ALBUM_ART_SIZE, 128, 2);
+	album_art_size = gtk_spin_button_new_with_range (24, 128, 2);
 
 	pragha_hig_workarea_table_add_row (table, &row, album_art_size_label, album_art_size);
 
