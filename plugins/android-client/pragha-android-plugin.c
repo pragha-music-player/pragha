@@ -44,7 +44,6 @@ typedef struct
 {
 	PraghaAndroidClientPlugin *plugin;
 	gchar                     *message;
-	GDBusConnection *connection;
 } MessageIdleData;
 
 static void
@@ -81,7 +80,10 @@ android_client_message_on_idle (gpointer user_data)
 	if (pragha_backend_emitted_error (backend))
 		return FALSE;
 
-	if (!g_strcmp0 (data->message, "play")) {
+	if (!g_strcmp0 (data->message, "prev")) {
+		pragha_playback_prev_track (priv->pragha);
+	}
+	else if (!g_strcmp0 (data->message, "play")) {
 		pragha_playback_play_pause_resume (priv->pragha);
 	}
 	else if (!g_strcmp0 (data->message, "stop")) {
@@ -93,6 +95,7 @@ android_client_message_on_idle (gpointer user_data)
 	else {
 		g_print ("Unknown command: %s\n", data->message);
 	}
+
 	return FALSE;
 }
 
@@ -113,6 +116,9 @@ socket_thread_on_run (GThreadedSocketService *service,
 	istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
 
 	while (TRUE) {
+		if (g_cancellable_is_cancelled(priv->canceller))
+			break;
+
 		res = g_input_stream_read (istream,
 		                           buffer, sizeof(buffer),
 		                           NULL,
@@ -156,6 +162,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 	CDEBUG(DBG_PLUGIN, "AndroidClient plugin %s", G_STRFUNC);
 
 	priv->service = g_threaded_socket_service_new (10);
+	priv->canceller = g_cancellable_new ();
 
 	g_socket_listener_add_inet_port (G_SOCKET_LISTENER(priv->service),
 	                                 5500,
@@ -170,6 +177,8 @@ pragha_plugin_activate (PeasActivatable *activatable)
  	                  "run",
  	                  G_CALLBACK (socket_thread_on_run),
  	                  plugin);
+
+	g_socket_service_start (G_SOCKET_SERVICE(priv->service));
 }
 
 static void
@@ -179,6 +188,21 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	PraghaAndroidClientPluginPrivate *priv = plugin->priv;
 
 	CDEBUG(DBG_PLUGIN, "AndroidClient plugin %s", G_STRFUNC);
+
+	g_cancellable_cancel (priv->canceller);
+	g_socket_listener_close (G_SOCKET_LISTENER(priv->service));
+
+	g_signal_handlers_disconnect_by_func (priv->service,
+	                                      socket_thread_on_run,
+	                                      plugin);
+
+	g_socket_service_stop (G_SOCKET_SERVICE(priv->service));
+
+	if (priv->service != NULL)
+		g_object_unref (priv->service);
+
+	if (priv->canceller != NULL)
+		g_object_unref (priv->canceller);
 
 	priv->pragha = NULL;
 }

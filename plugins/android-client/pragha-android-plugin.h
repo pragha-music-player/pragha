@@ -40,6 +40,7 @@ struct _PraghaAndroidClientPluginPrivate {
 
 	GSocketService    *service;
 	GMainContext      *main_context;
+	GCancellable      *canceller;
 };
 
 GType                 pragha_android_client_plugin_get_type        (void) G_GNUC_CONST;
