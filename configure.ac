@@ -255,6 +255,7 @@ AC_CONFIG_FILES([po/Makefile.in])
 
 if test x"$LIBPEAS_FOUND" = x"yes"; then
 AC_CONFIG_FILES([plugins/Makefile])
+AC_CONFIG_FILES([plugins/android-client/Makefile])
 AC_CONFIG_FILES([plugins/acoustid/Makefile])
 AC_CONFIG_FILES([plugins/mpris2/Makefile])
 AC_CONFIG_FILES([plugins/keybinder/Makefile])
@@ -283,6 +284,7 @@ echo "  Plugins enabled.......: $LIBPEAS_FOUND"
 echo "   * Show notification when change songs....................................: $LIBNOTIFY_FOUND"
 echo "   * Controls Pragha using Mpris2 interface.................................: $LIBPEAS_FOUND"
 echo "   * Controls Pragha using gnome-media-keys interface.......................: $LIBPEAS_FOUND"
+echo "   * Controls Pragha using Android client...........,.......................: $LIBPEAS_FOUND"
 echo "   * Play Audio cds.........................................................: $CDROM_SUPPORT"
 echo "   * Controls Pragha using multimedia keys.............(Need keybinder-3.0).: $LIBKEYBINDER_FOUND"
 echo "   * Search lyrics, artists info and albums art.....(Need libglyr >= 1.0.1).: $LIBGLYR_FOUND"

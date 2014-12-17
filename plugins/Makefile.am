@@ -10,6 +10,7 @@ pluginincludedir = $(includedir)/pragha/plugins
 plugininclude_HEADERS = pragha-plugin-macros.h
 
 SUBDIRS =              \
+	android-client     \
 	mpris2             \
 	gnome-media-keys
 
