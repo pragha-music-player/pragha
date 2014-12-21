@@ -8,6 +8,8 @@ AM_CPPFLAGS = \
 plugin_LTLIBRARIES = libandroid-client.la
 
 libandroid_client_la_SOURCES =  \
+	praghathreadedsocketservice.c \
+	praghathreadedsocketservice.h \
 	pragha-android-plugin.h \
 	pragha-android-plugin.c
 

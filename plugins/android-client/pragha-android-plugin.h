@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -40,7 +40,6 @@ struct _PraghaAndroidClientPluginPrivate {
 
 	GSocketService    *service;
 	GMainContext      *main_context;
-	GCancellable      *canceller;
 };
 
 GType                 pragha_android_client_plugin_get_type        (void) G_GNUC_CONST;

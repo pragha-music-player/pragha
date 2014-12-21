@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2014 matias <mati86dl@gmail.com>                        */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -28,6 +28,7 @@
 #include <libpeas-gtk/peas-gtk.h>
 
 #include "pragha-android-plugin.h"
+#include "praghathreadedsocketservice.h"
 
 #include "src/pragha.h"
 #include "src/pragha-playback.h"
@@ -102,7 +103,7 @@ android_client_message_on_idle (gpointer user_data)
 gboolean
 socket_thread_on_run (GThreadedSocketService *service,
                       GSocketConnection      *connection,
-                      GObject                *source_object,
+                      GCancellable           *cancel,
                       gpointer                user_data)
 {
 	GInputStream *istream = NULL;
@@ -116,17 +117,17 @@ socket_thread_on_run (GThreadedSocketService *service,
 	istream = g_io_stream_get_input_stream (G_IO_STREAM (connection));
 
 	while (TRUE) {
-		if (g_cancellable_is_cancelled(priv->canceller))
+		if (g_cancellable_is_cancelled(cancel))
 			break;
 
 		res = g_input_stream_read (istream,
 		                           buffer, sizeof(buffer),
-		                           NULL,
+		                           cancel,
 		                           &error);
 		buffer[res] = '\0';
 
 		if (res == 0) {
-			g_usleep (5000);
+			g_usleep (G_USEC_PER_SEC*0.2);
 			continue;
 		}
 
@@ -161,8 +162,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "AndroidClient plugin %s", G_STRFUNC);
 
-	priv->service = g_threaded_socket_service_new (10);
-	priv->canceller = g_cancellable_new ();
+	priv->service = pragha_threaded_socket_service_new ();
 
 	g_socket_listener_add_inet_port (G_SOCKET_LISTENER(priv->service),
 	                                 5500,
@@ -189,20 +189,15 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 
 	CDEBUG(DBG_PLUGIN, "AndroidClient plugin %s", G_STRFUNC);
 
-	g_cancellable_cancel (priv->canceller);
-	g_socket_listener_close (G_SOCKET_LISTENER(priv->service));
-
 	g_signal_handlers_disconnect_by_func (priv->service,
 	                                      socket_thread_on_run,
 	                                      plugin);
 
-	g_socket_service_stop (G_SOCKET_SERVICE(priv->service));
+	pragha_threaded_socket_service_cancel (priv->service);
 
-	if (priv->service != NULL)
-		g_object_unref (priv->service);
-
-	if (priv->canceller != NULL)
-		g_object_unref (priv->canceller);
+	g_socket_service_stop (priv->service);
+	g_socket_listener_close (G_SOCKET_LISTENER(priv->service));
+	g_object_unref (priv->service);
 
 	priv->pragha = NULL;
 }
