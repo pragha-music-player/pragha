@@ -841,7 +841,7 @@ trash_or_unlink_row (GArray *loc_arr, gboolean unlink, PraghaLibraryPane *librar
 				file = g_file_new_for_path(filename);
 
 				if(!unlink && !(deleted = g_file_trash(file, NULL, &error))) {
-					primary = g_strdup (_("File can´t be moved to trash. Delete permanently?"));
+					primary = g_strdup (_("File can't be moved to trash. Delete permanently?"));
 					secondary = g_strdup_printf (_("The file \"%s\" cannot be moved to the trash. Details: %s"),
 									g_file_get_basename (file), error->message);
 

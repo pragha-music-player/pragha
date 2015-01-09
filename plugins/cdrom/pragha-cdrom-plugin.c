@@ -404,7 +404,7 @@ pragha_cdrom_plugin_device_added (PraghaDeviceClient *device_client,
 		return;
 
 	dialog = pragha_gudev_dialog_new (NULL, _("Audio/Data CD"), "media-optical",
-	                                 _("Was inserted an Audio Cd."), NULL,
+	                                 _("An audio CD was inserted"), NULL,
 	                                 _("Add Audio _CD"), PRAGHA_DEVICE_RESPONSE_PLAY);
 
 	g_signal_connect (G_OBJECT (dialog), "response",

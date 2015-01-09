@@ -742,14 +742,14 @@ append_mobj_list_current_playlist_idle(gpointer user_data)
 				summary = g_strdup_printf(_("Added %d tracks of %d suggested from Last.fm"),
 				                          songs_added, data->query_count);
 			else
-				summary = g_strdup_printf(_("Last.fm doesn´t suggest any similar track"));
+				summary = g_strdup_printf(_("Last.fm doesn't suggest any similar track"));
 			break;
 		case LASTFM_GET_LOVED:
 			if (data->query_count > 0)
 				summary = g_strdup_printf(_("Added %d songs of the last %d loved on Last.fm."),
 							  songs_added, data->query_count);
 			else
-				summary = g_strdup_printf(_("You don´t have favorite tracks on Last.fm"));
+				summary = g_strdup_printf(_("You don't have favorite tracks on Last.fm"));
 			break;
 		case LASTFM_NONE:
 		default:

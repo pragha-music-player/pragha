@@ -199,7 +199,7 @@ pragha_application_open_files (PraghaApplication *pragha)
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-	toggle = gtk_check_button_new_with_label(_("Add recursively files"));
+	toggle = gtk_check_button_new_with_label(_("Add files recursively"));
 	if(pragha_preferences_get_add_recursively (preferences))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle), TRUE);
 
