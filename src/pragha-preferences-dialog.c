@@ -23,6 +23,7 @@
 #include "pragha-preferences-dialog.h"
 
 #include <glib.h>
+#include <gdk/gdkkeysyms.h>
 
 #if defined(GETTEXT_PACKAGE)
 #include <glib/gi18n-lib.h>
@@ -34,14 +35,11 @@
 #include <libpeas-gtk/peas-gtk.h>
 #endif
 
-#include <gdk/gdkkeysyms.h>
-
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-simple-widgets.h"
 #include "pragha-library-pane.h"
 #include "pragha-database.h"
-#include "pragha.h"
 
 struct _PreferencesTab {
 	GtkWidget *widget;

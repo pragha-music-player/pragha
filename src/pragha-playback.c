@@ -21,7 +21,6 @@
 
 #include "pragha-playback.h"
 
-#include "pragha-menubar.h"
 #include "pragha-tags-dialog.h"
 #include "pragha-tagger.h"
 #include "pragha-musicobject-mgmt.h"

@@ -25,22 +25,27 @@
 #include <glib.h>
 #include <stdlib.h>
 
-#include "pragha-musicobject.h"
-#include "pragha-utils.h"
-#include "pragha-musicobject-mgmt.h"
-#include "pragha.h"
-
 #if HAVE_GSTREAMER_AUDIO
 #include <gst/audio/streamvolume.h>
+#endif
+
+#include "pragha-art-cache.h"
+#include "pragha-debug.h"
+#include "pragha-musicobject.h"
+#include "pragha-musicobject-mgmt.h"
+#include "pragha-utils.h"
+
+static void
+pragha_backend_evaluate_state(GstState       old,
+                              GstState       new,
+                              GstState       pending,
+                              PraghaBackend *backend);
+
+#if HAVE_GSTREAMER_AUDIO
 #define convert_volume(from, to, val) gst_stream_volume_convert_volume((from), (to), (val))
 #define VOLUME_FORMAT_LINEAR GST_STREAM_VOLUME_FORMAT_LINEAR
 #define VOLUME_FORMAT_CUBIC GST_STREAM_VOLUME_FORMAT_CUBIC
 #endif
-
-static void pragha_backend_evaluate_state(GstState old,
-					  GstState new,
-					  GstState pending,
-					  PraghaBackend *backend);
 
 typedef enum {
   GST_PLAY_FLAG_VIDEO         = (1 << 0),

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/* Copyright (C) 2013-2014 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2013-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -21,7 +21,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "pragha.h"
+//#include "pragha.h"
+typedef struct _PraghaApplication PraghaApplication;
 
 G_BEGIN_DECLS
 
@@ -40,6 +41,8 @@ struct _PraghaPluginsEngineClass
 {
 	GObjectClass parent_class;
 };
+
+gboolean             pragha_plugins_is_shutdown     (PraghaPluginsEngine *engine);
 
 void                 pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine);
 void                 pragha_plugins_engine_startup  (PraghaPluginsEngine *engine);

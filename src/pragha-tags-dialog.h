@@ -21,6 +21,7 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
+
 #include "pragha-musicobject.h"
 
 G_BEGIN_DECLS

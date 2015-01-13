@@ -17,6 +17,9 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "pragha-database.h"
 #include "pragha-prepared-statement-private.h"

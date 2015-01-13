@@ -31,7 +31,6 @@
 #include "pragha-hig.h"
 #include "pragha-utils.h"
 #include "pragha-musicobject-mgmt.h"
-#include "pragha.h"
 
 static void     pragha_tags_dialog_dispose            (GObject *object);
 static void     pragha_tags_dialog_finalize           (GObject *object);

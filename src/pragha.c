@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -32,10 +32,6 @@
 #include <locale.h> /* require LC_ALL */
 #include <libintl.h>
 #include <tag_c.h>
-
-#ifdef HAVE_LIBPEAS
-#include "pragha-plugins-engine.h"
-#endif
 
 #include "pragha-window.h"
 #include "pragha-playback.h"
@@ -758,6 +754,14 @@ pragha_application_get_backend (PraghaApplication *pragha)
 {
 	return pragha->backend;
 }
+
+#ifdef HAVE_LIBPEAS
+PraghaPluginsEngine *
+pragha_application_get_plugins_engine (PraghaApplication *pragha)
+{
+	return pragha->plugins_engine;
+}
+#endif
 
 PraghaScanner *
 pragha_application_get_scanner (PraghaApplication *pragha)

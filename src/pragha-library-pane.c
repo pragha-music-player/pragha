@@ -43,7 +43,6 @@
 #include "pragha-tags-mgmt.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-dnd.h"
-#include "pragha.h"
 
 #ifdef G_OS_WIN32
 #include "../win32/win32dep.h"

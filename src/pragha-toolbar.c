@@ -32,7 +32,6 @@
 
 #include "pragha-simple-widgets.h"
 #include "pragha-utils.h"
-#include "pragha.h"
 
 static void pragha_toolbar_finalize (GObject *object);
 

@@ -43,6 +43,7 @@
 #include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-plugins-engine.h"
 #include "src/pragha-statusicon.h"
 #include "src/pragha-music-enum.h"
 #include "src/pragha-window.h"
@@ -585,14 +586,14 @@ pragha_cdrom_plugin_remove_setting (PraghaCdromPlugin *plugin)
 
 	dialog = pragha_application_get_preferences_dialog (priv->pragha);
 
+	pragha_preferences_dialog_disconnect_handler (dialog,
+	                                              G_CALLBACK(pragha_cdrom_preferences_dialog_response),
+	                                              plugin);
+
 	pragha_preferences_remove_audio_setting (dialog,
 	                                         priv->device_setting_widget);
 	pragha_preferences_remove_services_setting (dialog,
 	                                            priv->cddb_setting_widget);
-
-	pragha_preferences_dialog_disconnect_handler (dialog,
-	                                              G_CALLBACK(pragha_cdrom_preferences_dialog_response),
-	                                              plugin);
 }
 
 /*
@@ -671,6 +672,7 @@ static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
 	PraghaBackend *backend;
+	PraghaPreferences *preferences;
 	PraghaStatusIcon *status_icon = NULL;
 	PraghaMusicEnum *enum_map = NULL;
 
@@ -703,6 +705,12 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	#endif
 
 	pragha_cdrom_plugin_remove_setting (plugin);
+
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+		preferences = pragha_preferences_get ();
+		pragha_preferences_set_audio_cd_device (preferences, NULL);
+		g_object_unref (preferences);
+	}
 
 	enum_map = pragha_music_enum_get ();
 	pragha_music_enum_map_remove (enum_map, "FILE_CDDA");

@@ -40,7 +40,6 @@
 #include "pragha-tags-dialog.h"
 #include "pragha-musicobject-mgmt.h"
 #include "pragha-dnd.h"
-#include "pragha.h"
 
 /**
  * PraghaPlaylist - Pertains to the current state of the playlist

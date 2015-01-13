@@ -31,7 +31,6 @@
 
 #include "pragha-utils.h"
 #include "pragha-search-entry.h"
-#include "pragha.h"
 
 typedef struct {
 	GtkWidget *filter_view;

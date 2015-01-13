@@ -15,11 +15,17 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "pragha-plugins-engine.h"
 
 #include <libpeas/peas.h>
 
 #include "pragha-utils.h"
+#include "pragha-debug.h"
+#include "pragha.h"
 
 struct _PraghaPluginsEngine {
 	GObject           _parent;
@@ -28,6 +34,8 @@ struct _PraghaPluginsEngine {
 
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
+
+	gboolean           shutdown;
 };
 
 G_DEFINE_TYPE(PraghaPluginsEngine, pragha_plugins_engine, G_TYPE_OBJECT)
@@ -50,6 +58,12 @@ on_extension_removed (PeasExtensionSet  *set,
 	peas_activatable_deactivate (PEAS_ACTIVATABLE (exten));
 }
 
+gboolean
+pragha_plugins_is_shutdown (PraghaPluginsEngine *engine)
+{
+	return engine->shutdown;
+}
+
 void
 pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine)
 {
@@ -57,6 +71,8 @@ pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine)
 	gchar **loaded_plugins = NULL;
 
 	CDEBUG(DBG_PLUGIN,"Plugins engine shutdown");
+
+	engine->shutdown = TRUE;
 
 	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_added, engine);
 	g_signal_handlers_disconnect_by_func (engine->peas_exten_set, (GCallback) on_extension_removed, engine);
@@ -113,7 +129,6 @@ pragha_plugins_engine_dispose (GObject *object)
 	CDEBUG(DBG_PLUGIN,"Dispose plugins engine");
 
 	if (engine->peas_exten_set) {
-	
 		g_object_unref (engine->peas_exten_set);
 		engine->peas_exten_set = NULL;
 	}
@@ -144,6 +159,7 @@ static void
 pragha_plugins_engine_init (PraghaPluginsEngine *engine)
 {
 	engine->peas_engine = peas_engine_get_default ();
+	engine->shutdown = FALSE;
 }
 
 PraghaPluginsEngine *

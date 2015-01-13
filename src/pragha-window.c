@@ -34,7 +34,6 @@
 #include "pragha-playlists-mgmt.h"
 #include "pragha-session.h"
 #include "pragha-utils.h"
-#include "pragha.h"
 
 /********************************/
 /* Externally visible functions */

@@ -1,6 +1,6 @@
 /*************************************************************************/
 /* Copyright (C) 2007-2009 sujith <m.sujith@gmail.com>                   */
-/* Copyright (C) 2009-2013 matias <mati86dl@gmail.com>                   */
+/* Copyright (C) 2009-2015 matias <mati86dl@gmail.com>                   */
 /*                                                                       */
 /* This program is free software: you can redistribute it and/or modify  */
 /* it under the terms of the GNU General Public License as published by  */
@@ -16,8 +16,12 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#ifndef PRAGHA_H
-#define PRAGHA_H
+#ifndef PRAGHA_APPLICATION_H
+#define PRAGHA_APPLICATION_H
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -36,6 +40,12 @@
 #include "pragha-statusbar.h"
 #include "pragha-statusicon.h"
 #include "pragha-debug.h"
+
+#ifdef HAVE_LIBPEAS
+#include "pragha-plugins-engine.h"
+#endif
+
+G_BEGIN_DECLS
 
 /* Some default preferences. */
 
@@ -58,6 +68,10 @@ PraghaDatabase    *pragha_application_get_database        (PraghaApplication *pr
 PraghaArtCache    *pragha_application_get_art_cache       (PraghaApplication *pragha);
 
 PraghaBackend     *pragha_application_get_backend         (PraghaApplication *pragha);
+
+#ifdef HAVE_LIBPEAS
+PraghaPluginsEngine *pragha_application_get_plugins_engine (PraghaApplication *pragha);
+#endif
 
 PraghaScanner     *pragha_application_get_scanner         (PraghaApplication *pragha);
 
@@ -108,4 +122,6 @@ typedef struct {
 
 void pragha_application_quit (PraghaApplication *pragha);
 
-#endif /* PRAGHA_H */
+G_END_DECLS
+
+#endif /* PRAGHA_APPLICATION_H */

@@ -42,6 +42,7 @@
 #include "src/pragha-menubar.h"
 #include "src/pragha-musicobject.h"
 #include "src/pragha-musicobject-mgmt.h"
+#include "src/pragha-plugins-engine.h"
 #include "src/pragha-statusicon.h"
 #include "src/pragha-tagger.h"
 #include "src/pragha-simple-async.h"
@@ -1870,6 +1871,7 @@ pragha_plugin_activate (PeasActivatable *activatable)
 static void
 pragha_plugin_deactivate (PeasActivatable *activatable)
 {
+	PraghaPreferences *preferences;
 	PraghaLastfmPlugin *plugin = PRAGHA_LASTFM_PLUGIN (activatable);
 	PraghaLastfmPluginPrivate *priv = plugin->priv;
 
@@ -1881,6 +1883,13 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                      backend_changed_state_cb, plugin);
 
 	pragha_lastfm_disconnect (plugin);
+
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+		preferences = pragha_preferences_get ();
+		pragha_lastfm_plugin_set_user (preferences, NULL);
+		pragha_lastfm_plugin_set_password (preferences, NULL);
+		g_object_unref (preferences);
+	}
 
 	/* Remove menu and settings */
 
