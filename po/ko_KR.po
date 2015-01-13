@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# woosuk park <bjh13579@gmail.com>, 2013-2014
+# woosuk park <bjh13579@gmail.com>, 2013-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-17 11:53-0300\n"
-"PO-Revision-Date: 2014-05-17 14:58+0000\n"
-"Last-Translator: matias <mati86dl@gmail.com>\n"
+"POT-Creation-Date: 2014-12-21 14:02-0300\n"
+"PO-Revision-Date: 2015-01-11 05:12+0000\n"
+"Last-Translator: woosuk park <bjh13579@gmail.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/projects/p/Pragha/language/ko_KR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,12 +20,14 @@ msgstr ""
 
 #. GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
 #: ../src/info-bar-import-music.c:80 ../src/info-bar-import-music.c:127
+#: ../src/info-bar-import-music.c:170
 msgid "_No"
-msgstr ""
+msgstr "_아니요"
 
 #: ../src/info-bar-import-music.c:81 ../src/info-bar-import-music.c:128
+#: ../src/info-bar-import-music.c:171
 msgid "_Yes"
-msgstr ""
+msgstr "_예"
 
 #: ../src/info-bar-import-music.c:83
 #, c-format
@@ -34,953 +36,948 @@ msgstr "%s을 라이브러리로 가져오시겠습니까?"
 
 #: ../src/info-bar-import-music.c:130
 msgid "Would you like to update your music library?"
-msgstr ""
+msgstr "음악 라이브러리를 업데이트 하시겠습니까?"
 
-#: ../src/pragha-cmdline.c:198
+#: ../src/info-bar-import-music.c:173
+msgid "Some changes need restart pragha."
+msgstr "몇몇 변경사항을 적용하려면 Pragha를 재시작해야 됩니다."
+
+#: ../src/pragha-cmdline.c:199
 msgid "FILENAME"
 msgstr "파일명"
 
-#: ../src/pragha-cmdline.c:257
+#: ../src/pragha-cmdline.c:258
 msgid "Use --help to see a full list of available command line options."
 msgstr "--help를 사용하시면, 커맨드 라인에서 사용할수 있는 모든 명령의 목록을 보실수 있습니다."
 
-#: ../src/pragha-equalizer-dialog.c:41
+#: ../src/pragha-equalizer-dialog.c:44
 msgid "Disabled"
 msgstr "해제"
 
-#: ../src/pragha-equalizer-dialog.c:42
+#: ../src/pragha-equalizer-dialog.c:45
 msgid "Classical"
 msgstr "Classical"
 
-#: ../src/pragha-equalizer-dialog.c:43
+#: ../src/pragha-equalizer-dialog.c:46
 msgid "Club"
 msgstr "Club"
 
-#: ../src/pragha-equalizer-dialog.c:44
+#: ../src/pragha-equalizer-dialog.c:47
 msgid "Dance"
 msgstr "Dance"
 
-#: ../src/pragha-equalizer-dialog.c:45
+#: ../src/pragha-equalizer-dialog.c:48
 msgid "Full Bass"
 msgstr "Full Bass"
 
-#: ../src/pragha-equalizer-dialog.c:46
+#: ../src/pragha-equalizer-dialog.c:49
 msgid "Full Bass and Treble"
 msgstr "Full Bass and Treble"
 
-#: ../src/pragha-equalizer-dialog.c:47
+#: ../src/pragha-equalizer-dialog.c:50
 msgid "Full Treble"
 msgstr "Full Treble"
 
-#: ../src/pragha-equalizer-dialog.c:48
+#: ../src/pragha-equalizer-dialog.c:51
 msgid "Laptop Speakers and Headphones"
 msgstr "노트북 스피커 & 헤드폰"
 
-#: ../src/pragha-equalizer-dialog.c:49
+#: ../src/pragha-equalizer-dialog.c:52
 msgid "Large Hall"
 msgstr "Large Hall"
 
-#: ../src/pragha-equalizer-dialog.c:50
+#: ../src/pragha-equalizer-dialog.c:53
 msgid "Live"
 msgstr "Live"
 
-#: ../src/pragha-equalizer-dialog.c:51
+#: ../src/pragha-equalizer-dialog.c:54
 msgid "Party"
 msgstr "Party"
 
-#: ../src/pragha-equalizer-dialog.c:52
+#: ../src/pragha-equalizer-dialog.c:55
 msgid "Pop"
 msgstr "Pop"
 
-#: ../src/pragha-equalizer-dialog.c:53
+#: ../src/pragha-equalizer-dialog.c:56
 msgid "Reggae"
 msgstr "Reggae"
 
-#: ../src/pragha-equalizer-dialog.c:54
+#: ../src/pragha-equalizer-dialog.c:57
 msgid "Rock"
 msgstr "Rock"
 
-#: ../src/pragha-equalizer-dialog.c:55
+#: ../src/pragha-equalizer-dialog.c:58
 msgid "Ska"
 msgstr "Ska"
 
-#: ../src/pragha-equalizer-dialog.c:56
+#: ../src/pragha-equalizer-dialog.c:59
 msgid "Smiley Face Curve"
 msgstr "Smiley Face Curve"
 
-#: ../src/pragha-equalizer-dialog.c:57
+#: ../src/pragha-equalizer-dialog.c:60
 msgid "Soft"
 msgstr "Soft"
 
-#: ../src/pragha-equalizer-dialog.c:58
+#: ../src/pragha-equalizer-dialog.c:61
 msgid "Soft Rock"
 msgstr "Soft Rock"
 
-#: ../src/pragha-equalizer-dialog.c:59
+#: ../src/pragha-equalizer-dialog.c:62
 msgid "Techno"
 msgstr "Techno"
 
-#: ../src/pragha-equalizer-dialog.c:60
+#: ../src/pragha-equalizer-dialog.c:63
 msgid "Custom"
 msgstr "사용자 정의"
 
 #. Create the dialog
-#: ../src/pragha-equalizer-dialog.c:294
+#: ../src/pragha-equalizer-dialog.c:298
 msgid "Equalizer"
 msgstr "이퀄라이저"
 
-#: ../src/pragha-equalizer-dialog.c:297 ../src/pragha-menubar.c:576
-#: ../src/pragha-playlists-mgmt.c:85 ../src/pragha-playlists-mgmt.c:540
-#: ../src/pragha-playlists-mgmt.c:1218 ../src/pragha-preferences-dialog.c:1149
-#: ../src/pragha-tags-dialog.c:101 ../src/pragha-tags-dialog.c:648
+#: ../src/pragha-equalizer-dialog.c:301 ../src/pragha-playlists-mgmt.c:86
+#: ../src/pragha-playlists-mgmt.c:541 ../src/pragha-playlists-mgmt.c:1239
+#: ../src/pragha-preferences-dialog.c:1275 ../src/pragha-tags-dialog.c:102
+#: ../src/pragha-tags-dialog.c:661 ../src/pragha.c:412
+#: ../plugins/song-info/pragha-song-info-dialog.c:83
+#: ../plugins/tunein/pragha-tunein-plugin.c:224
 msgid "_Ok"
-msgstr ""
+msgstr "_확인"
 
-#: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:506
-#: ../plugins/notify/pragha-notify-plugin.c:167
+#: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:507
+#: ../plugins/notify/pragha-notify-plugin.c:170
 msgid "Unknown Artist"
 msgstr "알수없는 아티스트"
 
-#: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:513
-#: ../src/pragha-library-pane.c:518
-#: ../plugins/notify/pragha-notify-plugin.c:168
+#: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:514
+#: ../src/pragha-library-pane.c:519
+#: ../plugins/notify/pragha-notify-plugin.c:171
 msgid "Unknown Album"
 msgstr "알수없는 앨범"
 
 #. The search dialog
-#: ../src/pragha-filter-dialog.c:372
+#: ../src/pragha-filter-dialog.c:370
 msgid "Search in playlist"
 msgstr "플레이리스트내 검색"
 
-#: ../src/pragha-filter-dialog.c:375
+#: ../src/pragha-filter-dialog.c:373
 msgid "_Close"
-msgstr ""
+msgstr "_닫기"
 
-#: ../src/pragha-filter-dialog.c:378 ../src/pragha-playlist.c:206
+#: ../src/pragha-filter-dialog.c:376 ../src/pragha-playlist.c:210
 msgid "Add to playback queue"
 msgstr "재생 큐 추가"
 
-#: ../src/pragha-filter-dialog.c:379
+#: ../src/pragha-filter-dialog.c:377
 msgid "_Jump to"
-msgstr ""
+msgstr "_이동"
 
-#: ../src/pragha-library-pane.c:132
+#: ../src/pragha-library-pane.c:133
 msgid "_Skip"
 msgstr "넘기기(_S)"
 
-#: ../src/pragha-library-pane.c:133
+#: ../src/pragha-library-pane.c:134
 msgid "S_kip All"
 msgstr "모두 넘기기(_K)"
 
-#: ../src/pragha-library-pane.c:134
+#: ../src/pragha-library-pane.c:135
 msgid "Delete _All"
 msgstr "전체 삭제(_A)"
 
-#: ../src/pragha-library-pane.c:188
+#: ../src/pragha-library-pane.c:189
 msgid "_Expand library"
 msgstr "라이브러리 펼치기(_E)"
 
-#: ../src/pragha-library-pane.c:190
+#: ../src/pragha-library-pane.c:191
 msgid "_Collapse library"
 msgstr "라이브러리 접기(_C)"
 
-#: ../src/pragha-library-pane.c:192 ../src/pragha-library-pane.c:1586
+#: ../src/pragha-library-pane.c:193 ../src/pragha-library-pane.c:1586
 msgid "Folders structure"
 msgstr "폴더구조"
 
-#: ../src/pragha-library-pane.c:194 ../src/pragha-library-pane.c:1595
-#: ../src/pragha-playlist.c:114 ../src/pragha-playlist.c:3346
-#: ../src/pragha-playlist.c:3515 ../src/pragha-statusicon.c:178
-#: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:827
+#: ../src/pragha-library-pane.c:195 ../src/pragha-library-pane.c:1595
+#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3355
+#: ../src/pragha-playlist.c:3531 ../src/pragha-statusicon.c:180
+#: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:840
 msgid "Artist"
 msgstr "아티스트"
 
-#: ../src/pragha-library-pane.c:196 ../src/pragha-library-pane.c:1604
-#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3347
-#: ../src/pragha-playlist.c:3516 ../src/pragha-statusicon.c:179
-#: ../src/pragha-tags-dialog.c:117 ../src/pragha-tags-dialog.c:832
+#: ../src/pragha-library-pane.c:197 ../src/pragha-library-pane.c:1604
+#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3356
+#: ../src/pragha-playlist.c:3532 ../src/pragha-statusicon.c:181
+#: ../src/pragha-tags-dialog.c:118 ../src/pragha-tags-dialog.c:845
 msgid "Album"
 msgstr "앨범"
 
-#: ../src/pragha-library-pane.c:198 ../src/pragha-library-pane.c:1613
-#: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3348
-#: ../src/pragha-playlist.c:3517 ../src/pragha-tags-dialog.c:118
-#: ../src/pragha-tags-dialog.c:837
+#: ../src/pragha-library-pane.c:199 ../src/pragha-library-pane.c:1613
+#: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3357
+#: ../src/pragha-playlist.c:3533 ../src/pragha-tags-dialog.c:119
+#: ../src/pragha-tags-dialog.c:850
 msgid "Genre"
 msgstr "장르"
 
-#: ../src/pragha-library-pane.c:200 ../src/pragha-library-pane.c:1625
+#: ../src/pragha-library-pane.c:201 ../src/pragha-library-pane.c:1625
 msgid "Artist / Album"
 msgstr "아티스트 / 앨범"
 
-#: ../src/pragha-library-pane.c:202 ../src/pragha-library-pane.c:1649
+#: ../src/pragha-library-pane.c:203 ../src/pragha-library-pane.c:1649
 msgid "Genre / Album"
 msgstr "장르 / 앨범"
 
-#: ../src/pragha-library-pane.c:204 ../src/pragha-library-pane.c:1637
+#: ../src/pragha-library-pane.c:205 ../src/pragha-library-pane.c:1637
 msgid "Genre / Artist"
 msgstr "장르 / 아티스트"
 
-#: ../src/pragha-library-pane.c:206 ../src/pragha-library-pane.c:1664
+#: ../src/pragha-library-pane.c:207 ../src/pragha-library-pane.c:1664
 msgid "Genre / Artist / Album"
 msgstr "장르 / 아티스트 / 앨범"
 
 #. Playlist and Radio tree
-#: ../src/pragha-library-pane.c:242
+#: ../src/pragha-library-pane.c:243
 msgid "_Add to current playlist"
 msgstr "현재 플레이리스트에 추가(_A)"
 
-#: ../src/pragha-library-pane.c:244
+#: ../src/pragha-library-pane.c:245
 msgid "_Replace current playlist"
 msgstr "현재 플레이리스트 대체(_R)"
 
-#: ../src/pragha-library-pane.c:246
+#: ../src/pragha-library-pane.c:247
 msgid "Replace and _play"
 msgstr "대체하고 재생하기(_p)"
 
-#: ../src/pragha-library-pane.c:248 ../src/pragha-playlists-mgmt.c:536
+#: ../src/pragha-library-pane.c:249 ../src/pragha-playlists-mgmt.c:537
 msgid "Rename"
 msgstr "이름바꾸기"
 
-#: ../src/pragha-library-pane.c:250
+#: ../src/pragha-library-pane.c:251
 msgid "Delete"
 msgstr "삭제"
 
-#: ../src/pragha-library-pane.c:252 ../src/pragha-playlists-mgmt.c:1303
-#: ../src/pragha-playlists-mgmt.c:1341 ../src/pragha-playlists-mgmt.c:1393
-#: ../src/pragha-playlists-mgmt.c:1446
+#: ../src/pragha-library-pane.c:253 ../src/pragha-menubar.c:222
+#: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1337
+#: ../src/pragha-playlists-mgmt.c:1375
 msgid "Export"
 msgstr "내보내기"
 
 #. Set dialog properties
-#: ../src/pragha-library-pane.c:254 ../src/pragha-tags-dialog.c:98
+#: ../src/pragha-library-pane.c:255 ../src/pragha-tags-dialog.c:99
 msgid "Edit tags"
 msgstr "태그 수정"
 
-#: ../src/pragha-library-pane.c:256
+#: ../src/pragha-library-pane.c:257
 msgid "Move to _trash"
 msgstr "휴지통으로 이동(_T)"
 
-#: ../src/pragha-library-pane.c:258
+#: ../src/pragha-library-pane.c:259
 msgid "Delete from library"
 msgstr "라이브러리에서 삭제"
 
-#: ../src/pragha-library-pane.c:511
+#: ../src/pragha-library-pane.c:512
 msgid "Unknown"
 msgstr "알수 없음"
 
-#: ../src/pragha-library-pane.c:523
+#: ../src/pragha-library-pane.c:524
 msgid "Unknown Genre"
 msgstr "알수없는 장르"
 
-#: ../src/pragha-library-pane.c:843
-msgid "File can´t be moved to trash. Delete permanently?"
-msgstr ""
-
 #: ../src/pragha-library-pane.c:844
+msgid "File can't be moved to trash. Delete permanently?"
+msgstr "파일을 휴지통으로 이동할수 없습니다. 영구 삭제하시겠습니까?"
+
+#: ../src/pragha-library-pane.c:845
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
 msgstr "\"%s\" 파일을 휴지통으로 이동할수 없습니다. 이유는 이렇습니다: %s"
 
-#: ../src/pragha-library-pane.c:852 ../src/pragha-menubar.c:375
-#: ../src/pragha-menubar.c:575 ../src/pragha-playlists-mgmt.c:84
-#: ../src/pragha-playlists-mgmt.c:539 ../src/pragha-playlists-mgmt.c:611
-#: ../src/pragha-playlists-mgmt.c:1217 ../src/pragha-preferences-dialog.c:496
-#: ../src/pragha-preferences-dialog.c:1148 ../src/pragha-tags-dialog.c:100
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:847
+#: ../src/pragha-library-pane.c:853 ../src/pragha-playlists-mgmt.c:85
+#: ../src/pragha-playlists-mgmt.c:540 ../src/pragha-playlists-mgmt.c:612
+#: ../src/pragha-playlists-mgmt.c:1238 ../src/pragha-preferences-dialog.c:667
+#: ../src/pragha-preferences-dialog.c:1274 ../src/pragha-tags-dialog.c:101
+#: ../src/pragha.c:210 ../src/pragha.c:411
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:930
+#: ../plugins/tunein/pragha-tunein-plugin.c:223
 msgid "_Cancel"
-msgstr ""
+msgstr "_취소"
 
-#: ../src/pragha-library-pane.c:858
+#: ../src/pragha-library-pane.c:859
 msgid "_Delete"
-msgstr ""
+msgstr "_삭제"
 
-#: ../src/pragha-library-pane.c:1900 ../src/pragha-library-pane.c:1982
-#: ../src/pragha-menubar.c:472 ../src/pragha-playlists-mgmt.c:640
-#: ../src/pragha-playlists-mgmt.c:667
+#: ../src/pragha-library-pane.c:1896 ../src/pragha-library-pane.c:1978
+#: ../src/pragha-playlists-mgmt.c:641 ../src/pragha-playlists-mgmt.c:668
+#: ../src/pragha.c:307 ../plugins/mpris2/pragha-mpris2-plugin.c:855
 msgid "Playlists"
 msgstr "플레이리스트"
 
-#: ../src/pragha-library-pane.c:1916 ../src/pragha-library-pane.c:1991
+#: ../src/pragha-library-pane.c:1912 ../src/pragha-library-pane.c:1987
 msgid "Radios"
 msgstr "라디오"
 
-#: ../src/pragha-library-pane.c:1932 ../src/pragha-preferences-dialog.c:855
-#: ../src/pragha-preferences-dialog.c:1155
+#: ../src/pragha-library-pane.c:1928 ../src/pragha-preferences-dialog.c:957
+#: ../src/pragha-preferences-dialog.c:1281
 msgid "Library"
 msgstr "라이브러리"
 
-#: ../src/pragha-library-pane.c:2487
+#: ../src/pragha-library-pane.c:2483
 msgid "Really want to move the files to trash?"
 msgstr "이 파일을 휴지통에 버리시겠습니까?"
 
-#: ../src/pragha-library-pane.c:2489
+#: ../src/pragha-library-pane.c:2485
 msgid "Delete permanently instead of moving to trash"
-msgstr ""
+msgstr "휴지통으로 보내는 대신 바로 삭제"
 
-#: ../src/pragha-library-pane.c:2539
+#: ../src/pragha-library-pane.c:2535
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
 msgstr "라이브러리에 저장된 현 파일을 삭제하시겠습니까?\n\n경고: 복구하실려면 전체 라이브러리를 다시 스캔해야 합니다."
 
-#: ../src/pragha-menubar.c:161
+#: ../src/pragha-menubar.c:190
 msgid "_Playback"
 msgstr "_재생"
 
-#: ../src/pragha-menubar.c:162
+#: ../src/pragha-menubar.c:191
 msgid "Play_list"
 msgstr "플레이리스트(_l)"
 
-#: ../src/pragha-menubar.c:163
+#: ../src/pragha-menubar.c:192
 msgid "_View"
 msgstr "보기(_V)"
 
-#: ../src/pragha-menubar.c:164 ../src/pragha-playlist.c:219
+#: ../src/pragha-menubar.c:193 ../src/pragha-playlist.c:223
 msgid "_Tools"
 msgstr "도구(_T)"
 
-#: ../src/pragha-menubar.c:165
+#: ../src/pragha-menubar.c:194
 msgid "_Help"
 msgstr "도움말(_H)"
 
-#: ../src/pragha-menubar.c:166 ../src/pragha-statusicon.c:81
-#: ../plugins/notify/pragha-notify-plugin.c:182
+#: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:83
+#: ../plugins/notify/pragha-notify-plugin.c:185
 msgid "Previous track"
-msgstr ""
+msgstr "전 트랙"
 
-#: ../src/pragha-menubar.c:168 ../src/pragha-statusicon.c:83
+#: ../src/pragha-menubar.c:197 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
 msgstr "재생 / 일시정지"
 
-#: ../src/pragha-menubar.c:170 ../src/pragha-statusicon.c:85
+#: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:87
 msgid "Stop"
 msgstr "정지"
 
-#: ../src/pragha-menubar.c:172 ../src/pragha-statusicon.c:87
-#: ../plugins/notify/pragha-notify-plugin.c:186
+#: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:89
+#: ../plugins/notify/pragha-notify-plugin.c:189
 msgid "Next track"
 msgstr "다음 트랙"
 
-#: ../src/pragha-menubar.c:174 ../src/pragha-playlist.c:222
-#: ../src/pragha-statusicon.c:89
+#: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:226
+#: ../src/pragha-statusicon.c:91
 msgid "Edit track information"
 msgstr "트랙 정보 수정"
 
-#: ../src/pragha-menubar.c:176 ../src/pragha-statusicon.c:91
+#: ../src/pragha-menubar.c:205 ../src/pragha-statusicon.c:93
 msgid "_Quit"
 msgstr "종료(_Q)"
 
-#: ../src/pragha-menubar.c:178 ../src/pragha-statusicon.c:77
+#: ../src/pragha-menubar.c:207 ../src/pragha-statusicon.c:79
 msgid "_Add files"
 msgstr "파일 추가(_A)"
 
-#: ../src/pragha-menubar.c:179
+#: ../src/pragha-menubar.c:208
 msgid "Open a media file"
 msgstr "미디어 파일 열기"
 
-#: ../src/pragha-menubar.c:180 ../src/pragha-statusicon.c:79
+#: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:81
 msgid "Add _location"
 msgstr "주소 추가 (_l)"
 
-#: ../src/pragha-menubar.c:182
+#: ../src/pragha-menubar.c:211
 msgid "_Add the library"
 msgstr "라이브러리 추가하기(_A)"
 
-#: ../src/pragha-menubar.c:184
+#: ../src/pragha-menubar.c:213
 msgid "Remove selection from playlist"
 msgstr "플레이리스트에서 선택한 항목 삭제"
 
-#: ../src/pragha-menubar.c:186 ../src/pragha-playlist.c:212
+#: ../src/pragha-menubar.c:215 ../src/pragha-playlist.c:216
 msgid "Crop playlist"
 msgstr "플레이리스트 자르기"
 
-#: ../src/pragha-menubar.c:188 ../src/pragha-playlist.c:214
+#: ../src/pragha-menubar.c:217 ../src/pragha-playlist.c:218
 msgid "Clear playlist"
 msgstr "플레이리스트 취소"
 
-#: ../src/pragha-menubar.c:190 ../src/pragha-playlist.c:216
-#: ../src/pragha-playlists-mgmt.c:68 ../src/pragha-playlists-mgmt.c:91
-#: ../src/pragha-playlists-mgmt.c:1222
+#: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:220
+#: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
+#: ../src/pragha-playlists-mgmt.c:1243
 msgid "Save playlist"
 msgstr "플레이리스트 저장"
 
-#: ../src/pragha-menubar.c:191 ../src/pragha-playlist.c:217
-#: ../src/pragha-playlists-mgmt.c:70 ../src/pragha-playlists-mgmt.c:93
-#: ../src/pragha-playlists-mgmt.c:1224
+#: ../src/pragha-menubar.c:220 ../src/pragha-menubar.c:225
+#: ../src/pragha-playlists-mgmt.c:1332 ../src/pragha-playlists-mgmt.c:1370
+msgid "New playlist"
+msgstr "새 플레이리스트"
+
+#: ../src/pragha-menubar.c:224 ../src/pragha-playlist.c:221
+#: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
+#: ../src/pragha-playlists-mgmt.c:1245
 msgid "Save selection"
 msgstr "선택한 곡 리스트 저장"
 
-#: ../src/pragha-menubar.c:192
+#: ../src/pragha-menubar.c:229
 msgid "_Search in playlist"
 msgstr "플레이리스트내 검색(_S)"
 
-#: ../src/pragha-menubar.c:194
+#: ../src/pragha-menubar.c:231
 msgid "_Preferences"
 msgstr "설정(_P)"
 
-#: ../src/pragha-menubar.c:196
+#: ../src/pragha-menubar.c:233
 msgid "Jump to playing song"
 msgstr "재생중인 음악으로 이동"
 
-#: ../src/pragha-menubar.c:198
+#: ../src/pragha-menubar.c:235
 msgid "E_qualizer"
 msgstr "이퀄라이저(_q)"
 
-#: ../src/pragha-menubar.c:200
+#: ../src/pragha-menubar.c:237
 msgid "_Rescan library"
 msgstr "라이브러리 재스캔(_R)"
 
-#: ../src/pragha-menubar.c:202
+#: ../src/pragha-menubar.c:239
+#: ../plugins/removable-media/pragha-devices-removable.c:302
 msgid "_Update library"
 msgstr "라이브러리 업데이트(_U)"
 
-#: ../src/pragha-menubar.c:204
+#: ../src/pragha-menubar.c:241
 msgid "_Statistics"
 msgstr "통계(_S)"
 
-#: ../src/pragha-menubar.c:206
+#: ../src/pragha-menubar.c:243
 msgid "Homepage"
 msgstr "홈페이지"
 
-#: ../src/pragha-menubar.c:208
+#: ../src/pragha-menubar.c:245
 msgid "Community"
 msgstr "커뮤니티"
 
-#: ../src/pragha-menubar.c:210
+#: ../src/pragha-menubar.c:247
 msgid "Wiki"
 msgstr "위키"
 
-#: ../src/pragha-menubar.c:212
+#: ../src/pragha-menubar.c:249
 msgid "Translate Pragha"
 msgstr "Pragha 번역하기"
 
-#: ../src/pragha-menubar.c:214 ../src/pragha-statusicon.c:75
+#: ../src/pragha-menubar.c:251 ../src/pragha-statusicon.c:77
 msgid "About"
 msgstr "대하여"
 
-#: ../src/pragha-menubar.c:219
+#: ../src/pragha-menubar.c:256
 msgid "_Shuffle"
 msgstr "랜덤재생(_S)"
 
-#: ../src/pragha-menubar.c:222
+#: ../src/pragha-menubar.c:259
 msgid "_Repeat"
 msgstr "반복(_R)"
 
-#: ../src/pragha-menubar.c:225
+#: ../src/pragha-menubar.c:262
 msgid "_Fullscreen"
 msgstr "전체화면(_F)"
 
-#: ../src/pragha-menubar.c:228
+#: ../src/pragha-menubar.c:265
 msgid "Lateral _panel"
 msgstr "옆 패널(_P)"
 
-#: ../src/pragha-menubar.c:231
+#: ../src/pragha-menubar.c:268
 msgid "Secondary lateral panel"
-msgstr ""
+msgstr "추가적인 옆 패널"
 
-#: ../src/pragha-menubar.c:234
+#: ../src/pragha-menubar.c:271
 msgid "Playback controls below"
 msgstr "재생 컨트롤 아래로 보내기"
 
-#: ../src/pragha-menubar.c:237
+#: ../src/pragha-menubar.c:274
+msgid "Menubar"
+msgstr "메뉴바"
+
+#: ../src/pragha-menubar.c:277
 msgid "Status bar"
 msgstr "상태"
 
-#: ../src/pragha-menubar.c:345
-msgid "Select a file to play"
-msgstr "선택한 파일 재생"
-
-#: ../src/pragha-menubar.c:367 ../src/pragha-preferences-dialog.c:1011
-msgid "Add files recursively"
-msgstr "하위 파일들을 추가"
-
-#: ../src/pragha-menubar.c:376 ../src/pragha-preferences-dialog.c:882
-msgid "_Add"
-msgstr ""
-
-#: ../src/pragha-menubar.c:389 ../plugins/lastfm/pragha-lastfm-plugin.c:852
-msgid "Supported media"
-msgstr "지원하는 미디어"
-
-#: ../src/pragha-menubar.c:475
-msgid "All files"
-msgstr "전체 파일"
-
-#: ../src/pragha-menubar.c:549
-msgid "Enter the URL of an internet radio stream"
-msgstr "인터넷 라디오 스트림의 URL을 입력해주세요"
-
-#: ../src/pragha-menubar.c:554
-msgid "Give it a name to save"
-msgstr "저장할 이름을 입력해주세요"
-
-#: ../src/pragha-menubar.c:572
-msgid "Add a location"
-msgstr "주소 추가"
-
-#: ../src/pragha-menubar.c:929
+#: ../src/pragha-menubar.c:638
 msgid "Total Tracks:"
 msgstr "총 트랙수:"
 
-#: ../src/pragha-menubar.c:931
+#: ../src/pragha-menubar.c:640
 msgid "Total Artists:"
 msgstr "총 아티스트 수:"
 
-#: ../src/pragha-menubar.c:933
+#: ../src/pragha-menubar.c:642
 msgid "Total Albums:"
 msgstr "총 앨범수:"
 
-#: ../src/pragha-menubar.c:936
+#: ../src/pragha-menubar.c:645
 msgid "Statistics"
 msgstr "통계"
 
-#: ../src/pragha-menubar.c:962
-msgid "translator-credits"
-msgstr "번역자 크레딧"
-
 #. Create labels
-#: ../src/pragha-playlist.c:113 ../src/pragha-playlist.c:3345
-#: ../src/pragha-playlist.c:3514 ../src/pragha-statusicon.c:177
-#: ../src/pragha-tags-dialog.c:115 ../src/pragha-tags-dialog.c:822
+#: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3354
+#: ../src/pragha-playlist.c:3530 ../src/pragha-statusicon.c:179
+#: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:835
 msgid "Title"
 msgstr "음악 이름"
 
-#: ../src/pragha-playlist.c:117 ../src/pragha-playlist.c:3349
-#: ../src/pragha-playlist.c:3518 ../src/pragha-tags-dialog.c:573
+#: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3358
+#: ../src/pragha-playlist.c:3534 ../src/pragha-tags-dialog.c:576
 msgid "Bitrate"
 msgstr "비트레이트"
 
-#: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3350
-#: ../src/pragha-playlist.c:3519 ../src/pragha-tags-dialog.c:120
+#: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3359
+#: ../src/pragha-playlist.c:3535 ../src/pragha-tags-dialog.c:121
 msgid "Year"
 msgstr "년"
 
-#: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3351
-#: ../src/pragha-playlist.c:3520 ../src/pragha-tags-dialog.c:121
-#: ../src/pragha-tags-dialog.c:842
+#: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3360
+#: ../src/pragha-playlist.c:3536 ../src/pragha-tags-dialog.c:122
+#: ../src/pragha-tags-dialog.c:855
 msgid "Comment"
 msgstr "주석"
 
 #. Create labels
-#: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3352
-#: ../src/pragha-playlist.c:3521 ../src/pragha-statusicon.c:180
-#: ../src/pragha-tags-dialog.c:572
+#: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3361
+#: ../src/pragha-playlist.c:3537 ../src/pragha-statusicon.c:182
+#: ../src/pragha-tags-dialog.c:575
 msgid "Length"
 msgstr "길이"
 
-#: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3353
-#: ../src/pragha-playlist.c:3522 ../src/pragha-tags-dialog.c:577
+#: ../src/pragha-playlist.c:123 ../src/pragha-playlist.c:3362
+#: ../src/pragha-playlist.c:3538 ../src/pragha-tags-dialog.c:580
 msgid "Filename"
 msgstr "파일명"
 
-#: ../src/pragha-playlist.c:208
-msgid "Remove from playback queue"
-msgstr ""
+#: ../src/pragha-playlist.c:124 ../src/pragha-playlist.c:3363
+#: ../src/pragha-playlist.c:3539 ../src/pragha-tags-dialog.c:581
+msgid "Mimetype"
+msgstr "MIME 유형"
 
-#: ../src/pragha-playlist.c:210
+#: ../src/pragha-playlist.c:212
+msgid "Remove from playback queue"
+msgstr "플레이백 큐에서 제거"
+
+#: ../src/pragha-playlist.c:214
 msgid "Remove from playlist"
 msgstr "플레이리스트에서 삭제"
 
-#: ../src/pragha-playlist.c:218
+#: ../src/pragha-playlist.c:222
 msgid "_Send to"
-msgstr ""
+msgstr "_보내기"
 
-#: ../src/pragha-playlist.c:2477
+#: ../src/pragha-playlist.c:2485
 #, c-format
 msgid "Copy \"%i\" to selected track numbers"
 msgstr "선택된 %i 트랙 번호 복사"
 
-#: ../src/pragha-playlist.c:2483
+#: ../src/pragha-playlist.c:2491
 #, c-format
 msgid "Copy \"%s\" to selected titles"
 msgstr "선택된 제목 \"%s\"을 복사"
 
-#: ../src/pragha-playlist.c:2489
+#: ../src/pragha-playlist.c:2497
 #, c-format
 msgid "Copy \"%s\" to selected artists"
 msgstr "선택된 아티스트 \"%s\"를 복사"
 
-#: ../src/pragha-playlist.c:2495
+#: ../src/pragha-playlist.c:2503
 #, c-format
 msgid "Copy \"%s\" to selected albums"
 msgstr "선택된 앨범 \"%s\"을 복사"
 
-#: ../src/pragha-playlist.c:2501
+#: ../src/pragha-playlist.c:2509
 #, c-format
 msgid "Copy \"%s\" to selected genres"
 msgstr "선택된 장르 \"%s\"을 복사"
 
-#: ../src/pragha-playlist.c:2507
+#: ../src/pragha-playlist.c:2515
 #, c-format
 msgid "Copy \"%i\" to selected years"
 msgstr "선택된 \"%i\" 년 복사"
 
-#: ../src/pragha-playlist.c:2513
+#: ../src/pragha-playlist.c:2521
 #, c-format
 msgid "Copy \"%s\" to selected comments"
 msgstr "선택된 주석 \"%s\" 복사"
 
 #. Create the checkmenu items
-#: ../src/pragha-playlist.c:3344 ../src/pragha-playlist.c:3513
-#: ../src/pragha.c:184
+#: ../src/pragha-playlist.c:3353 ../src/pragha-playlist.c:3529
+#: ../src/pragha.c:614
 msgid "Track"
 msgid_plural "Tracks"
 msgstr[0] "트랙"
 
-#: ../src/pragha-playlist.c:3356
+#: ../src/pragha-playlist.c:3366
 msgid "Clear sort"
 msgstr "선택 취소"
 
-#: ../src/pragha-playlists-mgmt.c:72 ../src/pragha-preferences-dialog.c:933
+#: ../src/pragha-playlists-mgmt.c:73 ../src/pragha-preferences-dialog.c:1062
 msgid "Playlist"
 msgstr "플레이리스트"
 
-#: ../src/pragha-playlists-mgmt.c:128
+#: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
 msgstr "<b>con_playlist</b>는 예약된 플레이리스트 이름입니다"
 
-#: ../src/pragha-playlists-mgmt.c:152
+#: ../src/pragha-playlists-mgmt.c:153
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
 msgstr "%s 플레이리스트를 겹쳐쓰시겠습니까?"
 
-#: ../src/pragha-playlists-mgmt.c:529
+#: ../src/pragha-playlists-mgmt.c:530
 msgid "Choose a new name"
 msgstr "새로운 이름 선택"
 
-#: ../src/pragha-playlists-mgmt.c:578
+#: ../src/pragha-playlists-mgmt.c:579
 #, c-format
 msgid "Do you want to delete the item: %s ?"
 msgstr "%s 항목을 삭제하시겠습니까?"
 
-#: ../src/pragha-playlists-mgmt.c:608
+#: ../src/pragha-playlists-mgmt.c:609
 msgid "Export playlist to file"
 msgstr "파일로 플레이리스트 내보내기"
 
-#: ../src/pragha-playlists-mgmt.c:612
+#: ../src/pragha-playlists-mgmt.c:613
 msgid "_Save"
-msgstr ""
+msgstr "_저장"
 
-#: ../src/pragha-playlists-mgmt.c:1049
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:820
+#: ../src/pragha-playlists-mgmt.c:1050
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:903
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
 msgstr "가져온 플레이리스트에서 %d / %d개의 곡이 추가되었습니다"
 
-#: ../src/pragha-playlists-mgmt.c:1202
+#: ../src/pragha-playlists-mgmt.c:1223
 msgid "What do you want to do?"
 msgstr "뭘 원하시는지요?"
 
-#: ../src/pragha-playlists-mgmt.c:1204
+#: ../src/pragha-playlists-mgmt.c:1225
 #, c-format
 msgid "Replace the playlist \"%s\""
 msgstr "\"%s\" 플레이리스트 대체하기"
 
-#: ../src/pragha-playlists-mgmt.c:1209
+#: ../src/pragha-playlists-mgmt.c:1230
 #, c-format
 msgid "Add to playlist \"%s\""
 msgstr "\"%s\" 플레이리스트에 추가하기"
 
-#: ../src/pragha-playlists-mgmt.c:1298 ../src/pragha-playlists-mgmt.c:1336
-#: ../src/pragha-playlists-mgmt.c:1381 ../src/pragha-playlists-mgmt.c:1435
-msgid "New playlist"
-msgstr "새 플레이리스트"
-
-#: ../src/pragha-preferences-dialog.c:191
+#: ../src/pragha-preferences-dialog.c:194
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
 msgstr "패턴은 다음과 같은 형식만 됩니다:<filename>;<filename>;....\n최대 패턴의 갯수는 6개입니다.\n와일드 카드는 현재 지원하지 않습니다 ( 패치 부탁드려요 :-) )."
 
-#: ../src/pragha-preferences-dialog.c:213
+#: ../src/pragha-preferences-dialog.c:217
 msgid "Album art pattern"
 msgstr "앨범 아트 패턴"
 
-#: ../src/pragha-preferences-dialog.c:370
-#: ../src/pragha-preferences-dialog.c:1002
+#: ../src/pragha-preferences-dialog.c:521
+#: ../src/pragha-preferences-dialog.c:1130
 msgid "Start normal"
 msgstr "일반적으로 시작"
 
-#: ../src/pragha-preferences-dialog.c:374
-#: ../src/pragha-preferences-dialog.c:1003
+#: ../src/pragha-preferences-dialog.c:525
+#: ../src/pragha-preferences-dialog.c:1131
 msgid "Start fullscreen"
 msgstr "전체화면에서 시작"
 
-#: ../src/pragha-preferences-dialog.c:378
-#: ../src/pragha-preferences-dialog.c:1004
+#: ../src/pragha-preferences-dialog.c:529
+#: ../src/pragha-preferences-dialog.c:1132
 msgid "Start in system tray"
 msgstr "시스템 트레이에서 시작"
 
 #. Create a folder chooser dialog
-#: ../src/pragha-preferences-dialog.c:493
+#: ../src/pragha-preferences-dialog.c:664
 msgid "Select a folder to add to library"
 msgstr "라이브러리에 추가할 폴더 선택"
 
-#: ../src/pragha-preferences-dialog.c:497
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:848
+#: ../src/pragha-preferences-dialog.c:668
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:931
 msgid "_Open"
-msgstr ""
+msgstr "_열기"
 
-#: ../src/pragha-preferences-dialog.c:791
-#: ../src/pragha-preferences-dialog.c:1171
+#: ../src/pragha-preferences-dialog.c:893
+#: ../src/pragha-preferences-dialog.c:1300
 msgid "Audio"
 msgstr "오디오"
 
-#: ../src/pragha-preferences-dialog.c:793
+#: ../src/pragha-preferences-dialog.c:895
 msgid "Audio sink"
 msgstr "오디오 싱크"
 
-#: ../src/pragha-preferences-dialog.c:797
-#: ../src/pragha-preferences-dialog.c:816
-#: ../src/pragha-preferences-dialog.c:822
+#: ../src/pragha-preferences-dialog.c:899
+#: ../src/pragha-preferences-dialog.c:918
+#: ../src/pragha-preferences-dialog.c:924
 msgid "Restart Required"
 msgstr "재시작 필요"
 
-#: ../src/pragha-preferences-dialog.c:812
+#: ../src/pragha-preferences-dialog.c:914
 msgid "Audio Device"
 msgstr "오디오 장치"
 
-#: ../src/pragha-preferences-dialog.c:821
+#: ../src/pragha-preferences-dialog.c:923
 msgid "Use software mixer"
 msgstr "소프트웨어 믹서 사용"
 
-#: ../src/pragha-preferences-dialog.c:863
+#: ../src/pragha-preferences-dialog.c:961
+msgid "Can not change directories while they are analyzing."
+msgstr "분석 도중에 디렉터리를 변경할 수 없습니다"
+
+#: ../src/pragha-preferences-dialog.c:971
 msgid "Folders"
 msgstr "폴더"
 
-#: ../src/pragha-preferences-dialog.c:883
-msgid "_Remove"
-msgstr ""
+#: ../src/pragha-preferences-dialog.c:990 ../src/pragha.c:211
+msgid "_Add"
+msgstr "_추가"
 
-#: ../src/pragha-preferences-dialog.c:899
+#: ../src/pragha-preferences-dialog.c:991
+msgid "_Remove"
+msgstr "_삭제"
+
+#: ../src/pragha-preferences-dialog.c:1007
 msgid "Merge folders in the folders estructure view"
 msgstr "폴더 구조 보기에서 폴더 병합"
 
-#: ../src/pragha-preferences-dialog.c:902
+#: ../src/pragha-preferences-dialog.c:1010
 msgid "Sort albums by release year"
 msgstr "발매 년대로 앨범 정렬"
 
-#: ../src/pragha-preferences-dialog.c:935
+#. Labels
+#: ../src/pragha-preferences-dialog.c:1053
+#: ../src/pragha-preferences-dialog.c:1280
+msgid "Appearance"
+msgstr "겉 모양"
+
+#: ../src/pragha-preferences-dialog.c:1055
+msgid "Use Gnome 3 HIG"
+msgstr "Gnome 3 HIG 사용"
+
+#: ../src/pragha-preferences-dialog.c:1064
 msgid "Highlight rows on current playlist"
 msgstr "현재 플레이리스트 줄에서 강조하기"
 
-#: ../src/pragha-preferences-dialog.c:938
-msgid "Use symbolic icons in panel"
-msgstr ""
-
-#: ../src/pragha-preferences-dialog.c:941
+#: ../src/pragha-preferences-dialog.c:1067
 msgid "Controls"
 msgstr "제어"
 
-#: ../src/pragha-preferences-dialog.c:943
+#: ../src/pragha-preferences-dialog.c:1069
 msgid "Show Album art in Panel"
 msgstr "패널에 앨범 아트 보이기"
 
-#: ../src/pragha-preferences-dialog.c:946
+#: ../src/pragha-preferences-dialog.c:1072
 msgid "Size of Album art"
 msgstr "앨범 아트 크기"
 
-#: ../src/pragha-preferences-dialog.c:951
+#: ../src/pragha-preferences-dialog.c:1077
 msgid "Album art file pattern"
 msgstr "앨범 아트 파일 패턴"
 
-#: ../src/pragha-preferences-dialog.c:990
+#: ../src/pragha-preferences-dialog.c:1118
 msgid "Search"
 msgstr "검색"
 
 #. Instant search.
-#: ../src/pragha-preferences-dialog.c:992 ../src/pragha-search-entry.c:40
+#: ../src/pragha-preferences-dialog.c:1120 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
-msgstr ""
+msgstr "적는동안 검색"
 
 #. Aproximate search.
-#: ../src/pragha-preferences-dialog.c:995 ../src/pragha-search-entry.c:47
+#: ../src/pragha-preferences-dialog.c:1123 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
-msgstr ""
+msgstr "유사한 단어 검색"
 
-#: ../src/pragha-preferences-dialog.c:998
+#: ../src/pragha-preferences-dialog.c:1126
 msgid "When starting pragha"
 msgstr "Pragha 시작시"
 
-#: ../src/pragha-preferences-dialog.c:1001
+#: ../src/pragha-preferences-dialog.c:1129
 msgid "Remember last window state"
 msgstr "마지막 창 상태 기억"
 
-#: ../src/pragha-preferences-dialog.c:1007
+#: ../src/pragha-preferences-dialog.c:1135
 msgid "Restore last playlist"
 msgstr "마지막 플레이리스트 복원"
 
-#: ../src/pragha-preferences-dialog.c:1010
+#: ../src/pragha-preferences-dialog.c:1138
 msgid "When adding folders"
 msgstr "폴더 추가시"
 
-#: ../src/pragha-preferences-dialog.c:1035
-#: ../src/pragha-preferences-dialog.c:1186
+#: ../src/pragha-preferences-dialog.c:1139 ../src/pragha.c:202
+msgid "Add files recursively"
+msgstr "하위 파일들을 추가"
+
+#: ../src/pragha-preferences-dialog.c:1163
+#: ../src/pragha-preferences-dialog.c:1315
 msgid "Desktop"
 msgstr "데스크탑"
 
-#: ../src/pragha-preferences-dialog.c:1037
+#: ../src/pragha-preferences-dialog.c:1165
 msgid "Show Pragha icon in the notification area"
 msgstr "Pragha 아이콘을 알림 항목에 보이기"
 
-#: ../src/pragha-preferences-dialog.c:1040
+#: ../src/pragha-preferences-dialog.c:1168
 msgid "Minimize Pragha when closing window"
-msgstr ""
+msgstr "창을 닫을때 Pragha 최소화 하기"
 
-#: ../src/pragha-preferences-dialog.c:1066
-#: ../src/pragha-preferences-dialog.c:1158
+#: ../src/pragha-preferences-dialog.c:1189
+#: ../src/pragha-preferences-dialog.c:1284
 msgid "Plugins"
-msgstr ""
+msgstr "플러그인"
 
 #. The main preferences dialog
-#: ../src/pragha-preferences-dialog.c:1145
+#: ../src/pragha-preferences-dialog.c:1271
 msgid "Preferences"
-msgstr ""
+msgstr "설정"
 
-#. Labels
-#: ../src/pragha-preferences-dialog.c:1154
-msgid "Appearance"
-msgstr "겉 모양"
-
-#: ../src/pragha-preferences-dialog.c:1156
+#: ../src/pragha-preferences-dialog.c:1282
 msgid "General"
 msgstr "일반"
 
-#: ../src/pragha-preferences-dialog.c:1190
+#: ../src/pragha-preferences-dialog.c:1319
 msgid "Services"
 msgstr "서비스"
 
 #. Add to dialog
-#: ../src/pragha-preferences-dialog.c:1203
+#: ../src/pragha-preferences-dialog.c:1332
 msgid "Preferences of Pragha"
 msgstr "Pragha 설정"
 
-#: ../src/pragha-scanner.c:88
+#: ../src/pragha-scanner.c:93
 #, c-format
 msgid "%i files analized of %i detected"
 msgstr "%i / %i 파일 분석됨"
 
-#: ../src/pragha-scanner.c:94
+#: ../src/pragha-scanner.c:99
 msgid "Searching files to analyze"
 msgstr "분석을 위해 파일 검색중"
 
-#: ../src/pragha-scanner.c:225
+#: ../src/pragha-scanner.c:250
 msgid "Library scan complete"
 msgstr "라이브러리 스캔 완료"
 
-#: ../src/pragha-statusicon.c:172 ../src/pragha-toolbar.c:165
-#: ../src/pragha-toolbar.c:468
+#: ../src/pragha-statusicon.c:174 ../src/pragha-toolbar.c:174
+#: ../src/pragha-toolbar.c:525
 msgid "<b>Not playing</b>"
 msgstr "<b>재생중인 음악이 없습니다</b>"
 
-#: ../src/pragha-tags-dialog.c:119
+#: ../src/pragha-tags-dialog.c:120
 msgid "Track No"
 msgstr "트랙 번호"
 
-#: ../src/pragha-tags-dialog.c:122
+#: ../src/pragha-tags-dialog.c:123
 msgid "File"
 msgstr "파일"
 
 #. The main edit dialog
-#: ../src/pragha-tags-dialog.c:455 ../src/pragha-tags-dialog.c:645
+#: ../src/pragha-tags-dialog.c:456 ../src/pragha-tags-dialog.c:658
 msgid "Details"
 msgstr "상세사항"
 
-#: ../src/pragha-tags-dialog.c:556
+#: ../src/pragha-tags-dialog.c:558
 msgid "channel"
 msgid_plural "channels"
 msgstr[0] "채널"
 
-#: ../src/pragha-tags-dialog.c:574
+#: ../src/pragha-tags-dialog.c:577
 msgid "Channels"
 msgstr "채널"
 
-#: ../src/pragha-tags-dialog.c:575
+#: ../src/pragha-tags-dialog.c:578
 msgid "Samplerate"
 msgstr "샘플레이트"
 
-#: ../src/pragha-tags-dialog.c:576
+#: ../src/pragha-tags-dialog.c:579
 msgid "Folder"
 msgstr "폴더"
 
-#: ../src/pragha-tags-dialog.c:815
+#: ../src/pragha-tags-dialog.c:828
 msgid "Selection to"
 msgstr "로 선택"
 
-#: ../src/pragha-tags-dialog.c:853
+#: ../src/pragha-tags-dialog.c:866
 msgid "Open folder"
 msgstr "폴더 열기"
 
-#: ../src/pragha-tags-mgmt.c:197
+#: ../src/pragha-tags-mgmt.c:198
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
 msgstr "선택된 트랙의 번호를 모두 %d 로 바꾸시겠습니까?"
 
-#: ../src/pragha-tags-mgmt.c:215
+#: ../src/pragha-tags-mgmt.c:216
 #, c-format
 msgid ""
 "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
 msgstr "선택된 트랙의 제목 태그를 모두 %s로 바꾸시겠습니까?"
 
-#: ../src/pragha-toolbar.c:141
+#: ../src/pragha-toolbar.c:150
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span "
 "weight=\"light\">in</span></small> %s"
 msgstr "%s <small><span weight=\"light\">, </span></small> %s <small><span weight=\"light\">곡, </span></small> %s 앨범"
 
-#: ../src/pragha-toolbar.c:146
+#: ../src/pragha-toolbar.c:155
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
 msgstr "%s <small><span weight=\"light\">, </span></small> %s가 작곡"
 
-#: ../src/pragha-toolbar.c:150
+#: ../src/pragha-toolbar.c:159
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
 msgstr "%s <small><span weight=\"light\">, </span></small> %s 앨범수록곡"
 
-#: ../src/pragha-toolbar.c:766
+#: ../src/pragha-toolbar.c:801
 msgid "Previous Track"
 msgstr "전 트랙"
 
-#: ../src/pragha-toolbar.c:772
+#: ../src/pragha-toolbar.c:806
 msgid "Play / Pause Track"
 msgstr "트랙 재생 / 일시정지"
 
-#: ../src/pragha-toolbar.c:778
+#: ../src/pragha-toolbar.c:811
 msgid "Stop playback"
 msgstr "재생 멈추기"
 
-#: ../src/pragha-toolbar.c:784
+#: ../src/pragha-toolbar.c:816
 msgid "Next Track"
 msgstr "다음 트랙"
 
-#: ../src/pragha-toolbar.c:818
+#: ../src/pragha-toolbar.c:849
 msgid "Leave Fullscreen"
 msgstr "전체화면 나가기"
 
-#: ../src/pragha-toolbar.c:824
+#: ../src/pragha-toolbar.c:854
 msgid "Play songs in a random order"
 msgstr "임의 순서대로 음악 재생"
 
-#: ../src/pragha-toolbar.c:830
+#: ../src/pragha-toolbar.c:858
 msgid "Repeat playback list at the end"
 msgstr "플레이 리스트 끝에 갔을시 반복"
 
-#: ../src/pragha-utils.c:238
+#: ../src/pragha-utils.c:239
 msgid "day"
 msgid_plural "days"
 msgstr[0] "일"
 
-#: ../src/pragha-utils.c:480
+#: ../src/pragha-utils.c:486
 msgid "Unable to open the browser"
 msgstr "브라우저 열기를 할수 없습니다"
 
-#: ../src/pragha-window.c:113
+#: ../src/pragha-window.c:116
 #, c-format
 msgid ""
 "<b>Error playing current track.</b>\n"
@@ -988,16 +985,46 @@ msgid ""
 "<b>Reason:</b> %s"
 msgstr "<b>현재 트랙을 재생하는데 오류가 발생했습니다.</b>\n(%s)\n<b>원인:</b> %s"
 
-#: ../src/pragha-window.c:116
+#: ../src/pragha-window.c:119
 msgid "_Stop"
-msgstr ""
+msgstr "_멈춤"
 
-#: ../src/pragha-window.c:117
+#: ../src/pragha-window.c:120
 msgid "_Next"
-msgstr ""
+msgstr "_다음"
+
+#: ../src/pragha.c:180
+msgid "Select a file to play"
+msgstr "선택한 파일 재생"
+
+#: ../src/pragha.c:224 ../plugins/lastfm/pragha-lastfm-plugin.c:935
+msgid "Supported media"
+msgstr "지원하는 미디어"
+
+#: ../src/pragha.c:310
+msgid "All files"
+msgstr "전체 파일"
+
+#: ../src/pragha.c:385
+msgid "Enter the URL of an internet radio stream"
+msgstr "인터넷 라디오 스트림의 URL을 입력해주세요"
+
+#: ../src/pragha.c:390
+msgid "Give it a name to save"
+msgstr "저장할 이름을 입력해주세요"
+
+#: ../src/pragha.c:408
+msgid "Add a location"
+msgstr "주소 추가"
+
+#: ../src/pragha.c:525
+msgid "translator-credits"
+msgstr "번역자 크레딧"
 
 #. Setup application name and pulseaudio role
-#: ../src/pragha.c:395 ../src/pragha.c:758
+#: ../src/pragha.c:713 ../src/pragha.c:931 ../src/pragha.c:1305
+#: ../plugins/dlna/pragha-dlna-plugin.c:220
+#: ../plugins/dlna/pragha-dlna-plugin.c:222
 msgid "Pragha Music Player"
 msgstr "Pragha 음악 플레이어"
 
@@ -1009,132 +1036,232 @@ msgstr "음악 플레이어"
 msgid "Manage and listen to music"
 msgstr "음악을 관리하고 들으세요"
 
-#: ../plugins/notify/pragha-notify-plugin.c:166
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:99
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:426
+msgid "Search tags on AcoustID"
+msgstr "AcoustID에서 태그 검색"
+
+#: ../plugins/acoustid/pragha-acoustid-plugin.c:259
+msgid "AcoustID not found any similar song"
+msgstr "AcoustID 에서 유사한 곡을 찾지 못했습니다"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:406
+msgid "Audio/Data CD"
+msgstr "음악 / 데이터 CD"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:407
+msgid "An audio CD was inserted"
+msgstr "오디오 CD가 삽입되었습니다"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:408
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:448
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:644
+msgid "Add Audio _CD"
+msgstr "오디오 CD 추가(_C)"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:536
+msgid "Audio CD"
+msgstr "오디오 CD"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:538
+msgid "Audio CD Device"
+msgstr "오디오 CD 장치"
+
+#: ../plugins/cdrom/pragha-cdrom-plugin.c:558
+msgid "Connect to CDDB server"
+msgstr "CDDB 서버에 접속"
+
+#: ../plugins/devices/pragha-devices-plugin.c:93
+msgid "Ignore"
+msgstr "무시"
+
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
+msgid "Search music on DLNA server"
+msgstr "DNLA 서버에서 음악 검색"
+
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:205
 #, c-format
-msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
+msgid "Music of the %s server was added."
+msgstr "%s 서버의 음악이 추가되었습니다."
 
-#: ../plugins/notify/pragha-notify-plugin.c:288
-msgid "Notifications"
-msgstr "알림"
+#: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:210
+msgid "Could not find any DLNA server."
+msgstr "DLNA 서버를 찾을 수 없습니다"
 
-#: ../plugins/notify/pragha-notify-plugin.c:290
-msgid "Show Album art in notifications"
-msgstr "알림에 앨범 아트 보이기"
-
-#: ../plugins/notify/pragha-notify-plugin.c:293
-msgid "Add actions to change track in notifications"
-msgstr ""
-
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:166
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:167
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1523
 msgid "_Lastfm"
 msgstr "_Lastfm"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:167
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:198
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:168
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:208
 msgid "Love track"
 msgstr "특히 좋아하는 곡 설정"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:169
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:200
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:170
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:210
 msgid "Unlove track"
 msgstr "특히 좋아하는 곡 해제"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:171
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:844
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:172
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:927
 msgid "Import a XSPF playlist"
 msgstr "XSPF 플레이리스트 가져오기"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:173
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:174
 msgid "Add favorites"
 msgstr "좋아하는 노래 추가"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:175
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:202
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:176
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:212
 msgid "Add similar"
 msgstr "유사한 노래 추가"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:329
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:387
 msgid "Unable to establish conection with Last.fm"
-msgstr ""
+msgstr "Last.fm 과 접속할수 없습니다"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:511
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:591
 msgid "Last.fm suggested a tag correction"
 msgstr "Last.fm이 태그 수정을 제안했습니다"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:534
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:617
 msgid "Love song on Last.fm failed."
 msgstr "Last.fm에 특히 좋아하는 곡으로 지정 실패함"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:552
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:635
 msgid "Unlove song on Last.fm failed."
 msgstr "Last.fm에 특히 좋아하는 곡을 해제 실패함"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:659
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:742
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr ""
+msgstr "Last.fm에서 추천한 %d / %d개의 곡이 추가되었습니다"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:662
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:745
 #, c-format
-msgid "Last.fm doesn´t suggest any similar track"
-msgstr ""
+msgid "Last.fm doesn't suggest any similar track"
+msgstr "Last.fm이 비슷한 노래를 제안하지 않았습니다."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:666
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:749
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
 msgstr "%d 곡들을 Last.fm의 특히 좋아하는 곡 %d 에 추가했습니다"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:669
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:752
 #, c-format
-msgid "You don´t have favorite tracks on Last.fm"
-msgstr ""
+msgid "You don't have favorite tracks on Last.fm"
+msgstr "Last.fm 에 좋아하는 곡이 없습니다."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1091
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1222
 msgid "Last.fm submission failed"
 msgstr "Last.fm에 제출 실패함"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1093
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1224
 msgid "Track scrobbled on Last.fm"
 msgstr "Last.fm에 트랙 스크로블하기"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1202
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1334
 msgid "Update current song on Last.fm failed."
 msgstr "현 음악을 Last.fm에 업데이트 하는데 실패했습니다."
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1586
-msgid "Last.fm Support"
-msgstr "Last.fm 사용"
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1761
+msgid "Scrobble on Last.fm"
+msgstr "Last.fm에 스크로블하기"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1589
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1764
 msgid "Username"
 msgstr "사용자명"
 
-#: ../plugins/lastfm/pragha-lastfm-plugin.c:1596
+#: ../plugins/lastfm/pragha-lastfm-plugin.c:1771
 msgid "Password"
 msgstr "비밀번호"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:384
-msgid "Audio/Data CD"
-msgstr ""
+#: ../plugins/notify/pragha-notify-plugin.c:169
+#, c-format
+msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
+msgstr "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:385
-msgid "Was inserted an Audio Cd."
-msgstr ""
+#: ../plugins/notify/pragha-notify-plugin.c:275
+msgid "Notifications"
+msgstr "알림"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:386
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:422
-msgid "Add Audio _CD"
-msgstr "오디오 CD 추가(_C)"
+#: ../plugins/notify/pragha-notify-plugin.c:277
+msgid "Show Album art in notifications"
+msgstr "알림에 앨범 아트 보이기"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:507
-msgid "Audio CD"
-msgstr "오디오 CD"
+#: ../plugins/notify/pragha-notify-plugin.c:282
+msgid "Add actions to change track in notifications"
+msgstr "트랙 변경시 알림 영역에 액션 추가하기"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:509
-msgid "Audio CD Device"
-msgstr "오디오 CD 장치"
+#: ../plugins/removable-media/pragha-devices-removable.c:211
+#, c-format
+msgid "Unable to access \"%s\""
+msgstr "\"%s\"에 접근할수 없음"
 
-#: ../plugins/cdrom/pragha-cdrom-plugin.c:529
-msgid "Connect to CDDB server"
-msgstr "CDDB 서버에 접속"
+#: ../plugins/removable-media/pragha-devices-removable.c:214
+#: ../plugins/removable-media/pragha-devices-removable.c:300
+msgid "Removable Device"
+msgstr "제거가능한 장비"
+
+#: ../plugins/removable-media/pragha-devices-removable.c:297
+#, c-format
+msgid "Want to manage \"%s\" volume?"
+msgstr "\"%s\" 볼륨을 관리하시겠습니까?"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:88
+msgid "Search _lyric"
+msgstr "_가사 검색"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:90
+msgid "Search _artist info"
+msgstr "_아티스트 정보 검색"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:377
+msgid "Song Information"
+msgstr "곡 정보"
+
+#: ../plugins/song-info/pragha-song-info-plugin.c:379
+msgid "Download the album art while playing their songs."
+msgstr "음악을 재생하는 동안 앨범 아트를 다운로드"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
+#, c-format
+msgid "Lyrics thanks to %s"
+msgstr "%s 님이 가사를 제공했습니다"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
+#, c-format
+msgid "Artist info"
+msgstr "아티스트 정보"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
+#, c-format
+msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
+msgstr "%s <small><span weight=\"light\">thanks to</span></small> %s"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:100
+msgid "Lyrics not found."
+msgstr "가사를 찾을수 없습니다"
+
+#: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:104
+msgid "Artist information not found."
+msgstr "아티스트 정보를 찾을수 없습니다"
+
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:185
+#: ../plugins/song-info/pragha-song-info-thread-pane.c:193
+msgid "Searching..."
+msgstr "검색중..."
+
+#: ../plugins/tunein/pragha-tunein-plugin.c:92
+#: ../plugins/tunein/pragha-tunein-plugin.c:291
+msgid "Search radio on TuneIn"
+msgstr "TuneIn 라디오 검색하기"
+
+#: ../plugins/tunein/pragha-tunein-plugin.c:220
+#: ../plugins/tunein/pragha-tunein-plugin.c:231
+msgid "Search in TuneIn"
+msgstr "TuneIn 검색"

@@ -3,92 +3,92 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Sérgio Marques <smarquespt@gmail.com>, 2011-2014
+# Adolfo Jayme Barrientos <fito@libreoffice.org>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Pragha\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-12-21 14:02-0300\n"
-"PO-Revision-Date: 2014-12-21 22:26+0000\n"
-"Last-Translator: Sérgio Marques <smarquespt@gmail.com>\n"
-"Language-Team: Portuguese (http://www.transifex.com/projects/p/Pragha/language/pt/)\n"
+"PO-Revision-Date: 2015-01-05 19:30+0000\n"
+"Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
+"Language-Team: Catalan (Spain) (http://www.transifex.com/projects/p/Pragha/language/ca_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: pt\n"
+"Language: ca_ES\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. GtkInfoBar has undocumented behavior for GTK_RESPONSE_CANCEL
 #: ../src/info-bar-import-music.c:80 ../src/info-bar-import-music.c:127
 #: ../src/info-bar-import-music.c:170
 msgid "_No"
-msgstr "_Não"
+msgstr "_No"
 
 #: ../src/info-bar-import-music.c:81 ../src/info-bar-import-music.c:128
 #: ../src/info-bar-import-music.c:171
 msgid "_Yes"
-msgstr "_Sim"
+msgstr "_Sí"
 
 #: ../src/info-bar-import-music.c:83
 #, c-format
 msgid "Would you like to import %s to library?"
-msgstr "Importar %s para a coleção de faixas?"
+msgstr "Voleu importar %s a la col·lecció?"
 
 #: ../src/info-bar-import-music.c:130
 msgid "Would you like to update your music library?"
-msgstr "Gostaria de atualizar a sua coleção de músicas?"
+msgstr "Voleu actualitzar la vostra col·leció musical?"
 
 #: ../src/info-bar-import-music.c:173
 msgid "Some changes need restart pragha."
-msgstr "Tem que reiniciar o Pragha para aplicar as alterações."
+msgstr "És necessari reiniciar el Pragha perquè alguns canvis s’apliquin."
 
 #: ../src/pragha-cmdline.c:199
 msgid "FILENAME"
-msgstr "Nome do ficheiro"
+msgstr "NOM DE FITXER"
 
 #: ../src/pragha-cmdline.c:258
 msgid "Use --help to see a full list of available command line options."
-msgstr "Utilize --help para ver a lista completa de opções da linha de comandos."
+msgstr "Useu «%s --help» per veure el llistat de les opcions disponibles de la línia d'ordres"
 
 #: ../src/pragha-equalizer-dialog.c:44
 msgid "Disabled"
-msgstr "Desligado"
+msgstr "Inhabilitat"
 
 #: ../src/pragha-equalizer-dialog.c:45
 msgid "Classical"
-msgstr "Clássica"
+msgstr "Clàssic"
 
 #: ../src/pragha-equalizer-dialog.c:46
 msgid "Club"
-msgstr "Clube"
+msgstr "Club"
 
 #: ../src/pragha-equalizer-dialog.c:47
 msgid "Dance"
-msgstr "Dança"
+msgstr "Ball"
 
 #: ../src/pragha-equalizer-dialog.c:48
 msgid "Full Bass"
-msgstr "Graves"
+msgstr "Màxim de greus"
 
 #: ../src/pragha-equalizer-dialog.c:49
 msgid "Full Bass and Treble"
-msgstr "Graves e agudos"
+msgstr "Màxim de greus i aguts"
 
 #: ../src/pragha-equalizer-dialog.c:50
 msgid "Full Treble"
-msgstr "Agudos"
+msgstr "Màxim d'aguts"
 
 #: ../src/pragha-equalizer-dialog.c:51
 msgid "Laptop Speakers and Headphones"
-msgstr "Colunas e auscultadores"
+msgstr "Altaveus i auriculars de l'ordinador portàtil"
 
 #: ../src/pragha-equalizer-dialog.c:52
 msgid "Large Hall"
-msgstr "Sala ampla"
+msgstr "Auditori gran"
 
 #: ../src/pragha-equalizer-dialog.c:53
 msgid "Live"
-msgstr "Ao vivo"
+msgstr "En viu"
 
 #: ../src/pragha-equalizer-dialog.c:54
 msgid "Party"
@@ -112,28 +112,28 @@ msgstr "Ska"
 
 #: ../src/pragha-equalizer-dialog.c:59
 msgid "Smiley Face Curve"
-msgstr "Sorriso"
+msgstr "Corba de la cara somrient"
 
 #: ../src/pragha-equalizer-dialog.c:60
 msgid "Soft"
-msgstr "Suave"
+msgstr "Tou"
 
 #: ../src/pragha-equalizer-dialog.c:61
 msgid "Soft Rock"
-msgstr "Rock suave"
+msgstr "Rock suau"
 
 #: ../src/pragha-equalizer-dialog.c:62
 msgid "Techno"
-msgstr "Techno"
+msgstr "Tecno"
 
 #: ../src/pragha-equalizer-dialog.c:63
 msgid "Custom"
-msgstr "Personalizado"
+msgstr "Personalitzat"
 
 #. Create the dialog
 #: ../src/pragha-equalizer-dialog.c:298
 msgid "Equalizer"
-msgstr "Equalizador"
+msgstr "Equalitzador"
 
 #: ../src/pragha-equalizer-dialog.c:301 ../src/pragha-playlists-mgmt.c:86
 #: ../src/pragha-playlists-mgmt.c:541 ../src/pragha-playlists-mgmt.c:1239
@@ -142,59 +142,59 @@ msgstr "Equalizador"
 #: ../plugins/song-info/pragha-song-info-dialog.c:83
 #: ../plugins/tunein/pragha-tunein-plugin.c:224
 msgid "_Ok"
-msgstr "_OK"
+msgstr "_D'acord"
 
 #: ../src/pragha-filter-dialog.c:219 ../src/pragha-library-pane.c:507
 #: ../plugins/notify/pragha-notify-plugin.c:170
 msgid "Unknown Artist"
-msgstr "Artista desconhecido"
+msgstr "Artista desconegut"
 
 #: ../src/pragha-filter-dialog.c:220 ../src/pragha-library-pane.c:514
 #: ../src/pragha-library-pane.c:519
 #: ../plugins/notify/pragha-notify-plugin.c:171
 msgid "Unknown Album"
-msgstr "Álbum desconhecido"
+msgstr "Àlbum desconegut"
 
 #. The search dialog
 #: ../src/pragha-filter-dialog.c:370
 msgid "Search in playlist"
-msgstr "Procurar na lista de reprodução"
+msgstr "Cerca a la llista de reproducció"
 
 #: ../src/pragha-filter-dialog.c:373
 msgid "_Close"
-msgstr "Fe_char"
+msgstr "_Tanca"
 
 #: ../src/pragha-filter-dialog.c:376 ../src/pragha-playlist.c:210
 msgid "Add to playback queue"
-msgstr "Adicionar à fila de reprodução"
+msgstr "Afegeix a la cua de reproducció"
 
 #: ../src/pragha-filter-dialog.c:377
 msgid "_Jump to"
-msgstr "_Ir para"
+msgstr "_Vés a"
 
 #: ../src/pragha-library-pane.c:133
 msgid "_Skip"
-msgstr "Ig_norar"
+msgstr "_Omet"
 
 #: ../src/pragha-library-pane.c:134
 msgid "S_kip All"
-msgstr "Ign_orar tudo"
+msgstr "Omet-los _tots"
 
 #: ../src/pragha-library-pane.c:135
 msgid "Delete _All"
-msgstr "Elimin_ar tudo"
+msgstr "Suprimeix-ho _tot"
 
 #: ../src/pragha-library-pane.c:189
 msgid "_Expand library"
-msgstr "_Expandir coleção"
+msgstr "Afegeix una _biblioteca"
 
 #: ../src/pragha-library-pane.c:191
 msgid "_Collapse library"
-msgstr "Recolher _coleção"
+msgstr "Afegeix una _biblioteca"
 
 #: ../src/pragha-library-pane.c:193 ../src/pragha-library-pane.c:1586
 msgid "Folders structure"
-msgstr "Estrutura de pastas"
+msgstr "Estructura de la biblioteca"
 
 #: ../src/pragha-library-pane.c:195 ../src/pragha-library-pane.c:1595
 #: ../src/pragha-playlist.c:116 ../src/pragha-playlist.c:3355
@@ -208,87 +208,87 @@ msgstr "Artista"
 #: ../src/pragha-playlist.c:3532 ../src/pragha-statusicon.c:181
 #: ../src/pragha-tags-dialog.c:118 ../src/pragha-tags-dialog.c:845
 msgid "Album"
-msgstr "Álbum"
+msgstr "Àlbum"
 
 #: ../src/pragha-library-pane.c:199 ../src/pragha-library-pane.c:1613
 #: ../src/pragha-playlist.c:118 ../src/pragha-playlist.c:3357
 #: ../src/pragha-playlist.c:3533 ../src/pragha-tags-dialog.c:119
 #: ../src/pragha-tags-dialog.c:850
 msgid "Genre"
-msgstr "Género"
+msgstr "Gènere"
 
 #: ../src/pragha-library-pane.c:201 ../src/pragha-library-pane.c:1625
 msgid "Artist / Album"
-msgstr "Artista/Álbum"
+msgstr "Artista/àlbum"
 
 #: ../src/pragha-library-pane.c:203 ../src/pragha-library-pane.c:1649
 msgid "Genre / Album"
-msgstr "Género/Álbum"
+msgstr "Gènere/àlbum"
 
 #: ../src/pragha-library-pane.c:205 ../src/pragha-library-pane.c:1637
 msgid "Genre / Artist"
-msgstr "Género/Artista"
+msgstr "Gènere/artista"
 
 #: ../src/pragha-library-pane.c:207 ../src/pragha-library-pane.c:1664
 msgid "Genre / Artist / Album"
-msgstr "Género/Artista/Álbum"
+msgstr "Gènere/artista/àlbum"
 
 #. Playlist and Radio tree
 #: ../src/pragha-library-pane.c:243
 msgid "_Add to current playlist"
-msgstr "_Adicionar à lista de reprodução atual"
+msgstr "_Afegeix a la llista de reproducció actual"
 
 #: ../src/pragha-library-pane.c:245
 msgid "_Replace current playlist"
-msgstr "Substituir  lista de _reprodução atual"
+msgstr "_Reemplaça la llista de reproducció actual"
 
 #: ../src/pragha-library-pane.c:247
 msgid "Replace and _play"
-msgstr "Substituir e re_produzir"
+msgstr "R_eemplaça i reprodueix"
 
 #: ../src/pragha-library-pane.c:249 ../src/pragha-playlists-mgmt.c:537
 msgid "Rename"
-msgstr "Mudar nome"
+msgstr "Canvia el nom"
 
 #: ../src/pragha-library-pane.c:251
 msgid "Delete"
-msgstr "Eliminar"
+msgstr "Suprimeix"
 
 #: ../src/pragha-library-pane.c:253 ../src/pragha-menubar.c:222
 #: ../src/pragha-menubar.c:227 ../src/pragha-playlists-mgmt.c:1337
 #: ../src/pragha-playlists-mgmt.c:1375
 msgid "Export"
-msgstr "Exportar"
+msgstr "Exporta"
 
 #. Set dialog properties
 #: ../src/pragha-library-pane.c:255 ../src/pragha-tags-dialog.c:99
 msgid "Edit tags"
-msgstr "Editar detalhes"
+msgstr "Edita les etiquetes"
 
 #: ../src/pragha-library-pane.c:257
 msgid "Move to _trash"
-msgstr "Mover para o li_xo"
+msgstr "Mou a la _paperera"
 
 #: ../src/pragha-library-pane.c:259
 msgid "Delete from library"
-msgstr "Eliminar da coleção"
+msgstr "Suprimeix de la biblioteca"
 
 #: ../src/pragha-library-pane.c:512
 msgid "Unknown"
-msgstr "Desconhecido"
+msgstr "Desconegut"
 
 #: ../src/pragha-library-pane.c:524
 msgid "Unknown Genre"
-msgstr "Género desconhecido"
+msgstr "Gènere desconegut"
 
 #: ../src/pragha-library-pane.c:844
 msgid "File can't be moved to trash. Delete permanently?"
-msgstr "O ficheiro não pode ser movido para o lixo. Eliminar permanentemente?"
+msgstr "El fitxer no es pot moure a la paperera. Voleu suprimir-ho permanentment?"
 
 #: ../src/pragha-library-pane.c:845
 #, c-format
 msgid "The file \"%s\" cannot be moved to the trash. Details: %s"
-msgstr "O ficheiro \"%s\" não pode ser movido para o lixo. Detalhes: %s"
+msgstr "No s’ha pogut moure el fitxer «%s» a la paperera. Detalls: %s"
 
 #: ../src/pragha-library-pane.c:853 ../src/pragha-playlists-mgmt.c:85
 #: ../src/pragha-playlists-mgmt.c:540 ../src/pragha-playlists-mgmt.c:612
@@ -298,170 +298,170 @@ msgstr "O ficheiro \"%s\" não pode ser movido para o lixo. Detalhes: %s"
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:930
 #: ../plugins/tunein/pragha-tunein-plugin.c:223
 msgid "_Cancel"
-msgstr "_Cancelar"
+msgstr "_Cancel·la"
 
 #: ../src/pragha-library-pane.c:859
 msgid "_Delete"
-msgstr "_Eliminar"
+msgstr "Su_primeix"
 
 #: ../src/pragha-library-pane.c:1896 ../src/pragha-library-pane.c:1978
 #: ../src/pragha-playlists-mgmt.c:641 ../src/pragha-playlists-mgmt.c:668
 #: ../src/pragha.c:307 ../plugins/mpris2/pragha-mpris2-plugin.c:855
 msgid "Playlists"
-msgstr "Listas de reprodução"
+msgstr "Llistes de reproducció"
 
 #: ../src/pragha-library-pane.c:1912 ../src/pragha-library-pane.c:1987
 msgid "Radios"
-msgstr "Rádios"
+msgstr "Ràdios"
 
 #: ../src/pragha-library-pane.c:1928 ../src/pragha-preferences-dialog.c:957
 #: ../src/pragha-preferences-dialog.c:1281
 msgid "Library"
-msgstr "Coleção"
+msgstr "Col·leció"
 
 #: ../src/pragha-library-pane.c:2483
 msgid "Really want to move the files to trash?"
-msgstr "Pretende mover o(s) ficheiro(s) para o lixo?"
+msgstr "Esteu segur que voleu moure els fitxers a la paperera?"
 
 #: ../src/pragha-library-pane.c:2485
 msgid "Delete permanently instead of moving to trash"
-msgstr "Eliminar permanentemente em vez de mover para o lixo"
+msgstr "Suprimeix permanentment en lloc de moure a la paperera"
 
 #: ../src/pragha-library-pane.c:2535
 msgid ""
 "Are you sure you want to delete current file from library?\n"
 "\n"
 "Warning: To recover we must rescan the entire library."
-msgstr "Tem certeza de quer quer eliminar o ficheiro?\n\nAtenção: para o recuperar tem que reanalisar a coleção."
+msgstr "Esteu segur que voleu suprimir el fitxer actual de la col·lecció?\n\nAvís: si el voleu recuperar és necessari escanejar de nou la col·lecció sencera."
 
 #: ../src/pragha-menubar.c:190
 msgid "_Playback"
-msgstr "_Reprodução"
+msgstr "_Reprodueix"
 
 #: ../src/pragha-menubar.c:191
 msgid "Play_list"
-msgstr "_Lista de reprodução"
+msgstr "Llista de _reprodució"
 
 #: ../src/pragha-menubar.c:192
 msgid "_View"
-msgstr "_Ver"
+msgstr "_Visualitza"
 
 #: ../src/pragha-menubar.c:193 ../src/pragha-playlist.c:223
 msgid "_Tools"
-msgstr "Ferramen_tas"
+msgstr "_Eines"
 
 #: ../src/pragha-menubar.c:194
 msgid "_Help"
-msgstr "Aj_uda"
+msgstr "A_juda"
 
 #: ../src/pragha-menubar.c:195 ../src/pragha-statusicon.c:83
 #: ../plugins/notify/pragha-notify-plugin.c:185
 msgid "Previous track"
-msgstr "Faixa anterior"
+msgstr "Pista anterior"
 
 #: ../src/pragha-menubar.c:197 ../src/pragha-statusicon.c:85
 msgid "Play / Pause"
-msgstr "Reproduzir/Pausa"
+msgstr "Reprodueix/fes una pausa"
 
 #: ../src/pragha-menubar.c:199 ../src/pragha-statusicon.c:87
 msgid "Stop"
-msgstr "Parar"
+msgstr "Atura"
 
 #: ../src/pragha-menubar.c:201 ../src/pragha-statusicon.c:89
 #: ../plugins/notify/pragha-notify-plugin.c:189
 msgid "Next track"
-msgstr "Faixa seguinte"
+msgstr "Pista següent"
 
 #: ../src/pragha-menubar.c:203 ../src/pragha-playlist.c:226
 #: ../src/pragha-statusicon.c:91
 msgid "Edit track information"
-msgstr "Editar informações da faixa"
+msgstr "Edita la informació de la cançó"
 
 #: ../src/pragha-menubar.c:205 ../src/pragha-statusicon.c:93
 msgid "_Quit"
-msgstr "_Sair"
+msgstr "_Surt"
 
 #: ../src/pragha-menubar.c:207 ../src/pragha-statusicon.c:79
 msgid "_Add files"
-msgstr "_Adicionar ficheiros"
+msgstr "_Afegeix fitxers"
 
 #: ../src/pragha-menubar.c:208
 msgid "Open a media file"
-msgstr "Abrir ficheiro"
+msgstr "Obre un fitxer multimèdia"
 
 #: ../src/pragha-menubar.c:209 ../src/pragha-statusicon.c:81
 msgid "Add _location"
-msgstr "Adicionar _localização"
+msgstr "Agefeix ubicació"
 
 #: ../src/pragha-menubar.c:211
 msgid "_Add the library"
-msgstr "Adicionar à _coleção"
+msgstr "_Afegeix una biblioteca"
 
 #: ../src/pragha-menubar.c:213
 msgid "Remove selection from playlist"
-msgstr "Remover seleção da lista de reprodução"
+msgstr "Suprimeix la selecció de la llista de reproducció"
 
 #: ../src/pragha-menubar.c:215 ../src/pragha-playlist.c:216
 msgid "Crop playlist"
-msgstr "Recortar lista de reprodução"
+msgstr "Retalla llista de reproducció"
 
 #: ../src/pragha-menubar.c:217 ../src/pragha-playlist.c:218
 msgid "Clear playlist"
-msgstr "Limpar lista de reprodução"
+msgstr "Neteja llista de reproducció"
 
 #: ../src/pragha-menubar.c:219 ../src/pragha-playlist.c:220
 #: ../src/pragha-playlists-mgmt.c:69 ../src/pragha-playlists-mgmt.c:92
 #: ../src/pragha-playlists-mgmt.c:1243
 msgid "Save playlist"
-msgstr "Gravar lista de reprodução"
+msgstr "Desa la llista de reproducció"
 
 #: ../src/pragha-menubar.c:220 ../src/pragha-menubar.c:225
 #: ../src/pragha-playlists-mgmt.c:1332 ../src/pragha-playlists-mgmt.c:1370
 msgid "New playlist"
-msgstr "Nova lista de reprodução"
+msgstr "Llista de reproducció nova"
 
 #: ../src/pragha-menubar.c:224 ../src/pragha-playlist.c:221
 #: ../src/pragha-playlists-mgmt.c:71 ../src/pragha-playlists-mgmt.c:94
 #: ../src/pragha-playlists-mgmt.c:1245
 msgid "Save selection"
-msgstr "Gravar seleção"
+msgstr "Desa la selecció"
 
 #: ../src/pragha-menubar.c:229
 msgid "_Search in playlist"
-msgstr "Procurar na li_sta de reprodução"
+msgstr "_Cerca en aquesta llista de reproducció"
 
 #: ../src/pragha-menubar.c:231
 msgid "_Preferences"
-msgstr "_Preferências"
+msgstr "_Preferències"
 
 #: ../src/pragha-menubar.c:233
 msgid "Jump to playing song"
-msgstr "Ir para a faixa atual"
+msgstr "Salta a la cançó que s'està reproduint"
 
 #: ../src/pragha-menubar.c:235
 msgid "E_qualizer"
-msgstr "E_qualizador"
+msgstr "_Equalitzador"
 
 #: ../src/pragha-menubar.c:237
 msgid "_Rescan library"
-msgstr "_Reanalisar coleção"
+msgstr "Torna a escanejar la biblioteca"
 
 #: ../src/pragha-menubar.c:239
 #: ../plugins/removable-media/pragha-devices-removable.c:302
 msgid "_Update library"
-msgstr "At_ualizar coleção"
+msgstr "_Actualitza _biblioteca"
 
 #: ../src/pragha-menubar.c:241
 msgid "_Statistics"
-msgstr "E_statísticas"
+msgstr "Estadí_stiques"
 
 #: ../src/pragha-menubar.c:243
 msgid "Homepage"
-msgstr "Página inicial"
+msgstr "Pàgina d'inici"
 
 #: ../src/pragha-menubar.c:245
 msgid "Community"
-msgstr "Comunidade"
+msgstr "Comunitat"
 
 #: ../src/pragha-menubar.c:247
 msgid "Wiki"
@@ -469,516 +469,516 @@ msgstr "Wiki"
 
 #: ../src/pragha-menubar.c:249
 msgid "Translate Pragha"
-msgstr "Traduzir o Pragha"
+msgstr "Tradueix el Pragha"
 
 #: ../src/pragha-menubar.c:251 ../src/pragha-statusicon.c:77
 msgid "About"
-msgstr "Sobre"
+msgstr "Quant a"
 
 #: ../src/pragha-menubar.c:256
 msgid "_Shuffle"
-msgstr "_Aleatório"
+msgstr "_Aleatori"
 
 #: ../src/pragha-menubar.c:259
 msgid "_Repeat"
-msgstr "_Repetir"
+msgstr "_Repeteix"
 
 #: ../src/pragha-menubar.c:262
 msgid "_Fullscreen"
-msgstr "_Ecrã completo"
+msgstr "_Pantalla completa"
 
 #: ../src/pragha-menubar.c:265
 msgid "Lateral _panel"
-msgstr "_Painel lateral"
+msgstr "Quadre _superior"
 
 #: ../src/pragha-menubar.c:268
 msgid "Secondary lateral panel"
-msgstr "Painel lateral secundário"
+msgstr "Quadre lateral secundari"
 
 #: ../src/pragha-menubar.c:271
 msgid "Playback controls below"
-msgstr "Controlos de reprodução em baixo"
+msgstr "Controls de reproducció cap avall"
 
 #: ../src/pragha-menubar.c:274
 msgid "Menubar"
-msgstr "Barra de menu"
+msgstr "Barra de menús"
 
 #: ../src/pragha-menubar.c:277
 msgid "Status bar"
-msgstr "Barra de estado"
+msgstr "Barra d'estat"
 
 #: ../src/pragha-menubar.c:638
 msgid "Total Tracks:"
-msgstr "Faixas:"
+msgstr "Peces totals:"
 
 #: ../src/pragha-menubar.c:640
 msgid "Total Artists:"
-msgstr "Artistas:"
+msgstr "Total d'artistes:"
 
 #: ../src/pragha-menubar.c:642
 msgid "Total Albums:"
-msgstr "Álbuns:"
+msgstr "Total d'àlbums:"
 
 #: ../src/pragha-menubar.c:645
 msgid "Statistics"
-msgstr "Estatísticas"
+msgstr "Estadístiques"
 
 #. Create labels
 #: ../src/pragha-playlist.c:115 ../src/pragha-playlist.c:3354
 #: ../src/pragha-playlist.c:3530 ../src/pragha-statusicon.c:179
 #: ../src/pragha-tags-dialog.c:116 ../src/pragha-tags-dialog.c:835
 msgid "Title"
-msgstr "Título"
+msgstr "Títol"
 
 #: ../src/pragha-playlist.c:119 ../src/pragha-playlist.c:3358
 #: ../src/pragha-playlist.c:3534 ../src/pragha-tags-dialog.c:576
 msgid "Bitrate"
-msgstr "Taxa de dados"
+msgstr "Taxa de bits"
 
 #: ../src/pragha-playlist.c:120 ../src/pragha-playlist.c:3359
 #: ../src/pragha-playlist.c:3535 ../src/pragha-tags-dialog.c:121
 msgid "Year"
-msgstr "Ano"
+msgstr "Any"
 
 #: ../src/pragha-playlist.c:121 ../src/pragha-playlist.c:3360
 #: ../src/pragha-playlist.c:3536 ../src/pragha-tags-dialog.c:122
 #: ../src/pragha-tags-dialog.c:855
 msgid "Comment"
-msgstr "Comentário"
+msgstr "Comentari"
 
 #. Create labels
 #: ../src/pragha-playlist.c:122 ../src/pragha-playlist.c:3361
 #: ../src/pragha-playlist.c:3537 ../src/pragha-statusicon.c:182
 #: ../src/pragha-tags-dialog.c:575
 msgid "Length"
-msgstr "Duração"
+msgstr "Durada"
 
 #: ../src/pragha-playlist.c:123 ../src/pragha-playlist.c:3362
 #: ../src/pragha-playlist.c:3538 ../src/pragha-tags-dialog.c:580
 msgid "Filename"
-msgstr "Nome do ficheiro"
+msgstr "Nom del fitxer"
 
 #: ../src/pragha-playlist.c:124 ../src/pragha-playlist.c:3363
 #: ../src/pragha-playlist.c:3539 ../src/pragha-tags-dialog.c:581
 msgid "Mimetype"
-msgstr "Tipo MIME"
+msgstr "Tipus MIME"
 
 #: ../src/pragha-playlist.c:212
 msgid "Remove from playback queue"
-msgstr "Remover da fila de reprodução"
+msgstr "Suprimeix de la cua de producció"
 
 #: ../src/pragha-playlist.c:214
 msgid "Remove from playlist"
-msgstr "Remover da lista de reprodução"
+msgstr "Suprimeix de la llista de reproducció"
 
 #: ../src/pragha-playlist.c:222
 msgid "_Send to"
-msgstr "_Enviar para"
+msgstr "_Envia a"
 
 #: ../src/pragha-playlist.c:2485
 #, c-format
 msgid "Copy \"%i\" to selected track numbers"
-msgstr "Copiar \"%i\" para o número das faixas selecionadas"
+msgstr "Copia «%i» als números de peça seleccionats"
 
 #: ../src/pragha-playlist.c:2491
 #, c-format
 msgid "Copy \"%s\" to selected titles"
-msgstr "Copiar \"%s\" para os títulos selecionados"
+msgstr "Copia «%s» als títols seleccionats"
 
 #: ../src/pragha-playlist.c:2497
 #, c-format
 msgid "Copy \"%s\" to selected artists"
-msgstr "Copiar \"%s\" para os artistas selecionados"
+msgstr "Copia «%s» als artistes seleccionats"
 
 #: ../src/pragha-playlist.c:2503
 #, c-format
 msgid "Copy \"%s\" to selected albums"
-msgstr "Copiar \"%s\" para os álbuns selecionados"
+msgstr "Copia «%s» als àlbums seleccionats"
 
 #: ../src/pragha-playlist.c:2509
 #, c-format
 msgid "Copy \"%s\" to selected genres"
-msgstr "Copiar \"%s\" para os géneros selecionados"
+msgstr "Copia «%s» als gèneres seleccionats"
 
 #: ../src/pragha-playlist.c:2515
 #, c-format
 msgid "Copy \"%i\" to selected years"
-msgstr "Copiar \"%i\" para os anos selecionados"
+msgstr "Copia «%i» als anys seleccionats"
 
 #: ../src/pragha-playlist.c:2521
 #, c-format
 msgid "Copy \"%s\" to selected comments"
-msgstr "Copiar \"%s\" para os comentários selecionados"
+msgstr "Copia «%s» als comentaris seleccionats"
 
 #. Create the checkmenu items
 #: ../src/pragha-playlist.c:3353 ../src/pragha-playlist.c:3529
 #: ../src/pragha.c:614
 msgid "Track"
 msgid_plural "Tracks"
-msgstr[0] "Faixa"
-msgstr[1] "Faixas"
+msgstr[0] "Pista"
+msgstr[1] "Pistes"
 
 #: ../src/pragha-playlist.c:3366
 msgid "Clear sort"
-msgstr "Limpar ordenação"
+msgstr "Neteja l'ordenació"
 
 #: ../src/pragha-playlists-mgmt.c:73 ../src/pragha-preferences-dialog.c:1062
 msgid "Playlist"
-msgstr "Lista de reprodução"
+msgstr "Llista de reproducció"
 
 #: ../src/pragha-playlists-mgmt.c:129
 msgid "<b>con_playlist</b> is a reserved playlist name"
-msgstr "<b>con_playlist</b> é um nome reservado"
+msgstr "<b>con_playlist</b> és un nom de llista de reproducció reservat"
 
 #: ../src/pragha-playlists-mgmt.c:153
 #, c-format
 msgid "Do you want to overwrite the playlist: %s ?"
-msgstr "Pretende substituir a lista de reprodução %s?"
+msgstr "Voleu sobreescriure la llista de reproducció: %s?"
 
 #: ../src/pragha-playlists-mgmt.c:530
 msgid "Choose a new name"
-msgstr "Escolha o novo nome"
+msgstr "Trieu un nom nou"
 
 #: ../src/pragha-playlists-mgmt.c:579
 #, c-format
 msgid "Do you want to delete the item: %s ?"
-msgstr "Pretende eliminar o item %s?"
+msgstr "Voleu suprimir l’element: %s?"
 
 #: ../src/pragha-playlists-mgmt.c:609
 msgid "Export playlist to file"
-msgstr "Exportar lista de reprodução para um ficheiro"
+msgstr "Exporta la llista de reproducció a un fitxer"
 
 #: ../src/pragha-playlists-mgmt.c:613
 msgid "_Save"
-msgstr "_Gravar"
+msgstr "_Desa"
 
 #: ../src/pragha-playlists-mgmt.c:1050
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:903
 #, c-format
 msgid "Added %d songs from %d of the imported playlist."
-msgstr "Adicionadas %d de %d faixas da lista de reprodução importada"
+msgstr "S’han afegit %d cançons de les %d que hi ha en la llista importada."
 
 #: ../src/pragha-playlists-mgmt.c:1223
 msgid "What do you want to do?"
-msgstr "O que pretende fazer?"
+msgstr "Què voleu fer?"
 
 #: ../src/pragha-playlists-mgmt.c:1225
 #, c-format
 msgid "Replace the playlist \"%s\""
-msgstr "Substituir a lista %s"
+msgstr "Reemplaça la llista de reproducció «%s»"
 
 #: ../src/pragha-playlists-mgmt.c:1230
 #, c-format
 msgid "Add to playlist \"%s\""
-msgstr "Adicionar à lista %s"
+msgstr "Afegeix-les a la llista de reproducció «%s»"
 
 #: ../src/pragha-preferences-dialog.c:194
 msgid ""
 "Patterns should be of the form:<filename>;<filename>;....\n"
 "A maximum of six patterns are allowed.\n"
 "Wildcards are not accepted as of now ( patches welcome :-) )."
-msgstr "Os padrões devem estar na forma:<nome>;<nome>;....\nÉ permitido um máximo de 6 padrões.\nPor enquanto, as \"wildcards\" não são aceites (aceita-se \"patches\" :-) )"
+msgstr "Els patrons segueixen la forma: <nom_fitxer>;<nom_fitxer>;…\nEs permeten sis patrons com a màxim.\nNo s’admeten comodins actualment (però s’accepten pedaços ;-) )."
 
 #: ../src/pragha-preferences-dialog.c:217
 msgid "Album art pattern"
-msgstr "Padrão da capa de álbum"
+msgstr "Patró de caràtula d’àlbum"
 
 #: ../src/pragha-preferences-dialog.c:521
 #: ../src/pragha-preferences-dialog.c:1130
 msgid "Start normal"
-msgstr "Iniciar normal"
+msgstr "Inicia normal"
 
 #: ../src/pragha-preferences-dialog.c:525
 #: ../src/pragha-preferences-dialog.c:1131
 msgid "Start fullscreen"
-msgstr "Iniciar em ecrã completo"
+msgstr "Inicia a pantalla completa"
 
 #: ../src/pragha-preferences-dialog.c:529
 #: ../src/pragha-preferences-dialog.c:1132
 msgid "Start in system tray"
-msgstr "Iniciar na bandeja do sistema"
+msgstr "Inicia en l'àrea de notificació."
 
 #. Create a folder chooser dialog
 #: ../src/pragha-preferences-dialog.c:664
 msgid "Select a folder to add to library"
-msgstr "Selecione a pasta a adicionar"
+msgstr "Trieu una carpeta per afegir-la a la col·lecció"
 
 #: ../src/pragha-preferences-dialog.c:668
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:931
 msgid "_Open"
-msgstr "_Abrir"
+msgstr "_Obre"
 
 #: ../src/pragha-preferences-dialog.c:893
 #: ../src/pragha-preferences-dialog.c:1300
 msgid "Audio"
-msgstr "Áudio"
+msgstr "Àudio"
 
 #: ../src/pragha-preferences-dialog.c:895
 msgid "Audio sink"
-msgstr "Sistema de som"
+msgstr "Destí («sink») d’àudio"
 
 #: ../src/pragha-preferences-dialog.c:899
 #: ../src/pragha-preferences-dialog.c:918
 #: ../src/pragha-preferences-dialog.c:924
 msgid "Restart Required"
-msgstr "Tem que reiniciar"
+msgstr "Es necessita reiniciar"
 
 #: ../src/pragha-preferences-dialog.c:914
 msgid "Audio Device"
-msgstr "Dispositivo de som"
+msgstr "Dispositiu d'àudio"
 
 #: ../src/pragha-preferences-dialog.c:923
 msgid "Use software mixer"
-msgstr "Utilizar gestor de som da aplicação"
+msgstr "Utilitza el mesclador per programari"
 
 #: ../src/pragha-preferences-dialog.c:961
 msgid "Can not change directories while they are analyzing."
-msgstr "Não pode alterar os diretórios durante a análise."
+msgstr "No és possible canviar les carpetes mentre s’estan analitzant."
 
 #: ../src/pragha-preferences-dialog.c:971
 msgid "Folders"
-msgstr "Pastas"
+msgstr "Carpetes"
 
 #: ../src/pragha-preferences-dialog.c:990 ../src/pragha.c:211
 msgid "_Add"
-msgstr "_Adicionar"
+msgstr "_Afegeix"
 
 #: ../src/pragha-preferences-dialog.c:991
 msgid "_Remove"
-msgstr "_Remover"
+msgstr "_Suprimeix"
 
 #: ../src/pragha-preferences-dialog.c:1007
 msgid "Merge folders in the folders estructure view"
-msgstr "Unir pastas nas vista Estrutura de pastas"
+msgstr "Fusiona les carpetes en la visualització de estructura"
 
 #: ../src/pragha-preferences-dialog.c:1010
 msgid "Sort albums by release year"
-msgstr "Ordenar álbuns por ano"
+msgstr "Ordena els àlbums per l'any de publicació"
 
 #. Labels
 #: ../src/pragha-preferences-dialog.c:1053
 #: ../src/pragha-preferences-dialog.c:1280
 msgid "Appearance"
-msgstr "Aparência"
+msgstr "Aparença"
 
 #: ../src/pragha-preferences-dialog.c:1055
 msgid "Use Gnome 3 HIG"
-msgstr "Utilizar Gnome 3 HIG"
+msgstr "Utilitza la interfície de GNOME 3"
 
 #: ../src/pragha-preferences-dialog.c:1064
 msgid "Highlight rows on current playlist"
-msgstr "Realçar linhas da lista de reprodução atual"
+msgstr "Realça les files de la llista de reproducció actual"
 
 #: ../src/pragha-preferences-dialog.c:1067
 msgid "Controls"
-msgstr "Controlos"
+msgstr "Controls"
 
 #: ../src/pragha-preferences-dialog.c:1069
 msgid "Show Album art in Panel"
-msgstr "Mostrar capa do álbum no painel"
+msgstr "Mostra la caràtula al quadre"
 
 #: ../src/pragha-preferences-dialog.c:1072
 msgid "Size of Album art"
-msgstr "Tamanho da imagem"
+msgstr "Mida de la caràtula"
 
 #: ../src/pragha-preferences-dialog.c:1077
 msgid "Album art file pattern"
-msgstr "Padrão da capa do álbum"
+msgstr "Patró de fitxers de caràtules"
 
 #: ../src/pragha-preferences-dialog.c:1118
 msgid "Search"
-msgstr "Procurar"
+msgstr "Cerca"
 
 #. Instant search.
 #: ../src/pragha-preferences-dialog.c:1120 ../src/pragha-search-entry.c:41
 msgid "Search while typing"
-msgstr "Procurar ao escrever"
+msgstr "Cerca mentre s'escriu"
 
 #. Aproximate search.
 #: ../src/pragha-preferences-dialog.c:1123 ../src/pragha-search-entry.c:48
 msgid "Search similar words"
-msgstr "Procurar palavras similares"
+msgstr "Cerca paraules semblants"
 
 #: ../src/pragha-preferences-dialog.c:1126
 msgid "When starting pragha"
-msgstr "Ao iniciar o Pragha"
+msgstr "En iniciar el Pragha"
 
 #: ../src/pragha-preferences-dialog.c:1129
 msgid "Remember last window state"
-msgstr "Lembrar o último estado da janela"
+msgstr "Recorda l'últim estat"
 
 #: ../src/pragha-preferences-dialog.c:1135
 msgid "Restore last playlist"
-msgstr "Restaurar última lista de reprodução"
+msgstr "Restaura l’última llista de reproducció"
 
 #: ../src/pragha-preferences-dialog.c:1138
 msgid "When adding folders"
-msgstr "Ao adicionar pastas"
+msgstr "En afegir carpetes"
 
 #: ../src/pragha-preferences-dialog.c:1139 ../src/pragha.c:202
 msgid "Add files recursively"
-msgstr "Adicionar ficheiros recursivamente"
+msgstr "Afegeix els fitxers recursivament"
 
 #: ../src/pragha-preferences-dialog.c:1163
 #: ../src/pragha-preferences-dialog.c:1315
 msgid "Desktop"
-msgstr "Área de trabalho"
+msgstr "Escriptori"
 
 #: ../src/pragha-preferences-dialog.c:1165
 msgid "Show Pragha icon in the notification area"
-msgstr "Mostrar ícone na área de notificação"
+msgstr "Mostra la icona del Pragha a l'àrea de notificació"
 
 #: ../src/pragha-preferences-dialog.c:1168
 msgid "Minimize Pragha when closing window"
-msgstr "Minimizar ao fechar a janela"
+msgstr "Minimitza el Pragha en tancar la finestra"
 
 #: ../src/pragha-preferences-dialog.c:1189
 #: ../src/pragha-preferences-dialog.c:1284
 msgid "Plugins"
-msgstr "Extras"
+msgstr "Connectors"
 
 #. The main preferences dialog
 #: ../src/pragha-preferences-dialog.c:1271
 msgid "Preferences"
-msgstr "Preferências"
+msgstr "Preferències"
 
 #: ../src/pragha-preferences-dialog.c:1282
 msgid "General"
-msgstr "Geral"
+msgstr "General"
 
 #: ../src/pragha-preferences-dialog.c:1319
 msgid "Services"
-msgstr "Serviços"
+msgstr "Serveis"
 
 #. Add to dialog
 #: ../src/pragha-preferences-dialog.c:1332
 msgid "Preferences of Pragha"
-msgstr "Preferências"
+msgstr "Preferències del Pragha"
 
 #: ../src/pragha-scanner.c:93
 #, c-format
 msgid "%i files analized of %i detected"
-msgstr "%i ficheiros analisados em %i detetados"
+msgstr "S’han analitzat %i fitxers de %i detectats"
 
 #: ../src/pragha-scanner.c:99
 msgid "Searching files to analyze"
-msgstr "A analisar ficheiros..."
+msgstr "S’estan cercant els fitxers a analitzar"
 
 #: ../src/pragha-scanner.c:250
 msgid "Library scan complete"
-msgstr "Terminou a análise da coleção"
+msgstr ""
 
 #: ../src/pragha-statusicon.c:174 ../src/pragha-toolbar.c:174
 #: ../src/pragha-toolbar.c:525
 msgid "<b>Not playing</b>"
-msgstr "<b>Nada em reprodução</b>"
+msgstr "<b>No s'està reproduint</b>"
 
 #: ../src/pragha-tags-dialog.c:120
 msgid "Track No"
-msgstr "Faixa n.º"
+msgstr "Núm. de peça"
 
 #: ../src/pragha-tags-dialog.c:123
 msgid "File"
-msgstr "Ficheiro"
+msgstr "Fitxer"
 
 #. The main edit dialog
 #: ../src/pragha-tags-dialog.c:456 ../src/pragha-tags-dialog.c:658
 msgid "Details"
-msgstr "Detalhes"
+msgstr "Detalls"
 
 #: ../src/pragha-tags-dialog.c:558
 msgid "channel"
 msgid_plural "channels"
 msgstr[0] "canal"
-msgstr[1] "canais"
+msgstr[1] "canals"
 
 #: ../src/pragha-tags-dialog.c:577
 msgid "Channels"
-msgstr "Canais"
+msgstr "Canals"
 
 #: ../src/pragha-tags-dialog.c:578
 msgid "Samplerate"
-msgstr "Frequência"
+msgstr "Taxa de mostra"
 
 #: ../src/pragha-tags-dialog.c:579
 msgid "Folder"
-msgstr "Pasta"
+msgstr "Carpeta"
 
 #: ../src/pragha-tags-dialog.c:828
 msgid "Selection to"
-msgstr "Seleção para"
+msgstr "Selecciona a"
 
 #: ../src/pragha-tags-dialog.c:866
 msgid "Open folder"
-msgstr "Abrir pasta"
+msgstr "Obre la carpeta"
 
 #: ../src/pragha-tags-mgmt.c:198
 #, c-format
 msgid ""
 "Do you want to set the track number of ALL of the selected tracks to: %d ?"
-msgstr "Definir o número de faixa de todas as faixas selecionadas para: %d?"
+msgstr ""
 
 #: ../src/pragha-tags-mgmt.c:216
 #, c-format
 msgid ""
 "Do you want to set the title tag of ALL of the selected tracks to: %s ?"
-msgstr "Definir o título de todas as faixas selecionadas para: %s?"
+msgstr ""
 
 #: ../src/pragha-toolbar.c:150
 #, c-format
 msgid ""
 "%s <small><span weight=\"light\">by</span></small> %s <small><span "
 "weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">de</span></small> %s <small><span weight=\"light\">em</span></small> %s"
+msgstr ""
 
 #: ../src/pragha-toolbar.c:155
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:52
 #, c-format
 msgid "%s <small><span weight=\"light\">by</span></small> %s"
-msgstr "%s <small><span weight=\"light\">de</span></small> %s"
+msgstr ""
 
 #: ../src/pragha-toolbar.c:159
 #, c-format
 msgid "%s <small><span weight=\"light\">in</span></small> %s"
-msgstr "%s <small><span weight=\"light\">em</span></small> %s"
+msgstr ""
 
 #: ../src/pragha-toolbar.c:801
 msgid "Previous Track"
-msgstr "Faixa anterior"
+msgstr "Pista anterior"
 
 #: ../src/pragha-toolbar.c:806
 msgid "Play / Pause Track"
-msgstr "Reproduzir/Pausar faixa"
+msgstr "Reprodueix / pausa la pista actual"
 
 #: ../src/pragha-toolbar.c:811
 msgid "Stop playback"
-msgstr "Parar reprodução"
+msgstr "Atura la reproducció"
 
 #: ../src/pragha-toolbar.c:816
 msgid "Next Track"
-msgstr "Faixa seguinte"
+msgstr "Pista següent"
 
 #: ../src/pragha-toolbar.c:849
 msgid "Leave Fullscreen"
-msgstr "Sair de ecrã completo"
+msgstr "Surt de la pantalla completa"
 
 #: ../src/pragha-toolbar.c:854
 msgid "Play songs in a random order"
-msgstr "Reproduzir aleatoriamente"
+msgstr "Reprodueix cançons en ordre aleatori"
 
 #: ../src/pragha-toolbar.c:858
 msgid "Repeat playback list at the end"
-msgstr "Repetir lista de reprodução"
+msgstr ""
 
 #: ../src/pragha-utils.c:239
 msgid "day"
 msgid_plural "days"
 msgstr[0] "dia"
-msgstr[1] "dias"
+msgstr[1] "dies"
 
 #: ../src/pragha-utils.c:486
 msgid "Unable to open the browser"
-msgstr "Não foi possível abrir o navegador"
+msgstr "No es pot obrir el navegador"
 
 #: ../src/pragha-window.c:116
 #, c-format
@@ -986,285 +986,285 @@ msgid ""
 "<b>Error playing current track.</b>\n"
 "(%s)\n"
 "<b>Reason:</b> %s"
-msgstr "<b>Erro ao reproduzir a faixa atual</b>\n(%s)\n<b>Motivo:</b> %s"
+msgstr "<b>S’ha produït un error en reproduir la peça actual.</b>\n(%s)\n<b>Motiu:</b> %s"
 
 #: ../src/pragha-window.c:119
 msgid "_Stop"
-msgstr "_Parar"
+msgstr "A_tura"
 
 #: ../src/pragha-window.c:120
 msgid "_Next"
-msgstr "Segui_nte"
+msgstr "Següe_nt"
 
 #: ../src/pragha.c:180
 msgid "Select a file to play"
-msgstr "Selecione o ficherio a reproduzir"
+msgstr ""
 
 #: ../src/pragha.c:224 ../plugins/lastfm/pragha-lastfm-plugin.c:935
 msgid "Supported media"
-msgstr "Ficheiros suportados"
+msgstr "Fitxers multimèdia admesos"
 
 #: ../src/pragha.c:310
 msgid "All files"
-msgstr "Todos os ficheiros"
+msgstr "Tots els fitxers"
 
 #: ../src/pragha.c:385
 msgid "Enter the URL of an internet radio stream"
-msgstr "Introduza o URL de uma emissão web"
+msgstr "Introduïu l’URL d’un flux de ràdio d’Internet"
 
 #: ../src/pragha.c:390
 msgid "Give it a name to save"
-msgstr "Associar um nome e gravar"
+msgstr "Nom del fitxer a desar"
 
 #: ../src/pragha.c:408
 msgid "Add a location"
-msgstr "Adicionar localização"
+msgstr "Afegeix una ubicació"
 
 #: ../src/pragha.c:525
 msgid "translator-credits"
-msgstr "Sérgio Marques <smarquespt@gmail.com>"
+msgstr "Jordi Mas i Hernàndez <jmas@softcatala.org>, 2014\nAdolfo Jayme Barrientos <fito@libreoffice.org>, 2014"
 
 #. Setup application name and pulseaudio role
 #: ../src/pragha.c:713 ../src/pragha.c:931 ../src/pragha.c:1305
 #: ../plugins/dlna/pragha-dlna-plugin.c:220
 #: ../plugins/dlna/pragha-dlna-plugin.c:222
 msgid "Pragha Music Player"
-msgstr "Pragha - Reprodutor de músicas"
+msgstr "Reproductor de música Pragha"
 
 #: ../data/pragha.desktop.in.h:1
 msgid "Music Player"
-msgstr "Reprodutor de músicas"
+msgstr "Reproductor de música"
 
 #: ../data/pragha.desktop.in.h:2
 msgid "Manage and listen to music"
-msgstr "Gestão e reprodução de músicas"
+msgstr "Escolteu i gestioneu la música"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:99
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:426
 msgid "Search tags on AcoustID"
-msgstr "Procurar detalhes em AcoustID"
+msgstr "Cerca etiquetes a l’AcoustID"
 
 #: ../plugins/acoustid/pragha-acoustid-plugin.c:259
 msgid "AcoustID not found any similar song"
-msgstr "Não foram encontradas faixas similares no AcoustID"
+msgstr ""
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:406
 msgid "Audio/Data CD"
-msgstr "CD áudio/dados"
+msgstr "CD d’àudio o dades"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:407
 msgid "An audio CD was inserted"
-msgstr "Foi inserido um CD áudio"
+msgstr "S’ha inserit un CD d’àudio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:408
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:448
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:644
 msgid "Add Audio _CD"
-msgstr "Adicionar _CD de áudio"
+msgstr "Afegeix CD d'àudio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:536
 msgid "Audio CD"
-msgstr "CD áudio"
+msgstr "CD d'àudio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:538
 msgid "Audio CD Device"
-msgstr "Dispositivo do CD de áudio"
+msgstr "Dispositiu CD d'àudio"
 
 #: ../plugins/cdrom/pragha-cdrom-plugin.c:558
 msgid "Connect to CDDB server"
-msgstr "Ligar ao servidor CDDB"
+msgstr "Connecta amb un servidor CDDB"
 
 #: ../plugins/devices/pragha-devices-plugin.c:93
 msgid "Ignore"
-msgstr "Ignorar"
+msgstr "Ignora"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:89
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:262
 msgid "Search music on DLNA server"
-msgstr "Procurar músicas no servidor DLNA"
+msgstr "Cerca música al servidor DLNA"
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:205
 #, c-format
 msgid "Music of the %s server was added."
-msgstr "Foram adicionadas as faixas do servidor %s."
+msgstr "S’ha afegit música des del servidor %s."
 
 #: ../plugins/dlna-renderer/pragha-dlna-renderer-plugin.c:210
 msgid "Could not find any DLNA server."
-msgstr "Servidor DLNA não encontrado."
+msgstr "No s’ha trobat cap servidor DLNA."
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:167
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1523
 msgid "_Lastfm"
-msgstr "_Last.fm"
+msgstr "_Lastfm"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:168
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:208
 msgid "Love track"
-msgstr "Gosto desta faixa"
+msgstr "M’encanta aquesta peça"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:170
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:210
 msgid "Unlove track"
-msgstr "Não gosto desta faixa"
+msgstr "Ja no m’encanta aquesta peça"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:172
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:927
 msgid "Import a XSPF playlist"
-msgstr "Importar uma lista XSPF"
+msgstr "Exporta la llista de reproducció a XSPF"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:174
 msgid "Add favorites"
-msgstr "Adicionar favoritas"
+msgstr "Afegeix als preferits"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:176
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:212
 msgid "Add similar"
-msgstr "Adicionar similares"
+msgstr "Afegeix similars"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:387
 msgid "Unable to establish conection with Last.fm"
-msgstr "Não foi possível estabelecer ligação à Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:591
 msgid "Last.fm suggested a tag correction"
-msgstr "A Last.fm sugeriu uma correção"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:617
 msgid "Love song on Last.fm failed."
-msgstr "Falha ao indicar \"Gosto desta faixa\" na Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:635
 msgid "Unlove song on Last.fm failed."
-msgstr "Falha ao indicar \"Não gosto desta faixa\" na Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:742
 #, c-format
 msgid "Added %d tracks of %d suggested from Last.fm"
-msgstr "Adicionadas %d faixas de %d sugeridas pela Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:745
 #, c-format
 msgid "Last.fm doesn't suggest any similar track"
-msgstr "A Last.fm não sugere quaisquer faixas similares"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:749
 #, c-format
 msgid "Added %d songs of the last %d loved on Last.fm."
-msgstr "Adicionadas %d faixas das últimas %d na Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:752
 #, c-format
 msgid "You don't have favorite tracks on Last.fm"
-msgstr "Não possui quaisquer faixas favoritas na Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1222
 msgid "Last.fm submission failed"
-msgstr "Ocorreu um erro ao enviar para a Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1224
 msgid "Track scrobbled on Last.fm"
-msgstr "Faixa enviada para a Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1334
 msgid "Update current song on Last.fm failed."
-msgstr "Falha ao atualizar faixa na Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1761
 msgid "Scrobble on Last.fm"
-msgstr "Enviar para a Last.fm"
+msgstr ""
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1764
 msgid "Username"
-msgstr "Utilizador"
+msgstr "Nom d'usuari"
 
 #: ../plugins/lastfm/pragha-lastfm-plugin.c:1771
 msgid "Password"
-msgstr "Senha"
+msgstr "Contrasenya"
 
 #: ../plugins/notify/pragha-notify-plugin.c:169
 #, c-format
 msgid "by <b>%s</b> in <b>%s</b> <b>(%s)</b>"
-msgstr "de <b>%s</b> em <b>%s</b> <b>(%s)</b>"
+msgstr ""
 
 #: ../plugins/notify/pragha-notify-plugin.c:275
 msgid "Notifications"
-msgstr "Notificações"
+msgstr "Notificacions"
 
 #: ../plugins/notify/pragha-notify-plugin.c:277
 msgid "Show Album art in notifications"
-msgstr "Mostrar capa de álbum nas notificações"
+msgstr "Mostra les caràtules dels àlbums a les notificacions"
 
 #: ../plugins/notify/pragha-notify-plugin.c:282
 msgid "Add actions to change track in notifications"
-msgstr "Adicionar ações para alterar faixas na notificação"
+msgstr ""
 
 #: ../plugins/removable-media/pragha-devices-removable.c:211
 #, c-format
 msgid "Unable to access \"%s\""
-msgstr "Não foi possível aceder a %s"
+msgstr "No es pot accedir a «%s»"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:214
 #: ../plugins/removable-media/pragha-devices-removable.c:300
 msgid "Removable Device"
-msgstr "Dispositivo amovível"
+msgstr "Dispositiu extraïble"
 
 #: ../plugins/removable-media/pragha-devices-removable.c:297
 #, c-format
 msgid "Want to manage \"%s\" volume?"
-msgstr "Pretende gerir o dispositivo %s?"
+msgstr "Voleu gestionar la unitat «%s»?"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:88
 msgid "Search _lyric"
-msgstr "Procurar _letra da faixa"
+msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:90
 msgid "Search _artist info"
-msgstr "Procurar informações do _artista"
+msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:377
 msgid "Song Information"
-msgstr "Informações da faixa"
+msgstr "Informació de la cançó"
 
 #: ../plugins/song-info/pragha-song-info-plugin.c:379
 msgid "Download the album art while playing their songs."
-msgstr "Transferir a capa do álbum ao reproduzir as faixas."
+msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:51
 #, c-format
 msgid "Lyrics thanks to %s"
-msgstr "Letras das faixas graças a %s"
+msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:58
 #, c-format
 msgid "Artist info"
-msgstr "Informações do artista"
+msgstr "Informació de l’artista"
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:59
 #, c-format
 msgid "%s <small><span weight=\"light\">thanks to</span></small> %s"
-msgstr "%s <small><span weight=\"light\">obrigado a</span></small> %s"
+msgstr ""
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:81
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:100
 msgid "Lyrics not found."
-msgstr "Letras não encontradas."
+msgstr "No s’ha trobat la lletra."
 
 #: ../plugins/song-info/pragha-song-info-thread-dialog.c:84
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:104
 msgid "Artist information not found."
-msgstr "Informações do artista não encontradas."
+msgstr "No s’ha trobat la informació de l’artista."
 
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:185
 #: ../plugins/song-info/pragha-song-info-thread-pane.c:193
 msgid "Searching..."
-msgstr "Procura..."
+msgstr "S’està cercant…"
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:92
 #: ../plugins/tunein/pragha-tunein-plugin.c:291
 msgid "Search radio on TuneIn"
-msgstr "Procurar rádio no TuneIn"
+msgstr ""
 
 #: ../plugins/tunein/pragha-tunein-plugin.c:220
 #: ../plugins/tunein/pragha-tunein-plugin.c:231
 msgid "Search in TuneIn"
-msgstr "Procurar no TuneIn"
+msgstr ""
