@@ -332,14 +332,20 @@ pragha_plugin_activate (PeasActivatable *activatable)
 
 	preferences = pragha_application_get_preferences (priv->pragha);
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "notify");
-	priv->actions_in_osd =
-		pragha_preferences_get_boolean (preferences,
-		                                plugin_group,
-		                                "actions_in_osd");
-	priv->album_art_in_osd =
-		pragha_preferences_get_boolean (preferences,
-		                                plugin_group,
-		                                "album_art_in_osd");
+	if (pragha_preferences_has_group (preferences, plugin_group)) {
+		priv->actions_in_osd =
+			pragha_preferences_get_boolean (preferences,
+			                                plugin_group,
+			                                "actions_in_osd");
+		priv->album_art_in_osd =
+			pragha_preferences_get_boolean (preferences,
+			                                plugin_group,
+			                                "album_art_in_osd");
+	}
+	else {
+		priv->actions_in_osd = TRUE;
+		priv->album_art_in_osd = TRUE;
+	}
 
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_connect (playlist, "playlist-set-track",
