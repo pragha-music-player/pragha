@@ -2508,7 +2508,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		                  "Secondary Sidebar Size Preferences",
 		                  0,
 		                  G_MAXINT,
-		                  DEFAULT_SIDEBAR_SIZE,
+		                  DEFAULT_SIDEBAR_SIZE*4,
 		                  PRAGHA_PREF_PARAMS);
 
 	/**

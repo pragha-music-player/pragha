@@ -175,6 +175,7 @@ pragha_sidebar_children_changed (PraghaSidebar *sidebar, PraghaApplication *prag
 	if (pragha_sidebar_get_n_panes (sidebar)) {
 		gtk_action_set_visible (action, TRUE);
 		g_simple_action_set_enabled (G_SIMPLE_ACTION (baction), TRUE);
+		gtk_widget_set_visible (GTK_WIDGET(sidebar), TRUE);
 	}
 	else {
 		gtk_action_set_visible (action, FALSE);

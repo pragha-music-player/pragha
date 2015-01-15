@@ -96,7 +96,7 @@ pragha_plugins_engine_startup (PraghaPluginsEngine *engine)
 {
 	PraghaPreferences *preferences;
 	gchar **loaded_plugins = NULL;
-	const gchar *default_plugins[] = {"notify", "song-info", NULL};
+	const gchar *default_plugins[] = {"notify", "mpris2", "song-info", NULL};
 
 	CDEBUG(DBG_PLUGIN,"Plugins engine startup");
 
