@@ -2359,7 +2359,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("sort-by-year",
 		                     "SortByYear",
 		                     "Sort By Year Preference",
-		                     FALSE,
+		                     TRUE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**
@@ -2370,7 +2370,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("fuse-folders",
 		                     "FuseFolders",
 		                     "Fuse Folders Preference",
-		                     FALSE,
+		                     TRUE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**
@@ -2403,7 +2403,7 @@ pragha_preferences_class_init (PraghaPreferencesClass *klass)
 		g_param_spec_boolean("use-hint",
 		                     "UseHint",
 		                     "Use hint Preference",
-		                     TRUE,
+		                     FALSE,
 		                     PRAGHA_PREF_PARAMS);
 
 	/**
