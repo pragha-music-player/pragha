@@ -242,6 +242,7 @@ gtk_cell_renderer_bubble_init (GtkCellRendererBubble *cell)
   
   /* we need extra padding on the side */
   /*g_object_set (cell, "xpad", 3, "ypad", 3, NULL);*/
+  g_object_set (cell, "xalign", 0.5, NULL);
 }
 
 GtkCellRenderer*

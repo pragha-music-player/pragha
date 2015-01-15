@@ -3324,7 +3324,7 @@ init_current_playlist_columns(PraghaPlaylist* cplaylist)
 	col = gtk_tree_view_get_column(GTK_TREE_VIEW(cplaylist->view), 0);
 	gtk_tree_view_column_set_visible(col, TRUE);
 	gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_fixed_width(col, 32);
+	gtk_tree_view_column_set_fixed_width(col, 36);
 }
 
 static GtkWidget*
@@ -3544,7 +3544,7 @@ create_current_playlist_columns(PraghaPlaylist *cplaylist, GtkTreeView *view)
 	column = gtk_tree_view_column_new ();
 
 	renderer = gtk_cell_renderer_bubble_new ();
-	gtk_cell_renderer_set_fixed_size (renderer, 12, -1);
+	gtk_cell_renderer_set_fixed_size (renderer, 14, -1);
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 	gtk_tree_view_column_set_attributes(column, renderer, "markup", P_QUEUE, "show-bubble", P_BUBBLE, NULL);

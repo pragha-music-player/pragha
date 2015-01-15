@@ -114,7 +114,7 @@ struct _PraghaPreferencesClass
 /* Some default preferences. */
 
 #define DEFAULT_SIDEBAR_SIZE       200
-#define DEFAULT_ALBUM_ART_SIZE     36
+#define DEFAULT_ALBUM_ART_SIZE     32
 
 #define DEFAULT_SINK               "default"
 #define ALSA_SINK                  "alsa"
