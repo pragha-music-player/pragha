@@ -1025,7 +1025,7 @@ pragha_application_startup (GApplication *application)
 	                  G_CALLBACK(pragha_enum_map_removed_handler), pragha);
 
 #ifdef HAVE_LIBPEAS
-	pragha->plugins_engine = pragha_plugins_engine_new (pragha);
+	pragha->plugins_engine = pragha_plugins_engine_new (G_OBJECT(pragha));
 #endif
 
 	pragha->art_cache = pragha_art_cache_get ();

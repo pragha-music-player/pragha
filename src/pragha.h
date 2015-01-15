@@ -116,6 +116,8 @@ GtkWidget *pragha_info_bar_need_restart (PraghaApplication *pragha);
 #define PRAGHA_IS_APPLICATION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass),  PRAGHA_TYPE_APPLICATION))
 #define PRAGHA_APPLICATION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj),  PRAGHA_TYPE_APPLICATION, PraghaApplicationClass))
 
+GType    pragha_application_get_type        (void) G_GNUC_CONST;
+
 typedef struct {
 	GtkApplicationClass parent_class;
 } PraghaApplicationClass;

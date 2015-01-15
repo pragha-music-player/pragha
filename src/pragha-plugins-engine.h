@@ -21,9 +21,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-//#include "pragha.h"
-typedef struct _PraghaApplication PraghaApplication;
-
 G_BEGIN_DECLS
 
 #define PRAGHA_TYPE_PLUGINS_ENGINE (pragha_plugins_engine_get_type())
@@ -47,7 +44,7 @@ gboolean             pragha_plugins_is_shutdown     (PraghaPluginsEngine *engine
 void                 pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine);
 void                 pragha_plugins_engine_startup  (PraghaPluginsEngine *engine);
 
-PraghaPluginsEngine *pragha_plugins_engine_new      (PraghaApplication *pragha);
+PraghaPluginsEngine *pragha_plugins_engine_new      (GObject             *object);
 
 G_END_DECLS
 

@@ -30,7 +30,7 @@
 struct _PraghaPluginsEngine {
 	GObject           _parent;
 
-	PraghaApplication *pragha;
+	GObject           *object;
 
 	PeasEngine        *peas_engine;
 	PeasExtensionSet  *peas_exten_set;
@@ -79,7 +79,7 @@ pragha_plugins_engine_shutdown (PraghaPluginsEngine *engine)
 
 	loaded_plugins = peas_engine_get_loaded_plugins (engine->peas_engine);
 	if (loaded_plugins) {
-		preferences = pragha_application_get_preferences (engine->pragha);
+		preferences = pragha_application_get_preferences (PRAGHA_APPLICATION(engine->object));
 		pragha_preferences_set_string_list (preferences,
 				                            "PLUGINS",
 				                            "Activated",
@@ -100,7 +100,7 @@ pragha_plugins_engine_startup (PraghaPluginsEngine *engine)
 
 	CDEBUG(DBG_PLUGIN,"Plugins engine startup");
 
-	preferences = pragha_application_get_preferences (engine->pragha);
+	preferences = pragha_application_get_preferences (PRAGHA_APPLICATION(engine->object));
 
 	if (string_is_not_empty (pragha_preferences_get_installed_version (preferences))) {
 		loaded_plugins = pragha_preferences_get_string_list (preferences,
@@ -138,9 +138,9 @@ pragha_plugins_engine_dispose (GObject *object)
 		g_object_unref (engine->peas_engine);
 		engine->peas_engine = NULL;
 	}
-	if (engine->pragha) {
-		g_object_unref (engine->pragha);
-		engine->pragha = NULL;
+	if (engine->object) {
+		g_object_unref (engine->object);
+		engine->object = NULL;
 	}
 
 	G_OBJECT_CLASS(pragha_plugins_engine_parent_class)->dispose(object);
@@ -163,7 +163,7 @@ pragha_plugins_engine_init (PraghaPluginsEngine *engine)
 }
 
 PraghaPluginsEngine *
-pragha_plugins_engine_new (PraghaApplication *pragha)
+pragha_plugins_engine_new (GObject *object)
 {
 	PraghaPluginsEngine *engine;
 
@@ -171,13 +171,13 @@ pragha_plugins_engine_new (PraghaApplication *pragha)
 
 	engine = g_object_new (PRAGHA_TYPE_PLUGINS_ENGINE, NULL);
 
-	engine->pragha = g_object_ref(pragha);
+	engine->object = g_object_ref(object);
 
 	peas_engine_add_search_path (engine->peas_engine, LIBPLUGINDIR, USRPLUGINDIR);
 
 	engine->peas_exten_set = peas_extension_set_new (engine->peas_engine,
 	                                                 PEAS_TYPE_ACTIVATABLE,
-	                                                 "object", pragha,
+	                                                 "object", object,
 	                                                 NULL);
 
 	g_signal_connect (engine->peas_exten_set, "extension-added",
