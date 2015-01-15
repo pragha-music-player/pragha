@@ -347,6 +347,10 @@ pragha_plugin_activate (PeasActivatable *activatable)
 		priv->album_art_in_osd = TRUE;
 	}
 
+	/* Fix for nofify-osd users */
+	if (!can_support_actions())
+		priv->actions_in_osd = FALSE;
+
 	playlist = pragha_application_get_playlist (priv->pragha);
 	g_signal_connect (playlist, "playlist-set-track",
 	                  G_CALLBACK(pragha_notify_plugin_show_new_track), plugin);
