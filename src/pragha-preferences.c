@@ -423,6 +423,21 @@ pragha_preferences_remove_key (PraghaPreferences *preferences,
 }
 
 /**
+ * pragha_preferences_remove_group:
+ *
+ */
+void
+pragha_preferences_remove_group (PraghaPreferences *preferences,
+                                 const gchar       *group_name)
+{
+	g_return_if_fail(PRAGHA_IS_PREFERENCES(preferences));
+
+	g_key_file_remove_group (preferences->priv->rc_keyfile,
+	                         group_name,
+	                         NULL);
+}
+
+/**
  * pragha_preferences_get_plugin_group_name:
  *
  */

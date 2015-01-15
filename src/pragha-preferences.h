@@ -207,10 +207,21 @@ pragha_preferences_set_filename_list (PraghaPreferences *preferences,
                                       const gchar *key,
                                       GSList *list);
 
+/**
+ * pragha_preferences_remove_key:
+ *
+ */
 void
 pragha_preferences_remove_key (PraghaPreferences *preferences,
-                               const gchar *group_name,
-                               const gchar *key);
+                               const gchar       *group_name,
+                               const gchar       *key);
+/**
+ * pragha_preferences_remove_group:
+ *
+ */
+void
+pragha_preferences_remove_group (PraghaPreferences *preferences,
+                                 const gchar       *group_name);
 
 /*
  * Specific plugin api.

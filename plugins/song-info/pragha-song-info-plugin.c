@@ -519,7 +519,9 @@ pragha_plugin_deactivate (PeasActivatable *activatable)
 	                                      plugin);
 
 	plugin_group = pragha_preferences_get_plugin_group_name (preferences, "song-info");
-	pragha_preferences_set_boolean (preferences, plugin_group, "DownloadAlbumArt", priv->download_album_art);
+	if (!pragha_plugins_is_shutdown(pragha_application_get_plugins_engine(priv->pragha))) {
+		pragha_preferences_remove_group (preferences, plugin_group);
+	}
 	g_free (plugin_group);
 
 	sidebar = pragha_application_get_second_sidebar (priv->pragha);
